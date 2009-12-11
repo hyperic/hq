@@ -310,7 +310,7 @@ public class ControlScheduleManagerImpl
             throw new ApplicationException(e);
         } finally {
             DBUtil.closeJDBCObjects(log, null, stmt, rs);
-            Util.endConnection();
+           
         }
 
         return list;

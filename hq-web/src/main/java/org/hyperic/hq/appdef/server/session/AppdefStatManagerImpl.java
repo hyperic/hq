@@ -175,7 +175,6 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
             throw new SystemException(e);
         } finally {
             DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
-            disconnect();
         }
         return platMap;
     }
@@ -219,7 +218,7 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
             throw new SystemException(e);
         } finally {
             DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
-            disconnect();
+           
         }
         return 0;
     }
@@ -265,7 +264,7 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
             throw new SystemException(e);
         } finally {
             DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
-            disconnect();
+          
         }
         return servMap;
     }
@@ -302,7 +301,7 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
             throw new SystemException(e);
         } finally {
             DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
-            disconnect();
+           
         }
         return 0;
     }
@@ -347,7 +346,7 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
             throw new SystemException(e);
         } finally {
             DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
-            disconnect();
+           
         }
         return svcMap;
     }
@@ -384,7 +383,7 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
             throw new SystemException(e);
         } finally {
             DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
-            disconnect();
+          
         }
         return 0;
     }
@@ -429,7 +428,7 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
             throw new SystemException(e);
         } finally {
             DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
-            disconnect();
+            
         }
         return appMap;
     }
@@ -466,7 +465,7 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
             throw new SystemException(e);
         } finally {
             DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
-            disconnect();
+           
         }
         return 0;
     }
@@ -513,9 +512,7 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
         } catch (SQLException e) {
             log.error("Caught SQL Exception finding groups by type: " + e, e);
             throw new SystemException(e);
-        } finally {
-            disconnect();
-        }
+        } 
         return grpMap;
     }
 
@@ -541,9 +538,7 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
         } catch (SQLException e) {
             log.error("Unable to determine navmap capability");
             return false;
-        } finally {
-            disconnect();
-        }
+        } 
     }
 
     /**
@@ -691,7 +686,7 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
             throw e;
         } finally {
             DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
-            disconnect();
+           
         }
         if (log.isDebugEnabled()) {
             log.debug(mapToString(retVal));
@@ -843,7 +838,7 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
             throw new SystemException(e);
         } finally {
             DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
-            disconnect();
+            
         }
         return retVal;
     }
@@ -1010,7 +1005,7 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
             throw new SystemException(e);
         } finally {
             DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
-            disconnect();
+            
         }
         return retVal;
     }
@@ -1143,7 +1138,7 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
             throw new SystemException(e);
         } finally {
             DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
-            disconnect();
+          
         }
         return retVal;
     }
@@ -1378,8 +1373,6 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
             }
         } catch (SQLException e) {
             throw e;
-        } finally {
-            disconnect();
         }
         return retVal;
     }
@@ -1506,9 +1499,7 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
 
         } catch (SQLException e) {
             throw e;
-        } finally {
-            disconnect();
-        }
+        } 
         return retVal;
     }
 
@@ -1522,10 +1513,6 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
         }
 
         return conn;
-    }
-
-    private void disconnect() {
-        Util.endConnection();
     }
 
     private int getChildEntityType(int type) {

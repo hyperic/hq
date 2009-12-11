@@ -27,7 +27,6 @@ package org.hyperic.hq.product.server.mbean;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -42,18 +41,6 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 import javax.annotation.PostConstruct;
-import javax.management.Attribute;
-import javax.management.AttributeChangeNotification;
-import javax.management.ListenerNotFoundException;
-import javax.management.MBeanNotificationInfo;
-import javax.management.MBeanServer;
-import javax.management.MalformedObjectNameException;
-import javax.management.Notification;
-import javax.management.NotificationBroadcaster;
-import javax.management.NotificationBroadcasterSupport;
-import javax.management.NotificationFilter;
-import javax.management.NotificationListener;
-import javax.management.ObjectName;
 import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
@@ -61,7 +48,6 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.application.HQApp;
-import org.hyperic.hq.bizapp.server.session.SystemAudit;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.hqu.RenditServer;
 import org.hyperic.hq.measurement.MeasurementConstants;
@@ -78,7 +64,6 @@ import org.hyperic.util.file.FileUtil;
 import org.hyperic.util.jdbc.DBUtil;
 import org.jboss.deployment.DeploymentException;
 import org.jboss.deployment.DeploymentInfo;
-import org.jboss.deployment.SubDeployerSupport;
 import org.jboss.system.server.ServerConfig;
 import org.jboss.system.server.ServerConfigLocator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,32 +74,20 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Service;
 
 /**
- * ProductPlugin deployer.
- * We accept $PLUGIN_DIR/*.{jar,xml}
- *
+ * ProductPlugin deployer. We accept $PLUGIN_DIR/*.{jar,xml}
+ * 
  * 
  */
 @ManagedResource("hyperic.jmx:type=Service,name=ProductPluginDeployer")
 @Service
-public class ProductPluginDeployer
-    extends SubDeployerSupport
-    implements NotificationBroadcaster,
-               NotificationListener,
-               ProductPluginDeployerMBean,
-               Comparator<String>
-{
-   
-    private static final String SERVER_NAME =
-        "jboss.system:type=Server";
-    private static final String URL_SCANNER_NAME =
-        "hyperic.jmx:type=DeploymentScanner,flavor=URL";
-    private static final String READY_ATTR = "Ready";
-    private static final String PRODUCT = "HQ";
+public class ProductPluginDeployer implements Comparator<String> {
+
+    private final Log log = LogFactory.getLog(ProductPluginDeployer.class);
+
     private static final String PLUGIN_DIR = "hq-plugins";
     private static final String HQU = "hqu";
-    
-    private static final String TAB_DATA = MeasurementConstants.TAB_DATA,
-    MEAS_VIEW = MeasTabManagerUtil.MEAS_VIEW;
+
+    private static final String TAB_DATA = MeasurementConstants.TAB_DATA, MEAS_VIEW = MeasTabManagerUtil.MEAS_VIEW;
 
     private HQApp hqApp;
     private DBUtil dbUtil;
@@ -126,71 +99,32 @@ public class ProductPluginDeployer
     private Log _log = LogFactory.getLog(ProductPluginDeployer.class);
 
     private ProductPluginManager _ppm;
-    private List<String>                 _plugins = new ArrayList<String>();
-    private boolean              _isStarted = false;
-    private ObjectName           _serverName;
-    private String               _pluginDir = PLUGIN_DIR;
-    private String               _hquDir;
+    private List<String> _plugins = new ArrayList<String>();
 
-    private NotificationBroadcasterSupport _broadcaster =
-        new NotificationBroadcasterSupport();
-
-    private long _notifSequence = 0;
-
-    private static final String PLUGIN_REGISTERED =
-        NOTIF_TYPE("registered");
-
-    private static final String PLUGIN_DEPLOYED =
-        NOTIF_TYPE("deployed");
-
-    private static final String PLUGIN_UNDEPLOYED =
-        NOTIF_TYPE("undeployed");
-
-    private static final String DEPLOYER_READY =
-        NOTIF_TYPE("deployer.ready");
-
-    private static final String DEPLOYER_CLEARED =
-        NOTIF_TYPE("deployer.cleared");
-
-    private static final String DEPLOYER_SUSPENDED =
-        NOTIF_TYPE("deployer.suspended");
-
-    private static final String[] NOTIF_TYPES = new String[] {
-        DEPLOYER_READY,
-        DEPLOYER_SUSPENDED,
-        DEPLOYER_CLEARED,
-        PLUGIN_REGISTERED,
-        PLUGIN_DEPLOYED,
-        PLUGIN_UNDEPLOYED,
-    };
-
-    private static String NOTIF_TYPE(String type) {
-        return PRODUCT + ".plugin." + type;
-    }
+    private String _pluginDir;
+    private String _hquDir;
 
     @Autowired
-    public ProductPluginDeployer(HQApp hqApp, DBUtil dbUtil, RenditServer renditServer, MBeanServer mbeanServer, ProductStartupListener productStartupListener, 
-                                 ProductManager productManager, NotReadyManager notReadyManager) {
-        super();
-        this.server = mbeanServer;
+    public ProductPluginDeployer(HQApp hqApp, DBUtil dbUtil, RenditServer renditServer,
+                                 ProductStartupListener productStartupListener, ProductManager productManager,
+                                 NotReadyManager notReadyManager) {
         this.hqApp = hqApp;
         this.dbUtil = dbUtil;
         this.renditServer = renditServer;
         this.productStartupListener = productStartupListener;
         this.productManager = productManager;
         this.notReadyManager = notReadyManager;
-        //XXX un-hardcode these paths.
-        String war =
-            System.getProperty("jboss.server.home.dir") +
-            "/deploy/hq.war";
+        // XXX un-hardcode these paths.
+        String war = System.getProperty("jboss.server.home.dir") + "/deploy/hq.war";
 
-        //native libraries are deployed into another directory
-        //which is not next to sigar.jar, so we drop this hint
-        //to find it.
-        System.setProperty("org.hyperic.sigar.path",
-                           war + "/sigar_bin/lib");
+        // native libraries are deployed into another directory
+        // which is not next to sigar.jar, so we drop this hint
+        // to find it.
+        System.setProperty("org.hyperic.sigar.path", war + "/sigar_bin/lib");
 
         _hquDir = war + "/" + HQU;
+        
+        _pluginDir = war + "/" + PLUGIN_DIR;
 
         // Initialize database
         initDatabase();
@@ -202,21 +136,13 @@ public class ProductPluginDeployer
         if (propFile.canRead()) {
             _log.info("Loaded custom properties from: " + propFile);
         }
-
-        try {
-           
-            _serverName   = new ObjectName(SERVER_NAME);
-        } catch (MalformedObjectNameException e) {
-            //notgonnahappen
-            _log.error(e);
-        }
     }
-    
+
     private void initDatabase() {
         Connection conn = null;
 
         try {
-         
+
             conn = dbUtil.getConnection();
 
             DatabaseRoutines[] dbrs = getDBRoutines(conn);
@@ -225,22 +151,19 @@ public class ProductPluginDeployer
                 dbrs[i].runRoutines(conn);
             }
         } catch (SQLException e) {
-            log.error("SQLException creating connection to " +
-                      HQConstants.DATASOURCE, e);
+            log.error("SQLException creating connection to " + HQConstants.DATASOURCE, e);
         } catch (NamingException e) {
-            log.error("NamingException creating connection to " +
-                      HQConstants.DATASOURCE, e);
+            log.error("NamingException creating connection to " + HQConstants.DATASOURCE, e);
         } finally {
             DBUtil.closeConnection(ProductPluginDeployer.class, conn);
         }
     }
-    
+
     interface DatabaseRoutines {
         public void runRoutines(Connection conn) throws SQLException;
     }
 
-    private DatabaseRoutines[] getDBRoutines(Connection conn)
-        throws SQLException {
+    private DatabaseRoutines[] getDBRoutines(Connection conn) throws SQLException {
         ArrayList<CommonRoutines> routines = new ArrayList<CommonRoutines>(2);
 
         routines.add(new CommonRoutines());
@@ -250,32 +173,29 @@ public class ProductPluginDeployer
 
     class CommonRoutines implements DatabaseRoutines {
         public void runRoutines(Connection conn) throws SQLException {
-            final String UNION_BODY =
-                "SELECT * FROM HQ_METRIC_DATA_0D_0S UNION ALL " +
-                "SELECT * FROM HQ_METRIC_DATA_0D_1S UNION ALL " +
-                "SELECT * FROM HQ_METRIC_DATA_1D_0S UNION ALL " +
-                "SELECT * FROM HQ_METRIC_DATA_1D_1S UNION ALL " +
-                "SELECT * FROM HQ_METRIC_DATA_2D_0S UNION ALL " +
-                "SELECT * FROM HQ_METRIC_DATA_2D_1S UNION ALL " +
-                "SELECT * FROM HQ_METRIC_DATA_3D_0S UNION ALL " +
-                "SELECT * FROM HQ_METRIC_DATA_3D_1S UNION ALL " +
-                "SELECT * FROM HQ_METRIC_DATA_4D_0S UNION ALL " +
-                "SELECT * FROM HQ_METRIC_DATA_4D_1S UNION ALL " +
-                "SELECT * FROM HQ_METRIC_DATA_5D_0S UNION ALL " +
-                "SELECT * FROM HQ_METRIC_DATA_5D_1S UNION ALL " +
-                "SELECT * FROM HQ_METRIC_DATA_6D_0S UNION ALL " +
-                "SELECT * FROM HQ_METRIC_DATA_6D_1S UNION ALL " +
-                "SELECT * FROM HQ_METRIC_DATA_7D_0S UNION ALL " +
-                "SELECT * FROM HQ_METRIC_DATA_7D_1S UNION ALL " +
-                "SELECT * FROM HQ_METRIC_DATA_8D_0S UNION ALL " +
-                "SELECT * FROM HQ_METRIC_DATA_8D_1S";
+            final String UNION_BODY = "SELECT * FROM HQ_METRIC_DATA_0D_0S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_0D_1S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_1D_0S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_1D_1S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_2D_0S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_2D_1S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_3D_0S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_3D_1S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_4D_0S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_4D_1S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_5D_0S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_5D_1S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_6D_0S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_6D_1S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_7D_0S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_7D_1S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_8D_0S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_8D_1S";
 
-            final String HQ_METRIC_DATA_VIEW =
-                "CREATE VIEW "+MEAS_VIEW+" AS " + UNION_BODY;
+            final String HQ_METRIC_DATA_VIEW = "CREATE VIEW " + MEAS_VIEW + " AS " + UNION_BODY;
 
-            final String EAM_METRIC_DATA_VIEW =
-                "CREATE VIEW "+TAB_DATA+" AS " + UNION_BODY +
-                " UNION ALL SELECT * FROM HQ_METRIC_DATA_COMPAT";
+            final String EAM_METRIC_DATA_VIEW = "CREATE VIEW " + TAB_DATA + " AS " + UNION_BODY +
+                                                " UNION ALL SELECT * FROM HQ_METRIC_DATA_COMPAT";
 
             Statement stmt = null;
             try {
@@ -294,72 +214,54 @@ public class ProductPluginDeployer
     }
 
     /**
-     * This is called when the full server startup has occurred, and you
-     * get the "Started in 30s:935ms" message.
-     *
-     * We load all startup classes, then initialize the plugins.  Currently
-     * this is necesssary, since startup classes need to initialize the
-     * application (creating callbacks, etc.), and plugins can't hit the
-     * app until that's been done.  Unfortunately, it also means that any
-     * startup listeners that depend on plugins loaded through the deployer
-     * won't work.  So far that doesn't seem to be a problem, but if it
-     * ends up being one, we can split the plugin loading into more stages so
-     * that everyone has access to everyone.
-     *
+     * This is called when the full server startup has occurred, and you get the
+     * "Started in 30s:935ms" message.
+     * 
+     * We load all startup classes, then initialize the plugins. Currently this
+     * is necesssary, since startup classes need to initialize the application
+     * (creating callbacks, etc.), and plugins can't hit the app until that's
+     * been done. Unfortunately, it also means that any startup listeners that
+     * depend on plugins loaded through the deployer won't work. So far that
+     * doesn't seem to be a problem, but if it ends up being one, we can split
+     * the plugin loading into more stages so that everyone has access to
+     * everyone.
+     * 
      * 
      */
-    @ManagedOperation
-    public void handleNotification(Notification n, Object o) {
-        afterServerStart();
-        if (n != null && n.getType().equals("org.jboss.system.server.started")) {
-            SystemAudit.createUpAudit(((Number)n.getUserData()).longValue());
-        }
-    }
-    
-    private void afterServerStart() {
+    private void serverStarted() {
         loadConfig();
-        
-     
-
-        pluginNotify("deployer", DEPLOYER_READY);
+        try {
+            loadPlugins();
+        } catch (Exception e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
 
         Collections.sort(_plugins, this);
 
-        
-
         for (String pluginName : _plugins) {
-          
+
             try {
                 deployPlugin(pluginName);
-            } catch(DeploymentException e) {
+            } catch (DeploymentException e) {
                 _log.error("Unable to deploy plugin [" + pluginName + "]", e);
             }
         }
 
-        productStartupListener
-            .getPluginsDeployedCaller().pluginsDeployed(_plugins);
+        productStartupListener.getPluginsDeployedCaller().pluginsDeployed(_plugins);
 
         _plugins.clear();
         startConcurrentStatsCollector();
 
-        //generally means we are done deploying plugins at startup.
-        //but we are not "done" since a plugin can be dropped into
-        //hq-plugins at anytime.
-        pluginNotify("deployer", DEPLOYER_CLEARED);
-
-       
-
         setReady(true);
 
-        
     }
 
     private void startConcurrentStatsCollector() {
-       
+
         try {
             ConcurrentStatsCollector c = ConcurrentStatsCollector.getInstance();
-            c.register(
-                ConcurrentStatsCollector.RUNTIME_PLATFORM_AND_SERVER_MERGER);
+            c.register(ConcurrentStatsCollector.RUNTIME_PLATFORM_AND_SERVER_MERGER);
             c.register(ConcurrentStatsCollector.AVAIL_MANAGER_METRICS_INSERTED);
             c.register(ConcurrentStatsCollector.DATA_MANAGER_INSERT_TIME);
             c.register(ConcurrentStatsCollector.JMS_TOPIC_PUBLISH_TIME);
@@ -380,42 +282,9 @@ public class ProductPluginDeployer
         }
     }
 
-
-    protected boolean isDeployable(String name, URL url) {
-        boolean isDeployable = super.isDeployable(name, url);
-        if (isDeployable && name.endsWith(SubDeployerSupport.nativeSuffix)) {
-            //e.g. JBoss will attempt to deploy a .so regardless of linux/solaris/etc
-            _log.info("Skipping deployment: " + name);
-            return false;
-        }
-        return isDeployable;
-    }
-
-    public void addNotificationListener(NotificationListener listener,
-                                        NotificationFilter filter,
-                                        Object handback)
-    {
-        _broadcaster.addNotificationListener(listener, filter, handback);
-    }
-
-    public void removeNotificationListener(NotificationListener listener)
-        throws ListenerNotFoundException
-    {
-        _broadcaster.removeNotificationListener(listener);
-    }
-
-    public MBeanNotificationInfo[] getNotificationInfo() {
-        return new MBeanNotificationInfo[] {
-            new MBeanNotificationInfo(NOTIF_TYPES,
-                                      Notification.class.getName(),
-                                      "Product Plugin Notifications"),
-        };
-    }
-
     /**
      * 
      */
-    @ManagedAttribute
     public ProductPluginManager getProductPluginManager() {
         return _ppm;
     }
@@ -436,43 +305,34 @@ public class ProductPluginDeployer
         return _pluginDir;
     }
 
-    private Set getPluginNames(String type)
-        throws PluginException
-    {
+    private Set<String> getPluginNames(String type) throws PluginException {
         return _ppm.getPluginManager(type).getPlugins().keySet();
     }
 
     /**
      * 
-     * List registered plugin names of given type.
-     * Intended for use via /jmx-console
+     * List registered plugin names of given type. Intended for use via
+     * /jmx-console
      */
     @ManagedAttribute
-    public ArrayList getRegisteredPluginNames(String type)
-        throws PluginException
-    {
-        return new ArrayList(getPluginNames(type));
+    public ArrayList<String> getRegisteredPluginNames(String type) throws PluginException {
+        return new ArrayList<String>(getPluginNames(type));
     }
 
     /**
      * 
-     * List registered product plugin names.
-     * Intended for use via /jmx-console
+     * List registered product plugin names. Intended for use via /jmx-console
      */
     @ManagedAttribute
-    public ArrayList getRegisteredPluginNames()
-        throws PluginException
-    {
-        return new ArrayList(_ppm.getPlugins().keySet());
+    public ArrayList<String> getRegisteredPluginNames() throws PluginException {
+        return new ArrayList<String>(_ppm.getPlugins().keySet());
     }
 
     /**
      * 
      */
     @ManagedMetric
-    public int getProductPluginCount()
-        throws PluginException
-    {
+    public int getProductPluginCount() throws PluginException {
         return _ppm.getPlugins().keySet().size();
     }
 
@@ -480,9 +340,7 @@ public class ProductPluginDeployer
      * 
      */
     @ManagedMetric
-    public int getMeasurementPluginCount()
-        throws PluginException
-    {
+    public int getMeasurementPluginCount() throws PluginException {
         return getPluginNames(ProductPlugin.TYPE_MEASUREMENT).size();
     }
 
@@ -490,9 +348,7 @@ public class ProductPluginDeployer
      * 
      */
     @ManagedMetric
-    public int getControlPluginCount()
-        throws PluginException
-    {
+    public int getControlPluginCount() throws PluginException {
         return getPluginNames(ProductPlugin.TYPE_CONTROL).size();
     }
 
@@ -500,9 +356,7 @@ public class ProductPluginDeployer
      * 
      */
     @ManagedMetric
-    public int getAutoInventoryPluginCount()
-        throws PluginException
-    {
+    public int getAutoInventoryPluginCount() throws PluginException {
         return getPluginNames(ProductPlugin.TYPE_AUTOINVENTORY).size();
     }
 
@@ -510,9 +364,7 @@ public class ProductPluginDeployer
      * 
      */
     @ManagedMetric
-    public int getLogTrackPluginCount()
-        throws PluginException
-    {
+    public int getLogTrackPluginCount() throws PluginException {
         return getPluginNames(ProductPlugin.TYPE_LOG_TRACK).size();
     }
 
@@ -520,9 +372,7 @@ public class ProductPluginDeployer
      * 
      */
     @ManagedMetric
-    public int getConfigTrackPluginCount()
-        throws PluginException
-    {
+    public int getConfigTrackPluginCount() throws PluginException {
         return getPluginNames(ProductPlugin.TYPE_CONFIG_TRACK).size();
     }
 
@@ -531,10 +381,8 @@ public class ProductPluginDeployer
      */
     @ManagedOperation
     public void setProperty(String name, String value) {
-        String oldValue = _ppm.getProperty(name, "null");
         _ppm.setProperty(name, value);
         _log.info("setProperty(" + name + ", " + value + ")");
-        attributeChangeNotify("setProperty", name, oldValue, value);
     }
 
     /**
@@ -542,16 +390,14 @@ public class ProductPluginDeployer
      */
     @ManagedOperation
     public String getProperty(String name) {
-       return _ppm.getProperty(name);
+        return _ppm.getProperty(name);
     }
 
     /**
      * 
      */
     @ManagedOperation
-    public PluginInfo getPluginInfo(String name)
-        throws PluginException
-    {
+    public PluginInfo getPluginInfo(String name) throws PluginException {
         PluginInfo info = _ppm.getPluginInfo(name);
 
         if (info == null) {
@@ -561,22 +407,7 @@ public class ProductPluginDeployer
         return info;
     }
 
-    public boolean accepts(DeploymentInfo di) {
-        String urlFile = di.url.getFile();
-
-        if (!(urlFile.endsWith("jar") || (urlFile.endsWith("xml")))) {
-            return false;
-        }
-
-        String urlPath = new File(urlFile).getParent();
-
-        if (urlPath.endsWith(_pluginDir)) {
-            _log.debug("accepting plugin=" + urlFile);
-            return true;
-        }
-
-        return false;
-    }
+   
 
     public int compare(String s1, String s2) {
         int order1 = _ppm.getPluginInfo(s1).deploymentOrder;
@@ -588,7 +419,7 @@ public class ProductPluginDeployer
     private void setReady(boolean ready) {
         try {
             notReadyManager.setReady(ready);
-        } catch(Exception e) {
+        } catch (Exception e) {
             _log.error("Unable to declare application ready", e);
         }
     }
@@ -608,59 +439,25 @@ public class ProductPluginDeployer
 
         return isReady.booleanValue();
     }
-    
+
     private void loadConfig() {
         ServerConfig sc = ServerConfigLocator.locate();
         hqApp.setRestartStorageDir(sc.getHomeDir());
         File deployDir = new File(sc.getServerHomeDir(), "deploy");
-        File earDir    = new File(deployDir, "hq.ear");
+        File earDir = new File(deployDir, "hq.ear");
         hqApp.setResourceDir(earDir);
-        File warDir    = new File(earDir, "hq.war");
+        File warDir = new File(earDir, "hq.war");
         hqApp.setWebAccessibleDir(warDir);
     }
 
-   
-    private void pluginNotify(String name, String type) {
-        String action = type.substring(type.lastIndexOf(".") + 1);
-        String msg = PRODUCT + " plugin " + name + " " + action;
-
-        Notification notif = new Notification(type, this, ++_notifSequence,
-                                              msg);
-
-        _log.info(msg);
-
-        _broadcaster.sendNotification(notif);
-    }
-
-    private void attributeChangeNotify(String msg, String attr,
-                                       Object oldValue, Object newValue) {
-
-        Notification notif =
-            new AttributeChangeNotification(this,
-                                            ++_notifSequence,
-                                            System.currentTimeMillis(),
-                                            msg,
-                                            attr,
-                                            newValue.getClass().getName(),
-                                            oldValue,
-                                            newValue);
-
-        _broadcaster.sendNotification(notif);
-    }
-
-
-    private String registerPluginJar(DeploymentInfo di) {
-        String pluginJar = di.url.getFile();
+    private String registerPluginJar(String pluginJar) {
+       
 
         if (!_ppm.isLoadablePluginName(pluginJar)) {
             return null;
         }
-
         try {
-            //di.localCl to find resources such as etc/hq-plugin.xml
-            String plugin = _ppm.registerPluginJar(pluginJar, di.localCl);
-
-            pluginNotify(plugin, PLUGIN_REGISTERED);
+            String plugin = _ppm.registerPluginJar(pluginJar, null);
             return plugin;
         } catch (Exception e) {
             _log.error("Unable to deploy plugin '" + pluginJar + "'", e);
@@ -668,57 +465,13 @@ public class ProductPluginDeployer
         }
     }
 
-    private void deployPlugin(String plugin)
-        throws DeploymentException {
+    private void deployPlugin(String plugin) throws DeploymentException {
 
         try {
             productManager.deploymentNotify(plugin);
-            pluginNotify(plugin, PLUGIN_DEPLOYED);
+
         } catch (Exception e) {
             _log.error("Unable to deploy plugin '" + plugin + "'", e);
-        }
-    }
-
-    private void addCustomPluginURL(File dir) {
-        ObjectName urlScanner;
-
-        String msg = "Adding custom plugin dir " + dir;
-        _log.info(msg);
-
-        try {
-            urlScanner = new ObjectName(URL_SCANNER_NAME);
-            server.invoke(urlScanner, "addURL",
-                          new Object[] { dir.toURL() },
-                          new String[] { URL.class.getName() });
-        } catch (Exception e) {
-            _log.error(msg, e);
-        }
-    }
-
-    //check $jboss.home.url/.. and higher for hq-plugins
-    private void addCustomPluginDir() {
-        URL url;
-        String prop = "jboss.home.url";
-        String home = System.getProperty(prop);
-
-        if (home == null) {
-            return;
-        }
-        try {
-            url = new URL(home);
-        } catch (MalformedURLException e) {
-            _log.error("Malformed " + prop + "=" + home);
-            return;
-        }
-
-        File dir = new File(url.getFile()).getParentFile();
-        while (dir != null) {
-            File pluginDir = new File(dir, PLUGIN_DIR);
-            if (pluginDir.exists()) {
-                addCustomPluginURL(pluginDir);
-                break;
-            }
-            dir = dir.getParentFile();
         }
     }
 
@@ -731,61 +484,49 @@ public class ProductPluginDeployer
      */
     @PostConstruct
     public void start() throws Exception {
-        if(_isStarted)
-            return;
-
-        _isStarted = true;
-
-        super.start();
-
         _ppm.init();
 
         try {
-            //hq.ear contains sigar_bin/lib with the
-            //native sigar libraries.  we set sigar.install.home
-            //here so plugins which use sigar can find it during Sigar.load()
+            // hq.war contains sigar_bin/lib with the
+            // native sigar libraries. we set sigar.install.home
+            // here so plugins which use sigar can find it during Sigar.load()
 
-            String path = getClass().getClassLoader().
-                getResource("sigar_bin").getFile();
+            String path = getClass().getClassLoader().getResource("sigar_bin").getFile();
 
             _ppm.setProperty("sigar.install.home", path);
         } catch (Exception e) {
             _log.error(e);
         }
 
-        getServer().addNotificationListener(_serverName, this, null, null);
-
-        //turn off ready filter asap at shutdown
-        //this.stop() won't run until all files are undeploy()ed
-        //which may take several minutes.
+        // turn off ready filter asap at shutdown
+        // this.stop() won't run until all files are undeploy()ed
+        // which may take several minutes.
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
                 setReady(false);
             }
         });
 
-        addCustomPluginDir();
-        afterServerStart();
+        serverStarted();
     }
 
     /**
      * 
      */
+    // TODO this is never called (used to be an MBean and called by JBoss on
+    // going down)
     @ManagedOperation
     public void stop() {
-        super.stop();
-        pluginNotify("deployer", DEPLOYER_SUSPENDED);
         setReady(false);
         _plugins.clear();
     }
 
-    private void unpackJar(URL url, File destDir, String prefix)
-        throws Exception {
+    private void unpackJar(URL url, File destDir, String prefix) throws Exception {
 
         JarFile jar = new JarFile(url.getFile());
         try {
-            for (Enumeration e=jar.entries(); e.hasMoreElements();) {
-                JarEntry entry = (JarEntry)e.nextElement();
+            for (Enumeration<JarEntry> e = jar.entries(); e.hasMoreElements();) {
+                JarEntry entry = e.nextElement();
                 String name = entry.getName();
 
                 if (name.startsWith(prefix)) {
@@ -796,10 +537,8 @@ public class ProductPluginDeployer
                     File file = new File(destDir, name);
                     if (entry.isDirectory()) {
                         file.mkdirs();
-                    }
-                    else {
-                        FileUtil.copyStream(jar.getInputStream(entry),
-                                            new FileOutputStream(file));
+                    } else {
+                        FileUtil.copyStream(jar.getInputStream(entry), new FileOutputStream(file));
                     }
                 }
             }
@@ -808,8 +547,8 @@ public class ProductPluginDeployer
         }
     }
 
-    private void deployHqu(String plugin, DeploymentInfo di)
-        throws Exception {
+    // TODO support deployment of everything in HQU folder
+    private void deployHqu(String plugin, DeploymentInfo di) throws Exception {
 
         final String prefix = HQU + "/";
         URL hqu = di.localCl.findResource(prefix);
@@ -818,66 +557,27 @@ public class ProductPluginDeployer
         }
         File destDir = new File(_hquDir, plugin);
         boolean exists = destDir.exists();
-        _log.info("Deploying " + plugin + " " +
-                  HQU + " to: " + destDir);
+        _log.info("Deploying " + plugin + " " + HQU + " to: " + destDir);
 
         unpackJar(di.url, destDir, prefix);
 
-        
-        if (renditServer.getSysDir() != null) { //rendit.isReady() ?
+        if (renditServer.getSysDir() != null) { // rendit.isReady() ?
             if (exists) {
-                //update ourselves to avoid having to delete,sleep,unpack
+                // update ourselves to avoid having to delete,sleep,unpack
                 renditServer.removePluginDir(destDir.getName());
                 renditServer.addPluginDir(destDir);
-            } //else Rendit watcher will deploy the new plugin
+            } // else Rendit watcher will deploy the new plugin
         }
     }
 
-    public void start(DeploymentInfo di)
-        throws DeploymentException
-    {
-        try {
-            start();
-        } catch (Exception e) {
-            throw new DeploymentException("Bombed", e);
-        }
-
-        _log.debug("start: " + di.url.getFile());
-
-        //the plugin jar can be registered at any time
-        String plugin = registerPluginJar(di);
-        if (plugin == null) {
-            return;
-        }
-
-        //plugin metadata cannot be deployed until HQ is up
-        if (isReady()) {
-           
-            deployPlugin(plugin);
-        }
-        else {
-            _plugins.add(plugin);
-        }
-
-        try {
-            deployHqu(plugin, di);
-        } catch (Exception e) {
-            throw new DeploymentException("Failed to deploy " +
-                                          plugin + " " + HQU + ": " + e, e);
-        }
-    }
-
-    public void stop(DeploymentInfo di)
-        throws DeploymentException
-    {
-        _log.debug("stop: " + di.url.getFile());
-
-        try {
-            String jar = di.url.getFile();
-            _ppm.removePluginJar(jar);
-            pluginNotify(new File(jar).getName(), PLUGIN_UNDEPLOYED);
-        } catch (Exception e) {
-            throw new DeploymentException(e);
+    private void loadPlugins() throws Exception {
+        File pluginDir = new File(getPluginDir());
+        File[] plugins = pluginDir.listFiles();
+        for(File pluginFile : plugins) {
+            String plugin = registerPluginJar(pluginFile.toString());
+            if (plugin != null) {
+                _plugins.add(plugin);
+            }
         }
     }
 }

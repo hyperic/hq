@@ -527,7 +527,7 @@ public class TemplateManagerImpl implements TemplateManager {
         } catch (SQLException e) {
             this.log.error("Unable to add measurements for: " + pluginName, e);
         } finally {
-            Util.endConnection();
+            //Util.endConnection();
         }
     }
 

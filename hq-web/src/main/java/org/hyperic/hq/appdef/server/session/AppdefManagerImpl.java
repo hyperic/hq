@@ -142,7 +142,6 @@ public class AppdefManagerImpl implements AppdefManager {
             throw new SystemException("SQL Error getting scope: " + e.getMessage());
         } finally {
             DBUtil.closeJDBCObjects(AppdefManagerImpl.class, null, stmt, rs);
-            Util.endConnection();
         }
     }
 
