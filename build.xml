@@ -196,6 +196,9 @@
 			<path location="${hq.pdk.shared}/target/classes" />
 		</path>
 		<compile-sources classpath.id="compile.classpath" src.dir="${hq.web}" output.dir="${hq.web}/target/classes" />
+		<copy toDir="${hq.web}/target/classes">
+			<fileset dir="${hq.web}/src/main/java" excludes="**/*.java" />
+		</copy>
 	</target>
 
 	<target name="compile-agent" depends="init">
@@ -529,7 +532,6 @@
 			</fileset>
 		</copy>
 
-
 		<!-- Assumes all .classes and resource files have been compiled to target dir-->
 		<copy todir="${war.dir}/WEB-INF/classes">
 			<fileset dir="${hq.home}/hq-web/target/classes">
@@ -540,8 +542,6 @@
 		<replace file="${war.dir}/META-INF/context.xml">
 			<replacefilter token="@@@HYPERIC_UI_HOTDEPLOY@@@" value="${hq.ui.hot-deploy}" />
 		</replace>
-
-
 
 		<copy todir="${war.dir}/WEB-INF/lib/">
 			<fileset dir="${thirdparty.lib}">
@@ -581,7 +581,6 @@
 				<include name="struts-el-1.3.10.jar" />
 				<include name="urlrewrite-3.1.0.jar" />
 
-
 				<include name="ant.jar" />
 				<include name="ant-lancher.jar" />
 
@@ -591,7 +590,6 @@
 
 				<include name="*aopalliance*.jar" />
 				<include name="*dbcp*.jar" />
-
 			</fileset>
 			<fileset dir="${thirdparty.lib}/spring" includes="*.jar" />
 			<fileset dir="${thirdparty.lib}/activemq" includes="*.jar" />
@@ -631,10 +629,7 @@
 				<include name="tapestry-prop-1.0.0.jar" />
 				<include name="tapestry-test-4.1.4-20080130-JUnit.jar" />
 			</fileset>
-
-
 		</copy>
-
 
 		<mkdir dir="${war.dir}/sigar_bin/lib" />
 		<copy todir="${war.dir}/sigar_bin/lib">
@@ -659,7 +654,7 @@
 			<param name="eardir" value="${ear.dir}"/>
 			<param name="wardir" value="${war.dir}"/>
 		</antcall> -->
-  </target>
+ 	</target>
 
 	<target name="deploy-ui" description="">
 		<echo>deploying files from ${hq.home}</echo>
@@ -772,23 +767,21 @@
 </target>
 
 <target name="pack-common" description="Pack the common jars">
-
-<jar basedir="${hq.util}/target/classes" jarfile="${build.dir}/hq-util.jar">
-</jar>
-
-<antcall target="write-version-file">
-	<param name="version-file" value="${hq.common}/target/classes/version.properties" />
-</antcall>
-
-<jar basedir="${hq.common}/target/classes" jarfile="${build.dir}/hq-common.jar">
-</jar>
-
-<jar basedir="${hq.pdk.shared}/target/classes" jarfile="${build.dir}/hq-pdk-shared.jar">
-	<manifest>
-		<attribute name="Main-Class" value="org.hyperic.hq.product.util.PluginMain" />
-	</manifest>
-</jar>
-
+	<jar basedir="${hq.util}/target/classes" jarfile="${build.dir}/hq-util.jar">
+	</jar>
+	
+	<antcall target="write-version-file">
+		<param name="version-file" value="${hq.common}/target/classes/version.properties" />
+	</antcall>
+	
+	<jar basedir="${hq.common}/target/classes" jarfile="${build.dir}/hq-common.jar">
+	</jar>
+	
+	<jar basedir="${hq.pdk.shared}/target/classes" jarfile="${build.dir}/hq-pdk-shared.jar">
+		<manifest>
+			<attribute name="Main-Class" value="org.hyperic.hq.product.util.PluginMain" />
+		</manifest>
+	</jar>
 </target>
 
 <target name="pack-pdk-lib" description="Pack the PDK lib jars">
@@ -1161,82 +1154,82 @@
 <!-- ==================== Catalina packaging ==================== -->
 
 <target name="pack-servlet" description="Pack servlet engine measurement dirs">
-
-<!-- The name is what the tomcat plugin uses. -->
-<property name="servlet.base" location="build/native_plugins/hyperic-hq" />
-<mkdir dir="${servlet.base}/native-lib" />
-<mkdir dir="${servlet.base}/WEB-INF/lib" />
-<copy file="plugins/servlet/examples/web.xml" todir="${servlet.base}/WEB-INF" />
-
-<jar basedir="${build.dir}/classes" jarfile="${servlet.base}/WEB-INF/lib/hq-filter.jar">
-	<include name="org/hyperic/hq/product/servlet/filter/**" />
-	<include name="org/hyperic/hq/product/servlet/mbean/**" />
-</jar>
-
-<jar basedir="${build.dir}/classes" jarfile="${servlet.base}/WEB-INF/lib/hq-webapp.jar">
-	<include name="org/hyperic/hq/product/servlet/webapp/**" />
-</jar>
-
-<copy todir="${servlet.base}/WEB-INF/lib">
-	<fileset dir="${thirdparty.lib}">
-		<include name="commons-modeler.jar" />
-		<include name="commons-logging-1.0.4.jar" />
-	</fileset>
-</copy>
-
-<!-- copy the sigar libraries too. -->
-<copy todir="${servlet.base}/WEB-INF/lib">
-	<fileset dir="${sigar.lib}">
-		<include name="sigar.jar" />
-	</fileset>
-</copy>
-<copy todir="${servlet.base}/native-lib">
-	<fileset dir="${sigar.lib}">
-		<include name="*.*" />
-		<exclude name="*.jar" />
-	</fileset>
-</copy>
-
-<mkdir dir="build/native_plugins/libs" />
-
-<copy todir="build/native_plugins/libs" file="${servlet.base}/WEB-INF/lib/hq-filter.jar" />
-
-<copy todir="build/native_plugins/libs" file="${thirdparty.lib}/mx4j-jmx.jar" />
-
-<copy todir="build/native_plugins/libs" file="${thirdparty.lib}/commons-modeler.jar" />
-
-<copy todir="build/native_plugins/libs">
-	<fileset dir="${thirdparty.lib}/tomcat">
-		<include name="tomcat-coyote.jar" />
-		<include name="tomcat-jk2.jar" />
-		<include name="tomcat-http11.jar" />
-		<include name="tomcat-util.jar" />
-		<include name="catalina.jar" />
-	</fileset>
-</copy>
-
-<!-- 2 simple webapps with instrumentation - one using global web.xml, the other using
-         its own web.xml -->
-
-<!-- hq-filter.jar, jmx must be configured in the container and the default 
-           web.xml must include our settings -->
-<mkdir dir="build/native_plugins/sample_global/WEB-INF" />
-<copy tofile="build/native_plugins/sample_global/WEB-INF/web.xml" file="plugins/servlet/examples/example_global_web.xml" />
-<copy todir="build/native_plugins/sample_global" file="plugins/servlet/examples/index.jsp" />
-
-<!-- JMX must be available -->
-<mkdir dir="build/native_plugins/sample_local/WEB-INF/lib" />
-<copy tofile="build/native_plugins/sample_local/WEB-INF/web.xml" file="plugins/servlet/examples/example_web.xml" />
-<copy todir="build/native_plugins/sample_local" file="plugins/servlet/examples/index.jsp" />
-<copy todir="build/native_plugins/sample_local/WEB-INF/lib" file="${servlet.base}/WEB-INF/lib/hq-filter.jar" />
-
-<!-- Instrument hq.ear -->
-<mkdir dir="${ear.dir}/hyperic-hq.war" />
-<copy todir="${ear.dir}/hyperic-hq.war">
-	<fileset dir="${servlet.base}" includes="**" />
-</copy>
-<copy todir="${tomcat.home}" file="installer/data/web.xml" />
-<copy todir="${tomcat.home}" file="${servlet.base}/WEB-INF/lib/hq-filter.jar" />
+	
+	<!-- The name is what the tomcat plugin uses. -->
+	<property name="servlet.base" location="build/native_plugins/hyperic-hq" />
+	<mkdir dir="${servlet.base}/native-lib" />
+	<mkdir dir="${servlet.base}/WEB-INF/lib" />
+	<copy file="plugins/servlet/examples/web.xml" todir="${servlet.base}/WEB-INF" />
+	
+	<jar basedir="${build.dir}/classes" jarfile="${servlet.base}/WEB-INF/lib/hq-filter.jar">
+		<include name="org/hyperic/hq/product/servlet/filter/**" />
+		<include name="org/hyperic/hq/product/servlet/mbean/**" />
+	</jar>
+	
+	<jar basedir="${build.dir}/classes" jarfile="${servlet.base}/WEB-INF/lib/hq-webapp.jar">
+		<include name="org/hyperic/hq/product/servlet/webapp/**" />
+	</jar>
+	
+	<copy todir="${servlet.base}/WEB-INF/lib">
+		<fileset dir="${thirdparty.lib}">
+			<include name="commons-modeler.jar" />
+			<include name="commons-logging-1.0.4.jar" />
+		</fileset>
+	</copy>
+	
+	<!-- copy the sigar libraries too. -->
+	<copy todir="${servlet.base}/WEB-INF/lib">
+		<fileset dir="${sigar.lib}">
+			<include name="sigar.jar" />
+		</fileset>
+	</copy>
+	<copy todir="${servlet.base}/native-lib">
+		<fileset dir="${sigar.lib}">
+			<include name="*.*" />
+			<exclude name="*.jar" />
+		</fileset>
+	</copy>
+	
+	<mkdir dir="build/native_plugins/libs" />
+	
+	<copy todir="build/native_plugins/libs" file="${servlet.base}/WEB-INF/lib/hq-filter.jar" />
+	
+	<copy todir="build/native_plugins/libs" file="${thirdparty.lib}/mx4j-jmx.jar" />
+	
+	<copy todir="build/native_plugins/libs" file="${thirdparty.lib}/commons-modeler.jar" />
+	
+	<copy todir="build/native_plugins/libs">
+		<fileset dir="${thirdparty.lib}/tomcat">
+			<include name="tomcat-coyote.jar" />
+			<include name="tomcat-jk2.jar" />
+			<include name="tomcat-http11.jar" />
+			<include name="tomcat-util.jar" />
+			<include name="catalina.jar" />
+		</fileset>
+	</copy>
+	
+	<!-- 2 simple webapps with instrumentation - one using global web.xml, the other using
+	         its own web.xml -->
+	
+	<!-- hq-filter.jar, jmx must be configured in the container and the default 
+	           web.xml must include our settings -->
+	<mkdir dir="build/native_plugins/sample_global/WEB-INF" />
+	<copy tofile="build/native_plugins/sample_global/WEB-INF/web.xml" file="plugins/servlet/examples/example_global_web.xml" />
+	<copy todir="build/native_plugins/sample_global" file="plugins/servlet/examples/index.jsp" />
+	
+	<!-- JMX must be available -->
+	<mkdir dir="build/native_plugins/sample_local/WEB-INF/lib" />
+	<copy tofile="build/native_plugins/sample_local/WEB-INF/web.xml" file="plugins/servlet/examples/example_web.xml" />
+	<copy todir="build/native_plugins/sample_local" file="plugins/servlet/examples/index.jsp" />
+	<copy todir="build/native_plugins/sample_local/WEB-INF/lib" file="${servlet.base}/WEB-INF/lib/hq-filter.jar" />
+	
+	<!-- Instrument hq.ear -->
+	<mkdir dir="${ear.dir}/hyperic-hq.war" />
+	<copy todir="${ear.dir}/hyperic-hq.war">
+		<fileset dir="${servlet.base}" includes="**" />
+	</copy>
+	<copy todir="${tomcat.home}" file="installer/data/web.xml" />
+	<copy todir="${tomcat.home}" file="${servlet.base}/WEB-INF/lib/hq-filter.jar" />
 </target>
 
 <!-- ==================== Generic targets ==================== -->
@@ -1248,15 +1241,15 @@
 </target>
 
 <target name="pack-test-coverage">
-<copy todir="${war.dir}/WEB-INF/lib/">
-	<fileset dir="${thirdparty.lib}">
-		<include name="com.springsource.com.cenqua.clover-*.jar" />
-	</fileset>
-</copy>
-
-<copy todir="${ROOT.war}/WEB-INF/lib/">
-	<fileset dir="${thirdparty.lib}" includes="com.springsource.com.cenqua.clover-*.jar" />
-</copy>
+	<copy todir="${war.dir}/WEB-INF/lib/">
+		<fileset dir="${thirdparty.lib}">
+			<include name="com.springsource.com.cenqua.clover-*.jar" />
+		</fileset>
+	</copy>
+	
+	<copy todir="${ROOT.war}/WEB-INF/lib/">
+		<fileset dir="${thirdparty.lib}" includes="com.springsource.com.cenqua.clover-*.jar" />
+	</copy>
 </target>
 
 <!-- When running the 'test' target 'test-all' must be run to deploy the 
@@ -1264,101 +1257,101 @@
 <target name="test-all" depends="test-build, pack-test-ear" />
 
 <target name="test-build">
-<property name="unittest-lib" location="${hq.home}/unittest/lib" />
-<echo message="using unittest.lib as -> ${unittest-lib}" />
-<antcall target="all">
-	<param name="unittest.lib" value="${unittest-lib}" />
-</antcall>
-<antcall target="compile-tests" />
+	<property name="unittest-lib" location="${hq.home}/unittest/lib" />
+	<echo message="using unittest.lib as -> ${unittest-lib}" />
+	<antcall target="all">
+		<param name="unittest.lib" value="${unittest-lib}" />
+	</antcall>
+	<antcall target="compile-tests" />
 </target>
 
 <target name="pack-test-ear">
-<!-- Package the test jars and deploy into the EAR -->
-<jar file="${ear.dir}/hq-test.jar" basedir="${build.dir}/classes">
-	<include name="org/hyperic/**/*_test*" />
-</jar>
-
-<mkdir dir="${ear.dir}/hq-session-test.jar/META-INF" />
-<copy todir="${ear.dir}/hq-session-test.jar/META-INF">
-	<fileset dir="${basedir}/dd/session-test" includes="*" />
-</copy>
-
-<copy todir="${ear.dir}/lib">
-	<fileset dir="${thirdparty.lib}" includes="com.springsource.com.cenqua.clover-*.jar" />
-</copy>
-
-<!-- Rewrite the manifest to include the test jars -->
-<antcall target="write-ear-manifest" inheritAll="false" />
-
-<!-- Copy in application.xml that includes the test EJBs -->
-<copy file="etc/application-test.xml" toFile="${ear.dir}/META-INF/application.xml" overwrite="true" />
-
+	<!-- Package the test jars and deploy into the EAR -->
+	<jar file="${ear.dir}/hq-test.jar" basedir="${build.dir}/classes">
+		<include name="org/hyperic/**/*_test*" />
+	</jar>
+	
+	<mkdir dir="${ear.dir}/hq-session-test.jar/META-INF" />
+	<copy todir="${ear.dir}/hq-session-test.jar/META-INF">
+		<fileset dir="${basedir}/dd/session-test" includes="*" />
+	</copy>
+	
+	<copy todir="${ear.dir}/lib">
+		<fileset dir="${thirdparty.lib}" includes="com.springsource.com.cenqua.clover-*.jar" />
+	</copy>
+	
+	<!-- Rewrite the manifest to include the test jars -->
+	<antcall target="write-ear-manifest" inheritAll="false" />
+	
+	<!-- Copy in application.xml that includes the test EJBs -->
+	<copy file="etc/application-test.xml" toFile="${ear.dir}/META-INF/application.xml" overwrite="true" />
 </target>
 
 <target name="build" depends="init,compile,pack" description="Compile and pack - no code generation" />
 
 <target name="clean" description="Clean the build directories">
-<delete dir="${build.dir}" />
-<delete dir="${hq.util}/target" />
-<delete dir="${hq.common}/target" />
-<delete dir="${hq.pdk.shared}/target" />
-<delete dir="${hq.pdk.agent}/target" />
-<delete dir="${hq.agent}/target" />
-<delete dir="${hq.web}/target" />
-<delete includeemptydirs="true">
-	<fileset dir="${hq.agent.handlers}" defaultexcludes="false" includes="*/target/classes/**" />
-</delete>
-<delete includeemptydirs="true">
-	<fileset dir="${hq.plugins}" defaultexcludes="false" includes="*/target/classes/**" />
-</delete>
+	<delete dir="${build.dir}" />
+	<delete dir="${hq.util}/target" />
+	<delete dir="${hq.common}/target" />
+	<delete dir="${hq.pdk.shared}/target" />
+	<delete dir="${hq.pdk.agent}/target" />
+	<delete dir="${hq.agent}/target" />
+	<delete dir="${hq.web}/target" />
+	<delete includeemptydirs="true">
+		<fileset dir="${hq.agent.handlers}" defaultexcludes="false" includes="*/target/classes/**" />
+	</delete>
+	<delete includeemptydirs="true">
+		<fileset dir="${hq.plugins}" defaultexcludes="false" includes="*/target/classes/**" />
+	</delete>
 </target>
 
 <target name="mostly-clean" depends="remote-clean" description="Clean the build directory">
-<delete>
-	<fileset dir="${build.dir}">
-		<exclude name="**/jsp/" />
-		<exclude name="**/docs/" />
-	</fileset>
-</delete>
+	<delete>
+		<fileset dir="${build.dir}">
+			<exclude name="**/jsp/" />
+			<exclude name="**/docs/" />
+		</fileset>
+	</delete>
 </target>
 
 <target name="check-for-ui">
-<available property="ui-subsystem.available" file="subsystem/ui" />
+	<available property="ui-subsystem.available" file="subsystem/ui" />
 </target>
+	
 <target name="remote-clean" depends="check-for-ui" description="Clean the remote tomcat" if="ui-subsystem.available">
-<delete>
-	<fileset dir="${webapp.home}" includes="**/*.nbattrs" />
-	<fileset dir="${webapp.home}" includes="**/*.DS_Store" />
-</delete>
-<delete file="${webapp.home}/WEB-INF/web.warContent" />
-<delete file="${webapp.home}/WEB-INF/tld/cam-rt.tld" />
-<delete>
-	<fileset dir="${webapp.home}/WEB-INF/lib" />
-</delete>
-<delete includeEmptyDirs="true">
-	<fileset dir="${webapp.home}/WEB-INF/classes">
-		<exclude name="ApplicationResources.properties" />
-		<exclude name="MockupResources.properties" />
-		<exclude name="*.properties" />
-		<include name="**/*.class" />
-	</fileset>
-</delete>
+	<delete>
+		<fileset dir="${webapp.home}" includes="**/*.nbattrs" />
+		<fileset dir="${webapp.home}" includes="**/*.DS_Store" />
+	</delete>
+	<delete file="${webapp.home}/WEB-INF/web.warContent" />
+	<delete file="${webapp.home}/WEB-INF/tld/cam-rt.tld" />
+	<delete>
+		<fileset dir="${webapp.home}/WEB-INF/lib" />
+	</delete>
+	<delete includeEmptyDirs="true">
+		<fileset dir="${webapp.home}/WEB-INF/classes">
+			<exclude name="ApplicationResources.properties" />
+			<exclude name="MockupResources.properties" />
+			<exclude name="*.properties" />
+			<include name="**/*.class" />
+		</fileset>
+	</delete>
 </target>
 
 <target name="deploy" description="Copy the war to jboss deploy dir ( slow )">
-<property name="jboss.deploy.dir" value="${jboss.home}/server/default/deploy" />
-
-<!-- create the deploy directory -->
-<mkdir dir="${jboss.deploy.dir}/hq.war" />
-<copy todir="${jboss.deploy.dir}/hq.war">
-	<fileset dir="${war.dir}" includes="**" />
-</copy>
+	<property name="jboss.deploy.dir" value="${jboss.home}/server/default/deploy" />
+	
+	<!-- create the deploy directory -->
+	<mkdir dir="${jboss.deploy.dir}/hq.war" />
+	<copy todir="${jboss.deploy.dir}/hq.war">
+		<fileset dir="${war.dir}" includes="**" />
+	</copy>
 </target>
 
 <target name="redeploy" depends="undeploy,deploy" />
 
 <target name="undeploy" depends="init-taskdefs" description="Remove the war from jboss deploy dir">
-<delete dir="${jboss.home}/server/default/deploy/hq.war" />
+	<delete dir="${jboss.home}/server/default/deploy/hq.war" />
 </target>
 
 <!--
