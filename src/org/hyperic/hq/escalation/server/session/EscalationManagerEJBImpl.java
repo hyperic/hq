@@ -40,7 +40,6 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
-import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
@@ -61,7 +60,8 @@ import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.Notify;
 import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.ActionManagerEJBImpl;
-import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
+import org.hyperic.hq.events.server.session.Alert;
+import org.hyperic.hq.events.server.session.AlertDAO;
 import org.hyperic.hq.events.server.session.AlertRegulator;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
 import org.hyperic.hq.events.server.session.SessionBase;
@@ -437,6 +437,11 @@ public class EscalationManagerEJBImpl
         
     private void endEscalation(EscalationState state) {
         if (state != null) {
+            // make sure we have the updated state to avoid StaleStateExceptions
+            state = _stateDAO.findById(state.getId());
+            if (state == null) {
+                return;
+            }
             _stateDAO.remove(state);
             EscalationRuntime.getInstance().unscheduleEscalation(state);
         }        
@@ -485,14 +490,15 @@ public class EscalationManagerEJBImpl
         
         // XXX -- Need to make sure the application is running before
         //        we allow this to proceed
-        _log.debug("Executing state[" + s.getId() + "]");
+        final boolean debug = _log.isDebugEnabled();
+        if (debug) _log.debug("Executing state[" + s.getId() + "]");
         if (actionIdx >= e.getActions().size()) {
             if (e.isRepeat() && e.getActions().size() > 0) {
                 actionIdx = 0;          // Loop back
             }
             else {
-                _log.debug("Reached the end of the escalation state[" + 
-                           s.getId() + "].  Ending it");
+                if (debug) _log.debug("Reached the end of the escalation state[" + 
+                                      s.getId() + "].  Ending it");
                 endEscalation(s);
                 return;
             }
@@ -501,6 +507,14 @@ public class EscalationManagerEJBImpl
         eAction = (EscalationAction)e.getActions().get(actionIdx);
         action = eAction.getAction();
 
+        AlertDAO dao = DAOFactory.getDAOFactory().getAlertDAO();
+        Alert alert = dao.getById(new Integer(s.getAlertId()));
+        // HHQ-3499, need to make sure that the alertId that is pointed to by
+        // the escalation still exists
+        if (alert == null) {
+            endEscalation(s);
+            return;
+        }
         Escalatable esc = getEscalatable(s);
         
         // HQ-1348: End escalation if alert is already fixed
@@ -516,8 +530,8 @@ public class EscalationManagerEJBImpl
         long nextTime = System.currentTimeMillis() + 
             Math.max(offset, eAction.getWaitTime());
             
-        _log.debug("Moving onto next state of escalation, but chillin' for "
-                   + eAction.getWaitTime() + " ms");
+        if (debug) _log.debug("Moving onto next state of escalation, but chillin' for "
+                              + eAction.getWaitTime() + " ms");
         s.setNextAction(actionIdx + 1);
         s.setNextActionTime(nextTime);
         s.setAcknowledgedBy(null);

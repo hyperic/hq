@@ -53,6 +53,7 @@ import org.hyperic.hq.dao.HibernateDAOFactory;
 import org.hyperic.hq.events.server.session.ActionDAO;
 import org.hyperic.hq.events.server.session.AlertActionLogDAO;
 import org.hyperic.hq.events.server.session.AlertConditionLogDAO;
+import org.hyperic.hq.events.server.session.AlertDAO;
 import org.hyperic.hq.events.server.session.AlertDefinitionDAO;
 import org.hyperic.hq.events.server.session.TriggerDAO;
 
@@ -81,6 +82,7 @@ public abstract class DAOFactory {
     // Event DAOs
     public abstract ActionDAO            getActionDAO();
     public abstract AlertDefinitionDAO   getAlertDefDAO();
+    public abstract AlertDAO             getAlertDAO();
     public abstract TriggerDAO           getTriggerDAO();
     public abstract AlertActionLogDAO    getAlertActionLogDAO();
     public abstract AlertConditionLogDAO getAlertConditionLogDAO();

@@ -1530,6 +1530,7 @@
     <!-- Package the test jars and deploy into the EAR -->
     <jar file="${ear.dir}/hq-test.jar" basedir="${build.dir}/classes" > 
       <include name="org/hyperic/**/*_test*"/>
+      <include name="org/hyperic/**/*Test*"/>
     </jar>
  
     <mkdir dir="${ear.dir}/hq-session-test.jar/META-INF" />

@@ -49,6 +49,7 @@ import org.hyperic.hq.common.server.session.CrispoOptionDAO;
 import org.hyperic.hq.events.server.session.ActionDAO;
 import org.hyperic.hq.events.server.session.AlertActionLogDAO;
 import org.hyperic.hq.events.server.session.AlertConditionLogDAO;
+import org.hyperic.hq.events.server.session.AlertDAO;
 import org.hyperic.hq.events.server.session.AlertDefinitionDAO;
 import org.hyperic.hq.events.server.session.TriggerDAO;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyTypeInfoDAO;
@@ -194,5 +195,9 @@ public class HibernateDAOFactory extends DAOFactory {
 
     public ExecutionStrategyTypeInfoDAO getExecutionStrategyTypeInfoDAO() {
         return new ExecutionStrategyTypeInfoDAO(this);
+    }
+
+    public AlertDAO getAlertDAO() {
+        return new AlertDAO(this);
     }
 }
