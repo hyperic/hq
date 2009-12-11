@@ -254,6 +254,35 @@ public class AlertDAO extends HibernateDAO {
             return null;
         }
     }
+
+    /**
+     * Return all last unfixed alerts
+     * 
+     * @return
+     */
+    public Map findAllLastUnfixed() {
+        String hql = 
+            new StringBuilder()
+                    .append("select a ")
+                    .append("from Alert a ")
+                    .append("join a.alertDefinition ad ")
+                    .append("where ad.deleted = false ")
+                    .append("and a.fixed = false ")
+                    .append("order by a.ctime ")
+                    .toString();
+                
+        List alerts = createQuery(hql).list();
+                
+        Map lastAlerts = new HashMap(alerts.size());
+        for (Iterator it=alerts.iterator(); it.hasNext(); ) {
+            Alert a = (Alert) it.next();
+            // since it is ordered by ctime in ascending order, the
+            // last alert will eventually be put into the map
+            lastAlerts.put(a.getAlertDefinition().getId(), a);
+        }
+        
+        return lastAlerts;
+    }
     
     /**
      * Return all last fixed alerts for the given resource

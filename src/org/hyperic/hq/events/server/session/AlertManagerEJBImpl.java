@@ -247,6 +247,29 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
     }
 
     /**
+     * Find all last unfixed alerts
+     *
+     * @ejb:interface-method
+     */
+    public Map findAllLastUnfixed() {        
+        StopWatch watch = new StopWatch();
+        Map unfixedAlerts = null;
+        try {
+            unfixedAlerts = 
+                getAlertDAO().findAllLastUnfixed();
+        } catch (Exception e) {
+            unfixedAlerts = Collections.EMPTY_MAP;
+            _log.error("Error finding all last unfixed alerts", e);
+        } finally {
+            if (_log.isDebugEnabled()) {
+                _log.debug("findAllLastUnfixed: " + watch);
+            }
+        }
+        
+        return unfixedAlerts;
+    }
+    
+    /**
      * Find the last alerts for the given resource
      *
      * @ejb:interface-method
