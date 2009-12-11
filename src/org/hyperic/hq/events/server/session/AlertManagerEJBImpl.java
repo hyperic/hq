@@ -216,6 +216,13 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
     }
 
     /**
+     * @ejb:interface-method
+     */
+    public Alert getAlertById(Integer id) {
+        return getAlertDAO().getById(id);
+    }
+
+    /**
      * Find an alert pojo by ID
      *
      * @ejb:interface-method
