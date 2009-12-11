@@ -443,34 +443,6 @@
 	<import file="${hq.home}/build_util/dbsetup-build.xml" />
 
 
-	<target name="pack-hq-jar">
-		<copy file="${pdk.productStub}" toDir="${build.dir}/classes/org/hyperic/hq/product" />
-		<!-- TODO: Create separate jars for each component -->
-		<jar file="${ear.dir}/hq.jar" basedir="${build.dir}/classes">
-			<include name="images/**" />
-			<include name="org/hyperic/**" />
-			<exclude name="org/hyperic/hq/ui/**" />
-			<exclude name="org/hyperic/tools/ant/**" />
-			<exclude name="org/hyperic/tools/db/**" />
-			<exclude name="org/hyperic/hq/plugin/**" />
-			<!-- Exclude unit tests -->
-			<exclude name="org/hyperic/**/*_test*" />
-			<!-- Exclude groovy classes -->
-			<exclude name="org/hyperic/hq/hqu/rendit/**" />
-		</jar>
-
-		<!-- We only want server and shared classes for the UI -->
-		<jar file="${ear.dir}/hq.jar" basedir="${build.dir}/classes" update="true">
-			<include name="org/hyperic/hq/ui/server/session/**" />
-			<include name="org/hyperic/hq/ui/shared/**" />
-		</jar>
-
-		<jar basedir="${build.dir}/src" jarfile="${ear.dir}/hq.jar" update="true">
-			<include name="version.properties" />
-			<include name="product.properties" />
-		</jar>
-	</target>
-
 	<target name="pack-test">
 		<mkdir dir="${war.dir}" />
 		<mkdir dir="${war.dir}/WEB-INF/lib" />
@@ -709,17 +681,6 @@
 		<delete file="${jboss.deploy.war.dir}/WEB-INF/lib/hq-tapestry-lib.jar" />
 		<delete file="${jboss.deploy.war.dir}/WEB-INF/lib/hq-ui.jar" />
 	</target>
-
-	<target name="trigger-jboss-reload" depends="init-taskdefs">
-		<post to="http://localhost:7080/jmx-console/HtmlAdaptor">
-			<prop name="action" value="invokeOp" />
-			<prop name="name" value="jboss.system:service=MainDeployer" />
-			<prop name="methodIndex" value="18" />
-			<prop name="arg0" value="file:${jboss.home}/server/default/deploy/hq.ear/hq.war/" />
-		</post>
-	</target>
-
-	<target name="redeploy-ui" depends="undeploy-ui,deploy-ui,trigger-jboss-reload" />
 
 	<target name="minify-ui" depends="init-taskdefs, pack-war">
 		<for param="file">
@@ -1254,7 +1215,7 @@
 
 <!-- When running the 'test' target 'test-all' must be run to deploy the 
        tests into the EAR and ensure deferrable constraints are set correctly -->
-<target name="test-all" depends="test-build, pack-test-ear" />
+<target name="test-all" depends="test-build" />
 
 <target name="test-build">
 	<property name="unittest-lib" location="${hq.home}/unittest/lib" />
@@ -1263,28 +1224,6 @@
 		<param name="unittest.lib" value="${unittest-lib}" />
 	</antcall>
 	<antcall target="compile-tests" />
-</target>
-
-<target name="pack-test-ear">
-	<!-- Package the test jars and deploy into the EAR -->
-	<jar file="${ear.dir}/hq-test.jar" basedir="${build.dir}/classes">
-		<include name="org/hyperic/**/*_test*" />
-	</jar>
-	
-	<mkdir dir="${ear.dir}/hq-session-test.jar/META-INF" />
-	<copy todir="${ear.dir}/hq-session-test.jar/META-INF">
-		<fileset dir="${basedir}/dd/session-test" includes="*" />
-	</copy>
-	
-	<copy todir="${ear.dir}/lib">
-		<fileset dir="${thirdparty.lib}" includes="com.springsource.com.cenqua.clover-*.jar" />
-	</copy>
-	
-	<!-- Rewrite the manifest to include the test jars -->
-	<antcall target="write-ear-manifest" inheritAll="false" />
-	
-	<!-- Copy in application.xml that includes the test EJBs -->
-	<copy file="etc/application-test.xml" toFile="${ear.dir}/META-INF/application.xml" overwrite="true" />
 </target>
 
 <target name="build" depends="init,compile,pack" description="Compile and pack - no code generation" />
