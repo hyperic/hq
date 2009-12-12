@@ -607,6 +607,10 @@ public class SenderThread
                     return;
                 }
 
+                if (log.isDebugEnabled()) {
+                    log.debug("Woke up, sending batch of metrics.");
+                }
+                
                 lastMetricTime = this.sendBatch();
                 if(lastMetricTime != null){
                     String backlogNum = "";
