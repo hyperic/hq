@@ -12,8 +12,7 @@
 	<property file="build.properties" />
 
 	<!-- Hibernate properties -->
-	<!-->
-	<property file="etc/hibernate.properties" /> -->
+   <property file="${hq.home}/hq-web/src/main/resources/hibernate.properties" />
 
   <!-- Version file -->
 	<property name="version.properties" value="${hq.home}/hq-common/src/main/resources/version.properties" />
@@ -21,6 +20,7 @@
 
 	<!-- ==================== Defaults ==================== -->
 	<property name="hq.web" location="${hq.home}/hq-web" />
+	<property name="hq.installer" location="${hq.home}/hq-installer" />
 	<property name="hq.common" location="${hq.home}/hq-common" />
 	<property name="hq.util" location="${hq.home}/hq-util" />
 	<property name="hq.pdk.shared" location="${hq.home}/hq-pdk-shared" />
@@ -59,11 +59,14 @@
 
 	<!-- PDK destination -->
 	<property name="pdk.dir" location="${agent.dir}/bundles/${agent.bundle.dir}/pdk" />
-	<property name="agent.pdkDir" location="${pdk.dir}" />
+
 	<property name="pdk.lib" location="${pdk.dir}/lib" />
 	<property name="pdk.plugins" location="${pdk.dir}/plugins" />
 	<property name="pdk.mibs" location="${pdk.dir}/mibs" />
 	<property name="pdk.scripts" location="${pdk.dir}/scripts" />
+	
+	<!-- This is used by the PluginJar task to resolve location of included XML during validation -->
+	<property name="agent.pdkDir" location="${build.dir}" />
 
 
 	<!-- Java Service Wrapper destination -->
@@ -134,16 +137,21 @@
 	</path>
 
 	<path id="pdkjars">
-		<path refid="pdknative" />
+		<!--><path refid="pdknative" />-->
 		<!-- exclude hq-product.jar, else version.properties
          update will fail on windows -->
-		<fileset dir="${pdk.lib}" includes="**/*.jar" />
+		<!--><fileset dir="${pdk.lib}" includes="**/*.jar" /> -->
+		<path location="${hq.pdk.shared}/target/classes"/>
 		<path location="${hq.common}/target/classes" />
+		<path location="${hq.util}/target/classes" />
+		<path refid="alljars"/>
 	</path>
 
 	<path id="custom-ant-tasks.path">
 		<path refid="alljars" />
-		<path location="${build.dir}/classes" />
+		<path location="${hq.installer}/target/classes" />
+		<path location="${hq.web}/target/classes" />
+		<path location="${hq.util}/target/classes" />
 	</path>
 
 	<!-- Source common targets -->
@@ -167,6 +175,9 @@
 		<taskdef name="for" classname="net.sf.antcontrib.logic.For" classpathref="alljars" />
 		<taskdef name="post" classname="net.sf.antcontrib.net.PostTask" classpathref="alljars" />
 		<taskdef resource="org/hyperic/tools/ant/ant-tools.properties" classpathref="custom-ant-tasks.path" />
+		<!-- validate pure-xml plugins -->
+		<taskdef name="plugincopy" classname="org.hyperic.hq.product.ant.PluginCopy" classpathref="pdkjars" />
+		<taskdef name="hqplugin" classname="org.hyperic.hq.product.ant.PluginJar" classpathref="pdkjars" />
 		<property name="init-taskdefs.notrequired" value="true" />
 	</target>
 
@@ -201,7 +212,7 @@
 		</copy>
 	</target>
 
-	<target name="compile-agent" depends="init">
+	<target name="compile-agent" depends="compile-agent-pdk">
 		<path id="compile.classpath">
 			<path refid="alljars" />
 			<path refid="testjars" />
@@ -220,13 +231,23 @@
 			<path location="${hq.agent}/target/classes" />
 		</path>
 		<compile-sources classpath.id="compile.classpath" src.dir="${hq.agent}" output.dir="${hq.agent}/target/classes" />
-		<compile-sources classpath.id="compile.classpath" src.dir="${hq.pdk.agent}" output.dir="${hq.pdk.agent}/target/classes" />
 		<compile-agent-handlers classpath.id="handler.classpath" handler.name="autoinventory" />
 		<compile-agent-handlers classpath.id="handler.classpath" handler.name="bizapp" />
 		<compile-agent-handlers classpath.id="handler.classpath" handler.name="commands" />
 		<compile-agent-handlers classpath.id="handler.classpath" handler.name="control" />
 		<compile-agent-handlers classpath.id="handler.classpath" handler.name="livedata" />
 		<compile-agent-handlers classpath.id="handler.classpath" handler.name="measurement" />
+	</target>
+	
+	<target name="compile-agent-pdk" depends="compile-shared">
+			<path id="compile.classpath">
+				<path refid="alljars" />
+				<path refid="testjars" />
+				<path location="${hq.util}/target/classes" />
+				<path location="${hq.common}/target/classes" />
+				<path location="${hq.pdk.shared}/target/classes" />
+			</path>
+			<compile-sources classpath.id="compile.classpath" src.dir="${hq.pdk.agent}" output.dir="${hq.pdk.agent}/target/classes" />
 	</target>
 
 	<macrodef name="compile-sources">
@@ -268,7 +289,7 @@
 		</sequential>
 	</macrodef>
 
-	<target name="compile-plugins">
+	<target name="compile-plugins" depends="compile-agent">
 		<compile-plugin name="apache" />
 
 		<compile-plugin name="tomcat" />
@@ -399,33 +420,6 @@
 		</sequential>
 	</macrodef>
 
-	<target name="copy-resources" depends="init">
-
-		<!-- Copy resources -->
-		<copy toDir="${build.dir}/classes">
-			<fileset dir="src" includes="**/*.properties" />
-		</copy>
-
-		<copy toDir="${build.dir}/classes" file="etc/ehcache.xml" />
-
-		<mkdir dir="${build.dir}/classes/images" />
-		<copy toDir="${build.dir}/classes/images">
-			<fileset dir="${webapp.home}/images">
-				<include name="icon_available_green.gif" />
-				<include name="icon_available_red.gif" />
-				<include name="icon_available_error.gif" />
-				<include name="icon_auto-group.gif" />
-				<include name="icon_cluster.gif" />
-				<include name="icon_resource.gif" />
-			</fileset>
-		</copy>
-		<copy toDir="${build.dir}/classes">
-			<fileset dir="${hq.home}/etc" includes="cactus.properties,log_client.properties,spring-*.properties,META-INF/spring/**/*-context.xml" />
-		</copy>
-	</target>
-
-
-
 	<!-- ==================== JSP precompile ============================ -->
 
 	<import file="${hq.home}/build_util/jsp-build.xml" />
@@ -462,7 +456,7 @@
 		</copy>
 	</target>
 
-	<target name="build-war" description="Build and create the war" depends="compile,pack-war" />
+	<target name="build-war" description="Build and create the war" depends="compile,compile-plugins,pack-plugins,pack-war" />
 
 	<!-- ==================== UI packaging ==================== -->
 
@@ -529,6 +523,7 @@
 				<include name="snmp4j.jar" />
 				<include name="dnsjava-2.0.3.jar" />
 				<include name="ehcache-1.5.0.jar" />
+				<include name="jdom-1.1.jar"/>
 				<include name="jsr107cache-1.0.jar" />
 				<!-- EHCache 1.5 dep -->
 				<include name="json.jar" />
@@ -619,6 +614,8 @@
 				<include name="hq-pdk-shared.jar" />
 			</fileset>
 		</copy>
+		
+		<antcall target="copy-plugins-to-server"/>
 
 		<!-- Pack UI plugins -->
 		<!-->
@@ -827,25 +824,21 @@
 	<!-- Postgres plugin uses the 7.4.3 driver -->
 	<fileset dir="${thirdparty.lib}/postgresql" includes="postgresql-7.4.3.jar" />
 </copy>
-
-<!-- requires ${pdk.lib} we just created -->
-<taskdef name="hqplugin" classname="org.hyperic.hq.product.ant.PluginJar" classpathref="pdkjars" />
-<!-- validate pure-xml plugins -->
-<taskdef name="plugincopy" classname="org.hyperic.hq.product.ant.PluginCopy" classpathref="pdkjars" />
 </target>
 
 <!-- Build the plugins -->
-<target name="pack-plugins" depends="init-taskdefs,pack-pdk-lib">
-<mkdir dir="${pdk.plugins}" />
+<target name="pack-plugins" depends="init-taskdefs">
+
 <mkdir dir="${plugin.dir}" />
 
-<copy todir="${pdk.plugins}">
+<copy todir="${plugin.dir}">
 	<!-- copy shared xml pieces prior to validation-->
 	<fileset dir="${hq.plugins}/process/src/main/resources">
 		<include name="*.xml" />
 	</fileset>
 	<fileset dir="${hq.plugins}/jvm/src/main/resources" includes="*.xml" />
 </copy>
+
 
 <hqplugin name="apache" />
 
@@ -935,15 +928,20 @@
 
 <hqplugin name="groovy-scripting" />
 
-
-
-
 </target>
 
 <!-- Copy plugins -->
 <target name="copy-plugins" depends="init-taskdefs">
 <mkdir dir="${pdk.plugins}" />
 <mkdir dir="${pdk.plugins}/scripting" />
+
+<copy todir="${pdk.plugins}">
+	<!-- copy shared xml pieces prior to validation-->
+	<fileset dir="${hq.plugins}/process/src/main/resources">
+		<include name="*.xml" />
+	</fileset>
+	<fileset dir="${hq.plugins}/jvm/src/main/resources" includes="*.xml" />
+</copy>
 
 <echo message="Copying plugins from: ${plugin.dir}" />
 
@@ -987,6 +985,48 @@
 	<fileset dir="${hq.pdk.agent}/scripts" includes="*.*" />
 </copy>
 </target>
+
+ <target name="copy-plugins-to-server" depends="init-taskdefs">
+	<mkdir dir="${war.dir}/hq-plugins"/>
+	<mkdir dir="${war.dir}/hq-plugins/scripting"/>
+	
+	<copy todir="${war.dir}/hq-plugins">
+      <fileset dir="${plugin.dir}"
+               excludes="${plugins.exclude}">
+        <exclude name="*-scripting-plugin.jar"/>
+        <include name="*-plugin.jar"/>
+      </fileset>
+    </copy>
+
+    <copy todir="${war.dir}/hq-plugins">
+	<!-- copy shared xml pieces-->
+	   <fileset dir="${hq.plugins}/process/src/main/resources">
+		   <include name="*.xml"/>
+	    </fileset>
+	   <fileset dir="${hq.plugins}/jvm/src/main/resources" includes="*.xml"/>
+    </copy>
+
+    <copy todir="${war.dir}/hq-plugins/scripting">
+      <fileset dir="${plugin.dir}"
+               excludes="${plugins.exclude}">
+        <include name="*-scripting-plugin.jar"/>
+      </fileset>
+      <fileset dir="${thirdparty.lib}">
+        <include name="groovy-all-1.6.jar" />
+      </fileset>
+    </copy>
+
+    <plugincopy todir="${war.dir}/hq-plugins" file="hq-plugins/activemq/src/main/resources/activemq-plugin.xml"/>
+    <plugincopy todir="${war.dir}/hq-plugins" file="hq-plugins/geronimo/src/main/resources/geronimo-plugin.xml"/>
+    <plugincopy todir="${war.dir}/hq-plugins" file="hq-plugins/glassfish/src/main/resources/glassfish-plugin.xml"/>
+    <plugincopy todir="${war.dir}/hq-plugins" file="hq-plugins/hq-internal/src/main/resources/hq-internal-plugin.xml"/>
+    <plugincopy todir="${war.dir}/hq-plugins" file="hq-plugins/jetty/src/main/resources/jetty-plugin.xml"/>
+    <plugincopy todir="${war.dir}/hq-plugins" file="hq-plugins/jmx/src/main/resources/jmx-plugin.xml"/>
+    <plugincopy todir="${war.dir}/hq-plugins" file="hq-plugins/resin/src/main/resources/resin-plugin.xml"/>
+	<plugincopy todir="${war.dir}/hq-plugins" file="hq-plugins/sendmail/src/main/resources/sendmail-plugin.xml"/>
+
+</target>
+
 
 <target name="pack-pdk" description="Pack the PDK" depends="pack-pdk-lib,pack-plugins,copy-plugins" />
 
@@ -1110,7 +1150,7 @@
 
 </target>
 
-<target name="build-agent" description="Build and pack the agent directory structure" depends="compile-shared,compile-agent,compile-plugins,pack-pdk,pack-agent" />
+<target name="build-agent" description="Build and pack the agent directory structure" depends="compile-agent,compile-plugins,pack-pdk,pack-agent" />
 
 <!-- ==================== Catalina packaging ==================== -->
 

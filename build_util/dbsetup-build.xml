@@ -4,38 +4,8 @@
 
   <!-- ==================== DBSetup ==================== -->
   <target name="dbsetup-init" depends="init-taskdefs" unless="dbsetup-init.isLoaded">
-    <switch value="${hq.server.ds-mapping}">
-      <case value="Oracle8">
-        <echo>dbsetup-init: Oracle8</echo>
-        <property name="using.oracle8.db" value="true"/>
-        <property name="quartz.delegate" value="org.quartz.impl.jdbcjobstore.oracle.OracleDelegate"/>
-      </case>
-      <case value="Oracle9i">
-        <echo>dbsetup-init: Oracle</echo>
-        <property name="using.oracle8.db" value="true"/>
-        <property name="quartz.delegate" value="org.quartz.impl.jdbcjobstore.oracle.OracleDelegate"/>
-      </case>
-      <case value="Oracle10g">
-        <echo>dbsetup-init: Oracle10g</echo>
-        <property name="using.oracle8.db" value="true"/>
-        <property name="quartz.delegate" value="org.quartz.impl.jdbcjobstore.oracle.OracleDelegate"/>
-      </case>
-      <case value="PostgreSQL">
-        <echo>dbsetup-init: PostgreSQL</echo>
-        <property name="quartz.delegate" value="org.quartz.impl.jdbcjobstore.PostgreSQLDelegate"/>
-      </case>
-
-      <case value="MySQL">
-        <echo>dbsetup-init: MySQL</echo>
-        <property name="quartz.delegate" value="org.quartz.impl.jdbcjobstore.StdJDBCDelegate"/>
-      </case>
-      <default>
-        <fail>
-        Unrecognized datasource mapping name: ${hq.server.ds-mapping}
-        </fail>
-      </default>
-    </switch>
-
+	<property name="quartz.delegate" value="org.quartz.impl.jdbcjobstore.StdJDBCDelegate"/>
+	<property  name="hq.server.ds-mapping" value="MySQL"/>
     <mkdir dir="${build.dir}/sql" />
 
     <property name="dbsetup-init.isLoaded" value="t"/>
@@ -46,7 +16,7 @@
   <target name="dbsetup-combine-check">
     <uptodate property="dbsetup-combine.notrequired"
               targetfile="${build.dir}/sql/dbsetup-combine.tstamp">
-      <srcfiles dir="${hq.home}/sql">
+      <srcfiles dir="${hq.home}/hq-installer/src/main/resources/sql">
         <include name="*.xml"/>
         <include name="**/*.hq-xml"/>
       </srcfiles>
@@ -60,18 +30,17 @@
   <target name="dbsetup-combine" depends="dbsetup-init,dbsetup-combine-check"
           unless="dbsetup-combine.notrequired">
 
-    <delete quiet="true" dir="${build.dir}/dd/sql" />
-    <mkdir dir="${build.dir}/dd" />
-    <mkdir dir="${build.dir}/dd/sql" />
+    <delete quiet="true" dir="${build.dir}/sql" />
+    <mkdir dir="${build.dir}/sql" />
     <switch value="${hqee.build}">
       <case value="true">
-        <copy todir="${build.dir}/dd/sql">
-          <fileset dir="${hq.home}/sql" includes="*-data.xml" />
+        <copy todir="${build.dir}/sql">
+          <fileset dir="${hq.home}/hq-installer/src/main/resources/sql" includes="*-data.xml" />
         </copy>
       </case>
       <default>
-        <copy todir="${build.dir}/dd/sql">
-          <fileset dir="${hq.home}/sql" includes="*-data.xml" excludes="rt-data.xml" />
+        <copy todir="${build.dir}/sql">
+          <fileset dir="${hq.home}/hq-installer/src/main/resources/sql" includes="*-data.xml" excludes="rt-data.xml" />
         </copy>
       </default>
     </switch>
@@ -86,7 +55,7 @@
         name="data-orig.xml"
         notice="Copyright (C) 2004-2007, Hyperic, Inc., All Rights Reserved."
         order="${dbsetup-subsystems}">
-      <fileset dir="${build.dir}/dd/sql">
+      <fileset dir="${build.dir}/sql">
         <include name="*-data.xml"/>
       </fileset>
     </dbsetup-cat>
@@ -166,7 +135,7 @@
          jdbcUrl="${hq.jdbc.url}" 
          jdbcUser="${hq.jdbc.user}"
          jdbcPassword="${hq.jdbc.password}"
-         typeMap="${hq.home}/sql/common-dbsetup-typemap.xml"
+         typeMap="${hq.home}/hq-installer/src/main/resources/sql/common-dbsetup-typemap.xml"
          data="${data}"
          sqlFile="${basedir}/build/sql/dbsetup-all-${hq.server.ds-mapping}-install.sql"
          noexec="false"
@@ -174,15 +143,7 @@
          appendToSqlFile="true" />
   </target> 
 
-  <!-- DBSetup target for unittest framework -->
-  <target name="test-dbsetup" depends="delete-dump">	  	  
-    <property name="unittest-lib" location="${hq.home}/unittest/lib" />
-    <echo message="using unittest.lib as -> ${unittest-lib}"/>
-    <antcall target="dbsetup">
-      <param name="unittest.lib" value="${unittest-lib}"/>
-    </antcall>
-  </target>
-
+ 
   <!-- Main DBSetup target -->
   <target name="dbsetup"
           depends="dbsetup-schema-only,dbsetup-data,dbsetup-upgrade"
@@ -192,22 +153,19 @@
           depends="dbsetup-combine,dbsetup-replace,dbsetup-uninstall,dbsetup-schema"
           description="Create an empty schema in the database, without any data."/>
 
-  <target name="dbsetup-upgrade" depends="init-taskdefs,delete-dump">
-    <ant antfile="${hq.home}/installer/data/db-upgrade.xml"
+  <target name="dbsetup-upgrade" depends="init-taskdefs">
+    <ant antfile="${hq.home}/hq-installer/src/main/resources/data/db-upgrade.xml"
          target="upgrade"
          inheritAll="true"
          inheritRefs="true">
       <property name="jdbc.url" value="${hq.jdbc.url}"/>
       <property name="jdbc.user" value="${hq.jdbc.user}"/>
       <property name="jdbc.password" value="${hq.jdbc.password}"/>
-      <property name="typemap.file" value="${hq.home}/sql/common-dbsetup-typemap.xml"/>
+      <property name="typemap.file" value="${hq.home}/hq-installer/src/main/resources/sql/common-dbsetup-typemap.xml"/>
       <property name="schema.target" value="${hq.schema.target.version}"/>
     </ant>
   </target>
 	
-  <target name="delete-dump">
-    <!-- this file is used for hqdb data dump during unit test framework execution -->
-    <delete file="${hq.home}/unittest/data/hqdb.dump.xml.gz" />	  
-  </target>	
+ 
 
 </project>
