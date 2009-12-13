@@ -1,4 +1,7 @@
 /*
+ * 'SNMPSession_v3.java'
+ *
+ *
  * NOTE: This copyright does *not* cover user programs that use HQ
  * program services by normal system calls through the application
  * program interfaces provided as part of the Hyperic Plug-in Development
@@ -6,7 +9,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004, 2005, 2006, 2007, 2008, 2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -25,6 +28,8 @@
 
 package org.hyperic.snmp;
 
+import java.io.*;  // stub
+
 import org.snmp4j.PDU;
 import org.snmp4j.ScopedPDU;
 import org.snmp4j.UserTarget;
@@ -38,6 +43,7 @@ import org.snmp4j.security.PrivAES128;
 import org.snmp4j.security.PrivAES192;
 import org.snmp4j.security.PrivAES256;
 import org.snmp4j.security.PrivDES;
+import org.snmp4j.security.Priv3DES;
 import org.snmp4j.security.SecurityLevel;
 import org.snmp4j.security.SecurityModels;
 import org.snmp4j.security.SecurityProtocols;
@@ -46,105 +52,135 @@ import org.snmp4j.security.UsmUser;
 import org.snmp4j.smi.OID;
 import org.snmp4j.smi.OctetString;
 
-/**
+/*
  * Implements the SNMPSession interface for SNMPv3 sessions by
  * extending the SNMPSession_v2c implementation.  SNMPv3 is
- * only different from v1 or v2c inthe way that a session
+ * only different from v1 or v2c in the way that a session
  * is initialized.
  */
-class SNMPSession_v3 extends SNMPSession_v2c {
+class SNMPSession_v3 extends SNMPSession_v2c
+{
+   static
+   {
+      USM usm = new USM ( SecurityProtocols.getInstance ( ), new OctetString ( MPv3.createLocalEngineID ( ) ), 0 );
 
-    static {
-        USM usm =
-            new USM(SecurityProtocols.getInstance(),
-                    new OctetString(MPv3.createLocalEngineID()), 0);
-        SecurityModels.getInstance().addSecurityModel(usm);
-        if ("true".equals(System.getProperty("snmpLogging"))) {
-            LogFactory.setLogFactory(new Log4jLogFactory());
-        }
-    }
+      SecurityModels.getInstance().addSecurityModel ( usm );
 
-    SNMPSession_v3() {
-        this.version = SnmpConstants.version3;
-    }
+      if ( "true".equals ( System.getProperty ( "snmpLogging" ) ) )
+      {
+         LogFactory.setLogFactory ( new Log4jLogFactory ( ) );
+      }
+   }
 
-    protected PDU newPDU() {
-        ScopedPDU pdu = new ScopedPDU();
-        return pdu;
-    }
+   SNMPSession_v3 ( )
+   {
+      this.version = SnmpConstants.version3;
+   }
 
-    private OctetString getPrivPassphrase(String defVal) {
-        String val = System.getProperty("snmpPrivPassphrase", defVal);
-        if (val == null) {
-            return null;
-        }
-        return new OctetString(val);
-    }
+   protected PDU newPDU ( )
+   {
+      ScopedPDU pdu = new ScopedPDU ( );
 
-    private OID getPrivProtocol(String defVal)
-        throws SNMPException {
+      return pdu;
+   }
 
-        String val = System.getProperty("snmpPrivProtocol", defVal);
-        if (val == null) {
-            return null;
-        }
-        if (val.equals("DES")) {
-            return PrivDES.ID;
-        }
-        else if ((val.equals("AES128")) || (val.equals("AES"))) {
-            return PrivAES128.ID;
-        }
-        else if (val.equals("AES192")) {
-            return PrivAES192.ID;
-        }
-        else if (val.equals("AES256")) {
-            return PrivAES256.ID;
-        }
-        else {
-            throw new SNMPException("Privacy protocol " + val + " not supported");
-        }
-    }
+   private OctetString getPrivPassphrase ( String defVal ) throws SNMPException
+   {
+      String val = System.getProperty ( "snmpPrivacyPassPhrase", defVal );
 
-    void init(String host,
-              String port,
-              String transport,
-              String user,
-              String password,
-              int authmethod)
-        throws SNMPException {
+      if ( val == null )
+      {
+         return null;
+      }
 
-        OID authProtocol =
-            authmethod == SNMPClient.AUTH_SHA ? AuthSHA.ID : AuthMD5.ID;
-        OctetString securityName = new OctetString(user);
-        OctetString authPassphrase =
-            password == null ? null : new OctetString(password);
-        OctetString privPassphrase = getPrivPassphrase(null); //XXX template option
-        OID privProtocol = getPrivProtocol(null); //XXX template option
+      return new OctetString ( val );
+   }
 
-        UserTarget target = new UserTarget(); 
-        target.setSecurityName(securityName);
-        if (authPassphrase != null) { 
-            if (privPassphrase != null) { 
-                target.setSecurityLevel(SecurityLevel.AUTH_PRIV); 
-            }
-            else { 
-                target.setSecurityLevel(SecurityLevel.AUTH_NOPRIV); 
-            } 
-        }
-        else { 
-            target.setSecurityLevel(SecurityLevel.NOAUTH_NOPRIV); 
-        } 
-        this.target = target;
+   private OID getPrivProtocol ( String defVal ) throws SNMPException
+   {
+      String val = System.getProperty ( "snmpPrivacyType", defVal );
 
-        initSession(host, port, transport);
-        USM usm = this.session.getUSM();
-        if (usm.getUserTable().getUser(securityName) != null) {
-            return;
-        }
-        usm.addUser(securityName, new UsmUser(securityName,
-                                              authProtocol,
-                                              authPassphrase,
-                                              privProtocol,
-                                              privPassphrase));
-    }
+      if ( val == null )
+      {
+         return null;
+      }
+
+      if ( val.equals ( "DES" ) )
+      {
+         return PrivDES.ID;
+      }
+      else if ( val.equals ( "3DES" ) )  // "Triple DES" privacy (encryption) mode has been added in HQ v4.3
+      {
+         return Priv3DES.ID;
+      }
+      else if ( ( val.equals ( "AES128" ) )  ||  ( val.equals ( "AES" ) ) )
+      {
+         return PrivAES128.ID;
+      }
+      else if ( val.equals ( "AES192" ) )
+      {
+         return PrivAES192.ID;
+      }
+      else if ( val.equals ( "AES256" ) )
+      {
+         return PrivAES256.ID;
+      }
+      else
+      {
+         throw new SNMPException ( "Privacy protocol " + val + " not supported" );
+      }
+   }
+
+   void init ( String host,
+               String port,
+               String transport,
+               String user,
+               String password,
+               int    authmethod ) throws SNMPException
+   {
+      OID authProtocol = authmethod == SNMPClient.AUTH_SHA ? AuthSHA.ID : AuthMD5.ID;
+
+      OID privProtocol = getPrivProtocol ( null ); // Template option...
+
+      OctetString securityName   = new OctetString ( user );
+      OctetString authPassphrase = password == null ? null : new OctetString ( password );
+      OctetString privPassphrase = getPrivPassphrase ( null ); // Template option...
+
+      UserTarget target = new UserTarget ( );
+
+      target.setSecurityName ( securityName );
+
+      if ( authPassphrase != null )
+      {
+         if ( privPassphrase != null )
+         {
+            target.setSecurityLevel ( SecurityLevel.AUTH_PRIV );
+         }
+         else
+         {
+            target.setSecurityLevel ( SecurityLevel.AUTH_NOPRIV ); 
+         } 
+      }
+      else
+      {
+         target.setSecurityLevel ( SecurityLevel.NOAUTH_NOPRIV ); 
+      } 
+
+      this.target = target;
+
+      initSession ( host, port, transport );
+
+      USM usm = this.session.getUSM ( );
+
+      if ( usm.getUserTable().getUser ( securityName ) != null )
+      {
+         return;
+      }
+
+      usm.addUser ( securityName, new UsmUser ( securityName,
+                                                authProtocol,
+                                                authPassphrase,
+                                                privProtocol,
+                                                privPassphrase ) );
+   }
 }

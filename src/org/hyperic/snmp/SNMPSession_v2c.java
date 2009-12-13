@@ -1,4 +1,7 @@
 /*
+ * 'SNMPSession_v2c.java'
+ *
+ *
  * NOTE: This copyright does *not* cover user programs that use HQ
  * program services by normal system calls through the application
  * program interfaces provided as part of the Hyperic Plug-in Development
@@ -6,7 +9,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004, 2005, 2006, 2007, 2008, 2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -30,19 +33,22 @@ import java.util.Map;
 
 import org.snmp4j.mp.SnmpConstants;
 
-class SNMPSession_v2c extends SNMPSession_v1 {
+class SNMPSession_v2c extends SNMPSession_v1
+{
+   SNMPSession_v2c ( )
+   {
+      this.version = SnmpConstants.version2c;
+   }
 
-    SNMPSession_v2c() {
-        this.version = SnmpConstants.version2c;
-    }
+   public List getBulk ( String name ) throws SNMPException
+   {
+      // Optimize using snmp4j v2 specific stuff...
+      return super.getBulk ( name );
+   }
 
-    public List getBulk(String name) throws SNMPException {
-        // XXX optimize using snmp4j v2 specific stuff
-        return super.getBulk(name);
-    }
-
-    public Map getTable(String name, int index) throws SNMPException {
-        // XXX optimize using snmp4j v2 specific stuff
-        return super.getTable(name, index);
-    }    
+   public Map getTable(String name, int index) throws SNMPException
+   {
+      // Optimize using snmp4j v2 specific stuff...
+      return super.getTable ( name, index );
+   }    
 }

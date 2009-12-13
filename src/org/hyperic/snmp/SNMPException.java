@@ -1,4 +1,7 @@
 /*
+ * 'SNMPException.java'
+ *
+ *
  * NOTE: This copyright does *not* cover user programs that use HQ
  * program services by normal system calls through the application
  * program interfaces provided as part of the Hyperic Plug-in Development
@@ -6,7 +9,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004, 2005, 2006, 2007, 2008, 2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -27,17 +30,20 @@ package org.hyperic.snmp;
 
 import org.hyperic.util.NestedException;
 
-public class SNMPException extends NestedException {
+public class SNMPException extends NestedException
+{
+   public SNMPException ( )
+   {
+      super ( );
+   }
 
-    public SNMPException() {
-        super();
-    }
+   public SNMPException ( String s )
+   {
+      super ( s );
+   }
 
-    public SNMPException(String s) {
-        super(s);
-    }
-
-    public SNMPException(String s, Throwable t) {
-        super(s, t);
-    }
+   public SNMPException ( String s, Throwable t )
+   {
+      super ( s, t );
+   }
 }

@@ -1,4 +1,7 @@
 /*
+ * 'SNMPSession_v1.java'
+ *
+ *
  * NOTE: This copyright does *not* cover user programs that use HQ
  * program services by normal system calls through the application
  * program interfaces provided as part of the Hyperic Plug-in Development
@@ -6,7 +9,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004, 2005, 2006, 2007, 2008, 2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -53,288 +56,345 @@ import org.snmp4j.util.DefaultPDUFactory;
 import org.snmp4j.util.TreeEvent;
 import org.snmp4j.util.TreeUtils;
 
-class SNMPSession_v1 implements SNMPSession {
+class SNMPSession_v1 implements SNMPSession
+{
+   protected int version;
+   protected AbstractTarget target;
+   protected Snmp session;
+   private Address address;
+   private static Snmp sessionInstance = null;
+   protected static Log log = LogFactory.getLog ( "SNMPSession" );
 
-    protected int version;
-    protected AbstractTarget target;
-    protected Snmp session;
-    private Address address;
-    private static Snmp sessionInstance = null;
-    protected static Log log = LogFactory.getLog("SNMPSession");
+   private Snmp getSessionInstance ( ) throws IOException
+   {
+      if ( sessionInstance == null )
+      {
+         String listen = "0.0.0.0/0";
 
-    private Snmp getSessionInstance()
-        throws IOException {
+         AbstractTransportMapping transport;
 
-        if (sessionInstance == null) {
-            String listen = "0.0.0.0/0";
-            AbstractTransportMapping transport;
-            if (this.address instanceof TcpAddress) {
-              transport = new DefaultTcpTransportMapping(new TcpAddress(listen));
-            }
-            else {
-              transport = new DefaultUdpTransportMapping(new UdpAddress(listen));
-            }
-            sessionInstance = new Snmp(transport);
-            sessionInstance.listen();
-        }
+         if ( this.address instanceof TcpAddress )
+         {
+            transport = new DefaultTcpTransportMapping ( new TcpAddress ( listen ) );
+         }
+         else
+         {
+            transport = new DefaultUdpTransportMapping ( new UdpAddress ( listen ) );
+         }
 
-        return sessionInstance;
-    }
-    
-    SNMPSession_v1() {
-        this.version = SnmpConstants.version1;
-    }
+         sessionInstance = new Snmp ( transport );
+         sessionInstance.listen ( );
+      }
 
-    protected void initSession(String address, String port, String transport)
-        throws SNMPException {
+      return sessionInstance;
+   }
 
-        if (address == null) {
-            address = SNMPClient.DEFAULT_IP;
-        }
+   SNMPSession_v1 ( )
+   {
+      this.version = SnmpConstants.version1;
+   }
 
-        if (port == null) {
-            port = SNMPClient.DEFAULT_PORT_STRING;
-        }
+   protected void initSession ( String address,
+                                String port,
+                                String transport ) throws SNMPException
+   {
+      if ( address == null )
+      {
+         address = SNMPClient.DEFAULT_IP;
+      }
 
-        this.address =
-            GenericAddress.parse(transport + ":" + address + "/" + port);
-        this.target.setAddress(this.address);
-        this.target.setVersion(this.version);
-        this.target.setRetries(1);
-        this.target.setTimeout(1500);
+      if ( port == null )
+      {
+         port = SNMPClient.DEFAULT_PORT_STRING;
+      }
 
-        try {
-            this.session = getSessionInstance();
-        } catch (IOException e) {
-            throw new SNMPException(e.getMessage(), e);
-        }
-    }
+      this.address = GenericAddress.parse ( transport + ":" + address + "/" + port );
 
-    void init(String address,
-              String port,
-              String community,
-              String transport)
-        throws SNMPException {
+      this.target.setAddress ( this.address );
+      this.target.setVersion ( this.version );
+      this.target.setRetries ( 1 );
+      this.target.setTimeout ( 1500 );
 
-        CommunityTarget target = new CommunityTarget();
-        if (community == null) {
-            community = SNMPClient.DEFAULT_COMMUNITY;
-        }
-        target.setCommunity(new OctetString(community));
-        this.target = target;
-        initSession(address, port, transport);
-    }
+      try
+      {
+         this.session = getSessionInstance ( );
+      }
+      catch ( IOException e )
+      {
+         throw new SNMPException ( e.getMessage ( ), e );
+      }
+   }
 
-    protected static OID getOID(String name)
-        throws MIBLookupException {
+   void init ( String address,
+               String port,
+               String community,
+               String transport ) throws SNMPException
+   {
+      CommunityTarget target = new CommunityTarget();
 
-        MIBTree mibTree = MIBTree.getInstance();
+      if ( community == null )
+      {
+         community = SNMPClient.DEFAULT_COMMUNITY;
+      }
+
+      target.setCommunity ( new OctetString ( community ) );
+
+      this.target = target;
+
+      initSession ( address, port, transport );
+   }
+
+   protected static OID getOID(String name ) throws MIBLookupException
+   {
+      MIBTree mibTree = MIBTree.getInstance ( );
         
-        int[] oid = mibTree.getOID(name);
+      int[] oid = mibTree.getOID ( name );
 
-        if (oid == null) {
-            String msg = "Failed to lookup OID for name=" + name;
-            String unfound = mibTree.getLastLookupFailure();
-            if (!name.equals(unfound)) {
-                msg += " (last lookup failure=" + unfound + ")";
-            }
-            throw new MIBLookupException(msg);
-        }
+      if ( oid == null )
+      {
+         String msg = "Failed to lookup OID for name=" + name;
 
-        return new OID(oid);
-    }
+         String unfound = mibTree.getLastLookupFailure();
 
-    protected PDU newPDU() {
-        return new PDU();
-    }
+         if ( !name.equals ( unfound ) )
+         {
+            msg += " (last lookup failure=" + unfound + ")";
+         }
 
-    protected PDU getPDU(String oid, int type)
-        throws MIBLookupException {
+         throw new MIBLookupException ( msg );
+      }
 
-        return getPDU(getOID(oid), type);
-    }
+      return new OID ( oid );
+   }
+
+   protected PDU newPDU ( )
+   {
+      return new PDU ( );
+   }
+
+   protected PDU getPDU ( String oid,
+                          int    type ) throws MIBLookupException
+   {
+      return getPDU ( getOID ( oid ), type );
+   }
     
-    protected PDU getPDU(OID oid, int type) {
-        PDU pdu = newPDU();
-        pdu.setType(type);
+   protected PDU getPDU ( OID oid,
+                          int type )
+   {
+      PDU pdu = newPDU ( );
 
-        if (type == PDU.GETBULK) {
-            pdu.setMaxRepetitions(10);
-            pdu.setNonRepeaters(0);
-        }
+      pdu.setType ( type );
 
-        pdu.add(new VariableBinding(oid));
+      if ( type == PDU.GETBULK )
+      {
+         pdu.setMaxRepetitions (10 );
+         pdu.setNonRepeaters   ( 0 );
+      }
 
-        return pdu;
-    }
+      pdu.add ( new VariableBinding ( oid ) );
 
-    private boolean walk(OID rootOID, List values) throws IOException {
-        int requests = 0;
-        int vars = 0;
-        boolean isError = false;
-        TreeUtils treeUtils = new TreeUtils(this.session, new DefaultPDUFactory());
-        List events = treeUtils.getSubtree(this.target, rootOID);
+      return pdu;
+   }
 
-        for (int i=0; i<events.size(); i++) {
-            TreeEvent e = (TreeEvent)events.get(i);
-            requests++;
-            if (e.isError()) {
-                isError = true;
-                log.debug(rootOID + " walk: " + e.getErrorMessage(),
-                          e.getException());
+   private boolean walk ( OID  rootOID,
+                          List values ) throws IOException
+   {
+      int requests = 0;
+      int vars     = 0;
+
+      boolean isError = false;
+
+      TreeUtils treeUtils = new TreeUtils ( this.session, new DefaultPDUFactory ( ) );
+
+      List events = treeUtils.getSubtree ( this.target, rootOID );
+
+      for ( int i = 0; i < events.size ( ); i++ )
+      {
+         TreeEvent e = (TreeEvent)events.get ( i );
+
+         requests++;
+
+         if ( e.isError ( ) )
+         {
+            isError = true;
+
+            log.debug ( rootOID + " walk: " + e.getErrorMessage ( ), e.getException ( ) );
+         }
+
+         VariableBinding[] vb = e.getVariableBindings ( );
+
+         if ( vb != null )
+         {
+            vars += vb.length;
+
+            for ( int j = 0; j < vb.length; j++ )
+            {
+               values.add ( new SNMPValue ( vb[j] ) );
             }
+         }            
+      }
 
-            VariableBinding[] vb = e.getVariableBindings();
-            if (vb != null) {
-                vars += vb.length;
-                for (int j=0; j<vb.length; j++) {
-                    values.add(new SNMPValue(vb[j]));
-                }
-            }            
-        }
+      if ( log.isDebugEnabled ( ) )
+      {
+         log.debug ( rootOID + " walk: " + requests + " requests, " + vars + " vars, avg=" + vars / requests );
+      }
 
-        if (log.isDebugEnabled()) {
-            log.debug(rootOID + " walk: " + requests + " requests, " +
-                      vars + " vars, avg=" +
-                      vars / requests);
-        }
+      return !isError;
+   }
 
-        return !isError;
-    }
+   private SNMPValue getValue ( String name,
+                                int    type ) throws SNMPException
+   {
+      PDU request = getPDU ( name, type );
+      PDU response;
 
-    private SNMPValue getValue(String name, int type)
-        throws SNMPException {
+      ResponseEvent event = null;
 
-        PDU request = getPDU(name, type);
-        PDU response;
-        ResponseEvent event = null;
-        try {
-            event =
-                this.session.send(request, this.target);
-        } catch (IOException e) {
-            throw new SNMPException("Failed to get " + name, e);
-        }
+      try
+      {
+         event = this.session.send ( request, this.target );
+      }
+      catch ( IOException e )
+      {
+         throw new SNMPException ( "Failed to get " + name, e );
+      }
 
-        if (event == null) {
-            throw new SNMPException("No response for " + name);
-        }
+      if ( event == null )
+      {
+         throw new SNMPException ( "No response for " + name );
+      }
 
-        response = event.getResponse();
+      response = event.getResponse ( );
 
-        if (response == null) {
-            throw new SNMPException("No response for " + name);
-        }
+      if ( response == null )
+      {
+         throw new SNMPException ( "No response for " + name );
+      }
 
-        VariableBinding var = response.get(0);
-        if (var.isException()) {
-            throw new MIBLookupException(name + ": " +  //e.g. noSuchObject
-                                         var.getVariable().toString());
-        }
-        return new SNMPValue(var);
-    }
-    
-    public SNMPValue getSingleValue(String name)
-        throws SNMPException {
+      VariableBinding var = response.get ( 0 );
 
-        return getValue(name, PDU.GET);
-    }
+      if ( var.isException ( ) )
+      {
+         throw new MIBLookupException ( name + ": " + var.getVariable().toString ( ) );   // e.g. noSuchObject
+      }
 
-    public SNMPValue getNextValue(String name)
-        throws SNMPException {
+      return new SNMPValue ( var );
+   }
 
-        return getValue(name, PDU.GETNEXT);
-    }
+   public SNMPValue getSingleValue ( String name ) throws SNMPException
+   {
+      return getValue ( name, PDU.GET );
+   }
 
-    public List getColumn(String name)
-        throws SNMPException {
+   public SNMPValue getNextValue ( String name ) throws SNMPException
+   {
+      return getValue ( name, PDU.GETNEXT );
+   }
 
-        List values = new ArrayList();
+   public List getColumn(String name) throws SNMPException
+   {
+      List values = new ArrayList ( );
         
-        try {
-            if (!walk(getOID(name), values)) {
-                throw new SNMPException("No response for " + name);
-            }
-        } catch (IOException e) {
-            throw new SNMPException(e.getMessage(), e);
-        }
+      try
+      {
+         if ( !walk ( getOID ( name ), values ) )
+         {
+            throw new SNMPException ( "No response for " + name );
+         }
+      }
+      catch ( IOException e )
+      {
+         throw new SNMPException ( e.getMessage ( ), e );
+      }
 
-        return values;
-    }
+      return values;
+   }
 
-    private StringBuffer getSubId(OID oid1,
-                                  int oid1Len,
-                                  OID oid2) {
-        int oid2Len = oid2.getValue().length;
+   private StringBuffer getSubId ( OID oid1,
+                                   int oid1Len,
+                                   OID oid2 )
+   {
+      int oid2Len = oid2.getValue().length;
 
-        StringBuffer sb = new StringBuffer();
+      StringBuffer sb = new StringBuffer ( );
 
-        for (int x=oid1Len; 
-             x<oid2Len;
-             x++)
-        {
-            sb.append(oid2.get(x));
-            if (x<oid2Len-1) {
-                sb.append('.');
-            }
-        }
+      for ( int x = oid1Len; x < oid2Len; x++ )
+      {
+         sb.append ( oid2.get ( x ) );
 
-        return sb;
-    }
+         if ( x < oid2Len - 1 )
+         {
+            sb.append ( '.' );
+         }
+      }
 
-    public Map getTable(String name, int index)
-        throws SNMPException {
+      return sb;
+   }
 
-        OID oid = (OID)getOID(name).clone();
-        oid.append(index);
+   public Map getTable ( String name,
+                         int    index ) throws SNMPException
+   {
+      OID oid = (OID)getOID(name).clone ( );
 
-        HashMap map = new HashMap();
-        List column = getColumn(name);
+      oid.append ( index );
 
-        for (int i=0; i<column.size(); i++) {
-            SNMPValue value = (SNMPValue)column.get(i);
-            StringBuffer sb =
-                getSubId(oid, oid.getValue().length, value.oid);
-            map.put(sb.toString(),
-                    new SNMPValue(value.oid, value.var));
-        }
+      HashMap map = new HashMap ( );
 
-        return map;
-    }
+      List column = getColumn ( name );
 
-    public SNMPValue getTableValue(String name, int index, String leaf)
-        throws SNMPException {
+      for ( int i = 0; i < column.size ( ); i++ )
+      {
+         SNMPValue value = (SNMPValue)column.get ( i );
 
-        OID oid = (OID)getOID(name).clone();
-        oid.append(index);
-        oid.append(leaf);
+         StringBuffer sb = getSubId ( oid, oid.getValue().length, value.oid );
 
-        PDU request = getPDU(oid, PDU.GET);
+         map.put ( sb.toString ( ), new SNMPValue ( value.oid, value.var ) );
+      }
 
-        PDU response;
-        ResponseEvent event = null;
-        try {
-            event =
-                this.session.send(request, this.target);
-        } catch (IOException e) {
-            throw new SNMPException("Failed to get " + name, e);
-        }
+      return map;
+   }
 
-        if (event == null) {
-            throw new SNMPException("No response for " + name);
-        }
+   public SNMPValue getTableValue  ( String name,
+                                     int    index,
+                                     String leaf ) throws SNMPException
+   {
+      OID oid = (OID)getOID(name).clone();
 
-        response = event.getResponse();
+      oid.append ( index );
+      oid.append ( leaf  );
 
-        if (response == null) {
-            throw new SNMPException("No response for " + name);
-        }
+      PDU request = getPDU ( oid, PDU.GET );
 
-        return new SNMPValue(response.get(0));
-    }
+      PDU response;
 
-    public List getBulk(String name)
-        throws SNMPException {
+      ResponseEvent event = null;
 
-        return getColumn(name);
-    }
+      try
+      {
+         event = this.session.send ( request, this.target );
+      }
+      catch ( IOException e )
+      {
+         throw new SNMPException ( "Failed to get " + name, e );
+      }
+
+      if ( event == null )
+      {
+         throw new SNMPException ( "No response for " + name );
+      }
+
+      response = event.getResponse ( );
+
+      if ( response == null )
+      {
+         throw new SNMPException ( "No response for " + name );
+      }
+
+      return new SNMPValue ( response.get ( 0 ) );
+   }
+
+   public List getBulk ( String name ) throws SNMPException
+   {
+      return getColumn ( name );
+   }
 }

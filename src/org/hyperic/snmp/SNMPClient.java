@@ -1,4 +1,7 @@
 /*
+ * 'SNMPClient.java'
+ *
+ *
  * NOTE: This copyright does *not* cover user programs that use HQ
  * program services by normal system calls through the application
  * program interfaces provided as part of the Hyperic Plug-in Development
@@ -6,7 +9,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004, 2005, 2006, 2007, 2008, 2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -36,238 +39,302 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.snmp4j.smi.OID;
 
-public class SNMPClient {
-    private static final int VERSION_1  = 1;
-    private static final int VERSION_2C = 2;
-    private static final int VERSION_3  = 3;
+public class SNMPClient
+{
+   private static final int VERSION_1  = 1;
+   private static final int VERSION_2C = 2;
+   private static final int VERSION_3  = 3;
 
-    static final int AUTH_MD5 = 0;
-    static final int AUTH_SHA = 1;
+   static final int AUTH_MD5 = 0;
+   static final int AUTH_SHA = 1;
 
-    public static final String DEFAULT_IP = "127.0.0.1";
+   public static final String DEFAULT_IP = "127.0.0.1";
 
-    public static final int DEFAULT_PORT = 161;
-    public static final String DEFAULT_PORT_STRING = String.valueOf(DEFAULT_PORT);
-    public static final String DEFAULT_TRANSPORT = "udp";
-    public static final String DEFAULT_COMMUNITY =
-        System.getProperty("snmp.defaultCommunity", "public");
-    public static final String DEFAULT_USERNAME  = "username";
-    public static final String DEFAULT_PASSWORD  = "password";
+   public static final int DEFAULT_PORT = 161;
 
-    public static final String[] VALID_VERSIONS = {
-        "v1", "v2c", "v3"
-    };
+   public static final String DEFAULT_TRANSPORT = "udp";
+   public static final String DEFAULT_USERNAME  = "username";
+   public static final String DEFAULT_PASSWORD  = "password";
 
-    public static final String[] VALID_AUTHTYPES = {
-        "md5", "sha"
-    };
+   public static final String DEFAULT_PORT_STRING = String.valueOf ( DEFAULT_PORT );
+   public static final String DEFAULT_COMMUNITY   = System.getProperty ( "snmp.defaultCommunity", "public" );
 
-    public static final String PROP_IP        = "snmpIp";
-    public static final String PROP_PORT      = "snmpPort";
-    public static final String PROP_TRANSPORT = "snmpTransport";
-    public static final String PROP_VERSION   = "snmpVersion";
-    public static final String PROP_COMMUNITY = "snmpCommunity";
-    public static final String PROP_USER      = "snmpUser";
-    public static final String PROP_PASSWORD  = "snmpPassword";
-    public static final String PROP_AUTHTYPE  = "snmpAuthType";
+   public static final String[] VALID_VERSIONS =
+   {
+      "v1", "v2c", "v3"
+   };
 
-    private static Log log = LogFactory.getLog(SNMPClient.class);
+   public static final String[] VALID_AUTHTYPES =
+   {
+      "md5", "sha"
+   };
 
-    //XXX cache should be configurable by subclasses
-    private static int CACHE_EXPIRE_DEFAULT = 60 * 5 * 1000; //5 minutes
+   public static final String PROP_IP        = "snmpIp";
+   public static final String PROP_PORT      = "snmpPort";
+   public static final String PROP_TRANSPORT = "snmpTransport";
+   public static final String PROP_VERSION   = "snmpVersion";
+   public static final String PROP_COMMUNITY = "snmpCommunity";
+   public static final String PROP_USER      = "snmpUser";
+   public static final String PROP_PASSWORD  = "snmpPassword";
+   public static final String PROP_AUTHTYPE  = "snmpAuthType";
 
-    private static MIBTree mibTree;
-    private static IntHashMap sessionCache = null;
+   private static Log log = LogFactory.getLog ( SNMPClient.class );
 
-    private int sessionCacheExpire = CACHE_EXPIRE_DEFAULT;
+   // Cache should be configurable by subclasses...
+   private static int CACHE_EXPIRE_DEFAULT = 60 * 5 * 1000;   // 5 minutes
 
-    private static int parseVersion(String version) {
-        if (version == null) {
-            throw new IllegalArgumentException("version is null");
-        }
-        if (version.equalsIgnoreCase("v1")) {
-            return VERSION_1;
-        }
-        else if (version.equalsIgnoreCase("v2c")) {
-            return VERSION_2C;
-        }
-        else if (version.equalsIgnoreCase("v3")) {
-            return VERSION_3;
-        }
-        throw new IllegalArgumentException("unknown version: " + version);
-    }
+   private static IntHashMap sessionCache = null;
+   private static MIBTree    mibTree;
 
-    private static int parseAuthMethod(String authMethod) {
-        if (authMethod == null) {
-            throw new IllegalArgumentException("authMethod is null");
-        }
-        if (authMethod.equalsIgnoreCase("md5")) {
-            return AUTH_MD5;
-        }
-        else if (authMethod.equalsIgnoreCase("sha")) {
-            return AUTH_SHA;
-        }
-        throw new IllegalArgumentException("unknown authMethod: " + authMethod);
-    }
+   private int sessionCacheExpire = CACHE_EXPIRE_DEFAULT;
 
-    public SNMPClient() {
-    }
+   private static int parseVersion ( String version )
+   {
+      if ( version == null )
+      {
+         throw new IllegalArgumentException ( "version is null" );
+      }
 
-    public void addMIBs(String jar, String[] accept) {
-        try {
-            mibTree.parse(new File(jar), accept);
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-        }
-    }
+      if ( version.equalsIgnoreCase ( "v1" ) )
+      {
+         return VERSION_1;
+      }
+      else if ( version.equalsIgnoreCase ( "v2c" ) )
+      {
+         return VERSION_2C;
+      }
+      else if ( version.equalsIgnoreCase ( "v3" ) )
+      {
+         return VERSION_3;
+      }
+
+      throw new IllegalArgumentException ( "unknown version: " + version );
+   }
+
+   private static int parseAuthMethod ( String authMethod )
+   {
+      if ( authMethod == null )
+      {
+         throw new IllegalArgumentException ( "authMethod is null" );
+      }
+
+      if ( authMethod.equalsIgnoreCase ( "md5" ) )
+      {
+         return AUTH_MD5;
+      }
+      else if ( authMethod.equalsIgnoreCase ( "sha" ) )
+      {
+         return AUTH_SHA;
+      }
+
+      throw new IllegalArgumentException ( "unknown authMethod: " + authMethod );
+   }
+
+   public SNMPClient ( )
+   { }
+
+   public void addMIBs ( String   jar,
+                         String[] accept )
+   {
+      try
+      {
+         mibTree.parse ( new File ( jar ), accept );
+      }
+      catch ( IOException e )
+      {
+         log.error ( e.getMessage ( ), e );
+      }
+   }
     
-    public void addMIBs(String[] mibs) {
-        for (int i=0; i<mibs.length; i++) {
-            File file = new File(mibs[i]);
-            if (file.exists()) {
-                try {
-                    mibTree.parse(file);
-                } catch (IOException e) {
-                    log.error(e.getMessage(), e);
-                }
+   public void addMIBs ( String[] mibs )
+   {
+      for ( int i = 0; i < mibs.length; i++ )
+      {
+         File file = new File ( mibs[i] );
+
+         if ( file.exists ( ) )
+         {
+            try
+            {
+               mibTree.parse ( file );
             }
-            else {
-                log.debug("MIB '" + file + "' does not exist");
+            catch ( IOException e )
+            {
+               log.error ( e.getMessage ( ), e );
             }
-        }
-    }
+         }
+         else
+         {
+            log.debug ( "MIB '" + file + "' does not exist" );
+         }
+      }
+   }
+
+   static synchronized OID getMibOID ( String mibName ) throws MIBLookupException
+   {
+      int[] oid = mibTree.getOID ( mibName );
+
+      if ( oid == null )
+      {
+         String msg = "Failed to lookup MIB for name=" + mibName;
+
+         String unfound = mibTree.getLastLookupFailure ( );
+
+         if ( !mibName.equals ( unfound ) )
+         {
+            msg += " (last lookup failure=" + unfound + ")";
+         }
+
+         throw new MIBLookupException ( msg );
+      }
+
+      return new OID ( oid );
+   }
+
+   public static String getOID ( String mibName )
+   {
+      try
+      {
+         return getMibOID ( mibName ).toString ( );
+      }
+      catch ( MIBLookupException e )
+      {
+         return null;
+      }
+   }
+
+   /*
+    * Begins a "session" with an SNMP agent.
+    *
+    * @param version The version of SNMP to use.  Can be one of the
+    * following values: VERSION_1, VERSION_2C, VERSION_3
+    *
+    * @return A SNMPSession object to be used in all future
+    * communications with the SNMP agent.
+    */
+   static SNMPSession startSession ( int version ) throws SNMPException
+   {
+      switch ( version )
+      {
+         case VERSION_1:
+
+            return new SNMPSession_v1 ( );
+
+         case VERSION_2C:
+
+            return new SNMPSession_v2c ( );
+
+         case VERSION_3:
+
+            return new SNMPSession_v3 ( );
+
+         default:
+
+            throw new SNMPException ( "Invalid SNMP Version: " + version );
+      }
+   }
     
-    static synchronized OID getMibOID(String mibName) 
-        throws MIBLookupException {
+   public boolean init ( Properties props ) throws SNMPException
+   {
+      // Mainly for debugging...
+      final String prop = "snmp.sessionCacheExpire";
 
-        int[] oid = mibTree.getOID(mibName);
+      String expire = props.getProperty ( prop );
 
-        if (oid == null) {
-            String msg = "Failed to lookup MIB for name=" + mibName;
-            String unfound = mibTree.getLastLookupFailure();
-            if (!mibName.equals(unfound)) {
-                msg += " (last lookup failure=" + unfound + ")";
-            }
-            throw new MIBLookupException(msg);
-        }
+      if ( expire != null )
+      {
+         this.sessionCacheExpire = Integer.parseInt ( expire ) * 1000;
+      }
 
-        return new OID(oid);
-    }
+      if ( mibTree == null )
+      {
+         mibTree = MIBTree.getInstance ( );
+
+         sessionCache = new IntHashMap ( );
+      }
+
+      return true;
+   }
+
+   public SNMPSession getSession ( ConfigResponse config ) throws SNMPException
+   {
+      return getSession ( config.toProperties ( ) );
+   }
     
-    public static String getOID(String mibName) {
-        try {
-            return getMibOID(mibName).toString();
-        } catch (MIBLookupException e) {
-            return null;
-        }
-    }
+   public SNMPSession getSession ( Properties props ) throws SNMPException
+   {
+      String address   = props.getProperty ( PROP_IP,        DEFAULT_IP          );
+      String port      = props.getProperty ( PROP_PORT,      DEFAULT_PORT_STRING );
+      String version   = props.getProperty ( PROP_VERSION,   VALID_VERSIONS[1]   );
+      String community = props.getProperty ( PROP_COMMUNITY, DEFAULT_COMMUNITY   );
+      String transport = props.getProperty ( PROP_TRANSPORT, DEFAULT_TRANSPORT   );
 
-    /**
-     * Begins a "session" with an SNMP agent.
-     *
-     * @param version The version of SNMP to use.  Can be one of the
-     * following values: VERSION_1, VERSION_2C, VERSION_3
-     *
-     * @return A SNMPSession object to be used in all future
-     * communications with the SNMP agent.
-     */
-    static SNMPSession startSession(int version) throws SNMPException {
-        switch (version) {
-          case VERSION_1:
-            return new SNMPSession_v1();
-          case VERSION_2C:
-            return new SNMPSession_v2c();
-          case VERSION_3:
-            return new SNMPSession_v3();
-          default:
-            throw new SNMPException("Invalid SNMP Version: " + version);
-        }
-    }
-    
-    public boolean init(Properties props) throws SNMPException {
-        //this is mainly for debugging.
-        final String prop = "snmp.sessionCacheExpire";
+      SNMPSession session = null;
 
-        String expire = props.getProperty(prop);
+      int id = address.hashCode()   ^
+               port.hashCode()      ^
+               version.hashCode()   ^
+               community.hashCode() ^
+               transport.hashCode();
 
-        if (expire != null) {
-            this.sessionCacheExpire = Integer.parseInt(expire) * 1000;
-        }
+      synchronized ( sessionCache )
+      {
+         session = (SNMPSession)sessionCache.get ( id );
+      }
 
-        if (mibTree == null) {
-            mibTree = MIBTree.getInstance();
-            sessionCache = new IntHashMap();
-        }
+      if ( session != null )
+      {
+         return session;
+      }
 
-        return true;
-    }
+      int snmpVersion = parseVersion ( version );
 
-    public SNMPSession getSession(ConfigResponse config)
-        throws SNMPException {
+      try
+      {
+         session = startSession ( snmpVersion );
 
-        return getSession(config.toProperties());
-    }
-    
-     public SNMPSession getSession(Properties props)
-        throws SNMPException {
+         switch ( snmpVersion )
+         {
+            case SNMPClient.VERSION_1:
 
-        String address   = props.getProperty(PROP_IP, DEFAULT_IP);
-        String port      = props.getProperty(PROP_PORT, DEFAULT_PORT_STRING);
-        String version   = props.getProperty(PROP_VERSION, VALID_VERSIONS[1]);
-        String community = props.getProperty(PROP_COMMUNITY, DEFAULT_COMMUNITY);
-        String transport = props.getProperty(PROP_TRANSPORT, DEFAULT_TRANSPORT);
+            case SNMPClient.VERSION_2C:
 
-        SNMPSession session = null;
+               ( (SNMPSession_v1)session ).init ( address, port, community, transport );
 
-        int id =
-            address.hashCode() ^
-            port.hashCode() ^
-            version.hashCode() ^
-            community.hashCode() ^
-            transport.hashCode();
+               break;
 
-        synchronized (sessionCache) {
-            session = (SNMPSession)sessionCache.get(id);
-        }
+            case SNMPClient.VERSION_3:
 
-        if (session != null) {
-            return session;
-        }
+               String user = props.getProperty ( PROP_USER, DEFAULT_USERNAME );
 
-        int snmpVersion = parseVersion(version);
-        try {
-            session = startSession(snmpVersion);
+               String pass = props.getProperty ( PROP_PASSWORD, DEFAULT_PASSWORD );
 
-            switch (snmpVersion) {
-              case SNMPClient.VERSION_1:
-              case SNMPClient.VERSION_2C:
-                ((SNMPSession_v1)session).init(address, port, community, transport);
-                break;
-              case SNMPClient.VERSION_3:
-                String user =
-                    props.getProperty(PROP_USER, DEFAULT_USERNAME);
-                String pass =
-                    props.getProperty(PROP_PASSWORD, DEFAULT_PASSWORD);
-                int authtype =
-                    parseAuthMethod(props.getProperty(PROP_AUTHTYPE,
-                                                      VALID_AUTHTYPES[0]));
-                ((SNMPSession_v3)session).init(address, port, transport, user, pass, authtype);
-                break;
-              default:
-                throw new SNMPException("unsupported SNMP version");
-            }
-        } catch (SNMPException e) {
-            String msg = "Failed to initialize snmp session";
-            throw new SNMPException(msg, e);
-        }
+               int authtype = parseAuthMethod ( props.getProperty ( PROP_AUTHTYPE,
+                                                                    VALID_AUTHTYPES[0] ) );
 
-        session = SNMPSessionCache.newInstance(session,
-                                               this.sessionCacheExpire);
+               ( (SNMPSession_v3)session ).init ( address, port, transport, user, pass, authtype );
 
-        synchronized (sessionCache) {
-            sessionCache.put(id, session);
-        }
+               break;
 
-        return session;
-    }
+            default:
+
+               throw new SNMPException ( "unsupported SNMP version" );
+         }
+      }
+      catch ( SNMPException e )
+      {
+         String msg = "Failed to initialize snmp session";
+
+         throw new SNMPException ( msg, e );
+      }
+
+      session = SNMPSessionCache.newInstance ( session, this.sessionCacheExpire );
+
+      synchronized ( sessionCache )
+      {
+         sessionCache.put ( id, session );
+      }
+
+      return session;
+   }
 }
