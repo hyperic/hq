@@ -1,4 +1,7 @@
 /*
+ * 'IfTableCollector.java'
+ *
+ *
  * NOTE: This copyright does *not* cover user programs that use HQ
  * program services by normal system calls through the application
  * program interfaces provided as part of the Hyperic Plug-in Development
@@ -6,7 +9,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004, 2005, 2006, 2007, 2008, 2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -33,66 +36,85 @@ import org.hyperic.snmp.SNMPClient;
 import org.hyperic.snmp.SNMPException;
 import org.hyperic.snmp.SNMPSession;
 
-public class IfTableCollector extends SNMPCollector {
-    private boolean _isVersion1;
-    private String _columnName;
+public class IfTableCollector extends SNMPCollector
+{
+   private boolean _isVersion1;
+   private String  _columnName;
 
-    private static HashMap counter64 = new HashMap();
+   private static HashMap counter64 = new HashMap ( );
     
-    //Conditionally use Counter64 versions of IF-MIB metrics.
-    //These metrics are not supported when using snmp v1.
-    //Not all devices support the 64 bit versions regardless.
-    static {
-        counter64.put("ifInOctets", "ifHCInOctets");
-        counter64.put("ifOutOctets", "ifHCOutOctets");
+   //
+   // Conditionally use Counter64 versions of IF-MIB metrics.
+   // These metrics are not supported when using SNMPv1.
+   // Not all devices support the 64 bit versions, regardless.
+   //
+   static
+   {
+      counter64.put ( "ifInOctets",      "ifHCInOctets"       );
+      counter64.put ( "ifOutOctets",     "ifHCOutOctets"      );
+      counter64.put ( "ifInUcastPkts",   "ifHCInUcastPkts"    );
+      counter64.put ( "ifOutUcastPkts",  "ifHCOutUcastPkts"   );
+      counter64.put ( "ifInNUcastPkts",  "ifInMulticastPkts"  );
+      counter64.put ( "ifOutNUcastPkts", "ifOutMulticastPkts" );
+   }
 
-        counter64.put("ifInUcastPkts", "ifHCInUcastPkts");
-        counter64.put("ifOutUcastPkts", "ifHCOutUcastPkts");
+   protected String getColumnName ( )
+   {
+      return _columnName;
+   }
 
-        counter64.put("ifInNUcastPkts", "ifInMulticastPkts");
-        counter64.put("ifOutNUcastPkts", "ifOutMulticastPkts");
-    }
+   protected void init ( SNMPSession session ) throws PluginException
+   {
+      _isVersion1 = "v1".equals ( _props.getProperty ( SNMPClient.PROP_VERSION ) );
 
-    protected String getColumnName() {
-        return _columnName;
-    }
+      _columnName = super.getColumnName ( );
 
-    protected void init(SNMPSession session) throws PluginException {
-        _isVersion1 =
-            "v1".equals(_props.getProperty(SNMPClient.PROP_VERSION));
-        _columnName = super.getColumnName();
+      if ( _columnName == null )
+      {
+         throw new PluginException ( PROP_COLUMN + " not defined: " + getProperties ( ) + " (stale template?)" );
+      }
 
-        if (_columnName == null) {
-            throw new PluginException(PROP_COLUMN + " not defined: " +
-                                      getProperties() + " (stale template?)");
-        }
-        if (_isVersion1) {
-            return;
-        }
-        String name = (String)counter64.get(_columnName);
-        if (name != null) {
-            List list64 = null;
-            try {
-                list64 = session.getBulk(name);
-            } catch (SNMPException e) {
-            }
-            if (isEmpty(list64, name)) {
-                getLog().debug(getInfo() + " does not support Counter64: " + name);
-            }
-            else {
-                getLog().debug("Switching to 64 bit counter: " +
-                               _columnName + "->" + name + ": " + getInfo());
-                _columnName = name;                
-            }
-        }
-        setSource(_columnName + "@" + getInfo());
-    }
+      if ( _isVersion1 )
+      {
+         return;
+      }
 
-    protected boolean isTotalCounter(String name) {
-        return name.endsWith("Octets");
-    }
+      String name = (String)counter64.get ( _columnName );
 
-    public void collect() {
-        collectIndexedColumn();
-    }
+      if ( name != null )
+      {
+         List list64 = null;
+
+         try
+         {
+            list64 = session.getBulk ( name );
+         }
+         catch ( SNMPException e )
+         {
+         }
+
+         if ( isEmpty ( list64, name ) )
+         {
+            getLog().debug ( getInfo ( ) + " does not support Counter64: " + name );
+         }
+         else
+         {
+            getLog().debug ( "Switching to 64 bit counter: " + _columnName + "->" + name + ": " + getInfo ( ) );
+
+            _columnName = name;                
+         }
+      }
+
+      setSource ( _columnName + "@" + getInfo ( ) );
+   }
+
+   protected boolean isTotalCounter ( String name )
+   {
+      return name.endsWith ( "Octets" );
+   }
+
+   public void collect ( )
+   {
+      collectIndexedColumn ( );
+   }
 }

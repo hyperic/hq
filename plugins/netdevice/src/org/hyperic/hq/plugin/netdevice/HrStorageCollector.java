@@ -1,4 +1,7 @@
 /*
+ * 'HrStorageCollector.java'
+ *
+ *
  * NOTE: This copyright does *not* cover user programs that use HQ
  * program services by normal system calls through the application
  * program interfaces provided as part of the Hyperic Plug-in Development
@@ -6,7 +9,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004, 2005, 2006, 2007, 2008, 2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -30,49 +33,63 @@ import java.util.Map;
 import org.hyperic.snmp.SNMPSession;
 import org.hyperic.snmp.SNMPValue;
 
-public class HrStorageCollector extends SNMPCollector {
+public class HrStorageCollector extends SNMPCollector
+{
+   private static final String SIZE  = "hrStorageSize";
+   private static final String USED  = "hrStorageUsed";
+   private static final String UNITS = "hrStorageAllocationUnits";
 
-    private static final String SIZE = "hrStorageSize";
-    private static final String USED = "hrStorageUsed";
-    private static final String UNITS = "hrStorageAllocationUnits";
+   public static class HrUnitsConverter implements ColumnValueConverter
+   {
+      private Map _units;
 
-    public static class HrUnitsConverter
-        implements ColumnValueConverter {
+      public HrUnitsConverter ( Map units )
+      {
+         _units = units;
+      }
 
-        private Map _units;
+      //
+      // Convert value to bytes...
+      // See HOST-RESOURCES-MIB::hrStorageAllocationUnits
+      //
+      public double convert ( String    index,
+                              SNMPValue value ) throws Exception
+      {
+         double val = value.toLong ( );
 
-        public HrUnitsConverter(Map units) {
-            _units = units;
-        }
+            SNMPValue unit = (SNMPValue)_units.get ( index );
 
-        //convert value to bytes
-        //see HOST-RESOURCES-MIB::hrStorageAllocationUnits
-        public double convert(String index, SNMPValue value)
-            throws Exception {
-            double val = value.toLong();
-            SNMPValue unit = (SNMPValue)_units.get(index);
-            if (unit != null) {
-                val *= unit.toLong();
+            if ( unit != null )
+            {
+               val *= unit.toLong ( );
             }
-            return val;
-        }
-    }
 
-    public void collect() {
-        String columnName = getColumnName();
-        if (columnName.equals(SIZE) ||
-            columnName.equals(USED))
-        {
-            try {
-                SNMPSession session = getSession();
-                Map units = getIndexedColumn(session, UNITS, false);
-                collectIndexedColumn(new HrUnitsConverter(units));
-            } catch (Exception e) {
-                return;
-            }
-        }
-        else {
-            collectIndexedColumn();
-        }
-    }
+         return val;
+      }
+   }
+
+   public void collect ( )
+   {
+      String columnName = getColumnName ( );
+
+      if ( columnName.equals ( SIZE ) || columnName.equals ( USED ) )
+      {
+         try
+         {
+            SNMPSession session = getSession ( );
+
+            Map units = getIndexedColumn ( session, UNITS, false );
+
+            collectIndexedColumn ( new HrUnitsConverter ( units ) );
+         }
+         catch ( Exception e )
+         {
+            return;
+         }
+      }
+      else
+      {
+         collectIndexedColumn ( );
+      }
+   }
 }
