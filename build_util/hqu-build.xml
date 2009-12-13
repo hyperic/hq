@@ -2,32 +2,33 @@
 
 <project name="hqu-build" basedir="..">
 
-	<property name="rendit_sys.dir" value="${hq.home}/src/org/hyperic/hq/hqu/rendit" />
-	<property name="hqu.deployed.dir" value="${jboss.home}/server/default/deploy/hq.ear/hq.war/hqu" />
-	<property name="hqu.deployed.rendit_sys.dir" value="${jboss.home}/server/default/deploy/hq.ear/rendit_sys" />
-	<property name="compile.groovy.classes" value="${build.dir}/classes-groovy" />
+	<property name="rendit_sys.dir" value="${hq.home}/hq-rendit" />
+	<property name="hqu.deployed.dir" value="${jboss.home}/server/default/deploy/hq.war/hqu" />
+	<property name="hqu.deployed.rendit_sys.dir" value="${jboss.home}/server/default/deploy/hq.war/rendit_sys" />
+
 
 	<target name="hqu-init" unless="hqu-init.notrequired">
 		<macrodef name="hqu-copy">
-			<attribute name="eardir" />
 			<attribute name="wardir" />
 			<sequential>
-				<mkdir dir="@{eardir}/rendit_sys/org/hyperic/hq/hqu/rendit" />
-				<copy todir="@{eardir}/rendit_sys/org/hyperic/hq/hqu/rendit">
-					<fileset dir="${rendit_sys.dir}">
+				<mkdir dir="@{wardir}/rendit_sys" />
+				<copy todir="@{wardir}/rendit_sys">
+					<fileset dir="${rendit_sys.dir}/src/main/java">
 						<include name="**/*.groovy" />
+					</fileset>
+					<fileset dir="${rendit_sys.dir}/src/main/resources">
 						<include name="**/*.properties" />
 					</fileset>
 				</copy>
 				<mkdir dir="@{wardir}/hqu" />
 				<copy todir="@{wardir}/hqu">
-					<fileset dir="${basedir}/ui_plugins">
+					<fileset dir="${basedir}/hq-ui-plugins">
 						<exclude name="scaffold/**" />
 						<exclude name="extra/**" />
 						<exclude name="old/**" />
 						<exclude name="**/.classpath"/>
 						<exclude name="**/.project"/>
-						<exclude name="**/bin/**"/>
+						<exclude name="**/target/**"/>
 					</fileset>
 				</copy>
 			</sequential>
@@ -40,48 +41,45 @@
 				<delete dir="${hqu.deployed.dir}/@{plugin}" />
 				<sleep seconds="2" />
 				<copy todir="@{wardir}/hqu/@{plugin}">
-					<fileset dir="${basedir}/ui_plugins/@{plugin}" />
+					<fileset dir="${basedir}/hq-ui-plugins/@{plugin}" />
 				</copy>
 			</sequential>
 		</macrodef>
 
 		<taskdef name="groovydoc" classname="org.codehaus.groovy.ant.Groovydoc" classpathref="alljars" />
 
-		<!-- compile and add the groovy scripts to hq.jar -->
 		<path id="compile.classpath">
 			<path refid="alljars" />
 			<path refid="testjars" />
-			<path location="${build.dir}/classes" />
 		</path>
 
 		<taskdef name="groovyc" classname="org.codehaus.groovy.ant.Groovyc">
 			<classpath refid="compile.classpath" />
 		</taskdef>
-
-		<mkdir dir="${compile.groovy.classes}" />
-		<groovyc destdir="${compile.groovy.classes}" srcdir="${rendit_sys.dir}" listfiles="true">
-			<classpath refid="compile.classpath" />
-		</groovyc>
-
-		<!-- compiled classes -->
-		<jar file="${ear.dir}/hqu-groovy.jar" basedir="${compile.groovy.classes}">
-			<include name="org/hyperic/hq/hqu/rendit/**" />
-		</jar>
-
-		<!-- script sources -->
-		<jar file="${ear.dir}/hqu-groovy-source.jar" basedir="${hq.home}/src/">
-			<include name="org/hyperic/hq/hqu/rendit/**/*.groovy" />
-		</jar>
-		
+			
 		<property name="hqu-init.notrequired" value="true" />
 	</target>
 
 	<!-- HQU == UI Plugins -->
 	<target name="hqu-deploy" depends="hqu-init">
-		<!-- Default eardir & wardir to the running jboss if not defined -->
-		<property name="eardir" value="${jboss.home}/server/default/deploy/hq.ear" />
-		<property name="wardir" value="${jboss.home}/server/default/deploy/hq.ear/hq.war" />
-		<hqu-copy eardir="${eardir}" wardir="${wardir}" />
+		<property name="wardir" value="${jboss.home}/server/default/deploy/hq.war" />
+		<hqu-copy wardir="${wardir}" />
+	</target>
+	
+	<target name="compile-rendit" depends="hqu-init">
+		<mkdir dir="${rendit_sys.dir}/target/classes" />
+		<!-- compile the groovy scripts as a check -->
+		<groovyc destdir="${rendit_sys.dir}/target/classes" srcdir="${rendit_sys.dir}/src/main/java" listfiles="true">
+			<classpath refid="compile.classpath" />
+		</groovyc>
+	</target>
+	
+	<target name="pack-rendit">
+		<!-- compiled classes -->
+		<jar file="${build.dir}/hqu-groovy.jar" basedir="${rendit_sys.dir}/target/classes"/>
+	
+		<!-- script sources -->
+		<jar file="${build.dir}/hqu-groovy-source.jar" basedir="${rendit_sys.dir}/src/main/java"/>	
 	</target>
 
 	<target name="hqu-undeploy" depends="hqu-init">
@@ -91,7 +89,7 @@
 	</target>
 
 	<target name="hqu-redeploy-plugin" depends="hqu-init">
-		<hqu-redeploy-plugin wardir="${jboss.home}/server/default/deploy/hq.ear/hq.war" plugin="${plugin}" />
+		<hqu-redeploy-plugin wardir="${jboss.home}/server/default/deploy/hq.war" plugin="${plugin}" />
 	</target>
 
 	<target name="hqu-gen-scaffold" depends="hqu-init">
@@ -109,14 +107,14 @@
 		<fail unless="controller" />
 		<fail unless="controllerDir" />
 
-		<property name="targetDir" value="${basedir}/ui_plugins/${plugin}" />
+		<property name="targetDir" value="${basedir}/hq-ui-plugins/${plugin}" />
 		<available property="target.exists" file="${targetDir}" />
 		<fail if="target.exists">
        Plugin at ${targetDir} already exists.
     </fail>
 
-		<copy todir="${basedir}/ui_plugins/${plugin}" overwrite="false" verbose="true">
-			<fileset dir="${hq.home}/ui_plugins/scaffold" />
+		<copy todir="${basedir}/hq-ui-plugins/${plugin}" overwrite="false" verbose="true">
+			<fileset dir="${hq.home}/hq-ui-plugins/scaffold" />
 		</copy>
 
 		<replace dir="${targetDir}" token="@PLUGIN_NAME@" value="${plugin}" />
@@ -141,7 +139,7 @@
 
 		<taskdef name="groovydoc" classname="org.codehaus.groovy.ant.Groovydoc" classpathref="alljars" />
 
-		<groovydoc destdir="${build.dir}/hqudoc" sourcepath="${build.dir}/hq.ear/rendit_sys" use="true" windowtitle="groovydoc" private="false" />
+		<groovydoc destdir="${build.dir}/hqudoc" sourcepath="${build.dir}/hq.war/rendit_sys" use="true" windowtitle="groovydoc" private="false" />
 	</target>
 
 </project>
