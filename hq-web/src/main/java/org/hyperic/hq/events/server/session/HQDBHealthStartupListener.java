@@ -34,7 +34,6 @@ import java.sql.Statement;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 import java.util.ResourceBundle;
 
 import javax.annotation.PostConstruct;
@@ -54,7 +53,6 @@ import org.hyperic.hq.bizapp.server.action.email.EmailFilter;
 import org.hyperic.hq.bizapp.server.action.email.EmailRecipient;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.product.server.session.PluginsDeployedCallback;
 import org.hyperic.util.jdbc.DBUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -63,20 +61,18 @@ import org.springframework.stereotype.Service;
  * The startup listener that schedules the HQ DB Health task
  */
 @Service
-public class HQDBHealthStartupListener
-    implements StartupListener, PluginsDeployedCallback {
+public class HQDBHealthStartupListener implements StartupListener {
 
     private static final String BUNDLE = "org.hyperic.hq.events.Resources";
     private static final Object HEALTH_CHECK_LOCK = new Object();
-    private static final int HEALTH_CHECK_PERIOD_MILLIS = 15*1000;
+    private static final int HEALTH_CHECK_PERIOD_MILLIS = 15 * 1000;
     private static final int FAILURE_CHECK_PERIOD_MILLIS = 1000;
     private static final int MAX_NUM_OF_FAILURE_CHECKS = 10;
 
-    private final Log log =
-        LogFactory.getLog(HQDBHealthStartupListener.class);
+    private final Log log = LogFactory.getLog(HQDBHealthStartupListener.class);
     private HQApp hqApp;
     private DBUtil dbUtil;
-    
+
     @Autowired
     public HQDBHealthStartupListener(HQApp hqApp, DBUtil dbUtil) {
         this.hqApp = hqApp;
@@ -91,22 +87,12 @@ public class HQDBHealthStartupListener
         // We want to start the health check only after all plugins
         // have been deployed since this is when the server starts accepting
         // metrics from agents.
-        hqApp.
-            registerCallbackListener(PluginsDeployedCallback.class, this);
-    }
-
-    /**
-     * @see org.hyperic.hq.product.server.session.PluginsDeployedCallback#pluginsDeployed(java.util.List)
-     */
-    public void pluginsDeployed(List<String> plugins) {
-        log.info("Scheduling HQ DB Health to perform a health check every " +
-                   (HEALTH_CHECK_PERIOD_MILLIS/1000) + " sec");
+        log.info("Scheduling HQ DB Health to perform a health check every " + (HEALTH_CHECK_PERIOD_MILLIS / 1000) +
+                 " sec");
 
         Scheduler scheduler = hqApp.getScheduler();
 
-        scheduler.scheduleAtFixedRate(new HQDBHealthTask(),
-                                      Scheduler.NO_INITIAL_DELAY,
-                                      HEALTH_CHECK_PERIOD_MILLIS);
+        scheduler.scheduleAtFixedRate(new HQDBHealthTask(), Scheduler.NO_INITIAL_DELAY, HEALTH_CHECK_PERIOD_MILLIS);
     }
 
     private class HQDBHealthTask implements Runnable {
@@ -116,10 +102,9 @@ public class HQDBHealthStartupListener
         private long healthOkStartTime = 0; // time of first OK health check
         private long lastHealthOkTime = 0; // time of last OK health check
         private int numOfHealthCheckFailures = 0;
-        private final String HQADMIN_EMAIL_SQL = "SELECT email_address FROM EAM_SUBJECT WHERE id = "
-                                                    + AuthzConstants.rootSubjectId;
+        private final String HQADMIN_EMAIL_SQL = "SELECT email_address FROM EAM_SUBJECT WHERE id = " +
+                                                 AuthzConstants.rootSubjectId;
         private String hqadminEmail = null;
-       
 
         public void run() {
             Connection conn = null;
@@ -134,7 +119,8 @@ public class HQDBHealthStartupListener
                     if (healthOkStartTime == 0) {
                         healthOkStartTime = pingDatabase(conn, stmt, rs);
                     } else {
-                        // get latest email address to send to in case of db failures
+                        // get latest email address to send to in case of db
+                        // failures
                         rs = stmt.executeQuery(HQADMIN_EMAIL_SQL);
 
                         if (rs.next()) {
@@ -164,8 +150,7 @@ public class HQDBHealthStartupListener
                     // wait 1 second before trying
                     Thread.sleep(FAILURE_CHECK_PERIOD_MILLIS);
 
-                    conn = dbUtil.getConnByContext(new InitialContext(),
-                                                   HQConstants.DATASOURCE);
+                    conn = dbUtil.getConnByContext(new InitialContext(), HQConstants.DATASOURCE);
                     stmt = conn.createStatement();
 
                     healthOkStartTime = pingDatabase(conn, stmt, rs);
@@ -192,8 +177,7 @@ public class HQDBHealthStartupListener
         /**
          * Get database timestamp to check overall database health
          */
-        private long pingDatabase(Connection conn, Statement stmt, ResultSet rs)
-            throws SQLException {
+        private long pingDatabase(Connection conn, Statement stmt, ResultSet rs) throws SQLException {
 
             Dialect dialect = HQDialectUtil.getDialect(conn);
             rs = stmt.executeQuery(dialect.getCurrentTimestampSelectString());
@@ -230,12 +214,11 @@ public class HQDBHealthStartupListener
             if (numOfHealthCheckFailures == 0) {
                 _log.debug("HQ DB Health: OK since " + new Date(healthOkStartTime));
             } else {
-                String status = "HQ DB Health: Failed. Attempt #" + numOfHealthCheckFailures
-                                    + ". Last successful check at " + new Date(lastHealthOkTime);
+                String status = "HQ DB Health: Failed. Attempt #" + numOfHealthCheckFailures +
+                                ". Last successful check at " + new Date(lastHealthOkTime);
 
                 if (numOfHealthCheckFailures < MAX_NUM_OF_FAILURE_CHECKS) {
-                    _log.error(status + ". Checking again in "
-                                  + (FAILURE_CHECK_PERIOD_MILLIS/1000) + " sec.", t);
+                    _log.error(status + ". Checking again in " + (FAILURE_CHECK_PERIOD_MILLIS / 1000) + " sec.", t);
                 } else {
                     _log.error(status + ". Shutting down HQ.", t);
                 }
@@ -258,21 +241,14 @@ public class HQDBHealthStartupListener
                 t.printStackTrace(pw);
 
                 StringBuffer sb = new StringBuffer();
-                MessageFormat messageFormat =
-                    new MessageFormat((ResourceBundle.getBundle(BUNDLE)
-                                            .getString("event.hqdbhealth.email.message")));
-                messageFormat.format(
-                        new String[] {
-                                new Date().toString(),
-                                sw.toString()},
-                        sb, null);
+                MessageFormat messageFormat = new MessageFormat((ResourceBundle.getBundle(BUNDLE)
+                    .getString("event.hqdbhealth.email.message")));
+                messageFormat.format(new String[] { new Date().toString(), sw.toString() }, sb, null);
 
                 Arrays.fill(body, sb.toString());
 
-                EmailFilter.sendEmail(addresses,
-                                      ResourceBundle.getBundle(BUNDLE)
-                                          .getString("event.hqdbhealth.email.subject"),
-                                      body, null, null);
+                EmailFilter.sendEmail(addresses, ResourceBundle.getBundle(BUNDLE).getString(
+                    "event.hqdbhealth.email.subject"), body, null, null);
             } catch (AddressException e) {
                 _log.error("Invalid email address: " + hqadminEmail);
             } catch (SystemException e) {

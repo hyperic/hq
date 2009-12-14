@@ -26,7 +26,6 @@
 package org.hyperic.hq.events.server.session;
 
 import java.util.Date;
-import java.util.List;
 
 import javax.annotation.PostConstruct;
 
@@ -36,31 +35,27 @@ import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.Scheduler;
 import org.hyperic.hq.application.StartupListener;
 import org.hyperic.hq.events.shared.HeartBeatService;
-import org.hyperic.hq.product.server.session.PluginsDeployedCallback;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * The startup listener that schedules the Heart Beat Service to dispatch 
- * heart beats at a fixed rate.
+ * The startup listener that schedules the Heart Beat Service to dispatch heart
+ * beats at a fixed rate.
  */
 @Service
-public class HeartBeatServiceStartupListener 
-    implements StartupListener, PluginsDeployedCallback {
+public class HeartBeatServiceStartupListener implements StartupListener {
 
     /**
-     * The period (in msec) at which heart beats are dispatched by the 
-     * Heart Beat Service.
+     * The period (in msec) at which heart beats are dispatched by the Heart
+     * Beat Service.
      */
-    public static final int HEART_BEAT_PERIOD_MILLIS = 30*1000;
-    
-    private final Log log = 
-        LogFactory.getLog(HeartBeatServiceStartupListener.class);
-    
+    public static final int HEART_BEAT_PERIOD_MILLIS = 30 * 1000;
+
+    private final Log log = LogFactory.getLog(HeartBeatServiceStartupListener.class);
+
     private HQApp hqApp;
     private HeartBeatService heartBeatService;
-    
-    
+
     @Autowired
     public HeartBeatServiceStartupListener(HQApp hqApp, HeartBeatService heartBeatService) {
         this.hqApp = hqApp;
@@ -72,42 +67,32 @@ public class HeartBeatServiceStartupListener
      */
     @PostConstruct
     public void hqStarted() {
-        // We want to start dispatching heart beats only after all plugins 
-        // have been deployed since this is when the server starts accepting 
+        // We want to start dispatching heart beats only after all plugins
+        // have been deployed since this is when the server starts accepting
         // metrics from agents.
-        hqApp.
-            registerCallbackListener(PluginsDeployedCallback.class, this);
-    }
-    
-    /**
-     * @see org.hyperic.hq.product.server.session.PluginsDeployedCallback#pluginsDeployed(java.util.List)
-     */
-    public void pluginsDeployed(List<String> plugins) {
-        log.info("Scheduling Heart Beat Service to dispatch heart beats every "+
-                   (HEART_BEAT_PERIOD_MILLIS/1000)+" sec");
-        
+        log.info("Scheduling Heart Beat Service to dispatch heart beats every " + (HEART_BEAT_PERIOD_MILLIS / 1000) +
+                 " sec");
+
         Scheduler scheduler = hqApp.getScheduler();
-        
-        scheduler.scheduleAtFixedRate(new HeartBeatServiceTask(), 
-                                      Scheduler.NO_INITIAL_DELAY, 
-                                      HEART_BEAT_PERIOD_MILLIS);        
+
+        scheduler.scheduleAtFixedRate(new HeartBeatServiceTask(), Scheduler.NO_INITIAL_DELAY, HEART_BEAT_PERIOD_MILLIS);
     }
-    
+
     private class HeartBeatServiceTask implements Runnable {
-        
+
         private final Log log = LogFactory.getLog(HeartBeatServiceTask.class);
 
         public void run() {
             try {
                 heartBeatService.dispatchHeartBeat(new Date());
             } catch (Throwable t) {
-                // we want to catch everything so that the scheduled task 
+                // we want to catch everything so that the scheduled task
                 // continues executing.
                 log.error("Error while dispatching a heart beat", t);
             }
-            
+
         }
-        
+
     }
 
 }
