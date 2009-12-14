@@ -119,7 +119,7 @@ public abstract class AgentCallbackClient {
         proto = secure ? "https" : "http";
 
         return proto + "://" + host + ":" + port +
-            "/jboss-lather/JBossLather";
+            "/lather";
     }
     
     /**

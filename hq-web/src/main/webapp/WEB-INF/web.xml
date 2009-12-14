@@ -355,12 +355,12 @@
 
   <filter-mapping>
     <filter-name>NotReadyFilter</filter-name>
-    <servlet-name>JBossLather</servlet-name>
+    <servlet-name>lather</servlet-name>
   </filter-mapping>
 
   <servlet>
-    <servlet-name>JBossLather</servlet-name>
-    <display-name>JBoss Lather Servlet</display-name>
+    <servlet-name>lather</servlet-name>
+    <display-name>Lather Servlet</display-name>
     <servlet-class>
         org.hyperic.lather.jboss.JBossLatherServlet
     </servlet-class>
@@ -388,8 +388,8 @@
   </servlet>
   
   <servlet-mapping>
-    <servlet-name>JBossLather</servlet-name>
-    <url-pattern>/JBossLather</url-pattern>
+    <servlet-name>lather</servlet-name>
+    <url-pattern>/lather</url-pattern>
   </servlet-mapping>
 	
 </web-app>
