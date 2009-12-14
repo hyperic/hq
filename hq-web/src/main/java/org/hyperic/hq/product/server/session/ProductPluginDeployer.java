@@ -23,11 +23,12 @@
  * USA.
  */
 
-package org.hyperic.hq.product.server.mbean;
+package org.hyperic.hq.product.server.session;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -57,13 +58,11 @@ import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginInfo;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ProductPluginManager;
-import org.hyperic.hq.product.server.session.ProductStartupListener;
 import org.hyperic.hq.product.shared.ProductManager;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.util.file.FileUtil;
 import org.hyperic.util.jdbc.DBUtil;
 import org.jboss.deployment.DeploymentException;
-import org.jboss.deployment.DeploymentInfo;
 import org.jboss.system.server.ServerConfig;
 import org.jboss.system.server.ServerConfigLocator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,7 +91,6 @@ public class ProductPluginDeployer implements Comparator<String> {
     private HQApp hqApp;
     private DBUtil dbUtil;
     private RenditServer renditServer;
-    private ProductStartupListener productStartupListener;
     private ProductManager productManager;
     private NotReadyManager notReadyManager;
 
@@ -106,12 +104,11 @@ public class ProductPluginDeployer implements Comparator<String> {
 
     @Autowired
     public ProductPluginDeployer(HQApp hqApp, DBUtil dbUtil, RenditServer renditServer,
-                                 ProductStartupListener productStartupListener, ProductManager productManager,
+                                 ProductManager productManager,
                                  NotReadyManager notReadyManager) {
         this.hqApp = hqApp;
         this.dbUtil = dbUtil;
         this.renditServer = renditServer;
-        this.productStartupListener = productStartupListener;
         this.productManager = productManager;
         this.notReadyManager = notReadyManager;
         // XXX un-hardcode these paths.
@@ -232,24 +229,20 @@ public class ProductPluginDeployer implements Comparator<String> {
         loadConfig();
         try {
             loadPlugins();
-        } catch (Exception e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+        } catch (Exception e) {
+            log.error("Error loading product plugins",e);
         }
 
         Collections.sort(_plugins, this);
 
         for (String pluginName : _plugins) {
-
             try {
                 deployPlugin(pluginName);
             } catch (DeploymentException e) {
                 _log.error("Unable to deploy plugin [" + pluginName + "]", e);
             }
         }
-
-        productStartupListener.getPluginsDeployedCaller().pluginsDeployed(_plugins);
-
+        
         _plugins.clear();
         startConcurrentStatsCollector();
 
@@ -451,8 +444,6 @@ public class ProductPluginDeployer implements Comparator<String> {
     }
 
     private String registerPluginJar(String pluginJar) {
-       
-
         if (!_ppm.isLoadablePluginName(pluginJar)) {
             return null;
         }
@@ -466,10 +457,8 @@ public class ProductPluginDeployer implements Comparator<String> {
     }
 
     private void deployPlugin(String plugin) throws DeploymentException {
-
         try {
             productManager.deploymentNotify(plugin);
-
         } catch (Exception e) {
             _log.error("Unable to deploy plugin '" + plugin + "'", e);
         }
@@ -492,7 +481,6 @@ public class ProductPluginDeployer implements Comparator<String> {
             // here so plugins which use sigar can find it during Sigar.load()
 
             String path = getClass().getClassLoader().getResource("sigar_bin").getFile();
-
             _ppm.setProperty("sigar.install.home", path);
         } catch (Exception e) {
             _log.error(e);
@@ -547,11 +535,11 @@ public class ProductPluginDeployer implements Comparator<String> {
         }
     }
 
-    // TODO support deployment of everything in HQU folder
-    private void deployHqu(String plugin, DeploymentInfo di) throws Exception {
-
+  
+    private void deployHqu(String plugin, URL pluginFile) throws Exception {
+        URLClassLoader pluginClassloader = new URLClassLoader(new URL[] {pluginFile});
         final String prefix = HQU + "/";
-        URL hqu = di.localCl.findResource(prefix);
+        URL hqu = pluginClassloader.getResource(prefix);
         if (hqu == null) {
             return;
         }
@@ -559,7 +547,7 @@ public class ProductPluginDeployer implements Comparator<String> {
         boolean exists = destDir.exists();
         _log.info("Deploying " + plugin + " " + HQU + " to: " + destDir);
 
-        unpackJar(di.url, destDir, prefix);
+        unpackJar(pluginFile, destDir, prefix);
 
         if (renditServer.getSysDir() != null) { // rendit.isReady() ?
             if (exists) {
@@ -577,6 +565,7 @@ public class ProductPluginDeployer implements Comparator<String> {
             String plugin = registerPluginJar(pluginFile.toString());
             if (plugin != null) {
                 _plugins.add(plugin);
+                deployHqu(plugin, pluginFile.toURI().toURL());
             }
         }
     }

@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="app"/>
-	<classpathentry kind="src" path="views"/>
-	<classpathentry kind="src" path="etc"/>
+	<classpathentry kind="src" path="src/main/java"/>
+	<classpathentry kind="src" path="src/main/resources"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry exported="true" kind="con" path="GROOVY_SUPPORT"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/hq-web"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/hq-rendit"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

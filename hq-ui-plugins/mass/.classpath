@@ -7,5 +7,6 @@
 	<classpathentry exported="true" kind="con" path="GROOVY_SUPPORT"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/hq-web"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/hq-pdk-shared"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/hq-rendit"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

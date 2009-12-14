@@ -57,30 +57,9 @@
   </sequential>
   </macrodef>
 
-  <target name="cactus" depends="init,init-taskdefs,init-tests">
-    <junit reloading="no" fork="no" printsummary="yes" haltonerror="no">
-      <classpath>
-        <path refid="alljars"/>
-        <path refid="testjars"/>
-        <path location="${build.dir}/classes" />
-        <path>
-          <fileset dir="${thirdparty.lib}" includes="*.jar" />
-        </path>
-      </classpath>
-      <formatter type="plain"/>
-      <batchtest todir="${junitResults.dir}">
-        <fileset dir="src">
-          <include name="**/*CactusTest.java"/>
-        </fileset>
-      </batchtest>
-      <sysproperty key="mockejb.cactus.mode" value="true"/>
-      <sysproperty key="hq.example.plugins" value="${hq.home}/plugins/examples"/>
-      <sysproperty key="pdk.dir" value="${pdk.dir}"/>
-    </junit>
+  
 
-  </target>
-
-  <target name="clover" depends="clover.pre, clover.instrument, clover.compile, pack, precompile-jsp, pack-test-coverage, clover.testdb.setup, test-prepare-jboss, clover.do, clover.post" description="Executes all tests resulting from a compilation of the test tree returning test coverage metrics."/>
+  <target name="clover" depends="clover.pre, clover.instrument, clover.compile, precompile-jsp,  clover.testdb.setup, clover.do, clover.post" description="Executes all tests resulting from a compilation of the test tree returning test coverage metrics."/>
 
   <target name="clover.pre">
     <delete dir="${clover.output.dir}" quiet="true"/>

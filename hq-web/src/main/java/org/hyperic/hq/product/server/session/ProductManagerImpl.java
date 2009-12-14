@@ -75,7 +75,6 @@ import org.hyperic.hq.product.ServiceType;
 import org.hyperic.hq.product.ServiceTypeInfo;
 import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.hq.product.pluginxml.PluginData;
-import org.hyperic.hq.product.server.mbean.ProductPluginDeployer;
 import org.hyperic.hq.product.shared.PluginValue;
 import org.hyperic.hq.product.shared.ProductManager;
 import org.hyperic.util.config.ConfigOption;

@@ -129,8 +129,8 @@ class HealthController
     private getAgentData(pageInfo) {
         def res = []
         def agents     = agentHelper.find(withPaging: pageInfo)
-        def offsetData = MM.one.MeasurementManagerImplles()
-        def metricData = MM.one.MeasurementManagerImplgent()
+        def offsetData = MM.one.findAgentOffsetTuples()
+        def metricData = MM.one.findNumMetricsPerAgent()
         for (a in agents) {
             def found = false
             def numMetrics = 0
@@ -261,7 +261,7 @@ class HealthController
     }
     
     private getMetricsPerMinute() {
-        def vals  = MM.one.MeasurementManagerImplmaries()
+		def vals  = MM.one.findMetricCountSummaries()
         def total = 0.0
         
         for (v in vals) {

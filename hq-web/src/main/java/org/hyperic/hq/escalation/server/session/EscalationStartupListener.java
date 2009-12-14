@@ -25,38 +25,25 @@
 
 package org.hyperic.hq.escalation.server.session;
 
-import java.util.List;
-
 import javax.annotation.PostConstruct;
 
-import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.StartupListener;
 import org.hyperic.hq.escalation.shared.EscalationManager;
-import org.hyperic.hq.product.server.session.PluginsDeployedCallback;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class EscalationStartupListener 
-    implements StartupListener, PluginsDeployedCallback
-{
+public class EscalationStartupListener implements StartupListener {
     private EscalationManager escalationManager;
-    private HQApp hqApp;
-    
-    
+
     @Autowired
-    public EscalationStartupListener(EscalationManager escalationManager, HQApp hqApp) {
+    public EscalationStartupListener(EscalationManager escalationManager) {
         this.escalationManager = escalationManager;
-        this.hqApp = hqApp;
     }
 
     @PostConstruct
     public void hqStarted() {
-        hqApp
-             .registerCallbackListener(PluginsDeployedCallback.class, this);        
-    }
-
-    public void pluginsDeployed(List<String> plugins) {
         escalationManager.startup();
     }
+
 }
