@@ -104,6 +104,56 @@ public class DiskListTest extends TestCase
         }
     }    
     
+    public void testFillAndReopen() throws Exception {
+
+        DiskListDataHolder holder = null;
+
+        try {
+
+            try {
+                holder = new DiskListDataHolder();
+            } catch (Exception e) {
+                e.printStackTrace();
+                fail(e.toString());
+            }
+            
+            String toPut = String.valueOf("dummystring");
+            
+            // Insert until we *almost* spill over
+            long nRecs = 0;
+            while (holder.list.dataFile.length() < MAXSIZE) {
+                holder.list.addToList(toPut);
+                nRecs++;
+            }
+                                    
+            holder.list.close();
+            
+            // Check that we can read the proper number after close/reopen, and that they can be cleanly deleted
+            holder.list = new DiskList(holder.dataFile,
+                                       RECSIZE,
+                                       CHKSIZE,
+                                       CHKPERC,
+                                       MAXSIZE);
+            
+            assertTrue(holder.list.freeList.size() == 0);
+            
+            Iterator it = holder.list.getListIterator();
+            long nIterated = 0;
+            while (it.hasNext()) {
+                it.next();
+                nIterated++;
+            }
+
+            assertTrue("Expected " + nRecs + " records, got " + nIterated,
+                       nIterated == nRecs);
+            
+        } finally {
+            
+            holder.dispose();
+            
+        }
+    }    
+    
     public void testFreeListWithInsertsAndNoDeletes() throws Exception {
 
         DiskListDataHolder holder = null;
