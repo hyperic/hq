@@ -30,7 +30,7 @@
 	<property name="hq.plugins" location="${hq.home}/hq-plugins" />
 
 	<property name="jboss.home" location="${ENV.JBOSS_HOME}" />
-	<property name="j2ee.jar" location="${jboss.home}/client/jboss-j2ee.jar" />
+
 	<property name="jbossweb.home" value="jboss-web.deployer" />
 	<property name="tomcat.home" location="${jboss.home}/server/default/deploy/${jbossweb.home}" />
 
@@ -73,8 +73,7 @@
 	<property name="wrapper.lib" location="${hq.bin}/wrapper_bin/lib" />
 	<property name="wrapper.bin" location="${hq.bin}/wrapper_bin/bin" />
 
-	<!-- Server plugins destination -->
-	<property name="server.plugin.dir" location="${ear.dir}/hq-plugins" />
+
 	<!-- Location to pack plugins (pre-copy to PDK and Server) -->
 	<property name="plugin.dir" value="${build.dir}/plugins" />
 
@@ -137,10 +136,6 @@
 	</path>
 
 	<path id="pdkjars">
-		<!--><path refid="pdknative" />-->
-		<!-- exclude hq-product.jar, else version.properties
-         update will fail on windows -->
-		<!--><fileset dir="${pdk.lib}" includes="**/*.jar" /> -->
 		<path location="${hq.pdk.shared}/target/classes"/>
 		<path location="${hq.common}/target/classes" />
 		<path location="${hq.util}/target/classes" />
@@ -174,11 +169,15 @@
 		<taskdef resource="net/sf/antcontrib/antcontrib.properties" classpathref="alljars" />
 		<taskdef name="for" classname="net.sf.antcontrib.logic.For" classpathref="alljars" />
 		<taskdef name="post" classname="net.sf.antcontrib.net.PostTask" classpathref="alljars" />
-		<taskdef resource="org/hyperic/tools/ant/ant-tools.properties" classpathref="custom-ant-tasks.path" />
 		<!-- validate pure-xml plugins -->
 		<taskdef name="plugincopy" classname="org.hyperic.hq.product.ant.PluginCopy" classpathref="pdkjars" />
 		<taskdef name="hqplugin" classname="org.hyperic.hq.product.ant.PluginJar" classpathref="pdkjars" />
 		<property name="init-taskdefs.notrequired" value="true" />
+	</target>
+	
+	<target name="init-install-taskdefs" depends="compile-installer,init-taskdefs" unless="init-install-taskdefs.notrequired">
+		<taskdef resource="org/hyperic/tools/ant/ant-tools.properties" classpathref="custom-ant-tasks.path" />
+		<property name="init-install-taskdefs.notrequired" value="true" />
 	</target>
 
 	<!-- ==================== Compile java sources ==================== -->
@@ -210,6 +209,18 @@
 		<copy toDir="${hq.web}/target/classes">
 			<fileset dir="${hq.web}/src/main/java" excludes="**/*.java" />
 		</copy>
+	</target>
+	
+	<target name="compile-installer" depends="compile">
+		<path id="compile.classpath">
+			<path refid="alljars" />
+			<path refid="testjars" />
+			<path location="${hq.util}/target/classes" />
+			<path location="${hq.common}/target/classes" />
+			<path location="${hq.pdk.shared}/target/classes" />
+			<path location="${hq.web}/target/classes" />
+		</path>
+		<compile-sources classpath.id="compile.classpath" src.dir="${hq.installer}" output.dir="${hq.installer}/target/classes" />
 	</target>
 
 	<target name="compile-agent" depends="compile-agent-pdk">
@@ -1091,6 +1102,7 @@
 	<delete dir="${hq.pdk.agent}/target" />
 	<delete dir="${hq.agent}/target" />
 	<delete dir="${hq.web}/target" />
+	<delete dir="${hq.installer}/target" />
 	<delete includeemptydirs="true">
 		<fileset dir="${hq.agent.handlers}" defaultexcludes="false" includes="*/target/classes/**" />
 	</delete>
@@ -1111,7 +1123,7 @@
 
 <target name="redeploy" depends="undeploy,deploy" />
 
-<target name="undeploy" depends="init-taskdefs" description="Remove the war from jboss deploy dir">
+<target name="undeploy" description="Remove the war from jboss deploy dir">
 	<delete dir="${jboss.home}/server/default/deploy/hq.war" />
 </target>
 
