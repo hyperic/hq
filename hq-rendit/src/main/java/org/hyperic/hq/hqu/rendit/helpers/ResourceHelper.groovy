@@ -86,7 +86,7 @@ class ResourceHelper extends BaseHelper {
             case 'roles': return RoleMan.one.roleCount
             case 'users': return RoleMan.one.subjectCount
             case 'alerts': return AlertMan.one.alertCount
-            case 'alertDefs': return AlertDefMan.one.AlertDefinitionManagerImpl
+            case 'alertDefs': return AlertDefMan.one.activeCount
             case 'resources': return ResMan.one.resourceCount
             case 'resourceTypes': return ResMan.one.resourceTypeCount
             case 'groups': return GroupMan.one.groupCount
