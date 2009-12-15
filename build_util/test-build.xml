@@ -59,7 +59,7 @@
 
   
 
-  <target name="clover" depends="clover.pre, clover.instrument, clover.compile, precompile-jsp,  clover.testdb.setup, clover.do, clover.post" description="Executes all tests resulting from a compilation of the test tree returning test coverage metrics."/>
+  <target name="clover" depends="clover.pre, clover.instrument, clover.compile, clover.testdb.setup, clover.do, clover.post" description="Executes all tests resulting from a compilation of the test tree returning test coverage metrics."/>
 
   <target name="clover.pre">
     <delete dir="${clover.output.dir}" quiet="true"/>
