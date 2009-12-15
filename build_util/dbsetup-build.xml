@@ -3,7 +3,7 @@
 <project name="dbsetup-build" basedir="..">
 
   <!-- ==================== DBSetup ==================== -->
-  <target name="dbsetup-init" depends="init-taskdefs" unless="dbsetup-init.isLoaded">
+  <target name="dbsetup-init" depends="init-install-taskdefs" unless="dbsetup-init.isLoaded">
 	<property name="quartz.delegate" value="org.quartz.impl.jdbcjobstore.StdJDBCDelegate"/>
 	<property  name="hq.server.ds-mapping" value="MySQL"/>
     <mkdir dir="${build.dir}/sql" />
@@ -130,7 +130,7 @@
          uninstall : if the dbsetup file is creating stuff, this is false.
                      if the dbsetup file is dropping stuff, this is true.
   -->
-  <target name="dbsetup-process-file" depends="init-taskdefs">
+  <target name="dbsetup-process-file" depends="init-install-taskdefs">
     <dbsetup xmlFile="${sqlfile}"
          jdbcUrl="${hq.jdbc.url}" 
          jdbcUser="${hq.jdbc.user}"
@@ -153,7 +153,7 @@
           depends="dbsetup-combine,dbsetup-replace,dbsetup-uninstall,dbsetup-schema"
           description="Create an empty schema in the database, without any data."/>
 
-  <target name="dbsetup-upgrade" depends="init-taskdefs">
+  <target name="dbsetup-upgrade" depends="init-install-taskdefs">
     <ant antfile="${hq.home}/hq-installer/src/main/resources/data/db-upgrade.xml"
          target="upgrade"
          inheritAll="true"
