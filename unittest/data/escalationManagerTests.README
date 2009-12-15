@@ -1,4 +1,4 @@
-bin/exportTable.sh -l jdbc:oracle:thin:@localhost:1522:hqdb -u hqadmin -p hqadmin \
+bin/exportTable.sh -l jdbc:mysql://localhost:3306/hqdb -u hqadmin -p hqadmin \
 -t EAM_AGENT,\
 EAM_AUDIT,\
 EAM_CONFIG_RESPONSE,\
@@ -14,6 +14,7 @@ EAM_OPERATION,\
 EAM_PLATFORM,\
 EAM_PLATFORM_SERVER_TYPE_MAP,\
 EAM_PLATFORM_TYPE,\
+EAM_REGISTERED_TRIGGER,\
 EAM_RES_GRP_RES_MAP,\
 EAM_RESOURCE,\
 EAM_RESOURCE_EDGE,\
@@ -36,4 +37,5 @@ EAM_ESCALATION,\
 EAM_ALERT_DEFINITION,\
 EAM_ALERT,\
 EAM_ALERT_CONDITION,\
-EAM_ACTION -d escalationManagerTest
+HQ_SEQUENCE,\
+EAM_ACTION -d escalationManagerTests

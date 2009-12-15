@@ -52,16 +52,16 @@ public class EscalationManagerTestEJBImpl implements SessionBean {
         state.setAcknowledgedBy(null);
         state.setNextAction(0);
         state.setNextActionTime(System.currentTimeMillis()+MeasurementConstants.DAY);
-        int alertId = 10105;
-        Escalation esc = eMan.findById(new Integer(100));
+        int alertId = 10100;
+        Escalation esc = eMan.findById(new Integer(10100));
         state.setEscalation(esc);
         state.setAlertId(alertId);
-        state.setAlertDefinitionId(10001);
+        state.setAlertDefinitionId(10100);
         state.setAlertTypeEnum(-559038737);
         getOne().runEscalation(state);
         aMan.deleteAlerts(new Integer[] {new Integer(alertId)});
         Assert.assertNull(
-            "alert 10105 should not exist", aMan.getAlertById(new Integer(10105)));
+            "alert " + alertId + " should not exist", aMan.getAlertById(new Integer(alertId)));
         try {
             // should exit without any errors
             eMan.executeState(state.getId());
