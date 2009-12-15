@@ -9,7 +9,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 public class Bootstrap {
 
     private static final String[] APP_CONTEXT_FILES = new String[] { "classpath*:/META-INF/spring/app-*context.xml", 
-                                                                     "classpath*:/META-INF/spring/jms-context.xml"};
+                                                                     "classpath*:/META-INF/spring/jms-*context.xml"};
 
     private static ApplicationContext APP_CONTEXT;
      

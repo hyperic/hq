@@ -179,8 +179,8 @@ public class OpenNMSAction implements ActionInterface {
     public void setImplementor(String implementor) {}
 
     private String renderTemplate(String filename, Map params) {
-        File templateDir = new File(HQApp.getInstance().getResourceDir(),
-                                    "alertTemplates");
+        File templateDir = new File(HQApp.getInstance().getWebAccessibleDir(),
+                                    "WEB-INF/classes/alertTemplates");
         File templateFile = new File(templateDir, filename);
         StringWriter output = new StringWriter();
         try {

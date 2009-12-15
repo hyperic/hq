@@ -198,22 +198,6 @@ public class HQApp  {
         }
     }
 
-    public void setResourceDir(File dir) {
-        synchronized (initLock) {
-            _resourceDir = dir;
-        }
-    }
-
-    /**
-     * Get a directory which contains resources that various parts of the
-     * application may need (templates, reports, license files, etc.)
-     */
-    public File getResourceDir() {
-        synchronized (initLock) {
-            return _resourceDir;
-        }
-    }
-
     public void setWebAccessibleDir(File dir) {
         synchronized(initLock) {
             _webAccessibleDir = dir;

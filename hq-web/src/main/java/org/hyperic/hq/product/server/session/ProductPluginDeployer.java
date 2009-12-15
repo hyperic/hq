@@ -437,9 +437,7 @@ public class ProductPluginDeployer implements Comparator<String> {
         ServerConfig sc = ServerConfigLocator.locate();
         hqApp.setRestartStorageDir(sc.getHomeDir());
         File deployDir = new File(sc.getServerHomeDir(), "deploy");
-        File earDir = new File(deployDir, "hq.ear");
-        hqApp.setResourceDir(earDir);
-        File warDir = new File(earDir, "hq.war");
+        File warDir = new File(deployDir, "hq.war");
         hqApp.setWebAccessibleDir(warDir);
     }
 

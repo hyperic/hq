@@ -10,6 +10,7 @@
 	<target name="hqu-init" unless="hqu-init.notrequired">
 		<macrodef name="hqu-copy">
 			<attribute name="wardir" />
+			<attribute name="plugindir"/>
 			<sequential>
 				<mkdir dir="@{wardir}/rendit_sys" />
 				<copy todir="@{wardir}/rendit_sys">
@@ -22,7 +23,7 @@
 				</copy>
 				<mkdir dir="@{wardir}/hqu" />
 				<copy todir="@{wardir}/hqu">
-					<fileset dir="${basedir}/hq-ui-plugins">
+					<fileset dir="${plugindir}">
 						<exclude name="scaffold/**" />
 						<exclude name="extra/**" />
 						<exclude name="old/**" />
@@ -63,7 +64,8 @@
 	<!-- HQU == UI Plugins -->
 	<target name="hqu-deploy" depends="hqu-init">
 		<property name="wardir" value="${jboss.home}/server/default/deploy/hq.war" />
-		<hqu-copy wardir="${wardir}" />
+		<property name="plugindir" value="${basedir}/hq-ui-plugins" />
+		<hqu-copy wardir="${wardir}" plugindir="{plugindir}"/>
 	</target>
 	
 	<target name="compile-rendit" depends="hqu-init">

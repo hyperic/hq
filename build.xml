@@ -35,8 +35,7 @@
 	<property name="tomcat.home" location="${jboss.home}/server/default/deploy/${jbossweb.home}" />
 
 	<property name="build.dir" location="${basedir}/build" />
-	<property name="archive.basename" value="hyperic-hq" />
-	<property name="archive.build.dir" location="${build.dir}/archive" />
+
 
 	<!-- Native libs -->
 	<property name="hq.bin" location="${hq.common}/thirdparty/hq_bin" />
@@ -154,7 +153,7 @@
 	<import file="${hq.home}/build_util/test-build.xml" />
 
 	<target name="init-props" unless="init-props.notrequired">
-		<!--<property file="${version.properties}" />-->
+		<property file="${version.properties}" />
 		<property name="release.comment" value="Development Build" />
 		<property name="hq.isDev" value="true" />
 		<echo>${release.comment}, version: ${version}, build number: ${build}</echo>
@@ -431,9 +430,6 @@
 		</sequential>
 	</macrodef>
 
-	<!-- ==================== JSP precompile ============================ -->
-
-	<import file="${hq.home}/build_util/jsp-build.xml" />
 
 	<!-- ==================== Source code generation ==================== -->
 
