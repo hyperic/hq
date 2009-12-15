@@ -30,7 +30,7 @@ import org.hyperic.hq.measurement.MeasurementConstants;
  *      type="Stateless"
  * 
  * @ejb:util generate="physical"
- * @ejb:transaction type="Bean"
+ * @ejb:transaction type="NotSupported"
  */
 public class EscalationManagerTestEJBImpl implements SessionBean {
     
