@@ -53,7 +53,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.shared.AvailabilityManagerLocal;
 import org.hyperic.hq.measurement.shared.AvailabilityManager_testLocal;
@@ -149,10 +148,14 @@ public class AvailabilityManager_testEJBImpl implements SessionBean {
         server.invoke(objName, "hitWithDate", obj, str);
     }
     
+    private long now() {
+        return System.currentTimeMillis();
+    }
+    
     private void testOverlap() throws Exception {
         AvailabilityManagerLocal avail = AvailabilityManagerEJBImpl.getOne();
         List list = new ArrayList();
-        long now = System.currentTimeMillis();
+        long now = now();
         long baseTime = TimingVoodoo.roundDownTime(now, 60000);
         DataPoint pt = new DataPoint(PLAT_MEAS_ID, new MetricValue(1.0, baseTime));
         pt = new DataPoint(PLAT_MEAS_ID, new MetricValue(0.5, baseTime));
@@ -166,7 +169,7 @@ public class AvailabilityManager_testEJBImpl implements SessionBean {
         setupAvailabilityTable();
         AvailabilityManagerLocal avail = AvailabilityManagerEJBImpl.getOne();
         ArrayList list = new ArrayList();
-        long now = System.currentTimeMillis();
+        long now = now();
         long baseTime = TimingVoodoo.roundDownTime(now, 60000);
         long incrTime = 60000;
         long tmpTime = baseTime;
@@ -190,7 +193,7 @@ public class AvailabilityManager_testEJBImpl implements SessionBean {
 
     private void stressTest1() throws Exception {
         setupAvailabilityTable();
-        long now = System.currentTimeMillis();
+        long now = now();
         long baseTime = TimingVoodoo.roundDownTime(now, 60000);
         long incrTime = 60000;
         DataPoint pt = testCatchup(PLAT_MEAS_ID, baseTime, incrTime);
@@ -206,7 +209,7 @@ public class AvailabilityManager_testEJBImpl implements SessionBean {
         Measurement meas = mMan.getMeasurement(measId);
 
         long interval = meas.getInterval();
-        long now = System.currentTimeMillis();
+        long now = now();
         long baseTime = TimingVoodoo.roundDownTime(now, 60000);
         DataPoint pt;
         invokeBackfiller(baseTime);
@@ -297,7 +300,7 @@ public class AvailabilityManager_testEJBImpl implements SessionBean {
         Measurement meas = mMan.getMeasurement(measId);
 
         long interval = meas.getInterval();        
-        long now = System.currentTimeMillis();
+        long now = now();
         long baseTime = TimingVoodoo.roundDownTime(now, 600000);
         DataPoint pt;
         List list = new ArrayList();
@@ -345,14 +348,15 @@ public class AvailabilityManager_testEJBImpl implements SessionBean {
     }    
     
     private void testAvailabilityForService(Integer measId) throws Exception{
-	setupAvailabilityTable();
-	setupAvailabilityTable(measId);
+        setupAvailabilityTable();
+        setupAvailabilityTable(measId);
         AvailabilityManagerLocal avail = AvailabilityManagerEJBImpl.getOne();
+        
         MeasurementManagerLocal mMan = MeasurementManagerEJBImpl.getOne();
         Measurement meas = mMan.getMeasurement(measId); 
 
         long interval = meas.getInterval();        
-        long now = System.currentTimeMillis();
+        long now = now();
         long baseTime = TimingVoodoo.roundDownTime(now, 600000);
         DataPoint pt;
         List list = new ArrayList();        
@@ -410,7 +414,7 @@ public class AvailabilityManager_testEJBImpl implements SessionBean {
     private void testNonOneorZeroDupPtInsertAtBegin() throws Exception {
         setupAvailabilityTable();
         long INCRTIME = 60000;
-        long baseTime = System.currentTimeMillis();
+        long baseTime = now();
         baseTime = TimingVoodoo.roundDownTime(baseTime, 60000);
         long tmpTime = baseTime;
 
@@ -436,7 +440,7 @@ public class AvailabilityManager_testEJBImpl implements SessionBean {
     private void testPrependWithDupValue() throws Exception {
         setupAvailabilityTable();
 
-        long baseTime = System.currentTimeMillis();
+        long baseTime = now();
         baseTime = TimingVoodoo.roundDownTime(baseTime, 60000);
         long tmpTime = baseTime;
 
@@ -463,7 +467,7 @@ public class AvailabilityManager_testEJBImpl implements SessionBean {
     private void testPrepend() throws Exception {
         setupAvailabilityTable();
 
-        long baseTime = System.currentTimeMillis();
+        long baseTime = now();
         baseTime = TimingVoodoo.roundDownTime(baseTime, 60000);
         long tmpTime = baseTime;
 
@@ -493,7 +497,7 @@ public class AvailabilityManager_testEJBImpl implements SessionBean {
         setupAvailabilityTable();
         int INCRTIME = 240000;
 
-        long baseTime = System.currentTimeMillis();
+        long baseTime = now();
         baseTime = TimingVoodoo.roundDownTime(baseTime, 60000);
         long tmpTime = baseTime;
 
@@ -580,6 +584,7 @@ public class AvailabilityManager_testEJBImpl implements SessionBean {
         AvailabilityCache cache = AvailabilityCache.getInstance();
         cache.clear();
         AvailabilityDataDAO dao = getAvailabilityDataDAO();
+        dao.getSession().clear();
         boolean descending = false;
         long start = 0l;
         long end = AvailabilityDataRLE.getLastTimestamp();
@@ -598,6 +603,7 @@ public class AvailabilityManager_testEJBImpl implements SessionBean {
         AvailabilityCache cache = AvailabilityCache.getInstance();
         cache.clear();
         AvailabilityDataDAO dao = getAvailabilityDataDAO();
+        dao.getSession().clear();
         boolean descending = false;
         long start = 0l;
         long end = AvailabilityDataRLE.getLastTimestamp();
