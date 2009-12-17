@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
-	xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
 	xmlns:jee="http://www.springframework.org/schema/jee"
+	xmlns:util="http://www.springframework.org/schema/util"
 	xsi:schemaLocation="http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-2.0.xsd
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
-		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
 	<context:property-placeholder location="classpath:/spring-jdbc.properties" />
 
@@ -86,6 +90,19 @@
 		class="org.hyperic.hq.events.server.session.AlertConditionEvaluatorRepositoryImpl" />
 
 	<bean class="org.hyperic.hq.events.server.session.TriggersCreatedListener" />
+
+	<!-- This bean refers to various classes that should be loaded at startup. Its only interest is loading the classes listed 
+	     to have static blocks in them executed (which typically register event types) -->
+	<util:list id="tiggers">
+		<bean class="org.hyperic.hq.bizapp.server.trigger.conditional.AlertTrigger"/>
+		<bean class="org.hyperic.hq.bizapp.server.trigger.conditional.ConfigChangedTrigger"/>
+		<bean class="org.hyperic.hq.bizapp.server.trigger.conditional.ValueChangeTrigger"/>
+		<bean class="org.hyperic.hq.bizapp.server.trigger.conditional.ControlEventTrigger"/>
+		<bean class="org.hyperic.hq.bizapp.server.trigger.conditional.CustomPropertyTrigger"/>
+		<bean class="org.hyperic.hq.bizapp.server.trigger.conditional.LogEventTrigger"/>
+		<bean class="org.hyperic.hq.bizapp.server.trigger.conditional.MeasurementThresholdTrigger"/>
+		<bean class="org.hyperic.hq.bizapp.server.trigger.conditional.ValueChangeTrigger"/>
+	</util:list>
 
 	<!-- END required bean defs for restart storage dir -->
 
