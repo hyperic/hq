@@ -174,15 +174,16 @@
 		<property name="init-taskdefs.notrequired" value="true" />
 	</target>
 	
-	<target name="init-install-taskdefs" depends="compile-installer,init-taskdefs" unless="init-install-taskdefs.notrequired">
+	<target name="init-install-taskdefs" depends="init-taskdefs" unless="init-install-taskdefs.notrequired">
 		<taskdef resource="org/hyperic/tools/ant/ant-tools.properties" classpathref="custom-ant-tasks.path" />
 		<property name="init-install-taskdefs.notrequired" value="true" />
-	</target>
+	 </target>
+
 
 	<!-- ==================== Compile java sources ==================== -->
 
 
-	<target name="compile" depends="compile-shared,compile-web" />
+	<target name="compile" depends="compile-shared,compile-web, compile-installer" />
 
 	<target name="compile-shared" depends="init">
 		<path id="compile.classpath">
@@ -210,7 +211,8 @@
 		</copy>
 	</target>
 	
-	<target name="compile-installer" depends="compile">
+
+	<target name="compile-installer">
 		<path id="compile.classpath">
 			<path refid="alljars" />
 			<path refid="testjars" />
