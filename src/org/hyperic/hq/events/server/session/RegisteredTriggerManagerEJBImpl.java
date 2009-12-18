@@ -47,6 +47,9 @@ import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.ShutdownCallback;
 import org.hyperic.hq.application.TransactionListener;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.bizapp.server.trigger.conditional.ConditionalTriggerInterface;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.AlertFiredEvent;
@@ -56,9 +59,11 @@ import org.hyperic.hq.events.TriggerCreateException;
 import org.hyperic.hq.events.ext.RegisterableTriggerInterface;
 import org.hyperic.hq.events.ext.RegisterableTriggerRepository;
 import org.hyperic.hq.events.ext.RegisteredTriggers;
+import org.hyperic.hq.events.server.session.AlertManagerEJBImpl;
 import org.hyperic.hq.events.server.session.EventLogManagerEJBImpl;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
+import org.hyperic.hq.events.shared.AlertManagerLocal;
 import org.hyperic.hq.events.shared.EventLogManagerLocal;
 import org.hyperic.hq.events.shared.RegisteredTriggerManagerLocal;
 import org.hyperic.hq.events.shared.RegisteredTriggerManagerUtil;
@@ -101,6 +106,10 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
     private RegisterableTriggerRepository registeredTriggerRepository;
 
     private TriggerDAOInterface triggerDAO;
+    
+    private AlertManagerLocal alertManager;
+    
+    private AuthzSubjectManagerLocal authzSubjectManager;
     
     private EventLogManagerLocal eventLogManager;
 
@@ -163,8 +172,11 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
                 log.warn("Unable to find AlertDefinition with id: " + alertDefId + ".  These alerts will not fire.");
                 return;
             }
+            
             AlertConditionEvaluator alertConditionEvaluator = alertConditionEvaluatorFactory.create(alertDefinition);
+            initializeAlertConditionEvaluatorState(alertConditionEvaluator);                        
             alertConditionEvaluatorRepository.addAlertConditionEvaluator(alertConditionEvaluator);
+            
             for (Iterator i = registeredTriggers.iterator(); i.hasNext();) {
                 // Try to register each trigger, if exception, then move on
                 RegisteredTrigger tv = (RegisteredTrigger) i.next();
@@ -179,6 +191,36 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
         }
     }
 
+    private void initializeAlertConditionEvaluatorState(AlertConditionEvaluator ace) {        
+        Serializable initialState = null;
+        
+        if (ace instanceof RecoveryConditionEvaluator) {
+            // HQ-1903: The initial state of a recovery alert definition
+            // should be reconstituted from the db so that it is aware of
+            // the current state of the problem alert definition.
+            RecoveryConditionEvaluator rce = (RecoveryConditionEvaluator) ace;
+            Integer alertDefId = rce.getRecoveringFromAlertDefinitionId();
+            AuthzSubject hqadmin = getAuthzSubjectManager()
+                                        .getSubjectById(AuthzConstants.rootSubjectId);
+            Alert alert = getAlertManager()
+                            .findLastUnfixedByDefinition(hqadmin, alertDefId);
+            if (alert != null) {
+                AlertDefinition ad = alert.getAlertDefinition();
+                initialState = 
+                    new AlertFiredEvent(alert.getId(), 
+                                        ad.getId(), 
+                                        new AppdefEntityID(ad.getResource()), 
+                                        ad.getName(),
+                                        alert.getTimestamp(), 
+                                        null);
+            }
+        }      
+        
+        if (initialState != null) {
+            ace.initialize(initialState);
+        }
+    }
+    
     private void initializeTriggers(Collection registeredTriggers) {
         final boolean debug = log.isDebugEnabled();
         StopWatch watch = new StopWatch();
@@ -320,7 +362,7 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
             }
         }
 
-        Map results = getEventLogManagerLocal()
+        Map results = getEventLogManager()
             .findLastUnfixedAlertFiredEvents(new ArrayList(alertDefinitionIds));
         
         if (debug) {
@@ -736,14 +778,34 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
     void setTriggerDAO(TriggerDAOInterface triggerDAO) {
         this.triggerDAO = triggerDAO;
     }
+
+    AlertManagerLocal getAlertManager() {
+        return (this.alertManager == null)
+                    ? AlertManagerEJBImpl.getOne()
+                    : this.alertManager;
+    }
     
-    EventLogManagerLocal getEventLogManagerLocal() {
+    void setAlertManager(AlertManagerLocal alertManagerLocal) {
+        this.alertManager = alertManagerLocal;
+    }
+
+    AuthzSubjectManagerLocal getAuthzSubjectManager() {
+        return (this.authzSubjectManager == null)
+                    ? AuthzSubjectManagerEJBImpl.getOne()
+                    : this.authzSubjectManager;
+    }
+
+    void setAuthzSubjectManager(AuthzSubjectManagerLocal authzSubjectManagerLocal) {
+        this.authzSubjectManager = authzSubjectManagerLocal;
+    }
+    
+    EventLogManagerLocal getEventLogManager() {
         return (this.eventLogManager == null)
                     ? EventLogManagerEJBImpl.getOne()
                     : this.eventLogManager;
     }
     
-    void setEventLogManagerLocal(EventLogManagerLocal eventLogManagerLocal) {
+    void setEventLogManager(EventLogManagerLocal eventLogManagerLocal) {
         this.eventLogManager = eventLogManagerLocal;
     }
 

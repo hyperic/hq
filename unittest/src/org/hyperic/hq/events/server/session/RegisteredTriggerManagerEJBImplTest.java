@@ -12,10 +12,12 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import org.easymock.EasyMock;
+import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.events.InvalidTriggerDataException;
 import org.hyperic.hq.events.ext.MockTrigger;
 import org.hyperic.hq.events.ext.RegisterableTriggerInterface;
 import org.hyperic.hq.events.ext.RegisterableTriggerRepository;
+import org.hyperic.hq.events.shared.AlertManagerLocal;
 import org.hyperic.hq.events.shared.EventLogManagerLocal;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
@@ -32,6 +34,8 @@ public class RegisteredTriggerManagerEJBImplTest
     private AlertConditionEvaluatorFactory alertConditionEvaluatorFactory;
     private AlertConditionEvaluator alertConditionEvaluator;
     private TriggerDAOInterface triggerDAO;
+    private AlertManagerLocal alertManagerLocal;
+    private AuthzSubjectManagerLocal authzSubjectManagerLocal;
     private EventLogManagerLocal eventLogManagerLocal;
     private RegisteredTriggerManagerEJBImpl registeredTriggerManager;
     private RegisterableTriggerRepository registeredTriggerRepository;
@@ -53,6 +57,8 @@ public class RegisteredTriggerManagerEJBImplTest
         this.alertConditionEvaluatorFactory = EasyMock.createMock(AlertConditionEvaluatorFactory.class);
         this.alertConditionEvaluator = EasyMock.createMock(AlertConditionEvaluator.class);
         this.triggerDAO = EasyMock.createMock(TriggerDAOInterface.class);
+        this.alertManagerLocal = EasyMock.createMock(AlertManagerLocal.class);
+        this.authzSubjectManagerLocal = EasyMock.createMock(AuthzSubjectManagerLocal.class);
         this.eventLogManagerLocal = EasyMock.createMock(EventLogManagerLocal.class);
         this.registeredTriggerRepository = EasyMock.createMock(RegisterableTriggerRepository.class);
         this.zEventEnqueuer = EasyMock.createMock(ZeventEnqueuer.class);
@@ -62,7 +68,9 @@ public class RegisteredTriggerManagerEJBImplTest
         this.registeredTriggerManager = new RegisteredTriggerManagerEJBImpl();
         registeredTriggerManager.setAlertConditionEvaluatorFactory(alertConditionEvaluatorFactory);
         registeredTriggerManager.setTriggerDAO(triggerDAO);
-        registeredTriggerManager.setEventLogManagerLocal(eventLogManagerLocal);
+        registeredTriggerManager.setAlertManager(alertManagerLocal);
+        registeredTriggerManager.setAuthzSubjectManager(authzSubjectManagerLocal);
+        registeredTriggerManager.setEventLogManager(eventLogManagerLocal);
         registeredTriggerManager.setZeventEnqueuer(zEventEnqueuer);
         registeredTriggerManager.setAlertConditionEvaluatorRepository(alertConditionEvaluatorRepository);
         MockTrigger.initialized = false;
