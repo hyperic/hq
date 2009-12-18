@@ -39,7 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
  *
  *
  */
-@Service
+@Service("MaintenanceEventManager")
 @Transactional
 public class MaintenanceEventManagerImpl 
     implements MaintenanceEventManager
@@ -104,7 +104,7 @@ public class MaintenanceEventManagerImpl
      * Get local home object
      */
     public static MaintenanceEventManager getOne() {
-       return Bootstrap.getBean(MaintenanceEventManager.class);
+       return (MaintenanceEventManager)Bootstrap.getBean("MaintenanceEventManager");
     }
     
 }

@@ -39,7 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
  * 
  * 
  */
-@Service
+@Service("HierarchicalAlertingManager")
 @Transactional
 public class HierarchicalAlertingManagerImpl implements HierarchicalAlertingManager {
     /**
@@ -65,7 +65,7 @@ public class HierarchicalAlertingManagerImpl implements HierarchicalAlertingMana
      * Get local home object
      */
     public static HierarchicalAlertingManager getOne() {
-        return Bootstrap.getBean(HierarchicalAlertingManager.class);
+        return (HierarchicalAlertingManager)Bootstrap.getBean("HierarchicalAlertingManager");
     }
 
 }

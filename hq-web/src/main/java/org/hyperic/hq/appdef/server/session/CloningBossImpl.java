@@ -52,7 +52,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  */
-@Service
+@Service("CloningBoss")
 @Transactional
 public class CloningBossImpl implements CloningBoss {
 
@@ -95,7 +95,7 @@ public class CloningBossImpl implements CloningBoss {
     }
 
     public static CloningBoss getOne() {
-        return Bootstrap.getBean(CloningBoss.class);
+        return (CloningBoss) Bootstrap.getBean("CloningBoss");
     }
 
 }
