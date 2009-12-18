@@ -123,7 +123,7 @@
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.oxm-3.0.0.CI-503.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.test-3.0.0.CI-503.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.transaction-3.0.0.CI-503.jar"/>
-	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.web-3.0.0.CI-503.jar"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.web-3.0.0.CI-503.jar" sourcepath="thirdparty/lib-src/org.springframework.web-sources-3.0.0.CI-503.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.web.servlet-3.0.0.CI-503.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.web.struts-3.0.0.CI-503.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
