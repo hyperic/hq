@@ -26,6 +26,7 @@ if not exist "%JAVA_HOME%\bin\java.exe" goto nojavaExe
 set JAVA=%JAVA_HOME%\bin\java
 
 set CLIENT_CLASSPATH=%AGENT_LIB%\hq-agent-core.jar
+set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%AGENT_LIB%
 set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\hq-common.jar
 set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%AGENT_LIB%\lather.jar
 set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\ant.jar

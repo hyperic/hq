@@ -15,7 +15,7 @@
    <property file="${hq.home}/hq-web/src/main/resources/hibernate.properties" />
 
   <!-- Version file -->
-	<property name="version.properties" value="${hq.home}/hq-common/src/main/resources/version.properties" />
+	<property name="version.properties" value="${hq.home}/version.properties" />
 	<property file="${version.properties}" />
 
 	<!-- ==================== Defaults ==================== -->
@@ -493,6 +493,11 @@
 				<include name="**" />
 			</fileset>
 		</copy>
+		
+		<!-- Write version file to WEB-INF/classes -->
+		<antcall target="write-version-file">
+			<param name="version-file" value="${war.dir}/WEB-INF/classes/version.properties" />
+		</antcall>
 
 		<replace file="${war.dir}/META-INF/context.xml">
 			<replacefilter token="@@@HYPERIC_UI_HOTDEPLOY@@@" value="${hq.ui.hot-deploy}" />
@@ -663,10 +668,6 @@
 <target name="pack-common" description="Pack the common jars">
 	<jar basedir="${hq.util}/target/classes" jarfile="${build.dir}/hq-util.jar">
 	</jar>
-	
-	<antcall target="write-version-file">
-		<param name="version-file" value="${hq.common}/target/classes/version.properties" />
-	</antcall>
 	
 	<jar basedir="${hq.common}/target/classes" jarfile="${build.dir}/hq-common.jar">
 	</jar>
@@ -1040,6 +1041,11 @@
 <!-- Agent jars -->
 <jar basedir="${hq.agent}/target/classes" jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/hq-agent-core.jar">
 </jar>
+
+<!-- version.properties to agent lib -->
+<antcall target="write-version-file">
+	<param name="version-file" value="${agent.dir}/bundles/${agent.bundle.dir}/lib/version.properties" />
+</antcall>
 
 <copy todir="${agent.dir}/wrapper/sbin">
 	<fileset dir="${wrapper.bin}" includes="*" />

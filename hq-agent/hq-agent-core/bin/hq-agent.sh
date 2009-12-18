@@ -66,6 +66,9 @@ do
   CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${i}"
 done
 
+
+CLIENT_CLASSPATH = "${CLIENT_CLASSPATH}:${AGENT_LIB}"
+
 CLIENT_CLASS=org.hyperic.hq.bizapp.agent.client.AgentClient
 
 HQ_JAVA_OPTS="${HQ_JAVA_OPTS} \
