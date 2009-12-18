@@ -113,7 +113,7 @@
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.beans-3.0.0.CI-503.jar" sourcepath="thirdparty/lib-src/org.springframework.beans-sources-3.0.0.CI-503.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.context-3.0.0.CI-503.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.context.support-3.0.0.CI-503.jar"/>
-	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.core-3.0.0.CI-503.jar"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.core-3.0.0.CI-503.jar" sourcepath="thirdparty/lib-src/org.springframework.core-sources-3.0.0.CI-503.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.expression-3.0.0.CI-503.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.instrument-3.0.0.CI-503.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.instrument.tomcat-3.0.0.CI-503.jar"/>
