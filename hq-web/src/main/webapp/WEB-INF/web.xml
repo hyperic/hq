@@ -6,7 +6,16 @@
       						 http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd" 
       	 version="2.4">
 	<display-name>HQ</display-name>
+
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>classpath*:/META-INF/spring/*-context.xml</param-value>
+	</context-param>
 	
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+
 	<context-param>
 		<param-name>javax.servlet.jsp.jstl.fmt.localizationContext</param-name>
 		<param-value>ApplicationResources</param-value>
