@@ -113,8 +113,5 @@
 		<bean class="org.hyperic.hq.bizapp.server.trigger.conditional.ValueChangeTrigger"/>
 	</util:list>
 
-	<!-- END required bean defs for restart storage dir -->
-
-
 
 </beans>
