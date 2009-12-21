@@ -25,56 +25,51 @@
 
 package org.hyperic.hq.ui.action.authentication;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
-import org.hyperic.hq.bizapp.shared.AuthBoss;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-
+import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * An <code>Action</code> subclass that authenticates the web user's
- * credentials and establishes his identity.
+ * An <code>Action</code> subclass that authenticates the web user's credentials
+ * and establishes his identity.
  */
 
-public class LogoutAction extends Action {
+public class LogoutAction
+    extends Action {
 
-    // ---------------------------------------------------- Public Methods
+    private AuthBoss authBoss;
+
+    @Autowired
+    public LogoutAction(AuthBoss authBoss) {
+        super();
+        this.authBoss = authBoss;
+    }
 
     /**
      * log a user out of the system.
      */
-    public ActionForward execute(ActionMapping mapping,
-                            ActionForm form,
-                            HttpServletRequest request,
-                            HttpServletResponse response)
-    throws Exception {
-        Log log = LogFactory.getLog( LogoutAction.class.getName() );
-       
-        ServletContext ctx = getServlet().getServletContext();
-        AuthBoss authBoss = ContextUtils.getAuthBoss(ctx);
-        Integer sessionId =  RequestUtils.getSessionId(request);
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
+        Integer sessionId = RequestUtils.getSessionId(request);
         authBoss.logout(sessionId.intValue());
 
-        HttpSession session = request.getSession();              
+        HttpSession session = request.getSession();
 
-        session.removeAttribute( Constants.USER_PARAM );
-        session.removeAttribute(Constants.WEBUSER_SES_ATTR);        
-        session.invalidate();            
+        session.removeAttribute(Constants.USER_PARAM);
+        session.removeAttribute(Constants.WEBUSER_SES_ATTR);
+        session.invalidate();
 
-        return mapping.findForward("success");        
-        
+        return mapping.findForward("success");
+
     }
+
 }
