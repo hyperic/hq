@@ -58,7 +58,6 @@ import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.ApplicationType;
-import org.hyperic.hq.appdef.server.session.AsyncDeleteAgentCache;
 import org.hyperic.hq.appdef.server.session.CPropResource;
 import org.hyperic.hq.appdef.server.session.CPropResourceSortField;
 import org.hyperic.hq.appdef.server.session.Cprop;
@@ -1341,16 +1340,21 @@ public class AppdefBossEJBImpl
         }
         AppdefEntityID[] removed = resMan.removeResourcePerms(
             subject, res, false);
+        Map agentCache = null;
         try {
             final Integer id = aeid.getId();
             switch (aeid.getType()) {
                 case AppdefEntityConstants.APPDEF_TYPE_SERVER :
                     final ServerManagerLocal sMan = getServerManager();
-                    removeServer(subject, sMan.findServerById(id));
+                    Server server = sMan.findServerById(id);
+                    agentCache = buildAsyncDeleteAgentCache(server);
+                    removeServer(subject, server);
                     break;
                 case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
                     final PlatformManagerLocal pMan = getPlatformManager();
-                    removePlatform(subject, pMan.findPlatformById(id));
+                    Platform platform = pMan.findPlatformById(id);
+                    agentCache = buildAsyncDeleteAgentCache(platform);
+                    removePlatform(subject, platform);
                     break;
                 case AppdefEntityConstants.APPDEF_TYPE_SERVICE :
                     final ServiceManagerLocal svcMan = getServiceManager();
@@ -1378,7 +1382,7 @@ public class AppdefBossEJBImpl
         }
         
         ZeventManager.getInstance().enqueueEventAfterCommit(
-            new ResourcesCleanupZevent());
+            new ResourcesCleanupZevent(agentCache));
         
         return removed;
     }
@@ -1388,52 +1392,36 @@ public class AppdefBossEJBImpl
      * Method is "NotSupported" since all the resource deletes may take longer
      * than the jboss transaction timeout.  No need for a transaction in this
      * context.
+     * 
+     * @param agentCache {@link Map} of {@link Integer} of agentIds 
+     * to {@link List} of {@link AppdefEntityID}s
+     * 
      * @ejb:transaction type="NotSupported"
      * @ejb:interface-method
      */
-    public void removeDeletedResources()
+    public void removeDeletedResources(Map agentCache)
         throws ApplicationException, VetoException, RemoveException {
         final boolean debug = log.isDebugEnabled();
         final StopWatch watch = new StopWatch();
         final AuthzSubject subject =
             getAuthzSubjectManager().findSubjectById(AuthzConstants.overlordId);
 
-        AsyncDeleteAgentCache cache = AsyncDeleteAgentCache.getInstance();
-        if (debug) {
-            log.debug("AsyncDeleteAgentCache start size=" + cache.getSize());
-        }
-        
+        watch.markTimeBegin("unscheduleMeasurementsForAsyncDelete");
+        unscheduleMeasurementsForAsyncDelete(agentCache);
+        watch.markTimeEnd("unscheduleMeasurementsForAsyncDelete");
+
+        // Look through services, servers, platforms, applications, and groups
         watch.markTimeBegin("removeApplications");
         Collection applications =
             getApplicationManager().findDeletedApplications();
-        for (Iterator it = applications.iterator(); it.hasNext(); ) {
-            try {
-                getOne()._removeApplicationInNewTran(
-                    subject, (Application)it.next());
-            } catch (Exception e) {
-                log.error("Unable to remove application: " + e, e);
-            }
-        }
+        removeApplications(subject, applications);
         watch.markTimeEnd("removeApplications");
-        if (debug) {
-            log.debug("Removed " + applications.size() + " applications");
-        }
 
         watch.markTimeBegin("removeResourceGroups");
         Collection groups = getResourceGroupManager().findDeletedGroups();
-        for (Iterator it = groups.iterator(); it.hasNext(); ) {
-            try {
-                getOne()._removeGroupInNewTran(subject, (ResourceGroup)it.next());
-            } catch (Exception e) {
-                log.error("Unable to remove group: " + e, e);
-            }
-        }
+        removeResourceGroups(subject, groups);
         watch.markTimeEnd("removeResourceGroups");
-        if (debug) {
-            log.debug("Removed " + groups.size() + " resource groups");
-        }
 
-        // Look through services, servers, platforms, applications, and groups
         watch.markTimeBegin("removeServices");
         Collection services = getServiceManager().findDeletedServices();
         removeServices(subject, services);
@@ -1451,10 +1439,66 @@ public class AppdefBossEJBImpl
         
         if (debug) {
             log.debug("removeDeletedResources: " + watch);
-            log.debug("AsyncDeleteAgentCache end size=" + cache.getSize());
-            if (cache.getSize() > 0) {
-                log.debug("AsyncDeleteAgentCache " + cache);
+        }
+    }
+    
+    /**
+     * Disable measurements and unschedule from the agent in bulk
+     * with the agent cache info because the resources have been
+     * de-referenced from the agent
+     * 
+     * @param agentCache {@link Map} of {@link Integer} of agentIds 
+     * to {@link List} of {@link AppdefEntityID}s
+     */
+    private void unscheduleMeasurementsForAsyncDelete(Map agentCache) {
+        if (agentCache == null) {
+            return;
+        }
+        
+        try {
+            AuthzSubject subject =
+                getAuthzSubjectManager().findSubjectById(AuthzConstants.overlordId);
+
+            for (Iterator j = agentCache.keySet().iterator(); j.hasNext(); ) {
+                Integer agentId = (Integer)j.next();
+                Agent agent = getAgentManager().getAgent(agentId);
+                List resources = (List) agentCache.get(agentId);
+                
+                getMetricManager().disableMeasurements(
+                        subject, 
+                        agent,
+                        (AppdefEntityID[]) resources.toArray(new AppdefEntityID[0]), 
+                        true);
             }
+        } catch (Exception e) {
+            log.error("Error unscheduling measurements during async delete", e);
+        }
+    }
+    
+    private final void removeApplications(AuthzSubject subject, Collection applications) {
+        for (Iterator it = applications.iterator(); it.hasNext(); ) {
+            try {
+                getOne()._removeApplicationInNewTran(
+                    subject, (Application)it.next());
+            } catch (Exception e) {
+                log.error("Unable to remove application: " + e, e);
+            }
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Removed " + applications.size() + " applications");
+        }
+    }
+    
+    private final void removeResourceGroups(AuthzSubject subject, Collection groups) {
+        for (Iterator it = groups.iterator(); it.hasNext(); ) {
+            try {
+                getOne()._removeGroupInNewTran(subject, (ResourceGroup)it.next());
+            } catch (Exception e) {
+                log.error("Unable to remove group: " + e, e);
+            }
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Removed " + groups.size() + " resource groups");
         }
     }
     
@@ -1569,11 +1613,6 @@ public class AppdefBossEJBImpl
         StopWatch watch = new StopWatch();
 
         try {
-            // Update cache for asynchronous delete process
-            if (debug) watch.markTimeBegin("buildAsyncDeleteAgentCache");
-            buildAsyncDeleteAgentCache(platform);
-            if (debug) watch.markTimeEnd("buildAsyncDeleteAgentCache");
-
             // Disable all measurements for this platform.  We don't actually
             // remove the measurements here to avoid delays in deleting
             // resources.
@@ -1630,11 +1669,6 @@ public class AppdefBossEJBImpl
         StopWatch watch = new StopWatch();
         
         try {
-            // Update cache for asynchronous delete process
-            if (debug) watch.markTimeBegin("buildAsyncDeleteAgentCache");
-            buildAsyncDeleteAgentCache(server);
-            if (debug) watch.markTimeEnd("buildAsyncDeleteAgentCache");
-
             // now remove the measurements
             if (debug) watch.markTimeBegin("disableMeasurements");
             getMetricManager().disableMeasurements(
@@ -1675,56 +1709,95 @@ public class AppdefBossEJBImpl
         }
     }
     
-    private void buildAsyncDeleteAgentCache(Server server) {        
-        AsyncDeleteAgentCache cache = AsyncDeleteAgentCache.getInstance();
+    /**
+     * @param server The server being deleted
+     * 
+     * @return {@link Map} of {@link Integer} of agentIds 
+     * to {@link List} of {@link AppdefEntityID}s
+     */
+    private Map buildAsyncDeleteAgentCache(Server server) {        
+        Map cache = new HashMap();
         
         try {
             Agent agent = findResourceAgent(server.getEntityId());
+            List resources = new ArrayList();
             
             for (Iterator i=server.getServices().iterator(); i.hasNext(); ) {
                 Service s = (Service)i.next();
-                AppdefEntityID eid = s.getEntityId();
-                cache.put(eid, agent.getId());
+                resources.add(s.getEntityId());
             }
-        } catch (AgentNotFoundException anfe) {
-            if (cache.get(server.getEntityId()) == null) {
-                if (!server.getServerType().isVirtual()) {
-                    log.warn("Unable to build AsyncDeleteAgentCache for server[id=" 
-                                + server.getId() 
-                                + ", name=" + server.getName() + "]: "
-                                + anfe.getMessage());
-                }
-            } else {
-                log.debug("Platform has been asynchronously deleted: " 
-                            + anfe.getMessage());
-            }
+            cache.put(agent.getId(), resources);
         } catch (Exception e) {
             log.warn("Unable to build AsyncDeleteAgentCache for server[id=" 
                             + server.getId()
                             + ", name=" + server.getName() + "]: "
                             + e.getMessage());
         }
+        
+        return cache;
     }
 
-    private void buildAsyncDeleteAgentCache(Platform platform) {
-        AsyncDeleteAgentCache cache = AsyncDeleteAgentCache.getInstance();
+    /**
+     * @param platform The platform being deleted
+     * 
+     * @return {@link Map} of {@link Integer} of agentIds 
+     * to {@link List} of {@link AppdefEntityID}s
+     */
+    private Map buildAsyncDeleteAgentCache(Platform platform) {
+        Map cache = new HashMap();
 
         try {
             Agent agent = platform.getAgent();
+            List resources = new ArrayList();
             
             for (Iterator i=platform.getServers().iterator(); i.hasNext(); ) {
                 Server s = (Server)i.next();
                 if (!s.getServerType().isVirtual()) {
-                    AppdefEntityID eid = s.getEntityId();
-                    cache.put(eid, agent.getId());
+                    resources.add(s.getEntityId());
                 }
-                buildAsyncDeleteAgentCache(s);
-            }       
+                List services = (List) buildAsyncDeleteAgentCache(s).get(agent.getId());
+                resources.addAll(services);
+            }
+            cache.put(agent.getId(), resources);
         } catch (Exception e) {
             log.warn("Unable to build AsyncDeleteAgentCache for platform[id=" 
                         + platform.getId()
                         + ", name=" + platform.getName() + "]: "
-                        + e.getMessage());        }
+                        + e.getMessage());
+        }
+        
+        return cache;
+    }
+
+    /**
+     * @param zevents {@link List} of {@link ResourcesCleanupZevent}
+     * 
+     * @return {@link Map} of {@link Integer} of agentIds 
+     * to {@link List} of {@link AppdefEntityID}s
+     */
+    private Map buildAsyncDeleteAgentCache(List zevents) {
+        Map masterCache = new HashMap();
+        
+        for (Iterator i = zevents.iterator(); i.hasNext();) {
+            ResourcesCleanupZevent z = (ResourcesCleanupZevent) i.next();
+            if (z.getAgents() != null) {
+                Map cache = z.getAgents();
+                
+                for (Iterator j = cache.keySet().iterator(); j.hasNext(); ) {
+                    Integer agentId = (Integer)j.next();
+                    List newResources = (List) cache.get(agentId);
+                    List resources = (List) masterCache.get(agentId);
+                    if (resources == null) {
+                        resources = newResources;
+                    } else {
+                        resources.addAll(newResources);
+                    }
+                    masterCache.put(agentId, resources);
+                }
+            }
+        }
+        
+        return masterCache;
     }
     
     /**
@@ -4085,15 +4158,14 @@ public class AppdefBossEJBImpl
         events.add (ResourcesCleanupZevent.class);
         ZeventManager.getInstance().addBufferedListener(events,
             new ZeventListener() {
-                public void processEvents(List events) {
-                    for (Iterator i = events.iterator(); i.hasNext();) {
+                public void processEvents(List zevents) {                                        
+                    if (zevents != null && !zevents.isEmpty()) {
                         try {
-                            getOne().removeDeletedResources();
+                            Map agentCache = buildAsyncDeleteAgentCache(zevents);
+                            getOne().removeDeletedResources(agentCache);
                         } catch (Exception e) {
                             log.error("removeDeletedResources() failed", e);
-                        }
-                        // Only need to run this once
-                        break;
+                        }                        
                     }
                 }
 

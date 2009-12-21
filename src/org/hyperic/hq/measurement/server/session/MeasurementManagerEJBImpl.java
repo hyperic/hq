@@ -45,6 +45,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.AppService;
+import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.ApplicationManagerEJBImpl;
@@ -55,6 +56,7 @@ import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
 import org.hyperic.hq.appdef.server.session.ResourceZevent;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.Service;
+import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
@@ -1135,13 +1137,51 @@ public class MeasurementManagerEJBImpl extends SessionEJB
      */
     public void disableMeasurements(AuthzSubject subject, AppdefEntityID agentId,
                                     AppdefEntityID[] ids)
+        throws PermissionException, AgentNotFoundException {
+        
+        Agent agent = AgentManagerEJBImpl.getOne().getAgent(agentId);
+        
+        disableMeasurements(subject, agent, ids, false);
+    }
+    
+    /**
+     * Disable all measurements for the given resources.
+     *
+     * @param agent The agent for the given resources
+     * @param ids The list of entitys to unschedule
+     * @param isAsyncDelete Indicates whether it is for async delete
+     * @ejb:interface-method
+     *
+     * NOTE: This method requires all entity ids to be monitored by the same
+     * agent as specified by the agent
+     */
+    public void disableMeasurements(AuthzSubject subject, Agent agent,
+                                    AppdefEntityID[] ids, boolean isAsyncDelete)
         throws PermissionException {
-
+        
         MeasurementDAO dao = getMeasurementDAO();
         for (int i = 0; i < ids.length; i++) {
             checkModifyPermission(subject.getId(), ids[i]);
-
-            List mcol = dao.findEnabledByResource(getResource(ids[i]));
+            List mcol = null;
+            Resource res = getResource(ids[i]);
+            if (isAsyncDelete) {
+                // For asynchronous deletes, we need to get all measurements
+                // because some disabled measurements are not unscheduled
+                // from the agent (like during the maintenance window) and
+                // we need to unschedule these measurements
+                mcol = findMeasurements(subject, res);
+            } else {
+                mcol = dao.findEnabledByResource(res);            
+            }
+            
+            if (mcol.isEmpty()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("No measurements to disable for resource[" 
+                                    + ids[i]
+                                    + "], isAsyncDelete=" + isAsyncDelete);
+                }
+                continue;
+            }
             
             Integer[] mids = new Integer[mcol.size()];
             Iterator it = mcol.iterator();
@@ -1159,8 +1199,9 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         // Unscheduling of all metrics for a resource could indicate that
         // the resource is getting removed.  Send the unschedule synchronously
         // so that all the necessary plumbing is in place.
-        try {
-            MeasurementProcessorEJBImpl.getOne().unschedule(agentId, ids);
+        try {          
+            MeasurementProcessorEJBImpl.getOne().unschedule(
+                    agent.getAgentToken(), ids);
         } catch (MeasurementUnscheduleException e) {
             log.error("Unable to disable measurements", e);           
         }
