@@ -154,6 +154,107 @@ public class DiskListTest extends TestCase
         }
     }    
     
+    public void testFillAndDeleteAllAndReopen() throws Exception {
+
+        DiskListDataHolder holder = null;
+
+        try {
+
+            try {
+                holder = new DiskListDataHolder();
+            } catch (Exception e) {
+                e.printStackTrace();
+                fail(e.toString());
+            }
+            
+            String toPut = String.valueOf("dummystring");
+            
+            // Insert until we *almost* spill over
+            while (holder.list.dataFile.length() < MAXSIZE) {
+                holder.list.addToList(toPut);
+            }
+            
+            // Iterate and delete
+            Iterator it = holder.list.getListIterator();
+            while (it.hasNext()) {
+                it.next();
+                it.remove();
+            }
+                                    
+            holder.list.close();
+            
+            // Check that we can read the proper number after close/reopen, and that they can be cleanly deleted
+            holder.list = new DiskList(holder.dataFile,
+                                       RECSIZE,
+                                       CHKSIZE,
+                                       CHKPERC,
+                                       MAXSIZE);
+            
+            it = holder.list.getListIterator();
+            // This is current behavior, but bad behavior
+            assertNull(it);
+            
+        } finally {
+            
+            holder.dispose();
+            
+        }
+    }    
+    
+    public void testFillAndDeleteAllButLastAndReopen() throws Exception {
+
+        DiskListDataHolder holder = null;
+
+        try {
+
+            try {
+                holder = new DiskListDataHolder();
+            } catch (Exception e) {
+                e.printStackTrace();
+                fail(e.toString());
+            }
+            
+            String toPut = String.valueOf("dummystring");
+            
+            // Insert until we *almost* spill over
+            long nRecs = 0;
+            while (holder.list.dataFile.length() < MAXSIZE) {
+                holder.list.addToList(toPut);
+                nRecs++;
+            }
+            
+            // Iterate and delete all but the last record.  By not deleting the last record,
+            // we prevent maintenance from happening.
+            Iterator it = holder.list.getListIterator();
+            long nDeleted = 0;
+            while (it.hasNext()) {
+                it.next();
+                if (++nDeleted < nRecs) {
+                    it.remove();
+                }
+            }
+                                    
+            holder.list.close();
+            
+            // Check that we can read the proper number after close/reopen, and that they can be cleanly deleted
+            holder.list = new DiskList(holder.dataFile,
+                                       RECSIZE,
+                                       CHKSIZE,
+                                       CHKPERC,
+                                       MAXSIZE);
+            
+            it = holder.list.getListIterator();
+            while (it.hasNext()) {
+                it.next();
+            }
+            
+        } finally {
+            
+            holder.dispose();
+            
+        }
+    }    
+    
     public void testFreeListWithInsertsAndNoDeletes() throws Exception {
 
         DiskListDataHolder holder = null;
