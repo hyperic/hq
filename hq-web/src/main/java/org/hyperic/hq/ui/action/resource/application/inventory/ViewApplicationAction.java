@@ -26,28 +26,11 @@
 package org.hyperic.hq.ui.action.resource.application.inventory;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.hyperic.hq.appdef.shared.AppServiceNodeBean;
-import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.appdef.shared.ApplicationValue;
-import org.hyperic.hq.appdef.shared.DependencyNode;
-import org.hyperic.hq.appdef.shared.DependencyTree;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.action.resource.common.inventory.RemoveResourceGroupsForm;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.util.pager.PageControl;
-import org.hyperic.util.pager.PageList;
-import org.hyperic.util.pager.Pager;
-import org.hyperic.util.pager.SortAttribute;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -56,13 +39,37 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
+import org.hyperic.hq.appdef.shared.AppServiceNodeBean;
+import org.hyperic.hq.appdef.shared.AppdefGroupValue;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.appdef.shared.ApplicationValue;
+import org.hyperic.hq.appdef.shared.DependencyNode;
+import org.hyperic.hq.appdef.shared.DependencyTree;
+import org.hyperic.hq.appdef.shared.ServiceTypeValue;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.action.resource.common.inventory.RemoveResourceGroupsForm;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.util.pager.PageControl;
+import org.hyperic.util.pager.PageList;
+import org.hyperic.util.pager.Pager;
+import org.hyperic.util.pager.SortAttribute;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * This class prepares the data to view an application (screen
  * 2.1.6)
  */
 public class ViewApplicationAction extends TilesAction {
-    private static Log log = LogFactory.getLog(ViewApplicationAction.class.getName());
+    private final Log log = LogFactory.getLog(ViewApplicationAction.class.getName());
+    private AppdefBoss appdefBoss;
+    
+    
+    @Autowired
+    public ViewApplicationAction(AppdefBoss appdefBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+    }
 
     public ActionForward execute(ComponentContext context,
                                  ActionMapping mapping,
@@ -82,9 +89,9 @@ public class ViewApplicationAction extends TilesAction {
         Integer appId = app.getId();
         Integer appdefType = new Integer(app.getEntityId().getType());
 
-        ServletContext ctx = getServlet().getServletContext();
+       
         Integer sessionId = RequestUtils.getSessionId(request);
-        AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+       
         Pager valuePager = Pager.getDefaultPager();
 
         // display of the services includes:
@@ -99,20 +106,20 @@ public class ViewApplicationAction extends TilesAction {
         log.trace("getting services for appId " + appId);
         PageControl pcs = RequestUtils.getPageControl(request,"pss", "pns", "sos", "scs");
         PageControl pc = new PageControl(0, -1, 1, SortAttribute.SERVICE_NAME);
-        PageList services = 
-            boss.findServiceInventoryByApplication(sessionId.intValue(),appId,pc);
+        PageList<AppdefResourceValue> services = 
+            appdefBoss.findServiceInventoryByApplication(sessionId.intValue(),appId,pc);
 
         log.debug("AppdefBoss returning " + services.toString());
 
         log.trace("getting service type map for application");
-        Map typeMap = AppdefResourceValue.getServiceTypeCountMap(services);
+        Map<String,Integer> typeMap = AppdefResourceValue.getServiceTypeCountMap(services);
         request.setAttribute(Constants.RESOURCE_TYPE_MAP_ATTR, typeMap);
 
         services = valuePager.seek(services, pcs);
         // second, get the dependency tree            
-        DependencyTree tree = boss.getAppDependencyTree(sessionId.intValue(),app.getId());
+        DependencyTree tree = appdefBoss.getAppDependencyTree(sessionId.intValue(),app.getId());
 
-        List asnbList = getAppServiceNodes(tree, services);
+        List<AppServiceNodeBean> asnbList = getAppServiceNodes(tree, services);
 
         request.setAttribute( Constants.SERVICES_ATTR, asnbList);
 
@@ -129,15 +136,15 @@ public class ViewApplicationAction extends TilesAction {
         // forth, get the groups
         PageControl pcg =
             RequestUtils.getPageControl(request, "psg", "png", "sog", "scg");
-        PageList groups = 
-            boss.findAllGroupsMemberInclusive(sessionId.intValue(), pcg,
+        PageList<AppdefGroupValue> groups = 
+            appdefBoss.findAllGroupsMemberInclusive(sessionId.intValue(), pcg,
                                               app.getEntityId());
 
         request.setAttribute(Constants.ALL_RESGRPS_ATTR, groups);
 
         // create and initialize the remove resources form for services
         log.trace("getting all service types");
-        List serviceTypes = boss.findAllServiceTypes(sessionId.intValue(),
+        List<ServiceTypeValue> serviceTypes = appdefBoss.findAllServiceTypes(sessionId.intValue(),
                                                      PageControl.PAGE_ALL);
 
         // horrible pagination stuff
@@ -171,8 +178,8 @@ public class ViewApplicationAction extends TilesAction {
         return null;
     }
 
-    private List getAppServiceNodes(DependencyTree tree, List services) {
-        List returnList = new ArrayList();
+    private List<AppServiceNodeBean> getAppServiceNodes(DependencyTree tree, List<AppdefResourceValue> services) {
+        List<AppServiceNodeBean> returnList = new ArrayList<AppServiceNodeBean>();
         /* We need to iterate over the service list (not the tree).
            This is so as not to offend our API method which spent numerous
            CPU cycles painstakingly sorting and paging the data. 
@@ -183,8 +190,8 @@ public class ViewApplicationAction extends TilesAction {
             ServiceValue service = (ServiceValue)serviceMap.get(node.getAppService().getService().getId());
             returnList.add(new AppServiceNodeBean(service,node));
         }*/ 
-        for (Iterator iter = services.iterator(); iter.hasNext();) {
-            AppdefResourceValue resVo = (AppdefResourceValue)iter.next();
+        for (AppdefResourceValue resVo : services) {
+           
             DependencyNode appSvcDepNode = tree.findAppService(resVo);
             returnList.add(new AppServiceNodeBean(resVo,appSvcDepNode));
         } 

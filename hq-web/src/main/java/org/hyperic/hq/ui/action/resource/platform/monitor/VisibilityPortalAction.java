@@ -28,14 +28,16 @@ package org.hyperic.hq.ui.action.resource.platform.monitor;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.action.resource.common.monitor.visibility.ResourceVisibilityPortalAction;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * A <code>BaseDispatchAction</code> that sets up platform
@@ -61,8 +63,10 @@ public class VisibilityPortalAction extends ResourceVisibilityPortalAction {
     private static final String PORTLET_PERFORMANCE =
         ".resource.platform.monitor.visibility.Performance";
 
-    protected static Log log =
-        LogFactory.getLog(VisibilityPortalAction.class.getName());
+    @Autowired
+    public VisibilityPortalAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss) {
+        super(appdefBoss, authzBoss, controlBoss);
+    }
 
     public ActionForward currentHealth(ActionMapping mapping,
                                        ActionForm form,

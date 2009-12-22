@@ -28,11 +28,13 @@ package org.hyperic.hq.ui.action.resource.platform.autodiscovery;
 import java.rmi.RemoteException;
 import java.util.Properties;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
@@ -47,26 +49,34 @@ import org.hyperic.hq.autoinventory.ScanState;
 import org.hyperic.hq.autoinventory.ScanStateCore;
 import org.hyperic.hq.autoinventory.shared.AIScheduleValue;
 import org.hyperic.hq.bizapp.shared.AIBoss;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.action.BaseActionMapping;
 import org.hyperic.hq.ui.action.resource.ResourceController;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.BizappUtils;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.StringifiedException;
-
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class PlatformAutoDiscoveryAction extends ResourceController {
 
     private static final String TITLE_PATH =
         "resource.autodiscovery.inventory.";
     
+    private AIBoss aiBoss;
+    
+    @Autowired
+    public PlatformAutoDiscoveryAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss,
+                                      AIBoss aiBoss) {
+       super(appdefBoss, authzBoss, controlBoss);
+       this.aiBoss = aiBoss;
+    }
+
     // @see org.hyperic.hq.ui.action.BaseDispatchAction#getKeyMethodMap
     protected Properties getKeyMethodMap() {
         Properties map = new Properties();
@@ -84,22 +94,22 @@ public class PlatformAutoDiscoveryAction extends ResourceController {
                                           HttpServletResponse response)
         throws Exception {
 
-        ServletContext ctx = getServlet().getServletContext();
+       
         int sessionId = RequestUtils.getSessionIdInt(request);
-        AIBoss aiboss = ContextUtils.getAIBoss(ctx);
+       
         
         // If the caller specified an aiPlatformID, then lookup
         // the agent token and other stuff from that.
-        ScanStateCore ssc;
+       
         try {
             Integer aiPid =
                 RequestUtils.getIntParameter(request,
                                              Constants.AI_PLATFORM_PARAM);
             AIPlatformValue aiPlatform =
-                aiboss.findAIPlatformById(sessionId, aiPid.intValue());
+                aiBoss.findAIPlatformById(sessionId, aiPid.intValue());
             
             try {
-                ssc = aiboss.getScanStatusByAgentToken
+                aiBoss.getScanStatusByAgentToken
                     (sessionId, aiPlatform.getAgentToken());
             } catch (AgentConnectionException e) {
                 log.warn("AgentConnectException: " + e);
@@ -115,7 +125,7 @@ public class PlatformAutoDiscoveryAction extends ResourceController {
             PlatformValue pVal =
                 (PlatformValue)RequestUtils.getResource(request);
             try {
-                ssc = aiboss.getScanStatus(sessionId,
+                 aiBoss.getScanStatus(sessionId,
                                            pVal.getId().intValue());
             } catch (AgentConnectionException ace) {
                 // redirect to viewResource
@@ -210,8 +220,7 @@ public class PlatformAutoDiscoveryAction extends ResourceController {
     private void findAndSetAISchedule(HttpServletRequest request)
         throws Exception {
 
-        ServletContext ctx = getServlet().getServletContext();
-        AIBoss aiBoss = ContextUtils.getAIBoss(ctx);
+        
         int sessionId = RequestUtils.getSessionIdInt(request);
 
         Integer scheduleId = RequestUtils.getScheduleId(request);
@@ -237,15 +246,15 @@ public class PlatformAutoDiscoveryAction extends ResourceController {
         throws ServletException, SessionTimeoutException,
                SessionNotFoundException, PermissionException,
                AgentRemoteException, AutoinventoryException, RemoteException {
-        ServletContext ctx = getServlet().getServletContext();
+      
         int sessionId = RequestUtils.getSessionIdInt(request);
-        AIBoss aiboss = ContextUtils.getAIBoss(ctx);
+       
         
         AIPlatformValue aip;
         ScanState ss;
         ScanStateCore ssc;
         try {
-            ssc = aiboss.getScanStatus(sessionId, pVal.getId().intValue());
+            ssc = aiBoss.getScanStatus(sessionId, pVal.getId().intValue());
             ss = new ScanState(ssc);
             StringifiedException lastException = BizappUtils.findLastError(ssc);
             
@@ -264,7 +273,7 @@ public class PlatformAutoDiscoveryAction extends ResourceController {
         }
 
         try {
-            aip = aiboss.findAIPlatformByPlatformID(sessionId, 
+            aip = aiBoss.findAIPlatformByPlatformID(sessionId, 
                                                     pVal.getId().intValue());
         } catch (PlatformNotFoundException e) {
             aip = null;
@@ -277,14 +286,13 @@ public class PlatformAutoDiscoveryAction extends ResourceController {
     
     public void loadAIResource(HttpServletRequest request)
         throws Exception {
-        ServletContext ctx = getServlet().getServletContext();
-        AIBoss aiboss = ContextUtils.getAIBoss(ctx);
+       
         int sessionId = RequestUtils.getSessionIdInt(request);
 
         Integer id =
             RequestUtils.getIntParameter(request, Constants.AI_PLATFORM_PARAM);
         AIPlatformValue aip =
-            aiboss.findAIPlatformById(sessionId, id.intValue());
+            aiBoss.findAIPlatformById(sessionId, id.intValue());
                                                
         request.setAttribute(Constants.AIPLATFORM_ATTR, aip);
         request.setAttribute(Constants.TITLE_PARAM_ATTR, aip.getName());        

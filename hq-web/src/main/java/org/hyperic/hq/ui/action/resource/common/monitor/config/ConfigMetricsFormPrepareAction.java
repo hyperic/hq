@@ -25,10 +25,18 @@
 
 package org.hyperic.hq.ui.action.resource.common.monitor.config;
 
-import javax.servlet.ServletContext;
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+import org.apache.struts.tiles.ComponentContext;
+import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
@@ -39,25 +47,29 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.resource.common.monitor.visibility.InventoryHelper;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
-import org.hyperic.util.pager.PageList;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.tiles.ComponentContext;
-import org.apache.struts.tiles.actions.TilesAction;
-
-import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * This populates the ConfigMetrics/Update metrics pages' request attributes.
  */
 public class ConfigMetricsFormPrepareAction extends TilesAction {
+    
+    private final  Log log = LogFactory.getLog(ConfigMetricsFormPrepareAction.class);
+    
+    protected MeasurementBoss measurementBoss;
+    protected AppdefBoss appdefBoss;
+    
+    
+    @Autowired
+    public ConfigMetricsFormPrepareAction(MeasurementBoss measurementBoss, AppdefBoss appdefBoss) {
+        super();
+        this.measurementBoss = measurementBoss;
+        this.appdefBoss = appdefBoss;
+    }
+
+
 
     /**
      * Retrieve different resource metrics and store them in various request
@@ -70,13 +82,12 @@ public class ConfigMetricsFormPrepareAction extends TilesAction {
                                  HttpServletResponse response)
         throws Exception {
 
-        Log log = LogFactory.getLog(ConfigMetricsFormPrepareAction.class);
+       
         log.trace("Preparing resource metrics action.");
         
         int sessionId = RequestUtils.getSessionId(request).intValue();
-        ServletContext ctx = getServlet().getServletContext();            
-        MeasurementBoss mBoss = ContextUtils.getMeasurementBoss(ctx);
-        AppdefBoss aBoss = ContextUtils.getAppdefBoss(ctx);
+       
+      
         
         PageControl pca = RequestUtils.getPageControl(request, "ps", "pn",
                             "soa", "sca");           
@@ -96,21 +107,21 @@ public class ConfigMetricsFormPrepareAction extends TilesAction {
         
         int totalSize = 0;
         
-        List availMetrics, perfMetrics, throughMetrics, utilMetrics;
+        List availMetrics, perfMetrics,throughMetrics,utilMetrics;
         try {
             AppdefEntityTypeID atid = new AppdefEntityTypeID(RequestUtils
                 .getStringParameter(request, Constants.APPDEF_RES_TYPE_ID));
 
             AppdefResourceTypeValue resourceTypeVal =
-                aBoss.findResourceTypeById(sessionId, atid);
+                appdefBoss.findResourceTypeById(sessionId, atid);
 
-            availMetrics = mBoss.findMeasurementTemplates(
+            availMetrics = measurementBoss.findMeasurementTemplates(
                 sessionId, atid, MeasurementConstants.CAT_AVAILABILITY, pca);
-            perfMetrics = mBoss.findMeasurementTemplates(
+            perfMetrics = measurementBoss.findMeasurementTemplates(
                 sessionId, atid, MeasurementConstants.CAT_PERFORMANCE, pcp);
-            throughMetrics = mBoss.findMeasurementTemplates(
+            throughMetrics = measurementBoss.findMeasurementTemplates(
                 sessionId, atid, MeasurementConstants.CAT_THROUGHPUT, pct);
-            utilMetrics = mBoss.findMeasurementTemplates(
+            utilMetrics = measurementBoss.findMeasurementTemplates(
                 sessionId, atid, MeasurementConstants.CAT_UTILIZATION, pcu);
             
             request.setAttribute(Constants.MONITOR_ENABLED_ATTR, Boolean.FALSE);
@@ -125,7 +136,7 @@ public class ConfigMetricsFormPrepareAction extends TilesAction {
 	        try {
 	            // Check configuration
 	            InventoryHelper helper = InventoryHelper.getHelper(appdefId);
-	            configEnabled = helper.isResourceConfigured(request, ctx, true);
+	            configEnabled = helper.isResourceConfigured(request, getServlet().getServletContext(), true);
 	        } finally {
 	            log.debug("config enabled: " + configEnabled);
 	        }
@@ -134,13 +145,13 @@ public class ConfigMetricsFormPrepareAction extends TilesAction {
 	        
 	        // obtain the different categories of measurements
 	        log.debug("obtaining metrics for resource " + appdefId);
-	        availMetrics = mBoss.findEnabledMeasurements(sessionId, appdefId,
+	        availMetrics = measurementBoss.findEnabledMeasurements(sessionId, appdefId,
                 MeasurementConstants.CAT_AVAILABILITY, pca);
-	        perfMetrics = mBoss.findEnabledMeasurements(sessionId, appdefId,
+	        perfMetrics = measurementBoss.findEnabledMeasurements(sessionId, appdefId,
                 MeasurementConstants.CAT_PERFORMANCE, pcp);
-	        throughMetrics = mBoss.findEnabledMeasurements(sessionId, appdefId,
+	        throughMetrics = measurementBoss.findEnabledMeasurements(sessionId, appdefId,
                 MeasurementConstants.CAT_THROUGHPUT, pct);
-	        utilMetrics = mBoss.findEnabledMeasurements(sessionId, appdefId,
+	        utilMetrics = measurementBoss.findEnabledMeasurements(sessionId, appdefId,
                 MeasurementConstants.CAT_UTILIZATION, pcu);
         }
         

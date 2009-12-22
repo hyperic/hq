@@ -27,7 +27,6 @@ package org.hyperic.hq.ui.action.resource.common.control;
 
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -40,8 +39,8 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.beans.OptionItem;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An <code>Action</code> subclass that prepares to
@@ -50,7 +49,17 @@ import org.hyperic.hq.ui.util.RequestUtils;
  */
 public class NewFormPrepareAction extends BaseAction {
 
-    // ---------------------------------------------------- Public Methods
+    private ControlBoss controlBoss;
+    private final Log log = LogFactory.getLog(NewFormPrepareAction.class.getName());  
+    
+    
+    @Autowired
+    public NewFormPrepareAction(ControlBoss controlBoss) {
+        super();
+        this.controlBoss = controlBoss;
+    }
+
+
 
     /**
      * Create the control action and associate it with the server.
@@ -62,21 +71,19 @@ public class NewFormPrepareAction extends BaseAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-        
-        Log log = LogFactory.getLog(NewFormPrepareAction.class.getName());            
+         
         log.trace("preparing new server control action" );                    
 
         int sessionId = RequestUtils.getSessionId(request).intValue();
         ControlForm cForm = (ControlForm) form;        
-        ControlBoss cBoss =
-            ContextUtils.getControlBoss(getServlet().getServletContext());
+      
 
         AppdefEntityID appdefId = RequestUtils.getEntityId(request);
 
-        List actions = cBoss.getActions(sessionId, appdefId);
-        actions = OptionItem.createOptionsList(actions);
-        cForm.setControlActions(actions);
-        cForm.setNumControlActions(new Integer(actions.size()));
+        List<String> actions = controlBoss.getActions(sessionId, appdefId);
+        List<OptionItem> options = OptionItem.createOptionsList(actions);
+        cForm.setControlActions(options);
+        cForm.setNumControlActions(new Integer(options.size()));
 
         return null;
 

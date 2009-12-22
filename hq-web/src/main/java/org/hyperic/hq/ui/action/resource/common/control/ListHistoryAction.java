@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.ui.action.resource.common.control;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -41,14 +40,15 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.control.server.session.ControlHistory;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseValidatorForm;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * A tiles Controller that retrieves a history of control actions for
@@ -56,8 +56,16 @@ import org.hyperic.util.pager.PageList;
  */
 public class ListHistoryAction extends TilesAction {
     
-    // ---------------------------------------------------- Public Methods
+    private final  Log log = LogFactory.getLog(ListHistoryAction.class.getName());
+    private ControlBoss controlBoss;
     
+    @Autowired
+    public ListHistoryAction(ControlBoss controlBoss) {
+        super();
+        this.controlBoss = controlBoss;
+    }
+
+
     /**
      * Retrieve a <code>PageList</code> of all
      * <code>EventLogValue</code> objects and save it into the
@@ -69,14 +77,10 @@ public class ListHistoryAction extends TilesAction {
                                   HttpServletRequest request,
                                   HttpServletResponse response)
     throws Exception {
-            
-        Log log = LogFactory.getLog(ListHistoryAction.class.getName());
-        
+  
         try {
             log.trace("Getting resource control history list.");
 
-            ServletContext ctx = getServlet().getServletContext();
-            ControlBoss cBoss = ContextUtils.getControlBoss(ctx);
             int sessionId = RequestUtils.getSessionId(request).intValue();
             PageControl pc = RequestUtils.getPageControl(request);
             
@@ -87,7 +91,7 @@ public class ListHistoryAction extends TilesAction {
             
             AppdefEntityID appdefId = RequestUtils.getEntityId(request);
   
-            PageList histList = cBoss.findJobHistory(sessionId, appdefId, pc);           
+            PageList<ControlHistory> histList = controlBoss.findJobHistory(sessionId, appdefId, pc);           
             
             request.setAttribute( Constants.CONTROL_HST_DETAIL_ATTR, histList );
             

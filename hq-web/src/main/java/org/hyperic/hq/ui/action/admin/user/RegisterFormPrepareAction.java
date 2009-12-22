@@ -28,14 +28,11 @@ package org.hyperic.hq.ui.action.admin.user;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.hyperic.hq.ui.action.WorkflowPrepareAction;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
+import org.hyperic.hq.ui.action.WorkflowPrepareAction;
 
 /**
  * An Action that retrieves data from the BizApp to facilitate display
@@ -43,10 +40,7 @@ import org.apache.struts.tiles.ComponentContext;
  */
 public class RegisterFormPrepareAction extends WorkflowPrepareAction {
 
-    protected static Log log =
-        LogFactory.getLog(RegisterFormPrepareAction.class.getName());
-
-    // ---------------------------------------------------- Public Methods
+    
 
     public ActionForward workflow(ComponentContext context,
                                  ActionMapping mapping,

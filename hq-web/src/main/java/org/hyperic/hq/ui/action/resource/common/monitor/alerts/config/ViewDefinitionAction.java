@@ -27,7 +27,6 @@ package org.hyperic.hq.ui.action.resource.common.monitor.alerts.config;
 
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -46,9 +45,10 @@ import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.resource.common.monitor.alerts.AlertDefUtil;
+import org.hyperic.hq.ui.beans.AlertConditionBean;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * View an alert definition.
@@ -56,7 +56,19 @@ import org.hyperic.hq.ui.util.RequestUtils;
  */
 public class ViewDefinitionAction extends TilesAction {
 
-    private Log log = LogFactory.getLog(ViewDefinitionAction.class.getName());
+    private final Log log = LogFactory.getLog(ViewDefinitionAction.class.getName());
+    protected EventsBoss eventsBoss;
+    protected MeasurementBoss measurementBoss;
+    
+    
+    @Autowired
+    public ViewDefinitionAction(EventsBoss eventsBoss, MeasurementBoss measurementBoss) {
+        super();
+        this.eventsBoss = eventsBoss;
+        this.measurementBoss = measurementBoss;
+    }
+
+
 
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
@@ -64,7 +76,7 @@ public class ViewDefinitionAction extends TilesAction {
                                  HttpServletResponse response)
         throws Exception
     {            
-        ServletContext ctx = getServlet().getServletContext();
+       
         
         try {
             AppdefEntityID aeid = RequestUtils.getEntityId(request);
@@ -83,11 +95,10 @@ public class ViewDefinitionAction extends TilesAction {
         log.trace("alertDefId=" + alertDefId);
 
         int sessionID = RequestUtils.getSessionId(request).intValue();
-        EventsBoss eb = ContextUtils.getEventsBoss(ctx);
-        MeasurementBoss mb = ContextUtils.getMeasurementBoss(ctx);
+        
 
         // properties
-        AlertDefinitionValue adv = eb.getAlertDefinition(sessionID, alertDefId);
+        AlertDefinitionValue adv = eventsBoss.getAlertDefinition(sessionID, alertDefId);
         request.setAttribute(Constants.ALERT_DEFINITION_ATTR, adv);
 
         // conditions
@@ -119,13 +130,13 @@ public class ViewDefinitionAction extends TilesAction {
         }
         request.setAttribute("canEditConditions",
                              new Boolean(canEditConditions));
-        List alertDefConditions = AlertDefUtil.getAlertConditionBeanList(
-                sessionID, request, mb, acvList,
+        List<AlertConditionBean> alertDefConditions = AlertDefUtil.getAlertConditionBeanList(
+                sessionID, request, measurementBoss, acvList,
                 EventConstants.TYPE_ALERT_DEF_ID.equals(adv.getParentId()));
         request.setAttribute("alertDefConditions", alertDefConditions);
         request.setAttribute("openNMSEnabled", OpenNMSAction.isLoaded());
         if (recoverId > 0) {
-            AlertDefinitionValue primaryAdv = eb.getAlertDefinition(
+            AlertDefinitionValue primaryAdv = eventsBoss.getAlertDefinition(
             		sessionID, Integer.valueOf(recoverId));        	
         	request.setAttribute("primaryAlert", primaryAdv);
         }
@@ -137,4 +148,3 @@ public class ViewDefinitionAction extends TilesAction {
     }
 }
 
-// EOF

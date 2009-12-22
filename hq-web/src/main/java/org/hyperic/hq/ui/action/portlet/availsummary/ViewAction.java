@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -62,11 +61,11 @@ import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * This action class is used by the Availability Summary portlet.  It's main
@@ -74,7 +73,19 @@ import org.json.JSONObject;
  */
 public class ViewAction extends BaseAction {
 
-    private static Log _log = LogFactory.getLog(ViewAction.class);
+   private final Log log = LogFactory.getLog(ViewAction.class.getName());
+   private AuthzBoss authzBoss;
+   private MeasurementBoss measurementBoss;
+   private AppdefBoss appdefBoss;
+   
+   
+   @Autowired
+    public ViewAction(AuthzBoss authzBoss, MeasurementBoss measurementBoss, AppdefBoss appdefBoss) {
+        super();
+        this.authzBoss = authzBoss;
+        this.measurementBoss = measurementBoss;
+        this.appdefBoss = appdefBoss;
+    }
 
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
@@ -82,15 +93,13 @@ public class ViewAction extends BaseAction {
                                  HttpServletResponse response)
         throws Exception
     {
-        ServletContext ctx = getServlet().getServletContext();
-        MeasurementBoss mBoss = ContextUtils.getMeasurementBoss(ctx);
+        
         HttpSession session = request.getSession();
         WebUser user = RequestUtils.getWebUser(session);
-        AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
-        AppdefBoss appBoss = ContextUtils.getAppdefBoss(ctx);
+       
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
         		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, aBoss);
+        		user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         
         String token;
@@ -112,29 +121,30 @@ public class ViewAction extends BaseAction {
             titleKey += token;
         }
 
-        List entityIds =
+        List<AppdefEntityID> entityIds =
             DashboardUtils.preferencesAsEntityIds(resKey, dashPrefs);
         
         // Can only do Platforms, Servers, and Services
-        for (Iterator it = entityIds.iterator(); it.hasNext(); ) {
-            AppdefEntityID aeid = (AppdefEntityID) it.next();
+        for (Iterator<AppdefEntityID> it = entityIds.iterator(); it.hasNext(); ) {
+            AppdefEntityID aeid =  it.next();
             
-            if (aeid.isPlatform() || aeid.isServer() || aeid.isService())
+            if (aeid.isPlatform() || aeid.isServer() || aeid.isService()) {
                 continue;
+            }
             
             it.remove();
         }
 
-        AppdefEntityID[] arrayIds = (AppdefEntityID[])
+        AppdefEntityID[] arrayIds =
             entityIds.toArray(new AppdefEntityID[entityIds.size()]);
         int count = Integer.parseInt(dashPrefs.getValue(numKey, "10"));
         int sessionId = user.getSessionId().intValue();
 
         CacheEntry[] ents = new CacheEntry[arrayIds.length];
-        List measurements = new ArrayList(arrayIds.length);
-        Map res = new HashMap();
+        List<Measurement> measurements = new ArrayList<Measurement>(arrayIds.length);
+        Map<String, AvailSummary> res = new HashMap<String, AvailSummary>();
         long interval = 0;
-        ArrayList toRemove = new ArrayList();
+        ArrayList<String> toRemove = new ArrayList<String>();
         for (int i = 0; i < arrayIds.length; i++) {
             AppdefEntityID id = arrayIds[i];
             try {
@@ -153,7 +163,7 @@ public class ViewAction extends BaseAction {
             }
         }
 
-        MetricValue[] vals = mBoss.getLastMetricValue(sessionId, measurements,
+        MetricValue[] vals = measurementBoss.getLastMetricValue(sessionId, measurements,
                                                       interval);
 
         for (int i = 0; i < ents.length; i++) {
@@ -166,7 +176,7 @@ public class ViewAction extends BaseAction {
                 if (arrayIds[i].isApplication()) {
                     // A little expensive, hopefully we don't have to do it very
                     // often
-                    mval = mBoss.getAvailability(sessionId, arrayIds[i]);
+                    mval = measurementBoss.getAvailability(sessionId, arrayIds[i]);
                 }
                 val = new MetricValue(mval);
             }
@@ -174,7 +184,7 @@ public class ViewAction extends BaseAction {
             // If no avail measurement is scheduled, skip this resource
             if (ent != null) {
                 if (ent.getType() == null) {
-                    AppdefResourceValue resVal = appBoss.findById(sessionId,
+                    AppdefResourceValue resVal = appdefBoss.findById(sessionId,
                                                                 arrayIds[i]);
                     ent.setType(resVal.getAppdefResourceTypeValue());
                 }
@@ -190,13 +200,13 @@ public class ViewAction extends BaseAction {
         }
 
         JSONObject availSummary = new JSONObject();
-        List types = new ArrayList();
+        List<JSONObject> types = new ArrayList<JSONObject>();
 
-        TreeSet sortedSet = new TreeSet(new AvailSummaryComparator());
+        TreeSet<AvailSummary> sortedSet = new TreeSet<AvailSummary>(new AvailSummaryComparator());
         sortedSet.addAll(res.values());
 
-        for (Iterator i = sortedSet.iterator(); i.hasNext() && count-- > 0; ) {
-            AvailSummary summary = (AvailSummary)i.next();
+        for (Iterator<AvailSummary> i = sortedSet.iterator(); i.hasNext() && count-- > 0; ) {
+            AvailSummary summary = i.next();
             JSONObject typeSummary = new JSONObject();
             typeSummary.put("resourceTypeName", summary.getTypeName());
             typeSummary.put("numUp", summary.getNumUp());
@@ -218,11 +228,11 @@ public class ViewAction extends BaseAction {
         
         response.getWriter().write(availSummary.toString());
 
-        _log.debug("Availability summary loaded in " +
+        log.debug("Availability summary loaded in " +
                    (System.currentTimeMillis() - ts) + " ms");
 
         if (toRemove.size() > 0) {
-            _log.debug("Removing " + toRemove.size() + " missing resources.");
+            log.debug("Removing " + toRemove.size() + " missing resources.");
             DashboardUtils.removeResources((String[]) toRemove.toArray(new String[toRemove.size()]),
                                            resKey, dashPrefs);
         }
@@ -272,12 +282,10 @@ public class ViewAction extends BaseAction {
         }
     }
 
-    private class AvailSummaryComparator implements Comparator {
+    private class AvailSummaryComparator implements Comparator<AvailSummary> {
 
-        public int compare(Object o1, Object o2) {
-            AvailSummary s1 = (AvailSummary)o1;
-            AvailSummary s2 = (AvailSummary)o2;
-
+        public int compare(AvailSummary s1, AvailSummary s2) {
+          
             if (s1.getAvailPercentage() == s2.getAvailPercentage()) {
                 // Sort on the actual number
                 if (s1.getNumDown() != s2.getNumDown()) {
@@ -304,17 +312,15 @@ public class ViewAction extends BaseAction {
         }
 
         // Otherwise, load from the backend
-        ServletContext ctx = getServlet().getServletContext();
-        MeasurementBoss mBoss = ContextUtils.getMeasurementBoss(ctx);
-
+       
         try {
-            Measurement m = mBoss.findAvailabilityMetric(sessionId, id);
+            Measurement m = measurementBoss.findAvailabilityMetric(sessionId, id);
 
             CacheEntry res = new CacheEntry(m);
             cache.put(new Element(id, res));
             return res;
         } catch (Exception ex) {
-            _log.debug("Caught exception loading data: " + ex, ex);
+            log.debug("Caught exception loading data: " + ex, ex);
             return null;
         }
     }

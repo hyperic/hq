@@ -25,10 +25,7 @@
 
 package org.hyperic.hq.ui.action.admin.user;
         
-import java.util.Iterator;
-
 import javax.security.auth.login.LoginException;
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -44,8 +41,8 @@ import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An <code>BaseAction</code> subclass that edit's a user's
@@ -53,7 +50,19 @@ import org.hyperic.hq.ui.util.RequestUtils;
  */
 public class EditPasswordAction extends BaseAction {
 
-    // ---------------------------------------------------- Public Methods
+   private final Log log = LogFactory.getLog(NewAction.class.getName());
+   private AuthBoss authBoss;
+   private AuthzBoss authzBoss;
+   
+   
+   @Autowired
+    public EditPasswordAction(AuthBoss authBoss, AuthzBoss authzBoss) {
+    super();
+    this.authBoss = authBoss;
+    this.authzBoss = authzBoss;
+}
+
+
 
     /**
      *  Edit the user's password. Make sure that the
@@ -65,7 +74,7 @@ public class EditPasswordAction extends BaseAction {
                                  HttpServletResponse response)
     throws Exception {
         
-        Log log = LogFactory.getLog(NewAction.class.getName());
+       
         log.trace("Editing password for user." );                    
     
         EditPasswordForm pForm = (EditPasswordForm)form;
@@ -77,10 +86,6 @@ public class EditPasswordAction extends BaseAction {
             return forward;
         }         
 
-        //get the spiderSubjectValue of the user to be deleated.
-        ServletContext ctx = getServlet().getServletContext();            
-        AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
-        AuthBoss authBoss = ContextUtils.getAuthBoss(ctx);
         Integer sessionId = RequestUtils.getSessionId(request);
 
         AuthzSubject user =
@@ -91,9 +96,7 @@ public class EditPasswordAction extends BaseAction {
 
         boolean admin = false;                
 
-        for(Iterator i = authzBoss.getAllOperations( sessionId ).iterator();
-            i.hasNext();){
-            Operation operation = (Operation) i.next();
+        for(Operation operation  :authzBoss.getAllOperations( sessionId )){
             if (admin = AuthzConstants.subjectOpModifySubject
                     .equals(operation.getName())) {
                 break;

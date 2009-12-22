@@ -30,35 +30,42 @@ import java.util.HashMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.action.resource.common.monitor.config.ConfigMetricsAction;
-import org.hyperic.hq.ui.action.resource.common.monitor.config.MonitoringConfigForm;
-import org.hyperic.hq.ui.util.RequestUtils;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.bizapp.shared.MeasurementBoss;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.action.resource.common.monitor.config.ConfigMetricsAction;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * modifies the metrics data.
  */
 public class GroupConfigMetricsAction extends ConfigMetricsAction {
     
+    private final Log log = LogFactory.getLog(ConfigMetricsAction.class.getName());
+    
+    @Autowired
+    public GroupConfigMetricsAction(MeasurementBoss measurementBoss) {
+        super(measurementBoss);
+    }
+
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
         
-        Log log = LogFactory.getLog(ConfigMetricsAction.class.getName());            
+                    
         log.trace("modifying metrics action");                    
 
-        HashMap parms = new HashMap(2);
+        HashMap<String, Object> parms = new HashMap<String, Object>(2);
         
-        int sessionId = RequestUtils.getSessionId(request).intValue();
+       
         AppdefEntityID aeid = RequestUtils.getEntityId(request);
 
         parms.put(Constants.RESOURCE_PARAM, aeid.getId());

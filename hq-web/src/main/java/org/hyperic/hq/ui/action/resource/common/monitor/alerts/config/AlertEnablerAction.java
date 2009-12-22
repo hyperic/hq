@@ -27,39 +27,44 @@ package org.hyperic.hq.ui.action.resource.common.monitor.alerts.config;
 
 import java.util.HashMap;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * A class to enable or disable alerts for a resource and all its children
  */
 public class AlertEnablerAction extends BaseAction {
     
-    private Log log = LogFactory.getLog(AlertEnablerAction.class.getName());
+    private EventsBoss eventsBoss;
     
+    
+    @Autowired
+    public AlertEnablerAction(EventsBoss eventsBoss) {
+        super();
+        this.eventsBoss = eventsBoss;
+    }
+
+
+
     public ActionForward execute(ActionMapping mapping, ActionForm form,
             HttpServletRequest request, HttpServletResponse response)
             throws Exception {
         Integer sessionId = RequestUtils.getSessionId(request);
         AppdefEntityID eid = RequestUtils.getEntityId(request);
         String state = RequestUtils.getStringParameter(request, Constants.ALERT_STATE_PARAM);
-        ServletContext ctx = this.getServlet().getServletContext();
-        EventsBoss ev = ContextUtils.getEventsBoss(ctx);
-        HashMap forwardParams = new HashMap(3);
+      
+       
+        HashMap<String, Object> forwardParams = new HashMap<String, Object>(3);
         
         forwardParams.put(Constants.RESOURCE_PARAM, eid.getId());
         forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, new Integer(eid.getType()));
@@ -68,7 +73,7 @@ public class AlertEnablerAction extends BaseAction {
         if (state.equals(Constants.MODE_DISABLED)) {
             enabled = false;
         }
-        ev.activateAlertDefinitions(sessionId.intValue(),
+        eventsBoss.activateAlertDefinitions(sessionId.intValue(),
                 new AppdefEntityID[] {eid}, enabled);
         
         return this.returnSuccess(request, mapping, 

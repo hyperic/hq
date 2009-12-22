@@ -30,7 +30,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -43,14 +42,15 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.timer.StopWatch;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An <code>Action</code> that loads the <code>Portal</code> identified by the
@@ -60,7 +60,14 @@ import org.hyperic.util.timer.StopWatch;
  */
 public class ViewAction extends TilesAction {
 
-    private static Log _log = LogFactory.getLog("DASHBOARD-TIMING");
+    private final Log log = LogFactory.getLog("DASHBOARD-TIMING");
+    private AuthzBoss authzBoss;
+
+    @Autowired
+    public ViewAction(AuthzBoss authzBoss) {
+        super();
+        this.authzBoss = authzBoss;
+    }
 
     public ActionForward execute(ComponentContext context,
                                  ActionMapping mapping,
@@ -71,19 +78,18 @@ public class ViewAction extends TilesAction {
 
         StopWatch timer = new StopWatch();
 
-        ServletContext ctx = getServlet().getServletContext();
-        AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
+        
         HttpSession session = request.getSession();
         WebUser user = SessionUtils.getWebUser(session);
         ConfigResponse userPrefs = user.getPreferences();
         String key = Constants.USERPREF_KEY_RECENT_RESOURCES;
         if(userPrefs.getValue(key, null) != null){
-	        Map list;
+	        Map<AppdefEntityID,Resource>  list;
 	        try {
-	            list = getStuff(key, boss, user, userPrefs);
+	            list = getStuff(key, user, userPrefs);
 	        } catch (Exception e) {
-	            DashboardUtils.verifyResources(key, ctx, userPrefs, user);
-	            list = getStuff(key, boss, user, userPrefs);
+	            DashboardUtils.verifyResources(key, getServlet().getServletContext(), userPrefs, user);
+	            list = getStuff(key, user, userPrefs);
 	        }
 	        
 	        context.putAttribute("resources", list);
@@ -91,19 +97,19 @@ public class ViewAction extends TilesAction {
         	context.putAttribute("resources", new ArrayList());
         }
         
-        _log.debug("ViewRecentResources - timing [" + timer.toString() + "]");
+        log.debug("ViewRecentResources - timing [" + timer.toString() + "]");
         return null;
     }
 
-    private Map getStuff(String key, AuthzBoss boss, WebUser user,
+    private Map<AppdefEntityID,Resource> getStuff(String key,  WebUser user,
                           ConfigResponse dashPrefs)
         throws Exception {
-        List entityIds = DashboardUtils.preferencesAsEntityIds(key, dashPrefs);
+        List<AppdefEntityID> entityIds = DashboardUtils.preferencesAsEntityIds(key, dashPrefs);
         Collections.reverse(entityIds);     // Most recent on top
 
         AppdefEntityID[] arrayIds = new AppdefEntityID[entityIds.size()];
-        arrayIds = (AppdefEntityID[]) entityIds.toArray(arrayIds);
+        arrayIds =  entityIds.toArray(arrayIds);
 
-        return boss.findResourcesByIds(user.getSessionId().intValue(), arrayIds);
+        return authzBoss.findResourcesByIds(user.getSessionId().intValue(), arrayIds);
     }
 }

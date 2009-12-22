@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -42,22 +41,28 @@ import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.bizapp.shared.ControlBoss;
+import org.hyperic.hq.grouping.shared.GroupEntry;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.action.resource.ResourceForm;
 import org.hyperic.hq.ui.action.resource.common.control.ResourceControlController;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * A <code>ResourceControllerAction</code> that sets up group control
  * portals.
  */
 public class GroupControllerAction extends ResourceControlController {
-    protected static Log log = LogFactory.getLog( GroupControllerAction.class.getName() );
-    private Properties map = getKeyMethodMap();
+    protected Log log = LogFactory.getLog( GroupControllerAction.class.getName() );
+    private final Properties map = getKeyMethodMap();
     
-    public GroupControllerAction() {
+    
+    @Autowired
+    public GroupControllerAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss) {
+        super(appdefBoss, authzBoss, controlBoss);
         map.setProperty(Constants.MODE_CRNT_DETAIL,"currentControlStatusDetail");
     }
     
@@ -195,14 +200,11 @@ public class GroupControllerAction extends ResourceControlController {
         } else {
             groupId = addForm.getRid();
         }
-        
-        ServletContext ctx = getServlet().getServletContext();                                    
-        AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
-        
+    
         try {
             Integer sessionId = RequestUtils.getSessionId(request);
-            AppdefGroupValue group = boss.findGroup(sessionId.intValue(), groupId);
-            List entries = group.getGroupEntries();
+            AppdefGroupValue group = appdefBoss.findGroup(sessionId.intValue(), groupId);
+            List<GroupEntry> entries = group.getGroupEntries();
             
             if (entries != null && entries.size() < 1) {
                 RequestUtils.setError(request, "resource.common.control.error.NoResourcesInGroup");

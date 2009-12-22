@@ -35,20 +35,26 @@ import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class SetDashboardAction extends org.hyperic.hq.ui.action.BaseAction {
+    private AuthzBoss authzBoss;
+    
+    @Autowired
+	public SetDashboardAction(AuthzBoss authzBoss) {
+        super();
+        this.authzBoss = authzBoss;
+    }
 
-	public ActionForward execute(ActionMapping mapping, ActionForm form,
+    public ActionForward execute(ActionMapping mapping, ActionForm form,
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 	
 		HttpSession session = request.getSession(false);
 		DashboardForm dForm = (DashboardForm) form;
         WebUser user = RequestUtils.getWebUser(session);
-		AuthzBoss authzBoss = ContextUtils.getAuthzBoss(request.getSession()
-				.getServletContext());
+		
 		if (!isPropertyEmpty(dForm.getSelectedDashboardId())) {
 			//assign a selected dashboard
 			session.setAttribute(Constants.SELECTED_DASHBOARD_ID, new Integer(dForm.getSelectedDashboardId()));

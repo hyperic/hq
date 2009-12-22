@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.ui.action.portlet.recentlyApproved;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -33,13 +32,12 @@ import javax.servlet.http.HttpSession;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.ConfigurationProxy;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An <code>Action</code> that loads the <code>Portal</code>
@@ -49,6 +47,17 @@ import org.hyperic.hq.ui.util.SessionUtils;
  *
  */
 public class ModifyAction extends BaseAction {
+    
+    private ConfigurationProxy configurationProxy;
+    
+    
+    @Autowired
+    public ModifyAction(ConfigurationProxy configurationProxy) {
+        super();
+        this.configurationProxy = configurationProxy;
+    }
+
+
 
     /**
      * @param mapping The ActionMapping used to select this instance
@@ -65,8 +74,7 @@ public class ModifyAction extends BaseAction {
                                  HttpServletResponse response)
         throws Exception {
 
-        ServletContext ctx = getServlet().getServletContext();
-        AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
+       
         ActionForward forward = checkSubmit(request, mapping, form);
 
         if (forward != null) {
@@ -77,7 +85,7 @@ public class ModifyAction extends BaseAction {
         WebUser user = SessionUtils.getWebUser(session);
         String range = pForm.getRange().toString();            
         
-        ConfigurationProxy.getInstance().setPreference(session, user, boss, 
+        configurationProxy.setPreference(session, user, 
         		PropertiesForm.RANGE, range);
 
         session.removeAttribute(Constants.USERS_SES_PORTAL);

@@ -98,8 +98,8 @@ public class MonitorUtils {
      * constants
      * @return List
      */
-    public static List calculateTimeFrame(int lastN, int unit) {
-        List l = new ArrayList(0);
+    public static List<Long> calculateTimeFrame(int lastN, int unit) {
+        List<Long> l = new ArrayList<Long>(0);
 
         if (unit == UNIT_COLLECTION_POINTS) {
             return null;
@@ -234,8 +234,8 @@ public class MonitorUtils {
      * @param services
      * @return List
      */
-    public static List findServiceTypes(List services, Boolean internal) {
-        TreeMap serviceTypeSet = new TreeMap();
+    public static List<ServiceTypeValue> findServiceTypes(List services, Boolean internal) {
+        TreeMap<String, ServiceTypeValue> serviceTypeSet = new TreeMap<String, ServiceTypeValue>();
         for (Iterator i = services.iterator(); i.hasNext();) {
             AppdefResourceValue svcCandidate = (AppdefResourceValue)i.next();
             final AppdefEntityID aeid = svcCandidate.getEntityId();

@@ -64,11 +64,11 @@ import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.MonitorUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.InvalidOptionException;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *
@@ -77,14 +77,25 @@ import org.hyperic.util.config.InvalidOptionException;
 public class IndicatorChartsAction extends DispatchAction 
     implements Serializable 
 {
-    private static Log log =
+    private final Log log =
         LogFactory.getLog(IndicatorChartsAction.class.getName());
     
-    private static String PREF_DELIMITER = Constants.DASHBOARD_DELIMITER;
+    private MeasurementBoss measurementBoss;
+    private AuthzBoss authzBoss;
     
-    private static String DEFAULT_VIEW = 
+    private static final String PREF_DELIMITER = Constants.DASHBOARD_DELIMITER;
+    
+    private static final String DEFAULT_VIEW = 
         "resource.common.monitor.visibility.defaultview";
     
+    
+    @Autowired
+    public IndicatorChartsAction(MeasurementBoss measurementBoss, AuthzBoss authzBoss) {
+        super();
+        this.measurementBoss = measurementBoss;
+        this.authzBoss = authzBoss;
+    }
+
     protected ActionForward dispatchMethod(ActionMapping mapping,
                                            ActionForm form,
                                            HttpServletRequest request,
@@ -92,25 +103,25 @@ public class IndicatorChartsAction extends DispatchAction
                                            String name)
         throws Exception {
         WebUser user = RequestUtils.getWebUser(request);
-        Map pref = user.getMetricRangePreference(true);
+        Map<String,Object> pref = user.getMetricRangePreference(true);
         request.setAttribute(MonitorUtils.BEGIN, pref.get(MonitorUtils.BEGIN));
         request.setAttribute(MonitorUtils.END, pref.get(MonitorUtils.END));
 
         return super.dispatchMethod(mapping, form, request, response, name);
     }
 
-    private List getMetrics(HttpServletRequest request, MeasurementBoss boss,
+    private List getMetrics(HttpServletRequest request, 
                             AppdefEntityID aeid, AppdefEntityTypeID ctype,
-                            List tids)
+                            List<Integer> tids)
         throws ServletException, SessionTimeoutException,
                SessionNotFoundException, AppdefEntityNotFoundException,
                PermissionException, AppdefCompatException, RemoteException {
-        ArrayList metrics = new ArrayList();
+        ArrayList<MetricDisplaySummary> metrics = new ArrayList<MetricDisplaySummary>();
         int sessionId = RequestUtils.getSessionId(request).intValue();
 
         // Get metric range defaults
         WebUser user = RequestUtils.getWebUser(request);
-        Map pref = user.getMetricRangePreference(true);
+        Map<String,Object> pref = user.getMetricRangePreference(true);
         long begin = ((Long) pref.get(MonitorUtils.BEGIN)).longValue();
         long end = ((Long) pref.get(MonitorUtils.END)).longValue();
         
@@ -118,13 +129,13 @@ public class IndicatorChartsAction extends DispatchAction
         AppdefEntityID[] eids = (AppdefEntityID[]) request.getSession()
             .getAttribute(aeid.getAppdefKey() + ".entities");
         
-        ArrayList entList = null;
+        ArrayList<AppdefEntityID> entList = null;
         if (eids != null) {
-            entList = new ArrayList(Arrays.asList(eids));
+            entList = new ArrayList<AppdefEntityID>(Arrays.asList(eids));
         }
         
-        for (Iterator it = tids.iterator(); it.hasNext(); ) {
-            Integer tid = (Integer) it.next();
+        for (Integer tid: tids) {
+            
             
             try {
                 MetricDisplaySummary mds;
@@ -135,12 +146,12 @@ public class IndicatorChartsAction extends DispatchAction
                         entList.add(aeid);
                     }
                     
-                    mds = boss.findMetric(sessionId, entList, tid, begin, end);
+                    mds = measurementBoss.findMetric(sessionId, entList, tid, begin, end);
                 }
-                else
-                    mds = boss.findMetric(sessionId, aeid, ctype, tid,
+                else {
+                    mds = measurementBoss.findMetric(sessionId, aeid, ctype, tid,
                         begin, end);
-
+                }
                 if (mds != null) {
                     IndicatorDisplaySummary ids =
                         new IndicatorDisplaySummary(mds);
@@ -161,15 +172,14 @@ public class IndicatorChartsAction extends DispatchAction
         return metrics;
     }
     
-    private List getViewMetrics(HttpServletRequest request, AppdefEntityID aeid,
+    private List<MetricDisplaySummary> getViewMetrics(HttpServletRequest request, AppdefEntityID aeid,
                                 AppdefEntityTypeID ctype, String viewName)
         throws SessionTimeoutException, SessionNotFoundException,
                AppdefEntityNotFoundException, PermissionException,
                AppdefCompatException, RemoteException, ServletException {
         MessageResources res = getResources(request);
         int sessionId = RequestUtils.getSessionId(request).intValue();
-        MeasurementBoss boss =
-            ContextUtils.getMeasurementBoss(getServlet().getServletContext());
+      
 
         String key = Constants.INDICATOR_VIEWS + generateUniqueKey(request);
         WebUser user = RequestUtils.getWebUser(request);
@@ -180,18 +190,18 @@ public class IndicatorChartsAction extends DispatchAction
                 user.getPreference(generatePrefsMetricsKey(key, viewName));
 
             // The metrics have to come from the preferences
-            List metrics = StringUtil.explode(metricsStr, PREF_DELIMITER);
+            List<String> metrics = StringUtil.explode(metricsStr, PREF_DELIMITER);
             
-            ArrayList summaries = new ArrayList();
-            for (Iterator it = metrics.iterator(); it.hasNext(); ) {
+            ArrayList<MetricDisplaySummary> summaries = new ArrayList<MetricDisplaySummary>();
+            for (Iterator<String> it = metrics.iterator(); it.hasNext(); ) {
                 IndicatorDisplaySummary ids =
                     new IndicatorDisplaySummary((String) it.next());
                 
-                ArrayList tids = new ArrayList();
+                ArrayList<Integer> tids = new ArrayList<Integer>();
                 tids.add(ids.getTemplateId());
                 
                 summaries.addAll(
-                    this.getMetrics(request, boss, ids.getEntityId(),
+                    this.getMetrics(request,  ids.getEntityId(),
                                     ids.getChildType(), tids));
             }
             
@@ -199,32 +209,31 @@ public class IndicatorChartsAction extends DispatchAction
         } catch (InvalidOptionException e) {
             // Maybe we have a "default" view
             if (viewName.equals(res.getMessage(DEFAULT_VIEW))) {
-                ArrayList tids = new ArrayList();
-                HashSet cats = new HashSet(4);
+                ArrayList<Integer> tids = new ArrayList<Integer>();
+                HashSet<String> cats = new HashSet<String>(4);
                 cats.add(MeasurementConstants.CAT_AVAILABILITY);
                 cats.add(MeasurementConstants.CAT_UTILIZATION);
                 cats.add(MeasurementConstants.CAT_THROUGHPUT);
                 cats.add(MeasurementConstants.CAT_PERFORMANCE);
         
-                List tmpls;
+                List<MeasurementTemplate> tmpls;
                 try {
                     if (ctype == null) {
-                        tmpls = boss.getDesignatedTemplates(sessionId, aeid,
+                        tmpls = measurementBoss.getDesignatedTemplates(sessionId, aeid,
                                                             cats);
                     }
                     else {
-                        tmpls = boss.getAGDesignatedTemplates(
+                        tmpls = measurementBoss.getAGDesignatedTemplates(
                             sessionId, new AppdefEntityID[] { aeid }, ctype,
                             cats);
                     }
                     
-                    for (Iterator it = tmpls.iterator(); it.hasNext(); ) {
-                        MeasurementTemplate mtv =
-                            (MeasurementTemplate) it.next();
-                        
+                    for (MeasurementTemplate mtv : tmpls) {
+                       
                         if (!mtv.getAlias().equalsIgnoreCase(
-                                MeasurementConstants.CAT_AVAILABILITY))
+                                MeasurementConstants.CAT_AVAILABILITY)) {
                             tids.add(mtv.getId());
+                        }
                     }
                 } catch (MeasurementNotFoundException me) {
                     // No utilization metric
@@ -232,12 +241,12 @@ public class IndicatorChartsAction extends DispatchAction
                               ctype);
                 }
                 
-                return this.getMetrics(request, boss, aeid, ctype, tids);
+                return this.getMetrics(request,  aeid, ctype, tids);
             }
         }
         
         // No metrics
-        return new ArrayList();
+        return new ArrayList<MetricDisplaySummary>();
     }
 
     private String generateSessionKey(HttpServletRequest request) {
@@ -262,14 +271,14 @@ public class IndicatorChartsAction extends DispatchAction
         return key + "." + view;
     }
 
-    private void storeMetrics(HttpServletRequest request, List metrics,
+    private void storeMetrics(HttpServletRequest request, List<MetricDisplaySummary> metrics,
                               IndicatorViewsForm form) {
         request.setAttribute(Constants.CHART_DATA_KEYS, metrics);
         
         String[] tmplIds = new String[metrics.size()];
         int i = 0;
-        for (Iterator it = metrics.iterator(); it.hasNext(); ) {
-            MetricDisplaySummary summary = (MetricDisplaySummary) it.next();
+        for ( MetricDisplaySummary summary  : metrics) {
+            
             tmplIds[i++] = summary.getTemplateId().toString();
         }
         form.setMetric(tmplIds);
@@ -304,7 +313,7 @@ public class IndicatorChartsAction extends DispatchAction
         String viewName = ivf.getView();
         
         // Look up the metrics based on view name
-        List metrics;
+        List<MetricDisplaySummary> metrics;
         try {
             // See if there's a ctype
             AppdefEntityTypeID childTypeId =
@@ -340,8 +349,7 @@ public class IndicatorChartsAction extends DispatchAction
             return mapping.findForward(Constants.FAILURE_URL);
         }
         
-        MeasurementBoss boss =
-            ContextUtils.getMeasurementBoss(getServlet().getServletContext());
+       
         
         String newMetric = ivf.getAddMetric();
         
@@ -359,9 +367,9 @@ public class IndicatorChartsAction extends DispatchAction
 
         // Add the new metrics
         if (!found) {
-            ArrayList tids = new ArrayList();
+            ArrayList<Integer> tids = new ArrayList<Integer>();
             tids.add(ids.getTemplateId());
-            metrics.addAll(getMetrics(request, boss, ids.getEntityId(),
+            metrics.addAll(getMetrics(request, ids.getEntityId(),
                                       ids.getChildType(), tids));
         }
 
@@ -496,7 +504,7 @@ public class IndicatorChartsAction extends DispatchAction
      * 
      * <P>
      */
-    private static int indexOfSpecialChars(String aTagFragment) {
+    private int indexOfSpecialChars(String aTagFragment) {
         final StringCharacterIterator iterator =
             new StringCharacterIterator(aTagFragment);
         
@@ -545,8 +553,8 @@ public class IndicatorChartsAction extends DispatchAction
             
             if (views.length() > 0) {
                 // Make sure that we're not duplicating names
-                List viewNames = StringUtil.explode(views, PREF_DELIMITER);
-                for (Iterator it = viewNames.iterator(); it.hasNext(); ) {
+                List<String> viewNames = StringUtil.explode(views, PREF_DELIMITER);
+                for (Iterator<String> it = viewNames.iterator(); it.hasNext(); ) {
                     if (ivf.getView().equals(it.next())) {
                         return error (mapping, request,
                         "resource.common.monitor.visibility.view.error.exists");
@@ -592,9 +600,8 @@ public class IndicatorChartsAction extends DispatchAction
         user.setPreference(generatePrefsMetricsKey(key, ivf.getView()),
                            viewMetrics.toString());
         
-        AuthzBoss boss =
-            ContextUtils.getAuthzBoss(getServlet().getServletContext());
-        boss.setUserPrefs(user.getSessionId(), user.getId(),
+       
+        authzBoss.setUserPrefs(user.getSessionId(), user.getId(),
                           user.getPreferences());            
 
         return mapping.findForward(Constants.MODE_MON_CUR);
@@ -619,9 +626,9 @@ public class IndicatorChartsAction extends DispatchAction
         }
         
         // Parse the views
-        List viewNames = StringUtil.explode(views, PREF_DELIMITER);
+        List<String> viewNames = StringUtil.explode(views, PREF_DELIMITER);
 
-        for (Iterator it = viewNames.iterator(); it.hasNext(); ) {
+        for (Iterator<String> it = viewNames.iterator(); it.hasNext(); ) {
             String view = (String) it.next();
             
             if (view.equals(ivf.getUpdate()))
@@ -640,9 +647,8 @@ public class IndicatorChartsAction extends DispatchAction
         user.unsetPreference(
                 key + generatePrefsMetricsKey(key, ivf.getUpdate()));
 
-        AuthzBoss boss =
-            ContextUtils.getAuthzBoss(getServlet().getServletContext());
-        boss.setUserPrefs(user.getSessionId(), user.getId(),
+      
+        authzBoss.setUserPrefs(user.getSessionId(), user.getId(),
                           user.getPreferences());            
 
         return mapping.findForward(Constants.MODE_MON_CUR);

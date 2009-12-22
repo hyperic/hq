@@ -26,29 +26,29 @@
 package org.hyperic.hq.ui.action.resource.server.monitor;
 
 import java.util.List;
-import java.util.Properties;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.bizapp.shared.MeasurementBoss;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.Portal;
-import org.hyperic.hq.ui.action.BaseActionMapping;
-import org.hyperic.hq.ui.action.resource.common.monitor.visibility.ResourceVisibilityPortalAction;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.util.pager.PageControl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.bizapp.shared.ControlBoss;
+import org.hyperic.hq.bizapp.shared.MeasurementBoss;
+import org.hyperic.hq.bizapp.shared.uibeans.ResourceDisplaySummary;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.Portal;
+import org.hyperic.hq.ui.action.resource.common.monitor.visibility.ResourceVisibilityPortalAction;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.util.pager.PageControl;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * A <code>BaseDispatchAction</code> that sets up server
@@ -77,8 +77,17 @@ public class VisibilityPortalAction extends ResourceVisibilityPortalAction {
     private static final String ERR_PLATFORM_PERMISSION =
         "resource.server.monitor.visibility.error.PlatformPermission";
 
-    protected static Log log =
+    private final Log log =
         LogFactory.getLog(VisibilityPortalAction.class.getName());
+    
+    private MeasurementBoss measurementBoss;
+    
+    
+    @Autowired
+    public VisibilityPortalAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss, MeasurementBoss measurementBoss) {
+        super(appdefBoss, authzBoss, controlBoss);
+        this.measurementBoss = measurementBoss;
+    }
 
     public ActionForward currentHealth(ActionMapping mapping,
                                        ActionForm form,
@@ -143,18 +152,18 @@ public class VisibilityPortalAction extends ResourceVisibilityPortalAction {
             int sessionId = RequestUtils.getSessionId(request).intValue();
             entityId = RequestUtils.getEntityId(request);
 
-            ServletContext ctx = getServlet().getServletContext();
-            MeasurementBoss boss = ContextUtils.getMeasurementBoss(ctx);
+           
 
             // no need to page host platform health summaries, as
             // there can only be one
             PageControl pc = PageControl.PAGE_ALL;
 
-            if (log.isDebugEnabled())
+            if (log.isDebugEnabled()) {
                 log.debug("getting host platform health for resource [" +
                       entityId + "]");
-            List healths =
-                boss.findPlatformsCurrentHealth(sessionId, entityId, pc);
+            }
+            List<ResourceDisplaySummary> healths =
+                measurementBoss.findPlatformsCurrentHealth(sessionId, entityId, pc);
             request.setAttribute(Constants.HOST_HEALTH_SUMMARIES_ATTR,
                                  healths);
         }
@@ -167,8 +176,9 @@ public class VisibilityPortalAction extends ResourceVisibilityPortalAction {
             RequestUtils.setError(request, Constants.ERR_RESOURCE_NOT_FOUND);
         }        
         finally { 
-            if (thrown != null && log.isDebugEnabled())
+            if (thrown != null && log.isDebugEnabled()) {
                 log.debug("resource [" + entityId + "] access error", thrown);
+            }
         }
     }
 }

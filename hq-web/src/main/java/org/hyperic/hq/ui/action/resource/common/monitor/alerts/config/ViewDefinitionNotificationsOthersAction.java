@@ -38,10 +38,12 @@ import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
 import org.hyperic.util.JavaBeanPropertyComparator;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.springframework.beans.factory.annotation.Autowired;
 
 
 /**
@@ -53,12 +55,14 @@ public class ViewDefinitionNotificationsOthersAction
 {
     private static final String[] SORT_ATTRS = { "label" };
 
-    private Log log =
-        LogFactory.getLog( ViewDefinitionNotificationsOthersAction.class.getName() );
+    @Autowired
+    public ViewDefinitionNotificationsOthersAction(EventsBoss eventsBoss, AuthzBoss authzBoss) {
+        super(eventsBoss, authzBoss);
+    }
 
     public int getNotificationType() { return EmailActionConfig.TYPE_EMAILS; }
 
-    protected PageList getPageList(int sessionID, AuthzBoss ab,
+    protected PageList getPageList(int sessionID, 
                                    EmailActionConfig ea, PageControl pc)
         throws FinderException,
                SessionTimeoutException,
@@ -66,7 +70,7 @@ public class ViewDefinitionNotificationsOthersAction
                PermissionException,
                RemoteException
     {
-        PageList notifyList = new PageList();
+        PageList<LabelValueBean> notifyList = new PageList<LabelValueBean>();
         for (Iterator it=ea.getUsers().iterator(); it.hasNext();) {
             String email = (String)it.next();
             LabelValueBean lvb = new LabelValueBean(email, email);
@@ -85,4 +89,3 @@ public class ViewDefinitionNotificationsOthersAction
     }
 }
 
-// EOF

@@ -42,7 +42,7 @@ import org.hyperic.hq.ui.action.BaseDispatchAction;
  */
 public class DashboardAdminController extends BaseDispatchAction {
 
-    protected static Log log =
+    protected final Log log =
         LogFactory.getLog(DashboardAdminController.class.getName());
     
     private ActionForward setPortal(HttpServletRequest request, String title,

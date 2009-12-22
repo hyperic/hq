@@ -28,7 +28,6 @@ package org.hyperic.hq.ui.action.portlet.addcontent;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -42,10 +41,10 @@ import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An <code>Action</code> that loads the <code>Portal</code>
@@ -55,7 +54,18 @@ import org.hyperic.util.config.ConfigResponse;
  */
 public class ViewAction extends TilesAction {
     
-   public ActionForward execute(ComponentContext context,
+    private AuthzBoss authzBoss;
+    
+    
+    @Autowired
+   public ViewAction(AuthzBoss authzBoss) {
+        super();
+        this.authzBoss = authzBoss;
+    }
+
+
+
+    public ActionForward execute(ComponentContext context,
                                  ActionMapping mapping, ActionForm form,
                                  HttpServletRequest request,
                                  HttpServletResponse response)
@@ -63,15 +73,15 @@ public class ViewAction extends TilesAction {
 
         List<String> portlets = (List<String>) context.getAttribute("portlets");
         WebUser user = RequestUtils.getWebUser(request);
-		ServletContext ctx = getServlet().getServletContext();
+		
         List<String> availablePortlets = new ArrayList<String>();
         String userPortlets = new String();
         Boolean wide = new Boolean((String) context.getAttribute("wide"));
         HttpSession session = request.getSession();
-        AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
+       
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
         		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, boss);
+        		user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         List<String> multi;
 

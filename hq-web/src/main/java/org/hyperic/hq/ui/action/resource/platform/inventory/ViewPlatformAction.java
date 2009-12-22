@@ -28,31 +28,8 @@ package org.hyperic.hq.ui.action.resource.platform.inventory;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.appdef.shared.ConfigFetchException;
-import org.hyperic.hq.appdef.shared.PlatformValue;
-import org.hyperic.hq.appdef.Agent;
-import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.bizapp.shared.ProductBoss;
-import org.hyperic.hq.product.PluginNotFoundException;
-import org.hyperic.hq.product.ProductPlugin;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.action.resource.RemoveResourceForm;
-import org.hyperic.hq.ui.action.resource.common.inventory.RemoveResourceGroupsForm;
-import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.ActionUtils;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.config.ConfigSchema;
-import org.hyperic.util.pager.PageControl;
-import org.hyperic.util.pager.PageList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -61,6 +38,33 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
+import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefGroupValue;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.appdef.shared.ConfigFetchException;
+import org.hyperic.hq.appdef.shared.PlatformValue;
+import org.hyperic.hq.appdef.shared.ServerTypeValue;
+import org.hyperic.hq.appdef.shared.ServerValue;
+import org.hyperic.hq.appdef.shared.ServiceTypeValue;
+import org.hyperic.hq.appdef.shared.ServiceValue;
+import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.ProductBoss;
+import org.hyperic.hq.product.PluginNotFoundException;
+import org.hyperic.hq.product.ProductPlugin;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.action.resource.RemoveResourceForm;
+import org.hyperic.hq.ui.action.resource.common.inventory.RemoveResourceGroupsForm;
+import org.hyperic.hq.ui.beans.ConfigValues;
+import org.hyperic.hq.ui.exception.ParameterNotFoundException;
+import org.hyperic.hq.ui.util.ActionUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.config.ConfigSchema;
+import org.hyperic.util.pager.PageControl;
+import org.hyperic.util.pager.PageList;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An Action that retrieves data from the previously fetched platform
@@ -68,7 +72,19 @@ import org.apache.struts.tiles.actions.TilesAction;
  */
 public class ViewPlatformAction extends TilesAction {
 
-    // ---------------------------------------------------- Public Methods
+    private final  Log log = LogFactory.getLog(ViewPlatformAction.class.getName());
+    private  AppdefBoss appdefBoss;
+    private ProductBoss productBoss;
+    
+    
+    @Autowired
+    public ViewPlatformAction(AppdefBoss appdefBoss, ProductBoss productBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+        this.productBoss = productBoss;
+    }
+
+
 
     /**
      * Retrieve this data and store it in request attributes:
@@ -89,7 +105,7 @@ public class ViewPlatformAction extends TilesAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-        Log log = LogFactory.getLog(ViewPlatformAction.class.getName());
+       
 
         PlatformValue platform =
             (PlatformValue) RequestUtils.getResource(request);
@@ -105,10 +121,10 @@ public class ViewPlatformAction extends TilesAction {
         log.debug("Agent is = " + agent);
 
         try {
-            ServletContext ctx = getServlet().getServletContext();
+           
             Integer sessionId = RequestUtils.getSessionId(request);
             int sessionInt = sessionId.intValue();
-            AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+           
 
             int resType = 0;
             try {
@@ -131,25 +147,27 @@ public class ViewPlatformAction extends TilesAction {
             log.trace("getting servers for platform [" + platformId + "]");
             PageControl pcs = RequestUtils.getPageControl(request, "pss", "pns",
                                                           "sos", "scs");
-            PageList servers ;
-            if(resType == 0) 
-                servers = boss.findViewableServersByPlatform(sessionInt,
+            PageList<ServerValue> servers;
+            if(resType == 0)  {
+                servers = appdefBoss.findViewableServersByPlatform(sessionInt,
                                                              platformId, pcs);
-            else
-                servers = boss.findServersByTypeAndPlatform(sessionInt,
+            }
+            else {
+                servers = appdefBoss.findServersByTypeAndPlatform(sessionInt,
                                                             platformId,
                                                             resType, pcs);
+            }
                                                           
             log.trace("getting all server types");
-            List serverTypes =
-                boss.findServerTypesByPlatform(sessionInt, platformId,
+            List<ServerTypeValue> serverTypes =
+                appdefBoss.findServerTypesByPlatform(sessionInt, platformId,
                                                PageControl.PAGE_ALL);
 
             request.setAttribute(Constants.CHILD_RESOURCES_ATTR, servers);
 
             log.trace("getting all platform services");
-            PageList serviceTypes =
-                boss.findViewablePlatformServiceTypes(sessionInt, platformId);
+            PageList<ServiceTypeValue> serviceTypes =
+                appdefBoss.findViewablePlatformServiceTypes(sessionInt, platformId);
 
             RemoveResourceForm rmServicesForm = new RemoveResourceForm();
             rmServicesForm.setResourceTypes(serviceTypes);
@@ -161,12 +179,12 @@ public class ViewPlatformAction extends TilesAction {
             PageControl pcsvc = RequestUtils.getPageControl(request, "ps", "pn",
                 "so", "sc");
 
-            PageList svcArr;
+            PageList<ServiceValue> svcArr;
             if (ctype.intValue() != -1) {
-                svcArr = boss.findPlatformServices(sessionInt, platformId,
+                svcArr = appdefBoss.findPlatformServices(sessionInt, platformId,
                                                    ctype, pcsvc);
             } else {
-                svcArr = boss.findPlatformServices(sessionInt, platformId,
+                svcArr = appdefBoss.findPlatformServices(sessionInt, platformId,
                                                    pcsvc);
             }
             
@@ -176,8 +194,8 @@ public class ViewPlatformAction extends TilesAction {
             log.trace("getting groups for platform [" + platformId + "]");
             PageControl pcg =
                 RequestUtils.getPageControl(request, "psg", "png", "sog","scg");
-            PageList groups = 
-                boss.findAllGroupsMemberInclusive(sessionInt, pcg,
+            PageList<AppdefGroupValue> groups = 
+                appdefBoss.findAllGroupsMemberInclusive(sessionInt, pcg,
                                                   platform.getEntityId());
             
             // XXX: stub
@@ -186,7 +204,7 @@ public class ViewPlatformAction extends TilesAction {
 
             log.trace("getting server type map for platform [" + platformId +
                       "]");
-            Map typeMap = AppdefResourceValue.getServerTypeCountMap(servers);
+            Map<String,Integer> typeMap = AppdefResourceValue.getServerTypeCountMap(servers);
             request.setAttribute(Constants.RESOURCE_TYPE_MAP_ATTR, typeMap);
 
             // create and initialize the remove servers form
@@ -216,30 +234,30 @@ public class ViewPlatformAction extends TilesAction {
             request.setAttribute(Constants.RESOURCE_REMOVE_GROUPS_MEMBERS_FORM_ATTR,
                                  rmGroupsForm);
 
-            ProductBoss pboss = ContextUtils.getProductBoss(ctx);
+           
             
             log.debug("AppdefEntityID = " + entityId.toString()); 
             ConfigResponse oldResponse =
-                pboss.getMergedConfigResponse(sessionInt,
+                productBoss.getMergedConfigResponse(sessionInt,
                                               ProductPlugin.TYPE_PRODUCT,
                                               entityId, false);
             log.debug(oldResponse);
 
             ConfigSchema config =
-                pboss.getConfigSchema(sessionInt, entityId,
+                productBoss.getConfigSchema(sessionInt, entityId,
                                       ProductPlugin.TYPE_PRODUCT, oldResponse);
             log.debug("configSchema = " + config.getOptions().toString());
 
-            List uiResourceOptions =
+            List<ConfigValues> uiResourceOptions =
                 ActionUtils.getConfigValues(config, oldResponse);
 
             config = new ConfigSchema();
             oldResponse = new ConfigResponse();
 
             try {
-                oldResponse = pboss.getMergedConfigResponse(sessionInt,
+                oldResponse = productBoss.getMergedConfigResponse(sessionInt,
                         ProductPlugin.TYPE_MEASUREMENT, entityId, false);
-                config = pboss.getConfigSchema(sessionInt, entityId,
+                config = productBoss.getConfigSchema(sessionInt, entityId,
                         ProductPlugin.TYPE_MEASUREMENT, oldResponse);
             }catch(ConfigFetchException e) {
                 //do nothing as this could happen when the prodyct config is
@@ -248,7 +266,7 @@ public class ViewPlatformAction extends TilesAction {
                 //do nothing as this could happen when the prodyct config is not set
             }
 
-            List uiMonitorOptions =
+            List<ConfigValues> uiMonitorOptions =
                 ActionUtils.getConfigValues(config, oldResponse);
 
            request.setAttribute(Constants.PRODUCT_CONFIG_OPTIONS,

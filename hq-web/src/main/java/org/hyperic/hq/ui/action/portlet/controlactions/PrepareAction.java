@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.ui.action.portlet.controlactions;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -38,12 +37,21 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.ConfigResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class PrepareAction extends BaseAction {
+
+    private AuthzBoss authzBoss;
+    
+    @Autowired
+    public PrepareAction(AuthzBoss authzBoss) {
+        super();
+        this.authzBoss = authzBoss;
+    }
+
 
     /**
      * @param mapping The ActionMapping used to select this instance
@@ -64,11 +72,10 @@ public class PrepareAction extends BaseAction {
 
         HttpSession session = request.getSession();
         WebUser user = SessionUtils.getWebUser(session);
-        ServletContext ctx = getServlet().getServletContext();
-        AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
+      
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
         		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, aBoss);
+        		user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         
         Integer lastCompleted = new Integer(

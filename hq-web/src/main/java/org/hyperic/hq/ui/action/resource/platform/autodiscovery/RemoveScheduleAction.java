@@ -32,28 +32,37 @@ package org.hyperic.hq.ui.action.resource.platform.autodiscovery;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.hyperic.hq.bizapp.shared.AIBoss;
-import org.hyperic.hq.bizapp.shared.AuthzBoss;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.action.resource.RemoveResourceForm;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.bizapp.shared.AIBoss;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.action.BaseAction;
+import org.hyperic.hq.ui.action.resource.RemoveResourceForm;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *
  */
 public class RemoveScheduleAction extends BaseAction {
+    
+    private AIBoss aiBoss;
+    private final  Log log = LogFactory.getLog(RemoveScheduleAction.class.getName());
+    
+    
+    @Autowired
+    public RemoveScheduleAction(AIBoss aiBoss) {
+        super();
+        this.aiBoss = aiBoss;
+    }
+
+
 
     /** Removes a server identified by the
      * value of the request parameter <code>Constants.SERVER_PARAM</code>
@@ -66,14 +75,13 @@ public class RemoveScheduleAction extends BaseAction {
                                  HttpServletResponse response)
         throws Exception {
             
-        Log log = LogFactory.getLog(RemoveScheduleAction.class.getName());
-                
+ 
         RemoveResourceForm nwForm = (RemoveResourceForm) form;
         
         Integer[] resources = nwForm.getResources();
         Integer rid = nwForm.getRid();
         Integer type = nwForm.getType();
-        Map params = new HashMap();
+        Map<String, Object> params = new HashMap<String, Object>();
         params.put(Constants.RESOURCE_PARAM, rid);
         params.put(Constants.RESOURCE_TYPE_ID_PARAM, type);
         
@@ -82,15 +90,12 @@ public class RemoveScheduleAction extends BaseAction {
         }
         
         Integer sessionId =  RequestUtils.getSessionId(request);
-        
-        //get the spiderSubjectValue of the user to be deleated.
-        ServletContext ctx = getServlet().getServletContext();            
-        AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);            
+                
         
         log.trace("removing resource");                                                      
-        AIBoss boss = ContextUtils.getAIBoss(ctx);
+      
         
-        boss.deleteAIJob(sessionId.intValue(), resources);
+        aiBoss.deleteAIJob(sessionId.intValue(), resources);
 
         return returnSuccess(request, mapping, params);
             

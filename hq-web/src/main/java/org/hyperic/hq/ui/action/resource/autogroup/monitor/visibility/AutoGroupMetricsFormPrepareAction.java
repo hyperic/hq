@@ -28,6 +28,7 @@ package org.hyperic.hq.ui.action.resource.autogroup.monitor.visibility;
 import java.rmi.RemoteException;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -44,12 +45,12 @@ import org.hyperic.hq.appdef.shared.AppdefCompatException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
-import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
+import org.hyperic.hq.bizapp.shared.uibeans.MetricDisplaySummary;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.resource.common.monitor.visibility.InventoryHelper;
@@ -57,9 +58,9 @@ import org.hyperic.hq.ui.action.resource.common.monitor.visibility.MetricsDispla
 import org.hyperic.hq.ui.action.resource.common.monitor.visibility.MetricsDisplayFormPrepareAction;
 import org.hyperic.hq.ui.action.resource.platform.monitor.visibility.RootInventoryHelper;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.MonitorUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * A <code>MetricsDisplayFormPrepareAction</code> that retrieves data
@@ -69,10 +70,17 @@ import org.hyperic.hq.ui.util.RequestUtils;
 public class AutoGroupMetricsFormPrepareAction
     extends MetricsDisplayFormPrepareAction {
 
-    protected static Log log = LogFactory
+    private final Log log = LogFactory
             .getLog(AutoGroupMetricsFormPrepareAction.class.getName());
 
-    // ---------------------------------------------------- Public Methods
+    private MeasurementBoss measurementBoss;
+    
+    
+    @Autowired
+    public AutoGroupMetricsFormPrepareAction(MeasurementBoss measurementBoss) {
+        super();
+        this.measurementBoss = measurementBoss;
+    }
 
     /**
      * Retrieve data needed to display an autogroup's metrics page
@@ -130,7 +138,7 @@ public class AutoGroupMetricsFormPrepareAction
 
         // get the "metric range" user pref
         WebUser user = RequestUtils.getWebUser(request);
-        Map range = user.getMetricRangePreference();
+        Map<String,Object> range = user.getMetricRangePreference();
         begin = (Long) range.get(MonitorUtils.BEGIN);
         end = (Long) range.get(MonitorUtils.END);
 
@@ -167,7 +175,7 @@ public class AutoGroupMetricsFormPrepareAction
      * @return Map keyed on the category (String), values are List's of 
      * MetricDisplaySummary beans
      */
-    protected Map getMetrics(HttpServletRequest request,
+    protected Map<String,Set<MetricDisplaySummary>> getMetrics(HttpServletRequest request,
                              AppdefEntityID entityId,
                              long filters, String keyword,
                              Long begin, Long end, boolean showAll)
@@ -195,7 +203,7 @@ public class AutoGroupMetricsFormPrepareAction
      * @throws InvalidAppdefTypeException
      * @throws AppdefCompatException
      */
-    protected Map getMetrics(HttpServletRequest request,
+    protected Map<String,Set<MetricDisplaySummary>> getMetrics(HttpServletRequest request,
                              AppdefEntityID[] entityIds,
                              long filters, String keyword,
                              Long begin, Long end, boolean showAll)
@@ -205,8 +213,8 @@ public class AutoGroupMetricsFormPrepareAction
                InvalidAppdefTypeException, RemoteException
     {
         int sessionId = RequestUtils.getSessionId(request).intValue();
-        ServletContext ctx = getServlet().getServletContext();
-        MeasurementBoss boss = ContextUtils.getMeasurementBoss(ctx);
+       
+       
         AppdefResourceType childType = (AppdefResourceType)
             request.getAttribute(Constants.CHILD_RESOURCE_TYPE_ATTR);
         Integer selectedId = childType.getId();
@@ -219,7 +227,7 @@ public class AutoGroupMetricsFormPrepareAction
             log.trace("finding metric summaries for autogrouped platforms " +
                       "of type " + selectedId + " for range " + begin +
                       ":" + end);
-            return boss.findAGPlatformMetricsByType(sessionId, atid,
+            return measurementBoss.findAGPlatformMetricsByType(sessionId, atid,
                                                     begin.longValue(),
                                                     end.longValue(),
                                                     showAll);
@@ -229,7 +237,7 @@ public class AutoGroupMetricsFormPrepareAction
                         "or services of type " + atid +
                         " for resources " + Arrays.asList(entityIds) +
                         " for range " + begin + ":" + end);
-            return boss.findAGMetricsByType(sessionId, entityIds, atid,
+            return measurementBoss.findAGMetricsByType(sessionId, entityIds, atid,
                                             filters, keyword,
                                             begin.longValue(), end.longValue(),
                                             showAll);
@@ -237,4 +245,3 @@ public class AutoGroupMetricsFormPrepareAction
     }
 }
 
-// EOF

@@ -52,10 +52,10 @@ import org.apache.struts.tiles.actions.TilesAction;
  */
 public class MetricsControlFormPrepareAction extends TilesAction {
 
-    protected static Log log =
+    protected final Log log =
     LogFactory.getLog(MetricsControlFormPrepareAction.class.getName());
 
-    // ---------------------------------------------------- Public Methods
+   
 
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
@@ -88,7 +88,7 @@ public class MetricsControlFormPrepareAction extends TilesAction {
         WebUser user = SessionUtils.getWebUser(request.getSession());
 
         // set metric range defaults
-        Map pref = user.getMetricRangePreference(true);
+        Map<String,Object> pref = user.getMetricRangePreference(true);
         form.setReadOnly((Boolean) pref.get(MonitorUtils.RO));
         form.setRn((Integer) pref.get(MonitorUtils.LASTN));
         form.setRu((Integer) pref.get(MonitorUtils.UNIT));

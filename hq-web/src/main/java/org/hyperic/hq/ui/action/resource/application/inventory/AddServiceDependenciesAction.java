@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -52,9 +51,9 @@ import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.action.BaseValidatorForm;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 
 /**
@@ -66,8 +65,18 @@ import org.hyperic.hq.ui.util.SessionUtils;
  */
 public class AddServiceDependenciesAction extends BaseAction {
 
-    private static Log log =
+    private final Log log =
         LogFactory.getLog(AddServiceDependenciesAction.class.getName());
+    private AppdefBoss appdefBoss;
+    
+    
+    @Autowired
+    public AddServiceDependenciesAction(AppdefBoss appdefBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+    }
+
+
 
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
@@ -81,7 +90,7 @@ public class AddServiceDependenciesAction extends BaseAction {
         Integer entityType = addForm.getType();
         Integer appSvcId = addForm.getAppSvcId();
 
-        HashMap forwardParams = new HashMap(2);
+        HashMap<String, Object> forwardParams = new HashMap<String, Object>(2);
         forwardParams.put(Constants.RESOURCE_PARAM, resourceId);
         forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, entityType);
         forwardParams.put("appSvcId",appSvcId);
@@ -113,15 +122,13 @@ public class AddServiceDependenciesAction extends BaseAction {
             return forward;
         }
 
-        ServletContext ctx = getServlet().getServletContext();
-        AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
         Integer sessionId = RequestUtils.getSessionId(request);
 
         log.trace("getting pending service list");
-        List uiPendings =
+        List<String> uiPendings =
             SessionUtils.getListAsListStr(session,
                                           Constants.PENDING_SVCDEPS_SES_ATTR);
-        List pendingServiceIdList = new ArrayList();
+        List<AppdefEntityID> pendingServiceIdList = new ArrayList<AppdefEntityID>();
 
         for(int i = 0;i< uiPendings.size(); i++) {
             StringTokenizer tok =
@@ -138,11 +145,12 @@ public class AddServiceDependenciesAction extends BaseAction {
         }
 
         DependencyTree tree =
-            boss.getAppDependencyTree(sessionId.intValue(), resourceId);
+            appdefBoss.getAppDependencyTree(sessionId.intValue(), resourceId);
 
-        Map depNodeChildren = new HashMap();
+        Map<Integer, AppServiceValue> depNodeChildren = new HashMap<Integer, AppServiceValue>();
         DependencyNode depNode =
             DependencyTree.findAppServiceById(tree, appSvcId);
+        //TODO this looks suspicious.  Seems like depNode.getChildren returns list of AppService, not AppServiceValue
         for (Iterator iter = depNode.getChildren().iterator(); iter.hasNext();){
             AppServiceValue anAppSvc = (AppServiceValue) iter.next();
             if(anAppSvc.getIsCluster())
@@ -158,8 +166,8 @@ public class AddServiceDependenciesAction extends BaseAction {
 
         // look through the tree's DependencyNodes to find the ones
         // we have pending (identified by their service ids)
-        for (Iterator iter = tree.getNodes().iterator(); iter.hasNext();) {
-            DependencyNode node = (DependencyNode) iter.next();
+        for ( DependencyNode node : tree.getNodes()) {
+          
             AppdefEntityID lookFor;
             
             if (node.isCluster())
@@ -174,10 +182,10 @@ public class AddServiceDependenciesAction extends BaseAction {
             }                                
         }
         log.trace("Saving tree: " + tree);
-        boss.setAppDependencyTree(sessionId.intValue(), tree);
+        appdefBoss.setAppDependencyTree(sessionId.intValue(), tree);
         // XXX remember to kill this, this is just to demonstrate for Javier
         DependencyTree savedTree =
-            boss.getAppDependencyTree(sessionId.intValue(),
+            appdefBoss.getAppDependencyTree(sessionId.intValue(),
                                       tree.getApplication().getId());
         log.trace("Saved tree: " + savedTree);
 

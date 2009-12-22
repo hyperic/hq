@@ -155,9 +155,9 @@ public class ActionUtils {
         return findReturnPath(mapping, params);
     }
 
-    public static List getConfigValues(ConfigSchema schema,
+    public static List<ConfigValues> getConfigValues(ConfigSchema schema,
                                        ConfigResponse config) {
-        List values = new ArrayList();
+        List<ConfigValues> values = new ArrayList<ConfigValues>();
 
         if (schema == null) {
             return values;

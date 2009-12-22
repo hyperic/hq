@@ -33,12 +33,12 @@ import java.util.StringTokenizer;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An action that adds other email addresses ( those that are not in
@@ -47,12 +47,16 @@ import org.hyperic.hq.ui.util.RequestUtils;
  */
 public class AddOthersAction extends AddNotificationsAction {
 
-    private Log log = LogFactory.getLog( AddOthersAction.class.getName() );
+  
+    @Autowired
+    public AddOthersAction(EventsBoss eventsBoss) {
+        super(eventsBoss);
+    }
 
     protected ActionForward preProcess(HttpServletRequest request,
                                        ActionMapping mapping,
                                        AddNotificationsForm form,
-                                       Map params,
+                                       Map<String, Object> params,
                                        HttpSession session)
     throws Exception {
         return checkSubmit(request, mapping, form, params);
@@ -62,11 +66,11 @@ public class AddOthersAction extends AddNotificationsAction {
         RequestUtils.setConfirmation(request, "alerts.config.confirm.AddOthers");
     }
 
-    protected Set getNotifications(AddNotificationsForm form, HttpSession session) {
+    protected Set<Object> getNotifications(AddNotificationsForm form, HttpSession session) {
         AddOthersForm addForm = (AddOthersForm)form;
         String emailAddresses = addForm.getEmailAddresses();
         StringTokenizer token = new StringTokenizer(emailAddresses, ",;");
-        Set emails = new HashSet();
+        Set<Object> emails = new HashSet<Object>();
         while ( token.hasMoreTokens() ) {
             emails.add( token.nextToken().trim() );
         }
@@ -77,4 +81,3 @@ public class AddOthersAction extends AddNotificationsAction {
     public int getNotificationType() { return EmailActionConfig.TYPE_EMAILS; }
 }
 
-// EOF

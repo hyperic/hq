@@ -27,7 +27,6 @@ package org.hyperic.hq.ui.action.resource.group.inventory;
 
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -44,12 +43,23 @@ import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.WorkflowPrepareAction;
 import org.hyperic.hq.ui.util.BizappUtils;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class NewGroupFormPrepareAction 
     extends WorkflowPrepareAction {
+    
+    private AppdefBoss appdefBoss;
+    
+    
+    @Autowired
+    public NewGroupFormPrepareAction(AppdefBoss appdefBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+    }
+
+
 
     public ActionForward workflow(ComponentContext context,
                                  ActionMapping mapping,
@@ -63,8 +73,8 @@ public class NewGroupFormPrepareAction
             
         List groupTypes = BizappUtils.buildGroupTypes(request);
         Integer sessionId = RequestUtils.getSessionId(request);
-        ServletContext ctx = getServlet().getServletContext();
-        AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+      
+        
         HttpSession session = request.getSession();
         
         List platformTypes, serverTypes, serviceTypes, applicationTypes;
@@ -89,7 +99,7 @@ public class NewGroupFormPrepareAction
                 case AppdefEntityConstants.APPDEF_TYPE_SERVER:
                 case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
                     // See if they have a common resource type
-                    art = boss.findCommonResourceType(sessionId.intValue(),
+                    art = appdefBoss.findCommonResourceType(sessionId.intValue(),
                                                       eids);
                     break;
                 default:
@@ -137,16 +147,16 @@ public class NewGroupFormPrepareAction
             }
         }
         
-        platformTypes = boss.findViewablePlatformTypes(sessionId.intValue(),
+        platformTypes = appdefBoss.findViewablePlatformTypes(sessionId.intValue(),
                                                        PageControl.PAGE_ALL);
 
-        serverTypes = boss.findViewableServerTypes(sessionId.intValue(),
+        serverTypes = appdefBoss.findViewableServerTypes(sessionId.intValue(),
                                                    PageControl.PAGE_ALL);
 
-        serviceTypes = boss.findViewableServiceTypes(sessionId.intValue(),
+        serviceTypes = appdefBoss.findViewableServiceTypes(sessionId.intValue(),
                                                      PageControl.PAGE_ALL);
 
-        applicationTypes = boss.findAllApplicationTypes(sessionId.intValue());
+        applicationTypes = appdefBoss.findAllApplicationTypes(sessionId.intValue());
         
         newForm.setPlatformTypes(platformTypes);
         newForm.setServerTypes(serverTypes);

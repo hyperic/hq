@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.ui.action.resource.autogroup.monitor.visibility;
 
+import java.util.Arrays;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -39,15 +40,19 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.bizapp.shared.MeasurementBoss;
+import org.hyperic.hq.bizapp.shared.uibeans.ResourceDisplaySummary;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.resource.common.monitor.visibility.InventoryHelper;
 import org.hyperic.hq.ui.action.resource.platform.monitor.visibility.RootInventoryHelper;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.timer.StopWatch;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *
@@ -55,8 +60,17 @@ import org.hyperic.util.timer.StopWatch;
  */
 public class ListChildrenAction extends TilesAction {
     
-    private static Log log =
+    private final Log log =
         LogFactory.getLog(ListChildrenAction.class.getName());
+    
+    private MeasurementBoss measurementBoss;
+    
+    
+    @Autowired
+    public ListChildrenAction(MeasurementBoss measurementBoss) {
+        super();
+        this.measurementBoss = measurementBoss;
+    }
 
     public ActionForward execute(ComponentContext context,
                                  ActionMapping mapping,
@@ -121,7 +135,7 @@ public class ListChildrenAction extends TilesAction {
             
         // get the resource healths
         StopWatch watch = new StopWatch();
-        List healths = AutoGroupHelper.getAutoGroupResourceHealths(ctx,
+        List<ResourceDisplaySummary> healths = getAutoGroupResourceHealths(ctx,
                                                                    sessionId,
                                                                    entityIds,
                                                                    childTypeId);
@@ -132,5 +146,43 @@ public class ListChildrenAction extends TilesAction {
         context.putAttribute(Constants.CTX_SUMMARIES, healths);
 
         return null;
+    }
+    
+    private List<ResourceDisplaySummary> getAutoGroupResourceHealths(ServletContext ctx,
+                                                   Integer sessionId,
+                                                   AppdefEntityID[] entityIds,
+                                                   AppdefEntityTypeID childTypeId)
+        throws Exception {
+      
+
+        if (null == entityIds) {
+            // auto-group of platforms
+            log.trace("finding current health for autogrouped platforms " +
+                      "of type " + childTypeId);
+            return measurementBoss.findAGPlatformsCurrentHealthByType(sessionId.intValue(),
+                                                           childTypeId.getId());
+        } else {
+            // auto-group of servers or services
+            switch (childTypeId.getType()) {
+            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                return measurementBoss.findAGServersCurrentHealthByType(sessionId.intValue(),
+                                                             entityIds, 
+                                                             childTypeId.getId());
+            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                    log.trace("finding current health for autogrouped services " +
+                              "of type " + childTypeId + " for resources " +
+                              Arrays.asList(entityIds));
+                    return measurementBoss.findAGServicesCurrentHealthByType(sessionId.intValue(),
+                                                                  entityIds,
+                                                                  childTypeId.getId());
+            default:
+                log.trace("finding current health for autogrouped services " +
+                          "of type " + childTypeId + " for resources " +
+                          Arrays.asList(entityIds));
+                return measurementBoss.findAGServicesCurrentHealthByType(sessionId.intValue(),
+                                                              entityIds,
+                                                              childTypeId.getId());
+            }
+        }
     }
 }

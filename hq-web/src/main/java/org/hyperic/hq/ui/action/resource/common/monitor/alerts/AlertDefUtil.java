@@ -151,7 +151,7 @@ public class AlertDefUtil {
      * @param acvList the list of alert conditions to convert
      * @return List of AlertConditionBean objects
      */
-    public static List getAlertConditionBeanList(int sessionID,
+    public static List<AlertConditionBean> getAlertConditionBeanList(int sessionID,
                                                  HttpServletRequest request,
                                                  MeasurementBoss mb,
                                                  AlertConditionValue[] acvList,

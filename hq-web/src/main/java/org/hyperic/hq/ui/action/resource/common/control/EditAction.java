@@ -28,7 +28,6 @@ package org.hyperic.hq.ui.action.resource.common.control;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -44,25 +43,38 @@ import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.scheduler.ScheduleValue;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.action.ScheduleForm;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * modifies the controlAction data.
  */
 public class EditAction extends BaseAction {
     
+    private final Log log = LogFactory.getLog(EditAction.class.getName()); 
+    private ControlBoss controlBoss;
+    
+    
+    @Autowired
+    public EditAction(ControlBoss controlBoss) {
+        super();
+        this.controlBoss = controlBoss;
+    }
+
+
+
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception 
     {
-        Log log = LogFactory.getLog(EditAction.class.getName());            
+                   
         log.trace("modifying Control action");                    
 
-        HashMap parms = new HashMap(2);
+        HashMap<String, Object> parms = new HashMap<String, Object>(2);
         try {
             int sessionId = RequestUtils.getSessionId(request).intValue();
             ControlForm cForm = (ControlForm) form;
@@ -82,12 +94,9 @@ public class EditAction extends BaseAction {
             // resolved. Currently
             // will delete that control action, and replace it with a new.
 
-            ServletContext ctx = getServlet().getServletContext();
-            ControlBoss cBoss = ContextUtils.getControlBoss(ctx);
-            
             // make sure that the ControlAction is valid.
             String action = cForm.getControlAction();
-            List validActions = cBoss.getActions(sessionId, appdefId);
+            List<String> validActions = controlBoss.getActions(sessionId, appdefId);
             if (!validActions.contains(action)) {
                 RequestUtils.setError(request,
                     "resource.common.control.error.ControlActionNotValid",
@@ -99,16 +108,16 @@ public class EditAction extends BaseAction {
                  RequestUtils.getIntParameter(request, 
                                              Constants.CONTROL_BATCH_ID_PARAM),
             };            
-            cBoss.deleteControlJob(sessionId, triggers);
+            controlBoss.deleteControlJob(sessionId, triggers);
             
             // create the new action to schedule
             ScheduleValue sv = cForm.createSchedule();
             sv.setDescription(cForm.getDescription());
 
-            if (cForm.getStartTime().equals(cForm.START_NOW)) {
-                cBoss.doAction(sessionId, appdefId, action, (String)null);
+            if (cForm.getStartTime().equals(ScheduleForm.START_NOW)) {
+                controlBoss.doAction(sessionId, appdefId, action, (String)null);
             } else {
-                cBoss.doAction(sessionId, appdefId, action, sv);
+                controlBoss.doAction(sessionId, appdefId, action, sv);
             }
 
             // set confirmation message

@@ -33,31 +33,38 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
-import org.hyperic.hq.appdef.shared.AppdefGroupValue;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class RemoveAction extends BaseAction {
 
-    Log log = LogFactory.getLog(RemoveAction.class.getName());
+    private ResourceManager resourceManager;
+    private AppdefBoss appdefBoss;
+    
+    
+    @Autowired
+    public RemoveAction(ResourceManager resourceManager, AppdefBoss appdefBoss) {
+        super();
+        this.resourceManager = resourceManager;
+        this.appdefBoss = appdefBoss;
+    }
+
+
 
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
@@ -66,7 +73,7 @@ public class RemoveAction extends BaseAction {
         throws Exception
     {
         RemoveGroupResourcesForm nwForm = (RemoveGroupResourcesForm) form;
-        HashMap forwardParams = new HashMap(2);
+        HashMap<String, Object> forwardParams = new HashMap<String, Object>(2);
         forwardParams.put(Constants.ENTITY_ID_PARAM, nwForm.getEid());
         forwardParams.put(Constants.ACCORDION_PARAM, "1");
         
@@ -80,21 +87,21 @@ public class RemoveAction extends BaseAction {
             Integer groupId   = RequestUtils.getResourceId(request);
             Integer sessionId = RequestUtils.getSessionId(request);
             
-            ServletContext ctx = getServlet().getServletContext();            
-            AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+                    
+           
             
-            ResourceGroup group = boss.findGroupById(sessionId.intValue(), 
+            ResourceGroup group = appdefBoss.findGroupById(sessionId.intValue(), 
                                                      groupId);
 
-            ResourceManager rMan = ResourceManagerImpl.getOne();
-            List resources = new ArrayList(rsrcIds.length);
+          
+            List<Resource> resources = new ArrayList<Resource>(rsrcIds.length);
             for (int i = 0; i < rsrcIds.length; i++) {
                 AppdefEntityID entity = new AppdefEntityID(rsrcIds[i]);
                 
-                resources.add(rMan.findResource(entity));
+                resources.add(resourceManager.findResource(entity));
             }
 
-            boss.removeResourcesFromGroup(sessionId.intValue(), group,
+            appdefBoss.removeResourcesFromGroup(sessionId.intValue(), group,
                                           resources);
             
             return returnSuccess(request, mapping,forwardParams);

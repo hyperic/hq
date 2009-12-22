@@ -28,12 +28,9 @@ package org.hyperic.hq.ui.action.resource.hub;
 import java.util.HashSet;
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
@@ -42,9 +39,10 @@ import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.measurement.MeasurementConstants;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *
@@ -52,17 +50,18 @@ import org.hyperic.hq.ui.util.RequestUtils;
  */
 public class ResourceDesignatedMetricsAction extends TilesAction {
     
-    private static Log log =
-        LogFactory.getLog(ResourceDesignatedMetricsAction.class.getName());
-
-    private static HashSet CATEGORIES;
+   
+    private final HashSet<String> categories =  new HashSet<String>();
+    private MeasurementBoss measurementBoss;
     
-    static {
-        CATEGORIES = new HashSet();
-        CATEGORIES.add(MeasurementConstants.CAT_AVAILABILITY);
-        CATEGORIES.add(MeasurementConstants.CAT_UTILIZATION);
-        CATEGORIES.add(MeasurementConstants.CAT_THROUGHPUT);
-    }; 
+    @Autowired
+    public ResourceDesignatedMetricsAction(MeasurementBoss measurementBoss) {
+        super();
+        this.measurementBoss = measurementBoss;
+        categories.add(MeasurementConstants.CAT_AVAILABILITY);
+        categories.add(MeasurementConstants.CAT_UTILIZATION);
+        categories.add(MeasurementConstants.CAT_THROUGHPUT);
+    }
     
     public ActionForward execute(ComponentContext context,
                                  ActionMapping mapping,
@@ -75,11 +74,9 @@ public class ResourceDesignatedMetricsAction extends TilesAction {
         AppdefEntityID entityId = new AppdefEntityID(appdefKey);
 
         int sessionId = RequestUtils.getSessionId(request).intValue();
-        ServletContext ctx = getServlet().getServletContext();
-        MeasurementBoss boss = ContextUtils.getMeasurementBoss(ctx);
-
-        List designates =
-            boss.getDesignatedTemplates(sessionId, entityId, CATEGORIES);
+       
+        List<MeasurementTemplate> designates =
+            measurementBoss.getDesignatedTemplates(sessionId, entityId, categories);
         context.putAttribute(Constants.CTX_SUMMARIES, designates);
 
         return null;

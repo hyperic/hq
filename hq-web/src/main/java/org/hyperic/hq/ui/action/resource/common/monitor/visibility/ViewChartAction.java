@@ -25,15 +25,12 @@
 
 package org.hyperic.hq.ui.action.resource.common.monitor.visibility;
 
-import java.text.StringCharacterIterator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,29 +38,25 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.WebUser;
-import org.hyperic.hq.ui.server.session.DashboardConfig;
-import org.hyperic.hq.ui.server.session.DashboardManagerImpl;
-import org.hyperic.hq.ui.util.ActionUtils;
-import org.hyperic.hq.ui.util.ConfigurationProxy;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SaveChartToDashboardUtil;
 import org.hyperic.hq.ui.util.SaveChartToDashboardUtil.ResultCode;
-import org.hyperic.util.config.ConfigResponse;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * View a chart for a metric.
  */
 public class ViewChartAction extends MetricDisplayRangeAction {
-    protected static Log log =
+    protected final Log log =
         LogFactory.getLog( ViewChartAction.class.getName() );
+    
+    
+    @Autowired
+    public ViewChartAction(AuthzBoss authzBoss) {
+        super(authzBoss);
+    }
 
     /**
      * Modify the metric chart as specified in the given <code>@{link
@@ -117,7 +110,7 @@ public class ViewChartAction extends MetricDisplayRangeAction {
                     range.setBegin( new Long(newBegin) );
                     range.setEnd( new Long(newEnd) );
                 }
-                chartForm.setA(chartForm.ACTION_DATE_RANGE);
+                chartForm.setA(MetricDisplayRangeForm.ACTION_DATE_RANGE);
                 chartForm.populateStartDate( new Date( range.getBegin().longValue() ), request.getLocale() );
                 chartForm.populateEndDate( new Date( range.getEnd().longValue() ), request.getLocale() );
                 range.shiftNow();
@@ -139,7 +132,7 @@ public class ViewChartAction extends MetricDisplayRangeAction {
     }
         
     protected ActionForward returnRedraw(HttpServletRequest request,
-                                         ActionMapping mapping, Map params)
+                                         ActionMapping mapping, Map<String,Object> params)
     throws Exception {
         return constructForward(request, mapping, Constants.REDRAW_URL, 
                                 params, false);

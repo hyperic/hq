@@ -32,6 +32,9 @@ package org.hyperic.hq.ui.action.resource.common.inventory;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.action.resource.ResourceController;
@@ -41,6 +44,10 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 
 public abstract class ResourceInventoryPortalAction extends ResourceController {
+    
+    public ResourceInventoryPortalAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss) {
+        super(appdefBoss, authzBoss, controlBoss);
+    }
 
     public ActionForward viewResource(ActionMapping mapping,
                                       ActionForm form,

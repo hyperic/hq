@@ -25,11 +25,8 @@
 
 package org.hyperic.hq.ui.action.resource.application.inventory;
 
-import java.io.IOException;
 import java.util.HashMap;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -38,16 +35,12 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-
-import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
-import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.action.resource.RemoveResourceForm;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 
 /**
@@ -57,8 +50,18 @@ import org.hyperic.hq.ui.util.RequestUtils;
  */
 public class RemoveServicesAction extends BaseAction {
 
-    private Log log = LogFactory.getLog(RemoveServicesAction.class.getName());
+    private final Log log = LogFactory.getLog(RemoveServicesAction.class.getName());
+    private AppdefBoss appdefBoss;
     
+    
+    @Autowired
+    public RemoveServicesAction(AppdefBoss appdefBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+    }
+
+
+
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
                                  HttpServletRequest request,
@@ -66,22 +69,21 @@ public class RemoveServicesAction extends BaseAction {
         throws Exception {                                 
  
         RemoveResourceForm cform = (RemoveResourceForm) form;
-        HashMap forwardParams = new HashMap(2);
+        HashMap<String, Object> forwardParams = new HashMap<String, Object>(2);
         forwardParams.put(Constants.ENTITY_ID_PARAM, cform.getEid());
         forwardParams.put(Constants.ACCORDION_PARAM, "3");
 
         Integer[] appSvcIds = cform.getResources();
         if (appSvcIds != null && appSvcIds.length > 0) {
 
-            ServletContext ctx = getServlet().getServletContext();
             Integer sessionId = RequestUtils.getSessionId(request);
-            AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+         
 
             for (int i = 0; i < appSvcIds.length; i++) {
                 Integer appSvcId= appSvcIds[i];
                 log.debug("Removing appSvc = " + appSvcId +
                           "  from application " + cform.getRid());
-                boss.removeAppService(sessionId.intValue(), cform.getRid(),
+                appdefBoss.removeAppService(sessionId.intValue(), cform.getRid(),
                                       appSvcId);                
             }
 

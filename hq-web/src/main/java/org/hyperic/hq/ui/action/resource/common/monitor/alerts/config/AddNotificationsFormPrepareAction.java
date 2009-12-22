@@ -28,16 +28,17 @@ package org.hyperic.hq.ui.action.resource.common.monitor.alerts.config;
 import java.rmi.RemoteException;
 
 import javax.ejb.FinderException;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
 import org.hyperic.hq.events.InvalidActionDataException;
@@ -45,14 +46,9 @@ import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.tiles.actions.TilesAction;
 
 
 /**
@@ -61,9 +57,19 @@ import org.apache.struts.tiles.actions.TilesAction;
  *
  */
 public abstract class AddNotificationsFormPrepareAction extends TilesAction {
-    private Log log = LogFactory.getLog( AddNotificationsFormPrepareAction.class.getName() );
+    private final Log log = LogFactory.getLog( AddNotificationsFormPrepareAction.class.getName() );
+    private EventsBoss eventsBoss;
+    
+    
+   
 
-    // ---------------------------------------------------- Public Methods
+    public AddNotificationsFormPrepareAction(EventsBoss eventBoss) {
+        super();
+        this.eventsBoss = eventBoss;
+    }
+
+
+
 
     /**
      * <p>Return the array of Integer ids for the given
@@ -96,8 +102,8 @@ public abstract class AddNotificationsFormPrepareAction extends TilesAction {
                SessionTimeoutException, PermissionException, RemoteException,
                FinderException, EncodingException, InvalidActionDataException {
         Integer[] ids = new Integer[0];
-        ServletContext ctx = getServlet().getServletContext();
-        EventsBoss eventBoss = ContextUtils.getEventsBoss(ctx);
+       
+       
         Integer sessionId = RequestUtils.getSessionId(request);
         
         Integer alertDefId = addForm.getAd();
@@ -109,7 +115,7 @@ public abstract class AddNotificationsFormPrepareAction extends TilesAction {
         AlertDefinitionValue alertDef = (AlertDefinitionValue)
              request.getAttribute(Constants.ALERT_DEFS_ATTR);
         if (alertDef == null) {
-            alertDef = eventBoss.getAlertDefinition(sessionId.intValue(),
+            alertDef = eventsBoss.getAlertDefinition(sessionId.intValue(),
                                                     alertDefId);
         }
         request.setAttribute(Constants.ALERT_DEFINITION_ATTR, alertDef);
@@ -155,4 +161,3 @@ public abstract class AddNotificationsFormPrepareAction extends TilesAction {
     }
 }
 
-// EOF

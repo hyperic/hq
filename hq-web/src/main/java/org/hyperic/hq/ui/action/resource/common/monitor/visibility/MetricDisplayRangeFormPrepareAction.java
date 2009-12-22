@@ -52,10 +52,10 @@ import org.hyperic.util.config.InvalidOptionException;
  */
 public class MetricDisplayRangeFormPrepareAction extends WorkflowPrepareAction {
 
-    protected static Log log =  LogFactory
+    protected final Log log =  LogFactory
         .getLog(MetricDisplayRangeFormPrepareAction.class.getName());
 
-    // ---------------------------------------------------- Public Methods
+  
 
     /**
      * Retrieve data needed to display a Metrics Display Form. Respond
@@ -72,7 +72,7 @@ public class MetricDisplayRangeFormPrepareAction extends WorkflowPrepareAction {
 
         try {
             WebUser user = RequestUtils.getWebUser(request);
-            Map pref = user.getMetricRangePreference(false);
+            Map<String,Object> pref = user.getMetricRangePreference(false);
 
             if (rangeForm.isResetClicked() || rangeForm.getRn() == null) {
                 rangeForm.setRn((Integer) pref.get(MonitorUtils.LASTN));
@@ -126,7 +126,7 @@ public class MetricDisplayRangeFormPrepareAction extends WorkflowPrepareAction {
     private MetricRange getLastNRange(Integer lastN, Integer unit) {
         MetricRange range = new MetricRange();
 
-        List timeframe = MonitorUtils.calculateTimeFrame(lastN.intValue(),
+        List<Long> timeframe = MonitorUtils.calculateTimeFrame(lastN.intValue(),
                                                          unit.intValue());
         if (timeframe != null) {
             range.setBegin((Long) timeframe.get(0));

@@ -28,31 +28,29 @@ package org.hyperic.hq.ui.action.portlet.resourcehealth;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+import org.apache.struts.util.MessageResources;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.bizapp.shared.ConfigBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.bizapp.shared.uibeans.ResourceDisplaySummary;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.portlet.BaseRSSAction;
 import org.hyperic.hq.ui.action.portlet.RSSFeed;
-import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.units.UnitNumber;
 import org.hyperic.util.units.UnitsConstants;
 import org.hyperic.util.units.UnitsFormat;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.util.MessageResources;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An <code>Action</code> that loads the <code>Portal</code>
@@ -61,8 +59,16 @@ import org.apache.struts.util.MessageResources;
  * <code>PORTAL_KEY</code> request attribute.
  */
 public class RSSAction extends BaseRSSAction {
-    private static final Log log = LogFactory.getLog(RSSAction.class.getName());
     
+    private MeasurementBoss measurementBoss;
+    
+    @Autowired
+    public RSSAction(DashboardManager dashboardManager, ConfigBoss configBoss, MeasurementBoss measurementBoss) {
+        super(dashboardManager, configBoss);
+        this.measurementBoss = measurementBoss;
+    }
+
+
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
                                  HttpServletRequest request,
@@ -75,11 +81,10 @@ public class RSSAction extends BaseRSSAction {
         feed.setTitle(res.getMessage("dash.home.ResourceHealth"));
 
         // Get the resources health
-        ServletContext ctx = getServlet().getServletContext();
-        MeasurementBoss boss = ContextUtils.getMeasurementBoss(ctx);
+      
 
         String user = getUsername(request);
-        List list = null;
+        List<ResourceDisplaySummary> list = null;
         try {
             // Set the managingEditor
             setManagingEditor(request);
@@ -91,12 +96,12 @@ public class RSSAction extends BaseRSSAction {
                 preferences.getValue(Constants.USERPREF_KEY_FAVORITE_RESOURCES);
 
             if (favIds != null) {
-                List ids = DashboardUtils.listAsEntityIds(
+                List<AppdefEntityID> ids = DashboardUtils.listAsEntityIds(
                     StringUtil.explode(favIds, Constants.DASHBOARD_DELIMITER));
                 AppdefEntityID[] arrayIds = new AppdefEntityID[ids.size()];
-                arrayIds = (AppdefEntityID[]) ids.toArray(arrayIds);
+                arrayIds =  ids.toArray(arrayIds);
                 
-                list = boss.findResourcesCurrentHealth(user, arrayIds);
+                list = measurementBoss.findResourcesCurrentHealth(user, arrayIds);
             }
         } catch (Exception e) {
             throw new ServletException("Error finding resource health", e);
@@ -104,9 +109,9 @@ public class RSSAction extends BaseRSSAction {
 
         if (list != null) {
             int i = 0;
-            for (Iterator it = list.iterator(); it.hasNext(); i++) {
+            for (Iterator<ResourceDisplaySummary> it = list.iterator(); it.hasNext(); i++) {
                 ResourceDisplaySummary summary =
-                    (ResourceDisplaySummary) it.next();
+                    it.next();
                 AppdefEntityID aeid = summary.getEntityId();
                 
                 String link = feed.getBaseUrl() + "/Resource.do?eid=" +

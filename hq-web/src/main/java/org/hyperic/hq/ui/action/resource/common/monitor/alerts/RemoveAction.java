@@ -30,7 +30,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -44,14 +43,23 @@ import org.hyperic.hq.escalation.server.session.EscalationAlertType;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An Action that removes an alert
  */
 public class RemoveAction extends BaseAction {
+    private EventsBoss eventsBoss;
+    private final Log log = LogFactory.getLog(RemoveAction.class.getName());
+    
+    
+    @Autowired
+    public RemoveAction(EventsBoss eventsBoss) {
+        super();
+        this.eventsBoss = eventsBoss;
+    }
 
     /** 
      * removes alerts 
@@ -62,12 +70,12 @@ public class RemoveAction extends BaseAction {
                                  HttpServletResponse response)
         throws Exception {
             
-        Log log = LogFactory.getLog(RemoveAction.class.getName());
+        
                 
         RemoveForm nwForm = (RemoveForm) form;
         log.debug("entering removeAlertsAction");
         Integer type = nwForm.getType();
-        Map params = new HashMap();
+        Map<String, Object> params = new HashMap<String, Object>();
         params.put(Constants.ENTITY_ID_PARAM, nwForm.getEid());
         
         ActionForward forward = checkSubmit(request, mapping, form, params);
@@ -105,12 +113,12 @@ public class RemoveAction extends BaseAction {
 
         Integer sessionId =  RequestUtils.getSessionId(request);
 
-        ServletContext ctx = getServlet().getServletContext();
-        EventsBoss boss = ContextUtils.getEventsBoss(ctx);
+       
+      
 
         if (nwForm.isDeleteClicked()) {
             log.debug("!!!!!!!!!!!!!!!! removing alerts!!!!!!!!!!!!");
-            boss.deleteAlerts(sessionId.intValue(), alertIds);
+            eventsBoss.deleteAlerts(sessionId.intValue(), alertIds);
         } else if (nwForm.getButtonAction() != null) {
             if ("ACKNOWLEDGE".equals(nwForm.getButtonAction())) {
                 log.debug("Acknowledge alerts");
@@ -118,7 +126,7 @@ public class RemoveAction extends BaseAction {
                 if (alertIds != null) {
                     for (int i=0; i<alertIds.length; i++) {
                         // XXX:  This only works for classic alert types ATM
-                        boss.acknowledgeAlert(sessionId.intValue(),
+                        eventsBoss.acknowledgeAlert(sessionId.intValue(),
                                     ClassicEscalationAlertType.CLASSIC,
                                     alertIds[i],
                                     nwForm.getPauseTime(),
@@ -135,7 +143,7 @@ public class RemoveAction extends BaseAction {
                         int code = Integer.parseInt(st.nextToken());
                         Integer alert = Integer.valueOf(st.nextToken());
                         
-                        boss.acknowledgeAlert(sessionId.intValue(),
+                        eventsBoss.acknowledgeAlert(sessionId.intValue(),
                                       EscalationAlertType.findByCode(code),
                                       alert,
                                       nwForm.getPauseTime(),
@@ -148,7 +156,7 @@ public class RemoveAction extends BaseAction {
                 if (alertIds != null) {
                     for (int i = 0; i < alertIds.length; i++) {
                         // This only works for classic alert types
-                        boss.fixAlert(sessionId.intValue(), 
+                        eventsBoss.fixAlert(sessionId.intValue(), 
                                       ClassicEscalationAlertType.CLASSIC,
                                       alertIds[i], nwForm.getFixedNote(),
                                       nwForm.isFixAll());
@@ -164,7 +172,7 @@ public class RemoveAction extends BaseAction {
                         int code = Integer.parseInt(st.nextToken());
                         Integer alert = Integer.valueOf(st.nextToken());
                         
-                        boss.fixAlert(sessionId.intValue(),
+                        eventsBoss.fixAlert(sessionId.intValue(),
                                       EscalationAlertType.findByCode(code),
                                       alert,  nwForm.getFixedNote(),
                                       nwForm.isFixAll());

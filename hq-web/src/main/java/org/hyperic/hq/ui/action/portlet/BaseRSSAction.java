@@ -25,37 +25,41 @@
 
 package org.hyperic.hq.ui.action.portlet;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import java.rmi.RemoteException;
+import java.util.Properties;
+
+import javax.security.auth.login.LoginException;
+import javax.servlet.http.HttpServletRequest;
+
 import org.hyperic.hq.bizapp.shared.ConfigBoss;
-import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.server.session.DashboardManagerImpl;
 import org.hyperic.hq.ui.shared.DashboardManager;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.config.ConfigResponse;
-
-import javax.security.auth.login.LoginException;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import java.rmi.RemoteException;
-import java.util.Properties;
 
 /**
  * Base RSSAction class to extend.  Provides utility methods.
  */
 public abstract class BaseRSSAction extends BaseAction {
-    private static final Log log =
-        LogFactory.getLog(BaseRSSAction.class.getName());
-
+   
+    
+    protected DashboardManager dashboardManager;
+    
+    protected ConfigBoss configBoss;
+    
     private Properties configProps = null;
     
+    
+    
+    public BaseRSSAction(DashboardManager dashboardManager, ConfigBoss configBoss) {
+        super();
+        this.dashboardManager = dashboardManager;
+        this.configBoss = configBoss;
+    }
+
     protected String getUsername(HttpServletRequest request) {
         return RequestUtils.getStringParameter(request, "user");
     }
@@ -63,18 +67,17 @@ public abstract class BaseRSSAction extends BaseAction {
     protected ConfigResponse getUserPreferences(HttpServletRequest request,
                                                 String user)
         throws LoginException, RemoteException, ConfigPropertyException {
-        ServletContext ctx = getServlet().getServletContext();
-        AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
+     
 
         // Let's make sure that the rss auth token matches
         String rssToken = RequestUtils.getStringParameter(request, "token");
 
         // Get user preferences
-        ConfigResponse preferences = DashboardManagerImpl.getOne()
+        ConfigResponse preferences = dashboardManager
             .getRssUserPreferences(user, rssToken);
 
         ConfigResponse defaultPreferences =
-            (ConfigResponse) ctx.getAttribute(Constants.DEF_USER_PREFS);
+            (ConfigResponse) getServlet().getServletContext().getAttribute(Constants.DEF_USER_PREFS);
 
         preferences.merge(defaultPreferences, false);
         
@@ -100,9 +103,7 @@ public abstract class BaseRSSAction extends BaseAction {
         throws RemoteException, ConfigPropertyException {
         if (configProps == null) {
             synchronized(this) {
-                ServletContext ctx = getServlet().getServletContext();
-                ConfigBoss cboss = ContextUtils.getConfigBoss(ctx);
-                configProps = cboss.getConfig();
+                configProps = configBoss.getConfig();
             }
         }
         

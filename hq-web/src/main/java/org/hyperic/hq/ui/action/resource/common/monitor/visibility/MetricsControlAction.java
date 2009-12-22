@@ -30,7 +30,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -46,8 +45,8 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.action.BaseActionMapping;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * A <code>BaseAction</code> that handles metrics control form
@@ -55,10 +54,17 @@ import org.hyperic.hq.ui.util.SessionUtils;
  */
 public class MetricsControlAction extends BaseAction {
 
-    private static Log log =
+    private final Log log =
         LogFactory.getLog(MetricsControlAction.class.getName());
 
-    // ---------------------------------------------------- Public Methods
+    protected AuthzBoss authzBoss;
+    
+    
+    @Autowired
+    public MetricsControlAction(AuthzBoss authzBoss) {
+        super();
+        this.authzBoss = authzBoss;
+    }
 
     /**
      * Modify the metrics summary display as specified in the given
@@ -84,10 +90,10 @@ public class MetricsControlAction extends BaseAction {
         }
 
         Integer sessionId = user.getSessionId();
-        ServletContext ctx = getServlet().getServletContext();
-        AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
+     
+       
 
-        Map forwardParams = controlForm.getForwardParams();
+        Map<String, Object> forwardParams = controlForm.getForwardParams();
         if (controlForm.isEditRangeClicked()) {
             return returnEditRange(request, mapping, forwardParams);
         }
@@ -101,7 +107,7 @@ public class MetricsControlAction extends BaseAction {
                 controlForm.isNextRangeClicked()) {
                 // Figure out what it's currently set to and go backwards/forwards
                 long diff = endTime - beginTime;
-                List range = new ArrayList();
+                List<Long> range = new ArrayList<Long>();
                 if (controlForm.isPrevRangeClicked()) {
                     range.add(new Long(beginTime - diff));
                     range.add(new Long(beginTime));
@@ -145,7 +151,7 @@ public class MetricsControlAction extends BaseAction {
             
             if (controlForm.isAdvancedClicked()) {
                 if (controlForm.isDateRangeSelected()) {
-                    List range = new ArrayList();
+                    List<Long> range = new ArrayList<Long>();
                     range.add(new Long(beginTime));
                     range.add(new Long(endTime));
 
@@ -183,7 +189,7 @@ public class MetricsControlAction extends BaseAction {
                     }
                 }
             }
-            boss.setUserPrefs(sessionId, user.getId(), user.getPreferences());
+            authzBoss.setUserPrefs(sessionId, user.getId(), user.getPreferences());
         }
 
 
@@ -195,7 +201,7 @@ public class MetricsControlAction extends BaseAction {
 
     private ActionForward returnEditRange(HttpServletRequest request,
                                           ActionMapping mapping,
-                                          Map params)
+                                          Map<String, Object> params)
         throws Exception {
         return constructForward(request, mapping, Constants.EDIT_RANGE_URL,
                                 params, NO_RETURN_PATH);

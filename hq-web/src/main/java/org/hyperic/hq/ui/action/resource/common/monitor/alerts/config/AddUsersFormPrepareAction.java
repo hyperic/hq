@@ -27,28 +27,26 @@ package org.hyperic.hq.ui.action.resource.common.monitor.alerts.config;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.springframework.beans.factory.annotation.Autowired;
 
 
 /**
@@ -57,9 +55,14 @@ import org.hyperic.util.pager.PageList;
  *
  */
 public class AddUsersFormPrepareAction extends AddNotificationsFormPrepareAction {
-    private Log log = LogFactory.getLog( AddUsersFormPrepareAction.class.getName() );
-
-    // ---------------------------------------------------- Public Methods
+   
+    private AuthzBoss authzBoss;
+    
+    @Autowired
+    public AddUsersFormPrepareAction(EventsBoss eventBoss, AuthzBoss authzBoss) {
+        super(eventBoss);
+        this.authzBoss = authzBoss;
+    }
 
     /**
      * Retrieve this data and store it in the specified request
@@ -89,8 +92,8 @@ public class AddUsersFormPrepareAction extends AddNotificationsFormPrepareAction
     {
         AddUsersForm addForm = (AddUsersForm) form;
  
-        ServletContext ctx = getServlet().getServletContext();
-        AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
+       
+       
         Integer sessionId = RequestUtils.getSessionId(request);
 
         AppdefEntityID aeid;
@@ -115,7 +118,7 @@ public class AddUsersFormPrepareAction extends AddNotificationsFormPrepareAction
 
         PageControl pcp =
             RequestUtils.getPageControl(request, "psp", "pnp", "sop", "scp");
-        PageList pendingUsers =
+        PageList<AuthzSubjectValue> pendingUsers =
             authzBoss.getSubjectsById(sessionId, pendingUserIds, pcp);
 
         // available users are all users in the system that are
@@ -124,12 +127,12 @@ public class AddUsersFormPrepareAction extends AddNotificationsFormPrepareAction
         PageControl pca =
             RequestUtils.getPageControl(request, "psa", "pna", "soa", "sca");
         
-        ArrayList excludes =
-            new ArrayList(pendingUserIds.length + userIds.length);
+        ArrayList<Integer> excludes =
+            new ArrayList<Integer>(pendingUserIds.length + userIds.length);
         excludes.addAll(Arrays.asList(pendingUserIds));
         excludes.addAll(Arrays.asList(userIds));
         
-        PageList availableUsers =
+        PageList<AuthzSubjectValue> availableUsers =
             authzBoss.getAllSubjects(sessionId, excludes, pca);
 
         request.setAttribute(Constants.PENDING_USERS_ATTR, pendingUsers);
@@ -140,4 +143,3 @@ public class AddUsersFormPrepareAction extends AddNotificationsFormPrepareAction
     
 }
 
-// EOF

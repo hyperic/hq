@@ -121,7 +121,7 @@ public class Alert
         return getAlertDefinition();
     }
 
-    public Collection getActionLog() {
+    public Collection<AlertActionLog> getActionLog() {
         return Collections.unmodifiableCollection(_actionLog);
     }
 

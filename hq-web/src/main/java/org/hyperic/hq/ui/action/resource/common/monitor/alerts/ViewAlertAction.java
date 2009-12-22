@@ -30,36 +30,30 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
+import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.events.EventConstants;
-import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertActionLog;
 import org.hyperic.hq.events.server.session.AlertConditionLog;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
-import org.hyperic.hq.events.shared.AlertDefinitionValue;
-import org.hyperic.hq.events.shared.AlertValue;
 import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.beans.AlertConditionBean;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.NumberUtil;
 import org.hyperic.util.pager.PageControl;
@@ -67,13 +61,27 @@ import org.hyperic.util.pager.PageList;
 import org.hyperic.util.units.FormatSpecifics;
 import org.hyperic.util.units.FormattedNumber;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * View an alert.
  *
  */
 public class ViewAlertAction extends TilesAction {
-    private Log log = LogFactory.getLog(ViewAlertAction.class.getName());
+    private EventsBoss eventsBoss;
+    private MeasurementBoss measurementBoss;
+    private AuthzBoss authzBoss;
+    
+    
+    @Autowired
+    public ViewAlertAction(EventsBoss eventsBoss, MeasurementBoss measurementBoss, AuthzBoss authzBoss) {
+        super();
+        this.eventsBoss = eventsBoss;
+        this.measurementBoss = measurementBoss;
+        this.authzBoss = authzBoss;
+    }
+
+
 
     /**
      * Retrieve this data and store it in request attributes.
@@ -87,11 +95,10 @@ public class ViewAlertAction extends TilesAction {
     {
         // pass-through the alertId
         Integer alertId = RequestUtils.getIntParameter(request, "a");
-        ServletContext ctx = getServlet().getServletContext();
+      
         int sessionID = RequestUtils.getSessionId(request).intValue();
-        EventsBoss eb = ContextUtils.getEventsBoss(ctx);
-        MeasurementBoss mb = ContextUtils.getMeasurementBoss(ctx);
-        Alert alert = eb.getAlert(sessionID, alertId);
+       
+        Alert alert = eventsBoss.getAlert(sessionID, alertId);
         
         request.setAttribute("alert", alert);
         
@@ -132,7 +139,7 @@ public class ViewAlertAction extends TilesAction {
         List<AlertConditionBean> conditionBeans = 
         	AlertDefUtil.getAlertConditionBeanList(sessionID, 
         			                               request, 
-        			                               mb,
+        			                               measurementBoss,
         			                               conditionValues,
         			                               template);
 
@@ -172,7 +179,7 @@ public class ViewAlertAction extends TilesAction {
 	                        // format threshold and value
             				Integer mid = new Integer(conditionLogValue.getCondition()
                                                                        .getMeasurementId());
-            				Measurement m = mb.getMeasurement(sessionID, mid);
+            				Measurement m = measurementBoss.getMeasurement(sessionID, mid);
             				FormatSpecifics precMax = new FormatSpecifics();
                         
             				precMax.setPrecision(FormatSpecifics.PRECISION_MAX);
@@ -220,7 +227,7 @@ public class ViewAlertAction extends TilesAction {
             }
         } else {
             // See if there might be a previous fixed log
-            String fixedNote = eb.getLastFix(sessionID, alertDefinition.getId());
+            String fixedNote = eventsBoss.getLastFix(sessionID, alertDefinition.getId());
             
             if (fixedNote != null) {
                 request.setAttribute("fixedNote", fixedNote);
@@ -231,8 +238,8 @@ public class ViewAlertAction extends TilesAction {
         AlertDefUtil.setEnablementRequestAttributes(request, alertDefinition.getAlertDefinitionValue());
 
         // Get the list of users
-        AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
-        PageList availableUsers =
+        
+        PageList<AuthzSubjectValue> availableUsers =
             authzBoss.getAllSubjects(new Integer(sessionID), null,
                                      PageControl.PAGE_ALL);
         request.setAttribute(Constants.AVAIL_USERS_ATTR, availableUsers);

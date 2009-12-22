@@ -28,7 +28,6 @@ package org.hyperic.hq.ui.action.resource.common.monitor.visibility;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -45,22 +44,30 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
-import org.hyperic.hq.bizapp.shared.uibeans.ResourceMetricDisplaySummary;
+import org.hyperic.hq.bizapp.shared.uibeans.MetricDisplaySummary;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.WorkflowPrepareAction;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.MonitorUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.units.FormattedNumber;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class CompareMetricsFormPrepareAction extends WorkflowPrepareAction {
-    protected static Log log =
-        LogFactory.getLog(CompareMetricsFormPrepareAction.class.getName());
+    
+    private final Log log =  LogFactory.getLog(CompareMetricsFormPrepareAction.class.getName());
+    private MeasurementBoss measurementBoss;
+    
+    
+    @Autowired
+    public CompareMetricsFormPrepareAction(MeasurementBoss measurementBoss) {
+        super();
+        this.measurementBoss = measurementBoss;
+    }
 
     public ActionForward workflow(ComponentContext context,
                                   ActionMapping mapping, ActionForm form,
@@ -70,15 +77,15 @@ public class CompareMetricsFormPrepareAction extends WorkflowPrepareAction {
         CompareMetricsForm cform = (CompareMetricsForm) form;
         WebUser user = RequestUtils.getWebUser(request.getSession());
         int sessionId = user.getSessionId().intValue();
-        Map range = user.getMetricRangePreference();
+        Map<String,Object> range = user.getMetricRangePreference();
 
         long begin = ((Long) range.get(MonitorUtils.BEGIN)).longValue();
         long end = ((Long) range.get(MonitorUtils.END)).longValue();
 
         // assemble the ids, making sure none are duplicated
         Integer[] raw = cform.getR();
-        ArrayList cooked = new ArrayList();
-        HashMap idx = new HashMap();
+        ArrayList<Integer> cooked = new ArrayList<Integer>();
+        HashMap<Integer,Integer> idx = new HashMap<Integer,Integer>();
         for (int i = 0; i < raw.length; i++) {
             Integer val = raw[i];
             if (idx.get(val) == null) {
@@ -95,10 +102,9 @@ public class CompareMetricsFormPrepareAction extends WorkflowPrepareAction {
         }
 
         try {
-            MeasurementBoss boss =
-                ContextUtils.getMeasurementBoss(getServlet().getServletContext());
+          
 
-            Map metrics = boss.findResourceMetricSummary(sessionId, entIds,
+            Map<MeasurementTemplate,List<MetricDisplaySummary>> metrics = measurementBoss.findResourceMetricSummary(sessionId, entIds,
                                                          begin, end);
 
             formatComparisonMetrics(metrics, request.getLocale());
@@ -121,7 +127,7 @@ public class CompareMetricsFormPrepareAction extends WorkflowPrepareAction {
         WebUser user = SessionUtils.getWebUser(request.getSession());
 
         // set metric range defaults
-        Map pref = user.getMetricRangePreference(true);
+        Map<String,Object> pref = user.getMetricRangePreference(true);
         form.setReadOnly((Boolean) pref.get(MonitorUtils.RO));
         form.setRn((Integer) pref.get(MonitorUtils.LASTN));
         form.setRu((Integer) pref.get(MonitorUtils.UNIT));
@@ -153,10 +159,10 @@ public class CompareMetricsFormPrepareAction extends WorkflowPrepareAction {
         }
     }
 
-    private static Map mapCategorizedMetrics(Map metrics) {
-        Map returnMap = new LinkedHashMap();
+    private Map<String, Map<MeasurementTemplate, List<MetricDisplaySummary>>> mapCategorizedMetrics(Map<MeasurementTemplate,List<MetricDisplaySummary>> metrics) {
+        Map<String, Map<MeasurementTemplate, List<MetricDisplaySummary>>> returnMap = new LinkedHashMap<String, Map<MeasurementTemplate, List<MetricDisplaySummary>>>();
         for (int i = 0; i < MeasurementConstants.VALID_CATEGORIES.length; i++) {
-            Map categoryMetrics =
+            Map<MeasurementTemplate, List<MetricDisplaySummary>> categoryMetrics =
                 getMetricsByCategory(metrics,
                                      MeasurementConstants.VALID_CATEGORIES[i]);
             if (categoryMetrics.size() > 0)
@@ -167,28 +173,26 @@ public class CompareMetricsFormPrepareAction extends WorkflowPrepareAction {
     }
 
     // returns a "sub map" with entries that match the category
-    private static Map getMetricsByCategory(Map metrics, String category) {
-        Map returnMap = new HashMap();
-        for (Iterator iter = metrics.entrySet().iterator(); iter.hasNext();) {
-            Map.Entry entry = (Map.Entry) iter.next();
+    private Map<MeasurementTemplate, List<MetricDisplaySummary>> getMetricsByCategory(Map<MeasurementTemplate,List<MetricDisplaySummary>> metrics, String category) {
+        Map<MeasurementTemplate, List<MetricDisplaySummary>> returnMap = new HashMap<MeasurementTemplate, List<MetricDisplaySummary>>();
+        for (Map.Entry<MeasurementTemplate,List<MetricDisplaySummary>> entry :  metrics.entrySet()) {
             MeasurementTemplate mt =
-                (MeasurementTemplate) entry.getKey();
+               entry.getKey();
             if (mt.getCategory().getName().equals(category)) {
-                List metricList = (List) entry.getValue();
+                List<MetricDisplaySummary> metricList =  entry.getValue();
                 returnMap.put(mt, metricList);
             }
         } 
         return returnMap;               
     }
 
-    private static void formatComparisonMetrics(Map metrics, Locale userLocale)
+    private void formatComparisonMetrics(Map<MeasurementTemplate,List<MetricDisplaySummary>> metrics, Locale userLocale)
     {
-        for (Iterator categoryIter = metrics.entrySet().iterator();
-             categoryIter.hasNext(); ) {
-            Map.Entry entry = (Map.Entry) categoryIter.next();
+        for (Map.Entry<MeasurementTemplate,List<MetricDisplaySummary>> entry : metrics.entrySet() ) {
+           
             MeasurementTemplate mt =
-                (MeasurementTemplate) entry.getKey();
-            List metricList = (List) entry.getValue();
+                entry.getKey();
+            List<MetricDisplaySummary> metricList =  entry.getValue();
             if (metricList == null) {
                 // apparently, there may be meaurement templates populated but
                 // none of the included resources are config'd for it, so 
@@ -198,9 +202,8 @@ public class CompareMetricsFormPrepareAction extends WorkflowPrepareAction {
                               "for it in the included map of metrics");   
                 continue;
             }
-            for (Iterator iter = metricList.iterator(); iter.hasNext();) {
-                ResourceMetricDisplaySummary mds =
-                    (ResourceMetricDisplaySummary) iter.next();
+            for ( MetricDisplaySummary mds : metricList) {
+              
                 // the formatting subsystem doesn't interpret
                 // units set to empty strings as "no units" so
                 // we'll explicity set it so

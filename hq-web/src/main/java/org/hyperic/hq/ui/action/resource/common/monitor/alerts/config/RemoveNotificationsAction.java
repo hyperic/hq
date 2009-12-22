@@ -28,10 +28,14 @@ package org.hyperic.hq.ui.action.resource.common.monitor.alerts.config;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
@@ -40,15 +44,8 @@ import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
 
 /**
  * An Action that removes notifications for an alert definition.
@@ -58,7 +55,15 @@ public abstract class RemoveNotificationsAction
     extends BaseAction
     implements NotificationsAction
 {
-    private Log log = LogFactory.getLog(RemoveNotificationsAction.class.getName());
+    private final Log log = LogFactory.getLog(RemoveNotificationsAction.class.getName());
+    protected EventsBoss eventsBoss;
+    
+    
+
+    public RemoveNotificationsAction(EventsBoss eventsBoss) {
+        super();
+        this.eventsBoss = eventsBoss;
+    }
 
     /** 
      * removes alert definitions 
@@ -69,7 +74,7 @@ public abstract class RemoveNotificationsAction
                                  HttpServletResponse response)
     throws Exception {
         RemoveNotificationsForm rnForm = (RemoveNotificationsForm)form;
-        Map params = new HashMap();
+        Map<String, Object> params = new HashMap<String, Object>();
         
         if (rnForm.getAetid() != null)
             params.put(Constants.APPDEF_RES_TYPE_ID, rnForm.getAetid());
@@ -81,10 +86,10 @@ public abstract class RemoveNotificationsAction
         params.put( "ad", rnForm.getAd() );
         
         Integer sessionID =  RequestUtils.getSessionId(request);
-        ServletContext ctx = getServlet().getServletContext();
-        EventsBoss eb = ContextUtils.getEventsBoss(ctx);
+       
+        
 
-        AlertDefinitionValue adv = eb.getAlertDefinition( sessionID.intValue(),
+        AlertDefinitionValue adv = eventsBoss.getAlertDefinition( sessionID.intValue(),
                                                           rnForm.getAd() );
         ActionValue[] actions = adv.getActions();
         for (int i=0; i<actions.length; i++) {
@@ -105,7 +110,7 @@ public abstract class RemoveNotificationsAction
 
                 if ( emailCfg.getType() == getNotificationType() ) {
                     return handleRemove(mapping, request, params, sessionID,
-                                        actions[i], emailCfg, eb,  rnForm);
+                                        actions[i], emailCfg, eventsBoss,  rnForm);
                 }
             }
         }
@@ -116,7 +121,7 @@ public abstract class RemoveNotificationsAction
 
     protected abstract ActionForward handleRemove(ActionMapping mapping,
                                                   HttpServletRequest request,
-                                                  Map params,
+                                                  Map<String, Object> params,
                                                   Integer sessionID,
                                                   ActionValue action,
                                                   EmailActionConfig ea,
@@ -125,4 +130,3 @@ public abstract class RemoveNotificationsAction
         throws Exception;
 }
 
-// EOF

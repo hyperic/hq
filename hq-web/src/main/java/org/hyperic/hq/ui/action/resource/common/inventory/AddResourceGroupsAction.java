@@ -28,7 +28,6 @@ package org.hyperic.hq.ui.action.resource.common.inventory;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -45,9 +44,9 @@ import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.action.BaseValidatorForm;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * A <code>BaseAction</code> that adds group memberships for a
@@ -55,7 +54,17 @@ import org.hyperic.hq.ui.util.SessionUtils;
  */
 public class AddResourceGroupsAction extends BaseAction {
 
-    // ---------------------------------------------------- Public Methods
+   private AppdefBoss appdefBoss;
+   private final  Log log = LogFactory.getLog(AddResourceGroupsAction.class.getName());
+   
+   
+   @Autowired
+    public AddResourceGroupsAction(AppdefBoss appdefBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+    }
+
+
 
     /**
      * Add users to the resource specified in the given
@@ -66,14 +75,14 @@ public class AddResourceGroupsAction extends BaseAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-        Log log = LogFactory.getLog(AddResourceGroupsAction.class.getName());
+       
         HttpSession session = request.getSession();
 
         AddResourceGroupsForm addForm = (AddResourceGroupsForm) form;
         AppdefEntityID aeid = new AppdefEntityID(addForm.getType().intValue(),
                                                  addForm.getRid());
 
-        HashMap forwardParams = new HashMap(2);
+        HashMap<String, Object> forwardParams = new HashMap<String, Object>(2);
         forwardParams.put(Constants.ENTITY_ID_PARAM, aeid.getAppdefKey());
 
         switch (aeid.getType()) {
@@ -119,8 +128,7 @@ public class AddResourceGroupsAction extends BaseAction {
                 return forward;
             }
 
-            ServletContext ctx = getServlet().getServletContext();
-            AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+           
             Integer sessionId = RequestUtils.getSessionId(request);
 
             log.trace("getting pending group list");
@@ -131,7 +139,7 @@ public class AddResourceGroupsAction extends BaseAction {
             if (log.isTraceEnabled())
                 log.trace("adding groups " + Arrays.asList(pendingGroupIds) +
                       " for resource [" + aeid + "]");
-            boss.batchGroupAdd(sessionId.intValue(), aeid, pendingGroupIds);
+            appdefBoss.batchGroupAdd(sessionId.intValue(), aeid, pendingGroupIds);
 
             log.trace("removing pending group list");
             SessionUtils.removeList(session,

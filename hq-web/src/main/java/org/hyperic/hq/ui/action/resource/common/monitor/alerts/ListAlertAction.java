@@ -29,12 +29,17 @@ import java.rmi.RemoteException;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.GregorianCalendar;
-import java.util.Iterator;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+import org.apache.struts.tiles.ComponentContext;
+import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
@@ -47,10 +52,7 @@ import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertCondition;
 import org.hyperic.hq.events.server.session.AlertConditionLog;
 import org.hyperic.hq.events.server.session.AlertDefinition;
-import org.hyperic.hq.events.shared.AlertConditionLogValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
-import org.hyperic.hq.events.shared.AlertDefinitionValue;
-import org.hyperic.hq.events.shared.AlertValue;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.measurement.server.session.Measurement;
@@ -58,21 +60,13 @@ import org.hyperic.hq.measurement.shared.ResourceLogEvent;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.beans.AlertBean;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.NumberUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.units.FormatSpecifics;
 import org.hyperic.util.units.FormattedNumber;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.tiles.ComponentContext;
-import org.apache.struts.tiles.actions.TilesAction;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * List all alerts for this entity
@@ -80,8 +74,19 @@ import org.apache.struts.tiles.actions.TilesAction;
  */
 public class ListAlertAction extends TilesAction {
 
-    private Log log = LogFactory.getLog(ListAlertAction.class.getName());
+    private final Log log = LogFactory.getLog(ListAlertAction.class.getName());
+    private EventsBoss eventsBoss;
+    private MeasurementBoss measurementBoss;
     
+    
+    
+    @Autowired
+    public ListAlertAction(EventsBoss eventsBoss, MeasurementBoss measurementBoss) {
+        super();
+        this.eventsBoss = eventsBoss;
+        this.measurementBoss = measurementBoss;
+    }
+
     /**
      * Create a list of AlertBean objects based on the AlertValue
      * objects for this resource.
@@ -95,9 +100,8 @@ public class ListAlertAction extends TilesAction {
     {
         int sessionId = RequestUtils.getSessionId(request).intValue();
         AppdefEntityID appEntId = RequestUtils.getEntityId(request);
-        ServletContext ctx = getServlet().getServletContext();
-        EventsBoss eb = ContextUtils.getEventsBoss(ctx);
-        MeasurementBoss mb = ContextUtils.getMeasurementBoss(ctx);
+        
+      
         GregorianCalendar cal = new GregorianCalendar();
         
         try {
@@ -125,11 +129,11 @@ public class ListAlertAction extends TilesAction {
             pc.setSortorder(PageControl.SORT_DESC);
         }
         
-        PageList alerts;
+        PageList<Alert> alerts;
         
         try {
             long begin = cal.getTimeInMillis();
-            alerts = eb.findAlerts(sessionId, 
+            alerts = eventsBoss.findAlerts(sessionId, 
             		               appEntId, 
             		               begin, 
             		               begin + Constants.DAYS, 
@@ -137,13 +141,13 @@ public class ListAlertAction extends TilesAction {
         } catch(PermissionException e) {
             // user is not allowed to see/manage alerts. 
             // return empty list for now
-            alerts = new PageList();
+            alerts = new PageList<Alert>();
         }
 
-        PageList uiBeans = new PageList();
+        PageList<AlertBean> uiBeans = new PageList<AlertBean>();
         
-        for (Iterator<Alert> itr = alerts.iterator();itr.hasNext();) {
-            Alert alert = itr.next();
+        for (Alert alert : alerts) {
+           
             AlertDefinition alertDefinition = alert.getAlertDefinition();
             AlertBean bean = new AlertBean(alert.getId(), 
             							   alert.getCtime(),
@@ -168,18 +172,18 @@ public class ListAlertAction extends TilesAction {
             Collection<AlertConditionLog> conditionLogs = alert.getConditionLog();
             
             if (conditionLogs.size() > 1) {
-                _setupMultiCondition(bean, request);
+                setupMultiCondition(bean, request);
             } else if (conditionLogs.size() == 1) {
             	AlertConditionLog conditionLog = 
             		(AlertConditionLog) conditionLogs.iterator().next();
                 AlertConditionValue condition = 
                 	conditionLog.getCondition().getAlertConditionValue();
                 
-                _setupCondition(bean, 
+                setupCondition(bean, 
                 		        condition, 
                 		        conditionLog.getValue(), 
                 		        request,
-                                mb, 
+                                
                                 sessionId);
             } else {
                 // fall back to alert definition conditions: PR 6992
@@ -187,15 +191,15 @@ public class ListAlertAction extends TilesAction {
                 	alertDefinition.getConditions();
                 
                 if (conditions.size() > 1) {
-                    _setupMultiCondition(bean, request);
+                    setupMultiCondition(bean, request);
                 } else if (conditions.size() == 1) {
                 	AlertCondition condition = conditions.iterator().next();
                 	
-                    _setupCondition(bean, 
+                    setupCondition(bean, 
                     		        condition.getAlertConditionValue(),
                     		        null, 
                     		        request, 
-                    		        mb, 
+                    		       
                     		        sessionId);
                 } else {
                     // *serious* trouble
@@ -223,9 +227,9 @@ public class ListAlertAction extends TilesAction {
         return null;
     }
 
-    private void _setupCondition(AlertBean bean, AlertConditionValue cond,
+    private void setupCondition(AlertBean bean, AlertConditionValue cond,
                                  String value, HttpServletRequest request,
-                                 MeasurementBoss mb, int sessionId)
+                                 int sessionId)
     throws SessionTimeoutException,
            SessionNotFoundException,
            MeasurementNotFoundException,
@@ -249,7 +253,7 @@ public class ListAlertAction extends TilesAction {
 
             Measurement m = null;
             if (cond.getType() == EventConstants.TYPE_THRESHOLD) {
-                m = mb.getMeasurement(sessionId,
+                m = measurementBoss.getMeasurement(sessionId,
                                       new Integer(cond.getMeasurementId()));
                 bean.setComparator(cond.getComparator());
                 FormattedNumber th =
@@ -279,7 +283,7 @@ public class ListAlertAction extends TilesAction {
 
                     // format threshold and value
                     if (m == null) {
-                        m = mb.getMeasurement(sessionId,
+                        m = measurementBoss.getMeasurement(sessionId,
                                           new Integer(cond.getMeasurementId()));
 
                     }
@@ -329,7 +333,7 @@ public class ListAlertAction extends TilesAction {
         }
     }
 
-    private void _setupMultiCondition(AlertBean bean, HttpServletRequest request) {
+    private void setupMultiCondition(AlertBean bean, HttpServletRequest request) {
         bean.setMultiCondition(true);
         bean.setConditionName
             ( RequestUtils.message(request, "alert.current.list.MultiCondition") );

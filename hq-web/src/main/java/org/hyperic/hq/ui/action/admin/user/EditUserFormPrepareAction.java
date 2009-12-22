@@ -28,8 +28,6 @@ package org.hyperic.hq.ui.action.admin.user;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
@@ -44,7 +42,7 @@ import org.hyperic.hq.ui.WebUser;
  */
 public class EditUserFormPrepareAction extends TilesAction {
 
-    // ---------------------------------------------------- Public Methods
+  
 
     /**
      * Retrieve User data and store it in the specified request
@@ -56,25 +54,32 @@ public class EditUserFormPrepareAction extends TilesAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
     throws Exception {
-        Log log = LogFactory.getLog(EditUserFormPrepareAction.class.getName());
+       
         EditForm userForm = (EditForm)form;
 
         WebUser user = (WebUser) request.getAttribute(Constants.USER_ATTR);
 
-        if (userForm.getFirstName() == null)
+        if (userForm.getFirstName() == null) {
             userForm.setFirstName( user.getFirstName() );
-        if(userForm.getLastName() == null)
+        }
+        if(userForm.getLastName() == null) {
             userForm.setLastName( user.getLastName() );
-        if(userForm.getDepartment() == null)
+        }
+        if(userForm.getDepartment() == null) {
             userForm.setDepartment( user.getDepartment() );
-        if(userForm.getName() == null)
+        }
+        if(userForm.getName() == null) {
             userForm.setName( user.getName() );
-        if(userForm.getEmailAddress() == null)
+        }
+        if(userForm.getEmailAddress() == null) {
             userForm.setEmailAddress( user.getEmailAddress() );
-        if(userForm.getPhoneNumber() == null)
+        }
+        if(userForm.getPhoneNumber() == null) {
             userForm.setPhoneNumber( user.getPhoneNumber() );
-        if(userForm.getSmsAddress() == null)
+        }
+        if(userForm.getSmsAddress() == null) {
             userForm.setSmsAddress( user.getSmsaddress());    
+        }
 
         userForm.setHtmlEmail(user.isHtmlEmail());
         if ( user.getActive() ) {

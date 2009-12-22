@@ -28,10 +28,8 @@ package org.hyperic.hq.ui.action.portlet.criticalalerts;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -54,12 +52,11 @@ import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * This action class is used by the Critical Alerts portlet.  It's main
@@ -68,6 +65,19 @@ import org.json.JSONObject;
 public class ViewAction extends BaseAction {
 
     static final String RESOURCES_KEY = Constants.USERPREF_KEY_CRITICAL_ALERTS_RESOURCES;
+    
+    private AuthzBoss authzBoss;
+    private EventsBoss eventsBoss;
+    
+    
+    @Autowired
+    public ViewAction(AuthzBoss authzBoss, EventsBoss eventsBoss) {
+        super();
+        this.authzBoss = authzBoss;
+        this.eventsBoss = eventsBoss;
+    }
+
+
 
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
@@ -75,9 +85,7 @@ public class ViewAction extends BaseAction {
                                  HttpServletResponse response)
         throws Exception
     {
-        ServletContext ctx = getServlet().getServletContext();
-        AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
-        EventsBoss eventBoss = ContextUtils.getEventsBoss(ctx);
+       
         HttpSession session = request.getSession();
         WebUser user = RequestUtils.getWebUser(session);
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
@@ -111,9 +119,9 @@ public class ViewAction extends BaseAction {
             titleKey += token;
         }
 
-        List entityIds = DashboardUtils.preferencesAsEntityIds(resKey, dashPrefs);
+        List<AppdefEntityID> entityIds = DashboardUtils.preferencesAsEntityIds(resKey, dashPrefs);
         AppdefEntityID[] arrayIds =
-            (AppdefEntityID[])entityIds.toArray(new AppdefEntityID[0]);
+           entityIds.toArray(new AppdefEntityID[0]);
 
         int count = Integer.parseInt(dashPrefs.getValue(countKey));
         int priority = Integer.parseInt(dashPrefs.getValue(priorityKey).trim());
@@ -126,12 +134,12 @@ public class ViewAction extends BaseAction {
             arrayIds = null;
         }
 
-        List criticalAlerts = eventBoss.findRecentAlerts(sessionID, count, 
+        List<Escalatable> criticalAlerts = eventsBoss.findRecentAlerts(sessionID, count, 
                                                          priority, timeRange, 
                                                          arrayIds); 
 
         JSONObject alerts = new JSONObject();
-        List a = new ArrayList();
+        List<JSONObject> a = new ArrayList<JSONObject>();
 
         MessageResources res = getResources(request);
         String formatString =
@@ -139,8 +147,8 @@ public class ViewAction extends BaseAction {
 
         AuthzSubject subject = authzBoss.getCurrentSubject(sessionID); 
         SimpleDateFormat df = new SimpleDateFormat(formatString);
-        for (Iterator i = criticalAlerts.iterator(); i.hasNext(); ) {
-            Escalatable alert = (Escalatable) i.next();
+        for (Escalatable alert : criticalAlerts ) {
+           
             AlertDefinitionInterface def;
             AppdefEntityValue aVal;
             AppdefEntityID eid;

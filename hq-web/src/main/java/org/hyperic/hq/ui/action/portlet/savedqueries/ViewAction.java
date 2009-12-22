@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -41,18 +40,19 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.util.CheckPermissionsUtil;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.timer.StopWatch;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An <code>Action</code> that loads the <code>Portal</code>
@@ -61,10 +61,25 @@ import org.hyperic.util.timer.StopWatch;
  * <code>PORTAL_KEY</code> request attribute.
  */
 public class ViewAction extends TilesAction {
-    // --------------------------------------------------------- Public Methods
+  
     
-   private static Log log = LogFactory.getLog(ViewAction.class.getName());
-    
+   private final Log log = LogFactory.getLog(ViewAction.class.getName());
+   private AuthzBoss authzBoss;
+   private AppdefBoss appdefBoss;
+   private final  Log timingLog = LogFactory.getLog("DASHBOARD-TIMING");
+   
+   
+   
+   @Autowired 
+   public ViewAction(AuthzBoss authzBoss, AppdefBoss appdefBoss) {
+       super();
+       this.authzBoss = authzBoss;
+       this.appdefBoss = appdefBoss;
+   }
+
+
+
+
    public ActionForward execute(ComponentContext context,
                             ActionMapping mapping,
                             ActionForm form,
@@ -72,14 +87,14 @@ public class ViewAction extends TilesAction {
                             HttpServletResponse response)
    throws Exception {
         StopWatch timer = new StopWatch();
-        Log timingLog = LogFactory.getLog("DASHBOARD-TIMING");
-        ServletContext ctx = getServlet().getServletContext();
+       
+    
         HttpSession session = request.getSession();
-        AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
+       
         WebUser user = SessionUtils.getWebUser(session);
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
         		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, boss);
+        		user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         
 
@@ -114,8 +129,9 @@ public class ViewAction extends TilesAction {
 				// scheme, we can't display diddly squat about the preference
 				if (chart.size() != 2) {
 					// it's amazing but true: bogosity has been found
-					if (log.isTraceEnabled())
+					if (log.isTraceEnabled()) {
 						log.trace("chart preference not understood: " + chart);
+					}
 					continue;
 				}
 
@@ -124,7 +140,7 @@ public class ViewAction extends TilesAction {
 		        // for now doing it here...
 				if (CheckPermissionsUtil.canUserViewChart(RequestUtils.getSessionId(request).intValue(),
 						             					  chart.get(1),
-						             					  ContextUtils.getAppdefBoss(ctx))) 
+						             					 appdefBoss)) 
 				{
 					Iterator<String> j = chart.iterator();
 					String name = j.next();

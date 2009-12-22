@@ -27,7 +27,6 @@ package org.hyperic.hq.ui.action.admin.user;
 
 import java.util.HashMap;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -42,8 +41,8 @@ import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An <code>WorkflowAction</code> subclass that creates a user
@@ -51,7 +50,19 @@ import org.hyperic.hq.ui.util.RequestUtils;
  */
 public class NewAction extends BaseAction {
 
-    // ---------------------------------------------------- Public Methods
+   private AuthzBoss authzBoss;
+   private AuthBoss authBoss;
+   private final Log log = LogFactory.getLog(NewAction.class.getName());
+   
+   
+   @Autowired
+    public NewAction(AuthzBoss authzBoss, AuthBoss authBoss) {
+        super();
+        this.authzBoss = authzBoss;
+        this.authBoss = authBoss;
+    }
+
+
 
     /**
      * Create the user with the attributes specified in the given
@@ -63,7 +74,7 @@ public class NewAction extends BaseAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
     throws Exception {
-        Log log = LogFactory.getLog(NewAction.class.getName());
+        
 
         Integer sessionId =  RequestUtils.getSessionId(request);
         NewForm userForm = (NewForm)form;
@@ -73,10 +84,7 @@ public class NewAction extends BaseAction {
             return forward;
         }
 
-        //get the spiderSubjectValue of the user to be deleated.
-        ServletContext ctx = getServlet().getServletContext();            
-        AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);             
-        AuthBoss authBoss = ContextUtils.getAuthBoss(ctx); 
+      
 
         // add both a subject and a principal as normal
         log.trace("creating subject [" + userForm.getName() + "]");
@@ -100,7 +108,7 @@ public class NewAction extends BaseAction {
         AuthzSubject newUser =
             authzBoss.findSubjectByName(sessionId, userForm.getName());
 
-        HashMap parms = new HashMap(1);
+        HashMap<String, Object> parms = new HashMap<String, Object>(1);
         parms.put(Constants.USER_PARAM, newUser.getId());
 
         return returnOkAssign(request, mapping, parms, false);

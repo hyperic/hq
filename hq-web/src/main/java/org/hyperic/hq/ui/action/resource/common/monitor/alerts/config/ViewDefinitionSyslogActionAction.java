@@ -29,19 +29,17 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.bizapp.shared.ConfigBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.ui.action.resource.common.monitor.alerts.AlertDefUtil;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.tiles.actions.TilesAction;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * View an alert definition -- syslog action.
@@ -49,7 +47,18 @@ import org.apache.struts.tiles.actions.TilesAction;
  */
 public class ViewDefinitionSyslogActionAction extends TilesAction {
 
-    private Log log = LogFactory.getLog(ViewDefinitionSyslogActionAction.class.getName());
+   private ConfigBoss configBoss;
+   private EventsBoss eventsBoss;
+   
+   
+   @Autowired
+    public ViewDefinitionSyslogActionAction(ConfigBoss configBoss, EventsBoss eventsBoss) {
+        super();
+        this.configBoss = configBoss;
+        this.eventsBoss = eventsBoss;
+    }
+
+
 
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
@@ -57,10 +66,9 @@ public class ViewDefinitionSyslogActionAction extends TilesAction {
                                  HttpServletResponse response)
         throws Exception
     {            
-        ServletContext ctx = getServlet().getServletContext();
+       
         int sessionID = RequestUtils.getSessionId(request).intValue();
-        ConfigBoss configBoss = ContextUtils.getConfigBoss(ctx);
-        EventsBoss eb = ContextUtils.getEventsBoss(ctx);
+      
 
         String enabledStr = configBoss.getConfig().getProperty
             (HQConstants.SyslogActionsEnabled);
@@ -70,7 +78,7 @@ public class ViewDefinitionSyslogActionAction extends TilesAction {
 
         if ( syslogActionsEnabled.booleanValue() ) {
             AlertDefinitionValue adv = AlertDefUtil.getAlertDefinition
-                (request, sessionID, eb);
+                (request, sessionID, eventsBoss);
             SyslogActionForm saForm = new SyslogActionForm();
             AlertDefUtil.prepareSyslogActionForm(adv, saForm);
             request.setAttribute("syslogActionForm", saForm);
@@ -80,4 +88,3 @@ public class ViewDefinitionSyslogActionAction extends TilesAction {
     }
 }
 
-// EOF

@@ -30,11 +30,15 @@ import java.util.Properties;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.action.resource.common.inventory.ResourceInventoryPortalAction;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.SessionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -48,11 +52,18 @@ import org.apache.struts.action.ActionMapping;
  */
 public class PlatformInventoryPortalAction extends ResourceInventoryPortalAction {
 
-    protected static Log log =
+    private final Log log =
         LogFactory.getLog(PlatformInventoryPortalAction.class.getName());
 
-    private static Properties keyMethodMap = new Properties();
-    static {
+    private final Properties keyMethodMap = new Properties();
+   
+    @Autowired
+    public PlatformInventoryPortalAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss) {
+        super(appdefBoss, authzBoss, controlBoss);
+        initKeyMethodMap();
+    }
+
+    private void initKeyMethodMap() {
         keyMethodMap.setProperty(
             Constants.MODE_NEW, "newPlatform");
         keyMethodMap.setProperty(

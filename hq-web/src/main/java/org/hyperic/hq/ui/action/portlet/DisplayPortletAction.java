@@ -1,6 +1,5 @@
 package org.hyperic.hq.ui.action.portlet;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -17,22 +16,33 @@ import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.server.session.DashboardManagerImpl;
 import org.hyperic.hq.ui.shared.DashboardManager;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class DisplayPortletAction extends TilesAction {
-	@Override
+    
+    private AuthzBoss authzBoss;
+    
+    
+    @Autowired
+	public DisplayPortletAction(AuthzBoss authzBoss) {
+        super();
+        this.authzBoss = authzBoss;
+    }
+
+
+
+    @Override
 	public ActionForward execute(ActionMapping mapping, ActionForm form,
 			HttpServletRequest request, HttpServletResponse response)
 	throws Exception 
 	{
-		ServletContext ctx = getServlet().getServletContext();
+		
         HttpSession session = request.getSession();
-        AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
+      
 		WebUser user = SessionUtils.getWebUser(session);
 		DashboardManager dashManager = DashboardManagerImpl.getOne();
-		AuthzSubject guestUser = boss.findSubjectByName(user.getSessionId(), "guest");
+		AuthzSubject guestUser = authzBoss.findSubjectByName(user.getSessionId(), "guest");
 		DashboardConfig dashboardConfig = dashManager.getUserDashboard(guestUser, guestUser);
 			
 		String portletId = request.getParameter("pid");

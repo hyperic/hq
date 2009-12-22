@@ -25,30 +25,35 @@
 
 package org.hyperic.hq.ui.action.resource.common.inventory;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+import org.apache.struts.tiles.ComponentContext;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.action.WorkflowPrepareAction;
 import org.hyperic.hq.ui.action.resource.ResourceForm;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.tiles.ComponentContext;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *
  */
 public class ResourceGeneralFormPrepareAction 
     extends WorkflowPrepareAction {
+
+    private AppdefBoss appdefBoss;
+    
+    @Autowired
+    public ResourceGeneralFormPrepareAction(AppdefBoss appdefBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+    }
+
 
     /**
      * Retrieve this data and store it in the
@@ -61,19 +66,17 @@ public class ResourceGeneralFormPrepareAction
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-        Log log =
-            LogFactory.getLog(ResourceGeneralFormPrepareAction.class.getName());
+        
 
             ResourceForm resourceForm = (ResourceForm) form;
 
         Integer sessionId = RequestUtils.getSessionId(request);
-        ServletContext ctx = getServlet().getServletContext();
-
+       
         AppdefEntityID rid = RequestUtils.getEntityId(request);
 
-        AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+       
 
-        AppdefResourceValue resource = (AppdefResourceValue) boss.findById(
+        AppdefResourceValue resource =  appdefBoss.findById(
         sessionId.intValue(), rid );
 
         resourceForm.loadResourceValue(resource);

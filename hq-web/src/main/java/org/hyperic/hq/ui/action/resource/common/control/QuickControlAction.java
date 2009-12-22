@@ -27,7 +27,6 @@ package org.hyperic.hq.ui.action.resource.common.control;
 
 import java.util.HashMap;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -43,17 +42,28 @@ import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Perform a quick control action on a resource.
  */
 public class QuickControlAction extends BaseAction {
 
-    private static final Log log
-        = LogFactory.getLog(QuickControlAction.class.getName());    
+    private final Log log
+        = LogFactory.getLog(QuickControlAction.class.getName()); 
+    
+    private ControlBoss controlBoss;
+    
+    
+    @Autowired
+    public QuickControlAction(ControlBoss controlBoss) {
+        super();
+        this.controlBoss = controlBoss;
+    }
+
+
 
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
@@ -64,11 +74,10 @@ public class QuickControlAction extends BaseAction {
         QuickControlForm qcForm = (QuickControlForm)form;
         log.trace("performing resouce quick control action: " + qcForm.getResourceAction());
  
-        HashMap fwdParms = new HashMap(2);
+        HashMap<String, Object> fwdParms = new HashMap<String, Object>(2);
             
         try {    
-            ServletContext ctx = getServlet().getServletContext();            
-            ControlBoss cBoss = ContextUtils.getControlBoss(ctx);
+           
             int sessionId =  RequestUtils.getSessionIdInt(request);
             
             // create the new action to schedule
@@ -82,9 +91,9 @@ public class QuickControlAction extends BaseAction {
             String args = qcForm.getArguments();
 
             if ( AppdefEntityConstants.APPDEF_TYPE_GROUP == type ) {
-                cBoss.doGroupAction(sessionId, appdefId, action, args, null);
+                controlBoss.doGroupAction(sessionId, appdefId, action, args, null);
             } else {
-                cBoss.doAction(sessionId, appdefId, action, args);
+                controlBoss.doAction(sessionId, appdefId, action, args);
             }
             ActionForward fwd 
                 = this.returnSuccess(request, mapping, fwdParms); 

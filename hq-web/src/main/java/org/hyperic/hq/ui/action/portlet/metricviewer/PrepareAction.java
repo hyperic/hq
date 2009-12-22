@@ -27,7 +27,6 @@ package org.hyperic.hq.ui.action.portlet.metricviewer;
 
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -40,21 +39,41 @@ import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.appdef.shared.PlatformTypeValue;
+import org.hyperic.hq.appdef.shared.ServerTypeValue;
+import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class PrepareAction extends TilesAction {
+    
+    private AuthzBoss authzBoss;
+    private AppdefBoss appdefBoss;
+    private MeasurementBoss measurementBoss;
+    
+    
+    @Autowired
+    public PrepareAction(AuthzBoss authzBoss, AppdefBoss appdefBoss, MeasurementBoss measurementBoss) {
+        super();
+        this.authzBoss = authzBoss;
+        this.appdefBoss = appdefBoss;
+        this.measurementBoss = measurementBoss;
+    }
+
+
 
     public ActionForward execute(ComponentContext context,
                                  ActionMapping mapping,
@@ -63,20 +82,17 @@ public class PrepareAction extends TilesAction {
                                  HttpServletResponse response)
         throws Exception
     {
-        ServletContext ctx = getServlet().getServletContext();
-        AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
-        MeasurementBoss measBoss = ContextUtils.getMeasurementBoss(ctx);
-
+       
         HttpSession session = request.getSession();
         WebUser user = RequestUtils.getWebUser(session);
         int sessionId = user.getSessionId().intValue();
-        AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
+       
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
         		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, aBoss);
+        		user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         PropertiesForm pForm = (PropertiesForm) form;
-        PageList resources = new PageList();
+      
 
         // this quarantees that the session dosen't contain any resources it
         // shouldnt
@@ -113,24 +129,24 @@ public class PrepareAction extends TilesAction {
         pForm.setMetric(metric);
         pForm.setDescending(descending);
         
-        List resourceList = DashboardUtils.preferencesAsEntityIds(resKey, dashPrefs);        
-        AppdefEntityID[] aeids = (AppdefEntityID[])
+        List<AppdefEntityID> resourceList = DashboardUtils.preferencesAsEntityIds(resKey, dashPrefs);        
+        AppdefEntityID[] aeids = 
             resourceList.toArray(new AppdefEntityID[resourceList.size()]);
 
         PageControl pc = RequestUtils.getPageControl(request);
-        resources = appdefBoss.findByIds(sessionId, aeids, pc);
+        PageList<AppdefResourceValue> resources = appdefBoss.findByIds(sessionId, aeids, pc);
         request.setAttribute("descending", descending);
         request.setAttribute("metricViewerList", resources);
 
-        PageList viewablePlatformTypes =
+        PageList<PlatformTypeValue> viewablePlatformTypes =
             appdefBoss.findViewablePlatformTypes(sessionId,
                                                  PageControl.PAGE_ALL);
         request.setAttribute("platformTypes", viewablePlatformTypes);
-        PageList viewableServerTypes =
+        PageList<ServerTypeValue> viewableServerTypes =
             appdefBoss.findViewableServerTypes(sessionId,
                                                PageControl.PAGE_ALL);
         request.setAttribute("serverTypes", viewableServerTypes);
-        PageList viewableServiceTypes =
+        PageList<ServiceTypeValue> viewableServiceTypes =
             appdefBoss.findViewableServiceTypes(sessionId,
                                                 PageControl.PAGE_ALL);
         request.setAttribute("serviceTypes", viewableServiceTypes);
@@ -140,17 +156,17 @@ public class PrepareAction extends TilesAction {
             if (viewablePlatformTypes.size() > 0) {
                 // Take the first platform type
                 typeVal =
-                    (AppdefResourceTypeValue) viewablePlatformTypes.get(0);
+                    viewablePlatformTypes.get(0);
             }
             else if (viewableServerTypes.size() > 0) {
                 // Take the first server type
                 typeVal =
-                    (AppdefResourceTypeValue) viewableServerTypes.get(0);
+                     viewableServerTypes.get(0);
             }
             else if (viewableServiceTypes.size() > 0) {
                 // Take the first service type
                 typeVal =
-                    (AppdefResourceTypeValue) viewableServiceTypes.get(0);
+                    viewableServiceTypes.get(0);
             }
         }
         else {
@@ -160,7 +176,7 @@ public class PrepareAction extends TilesAction {
         
         if (typeVal != null) {
             pForm.setResourceType(typeVal.getAppdefTypeKey());
-            List metrics = measBoss.findMeasurementTemplates(sessionId,
+            List<MeasurementTemplate> metrics = measurementBoss.findMeasurementTemplates(sessionId,
                                                              typeVal.getName(),
                                                              PageControl.PAGE_ALL);
             request.setAttribute("metrics", metrics);

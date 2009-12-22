@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.ui.action.resource.common.monitor.alerts.config;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -33,29 +32,39 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
+import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationAlertType;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
 import org.hyperic.hq.galerts.server.session.GalertEscalationAlertType;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class ViewEscalationAction extends ViewDefinitionAction {
+    
+    private AuthzBoss authzBoss;
+
+    @Autowired
+    public ViewEscalationAction(EventsBoss eventsBoss, MeasurementBoss measurementBoss, AuthzBoss authzBoss) {
+        super(eventsBoss, measurementBoss);
+        this.authzBoss = authzBoss;
+    }
 
     public ActionForward execute(ActionMapping mapping, ActionForm form,
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception 
     {
-        ServletContext ctx = getServlet().getServletContext();
+        
         Integer sessionID = RequestUtils.getSessionId(request);
         int sessionId = sessionID.intValue();
 
@@ -71,34 +80,34 @@ public class ViewEscalationAction extends ViewDefinitionAction {
         }
         
         // Get the list of escalations
-        EventsBoss eb = ContextUtils.getEventsBoss(ctx);
+       
         if (request.getAttribute("escalations") == null) {
-            JSONArray arr = eb.listAllEscalationName(sessionId);
+            JSONArray arr = eventsBoss.listAllEscalationName(sessionId);
             request.setAttribute("escalations", arr);
         }
 
         // Get the list of users
-        AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
-        PageList availableUsers =
+       
+        PageList<AuthzSubjectValue> availableUsers =
             authzBoss.getAllSubjects(sessionID, null, PageControl.PAGE_ALL);
         request.setAttribute(Constants.AVAIL_USERS_ATTR, availableUsers);
         
         EscalationSchemeForm eForm = (EscalationSchemeForm) form;
         if (eForm.getEscId() == null) {
-            eForm.setEscId(eb.getEscalationIdByAlertDefId(sessionId,
+            eForm.setEscId(eventsBoss.getEscalationIdByAlertDefId(sessionId,
                                           new Integer(eForm.getAd()),
                                           mat));
         } else {
             if (eForm.getEscId().intValue() == 0) {
                 // Unset current escalation scheme
-                eb.unsetEscalationByAlertDefId(sessionId,
+                eventsBoss.unsetEscalationByAlertDefId(sessionId,
                                                new Integer(eForm.getAd()), mat);
                 eForm.setEscId(null);
             }
             else {
                 // We actually need to set the escalation scheme for alert
                 // definition
-                eb.setEscalationByAlertDefId(sessionId,
+                eventsBoss.setEscalationByAlertDefId(sessionId,
                                              new Integer(eForm.getAd()),
                                              eForm.getEscId(), mat);
             }
@@ -108,7 +117,7 @@ public class ViewEscalationAction extends ViewDefinitionAction {
         try {
             if (eForm.getEscId() != null) {
                 JSONObject escalation =
-                    Escalation.getJSON(eb.findEscalationById(sessionId,
+                    Escalation.getJSON(eventsBoss.findEscalationById(sessionId,
                                                              eForm.getEscId()));
                 request.setAttribute("escalationJSON", escalation.toString());
             }

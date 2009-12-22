@@ -28,7 +28,6 @@ package org.hyperic.hq.ui.action.portlet.summaryCounts;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -43,20 +42,28 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An <code>Action</code> that loads the admin screen for a portlet 
  */
 public class PrepareAction extends BaseAction {
 
-    // --------------------------------------------------------- Public Methods
-    
+   private AuthzBoss authzBoss;
+   private AppdefBoss appdefBoss;
+   
+   
+   @Autowired 
+    public PrepareAction(AuthzBoss authzBoss, AppdefBoss appdefBoss) {
+        super();
+        this.authzBoss = authzBoss;
+        this.appdefBoss = appdefBoss;
+   }
+
     /**
      *
      * @param mapping The ActionMapping used to select this instance
@@ -72,16 +79,14 @@ public class PrepareAction extends BaseAction {
                             HttpServletRequest request,
                             HttpServletResponse response)
     throws Exception {
-          
-        ServletContext ctx = getServlet().getServletContext();
+     
         PropertiesForm pForm = (PropertiesForm) form;
-        AuthzBoss boss = ContextUtils.getAuthzBoss(ctx); 
-        AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
+       
         HttpSession session = request.getSession();
         WebUser user = RequestUtils.getWebUser(session);
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
         		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, boss);
+        		user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
 
         boolean application = new Boolean( dashPrefs.getValue(".dashContent.summaryCounts.application")).booleanValue();
@@ -130,16 +135,15 @@ public class PrepareAction extends BaseAction {
     }
     
     private String[] getStringArray(String preference, ConfigResponse config) throws Exception{
-        List preferences = StringUtil.explode(config.getValue(preference), "," );
+        List<String> preferences = StringUtil.explode(config.getValue(preference), "," );
         
         int element;
-        Iterator i;
+        Iterator<String> i;
         
         String[] array = new String[preferences.size()];
         
         for(i = preferences.iterator(), element = 0; i.hasNext(); element++){
-            array[element] =  (String) i.next();            
-        
+            array[element] =  i.next();            
         }           
         
         return array;

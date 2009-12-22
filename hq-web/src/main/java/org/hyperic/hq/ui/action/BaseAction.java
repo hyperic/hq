@@ -55,7 +55,7 @@ public class BaseAction extends Action {
     protected static final boolean YES_RETURN_PATH = true;
     protected static final boolean NO_RETURN_PATH = false;
     
-    private static Log log = LogFactory.getLog(BaseAction.class.getName());
+    private Log log = LogFactory.getLog(BaseAction.class.getName());
 
     //-------------------------------------protected methods
 
@@ -92,7 +92,7 @@ public class BaseAction extends Action {
      */
     protected ActionForward checkSubmit(HttpServletRequest request,
                                      ActionMapping mapping, ActionForm form,
-                                     Map params, boolean doReturnPath)
+                                     Map<String, Object> params, boolean doReturnPath)
         throws Exception {
         BaseValidatorForm spiderForm = (BaseValidatorForm) form;
 
@@ -122,7 +122,7 @@ public class BaseAction extends Action {
 
     protected ActionForward checkSubmit(HttpServletRequest request,
                                      ActionMapping mapping, ActionForm form,
-                                     Map params)
+                                     Map<String, Object> params)
         throws Exception {
         return checkSubmit(request, mapping, form, params, NO_RETURN_PATH);
     }
@@ -145,7 +145,7 @@ public class BaseAction extends Action {
                                      String param, Object value,
                                      boolean doReturnPath)
         throws Exception {
-        HashMap params = new HashMap(1);
+        HashMap<String, Object> params = new HashMap<String, Object>(1);
         params.put(param, value);
         return checkSubmit(request, mapping, form, params, doReturnPath);
     }
@@ -164,7 +164,7 @@ public class BaseAction extends Action {
      */
     protected ActionForward returnAdd(HttpServletRequest request,
                                    ActionMapping mapping,
-                                   Map params)
+                                   Map<String, Object> params)
         throws Exception {
         return constructForward(request, mapping, Constants.ADD_URL,
                                 params, NO_RETURN_PATH);
@@ -180,7 +180,7 @@ public class BaseAction extends Action {
                                    ActionMapping mapping,
                                    String param, Object value)
         throws Exception {
-        HashMap params = new HashMap(1);
+        HashMap<String, Object> params = new HashMap<String, Object>(1);
         params.put(param, value);
         return returnAdd(request, mapping, params);
     }
@@ -191,7 +191,7 @@ public class BaseAction extends Action {
      */
     protected ActionForward returnCancelled(HttpServletRequest request,
                                          ActionMapping mapping,
-                                         Map params, boolean doReturnPath)
+                                         Map<String, Object> params, boolean doReturnPath)
         throws Exception {
             return constructForward(request, mapping, Constants.CANCEL_URL,
                                     params, doReturnPath);
@@ -199,7 +199,7 @@ public class BaseAction extends Action {
 
     protected ActionForward returnCancelled(HttpServletRequest request,
                                          ActionMapping mapping,
-                                         Map params)
+                                         Map<String, Object> params)
         throws Exception {
         return returnCancelled(request, mapping, params, YES_RETURN_PATH);
     }
@@ -215,7 +215,7 @@ public class BaseAction extends Action {
                                          String param, Object value)
         throws Exception {
         
-        HashMap params = new HashMap(1);
+        HashMap<String, Object> params = new HashMap<String, Object>(1);
         params.put(param, value);
         return returnCancelled(request, mapping, params);
     }
@@ -226,7 +226,7 @@ public class BaseAction extends Action {
      */
     protected ActionForward returnFailure(HttpServletRequest request,
                                        ActionMapping mapping,
-                                       Map params, boolean doReturnPath)
+                                       Map<String, Object> params, boolean doReturnPath)
         throws Exception {
         return constructForward(request, mapping, Constants.FAILURE_URL,
                                 params, doReturnPath);
@@ -234,7 +234,7 @@ public class BaseAction extends Action {
 
     protected ActionForward returnFailure(HttpServletRequest request,
                                        ActionMapping mapping,
-                                       Map params)
+                                       Map<String, Object> params)
         throws Exception {
         return returnFailure(request, mapping, params, NO_RETURN_PATH);
     }
@@ -255,7 +255,7 @@ public class BaseAction extends Action {
                                        ActionMapping mapping,
                                        String param, Object value)
         throws Exception {
-        HashMap params = new HashMap(1);
+        HashMap<String, Object> params = new HashMap<String, Object>(1);
         params.put(param, value);
         return constructForward(request, mapping, Constants.FAILURE_URL,
                                 params, NO_RETURN_PATH);
@@ -268,7 +268,7 @@ public class BaseAction extends Action {
      */
     protected ActionForward returnNew(HttpServletRequest request,
                                    ActionMapping mapping,
-                                   Map params)
+                                   Map<String, Object> params)
         throws Exception {
         return constructForward(request, mapping, Constants.SUCCESS_URL, 
             params, NO_RETURN_PATH);
@@ -284,7 +284,7 @@ public class BaseAction extends Action {
                                    ActionMapping mapping,
                                    String param, Object value)
         throws Exception {
-        HashMap params = new HashMap();
+        HashMap<String, Object> params = new HashMap<String, Object>();
         params.put(param, value);
         return constructForward(request, mapping, Constants.SUCCESS_URL, 
             params, NO_RETURN_PATH);
@@ -296,7 +296,7 @@ public class BaseAction extends Action {
      * <em>success</em> action state.
      */
     protected ActionForward returnNew(HttpServletRequest request,
-                                       ActionMapping mapping, Map params,
+                                       ActionMapping mapping, Map<String, Object> params,
                                        boolean doReturnPath)
         throws Exception {
 
@@ -309,7 +309,7 @@ public class BaseAction extends Action {
                                    ActionMapping mapping, String param,
                                    Object value, boolean doReturnPath)
         throws Exception {
-        HashMap params = new HashMap(1);
+        HashMap<String, Object> params = new HashMap<String, Object>(1);
         params.put(param, value);
         return returnNew(request, mapping, params, doReturnPath);
     }
@@ -321,7 +321,7 @@ public class BaseAction extends Action {
      */
     protected ActionForward returnRemove(HttpServletRequest request,
                                       ActionMapping mapping,
-                                      Map params)
+                                      Map<String, Object> params)
         throws Exception {
         return constructForward(request, mapping, Constants.REMOVE_URL,
                                 params, NO_RETURN_PATH);
@@ -338,7 +338,7 @@ public class BaseAction extends Action {
                                    ActionMapping mapping,
                                    String param, Object value)
         throws Exception {
-        HashMap params = new HashMap(1);
+        HashMap<String, Object> params = new HashMap<String, Object>(1);
         params.put(param, value);
         return returnRemove(request, mapping, params);
     }
@@ -349,7 +349,7 @@ public class BaseAction extends Action {
      */
     protected ActionForward returnReset(HttpServletRequest request,
                                      ActionMapping mapping,
-                                     Map params, boolean doReturnPath)
+                                     Map<String, Object> params, boolean doReturnPath)
         throws Exception {
         return constructForward(request, mapping, Constants.RESET_URL,
                                 params, doReturnPath);
@@ -357,7 +357,7 @@ public class BaseAction extends Action {
 
     protected ActionForward returnReset(HttpServletRequest request,
                                      ActionMapping mapping,
-                                     Map params)
+                                     Map<String, Object> params)
         throws Exception {
         return returnReset(request, mapping, params, NO_RETURN_PATH);
     }
@@ -372,7 +372,7 @@ public class BaseAction extends Action {
                                      ActionMapping mapping,
                                      String param, Object value)
         throws Exception {
-        HashMap params = new HashMap(1);
+        HashMap<String, Object> params = new HashMap<String, Object>(1);
         params.put(param, value);
         return returnReset(request, mapping, params);
     }
@@ -382,7 +382,7 @@ public class BaseAction extends Action {
      * <em>okassign</em> action state.
      */
     protected ActionForward returnOkAssign(HttpServletRequest request,
-                                       ActionMapping mapping, Map params)
+                                       ActionMapping mapping, Map<String, Object> params)
         throws Exception {
 
         return returnOkAssign(request, mapping, params, YES_RETURN_PATH);
@@ -393,7 +393,7 @@ public class BaseAction extends Action {
      * <em>okassign</em> action state.
      */
     protected ActionForward returnOkAssign(HttpServletRequest request, ActionMapping mapping,
-                                        Map params, boolean doReturnPath)
+                                        Map<String, Object> params, boolean doReturnPath)
         throws Exception {
 
         return constructForward(request, mapping, Constants.OK_ASSIGN_URL, 
@@ -405,7 +405,7 @@ public class BaseAction extends Action {
      * <em>success</em> action state.
      */
     protected ActionForward returnSuccess(HttpServletRequest request,
-                                       ActionMapping mapping, Map params,
+                                       ActionMapping mapping, Map<String, Object> params,
                                        boolean doReturnPath)
         throws Exception {
         if (doReturnPath) {
@@ -424,7 +424,7 @@ public class BaseAction extends Action {
     }
 
     protected ActionForward returnSuccess(HttpServletRequest request,
-                                       ActionMapping mapping, Map params)
+                                       ActionMapping mapping, Map<String, Object> params)
         throws Exception {
         return returnSuccess(request, mapping, params, YES_RETURN_PATH);
     }
@@ -439,7 +439,7 @@ public class BaseAction extends Action {
                                        ActionMapping mapping, String param,
                                        Object value, boolean doReturnPath)
         throws Exception {
-        HashMap params = new HashMap(1);
+        HashMap<String, Object> params = new HashMap<String, Object>(1);
         params.put(param, value);
         return returnSuccess(request, mapping, params, doReturnPath);
     }
@@ -461,7 +461,7 @@ public class BaseAction extends Action {
     protected ActionForward constructForward(HttpServletRequest request,
                                              ActionMapping mapping,
                                              String forwardName,
-                                             Map params,
+                                             Map<String, Object> params,
                                              boolean doReturnPath)
         throws Exception {
         ActionForward forward = null;
@@ -511,7 +511,7 @@ public class BaseAction extends Action {
                                              String param, Object value,
                                              boolean doReturnPath)
         throws Exception {
-        HashMap params = new HashMap(1);
+        HashMap<String, Object> params = new HashMap<String, Object>(1);
         params.put(param, value);
         return constructForward(request, mapping, forwardName, params,
                                 doReturnPath);
@@ -535,4 +535,3 @@ public class BaseAction extends Action {
     }
 }
 
-// EOF

@@ -25,33 +25,36 @@
 
 package org.hyperic.hq.ui.action.admin.user;
 
-import java.io.IOException;
 import java.util.HashMap;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.hyperic.hq.bizapp.shared.AuthzBoss;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.util.ActionUtils;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An Action that removes a user from the application.
  */
 public class RemoveAction extends BaseAction {
 
-    // ---------------------------------------------------- Public Methods
+   private final  Log log = LogFactory.getLog(RemoveAction.class.getName());
+   private AuthzBoss authzBoss;
+   
+   @Autowired
+    public RemoveAction(AuthzBoss authzBoss) {
+    super();
+    this.authzBoss = authzBoss;
+}
+
 
     /** Removes a user identified by the
      * value of the request parameter <code>Constants.USER_PARAM</code>
@@ -64,14 +67,14 @@ public class RemoveAction extends BaseAction {
                                  HttpServletResponse response)
     throws Exception{
             
-        Log log = LogFactory.getLog(RemoveAction.class.getName());
+       
                 
         RemoveForm nwForm = (RemoveForm) form;
         
         Integer[] users = nwForm.getUsers();
 
         // maintain sort after remove
-        HashMap params = new HashMap();
+        HashMap<String, Object> params = new HashMap<String, Object>();
         RequestUtils.propogateParam(request, params, Constants.SORTORDER_PARAM);
         RequestUtils.propogateParam(request, params, Constants.SORTCOL_PARAM);
 
@@ -81,9 +84,7 @@ public class RemoveAction extends BaseAction {
 
         Integer sessionId = RequestUtils.getSessionId(request);
 
-        //get the spiderSubjectValue of the user to be deleated.
-        ServletContext ctx = getServlet().getServletContext();            
-        AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);            
+                
 
         log.trace("removing users");                                                      
         authzBoss.removeSubject(sessionId, users );                    

@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.ui.action.resource.autogroup.monitor.visibility;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -46,6 +45,7 @@ import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
+import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
@@ -54,11 +54,11 @@ import org.hyperic.hq.ui.action.resource.common.monitor.visibility.IndicatorView
 import org.hyperic.hq.ui.action.resource.common.monitor.visibility.InventoryHelper;
 import org.hyperic.hq.ui.action.resource.platform.monitor.visibility.RootInventoryHelper;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.MonitorUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.TimeUtil;
 import org.hyperic.util.pager.PageControl;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * A <code>TilesAction</code> that retrieves data from the Bizapp to be
@@ -68,10 +68,18 @@ import org.hyperic.util.pager.PageControl;
  */
 public class AutoGroupCurrentHealthAction extends CurrentHealthAction {
 
-    private static Log log =
+    private final Log log =
         LogFactory.getLog(AutoGroupCurrentHealthAction.class.getName());
 
-    private PageControl pc = new PageControl(0, Constants.DEFAULT_CHART_POINTS);
+    private final PageControl pc = new PageControl(0, Constants.DEFAULT_CHART_POINTS);
+    
+    
+    @Autowired
+    public AutoGroupCurrentHealthAction(MeasurementBoss measurementBoss) {
+        super(measurementBoss);
+    }
+
+
 
     /**
      * Retrieve data needed to display an autogroup's current health
@@ -130,33 +138,32 @@ public class AutoGroupCurrentHealthAction extends CurrentHealthAction {
                    parentKey + "." + childTypeId.getAppdefKey());
 
         // Get the resource availability
-        MeasurementBoss boss =
-            ContextUtils.getMeasurementBoss(getServlet().getServletContext());
+       
         WebUser user = RequestUtils.getWebUser(request);
 
         try {
             MeasurementTemplate mt =
-                boss.getAvailabilityMetricTemplate(sessionId.intValue(),
+                measurementBoss.getAvailabilityMetricTemplate(sessionId.intValue(),
                                                    entityIds[0], childTypeId);
             
-            Map pref = user.getMetricRangePreference(true);
+            Map<String,Object> pref = user.getMetricRangePreference(true);
             long begin = ((Long) pref.get(MonitorUtils.BEGIN)).longValue();
             long end = ((Long) pref.get(MonitorUtils.END)).longValue();
             long interval = TimeUtil.getInterval(begin, end,
                     Constants.DEFAULT_CHART_POINTS);
 
-            List data =
-                boss.findAGMeasurementData(sessionId.intValue(), entityIds,
+            List<HighLowMetricValue> data =
+                measurementBoss.findAGMeasurementData(sessionId.intValue(), entityIds,
                                            mt, childTypeId, begin, end,
                                            interval, true, pc);
             
             // Seems like sometimes Postgres does not average cleanly, and
             // the value ends up being like 0.9999999999.  We don't want the
             // insignificant amount to mess up our display.
-            for (Iterator it = data.iterator(); it.hasNext(); ) {
-                MetricValue val = (MetricValue) it.next();
-                if (val.toString().equals("1"))
+            for (MetricValue val : data ) {
+                if (val.toString().equals("1")) {
                     val.setValue(1);
+                }
             }
 
             request.setAttribute(Constants.CAT_AVAILABILITY_METRICS_ATTR, data);
@@ -172,4 +179,3 @@ public class AutoGroupCurrentHealthAction extends CurrentHealthAction {
     }
 }
 
-// EOF

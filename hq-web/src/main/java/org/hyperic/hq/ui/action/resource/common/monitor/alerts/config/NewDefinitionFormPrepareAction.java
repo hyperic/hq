@@ -27,8 +27,10 @@ package org.hyperic.hq.ui.action.resource.common.monitor.alerts.config;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.ControlBoss;
+import org.hyperic.hq.bizapp.shared.MeasurementBoss;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Prepare the alert definition form for new.
@@ -36,12 +38,15 @@ import org.apache.commons.logging.LogFactory;
  */
 public class NewDefinitionFormPrepareAction extends DefinitionFormPrepareAction
 {
-    protected Log log =
-        LogFactory.getLog(NewDefinitionFormPrepareAction.class.getName());
-    
+  
+    @Autowired
+    public NewDefinitionFormPrepareAction(MeasurementBoss measurementBoss, ControlBoss controlBoss,
+                                          AppdefBoss appdefBoss) {
+        super(measurementBoss, controlBoss, appdefBoss);
+    }
+
     protected void setupConditions(HttpServletRequest request,
                                    DefinitionForm defForm)
         throws Exception {}
 }
 
-// EOF

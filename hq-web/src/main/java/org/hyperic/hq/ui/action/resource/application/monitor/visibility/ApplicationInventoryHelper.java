@@ -37,16 +37,14 @@ import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
-import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.appdef.shared.ApplicationValue;
+import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.action.resource.common.monitor.visibility.InventoryHelper;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.MonitorUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
@@ -57,11 +55,12 @@ import org.hyperic.util.pager.PageControl;
  */
 public class ApplicationInventoryHelper extends InventoryHelper {
 
-    public ApplicationInventoryHelper(AppdefEntityID entityId) {
+    private AppdefBoss appdefBoss;
+    
+    public ApplicationInventoryHelper(AppdefEntityID entityId, AppdefBoss appdefBoss) {
         super(entityId);
+        this.appdefBoss = appdefBoss;
     }
-
-    // ---------------------------------------------------- Protected Methods
 
 
     /**
@@ -72,7 +71,7 @@ public class ApplicationInventoryHelper extends InventoryHelper {
      * @param ctx the servlet context
      * @param resource the application
      */
-    public List getChildResourceTypes(HttpServletRequest request,
+    public List<ServiceTypeValue> getChildResourceTypes(HttpServletRequest request,
                                       ServletContext ctx,
                                       AppdefResourceValue resource)
         throws PermissionException, AppdefEntityNotFoundException,
@@ -80,10 +79,10 @@ public class ApplicationInventoryHelper extends InventoryHelper {
                SessionException, ServletException {
         AppdefEntityID entityId = resource.getEntityId();
         int sessionId = RequestUtils.getSessionId(request).intValue();
-        AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+      
 
         log.trace("finding services for resource [" + entityId + "]");
-        List services = boss
+        List<AppdefResourceValue> services = appdefBoss
             .findServiceInventoryByApplication(sessionId,
                                                entityId.getId(),
                                                PageControl.PAGE_ALL);
@@ -104,10 +103,10 @@ public class ApplicationInventoryHelper extends InventoryHelper {
         RemoteException, SessionNotFoundException, SessionTimeoutException,
         ServletException {
         int sessionId = RequestUtils.getSessionId(request).intValue();
-        AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+       
 
         log.trace("finding service type [" + id + "]");
-        return boss.findServiceTypeById(sessionId, id.getId());
+        return appdefBoss.findServiceTypeById(sessionId, id.getId());
     }
 
     /**
@@ -119,19 +118,19 @@ public class ApplicationInventoryHelper extends InventoryHelper {
      * @param resource the appdef resource whose children we are
      * counting
      */
-    public Map getChildCounts(HttpServletRequest request,
+    public Map<String,Integer> getChildCounts(HttpServletRequest request,
                               ServletContext ctx,
                               AppdefResourceValue resource)
         throws PermissionException, AppdefEntityNotFoundException,
         RemoteException, SessionException, 
         ServletException {
-        ApplicationValue application = (ApplicationValue) resource;
+      
         int sessionId = RequestUtils.getSessionId(request).intValue();
-        AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+       
 
         log.trace("finding service counts for application [" +
 		  resource.getEntityId() + "]");
-	   List services = boss.findServiceInventoryByApplication(sessionId,
+	   List<AppdefResourceValue> services = appdefBoss.findServiceInventoryByApplication(sessionId,
 						       resource.getId(),
 						       PageControl.PAGE_ALL);
        return AppdefResourceValue.getServiceTypeCountMap(services);        

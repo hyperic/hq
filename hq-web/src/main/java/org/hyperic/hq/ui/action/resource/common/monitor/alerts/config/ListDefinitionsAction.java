@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.ui.action.resource.common.monitor.alerts.config;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -41,12 +40,13 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
+import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * List all alert definitions for this entity
@@ -54,7 +54,17 @@ import org.hyperic.util.pager.PageList;
  */
 public class ListDefinitionsAction extends TilesAction {
 
-    private Log log = LogFactory.getLog(ListDefinitionsAction.class.getName());
+    private final Log log = LogFactory.getLog(ListDefinitionsAction.class.getName());
+    private EventsBoss eventsBoss;
+    
+    
+    @Autowired
+    public ListDefinitionsAction(EventsBoss eventsBoss) {
+        super();
+        this.eventsBoss = eventsBoss;
+    }
+
+
 
     /**
      * Retrieve this data and store it in request attributes.
@@ -68,29 +78,27 @@ public class ListDefinitionsAction extends TilesAction {
         log.trace("in ListDefinitionAction");
         Integer sessionId = RequestUtils.getSessionId(request);
 
-        ServletContext ctx = getServlet().getServletContext();
-        EventsBoss boss = ContextUtils.getEventsBoss( ctx );
-
+      
         PageControl pc = RequestUtils.getPageControl(request);
         
         AppdefEntityID appEntId;
-        PageList alertDefs;        
+        PageList<AlertDefinitionValue> alertDefs;        
         try {
             appEntId = RequestUtils.getEntityTypeId(request);
             request.setAttribute("section", AppdefEntityConstants.typeToString(
                                  appEntId.getType()));
-            alertDefs = boss.findAlertDefinitions(sessionId.intValue(),
+            alertDefs = eventsBoss.findAlertDefinitions(sessionId.intValue(),
                                                   (AppdefEntityTypeID) appEntId,
                                                   pc);
         } catch (ParameterNotFoundException e) {
             appEntId = RequestUtils.getEntityId(request);
             try {
                 alertDefs =
-                    boss.findAlertDefinitions(sessionId.intValue(), appEntId,
+                    eventsBoss.findAlertDefinitions(sessionId.intValue(), appEntId,
                                               pc);
             } catch (PermissionException pe) {
                 // user cant manage alerts... set empty list
-                alertDefs = new PageList();
+                alertDefs = new PageList<AlertDefinitionValue>();
             }
         }        
         
@@ -106,4 +114,3 @@ public class ListDefinitionsAction extends TilesAction {
     }
 }
 
-// EOF

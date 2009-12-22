@@ -27,7 +27,6 @@ package org.hyperic.hq.ui.action.resource.service.monitor;
 
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -41,13 +40,16 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
+import org.hyperic.hq.bizapp.shared.uibeans.ResourceDisplaySummary;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.action.resource.common.monitor.visibility.ResourceVisibilityPortalAction;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * A <code>BaseDispatchAction</code> that sets up service
@@ -55,10 +57,19 @@ import org.hyperic.util.pager.PageControl;
  */
 public class VisibilityPortalAction extends ResourceVisibilityPortalAction {
 
-    protected static Log log =
+    private final Log log =
         LogFactory.getLog(VisibilityPortalAction.class.getName());
     private static final String ERR_SERVER_PERMISSION =
         "resource.service.monitor.visibility.error.ServerPermission";
+    
+    private MeasurementBoss measurementBoss;
+    
+    @Autowired
+    public VisibilityPortalAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss, MeasurementBoss measurementBoss) {
+        super(appdefBoss, authzBoss, controlBoss);
+        this.measurementBoss = measurementBoss;
+    }
+
 
     public ActionForward currentHealth(ActionMapping mapping,
                                        ActionForm form,
@@ -122,27 +133,25 @@ public class VisibilityPortalAction extends ResourceVisibilityPortalAction {
             int sessionId = RequestUtils.getSessionId(request).intValue();
             entityId = RequestUtils.getEntityId(request);
     
-            ServletContext ctx = getServlet().getServletContext();
-            MeasurementBoss boss = ContextUtils.getMeasurementBoss(ctx);
     
             // for a regular service, there can only be one
             PageControl pc = PageControl.PAGE_ALL;
-            AppdefBoss aboss = ContextUtils.getAppdefBoss(ctx);
-            ServiceValue sv = aboss.findServiceById(sessionId, entityId.getId());
+           
+            ServiceValue sv = appdefBoss.findServiceById(sessionId, entityId.getId());
             // check for platform services
-            List healths = null;
+            List<ResourceDisplaySummary> healths = null;
             if(sv.getServer().getServerType().getVirtual()) {
                 request.setAttribute(Constants.PLATFORM_SERVICE_ATTR, "true");
                 AppdefEntityID platId = 
-                    aboss.findPlatformByDependentID(sessionId, entityId).getEntityId();
+                    appdefBoss.findPlatformByDependentID(sessionId, entityId).getEntityId();
                 healths = 
-                    boss.findPlatformsCurrentHealth(sessionId,
+                    measurementBoss.findPlatformsCurrentHealth(sessionId,
                                                     platId, pc);
             } else {
                 // for a "clustered services" there'd be many... does
                 // that get handled here or the group monitoring?
                 healths =
-                    boss.findServersCurrentHealth(sessionId, entityId, pc);
+                    measurementBoss.findServersCurrentHealth(sessionId, entityId, pc);
                 
             }
             request.setAttribute(Constants.HOST_HEALTH_SUMMARIES_ATTR,
@@ -157,8 +166,9 @@ public class VisibilityPortalAction extends ResourceVisibilityPortalAction {
             request.setAttribute(Constants.ERR_SERVER_HEALTH_ATTR, ERR_SERVER_PERMISSION);
         }
         finally {
-            if (thrown != null && log.isDebugEnabled())
+            if (thrown != null && log.isDebugEnabled()) {
                 log.debug("resource [" + entityId + "] access error", thrown);
+            }
         }
 
     }

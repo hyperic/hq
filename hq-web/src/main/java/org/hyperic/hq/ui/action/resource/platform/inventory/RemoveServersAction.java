@@ -27,10 +27,8 @@ package org.hyperic.hq.ui.action.resource.platform.inventory;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -43,14 +41,26 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * A <code>BaseAction</code> that removes servers from the
  * inventory.
  */
 public class RemoveServersAction extends BaseAction {
+    
+    private final Log log = LogFactory.getLog(RemoveServersAction.class.getName());
+    private AppdefBoss appdefBoss;
+    
+    
+    @Autowired
+    public RemoveServersAction(AppdefBoss appdefBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+    }
+
+
 
     /**
      * Removes the servers identified in the
@@ -61,29 +71,26 @@ public class RemoveServersAction extends BaseAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-        Log log = LogFactory.getLog(RemoveServersAction.class.getName());
+        
 
         RemoveServersForm rmForm = (RemoveServersForm) form;
         Integer platformId = rmForm.getRid();
         Integer resourceType = rmForm.getType();
 
-        HashMap forwardParams = new HashMap(2);
+        HashMap<String, Object> forwardParams = new HashMap<String, Object>(2);
         forwardParams.put(Constants.RESOURCE_PARAM, platformId);
         forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, resourceType);
-    
-        ServletContext ctx = getServlet().getServletContext();
-        AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);            
+ 
         Integer sessionId = RequestUtils.getSessionId(request);
 
         Integer[] resources = rmForm.getResources();
         if (resources != null && resources.length > 0) {
-            List servers = Arrays.asList(resources);
+            List<Integer> servers = Arrays.asList(resources);
             log.trace("removing servers " + servers +
                       " for platform [" + platformId + "]");
-            Iterator i = servers.iterator();
-            while (i.hasNext()) {
-                Integer serverId = (Integer) i.next();
-                boss.removeAppdefEntity(sessionId.intValue(),
+           
+            for (Integer serverId : servers) {
+                appdefBoss.removeAppdefEntity(sessionId.intValue(),
                                         AppdefEntityID.newServerID(serverId));
             }
 

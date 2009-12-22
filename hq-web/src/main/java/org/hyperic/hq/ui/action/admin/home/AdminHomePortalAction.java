@@ -48,10 +48,10 @@ public class AdminHomePortalAction extends BaseAction {
     private static final String TITLE_HOME = "user.admin.page.title";
     private static final String PORTLET_HOME   = ".admin.home";
 
-    protected static Log log =
+    private final Log log =
         LogFactory.getLog(AdminHomePortalAction.class.getName());
 
-    // ---------------------------------------------------- Public Methods
+   
 
     /** Set up the Admin Home portal.
      *  
@@ -61,8 +61,7 @@ public class AdminHomePortalAction extends BaseAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-        Log log = LogFactory.getLog(AdminHomePortalAction.class.getName());
-
+      
         Portal portal = Portal.createPortal(TITLE_HOME, PORTLET_HOME);
         request.setAttribute( Constants.PORTAL_KEY, portal );               
 

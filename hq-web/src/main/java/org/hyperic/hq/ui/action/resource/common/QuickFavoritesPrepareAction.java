@@ -25,8 +25,6 @@
 
 package org.hyperic.hq.ui.action.resource.common;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -42,13 +40,23 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Dashboard;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.WorkflowPrepareAction;
-import org.hyperic.hq.ui.server.session.DashboardConfig;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class QuickFavoritesPrepareAction extends WorkflowPrepareAction {
+
+    private AuthzBoss authzBoss;
+    
+    
+    @Autowired
+    public QuickFavoritesPrepareAction(AuthzBoss authzBoss) {
+        super();
+        this.authzBoss = authzBoss;
+    }
+
+
 
     public ActionForward workflow(ComponentContext context,
                                   ActionMapping mapping,
@@ -61,14 +69,14 @@ public class QuickFavoritesPrepareAction extends WorkflowPrepareAction {
 		AppdefResourceValue arv = (AppdefResourceValue) context.getAttribute("resource");
 
 		// check our preferences to see if this resource is in there.
-        AuthzBoss boss = ContextUtils.getAuthzBoss(getServlet().getServletContext());
-        ConfigResponse dashConfig = DashboardUtils.findUserDashboardConfig(user, boss);
+       
+        ConfigResponse dashConfig = DashboardUtils.findUserDashboardConfig(user, authzBoss);
 		isFavorite = QuickFavoritesUtil.isFavorite(dashConfig, arv.getEntityId());
 
 		request.setAttribute(Constants.ENTITY_ID_PARAM, arv.getEntityId().getAppdefKey());
 		request.setAttribute(Constants.IS_FAVORITE_PARAM, isFavorite);
 	
-		List editableDashboards = DashboardUtils.findEditableDashboards(user, boss);
+		List<Dashboard> editableDashboards = DashboardUtils.findEditableDashboards(user, authzBoss);
 		
 		request.setAttribute(Constants.EDITABLE_DASHBOARDS_PARAM, editableDashboards);
 		request.setAttribute(Constants.HAS_MULTIPLE_DASHBOARDS_PARAM, editableDashboards.size() > 1);

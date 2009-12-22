@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.ejb.ObjectNotFoundException;
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -42,13 +41,14 @@ import org.hyperic.hq.appdef.server.session.ApplicationType;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
+import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.action.resource.application.ApplicationForm;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * This class handles saving the submission from the application
@@ -56,7 +56,17 @@ import org.hyperic.util.config.ConfigResponse;
  */
 public class NewApplicationAction extends BaseAction {
 
-    private static Log log = LogFactory.getLog(NewApplicationAction.class.getName());
+    private final Log log = LogFactory.getLog(NewApplicationAction.class.getName());
+    private AppdefBoss appdefBoss;
+    
+    
+    @Autowired
+    public NewApplicationAction(AppdefBoss appdefBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+    }
+
+
 
     /**
      * Create the server with the attributes specified in the given
@@ -68,17 +78,17 @@ public class NewApplicationAction extends BaseAction {
                                  HttpServletResponse response)
     throws Exception {
         ApplicationForm newForm = (ApplicationForm) form;
-        HashMap forwardParams = new HashMap(2);
+        HashMap<String, Object> forwardParams = new HashMap<String, Object>(2);
     
         try {
             ActionForward forward = checkSubmit(request, mapping, form);            
             if (forward != null) {
                 return forward;
             }         
-            ServletContext ctx = getServlet().getServletContext();
+          
             Integer sessionId = RequestUtils.getSessionId(request);
             Integer applicationTypeId = newForm.getResourceType();
-            AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+           
             ApplicationValue app = new ApplicationValue();
             app.setName(newForm.getName());
             app.setDescription(newForm.getDescription());
@@ -88,15 +98,15 @@ public class NewApplicationAction extends BaseAction {
             app.setLocation(newForm.getLocation());
             log.trace("finding application type [" + applicationTypeId + "]");
             ApplicationType applicationType =
-                boss.findApplicationTypeById(sessionId.intValue(),
+                appdefBoss.findApplicationTypeById(sessionId.intValue(),
                                              applicationTypeId);
             app.setApplicationType(applicationType);
             log.trace("creating application [" + app.getName() +
                       "] with attributes " + newForm);
             // XXX ConfigResponse is a dummy arg, must be nuked when the boss
             // interface fixed
-            app = boss.createApplication(sessionId.intValue(), app,
-                                         new ArrayList(), new ConfigResponse());
+            app =appdefBoss.createApplication(sessionId.intValue(), app,
+                                         new ArrayList<ServiceValue>(), new ConfigResponse());
             AppdefEntityID appId = app.getEntityId();
             log.trace("created application [" + app.getName() +
                       "] with attributes " + app.toString() +

@@ -42,6 +42,7 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.hyperic.hq.appdef.server.session.ServerType;
+import org.hyperic.hq.appdef.shared.AIAppdefResourceValue;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIServerValue;
@@ -51,11 +52,21 @@ import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.WorkflowPrepareAction;
 import org.hyperic.hq.ui.util.BizappUtils;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageList;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class ViewResultsPrepAction extends WorkflowPrepareAction {
+    
+    private AppdefBoss appdefBoss;
+    
+    
+    
+    @Autowired
+    public ViewResultsPrepAction(AppdefBoss appdefBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+    }
 
     public ActionForward workflow(ComponentContext context,
                                  ActionMapping mapping,
@@ -71,7 +82,7 @@ public class ViewResultsPrepAction extends WorkflowPrepareAction {
         
         ServletContext ctx = getServlet().getServletContext();
         Integer sessionId = RequestUtils.getSessionId(request);
-        AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
+      
         
         AppdefResourceTypeValue[] supportedSTypeFilter;
         supportedSTypeFilter =
@@ -95,14 +106,14 @@ public class ViewResultsPrepAction extends WorkflowPrepareAction {
         aForm.buildActionOptions(request);
         
                                          
-        List newModifiedServers = new PageList();
+        List<AIServerValue> newModifiedServers = new PageList<AIServerValue>();
         AIServerValue[] aiServerVals = aiVal.getAIServerValues();
         CollectionUtils.addAll(newModifiedServers,aiServerVals);
         
-        List filteredNewServers =
+        List<AIAppdefResourceValue> filteredNewServers =
             BizappUtils.filterAIResourcesByStatus(newModifiedServers, 
                                                   aForm.getStdStatusFilter());
-        List filteredServers2 = null;
+       
         String name = "";
 
         if (aForm.getServerTypeFilter() != null &&
@@ -114,16 +125,16 @@ public class ViewResultsPrepAction extends WorkflowPrepareAction {
             name = sTypeVal.getName();                                                                 
         }
         
-        filteredServers2 =
+        List<AIServerValue> filteredServers2 =
             BizappUtils.filterAIResourcesByServerType(filteredNewServers, 
                                                       name);
         
-        List newIps = new ArrayList();
+        List<AIIpValue> newIps = new ArrayList<AIIpValue>();
 
         AIIpValue[] aiIpVals = aiVal.getAIIpValues();
         CollectionUtils.addAll(newIps, aiIpVals);
 
-        List filteredIps =
+        List<AIAppdefResourceValue> filteredIps =
             BizappUtils.filterAIResourcesByStatus(newIps, 
                                                   aForm.getIpsStatusFilter());
 

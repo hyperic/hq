@@ -34,12 +34,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
 import org.hyperic.util.JavaBeanPropertyComparator;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * View an alert definition -- notified roles.
@@ -50,11 +53,17 @@ public class ViewDefinitionNotificationsUsersAction
 {
     private static final String[] SORT_ATTRS = { "name", "lastName", "firstName" };
 
-    private Log log = LogFactory.getLog(ViewDefinitionNotificationsUsersAction.class.getName());
+    private final Log log = LogFactory.getLog(ViewDefinitionNotificationsUsersAction.class.getName());
+    
+    
+    @Autowired
+    public ViewDefinitionNotificationsUsersAction(EventsBoss eventsBoss, AuthzBoss authzBoss) {
+        super(eventsBoss, authzBoss);
+    }
 
     public int getNotificationType() { return EmailActionConfig.TYPE_USERS; }
 
-    protected PageList getPageList(int sessionID, AuthzBoss ab,
+    protected PageList getPageList(int sessionID, 
                                    EmailActionConfig ea, PageControl pc)
         throws FinderException,
                SessionTimeoutException,
@@ -65,7 +74,7 @@ public class ViewDefinitionNotificationsUsersAction
         log.debug( "userIds: " + ea.getUsers() );
         Integer[] userIds = new Integer[ea.getUsers().size()];
         userIds = (Integer[])ea.getUsers().toArray(userIds);
-        PageList notifyList = ab.getSubjectsById
+        PageList<AuthzSubjectValue> notifyList = authzBoss.getSubjectsById
             ( new Integer(sessionID), userIds, PageControl.PAGE_ALL );
 
         int sortOrder = pc.isAscending() ?
@@ -80,4 +89,3 @@ public class ViewDefinitionNotificationsUsersAction
     }
 }
 
-// EOF

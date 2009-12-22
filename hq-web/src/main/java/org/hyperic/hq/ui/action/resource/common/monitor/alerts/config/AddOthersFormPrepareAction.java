@@ -25,24 +25,20 @@
 
 package org.hyperic.hq.ui.action.resource.common.monitor.alerts.config;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.struts.action.Action;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.Action;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An Action that retrieves data from the BizApp to facilitate display
@@ -50,7 +46,13 @@ import org.apache.struts.action.ActionMapping;
  */
 public class AddOthersFormPrepareAction extends Action {
 
-    // ---------------------------------------------------- Public Methods
+   private EventsBoss eventsBoss;
+
+   @Autowired
+    public AddOthersFormPrepareAction(EventsBoss eventsBoss) {
+        super();
+        this.eventsBoss = eventsBoss;
+    }
 
     /**
      * Retrieve this data and store it in the specified request
@@ -69,12 +71,13 @@ public class AddOthersFormPrepareAction extends Action {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-        Log log = LogFactory.getLog(AddOthersFormPrepareAction.class.getName());    
+      
 
         AddOthersForm addForm = (AddOthersForm) form;
         Integer alertDefId = addForm.getAd();
-        if (alertDefId == null)
+        if (alertDefId == null) {
             throw new ParameterNotFoundException("alert definition id not found");
+        }
 
         try {
             AppdefEntityID appTypeId = RequestUtils.getEntityTypeId(request);
@@ -85,15 +88,15 @@ public class AddOthersFormPrepareAction extends Action {
             addForm.setRid(aeid.getId());
         }        
 
-        ServletContext ctx = getServlet().getServletContext();
+      
         Integer sessionId = RequestUtils.getSessionId(request);
-        EventsBoss eventBoss = ContextUtils.getEventsBoss(ctx);
+      
 
         AlertDefinitionValue alertDef = (AlertDefinitionValue)
             request.getAttribute(Constants.ALERT_DEFS_ATTR);
         if (alertDef == null) {
             alertDef =
-                eventBoss.getAlertDefinition(sessionId.intValue(), alertDefId);
+                eventsBoss.getAlertDefinition(sessionId.intValue(), alertDefId);
         }
         addForm.setAd(alertDef.getId());
 

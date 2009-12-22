@@ -27,16 +27,8 @@ package org.hyperic.hq.ui.action.resource.application.inventory;
 
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.hyperic.hq.appdef.shared.ApplicationValue;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.action.resource.application.ApplicationForm;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -45,6 +37,13 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
+import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
+import org.hyperic.hq.appdef.shared.ApplicationValue;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.action.resource.application.ApplicationForm;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * This class handles preparing the data for edit operations performed 
@@ -52,8 +51,18 @@ import org.apache.struts.tiles.actions.TilesAction;
  */
 public class EditApplicationPropertiesFormPrepareAction extends TilesAction {
 
-    private static Log log = LogFactory.
+    private final Log log = LogFactory.
         getLog(EditApplicationPropertiesFormPrepareAction.class.getName());
+    private AppdefBoss appdefBoss;
+    
+    
+    @Autowired
+    public EditApplicationPropertiesFormPrepareAction(AppdefBoss appdefBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+    }
+
+
 
     public ActionForward execute(ComponentContext context,
                                  ActionMapping mapping,
@@ -71,14 +80,13 @@ public class EditApplicationPropertiesFormPrepareAction extends TilesAction {
         ApplicationForm appForm = (ApplicationForm) form;
         appForm.loadResourceValue(appVal);
         
-        ServletContext ctx = getServlet().getServletContext();
+       
         Integer sessionId = RequestUtils.getSessionId(request);
-        AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+      
         log.trace("getting all application types");
-        List applicationTypes = boss.findAllApplicationTypes(sessionId.intValue());
+        List<AppdefResourceTypeValue> applicationTypes = appdefBoss.findAllApplicationTypes(sessionId.intValue());
         appForm.setResourceTypes(applicationTypes);
         appForm.setResourceType(appVal.getApplicationType().getId());
-        //request.setAttribute("resourceTypes", applicationTypes);
         request.setAttribute(Constants.NUM_CHILD_RESOURCES_ATTR,
                              new Integer(1));
         return null;                

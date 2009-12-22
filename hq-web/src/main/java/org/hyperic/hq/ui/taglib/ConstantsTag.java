@@ -30,6 +30,7 @@
 package org.hyperic.hq.ui.taglib;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 
 import javax.servlet.jsp.JspException;
@@ -165,7 +166,8 @@ public class ConstantsTag extends TagSupport {
             } else {
                 fieldMap = new HashMap();
                 Class typeClass = Class.forName(className);
-                Object con = typeClass.newInstance();
+                
+                //Object con = typeClass.newInstance();
                 Field[] fields = typeClass.getFields();
                 for (int i = 0; i < fields.length; i++) {
                     // string comparisons of class names should be cheaper
@@ -173,31 +175,35 @@ public class ConstantsTag extends TagSupport {
                     // is that most constants are Strings, ints and booleans
                     // but a minimal effort is made to accomadate all types
                     // and represent them as String's for our tag's output
-                    String fieldType = fields[i].getType().getName();
-                    String strVal;
-                    if (fieldType.equals("java.lang.String")) {
-                        strVal = (String)fields[i].get(con);
-                    } else if (fieldType.equals("int")) {
-                        strVal = Integer.toString(fields[i].getInt(con));
-                    } else if (fieldType.equals("boolean")) {
-                        strVal = Boolean.toString(fields[i].getBoolean(con));
-                    } else if (fieldType.equals("char")) {
-                        strVal = Character.toString(fields[i].getChar(con));
-                    } else if (fieldType.equals("double")) {
-                        strVal = Double.toString(fields[i].getDouble(con));
-                    } else if (fieldType.equals("float")) {
-                        strVal = Float.toString(fields[i].getFloat(con));
-                    } else if (fieldType.equals("long")) {
-                        strVal = Long.toString(fields[i].getLong(con));
-                    } else if (fieldType.equals("short")) {
-                        strVal = Short.toString(fields[i].getShort(con));
-                    } else if (fieldType.equals("byte")) {
-                        strVal = Byte.toString(fields[i].getByte(con));
-                    } else {
-                        Object val = (Object)fields[i].get(con);
-                        strVal = val.toString();
+                    //BIG NEW ASSUMPTION: Constants are statics and do not require instantiation of the class
+                    if(Modifier.isStatic(fields[i].getModifiers())) {
+                    
+                        String fieldType = fields[i].getType().getName();
+                        String strVal;
+                        if (fieldType.equals("java.lang.String")) {
+                            strVal = (String)fields[i].get(null);
+                        } else if (fieldType.equals("int")) {
+                            strVal = Integer.toString(fields[i].getInt(null));
+                        } else if (fieldType.equals("boolean")) {
+                            strVal = Boolean.toString(fields[i].getBoolean(null));
+                        } else if (fieldType.equals("char")) {
+                            strVal = Character.toString(fields[i].getChar(null));
+                        } else if (fieldType.equals("double")) {
+                            strVal = Double.toString(fields[i].getDouble(null));
+                        } else if (fieldType.equals("float")) {
+                            strVal = Float.toString(fields[i].getFloat(null));
+                        } else if (fieldType.equals("long")) {
+                            strVal = Long.toString(fields[i].getLong(null));
+                        } else if (fieldType.equals("short")) {
+                            strVal = Short.toString(fields[i].getShort(null));
+                        } else if (fieldType.equals("byte")) {
+                            strVal = Byte.toString(fields[i].getByte(null));
+                        } else {
+                            Object val = (Object)fields[i].get(null);
+                            strVal = val.toString();
+                        }
+                        fieldMap.put(fields[i].getName(), strVal);
                     }
-                    fieldMap.put(fields[i].getName(), strVal);
                 }
                 // cache the result
                 constants.put(className, fieldMap);

@@ -28,7 +28,6 @@ package org.hyperic.hq.ui.action.portlet.autoDisc;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -52,18 +51,29 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.util.BizappUtils;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class ViewAction extends TilesAction {
 
-    public static final Log log = LogFactory.getLog(ViewAction.class.getName());
+    private final Log log = LogFactory.getLog(ViewAction.class.getName());
+    private AuthzBoss authzBoss;
+    private AIBoss aiBoss;
+    private AppdefBoss appdefBoss;
     
+    @Autowired
+    public ViewAction(AuthzBoss authzBoss, AIBoss aiBoss, AppdefBoss appdefBoss) {
+        super();
+        this.authzBoss = authzBoss;
+        this.aiBoss = aiBoss;
+        this.appdefBoss = appdefBoss;
+    }
+
     public ActionForward execute(ComponentContext context,
                                  ActionMapping mapping,
                                  ActionForm form,
@@ -71,27 +81,26 @@ public class ViewAction extends TilesAction {
                                  HttpServletResponse response)
         throws Exception {
         
-        ServletContext ctx = getServlet().getServletContext();
+       
         HttpSession session = request.getSession();
-        AIBoss boss = ContextUtils.getAIBoss(ctx);
-        AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
+     
         WebUser user = RequestUtils.getWebUser(request);
         int sessionId = user.getSessionId().intValue();
         AIQueueForm queueForm = (AIQueueForm) form;
 
         PageControl page = new PageControl();
-        AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
+       
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
         		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, aBoss);
+        		user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         page.setPagesize(Integer.parseInt( 
         		dashPrefs.getValue(".dashContent.autoDiscovery.range") ) );
 
         // always show ignored platforms and already-processed platforms
-        PageList aiQueue = boss.getQueue(sessionId, true, false, true,
+        PageList<AIPlatformValue> aiQueue = aiBoss.getQueue(sessionId, true, false, true,
                                               page);
-        List queueWithStatus = getStatuses(aiQueue);
+        List<AIPlatformWithStatus> queueWithStatus = getStatuses(aiQueue);
         context.putAttribute("resources", queueWithStatus);
 
         // If the queue is empty, check to see if there are ANY agents
@@ -103,11 +112,11 @@ public class ViewAction extends TilesAction {
 
         // check every box for queue
         Integer[] platformsToProcess = new Integer[aiQueue.size()];
-        List serversToProcess = new ArrayList();
+        List<Integer> serversToProcess = new ArrayList<Integer>();
         AIPlatformValue aiPlatform;
         AIServerValue[] aiServers;
         for (int i=0; i<platformsToProcess.length; i++) {
-            aiPlatform = (AIPlatformValue) aiQueue.get(i);
+            aiPlatform =  aiQueue.get(i);
             platformsToProcess[i] = aiPlatform.getId();
 
             // Add all non-virtual servers on this platform
@@ -155,13 +164,13 @@ public class ViewAction extends TilesAction {
         return null;
     }
     
-    private List getStatuses(PageList aiQueue) {
+    private List<AIPlatformWithStatus> getStatuses(PageList<AIPlatformValue> aiQueue) {
         ScanStateCore ssc = null;
         AIPlatformValue aiPlatform;
-        List results = new ArrayList();
+        List<AIPlatformWithStatus> results = new ArrayList<AIPlatformWithStatus>();
 
         for (int i=0; i<aiQueue.size(); i++) {
-            aiPlatform = (AIPlatformValue) aiQueue.get(i);
+            aiPlatform =  aiQueue.get(i);
 
             results.add(new AIPlatformWithStatus(aiPlatform, ssc));
         }

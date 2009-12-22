@@ -1,6 +1,7 @@
 package org.hyperic.hq.ui.service;
 
 import java.io.IOException;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -40,6 +41,8 @@ import org.hyperic.hq.bizapp.server.session.DashboardPortletBossImpl;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.DashboardPortletBoss;
+import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
@@ -68,6 +71,8 @@ import org.json.JSONObject;
 public class RESTService extends BaseService {
 
     private static Log log = LogFactory.getLog(RESTService.class);
+    
+   
 
     public static final String SERVICE_NAME = "api";
 
@@ -185,9 +190,9 @@ public class RESTService extends BaseService {
 
                 if (update) {
                     //update the crispo
-                    ConfigurationProxy.getInstance()
+                    Bootstrap.getBean(ConfigurationProxy.class)
                         .setDashboardPreferences(_request.getSession(), user,
-                                                 boss, config);
+                                                 config);
                 }
                 
                 int sessionId = RequestUtils.getSessionId(_request).intValue();
@@ -354,9 +359,9 @@ public class RESTService extends BaseService {
             if (update) {
                 //update the crispo
                 try {
-                    ConfigurationProxy.getInstance()
+                    Bootstrap.getBean(ConfigurationProxy.class)
                         .setDashboardPreferences(_request.getSession(), user,
-                                                 boss, config);
+                                                  config);
                 } catch (Exception e) {
                     log.debug(e.getLocalizedMessage());
                     res = ERROR_GENERIC;
@@ -420,8 +425,8 @@ public class RESTService extends BaseService {
                                             Constants.DASHBOARD_DELIMITER);
                                     list = Constants.DASHBOARD_DELIMITER + list;
                                     config.setValue(Constants.USER_DASHBOARD_CHARTS, list);
-                                    ConfigurationProxy.getInstance().setDashboardPreferences(
-                                            _request.getSession(), user, boss, config);
+                                    Bootstrap.getBean(ConfigurationProxy.class).setDashboardPreferences(
+                                            _request.getSession(), user, config);
                                     break;
                                 }
                             }

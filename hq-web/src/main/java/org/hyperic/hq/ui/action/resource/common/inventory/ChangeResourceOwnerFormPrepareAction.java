@@ -28,7 +28,6 @@ package org.hyperic.hq.ui.action.resource.common.inventory;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -39,14 +38,15 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.WorkflowPrepareAction;
 import org.hyperic.hq.ui.util.BizappUtils;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An Action that retrieves a resource and a list of subjects from the
@@ -56,7 +56,18 @@ import org.hyperic.util.pager.PageList;
 public class ChangeResourceOwnerFormPrepareAction 
     extends WorkflowPrepareAction {
 
-    // ---------------------------------------------------- Public Methods
+    private final  Log log = LogFactory
+    .getLog(ChangeResourceOwnerFormPrepareAction.class.getName());
+    private AuthzBoss authzBoss;
+    
+    
+    @Autowired
+    public ChangeResourceOwnerFormPrepareAction(AuthzBoss authzBoss) {
+        super();
+        this.authzBoss = authzBoss;
+    }
+
+
 
     /**
      * Retrieve the full <code>List</code> of
@@ -75,8 +86,7 @@ public class ChangeResourceOwnerFormPrepareAction
                                   HttpServletRequest request,
                                   HttpServletResponse response)
         throws Exception {
-        Log log = LogFactory
-            .getLog(ChangeResourceOwnerFormPrepareAction.class.getName());
+       
 
         ChangeResourceOwnerForm changeForm = (ChangeResourceOwnerForm) form;
         Integer resourceId = changeForm.getRid();
@@ -108,16 +118,15 @@ public class ChangeResourceOwnerFormPrepareAction
 
         Integer sessionId = RequestUtils.getSessionId(request);
         PageControl pc = RequestUtils.getPageControl(request);
-        ServletContext ctx = getServlet().getServletContext();
-        AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
+       
 
         log.trace("getting all users");
-        PageList allUsers = boss.getAllSubjects(sessionId, null, pc);
+        PageList<AuthzSubjectValue> allUsers = authzBoss.getAllSubjects(sessionId, null, pc);
 
         // remove the resource's owner from the list of users
-        ArrayList owner = new ArrayList();
+        ArrayList<Object> owner = new ArrayList<Object>();
         owner.add(resourceOwner);
-        List users = BizappUtils.grepSubjects(allUsers, owner);
+        List<AuthzSubjectValue> users = BizappUtils.grepSubjects(allUsers, owner);
 
         request.setAttribute(Constants.ALL_USERS_ATTR, users);
         request.setAttribute(Constants.NUM_USERS_ATTR,

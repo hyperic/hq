@@ -25,16 +25,8 @@
 
 package org.hyperic.hq.ui.action.admin.user;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.hyperic.hq.bizapp.shared.AuthzBoss;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.util.pager.PageControl;
-import org.hyperic.util.pager.PageList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -43,13 +35,31 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
+import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.util.pager.PageControl;
+import org.hyperic.util.pager.PageList;
+import org.springframework.beans.factory.annotation.Autowired;
 /**
  * An Action that retrieves all users from the BizApp.
  */
 public class ListAction extends TilesAction {
     
-    // ---------------------------------------------------- Public Methods
+    private final Log log = LogFactory.getLog(ListAction.class.getName());
     
+    private AuthzBoss authzBoss;
+    
+    
+    @Autowired
+    public ListAction(AuthzBoss authzBoss) {
+        super();
+        this.authzBoss = authzBoss;
+    }
+
+
+
     /**
      * Retrieve a <code>List</code> of all
      * <code>AuthzSubjectValue</code> objects and save it into the
@@ -61,18 +71,13 @@ public class ListAction extends TilesAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-        
-        Log log = LogFactory.getLog(ListAction.class.getName());
-        
-        ServletContext ctx = getServlet().getServletContext();
-        AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
         Integer sessionId = RequestUtils.getSessionId(request);
         PageControl pc = RequestUtils.getPageControl(request);
 
         if (log.isTraceEnabled()) {
             log.trace("getting all subjects");
         }
-        PageList users = authzBoss.getAllSubjects(sessionId, null, pc);
+        PageList<AuthzSubjectValue> users = authzBoss.getAllSubjects(sessionId, null, pc);
         request.setAttribute(Constants.ALL_USERS_ATTR, users);
 
         return null;

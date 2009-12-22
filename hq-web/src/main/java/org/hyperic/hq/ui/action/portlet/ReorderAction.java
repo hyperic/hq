@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.ui.action.portlet;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -39,13 +38,26 @@ import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.util.ConfigurationProxy;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.ConfigResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 
 
 public class ReorderAction extends BaseAction {
+    
+    private ConfigurationProxy configurationProxy;
+    private AuthzBoss authzBoss;
+    
+    
+    @Autowired
+    public ReorderAction(ConfigurationProxy configurationProxy, AuthzBoss authzBoss) {
+        super();
+        this.configurationProxy = configurationProxy;
+        this.authzBoss = authzBoss;
+    }
+
+
 
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
@@ -55,8 +67,7 @@ public class ReorderAction extends BaseAction {
     {
         HttpSession session = request.getSession();
         WebUser user = SessionUtils.getWebUser(session);
-        ServletContext ctx = getServlet().getServletContext();
-        AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
+       
         String[] narrowPortlets =
             request.getParameterValues("narrowList_true[]");
         String[] widePortlets =
@@ -87,13 +98,13 @@ public class ReorderAction extends BaseAction {
         }
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
         		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, boss);
+        		user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         // tokenize and reshuffle
         if (!dashPrefs.getValue(columnKey).equals(ordPortlets.toString())) {
         	dashPrefs.setValue(columnKey, ordPortlets.toString());
-        	ConfigurationProxy.getInstance().setDashboardPreferences(session,
-        			user, boss, dashPrefs);
+        	configurationProxy.setDashboardPreferences(session,
+        			user,  dashPrefs);
             session.removeAttribute(Constants.USERS_SES_PORTAL);
         }
         return mapping.findForward(Constants.AJAX_URL);

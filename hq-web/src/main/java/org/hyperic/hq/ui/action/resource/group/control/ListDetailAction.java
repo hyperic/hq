@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.ui.action.resource.group.control;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -38,20 +37,30 @@ import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.ControlBoss;
+import org.hyperic.hq.control.server.session.ControlHistory;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseValidatorForm;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Retrieves details for a group control history or current event.
  */
 public class ListDetailAction extends TilesAction {
 
-    // ---------------------------------------------------- Public Methods
+    private ControlBoss controlBoss;
+   
+    
+    @Autowired
+    public ListDetailAction(ControlBoss controlBoss) {
+        super();
+        this.controlBoss = controlBoss;
+    }
+
+
 
     /** 
      * Retrieves details of history event.
@@ -67,14 +76,14 @@ public class ListDetailAction extends TilesAction {
         
         log.trace("getting group control history details");
 
-        ServletContext ctx = getServlet().getServletContext();            
-        ControlBoss cBoss = ContextUtils.getControlBoss(ctx);
+          
+      
         int sessionId = RequestUtils.getSessionId(request).intValue();
         AppdefEntityID appdefId = RequestUtils.getEntityId(request);
         int batchId = RequestUtils.getIntParameter(request, Constants.CONTROL_BATCH_ID_PARAM).intValue();
         PageControl pc = RequestUtils.getPageControl(request);
 
-        PageList histList = cBoss.findGroupJobHistory(sessionId, appdefId, batchId, pc);
+        PageList<ControlHistory> histList = controlBoss.findGroupJobHistory(sessionId, appdefId, batchId, pc);
         request.setAttribute( Constants.CONTROL_HST_DETAIL_ATTR, histList );
         request.setAttribute( Constants.LIST_SIZE_ATTR, 
             new Integer(histList.getTotalSize()));

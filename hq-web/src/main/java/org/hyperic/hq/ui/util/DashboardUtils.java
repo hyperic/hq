@@ -62,12 +62,12 @@ public class DashboardUtils {
     public static final char MULTI_PORTLET_TOKEN = '_';
     public static final Log log = LogFactory.getLog(DashboardUtils.class.getName());
     
-    public static List listAsResources(List list, ServletContext ctx,
+    public static List<AppdefResourceValue> listAsResources(List list, ServletContext ctx,
                                        WebUser user)
         throws Exception {
         AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
         List entityIds = listAsEntityIds(list);
-        ArrayList resources = new ArrayList();
+        ArrayList<AppdefResourceValue> resources = new ArrayList<AppdefResourceValue>();
         for (Iterator i = entityIds.iterator(); i.hasNext();) {
             AppdefEntityID entityID = (AppdefEntityID) i.next();
             
@@ -91,7 +91,7 @@ public class DashboardUtils {
         return resources;
     }
     
-    public static List listAsEntityIds(List list) {
+    public static List<AppdefEntityID> listAsEntityIds(List list) {
         ArrayList resources = new ArrayList();
         Iterator i = list.iterator();
 
@@ -114,7 +114,7 @@ public class DashboardUtils {
         return listAsResources(resourceList, ctx, user);
     }
     
-    public static List preferencesAsResources(String key, ServletContext ctx,
+    public static List<AppdefResourceValue> preferencesAsResources(String key, ServletContext ctx,
 			WebUser user, ConfigResponse config) throws Exception {
 		List resourceList = config.getPreferenceAsList(key,
 				Constants.DASHBOARD_DELIMITER);
@@ -131,7 +131,7 @@ public class DashboardUtils {
         }
     }
     
-    public static List preferencesAsEntityIds(String key,
+    public static List<AppdefEntityID> preferencesAsEntityIds(String key,
                                               ConfigResponse userConfig) {
         try {
             List resourceList = 
@@ -477,11 +477,11 @@ public class DashboardUtils {
 		return editableDashboardConfigs; 
     }
     
-    public static List findEditableDashboards(WebUser user, AuthzBoss boss)
+    public static List<Dashboard> findEditableDashboards(WebUser user, AuthzBoss boss)
     throws SessionNotFoundException, SessionTimeoutException, PermissionException, RemoteException
     {
 		List dashboardConfigs = findEditableDashboardConfigs(user, boss);
-		List editableDashboards = new ArrayList();
+		List<Dashboard> editableDashboards = new ArrayList<Dashboard>();
 		
 		for (Iterator i = dashboardConfigs.iterator(); i.hasNext();) {
 			DashboardConfig config = (DashboardConfig) i.next();

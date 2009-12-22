@@ -30,9 +30,13 @@ import java.util.Properties;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.action.resource.common.monitor.config.ResourceConfigPortalAction;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
@@ -60,6 +64,12 @@ public class ConfigPortalAction extends ResourceConfigPortalAction {
     private static final String EDIT_AVAILABILITY_TITLE
         = "resource.group.monitor.visibility.config.ConfigureVisibility.EditGroupAvail.Title";
     
+    
+    @Autowired
+    public ConfigPortalAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss) {
+        super(appdefBoss, authzBoss, controlBoss);
+    }
+
     /* (non javadoc)
      * @see org.hyperic.hq.ui.action.BaseDispatchAction#getKeyMethodMap()
      */

@@ -32,16 +32,13 @@ package org.hyperic.hq.ui.action.resource.platform.autodiscovery;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.ui.action.resource.ResourceForm;
-import org.hyperic.hq.ui.util.RequestUtils;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.actions.TilesAction;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.ui.action.resource.ResourceForm;
+import org.hyperic.hq.ui.util.RequestUtils;
 
 /**
  * This action class class prepares for a ScanControl action 
@@ -59,7 +56,7 @@ public class ScanControlPrepAction extends TilesAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-        Log log = LogFactory.getLog(ScanControlPrepAction.class.getName());
+       
 
         ResourceForm newForm = (ResourceForm) form;
 

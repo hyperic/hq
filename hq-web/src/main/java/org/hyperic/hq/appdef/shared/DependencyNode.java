@@ -53,7 +53,7 @@ public class DependencyNode implements Serializable, Comparable {
             return _childNodes.size() > 0;
     }
 
-    public List getChildren() {
+    public List<AppService> getChildren() {
         if (_childNodes == null)
             // return an empty list
             return new ArrayList();

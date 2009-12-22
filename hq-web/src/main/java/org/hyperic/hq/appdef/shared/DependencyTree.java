@@ -72,7 +72,7 @@ public class DependencyTree implements Serializable {
     /**
      * Returns a List of top level DependencyNodes
      */
-    public List getNodes() {
+    public List<DependencyNode> getNodes() {
         return _nodes;
     }
 
@@ -226,8 +226,8 @@ public class DependencyTree implements Serializable {
         return returnNode;
     }
 
-    public static Map mapServices(List services) {
-        Map serviceMap = new LinkedHashMap();
+    public static Map<AppdefEntityID,AppdefResourceValue> mapServices(List services) {
+        Map<AppdefEntityID, AppdefResourceValue> serviceMap = new LinkedHashMap<AppdefEntityID, AppdefResourceValue>();
         for (Iterator serviceIter = services.iterator(); serviceIter.hasNext();)
         {
             AppdefResourceValue service =
@@ -246,10 +246,10 @@ public class DependencyTree implements Serializable {
      * @param services
      * @return List a list of AppServiceNodeBeans
      */
-    public static List findDependees(DependencyTree tree, 
+    public static List<AppServiceNodeBean> findDependees(DependencyTree tree, 
                                      DependencyNode appSvcNode, 
                                      List services) {
-        List returnList = new ArrayList();
+        List<AppServiceNodeBean> returnList = new ArrayList<AppServiceNodeBean>();
         Map serviceMap = DependencyTree.mapServices(services);
         for (Iterator iter = appSvcNode.getChildren().iterator();
              iter.hasNext();) {
@@ -283,10 +283,10 @@ public class DependencyTree implements Serializable {
      * @param services a list of ServiceValues associated with the application
      * @return List a list of AppServiceNodeBeans
      */
-    public static List findDependers(DependencyTree tree,   
+    public static List<AppServiceNodeBean> findDependers(DependencyTree tree,   
                                      Integer appSvcId, 
                                      List services) {
-        List returnList = new ArrayList();
+        List<AppServiceNodeBean> returnList = new ArrayList<AppServiceNodeBean>();
         Map serviceMap = DependencyTree.mapServices(services);
         for (Iterator iter = tree.getNodes().iterator(); iter.hasNext();) {
             DependencyNode node = (DependencyNode) iter.next();
@@ -328,7 +328,7 @@ public class DependencyTree implements Serializable {
      * @param services
      * @return
      */
-    public static List findPotentialDependees(DependencyTree tree,
+    public static List<DependencyNode> findPotentialDependees(DependencyTree tree,
                                               DependencyNode currentNode,
                                               List services) {
         // id of the current node's AppService

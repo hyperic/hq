@@ -29,19 +29,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.hyperic.hq.appdef.shared.IpValue;
-import org.hyperic.hq.appdef.shared.PlatformValue;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.action.resource.platform.PlatformForm;
-import org.hyperic.hq.ui.util.BizappUtils;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.util.pager.PageControl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -50,6 +39,16 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
+import org.hyperic.hq.appdef.shared.IpValue;
+import org.hyperic.hq.appdef.shared.PlatformTypeValue;
+import org.hyperic.hq.appdef.shared.PlatformValue;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.action.resource.platform.PlatformForm;
+import org.hyperic.hq.ui.util.BizappUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.util.pager.PageControl;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An Action that retrieves data from the BizApp to facilitate display
@@ -58,7 +57,19 @@ import org.apache.struts.tiles.actions.TilesAction;
 public class EditPlatformTypeNetworkPropertiesFormPrepareAction
     extends TilesAction {
 
-    // ---------------------------------------------------- Public Methods
+    private final Log log = LogFactory
+    .getLog(EditPlatformTypeNetworkPropertiesFormPrepareAction
+        .class.getName());
+    private AppdefBoss appdefBoss;
+    
+    
+    @Autowired
+    public EditPlatformTypeNetworkPropertiesFormPrepareAction(AppdefBoss appdefBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+    }
+
+
 
     /**
      * Retrieve the data necessary to display the
@@ -71,9 +82,7 @@ public class EditPlatformTypeNetworkPropertiesFormPrepareAction
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-        Log log = LogFactory
-            .getLog(EditPlatformTypeNetworkPropertiesFormPrepareAction
-                    .class.getName());
+        
         
         PlatformValue platform =
             (PlatformValue) RequestUtils.getResource(request);
@@ -85,12 +94,12 @@ public class EditPlatformTypeNetworkPropertiesFormPrepareAction
         PlatformForm editForm = (PlatformForm) form;
         editForm.loadPlatformValue(platform);
 
-        ServletContext ctx = getServlet().getServletContext();
+       
         Integer sessionId = RequestUtils.getSessionId(request);
-        AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+       
 
         log.trace("getting all platform types");
-        List platformTypes = boss.findAllPlatformTypes(sessionId.intValue(),
+        List<PlatformTypeValue> platformTypes = appdefBoss.findAllPlatformTypes(sessionId.intValue(),
                                                        PageControl.PAGE_ALL);
         editForm.setResourceTypes(platformTypes);
 
@@ -102,7 +111,7 @@ public class EditPlatformTypeNetworkPropertiesFormPrepareAction
                 platform.getAgent().getPort();
         }
         BizappUtils.populateAgentConnections(sessionId.intValue(),
-                                             boss, request,
+                                             appdefBoss, request,
                                              editForm, usedIpPort);
 
         // respond to an add or remove click- we do this here
@@ -134,8 +143,8 @@ public class EditPlatformTypeNetworkPropertiesFormPrepareAction
             if (oldIps != null) {
                 // remove the indicated ip, leaving all others
                 // intact
-                ArrayList oldIpsList =
-                    new ArrayList(Arrays.asList(oldIps));
+                ArrayList<IpValue> oldIpsList =
+                    new ArrayList<IpValue>(Arrays.asList(oldIps));
                 oldIpsList.remove(ri);
                 IpValue[] newIps =
                     (IpValue[]) oldIpsList.toArray(new IpValue[0]);

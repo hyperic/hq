@@ -28,7 +28,6 @@ package org.hyperic.hq.ui.action.resource.common.control;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -45,10 +44,11 @@ import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.scheduler.ScheduleValue;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.action.ScheduleForm;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.quartz.SchedulerException;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An <code>Action</code> subclass that creates a control action associated
@@ -56,7 +56,16 @@ import org.quartz.SchedulerException;
  */
 public class NewAction extends BaseAction {
 
-    // ---------------------------------------------------- Public Methods
+   private ControlBoss controlBoss;
+   private final Log log = LogFactory.getLog(NewAction.class.getName());   
+   
+   @Autowired
+    public NewAction(ControlBoss controlBoss) {
+        super();
+        this.controlBoss = controlBoss;
+    }
+
+
 
     /**
      * Create the control action and associate it with the server.
@@ -68,11 +77,10 @@ public class NewAction extends BaseAction {
                                  HttpServletRequest request, 
                                  HttpServletResponse response) 
         throws Exception {
-        
-        Log log = LogFactory.getLog(NewAction.class.getName());            
+             
         log.trace("creating new action" );                    
 
-        HashMap parms = new HashMap(2);
+        HashMap<String, Object> parms = new HashMap<String, Object>(2);
         
         try {                                  
  
@@ -90,9 +98,6 @@ public class NewAction extends BaseAction {
                 return forward;
             }
 
-            ServletContext ctx = getServlet().getServletContext();            
-            ControlBoss cBoss = ContextUtils.getControlBoss(ctx);
-            
             // create the new action to schedule
 
             ScheduleValue sv = cForm.createSchedule();
@@ -100,7 +105,7 @@ public class NewAction extends BaseAction {
             
             // make sure that the ControlAction is valid.
             String action = cForm.getControlAction();
-            List validActions = cBoss.getActions(sessionId, appdefId);
+            List<String> validActions = controlBoss.getActions(sessionId, appdefId);
             if (!validActions.contains(action)) {
                 RequestUtils.setError(request,
                     "resource.common.control.error.ControlActionNotValid",
@@ -108,10 +113,10 @@ public class NewAction extends BaseAction {
                 return returnFailure(request, mapping, parms);
             }
             
-            if (cForm.getStartTime().equals(cForm.START_NOW)) {
-                cBoss.doAction(sessionId, appdefId, action, (String)null);
+            if (cForm.getStartTime().equals(ScheduleForm.START_NOW)) {
+                controlBoss.doAction(sessionId, appdefId, action, (String)null);
             } else {
-                cBoss.doAction(sessionId, appdefId, action, sv);
+                controlBoss.doAction(sessionId, appdefId, action, sv);
             }
 
             // set confirmation message

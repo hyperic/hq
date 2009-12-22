@@ -29,7 +29,6 @@ import java.rmi.RemoteException;
 import java.util.List;
 
 import javax.ejb.FinderException;
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -50,7 +49,6 @@ import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.resource.common.monitor.alerts.AlertDefUtil;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
@@ -65,7 +63,17 @@ public abstract class ViewDefinitionNotificationsAction
     extends TilesAction
     implements NotificationsAction
 {
-    private Log log = LogFactory.getLog(ViewDefinitionNotificationsAction.class.getName());
+    private final Log log = LogFactory.getLog(ViewDefinitionNotificationsAction.class.getName());
+    protected EventsBoss eventsBoss;
+    protected AuthzBoss authzBoss;
+    
+    
+
+    public ViewDefinitionNotificationsAction(EventsBoss eventsBoss, AuthzBoss authzBoss) {
+        super();
+        this.eventsBoss = eventsBoss;
+        this.authzBoss = authzBoss;
+    }
 
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
@@ -73,10 +81,9 @@ public abstract class ViewDefinitionNotificationsAction
                                  HttpServletResponse response)
         throws Exception
     {
-        ServletContext ctx = getServlet().getServletContext();
+      
         int sessionID = RequestUtils.getSessionId(request).intValue();
-        EventsBoss eb = ContextUtils.getEventsBoss(ctx);
-        AuthzBoss ab = ContextUtils.getAuthzBoss(ctx);
+        
 
         PageControl pc = RequestUtils.getPageControl(request);
 
@@ -85,13 +92,13 @@ public abstract class ViewDefinitionNotificationsAction
         if (null != a) {
             log.debug("Viewing notifications for an alert ...");
             Integer aid = new Integer(a);
-            List actionList = eb.getActionsForAlert(sessionID, aid);
-            actions = (ActionValue[])
+            List<ActionValue> actionList = eventsBoss.getActionsForAlert(sessionID, aid);
+            actions = 
                 actionList.toArray(new ActionValue[actionList.size()]);
         } else {
             log.debug("Viewing notifications for an alert definition ...");
             AlertDefinitionValue adv =
-                AlertDefUtil.getAlertDefinition(request, sessionID, eb);
+                AlertDefUtil.getAlertDefinition(request, sessionID, eventsBoss);
             actions = adv.getActions();
         }
 
@@ -115,7 +122,7 @@ public abstract class ViewDefinitionNotificationsAction
                 
                 if ( emailCfg.getType() == getNotificationType() ) {
                     try {
-                        PageList pl = getPageList(sessionID, ab, emailCfg, pc);
+                        PageList pl = getPageList(sessionID, emailCfg, pc);
                         notifyList.setTotalSize( pl.size() );
                         notifyList.addAll( getSubList(pl, pc) );
                         listNotSet = false;
@@ -138,7 +145,7 @@ public abstract class ViewDefinitionNotificationsAction
         return null;
     }
 
-    protected abstract PageList getPageList(int sessionID, AuthzBoss ab,
+    protected abstract PageList getPageList(int sessionID, 
                                             EmailActionConfig ea, PageControl pc)
         throws FinderException,
                SessionTimeoutException,
@@ -168,4 +175,3 @@ public abstract class ViewDefinitionNotificationsAction
     }
 }
 
-// EOF

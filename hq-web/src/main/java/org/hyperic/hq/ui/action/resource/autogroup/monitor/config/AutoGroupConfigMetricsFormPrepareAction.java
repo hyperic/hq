@@ -40,16 +40,18 @@ import org.apache.struts.tiles.ComponentContext;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
+import org.hyperic.hq.bizapp.shared.uibeans.MetricConfigSummary;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.resource.common.monitor.config.ConfigMetricsFormPrepareAction;
 import org.hyperic.hq.ui.action.resource.common.monitor.visibility.InventoryHelper;
 import org.hyperic.hq.ui.action.resource.platform.monitor.visibility.RootInventoryHelper;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * This populates the AutoGroupConfigMetrics/Update metrics pages' request
@@ -58,7 +60,15 @@ import org.hyperic.util.pager.PageControl;
 public class AutoGroupConfigMetricsFormPrepareAction 
     extends ConfigMetricsFormPrepareAction {
 
-    Log log = LogFactory.getLog(AutoGroupConfigMetricsFormPrepareAction.class.getName());    
+    private final Log log = LogFactory.getLog(AutoGroupConfigMetricsFormPrepareAction.class.getName());  
+    
+    
+    @Autowired
+    public AutoGroupConfigMetricsFormPrepareAction(MeasurementBoss measurementBoss, AppdefBoss appdefBoss) {
+        super(measurementBoss, appdefBoss);
+    }
+
+
 
     /**
      * Retrieve different resource metrics and store them in various request
@@ -74,8 +84,7 @@ public class AutoGroupConfigMetricsFormPrepareAction
         log.trace("Preparing auto-group resource metrics action.");
 
         int sessionId = RequestUtils.getSessionId(request).intValue();
-        ServletContext ctx = getServlet().getServletContext();
-        MeasurementBoss mBoss = ContextUtils.getMeasurementBoss(ctx);
+       
 
         // auto-group specific prepare actions here
         InventoryHelper helper = null;
@@ -104,7 +113,7 @@ public class AutoGroupConfigMetricsFormPrepareAction
             // REMOVE ME?
             throw e1;
         }
-        
+        ServletContext ctx = getServlet().getServletContext();
         AppdefResourceType selectedType =
             helper.getChildResourceType(request, ctx, childTypeId);
         request.setAttribute(Constants.CHILD_RESOURCE_TYPE_ATTR, selectedType);
@@ -114,7 +123,7 @@ public class AutoGroupConfigMetricsFormPrepareAction
         int totalSize = 0;
         
         // check to see if monitoring is configured for this resource
-        helper = helper.getHelper(appdefId);
+        helper = InventoryHelper.getHelper(appdefId);
         boolean configEnabled = true;
         try {
             configEnabled = helper.isResourceConfigured(request, ctx, true);
@@ -127,29 +136,29 @@ public class AutoGroupConfigMetricsFormPrepareAction
         // obtain the different categories of measurements
         log.debug("obtaining metrics for resource " + appdefId +
                   " autogroup type " + childTypeId);
-        List availMetrics =
-            mBoss.findEnabledAGMeasurements(sessionId, appdefId, childTypeId,
+        List<MetricConfigSummary> availMetrics =
+            measurementBoss.findEnabledAGMeasurements(sessionId, appdefId, childTypeId,
             MeasurementConstants.CAT_AVAILABILITY, PageControl.PAGE_ALL);
         request.setAttribute(Constants.CAT_AVAILABILITY_METRICS_ATTR,
                              availMetrics);
         totalSize += availMetrics.size();
         
-        List perfMetrics =
-            mBoss.findEnabledAGMeasurements(sessionId, appdefId, childTypeId, 
+        List<MetricConfigSummary> perfMetrics =
+            measurementBoss.findEnabledAGMeasurements(sessionId, appdefId, childTypeId, 
             MeasurementConstants.CAT_PERFORMANCE, PageControl.PAGE_ALL);
         request.setAttribute(Constants.CAT_PERFORMANCE_METRICS_ATTR,
                              perfMetrics);
         totalSize += perfMetrics.size();
         
-        List throughMetrics =
-            mBoss.findEnabledAGMeasurements(sessionId, appdefId, childTypeId, 
+        List<MetricConfigSummary> throughMetrics =
+            measurementBoss.findEnabledAGMeasurements(sessionId, appdefId, childTypeId, 
             MeasurementConstants.CAT_THROUGHPUT, PageControl.PAGE_ALL);
         request.setAttribute(Constants.CAT_THROUGHPUT_METRICS_ATTR,
                              throughMetrics);
         totalSize += throughMetrics.size();
         
-        List utilMetrics =
-            mBoss.findEnabledAGMeasurements(sessionId, appdefId, childTypeId,
+        List<MetricConfigSummary> utilMetrics =
+            measurementBoss.findEnabledAGMeasurements(sessionId, appdefId, childTypeId,
             MeasurementConstants.CAT_UTILIZATION, PageControl.PAGE_ALL);
         request.setAttribute(Constants.CAT_UTILIZATION_METRICS_ATTR,
                              utilMetrics);

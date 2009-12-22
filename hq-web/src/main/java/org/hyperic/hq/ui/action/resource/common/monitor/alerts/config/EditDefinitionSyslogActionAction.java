@@ -28,7 +28,6 @@ package org.hyperic.hq.ui.action.resource.common.monitor.alerts.config;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -46,9 +45,9 @@ import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.action.resource.common.monitor.alerts.AlertDefUtil;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Update the syslog action for an alert definition.
@@ -56,9 +55,18 @@ import org.hyperic.util.config.ConfigResponse;
  */
 public class EditDefinitionSyslogActionAction extends BaseAction {
 
-    private Log log = LogFactory.getLog(EditDefinitionSyslogActionAction.class.getName());
+    private final Log log = LogFactory.getLog(EditDefinitionSyslogActionAction.class.getName());
 
-    // ---------------------------------------------------- Public Methods
+    private EventsBoss eventsBoss;
+    
+    
+    @Autowired
+    public EditDefinitionSyslogActionAction(EventsBoss eventsBoss) {
+        super();
+        this.eventsBoss = eventsBoss;
+    }
+
+
 
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
@@ -68,10 +76,10 @@ public class EditDefinitionSyslogActionAction extends BaseAction {
     {
         SyslogActionForm saForm = (SyslogActionForm)form;
 
-        ServletContext ctx = getServlet().getServletContext();
+        
         int sessionID = RequestUtils.getSessionId(request).intValue();
         
-        Map params = new HashMap(2);
+        Map<String, Object> params = new HashMap<String, Object>(2);
         
         if (saForm.getAetid() != null) {
             params.put(Constants.APPDEF_RES_TYPE_ID,
@@ -83,7 +91,7 @@ public class EditDefinitionSyslogActionAction extends BaseAction {
         }
         params.put("ad", saForm.getAd());
         
-        EventsBoss eb = ContextUtils.getEventsBoss(ctx);
+        
 
 
         ActionForward forward = checkSubmit(request, mapping, form, params);
@@ -93,12 +101,12 @@ public class EditDefinitionSyslogActionAction extends BaseAction {
         }
 
         AlertDefinitionValue adv =
-            eb.getAlertDefinition( sessionID, saForm.getAd() );
+            eventsBoss.getAlertDefinition( sessionID, saForm.getAd() );
         ActionValue actionValue = AlertDefUtil.getSyslogActionValue(adv);
         if ( saForm.getShouldBeRemoved() ) {
             if (null != actionValue) {
                 adv.removeAction(actionValue);
-                eb.updateAlertDefinition(sessionID, adv);
+                eventsBoss.updateAlertDefinition(sessionID, adv);
             }
         } else {
             SyslogActionConfig sa = new SyslogActionConfig();
@@ -107,11 +115,11 @@ public class EditDefinitionSyslogActionAction extends BaseAction {
             sa.setVersion( saForm.getVersion() );
             ConfigResponse configResponse = sa.getConfigResponse();
             if (null == actionValue) {
-                eb.createAction( sessionID, saForm.getAd(),
+                eventsBoss.createAction( sessionID, saForm.getAd(),
                                  sa.getImplementor(), configResponse );
             } else {
                 actionValue.setConfig( configResponse.encode() );
-                eb.updateAction(sessionID, actionValue);
+                eventsBoss.updateAction(sessionID, actionValue);
             }
         }
 
@@ -119,4 +127,3 @@ public class EditDefinitionSyslogActionAction extends BaseAction {
     }
 }
 
-// EOF

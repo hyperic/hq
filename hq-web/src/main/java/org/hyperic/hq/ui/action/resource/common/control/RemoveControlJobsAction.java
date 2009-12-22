@@ -27,7 +27,6 @@ package org.hyperic.hq.ui.action.resource.common.control;
 
 import java.util.HashMap;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -41,16 +40,26 @@ import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An Action that removes a control event from a server.
  */
 public class RemoveControlJobsAction extends BaseAction {
 
-    // ---------------------------------------------------- Public Methods
+    private final   Log log = LogFactory.getLog(RemoveControlJobsAction.class.getName());
+    private ControlBoss controlBoss;
+    
+    
+    @Autowired
+    public RemoveControlJobsAction(ControlBoss controlBoss) {
+        super();
+        this.controlBoss = controlBoss;
+    }
+
+
 
     /** 
      * Removes control jobs from a server. 
@@ -61,8 +70,8 @@ public class RemoveControlJobsAction extends BaseAction {
                                  HttpServletResponse response)
         throws Exception {
             
-        Log log = LogFactory.getLog(RemoveControlJobsAction.class.getName());
-        HashMap parms = new HashMap(2);
+      
+        HashMap<String, Object> parms = new HashMap<String, Object>(2);
         
         try {
             RemoveControlJobsForm rmForm = (RemoveControlJobsForm)form;
@@ -79,10 +88,8 @@ public class RemoveControlJobsAction extends BaseAction {
             }
             
             Integer sessionId = RequestUtils.getSessionId(request);
-            ServletContext ctx = getServlet().getServletContext();            
-            ControlBoss cBoss = ContextUtils.getControlBoss(ctx);
-           
-            cBoss.deleteControlJob(sessionId.intValue(), jobs);
+          
+            controlBoss.deleteControlJob(sessionId.intValue(), jobs);
         
             log.trace("Removed resource control jobs.");                                                      
             SessionUtils.setConfirmation(request.getSession(false),

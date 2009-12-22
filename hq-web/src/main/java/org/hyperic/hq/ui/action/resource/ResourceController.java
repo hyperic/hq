@@ -67,6 +67,20 @@ public abstract class ResourceController extends BaseDispatchAction {
     protected static final Log log =
         LogFactory.getLog(ResourceController.class.getName());
     
+    protected AppdefBoss appdefBoss;
+    protected AuthzBoss authzBoss;
+    protected ControlBoss controlBoss;
+    
+    
+    
+    
+    public ResourceController(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+        this.authzBoss = authzBoss;
+        this.controlBoss = controlBoss;
+    }
+
     protected AppdefEntityID setResource(HttpServletRequest request)
         throws Exception {
         return setResource(request, false);
@@ -92,9 +106,7 @@ public abstract class ResourceController extends BaseDispatchAction {
         throws Exception {
         Integer sessionId = RequestUtils.getSessionId(request);
 
-        ServletContext ctx = getServlet().getServletContext();            
-        AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
-        AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
+       
         AppdefEntityTypeID aetid;
         if (null == entityId || entityId instanceof AppdefEntityTypeID) {
             // this can happen if we're an auto-group of platforms
@@ -103,12 +115,14 @@ public abstract class ResourceController extends BaseDispatchAction {
             request.setAttribute(Constants.PERFORMANCE_SUPPORTED_ATTR,
                                  Boolean.FALSE);
             try {
-                if (entityId != null)
+                if (entityId != null) {
                     aetid = (AppdefEntityTypeID) entityId;
-                else
+                }
+                else {
                     aetid = new AppdefEntityTypeID(
                         RequestUtils.getStringParameter(
                             request, Constants.APPDEF_RES_TYPE_ID));
+                }
                 
                 AppdefResourceTypeValue resourceTypeVal =
                     appdefBoss.findResourceTypeById(sessionId.intValue(),
@@ -146,7 +160,7 @@ public abstract class ResourceController extends BaseDispatchAction {
 
                 // set the resource controllability flag
                 if (!entityId.isApplication()) {
-                    ControlBoss controlBoss = ContextUtils.getControlBoss(ctx);
+                   
                     // We were doing group Specific isGroupControlEnabled for
                     // groups.
                     // We should just see if the group control is supported
@@ -160,11 +174,12 @@ public abstract class ResourceController extends BaseDispatchAction {
                     request.setAttribute(Constants.CONTROL_ENABLED_ATTR,
                                          new Boolean(isControllable));
                 }
-
+                ServletContext ctx = getServlet().getServletContext();
                 // Set additional flags
                 UIUtils utils = ContextUtils.getUIUtils(ctx);
-                if (utils != null)
+                if (utils != null) {
                     utils.setResourceFlags(resource, config, request);
+                }
                 
                 // Get the custom properties
                 Properties cprops =
@@ -172,8 +187,9 @@ public abstract class ResourceController extends BaseDispatchAction {
                                                    entityId);
                 
                 // Set the properties in the request
-                if (cprops.size() > 0)
+                if (cprops.size() > 0) {
                     request.setAttribute("cprops", cprops);
+                }
                 
                 // Add this resource to the recently used preference
                 WebUser user = RequestUtils.getWebUser(request);
@@ -182,8 +198,7 @@ public abstract class ResourceController extends BaseDispatchAction {
                 if (DashboardUtils.addEntityToPreferences(
                         Constants.USERPREF_KEY_RECENT_RESOURCES, userPrefs,
                         entityId, 10)) {
-                	AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
-                	boss.setUserPrefs(user.getSessionId(),
+                	authzBoss.setUserPrefs(user.getSessionId(),
                                       user.getSubject().getId(), userPrefs);
                 }
             } catch (AppdefEntityNotFoundException aenf) {
@@ -200,7 +215,7 @@ public abstract class ResourceController extends BaseDispatchAction {
     }
 
     protected void fetchReturnPathParams(HttpServletRequest request,
-                                         Map params) {
+                                         Map<String, Object> params) {
         AppdefEntityID aeid = RequestUtils.getEntityId(request);
         params.put(Constants.ENTITY_ID_PARAM, aeid.getAppdefKey());
 
@@ -237,7 +252,7 @@ public abstract class ResourceController extends BaseDispatchAction {
      */
     protected void setReturnPath(HttpServletRequest request,
                                  ActionMapping mapping,
-                                 Map params) 
+                                 Map<String, Object> params) 
         throws Exception {
         this.fetchReturnPathParams(request, params);
         String returnPath = ActionUtils.findReturnPath(mapping, params);
@@ -250,7 +265,7 @@ public abstract class ResourceController extends BaseDispatchAction {
     protected void setReturnPath(HttpServletRequest request,
                                  ActionMapping mapping)
         throws Exception {
-        setReturnPath(request, mapping, new HashMap());
+        setReturnPath(request, mapping, new HashMap<String,Object>());
     }
     
     /**
@@ -260,7 +275,7 @@ public abstract class ResourceController extends BaseDispatchAction {
                                      ActionMapping mapping, String currLoc)
         throws Exception                                       
     {
-        HashMap parms = new HashMap();
+        HashMap<String, Object> parms = new HashMap<String, Object>();
         // sets the returnPath to match the mode we're in.
         String mode = request.getParameter(Constants.MODE_PARAM);
         parms.put(Constants.MODE_PARAM, mode);

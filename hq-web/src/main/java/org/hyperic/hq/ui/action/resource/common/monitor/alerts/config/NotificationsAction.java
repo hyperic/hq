@@ -33,4 +33,3 @@ public interface NotificationsAction {
     int getNotificationType();
 }
 
-// EOF

@@ -31,7 +31,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -42,9 +41,8 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.UpdateBoss;
 import org.hyperic.hq.ui.Constants;
@@ -54,30 +52,53 @@ import org.hyperic.hq.ui.Portlet;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
-import org.hyperic.hq.ui.server.session.DashboardManagerImpl;
 import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.hq.ui.util.ConfigurationProxy;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.ConfigResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class DisplayDashboardAction extends TilesAction {
+    
+    private ConfigurationProxy configurationProxy;
+    
+    private AuthzBoss authzBoss;
+    
+    private DashboardManager dashboardManager;
+    
+    private UpdateBoss updateBoss;
+    
+    private AuthzSubjectManager authzSubjectManager;
+    
+    
+    @Autowired
+	public DisplayDashboardAction(ConfigurationProxy configurationProxy, AuthzBoss authzBoss,
+                                  DashboardManager dashboardManager, UpdateBoss updateBoss,
+                                  AuthzSubjectManager authzSubjectManager) {
+        super();
+        this.configurationProxy = configurationProxy;
+        this.authzBoss = authzBoss;
+        this.dashboardManager = dashboardManager;
+        this.updateBoss = updateBoss;
+        this.authzSubjectManager = authzSubjectManager;
+    }
 
-	public ActionForward execute(ComponentContext context,
+
+
+    public ActionForward execute(ComponentContext context,
 			                     ActionMapping mapping, 
 			                     ActionForm form, 
 			                     HttpServletRequest request,
 			                     HttpServletResponse response) 
 	throws Exception {
 		HttpSession session = request.getSession();
-		ServletContext ctx = getServlet().getServletContext();
-		AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
+		
 		DashboardForm dForm = (DashboardForm) form;
         WebUser user = RequestUtils.getWebUser(request);
-		DashboardManager dashManager = DashboardManagerImpl.getOne();
-		AuthzSubject me = boss.findSubjectById(user.getSessionId(), user.getSubject().getId());
+		
+		AuthzSubject me = authzBoss.findSubjectById(user.getSessionId(), user.getSubject().getId());
 		Portal portal = (Portal) session.getAttribute(Constants.USERS_SES_PORTAL);
 		portal = new Portal();
 		
@@ -85,7 +106,7 @@ public class DisplayDashboardAction extends TilesAction {
 		portal.setColumns(2);
 
 		// Set dashboard string list for the dashboard select list
-		List<DashboardConfig> dashboardCollection = (ArrayList<DashboardConfig>) dashManager.getDashboards(me);
+		List<DashboardConfig> dashboardCollection = (ArrayList<DashboardConfig>) dashboardManager.getDashboards(me);
 		List<Dashboard> dashboards = new ArrayList<Dashboard>();
         
 		for (Iterator<DashboardConfig> i = dashboardCollection.iterator(); i.hasNext();) {
@@ -127,12 +148,12 @@ public class DisplayDashboardAction extends TilesAction {
 		if (dashboardConfig == null) {
 			// Either no default/selected dashboard or default dashboard no longer exists
 			// in both cases, we'll set default dashboard to the user dashboard
-			dashboardConfig = dashManager.getUserDashboard(me, me);
+			dashboardConfig = dashboardManager.getUserDashboard(me, me);
 			defaultDashboard = dashboardConfig.getId().toString();
 			
 			// update preferences
 			user.setPreference(Constants.DEFAULT_DASHBOARD_ID, defaultDashboard);
-			boss.setUserPrefs(user.getSessionId(), user.getSubject().getId(), user.getPreferences());
+			authzBoss.setUserPrefs(user.getSessionId(), user.getSubject().getId(), user.getPreferences());
 		}
 
 		// Update the sessions with the selected dashboard
@@ -142,7 +163,7 @@ public class DisplayDashboardAction extends TilesAction {
 		dForm.setSelectedDashboardId(dashboardConfig.getId().toString());
 		dForm.setDefaultDashboard(defaultDashboard);
 
-		if (dashManager.isEditable(me, dashboardConfig)) {
+		if (dashboardManager.isEditable(me, dashboardConfig)) {
 			session.setAttribute(Constants.IS_DASH_EDITABLE, "true");
 		} else {
 			session.removeAttribute(Constants.IS_DASH_EDITABLE);
@@ -158,10 +179,10 @@ public class DisplayDashboardAction extends TilesAction {
 		//      dashboard creation happens, however for 4.2 this is not something
 		//      we can squeeze in, this will suffice for the time being
 		if (dashPrefs.getValue(Constants.USER_PORTLETS_FIRST) == null && dashPrefs.getValue(Constants.USER_PORTLETS_SECOND) == null) {
-		    ConfigResponse defaultRoleDashPrefs = (ConfigResponse) ctx.getAttribute(Constants.DEF_ROLE_DASH_PREFS);
-		    AuthzSubject overlord = AuthzSubjectManagerImpl.getOne().getOverlordPojo();
+		    ConfigResponse defaultRoleDashPrefs = (ConfigResponse) getServlet().getServletContext().getAttribute(Constants.DEF_ROLE_DASH_PREFS);
+		    AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
 		    
-		    dashManager.configureDashboard(overlord, dashboardConfig, defaultRoleDashPrefs);
+		    dashboardManager.configureDashboard(overlord, dashboardConfig, defaultRoleDashPrefs);
 		    dashPrefs.merge(defaultRoleDashPrefs, true); 
 		}
 		
@@ -183,7 +204,7 @@ public class DisplayDashboardAction extends TilesAction {
 		session.setAttribute(Constants.USERS_SES_PORTAL, portal);
 
 		// Make sure there's a valid RSS auth token
-		ConfigResponse dashCfg = dashManager.getUserDashboard(me, me).getConfig();
+		ConfigResponse dashCfg = dashboardManager.getUserDashboard(me, me).getConfig();
 		String rssToken = dashCfg.getValue(Constants.RSS_TOKEN);
 		
 		if (rssToken == null) {
@@ -191,7 +212,7 @@ public class DisplayDashboardAction extends TilesAction {
 			
 			dashCfg.setValue(Constants.RSS_TOKEN, rssToken);
 			// Now store the RSS auth token
-			ConfigurationProxy.getInstance().setUserDashboardPreferences(dashCfg, boss, user);
+			configurationProxy.setUserDashboardPreferences(dashCfg, user);
 		}
 		
 		session.setAttribute("rssToken", rssToken);
@@ -201,13 +222,13 @@ public class DisplayDashboardAction extends TilesAction {
 
 		if (userOpsMap.containsKey(AuthzConstants.rootOpCAMAdmin)) {
 			// Now check for updates
-			UpdateBoss uboss = ContextUtils.getUpdateBoss(ctx);
+			
 
 			try {
 				RequestUtils.getStringParameter(request, "update");
-				uboss.ignoreUpdate();
+				updateBoss.ignoreUpdate();
 			} catch (ParameterNotFoundException e) {
-				String update = uboss.getUpdateReport();
+				String update = updateBoss.getUpdateReport();
 
 				if (update != null) {
 					request.setAttribute("HQUpdateReport", update);

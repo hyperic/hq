@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.ui.action.portlet.criticalalerts;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -39,10 +38,10 @@ import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.util.ConfigurationProxy;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.ConfigResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An <code>Action</code> that loads the <code>Portal</code>
@@ -51,6 +50,20 @@ import org.hyperic.util.config.ConfigResponse;
  * <code>PORTAL_KEY</code> request attribute.
  */
 public class ModifyAction extends BaseAction {
+    
+    private ConfigurationProxy configurationProxy;
+    private AuthzBoss authzBoss;
+    
+    
+    @Autowired
+    public ModifyAction(ConfigurationProxy configurationProxy, AuthzBoss authzBoss) {
+        super();
+        this.configurationProxy = configurationProxy;
+        this.authzBoss = authzBoss;
+    }
+
+
+
     /**
      *
      * @param mapping The ActionMapping used to select this instance
@@ -67,8 +80,6 @@ public class ModifyAction extends BaseAction {
                                  HttpServletResponse response)
         throws Exception {
 
-        ServletContext ctx = getServlet().getServletContext();
-        AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
         PropertiesForm pForm = (PropertiesForm) form;
         HttpSession session = request.getSession();
         WebUser user = SessionUtils.getWebUser(session);
@@ -95,13 +106,13 @@ public class ModifyAction extends BaseAction {
         }
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
         		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, boss);
+        		user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         
         if(pForm.isRemoveClicked()){
             DashboardUtils.removeResources(pForm.getIds(), resKey, dashPrefs);
-            ConfigurationProxy.getInstance().setDashboardPreferences(session, user,
-                    boss, dashPrefs);
+            configurationProxy.setDashboardPreferences(session, user,
+                     dashPrefs);
         }
 
         ActionForward forward = checkSubmit(request, mapping, form);
@@ -122,8 +133,8 @@ public class ModifyAction extends BaseAction {
         dashPrefs.setValue(selOrAllKey, selectedOrAll);
         dashPrefs.setValue(titleKey, pForm.getTitle());
 		
-        ConfigurationProxy.getInstance().setDashboardPreferences(session, user,
-        		boss, dashPrefs);
+       configurationProxy.setDashboardPreferences(session, user,
+        		 dashPrefs);
 
 		session.removeAttribute(Constants.USERS_SES_PORTAL);
         return mapping.findForward(forwardStr);
