@@ -53,7 +53,7 @@ public class Calendar
         _name = name;
     }
     
-    public Collection getEntries() {
+    public Collection<CalendarEntry> getEntries() {
         return Collections.unmodifiableCollection(_entries);
     }
     
