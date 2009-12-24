@@ -34,15 +34,15 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.util.LabelValueBean;
 import org.hyperic.hq.ui.action.resource.ResourceForm;
 
-
 /**
  * A subclass of <code>ResourceForm</code> representing the
- * <em>AddGroupResources</em> form. The purpose of this form is
- * to add AppdefResourceValues to a AppdefGroupValue
+ * <em>AddGroupResources</em> form. The purpose of this form is to add
+ * AppdefResourceValues to a AppdefGroupValue
  */
-public class AddResourcesForm extends ResourceForm  {
+public class AddResourcesForm
+    extends ResourceForm {
 
-    //-------------------------------------instance variables
+    // -------------------------------------instance variables
 
     private String[] availableResources;
     private String[] pendingResources;
@@ -56,18 +56,18 @@ public class AddResourcesForm extends ResourceForm  {
     private List types;
     private String nameFilter;
     private String token;
-    
-    //-------------------------------------constructors
+
+    // -------------------------------------constructors
 
     public AddResourcesForm() {
         super();
         setDefaults();
     }
 
-    //-------------------------------------public methods
+    // -------------------------------------public methods
 
     public String[] getAvailableResource() {
-	   return this.availableResources;
+        return this.availableResources;
     }
 
     public String[] getAvailableResources() {
@@ -83,7 +83,7 @@ public class AddResourcesForm extends ResourceForm  {
     }
 
     public String[] getPendingResource() {
-	return this.pendingResources;
+        return this.pendingResources;
     }
 
     public String[] getPendingResources() {
@@ -114,8 +114,7 @@ public class AddResourcesForm extends ResourceForm  {
         this.psp = ps;
     }
 
-    public void reset(ActionMapping mapping,
-                      HttpServletRequest request) {
+    public void reset(ActionMapping mapping, HttpServletRequest request) {
         this.availableResources = new String[0];
         this.pendingResources = new String[0];
         this.psa = null;
@@ -141,15 +140,15 @@ public class AddResourcesForm extends ResourceForm  {
 
     private void listToString(StringBuffer s, String[] l) {
         if (l != null) {
-            for (int i=0; i<l.length; i++) {
+            for (int i = 0; i < l.length; i++) {
                 s.append(l[i]);
-                if (i<l.length-1) {
+                if (i < l.length - 1) {
                     s.append(", ");
                 }
             }
         }
     }
-    
+
     /**
      * @return List
      */
@@ -165,99 +164,108 @@ public class AddResourcesForm extends ResourceForm  {
         this.availResourceTypes = availResourceTypes;
     }
 
-    /** Getter for property key.
+    /**
+     * Getter for property key.
      * @return Value of property key.
-     *
+     * 
      */
     public String getKey() {
         return this.key;
     }
-    
-    /** Setter for property key.
+
+    /**
+     * Setter for property key.
      * @param key New value of property key.
-     *
+     * 
      */
     public void setKey(String key) {
         this.key = key;
     }
-    
-    /** Getter for property ft.
+
+    /**
+     * Getter for property ft.
      * @return Value of property ft.
-     *
+     * 
      */
     public String getFt() {
         return this.ft;
     }
-    
-    /** Setter for property ft.
+
+    /**
+     * Setter for property ft.
      * @param ft New value of property ft.
-     *
+     * 
      */
     public void setFt(String ft) {
         this.ft = ft;
     }
-    
-    /** Getter for property ff.
+
+    /**
+     * Getter for property ff.
      * @return Value of property ff.
-     *
+     * 
      */
     public Integer getFf() {
         return this.ff;
     }
-    
-    /** Setter for property ff.
+
+    /**
+     * Setter for property ff.
      * @param ff New value of property ff.
-     *
+     * 
      */
     public void setFf(Integer ff) {
         this.ff = ff;
     }
-    
-    /** Getter for property functions.
+
+    /**
+     * Getter for property functions.
      * @return Value of property functions.
-     *
+     * 
      */
     public List getFunctions() {
         return this.functions;
     }
-    
-    /** Setter for property functions.
+
+    /**
+     * Setter for property functions.
      * @param functions New value of property functions.
-     *
+     * 
      */
     public void setFunctions(List functions) {
         this.functions = functions;
     }
-    
+
     public void addFunction(LabelValueBean b) {
         if (this.functions != null) {
             this.functions.add(b);
         }
     }
-    
-    
-    /** Getter for property types.
+
+    /**
+     * Getter for property types.
      * @return Value of property types.
-     *
+     * 
      */
     public List getTypes() {
         return this.types;
     }
-    
-    /** Setter for property types.
+
+    /**
+     * Setter for property types.
      * @param types New value of property types.
-     *
+     * 
      */
     public void setTypes(List types) {
         this.types = types;
     }
-    
+
     public void addType(LabelValueBean b) {
         if (this.types != null) {
             this.types.add(b);
         }
     }
-    
+
     public String getNameFilter() {
         return nameFilter;
     }
@@ -278,7 +286,7 @@ public class AddResourcesForm extends ResourceForm  {
     private void setDefaults() {
         ff = null;
         ft = null;
-        functions = new ArrayList();        
+        functions = new ArrayList();
         types = new ArrayList();
         nameFilter = null;
         token = null;

@@ -41,43 +41,32 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * edit type & hold properties
- *  
- *
+ * 
+ * 
  */
-public class EditTypeHostPrepareAction extends TilesAction {
-    
+public class EditTypeHostPrepareAction
+    extends TilesAction {
+
     private AppdefBoss appdefBoss;
-    
-    
+
     @Autowired
     public EditTypeHostPrepareAction(AppdefBoss appdefBoss) {
         super();
         this.appdefBoss = appdefBoss;
     }
 
-
-
     /**
-     * Retrieve this data and store it in the
-     * <code>ServerForm</code>:
-     *
+     * Retrieve this data and store it in the <code>ServerForm</code>:
+     * 
      */
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-      
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
 
         ServerForm serverForm = (ServerForm) form;
 
         Integer sessionId = RequestUtils.getSessionId(request);
-       
 
         Integer serverId = RequestUtils.getResourceId(request);
-
-      
 
         ServerValue sValue = appdefBoss.findServerById(sessionId.intValue(), serverId);
 

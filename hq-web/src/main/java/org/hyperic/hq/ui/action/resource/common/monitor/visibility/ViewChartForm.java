@@ -41,11 +41,11 @@ import org.hyperic.hq.ui.util.MonitorUtils;
 /**
  * Represents the controls on the metric chart page(s).
  */
-public class ViewChartForm extends MetricDisplayRangeForm {
+public class ViewChartForm
+    extends MetricDisplayRangeForm {
     public static String NO_CHILD_TYPE = "";
 
-    private static Log log =
-        LogFactory.getLog( ViewChartForm.class.getName() );
+    private static Log log = LogFactory.getLog(ViewChartForm.class.getName());
 
     private String mode;
     private Integer[] m;
@@ -90,69 +90,132 @@ public class ViewChartForm extends MetricDisplayRangeForm {
 
     public String toString() {
         StringBuffer sb = new StringBuffer();
-        sb.append("\n"); sb.append("\t");
-        sb.append("mode="); sb.append(mode);
-        sb.append("\n"); sb.append("\t");
-        sb.append("showPeak="); sb.append(showPeak);
-        sb.append("\n"); sb.append("\t");
-        sb.append("showHighRange="); sb.append(showHighRange);
-        sb.append("\n"); sb.append("\t");
-        sb.append("showValues="); sb.append(showValues);
-        sb.append("\n"); sb.append("\t");
-        sb.append("showAverage="); sb.append(showAverage);
-        sb.append("\n"); sb.append("\t");
-        sb.append("showLowRange="); sb.append(showLowRange);
-        sb.append("\n"); sb.append("\t");
-        sb.append("showLow="); sb.append(showLow);
-        sb.append("\n"); sb.append("\t");
-        sb.append("showEvents="); sb.append(showEvents);
-        sb.append("\n"); sb.append("\t");
-        sb.append("showBaseline="); sb.append(showBaseline);
-        sb.append("\n"); sb.append("\t");
-        sb.append("isRedrawClicked="); sb.append(isRedrawClicked());
-        sb.append("\n"); sb.append("\t");
-        sb.append("isPrevRangeClicked="); sb.append(isPrevRangeClicked());
-        sb.append("\n"); sb.append("\t");
-        sb.append("isNextRangeClicked="); sb.append(isNextRangeClicked());
-        sb.append("\n"); sb.append("\t");
-        sb.append("isChangeBaselineClicked="); sb.append(isChangeBaselineClicked());
-        sb.append("\n"); sb.append("\t");
-        sb.append("isSaveBaselineClicked="); sb.append(isSaveBaselineClicked());
-        sb.append("\n"); sb.append("\t");
-        sb.append("isCancelBaselineClicked="); sb.append(isCancelBaselineClicked());
-        sb.append("\n"); sb.append("\t");
-        sb.append("isChangeHighRangeClicked="); sb.append(isChangeHighRangeClicked());
-        sb.append("\n"); sb.append("\t");
-        sb.append("isSaveHighRangeClicked="); sb.append(isSaveHighRangeClicked());
-        sb.append("\n"); sb.append("\t");
-        sb.append("isCancelHighRangeClicked="); sb.append(isCancelHighRangeClicked());
-        sb.append("\n"); sb.append("\t");
-        sb.append("isChangeLowRangeClicked="); sb.append(isChangeLowRangeClicked());
-        sb.append("\n"); sb.append("\t");
-        sb.append("isSaveLowRangeClicked="); sb.append(isSaveLowRangeClicked());
-        sb.append("\n"); sb.append("\t");
-        sb.append("isCancelLowRangeClicked="); sb.append(isCancelLowRangeClicked());
-        sb.append("\n"); sb.append("\t");
-        sb.append("isPrevPageClicked="); sb.append(isPrevPageClicked());
-        sb.append("baseline="); sb.append(baseline);
-        sb.append("\n"); sb.append("\t");
-        sb.append("newBaseline="); sb.append(newBaseline);
-        sb.append("\n"); sb.append("\t");
-        sb.append("highRange="); sb.append(highRange);
-        sb.append("\n"); sb.append("\t");
-        sb.append("lowRange="); sb.append(lowRange);
-        sb.append("\n"); sb.append("\t");
-        sb.append("baselineRaw="); sb.append(baselineRaw);
-        sb.append("\n"); sb.append("\t");
-        sb.append("newBaselineRaw="); sb.append(newBaselineRaw);
-        sb.append("\n"); sb.append("\t");
-        sb.append("highRangeRaw="); sb.append(highRangeRaw);
-        sb.append("\n"); sb.append("\t");
-        sb.append("lowRangeRaw="); sb.append(lowRangeRaw);
-        sb.append("\n"); sb.append("\t");
-        sb.append("threshold="); sb.append(threshold);
-        sb.append("\n"); sb.append("\t");
-        sb.append("chartName="); sb.append(chartName);
+        sb.append("\n");
+        sb.append("\t");
+        sb.append("mode=");
+        sb.append(mode);
+        sb.append("\n");
+        sb.append("\t");
+        sb.append("showPeak=");
+        sb.append(showPeak);
+        sb.append("\n");
+        sb.append("\t");
+        sb.append("showHighRange=");
+        sb.append(showHighRange);
+        sb.append("\n");
+        sb.append("\t");
+        sb.append("showValues=");
+        sb.append(showValues);
+        sb.append("\n");
+        sb.append("\t");
+        sb.append("showAverage=");
+        sb.append(showAverage);
+        sb.append("\n");
+        sb.append("\t");
+        sb.append("showLowRange=");
+        sb.append(showLowRange);
+        sb.append("\n");
+        sb.append("\t");
+        sb.append("showLow=");
+        sb.append(showLow);
+        sb.append("\n");
+        sb.append("\t");
+        sb.append("showEvents=");
+        sb.append(showEvents);
+        sb.append("\n");
+        sb.append("\t");
+        sb.append("showBaseline=");
+        sb.append(showBaseline);
+        sb.append("\n");
+        sb.append("\t");
+        sb.append("isRedrawClicked=");
+        sb.append(isRedrawClicked());
+        sb.append("\n");
+        sb.append("\t");
+        sb.append("isPrevRangeClicked=");
+        sb.append(isPrevRangeClicked());
+        sb.append("\n");
+        sb.append("\t");
+        sb.append("isNextRangeClicked=");
+        sb.append(isNextRangeClicked());
+        sb.append("\n");
+        sb.append("\t");
+        sb.append("isChangeBaselineClicked=");
+        sb.append(isChangeBaselineClicked());
+        sb.append("\n");
+        sb.append("\t");
+        sb.append("isSaveBaselineClicked=");
+        sb.append(isSaveBaselineClicked());
+        sb.append("\n");
+        sb.append("\t");
+        sb.append("isCancelBaselineClicked=");
+        sb.append(isCancelBaselineClicked());
+        sb.append("\n");
+        sb.append("\t");
+        sb.append("isChangeHighRangeClicked=");
+        sb.append(isChangeHighRangeClicked());
+        sb.append("\n");
+        sb.append("\t");
+        sb.append("isSaveHighRangeClicked=");
+        sb.append(isSaveHighRangeClicked());
+        sb.append("\n");
+        sb.append("\t");
+        sb.append("isCancelHighRangeClicked=");
+        sb.append(isCancelHighRangeClicked());
+        sb.append("\n");
+        sb.append("\t");
+        sb.append("isChangeLowRangeClicked=");
+        sb.append(isChangeLowRangeClicked());
+        sb.append("\n");
+        sb.append("\t");
+        sb.append("isSaveLowRangeClicked=");
+        sb.append(isSaveLowRangeClicked());
+        sb.append("\n");
+        sb.append("\t");
+        sb.append("isCancelLowRangeClicked=");
+        sb.append(isCancelLowRangeClicked());
+        sb.append("\n");
+        sb.append("\t");
+        sb.append("isPrevPageClicked=");
+        sb.append(isPrevPageClicked());
+        sb.append("baseline=");
+        sb.append(baseline);
+        sb.append("\n");
+        sb.append("\t");
+        sb.append("newBaseline=");
+        sb.append(newBaseline);
+        sb.append("\n");
+        sb.append("\t");
+        sb.append("highRange=");
+        sb.append(highRange);
+        sb.append("\n");
+        sb.append("\t");
+        sb.append("lowRange=");
+        sb.append(lowRange);
+        sb.append("\n");
+        sb.append("\t");
+        sb.append("baselineRaw=");
+        sb.append(baselineRaw);
+        sb.append("\n");
+        sb.append("\t");
+        sb.append("newBaselineRaw=");
+        sb.append(newBaselineRaw);
+        sb.append("\n");
+        sb.append("\t");
+        sb.append("highRangeRaw=");
+        sb.append(highRangeRaw);
+        sb.append("\n");
+        sb.append("\t");
+        sb.append("lowRangeRaw=");
+        sb.append(lowRangeRaw);
+        sb.append("\n");
+        sb.append("\t");
+        sb.append("threshold=");
+        sb.append(threshold);
+        sb.append("\n");
+        sb.append("\t");
+        sb.append("chartName=");
+        sb.append(chartName);
         return sb.toString();
     }
 
@@ -278,17 +341,17 @@ public class ViewChartForm extends MetricDisplayRangeForm {
     }
 
     public boolean isRangeNow() {
-        if ( getEndDate() == null ) {
+        if (getEndDate() == null) {
             return false;
         }
-        return ( System.currentTimeMillis() - getEndDate().getTime() ) <
-            MetricRange.SHIFT_RANGE;
+        return (System.currentTimeMillis() - getEndDate().getTime()) < MetricRange.SHIFT_RANGE;
     }
 
-    public boolean getSaveChart () {
+    public boolean getSaveChart() {
         return saveChart;
     }
-    public void setSaveChart (boolean b) {
+
+    public void setSaveChart(boolean b) {
         saveChart = b;
     }
 
@@ -498,27 +561,26 @@ public class ViewChartForm extends MetricDisplayRangeForm {
             long diff = getEndDate().getTime() - getStartDate().getTime();
             if (diff % Constants.DAYS == 0) {
                 setA(ACTION_LASTN);
-                int days = (int)(diff / Constants.DAYS);
-                setRn( new Integer(days) );
-                setRu( new Integer(MonitorUtils.UNIT_DAYS) );
+                int days = (int) (diff / Constants.DAYS);
+                setRn(new Integer(days));
+                setRu(new Integer(MonitorUtils.UNIT_DAYS));
             } else if (diff % Constants.HOURS == 0) {
                 setA(ACTION_LASTN);
-                int hours = (int)(diff / Constants.HOURS);
-                setRn( new Integer(hours) );
-                setRu( new Integer(MonitorUtils.UNIT_HOURS) );
+                int hours = (int) (diff / Constants.HOURS);
+                setRn(new Integer(hours));
+                setRu(new Integer(MonitorUtils.UNIT_HOURS));
             } else if (diff % Constants.MINUTES == 0) {
                 setA(ACTION_LASTN);
-                int minutes = (int)(diff / Constants.MINUTES);
-                setRn( new Integer(minutes) );
-                setRu( new Integer(MonitorUtils.UNIT_MINUTES) );
+                int minutes = (int) (diff / Constants.MINUTES);
+                setRn(new Integer(minutes));
+                setRu(new Integer(MonitorUtils.UNIT_MINUTES));
             }
         } else {
             setA(ACTION_DATE_RANGE);
         }
     }
 
-    public ActionErrors validate(ActionMapping mapping, 
-                                 HttpServletRequest request) {
+    public ActionErrors validate(ActionMapping mapping, HttpServletRequest request) {
         if (!shouldValidate(mapping, request)) {
             return null;
         }
@@ -530,51 +592,35 @@ public class ViewChartForm extends MetricDisplayRangeForm {
 
         // If we are doing "Last N collection points", N must be
         // between 1 and 60.
-        if ( ACTION_LASTN.equals(getA()) && 
-             (getRu().intValue() == MonitorUtils.UNIT_COLLECTION_POINTS) ) {
-            if ( null != getRn() ) {
+        if (ACTION_LASTN.equals(getA()) && (getRu().intValue() == MonitorUtils.UNIT_COLLECTION_POINTS)) {
+            if (null != getRn()) {
                 int numPoints = getRn().intValue();
                 if (numPoints < 1 || numPoints > 60) {
-                    errs.add( "rn",
-                              new ActionMessage( "errors.range", getRn(),
-                                                 new Integer(1),
-                                                 new Integer(60) ) );
+                    errs.add("rn", new ActionMessage("errors.range", getRn(), new Integer(1), new Integer(60)));
                 }
             }
         }
 
         return errs;
     }
-  
-     /* 
-      * Only validate if.
-      *  1) Any self-submitting buttons were clicked, and
-      *  2) the mapping specifies an input form to return to.
-      *
-      * Child classes should call this to decide whether or not to
-      * perform custom validation steps.
-      */    
-    protected boolean shouldValidate(ActionMapping mapping, 
-                                     HttpServletRequest request) {
-        boolean isRedrawing =
-            isRedrawClicked() ||
-            isPrevRangeClicked() ||
-            isNextRangeClicked() ||
-            getSaveChart() ||
-            isChangeBaselineClicked() ||
-            isSaveBaselineClicked() ||
-            isCancelBaselineClicked() ||
-            isChangeHighRangeClicked() ||
-            isSaveHighRangeClicked() ||
-            isCancelHighRangeClicked() ||
-            isChangeLowRangeClicked() ||
-            isSaveLowRangeClicked() ||
-            isCancelLowRangeClicked() ||
-            isDateRangeSelected();
+
+    /*
+     * Only validate if. 1) Any self-submitting buttons were clicked, and 2) the
+     * mapping specifies an input form to return to.
+     * 
+     * Child classes should call this to decide whether or not to perform custom
+     * validation steps.
+     */
+    protected boolean shouldValidate(ActionMapping mapping, HttpServletRequest request) {
+        boolean isRedrawing = isRedrawClicked() || isPrevRangeClicked() || isNextRangeClicked() || getSaveChart() ||
+                              isChangeBaselineClicked() || isSaveBaselineClicked() || isCancelBaselineClicked() ||
+                              isChangeHighRangeClicked() || isSaveHighRangeClicked() || isCancelHighRangeClicked() ||
+                              isChangeLowRangeClicked() || isSaveLowRangeClicked() || isCancelLowRangeClicked() ||
+                              isDateRangeSelected();
         return isRedrawing && (mapping.getInput() != null);
     }
-    
-    //-------------------------------------drop-downs
+
+    // -------------------------------------drop-downs
 
     public List getThresholdMenu() {
         return MonitorUtils.getThresholdMenu();

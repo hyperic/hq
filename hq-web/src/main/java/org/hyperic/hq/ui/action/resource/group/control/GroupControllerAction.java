@@ -52,160 +52,141 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * A <code>ResourceControllerAction</code> that sets up group control
- * portals.
+ * A <code>ResourceControllerAction</code> that sets up group control portals.
  */
-public class GroupControllerAction extends ResourceControlController {
-    protected Log log = LogFactory.getLog( GroupControllerAction.class.getName() );
+public class GroupControllerAction
+    extends ResourceControlController {
+    protected Log log = LogFactory.getLog(GroupControllerAction.class.getName());
     private final Properties map = getKeyMethodMap();
-    
-    
+
     @Autowired
     public GroupControllerAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss) {
         super(appdefBoss, authzBoss, controlBoss);
-        map.setProperty(Constants.MODE_CRNT_DETAIL,"currentControlStatusDetail");
+        map.setProperty(Constants.MODE_CRNT_DETAIL, "currentControlStatusDetail");
     }
-    
-    public ActionForward currentControlStatus(ActionMapping mapping,
-                                              ActionForm form,
-                                              HttpServletRequest request,
-                                              HttpServletResponse response)
-    throws Exception {
+
+    public ActionForward currentControlStatus(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                              HttpServletResponse response) throws Exception {
         List<String> portlets = new ArrayList<String>();
         Portal portal = new Portal();
-        
-        portlets.add( ".resource.group.control.list.detail" );
-        portal.setName( "resource.group.Control.PageTitle.New" );
+
+        portlets.add(".resource.group.control.list.detail");
+        portal.setName("resource.group.Control.PageTitle.New");
         portal.addPortlets(portlets);
-        
+
         checkGroupHasMembers(mapping, form, request, response);
-        
-        super.currentControlStatus(mapping,form,request,response, portal);
-        
+
+        super.currentControlStatus(mapping, form, request, response, portal);
+
         return null;
     }
-    
-    /** Method to call when mode=crntDetail
+
+    /**
+     * Method to call when mode=crntDetail
      **/
-    public ActionForward currentControlStatusDetail(ActionMapping mapping,
-                                                    ActionForm form,
-                                                    HttpServletRequest request,
-                                                    HttpServletResponse response)
-    throws Exception {
+    public ActionForward currentControlStatusDetail(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                                    HttpServletResponse response) throws Exception {
         List<String> portlets = new ArrayList<String>();
         Portal portal = new Portal();
-        
-        portlets.add( ".resource.group.control.list.current.detail" );       
-        portal.setName( "resource.group.Control.PageTitle.CurrentDetail" );
-        portal.addPortlets(portlets);
-        portal.setDialog( true );
-        
-        request.setAttribute(Constants.PORTAL_KEY, portal);
-        setResource(request);
-        
-        checkGroupHasMembers(mapping, form, request, response);
-        
-        return null;
-    }
-    
-    /** Method to call when mode=history
-     */
-    public ActionForward controlStatusHistory(ActionMapping mapping,
-                                              ActionForm form,
-                                              HttpServletRequest request,
-                                              HttpServletResponse response)
-    throws Exception {
-        List<String> portlets = new ArrayList<String>();
-        Portal portal = new Portal();
-        
-        portlets.add( ".resource.group.control.list.history" );
-        portal.setName( "resource.group.Control.PageTitle.New" );
-        portal.addPortlets(portlets);
-        
-        checkGroupHasMembers(mapping, form, request, response);
-                
-        super.controlStatusHistory(mapping,form,request,response, portal);
-        
-        return null;
-    }
-    
-    /** Method to call when mode=hstDetail.
-     */
-    public ActionForward controlStatusHistoryDetail(ActionMapping mapping,
-                                                    ActionForm form,
-                                                    HttpServletRequest request,
-                                                    HttpServletResponse response)
-    throws Exception {
-        List<String> portlets = new ArrayList<String>();
-        Portal portal = new Portal();
-        
-        portlets.add( ".resource.group.control.list.history.detail" );
-        portal.setName( "resource.group.Control.PageTitle.New" );
+
+        portlets.add(".resource.group.control.list.current.detail");
+        portal.setName("resource.group.Control.PageTitle.CurrentDetail");
         portal.addPortlets(portlets);
         portal.setDialog(true);
-        
+
+        request.setAttribute(Constants.PORTAL_KEY, portal);
+        setResource(request);
+
+        checkGroupHasMembers(mapping, form, request, response);
+
+        return null;
+    }
+
+    /**
+     * Method to call when mode=history
+     */
+    public ActionForward controlStatusHistory(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                              HttpServletResponse response) throws Exception {
+        List<String> portlets = new ArrayList<String>();
+        Portal portal = new Portal();
+
+        portlets.add(".resource.group.control.list.history");
+        portal.setName("resource.group.Control.PageTitle.New");
+        portal.addPortlets(portlets);
+
+        checkGroupHasMembers(mapping, form, request, response);
+
+        super.controlStatusHistory(mapping, form, request, response, portal);
+
+        return null;
+    }
+
+    /**
+     * Method to call when mode=hstDetail.
+     */
+    public ActionForward controlStatusHistoryDetail(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                                    HttpServletResponse response) throws Exception {
+        List<String> portlets = new ArrayList<String>();
+        Portal portal = new Portal();
+
+        portlets.add(".resource.group.control.list.history.detail");
+        portal.setName("resource.group.Control.PageTitle.New");
+        portal.addPortlets(portlets);
+        portal.setDialog(true);
+
         checkGroupHasMembers(mapping, form, request, response);
 
         super.controlStatusHistoryDetail(mapping, form, request, response, portal);
-        
+
         return null;
     }
-    
-    public ActionForward newScheduledControlAction(ActionMapping mapping,
-                                                   ActionForm form,
-                                                   HttpServletRequest request,
-                                                   HttpServletResponse response)
-    throws Exception {
+
+    public ActionForward newScheduledControlAction(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                                   HttpServletResponse response) throws Exception {
         List<String> portlets = new ArrayList<String>();
         Portal portal = new Portal();
-        
-        portlets.add( ".resource.group.control.new" );
-        portal.setName( "resource.group.Control.PageTitle.New" );
+
+        portlets.add(".resource.group.control.new");
+        portal.setName("resource.group.Control.PageTitle.New");
         portal.addPortlets(portlets);
         portal.setDialog(true);
-        
+
         checkGroupHasMembers(mapping, form, request, response);
-        
+
         super.newScheduledControlAction(mapping, form, request, response, portal);
-        
+
         return null;
     }
-    
-    public ActionForward editScheduledControlAction(ActionMapping mapping,
-                                                    ActionForm form,
-                                                    HttpServletRequest request,
-                                                    HttpServletResponse response)
-    throws Exception {
+
+    public ActionForward editScheduledControlAction(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                                    HttpServletResponse response) throws Exception {
         Portal portal = Portal.createPortal("resource.group.Control.PageTitle.Edit", ".resource.group.control.edit");
-        
+
         portal.setDialog(true);
-        
+
         checkGroupHasMembers(mapping, form, request, response);
 
         super.editScheduledControlAction(mapping, form, request, response, portal);
-        
+
         return null;
     }
- 
-    protected void checkGroupHasMembers(ActionMapping mapping,
-                                        ActionForm form,
-                                        HttpServletRequest request,
-                                        HttpServletResponse response)
-    throws Exception {
-        ResourceForm addForm = (ResourceForm)form;
+
+    protected void checkGroupHasMembers(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                        HttpServletResponse response) throws Exception {
+        ResourceForm addForm = (ResourceForm) form;
         Integer groupId = null;
-        
-        if ( form == null ) {
+
+        if (form == null) {
             groupId = RequestUtils.getResourceId(request);
         } else {
             groupId = addForm.getRid();
         }
-    
+
         try {
             Integer sessionId = RequestUtils.getSessionId(request);
             AppdefGroupValue group = appdefBoss.findGroup(sessionId.intValue(), groupId);
             List<GroupEntry> entries = group.getGroupEntries();
-            
+
             if (entries != null && entries.size() < 1) {
                 RequestUtils.setError(request, "resource.common.control.error.NoResourcesInGroup");
             }

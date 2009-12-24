@@ -43,100 +43,85 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 
 /**
- * The controller class for resource server control.
- * This assembles the list portlets for any given 
- * server control action.
- *
- * Common functionality, such as common header data,
- * can be setup and displayed here.
- *
+ * The controller class for resource server control. This assembles the list
+ * portlets for any given server control action.
+ * 
+ * Common functionality, such as common header data, can be setup and displayed
+ * here.
+ * 
  */
-public class ServerControllerAction extends ResourceControlController {
-    
+public class ServerControllerAction
+    extends ResourceControlController {
+
     @Autowired
     public ServerControllerAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss) {
         super(appdefBoss, authzBoss, controlBoss);
     }
 
-    public ActionForward currentControlStatus(ActionMapping mapping,
-                                              ActionForm form,
-                                              HttpServletRequest request,
-                                              HttpServletResponse response)
-    throws Exception {
+    public ActionForward currentControlStatus(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                              HttpServletResponse response) throws Exception {
         List<String> portlets = new ArrayList<String>();
         Portal portal = new Portal();
-        
+
         portlets.add(".resource.server.control.list.detail");
         portal.setName("resource.server.ControlSchedule.Title");
         portal.addPortlets(portlets);
-        
-        super.currentControlStatus(mapping,form,request,response, portal);
-        
+
+        super.currentControlStatus(mapping, form, request, response, portal);
+
         return null;
     }
-    
-    public ActionForward controlStatusHistory(ActionMapping mapping,
-                                              ActionForm form,
-                                              HttpServletRequest request,
-                                              HttpServletResponse response)
-    throws Exception {
+
+    public ActionForward controlStatusHistory(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                              HttpServletResponse response) throws Exception {
         List<String> portlets = new ArrayList<String>();
         Portal portal = new Portal();
-        
+
         portlets.add(".resource.server.control.list.history");
         portal.setName("resource.server.ControlHistory.Title");
         portal.addPortlets(portlets);
-        
-        super.controlStatusHistory(mapping,form,request,response, portal);
-        
+
+        super.controlStatusHistory(mapping, form, request, response, portal);
+
         return null;
     }
-    
-    public ActionForward controlStatusHistoryDetail(ActionMapping mapping,
-                                                    ActionForm form,
-                                                    HttpServletRequest request,
-                                                    HttpServletResponse response)
-    throws Exception {
+
+    public ActionForward controlStatusHistoryDetail(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                                    HttpServletResponse response) throws Exception {
         List<String> portlets = new ArrayList<String>();
         Portal portal = new Portal();
-        
+
         portlets.add(".page.title.resource.group");
         portlets.add(".resource.group.control.status.history.return");
         portlets.add(".resource.group.control.list.history.detail");
         portlets.add(".form.buttons.deleteCancel");
         portlets.add(".resource.group.control.status.history.return");
-        portal.setName( "resource.group.Control.PageTitle.New");
+        portal.setName("resource.group.Control.PageTitle.New");
         portal.addPortlets(portlets);
         portal.setDialog(true);
-        
+
         super.controlStatusHistoryDetail(mapping, form, request, response, portal);
-        
+
         return null;
     }
-    
-    public ActionForward newScheduledControlAction(ActionMapping mapping,
-                                                   ActionForm form,
-                                                   HttpServletRequest request,
-                                                   HttpServletResponse response)
-    throws Exception {
-        Portal portal = Portal.createPortal("resource.server.Control.PageTitle.New", ".resource.server.control.new" );
+
+    public ActionForward newScheduledControlAction(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                                   HttpServletResponse response) throws Exception {
+        Portal portal = Portal.createPortal("resource.server.Control.PageTitle.New", ".resource.server.control.new");
         portal.setDialog(true);
-        
+
         super.newScheduledControlAction(mapping, form, request, response, portal);
-        
+
         return null;
     }
-    
-    public ActionForward editScheduledControlAction(ActionMapping mapping,
-                                                    ActionForm form,
-                                                    HttpServletRequest request,
-                                                    HttpServletResponse response)
-    throws Exception {
+
+    public ActionForward editScheduledControlAction(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                                    HttpServletResponse response) throws Exception {
         Portal portal = Portal.createPortal("resource.server.Control.PageTitle.Edit", ".resource.server.control.edit");
         portal.setDialog(true);
-        
+
         super.editScheduledControlAction(mapping, form, request, response, portal);
-        
+
         return null;
     }
 }

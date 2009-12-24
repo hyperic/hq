@@ -51,7 +51,8 @@ import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.config.InvalidOptionValueException;
 
-public class PlatformAutoDiscoveryForm extends ResourceForm {
+public class PlatformAutoDiscoveryForm
+    extends ResourceForm {
 
     /**
      * LabelValueBean objects representing the serverTypes
@@ -59,7 +60,7 @@ public class PlatformAutoDiscoveryForm extends ResourceForm {
     ArrayList serverTypesLB = new ArrayList();
 
     private List configOptions = new ArrayList();
-    
+
     /**
      * original serverType objects
      */
@@ -68,61 +69,73 @@ public class PlatformAutoDiscoveryForm extends ResourceForm {
 
     private String scanName = null;
     private String scanDesc = null;
-    
-    private ImageButtonBean scheduleTypeChange;    
-        
+
+    private ImageButtonBean scheduleTypeChange;
+
     private String scanMethod;
 
-    //-------------------------------------constructors
+    // -------------------------------------constructors
 
     public PlatformAutoDiscoveryForm() {
         super();
         this.scheduleTypeChange = new ImageButtonBean();
     }
+
     /**
      * list of selected server types
-     */    
-    private Integer[] selectedServerTypeIds = {}; 
+     */
+    private Integer[] selectedServerTypeIds = {};
 
-    public String getName() {return scanName;}
-    public void   setName(String name) {scanName = name;}
-    public String getDescription() {return scanDesc;}
-    public void   setDescription(String desc) {scanDesc = desc;}
+    public String getName() {
+        return scanName;
+    }
 
-    public Integer[] getSelectedServerTypeIds() { 
-      return this.selectedServerTypeIds; 
-    } 
-    
-    public void setSelectedServerTypeIds(Integer[] selectedServerTypes) { 
-      this.selectedServerTypeIds = selectedServerTypes; 
+    public void setName(String name) {
+        scanName = name;
+    }
+
+    public String getDescription() {
+        return scanDesc;
+    }
+
+    public void setDescription(String desc) {
+        scanDesc = desc;
+    }
+
+    public Integer[] getSelectedServerTypeIds() {
+        return this.selectedServerTypeIds;
+    }
+
+    public void setSelectedServerTypeIds(Integer[] selectedServerTypes) {
+        this.selectedServerTypeIds = selectedServerTypes;
     }
 
     public boolean isScheduleTypeChgSelected() {
         return getScheduleTypeChange().isSelected();
     }
-    
+
     /**
      * @return Collection of LabelValueBean representing the ServerTypeValue
      */
-    public Collection getServerTypes() { return serverTypesLB; }
+    public Collection getServerTypes() {
+        return serverTypesLB;
+    }
 
     /**
-     * build up a list of label beans of serverType.names as label and
-     * server type id as value
+     * build up a list of label beans of serverType.names as label and server
+     * type id as value
      */
     public void setServerTypes(AppdefResourceTypeValue[] serverTypes) {
 
         this.sTypes = new ArrayList();
-        
+
         CollectionUtils.addAll(sTypes, serverTypes);
-        
-        for(int i = 0; i< serverTypes.length; i++) {
+
+        for (int i = 0; i < serverTypes.length; i++) {
             AppdefResourceTypeValue stype = serverTypes[i];
-            
+
             if (stype != null) {
-                LabelValueBean val = new 
-                    LabelValueBean(stype.getName(), 
-                                   stype.getId().toString());
+                LabelValueBean val = new LabelValueBean(stype.getName(), stype.getId().toString());
                 serverTypesLB.add(val);
             }
         }
@@ -130,17 +143,17 @@ public class PlatformAutoDiscoveryForm extends ResourceForm {
 
     /**
      * @return an initial current time to 5 minutes in the future
-     */    
+     */
     protected Calendar getInitStartTime() {
         Calendar cal = Calendar.getInstance();
         long currTime = cal.getTimeInMillis() + Constants.FIVE_MINUTES;
         cal.setTimeInMillis(currTime);
-        return cal;        
+        return cal;
     }
 
     /**
-     * build a list of ServerTypeValue objects from a list of
-     * ids selected in the form
+     * build a list of ServerTypeValue objects from a list of ids selected in
+     * the form
      */
     public List getSelectedServerTypes(ServerTypeValue[] serverTypeVals) {
         List selectServerTypeVals = new ArrayList();
@@ -149,74 +162,76 @@ public class PlatformAutoDiscoveryForm extends ResourceForm {
             if (sType != null)
                 selectServerTypeVals.add(sType);
         }
-        return selectServerTypeVals; 
+        return selectServerTypeVals;
     }
 
     /**
-     * find a ServerTypeValue object from a list of serverTypeVals. 
+     * find a ServerTypeValue object from a list of serverTypeVals.
      */
-    public static AppdefResourceTypeValue findResourceTypeValue
-        (ServerTypeValue[] serverTypeVals,
-         Integer id) {
+    public static AppdefResourceTypeValue findResourceTypeValue(ServerTypeValue[] serverTypeVals, Integer id) {
         for (int i = 0; i < serverTypeVals.length; i++) {
             if (serverTypeVals[i].getId().intValue() == id.intValue())
                 return serverTypeVals[i];
         }
         return null;
     }
-    
+
     /**
      * select all the server types for creating new auto-discovery
      */
     public void checkServerTypes(List sTypes1) {
         // if errors found, do nothing; reset the errorsFound flag
-        if (validationErrorsFound) return;
-        
+        if (validationErrorsFound)
+            return;
+
         selectedServerTypeIds = new Integer[sTypes1.size()];
         Iterator sIterator = sTypes1.iterator();
         int i = 0;
-        while (sIterator.hasNext())
-        {
-            ServerTypeValue sType = (ServerTypeValue)sIterator.next();
+        while (sIterator.hasNext()) {
+            ServerTypeValue sType = (ServerTypeValue) sIterator.next();
             selectedServerTypeIds[i++] = sType.getId();
         }
     }
 
     private Integer[] serverTypeId;
-    public Integer[] getServerTypeId() { return serverTypeId; }
+
+    public Integer[] getServerTypeId() {
+        return serverTypeId;
+    }
+
     public void setServerTypeId(Integer[] serverTypeId) {
         this.serverTypeId = serverTypeId;
     }
 
-    public ArrayList getServerTypesLB() { return serverTypesLB; }
+    public ArrayList getServerTypesLB() {
+        return serverTypesLB;
+    }
+
     public void setServerTypesLB(ArrayList serverTypesLB) {
         this.serverTypesLB = serverTypesLB;
     }
 
     /**
      * This validate method tries to
-     *   
-     * over-ride the validate method.  
+     * 
+     * over-ride the validate method.
      */
     public ActionErrors validate(ActionMapping mapping, HttpServletRequest request) {
         ActionErrors errors = super.validate(mapping, request);
 
-        if (shouldValidate(mapping, request)) 
-        {            
+        if (shouldValidate(mapping, request)) {
             if (errors == null) {
                 errors = new ActionErrors();
             }
 
             // only validate when user clicks on ok & not on reset or cancel.
             HttpSession session = request.getSession();
-            ConfigSchema schema = (ConfigSchema)session.getAttribute(Constants.CURR_CONFIG_SCHEMA);
-            ConfigResponse resp = (ConfigResponse)session.getAttribute(Constants.OLD_CONFIG_RESPONSE);
-            if (schema != null)
-            {
+            ConfigSchema schema = (ConfigSchema) session.getAttribute(Constants.CURR_CONFIG_SCHEMA);
+            ConfigResponse resp = (ConfigResponse) session.getAttribute(Constants.OLD_CONFIG_RESPONSE);
+            if (schema != null) {
                 ConfigResponse newResponse = null;
                 try {
-                    newResponse = BizappUtils.buildSaveConfigOptions(request, 
-                                                                        resp, schema, errors);
+                    newResponse = BizappUtils.buildSaveConfigOptions(request, resp, schema, errors);
                 } catch (InvalidOptionValsFoundException e) {
                     newResponse = e.getConfigResponse();
                     // do nothing. We are already handling this error by passing
@@ -226,15 +241,15 @@ public class PlatformAutoDiscoveryForm extends ResourceForm {
                 } catch (InvalidOptionValueException e) {
                     throw new SystemException("unknown exception:", e);
                 }
-                
-                List configs = BizappUtils.buildLoadConfigOptions(schema, newResponse ); 
+
+                List configs = BizappUtils.buildLoadConfigOptions(schema, newResponse);
                 this.configOptions = configs;
             }
         }
 
-        if (errors != null && !errors.isEmpty() )
+        if (errors != null && !errors.isEmpty())
             validationErrorsFound = true;
-        
+
         return errors;
     }
 
@@ -250,15 +265,21 @@ public class PlatformAutoDiscoveryForm extends ResourceForm {
 
     public void buildConfigOptions(ConfigSchema schema, ConfigResponse resp) {
         // if errors found, do nothing; reset the errorsFound flag
-        if (validationErrorsFound) return;
-            
-        List configs = BizappUtils.buildLoadConfigOptions(schema, resp );
-        
+        if (validationErrorsFound)
+            return;
+
+        List configs = BizappUtils.buildLoadConfigOptions(schema, resp);
+
         this.configOptions = configs;
     }
 
-    public String getScanMethod() { return scanMethod; }
-    public void setScanMethod(String name) {scanMethod = name;}
+    public String getScanMethod() {
+        return scanMethod;
+    }
+
+    public void setScanMethod(String name) {
+        scanMethod = name;
+    }
 
     public ImageButtonBean getScheduleTypeChange() {
         return scheduleTypeChange;

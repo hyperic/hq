@@ -59,13 +59,14 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class ViewAction extends TilesAction {
+public class ViewAction
+    extends TilesAction {
 
     private final Log log = LogFactory.getLog(ViewAction.class.getName());
     private AuthzBoss authzBoss;
     private AIBoss aiBoss;
     private AppdefBoss appdefBoss;
-    
+
     @Autowired
     public ViewAction(AuthzBoss authzBoss, AIBoss aiBoss, AppdefBoss appdefBoss) {
         super();
@@ -74,32 +75,24 @@ public class ViewAction extends TilesAction {
         this.appdefBoss = appdefBoss;
     }
 
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-        
-       
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
+
         HttpSession session = request.getSession();
-     
+
         WebUser user = RequestUtils.getWebUser(request);
         int sessionId = user.getSessionId().intValue();
         AIQueueForm queueForm = (AIQueueForm) form;
 
         PageControl page = new PageControl();
-       
-        DashboardConfig dashConfig = DashboardUtils.findDashboard(
-        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, authzBoss);
+
+        DashboardConfig dashConfig = DashboardUtils.findDashboard((Integer) session
+            .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
-        page.setPagesize(Integer.parseInt( 
-        		dashPrefs.getValue(".dashContent.autoDiscovery.range") ) );
+        page.setPagesize(Integer.parseInt(dashPrefs.getValue(".dashContent.autoDiscovery.range")));
 
         // always show ignored platforms and already-processed platforms
-        PageList<AIPlatformValue> aiQueue = aiBoss.getQueue(sessionId, true, false, true,
-                                              page);
+        PageList<AIPlatformValue> aiQueue = aiBoss.getQueue(sessionId, true, false, true, page);
         List<AIPlatformWithStatus> queueWithStatus = getStatuses(aiQueue);
         context.putAttribute("resources", queueWithStatus);
 
@@ -115,16 +108,14 @@ public class ViewAction extends TilesAction {
         List<Integer> serversToProcess = new ArrayList<Integer>();
         AIPlatformValue aiPlatform;
         AIServerValue[] aiServers;
-        for (int i=0; i<platformsToProcess.length; i++) {
-            aiPlatform =  aiQueue.get(i);
+        for (int i = 0; i < platformsToProcess.length; i++) {
+            aiPlatform = aiQueue.get(i);
             platformsToProcess[i] = aiPlatform.getId();
 
             // Add all non-virtual servers on this platform
             aiServers = aiPlatform.getAIServerValues();
-            for (int j=0; j<aiServers.length; j++) {
-                if (!BizappUtils.isAutoApprovedServer(sessionId,
-                                                      appdefBoss,
-                                                      aiServers[j])) {
+            for (int j = 0; j < aiServers.length; j++) {
+                if (!BizappUtils.isAutoApprovedServer(sessionId, appdefBoss, aiServers[j])) {
                     serversToProcess.add(aiServers[j].getId());
                 }
             }
@@ -132,45 +123,37 @@ public class ViewAction extends TilesAction {
         queueForm.setPlatformsToProcess(platformsToProcess);
         queueForm.setServersToProcess(serversToProcess);
 
-        // clean out the return path 
+        // clean out the return path
         SessionUtils.resetReturnPath(request.getSession());
-        
+
         // Check for previous error
         // First, check for ignore error.
-        Object ignoreErr =
-            request.getSession().getAttribute(Constants.
-                                              IMPORT_IGNORE_ERROR_ATTR);
+        Object ignoreErr = request.getSession().getAttribute(Constants.IMPORT_IGNORE_ERROR_ATTR);
         if (ignoreErr != null) {
-            ActionMessage err =
-                new ActionMessage("dash.autoDiscovery.import.ignore.Error");
+            ActionMessage err = new ActionMessage("dash.autoDiscovery.import.ignore.Error");
             RequestUtils.setError(request, err, ActionMessages.GLOBAL_MESSAGE);
             // Only show the error once
-            request.getSession().setAttribute(Constants.
-                                              IMPORT_IGNORE_ERROR_ATTR,
-                                              null);
+            request.getSession().setAttribute(Constants.IMPORT_IGNORE_ERROR_ATTR, null);
         }
 
         // Check for import exception
-        Exception exc = (Exception)
-            request.getSession().getAttribute(Constants.IMPORT_ERROR_ATTR);
+        Exception exc = (Exception) request.getSession().getAttribute(Constants.IMPORT_ERROR_ATTR);
         if (exc != null) {
             request.getSession().removeAttribute(Constants.IMPORT_ERROR_ATTR);
             log.error("Failed to approve AI report", exc);
-            ActionMessage err =
-                new ActionMessage("dash.autoDiscovery.import.Error",
-                                  exc);
+            ActionMessage err = new ActionMessage("dash.autoDiscovery.import.Error", exc);
             RequestUtils.setError(request, err, ActionMessages.GLOBAL_MESSAGE);
         }
         return null;
     }
-    
+
     private List<AIPlatformWithStatus> getStatuses(PageList<AIPlatformValue> aiQueue) {
         ScanStateCore ssc = null;
         AIPlatformValue aiPlatform;
         List<AIPlatformWithStatus> results = new ArrayList<AIPlatformWithStatus>();
 
-        for (int i=0; i<aiQueue.size(); i++) {
-            aiPlatform =  aiQueue.get(i);
+        for (int i = 0; i < aiQueue.size(); i++) {
+            aiPlatform = aiQueue.get(i);
 
             results.add(new AIPlatformWithStatus(aiPlatform, ssc));
         }

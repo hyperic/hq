@@ -27,7 +27,7 @@ package org.hyperic.hq.ui.action.resource.application.inventory;
 
 import org.hyperic.hq.ui.action.BaseValidatorForm;
 
-
-public class RemoveServiceDependenciesForm extends BaseValidatorForm {
+public class RemoveServiceDependenciesForm
+    extends BaseValidatorForm {
 
 }

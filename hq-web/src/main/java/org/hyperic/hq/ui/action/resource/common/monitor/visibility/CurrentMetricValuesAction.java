@@ -54,55 +54,45 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * An <code>Action</code> that retrieves data from the BizApp to
- * facilitate display of the various pages that provide metrics
- * summaries.
+ * An <code>Action</code> that retrieves data from the BizApp to facilitate
+ * display of the various pages that provide metrics summaries.
  */
-public class CurrentMetricValuesAction extends BaseAction {
+public class CurrentMetricValuesAction
+    extends BaseAction {
 
-    private final Log log =
-        LogFactory.getLog(CurrentMetricValuesAction.class.getName());
+    private final Log log = LogFactory.getLog(CurrentMetricValuesAction.class.getName());
 
     private MeasurementBoss measurementBoss;
-    
-    
-   
+
     @Autowired
     public CurrentMetricValuesAction(MeasurementBoss measurementBoss) {
         super();
         this.measurementBoss = measurementBoss;
     }
 
-
-
-
     /**
-     * Retrieve data needed to display a Metrics Display Form. Respond
-     * to certain button clicks that alter the form display.
+     * Retrieve data needed to display a Metrics Display Form. Respond to
+     * certain button clicks that alter the form display.
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
         AppdefEntityID[] entityIds = null;
         AppdefEntityTypeID ctype = null;
         try {
             entityIds = RequestUtils.getEntityIds(request);
             ctype = RequestUtils.getChildResourceTypeId(request);
-        }
-        catch (ParameterNotFoundException e) {
-            if (entityIds == null)  // Platform autogroup
+        } catch (ParameterNotFoundException e) {
+            if (entityIds == null) // Platform autogroup
                 ctype = RequestUtils.getChildResourceTypeId(request);
         }
 
         Long begin = null, end = null;
-        
+
         // get the "metric range" user pref
         WebUser user = RequestUtils.getWebUser(request);
-        Map<String,Object> range = user.getMetricRangePreference();
-        if (range != null) {    
+        Map<String, Object> range = user.getMetricRangePreference();
+        if (range != null) {
             begin = (Long) range.get(MonitorUtils.BEGIN);
             end = (Long) range.get(MonitorUtils.END);
         } else {
@@ -110,42 +100,31 @@ public class CurrentMetricValuesAction extends BaseAction {
         }
 
         int sessionId = RequestUtils.getSessionId(request).intValue();
-       
-     
 
-        Map<String,Set<MetricDisplaySummary>> metrics;
-        
+        Map<String, Set<MetricDisplaySummary>> metrics;
+
         if (ctype == null) {
-            metrics = measurementBoss.findMetrics(sessionId, entityIds,
-                                       MeasurementConstants.FILTER_NONE, null,
-                                       begin.longValue(), end.longValue(),
-                                       false);
-        }
-        else {
+            metrics = measurementBoss.findMetrics(sessionId, entityIds, MeasurementConstants.FILTER_NONE, null, begin
+                .longValue(), end.longValue(), false);
+        } else {
             if (null == entityIds) {
-                metrics = measurementBoss.findAGPlatformMetricsByType(sessionId, ctype,
-                                                           begin.longValue(),
-                                                           end.longValue(),
-                                                           false);
+                metrics = measurementBoss.findAGPlatformMetricsByType(sessionId, ctype, begin.longValue(), end
+                    .longValue(), false);
             } else {
-                metrics =
-                    measurementBoss.findAGMetricsByType(sessionId, entityIds, ctype,
-                                             MeasurementConstants.FILTER_NONE,
-                                             null, begin.longValue(),
-                                             end.longValue(), false);
+                metrics = measurementBoss.findAGMetricsByType(sessionId, entityIds, ctype,
+                    MeasurementConstants.FILTER_NONE, null, begin.longValue(), end.longValue(), false);
             }
         }
 
         if (metrics != null) {
-            MonitorUtils.formatMetrics(metrics, request.getLocale(),
-                                       getResources(request));
+            MonitorUtils.formatMetrics(metrics, request.getLocale(), getResources(request));
 
             // Create an array list of map objects for the attributes
             JSONArray objects = new JSONArray();
-            for (Iterator<Set<MetricDisplaySummary>> it = metrics.values().iterator(); it.hasNext(); ) {
-                Collection<MetricDisplaySummary> metricList =  it.next();
+            for (Iterator<Set<MetricDisplaySummary>> it = metrics.values().iterator(); it.hasNext();) {
+                Collection<MetricDisplaySummary> metricList = it.next();
                 for (Iterator<MetricDisplaySummary> m = metricList.iterator(); m.hasNext();) {
-                    MetricDisplaySummary mds =  m.next();
+                    MetricDisplaySummary mds = m.next();
                     JSONObject values = new JSONObject();
                     values.put("mid", mds.getTemplateId());
                     values.put("alertCount", new Integer(mds.getAlertCount()));

@@ -41,22 +41,19 @@ import org.hyperic.hq.ui.action.resource.ResourceForm;
 import org.hyperic.hq.ui.util.RequestUtils;
 
 /**
- * This action class class prepares for a ScanControl action 
+ * This action class class prepares for a ScanControl action
  * 
- *
+ * 
  */
-public class ScanControlPrepAction extends TilesAction {
+public class ScanControlPrepAction
+    extends TilesAction {
 
     /**
      * Create the platform with the attributes specified in the given
      * <code>ResourceForm</code>.
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-       
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
         ResourceForm newForm = (ResourceForm) form;
 
@@ -64,7 +61,7 @@ public class ScanControlPrepAction extends TilesAction {
 
         newForm.setRid(aeid.getId());
         newForm.setType(new Integer(aeid.getType()));
-            
+
         return null;
     }
 }

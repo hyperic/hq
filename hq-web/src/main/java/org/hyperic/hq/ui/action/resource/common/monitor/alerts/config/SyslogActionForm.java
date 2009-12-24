@@ -37,15 +37,15 @@ import org.apache.struts.action.ActionErrors;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionMessage;
 
-
 /**
  * Form for editing the control action for an alert definition.
- *
+ * 
  */
-public final class SyslogActionForm extends ResourceForm  {
+public final class SyslogActionForm
+    extends ResourceForm {
     private Log log = LogFactory.getLog(SyslogActionForm.class.getName());
 
-    //-------------------------------------instance variables
+    // -------------------------------------instance variables
 
     // control action properties
     private Integer id; // nullable
@@ -55,14 +55,13 @@ public final class SyslogActionForm extends ResourceForm  {
     private String version;
     private boolean shouldBeRemoved;
 
-    //-------------------------------------constructors
+    // -------------------------------------constructors
 
     public SyslogActionForm() {
         // do nothing
     }
 
-
-    //-------------------------------------public methods
+    // -------------------------------------public methods
 
     public Integer getId() {
         return this.id;
@@ -83,7 +82,7 @@ public final class SyslogActionForm extends ResourceForm  {
     public String getMetaProject() {
         return this.metaProject;
     }
-    
+
     public void setMetaProject(String metaProject) {
         this.metaProject = metaProject;
     }
@@ -122,38 +121,32 @@ public final class SyslogActionForm extends ResourceForm  {
 
     public ActionErrors validate(ActionMapping mapping, HttpServletRequest request) {
         // don't validate if we are preparing the form ...
-        if ( shouldValidate(mapping, request) ) {
+        if (shouldValidate(mapping, request)) {
             ActionErrors errs = super.validate(mapping, request);
             if (null == errs) {
                 errs = new ActionErrors();
             }
-            
+
             // if we are not removing the action, all the fields are
             // required
-            if (! getShouldBeRemoved() ) {
-                if ( GenericValidator.isBlankOrNull( getMetaProject() ) ) {
-                    String fieldName =
-                        RequestUtils.message(request, "alert.config.props.Syslog.MetaProject");
-                    ActionMessage err =
-                        new ActionMessage("errors.required", fieldName);
+            if (!getShouldBeRemoved()) {
+                if (GenericValidator.isBlankOrNull(getMetaProject())) {
+                    String fieldName = RequestUtils.message(request, "alert.config.props.Syslog.MetaProject");
+                    ActionMessage err = new ActionMessage("errors.required", fieldName);
                     errs.add("metaProject", err);
                 }
-                if ( GenericValidator.isBlankOrNull( getProject() ) ) {
-                    String fieldName =
-                        RequestUtils.message(request, "alert.config.props.Syslog.Project");
-                    ActionMessage err =
-                        new ActionMessage("errors.required", fieldName);
+                if (GenericValidator.isBlankOrNull(getProject())) {
+                    String fieldName = RequestUtils.message(request, "alert.config.props.Syslog.Project");
+                    ActionMessage err = new ActionMessage("errors.required", fieldName);
                     errs.add("project", err);
                 }
-                if ( GenericValidator.isBlankOrNull( getVersion() ) ) {
-                    String fieldName =
-                        RequestUtils.message(request, "alert.config.props.Syslog.Version");
-                    ActionMessage err =
-                        new ActionMessage("errors.required", fieldName);
+                if (GenericValidator.isBlankOrNull(getVersion())) {
+                    String fieldName = RequestUtils.message(request, "alert.config.props.Syslog.Version");
+                    ActionMessage err = new ActionMessage("errors.required", fieldName);
                     errs.add("version", err);
                 }
             }
-            
+
             return errs;
         } else {
             return null;

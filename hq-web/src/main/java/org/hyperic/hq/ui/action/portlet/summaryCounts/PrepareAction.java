@@ -49,57 +49,54 @@ import org.hyperic.util.config.ConfigResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * An <code>Action</code> that loads the admin screen for a portlet 
+ * An <code>Action</code> that loads the admin screen for a portlet
  */
-public class PrepareAction extends BaseAction {
+public class PrepareAction
+    extends BaseAction {
 
-   private AuthzBoss authzBoss;
-   private AppdefBoss appdefBoss;
-   
-   
-   @Autowired 
+    private AuthzBoss authzBoss;
+    private AppdefBoss appdefBoss;
+
+    @Autowired
     public PrepareAction(AuthzBoss authzBoss, AppdefBoss appdefBoss) {
         super();
         this.authzBoss = authzBoss;
         this.appdefBoss = appdefBoss;
-   }
+    }
 
     /**
-     *
+     * 
      * @param mapping The ActionMapping used to select this instance
      * @param actionForm The optional ActionForm bean for this request (if any)
      * @param request The HTTP request we are processing
      * @param response The HTTP response we are creating
-     *
-     * @exception Exception if the application business logic throws
-     *  an exception
+     * 
+     * @exception Exception if the application business logic throws an
+     *            exception
      */
-    public ActionForward execute(ActionMapping mapping,
-                            ActionForm form,
-                            HttpServletRequest request,
-                            HttpServletResponse response)
-    throws Exception {
-     
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
+
         PropertiesForm pForm = (PropertiesForm) form;
-       
+
         HttpSession session = request.getSession();
         WebUser user = RequestUtils.getWebUser(session);
-        DashboardConfig dashConfig = DashboardUtils.findDashboard(
-        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, authzBoss);
+        DashboardConfig dashConfig = DashboardUtils.findDashboard((Integer) session
+            .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
 
-        boolean application = new Boolean( dashPrefs.getValue(".dashContent.summaryCounts.application")).booleanValue();
-        boolean platform =  new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.platform")).booleanValue();             
-        boolean server = new Boolean( dashPrefs.getValue(".dashContent.summaryCounts.server")).booleanValue();
-        boolean service = new Boolean( dashPrefs.getValue(".dashContent.summaryCounts.service")).booleanValue();
-        boolean cluster = new Boolean( dashPrefs.getValue(".dashContent.summaryCounts.group.cluster")).booleanValue();
+        boolean application = new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.application")).booleanValue();
+        boolean platform = new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.platform")).booleanValue();
+        boolean server = new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.server")).booleanValue();
+        boolean service = new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.service")).booleanValue();
+        boolean cluster = new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.group.cluster")).booleanValue();
 
-        boolean groupMixed= new Boolean( dashPrefs.getValue(".dashContent.summaryCounts.group.mixed")).booleanValue();
-        boolean groupGroups = new Boolean( dashPrefs.getValue(".dashContent.summaryCounts.group.groups")).booleanValue();
-        boolean groupPlatServerService = new Boolean( dashPrefs.getValue(".dashContent.summaryCounts.group.plat.server.service")).booleanValue();
-        boolean groupApplication = new Boolean( dashPrefs.getValue(".dashContent.summaryCounts.group.application")).booleanValue();
-
+        boolean groupMixed = new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.group.mixed")).booleanValue();
+        boolean groupGroups = new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.group.groups")).booleanValue();
+        boolean groupPlatServerService = new Boolean(dashPrefs
+            .getValue(".dashContent.summaryCounts.group.plat.server.service")).booleanValue();
+        boolean groupApplication = new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.group.application"))
+            .booleanValue();
 
         pForm.setApplication(application);
         pForm.setCluster(cluster);
@@ -108,16 +105,15 @@ public class PrepareAction extends BaseAction {
         pForm.setService(service);
 
         pForm.setGroupMixed(groupMixed);
-        pForm.setGroupGroups(groupGroups);            
+        pForm.setGroupGroups(groupGroups);
         pForm.setGroupPlatServerService(groupPlatServerService);
         pForm.setGroupApplication(groupApplication);
 
-        String[] applicationTypes = getStringArray(".dashContent.summaryCounts.applicationTypes", dashPrefs);            
-        String[] platformTypes =    getStringArray(".dashContent.summaryCounts.platformTypes", dashPrefs);            
-        String[] serverTypes =      getStringArray(".dashContent.summaryCounts.serverTypes", dashPrefs);
-        String[] serviceTypes =     getStringArray(".dashContent.summaryCounts.serviceTypes", dashPrefs);
-        String[] clusterTypes =     getStringArray(".dashContent.summaryCounts.group.clusterTypes", dashPrefs);
-
+        String[] applicationTypes = getStringArray(".dashContent.summaryCounts.applicationTypes", dashPrefs);
+        String[] platformTypes = getStringArray(".dashContent.summaryCounts.platformTypes", dashPrefs);
+        String[] serverTypes = getStringArray(".dashContent.summaryCounts.serverTypes", dashPrefs);
+        String[] serviceTypes = getStringArray(".dashContent.summaryCounts.serviceTypes", dashPrefs);
+        String[] clusterTypes = getStringArray(".dashContent.summaryCounts.group.clusterTypes", dashPrefs);
 
         pForm.setApplicationTypes(applicationTypes);
         pForm.setClusterTypes(clusterTypes);
@@ -125,28 +121,27 @@ public class PrepareAction extends BaseAction {
         pForm.setServerTypes(serverTypes);
         pForm.setServiceTypes(serviceTypes);
 
-        AppdefInventorySummary summary = appdefBoss.getInventorySummary( 
-                                            user.getSessionId().intValue(), true );
+        AppdefInventorySummary summary = appdefBoss.getInventorySummary(user.getSessionId().intValue(), true);
 
         request.setAttribute("summary", summary);
 
         return null;
 
     }
-    
-    private String[] getStringArray(String preference, ConfigResponse config) throws Exception{
-        List<String> preferences = StringUtil.explode(config.getValue(preference), "," );
-        
+
+    private String[] getStringArray(String preference, ConfigResponse config) throws Exception {
+        List<String> preferences = StringUtil.explode(config.getValue(preference), ",");
+
         int element;
         Iterator<String> i;
-        
+
         String[] array = new String[preferences.size()];
-        
-        for(i = preferences.iterator(), element = 0; i.hasNext(); element++){
-            array[element] =  i.next();            
-        }           
-        
+
+        for (i = preferences.iterator(), element = 0; i.hasNext(); element++) {
+            array[element] = i.next();
+        }
+
         return array;
-    
+
     }
 }

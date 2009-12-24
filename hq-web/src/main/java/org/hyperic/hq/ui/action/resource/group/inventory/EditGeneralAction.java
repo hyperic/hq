@@ -53,119 +53,92 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * Action which saves the general properties for a group
  */
-public class EditGeneralAction extends BaseAction {
-    
-    private final  Log log = LogFactory.getLog(EditGeneralAction.class.getName());
+public class EditGeneralAction
+    extends BaseAction {
+
+    private final Log log = LogFactory.getLog(EditGeneralAction.class.getName());
     private AppdefBoss appdefBoss;
-    
-    
+
     @Autowired
     public EditGeneralAction(AppdefBoss appdefBoss) {
         super();
         this.appdefBoss = appdefBoss;
     }
 
-
-
     /**
      * Create the server with the attributes specified in the given
      * <code>GroupForm</code>.
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-       
-        
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
+
         ResourceForm rForm = (ResourceForm) form;
 
         Integer rid;
         Integer entityType;
         HashMap<String, Object> forwardParams = new HashMap<String, Object>(2);
-            
+
         rid = rForm.getRid();
         entityType = rForm.getType();
         forwardParams.put(Constants.RESOURCE_PARAM, rid);
         forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, entityType);
-            
-        ActionForward forward = checkSubmit(request, mapping, form,
-            forwardParams, BaseAction.YES_RETURN_PATH );
-            
+
+        ActionForward forward = checkSubmit(request, mapping, form, forwardParams, BaseAction.YES_RETURN_PATH);
+
         if (forward != null) {
             return forward;
         }
-                 
+
         AppdefGroupValue rValue;
-     
 
         try {
             Integer sessionId = RequestUtils.getSessionId(request);
-            
-            
+
             Integer groupId = RequestUtils.getResourceId(request);
-            
+
             rValue = appdefBoss.findGroup(sessionId.intValue(), groupId);
 
-            ResourceGroup group = appdefBoss.findGroupById(sessionId.intValue(), 
-                                                     groupId);
-            
+            ResourceGroup group = appdefBoss.findGroupById(sessionId.intValue(), groupId);
+
             // See if this is a private group
             boolean isPrivate = true;
-            Collection<ResourceGroup> groups = 
-                appdefBoss.getGroupsForResource(sessionId, group.getResource());
-            for (Iterator<ResourceGroup> it = groups.iterator(); it.hasNext(); ) {
-                ResourceGroup g =  it.next();
-                isPrivate =
-                    !g.getId().equals(AuthzConstants.rootResourceGroupId);
+            Collection<ResourceGroup> groups = appdefBoss.getGroupsForResource(sessionId, group.getResource());
+            for (Iterator<ResourceGroup> it = groups.iterator(); it.hasNext();) {
+                ResourceGroup g = it.next();
+                isPrivate = !g.getId().equals(AuthzConstants.rootResourceGroupId);
                 if (!isPrivate)
                     break;
             }
-            
+
             if (isPrivate) {
                 // Make sure the username appears in the name
                 final String owner = group.getResource().getOwner().getName();
                 if (rForm.getName().indexOf(owner) < 0) {
-                    final String privateName =
-                        RequestUtils.message(request,
-                                             "resource.group.name.private",
-                                             new Object[] { owner });
+                    final String privateName = RequestUtils.message(request, "resource.group.name.private",
+                        new Object[] { owner });
                     rForm.setName(rForm.getName() + " " + privateName);
                 }
             }
-            
-            appdefBoss.updateGroup(sessionId.intValue(), group,
-                             rForm.getName(), rForm.getDescription(),
-                             rForm.getLocation());
-              
-            // XXX: enable when we have a confirmed functioning API
-            log.trace("saving group [" + rValue.getName()
-                               + "]" + " with attributes " + rForm);
 
-            RequestUtils.setConfirmation(request,
-                   "resource.group.inventory.confirm.EditGeneralProperties");
-                                         
-            return returnSuccess(request, mapping, forwardParams, 
-                BaseAction.YES_RETURN_PATH);
-        }
-        catch (AppdefGroupNotFoundException e1) {
+            appdefBoss.updateGroup(sessionId.intValue(), group, rForm.getName(), rForm.getDescription(), rForm
+                .getLocation());
+
+            // XXX: enable when we have a confirmed functioning API
+            log.trace("saving group [" + rValue.getName() + "]" + " with attributes " + rForm);
+
+            RequestUtils.setConfirmation(request, "resource.group.inventory.confirm.EditGeneralProperties");
+
+            return returnSuccess(request, mapping, forwardParams, BaseAction.YES_RETURN_PATH);
+        } catch (AppdefGroupNotFoundException e1) {
             log.debug("group update failed:", e1);
-            RequestUtils
-                .setError(request,
-                          "resource.group.inventory.error.GroupNotFound");
+            RequestUtils.setError(request, "resource.group.inventory.error.GroupNotFound");
             return returnFailure(request, mapping);
-        } 
-        catch (ParameterNotFoundException e1) {
-            RequestUtils
-                .setError(request,
-                          Constants.ERR_RESOURCE_ID_FOUND);
+        } catch (ParameterNotFoundException e1) {
+            RequestUtils.setError(request, Constants.ERR_RESOURCE_ID_FOUND);
             return returnFailure(request, mapping);
-        }
-        catch (GroupDuplicateNameException ex) {
+        } catch (GroupDuplicateNameException ex) {
             log.debug("group creation failed:", ex);
-            RequestUtils
-                .setError(request,
-                          "resource.group.inventory.error.DuplicateGroupName");
+            RequestUtils.setError(request, "resource.group.inventory.error.DuplicateGroupName");
             return returnFailure(request, mapping);
         }
     }

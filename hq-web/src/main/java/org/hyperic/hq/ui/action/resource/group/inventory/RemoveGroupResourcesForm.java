@@ -36,7 +36,8 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.ui.action.resource.ResourceForm;
 
-public class RemoveGroupResourcesForm extends ResourceForm {
+public class RemoveGroupResourcesForm
+    extends ResourceForm {
 
     private String[] _resources;
     protected Integer _resourceType;
@@ -73,7 +74,6 @@ public class RemoveGroupResourcesForm extends ResourceForm {
     public Integer getResourceType() {
         return _resourceType;
     }
-
 
     public void setResourceType(Integer resourceType) {
         _resourceType = resourceType;

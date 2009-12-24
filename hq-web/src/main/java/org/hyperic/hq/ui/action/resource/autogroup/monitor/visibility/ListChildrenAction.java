@@ -55,42 +55,36 @@ import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- *
+ * 
  * Fetch the children resources for the group
  */
-public class ListChildrenAction extends TilesAction {
-    
-    private final Log log =
-        LogFactory.getLog(ListChildrenAction.class.getName());
-    
+public class ListChildrenAction
+    extends TilesAction {
+
+    private final Log log = LogFactory.getLog(ListChildrenAction.class.getName());
+
     private MeasurementBoss measurementBoss;
-    
-    
+
     @Autowired
     public ListChildrenAction(MeasurementBoss measurementBoss) {
         super();
         this.measurementBoss = measurementBoss;
     }
 
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
         AppdefResourceValue resource = RequestUtils.getResource(request);
-        
+
         if (resource == null) {
             RequestUtils.setError(request, Constants.ERR_RESOURCE_NOT_FOUND);
             return null;
         }
-        
+
         Integer sessionId = RequestUtils.getSessionId(request);
         ServletContext ctx = getServlet().getServletContext();
-        
-        Boolean isInternal =
-            new Boolean((String) context.getAttribute(Constants.CTX_INTERNAL));
-        
+
+        Boolean isInternal = new Boolean((String) context.getAttribute(Constants.CTX_INTERNAL));
+
         if (isInternal.booleanValue()) {
             // groups don't categorize members as "internal" or
             // "deployed", so we just return the full list of members
@@ -98,7 +92,7 @@ public class ListChildrenAction extends TilesAction {
             return null;
         }
 
-        // There are two possibilities for an auto-group.  Either it
+        // There are two possibilities for an auto-group. Either it
         // is an auto-group of platforms, in which case there will be
         // no parent entity ids, or it is an auto-group of servers or
         // services.
@@ -128,17 +122,13 @@ public class ListChildrenAction extends TilesAction {
             // REMOVE ME?
             throw e1;
         }
-        
-        AppdefResourceType selectedType =
-            helper.getChildResourceType(request, ctx, childTypeId);
+
+        AppdefResourceType selectedType = helper.getChildResourceType(request, ctx, childTypeId);
         request.setAttribute(Constants.CHILD_RESOURCE_TYPE_ATTR, selectedType);
-            
+
         // get the resource healths
         StopWatch watch = new StopWatch();
-        List<ResourceDisplaySummary> healths = getAutoGroupResourceHealths(ctx,
-                                                                   sessionId,
-                                                                   entityIds,
-                                                                   childTypeId);
+        List<ResourceDisplaySummary> healths = getAutoGroupResourceHealths(ctx, sessionId, entityIds, childTypeId);
         if (log.isDebugEnabled()) {
             log.debug("getAutoGroupResourceHealths: " + watch);
         }
@@ -147,41 +137,31 @@ public class ListChildrenAction extends TilesAction {
 
         return null;
     }
-    
-    private List<ResourceDisplaySummary> getAutoGroupResourceHealths(ServletContext ctx,
-                                                   Integer sessionId,
-                                                   AppdefEntityID[] entityIds,
-                                                   AppdefEntityTypeID childTypeId)
-        throws Exception {
-      
+
+    private List<ResourceDisplaySummary> getAutoGroupResourceHealths(ServletContext ctx, Integer sessionId,
+                                                                     AppdefEntityID[] entityIds,
+                                                                     AppdefEntityTypeID childTypeId) throws Exception {
 
         if (null == entityIds) {
             // auto-group of platforms
-            log.trace("finding current health for autogrouped platforms " +
-                      "of type " + childTypeId);
-            return measurementBoss.findAGPlatformsCurrentHealthByType(sessionId.intValue(),
-                                                           childTypeId.getId());
+            log.trace("finding current health for autogrouped platforms " + "of type " + childTypeId);
+            return measurementBoss.findAGPlatformsCurrentHealthByType(sessionId.intValue(), childTypeId.getId());
         } else {
             // auto-group of servers or services
             switch (childTypeId.getType()) {
-            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                return measurementBoss.findAGServersCurrentHealthByType(sessionId.intValue(),
-                                                             entityIds, 
-                                                             childTypeId.getId());
-            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                    log.trace("finding current health for autogrouped services " +
-                              "of type " + childTypeId + " for resources " +
-                              Arrays.asList(entityIds));
-                    return measurementBoss.findAGServicesCurrentHealthByType(sessionId.intValue(),
-                                                                  entityIds,
-                                                                  childTypeId.getId());
-            default:
-                log.trace("finding current health for autogrouped services " +
-                          "of type " + childTypeId + " for resources " +
-                          Arrays.asList(entityIds));
-                return measurementBoss.findAGServicesCurrentHealthByType(sessionId.intValue(),
-                                                              entityIds,
-                                                              childTypeId.getId());
+                case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                    return measurementBoss.findAGServersCurrentHealthByType(sessionId.intValue(), entityIds,
+                        childTypeId.getId());
+                case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                    log.trace("finding current health for autogrouped services " + "of type " + childTypeId +
+                              " for resources " + Arrays.asList(entityIds));
+                    return measurementBoss.findAGServicesCurrentHealthByType(sessionId.intValue(), entityIds,
+                        childTypeId.getId());
+                default:
+                    log.trace("finding current health for autogrouped services " + "of type " + childTypeId +
+                              " for resources " + Arrays.asList(entityIds));
+                    return measurementBoss.findAGServicesCurrentHealthByType(sessionId.intValue(), entityIds,
+                        childTypeId.getId());
             }
         }
     }

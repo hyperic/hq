@@ -44,42 +44,35 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- *
+ * 
  * Fetch the children resources for the application
  */
-public class ListChildrenAction extends TilesAction {
-    
+public class ListChildrenAction
+    extends TilesAction {
+
     private MeasurementBoss measurementBoss;
-    
-    
+
     @Autowired
     public ListChildrenAction(MeasurementBoss measurementBoss) {
         super();
         this.measurementBoss = measurementBoss;
     }
 
-
-
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
         AppdefResourceValue resource = RequestUtils.getResource(request);
-        
+
         if (resource == null) {
             RequestUtils.setError(request, Constants.ERR_RESOURCE_NOT_FOUND);
             return null;
         }
-        
+
         AppdefEntityID entityId = resource.getEntityId();
 
         int sessionId = RequestUtils.getSessionId(request).intValue();
-      
 
-        List<ResourceTypeDisplaySummary> internalHealths =
-            measurementBoss.findSummarizedServiceCurrentHealth(sessionId, entityId);
+        List<ResourceTypeDisplaySummary> internalHealths = measurementBoss.findSummarizedServiceCurrentHealth(
+            sessionId, entityId);
 
         context.putAttribute(Constants.CTX_SUMMARIES, internalHealths);
 

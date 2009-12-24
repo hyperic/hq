@@ -45,68 +45,50 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * An <code>WorkflowAction</code> subclass that creates a user
- * in the BizApp.
+ * An <code>WorkflowAction</code> subclass that creates a user in the BizApp.
  */
-public class NewAction extends BaseAction {
+public class NewAction
+    extends BaseAction {
 
-   private AuthzBoss authzBoss;
-   private AuthBoss authBoss;
-   private final Log log = LogFactory.getLog(NewAction.class.getName());
-   
-   
-   @Autowired
+    private AuthzBoss authzBoss;
+    private AuthBoss authBoss;
+    private final Log log = LogFactory.getLog(NewAction.class.getName());
+
+    @Autowired
     public NewAction(AuthzBoss authzBoss, AuthBoss authBoss) {
         super();
         this.authzBoss = authzBoss;
         this.authBoss = authBoss;
     }
 
-
-
     /**
      * Create the user with the attributes specified in the given
      * <code>NewForm</code> and save it into the session attribute
      * <code>Constants.USER_ATTR</code>.
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-    throws Exception {
-        
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
-        Integer sessionId =  RequestUtils.getSessionId(request);
-        NewForm userForm = (NewForm)form;
+        Integer sessionId = RequestUtils.getSessionId(request);
+        NewForm userForm = (NewForm) form;
 
         ActionForward forward = checkSubmit(request, mapping, form);
         if (forward != null) {
             return forward;
         }
 
-      
-
         // add both a subject and a principal as normal
         log.trace("creating subject [" + userForm.getName() + "]");
-        
-        authzBoss.createSubject(sessionId, userForm.getName(),
-                                userForm.getEnableLogin().equals("yes"),
-                                HQConstants.ApplicationName,
-                                userForm.getDepartment(),
-                                userForm.getEmailAddress(),
-                                userForm.getFirstName(),
-                                userForm.getLastName(),
-                                userForm.getPhoneNumber(),
-                                userForm.getSmsAddress(),
-                                userForm.isHtmlEmail());
+
+        authzBoss.createSubject(sessionId, userForm.getName(), userForm.getEnableLogin().equals("yes"),
+            HQConstants.ApplicationName, userForm.getDepartment(), userForm.getEmailAddress(), userForm.getFirstName(),
+            userForm.getLastName(), userForm.getPhoneNumber(), userForm.getSmsAddress(), userForm.isHtmlEmail());
 
         log.trace("adding user [" + userForm.getName() + "]");
-        authBoss.addUser(sessionId.intValue(), userForm.getName(),
-                         userForm.getNewPassword());
+        authBoss.addUser(sessionId.intValue(), userForm.getName(), userForm.getNewPassword());
 
         log.trace("finding subject [" + userForm.getName() + "]");
-        AuthzSubject newUser =
-            authzBoss.findSubjectByName(sessionId, userForm.getName());
+        AuthzSubject newUser = authzBoss.findSubjectByName(sessionId, userForm.getName());
 
         HashMap<String, Object> parms = new HashMap<String, Object>(1);
         parms.put(Constants.USER_PARAM, newUser.getId());

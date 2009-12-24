@@ -49,110 +49,84 @@ import org.hyperic.hq.ui.util.SessionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * A <code>BaseAction</code> that adds group memberships for a
- * resource.
+ * A <code>BaseAction</code> that adds group memberships for a resource.
  */
-public class AddResourceGroupsAction extends BaseAction {
+public class AddResourceGroupsAction
+    extends BaseAction {
 
-   private AppdefBoss appdefBoss;
-   private final  Log log = LogFactory.getLog(AddResourceGroupsAction.class.getName());
-   
-   
-   @Autowired
+    private AppdefBoss appdefBoss;
+    private final Log log = LogFactory.getLog(AddResourceGroupsAction.class.getName());
+
+    @Autowired
     public AddResourceGroupsAction(AppdefBoss appdefBoss) {
         super();
         this.appdefBoss = appdefBoss;
     }
 
-
-
     /**
      * Add users to the resource specified in the given
      * <code>AddResourceGroupsForm</code>.
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-       
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
+
         HttpSession session = request.getSession();
 
         AddResourceGroupsForm addForm = (AddResourceGroupsForm) form;
-        AppdefEntityID aeid = new AppdefEntityID(addForm.getType().intValue(),
-                                                 addForm.getRid());
+        AppdefEntityID aeid = new AppdefEntityID(addForm.getType().intValue(), addForm.getRid());
 
         HashMap<String, Object> forwardParams = new HashMap<String, Object>(2);
         forwardParams.put(Constants.ENTITY_ID_PARAM, aeid.getAppdefKey());
 
         switch (aeid.getType()) {
-        case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-            forwardParams.put(Constants.ACCORDION_PARAM, "4");
-            break;
-        case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-        case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-            forwardParams.put(Constants.ACCORDION_PARAM, "2");
-            break;
-        case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-            forwardParams.put(Constants.ACCORDION_PARAM, "1");
-            break;
+            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                forwardParams.put(Constants.ACCORDION_PARAM, "4");
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+            case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
+                forwardParams.put(Constants.ACCORDION_PARAM, "2");
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                forwardParams.put(Constants.ACCORDION_PARAM, "1");
+                break;
         }
 
         try {
-            ActionForward forward =
-                checkSubmit(request, mapping, form, forwardParams);
+            ActionForward forward = checkSubmit(request, mapping, form, forwardParams);
             if (forward != null) {
                 BaseValidatorForm spiderForm = (BaseValidatorForm) form;
 
-                if (spiderForm.isCancelClicked() ||
-                    spiderForm.isResetClicked()) {
+                if (spiderForm.isCancelClicked() || spiderForm.isResetClicked()) {
                     log.trace("removing pending group list");
-                    SessionUtils
-                        .removeList(session,
-                                    Constants.PENDING_RESGRPS_SES_ATTR);
-                }
-                else if (spiderForm.isAddClicked()) {
+                    SessionUtils.removeList(session, Constants.PENDING_RESGRPS_SES_ATTR);
+                } else if (spiderForm.isAddClicked()) {
                     log.trace("adding to pending group list");
-                    SessionUtils.addToList(session,
-                                           Constants.PENDING_RESGRPS_SES_ATTR,
-                                           addForm.getAvailableGroups());
-                }
-                else if (spiderForm.isRemoveClicked()) {
+                    SessionUtils.addToList(session, Constants.PENDING_RESGRPS_SES_ATTR, addForm.getAvailableGroups());
+                } else if (spiderForm.isRemoveClicked()) {
                     log.trace("removing from pending group list");
                     SessionUtils
-                        .removeFromList(session,
-                                        Constants.PENDING_RESGRPS_SES_ATTR,
-                                        addForm.getPendingGroups());
+                        .removeFromList(session, Constants.PENDING_RESGRPS_SES_ATTR, addForm.getPendingGroups());
                 }
 
                 return forward;
             }
 
-           
             Integer sessionId = RequestUtils.getSessionId(request);
 
             log.trace("getting pending group list");
-            Integer[] pendingGroupIds =
-                SessionUtils.getList(session,
-                                     Constants.PENDING_RESGRPS_SES_ATTR);
+            Integer[] pendingGroupIds = SessionUtils.getList(session, Constants.PENDING_RESGRPS_SES_ATTR);
 
             if (log.isTraceEnabled())
-                log.trace("adding groups " + Arrays.asList(pendingGroupIds) +
-                      " for resource [" + aeid + "]");
+                log.trace("adding groups " + Arrays.asList(pendingGroupIds) + " for resource [" + aeid + "]");
             appdefBoss.batchGroupAdd(sessionId.intValue(), aeid, pendingGroupIds);
 
             log.trace("removing pending group list");
-            SessionUtils.removeList(session,
-                                    Constants.PENDING_RESGRPS_SES_ATTR);
+            SessionUtils.removeList(session, Constants.PENDING_RESGRPS_SES_ATTR);
 
-            RequestUtils.setConfirmation(request,
-                                         "resource.common.inventory.confirm.AddResourceGroups");
+            RequestUtils.setConfirmation(request, "resource.common.inventory.confirm.AddResourceGroups");
             return returnSuccess(request, mapping, forwardParams);
-        } 
-        catch (AppSvcClustDuplicateAssignException e1) {
-            RequestUtils
-                .setError(request,
-                          "resource.common.inventory.error.DuplicateClusterAssignment");
+        } catch (AppSvcClustDuplicateAssignException e1) {
+            RequestUtils.setError(request, "resource.common.inventory.error.DuplicateClusterAssignment");
             return returnFailure(request, mapping);
         }
 

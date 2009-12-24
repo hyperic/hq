@@ -43,36 +43,27 @@ import org.hyperic.hq.hqu.server.session.AttachType;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class PluginsAction extends TilesAction {
-    
+public class PluginsAction
+    extends TilesAction {
+
     private ProductBoss productBoss;
-    
-    
-    
+
     @Autowired
-	public PluginsAction(ProductBoss productBoss) {
+    public PluginsAction(ProductBoss productBoss) {
         super();
         this.productBoss = productBoss;
     }
 
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws SessionException,
+        ServletException {
 
+        Collection<AttachmentDescriptor> a = productBoss.findAttachments(RequestUtils.getSessionIdInt(request),
+            AttachType.ADMIN);
 
+        request.setAttribute("adminAttachments", a);
 
-    public ActionForward execute(ComponentContext context,
-			ActionMapping mapping, ActionForm form, HttpServletRequest request,
-			HttpServletResponse response) 
-        throws SessionException, ServletException
-    {
-
-       
-		Collection<AttachmentDescriptor> a = 
-            productBoss.findAttachments(RequestUtils.getSessionIdInt(request),
-                                  AttachType.ADMIN);
-                                  
-                                  
-		request.setAttribute("adminAttachments", a);
-
-		return null;
-	}
+        return null;
+    }
 
 }

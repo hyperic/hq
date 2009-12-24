@@ -40,27 +40,27 @@ public class RSSFeed {
     private Date pubDate = null;
     private Date buildDate = null;
     private List items = new ArrayList(10);
-    
+
     public RSSFeed(String baseUrl) {
         setBaseUrl(baseUrl);
     }
-    
+
     public String getBaseUrl() {
         return baseUrl;
     }
-    
+
     public void setBaseUrl(String baseUrl) {
         // Strip out trailing slash if necessary
         if (baseUrl.lastIndexOf('/') == baseUrl.length() - 1)
             baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
-        
+
         this.baseUrl = baseUrl;
     }
-    
+
     public String getTitle() {
         return title;
     }
-    
+
     public void setTitle(String title) {
         this.title = title;
     }
@@ -68,46 +68,46 @@ public class RSSFeed {
     public String getPubDate() {
         if (pubDate == null)
             pubDate = new Date();
-        
+
         SimpleDateFormat fmt = new SimpleDateFormat(PUBTIME_FORMAT);
         return fmt.format(pubDate);
     }
-    
+
     public void setPubDate(long pubDate) {
         this.pubDate = new Date(pubDate);
     }
-    
+
     public String getBuildDate() {
         if (buildDate == null)
             buildDate = new Date();
-        
+
         SimpleDateFormat fmt = new SimpleDateFormat(PUBTIME_FORMAT);
         return fmt.format(buildDate);
     }
-    
+
     public void setBuildDate(long buildDate) {
         this.buildDate = new Date(buildDate);
     }
-    
+
     public List getItems() {
         return items;
     }
-    
+
     public void setItems(List items) {
         this.items = items;
     }
-    
+
     public void addItem(String title, String link, String desc, long pubDate) {
         items.add(new RSSItem(title, link, desc, pubDate));
     }
-    
+
     public class RSSItem {
         private String title;
         private String link;
         private String description;
         private String guid;
         private Date pubDate;
-        
+
         public RSSItem(String title, String link, String desc, long pubDate) {
             this.title = title;
             this.link = link;
@@ -119,31 +119,31 @@ public class RSSFeed {
         public String getDescription() {
             return description;
         }
-        
+
         public void setDescription(String description) {
             this.description = description;
         }
-        
+
         public String getGuid() {
             return guid;
         }
-        
+
         public void setGuid(String guid) {
             this.guid = guid;
         }
-        
+
         public String getLink() {
             return link;
         }
-        
+
         public void setLink(String link) {
             this.link = link;
         }
-        
+
         public String getTitle() {
             return title;
         }
-        
+
         public void setTitle(String title) {
             this.title = title;
         }
@@ -151,7 +151,7 @@ public class RSSFeed {
         public String getPubDate() {
             if (pubDate == null)
                 pubDate = new Date();
-            
+
             SimpleDateFormat fmt = new SimpleDateFormat(PUBTIME_FORMAT);
             return fmt.format(pubDate);
         }

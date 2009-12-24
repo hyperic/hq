@@ -52,7 +52,6 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
 import org.springframework.beans.factory.annotation.Autowired;
 
-
 /**
  * This action prepares the portal for viewing the application monitoring pages.
  * The subtabs presented to navigate to for an application may be dynamic. If
@@ -60,67 +59,62 @@ import org.springframework.beans.factory.annotation.Autowired;
  * rendered as their own subtabs, the subtabs will have to be identify
  * themselves when clicked on.
  */
-public class VisibilityPortalAction extends ResourceVisibilityPortalAction {
+public class VisibilityPortalAction
+    extends ResourceVisibilityPortalAction {
 
-    private final Log log =
-        LogFactory.getLog(VisibilityPortalAction.class.getName());
-    // XXX duplicated from the ServiceVisibilityPortalAction... refactoring needed
-    private static final String ERR_SERVER_PERMISSION =
-        "resource.service.monitor.visibility.error.ServerPermission";
+    private final Log log = LogFactory.getLog(VisibilityPortalAction.class.getName());
+    // XXX duplicated from the ServiceVisibilityPortalAction... refactoring
+    // needed
+    private static final String ERR_SERVER_PERMISSION = "resource.service.monitor.visibility.error.ServerPermission";
     private MeasurementBoss measurementBoss;
-    
+
     @Autowired
-    public VisibilityPortalAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss, MeasurementBoss measurementBoss) {
+    public VisibilityPortalAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss,
+                                  MeasurementBoss measurementBoss) {
         super(appdefBoss, authzBoss, controlBoss);
         this.measurementBoss = measurementBoss;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.hyperic.hq.ui.action.BaseDispatchAction#getKeyMethodMap()
      */
     public Properties getKeyMethodMap() {
         Properties map = new Properties();
-        map.setProperty(Constants.MODE_MON_URL,  "urlDetail");
+        map.setProperty(Constants.MODE_MON_URL, "urlDetail");
         return map;
     }
 
-    public ActionForward currentHealth(ActionMapping mapping,
-				       ActionForm form,
-				       HttpServletRequest request,
-				       HttpServletResponse response)
-        throws Exception {
-        
+    public ActionForward currentHealth(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                       HttpServletResponse response) throws Exception {
+
         setResource(request);
         setMiniTabs(request);
         setServersCurrentHealth(request);
-        
-        super.currentHealth(mapping, form, request,response);
-        
-        Portal portal = Portal
-            .createPortal("resource.application.monitor.visibility.CurrentHealthTitle",
-                          ".resource.application.monitor.visibility.CurrentHealth");
+
+        super.currentHealth(mapping, form, request, response);
+
+        Portal portal = Portal.createPortal("resource.application.monitor.visibility.CurrentHealthTitle",
+            ".resource.application.monitor.visibility.CurrentHealth");
         request.setAttribute(Constants.PORTAL_KEY, portal);
         return null;
     }
 
     /*
-     * Dispatch the content to the performance action, if a particular
-     * type of service is specified, it will be picked up as a request
-     * parameter inside the action
+     * Dispatch the content to the performance action, if a particular type of
+     * service is specified, it will be picked up as a request parameter inside
+     * the action
      */
-    public ActionForward performance(ActionMapping mapping,
-                                     ActionForm form,
-                                     HttpServletRequest request,
-                                     HttpServletResponse response)
-        throws Exception {
-            
-        super.performance(mapping,form,request,response);
-        
+    public ActionForward performance(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                     HttpServletResponse response) throws Exception {
+
+        super.performance(mapping, form, request, response);
+
         setResource(request);
         setMiniTabs(request);
-        Portal portal = Portal
-            .createPortal("resource.application.monitor.visibility.PerformanceTitle",  
-			  ".resource.application.monitor.visibility.Performance");
+        Portal portal = Portal.createPortal("resource.application.monitor.visibility.PerformanceTitle",
+            ".resource.application.monitor.visibility.Performance");
         request.setAttribute(Constants.PORTAL_KEY, portal);
         return null;
     }
@@ -128,31 +122,26 @@ public class VisibilityPortalAction extends ResourceVisibilityPortalAction {
     /*
      * Dispatch the content to the url detail action.
      */
-    public ActionForward urlDetail(ActionMapping mapping,
-				   ActionForm form,
-				   HttpServletRequest request,
-				   HttpServletResponse response)
-        throws Exception {
+    public ActionForward urlDetail(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                   HttpServletResponse response) throws Exception {
         setResource(request);
-        Portal portal = Portal
-            .createPortal("resource.application.monitor.visibility.URLDetailTitle",  
-			  ".resource.application.monitor.visibility.UrlDetail");
-	portal.setDialog(true);
+        Portal portal = Portal.createPortal("resource.application.monitor.visibility.URLDetailTitle",
+            ".resource.application.monitor.visibility.UrlDetail");
+        portal.setDialog(true);
         request.setAttribute(Constants.PORTAL_KEY, portal);
         return null;
     }
 
     protected void setMiniTabs(HttpServletRequest request) throws Exception {
-    	AppdefResourceValue resource = RequestUtils.getResource(request);
-    	if (resource == null) {
-    	    // setResource already set a request error
-    	    return;
-    	}
+        AppdefResourceValue resource = RequestUtils.getResource(request);
+        if (resource == null) {
+            // setResource already set a request error
+            return;
+        }
     }
-    
-    private void setServersCurrentHealth(HttpServletRequest request)
-        throws Exception {
-    	/*throws Exception throws RemoteException  {*/
+
+    private void setServersCurrentHealth(HttpServletRequest request) throws Exception {
+        /* throws Exception throws RemoteException { */
         Exception thrown = null;
         AppdefEntityID entityId = null;
         try {
@@ -168,28 +157,22 @@ public class VisibilityPortalAction extends ResourceVisibilityPortalAction {
             // against services in a variable timeframe -- so have the
             // MonitorUtil's give us a timeframe for the default retrospective
             // window
-         
+
             if (log.isTraceEnabled()) {
-                log.trace("finding servers current health for resource [" +
-                          app.getEntityId() + "]");
+                log.trace("finding servers current health for resource [" + app.getEntityId() + "]");
             }
 
-            List<ResourceDisplaySummary> servers =
-                measurementBoss.findServersCurrentHealth(
-                    RequestUtils.getSessionId(request).intValue(), 
-                    app.getEntityId(), PageControl.PAGE_ALL);
-            
+            List<ResourceDisplaySummary> servers = measurementBoss.findServersCurrentHealth(RequestUtils.getSessionId(
+                request).intValue(), app.getEntityId(), PageControl.PAGE_ALL);
+
             request.setAttribute(Constants.HOST_HEALTH_SUMMARIES_ATTR, servers);
-        }
-        catch (PermissionException e) {
+        } catch (PermissionException e) {
             thrown = e;
             request.setAttribute(Constants.ERR_SERVER_HEALTH_ATTR, ERR_SERVER_PERMISSION);
-        }        
-        catch (AppdefEntityNotFoundException e) {
+        } catch (AppdefEntityNotFoundException e) {
             thrown = e;
             RequestUtils.setError(request, Constants.ERR_RESOURCE_NOT_FOUND);
-        }        
-        finally {
+        } finally {
             if (thrown != null && log.isDebugEnabled())
                 log.debug("resource [" + entityId + "] access error", thrown);
         }

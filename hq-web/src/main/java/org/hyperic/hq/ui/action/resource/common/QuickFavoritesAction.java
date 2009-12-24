@@ -47,12 +47,12 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class QuickFavoritesAction extends BaseAction {
-    
+public class QuickFavoritesAction
+    extends BaseAction {
+
     private ConfigurationProxy configurationProxy;
     private AuthzBoss authzBoss;
-    
-    
+
     @Autowired
     public QuickFavoritesAction(ConfigurationProxy configurationProxy, AuthzBoss authzBoss) {
         super();
@@ -60,16 +60,11 @@ public class QuickFavoritesAction extends BaseAction {
         this.authzBoss = authzBoss;
     }
 
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
+        WebUser user = RequestUtils.getWebUser(request);
 
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-
-    	WebUser user = RequestUtils.getWebUser(request);
-       
         AppdefEntityID aeid = RequestUtils.getEntityId(request);
         String mode = request.getParameter(Constants.MODE_PARAM);
         String[] dashboardIds = request.getParameterValues(Constants.DASHBOARD_ID_PARAM);
@@ -82,61 +77,66 @@ public class QuickFavoritesAction extends BaseAction {
         }
 
         if (mode.equals(Constants.MODE_ADD)) {
-        	if (dashboardIds != null) {
-        		for (int x = 0; x < dashboardIds.length; x++) {
-        			Integer dashId = Integer.valueOf(dashboardIds[x]);
-        			DashboardConfig dashboardConfig = DashboardUtils.findDashboard(dashId, user, authzBoss);
-        			ConfigResponse configResponse = dashboardConfig.getConfig();
-        			Boolean isFavorite = QuickFavoritesUtil.isFavorite(configResponse, aeid);
-        			
-        			if (isFavorite.booleanValue()) continue;
-        			
-        			DashboardUtils.addEntityToPreferences(Constants.USERPREF_KEY_FAVORITE_RESOURCES, configResponse, aeid, Integer.MAX_VALUE);
-        			
-        			if (dashboardConfig instanceof RoleDashboardConfig) {
-        				RoleDashboardConfig roleDashboardConfig = (RoleDashboardConfig) dashboardConfig;
-         			
-        				configurationProxy.setRoleDashboardPreferences(configResponse,  user, roleDashboardConfig.getRole());
-        			} else if (dashboardConfig instanceof UserDashboardConfig) {
-        				configurationProxy.setUserDashboardPreferences(configResponse,  user);
-        			} else {
-        	            // Neither role or user dashboard. This shouldn't happen, but if it somehow does, treat it as an error.
-        	            return returnFailure(request, mapping, forwardParams);        				
-        			}
-        		}
-        	} else {
-        		ConfigResponse configResponse = DashboardUtils.findUserDashboardConfig(user, authzBoss);
+            if (dashboardIds != null) {
+                for (int x = 0; x < dashboardIds.length; x++) {
+                    Integer dashId = Integer.valueOf(dashboardIds[x]);
+                    DashboardConfig dashboardConfig = DashboardUtils.findDashboard(dashId, user, authzBoss);
+                    ConfigResponse configResponse = dashboardConfig.getConfig();
+                    Boolean isFavorite = QuickFavoritesUtil.isFavorite(configResponse, aeid);
+
+                    if (isFavorite.booleanValue())
+                        continue;
+
+                    DashboardUtils.addEntityToPreferences(Constants.USERPREF_KEY_FAVORITE_RESOURCES, configResponse,
+                        aeid, Integer.MAX_VALUE);
+
+                    if (dashboardConfig instanceof RoleDashboardConfig) {
+                        RoleDashboardConfig roleDashboardConfig = (RoleDashboardConfig) dashboardConfig;
+
+                        configurationProxy.setRoleDashboardPreferences(configResponse, user, roleDashboardConfig
+                            .getRole());
+                    } else if (dashboardConfig instanceof UserDashboardConfig) {
+                        configurationProxy.setUserDashboardPreferences(configResponse, user);
+                    } else {
+                        // Neither role or user dashboard. This shouldn't
+                        // happen, but if it somehow does, treat it as an error.
+                        return returnFailure(request, mapping, forwardParams);
+                    }
+                }
+            } else {
+                ConfigResponse configResponse = DashboardUtils.findUserDashboardConfig(user, authzBoss);
                 Boolean isFavorite = QuickFavoritesUtil.isFavorite(configResponse, aeid);
-        				
-        		// Is this already in the favorites list?  Should not happen
-        		if (isFavorite.booleanValue()) {
-        			// Just return, it's already there
-        			return returnSuccess(request, mapping, forwardParams, BaseAction.YES_RETURN_PATH);
-        		}
-            
-	            // Add to favorites and save
-	            DashboardUtils.addEntityToPreferences(Constants.USERPREF_KEY_FAVORITE_RESOURCES, configResponse, aeid, Integer.MAX_VALUE);
-	           configurationProxy.setUserDashboardPreferences(configResponse,  user);
-        	}
-        } else if (mode.equals(Constants.MODE_REMOVE) ) {
-       		ConfigResponse configResponse = DashboardUtils.findUserDashboardConfig(user, authzBoss);
+
+                // Is this already in the favorites list? Should not happen
+                if (isFavorite.booleanValue()) {
+                    // Just return, it's already there
+                    return returnSuccess(request, mapping, forwardParams, BaseAction.YES_RETURN_PATH);
+                }
+
+                // Add to favorites and save
+                DashboardUtils.addEntityToPreferences(Constants.USERPREF_KEY_FAVORITE_RESOURCES, configResponse, aeid,
+                    Integer.MAX_VALUE);
+                configurationProxy.setUserDashboardPreferences(configResponse, user);
+            }
+        } else if (mode.equals(Constants.MODE_REMOVE)) {
+            ConfigResponse configResponse = DashboardUtils.findUserDashboardConfig(user, authzBoss);
             Boolean isFavorite = QuickFavoritesUtil.isFavorite(configResponse, aeid);
 
-            // Is this not in the favorites list?  Should not happen
+            // Is this not in the favorites list? Should not happen
             if (!isFavorite.booleanValue()) {
                 // Already removed, just return
                 return returnSuccess(request, mapping, forwardParams, BaseAction.YES_RETURN_PATH);
             }
-            
+
             // Remove from favorites and save
-            DashboardUtils.removeResources(new String[] { aeid.getAppdefKey() }, Constants.USERPREF_KEY_FAVORITE_RESOURCES, configResponse);
-            configurationProxy.setUserDashboardPreferences(configResponse,  user);
+            DashboardUtils.removeResources(new String[] { aeid.getAppdefKey() },
+                Constants.USERPREF_KEY_FAVORITE_RESOURCES, configResponse);
+            configurationProxy.setUserDashboardPreferences(configResponse, user);
         } else {
-            // Not an add or remove, what the heck is it?  It's an error.
+            // Not an add or remove, what the heck is it? It's an error.
             return returnFailure(request, mapping, forwardParams);
         }
 
-        
         return returnSuccess(request, mapping, forwardParams, BaseAction.YES_RETURN_PATH);
     }
 }

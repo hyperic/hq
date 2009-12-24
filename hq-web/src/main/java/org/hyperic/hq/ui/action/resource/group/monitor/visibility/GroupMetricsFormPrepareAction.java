@@ -42,41 +42,43 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * This is for the "Group Metrics" page
  * 
- * Everything about ResourceMetricsFormPrepareAction is fine for groups,
- * except with groups we override getShowNumberCollecting()
+ * Everything about ResourceMetricsFormPrepareAction is fine for groups, except
+ * with groups we override getShowNumberCollecting()
  */
 public class GroupMetricsFormPrepareAction
     extends ResourceMetricsFormPrepareAction {
 
-    
     @Autowired
     public GroupMetricsFormPrepareAction(MeasurementBoss measurementBoss) {
         super(measurementBoss);
     }
 
-
-    /* (non-Javadoc)
-     * @see org.hyperic.hq.ui.action.resource.common.monitor.visibility.MetricsDisplayFormPrepareAction#getShowNumberCollecting()
+    /*
+     * (non-Javadoc)
+     * 
+     * @seeorg.hyperic.hq.ui.action.resource.common.monitor.visibility.
+     * MetricsDisplayFormPrepareAction#getShowNumberCollecting()
      */
     protected Boolean getShowNumberCollecting() {
         return Boolean.TRUE;
     }
-    
-    
-    /* (non-Javadoc)
-     * @see org.hyperic.hq.ui.action.resource.common.monitor.visibility.MetricsDisplayFormPrepareAction#getMetrics(javax.servlet.http.HttpServletRequest, org.hyperic.hq.appdef.shared.AppdefEntityID, java.lang.Long, java.lang.Long)
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @seeorg.hyperic.hq.ui.action.resource.common.monitor.visibility.
+     * MetricsDisplayFormPrepareAction
+     * #getMetrics(javax.servlet.http.HttpServletRequest,
+     * org.hyperic.hq.appdef.shared.AppdefEntityID, java.lang.Long,
+     * java.lang.Long)
      */
-    protected Map<String,Set<MetricDisplaySummary>> getMetrics(HttpServletRequest request, long filters,
-                             String keyword, AppdefEntityID entityId,
-                             Long begin, Long end, boolean showAll)
-        throws Exception{
-                
-        AppdefGroupValue group =
-            (AppdefGroupValue) RequestUtils.getResource(request);
-        request.setAttribute(Constants.CHILD_RESOURCE_TYPE_ATTR,
-                             group.getAppdefResourceTypeValue());
-        return super.getMetrics(request, entityId, filters, keyword, begin,
-                                end, showAll);
+    protected Map<String, Set<MetricDisplaySummary>> getMetrics(HttpServletRequest request, long filters,
+                                                                String keyword, AppdefEntityID entityId, Long begin,
+                                                                Long end, boolean showAll) throws Exception {
+
+        AppdefGroupValue group = (AppdefGroupValue) RequestUtils.getResource(request);
+        request.setAttribute(Constants.CHILD_RESOURCE_TYPE_ATTR, group.getAppdefResourceTypeValue());
+        return super.getMetrics(request, entityId, filters, keyword, begin, end, showAll);
     }
 
 }

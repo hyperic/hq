@@ -46,54 +46,46 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 
 /**
- * An <code>Action</code> subclass that provides convenience methods
- * for recognizing form submission types (cancel, reset, ok, etc) and
- * deciding where to return after the action has completed.
+ * An <code>Action</code> subclass that provides convenience methods for
+ * recognizing form submission types (cancel, reset, ok, etc) and deciding where
+ * to return after the action has completed.
  */
-public class BaseAction extends Action {
+public class BaseAction
+    extends Action {
 
     protected static final boolean YES_RETURN_PATH = true;
     protected static final boolean NO_RETURN_PATH = false;
-    
+
     private Log log = LogFactory.getLog(BaseAction.class.getName());
 
-    //-------------------------------------protected methods
+    // -------------------------------------protected methods
 
     /**
-     * Doesn't do a thing.  It's here as a dummy method
-     * used by list that don't submit a form.
+     * Doesn't do a thing. It's here as a dummy method used by list that don't
+     * submit a form.
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-    throws Exception {
-        return null;   
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
+        return null;
     }
-   
+
     /*
      * Finalize the method signature so that we don't mistakenly try to override
      * it when we try to convert from TileAction to Action and forget to change
      * the execute() parameter list.
      */
-    public final ActionForward execute(ComponentContext context,
-                                       ActionMapping mapping,
-                                       ActionForm form,
-                                       HttpServletRequest request,
-                                       HttpServletResponse response)
-        throws Exception {
+    public final ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                       HttpServletRequest request, HttpServletResponse response) throws Exception {
         return null;
     }
-        
+
     /**
-     * Return an <code>ActionForward</code> if the form has been
-     * cancelled or reset; otherwise return <code>null</code> so that
-     * the subclass can continue to execute.
+     * Return an <code>ActionForward</code> if the form has been cancelled or
+     * reset; otherwise return <code>null</code> so that the subclass can
+     * continue to execute.
      */
-    protected ActionForward checkSubmit(HttpServletRequest request,
-                                     ActionMapping mapping, ActionForm form,
-                                     Map<String, Object> params, boolean doReturnPath)
-        throws Exception {
+    protected ActionForward checkSubmit(HttpServletRequest request, ActionMapping mapping, ActionForm form,
+                                        Map<String, Object> params, boolean doReturnPath) throws Exception {
         BaseValidatorForm spiderForm = (BaseValidatorForm) form;
 
         if (spiderForm.isCancelClicked()) {
@@ -120,65 +112,47 @@ public class BaseAction extends Action {
         return null;
     }
 
-    protected ActionForward checkSubmit(HttpServletRequest request,
-                                     ActionMapping mapping, ActionForm form,
-                                     Map<String, Object> params)
-        throws Exception {
+    protected ActionForward checkSubmit(HttpServletRequest request, ActionMapping mapping, ActionForm form,
+                                        Map<String, Object> params) throws Exception {
         return checkSubmit(request, mapping, form, params, NO_RETURN_PATH);
     }
 
-    protected ActionForward checkSubmit(HttpServletRequest request,
-                                     ActionMapping mapping, ActionForm form,
-                                     boolean doReturnPath)
-        throws Exception {
+    protected ActionForward checkSubmit(HttpServletRequest request, ActionMapping mapping, ActionForm form,
+                                        boolean doReturnPath) throws Exception {
         return checkSubmit(request, mapping, form, null, doReturnPath);
     }
 
-    protected ActionForward checkSubmit(HttpServletRequest request,
-                                     ActionMapping mapping, ActionForm form)
+    protected ActionForward checkSubmit(HttpServletRequest request, ActionMapping mapping, ActionForm form)
         throws Exception {
         return checkSubmit(request, mapping, form, null, NO_RETURN_PATH);
     }
 
-    protected ActionForward checkSubmit(HttpServletRequest request,
-                                     ActionMapping mapping, ActionForm form,
-                                     String param, Object value,
-                                     boolean doReturnPath)
-        throws Exception {
+    protected ActionForward checkSubmit(HttpServletRequest request, ActionMapping mapping, ActionForm form,
+                                        String param, Object value, boolean doReturnPath) throws Exception {
         HashMap<String, Object> params = new HashMap<String, Object>(1);
         params.put(param, value);
         return checkSubmit(request, mapping, form, params, doReturnPath);
     }
 
-    protected ActionForward checkSubmit(HttpServletRequest request,
-                                     ActionMapping mapping, ActionForm form,
-                                     String param, Object value)
-        throws Exception {
+    protected ActionForward checkSubmit(HttpServletRequest request, ActionMapping mapping, ActionForm form,
+                                        String param, Object value) throws Exception {
         return checkSubmit(request, mapping, form, param, value, NO_RETURN_PATH);
     }
-    
+
     /**
-     * Return an <code>ActionForward</code> representing the
-     * <em>add</em> form gesture, setting the return path to the
-     * current URL.
+     * Return an <code>ActionForward</code> representing the <em>add</em> form
+     * gesture, setting the return path to the current URL.
      */
-    protected ActionForward returnAdd(HttpServletRequest request,
-                                   ActionMapping mapping,
-                                   Map<String, Object> params)
+    protected ActionForward returnAdd(HttpServletRequest request, ActionMapping mapping, Map<String, Object> params)
         throws Exception {
-        return constructForward(request, mapping, Constants.ADD_URL,
-                                params, NO_RETURN_PATH);
+        return constructForward(request, mapping, Constants.ADD_URL, params, NO_RETURN_PATH);
     }
 
-    protected ActionForward returnAdd(HttpServletRequest request,
-                                   ActionMapping mapping)
-        throws Exception {
+    protected ActionForward returnAdd(HttpServletRequest request, ActionMapping mapping) throws Exception {
         return returnAdd(request, mapping, null);
     }
 
-    protected ActionForward returnAdd(HttpServletRequest request,
-                                   ActionMapping mapping,
-                                   String param, Object value)
+    protected ActionForward returnAdd(HttpServletRequest request, ActionMapping mapping, String param, Object value)
         throws Exception {
         HashMap<String, Object> params = new HashMap<String, Object>(1);
         params.put(param, value);
@@ -186,191 +160,138 @@ public class BaseAction extends Action {
     }
 
     /**
-     * Return an <code>ActionForward</code> representing the
-     * <em>cancel</em> form gesture.
+     * Return an <code>ActionForward</code> representing the <em>cancel</em>
+     * form gesture.
      */
-    protected ActionForward returnCancelled(HttpServletRequest request,
-                                         ActionMapping mapping,
-                                         Map<String, Object> params, boolean doReturnPath)
-        throws Exception {
-            return constructForward(request, mapping, Constants.CANCEL_URL,
-                                    params, doReturnPath);
+    protected ActionForward returnCancelled(HttpServletRequest request, ActionMapping mapping,
+                                            Map<String, Object> params, boolean doReturnPath) throws Exception {
+        return constructForward(request, mapping, Constants.CANCEL_URL, params, doReturnPath);
     }
 
-    protected ActionForward returnCancelled(HttpServletRequest request,
-                                         ActionMapping mapping,
-                                         Map<String, Object> params)
-        throws Exception {
+    protected ActionForward returnCancelled(HttpServletRequest request, ActionMapping mapping,
+                                            Map<String, Object> params) throws Exception {
         return returnCancelled(request, mapping, params, YES_RETURN_PATH);
     }
 
-    protected ActionForward returnCancelled(HttpServletRequest request,
-                                         ActionMapping mapping)
-        throws Exception {
+    protected ActionForward returnCancelled(HttpServletRequest request, ActionMapping mapping) throws Exception {
         return returnCancelled(request, mapping, null);
     }
 
-    protected ActionForward returnCancelled(HttpServletRequest request,
-                                         ActionMapping mapping,
-                                         String param, Object value)
-        throws Exception {
-        
+    protected ActionForward returnCancelled(HttpServletRequest request, ActionMapping mapping, String param,
+                                            Object value) throws Exception {
+
         HashMap<String, Object> params = new HashMap<String, Object>(1);
         params.put(param, value);
         return returnCancelled(request, mapping, params);
     }
-    
+
     /**
-     * Return an <code>ActionForward</code> representing the
-     * <em>failure</em> action state.
+     * Return an <code>ActionForward</code> representing the <em>failure</em>
+     * action state.
      */
-    protected ActionForward returnFailure(HttpServletRequest request,
-                                       ActionMapping mapping,
-                                       Map<String, Object> params, boolean doReturnPath)
-        throws Exception {
-        return constructForward(request, mapping, Constants.FAILURE_URL,
-                                params, doReturnPath);
+    protected ActionForward returnFailure(HttpServletRequest request, ActionMapping mapping,
+                                          Map<String, Object> params, boolean doReturnPath) throws Exception {
+        return constructForward(request, mapping, Constants.FAILURE_URL, params, doReturnPath);
     }
 
-    protected ActionForward returnFailure(HttpServletRequest request,
-                                       ActionMapping mapping,
-                                       Map<String, Object> params)
+    protected ActionForward returnFailure(HttpServletRequest request, ActionMapping mapping, Map<String, Object> params)
         throws Exception {
         return returnFailure(request, mapping, params, NO_RETURN_PATH);
     }
 
-    protected ActionForward returnFailure(HttpServletRequest request,
-                                       ActionMapping mapping,
-                                       boolean doReturnPath)
+    protected ActionForward returnFailure(HttpServletRequest request, ActionMapping mapping, boolean doReturnPath)
         throws Exception {
         return returnFailure(request, mapping, null, doReturnPath);
     }
-    protected ActionForward returnFailure(HttpServletRequest request,
-                                       ActionMapping mapping)
-        throws Exception {
+
+    protected ActionForward returnFailure(HttpServletRequest request, ActionMapping mapping) throws Exception {
         return returnFailure(request, mapping, NO_RETURN_PATH);
     }
 
-    protected ActionForward returnFailure(HttpServletRequest request,
-                                       ActionMapping mapping,
-                                       String param, Object value)
+    protected ActionForward returnFailure(HttpServletRequest request, ActionMapping mapping, String param, Object value)
         throws Exception {
         HashMap<String, Object> params = new HashMap<String, Object>(1);
         params.put(param, value);
-        return constructForward(request, mapping, Constants.FAILURE_URL,
-                                params, NO_RETURN_PATH);
-    }
-    
-    /**
-     * Return an <code>ActionForward</code> representing the
-     * <em>new</em> form gesture, setting the return path to the
-     * current URL.
-     */
-    protected ActionForward returnNew(HttpServletRequest request,
-                                   ActionMapping mapping,
-                                   Map<String, Object> params)
-        throws Exception {
-        return constructForward(request, mapping, Constants.SUCCESS_URL, 
-            params, NO_RETURN_PATH);
+        return constructForward(request, mapping, Constants.FAILURE_URL, params, NO_RETURN_PATH);
     }
 
-    protected ActionForward returnNew(HttpServletRequest request,
-                                   ActionMapping mapping)
+    /**
+     * Return an <code>ActionForward</code> representing the <em>new</em> form
+     * gesture, setting the return path to the current URL.
+     */
+    protected ActionForward returnNew(HttpServletRequest request, ActionMapping mapping, Map<String, Object> params)
         throws Exception {
+        return constructForward(request, mapping, Constants.SUCCESS_URL, params, NO_RETURN_PATH);
+    }
+
+    protected ActionForward returnNew(HttpServletRequest request, ActionMapping mapping) throws Exception {
         return returnNew(request, mapping, null, NO_RETURN_PATH);
     }
 
-    protected ActionForward returnNew(HttpServletRequest request,
-                                   ActionMapping mapping,
-                                   String param, Object value)
+    protected ActionForward returnNew(HttpServletRequest request, ActionMapping mapping, String param, Object value)
         throws Exception {
         HashMap<String, Object> params = new HashMap<String, Object>();
         params.put(param, value);
-        return constructForward(request, mapping, Constants.SUCCESS_URL, 
-            params, NO_RETURN_PATH);
+        return constructForward(request, mapping, Constants.SUCCESS_URL, params, NO_RETURN_PATH);
     }
 
-     
     /**
-     * Return an <code>ActionForward</code> representing the
-     * <em>success</em> action state.
+     * Return an <code>ActionForward</code> representing the <em>success</em>
+     * action state.
      */
-    protected ActionForward returnNew(HttpServletRequest request,
-                                       ActionMapping mapping, Map<String, Object> params,
-                                       boolean doReturnPath)
-        throws Exception {
+    protected ActionForward returnNew(HttpServletRequest request, ActionMapping mapping, Map<String, Object> params,
+                                      boolean doReturnPath) throws Exception {
 
-        return constructForward(request, mapping, Constants.SUCCESS_URL,
-                                params, doReturnPath);
+        return constructForward(request, mapping, Constants.SUCCESS_URL, params, doReturnPath);
     }
-    
 
-    protected ActionForward returnNew(HttpServletRequest request,
-                                   ActionMapping mapping, String param,
-                                   Object value, boolean doReturnPath)
-        throws Exception {
+    protected ActionForward returnNew(HttpServletRequest request, ActionMapping mapping, String param, Object value,
+                                      boolean doReturnPath) throws Exception {
         HashMap<String, Object> params = new HashMap<String, Object>(1);
         params.put(param, value);
         return returnNew(request, mapping, params, doReturnPath);
     }
-    
+
     /**
-     * Return an <code>ActionForward</code> representing the
-     * <em>remove</em> form gesture, setting the return path to the
-     * current URL.
+     * Return an <code>ActionForward</code> representing the <em>remove</em>
+     * form gesture, setting the return path to the current URL.
      */
-    protected ActionForward returnRemove(HttpServletRequest request,
-                                      ActionMapping mapping,
-                                      Map<String, Object> params)
+    protected ActionForward returnRemove(HttpServletRequest request, ActionMapping mapping, Map<String, Object> params)
         throws Exception {
-        return constructForward(request, mapping, Constants.REMOVE_URL,
-                                params, NO_RETURN_PATH);
+        return constructForward(request, mapping, Constants.REMOVE_URL, params, NO_RETURN_PATH);
     }
 
-    protected ActionForward returnRemove(HttpServletRequest request,
-                                   ActionMapping mapping)
-        throws Exception {
+    protected ActionForward returnRemove(HttpServletRequest request, ActionMapping mapping) throws Exception {
 
         return returnRemove(request, mapping, null);
     }
 
-    protected ActionForward returnRemove(HttpServletRequest request,
-                                   ActionMapping mapping,
-                                   String param, Object value)
+    protected ActionForward returnRemove(HttpServletRequest request, ActionMapping mapping, String param, Object value)
         throws Exception {
         HashMap<String, Object> params = new HashMap<String, Object>(1);
         params.put(param, value);
         return returnRemove(request, mapping, params);
     }
-    
+
     /**
-     * Return an <code>ActionForward</code> representing the
-     * <em>reset</em> form gesture.
+     * Return an <code>ActionForward</code> representing the <em>reset</em> form
+     * gesture.
      */
-    protected ActionForward returnReset(HttpServletRequest request,
-                                     ActionMapping mapping,
-                                     Map<String, Object> params, boolean doReturnPath)
-        throws Exception {
-        return constructForward(request, mapping, Constants.RESET_URL,
-                                params, doReturnPath);
+    protected ActionForward returnReset(HttpServletRequest request, ActionMapping mapping, Map<String, Object> params,
+                                        boolean doReturnPath) throws Exception {
+        return constructForward(request, mapping, Constants.RESET_URL, params, doReturnPath);
     }
 
-    protected ActionForward returnReset(HttpServletRequest request,
-                                     ActionMapping mapping,
-                                     Map<String, Object> params)
+    protected ActionForward returnReset(HttpServletRequest request, ActionMapping mapping, Map<String, Object> params)
         throws Exception {
         return returnReset(request, mapping, params, NO_RETURN_PATH);
     }
 
-    protected ActionForward returnReset(HttpServletRequest request,
-                                     ActionMapping mapping)
-        throws Exception {
+    protected ActionForward returnReset(HttpServletRequest request, ActionMapping mapping) throws Exception {
         return returnReset(request, mapping, null);
     }
 
-    protected ActionForward returnReset(HttpServletRequest request,
-                                     ActionMapping mapping,
-                                     String param, Object value)
+    protected ActionForward returnReset(HttpServletRequest request, ActionMapping mapping, String param, Object value)
         throws Exception {
         HashMap<String, Object> params = new HashMap<String, Object>(1);
         params.put(param, value);
@@ -378,92 +299,73 @@ public class BaseAction extends Action {
     }
 
     /**
-     * Return an <code>ActionForward</code> representing the
-     * <em>okassign</em> action state.
+     * Return an <code>ActionForward</code> representing the <em>okassign</em>
+     * action state.
      */
-    protected ActionForward returnOkAssign(HttpServletRequest request,
-                                       ActionMapping mapping, Map<String, Object> params)
+    protected ActionForward returnOkAssign(HttpServletRequest request, ActionMapping mapping, Map<String, Object> params)
         throws Exception {
 
         return returnOkAssign(request, mapping, params, YES_RETURN_PATH);
     }
-    
+
     /**
-     * Return an <code>ActionForward</code> representing the
-     * <em>okassign</em> action state.
+     * Return an <code>ActionForward</code> representing the <em>okassign</em>
+     * action state.
      */
     protected ActionForward returnOkAssign(HttpServletRequest request, ActionMapping mapping,
-                                        Map<String, Object> params, boolean doReturnPath)
-        throws Exception {
+                                           Map<String, Object> params, boolean doReturnPath) throws Exception {
 
-        return constructForward(request, mapping, Constants.OK_ASSIGN_URL, 
-                                params, doReturnPath);
+        return constructForward(request, mapping, Constants.OK_ASSIGN_URL, params, doReturnPath);
     }
 
     /**
-     * Return an <code>ActionForward</code> representing the
-     * <em>success</em> action state.
+     * Return an <code>ActionForward</code> representing the <em>success</em>
+     * action state.
      */
-    protected ActionForward returnSuccess(HttpServletRequest request,
-                                       ActionMapping mapping, Map<String, Object> params,
-                                       boolean doReturnPath)
-        throws Exception {
+    protected ActionForward returnSuccess(HttpServletRequest request, ActionMapping mapping,
+                                          Map<String, Object> params, boolean doReturnPath) throws Exception {
         if (doReturnPath) {
-            doReturnPath = !SessionUtils.getReturnPathIgnoredForOk
-                ( request.getSession() ).booleanValue();
+            doReturnPath = !SessionUtils.getReturnPathIgnoredForOk(request.getSession()).booleanValue();
         }
         try {
-            return constructForward(request, mapping, Constants.SUCCESS_URL,
-                                    params, doReturnPath);
-        }
-        catch (UndefinedForwardException e) {
+            return constructForward(request, mapping, Constants.SUCCESS_URL, params, doReturnPath);
+        } catch (UndefinedForwardException e) {
             // if there's no success forward defined, struts will send
             // us back to the same place we were before
             return null;
         }
     }
 
-    protected ActionForward returnSuccess(HttpServletRequest request,
-                                       ActionMapping mapping, Map<String, Object> params)
+    protected ActionForward returnSuccess(HttpServletRequest request, ActionMapping mapping, Map<String, Object> params)
         throws Exception {
         return returnSuccess(request, mapping, params, YES_RETURN_PATH);
     }
 
-    protected ActionForward returnSuccess(HttpServletRequest request,
-                                       ActionMapping mapping)
-        throws Exception {
+    protected ActionForward returnSuccess(HttpServletRequest request, ActionMapping mapping) throws Exception {
         return returnSuccess(request, mapping, null);
     }
 
-    protected ActionForward returnSuccess(HttpServletRequest request,
-                                       ActionMapping mapping, String param,
-                                       Object value, boolean doReturnPath)
-        throws Exception {
+    protected ActionForward returnSuccess(HttpServletRequest request, ActionMapping mapping, String param,
+                                          Object value, boolean doReturnPath) throws Exception {
         HashMap<String, Object> params = new HashMap<String, Object>(1);
         params.put(param, value);
         return returnSuccess(request, mapping, params, doReturnPath);
     }
 
-    protected ActionForward returnSuccess(HttpServletRequest request,
-                                       ActionMapping mapping, String param,
-                                       Object value) throws Exception {
+    protected ActionForward returnSuccess(HttpServletRequest request, ActionMapping mapping, String param, Object value)
+        throws Exception {
         return returnSuccess(request, mapping, param, value, YES_RETURN_PATH);
     }
 
-    
-    //-------------------------------------protected methods
+    // -------------------------------------protected methods
 
     /**
-     * Return an <code>ActionForward</code> corresponding to the given
-     * form gesture or action state. Utilize the session return path
-     * if it is set. Optionally set a request parameter to the path.
+     * Return an <code>ActionForward</code> corresponding to the given form
+     * gesture or action state. Utilize the session return path if it is set.
+     * Optionally set a request parameter to the path.
      */
-    protected ActionForward constructForward(HttpServletRequest request,
-                                             ActionMapping mapping,
-                                             String forwardName,
-                                             Map<String, Object> params,
-                                             boolean doReturnPath)
-        throws Exception {
+    protected ActionForward constructForward(HttpServletRequest request, ActionMapping mapping, String forwardName,
+                                             Map<String, Object> params, boolean doReturnPath) throws Exception {
         ActionForward forward = null;
         ActionForward mappedForward = mapping.findForward(forwardName);
         HttpSession session = request.getSession();
@@ -475,16 +377,13 @@ public class BaseAction extends Action {
             if (doReturnPath && workflow != null && !"".equals(workflow)) {
                 returnPath = SessionUtils.popWorkflow(session, workflow);
             }
-            if ( log.isTraceEnabled() ) {
+            if (log.isTraceEnabled()) {
                 log.trace("forwardName=" + forwardName);
                 log.trace("returnPath=" + returnPath);
             }
             if (returnPath != null) {
-                boolean redirect = mappedForward != null ?
-                    mappedForward.getRedirect() :
-                    false;
-                forward = new ActionForward( forwardName, returnPath,
-                                             redirect );
+                boolean redirect = mappedForward != null ? mappedForward.getRedirect() : false;
+                forward = new ActionForward(forwardName, returnPath, redirect);
             }
         }
 
@@ -505,33 +404,20 @@ public class BaseAction extends Action {
         return forward;
     }
 
-    protected ActionForward constructForward(HttpServletRequest request,
-                                             ActionMapping mapping,
-                                             String forwardName,
-                                             String param, Object value,
-                                             boolean doReturnPath)
-        throws Exception {
+    protected ActionForward constructForward(HttpServletRequest request, ActionMapping mapping, String forwardName,
+                                             String param, Object value, boolean doReturnPath) throws Exception {
         HashMap<String, Object> params = new HashMap<String, Object>(1);
         params.put(param, value);
-        return constructForward(request, mapping, forwardName, params,
-                                doReturnPath);
+        return constructForward(request, mapping, forwardName, params, doReturnPath);
     }
 
-    protected ActionForward constructForward(HttpServletRequest request,
-                                             ActionMapping mapping,
-                                             String forwardName,
-                                             boolean doReturnPath)
-        throws Exception {
-        return constructForward(request, mapping, forwardName, null,
-                                doReturnPath);
+    protected ActionForward constructForward(HttpServletRequest request, ActionMapping mapping, String forwardName,
+                                             boolean doReturnPath) throws Exception {
+        return constructForward(request, mapping, forwardName, null, doReturnPath);
     }
 
-    protected ActionForward constructForward(HttpServletRequest request,
-                                             ActionMapping mapping,
-                                             String forwardName)
+    protected ActionForward constructForward(HttpServletRequest request, ActionMapping mapping, String forwardName)
         throws Exception {
-        return constructForward(request, mapping, forwardName, null,
-                                NO_RETURN_PATH);
+        return constructForward(request, mapping, forwardName, null, NO_RETURN_PATH);
     }
 }
-

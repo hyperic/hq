@@ -27,9 +27,8 @@ package org.hyperic.hq.ui.action.resource.common.monitor.alerts.config;
 
 /**
  * Interface for actions dealing with notifications.
- *
+ * 
  */
 public interface NotificationsAction {
     int getNotificationType();
 }
-

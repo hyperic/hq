@@ -45,30 +45,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  *
  */
-public class RemoveResourceGroupsAction extends BaseAction {
-    private final  Log log =
-        LogFactory.getLog(RemoveResourceGroupsAction.class.getName());
+public class RemoveResourceGroupsAction
+    extends BaseAction {
+    private final Log log = LogFactory.getLog(RemoveResourceGroupsAction.class.getName());
     private AppdefBoss appdefBoss;
-    
-    
+
     @Autowired
     public RemoveResourceGroupsAction(AppdefBoss appdefBoss) {
         super();
         this.appdefBoss = appdefBoss;
     }
 
-
-
     /**
      * Removes the servers identified in the
      * <code>RemoveResourceGroupsForm</code>.
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-       
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
         RemoveResourceGroupsForm rmForm = (RemoveResourceGroupsForm) form;
         Integer resourceId = rmForm.getRid();
@@ -78,26 +71,19 @@ public class RemoveResourceGroupsAction extends BaseAction {
         forwardParams.put(Constants.RESOURCE_PARAM, resourceId);
         forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, resourceType);
 
-        
-                  
         Integer sessionId = RequestUtils.getSessionId(request);
-        AppdefEntityID entityId = new AppdefEntityID(resourceType.intValue(), 
-                                                     resourceId);
+        AppdefEntityID entityId = new AppdefEntityID(resourceType.intValue(), resourceId);
 
         Integer[] groups = rmForm.getG();
         if (groups != null) {
-            log.trace("removing groups " + groups +
-                      " for resource [" + resourceId + "]");
-            appdefBoss.batchGroupRemove(sessionId.intValue(), entityId,
-                                  groups);
+            log.trace("removing groups " + groups + " for resource [" + resourceId + "]");
+            appdefBoss.batchGroupRemove(sessionId.intValue(), entityId, groups);
 
-            RequestUtils
-                .setConfirmation(request,
-                                 "resource.common.inventory.confirm.RemoveResourceGroups");
+            RequestUtils.setConfirmation(request, "resource.common.inventory.confirm.RemoveResourceGroups");
         }
 
         return returnSuccess(request, mapping, forwardParams);
-        
+
     }
 
 }

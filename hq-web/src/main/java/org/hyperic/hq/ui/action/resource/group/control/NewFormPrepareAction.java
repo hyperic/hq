@@ -53,13 +53,13 @@ import org.springframework.beans.factory.annotation.Autowired;
  * An <code>Action</code> subclass that prepares a control action associated
  * with a group.
  */
-public class NewFormPrepareAction extends BaseAction {
+public class NewFormPrepareAction
+    extends BaseAction {
 
-    private final   Log log = LogFactory.getLog(NewFormPrepareAction.class.getName());  
+    private final Log log = LogFactory.getLog(NewFormPrepareAction.class.getName());
     private AppdefBoss appdefBoss;
     private ControlBoss controlBoss;
-    
-    
+
     @Autowired
     public NewFormPrepareAction(AppdefBoss appdefBoss, ControlBoss controlBoss) {
         super();
@@ -67,24 +67,18 @@ public class NewFormPrepareAction extends BaseAction {
         this.controlBoss = controlBoss;
     }
 
-
-
     /**
-     * Create the control action and associate it with the group.
-     * populates resourceOrdering in the GroupControlForm.
+     * Create the control action and associate it with the group. populates
+     * resourceOrdering in the GroupControlForm.
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-        
-                
-        log.trace("preparing new group control action" );                    
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
+
+        log.trace("preparing new group control action");
 
         int sessionId = RequestUtils.getSessionId(request).intValue();
-        GroupControlForm gForm = (GroupControlForm)form;        
-       
+        GroupControlForm gForm = (GroupControlForm) form;
+
         AppdefEntityID appdefId = RequestUtils.getEntityId(request);
 
         List<String> actions = controlBoss.getActions(sessionId, appdefId);
@@ -94,21 +88,19 @@ public class NewFormPrepareAction extends BaseAction {
 
         // get the resource ids associated with this group,
         // create an options list, and associate it with the form
-       
+
         AppdefGroupValue group = appdefBoss.findGroup(sessionId, appdefId.getId());
-        List<AppdefResourceValue> groupMembers =
-            BizappUtils.buildGroupResources(appdefBoss, sessionId, group,
-                                            PageControl.PAGE_ALL);
-        
+        List<AppdefResourceValue> groupMembers = BizappUtils.buildGroupResources(appdefBoss, sessionId, group,
+            PageControl.PAGE_ALL);
+
         ArrayList<LabelValueBean> groupOptions = new ArrayList<LabelValueBean>();
         for (AppdefResourceValue arv : groupMembers) {
-           
-            LabelValueBean lvb 
-                = new LabelValueBean(arv.getName(), arv.getId().toString());
+
+            LabelValueBean lvb = new LabelValueBean(arv.getName(), arv.getId().toString());
             groupOptions.add(lvb);
-        }           
+        }
         gForm.setResourceOrderingOptions(groupOptions);
 
         return null;
-    } 
+    }
 }

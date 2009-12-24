@@ -49,8 +49,9 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class ViewEscalationAction extends ViewDefinitionAction {
-    
+public class ViewEscalationAction
+    extends ViewDefinitionAction {
+
     private AuthzBoss authzBoss;
 
     @Autowired
@@ -59,12 +60,9 @@ public class ViewEscalationAction extends ViewDefinitionAction {
         this.authzBoss = authzBoss;
     }
 
-    public ActionForward execute(ActionMapping mapping, ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception 
-    {
-        
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
+
         Integer sessionID = RequestUtils.getSessionId(request);
         int sessionId = sessionID.intValue();
 
@@ -78,47 +76,38 @@ public class ViewEscalationAction extends ViewDefinitionAction {
                 mat = GalertEscalationAlertType.GALERT;
             }
         }
-        
+
         // Get the list of escalations
-       
+
         if (request.getAttribute("escalations") == null) {
             JSONArray arr = eventsBoss.listAllEscalationName(sessionId);
             request.setAttribute("escalations", arr);
         }
 
         // Get the list of users
-       
-        PageList<AuthzSubjectValue> availableUsers =
-            authzBoss.getAllSubjects(sessionID, null, PageControl.PAGE_ALL);
+
+        PageList<AuthzSubjectValue> availableUsers = authzBoss.getAllSubjects(sessionID, null, PageControl.PAGE_ALL);
         request.setAttribute(Constants.AVAIL_USERS_ATTR, availableUsers);
-        
+
         EscalationSchemeForm eForm = (EscalationSchemeForm) form;
         if (eForm.getEscId() == null) {
-            eForm.setEscId(eventsBoss.getEscalationIdByAlertDefId(sessionId,
-                                          new Integer(eForm.getAd()),
-                                          mat));
+            eForm.setEscId(eventsBoss.getEscalationIdByAlertDefId(sessionId, new Integer(eForm.getAd()), mat));
         } else {
             if (eForm.getEscId().intValue() == 0) {
                 // Unset current escalation scheme
-                eventsBoss.unsetEscalationByAlertDefId(sessionId,
-                                               new Integer(eForm.getAd()), mat);
+                eventsBoss.unsetEscalationByAlertDefId(sessionId, new Integer(eForm.getAd()), mat);
                 eForm.setEscId(null);
-            }
-            else {
+            } else {
                 // We actually need to set the escalation scheme for alert
                 // definition
-                eventsBoss.setEscalationByAlertDefId(sessionId,
-                                             new Integer(eForm.getAd()),
-                                             eForm.getEscId(), mat);
+                eventsBoss.setEscalationByAlertDefId(sessionId, new Integer(eForm.getAd()), eForm.getEscId(), mat);
             }
         }
-        
+
         // Look for the escalation request parameter
         try {
             if (eForm.getEscId() != null) {
-                JSONObject escalation =
-                    Escalation.getJSON(eventsBoss.findEscalationById(sessionId,
-                                                             eForm.getEscId()));
+                JSONObject escalation = Escalation.getJSON(eventsBoss.findEscalationById(sessionId, eForm.getEscId()));
                 request.setAttribute("escalationJSON", escalation.toString());
             }
         } catch (ParameterNotFoundException e) {

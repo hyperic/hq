@@ -57,17 +57,17 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * This action class is used by the Favorite Resources portlet.  It's main
- * use is to generate the JSON objects required for display into the UI.
+ * This action class is used by the Favorite Resources portlet. It's main use is
+ * to generate the JSON objects required for display into the UI.
  */
-public class ViewAction extends BaseAction {
-    
+public class ViewAction
+    extends BaseAction {
+
     private AuthzBoss authzBoss;
     private AppdefBoss appdefBoss;
     private EventsBoss eventsBoss;
     private MeasurementBoss measurementBoss;
-    
-    
+
     @Autowired
     public ViewAction(AuthzBoss authzBoss, AppdefBoss appdefBoss, EventsBoss eventsBoss, MeasurementBoss measurementBoss) {
         super();
@@ -77,39 +77,31 @@ public class ViewAction extends BaseAction {
         this.measurementBoss = measurementBoss;
     }
 
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-       throws Exception
-    {
-        
-     
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
+
         HttpSession session = request.getSession();
         WebUser user = SessionUtils.getWebUser(session);
-        DashboardConfig dashConfig = DashboardUtils.findDashboard(
-        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, authzBoss);
+        DashboardConfig dashConfig = DashboardUtils.findDashboard((Integer) session
+            .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
-        
+
         String key = Constants.USERPREF_KEY_FAVORITE_RESOURCES;
 
         // First determine what entityIds can be viewed by this user
         // This code probably should be in the boss somewhere but
         // for now doing it here...
-        List<AppdefEntityID> entityIds = CheckPermissionsUtil.filterEntityIdsByViewPermission(
-        											RequestUtils.getSessionId(request).intValue(), 
-        											DashboardUtils.preferencesAsEntityIds(key, dashPrefs), 
-        		                                   appdefBoss);
-        
+        List<AppdefEntityID> entityIds = CheckPermissionsUtil.filterEntityIdsByViewPermission(RequestUtils
+            .getSessionId(request).intValue(), DashboardUtils.preferencesAsEntityIds(key, dashPrefs), appdefBoss);
+
         AppdefEntityID[] arrayIds = new AppdefEntityID[entityIds.size()];
         arrayIds = (AppdefEntityID[]) entityIds.toArray(arrayIds);
 
         List<ResourceDisplaySummary> list;
         int sessionID = user.getSessionId().intValue();
-        try{
+        try {
             list = measurementBoss.findResourcesCurrentHealth(sessionID, arrayIds);
-        } catch(Exception e) {
+        } catch (Exception e) {
             DashboardUtils.verifyResources(key, getServlet().getServletContext(), dashPrefs, user);
             list = measurementBoss.findResourcesCurrentHealth(sessionID, arrayIds);
         }
@@ -123,7 +115,7 @@ public class ViewAction extends BaseAction {
 
         List<JSONObject> resources = new ArrayList<JSONObject>();
         int count = 0;
-        
+
         for (ResourceDisplaySummary bean : list) {
             JSONObject res = new JSONObject();
 
@@ -131,10 +123,8 @@ public class ViewAction extends BaseAction {
             res.put("resourceTypeName", bean.getResourceTypeName());
             res.put("resourceTypeId", bean.getResourceTypeId());
             res.put("resourceId", bean.getResourceId());
-            res.put("performance", getFormattedValue(bean.getPerformance(),
-                                                     bean.getPerformanceUnits()));
-            res.put("throughput",  getFormattedValue(bean.getThroughput(),
-                                                     bean.getThroughputUnits()));
+            res.put("performance", getFormattedValue(bean.getPerformance(), bean.getPerformanceUnits()));
+            res.put("throughput", getFormattedValue(bean.getThroughput(), bean.getThroughputUnits()));
             res.put("availability", getAvailString(bean.getAvailability()));
             res.put("monitorable", bean.getMonitorable());
             res.put("alerts", alerts[count]);
@@ -142,29 +132,28 @@ public class ViewAction extends BaseAction {
             resources.add(res);
             count++;
         }
-        
+
         favorites.put("favorites", resources);
 
         response.getWriter().write(favorites.toString());
 
         return null;
     }
-    
+
     private String getFormattedValue(Double value, String units) {
         if (value != null) {
-            FormattedNumber fn = UnitsConvert.convert(value.doubleValue(),
-                                                      units);
+            FormattedNumber fn = UnitsConvert.convert(value.doubleValue(), units);
             return fn.toString();
         }
         return null;
     }
 
     /**
-     * Get the availability string for the given metric value.  The returned
+     * Get the availability string for the given metric value. The returned
      * string should match the availabilty icon filenames.
      * @param availability The availability metric value.
-     * @return The mapped string for the given availablity metric.  If the
-     * given metric is not valid, unknown is returned.
+     * @return The mapped string for the given availablity metric. If the given
+     *         metric is not valid, unknown is returned.
      */
     private String getAvailString(Double availability) {
         if (availability != null) {
@@ -176,8 +165,7 @@ public class ViewAction extends BaseAction {
                 return "red";
             } else if (avail == MeasurementConstants.AVAIL_PAUSED) {
                 return "orange";
-            } else if (avail > MeasurementConstants.AVAIL_DOWN && 
-                       avail < MeasurementConstants.AVAIL_UP) {
+            } else if (avail > MeasurementConstants.AVAIL_DOWN && avail < MeasurementConstants.AVAIL_UP) {
                 return "yellow";
             }
         }

@@ -35,18 +35,14 @@ import org.apache.struts.tiles.ComponentContext;
 import org.hyperic.hq.ui.action.WorkflowPrepareAction;
 
 /**
- * An Action that retrieves data from the BizApp to facilitate display
- * of the <em>New User</em> form.
+ * An Action that retrieves data from the BizApp to facilitate display of the
+ * <em>New User</em> form.
  */
-public class NewFormPrepareAction extends WorkflowPrepareAction {
+public class NewFormPrepareAction
+    extends WorkflowPrepareAction {
 
-
-    public ActionForward workflow(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-    throws Exception{
+    public ActionForward workflow(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                  HttpServletRequest request, HttpServletResponse response) throws Exception {
         return null;
     }
 }

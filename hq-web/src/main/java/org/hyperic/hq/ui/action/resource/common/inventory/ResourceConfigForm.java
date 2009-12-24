@@ -35,7 +35,8 @@ import org.hyperic.hq.ui.action.resource.ResourceForm;
 
 import org.apache.struts.action.ActionMapping;
 
-public class ResourceConfigForm extends ResourceForm {
+public class ResourceConfigForm
+    extends ResourceForm {
 
     private List resourceConfigOptions = new ArrayList();
     private List monitorConfigOptions = new ArrayList();
@@ -45,61 +46,60 @@ public class ResourceConfigForm extends ResourceForm {
     protected boolean validationErrors;
     private boolean serviceRTEnabled;
     private boolean euRTEnabled;
-    
-/**
- * A subclass of <code> ResourceForm </code> that adds convenience
- * methods for dealing with the Configuration Options.This form has built-in 
- * methods to help in retrieval of configOptions from the plugin.
- */
+
+    /**
+     * A subclass of <code> ResourceForm </code> that adds convenience methods
+     * for dealing with the Configuration Options.This form has built-in methods
+     * to help in retrieval of configOptions from the plugin.
+     */
     public Collection getResourceConfigOptions() {
         return resourceConfigOptions;
     }
 
     public void setResourceConfigOptions(List resourceConfigOptions) {
-        if(validationErrors)
+        if (validationErrors)
             return;
         this.resourceConfigOptions = resourceConfigOptions;
     }
-    
+
     public Collection getControlConfigOptions() {
         return controlConfigOptions;
     }
 
     public void setControlConfigOptions(List controlConfigOptions) {
-        if(validationErrors)
+        if (validationErrors)
             return;
         this.controlConfigOptions = controlConfigOptions;
     }
-    
+
     public Collection getMonitorConfigOptions() {
         return monitorConfigOptions;
     }
 
     public void setMonitorConfigOptions(List monitorConfigOptions) {
-        if(validationErrors)
+        if (validationErrors)
             return;
         this.monitorConfigOptions = monitorConfigOptions;
     }
-    
+
     public Collection getRtConfigOptions() {
         return rtConfigOptions;
     }
 
     public void setRtConfigOptions(List rtConfigOptions) {
-        if(validationErrors)
+        if (validationErrors)
             return;
         this.rtConfigOptions = rtConfigOptions;
     }
-    
+
     public boolean getServerBasedAutoInventory() {
         return this.serverBasedAutoInventory;
     }
 
     public void setServerBasedAutoInventory(boolean serverBasedAutoInventory) {
-        if(validationErrors) {
+        if (validationErrors) {
             // do nothing as this gets it from the form
-        }
-        else
+        } else
             this.serverBasedAutoInventory = serverBasedAutoInventory;
     }
 
@@ -118,7 +118,7 @@ public class ResourceConfigForm extends ResourceForm {
     public void setEuRTEnabled(boolean euRTEnabled) {
         this.euRTEnabled = euRTEnabled;
     }
-    
+
     public void reset(ActionMapping mapping, HttpServletRequest request) {
         super.reset(mapping, request);
         serverBasedAutoInventory = false;

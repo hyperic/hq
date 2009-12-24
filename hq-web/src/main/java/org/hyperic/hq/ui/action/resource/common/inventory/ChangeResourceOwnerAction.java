@@ -46,31 +46,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * An Action that changes the owner of a resource in the inventory.
  */
-public class ChangeResourceOwnerAction extends BaseAction {
+public class ChangeResourceOwnerAction
+    extends BaseAction {
 
-   private final  Log log =
-       LogFactory.getLog(ChangeResourceOwnerAction.class.getName());
-   private AppdefBoss appdefBoss;
-   
-   
-   @Autowired
+    private final Log log = LogFactory.getLog(ChangeResourceOwnerAction.class.getName());
+    private AppdefBoss appdefBoss;
+
+    @Autowired
     public ChangeResourceOwnerAction(AppdefBoss appdefBoss) {
         super();
         this.appdefBoss = appdefBoss;
     }
 
-
-
     /**
-     * Change the owner of the resource to the user specified in the the
-     * given <code>ChangeResourceOwnerForm</code>.
+     * Change the owner of the resource to the user specified in the the given
+     * <code>ChangeResourceOwnerForm</code>.
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-    throws Exception {
-       
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
         ChangeResourceOwnerForm chownForm = (ChangeResourceOwnerForm) form;
         Integer resourceId = chownForm.getRid();
@@ -81,35 +74,28 @@ public class ChangeResourceOwnerAction extends BaseAction {
         forwardParams.put(Constants.RESOURCE_PARAM, resourceId);
         forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, resourceType);
 
-        ActionForward forward =
-            checkSubmit(request, mapping, form, forwardParams, YES_RETURN_PATH);
+        ActionForward forward = checkSubmit(request, mapping, form, forwardParams, YES_RETURN_PATH);
         if (forward != null) {
             return forward;
         }
 
-       
         Integer sessionId = RequestUtils.getSessionId(request);
 
-        AppdefEntityID entityId =
-            new AppdefEntityID(resourceType.intValue(), resourceId);
-        log.trace("setting owner [" + ownerId + "] for resource [" +
-                  entityId + "]");
-        appdefBoss
-            .changeResourceOwner(sessionId.intValue(), entityId, ownerId);
+        AppdefEntityID entityId = new AppdefEntityID(resourceType.intValue(), resourceId);
+        log.trace("setting owner [" + ownerId + "] for resource [" + entityId + "]");
+        appdefBoss.changeResourceOwner(sessionId.intValue(), entityId, ownerId);
 
-        RequestUtils.setConfirmation(request,
-                                     "resource.common.inventory.confirm.ChangeResourceOwner");
-        // fix for 5265. Check if we've lost viewability of the 
+        RequestUtils.setConfirmation(request, "resource.common.inventory.confirm.ChangeResourceOwner");
+        // fix for 5265. Check if we've lost viewability of the
         // resource. If we have, then return to the resource hub
         try {
-            appdefBoss
-                .findById(sessionId.intValue(), entityId);                                         
+            appdefBoss.findById(sessionId.intValue(), entityId);
         } catch (PermissionException e) {
             // looks like we cant see the thing anymore...
             // you, sir, are going to the resource hub
             return mapping.findForward("lostRights");
         }
-        return returnSuccess(request, mapping, forwardParams, YES_RETURN_PATH);            
-        
+        return returnSuccess(request, mapping, forwardParams, YES_RETURN_PATH);
+
     }
 }

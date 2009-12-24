@@ -42,24 +42,23 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 
-
 /**
  * This action prepares the portal for configuring the service monitoring pages.
  */
-public class ConfigPortalAction extends ResourceConfigPortalAction {
+public class ConfigPortalAction
+    extends ResourceConfigPortalAction {
 
-    private static final String CONFIG_METRICS_PORTAL
-        = ".resource.service.monitor.config.ConfigMetrics";
-    private static final String CONFIG_METRICS_TITLE
-        = "resource.service.monitor.visibility.config.ConfigureVisibility.Title";
-    
-    
+    private static final String CONFIG_METRICS_PORTAL = ".resource.service.monitor.config.ConfigMetrics";
+    private static final String CONFIG_METRICS_TITLE = "resource.service.monitor.visibility.config.ConfigureVisibility.Title";
+
     @Autowired
     public ConfigPortalAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss) {
         super(appdefBoss, authzBoss, controlBoss);
     }
 
-    /* (non javadoc)
+    /*
+     * (non javadoc)
+     * 
      * @see org.hyperic.hq.ui.action.BaseDispatchAction#getKeyMethodMap()
      */
     protected Properties getKeyMethodMap() {
@@ -70,21 +69,17 @@ public class ConfigPortalAction extends ResourceConfigPortalAction {
     }
 
     /** mode=configure || mode=view */
-    public ActionForward configMetrics(ActionMapping mapping,
-                                       ActionForm form,
-                                       HttpServletRequest request,
-                                       HttpServletResponse response)
-        throws Exception {
-        
+    public ActionForward configMetrics(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                       HttpServletResponse response) throws Exception {
+
         setResource(request);
-               
-        super.configMetrics(mapping,form,request,response);
-        
-        Portal portal = Portal.createPortal( CONFIG_METRICS_TITLE, 
-            CONFIG_METRICS_PORTAL);
+
+        super.configMetrics(mapping, form, request, response);
+
+        Portal portal = Portal.createPortal(CONFIG_METRICS_TITLE, CONFIG_METRICS_PORTAL);
         request.setAttribute(Constants.PORTAL_KEY, portal);
         return null;
-    
+
     }
-  
+
 }

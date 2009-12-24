@@ -49,72 +49,61 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * Perform a quick control action on a resource.
  */
-public class QuickControlAction extends BaseAction {
+public class QuickControlAction
+    extends BaseAction {
 
-    private final Log log
-        = LogFactory.getLog(QuickControlAction.class.getName()); 
-    
+    private final Log log = LogFactory.getLog(QuickControlAction.class.getName());
+
     private ControlBoss controlBoss;
-    
-    
+
     @Autowired
     public QuickControlAction(ControlBoss controlBoss) {
         super();
         this.controlBoss = controlBoss;
     }
 
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
-
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-        
-        QuickControlForm qcForm = (QuickControlForm)form;
+        QuickControlForm qcForm = (QuickControlForm) form;
         log.trace("performing resouce quick control action: " + qcForm.getResourceAction());
- 
+
         HashMap<String, Object> fwdParms = new HashMap<String, Object>(2);
-            
-        try {    
-           
-            int sessionId =  RequestUtils.getSessionIdInt(request);
-            
+
+        try {
+
+            int sessionId = RequestUtils.getSessionIdInt(request);
+
             // create the new action to schedule
             Integer id = qcForm.getResourceId();
             Integer type = qcForm.getResourceType();
             AppdefEntityID appdefId = new AppdefEntityID(type.intValue(), id);
             fwdParms.put(Constants.RESOURCE_PARAM, id);
             fwdParms.put(Constants.RESOURCE_TYPE_ID_PARAM, type);
-            
+
             String action = qcForm.getResourceAction();
             String args = qcForm.getArguments();
 
-            if ( AppdefEntityConstants.APPDEF_TYPE_GROUP == type ) {
+            if (AppdefEntityConstants.APPDEF_TYPE_GROUP == type) {
                 controlBoss.doGroupAction(sessionId, appdefId, action, args, null);
             } else {
                 controlBoss.doAction(sessionId, appdefId, action, args);
             }
-            ActionForward fwd 
-                = this.returnSuccess(request, mapping, fwdParms); 
-            
+            ActionForward fwd = this.returnSuccess(request, mapping, fwdParms);
+
             // set confirmation message
             String ctrlStr = qcForm.getResourceAction();
-            SessionUtils.setConfirmation(request.getSession(false /* dont create */), 
+            SessionUtils.setConfirmation(request.getSession(false /* dont create */),
                 "resource.server.QuickControl.Confirmation", ctrlStr);
-            
+
             qcForm.reset(mapping, request);
             return fwd;
-        } 
-        catch (PluginException cpe) {
+        } catch (PluginException cpe) {
             log.trace("control not enabled", cpe);
-            SessionUtils.setError(request.getSession(false),
-                "resource.common.error.ControlNotEnabled");
-            return returnFailure(request, mapping, fwdParms);                 
-        }
-        catch (PermissionException pe) {
-            SessionUtils.setError(request.getSession(false),
-                "resource.common.control.error.NewPermission");
+            SessionUtils.setError(request.getSession(false), "resource.common.error.ControlNotEnabled");
+            return returnFailure(request, mapping, fwdParms);
+        } catch (PermissionException pe) {
+            SessionUtils.setError(request.getSession(false), "resource.common.control.error.NewPermission");
             return returnFailure(request, mapping, fwdParms);
         }
     }

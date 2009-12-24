@@ -47,36 +47,30 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.actions.DispatchAction;
 
 /**
- *  An abstract <strong>Action</strong> that dispatches to a subclass
- *  mapped method based on the value of a request parameter.
+ * An abstract <strong>Action</strong> that dispatches to a subclass mapped
+ * method based on the value of a request parameter.
  */
-public abstract class BaseDispatchAction extends DispatchAction {
+public abstract class BaseDispatchAction
+    extends DispatchAction {
 
-    private static Log log =
-        LogFactory.getLog(BaseDispatchAction.class.getName());
+    private static Log log = LogFactory.getLog(BaseDispatchAction.class.getName());
 
     /**
-     *  Process the specified HTTP request, and create the corresponding HTTP
-     *  response (or forward to another web component that will create it).
-     *  Return an <code>ActionForward</code> instance describing where and how
-     *  control should be forwarded, or <code>null</code> if the response has
-     *  already been completed.
-     *
-     *@param  mapping               The ActionMapping used to select this
-     *      instance
-     *@param  request               The HTTP request we are processing
-     *@param  response              The HTTP response we are creating
-     *@param  form                  The optional ActionForm bean for this
-     *      request (if any)
-     *@return                       Describes where and how control should be
-     *      forwarded.
-     *@exception  Exception         if an error occurs
+     * Process the specified HTTP request, and create the corresponding HTTP
+     * response (or forward to another web component that will create it).
+     * Return an <code>ActionForward</code> instance describing where and how
+     * control should be forwarded, or <code>null</code> if the response has
+     * already been completed.
+     * 
+     *@param mapping The ActionMapping used to select this instance
+     *@param request The HTTP request we are processing
+     *@param response The HTTP response we are creating
+     *@param form The optional ActionForm bean for this request (if any)
+     *@return Describes where and how control should be forwarded.
+     *@exception Exception if an error occurs
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
         // identify the request parameter containing the method name
         String parameter = mapping.getParameter();
@@ -87,8 +81,7 @@ public abstract class BaseDispatchAction extends DispatchAction {
         // identify the string to look up
         String name = request.getParameter(parameter);
         if (name == null) {
-            throw new ServletException("dispatch parameter [" + parameter +
-                                       "] not found");
+            throw new ServletException("dispatch parameter [" + parameter + "] not found");
         }
 
         // look up the dispatch method
@@ -98,59 +91,51 @@ public abstract class BaseDispatchAction extends DispatchAction {
             // DispatchAction was originally designed to do
             methodName = name;
         }
-        
+
         // execute the dispatch method
-        ActionForward fwd = dispatchMethod(mapping, form, request, response,
-                                            methodName);
+        ActionForward fwd = dispatchMethod(mapping, form, request, response, methodName);
 
         // save the return path in case the user clicks into a
         // workflow. be sure to include the mode parameter.
         try {
-            Portal tmpPortal = (Portal)request.getAttribute(Constants.PORTAL_KEY);
+            Portal tmpPortal = (Portal) request.getAttribute(Constants.PORTAL_KEY);
             if (tmpPortal.doWorkflow()) {
-                Map<String,Object> params = tmpPortal.getWorkflowParams();
+                Map<String, Object> params = tmpPortal.getWorkflowParams();
                 if (params == null) {
-                    params = new HashMap<String,Object>();
+                    params = new HashMap<String, Object>();
                     params.put(Constants.MODE_PARAM, name);
                 }
-                setReturnPath(request ,mapping, params);
+                setReturnPath(request, mapping, params);
             }
-        }
-        catch (ServletException e) {
+        } catch (ServletException e) {
             log.debug("Could not save return path: " + e);
-        }
-        catch (ParameterNotFoundException pne) {
+        } catch (ParameterNotFoundException pne) {
             log.debug("Could not save return path: " + pne);
         }
-        
+
         return fwd;
     }
 
     /**
      * Provides the mapping from resource key to method name
-     *
-     * @return          Resource key / method name map
+     * 
+     * @return Resource key / method name map
      */
     protected Properties getKeyMethodMap() {
         return new Properties();
     }
 
     /**
-     * Method to overload if the controller wants to be an origin 
-     * for workflows. Child classes should customize this to participate
-     * in workflows.
+     * Method to overload if the controller wants to be an origin for workflows.
+     * Child classes should customize this to participate in workflows.
      * 
-     * @param request The request to get the session to store
-     *                the returnPath into.
-     * @param mapping The ActionMapping to get the input forward
-     *                from.
-     * @param params  A Map of request parameters to add to the return
-     * path.
-     *
+     * @param request The request to get the session to store the returnPath
+     *        into.
+     * @param mapping The ActionMapping to get the input forward from.
+     * @param params A Map of request parameters to add to the return path.
+     * 
      */
-    protected void setReturnPath(HttpServletRequest request,
-                                 ActionMapping mapping,
-                                 Map<String, Object> params) 
+    protected void setReturnPath(HttpServletRequest request, ActionMapping mapping, Map<String, Object> params)
         throws Exception {
         String returnPath = ActionUtils.findReturnPath(mapping, params);
         if (log.isTraceEnabled()) {
@@ -159,9 +144,7 @@ public abstract class BaseDispatchAction extends DispatchAction {
         SessionUtils.setReturnPath(request.getSession(), returnPath);
     }
 
-    protected void setReturnPath(HttpServletRequest request,
-                                 ActionMapping mapping)
-        throws Exception {
+    protected void setReturnPath(HttpServletRequest request, ActionMapping mapping) throws Exception {
         setReturnPath(request, mapping, new HashMap<String, Object>());
     }
 }

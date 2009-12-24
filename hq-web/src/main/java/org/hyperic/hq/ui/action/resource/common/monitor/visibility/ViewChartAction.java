@@ -48,11 +48,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * View a chart for a metric.
  */
-public class ViewChartAction extends MetricDisplayRangeAction {
-    protected final Log log =
-        LogFactory.getLog( ViewChartAction.class.getName() );
-    
-    
+public class ViewChartAction
+    extends MetricDisplayRangeAction {
+    protected final Log log = LogFactory.getLog(ViewChartAction.class.getName());
+
     @Autowired
     public ViewChartAction(AuthzBoss authzBoss) {
         super(authzBoss);
@@ -62,101 +61,98 @@ public class ViewChartAction extends MetricDisplayRangeAction {
      * Modify the metric chart as specified in the given <code>@{link
      * ViewActionForm}</code>.
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-    throws Exception {
-        ViewChartForm chartForm = (ViewChartForm)form;
-        AppdefEntityID adeId = new AppdefEntityID( chartForm.getType().intValue(), chartForm.getRid());
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
+        ViewChartForm chartForm = (ViewChartForm) form;
+        AppdefEntityID adeId = new AppdefEntityID(chartForm.getType().intValue(), chartForm.getRid());
         Map<String, Object> forwardParams = new HashMap<String, Object>(3);
-        
-        forwardParams.put( Constants.RESOURCE_PARAM, chartForm.getRid() );
-        forwardParams.put( Constants.RESOURCE_TYPE_ID_PARAM, chartForm.getType() );
-        
+
+        forwardParams.put(Constants.RESOURCE_PARAM, chartForm.getRid());
+        forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, chartForm.getType());
+
         // The autogroup metrics pages pass the ctype to us, and we
-        // need to pass it back.  If this happens, we don't need the
-        // extra "mode" parameter.  See bug #7501. (2003/06/24 -- JW)
-        if ( null != chartForm.getCtype() && !chartForm.getCtype().equals(ViewChartForm.NO_CHILD_TYPE) ) {
-            forwardParams.put( Constants.CHILD_RESOURCE_TYPE_ID_PARAM, chartForm.getCtype() );
+        // need to pass it back. If this happens, we don't need the
+        // extra "mode" parameter. See bug #7501. (2003/06/24 -- JW)
+        if (null != chartForm.getCtype() && !chartForm.getCtype().equals(ViewChartForm.NO_CHILD_TYPE)) {
+            forwardParams.put(Constants.CHILD_RESOURCE_TYPE_ID_PARAM, chartForm.getCtype());
         } else {
-            forwardParams.put( Constants.MODE_PARAM, chartForm.getMode() );
+            forwardParams.put(Constants.MODE_PARAM, chartForm.getMode());
         }
 
-        if ( chartForm.getSaveChart() ) {
+        if (chartForm.getSaveChart()) {
             // isEE == false, bc this is the .org version of this action
-        	return saveChartToDashboard(mapping, request, forwardParams, chartForm, adeId, false);
-        } else if ( chartForm.isPrevPageClicked() ) {
+            return saveChartToDashboard(mapping, request, forwardParams, chartForm, adeId, false);
+        } else if (chartForm.isPrevPageClicked()) {
             return returnSuccess(request, mapping, forwardParams);
         } else {
             // If prev or next buttons were clicked, the dates
             // caused by those clicks will override what's
             // actually in the form, so we must update the form as
             // appropriate.
-            if ( chartForm.isNextRangeClicked() || chartForm.isPrevRangeClicked() ) {
+            if (chartForm.isNextRangeClicked() || chartForm.isPrevRangeClicked()) {
                 MetricRange range = new MetricRange();
-                if ( chartForm.isNextRangeClicked() ) {
+                if (chartForm.isNextRangeClicked()) {
                     long newBegin = chartForm.getEndDate().getTime();
                     long diff = newBegin - chartForm.getStartDate().getTime();
                     long newEnd = newBegin + diff;
 
-                    range.setBegin( new Long(newBegin) );
-                    range.setEnd( new Long(newEnd) );
-                } else if ( chartForm.isPrevRangeClicked() ) {
+                    range.setBegin(new Long(newBegin));
+                    range.setEnd(new Long(newEnd));
+                } else if (chartForm.isPrevRangeClicked()) {
                     long newEnd = chartForm.getStartDate().getTime();
                     long diff = chartForm.getEndDate().getTime() - newEnd;
                     long newBegin = newEnd - diff;
 
-                    range.setBegin( new Long(newBegin) );
-                    range.setEnd( new Long(newEnd) );
+                    range.setBegin(new Long(newBegin));
+                    range.setEnd(new Long(newEnd));
                 }
                 chartForm.setA(MetricDisplayRangeForm.ACTION_DATE_RANGE);
-                chartForm.populateStartDate( new Date( range.getBegin().longValue() ), request.getLocale() );
-                chartForm.populateEndDate( new Date( range.getEnd().longValue() ), request.getLocale() );
+                chartForm.populateStartDate(new Date(range.getBegin().longValue()), request.getLocale());
+                chartForm.populateEndDate(new Date(range.getEnd().longValue()), request.getLocale());
                 range.shiftNow();
                 request.setAttribute(Constants.METRIC_RANGE, range);
             }
 
             // update metric display range
             ActionForward retVal = super.execute(mapping, form, request, response);
-            if ( retVal.getName().equals(Constants.SUCCESS_URL) ) {
+            if (retVal.getName().equals(Constants.SUCCESS_URL)) {
                 return returnRedraw(request, mapping, forwardParams);
             } else {
-                if ( log.isTraceEnabled() ) {
-                    log.trace( "returning " + retVal.getName() );
+                if (log.isTraceEnabled()) {
+                    log.trace("returning " + retVal.getName());
                 }
                 return retVal;
             }
         }
 
     }
-        
-    protected ActionForward returnRedraw(HttpServletRequest request,
-                                         ActionMapping mapping, Map<String,Object> params)
-    throws Exception {
-        return constructForward(request, mapping, Constants.REDRAW_URL, 
-                                params, false);
+
+    protected ActionForward returnRedraw(HttpServletRequest request, ActionMapping mapping, Map<String, Object> params)
+        throws Exception {
+        return constructForward(request, mapping, Constants.REDRAW_URL, params, false);
     }
 
-    protected ActionForward saveChartToDashboard(ActionMapping mapping, HttpServletRequest request, Map<String, Object> forwardParams, ViewChartForm chartForm, AppdefEntityID adeId, boolean isEE) 
-    throws Exception {
+    protected ActionForward saveChartToDashboard(ActionMapping mapping, HttpServletRequest request,
+                                                 Map<String, Object> forwardParams, ViewChartForm chartForm,
+                                                 AppdefEntityID adeId, boolean isEE) throws Exception {
         ActionForward success = returnRedraw(request, mapping, forwardParams);
 
-        ResultCode result = SaveChartToDashboardUtil.saveChartToDashboard(getServlet().getServletContext(), request, success, chartForm, adeId, chartForm.getChartName(), isEE);
+        ResultCode result = SaveChartToDashboardUtil.saveChartToDashboard(getServlet().getServletContext(), request,
+            success, chartForm, adeId, chartForm.getChartName(), isEE);
 
         switch (result) {
-        	case DUPLICATE:
-        		RequestUtils.setConfirmation(request, "resource.common.monitor.visibility.chart.error.ChartDuplicated");
-        		break;
-        		
-        	case ERROR:
-        		RequestUtils.setConfirmation(request, "resource.common.monitor.visibility.chart.error.ChartNotSaved");
-        		break;
-        		
-        	case SUCCESS:
-        		RequestUtils.setConfirmation(request, "resource.common.monitor.visibility.chart.confirm.ChartSaved");
+            case DUPLICATE:
+                RequestUtils.setConfirmation(request, "resource.common.monitor.visibility.chart.error.ChartDuplicated");
+                break;
+
+            case ERROR:
+                RequestUtils.setConfirmation(request, "resource.common.monitor.visibility.chart.error.ChartNotSaved");
+                break;
+
+            case SUCCESS:
+                RequestUtils.setConfirmation(request, "resource.common.monitor.visibility.chart.confirm.ChartSaved");
         }
-        
+
         return success;
     }
 }

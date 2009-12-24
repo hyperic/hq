@@ -47,60 +47,50 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * An Action that removes a control event from a server.
  */
-public class RemoveControlJobsAction extends BaseAction {
+public class RemoveControlJobsAction
+    extends BaseAction {
 
-    private final   Log log = LogFactory.getLog(RemoveControlJobsAction.class.getName());
+    private final Log log = LogFactory.getLog(RemoveControlJobsAction.class.getName());
     private ControlBoss controlBoss;
-    
-    
+
     @Autowired
     public RemoveControlJobsAction(ControlBoss controlBoss) {
         super();
         this.controlBoss = controlBoss;
     }
 
-
-
-    /** 
-     * Removes control jobs from a server. 
+    /**
+     * Removes control jobs from a server.
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-            
-      
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
+
         HashMap<String, Object> parms = new HashMap<String, Object>(2);
-        
+
         try {
-            RemoveControlJobsForm rmForm = (RemoveControlJobsForm)form;
+            RemoveControlJobsForm rmForm = (RemoveControlJobsForm) form;
             Integer[] jobs = rmForm.getControlJobs();
- 
+
             AppdefEntityID aeid = RequestUtils.getEntityId(request);
 
             parms.put(Constants.RESOURCE_PARAM, aeid.getId());
-            parms.put(Constants.RESOURCE_TYPE_ID_PARAM,
-                      new Integer(aeid.getType()));
+            parms.put(Constants.RESOURCE_TYPE_ID_PARAM, new Integer(aeid.getType()));
 
-            if (jobs == null || jobs.length == 0){
+            if (jobs == null || jobs.length == 0) {
                 return this.returnSuccess(request, mapping, parms);
             }
-            
+
             Integer sessionId = RequestUtils.getSessionId(request);
-          
+
             controlBoss.deleteControlJob(sessionId.intValue(), jobs);
-        
-            log.trace("Removed resource control jobs.");                                                      
-            SessionUtils.setConfirmation(request.getSession(false),
-                "resource.common.control.confirm.ScheduledRemoved");
+
+            log.trace("Removed resource control jobs.");
+            SessionUtils.setConfirmation(request.getSession(false), "resource.common.control.confirm.ScheduledRemoved");
             return this.returnSuccess(request, mapping, parms);
-            
-        }
-        catch (PluginException cpe) {
+
+        } catch (PluginException cpe) {
             log.debug("There was a problem removing control jobs: ", cpe);
-            SessionUtils.setError(request.getSession(false), 
-                "resource.common.control.error.CouldNotRemoveScheduled");
+            SessionUtils.setError(request.getSession(false), "resource.common.control.error.CouldNotRemoveScheduled");
             return returnFailure(request, mapping, parms);
         }
     }

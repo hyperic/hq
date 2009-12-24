@@ -35,49 +35,52 @@ import org.apache.struts.util.ImageButtonBean;
 
 /**
  * Represents the search options of metric lists
- *
+ * 
  */
-public class MetricsFilterForm extends MetricsControlForm {
-    public static final int FILTER_AVAIL    = 0;
-    public static final int FILTER_UTIL     = 1;
-    public static final int FILTER_THRU     = 2;
-    public static final int FILTER_PERF     = 3;
+public class MetricsFilterForm
+    extends MetricsControlForm {
+    public static final int FILTER_AVAIL = 0;
+    public static final int FILTER_UTIL = 1;
+    public static final int FILTER_THRU = 2;
+    public static final int FILTER_PERF = 3;
 
-    public static final int FILTER_DYN      = 4;
+    public static final int FILTER_DYN = 4;
     public static final int FILTER_TREND_UP = 5;
     public static final int FILTER_TREND_DN = 6;
-    public static final int FILTER_STATIC   = 7;
+    public static final int FILTER_STATIC = 7;
 
-    public static final int[] ALL_FILTERS = {
-        FILTER_AVAIL, FILTER_UTIL,     FILTER_THRU,     FILTER_PERF,
-        FILTER_DYN,   FILTER_TREND_UP, FILTER_TREND_DN, FILTER_STATIC,
-    };
-    
-    public static final long[] BITWISE_FILTERS = {
-        MeasurementConstants.FILTER_AVAIL,
-        MeasurementConstants.FILTER_UTIL,
-        MeasurementConstants.FILTER_THRU,
-        MeasurementConstants.FILTER_PERF,
-        MeasurementConstants.FILTER_DYN,
-        MeasurementConstants.FILTER_TREND_UP,
-        MeasurementConstants.FILTER_TREND_DN,
-        MeasurementConstants.FILTER_STATIC,
-    };
-        
-    //-------------------------------------instance variables
+    public static final int[] ALL_FILTERS = { FILTER_AVAIL,
+                                             FILTER_UTIL,
+                                             FILTER_THRU,
+                                             FILTER_PERF,
+                                             FILTER_DYN,
+                                             FILTER_TREND_UP,
+                                             FILTER_TREND_DN,
+                                             FILTER_STATIC, };
+
+    public static final long[] BITWISE_FILTERS = { MeasurementConstants.FILTER_AVAIL,
+                                                  MeasurementConstants.FILTER_UTIL,
+                                                  MeasurementConstants.FILTER_THRU,
+                                                  MeasurementConstants.FILTER_PERF,
+                                                  MeasurementConstants.FILTER_DYN,
+                                                  MeasurementConstants.FILTER_TREND_UP,
+                                                  MeasurementConstants.FILTER_TREND_DN,
+                                                  MeasurementConstants.FILTER_STATIC, };
+
+    // -------------------------------------instance variables
 
     // links to metric display range edit page
     private ImageButtonBean filterSubmit;
     private int[] filter;
     private String keyword;
     private boolean showAll;
-    
+
     public MetricsFilterForm() {
         super();
         setDefaults();
     }
 
-    //-------------------------------------public methods
+    // -------------------------------------public methods
 
     public void setFilter(int[] filter) {
         this.filter = filter;
@@ -93,10 +96,10 @@ public class MetricsFilterForm extends MetricsControlForm {
             for (int i = 0; i < filter.length; i++)
                 filters |= BITWISE_FILTERS[filter[i]];
         }
-        return filters;            
+        return filters;
     }
 
-    //-------------------------------------public accessors
+    // -------------------------------------public accessors
 
     public ImageButtonBean getFilterSubmit() {
         return filterSubmit;
@@ -113,11 +116,12 @@ public class MetricsFilterForm extends MetricsControlForm {
     public String getKeyword() {
         return keyword;
     }
-    
+
     public void setKeyword(String keyword) {
         this.keyword = keyword;
     }
-    //-------------------------------------private methods    
+
+    // -------------------------------------private methods
 
     public boolean getShowAll() {
         return showAll;
@@ -140,8 +144,8 @@ public class MetricsFilterForm extends MetricsControlForm {
         setDefaults();
     }
 
-    //-------------------------------------public methods
-    
+    // -------------------------------------public methods
+
     public String toString() {
         StringBuffer s = new StringBuffer(super.toString());
         s.append(" filterSubmit=").append(filterSubmit);

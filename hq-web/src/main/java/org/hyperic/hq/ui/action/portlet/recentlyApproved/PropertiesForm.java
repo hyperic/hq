@@ -27,12 +27,13 @@ package org.hyperic.hq.ui.action.portlet.recentlyApproved;
 
 import org.hyperic.hq.ui.action.portlet.DashboardBaseForm;
 
-public class PropertiesForm extends DashboardBaseForm  {
+public class PropertiesForm
+    extends DashboardBaseForm {
 
     static String RANGE = ".dashContent.recentlyApproved.range";
 
     private Integer _range;
-    
+
     public PropertiesForm() {
         super();
     }
@@ -40,7 +41,7 @@ public class PropertiesForm extends DashboardBaseForm  {
     public Integer getRange() {
         return _range;
     }
-    
+
     public void setRange(Integer range) {
         _range = range;
     }

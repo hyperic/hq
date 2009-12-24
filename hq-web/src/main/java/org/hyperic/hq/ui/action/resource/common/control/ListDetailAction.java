@@ -28,8 +28,9 @@ package org.hyperic.hq.ui.action.resource.common.control;
 import org.hyperic.hq.ui.action.BaseTilesAction;
 
 /**
- * Do nothing.  Class exists to facilitate Struts Actions config.
+ * Do nothing. Class exists to facilitate Struts Actions config.
  */
-public class ListDetailAction extends BaseTilesAction {
+public class ListDetailAction
+    extends BaseTilesAction {
 
 }

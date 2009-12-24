@@ -36,12 +36,12 @@ import org.hyperic.hq.ui.action.resource.ResourceForm;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 
-
 /**
  * Form for editing the OpenNMS action for an alert definition.
- *
+ * 
  */
-public final class OpenNMSForm extends ResourceForm  {
+public final class OpenNMSForm
+    extends ResourceForm {
     private Integer _id; // nullable
     private Integer _ad; // nullable
     private boolean _shouldBeRemoved;
@@ -49,37 +49,31 @@ public final class OpenNMSForm extends ResourceForm  {
     private String _ip;
     private String _port;
 
-    //-------------------------------------constructors
+    // -------------------------------------constructors
 
     public String getServer() {
         return _server;
     }
 
-
     public void setServer(String server) {
         _server = server;
     }
-
 
     public String getIp() {
         return _ip;
     }
 
-
     public void setIp(String ip) {
         _ip = ip;
     }
-
 
     public String getPort() {
         return _port;
     }
 
-
     public void setPort(String port) {
         _port = port;
     }
-
 
     public OpenNMSForm() {
         // do nothing
@@ -118,17 +112,15 @@ public final class OpenNMSForm extends ResourceForm  {
         _ip = null;
         _port = null;
     }
-    
-    void importAction(AlertDefinitionValue def)
-        throws InvalidActionDataException, EncodingException {
+
+    void importAction(AlertDefinitionValue def) throws InvalidActionDataException, EncodingException {
         setAd(def.getId());
-        
+
         // Find the OpenNMS action
         ActionValue[] actions = def.getActions();
         for (int i = 0; i < actions.length; ++i) {
-            if ( actions[i].classnameHasBeenSet() &&
-                 !( actions[i].getClassname().equals(null) ||
-                    actions[i].getClassname().equals("") ) ) {
+            if (actions[i].classnameHasBeenSet() &&
+                !(actions[i].getClassname().equals(null) || actions[i].getClassname().equals(""))) {
                 try {
                     Class clazz = Class.forName(actions[i].getClassname());
                     if (OpenNMSAction.class.isAssignableFrom(clazz)) {
@@ -147,7 +139,7 @@ public final class OpenNMSForm extends ResourceForm  {
                 }
             }
         }
-        
+
     }
 }
 

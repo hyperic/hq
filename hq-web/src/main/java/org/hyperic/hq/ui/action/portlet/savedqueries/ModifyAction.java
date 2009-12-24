@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.ui.action.portlet.savedqueries;
 
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -53,17 +52,17 @@ import org.hyperic.util.config.ConfigResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * An <code>Action</code> that loads the <code>Portal</code>
- * identified by the <code>PORTAL_PARAM</code> request parameter (or
- * the default portal, if the parameter is not specified) into the
- * <code>PORTAL_KEY</code> request attribute.
+ * An <code>Action</code> that loads the <code>Portal</code> identified by the
+ * <code>PORTAL_PARAM</code> request parameter (or the default portal, if the
+ * parameter is not specified) into the <code>PORTAL_KEY</code> request
+ * attribute.
  */
-public class ModifyAction extends BaseAction {
-    
+public class ModifyAction
+    extends BaseAction {
+
     private ConfigurationProxy configurationProxy;
     private AuthzBoss authzBoss;
-    
-    
+
     @Autowired
     public ModifyAction(ConfigurationProxy configurationProxy, AuthzBoss authzBoss) {
         super();
@@ -71,31 +70,25 @@ public class ModifyAction extends BaseAction {
         this.authzBoss = authzBoss;
     }
 
-
-
     /**
-     *
+     * 
      * @param mapping The ActionMapping used to select this instance
      * @param actionForm The optional ActionForm bean for this request (if any)
      * @param request The HTTP request we are processing
      * @param response The HTTP response we are creating
-     *
-     * @exception Exception if the application business logic throws
-     *  an exception
+     * 
+     * @exception Exception if the application business logic throws an
+     *            exception
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-    throws Exception {
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
         HttpSession session = request.getSession();
         WebUser user = RequestUtils.getWebUser(request);
-       
-        DashboardConfig dashConfig = DashboardUtils.findDashboard(
-        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, authzBoss);
+
+        DashboardConfig dashConfig = DashboardUtils.findDashboard((Integer) session
+            .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
-        
+
         PropertiesForm pForm = (PropertiesForm) form;
         ActionForward forward = checkSubmit(request, mapping, form);
         String returnString = "success";
@@ -104,12 +97,11 @@ public class ModifyAction extends BaseAction {
         }
 
         String[] charts = pForm.getCharts();
-        if (charts != null && pForm.isDeleteClicked()) {                
-            String userCharts =
-            	dashPrefs.getValue(Constants.USER_DASHBOARD_CHARTS);
+        if (charts != null && pForm.isDeleteClicked()) {
+            String userCharts = dashPrefs.getValue(Constants.USER_DASHBOARD_CHARTS);
 
-            for(int i = 0; i < charts.length; i++){
-                userCharts = StringUtil.remove(userCharts, charts[i]);                
+            for (int i = 0; i < charts.length; i++) {
+                userCharts = StringUtil.remove(userCharts, charts[i]);
             }
             dashPrefs.setValue(Constants.USER_DASHBOARD_CHARTS, userCharts);
             returnString = "remove";
@@ -118,33 +110,30 @@ public class ModifyAction extends BaseAction {
             List<String> chartList = new ArrayList<String>();
             chartList.add(dashPrefs.getValue(Constants.USER_DASHBOARD_CHARTS));
             chartList.add(dashPrefs.getValue(StringConstants.DASHBOARD_DELIMITER));
-            
-            for (Iterator<String> it = chartList.iterator(); it.hasNext(); ) {
+
+            for (Iterator<String> it = chartList.iterator(); it.hasNext();) {
                 if ("null".equals(it.next()))
                     it.remove();
             }
-            
+
             String[] orderedCharts = new String[chartList.size()];
 
-            StringTokenizer orderTK = new StringTokenizer(pForm.getOrder(),
-                                                          "=&");
+            StringTokenizer orderTK = new StringTokenizer(pForm.getOrder(), "=&");
             for (int i = 0; orderTK.hasMoreTokens(); i++) {
-                orderTK.nextToken();                                // left-hand
-                int index = Integer.parseInt(orderTK.nextToken());  // index
+                orderTK.nextToken(); // left-hand
+                int index = Integer.parseInt(orderTK.nextToken()); // index
                 orderedCharts[i] = (String) chartList.get(index - 1);
             }
-            
-            dashPrefs.setValue(Constants.USER_DASHBOARD_CHARTS,
-                StringUtil.arrayToString(orderedCharts, StringConstants
-                                         .DASHBOARD_DELIMITER.charAt(0)));
+
+            dashPrefs.setValue(Constants.USER_DASHBOARD_CHARTS, StringUtil.arrayToString(orderedCharts,
+                StringConstants.DASHBOARD_DELIMITER.charAt(0)));
         }
 
-        configurationProxy.setDashboardPreferences(session, user, dashPrefs );
-        
-        LogFactory.getLog("user.preferences").trace("Invoking setUserPrefs"+
-            " in savedqueries/ModifyAction " +
-            " for " + user.getId() + " at "+System.currentTimeMillis() +
-            " user.prefs = " + dashPrefs.getKeys().toString());
+        configurationProxy.setDashboardPreferences(session, user, dashPrefs);
+
+        LogFactory.getLog("user.preferences").trace(
+            "Invoking setUserPrefs" + " in savedqueries/ModifyAction " + " for " + user.getId() + " at " +
+                System.currentTimeMillis() + " user.prefs = " + dashPrefs.getKeys().toString());
         return mapping.findForward(returnString);
 
     }

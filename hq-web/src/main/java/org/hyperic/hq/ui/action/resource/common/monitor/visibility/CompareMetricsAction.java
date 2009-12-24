@@ -41,45 +41,35 @@ import org.hyperic.hq.ui.action.BaseActionMapping;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class CompareMetricsAction extends MetricsControlAction {
+public class CompareMetricsAction
+    extends MetricsControlAction {
 
-   
-   
     @Autowired
     public CompareMetricsAction(AuthzBoss authzBoss) {
         super(authzBoss);
     }
 
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
         CompareMetricsForm compareForm = (CompareMetricsForm) form;
 
         if (compareForm.isBackClicked()) {
-            return returnBack(request, mapping, new HashMap<String,Object>());
+            return returnBack(request, mapping, new HashMap<String, Object>());
         }
 
         return super.execute(mapping, form, request, response);
     }
 
-    private ActionForward returnBack(HttpServletRequest request,
-                                     ActionMapping mapping,
-                                     Map<String, Object> params)
+    private ActionForward returnBack(HttpServletRequest request, ActionMapping mapping, Map<String, Object> params)
         throws Exception {
         whackMyReturnPath(request, (BaseActionMapping) mapping);
-        return constructForward(request, mapping, Constants.BACK_URL,
-                                params, YES_RETURN_PATH);
+        return constructForward(request, mapping, Constants.BACK_URL, params, YES_RETURN_PATH);
     }
 
-    private void whackMyReturnPath(HttpServletRequest request,
-                                   BaseActionMapping mapping)
-        throws ServletException {
+    private void whackMyReturnPath(HttpServletRequest request, BaseActionMapping mapping) throws ServletException {
         String workflowName = mapping.getWorkflow();
         if (workflowName == null || "".equals(workflowName.trim())) {
-            throw new ServletException("mapping " + mapping.getName() +
-                                       " has a null or invalid workflow " +
+            throw new ServletException("mapping " + mapping.getName() + " has a null or invalid workflow " +
                                        " attribute.");
         }
 
@@ -91,9 +81,8 @@ public class CompareMetricsAction extends MetricsControlAction {
         // except the very last one, which points back to where we
         // came from originally.
 
-        int size = SessionUtils.countWorkflow(request.getSession(false),
-                                              workflowName);
-        for (int i=size; i>1; i--) {
+        int size = SessionUtils.countWorkflow(request.getSession(false), workflowName);
+        for (int i = size; i > 1; i--) {
             SessionUtils.popWorkflow(request.getSession(false), workflowName);
         }
     }

@@ -54,45 +54,31 @@ import org.hyperic.hq.ui.util.SessionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * A <code>BaseDispatchAction</code> that sets up common
- * monitor portals.
+ * A <code>BaseDispatchAction</code> that sets up common monitor portals.
  */
-public class VisibilityPortalAction extends ResourceController {
+public class VisibilityPortalAction
+    extends ResourceController {
 
-    private static final String TITLE_EDIT_RANGE =
-        "resource.common.monitor.visibility.MetricDisplayRangeTitle";
+    private static final String TITLE_EDIT_RANGE = "resource.common.monitor.visibility.MetricDisplayRangeTitle";
 
-    private static final String PORTLET_EDIT_RANGE =
-        ".resource.common.monitor.visibility.MetricDisplayRange";
+    private static final String PORTLET_EDIT_RANGE = ".resource.common.monitor.visibility.MetricDisplayRange";
 
-    private static final String TITLE_CONFIGURE_VISIBILITY =
-        "resource.common.monitor.visibility.MetricDisplayRangeTitle";
+    private static final String TITLE_CONFIGURE_VISIBILITY = "resource.common.monitor.visibility.MetricDisplayRangeTitle";
 
-    private static final String PORTLET_CONFIGURE_VISIBILITY =
-        ".resource.common.monitor.visibility.MetricDisplayRange";
+    private static final String PORTLET_CONFIGURE_VISIBILITY = ".resource.common.monitor.visibility.MetricDisplayRange";
 
-    private static final String TITLE_CHART =
-        "resource.common.monitor.visibility.ChartTitle";
-    private static final String PORTLET_CHART_SMSR =
-        ".resource.common.monitor.visibility.charts.metric.smsr";
-    private static final String PORTLET_CHART_SMMR =
-        ".resource.common.monitor.visibility.charts.metric.smmr";
-    private static final String PORTLET_CHART_MMSR =
-        ".resource.common.monitor.visibility.charts.metric.mmsr";
+    private static final String TITLE_CHART = "resource.common.monitor.visibility.ChartTitle";
+    private static final String PORTLET_CHART_SMSR = ".resource.common.monitor.visibility.charts.metric.smsr";
+    private static final String PORTLET_CHART_SMMR = ".resource.common.monitor.visibility.charts.metric.smmr";
+    private static final String PORTLET_CHART_MMSR = ".resource.common.monitor.visibility.charts.metric.mmsr";
 
-    private static final String TITLE_COMPARE_METRICS = 
-        "resource.common.monitor.visibility.CompareMetricsTitle";
-    private static final String PORTLET_COMPARE_METRICS = 
-        ".resource.common.monitor.visibility.CompareMetrics";
-    private static final String PORTLET_METRIC_METADATA = 
-        ".resource.common.monitor.visibility.MetricMetadata";
-    private static final String TITLE_METRIC_METADATA =
-        "resource.common.monitor.visibility.MetricMetadata";
+    private static final String TITLE_COMPARE_METRICS = "resource.common.monitor.visibility.CompareMetricsTitle";
+    private static final String PORTLET_COMPARE_METRICS = ".resource.common.monitor.visibility.CompareMetrics";
+    private static final String PORTLET_METRIC_METADATA = ".resource.common.monitor.visibility.MetricMetadata";
+    private static final String TITLE_METRIC_METADATA = "resource.common.monitor.visibility.MetricMetadata";
 
-    private final Log log =
-        LogFactory.getLog(VisibilityPortalAction.class.getName());
-    
-    
+    private final Log log = LogFactory.getLog(VisibilityPortalAction.class.getName());
+
     @Autowired
     public VisibilityPortalAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss) {
         super(appdefBoss, authzBoss, controlBoss);
@@ -100,45 +86,29 @@ public class VisibilityPortalAction extends ResourceController {
 
     protected Properties getKeyMethodMap() {
         Properties map = new Properties();
-        map.setProperty(
-            Constants.MODE_MON_EDIT_RANGE, "editRange");
-        map.setProperty(
-            Constants.MODE_CONFIGURE, "configureVisibility");
-        map.setProperty(
-            Constants.MODE_MON_CHART_SMSR, "chartSingleMetricSingleResource");
-        map.setProperty(
-            Constants.MODE_MON_CHART_SMMR, "chartSingleMetricMultiResource");
-        map.setProperty(
-            Constants.MODE_MON_CHART_MMSR, "chartMultiMetricSingleResource");
-        map.setProperty(
-            Constants.MODE_MON_COMPARE_METRICS, "compareMetrics");
-        map.setProperty(
-            Constants.MODE_MON_METRIC_METADATA, "metricMetadata");
+        map.setProperty(Constants.MODE_MON_EDIT_RANGE, "editRange");
+        map.setProperty(Constants.MODE_CONFIGURE, "configureVisibility");
+        map.setProperty(Constants.MODE_MON_CHART_SMSR, "chartSingleMetricSingleResource");
+        map.setProperty(Constants.MODE_MON_CHART_SMMR, "chartSingleMetricMultiResource");
+        map.setProperty(Constants.MODE_MON_CHART_MMSR, "chartMultiMetricSingleResource");
+        map.setProperty(Constants.MODE_MON_COMPARE_METRICS, "compareMetrics");
+        map.setProperty(Constants.MODE_MON_METRIC_METADATA, "metricMetadata");
         return map;
     }
 
-    public ActionForward editRange(ActionMapping mapping,
-                                   ActionForm form,
-                                   HttpServletRequest request,
-                                   HttpServletResponse response)
-        throws Exception {
+    public ActionForward editRange(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                   HttpServletResponse response) throws Exception {
         setResource(request);
-        Portal portal =
-            Portal.createPortal(TITLE_EDIT_RANGE,
-                                PORTLET_EDIT_RANGE);
+        Portal portal = Portal.createPortal(TITLE_EDIT_RANGE, PORTLET_EDIT_RANGE);
         portal.setWorkflowPortal(true);
         request.setAttribute(Constants.PORTAL_KEY, portal);
         return null;
     }
-    
-    public ActionForward configureVisibility(ActionMapping mapping,
-                                   ActionForm form,
-                                   HttpServletRequest request,
-                                   HttpServletResponse response)
-        throws Exception {
+
+    public ActionForward configureVisibility(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                             HttpServletResponse response) throws Exception {
         setResource(request);
-        Portal portal = Portal.createPortal(TITLE_CONFIGURE_VISIBILITY,
-            PORTLET_CONFIGURE_VISIBILITY);
+        Portal portal = Portal.createPortal(TITLE_CONFIGURE_VISIBILITY, PORTLET_CONFIGURE_VISIBILITY);
         request.setAttribute(Constants.PORTAL_KEY, portal);
         return null;
     }
@@ -146,12 +116,9 @@ public class VisibilityPortalAction extends ResourceController {
     /**
      * Chart a single metric for a single resource.
      */
-    public ActionForward chartSingleMetricSingleResource(ActionMapping mapping,
-                                                         ActionForm form,
-                                                         HttpServletRequest request,
-                                                         HttpServletResponse response)
-        throws Exception
-    {
+    public ActionForward chartSingleMetricSingleResource(ActionMapping mapping, ActionForm form,
+                                                         HttpServletRequest request, HttpServletResponse response)
+        throws Exception {
         try {
             setResource(request);
         } catch (AppdefEntityNotFoundException e) {
@@ -160,23 +127,20 @@ public class VisibilityPortalAction extends ResourceController {
         Portal portal = Portal.createPortal(TITLE_CHART, PORTLET_CHART_SMSR);
         portal.setDialog(false);
         request.setAttribute(Constants.PORTAL_KEY, portal);
-        
+
         String returnURL = SessionUtils.getReturnPath(request.getSession());
         if (returnURL != null)
             request.setAttribute(Constants.BACK_URL, returnURL);
-        
+
         return null;
     }
 
     /**
      * Chart a single metric for a multiple resources.
      */
-    public ActionForward chartSingleMetricMultiResource(ActionMapping mapping,
-                                                        ActionForm form,
-                                                        HttpServletRequest request,
-                                                        HttpServletResponse response)
-        throws Exception
-    {
+    public ActionForward chartSingleMetricMultiResource(ActionMapping mapping, ActionForm form,
+                                                        HttpServletRequest request, HttpServletResponse response)
+        throws Exception {
         try {
             setResource(request);
         } catch (AppdefEntityNotFoundException e) {
@@ -191,12 +155,9 @@ public class VisibilityPortalAction extends ResourceController {
     /**
      * Chart multiple metrics for a single resource.
      */
-    public ActionForward chartMultiMetricSingleResource(ActionMapping mapping,
-                                                        ActionForm form,
-                                                        HttpServletRequest request,
-                                                        HttpServletResponse response)
-        throws Exception
-    {
+    public ActionForward chartMultiMetricSingleResource(ActionMapping mapping, ActionForm form,
+                                                        HttpServletRequest request, HttpServletResponse response)
+        throws Exception {
         try {
             setResource(request);
         } catch (AppdefEntityNotFoundException e) {
@@ -212,35 +173,27 @@ public class VisibilityPortalAction extends ResourceController {
         return null;
     }
 
-    public ActionForward metricMetadata(ActionMapping mapping,
-                                                          ActionForm form,
-                                                          HttpServletRequest request,
-                                                          HttpServletResponse response)
-          throws Exception {
-          setResource(request);
-          Portal portal = Portal.createPortal(TITLE_METRIC_METADATA, PORTLET_METRIC_METADATA);
-          portal.setDialog(true);
-          request.setAttribute(Constants.PORTAL_KEY, portal);
-          return null;
-      }
-
-    public ActionForward compareMetrics(ActionMapping mapping,
-                                        ActionForm form,
-                                        HttpServletRequest request,
-                                        HttpServletResponse response)
-        throws Exception {
+    public ActionForward metricMetadata(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                        HttpServletResponse response) throws Exception {
         setResource(request);
-        Portal portal =
-            Portal.createPortal(TITLE_COMPARE_METRICS,
-                                PORTLET_COMPARE_METRICS);
+        Portal portal = Portal.createPortal(TITLE_METRIC_METADATA, PORTLET_METRIC_METADATA);
+        portal.setDialog(true);
+        request.setAttribute(Constants.PORTAL_KEY, portal);
+        return null;
+    }
+
+    public ActionForward compareMetrics(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                        HttpServletResponse response) throws Exception {
+        setResource(request);
+        Portal portal = Portal.createPortal(TITLE_COMPARE_METRICS, PORTLET_COMPARE_METRICS);
 
         portal.setDialog(true);
         portal.setWorkflowPortal(true);
 
         // we potentially have a chained workflow happening here:
-        //   wherever we came from =>
-        //     compare metrics workflow =>
-        //       edit metric display range workflow
+        // wherever we came from =>
+        // compare metrics workflow =>
+        // edit metric display range workflow
         //
         // first we set up a bunch of workflow params so that the
         // return path that goes to the compare metrics page has
@@ -271,22 +224,19 @@ public class VisibilityPortalAction extends ResourceController {
         portal.setWorkflowParams(makeCompareWorkflowParams(request));
 
         // push old return path onto compare metrics workflow
-        SessionUtils.pushWorkflow(request.getSession(false), mapping,
-                                  Constants.WORKFLOW_COMPARE_METRICS_NAME);
+        SessionUtils.pushWorkflow(request.getSession(false), mapping, Constants.WORKFLOW_COMPARE_METRICS_NAME);
 
         request.setAttribute(Constants.PORTAL_KEY, portal);
         return null;
     }
 
-    private Map<String,Object> makeCompareWorkflowParams(HttpServletRequest request) {
-        Map<String, Object> params = new HashMap<String,Object>();
+    private Map<String, Object> makeCompareWorkflowParams(HttpServletRequest request) {
+        Map<String, Object> params = new HashMap<String, Object>();
         AppdefEntityID aeid = RequestUtils.getEntityId(request);
         params.put(Constants.MODE_PARAM, RequestUtils.getMode(request));
         params.put(Constants.RESOURCE_PARAM, aeid.getId());
-        params.put(Constants.RESOURCE_TYPE_ID_PARAM,
-                   new Integer(aeid.getType()));
-        params.put(Constants.CHILD_RESOURCE_TYPE_ID_PARAM,
-                   RequestUtils.getChildResourceTypeId(request));
+        params.put(Constants.RESOURCE_TYPE_ID_PARAM, new Integer(aeid.getType()));
+        params.put(Constants.CHILD_RESOURCE_TYPE_ID_PARAM, RequestUtils.getChildResourceTypeId(request));
         params.put("appdefTypeId", request.getParameter("appdefTypeId"));
         params.put("name", request.getParameter("name"));
 
@@ -294,7 +244,7 @@ public class VisibilityPortalAction extends ResourceController {
         String[] raw = request.getParameterValues("r");
         ArrayList<String> cooked = new ArrayList<String>();
         HashMap<String, String> idx = new HashMap<String, String>();
-        for (int i=0; i<raw.length; i++) {
+        for (int i = 0; i < raw.length; i++) {
             String val = raw[i];
             if (idx.get(val) == null) {
                 cooked.add(val);
@@ -306,19 +256,17 @@ public class VisibilityPortalAction extends ResourceController {
         return params;
     }
 
-    /** 
-     * This sets the return path for a ResourceAction by appending
-     * the type and resource id to the forward url.
+    /**
+     * This sets the return path for a ResourceAction by appending the type and
+     * resource id to the forward url.
      * 
      * @param request The current controller's request.
      * @param mapping The current controller's mapping that contains the input.
-     *
+     * 
      * @exception ParameterNotFoundException if the type or id are not found
      * @exception ServletException If there is not input defined for this form
      */
-    protected void setReturnPath(HttpServletRequest request,
-                                 ActionMapping mapping,
-                                 Map<String,Object> params) 
+    protected void setReturnPath(HttpServletRequest request, ActionMapping mapping, Map<String, Object> params)
         throws Exception {
         this.fetchReturnPathParams(request, params);
         String mode = (String) params.get(Constants.MODE_PARAM);
@@ -326,11 +274,11 @@ public class VisibilityPortalAction extends ResourceController {
             // Don't save any path back to charts
             return;
         }
-       
+
         String returnPath = ActionUtils.findReturnPath(mapping, params);
         if (log.isTraceEnabled()) {
             log.trace("setting return path: " + returnPath);
         }
-        SessionUtils.setReturnPath(request.getSession(), returnPath); 
+        SessionUtils.setReturnPath(request.getSession(), returnPath);
     }
 }

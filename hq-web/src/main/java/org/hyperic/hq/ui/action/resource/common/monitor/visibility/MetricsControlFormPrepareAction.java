@@ -47,21 +47,16 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.actions.TilesAction;
 
 /**
- * A base class for <code>Action</code>s that prepare pages containing
- * the metrics control form.
+ * A base class for <code>Action</code>s that prepare pages containing the
+ * metrics control form.
  */
-public class MetricsControlFormPrepareAction extends TilesAction {
+public class MetricsControlFormPrepareAction
+    extends TilesAction {
 
-    protected final Log log =
-    LogFactory.getLog(MetricsControlFormPrepareAction.class.getName());
+    protected final Log log = LogFactory.getLog(MetricsControlFormPrepareAction.class.getName());
 
-   
-
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-       throws Exception {
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
         MetricsControlForm controlForm = (MetricsControlForm) form;
 
@@ -75,54 +70,46 @@ public class MetricsControlFormPrepareAction extends TilesAction {
         controlForm.setType(new Integer(entityId.getType()));
         prepareForm(request, controlForm);
 
-
         return null;
     }
 
     // ---------------------------------------------------- Protected Methods
 
-    protected void prepareForm(HttpServletRequest request,
-                               MetricsControlForm form,
-                               MetricRange range)
+    protected void prepareForm(HttpServletRequest request, MetricsControlForm form, MetricRange range)
         throws InvalidOptionException {
         WebUser user = SessionUtils.getWebUser(request.getSession());
 
         // set metric range defaults
-        Map<String,Object> pref = user.getMetricRangePreference(true);
+        Map<String, Object> pref = user.getMetricRangePreference(true);
         form.setReadOnly((Boolean) pref.get(MonitorUtils.RO));
         form.setRn((Integer) pref.get(MonitorUtils.LASTN));
         form.setRu((Integer) pref.get(MonitorUtils.UNIT));
 
         Long begin, end;
-        
+
         if (range != null) {
             begin = range.getBegin();
             end = range.getEnd();
-        }
-        else {
+        } else {
             begin = (Long) pref.get(MonitorUtils.BEGIN);
             end = (Long) pref.get(MonitorUtils.END);
         }
-        
+
         form.setRb(begin);
         form.setRe(end);
-        
-        form.populateStartDate(new Date(begin.longValue()),
-                               request.getLocale());
+
+        form.populateStartDate(new Date(begin.longValue()), request.getLocale());
         form.populateEndDate(new Date(end.longValue()), request.getLocale());
-        
+
         Boolean readOnly = (Boolean) pref.get(MonitorUtils.RO);
         if (readOnly.booleanValue()) {
             form.setA(MetricDisplayRangeForm.ACTION_DATE_RANGE);
-        }
-        else {
+        } else {
             form.setA(MetricDisplayRangeForm.ACTION_LASTN);
         }
     }
 
-    protected void prepareForm(HttpServletRequest request,
-                               MetricsControlForm form)
-        throws InvalidOptionException {
+    protected void prepareForm(HttpServletRequest request, MetricsControlForm form) throws InvalidOptionException {
         prepareForm(request, form, null);
     }
 }

@@ -46,50 +46,39 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * This class handles preparing the data for edit operations performed 
- * on Application Properties (screen 2.1.6.2)
+ * This class handles preparing the data for edit operations performed on
+ * Application Properties (screen 2.1.6.2)
  */
-public class EditApplicationPropertiesFormPrepareAction extends TilesAction {
+public class EditApplicationPropertiesFormPrepareAction
+    extends TilesAction {
 
-    private final Log log = LogFactory.
-        getLog(EditApplicationPropertiesFormPrepareAction.class.getName());
+    private final Log log = LogFactory.getLog(EditApplicationPropertiesFormPrepareAction.class.getName());
     private AppdefBoss appdefBoss;
-    
-    
+
     @Autowired
     public EditApplicationPropertiesFormPrepareAction(AppdefBoss appdefBoss) {
         super();
         this.appdefBoss = appdefBoss;
     }
 
-
-
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-        ApplicationValue appVal =
-            (ApplicationValue) RequestUtils.getResource(request); 
-         if (appVal == null) {
-             RequestUtils.setError(request,
-                           "resource.application.inventory.error.ApplicationNotFound");
-             return null;
-         }
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
+        ApplicationValue appVal = (ApplicationValue) RequestUtils.getResource(request);
+        if (appVal == null) {
+            RequestUtils.setError(request, "resource.application.inventory.error.ApplicationNotFound");
+            return null;
+        }
         ApplicationForm appForm = (ApplicationForm) form;
         appForm.loadResourceValue(appVal);
-        
-       
+
         Integer sessionId = RequestUtils.getSessionId(request);
-      
+
         log.trace("getting all application types");
         List<AppdefResourceTypeValue> applicationTypes = appdefBoss.findAllApplicationTypes(sessionId.intValue());
         appForm.setResourceTypes(applicationTypes);
         appForm.setResourceType(appVal.getApplicationType().getId());
-        request.setAttribute(Constants.NUM_CHILD_RESOURCES_ATTR,
-                             new Integer(1));
-        return null;                
+        request.setAttribute(Constants.NUM_CHILD_RESOURCES_ATTR, new Integer(1));
+        return null;
 
     }
 }

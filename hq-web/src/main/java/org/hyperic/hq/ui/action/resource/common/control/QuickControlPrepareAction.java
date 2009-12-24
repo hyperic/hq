@@ -47,13 +47,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * This populates the server control list. "Start," "Stop," etc.
  */
-public class QuickControlPrepareAction extends TilesAction {
+public class QuickControlPrepareAction
+    extends TilesAction {
 
-    private  final Log log
-        = LogFactory.getLog(QuickControlPrepareAction.class.getName());
+    private final Log log = LogFactory.getLog(QuickControlPrepareAction.class.getName());
     private ControlBoss controlBoss;
-
-   
 
     @Autowired
     public QuickControlPrepareAction(ControlBoss controlBoss) {
@@ -61,26 +59,18 @@ public class QuickControlPrepareAction extends TilesAction {
         this.controlBoss = controlBoss;
     }
 
-
-
-
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
 
         log.trace("Preparing quick control options.");
- 
-        QuickControlForm qForm = (QuickControlForm)form;
-        
+
+        QuickControlForm qForm = (QuickControlForm) form;
+
         try {
-            int sessionId = RequestUtils.getSessionIdInt(request);           
-            
-            
+            int sessionId = RequestUtils.getSessionIdInt(request);
+
             AppdefEntityID appdefId = RequestUtils.getEntityId(request);
-            
+
             List<String> actions = controlBoss.getActions(sessionId, appdefId);
             List<OptionItem> options = OptionItem.createOptionsList(actions);
 
@@ -92,7 +82,7 @@ public class QuickControlPrepareAction extends TilesAction {
             log.trace("No control plugin available");
             qForm.setNumControlActions(new Integer(0));
             RequestUtils.setError(request, "resource.common.control.error.NoPlugin");
-            
+
             return null;
         }
     }

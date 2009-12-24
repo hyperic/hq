@@ -47,46 +47,36 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class NewGroupFormPrepareAction 
+public class NewGroupFormPrepareAction
     extends WorkflowPrepareAction {
-    
+
     private AppdefBoss appdefBoss;
-    
-    
+
     @Autowired
     public NewGroupFormPrepareAction(AppdefBoss appdefBoss) {
         super();
         this.appdefBoss = appdefBoss;
     }
 
-
-
-    public ActionForward workflow(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
+    public ActionForward workflow(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                  HttpServletRequest request, HttpServletResponse response) throws Exception {
 
         GroupForm newForm = (GroupForm) form;
         MessageResources res = getResources(request);
-            
+
         List groupTypes = BizappUtils.buildGroupTypes(request);
         Integer sessionId = RequestUtils.getSessionId(request);
-      
-        
+
         HttpSession session = request.getSession();
-        
+
         List platformTypes, serverTypes, serviceTypes, applicationTypes;
-        String[] eids =
-            (String[]) session.getAttribute(Constants.ENTITY_IDS_ATTR);
+        String[] eids = (String[]) session.getAttribute(Constants.ENTITY_IDS_ATTR);
 
         if (eids != null) {
             newForm.setEntityIds(eids);
-            
+
             AppdefResourceType art = null;
-            Integer ff = (Integer)
-                session.getAttribute(Constants.RESOURCE_TYPE_ATTR);
+            Integer ff = (Integer) session.getAttribute(Constants.RESOURCE_TYPE_ATTR);
 
             // HHQ-2839: Cleanup from new group session
             session.removeAttribute(Constants.ENTITY_IDS_ATTR);
@@ -95,75 +85,63 @@ public class NewGroupFormPrepareAction
             if (ff != null) {
                 // Only check if resource type is platform, server, or service
                 switch (ff.intValue()) {
-                case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                    // See if they have a common resource type
-                    art = appdefBoss.findCommonResourceType(sessionId.intValue(),
-                                                      eids);
-                    break;
-                default:
-                    break;
+                    case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                    case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                    case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                        // See if they have a common resource type
+                        art = appdefBoss.findCommonResourceType(sessionId.intValue(), eids);
+                        break;
+                    default:
+                        break;
                 }
             }
-            
+
             if (art != null) {
-                newForm.setGroupType(
-                        new Integer(Constants.APPDEF_TYPE_GROUP_COMPAT));
+                newForm.setGroupType(new Integer(Constants.APPDEF_TYPE_GROUP_COMPAT));
                 AppdefEntityTypeID aetid = new AppdefEntityTypeID(art);
                 newForm.setTypeAndResourceTypeId(aetid.getAppdefKey());
                 newForm.setTypeName(art.getName());
                 return null;
-            }
-            else {
-                newForm.setGroupType(
-                        new Integer(Constants.APPDEF_TYPE_GROUP_ADHOC));
+            } else {
+                newForm.setGroupType(new Integer(Constants.APPDEF_TYPE_GROUP_ADHOC));
 
                 String mixRes;
                 if (ff != null) {
                     switch (ff.intValue()) {
-                    case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                    case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                    case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                        newForm.setTypeAndResourceTypeId("" +
-                            AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS +
-                            ":-1");
-                        mixRes = "dash.home.DisplayCategory.group." +
-                                 "plat.server.service";
-                        break;
-                    default:
-                        newForm.setTypeAndResourceTypeId(ff.toString() +":-1");
-                        mixRes =
-                            ff.intValue() ==
-                                AppdefEntityConstants.APPDEF_TYPE_GROUP ?
-                            "dash.home.DisplayCategory.group.groups" :
-                            "dash.home.DisplayCategory.group.application";
-                        break;
+                        case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                        case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                        case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                            newForm.setTypeAndResourceTypeId("" + AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS +
+                                                             ":-1");
+                            mixRes = "dash.home.DisplayCategory.group." + "plat.server.service";
+                            break;
+                        default:
+                            newForm.setTypeAndResourceTypeId(ff.toString() + ":-1");
+                            mixRes = ff.intValue() == AppdefEntityConstants.APPDEF_TYPE_GROUP ? "dash.home.DisplayCategory.group.groups"
+                                                                                             : "dash.home.DisplayCategory.group.application";
+                            break;
                     }
-                    
+
                     newForm.setTypeName(res.getMessage(mixRes));
                     return null;
                 }
             }
         }
-        
-        platformTypes = appdefBoss.findViewablePlatformTypes(sessionId.intValue(),
-                                                       PageControl.PAGE_ALL);
 
-        serverTypes = appdefBoss.findViewableServerTypes(sessionId.intValue(),
-                                                   PageControl.PAGE_ALL);
+        platformTypes = appdefBoss.findViewablePlatformTypes(sessionId.intValue(), PageControl.PAGE_ALL);
 
-        serviceTypes = appdefBoss.findViewableServiceTypes(sessionId.intValue(),
-                                                     PageControl.PAGE_ALL);
+        serverTypes = appdefBoss.findViewableServerTypes(sessionId.intValue(), PageControl.PAGE_ALL);
+
+        serviceTypes = appdefBoss.findViewableServiceTypes(sessionId.intValue(), PageControl.PAGE_ALL);
 
         applicationTypes = appdefBoss.findAllApplicationTypes(sessionId.intValue());
-        
+
         newForm.setPlatformTypes(platformTypes);
         newForm.setServerTypes(serverTypes);
         newForm.setServiceTypes(serviceTypes);
         newForm.setApplicationTypes(applicationTypes);
         newForm.setGroupTypes(groupTypes);
-        
+
         return null;
     }
 }

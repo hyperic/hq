@@ -33,71 +33,71 @@ import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.ui.action.resource.ResourceForm;
 
 /**
- * This is a type 4 resource per org.hyperic.hq.appdef.shared.AppdefEntityConstants
-*/
-public class ApplicationForm extends ResourceForm {
-
+ * This is a type 4 resource per
+ * org.hyperic.hq.appdef.shared.AppdefEntityConstants
+ */
+public class ApplicationForm
+    extends ResourceForm {
 
     private String engContact;
     private String opsContact;
     private String busContact;
-    
-	/**
-	 * Returns the busContact.
-	 * @return String
-	 */
-	public String getBusContact() {
-		return busContact;
-	}
 
-	/**
-	 * Returns the engContact.
-	 * @return String
-	 */
-	public String getEngContact() {
-		return engContact;
-	}
+    /**
+     * Returns the busContact.
+     * @return String
+     */
+    public String getBusContact() {
+        return busContact;
+    }
 
-	/**
-	 * Returns the opsContact.
-	 * @return String
-	 */
-	public String getOpsContact() {
-		return opsContact;
-	}
+    /**
+     * Returns the engContact.
+     * @return String
+     */
+    public String getEngContact() {
+        return engContact;
+    }
 
-	/**
-	 * Sets the busContact.
-	 * @param busContact The busContact to set
-	 */
-	public void setBusContact(String busContact) {
-		this.busContact = busContact;
-	}
+    /**
+     * Returns the opsContact.
+     * @return String
+     */
+    public String getOpsContact() {
+        return opsContact;
+    }
 
-	/**
-	 * Sets the engContact.
-	 * @param engContact The engContact to set
-	 */
-	public void setEngContact(String engContact) {
-		this.engContact = engContact;
-	}
+    /**
+     * Sets the busContact.
+     * @param busContact The busContact to set
+     */
+    public void setBusContact(String busContact) {
+        this.busContact = busContact;
+    }
 
-	/**
-	 * Sets the opsContact.
-	 * @param opsContact The opsContact to set
-	 */
-	public void setOpsContact(String opsContact) {
-		this.opsContact = opsContact;
-	}
+    /**
+     * Sets the engContact.
+     * @param engContact The engContact to set
+     */
+    public void setEngContact(String engContact) {
+        this.engContact = engContact;
+    }
 
-    public void reset(ActionMapping mapping,
-                      HttpServletRequest request) {
+    /**
+     * Sets the opsContact.
+     * @param opsContact The opsContact to set
+     */
+    public void setOpsContact(String opsContact) {
+        this.opsContact = opsContact;
+    }
+
+    public void reset(ActionMapping mapping, HttpServletRequest request) {
         super.reset(mapping, request);
         this.busContact = null;
         this.engContact = null;
         this.opsContact = null;
     }
-    
+
     public String toString() {
         StringBuffer s = new StringBuffer(super.toString());
         s.append(" busContact=").append(busContact);
@@ -105,7 +105,7 @@ public class ApplicationForm extends ResourceForm {
         s.append(" opsContact=").append(opsContact);
         return s.toString();
     }
-    
+
     public void loadResourceValue(AppdefResourceValue resourceValue) {
         super.loadResourceValue(resourceValue);
         ApplicationValue application = (ApplicationValue) resourceValue;
@@ -113,7 +113,7 @@ public class ApplicationForm extends ResourceForm {
         this.setEngContact(application.getEngContact());
         this.setOpsContact(application.getOpsContact());
         this.setResourceType(application.getApplicationType().getId());
-    }    
+    }
 
     public void updateResourceValue(AppdefResourceValue resourceValue) {
         super.updateResourceValue(resourceValue);

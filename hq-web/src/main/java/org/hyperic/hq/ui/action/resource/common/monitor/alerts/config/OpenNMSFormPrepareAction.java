@@ -44,33 +44,26 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * View an alert definition -- OpenNMS action.
- *
+ * 
  */
-public class OpenNMSFormPrepareAction extends TilesAction {
+public class OpenNMSFormPrepareAction
+    extends TilesAction {
 
     private final Log log = LogFactory.getLog(OpenNMSFormPrepareAction.class);
     private EventsBoss eventsBoss;
-    
-    
+
     @Autowired
     public OpenNMSFormPrepareAction(EventsBoss eventsBoss) {
         super();
         this.eventsBoss = eventsBoss;
     }
 
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
-
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception
-    {            
-       
         int sessionID = RequestUtils.getSessionId(request).intValue();
 
-        AlertDefinitionValue adv = AlertDefUtil.getAlertDefinition
-            (request, sessionID, eventsBoss);
+        AlertDefinitionValue adv = AlertDefUtil.getAlertDefinition(request, sessionID, eventsBoss);
         OpenNMSForm oForm = (OpenNMSForm) form;
         try {
             oForm.importAction(adv);

@@ -61,18 +61,15 @@ import org.hyperic.util.pager.PageControl;
 
 /**
  * Prepare the alert definition form for new / edit.
- *
+ * 
  */
-public abstract class DefinitionFormPrepareAction extends TilesAction {
-    protected final Log log =
-        LogFactory.getLog(DefinitionFormPrepareAction.class.getName());
-    
-   
-   protected MeasurementBoss measurementBoss ;
-    protected ControlBoss controlBoss ;
-   protected AppdefBoss appdefBoss; 
-   
-   
+public abstract class DefinitionFormPrepareAction
+    extends TilesAction {
+    protected final Log log = LogFactory.getLog(DefinitionFormPrepareAction.class.getName());
+
+    protected MeasurementBoss measurementBoss;
+    protected ControlBoss controlBoss;
+    protected AppdefBoss appdefBoss;
 
     public DefinitionFormPrepareAction(MeasurementBoss measurementBoss, ControlBoss controlBoss, AppdefBoss appdefBoss) {
         super();
@@ -84,21 +81,15 @@ public abstract class DefinitionFormPrepareAction extends TilesAction {
     /**
      * Prepare the form for a new alert definition.
      */
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception
-    {
-       
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
+
         int sessionID = RequestUtils.getSessionId(request).intValue();
-      
 
         DefinitionForm defForm = (DefinitionForm) form;
         setupForm(defForm, request, sessionID);
 
-        if (! defForm.isOkClicked() ) {
+        if (!defForm.isOkClicked()) {
             // setting up form for the first time
             setupConditions(request, defForm);
         }
@@ -106,39 +97,30 @@ public abstract class DefinitionFormPrepareAction extends TilesAction {
         return null;
     }
 
-    protected void setupForm(DefinitionForm defForm, HttpServletRequest request,
-                             int sessionID)
-        throws Exception
-    {
-        request.setAttribute( "enableEachTime",
-                              new Integer(EventConstants.FREQ_EVERYTIME) );
-        request.setAttribute( "enableOnce",
-                              new Integer(EventConstants.FREQ_ONCE) );
-        request.setAttribute( "enableNumTimesInPeriod",
-                              new Integer(EventConstants.FREQ_COUNTER) );
-        request.setAttribute( "noneDeleted",
-                              new Integer(Constants.ALERT_CONDITION_NONE_DELETED) );
+    protected void setupForm(DefinitionForm defForm, HttpServletRequest request, int sessionID) throws Exception {
+        request.setAttribute("enableEachTime", new Integer(EventConstants.FREQ_EVERYTIME));
+        request.setAttribute("enableOnce", new Integer(EventConstants.FREQ_ONCE));
+        request.setAttribute("enableNumTimesInPeriod", new Integer(EventConstants.FREQ_COUNTER));
+        request.setAttribute("noneDeleted", new Integer(Constants.ALERT_CONDITION_NONE_DELETED));
 
         PageControl pc = PageControl.PAGE_ALL;
         List metrics, baselines = new ArrayList();
-       
+
         int numMetricsEnabled = 0;
         AppdefEntityID adeId;
         boolean controlEnabled;
 
         try {
             adeId = RequestUtils.getEntityTypeId(request);
-            metrics = measurementBoss.findMeasurementTemplates(
-                    sessionID, (AppdefEntityTypeID) adeId, null, pc);
+            metrics = measurementBoss.findMeasurementTemplates(sessionID, (AppdefEntityTypeID) adeId, null, pc);
             defForm.setType(new Integer(adeId.getType()));
             defForm.setResourceType(adeId.getId());
             numMetricsEnabled++;
 
-            controlEnabled =
-                controlBoss.isControlSupported(sessionID, (AppdefEntityTypeID) adeId);
+            controlEnabled = controlBoss.isControlSupported(sessionID, (AppdefEntityTypeID) adeId);
         } catch (ParameterNotFoundException e) {
             adeId = RequestUtils.getEntityId(request);
-            metrics = measurementBoss.findMeasurements( sessionID, adeId, pc );
+            metrics = measurementBoss.findMeasurements(sessionID, adeId, pc);
 
             if (!adeId.isGroup()) {
                 for (Iterator it = metrics.iterator(); it.hasNext();) {
@@ -156,21 +138,17 @@ public abstract class DefinitionFormPrepareAction extends TilesAction {
         defForm.setMetrics(metrics);
 
         if (metrics.size() == 0) {
-            RequestUtils.setError(
-                request, "resource.common.monitor.alert.config.error.NoMetricsConfigured");
+            RequestUtils.setError(request, "resource.common.monitor.alert.config.error.NoMetricsConfigured");
         } else if (numMetricsEnabled == 0) {
-            RequestUtils.setError(
-                request, "resource.common.monitor.alert.config.error.NoMetricsEnabled");
+            RequestUtils.setError(request, "resource.common.monitor.alert.config.error.NoMetricsEnabled");
         }
 
         // need to duplicate this for the JavaScript on the page
         request.setAttribute("baselines", baselines);
 
-        request.setAttribute(Constants.CONTROL_ENABLED,
-                             new Boolean(controlEnabled));
+        request.setAttribute(Constants.CONTROL_ENABLED, new Boolean(controlEnabled));
         if (controlEnabled) {
-            defForm.setControlActions(
-                AlertDefUtil.getControlActions(sessionID, adeId, controlBoss));
+            defForm.setControlActions(AlertDefUtil.getControlActions(sessionID, adeId, controlBoss));
         } else {
             List<String> controlActions = new ArrayList<String>(1);
             controlActions.add("(N/A)");
@@ -184,33 +162,26 @@ public abstract class DefinitionFormPrepareAction extends TilesAction {
         }
     }
 
-    protected abstract void setupConditions(HttpServletRequest request,
-                                            DefinitionForm defForm)
-        throws Exception;
+    protected abstract void setupConditions(HttpServletRequest request, DefinitionForm defForm) throws Exception;
 
     /**
      * Returns a List of custom property keys for the passed-in resource.
      */
     protected List<LabelValueBean> getCustomProperties(int sessionID, AppdefEntityID adeId)
-        throws SessionNotFoundException, SessionTimeoutException,
-               AppdefEntityNotFoundException, PermissionException,
-               RemoteException
-    {
+        throws SessionNotFoundException, SessionTimeoutException, AppdefEntityNotFoundException, PermissionException,
+        RemoteException {
         List<CpropKey> custProps;
 
         if (adeId instanceof AppdefEntityTypeID) {
-            custProps =
-                appdefBoss.getCPropKeys(sessionID, adeId.getType(), adeId.getID());
-        }
-        else {
+            custProps = appdefBoss.getCPropKeys(sessionID, adeId.getType(), adeId.getID());
+        } else {
             custProps = appdefBoss.getCPropKeys(sessionID, adeId);
         }
 
         ArrayList<LabelValueBean> custPropStrs = new ArrayList<LabelValueBean>(custProps.size());
         for (CpropKey custProp : custProps) {
-           
-            custPropStrs.add(new LabelValueBean(custProp.getDescription(),
-                                                custProp.getKey()));
+
+            custPropStrs.add(new LabelValueBean(custProp.getDescription(), custProp.getKey()));
         }
 
         return custPropStrs;

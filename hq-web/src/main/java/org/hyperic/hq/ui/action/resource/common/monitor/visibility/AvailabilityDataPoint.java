@@ -34,7 +34,7 @@ public class AvailabilityDataPoint implements IDisplayDataPoint {
     public AvailabilityDataPoint(Integer integerValue) {
         setValue(integerValue.doubleValue());
     }
-    
+
     public long getTimestamp() {
         return 0;
     }

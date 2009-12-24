@@ -43,50 +43,37 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 
 /**
- *
- * Base class for Resource Visibility Portal action.  Put
- * shared functionalility in this object.
+ * 
+ * Base class for Resource Visibility Portal action. Put shared functionalility
+ * in this object.
  * 
  */
-public abstract class ResourceVisibilityPortalAction extends ResourceController {
-    
-    
+public abstract class ResourceVisibilityPortalAction
+    extends ResourceController {
 
     public ResourceVisibilityPortalAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss) {
         super(appdefBoss, authzBoss, controlBoss);
     }
 
-    public ActionForward currentHealth(ActionMapping mapping,
-                                       ActionForm form,
-                                       HttpServletRequest request,
-                                       HttpServletResponse response)
-        throws Exception {
-   
-        super.setNavMapLocation(request,mapping,
-                                 Constants.MONITOR_VISIBILITY_LOC);
-        return null;            
+    public ActionForward currentHealth(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                       HttpServletResponse response) throws Exception {
+
+        super.setNavMapLocation(request, mapping, Constants.MONITOR_VISIBILITY_LOC);
+        return null;
     }
 
-    public ActionForward resourceMetrics(ActionMapping mapping,
-                                         ActionForm form,
-                                         HttpServletRequest request,
-                                         HttpServletResponse response)
-        throws Exception {
-            
-        super.setNavMapLocation(request,mapping,
-                                 Constants.MONITOR_VISIBILITY_LOC);
-        return null;            
+    public ActionForward resourceMetrics(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                         HttpServletResponse response) throws Exception {
+
+        super.setNavMapLocation(request, mapping, Constants.MONITOR_VISIBILITY_LOC);
+        return null;
     }
 
-    public ActionForward performance(ActionMapping mapping,
-                                     ActionForm form,
-                                     HttpServletRequest request,
-                                     HttpServletResponse response)
-        throws Exception {
-            
-        super.setNavMapLocation(request,mapping,
-                                 Constants.MONITOR_VISIBILITY_LOC);
-                                 
-        return null;            
+    public ActionForward performance(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                     HttpServletResponse response) throws Exception {
+
+        super.setNavMapLocation(request, mapping, Constants.MONITOR_VISIBILITY_LOC);
+
+        return null;
     }
 }

@@ -48,42 +48,33 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * modifies the metrics data.
  */
-public class AutoGroupConfigMetricsAction extends ConfigMetricsAction {
-    
-    private final Log log = LogFactory.getLog(ConfigMetricsAction.class.getName());  
-    
-    
-    
+public class AutoGroupConfigMetricsAction
+    extends ConfigMetricsAction {
+
+    private final Log log = LogFactory.getLog(ConfigMetricsAction.class.getName());
+
     @Autowired
     public AutoGroupConfigMetricsAction(MeasurementBoss measurementBoss) {
         super(measurementBoss);
-       
+
     }
 
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
-
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-        
-                  
-        log.trace("modifying metrics action");                    
+        log.trace("modifying metrics action");
 
         HashMap<String, Object> parms = new HashMap<String, Object>(2);
-        
+
         int sessionId = RequestUtils.getSessionId(request).intValue();
         MonitoringConfigForm mForm = (MonitoringConfigForm) form;
         AppdefEntityID appdefId = RequestUtils.getEntityId(request);
 
         parms.put(Constants.RESOURCE_PARAM, appdefId.getId());
-        parms.put(Constants.RESOURCE_TYPE_ID_PARAM,
-                  new Integer(appdefId.getType()));
+        parms.put(Constants.RESOURCE_TYPE_ID_PARAM, new Integer(appdefId.getType()));
 
         Integer[] tmplsToUpdate = mForm.getMids();
-        // We have to transform the templates to actual measurement IDs 
-       
+        // We have to transform the templates to actual measurement IDs
 
         AppdefEntityTypeID childTypeId;
         try {
@@ -94,7 +85,7 @@ public class AutoGroupConfigMetricsAction extends ConfigMetricsAction {
             // REMOVE ME?
             throw e1;
         }
-        
+
         ActionForward forward = checkSubmit(request, mapping, form, parms);
 
         if (forward != null) {
@@ -105,28 +96,25 @@ public class AutoGroupConfigMetricsAction extends ConfigMetricsAction {
                 if (tmplsToUpdate.length == 0)
                     return forward;
 
-                measurementBoss.disableAGMeasurements(sessionId, appdefId, childTypeId,
-                                            tmplsToUpdate);
+                measurementBoss.disableAGMeasurements(sessionId, appdefId, childTypeId, tmplsToUpdate);
                 RequestUtils.setConfirmation(request,
                     "resource.common.monitor.visibility.config.RemoveMetrics.Confirmation");
             }
             return forward;
-        }        
+        }
 
         // take the list of pending metric ids (mids),
         // and update them.);
         long interval = mForm.getIntervalTime();
-        
-        // don't make any back-end call if user has not selected any metrics.                      
+
+        // don't make any back-end call if user has not selected any metrics.
         if (tmplsToUpdate.length == 0)
             return returnSuccess(request, mapping, parms);
-            
-        measurementBoss.updateAGMeasurements(sessionId, appdefId, childTypeId,
-                                   tmplsToUpdate, interval);
-        
-        RequestUtils.setConfirmation(request, 
-            "resource.common.monitor.visibility.config.ConfigMetrics.Confirmation");
-        
+
+        measurementBoss.updateAGMeasurements(sessionId, appdefId, childTypeId, tmplsToUpdate, interval);
+
+        RequestUtils.setConfirmation(request, "resource.common.monitor.visibility.config.ConfigMetrics.Confirmation");
+
         return returnSuccess(request, mapping, parms);
-    }    
+    }
 }

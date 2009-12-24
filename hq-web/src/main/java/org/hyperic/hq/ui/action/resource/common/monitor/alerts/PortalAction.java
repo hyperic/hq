@@ -62,16 +62,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * A dispatcher for the alerts portal.
- *
+ * 
  */
-public class PortalAction extends ResourceController {
-    private final Log log =
-        LogFactory.getLog(PortalAction.class.getName());
+public class PortalAction
+    extends ResourceController {
+    private final Log log = LogFactory.getLog(PortalAction.class.getName());
     private GalertBoss galertBoss;
     private EventsBoss eventsBoss;
-    
+
     @Autowired
-    public PortalAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss, GalertBoss galertBoss, EventsBoss eventsBoss) {
+    public PortalAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss, GalertBoss galertBoss,
+                        EventsBoss eventsBoss) {
         super(appdefBoss, authzBoss, controlBoss);
         this.galertBoss = galertBoss;
         this.eventsBoss = eventsBoss;
@@ -80,27 +81,22 @@ public class PortalAction extends ResourceController {
     protected Properties getKeyMethodMap() {
         log.trace("Building method map ...");
         Properties map = new Properties();
-        map.put(Constants.MODE_VIEW,  "listAlerts");
-        map.put(Constants.MODE_LIST,  "listAlerts");
+        map.put(Constants.MODE_VIEW, "listAlerts");
+        map.put(Constants.MODE_LIST, "listAlerts");
         map.put("ACKNOWLEDGE", "acknowledgeAlert");
         map.put("FIXED", "fixAlert");
         return map;
     }
 
-    private void setTitle(AppdefEntityID aeid, Portal portal, String titleName) 
-        throws Exception  
-    {
+    private void setTitle(AppdefEntityID aeid, Portal portal, String titleName) throws Exception {
         portal.setName(BizappUtils.replacePlatform(titleName, aeid));
     }
 
-    public ActionForward listAlerts(ActionMapping mapping,
-                                    ActionForm form,
-                                    HttpServletRequest request,
-                                    HttpServletResponse response)
-        throws Exception {
+    public ActionForward listAlerts(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                    HttpServletResponse response) throws Exception {
         setResource(request);
-        
-        super.setNavMapLocation(request, mapping, Constants.ALERT_LOC); 
+
+        super.setNavMapLocation(request, mapping, Constants.ALERT_LOC);
         // clean out the return path
         SessionUtils.resetReturnPath(request.getSession());
         // set the return path
@@ -109,7 +105,7 @@ public class PortalAction extends ResourceController {
         } catch (ParameterNotFoundException pne) {
             log.debug(pne);
         }
-        
+
         GregorianCalendar cal = new GregorianCalendar();
         try {
             Integer year = RequestUtils.getIntParameter(request, "year");
@@ -132,66 +128,54 @@ public class PortalAction extends ResourceController {
         portal.setDialog(false);
         if (aeid.isGroup()) {
             portal.addPortlet(new Portlet(".events.group.alert.list"), 1);
-            
+
             // Set the total alerts
-          
+
             int sessionId = RequestUtils.getSessionId(request).intValue();
-            
-            
-            request.setAttribute("listSize",
-                new Integer(galertBoss.countAlertLogs(sessionId,
-                                                 aeid.getId(),
-                                                 cal.getTimeInMillis(),
-                                                 cal.getTimeInMillis() +
-                                                 Constants.DAYS)));
+
+            request.setAttribute("listSize", new Integer(galertBoss.countAlertLogs(sessionId, aeid.getId(), cal
+                .getTimeInMillis(), cal.getTimeInMillis() + Constants.DAYS)));
         } else {
             portal.addPortlet(new Portlet(".events.alert.list"), 1);
         }
         request.setAttribute(Constants.PORTAL_KEY, portal);
-        
+
         return null;
     }
 
-    public ActionForward viewAlert(ActionMapping mapping,
-                                   ActionForm form,
-                                   HttpServletRequest request,
-                                   HttpServletResponse response)
-        throws Exception {
+    public ActionForward viewAlert(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                   HttpServletResponse response) throws Exception {
         // Get alert definition name
-       
+
         int sessionID = RequestUtils.getSessionId(request).intValue();
-      
+
         AppdefEntityID aeid = setResource(request);
-        Integer alertId = new Integer( request.getParameter("a") );
+        Integer alertId = new Integer(request.getParameter("a"));
 
         try {
             Portal portal = Portal.createPortal();
-            
+
             if (aeid != null && aeid.isGroup()) {
-                
-                
+
                 // properties
                 Escalatable av = galertBoss.findEscalatableAlert(sessionID, alertId);
 
-                request.setAttribute(Constants.TITLE_PARAM2_ATTR,
-                                     av.getDefinition().getName());
-                
+                request.setAttribute(Constants.TITLE_PARAM2_ATTR, av.getDefinition().getName());
+
                 portal.addPortlet(new Portlet(".events.group.alert.view"), 1);
             } else {
                 Alert alert = eventsBoss.getAlert(sessionID, alertId);
                 AlertDefinition alertDefinition = alert.getAlertDefinition();
 
-                assert(alertDefinition != null);
-                
+                assert (alertDefinition != null);
+
                 request.setAttribute(Constants.TITLE_PARAM2_ATTR, alertDefinition.getName());
 
                 if (aeid == null) {
-                    aeid = setResource(request,
-                                       new AppdefEntityID(alertDefinition.getAppdefType(),
-                                    		   			  alertDefinition.getAppdefId()),
-                                       false);
+                    aeid = setResource(request, new AppdefEntityID(alertDefinition.getAppdefType(), alertDefinition
+                        .getAppdefId()), false);
                 }
-                
+
                 portal.addPortlet(new Portlet(".events.alert.view"), 1);
             }
 
@@ -208,37 +192,31 @@ public class PortalAction extends ResourceController {
         return null;
     }
 
-    public ActionForward acknowledgeAlert(ActionMapping mapping,
-                                          ActionForm form,
-                                          HttpServletRequest request,
-                                          HttpServletResponse response)
-        throws Exception {
-       
-        int sessionID = RequestUtils.getSessionId(request).intValue();
-       
+    public ActionForward acknowledgeAlert(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                          HttpServletResponse response) throws Exception {
 
-        Integer alertId = new Integer( request.getParameter("a") );
+        int sessionID = RequestUtils.getSessionId(request).intValue();
+
+        Integer alertId = new Integer(request.getParameter("a"));
         String ackNote = RequestUtils.getStringParameter(request, "ackNote", "");
-        
+
         long pause = 0;
         try {
             RequestUtils.getStringParameter(request, "pause");
-            pause = Long.valueOf(
-            				RequestUtils.getStringParameter(request, "pauseTime"))
-            			.longValue();
-        } catch(ParameterNotFoundException e) {
+            pause = Long.valueOf(RequestUtils.getStringParameter(request, "pauseTime")).longValue();
+        } catch (ParameterNotFoundException e) {
             // Don't need to pause
         }
-        
+
         // pass pause escalation time
         AppdefEntityID aeid = null;
         boolean ackOk = false;
         try {
             aeid = RequestUtils.getEntityId(request);
-            
+
             if (aeid.isGroup()) {
-                ackOk = eventsBoss.acknowledgeAlert(sessionID, GalertEscalationAlertType.GALERT,
-                                            alertId, pause, ackNote);
+                ackOk = eventsBoss.acknowledgeAlert(sessionID, GalertEscalationAlertType.GALERT, alertId, pause,
+                    ackNote);
             }
         } catch (ParameterNotFoundException e) {
             // not a problem, this can be null
@@ -246,48 +224,35 @@ public class PortalAction extends ResourceController {
 
         if (aeid == null || !aeid.isGroup()) {
             // Classic alerts
-            ackOk = eventsBoss.acknowledgeAlert(sessionID, 
-                                        ClassicEscalationAlertType.CLASSIC,
-                                        alertId, pause, ackNote);
+            ackOk = eventsBoss.acknowledgeAlert(sessionID, ClassicEscalationAlertType.CLASSIC, alertId, pause, ackNote);
         }
-        
+
         if (ackOk) {
-            RequestUtils.setConfirmation(request,
-                                         "alert.view.confirm.acknowledged");
+            RequestUtils.setConfirmation(request, "alert.view.confirm.acknowledged");
         } else {
-            RequestUtils.setError(request,
-                                  "alert.view.error.acknowledged");
+            RequestUtils.setError(request, "alert.view.error.acknowledged");
         }
         return viewAlert(mapping, form, request, response);
     }
 
-    public ActionForward fixAlert(ActionMapping mapping,
-                                  ActionForm form,
-                                  HttpServletRequest request,
-                                  HttpServletResponse response)
-        throws Exception 
-    {
-       
+    public ActionForward fixAlert(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                  HttpServletResponse response) throws Exception {
+
         int sessionID = RequestUtils.getSessionId(request).intValue();
-       
 
         Integer alertId = RequestUtils.getIntParameter(request, "a");
-        String note =
-            RequestUtils.getStringParameter(request, "fixedNote", "");
-        
+        String note = RequestUtils.getStringParameter(request, "fixedNote", "");
+
         MessageResources res = getResources(request);
-        String fixNote =
-            res.getMessage("resource.common.alert.fixBy",
-                           RequestUtils.getWebUser(request).getName(),
-                           note);
-        
+        String fixNote = res
+            .getMessage("resource.common.alert.fixBy", RequestUtils.getWebUser(request).getName(), note);
+
         AppdefEntityID aeid = null;
         try {
             aeid = RequestUtils.getEntityId(request);
-            
+
             if (aeid.isGroup()) {
-                eventsBoss.fixAlert(sessionID, GalertEscalationAlertType.GALERT,
-                            alertId, fixNote);
+                eventsBoss.fixAlert(sessionID, GalertEscalationAlertType.GALERT, alertId, fixNote);
             }
         } catch (ParameterNotFoundException e) {
             // not a problem, this can be null
@@ -295,8 +260,7 @@ public class PortalAction extends ResourceController {
 
         if (aeid == null || !aeid.isGroup()) {
             // Fix alert the old fashion way
-            eventsBoss.fixAlert(sessionID, ClassicEscalationAlertType.CLASSIC, alertId,
-                        fixNote); 
+            eventsBoss.fixAlert(sessionID, ClassicEscalationAlertType.CLASSIC, alertId, fixNote);
         }
 
         RequestUtils.setConfirmation(request, "alert.view.confirm.fixed");

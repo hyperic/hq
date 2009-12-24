@@ -52,46 +52,39 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- *
+ * 
  * Fetch the children resources for the platform
  */
-public class ListChildrenAction extends TilesAction {
-    
-    private final Log log =
-        LogFactory.getLog(ListChildrenAction.class.getName());
-    
+public class ListChildrenAction
+    extends TilesAction {
+
+    private final Log log = LogFactory.getLog(ListChildrenAction.class.getName());
+
     private MeasurementBoss measurementBoss;
-    
-    
+
     @Autowired
     public ListChildrenAction(MeasurementBoss measurementBoss) {
         super();
         this.measurementBoss = measurementBoss;
     }
 
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
         AppdefResourceValue resource = RequestUtils.getResource(request);
-        
+
         if (resource == null) {
             RequestUtils.setError(request, Constants.ERR_RESOURCE_NOT_FOUND);
             return null;
         }
-        
+
         AppdefEntityID entityId = resource.getEntityId();
 
         int sessionId = RequestUtils.getSessionId(request).intValue();
-     
 
-        Boolean isInternal =
-            new Boolean((String) context.getAttribute(Constants.CTX_INTERNAL));
-        
-        List<ResourceTypeDisplaySummary> internalHealths = getChildHealthSummaries(
-            request, sessionId, entityId, isInternal.booleanValue());
+        Boolean isInternal = new Boolean((String) context.getAttribute(Constants.CTX_INTERNAL));
+
+        List<ResourceTypeDisplaySummary> internalHealths = getChildHealthSummaries(request, sessionId, entityId,
+            isInternal.booleanValue());
 
         context.putAttribute(Constants.CTX_SUMMARIES, internalHealths);
 
@@ -103,37 +96,28 @@ public class ListChildrenAction extends TilesAction {
      * objects representing health summaries of the child resources of the
      * currently viewed resource.
      * 
-     * @param request
-     *            the current http request
-     * @param boss
-     *            the <code>MeasurementBoss</code> used to find metric data
-     * @param sessionId
-     *            the <code>int</code> representing the user's bizapp session
-     * @param entityId
-     *            an <code>AppdefEntityID</code> identifying the currently
-     *            viewed resource
-     * @param isInternal
-     *            a boolean indicating whether we are asking for internal or
-     *            deployed child resources
+     * @param request the current http request
+     * @param boss the <code>MeasurementBoss</code> used to find metric data
+     * @param sessionId the <code>int</code> representing the user's bizapp
+     *        session
+     * @param entityId an <code>AppdefEntityID</code> identifying the currently
+     *        viewed resource
+     * @param isInternal a boolean indicating whether we are asking for internal
+     *        or deployed child resources
      * @return List
      */
-    protected List<ResourceTypeDisplaySummary> getChildHealthSummaries(HttpServletRequest request,
-                                           int sessionId,
-                                           AppdefEntityID entityId,
-                                           boolean isInternal)
-        throws PermissionException, AppdefEntityNotFoundException,
-               RemoteException, SessionNotFoundException,
-               SessionTimeoutException, ServletException {
+    protected List<ResourceTypeDisplaySummary> getChildHealthSummaries(HttpServletRequest request, int sessionId,
+                                                                       AppdefEntityID entityId, boolean isInternal)
+        throws PermissionException, AppdefEntityNotFoundException, RemoteException, SessionNotFoundException,
+        SessionTimeoutException, ServletException {
 
         if (isInternal) {
-            // cheat and treat platform services as internal so as to not 
+            // cheat and treat platform services as internal so as to not
             // disturb the whackadocious action class hierarchy
-            return measurementBoss.findSummarizedPlatformServiceCurrentHealth(sessionId,
-                                                                   entityId);
+            return measurementBoss.findSummarizedPlatformServiceCurrentHealth(sessionId, entityId);
         }
 
-        log.trace("getting deployed server healths for resource [" +
-                  entityId + "]");
+        log.trace("getting deployed server healths for resource [" + entityId + "]");
 
         return measurementBoss.findSummarizedServerCurrentHealth(sessionId, entityId);
     }

@@ -39,26 +39,24 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * An <code>Action</code> that retrieves data from the BizApp to
- * facilitate display of the <em><Resource> Metrics</em> pages.
+ * An <code>Action</code> that retrieves data from the BizApp to facilitate
+ * display of the <em><Resource> Metrics</em> pages.
  * 
- * This is used for "Platform Metrics",  "Server Metrics"  and the 
- * various service metrcs pages. 
+ * This is used for "Platform Metrics", "Server Metrics" and the various service
+ * metrcs pages.
  */
 public class ResourceMetricsFormPrepareAction
     extends MetricsDisplayFormPrepareAction {
 
-    protected final Log log =
-        LogFactory.getLog(ResourceMetricsFormPrepareAction.class.getName());
+    protected final Log log = LogFactory.getLog(ResourceMetricsFormPrepareAction.class.getName());
 
-   private MeasurementBoss measurementBoss;
-   
-   
-   @Autowired
+    private MeasurementBoss measurementBoss;
+
+    @Autowired
     public ResourceMetricsFormPrepareAction(MeasurementBoss measurementBoss) {
-       super();
-       this.measurementBoss = measurementBoss;
-   }
+        super();
+        this.measurementBoss = measurementBoss;
+    }
 
     /**
      * Do we show the baseline column on this page? The answer is no (for now).
@@ -68,38 +66,32 @@ public class ResourceMetricsFormPrepareAction
     }
 
     /**
-     * Get from the Bizapp the set of metric summaries for the
-     * specified entity that will be displayed on the page. Returns a
-     * <code>Map</code> keyed by metric category.
-     *
+     * Get from the Bizapp the set of metric summaries for the specified entity
+     * that will be displayed on the page. Returns a <code>Map</code> keyed by
+     * metric category.
+     * 
      * @param request the http request
      * @param entityId the entity id of the currently viewed resource
-     * @param begin the time (in milliseconds since the epoch) that
-     *  begins the timeframe for which the metrics are summarized
-     * @param end the time (in milliseconds since the epoch) that
-     *  ends the timeframe for which the metrics are summarized
-     * @return Map keyed on the category (String), values are List's of 
-     * MetricDisplaySummary beans
+     * @param begin the time (in milliseconds since the epoch) that begins the
+     *        timeframe for which the metrics are summarized
+     * @param end the time (in milliseconds since the epoch) that ends the
+     *        timeframe for which the metrics are summarized
+     * @return Map keyed on the category (String), values are List's of
+     *         MetricDisplaySummary beans
      */
-    protected Map<String,Set<MetricDisplaySummary>> getMetrics(HttpServletRequest request,
-                             AppdefEntityID entityId,
-                             long filters, String keyword,
-                             Long begin, Long end, boolean showAll)
-    throws Exception {
+    protected Map<String, Set<MetricDisplaySummary>> getMetrics(HttpServletRequest request, AppdefEntityID entityId,
+                                                                long filters, String keyword, Long begin, Long end,
+                                                                boolean showAll) throws Exception {
         int sessionId = RequestUtils.getSessionId(request).intValue();
-      
+
         if (log.isTraceEnabled()) {
-            log.trace("finding metric summaries for resource [" + entityId +
-                      "] for range " + begin + ":" + end + " filters value: " +
-                      filters + " and keyword: " + keyword);
+            log.trace("finding metric summaries for resource [" + entityId + "] for range " + begin + ":" + end +
+                      " filters value: " + filters + " and keyword: " + keyword);
         }
 
         AppdefEntityID[] entIds = new AppdefEntityID[] { entityId };
-        Map<String,Set<MetricDisplaySummary>> metrics =
-            measurementBoss.findMetrics(sessionId, entIds, filters, keyword,
-                             begin.longValue(), end.longValue(), showAll);
-        
-
+        Map<String, Set<MetricDisplaySummary>> metrics = measurementBoss.findMetrics(sessionId, entIds, filters,
+            keyword, begin.longValue(), end.longValue(), showAll);
 
         return metrics;
     }

@@ -24,7 +24,7 @@
  */
 
 package org.hyperic.hq.ui.action.admin.user;
-        
+
 import javax.security.auth.login.LoginException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -45,78 +45,66 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * An <code>BaseAction</code> subclass that edit's a user's
- * passworrd in the BizApp.
+ * An <code>BaseAction</code> subclass that edit's a user's passworrd in the
+ * BizApp.
  */
-public class EditPasswordAction extends BaseAction {
+public class EditPasswordAction
+    extends BaseAction {
 
-   private final Log log = LogFactory.getLog(NewAction.class.getName());
-   private AuthBoss authBoss;
-   private AuthzBoss authzBoss;
-   
-   
-   @Autowired
+    private final Log log = LogFactory.getLog(NewAction.class.getName());
+    private AuthBoss authBoss;
+    private AuthzBoss authzBoss;
+
+    @Autowired
     public EditPasswordAction(AuthBoss authBoss, AuthzBoss authzBoss) {
-    super();
-    this.authBoss = authBoss;
-    this.authzBoss = authzBoss;
-}
-
-
+        super();
+        this.authBoss = authBoss;
+        this.authzBoss = authzBoss;
+    }
 
     /**
-     *  Edit the user's password. Make sure that the
-     *  <code>currentPassword</code> is valid.
+     * Edit the user's password. Make sure that the <code>currentPassword</code>
+     * is valid.
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-    throws Exception {
-        
-       
-        log.trace("Editing password for user." );                    
-    
-        EditPasswordForm pForm = (EditPasswordForm)form;
-        ActionForward forward = checkSubmit(request, mapping, form,
-                                            Constants.USER_PARAM, 
-                                            pForm.getId() );
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
+
+        log.trace("Editing password for user.");
+
+        EditPasswordForm pForm = (EditPasswordForm) form;
+        ActionForward forward = checkSubmit(request, mapping, form, Constants.USER_PARAM, pForm.getId());
 
         if (forward != null) {
             return forward;
-        }         
+        }
 
         Integer sessionId = RequestUtils.getSessionId(request);
 
-        AuthzSubject user =
-            authzBoss.findSubjectById(RequestUtils.getSessionId(request),
-                                      pForm.getId());                                                           
+        AuthzSubject user = authzBoss.findSubjectById(RequestUtils.getSessionId(request), pForm.getId());
 
-        log.trace("Editing user's password.");                                                      
+        log.trace("Editing user's password.");
 
-        boolean admin = false;                
+        boolean admin = false;
 
-        for(Operation operation  :authzBoss.getAllOperations( sessionId )){
-            if (admin = AuthzConstants.subjectOpModifySubject
-                    .equals(operation.getName())) {
+        for (Operation operation : authzBoss.getAllOperations(sessionId)) {
+            if (admin = AuthzConstants.subjectOpModifySubject.equals(operation.getName())) {
                 break;
-            }            
+            }
         }
 
-        if(!admin){
+        if (!admin) {
             try {
                 authBoss.login(user.getName(), pForm.getCurrentPassword());
-            } catch ( LoginException e ){
+            } catch (LoginException e) {
                 RequestUtils.setError(request, "admin.user.error.WrongPassword", "currentPassword");
                 return returnFailure(request, mapping, Constants.USER_PARAM, pForm.getId());
             }
         }
-        authBoss.changePassword(sessionId.intValue(), user.getName(), 
-                                    pForm.getNewPassword());
+        authBoss.changePassword(sessionId.intValue(), user.getName(), pForm.getNewPassword());
 
         return returnSuccess(request, mapping, Constants.USER_PARAM,
 
         pForm.getId());
 
-    } 
+    }
 }

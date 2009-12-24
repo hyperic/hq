@@ -45,42 +45,36 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * modifies the metrics data.
  */
-public class GroupConfigMetricsAction extends ConfigMetricsAction {
-    
+public class GroupConfigMetricsAction
+    extends ConfigMetricsAction {
+
     private final Log log = LogFactory.getLog(ConfigMetricsAction.class.getName());
-    
+
     @Autowired
     public GroupConfigMetricsAction(MeasurementBoss measurementBoss) {
         super(measurementBoss);
     }
 
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-        
-                    
-        log.trace("modifying metrics action");                    
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
+
+        log.trace("modifying metrics action");
 
         HashMap<String, Object> parms = new HashMap<String, Object>(2);
-        
-       
+
         AppdefEntityID aeid = RequestUtils.getEntityId(request);
 
         parms.put(Constants.RESOURCE_PARAM, aeid.getId());
-        parms.put(Constants.RESOURCE_TYPE_ID_PARAM,
-                  new Integer(aeid.getType()));
+        parms.put(Constants.RESOURCE_TYPE_ID_PARAM, new Integer(aeid.getType()));
 
-        ActionForward forward = super.execute(mapping, form, request, response);          
+        ActionForward forward = super.execute(mapping, form, request, response);
         if (forward != null) {
             return forward;
         }
 
-        RequestUtils.setConfirmation(request, 
-            "resource.common.monitor.visibility.config.ConfigMetrics.Confirmation");
+        RequestUtils.setConfirmation(request, "resource.common.monitor.visibility.config.ConfigMetrics.Confirmation");
 
         return returnSuccess(request, mapping, parms);
-    }               
-    
+    }
+
 }

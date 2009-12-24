@@ -54,20 +54,15 @@ import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
-
 /**
  * View an alert definition -- notified roles.
- *
+ * 
  */
 public abstract class ViewDefinitionNotificationsAction
-    extends TilesAction
-    implements NotificationsAction
-{
+    extends TilesAction implements NotificationsAction {
     private final Log log = LogFactory.getLog(ViewDefinitionNotificationsAction.class.getName());
     protected EventsBoss eventsBoss;
     protected AuthzBoss authzBoss;
-    
-    
 
     public ViewDefinitionNotificationsAction(EventsBoss eventsBoss, AuthzBoss authzBoss) {
         super();
@@ -75,15 +70,10 @@ public abstract class ViewDefinitionNotificationsAction
         this.authzBoss = authzBoss;
     }
 
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception
-    {
-      
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
+
         int sessionID = RequestUtils.getSessionId(request).intValue();
-        
 
         PageControl pc = RequestUtils.getPageControl(request);
 
@@ -93,25 +83,21 @@ public abstract class ViewDefinitionNotificationsAction
             log.debug("Viewing notifications for an alert ...");
             Integer aid = new Integer(a);
             List<ActionValue> actionList = eventsBoss.getActionsForAlert(sessionID, aid);
-            actions = 
-                actionList.toArray(new ActionValue[actionList.size()]);
+            actions = actionList.toArray(new ActionValue[actionList.size()]);
         } else {
             log.debug("Viewing notifications for an alert definition ...");
-            AlertDefinitionValue adv =
-                AlertDefUtil.getAlertDefinition(request, sessionID, eventsBoss);
+            AlertDefinitionValue adv = AlertDefUtil.getAlertDefinition(request, sessionID, eventsBoss);
             actions = adv.getActions();
         }
 
         boolean listNotSet = true;
         PageList notifyList = new PageList();
         for (int i = 0; i < actions.length; ++i) {
-            if ( actions[i].classnameHasBeenSet() &&
-                 !( actions[i].getClassname().equals(null) ||
-                    actions[i].getClassname().equals("") ) ) {
+            if (actions[i].classnameHasBeenSet() &&
+                !(actions[i].getClassname().equals(null) || actions[i].getClassname().equals(""))) {
                 EmailActionConfig emailCfg = new EmailActionConfig();
-                ConfigResponse configResponse =
-                    ConfigResponse.decode( actions[i].getConfig() );
-                
+                ConfigResponse configResponse = ConfigResponse.decode(actions[i].getConfig());
+
                 try {
                     emailCfg.init(configResponse);
                 } catch (InvalidActionDataException e) {
@@ -119,12 +105,12 @@ public abstract class ViewDefinitionNotificationsAction
                     log.debug("Action is " + actions[i].getClassname());
                     continue;
                 }
-                
-                if ( emailCfg.getType() == getNotificationType() ) {
+
+                if (emailCfg.getType() == getNotificationType()) {
                     try {
                         PageList pl = getPageList(sessionID, emailCfg, pc);
-                        notifyList.setTotalSize( pl.size() );
-                        notifyList.addAll( getSubList(pl, pc) );
+                        notifyList.setTotalSize(pl.size());
+                        notifyList.addAll(getSubList(pl, pc));
                         listNotSet = false;
                     } catch (PermissionException e) {
                         // No permission to view
@@ -134,38 +120,32 @@ public abstract class ViewDefinitionNotificationsAction
             }
         }
         request.setAttribute("notifyList", notifyList);
-        request.setAttribute( Constants.LIST_SIZE_ATTR,
-                              new Integer( notifyList.getTotalSize() ) );
+        request.setAttribute(Constants.LIST_SIZE_ATTR, new Integer(notifyList.getTotalSize()));
         if (listNotSet) {
             request.setAttribute("notifyList", new PageList());
-            request.setAttribute( Constants.LIST_SIZE_ATTR, new Integer(0) );
+            request.setAttribute(Constants.LIST_SIZE_ATTR, new Integer(0));
             log.debug("No notifications ...");
         }
 
         return null;
     }
 
-    protected abstract PageList getPageList(int sessionID, 
-                                            EmailActionConfig ea, PageControl pc)
-        throws FinderException,
-               SessionTimeoutException,
-               SessionNotFoundException,
-               PermissionException,
-               RemoteException;
+    protected abstract PageList getPageList(int sessionID, EmailActionConfig ea, PageControl pc)
+        throws FinderException, SessionTimeoutException, SessionNotFoundException, PermissionException, RemoteException;
 
-    //-----------------------------------------------------------------
-    //-- private helpers
-    //-----------------------------------------------------------------
+    // -----------------------------------------------------------------
+    // -- private helpers
+    // -----------------------------------------------------------------
     private List getSubList(PageList pl, PageControl pc) {
         if (pc.getPagesize() == PageControl.SIZE_UNLIMITED) {
             return pl;
         } else {
-            if ( pc.getPagesize() >= pl.size() ) {
+            if (pc.getPagesize() >= pl.size()) {
                 return pl;
             } else {
                 int startIdx = pc.getPagenum() * pc.getPagesize();
                 int endIdx = startIdx + pc.getPagesize();
-                if ( endIdx > pl.size() ) {
+                if (endIdx > pl.size()) {
                     endIdx = pl.size();
                 }
                 log.debug("startIdx=" + startIdx + ", endIdx=" + endIdx);
@@ -174,4 +154,3 @@ public abstract class ViewDefinitionNotificationsAction
         }
     }
 }
-

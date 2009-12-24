@@ -47,74 +47,57 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  *
  */
-public class EditTypeHostAction extends BaseAction {
+public class EditTypeHostAction
+    extends BaseAction {
 
-    private final   Log log = LogFactory.getLog(EditTypeHostAction.class.getName());
+    private final Log log = LogFactory.getLog(EditTypeHostAction.class.getName());
     private AppdefBoss appdefBoss;
-    
+
     @Autowired
     public EditTypeHostAction(AppdefBoss appdefBoss) {
         super();
         this.appdefBoss = appdefBoss;
     }
 
-
     /**
      * Create the server with the attributes specified in the given
      * <code>ServerForm</code>.
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-      
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
+
         try {
             ServerForm serverForm = (ServerForm) form;
-            AppdefEntityID aeid =
-                new AppdefEntityID(serverForm.getType().intValue(),
-                                   serverForm.getRid());
-            
+            AppdefEntityID aeid = new AppdefEntityID(serverForm.getType().intValue(), serverForm.getRid());
+
             HashMap<String, Object> forwardParams = new HashMap<String, Object>(2);
             forwardParams.put(Constants.ENTITY_ID_PARAM, aeid.getAppdefKey());
 
-            ActionForward forward = checkSubmit(request, mapping, form,
-                        forwardParams);
-            
+            ActionForward forward = checkSubmit(request, mapping, form, forwardParams);
+
             if (forward != null) {
                 return forward;
-            }         
+            }
 
-           
             Integer sessionId = RequestUtils.getSessionId(request);
-          
 
-            ServerValue server = appdefBoss.findServerById(sessionId.intValue(),
-                                                    serverForm.getRid());
-            
-            serverForm.updateServerValue(server); 
+            ServerValue server = appdefBoss.findServerById(sessionId.intValue(), serverForm.getRid());
 
-          
-              appdefBoss.updateServer(sessionId.intValue(), server);
-              
+            serverForm.updateServerValue(server);
+
+            appdefBoss.updateServer(sessionId.intValue(), server);
+
             // XXX: enable when we have a confirmed functioning API
-            log.trace("saving server [" + server.getName()
-                               + "]" + " with attributes " + serverForm);
+            log.trace("saving server [" + server.getName() + "]" + " with attributes " + serverForm);
 
             Integer serverId = new Integer(-1);
             serverForm.setRid(serverId);
 
-            RequestUtils.setConfirmation(request,
-                                         "resource.server.inventory.confirm.SaveServer",
-                                         server.getName());
-                                         
+            RequestUtils.setConfirmation(request, "resource.server.inventory.confirm.SaveServer", server.getName());
+
             return returnSuccess(request, mapping, forwardParams);
-        }
-        catch (ObjectNotFoundException oe) {
-            RequestUtils
-                .setError(request,
-                          "resource.server.inventory.error.ServerNotFound",
-                          "resourceType");
+        } catch (ObjectNotFoundException oe) {
+            RequestUtils.setError(request, "resource.server.inventory.error.ServerNotFound", "resourceType");
             return returnFailure(request, mapping);
         }
     }

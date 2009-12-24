@@ -35,19 +35,20 @@ package org.hyperic.hq.ui.action.resource.common.monitor.visibility;
 import org.hyperic.hq.ui.util.MonitorUtils;
 
 /**
- * Represents the common set of controls on various pages that display
- * alert metrics.
+ * Represents the common set of controls on various pages that display alert
+ * metrics.
  * 
- *
+ * 
  */
-public class AlertMetricsControlForm extends MetricsControlForm {
+public class AlertMetricsControlForm
+    extends MetricsControlForm {
 
-	private Boolean isAlertDefaults = Boolean.FALSE;
-    
-	public AlertMetricsControlForm() {
+    private Boolean isAlertDefaults = Boolean.FALSE;
+
+    public AlertMetricsControlForm() {
         super();
     }
-    
+
     public String toString() {
         StringBuffer s = new StringBuffer(super.toString());
         s.append(" isAlertDefaults=").append(this.getAlertDefaults());
@@ -56,21 +57,21 @@ public class AlertMetricsControlForm extends MetricsControlForm {
     }
 
     protected void setDefaults() {
-    	setAlertDefaults(Boolean.FALSE);        
+        setAlertDefaults(Boolean.FALSE);
     }
 
     public Boolean getAlertDefaults() {
-    	return this.isAlertDefaults;
+        return this.isAlertDefaults;
     }
-    
+
     public void setAlertDefaults(Boolean isAlertDefaults) {
-		super.setDefaults();
-		this.isAlertDefaults = isAlertDefaults;
-		
-    	if (isAlertDefaults.booleanValue()) {
-    		setA(ACTION_LASTN);
-    		setRn(MonitorUtils.DEFAULT_VALUE_RANGE_LASTN);
-    		setRu(MonitorUtils.DEFAULT_VALUE_RANGE_UNIT);
-    	}
-    }    
+        super.setDefaults();
+        this.isAlertDefaults = isAlertDefaults;
+
+        if (isAlertDefaults.booleanValue()) {
+            setA(ACTION_LASTN);
+            setRn(MonitorUtils.DEFAULT_VALUE_RANGE_LASTN);
+            setRu(MonitorUtils.DEFAULT_VALUE_RANGE_UNIT);
+        }
+    }
 }

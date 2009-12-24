@@ -30,71 +30,72 @@ import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.ui.action.resource.ResourceForm;
 
 /**
- * A subclass of <code>ResourceForm</code> that adds convenience
- * methods for dealing with Server.
+ * A subclass of <code>ResourceForm</code> that adds convenience methods for
+ * dealing with Server.
  */
-public class ServerForm extends ResourceForm {
+public class ServerForm
+    extends ResourceForm {
 
-    //-------------------------------------instance variables
-    
+    // -------------------------------------instance variables
+
     private String installPath;
 
-    //-------------------------------------constructors
-    
-    //-------------------------------------public methods
-    
+    // -------------------------------------constructors
+
+    // -------------------------------------public methods
+
     /**
      * Returns the installPath.
      * @return String
      */
-    
-    public String getInstallPath() {
-	return installPath;
-    } 
 
-    /** 
+    public String getInstallPath() {
+        return installPath;
+    }
+
+    /**
      * Sets the installPath.
      * @param installPath The installPath to set
      */
-    
+
     public void setInstallPath(String installPath) {
-	this.installPath = installPath;
+        this.installPath = installPath;
     }
 
-    /** set the server type here.  Can't access the
-     * server type in the super class.
+    /**
+     * set the server type here. Can't access the server type in the super
+     * class.
      * 
      * @param sValue
-     */    
-    public void loadResourceValue(AppdefResourceValue rValue)
-    {
+     */
+    public void loadResourceValue(AppdefResourceValue rValue) {
         super.loadResourceValue(rValue);
-        
-        ServerValue sValue = (ServerValue)rValue;
-        setResourceType(sValue.getServerType().getId());                
+
+        ServerValue sValue = (ServerValue) rValue;
+        setResourceType(sValue.getServerType().getId());
     }
-    
-    /** loads the server value
+
+    /**
+     * loads the server value
      * 
      * @param sValue
-     */    
-    public void loadResourceValue(ServerValue sValue)
-    {
+     */
+    public void loadResourceValue(ServerValue sValue) {
 
         super.loadResourceValue(sValue);
-                
+
         setInstallPath(sValue.getInstallPath());
-        
+
     }
 
-    /** updates the server value
+    /**
+     * updates the server value
      * 
      * @param sValue
-     */    
-    public void updateServerValue(ServerValue sValue)
-    {
+     */
+    public void updateServerValue(ServerValue sValue) {
         super.updateResourceValue(sValue);
-        
+
         if (installPath != null) {
             sValue.setInstallPath(installPath);
         }

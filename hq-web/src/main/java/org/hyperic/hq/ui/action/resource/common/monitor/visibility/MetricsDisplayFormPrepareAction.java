@@ -47,29 +47,20 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 
 /**
- * An <code>Action</code> that retrieves data from the BizApp to
- * facilitate display of the various pages that provide metrics
- * summaries.
+ * An <code>Action</code> that retrieves data from the BizApp to facilitate
+ * display of the various pages that provide metrics summaries.
  */
 public abstract class MetricsDisplayFormPrepareAction
     extends MetricsControlFormPrepareAction {
 
-    protected final Log log =
-        LogFactory.getLog(MetricsDisplayFormPrepareAction.class.getName());
-
-
-   
+    protected final Log log = LogFactory.getLog(MetricsDisplayFormPrepareAction.class.getName());
 
     /**
-     * Retrieve data needed to display a Metrics Display Form. Respond
-     * to certain button clicks that alter the form display.
+     * Retrieve data needed to display a Metrics Display Form. Respond to
+     * certain button clicks that alter the form display.
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response,
-                                 Long begin, Long end)
-        throws Exception {
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response, Long begin, Long end) throws Exception {
 
         MetricsDisplayForm displayForm = (MetricsDisplayForm) form;
         displayForm.setShowNumberCollecting(getShowNumberCollecting());
@@ -79,16 +70,15 @@ public abstract class MetricsDisplayFormPrepareAction
         AppdefEntityID[] entityIds = null;
         try {
             entityIds = RequestUtils.getEntityIds(request);
-        }
-        catch (ParameterNotFoundException e) {
+        } catch (ParameterNotFoundException e) {
             // this is fine until we finish migrating to eids
         }
 
         if (begin == null || end == null) {
             // get the "metric range" user pref
             WebUser user = RequestUtils.getWebUser(request);
-            Map<String,Object> range = user.getMetricRangePreference();
-            if (range != null) {    
+            Map<String, Object> range = user.getMetricRangePreference();
+            if (range != null) {
                 begin = (Long) range.get(MonitorUtils.BEGIN);
                 end = (Long) range.get(MonitorUtils.END);
             } else {
@@ -98,120 +88,107 @@ public abstract class MetricsDisplayFormPrepareAction
 
         long filters = MeasurementConstants.FILTER_NONE;
         String keyword = null;
-        
+
         if (displayForm.isFilterSubmitClicked()) {
             filters = displayForm.getFilters();
             keyword = displayForm.getKeyword();
         }
 
-        Map<String,Set<MetricDisplaySummary>> metrics =
-            getMetrics(request, entityIds, filters, keyword, begin, end,
-                       displayForm.getShowAll());
+        Map<String, Set<MetricDisplaySummary>> metrics = getMetrics(request, entityIds, filters, keyword, begin, end,
+            displayForm.getShowAll());
 
         if (metrics != null) {
-            Integer resourceCount =
-                MonitorUtils.formatMetrics(metrics, request.getLocale(),
-                                           getResources(request));
+            Integer resourceCount = MonitorUtils.formatMetrics(metrics, request.getLocale(), getResources(request));
 
+            request.setAttribute(Constants.NUM_CHILD_RESOURCES_ATTR, resourceCount);
+            request.setAttribute(Constants.METRIC_SUMMARIES_ATTR, metrics);
 
+            // populate the form
+            displayForm.setupCategoryList(metrics);
 
-           request.setAttribute(Constants.NUM_CHILD_RESOURCES_ATTR, resourceCount);
-           request.setAttribute(Constants.METRIC_SUMMARIES_ATTR, metrics);
-
-           // populate the form
-           displayForm.setupCategoryList(metrics);
-          
         } else {
             log.trace("no metrics were returned by getMetrics(...)");
         }
 
         // Clear any compare metric workflow
-        SessionUtils.clearWorkflow(request.getSession(),
-                                   Constants.WORKFLOW_COMPARE_METRICS_NAME);
-        
+        SessionUtils.clearWorkflow(request.getSession(), Constants.WORKFLOW_COMPARE_METRICS_NAME);
+
         return super.execute(mapping, form, request, response);
     }
 
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
         return execute(mapping, form, request, response, null, null);
-        
+
     }
 
     // ---------------------------------------------------- Protected Methods
 
     /**
-     * Do we show the number collecting column on this page? The
-     * default answer is no, but subclasses can specify otherwise.
+     * Do we show the number collecting column on this page? The default answer
+     * is no, but subclasses can specify otherwise.
      */
     protected Boolean getShowNumberCollecting() {
         return Boolean.FALSE;
     }
 
     /**
-     * Do we show the baseline column on this page? The default answer
-     * is no, but subclasses can specify otherwise.
+     * Do we show the baseline column on this page? The default answer is no,
+     * but subclasses can specify otherwise.
      */
     protected Boolean getShowBaseline() {
         return Boolean.FALSE;
     }
 
     /**
-     * Do we show the metric source column on this page? The default
-     * answer is no, but subclasses can specify otherwise.
+     * Do we show the metric source column on this page? The default answer is
+     * no, but subclasses can specify otherwise.
      */
     protected Boolean getShowMetricSource() {
         return Boolean.FALSE;
     }
 
     /**
-     * Get from the Bizapp the set of metric summaries for the
-     * specified entity that will be displayed on the page. Returns a
-     * <code>Map</code> keyed by metric category.
-     *
+     * Get from the Bizapp the set of metric summaries for the specified entity
+     * that will be displayed on the page. Returns a <code>Map</code> keyed by
+     * metric category.
+     * 
      * @param request the http request
      * @param entityId the entity id of the currently viewed resource
-     * @param begin the time (in milliseconds since the epoch) that
-     *  begins the timeframe for which the metrics are summarized
-     * @param end the time (in milliseconds since the epoch) that
-     *  ends the timeframe for which the metrics are summarized
-     * @return Map keyed on the category (String), values are List's of 
-     * MetricDisplaySummary beans
+     * @param begin the time (in milliseconds since the epoch) that begins the
+     *        timeframe for which the metrics are summarized
+     * @param end the time (in milliseconds since the epoch) that ends the
+     *        timeframe for which the metrics are summarized
+     * @return Map keyed on the category (String), values are List's of
+     *         MetricDisplaySummary beans
      */
-    protected abstract Map<String,Set<MetricDisplaySummary>> getMetrics(HttpServletRequest request,
-                                      AppdefEntityID entityId,
-                                      long filters, String keyword,
-                                      Long begin, Long end, boolean showAll)
-        throws Exception;
+    protected abstract Map<String, Set<MetricDisplaySummary>> getMetrics(HttpServletRequest request,
+                                                                         AppdefEntityID entityId, long filters,
+                                                                         String keyword, Long begin, Long end,
+                                                                         boolean showAll) throws Exception;
 
     /**
-     * Get from the Bizapp the set of metric summaries for the
-     * specified entities that will be displayed on the page. Returns a
-     * <code>Map</code> keyed by metric category.
-     *
+     * Get from the Bizapp the set of metric summaries for the specified
+     * entities that will be displayed on the page. Returns a <code>Map</code>
+     * keyed by metric category.
+     * 
      * @param request the http request
      * @param entityId the entity id of the currently viewed resource
-     * @param begin the time (in milliseconds since the epoch) that
-     *  begins the timeframe for which the metrics are summarized
-     * @param end the time (in milliseconds since the epoch) that
-     *  ends the timeframe for which the metrics are summarized
-     * @return Map keyed on the category (String), values are List's of 
-     * MetricDisplaySummary beans
+     * @param begin the time (in milliseconds since the epoch) that begins the
+     *        timeframe for which the metrics are summarized
+     * @param end the time (in milliseconds since the epoch) that ends the
+     *        timeframe for which the metrics are summarized
+     * @return Map keyed on the category (String), values are List's of
+     *         MetricDisplaySummary beans
      */
-    protected Map<String,Set<MetricDisplaySummary>> getMetrics(HttpServletRequest request,
-                             AppdefEntityID[] entityIds,
-                             long filters, String keyword,
-                             Long begin, Long end, boolean showAll)
-        throws Exception {
+    protected Map<String, Set<MetricDisplaySummary>> getMetrics(HttpServletRequest request, AppdefEntityID[] entityIds,
+                                                                long filters, String keyword, Long begin, Long end,
+                                                                boolean showAll) throws Exception {
         // XXX when we finish migrating to eids, the other form of
         // getMetrics will go away and this one will become abstract
         // in the meantime, preserve friggin backwards compatibility
         if (entityIds != null && entityIds.length == 1) {
-            return getMetrics(request, entityIds[0], filters, keyword,
-                              begin, end, showAll);
+            return getMetrics(request, entityIds[0], filters, keyword, begin, end, showAll);
         }
         return null;
     }

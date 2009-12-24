@@ -28,63 +28,63 @@ package org.hyperic.hq.ui.action;
 import org.apache.struts.action.ActionMapping;
 
 /**
- * An <code>ActionMapping</code> subclass that adds fields
- * for participating in a workflow struts-config.xml
- *
- * To use:
- * <CODE>        
+ * An <code>ActionMapping</code> subclass that adds fields for participating in
+ * a workflow struts-config.xml
+ * 
+ * To use: <CODE>        
  *  <set-property property="workflow" value="server/EditGeneralProperties"/>
  * </CODE>
- *
- * The value is used as a key into a HashMap of Queues of URLs 
- * to participate in a workflow.
+ * 
+ * The value is used as a key into a HashMap of Queues of URLs to participate in
+ * a workflow.
  */
-public class BaseActionMapping extends ActionMapping {
-    
+public class BaseActionMapping
+    extends ActionMapping {
+
     /**
-     * This field allows an ActionMapping to participate
-     * in a workflow, which is a Stack of returnUrls that
-     * is stored in the session and retrieved for 
+     * This field allows an ActionMapping to participate in a workflow, which is
+     * a Stack of returnUrls that is stored in the session and retrieved for
      * building forwards for that workflow.
      */
-     private String workflow = null;
-     
-     /** Flag indicating whether or not
-      * this is the first action in a workflow.
-      * If true, this resets the workflow.
-      */
+    private String workflow = null;
+
+    /**
+     * Flag indicating whether or not this is the first action in a workflow. If
+     * true, this resets the workflow.
+     */
     private Boolean start = Boolean.TRUE;
 
     private String title;
+
     public BaseActionMapping() {
         super();
-     }
-     
-     public String getWorkflow() {
-         return this.workflow;
-     }
-     
-     public void setWorkflow(String workflow) {
-         this.workflow = workflow;
-     }
-    
-     public Boolean getIsFirst() {
-         return this.start;
-     }
-     
-     public void setIsFirst(Boolean start) {
-         this.start = start;
-     }
-     
-     public String getTitle() {
-         return this.title;
-     }
-     
-     public void setTitle(String title) {
-         this.title = title;
-     }
+    }
 
-     public String toString() {
+    public String getWorkflow() {
+        return this.workflow;
+    }
+
+    public void setWorkflow(String workflow) {
+        this.workflow = workflow;
+    }
+
+    public Boolean getIsFirst() {
+        return this.start;
+    }
+
+    public void setIsFirst(Boolean start) {
+        this.start = start;
+    }
+
+    public String getTitle() {
+        return this.title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String toString() {
         StringBuffer buf = new StringBuffer(super.toString());
         buf.append("];BaseActionMapping[");
         buf.append("workflow=").append(workflow).append(",");
@@ -94,4 +94,3 @@ public class BaseActionMapping extends ActionMapping {
         return buf.toString();
     }
 }
-

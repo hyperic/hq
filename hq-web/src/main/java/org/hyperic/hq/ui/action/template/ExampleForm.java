@@ -35,12 +35,13 @@ import org.hyperic.hq.ui.action.BaseValidatorForm;
 /**
  * A subclass of <code>BaseValidatorForm</code> representing the
  * <em>Control</em> form data
- *
- * Customize as you see fit. 
- *
+ * 
+ * Customize as you see fit.
+ * 
  * @see org.hyperic.hq.ui.action.BaseValidatorForm
  */
-public class ExampleForm extends BaseValidatorForm  {
+public class ExampleForm
+    extends BaseValidatorForm {
 
     private String exampleProperty;
 
@@ -53,9 +54,8 @@ public class ExampleForm extends BaseValidatorForm  {
     }
 
     /**
-     * Resets all fields to values valid for validation.
-     * Calls super.reset() to insure that parent classes'
-     * fields are initialialized validly.
+     * Resets all fields to values valid for validation. Calls super.reset() to
+     * insure that parent classes' fields are initialialized validly.
      */
     public void reset(ActionMapping mapping, HttpServletRequest request) {
         this.exampleProperty = null;
@@ -65,36 +65,35 @@ public class ExampleForm extends BaseValidatorForm  {
     /**
      * Validates the form's fields in a custom way.
      * 
-     * XXX Delete this method if no custom validation outside of
-     * validation.xml needs to be done.
+     * XXX Delete this method if no custom validation outside of validation.xml
+     * needs to be done.
      */
-    public ActionErrors validate(ActionMapping mapping, 
-                                 HttpServletRequest request) {
-        
+    public ActionErrors validate(ActionMapping mapping, HttpServletRequest request) {
+
         if (!shouldValidate(mapping, request)) {
             return null;
         }
-        
-        ActionErrors errs = super.validate(mapping, request);        
-        if (errs == null ) {
+
+        ActionErrors errs = super.validate(mapping, request);
+        if (errs == null) {
             errs = new ActionErrors();
         }
-        
+
         // custom validation rules
 
         if (errs.size() == 0) {
             return null;
         }
-        
+
         return errs;
     }
-    
+
     public String toString() {
         StringBuffer buf = new StringBuffer();
-        
+
         buf.append("exampleProperty= ").append(exampleProperty);
-        
+
         return super.toString() + buf.toString();
     }
-    
+
 }

@@ -35,124 +35,131 @@ import org.hyperic.hq.ui.action.BaseValidatorForm;
 /**
  * A form for editing passwords.
  */
-public class EditPasswordForm extends BaseValidatorForm {
+public class EditPasswordForm
+    extends BaseValidatorForm {
 
-    //-------------------------------------instance variables
-    
+    // -------------------------------------instance variables
+
     /** Holds value of property newPassword. */
     private String newPassword;
-    
+
     /** Holds value of property confirmPassword. */
     private String confirmPassword;
-    
+
     /** Holds value of property currentPassword. */
     private String currentPassword;
-    
+
     /** Holds value of property id. */
     private Integer id;
-    
-    //-------------------------------------constructors
+
+    // -------------------------------------constructors
 
     public EditPasswordForm() {
     }
 
-    //-------------------------------------public methods
+    // -------------------------------------public methods
 
-    public void reset(ActionMapping mapping,
-                      HttpServletRequest request) {
+    public void reset(ActionMapping mapping, HttpServletRequest request) {
         this.newPassword = null;
         this.confirmPassword = null;
         this.currentPassword = null;
         this.id = null;
     }
 
-    public ActionErrors validate(ActionMapping mapping,
-                                 HttpServletRequest request) {
-        
+    public ActionErrors validate(ActionMapping mapping, HttpServletRequest request) {
+
         ActionErrors errors = super.validate(mapping, request);
         if (errors == null) {
             errors = new ActionErrors();
         }
-        
+
         if (errors.isEmpty()) {
             return null;
         }
-        
+
         return errors;
     }
 
     public String toString() {
         StringBuffer s = new StringBuffer();
         s.append("id= " + id + " ");
-        s.append("newPassword=" + newPassword +  " ");        
-        s.append("confirmPassword=" + confirmPassword + " ");                         
-        s.append("currentPassword=" + currentPassword + " ");   
-       
+        s.append("newPassword=" + newPassword + " ");
+        s.append("confirmPassword=" + confirmPassword + " ");
+        s.append("currentPassword=" + currentPassword + " ");
+
         return super.toString() + s.toString();
     }
-    
-    /** Getter for property newPassword.
+
+    /**
+     * Getter for property newPassword.
      * @return Value of property newPassword.
-     *
+     * 
      */
     public String getNewPassword() {
         return this.newPassword;
     }
-    
-    /** Setter for property newPassword.
+
+    /**
+     * Setter for property newPassword.
      * @param newPassword New value of property newPassword.
-     *
+     * 
      */
     public void setNewPassword(String newPassword) {
         this.newPassword = newPassword;
     }
-    
-    /** Getter for property confirmPassword.
+
+    /**
+     * Getter for property confirmPassword.
      * @return Value of property confirmPassword.
-     *
+     * 
      */
     public String getConfirmPassword() {
         return this.confirmPassword;
     }
-    
-    /** Setter for property confirmPassword.
+
+    /**
+     * Setter for property confirmPassword.
      * @param confirmPassword New value of property confirmPassword.
-     *
+     * 
      */
     public void setConfirmPassword(String confirmPassword) {
         this.confirmPassword = confirmPassword;
     }
-    
-    /** Getter for property currentPassword.
+
+    /**
+     * Getter for property currentPassword.
      * @return Value of property currentPassword.
-     *
+     * 
      */
     public String getCurrentPassword() {
         return this.currentPassword;
     }
-    
-    /** Setter for property currentPassword.
+
+    /**
+     * Setter for property currentPassword.
      * @param currentPassword New value of property currentPassword.
-     *
+     * 
      */
     public void setCurrentPassword(String currentPassword) {
         this.currentPassword = currentPassword;
     }
-    
-    /** Getter for property id.
+
+    /**
+     * Getter for property id.
      * @return Value of property id.
-     *
+     * 
      */
     public Integer getId() {
         return this.id;
     }
-    
-    /** Setter for property id.
+
+    /**
+     * Setter for property id.
      * @param id New value of property id.
-     *
+     * 
      */
     public void setId(Integer id) {
         this.id = id;
     }
-    
+
 }

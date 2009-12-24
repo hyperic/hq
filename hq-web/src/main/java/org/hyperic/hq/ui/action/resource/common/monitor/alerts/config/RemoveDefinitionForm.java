@@ -31,14 +31,15 @@ import org.hyperic.hq.ui.action.resource.ResourceForm;
  * A subclass of <code>ResourceForm</code> representing the
  * <em>RemoveDefinition</em> form.
  */
-public class RemoveDefinitionForm extends ResourceForm  {
+public class RemoveDefinitionForm
+    extends ResourceForm {
 
-    /** Holds value of  alert definitions. */
+    /** Holds value of alert definitions. */
     private Integer[] definitions;
     private Integer ad;
     private Integer active;
     private String setActiveInactive;
-    private String aetid;    
+    private String aetid;
 
     public RemoveDefinitionForm() {
     }
@@ -47,20 +48,22 @@ public class RemoveDefinitionForm extends ResourceForm  {
         if (definitions == null)
             return "empty";
         else
-            return definitions.toString();    
+            return definitions.toString();
     }
-    
-    /** Getter for alert definitionss
-     * @return alert definitions in an array 
-     *
+
+    /**
+     * Getter for alert definitionss
+     * @return alert definitions in an array
+     * 
      */
     public Integer[] getDefinitions() {
         return this.definitions;
     }
-    
-    /** Setter for alert definitions
-     * @param alert definitions As an Integer array  
-     *
+
+    /**
+     * Setter for alert definitions
+     * @param alert definitions As an Integer array
+     * 
      */
     public void setDefinitions(Integer[] definitions) {
         this.definitions = definitions;
@@ -69,23 +72,23 @@ public class RemoveDefinitionForm extends ResourceForm  {
     public Integer getAd() {
         return this.ad;
     }
-    
+
     public void setAd(Integer ad) {
         this.ad = ad;
     }
-    
+
     public Integer getActive() {
         return this.active;
     }
-    
+
     public void setActive(Integer active) {
         this.active = active;
     }
-    
+
     public String getSetActiveInactive() {
-        return this.setActiveInactive; 
+        return this.setActiveInactive;
     }
-    
+
     public void setSetActiveInactive(String setActiveInactive) {
         this.setActiveInactive = setActiveInactive;
     }
@@ -93,7 +96,7 @@ public class RemoveDefinitionForm extends ResourceForm  {
     public String getAetid() {
         return aetid;
     }
-    
+
     public void setAetid(String aetid) {
         this.aetid = aetid;
     }

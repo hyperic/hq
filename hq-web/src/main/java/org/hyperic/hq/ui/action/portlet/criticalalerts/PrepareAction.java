@@ -51,12 +51,12 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class PrepareAction extends TilesAction {
-    
+public class PrepareAction
+    extends TilesAction {
+
     private AppdefBoss appdefBoss;
     private AuthzBoss authzBoss;
-    
-    
+
     @Autowired
     public PrepareAction(AppdefBoss appdefBoss, AuthzBoss authzBoss) {
         super();
@@ -64,29 +64,19 @@ public class PrepareAction extends TilesAction {
         this.authzBoss = authzBoss;
     }
 
-
-
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
 
         PropertiesForm pForm = (PropertiesForm) form;
-
-        
 
         HttpSession session = request.getSession();
         WebUser user = RequestUtils.getWebUser(session);
         Integer sessionId = user.getSessionId();
-      
-        DashboardConfig dashConfig = DashboardUtils.findDashboard(
-        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, authzBoss);
+
+        DashboardConfig dashConfig = DashboardUtils.findDashboard((Integer) session
+            .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
-        
-        
+
         String token = pForm.getToken();
 
         // For multi-portlet configurations
@@ -96,7 +86,7 @@ public class PrepareAction extends TilesAction {
         String timeKey = PropertiesForm.PAST;
         String selOrAllKey = PropertiesForm.SELECTED_OR_ALL;
         String titleKey = PropertiesForm.TITLE;
-        
+
         if (token != null) {
             resKey += token;
             countKey += token;
@@ -118,21 +108,16 @@ public class PrepareAction extends TilesAction {
         String selectedOrAll;
 
         pForm.setTitle(dashPrefs.getValue(titleKey, ""));
-        
-        numberOfAlerts =
-            new Integer(dashPrefs.getValue(countKey,
-                              dashPrefs.getValue(PropertiesForm.ALERT_NUMBER)));
 
-        past = Long.parseLong(dashPrefs.getValue(timeKey,
-                              dashPrefs.getValue(PropertiesForm.PAST)));
+        numberOfAlerts = new Integer(dashPrefs.getValue(countKey, dashPrefs.getValue(PropertiesForm.ALERT_NUMBER)));
 
-        priority = dashPrefs.getValue(priorityKey,
-                              dashPrefs.getValue(PropertiesForm.PRIORITY));
+        past = Long.parseLong(dashPrefs.getValue(timeKey, dashPrefs.getValue(PropertiesForm.PAST)));
 
-        selectedOrAll = dashPrefs.getValue(selOrAllKey,
-                            dashPrefs.getValue(PropertiesForm.SELECTED_OR_ALL));
+        priority = dashPrefs.getValue(priorityKey, dashPrefs.getValue(PropertiesForm.PRIORITY));
 
-        DashboardUtils.verifyResources(resKey,getServlet().getServletContext(), dashPrefs, user);
+        selectedOrAll = dashPrefs.getValue(selOrAllKey, dashPrefs.getValue(PropertiesForm.SELECTED_OR_ALL));
+
+        DashboardUtils.verifyResources(resKey, getServlet().getServletContext(), dashPrefs, user);
 
         pForm.setNumberOfAlerts(numberOfAlerts);
         pForm.setPast(past);
@@ -140,8 +125,7 @@ public class PrepareAction extends TilesAction {
         pForm.setSelectedOrAll(selectedOrAll);
 
         List<AppdefEntityID> entityIds = DashboardUtils.preferencesAsEntityIds(resKey, dashPrefs);
-        AppdefEntityID[] aeids = 
-            entityIds.toArray(new AppdefEntityID[entityIds.size()]);
+        AppdefEntityID[] aeids = entityIds.toArray(new AppdefEntityID[entityIds.size()]);
 
         PageControl pc = RequestUtils.getPageControl(request);
         PageList<AppdefResourceValue> resources = appdefBoss.findByIds(sessionId.intValue(), aeids, pc);

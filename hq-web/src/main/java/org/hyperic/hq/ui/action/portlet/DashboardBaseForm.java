@@ -31,33 +31,36 @@ import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.ui.action.BaseValidatorForm;
 
 /**
- * A subclass of <code>ValidatorForm</code> that adds convenience
- * methods for dealing with image-based form buttons.
+ * A subclass of <code>ValidatorForm</code> that adds convenience methods for
+ * dealing with image-based form buttons.
  */
-public class DashboardBaseForm extends BaseValidatorForm  {
+public class DashboardBaseForm
+    extends BaseValidatorForm {
 
     /** Holds value of property portletName. */
     private String _portletName;
     private String _token;
-    
-    //-------------------------------------constructors
+
+    // -------------------------------------constructors
 
     public DashboardBaseForm() {
         super();
     }
 
-    //-------------------------------------public methods
-    /** Getter for property portletName.
+    // -------------------------------------public methods
+    /**
+     * Getter for property portletName.
      * @return Value of property displayOnDash.
-     *
+     * 
      */
     public String getPortletName() {
         return _portletName;
     }
-    
-    /** Setter for property displayOnDash.
+
+    /**
+     * Setter for property displayOnDash.
      * @param removePortlet New value of property displayOnDash.
-     *
+     * 
      */
     public void setPortletName(String portletName) {
         _portletName = portletName;
@@ -76,5 +79,5 @@ public class DashboardBaseForm extends BaseValidatorForm  {
         _portletName = null;
         _token = null;
     }
-    
+
 }

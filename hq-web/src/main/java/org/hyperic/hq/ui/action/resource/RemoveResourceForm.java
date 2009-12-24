@@ -34,11 +34,12 @@ import org.apache.struts.action.ActionMapping;
 /**
  * removes a list of resources
  * 
- *
+ * 
  */
-public class RemoveResourceForm extends ResourceForm {
+public class RemoveResourceForm
+    extends ResourceForm {
 
-    //-------------------------------------instance variables
+    // -------------------------------------instance variables
 
     private Integer[] resources;
     protected Integer resourceType;
@@ -48,7 +49,7 @@ public class RemoveResourceForm extends ResourceForm {
         super();
     }
 
-    //-------------------------------------public methods
+    // -------------------------------------public methods
 
     public Integer getF() {
         return getResourceType();
@@ -66,23 +67,26 @@ public class RemoveResourceForm extends ResourceForm {
         setResources(r);
     }
 
-    /** Getter for property users.
+    /**
+     * Getter for property users.
      * @return Value of property users.
-     *
+     * 
      */
     public Integer[] getResources() {
-	return resources;
+        return resources;
     }
-    
-    /** Setter for property users.
+
+    /**
+     * Setter for property users.
      * @param users New value of property users.
-     *
+     * 
      */
     public void setResources(Integer[] resources) {
-	this.resources = resources;
+        this.resources = resources;
     }
-    
-    /** Returns the resourceType.
+
+    /**
+     * Returns the resourceType.
      * @return Integer
      */
     public Integer getResourceType() {
@@ -96,14 +100,17 @@ public class RemoveResourceForm extends ResourceForm {
     public void setResourceType(Integer resourceType) {
         this.resourceType = resourceType;
     }
-    /** Returns the resourceTypes.
+
+    /**
+     * Returns the resourceTypes.
      * @return List
      */
     public List getResourceTypes() {
         return resourceTypes;
     }
 
-    /** Sets the resourceTypes.
+    /**
+     * Sets the resourceTypes.
      * @param resourceTypes The resourceTypes to set
      */
     public void setResourceTypes(List resourceTypes) {

@@ -38,48 +38,49 @@ import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class SetDashboardAction extends org.hyperic.hq.ui.action.BaseAction {
+public class SetDashboardAction
+    extends org.hyperic.hq.ui.action.BaseAction {
     private AuthzBoss authzBoss;
-    
+
     @Autowired
-	public SetDashboardAction(AuthzBoss authzBoss) {
+    public SetDashboardAction(AuthzBoss authzBoss) {
         super();
         this.authzBoss = authzBoss;
     }
 
-    public ActionForward execute(ActionMapping mapping, ActionForm form,
-			HttpServletRequest request, HttpServletResponse response)
-			throws Exception {
-	
-		HttpSession session = request.getSession(false);
-		DashboardForm dForm = (DashboardForm) form;
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
+
+        HttpSession session = request.getSession(false);
+        DashboardForm dForm = (DashboardForm) form;
         WebUser user = RequestUtils.getWebUser(session);
-		
-		if (!isPropertyEmpty(dForm.getSelectedDashboardId())) {
-			//assign a selected dashboard
-			session.setAttribute(Constants.SELECTED_DASHBOARD_ID, new Integer(dForm.getSelectedDashboardId()));
-		}
-		if (!isPropertyEmpty(dForm.getDefaultDashboard())) {
-			String currentDefaultDashboardId = user.getPreference(Constants.DEFAULT_DASHBOARD_ID, null);
-			String submittedDefaultDashboardId = dForm.getDefaultDashboard();
-			
-			// Compare the incoming default dashboard id with the one we had in our user preferences
-			// If they aren't equal it means the user is changing it, so update
-			if (!submittedDefaultDashboardId.equals(currentDefaultDashboardId)) {
-				user.setPreference(Constants.DEFAULT_DASHBOARD_ID, dForm.getDefaultDashboard());
-				session.setAttribute(Constants.SELECTED_DASHBOARD_ID, new Integer(dForm.getDefaultDashboard()));
-				authzBoss.setUserPrefs(user.getSessionId(), user.getSubject().getId(), user.getPreferences());
-			}
-		}
-		return mapping.findForward(Constants.SUCCESS_URL);
-	}
-	
-	private boolean isPropertyEmpty(String property) {
-		if (property == null) {
-			return true;
-		} else if (property.equals("")) {
-			return true;
-		} else
-			return false;
-	}
+
+        if (!isPropertyEmpty(dForm.getSelectedDashboardId())) {
+            // assign a selected dashboard
+            session.setAttribute(Constants.SELECTED_DASHBOARD_ID, new Integer(dForm.getSelectedDashboardId()));
+        }
+        if (!isPropertyEmpty(dForm.getDefaultDashboard())) {
+            String currentDefaultDashboardId = user.getPreference(Constants.DEFAULT_DASHBOARD_ID, null);
+            String submittedDefaultDashboardId = dForm.getDefaultDashboard();
+
+            // Compare the incoming default dashboard id with the one we had in
+            // our user preferences
+            // If they aren't equal it means the user is changing it, so update
+            if (!submittedDefaultDashboardId.equals(currentDefaultDashboardId)) {
+                user.setPreference(Constants.DEFAULT_DASHBOARD_ID, dForm.getDefaultDashboard());
+                session.setAttribute(Constants.SELECTED_DASHBOARD_ID, new Integer(dForm.getDefaultDashboard()));
+                authzBoss.setUserPrefs(user.getSessionId(), user.getSubject().getId(), user.getPreferences());
+            }
+        }
+        return mapping.findForward(Constants.SUCCESS_URL);
+    }
+
+    private boolean isPropertyEmpty(String property) {
+        if (property == null) {
+            return true;
+        } else if (property.equals("")) {
+            return true;
+        } else
+            return false;
+    }
 }

@@ -45,33 +45,30 @@ import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.RequestUtils;
 
 /**
- * An Action that edits a compatible group's availability thresholds.
- * XXX waiting on PR: 6617 for actual backend implementation
+ * An Action that edits a compatible group's availability thresholds. XXX
+ * waiting on PR: 6617 for actual backend implementation
  */
-public class EditAvailabilityAction extends BaseAction {
+public class EditAvailabilityAction
+    extends BaseAction {
 
-    private final Log log = LogFactory.getLog(EditAvailabilityAction.class.getName()); 
+    private final Log log = LogFactory.getLog(EditAvailabilityAction.class.getName());
 
     /**
      * Add metrics to the resource specified in the given
      * <code>MonitoringAddMetricsForm</code>.
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-           
-        
-        GroupMonitoringConfigForm addForm = (GroupMonitoringConfigForm)form;
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
+
+        GroupMonitoringConfigForm addForm = (GroupMonitoringConfigForm) form;
         Integer resourceId = addForm.getRid();
         Integer resourceType = addForm.getType();
-      
+
         HashMap<String, Object> parms = new HashMap<String, Object>();
-        
+
         int id = resourceId.intValue();
-        int type = resourceType.intValue();      
-        
+        int type = resourceType.intValue();
+
         parms.put(Constants.RESOURCE_PARAM, new Integer(id));
         parms.put(Constants.RESOURCE_TYPE_ID_PARAM, new Integer(type));
 
@@ -79,16 +76,14 @@ public class EditAvailabilityAction extends BaseAction {
         if (forward != null) {
             return forward;
         }
-        
-        log.trace("Editing compatible group's availability thresholds.");
-        // XXX    mBoss.createMeasurements(sessionId.intValue(), 
-        //preapre the form here    appdefId, pendingMetricsIds);
 
-        RequestUtils.setConfirmation(request,
-            "resource.group.monitor.visibility.config.Availability.Confirmation");
+        log.trace("Editing compatible group's availability thresholds.");
+        // XXX mBoss.createMeasurements(sessionId.intValue(),
+        // preapre the form here appdefId, pendingMetricsIds);
+
+        RequestUtils.setConfirmation(request, "resource.group.monitor.visibility.config.Availability.Confirmation");
 
         return returnSuccess(request, mapping, parms);
-
 
     }
 }

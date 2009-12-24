@@ -31,42 +31,43 @@ import org.hyperic.hq.ui.action.BaseValidatorForm;
  * A subclass of <code>EditForm</code> representing the
  * <em>EditUserProperties</em> form.
  */
-public class EditForm extends BaseValidatorForm  {
+public class EditForm
+    extends BaseValidatorForm {
 
-    //-------------------------------------instance variables
+    // -------------------------------------instance variables
     private Integer id;
-    
+
     /** Holds value of property lastName. */
     private String lastName;
-    
+
     /** Holds value of property firstName. */
     private String firstName;
-    
+
     /** Holds value of property department. */
     private String department;
-    
+
     /** Holds value of property name. */
     private String name;
-    
+
     /** Holds value of property emailAddress. */
     private String emailAddress;
-    
+
     private boolean htmlEmail;
-    
+
     private String smsAddress;
-    
+
     /** Holds value of property phoneNumber. */
     private String phoneNumber;
-    
+
     /** Holds value of property enableLogin. */
     private String enableLogin;
-    
-    //-------------------------------------constructors
+
+    // -------------------------------------constructors
 
     public EditForm() {
     }
 
-    //-------------------------------------public methods
+    // -------------------------------------public methods
 
     public Integer getId() {
         return this.id;
@@ -76,86 +77,96 @@ public class EditForm extends BaseValidatorForm  {
         this.id = id;
     }
 
-    /** Getter for property lastName.
+    /**
+     * Getter for property lastName.
      * @return Value of property lastName.
-     *
+     * 
      */
     public String getLastName() {
         return this.lastName;
     }
-    
-    /** Setter for property lastName.
+
+    /**
+     * Setter for property lastName.
      * @param lastName New value of property lastName.
-     *
+     * 
      */
     public void setLastName(String lastName) {
         this.lastName = lastName;
     }
-    
-    /** Getter for property firstName.
+
+    /**
+     * Getter for property firstName.
      * @return Value of property firstName.
-     *
+     * 
      */
     public String getFirstName() {
         return this.firstName;
     }
-    
-    /** Setter for property firstName.
+
+    /**
+     * Setter for property firstName.
      * @param firstName New value of property firstName.
-     *
+     * 
      */
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
-    
-    /** Getter for property department.
+
+    /**
+     * Getter for property department.
      * @return Value of property department.
-     *
+     * 
      */
     public String getDepartment() {
         return this.department;
     }
-    
-    /** Setter for property department.
+
+    /**
+     * Setter for property department.
      * @param department New value of property department.
-     *
+     * 
      */
     public void setDepartment(String department) {
         this.department = department;
     }
-    
-    /** Getter for property userName.
+
+    /**
+     * Getter for property userName.
      * @return Value of property userName.
-     *
+     * 
      */
     public String getName() {
         return this.name;
     }
-    
-    /** Setter for property userName.
+
+    /**
+     * Setter for property userName.
      * @param userName New value of property userName.
-     *
+     * 
      */
     public void setName(String name) {
         this.name = name;
     }
-    
-    /** Getter for property email.
+
+    /**
+     * Getter for property email.
      * @return Value of property email.
-     *
+     * 
      */
     public String getEmailAddress() {
         return this.emailAddress;
     }
-    
-    /** Setter for property email.
+
+    /**
+     * Setter for property email.
      * @param email New value of property email.
-     *
+     * 
      */
     public void setEmailAddress(String emailAddress) {
         this.emailAddress = emailAddress.trim();
     }
-    
+
     public boolean isHtmlEmail() {
         return htmlEmail;
     }
@@ -164,60 +175,64 @@ public class EditForm extends BaseValidatorForm  {
         this.htmlEmail = htmlEmail;
     }
 
-    /** Getter for property phoneNumber.
+    /**
+     * Getter for property phoneNumber.
      * @return Value of property phoneNumber.
-     *
+     * 
      */
     public String getPhoneNumber() {
         return this.phoneNumber;
     }
-    
-    /** Setter for property phoneNumber.
+
+    /**
+     * Setter for property phoneNumber.
      * @param phoneNumber New value of property phoneNumber.
-     *
+     * 
      */
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
     }
 
-     /** Getter for property enableLogin.
+    /**
+     * Getter for property enableLogin.
      * @return Value of property enableLogin.
-     *
+     * 
      */
     public String getEnableLogin() {
         return this.enableLogin;
     }
-    
-    /** Setter for property enableLogin.
+
+    /**
+     * Setter for property enableLogin.
      * @param confirmPassword New value of property enableLogin.
-     *
+     * 
      */
     public void setEnableLogin(String enableLogin) {
         this.enableLogin = enableLogin;
     }
-    
+
     public String getSmsAddress() {
         return this.smsAddress;
     }
-    
+
     public void setSmsAddress(String add) {
         this.smsAddress = add;
     }
-    
-    //-------- form methods-------------------------
+
+    // -------- form methods-------------------------
 
     // for validation, please see web/WEB-INF/validation/validation.xml
 
     public String toString() {
         StringBuffer s = new StringBuffer();
         s.append("id=" + id + " ");
-        s.append("name=" + name + " firstName=" + firstName+ " ");
-        s.append("lastName=" + lastName + " emailAddress=" + emailAddress+ " ");        
+        s.append("name=" + name + " firstName=" + firstName + " ");
+        s.append("lastName=" + lastName + " emailAddress=" + emailAddress + " ");
         s.append("phoneNumber=" + phoneNumber + " ");
-        s.append("department=" + department + " " );
+        s.append("department=" + department + " ");
         s.append("enableLogin=" + enableLogin + " ");
-        s.append("smsAddress=" + smsAddress +  " ");
+        s.append("smsAddress=" + smsAddress + " ");
         return s.toString();
     }
-    
+
 }

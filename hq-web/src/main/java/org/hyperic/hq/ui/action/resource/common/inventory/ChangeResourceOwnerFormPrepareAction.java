@@ -49,44 +49,33 @@ import org.hyperic.util.pager.PageList;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * An Action that retrieves a resource and a list of subjects from the
- * BizApp to facility display of the <em>Change Resource Owner</em>
- * page.
+ * An Action that retrieves a resource and a list of subjects from the BizApp to
+ * facility display of the <em>Change Resource Owner</em> page.
  */
-public class ChangeResourceOwnerFormPrepareAction 
+public class ChangeResourceOwnerFormPrepareAction
     extends WorkflowPrepareAction {
 
-    private final  Log log = LogFactory
-    .getLog(ChangeResourceOwnerFormPrepareAction.class.getName());
+    private final Log log = LogFactory.getLog(ChangeResourceOwnerFormPrepareAction.class.getName());
     private AuthzBoss authzBoss;
-    
-    
+
     @Autowired
     public ChangeResourceOwnerFormPrepareAction(AuthzBoss authzBoss) {
         super();
         this.authzBoss = authzBoss;
     }
 
-
-
     /**
-     * Retrieve the full <code>List</code> of
-     * <code>AuthzSubjectValue</code> objects representing all users
-     * in the database excluding the owner of the resource identified by
-     * the request parameters <code>Constants.RESOURCE_PARAM</code>
-     * and <code>Constants.RESOURCE_TYPE_ID_PARAM</code> and store
-     * that list in in the <code>Constants.ALL_USERS_ATTR</code> request
-     * attribute. Also store the <code>AppdefResourceValue</code>
-     * itself in the <code>Constants.RESOURCE_ATTR</code> request
-     * attribute.
+     * Retrieve the full <code>List</code> of <code>AuthzSubjectValue</code>
+     * objects representing all users in the database excluding the owner of the
+     * resource identified by the request parameters
+     * <code>Constants.RESOURCE_PARAM</code> and
+     * <code>Constants.RESOURCE_TYPE_ID_PARAM</code> and store that list in in
+     * the <code>Constants.ALL_USERS_ATTR</code> request attribute. Also store
+     * the <code>AppdefResourceValue</code> itself in the
+     * <code>Constants.RESOURCE_ATTR</code> request attribute.
      */
-    public ActionForward workflow(ComponentContext context,
-                                  ActionMapping mapping,
-                                  ActionForm form,
-                                  HttpServletRequest request,
-                                  HttpServletResponse response)
-        throws Exception {
-       
+    public ActionForward workflow(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                  HttpServletRequest request, HttpServletResponse response) throws Exception {
 
         ChangeResourceOwnerForm changeForm = (ChangeResourceOwnerForm) form;
         Integer resourceId = changeForm.getRid();
@@ -107,18 +96,15 @@ public class ChangeResourceOwnerFormPrepareAction
         changeForm.setRid(resource.getId());
         changeForm.setType(new Integer(resource.getEntityId().getType()));
 
-        Object resourceOwner =
-            request.getAttribute(Constants.RESOURCE_OWNER_ATTR);
-        
+        Object resourceOwner = request.getAttribute(Constants.RESOURCE_OWNER_ATTR);
+
         if (resourceOwner == null) {
-            RequestUtils.setError(request,
-                                  "resource.common.inventory.error.ResourceOwnerNotFound");
+            RequestUtils.setError(request, "resource.common.inventory.error.ResourceOwnerNotFound");
             return null;
         }
 
         Integer sessionId = RequestUtils.getSessionId(request);
         PageControl pc = RequestUtils.getPageControl(request);
-       
 
         log.trace("getting all users");
         PageList<AuthzSubjectValue> allUsers = authzBoss.getAllSubjects(sessionId, null, pc);
@@ -129,10 +115,8 @@ public class ChangeResourceOwnerFormPrepareAction
         List<AuthzSubjectValue> users = BizappUtils.grepSubjects(allUsers, owner);
 
         request.setAttribute(Constants.ALL_USERS_ATTR, users);
-        request.setAttribute(Constants.NUM_USERS_ATTR,
-        new Integer( allUsers.getTotalSize() -1 ));
+        request.setAttribute(Constants.NUM_USERS_ATTR, new Integer(allUsers.getTotalSize() - 1));
 
-        
         return null;
     }
 }

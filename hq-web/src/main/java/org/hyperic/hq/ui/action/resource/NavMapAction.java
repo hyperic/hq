@@ -47,15 +47,15 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * Action class to figure out which page to go to based on a
- * navigation map click of a resource and the previous page.
- *
+ * Action class to figure out which page to go to based on a navigation map
+ * click of a resource and the previous page.
+ * 
  */
-public class NavMapAction extends BaseAction {
+public class NavMapAction
+    extends BaseAction {
     private VisibilityPortalAction visibilityPortalAction;
     private AppdefBoss appdefBoss;
-    
-    
+
     @Autowired
     public NavMapAction(VisibilityPortalAction visibilityPortalAction, AppdefBoss appdefBoss) {
         super();
@@ -65,76 +65,63 @@ public class NavMapAction extends BaseAction {
 
     // ---------------------------------------------------- Public Methods
 
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception
-    {
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
         // this is the base of the forward path
         String defaultPageUrl = request.getParameter("defaultPage");
-        
+
         String mode = request.getParameter("currentMode");
 
         AppdefEntityID[] eids = RequestUtils.getEntityIds(request);
-        
-       
-        Integer sessionId = RequestUtils.getSessionId(request); 
-        
-        
+
+        Integer sessionId = RequestUtils.getSessionId(request);
+
         String resType = AppdefEntityConstants.typeToString(eids[0].getType());
-    
-      
+
         AppdefResourceValue resVal = appdefBoss.findById(sessionId.intValue(), eids[0]);
-        
+
         boolean useDefaultPage = useDefaultPage(request, resVal);
         String currentResType = request.getParameter("currentResType");
 
-        String ctype =
-            RequestUtils.getStringParameter(request,
-                                            Constants.CHILD_RESOURCE_TYPE_ID_PARAM,
-                                            null);
-                                                     
+        String ctype = RequestUtils.getStringParameter(request, Constants.CHILD_RESOURCE_TYPE_ID_PARAM, null);
+
         /**
-         * we are only inserting the autogrouptype for applications. These changes
-         * are not done due to the fact that we are late in 1.0.3 release. We should
-         * use autogrouptypes for all resources for 1.1 release.
-         */                                                     
-        String autogrouptype =
-            RequestUtils.getStringParameter(request,
-                                            Constants.AUTOGROUP_TYPE_ID_PARAM,
-                                            null);
+         * we are only inserting the autogrouptype for applications. These
+         * changes are not done due to the fact that we are late in 1.0.3
+         * release. We should use autogrouptypes for all resources for 1.1
+         * release.
+         */
+        String autogrouptype = RequestUtils.getStringParameter(request, Constants.AUTOGROUP_TYPE_ID_PARAM, null);
         if (autogrouptype != null) {
             ctype = autogrouptype;
         }
-            
-        HashMap<String, Object> params = new HashMap<String,Object>();
+
+        HashMap<String, Object> params = new HashMap<String, Object>();
         if (null == eids) {
             // platform auto-group
             params.put(Constants.CHILD_RESOURCE_TYPE_ID_PARAM, ctype);
         } else {
             if (null == ctype && autogrouptype == null) {
                 // individual resource or group
-                params.put( Constants.RESOURCE_PARAM, new Integer( eids[0].getID() ) );
-                params.put( Constants.RESOURCE_TYPE_ID_PARAM, new Integer( eids[0].getType() ) );
+                params.put(Constants.RESOURCE_PARAM, new Integer(eids[0].getID()));
+                params.put(Constants.RESOURCE_TYPE_ID_PARAM, new Integer(eids[0].getType()));
             } else {
-                // server / service auto-group 
-                params.put( Constants.ENTITY_ID_PARAM, BizappUtils.stringifyEntityIds(eids) );
+                // server / service auto-group
+                params.put(Constants.ENTITY_ID_PARAM, BizappUtils.stringifyEntityIds(eids));
                 params.put(Constants.CHILD_RESOURCE_TYPE_ID_PARAM, ctype);
-				// add the autogroup type if available
+                // add the autogroup type if available
                 if (autogrouptype != null) {
                     params.put(Constants.AUTOGROUP_TYPE_ID_PARAM, autogrouptype);
                 }
-                
+
                 // need to set the auto-group type - this type is not part
                 // of the resource type
                 resType = AppdefEntityConstants.typeToString(AppdefEntityConstants.APPDEF_TYPE_AUTOGROUP);
-                
+
                 // send auto-group resource to defaulg page if the mode
-                // is not resourceMetrics  
-                if ( !( Constants.MONITOR_VISIBILITY_LOC.equalsIgnoreCase(currentResType) 
-                            && Constants.MODE_MON_RES_METS.equalsIgnoreCase(mode) ) )
-                {
+                // is not resourceMetrics
+                if (!(Constants.MONITOR_VISIBILITY_LOC.equalsIgnoreCase(currentResType) && Constants.MODE_MON_RES_METS
+                    .equalsIgnoreCase(mode))) {
                     // send to default page
                     useDefaultPage = true;
                 }
@@ -142,53 +129,43 @@ public class NavMapAction extends BaseAction {
         }
 
         ActionForward forward = null;
-        if (!useDefaultPage)
-        {
+        if (!useDefaultPage) {
             params.put(Constants.MODE_PARAM, mode);
-        
-            if (Constants.ALERT_LOC.equalsIgnoreCase(currentResType) || 
-                 Constants.ALERT_CONFIG_LOC.equalsIgnoreCase(currentResType))
-            {
-                forward = new ActionForward("lastpage", 
-                            currentResType, /*redirect*/true);
-            }
-            else
-               forward = new ActionForward("lastpage", 
-                        "/resource/" + resType + "/" + currentResType, /*redirect*/true);
-        }
-        else // send to the default page
-            forward = new ActionForward("lastpage", defaultPageUrl, /*redirect*/true);
-            
+
+            if (Constants.ALERT_LOC.equalsIgnoreCase(currentResType) ||
+                Constants.ALERT_CONFIG_LOC.equalsIgnoreCase(currentResType)) {
+                forward = new ActionForward("lastpage", currentResType, /* redirect */true);
+            } else
+                forward = new ActionForward("lastpage", "/resource/" + resType + "/" + currentResType, /* redirect */
+                    true);
+        } else
+            // send to the default page
+            forward = new ActionForward("lastpage", defaultPageUrl, /* redirect */true);
+
         forward = ActionUtils.changeForwardPath(forward, params);
 
         return forward;
     }
 
-    protected boolean useDefaultPage(HttpServletRequest request,
-                                     AppdefResourceValue resVal)
-        throws Exception {
+    protected boolean useDefaultPage(HttpServletRequest request, AppdefResourceValue resVal) throws Exception {
         String mode = request.getParameter("currentMode");
 
         // not current Resource Type specified
         String currentResType = request.getParameter("currentResType");
-            
+
         // check if the Resource supports the mode
         return !isValidResourceMode(resVal, mode, currentResType);
     }
-    
+
     /**
      * contains a map of valid modes for a given resource
      */
-    protected boolean isValidResourceMode(AppdefResourceValue resVal, String mode,
-                                          String currentResType)
-    {
+    protected boolean isValidResourceMode(AppdefResourceValue resVal, String mode, String currentResType) {
         // application controller
-        if (resVal.getEntityId().getType() ==
-            AppdefEntityConstants.APPDEF_TYPE_APPLICATION) {
-            
-            if (Constants.MONITOR_VISIBILITY_LOC
-                    .equalsIgnoreCase(currentResType)) {
-             
+        if (resVal.getEntityId().getType() == AppdefEntityConstants.APPDEF_TYPE_APPLICATION) {
+
+            if (Constants.MONITOR_VISIBILITY_LOC.equalsIgnoreCase(currentResType)) {
+
                 Map tabs = visibilityPortalAction.getKeyMethodMap();
 
                 if (!tabs.containsKey(mode)) {
@@ -203,9 +180,8 @@ public class NavMapAction extends BaseAction {
                 return false;
             }
         }
-        
-        // by default a resource supports all modes    
+
+        // by default a resource supports all modes
         return currentResType != null && !"".equalsIgnoreCase(currentResType);
     }
 }
-

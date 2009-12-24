@@ -39,8 +39,8 @@ import org.hyperic.hq.ui.action.resource.ResourceForm;
 import org.hyperic.hq.ui.util.RequestUtils;
 
 /**
- * An Action that retrieves data from the BizApp to facilitate display
- * of the form for editing a resource's general properties.
+ * An Action that retrieves data from the BizApp to facilitate display of the
+ * form for editing a resource's general properties.
  */
 public class EditResourceGeneralPropertiesFormPrepareAction
     extends WorkflowPrepareAction {
@@ -48,21 +48,17 @@ public class EditResourceGeneralPropertiesFormPrepareAction
     /**
      * Retrieve the data necessary to display the
      * <code>GeneralPropertiesForm</code> page.
-     *
+     * 
      */
-    public ActionForward workflow(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-        
+    public ActionForward workflow(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                  HttpServletRequest request, HttpServletResponse response) throws Exception {
+
         AppdefResourceValue resource = RequestUtils.getResource(request);
         if (resource == null) {
             RequestUtils.setError(request, Constants.ERR_RESOURCE_NOT_FOUND);
             return null;
         }
-        
+
         ResourceForm resourceForm = (ResourceForm) form;
         resourceForm.loadResourceValue(resource);
 

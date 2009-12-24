@@ -16,19 +16,16 @@ import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.action.resource.common.control.ResourceControlController;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class PlatformControllerAction extends ResourceControlController {
-    
-    
+public class PlatformControllerAction
+    extends ResourceControlController {
+
     @Autowired
     public PlatformControllerAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss) {
         super(appdefBoss, authzBoss, controlBoss);
     }
 
-    public ActionForward currentControlStatus(ActionMapping mapping,
-                                              ActionForm form,
-                                              HttpServletRequest request,
-                                              HttpServletResponse response)
-    throws Exception {
+    public ActionForward currentControlStatus(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                              HttpServletResponse response) throws Exception {
         List<String> portlets = new ArrayList<String>();
         Portal portal = new Portal();
 
@@ -41,11 +38,8 @@ public class PlatformControllerAction extends ResourceControlController {
         return null;
     }
 
-    public ActionForward controlStatusHistory(ActionMapping mapping,
-                                              ActionForm form,
-                                              HttpServletRequest request,
-                                              HttpServletResponse response) 
-    throws Exception {
+    public ActionForward controlStatusHistory(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                              HttpServletResponse response) throws Exception {
         List<String> portlets = new ArrayList<String>();
         Portal portal = new Portal();
 
@@ -58,11 +52,8 @@ public class PlatformControllerAction extends ResourceControlController {
         return null;
     }
 
-    public ActionForward controlStatusHistoryDetail(ActionMapping mapping,
-                                                    ActionForm form,
-                                                    HttpServletRequest request,
-                                                    HttpServletResponse response) 
-    throws Exception {
+    public ActionForward controlStatusHistoryDetail(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                                    HttpServletResponse response) throws Exception {
         List<String> portlets = new ArrayList<String>();
         Portal portal = new Portal();
 
@@ -76,33 +67,27 @@ public class PlatformControllerAction extends ResourceControlController {
         portal.setDialog(true);
 
         super.controlStatusHistoryDetail(mapping, form, request, response, portal);
-        
+
         return null;
     }
 
-    public ActionForward newScheduledControlAction(ActionMapping mapping,
-                                                   ActionForm form,
-                                                   HttpServletRequest request,
-                                                   HttpServletResponse response) 
-    throws Exception {
+    public ActionForward newScheduledControlAction(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                                   HttpServletResponse response) throws Exception {
         Portal portal = Portal.createPortal("resource.server.Control.PageTitle.New", ".resource.server.control.new");
         portal.setDialog(true);
 
         super.newScheduledControlAction(mapping, form, request, response, portal);
-        
+
         return null;
     }
 
-    public ActionForward editScheduledControlAction(ActionMapping mapping,
-                                                    ActionForm form,
-                                                    HttpServletRequest request,
-                                                    HttpServletResponse response) 
-    throws Exception {
+    public ActionForward editScheduledControlAction(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                                    HttpServletResponse response) throws Exception {
         Portal portal = Portal.createPortal("resource.server.Control.PageTitle.Edit", ".resource.server.control.edit");
         portal.setDialog(true);
 
         super.editScheduledControlAction(mapping, form, request, response, portal);
-        
+
         return null;
     }
 }

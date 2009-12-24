@@ -57,34 +57,26 @@ import org.springframework.beans.factory.annotation.Autowired;
  * This populates the AutoGroupConfigMetrics/Update metrics pages' request
  * attributes.
  */
-public class AutoGroupConfigMetricsFormPrepareAction 
+public class AutoGroupConfigMetricsFormPrepareAction
     extends ConfigMetricsFormPrepareAction {
 
-    private final Log log = LogFactory.getLog(AutoGroupConfigMetricsFormPrepareAction.class.getName());  
-    
-    
+    private final Log log = LogFactory.getLog(AutoGroupConfigMetricsFormPrepareAction.class.getName());
+
     @Autowired
     public AutoGroupConfigMetricsFormPrepareAction(MeasurementBoss measurementBoss, AppdefBoss appdefBoss) {
         super(measurementBoss, appdefBoss);
     }
 
-
-
     /**
      * Retrieve different resource metrics and store them in various request
      * attributes.
      */
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
 
         log.trace("Preparing auto-group resource metrics action.");
 
         int sessionId = RequestUtils.getSessionId(request).intValue();
-       
 
         // auto-group specific prepare actions here
         InventoryHelper helper = null;
@@ -103,7 +95,7 @@ public class AutoGroupConfigMetricsFormPrepareAction
             // platforms
             helper = new RootInventoryHelper();
         }
-        
+
         AppdefEntityTypeID childTypeId;
         try {
             childTypeId = RequestUtils.getChildResourceTypeId(request);
@@ -114,14 +106,13 @@ public class AutoGroupConfigMetricsFormPrepareAction
             throw e1;
         }
         ServletContext ctx = getServlet().getServletContext();
-        AppdefResourceType selectedType =
-            helper.getChildResourceType(request, ctx, childTypeId);
+        AppdefResourceType selectedType = helper.getChildResourceType(request, ctx, childTypeId);
         request.setAttribute(Constants.CHILD_RESOURCE_TYPE_ATTR, selectedType);
 
         AppdefEntityID appdefId = RequestUtils.getEntityId(request);
-                
+
         int totalSize = 0;
-        
+
         // check to see if monitoring is configured for this resource
         helper = InventoryHelper.getHelper(appdefId);
         boolean configEnabled = true;
@@ -130,43 +121,33 @@ public class AutoGroupConfigMetricsFormPrepareAction
         } finally {
             log.debug("config enabled: " + configEnabled);
         }
-        request.setAttribute(Constants.MONITOR_ENABLED_ATTR,
-                             new Boolean(configEnabled));            
+        request.setAttribute(Constants.MONITOR_ENABLED_ATTR, new Boolean(configEnabled));
 
         // obtain the different categories of measurements
-        log.debug("obtaining metrics for resource " + appdefId +
-                  " autogroup type " + childTypeId);
-        List<MetricConfigSummary> availMetrics =
-            measurementBoss.findEnabledAGMeasurements(sessionId, appdefId, childTypeId,
-            MeasurementConstants.CAT_AVAILABILITY, PageControl.PAGE_ALL);
-        request.setAttribute(Constants.CAT_AVAILABILITY_METRICS_ATTR,
-                             availMetrics);
+        log.debug("obtaining metrics for resource " + appdefId + " autogroup type " + childTypeId);
+        List<MetricConfigSummary> availMetrics = measurementBoss.findEnabledAGMeasurements(sessionId, appdefId,
+            childTypeId, MeasurementConstants.CAT_AVAILABILITY, PageControl.PAGE_ALL);
+        request.setAttribute(Constants.CAT_AVAILABILITY_METRICS_ATTR, availMetrics);
         totalSize += availMetrics.size();
-        
-        List<MetricConfigSummary> perfMetrics =
-            measurementBoss.findEnabledAGMeasurements(sessionId, appdefId, childTypeId, 
-            MeasurementConstants.CAT_PERFORMANCE, PageControl.PAGE_ALL);
-        request.setAttribute(Constants.CAT_PERFORMANCE_METRICS_ATTR,
-                             perfMetrics);
+
+        List<MetricConfigSummary> perfMetrics = measurementBoss.findEnabledAGMeasurements(sessionId, appdefId,
+            childTypeId, MeasurementConstants.CAT_PERFORMANCE, PageControl.PAGE_ALL);
+        request.setAttribute(Constants.CAT_PERFORMANCE_METRICS_ATTR, perfMetrics);
         totalSize += perfMetrics.size();
-        
-        List<MetricConfigSummary> throughMetrics =
-            measurementBoss.findEnabledAGMeasurements(sessionId, appdefId, childTypeId, 
-            MeasurementConstants.CAT_THROUGHPUT, PageControl.PAGE_ALL);
-        request.setAttribute(Constants.CAT_THROUGHPUT_METRICS_ATTR,
-                             throughMetrics);
+
+        List<MetricConfigSummary> throughMetrics = measurementBoss.findEnabledAGMeasurements(sessionId, appdefId,
+            childTypeId, MeasurementConstants.CAT_THROUGHPUT, PageControl.PAGE_ALL);
+        request.setAttribute(Constants.CAT_THROUGHPUT_METRICS_ATTR, throughMetrics);
         totalSize += throughMetrics.size();
-        
-        List<MetricConfigSummary> utilMetrics =
-            measurementBoss.findEnabledAGMeasurements(sessionId, appdefId, childTypeId,
-            MeasurementConstants.CAT_UTILIZATION, PageControl.PAGE_ALL);
-        request.setAttribute(Constants.CAT_UTILIZATION_METRICS_ATTR,
-                             utilMetrics);
+
+        List<MetricConfigSummary> utilMetrics = measurementBoss.findEnabledAGMeasurements(sessionId, appdefId,
+            childTypeId, MeasurementConstants.CAT_UTILIZATION, PageControl.PAGE_ALL);
+        request.setAttribute(Constants.CAT_UTILIZATION_METRICS_ATTR, utilMetrics);
         totalSize += utilMetrics.size();
-        
+
         // set total size as aggregate of all
         request.setAttribute(Constants.LIST_SIZE_ATTR, new Integer(totalSize));
-        
+
         log.debug("Successfully completed preparing Config Metrics");
 
         return null;

@@ -43,34 +43,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * An <code>Action</code> that sets up the Resource Hub portal.
  */
-public class DetermineLocationAction extends BaseAction {
+public class DetermineLocationAction
+    extends BaseAction {
 
-  private AppdefBoss appdefBoss;
-  
-   
-  @Autowired
+    private AppdefBoss appdefBoss;
+
+    @Autowired
     public DetermineLocationAction(AppdefBoss appdefBoss) {
-    super();
-    this.appdefBoss = appdefBoss;
-}
-
-
+        super();
+        this.appdefBoss = appdefBoss;
+    }
 
     /**
      * determines what resource default page to go to.
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-        
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
-        // We need to support auto-groups here, too.  If there's a
+        // We need to support auto-groups here, too. If there's a
         // ctype, we'll assume it's an autogroup.
-        String ctype = RequestUtils.getStringParameter(
-            request, Constants.CHILD_RESOURCE_TYPE_ID_PARAM, null);
-        
+        String ctype = RequestUtils.getStringParameter(request, Constants.CHILD_RESOURCE_TYPE_ID_PARAM, null);
+
         String type = null;
         if (null == ctype) {
             // non-autogroup
@@ -78,11 +71,10 @@ public class DetermineLocationAction extends BaseAction {
 
             type = AppdefEntityConstants.typeToString(aeid.getType());
 
-            if(aeid.isGroup()){
+            if (aeid.isGroup()) {
                 int sessionId = RequestUtils.getSessionId(request).intValue();
-              
-                AppdefGroupValue group =
-                    appdefBoss.findGroup(sessionId, aeid.getId());
+
+                AppdefGroupValue group = appdefBoss.findGroup(sessionId, aeid.getId());
 
                 if (AppdefEntityConstants.isGroupAdhoc(group.getGroupType())) {
                     type = "adhocGroup";
@@ -92,11 +84,9 @@ public class DetermineLocationAction extends BaseAction {
             }
         } else {
             // autogroup
-            type = AppdefEntityConstants.typeToString(
-                AppdefEntityConstants.APPDEF_TYPE_AUTOGROUP);
+            type = AppdefEntityConstants.typeToString(AppdefEntityConstants.APPDEF_TYPE_AUTOGROUP);
         }
 
         return mapping.findForward(type);
     }
 }
-

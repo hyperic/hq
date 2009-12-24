@@ -49,14 +49,14 @@ import org.hyperic.util.pager.PageControl;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * An Action that retrieves data from the BizApp to facilitate display
- * of the form for creating a platform.
+ * An Action that retrieves data from the BizApp to facilitate display of the
+ * form for creating a platform.
  */
-public class NewPlatformFormPrepareAction extends TilesAction {
+public class NewPlatformFormPrepareAction
+    extends TilesAction {
 
     private AppdefBoss appdefBoss;
-    
-    
+
     @Autowired
     public NewPlatformFormPrepareAction(AppdefBoss appdefBoss) {
         super();
@@ -64,26 +64,19 @@ public class NewPlatformFormPrepareAction extends TilesAction {
     }
 
     /**
-     * Retrieve data necessary to display the
-     * <code>NewPlatformForm</code>.
+     * Retrieve data necessary to display the <code>NewPlatformForm</code>.
      */
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-       
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
+
         PlatformForm newForm = (PlatformForm) form;
 
-       
         Integer sessionId = RequestUtils.getSessionId(request);
-        
 
         List<PlatformTypeValue> resourceTypes = new ArrayList<PlatformTypeValue>();
         List<PlatformTypeValue> platformTypes = appdefBoss.findAllPlatformTypes(sessionId.intValue(),
-                                                       PageControl.PAGE_ALL);
-        //XXX need a finder for device types, this will do for the moment.
+            PageControl.PAGE_ALL);
+        // XXX need a finder for device types, this will do for the moment.
         for (PlatformTypeValue pType : platformTypes) {
             if (PlatformDetector.isSupportedPlatform(pType.getName())) {
                 continue;
@@ -92,9 +85,7 @@ public class NewPlatformFormPrepareAction extends TilesAction {
         }
         newForm.setResourceTypes(resourceTypes);
 
-        BizappUtils.populateAgentConnections(sessionId.intValue(),
-                                             appdefBoss, request,
-                                             newForm, "");
+        BizappUtils.populateAgentConnections(sessionId.intValue(), appdefBoss, request, newForm, "");
 
         // respond to an add or remove click- we do this here
         // rather than in NewPlatformAction because in between
@@ -104,7 +95,7 @@ public class NewPlatformFormPrepareAction extends TilesAction {
 
         if (newForm.isAddClicked()) {
             int nextIndex = newForm.getNumIps();
-            for (int i=0; i<nextIndex+1; i++) {
+            for (int i = 0; i < nextIndex + 1; i++) {
                 IpValue oldIp = newForm.getIp(i);
                 if (oldIp == null) {
                     newForm.setIp(i, new IpValue());
@@ -112,35 +103,30 @@ public class NewPlatformFormPrepareAction extends TilesAction {
             }
 
             newForm.setNumIps(nextIndex + 1);
-        }
-        else if (newForm.isRemoveClicked()) {
+        } else if (newForm.isRemoveClicked()) {
             int ri = Integer.parseInt(newForm.getRemove().getX());
 
             IpValue[] oldIps = newForm.getIps();
             if (oldIps != null) {
                 // remove the indicated ip, leaving all others
                 // intact
-                ArrayList<IpValue> oldIpsList =
-                    new ArrayList<IpValue>(Arrays.asList(oldIps));
+                ArrayList<IpValue> oldIpsList = new ArrayList<IpValue>(Arrays.asList(oldIps));
                 oldIpsList.remove(ri);
-                IpValue[] newIps =
-                     oldIpsList.toArray(new IpValue[0]);
+                IpValue[] newIps = oldIpsList.toArray(new IpValue[0]);
 
                 // automatically sets numIps
                 newForm.setIps(newIps);
-            }
-            else {
+            } else {
                 // should never happen, but if it does, reset to a
                 // single ip
                 resetFormIps(newForm);
             }
-        }
-        else if (! newForm.isOkClicked()) {
+        } else if (!newForm.isOkClicked()) {
             // reset to a single ip
             resetFormIps(newForm);
         }
         // the OSType dropdown is editable in new create mode hence the true
-        request.setAttribute(Constants.PLATFORM_OS_EDITABLE, Boolean.TRUE); 
+        request.setAttribute(Constants.PLATFORM_OS_EDITABLE, Boolean.TRUE);
         return null;
     }
 

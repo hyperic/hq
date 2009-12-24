@@ -43,12 +43,12 @@ import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class ModifyAction extends BaseAction {
-    
+public class ModifyAction
+    extends BaseAction {
+
     private ConfigurationProxy configurationProxy;
     private AuthzBoss authzBoss;
-    
-    
+
     @Autowired
     public ModifyAction(ConfigurationProxy configurationProxy, AuthzBoss authzBoss) {
         super();
@@ -56,23 +56,16 @@ public class ModifyAction extends BaseAction {
         this.authzBoss = authzBoss;
     }
 
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
-
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-
-       
         PropertiesForm pForm = (PropertiesForm) form;
         HttpSession session = request.getSession();
         WebUser user = SessionUtils.getWebUser(session);
-        DashboardConfig dashConfig = DashboardUtils.findDashboard(
-        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, authzBoss);
+        DashboardConfig dashConfig = DashboardUtils.findDashboard((Integer) session
+            .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
- 
+
         String forwardStr = Constants.SUCCESS_URL;
 
         String token = pForm.getToken();
@@ -80,18 +73,17 @@ public class ModifyAction extends BaseAction {
         String numKey = PropertiesForm.NUM_TO_SHOW;
         String resKey = PropertiesForm.RESOURCES;
         String titleKey = PropertiesForm.TITLE;
-        
+
         if (token != null) {
             resKey += token;
             numKey += token;
             titleKey += token;
         }
 
-        if(pForm.isRemoveClicked()){
+        if (pForm.isRemoveClicked()) {
             DashboardUtils.removeResources(pForm.getIds(), resKey, dashPrefs);
             forwardStr = "review";
-            configurationProxy.setDashboardPreferences(session,
-					user, dashPrefs);
+            configurationProxy.setDashboardPreferences(session, user, dashPrefs);
         }
 
         ActionForward forward = checkSubmit(request, mapping, form);
@@ -101,12 +93,11 @@ public class ModifyAction extends BaseAction {
         }
 
         Integer numberToShow = pForm.getNumberToShow();
-      
+
         dashPrefs.setValue(numKey, numberToShow.toString());
         dashPrefs.setValue(titleKey, pForm.getTitle());
-        
-        configurationProxy.setDashboardPreferences(session, user,
-				 dashPrefs);
+
+        configurationProxy.setDashboardPreferences(session, user, dashPrefs);
 
         session.removeAttribute(Constants.USERS_SES_PORTAL);
 

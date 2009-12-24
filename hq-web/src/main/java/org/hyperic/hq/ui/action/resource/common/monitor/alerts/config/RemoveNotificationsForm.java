@@ -29,9 +29,10 @@ import org.hyperic.hq.ui.action.resource.ResourceForm;
 
 /**
  * Form for removing notifications for alerts
- *
+ * 
  */
-public class RemoveNotificationsForm extends ResourceForm  {
+public class RemoveNotificationsForm
+    extends ResourceForm {
     public static final String ROLES = "Roles";
     public static final String USERS = "Users";
     public static final String OTHERS = "Others";
@@ -42,14 +43,14 @@ public class RemoveNotificationsForm extends ResourceForm  {
     private Integer[] users;
     private Integer[] roles;
     private String[] emails;
-    
+
     public RemoveNotificationsForm() {
     }
 
     public Integer getAd() {
         return this.ad;
     }
-    
+
     public void setAd(Integer ad) {
         this.ad = ad;
     }
@@ -77,11 +78,11 @@ public class RemoveNotificationsForm extends ResourceForm  {
     public void setEmails(String[] emails) {
         this.emails = emails;
     }
-    
+
     public String getAetid() {
         return aetid;
     }
-    
+
     public void setAetid(String aetid) {
         this.aetid = aetid;
     }

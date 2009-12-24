@@ -55,24 +55,22 @@ import org.hyperic.util.pager.PageList;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * A <code>ResourceControllerAction</code> that sets up server
- * inventory portals.
+ * A <code>ResourceControllerAction</code> that sets up server inventory
+ * portals.
  */
-public class ServiceInventoryPortalAction extends ResourceInventoryPortalAction {
+public class ServiceInventoryPortalAction
+    extends ResourceInventoryPortalAction {
 
     /**
-     * The request scope attribute under which actions store the
-     * full <code>List</code> of <code>EmptyValue</code>
-     * objects.
+     * The request scope attribute under which actions store the full
+     * <code>List</code> of <code>EmptyValue</code> objects.
      * 
      * temporary list - (will remove - implementing the groups.)
      */
     public static final String EMPTY_VALS_ATTR = "EmptyValues";
-    
-    private final Log log =
-        LogFactory.getLog(ServerInventoryPortalAction.class.getName());
-       
-    
+
+    private final Log log = LogFactory.getLog(ServerInventoryPortalAction.class.getName());
+
     @Autowired
     public ServiceInventoryPortalAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss) {
         super(appdefBoss, authzBoss, controlBoss);
@@ -80,43 +78,35 @@ public class ServiceInventoryPortalAction extends ResourceInventoryPortalAction 
 
     protected Properties getKeyMethodMap() {
         Properties map = new Properties();
-        map.setProperty(Constants.MODE_NEW,         "newResource");
-        map.setProperty(Constants.MODE_EDIT,        "editResourceGeneral");
+        map.setProperty(Constants.MODE_NEW, "newResource");
+        map.setProperty(Constants.MODE_EDIT, "editResourceGeneral");
         map.setProperty(Constants.MODE_EDIT_CONFIG, "editConfig");
-        map.setProperty(Constants.MODE_VIEW,        "viewResource");
-        map.setProperty(Constants.MODE_ADD_GROUPS,  "addGroups");
-        map.setProperty(Constants.MODE_CHANGE_OWNER,"changeOwner");
+        map.setProperty(Constants.MODE_VIEW, "viewResource");
+        map.setProperty(Constants.MODE_ADD_GROUPS, "addGroups");
+        map.setProperty(Constants.MODE_CHANGE_OWNER, "changeOwner");
         return map;
     }
 
-    public ActionForward newResource(ActionMapping mapping,
-                                     ActionForm form,
-                                     HttpServletRequest request,
-                                     HttpServletResponse response)
-        throws Exception {
+    public ActionForward newResource(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                     HttpServletResponse response) throws Exception {
 
         setResource(request);
 
-        Portal portal = Portal
-             .createPortal("resource.service.inventory.NewServiceTitle",
-                          ".resource.service.inventory.NewService");
+        Portal portal = Portal.createPortal("resource.service.inventory.NewServiceTitle",
+            ".resource.service.inventory.NewService");
         portal.setDialog(true);
         request.setAttribute(Constants.PORTAL_KEY, portal);
 
         return null;
     }
 
-    public ActionForward editResourceGeneral(ActionMapping mapping,
-                                     ActionForm form,
-                                     HttpServletRequest request,
-                                     HttpServletResponse response)
-        throws Exception {
+    public ActionForward editResourceGeneral(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                             HttpServletResponse response) throws Exception {
 
         setResource(request);
 
-        Portal portal = Portal
-             .createPortal("resource.service.inventory.EditGeneralPropertiesTitle",
-                          ".resource.service.inventory.EditGeneralProperties");
+        Portal portal = Portal.createPortal("resource.service.inventory.EditGeneralPropertiesTitle",
+            ".resource.service.inventory.EditGeneralProperties");
         portal.setDialog(true);
         request.setAttribute(Constants.PORTAL_KEY, portal);
 
@@ -124,118 +114,92 @@ public class ServiceInventoryPortalAction extends ResourceInventoryPortalAction 
         AppdefResourceValue service = RequestUtils.getResource(request);
 
         Integer sessionId = RequestUtils.getSessionId(request);
-       
-        appdefBoss
-            .findServerByService(sessionId.intValue(), service.getId());
-        
+
+        appdefBoss.findServerByService(sessionId.intValue(), service.getId());
+
         return null;
     }
 
-    public ActionForward viewResource(ActionMapping mapping,
-                                      ActionForm form,
-                                      HttpServletRequest request,
-                                      HttpServletResponse response)
-        throws Exception {
+    public ActionForward viewResource(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                      HttpServletResponse response) throws Exception {
 
         findAndSetResource(request);
-                
-        Portal portal = Portal
-            .createPortal("resource.service.inventory.ViewServiceTitle",
-                          ".resource.service.inventory.ViewService");
+
+        Portal portal = Portal.createPortal("resource.service.inventory.ViewServiceTitle",
+            ".resource.service.inventory.ViewService");
         request.setAttribute(Constants.PORTAL_KEY, portal);
 
         return super.viewResource(mapping, form, request, response);
     }
 
-    public ActionForward changeOwner(ActionMapping mapping,
-                                             ActionForm form,
-                                             HttpServletRequest request,
-                                             HttpServletResponse response)
-        throws Exception {
+    public ActionForward changeOwner(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                     HttpServletResponse response) throws Exception {
 
         setResource(request);
 
-        Portal portal = Portal
-            .createPortal(Constants.CHANGE_OWNER_TITLE,
-                          ".resource.service.inventory.changeOwner");
+        Portal portal = Portal.createPortal(Constants.CHANGE_OWNER_TITLE, ".resource.service.inventory.changeOwner");
         portal.setDialog(true);
         request.setAttribute(Constants.PORTAL_KEY, portal);
 
         return null;
     }
 
-    public ActionForward addGroups(ActionMapping mapping,
-                                     ActionForm form,
-                                     HttpServletRequest request,
-                                     HttpServletResponse response)
-        throws Exception {
+    public ActionForward addGroups(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                   HttpServletResponse response) throws Exception {
 
         setResource(request);
 
-        // clean out the return path 
+        // clean out the return path
         SessionUtils.resetReturnPath(request.getSession());
         // set the return path
         try {
             setReturnPath(request, mapping);
-        }
-        catch (ParameterNotFoundException pne) {
+        } catch (ParameterNotFoundException pne) {
             if (log.isDebugEnabled())
-                 log.debug("returnPath error:", pne);
+                log.debug("returnPath error:", pne);
         }
-        
-        Portal portal = Portal
-             .createPortal("resource.service.inventory.AddToGroups",
-                          ".resource.service.inventory.AddToGroups");
+
+        Portal portal = Portal.createPortal("resource.service.inventory.AddToGroups",
+            ".resource.service.inventory.AddToGroups");
         portal.setDialog(true);
         request.setAttribute(Constants.PORTAL_KEY, portal);
 
         return null;
     }
 
-    public ActionForward editConfig(ActionMapping mapping,
-                                    ActionForm form,
-                                    HttpServletRequest request,
-                                    HttpServletResponse response)
-        throws Exception {
-        
-        Portal portal = Portal
-             .createPortal("resource.service.inventory.ConfigurationPropertiesTitle",
-                          ".resource.service.inventory.EditConfigProperties");
+    public ActionForward editConfig(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                    HttpServletResponse response) throws Exception {
+
+        Portal portal = Portal.createPortal("resource.service.inventory.ConfigurationPropertiesTitle",
+            ".resource.service.inventory.EditConfigProperties");
 
         super.editConfig(request, portal);
-        
+
         return null;
     }
 
-
-    private void findAndSetResource(HttpServletRequest request) 
-        throws Exception {
+    private void findAndSetResource(HttpServletRequest request) throws Exception {
 
         Integer sessionId = RequestUtils.getSessionId(request);
         AppdefEntityID aeid = RequestUtils.getEntityId(request);
         Integer serviceId = aeid.getId();
 
         log.trace("getting service [" + serviceId + "]");
-       
-        ServiceValue service = appdefBoss
-            .findServiceById(RequestUtils.getSessionId(request).intValue(),
-                          serviceId);
+
+        ServiceValue service = appdefBoss.findServiceById(RequestUtils.getSessionId(request).intValue(), serviceId);
         // XXX: if server == null, throw ServerNotFoundException
         RequestUtils.setResource(request, service);
         request.setAttribute(Constants.TITLE_PARAM_ATTR, service.getName());
 
-        log.trace("getting owner for service");            
-        AuthzSubject owner = authzBoss
-            .findSubjectByNameNoAuthz(sessionId, service.getOwner());
+        log.trace("getting owner for service");
+        AuthzSubject owner = authzBoss.findSubjectByNameNoAuthz(sessionId, service.getOwner());
         request.setAttribute(Constants.RESOURCE_OWNER_ATTR, owner);
 
-        PageControl pc = RequestUtils.getPageControl(request, "pss", "pns",
-                                                     "sos", "scs");
-        PageList<ApplicationValue> appValues = appdefBoss
-                .findApplications(sessionId.intValue(), aeid, pc);
-        request.setAttribute( Constants.APPLICATIONS_ATTR, appValues );
+        PageControl pc = RequestUtils.getPageControl(request, "pss", "pns", "sos", "scs");
+        PageList<ApplicationValue> appValues = appdefBoss.findApplications(sessionId.intValue(), aeid, pc);
+        request.setAttribute(Constants.APPLICATIONS_ATTR, appValues);
 
         setResource(request);
-    }   
-    
+    }
+
 }

@@ -47,9 +47,10 @@ import org.hyperic.hq.ui.action.resource.ResourceForm;
  * A subclass of <code>ResourceForm</code> representing the
  * <em>New Platform</em> form.
  */
-public class PlatformForm extends ResourceForm  {
+public class PlatformForm
+    extends ResourceForm {
 
-    //-------------------------------------instance variables
+    // -------------------------------------instance variables
 
     private Integer cpuCount;
     private List cpuCounts;
@@ -57,17 +58,17 @@ public class PlatformForm extends ResourceForm  {
     private IpValue[] ips;
     private int numIps;
     private List agents = new ArrayList();
-    private Integer agentId ;
-    private String agentIpPort ;
+    private Integer agentId;
+    private String agentIpPort;
 
-    //-------------------------------------constructors
+    // -------------------------------------constructors
 
     public PlatformForm() {
         super();
         setDefaults();
     }
 
-    //-------------------------------------public methods
+    // -------------------------------------public methods
 
     public Integer getCpuCount() {
         return this.cpuCount;
@@ -81,8 +82,8 @@ public class PlatformForm extends ResourceForm  {
         if (this.cpuCounts == null) {
             this.cpuCounts = new ArrayList();
 
-            String[] counts = new String[] {"1", "2", "4", "8", "16"};
-            for (int i=0; i<counts.length; i++) {
+            String[] counts = new String[] { "1", "2", "4", "8", "16" };
+            for (int i = 0; i < counts.length; i++) {
                 this.cpuCounts.add(new LabelValueBean(counts[i], counts[i]));
             }
         }
@@ -111,12 +112,11 @@ public class PlatformForm extends ResourceForm  {
 
     public void setIp(int index, IpValue ip) {
         if (index >= ips.length) {
-            IpValue[] newIps = new IpValue[index+1];
+            IpValue[] newIps = new IpValue[index + 1];
             System.arraycopy(ips, 0, newIps, 0, ips.length);
             newIps[index] = ip;
             this.ips = newIps;
-        }
-        else {
+        } else {
             ips[index] = ip;
         }
     }
@@ -142,7 +142,7 @@ public class PlatformForm extends ResourceForm  {
     public void setAgents(List agents) {
         this.agents = agents;
     }
-    
+
     public Integer getAgentId() {
         return agentId;
     }
@@ -159,8 +159,7 @@ public class PlatformForm extends ResourceForm  {
         this.agentIpPort = agentIpPort;
     }
 
-    public void reset(ActionMapping mapping,
-                      HttpServletRequest request) {
+    public void reset(ActionMapping mapping, HttpServletRequest request) {
         super.reset(mapping, request);
         setDefaults();
     }
@@ -188,7 +187,7 @@ public class PlatformForm extends ResourceForm  {
 
         return s.toString();
     }
-    
+
     public void loadPlatformValue(PlatformValue platform) {
         loadResourceValue(platform);
         setResourceType(platform.getPlatformType().getId());
@@ -206,10 +205,10 @@ public class PlatformForm extends ResourceForm  {
 
         // update ip addresses
         IpValue[] oldIps = platform.getIpValues();
-        
+
         if (oldIps == null) {
             oldIps = new IpValue[0];
-        } 
+        }
         int numOldIps = oldIps.length;
         int numNewIps = getNumIps();
 
@@ -218,7 +217,7 @@ public class PlatformForm extends ResourceForm  {
         for (int i = 0; i < numOldIps; i++) {
             oldIpsMap.put(oldIps[i].getId(), oldIps[i]);
         }
-        
+
         for (int i = 0; i < numNewIps; i++) {
             IpValue newIp = getIp(i);
             if (newIp.getId() != null && newIp.getId().intValue() > 0) {
@@ -227,8 +226,7 @@ public class PlatformForm extends ResourceForm  {
                 oldIp.setMACAddress(newIp.getMACAddress());
                 oldIp.setNetmask(newIp.getNetmask());
                 platform.updateIpValue(oldIp);
-            }
-            else {
+            } else {
                 // we're into the land of new ips- use the form one
                 IpValue newAddedIp = getIp(i);
                 IpValue dbNewIp = new IpValue();
@@ -238,19 +236,17 @@ public class PlatformForm extends ResourceForm  {
                 platform.addIpValue(dbNewIp);
             }
         }
-        
+
         // Remove the left-overs
-        for (Iterator it = oldIpsMap.values().iterator(); it.hasNext(); ) {
+        for (Iterator it = oldIpsMap.values().iterator(); it.hasNext();) {
             IpValue oldIp = (IpValue) it.next();
             platform.removeIpValue(oldIp);
         }
     }
 
-    public ActionErrors validate(ActionMapping mapping,
-                                 HttpServletRequest request) {
+    public ActionErrors validate(ActionMapping mapping, HttpServletRequest request) {
         // don't validate if it's already happened in this action chain
-        ActionErrors previous =
-            (ActionErrors) request.getAttribute(Globals.ERROR_KEY);
+        ActionErrors previous = (ActionErrors) request.getAttribute(Globals.ERROR_KEY);
         if (previous != null) {
             return null;
         }
@@ -271,8 +267,7 @@ public class PlatformForm extends ResourceForm  {
         if (ips.length == 1) {
             String address = ips[0].getAddress();
             if (address.equals("127.0.0.1")) {
-                ActionMessage err = new ActionMessage(
-                        "resource.platform.inventory.error.IpAddressInvalid");
+                ActionMessage err = new ActionMessage("resource.platform.inventory.error.IpAddressInvalid");
                 errors.add("ip[0].address", err);
             }
         } else {
@@ -282,8 +277,7 @@ public class PlatformForm extends ResourceForm  {
                 // address is required
                 String address = ip.getAddress();
                 if (address == null || "".equals(address)) {
-                    ActionMessage err = new ActionMessage(
-                            "resource.platform.inventory.error.IpAddressIsRequired");
+                    ActionMessage err = new ActionMessage("resource.platform.inventory.error.IpAddressIsRequired");
                     errors.add("ip[" + i + "].address", err);
                 }
             }

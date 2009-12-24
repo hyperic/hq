@@ -45,22 +45,19 @@ import org.apache.struts.action.ActionMapping;
 /**
  *
  */
-public abstract class ResourceConfigPortalAction extends ResourceController {
+public abstract class ResourceConfigPortalAction
+    extends ResourceController {
 
     public ResourceConfigPortalAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss) {
         super(appdefBoss, authzBoss, controlBoss);
     }
 
-    public ActionForward configMetrics(ActionMapping mapping,
-                                       ActionForm form,
-                                       HttpServletRequest request,
-                                       HttpServletResponse response)
-        throws Exception {
-        
-        super.setNavMapLocation(request,mapping,
-                                 Constants.MONITOR_CONFIG_LOC);
-                                 
+    public ActionForward configMetrics(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                       HttpServletResponse response) throws Exception {
+
+        super.setNavMapLocation(request, mapping, Constants.MONITOR_CONFIG_LOC);
+
         return null;
-    
+
     }
 }

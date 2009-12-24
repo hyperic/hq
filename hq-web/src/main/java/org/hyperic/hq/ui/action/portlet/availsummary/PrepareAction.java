@@ -51,7 +51,8 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class PrepareAction extends TilesAction {
+public class PrepareAction
+    extends TilesAction {
     private AppdefBoss appdefBoss;
     private AuthzBoss authzBoss;
 
@@ -62,15 +63,9 @@ public class PrepareAction extends TilesAction {
         this.authzBoss = authzBoss;
     }
 
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
 
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception
-    {
-       
         HttpSession session = request.getSession();
         WebUser user = RequestUtils.getWebUser(session);
         Integer sessionId = user.getSessionId();
@@ -82,30 +77,28 @@ public class PrepareAction extends TilesAction {
         String resKey = PropertiesForm.RESOURCES;
         String numKey = PropertiesForm.NUM_TO_SHOW;
         String titleKey = PropertiesForm.TITLE;
-        
+
         if (token != null) {
             resKey += token;
             numKey += token;
             titleKey += token;
         }
-        
+
         // Clean up session attributes
         SessionUtils.removeList(session, Constants.PENDING_RESOURCES_SES_ATTR);
 
         // We set defaults here rather than in DefaultUserPreferences.properites
-      
-        DashboardConfig dashConfig = DashboardUtils.findDashboard(
-        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, authzBoss);
+
+        DashboardConfig dashConfig = DashboardUtils.findDashboard((Integer) session
+            .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         Integer numberToShow = new Integer(dashPrefs.getValue(numKey, "10"));
         pForm.setNumberToShow(numberToShow);
 
         pForm.setTitle(dashPrefs.getValue(titleKey, ""));
-        
-        List<AppdefEntityID> resourceList = DashboardUtils.preferencesAsEntityIds(resKey, dashPrefs);        
-        AppdefEntityID[] aeids = 
-            resourceList.toArray(new AppdefEntityID[resourceList.size()]);
+
+        List<AppdefEntityID> resourceList = DashboardUtils.preferencesAsEntityIds(resKey, dashPrefs);
+        AppdefEntityID[] aeids = resourceList.toArray(new AppdefEntityID[resourceList.size()]);
 
         PageControl pc = RequestUtils.getPageControl(request);
         resources = appdefBoss.findByIds(sessionId.intValue(), aeids, pc);

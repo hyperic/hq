@@ -49,57 +49,44 @@ import org.hyperic.util.config.ConfigResponse;
 
 /**
  * An Action that removes notifications for an alert definition.
- *
+ * 
  */
 public abstract class RemoveNotificationsAction
-    extends BaseAction
-    implements NotificationsAction
-{
+    extends BaseAction implements NotificationsAction {
     private final Log log = LogFactory.getLog(RemoveNotificationsAction.class.getName());
     protected EventsBoss eventsBoss;
-    
-    
 
     public RemoveNotificationsAction(EventsBoss eventsBoss) {
         super();
         this.eventsBoss = eventsBoss;
     }
 
-    /** 
-     * removes alert definitions 
+    /**
+     * removes alert definitions
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-    throws Exception {
-        RemoveNotificationsForm rnForm = (RemoveNotificationsForm)form;
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
+        RemoveNotificationsForm rnForm = (RemoveNotificationsForm) form;
         Map<String, Object> params = new HashMap<String, Object>();
-        
+
         if (rnForm.getAetid() != null)
             params.put(Constants.APPDEF_RES_TYPE_ID, rnForm.getAetid());
         else {
-            AppdefEntityID aeid =
-                new AppdefEntityID(rnForm.getType().intValue(),rnForm.getRid());
+            AppdefEntityID aeid = new AppdefEntityID(rnForm.getType().intValue(), rnForm.getRid());
             params.put(Constants.ENTITY_ID_PARAM, aeid.getAppdefKey());
         }
-        params.put( "ad", rnForm.getAd() );
-        
-        Integer sessionID =  RequestUtils.getSessionId(request);
-       
-        
+        params.put("ad", rnForm.getAd());
 
-        AlertDefinitionValue adv = eventsBoss.getAlertDefinition( sessionID.intValue(),
-                                                          rnForm.getAd() );
+        Integer sessionID = RequestUtils.getSessionId(request);
+
+        AlertDefinitionValue adv = eventsBoss.getAlertDefinition(sessionID.intValue(), rnForm.getAd());
         ActionValue[] actions = adv.getActions();
-        for (int i=0; i<actions.length; i++) {
-            if ( actions[i].classnameHasBeenSet() &&
-                 !( actions[i].getClassname().equals(null) ||
-                    actions[i].getClassname().equals("") ) ) {
+        for (int i = 0; i < actions.length; i++) {
+            if (actions[i].classnameHasBeenSet() &&
+                !(actions[i].getClassname().equals(null) || actions[i].getClassname().equals(""))) {
                 EmailActionConfig emailCfg = new EmailActionConfig();
-                ConfigResponse configResponse =
-                    ConfigResponse.decode( actions[i].getConfig() );
-                
+                ConfigResponse configResponse = ConfigResponse.decode(actions[i].getConfig());
+
                 try {
                     emailCfg.init(configResponse);
                 } catch (InvalidActionDataException e) {
@@ -108,9 +95,8 @@ public abstract class RemoveNotificationsAction
                     continue;
                 }
 
-                if ( emailCfg.getType() == getNotificationType() ) {
-                    return handleRemove(mapping, request, params, sessionID,
-                                        actions[i], emailCfg, eventsBoss,  rnForm);
+                if (emailCfg.getType() == getNotificationType()) {
+                    return handleRemove(mapping, request, params, sessionID, actions[i], emailCfg, eventsBoss, rnForm);
                 }
             }
         }
@@ -119,14 +105,8 @@ public abstract class RemoveNotificationsAction
 
     }
 
-    protected abstract ActionForward handleRemove(ActionMapping mapping,
-                                                  HttpServletRequest request,
-                                                  Map<String, Object> params,
-                                                  Integer sessionID,
-                                                  ActionValue action,
-                                                  EmailActionConfig ea,
-                                                  EventsBoss eb,
-                                                  RemoveNotificationsForm rnForm)
+    protected abstract ActionForward handleRemove(ActionMapping mapping, HttpServletRequest request,
+                                                  Map<String, Object> params, Integer sessionID, ActionValue action,
+                                                  EmailActionConfig ea, EventsBoss eb, RemoveNotificationsForm rnForm)
         throws Exception;
 }
-

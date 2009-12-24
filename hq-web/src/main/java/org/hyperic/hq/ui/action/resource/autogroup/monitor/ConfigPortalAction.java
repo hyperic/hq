@@ -49,27 +49,21 @@ import org.apache.struts.action.ActionMapping;
 /**
  * This action prepares the portal for configuring autogroup monitoring.
  */
-public class ConfigPortalAction extends ResourceConfigPortalAction {
+public class ConfigPortalAction
+    extends ResourceConfigPortalAction {
 
-    private static final String CONFIG_METRICS_PORTAL =
-        ".resource.autogroup.monitor.config.ConfigMetrics";
+    private static final String CONFIG_METRICS_PORTAL = ".resource.autogroup.monitor.config.ConfigMetrics";
 
-    private static final String CONFIG_METRICS_TITLE =
-        "resource.autogroup.monitor.visibility.config.ConfigureVisibility.Title";
+    private static final String CONFIG_METRICS_TITLE = "resource.autogroup.monitor.visibility.config.ConfigureVisibility.Title";
 
-    private static final String ADD_METRICS_PORTAL =
-        ".resource.autogroup.monitor.config.AddMetrics";
+    private static final String ADD_METRICS_PORTAL = ".resource.autogroup.monitor.config.AddMetrics";
 
-    private static final String ADD_METRICS_TITLE =
-        "resource.autogroup.monitor.visibility.config.AddMetrics.Title";
+    private static final String ADD_METRICS_TITLE = "resource.autogroup.monitor.visibility.config.AddMetrics.Title";
 
-    private static final String EDIT_AVAILABILITY_PORTAL =
-        ".resource.autogroup.monitor.config.EditAvailability";
+    private static final String EDIT_AVAILABILITY_PORTAL = ".resource.autogroup.monitor.config.EditAvailability";
 
-    private static final String EDIT_AVAILABILITY_TITLE =
-        "resource.autogroup.monitor.visibility.config.ConfigureVisibility.EditGroupAvail.Title";
-    
-    
+    private static final String EDIT_AVAILABILITY_TITLE = "resource.autogroup.monitor.visibility.config.ConfigureVisibility.EditGroupAvail.Title";
+
     @Autowired
     public ConfigPortalAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss) {
         super(appdefBoss, authzBoss, controlBoss);
@@ -90,31 +84,25 @@ public class ConfigPortalAction extends ResourceConfigPortalAction {
     }
 
     /** mode=configure || mode=view */
-    public ActionForward configMetrics(ActionMapping mapping, ActionForm form,
-                                       HttpServletRequest request,
-                                       HttpServletResponse response)
-        throws Exception {
+    public ActionForward configMetrics(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                       HttpServletResponse response) throws Exception {
 
         setResource(request);
 
         super.configMetrics(mapping, form, request, response);
 
-        Portal portal = Portal.createPortal(CONFIG_METRICS_TITLE,
-                                            CONFIG_METRICS_PORTAL);
+        Portal portal = Portal.createPortal(CONFIG_METRICS_TITLE, CONFIG_METRICS_PORTAL);
         request.setAttribute(Constants.PORTAL_KEY, portal);
         return null;
 
     }
 
     /** mode=addMetrics */
-    public ActionForward addMetrics(ActionMapping mapping, ActionForm form,
-                                    HttpServletRequest request,
-                                    HttpServletResponse response)
-        throws Exception {
+    public ActionForward addMetrics(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                    HttpServletResponse response) throws Exception {
 
         setResource(request);
-        Portal portal = Portal.createPortal(ADD_METRICS_TITLE,
-                                            ADD_METRICS_PORTAL);
+        Portal portal = Portal.createPortal(ADD_METRICS_TITLE, ADD_METRICS_PORTAL);
         portal.setDialog(true);
         request.setAttribute(Constants.PORTAL_KEY, portal);
         return null;
@@ -122,32 +110,26 @@ public class ConfigPortalAction extends ResourceConfigPortalAction {
     }
 
     /** mode=edit */
-    public ActionForward editAvailability(ActionMapping mapping,
-                                          ActionForm form,
-                                          HttpServletRequest request,
-                                          HttpServletResponse response)
-        throws Exception {
+    public ActionForward editAvailability(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                          HttpServletResponse response) throws Exception {
 
         setResource(request);
-        Portal portal = Portal.createPortal(EDIT_AVAILABILITY_TITLE,
-                                            EDIT_AVAILABILITY_PORTAL);
+        Portal portal = Portal.createPortal(EDIT_AVAILABILITY_TITLE, EDIT_AVAILABILITY_PORTAL);
         portal.setDialog(true);
         request.setAttribute(Constants.PORTAL_KEY, portal);
         return null;
     }
 
-    protected AppdefEntityID getAppdefEntityID(HttpServletRequest request)
-        throws ParameterNotFoundException {
-    
+    protected AppdefEntityID getAppdefEntityID(HttpServletRequest request) throws ParameterNotFoundException {
+
         // when we've fully migrated CAM to eid, this method can go away
-    
+
         try {
             AppdefEntityID[] eids = RequestUtils.getEntityIds(request);
-    
+
             // take this opportunity to cache the entity ids in the request
-            request.setAttribute(Constants.ENTITY_IDS_ATTR,
-                                 BizappUtils.stringifyEntityIds(eids));
-    
+            request.setAttribute(Constants.ENTITY_IDS_ATTR, BizappUtils.stringifyEntityIds(eids));
+
             return eids[0];
         } catch (ParameterNotFoundException e) {
             log.trace("No entity ids -- must be auto-group of platforms.");
@@ -155,4 +137,3 @@ public class ConfigPortalAction extends ResourceConfigPortalAction {
         }
     }
 }
-

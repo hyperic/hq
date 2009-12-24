@@ -52,10 +52,11 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
 
 /**
- * A class that provides platform-specific implementations of utility
- * methods for common monitoring tasks.
+ * A class that provides platform-specific implementations of utility methods
+ * for common monitoring tasks.
  */
-public class PlatformInventoryHelper extends InventoryHelper {
+public class PlatformInventoryHelper
+    extends InventoryHelper {
 
     public PlatformInventoryHelper(AppdefEntityID entityId) {
         super(entityId);
@@ -63,42 +64,32 @@ public class PlatformInventoryHelper extends InventoryHelper {
 
     /**
      * Get the set of server types representing a platform's servers.
-     *
+     * 
      * @param request the http request
      * @param ctx the servlet context
      * @param resource the platform
      */
-    public List getChildResourceTypes(HttpServletRequest request,
-                                      ServletContext ctx,
-                                      AppdefResourceValue resource)
-        throws PermissionException, AppdefEntityNotFoundException,
-        RemoteException, SessionNotFoundException,
-        SessionTimeoutException, ServletException
-    {
+    public List getChildResourceTypes(HttpServletRequest request, ServletContext ctx, AppdefResourceValue resource)
+        throws PermissionException, AppdefEntityNotFoundException, RemoteException, SessionNotFoundException,
+        SessionTimeoutException, ServletException {
         AppdefEntityID entityId = resource.getEntityId();
         int sessionId = RequestUtils.getSessionId(request).intValue();
         AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
 
-        List<ServerValue> servers =
-            boss.findServersByPlatform(sessionId, entityId.getId(),
-                                       PageControl.PAGE_ALL);
+        List<ServerValue> servers = boss.findServersByPlatform(sessionId, entityId.getId(), PageControl.PAGE_ALL);
         return MonitorUtils.findServerTypes(servers);
     }
 
     /**
      * Get a server type from the Bizapp.
-     *
+     * 
      * @param request the http request
      * @param ctx the servlet context
      * @param id the id of the server type
      */
-    public AppdefResourceType getChildResourceType(HttpServletRequest request,
-                                                   ServletContext ctx,
-                                                   AppdefEntityTypeID id)
-        throws PermissionException, AppdefEntityNotFoundException,
-        RemoteException, SessionNotFoundException, SessionTimeoutException,
-        ServletException
-    {
+    public AppdefResourceType getChildResourceType(HttpServletRequest request, ServletContext ctx, AppdefEntityTypeID id)
+        throws PermissionException, AppdefEntityNotFoundException, RemoteException, SessionNotFoundException,
+        SessionTimeoutException, ServletException {
         int sessionId = RequestUtils.getSessionId(request).intValue();
         AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
 
@@ -110,33 +101,24 @@ public class PlatformInventoryHelper extends InventoryHelper {
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
                 return boss.findServiceTypeById(sessionId, id.getId());
             default:
-                throw new IllegalArgumentException(
-                        "Unknown appdef entity type id: " + id);
+                throw new IllegalArgumentException("Unknown appdef entity type id: " + id);
         }
     }
 
     /**
-     * Get from the Bizapp the numbers of children of the given
-     * resource. Returns a <code>Map</code> of counts keyed by
-     * child resource type.
-     *
+     * Get from the Bizapp the numbers of children of the given resource.
+     * Returns a <code>Map</code> of counts keyed by child resource type.
+     * 
      * @param request the http request
-     * @param resource the appdef resource whose children we are
-     * counting
+     * @param resource the appdef resource whose children we are counting
      */
-    public Map getChildCounts(HttpServletRequest request,
-                              ServletContext ctx,
-                              AppdefResourceValue resource)
-        throws PermissionException, AppdefEntityNotFoundException,
-               RemoteException, SessionNotFoundException,
-               SessionTimeoutException, ServletException
-    {
+    public Map getChildCounts(HttpServletRequest request, ServletContext ctx, AppdefResourceValue resource)
+        throws PermissionException, AppdefEntityNotFoundException, RemoteException, SessionNotFoundException,
+        SessionTimeoutException, ServletException {
         int sessionId = RequestUtils.getSessionId(request).intValue();
         AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
 
-        Collection<ServerValue> servers = boss.findServersByPlatform(sessionId,
-                                                        resource.getId(),
-                                                        PageControl.PAGE_ALL);
+        Collection<ServerValue> servers = boss.findServersByPlatform(sessionId, resource.getId(), PageControl.PAGE_ALL);
         return AppdefResourceValue.getServerTypeCountMap(servers);
     }
 }

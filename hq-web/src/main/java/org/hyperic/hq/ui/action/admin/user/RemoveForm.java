@@ -31,39 +31,42 @@ import org.hyperic.hq.ui.action.BaseValidatorForm;
  * A subclass of <code>ActionForm</code> representing the
  * <em>AuthzSubjectValue</em>s to remove.
  */
-public class RemoveForm extends BaseValidatorForm {
+public class RemoveForm
+    extends BaseValidatorForm {
 
-    //-------------------------------------instance variables
+    // -------------------------------------instance variables
     private Integer[] users;
-    
-    //-------------------------------------constructors
+
+    // -------------------------------------constructors
 
     public RemoveForm() {
     }
 
-    //-------------------------------------public methods
+    // -------------------------------------public methods
 
     public String toString() {
         if (users == null)
             return "";
         else
-            return users.toString();    
+            return users.toString();
     }
-    
-    /** Getter for property users.
+
+    /**
+     * Getter for property users.
      * @return Value of property users.
-     *
+     * 
      */
-    public Integer[]  getUsers() {
+    public Integer[] getUsers() {
         return this.users;
     }
-    
-    /** Setter for property users.
+
+    /**
+     * Setter for property users.
      * @param users New value of property users.
-     *
+     * 
      */
     public void setUsers(Integer[] users) {
         this.users = users;
     }
-    
+
 }

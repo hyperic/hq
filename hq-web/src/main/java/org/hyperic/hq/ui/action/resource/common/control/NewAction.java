@@ -51,49 +51,43 @@ import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * An <code>Action</code> subclass that creates a control action associated
- * with a server.
+ * An <code>Action</code> subclass that creates a control action associated with
+ * a server.
  */
-public class NewAction extends BaseAction {
+public class NewAction
+    extends BaseAction {
 
-   private ControlBoss controlBoss;
-   private final Log log = LogFactory.getLog(NewAction.class.getName());   
-   
-   @Autowired
+    private ControlBoss controlBoss;
+    private final Log log = LogFactory.getLog(NewAction.class.getName());
+
+    @Autowired
     public NewAction(ControlBoss controlBoss) {
         super();
         this.controlBoss = controlBoss;
     }
-
-
 
     /**
      * Create the control action and associate it with the server.
      * <code>NewForm</code> and save it into the session attribute
      * <code>Constants.ACTION_ATTR</code>.
      */
-    public ActionForward execute(ActionMapping mapping, 
-                                 ActionForm form, 
-                                 HttpServletRequest request, 
-                                 HttpServletResponse response) 
-        throws Exception {
-             
-        log.trace("creating new action" );                    
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
+
+        log.trace("creating new action");
 
         HashMap<String, Object> parms = new HashMap<String, Object>(2);
-        
-        try {                                  
- 
+
+        try {
+
             int sessionId = RequestUtils.getSessionId(request).intValue();
             AppdefEntityID appdefId = RequestUtils.getEntityId(request);
             ControlForm cForm = (ControlForm) form;
 
             parms.put(Constants.RESOURCE_PARAM, appdefId.getId());
-            parms.put(Constants.RESOURCE_TYPE_ID_PARAM,
-                      new Integer(appdefId.getType()));
+            parms.put(Constants.RESOURCE_TYPE_ID_PARAM, new Integer(appdefId.getType()));
 
-            ActionForward forward 
-                = checkSubmit(request, mapping, cForm, parms);
+            ActionForward forward = checkSubmit(request, mapping, cForm, parms);
             if (forward != null) {
                 return forward;
             }
@@ -102,46 +96,39 @@ public class NewAction extends BaseAction {
 
             ScheduleValue sv = cForm.createSchedule();
             sv.setDescription(cForm.getDescription());
-            
+
             // make sure that the ControlAction is valid.
             String action = cForm.getControlAction();
             List<String> validActions = controlBoss.getActions(sessionId, appdefId);
             if (!validActions.contains(action)) {
-                RequestUtils.setError(request,
-                    "resource.common.control.error.ControlActionNotValid",
-                    action);
+                RequestUtils.setError(request, "resource.common.control.error.ControlActionNotValid", action);
                 return returnFailure(request, mapping, parms);
             }
-            
+
             if (cForm.getStartTime().equals(ScheduleForm.START_NOW)) {
-                controlBoss.doAction(sessionId, appdefId, action, (String)null);
+                controlBoss.doAction(sessionId, appdefId, action, (String) null);
             } else {
                 controlBoss.doAction(sessionId, appdefId, action, sv);
             }
 
             // set confirmation message
-            SessionUtils.setConfirmation(request.getSession(), 
-                "resource.common.scheduled.Confirmation");
-            
+            SessionUtils.setConfirmation(request.getSession(), "resource.common.scheduled.Confirmation");
+
             return returnSuccess(request, mapping, parms);
         } catch (PluginNotFoundException pnfe) {
             log.trace("no plugin available", pnfe);
-            RequestUtils.setError(request,
-                "resource.common.control.PluginNotFound");
-            return returnFailure(request, mapping, parms);                 
+            RequestUtils.setError(request, "resource.common.control.PluginNotFound");
+            return returnFailure(request, mapping, parms);
         } catch (PluginException cpe) {
             log.trace("control not enabled", cpe);
-            RequestUtils.setError(request,
-                "resource.common.error.ControlNotEnabled");
-            return returnFailure(request, mapping, parms);                 
+            RequestUtils.setError(request, "resource.common.error.ControlNotEnabled");
+            return returnFailure(request, mapping, parms);
         } catch (PermissionException pe) {
-            RequestUtils.setError(request,
-                "resource.common.control.error.NewPermission");
+            RequestUtils.setError(request, "resource.common.control.error.NewPermission");
             return returnFailure(request, mapping, parms);
         } catch (SchedulerException se) {
-            RequestUtils.setError(request,
-                "resource.common.control.error.ScheduleInvalid");
+            RequestUtils.setError(request, "resource.common.control.error.ScheduleInvalid");
             return returnFailure(request, mapping, parms);
         }
-    } 
+    }
 }

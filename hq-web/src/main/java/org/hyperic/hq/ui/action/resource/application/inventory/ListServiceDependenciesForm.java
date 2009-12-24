@@ -38,21 +38,22 @@ import org.hyperic.hq.ui.action.BaseValidatorForm;
  * "2.1.6.4 Application: Service Dependencies"
  * 
  * The screen has a list of AppServiceValues that this AppServiceValue depends
- * on (children or "dependers").  That list may grow or shrink.  Growing it is
+ * on (children or "dependers"). That list may grow or shrink. Growing it is
  * accomplished by invoking AddApplicationServicesPrepareFormAction to paint
  * screen "2.1.6.5 Edit Application: Add Dependencies", performing add and
  * commit operations (AddApplicationServicesAction).
  * 
- *  The  screen has another list of what the AppServiceValue depends on
- * ("dependees").  That is a read-only list for display purposes.
+ * The screen has another list of what the AppServiceValue depends on
+ * ("dependees"). That is a read-only list for display purposes.
  */
-public class ListServiceDependenciesForm extends BaseValidatorForm {
+public class ListServiceDependenciesForm
+    extends BaseValidatorForm {
 
     // the keys are AppServiceNodeBean.getId():Integer's
     // the values are AppServiceNodeBean objects
     private List appSvcDependers = new ArrayList();
     private List appSvcDependees = new ArrayList();
-    // the AppService's id 
+    // the AppService's id
     private Integer appSvcId;
     // the id for the application under discussion
     private Integer rid;
@@ -61,7 +62,7 @@ public class ListServiceDependenciesForm extends BaseValidatorForm {
     // the name of the service our current AppSvcValue is bound to needs
     // to be displayed
     private String serviceLabel;
-        
+
     /**
      * Constructor for ListServiceDependenciesForm.
      */

@@ -47,8 +47,7 @@ import org.hyperic.hq.ui.util.RequestUtils;
  * Form for editing / creating new alert definitions.
  */
 public class DefinitionForm
-    extends ResourceForm
-{
+    extends ResourceForm {
     private Log log = LogFactory.getLog(DefinitionForm.class.getName());
 
     // alert definition properties
@@ -236,55 +235,55 @@ public class DefinitionForm
      */
     public void setWhenEnabled(int whenEnabled) {
         switch (whenEnabled) {
-        case EventConstants.FREQ_EVERYTIME:
-        case EventConstants.FREQ_COUNTER:
-        case EventConstants.FREQ_ONCE:
-            break;
-        default:
-            throw new IllegalArgumentException("invalid whenEnabled property value");
+            case EventConstants.FREQ_EVERYTIME:
+            case EventConstants.FREQ_COUNTER:
+            case EventConstants.FREQ_ONCE:
+                break;
+            default:
+                throw new IllegalArgumentException("invalid whenEnabled property value");
         }
         this.whenEnabled = whenEnabled;
     }
-    
+
     public Integer getMeetTimeTP() {
         return meetTimeTP;
     }
-    
+
     public void setMeetTimeTP(Integer meetTimeTP) {
         this.meetTimeTP = meetTimeTP;
     }
-    
+
     /**
-     * Get units for time period.  One of:
+     * Get units for time period. One of:
      * <ul>
-     *   <li>Constants.ALERT_ACTION_ENABLE_UNITS_MINUTES</li>
-     *   <li>Constants.ALERT_ACTION_ENABLE_UNITS_HOURS</li>
-     *   <li>Constants.ALERT_ACTION_ENABLE_UNITS_DAYS</li>
-     *   <li>Constants.ALERT_ACTION_ENABLE_UNITS_WEEKS</li>
+     * <li>Constants.ALERT_ACTION_ENABLE_UNITS_MINUTES</li>
+     * <li>Constants.ALERT_ACTION_ENABLE_UNITS_HOURS</li>
+     * <li>Constants.ALERT_ACTION_ENABLE_UNITS_DAYS</li>
+     * <li>Constants.ALERT_ACTION_ENABLE_UNITS_WEEKS</li>
      * </ul>
      */
     public int getMeetTimeUnitsTP() {
         return meetTimeUnitsTP;
     }
-    
+
     /**
-     * Set units for time period.  Must be one of:
+     * Set units for time period. Must be one of:
      * <ul>
-     *   <li>Constants.ALERT_ACTION_ENABLE_UNITS_MINUTES</li>
-     *   <li>Constants.ALERT_ACTION_ENABLE_UNITS_HOURS</li>
-     *   <li>Constants.ALERT_ACTION_ENABLE_UNITS_DAYS</li>
-     *   <li>Constants.ALERT_ACTION_ENABLE_UNITS_WEEKS</li>
+     * <li>Constants.ALERT_ACTION_ENABLE_UNITS_MINUTES</li>
+     * <li>Constants.ALERT_ACTION_ENABLE_UNITS_HOURS</li>
+     * <li>Constants.ALERT_ACTION_ENABLE_UNITS_DAYS</li>
+     * <li>Constants.ALERT_ACTION_ENABLE_UNITS_WEEKS</li>
      * </ul>
      */
     public void setMeetTimeUnitsTP(int meetTimeUnitsTP) {
         switch (meetTimeUnitsTP) {
-        case Constants.ALERT_ACTION_ENABLE_UNITS_MINUTES:
-        case Constants.ALERT_ACTION_ENABLE_UNITS_HOURS:
-        case Constants.ALERT_ACTION_ENABLE_UNITS_DAYS:
-        case Constants.ALERT_ACTION_ENABLE_UNITS_WEEKS:
-            break;
-        default:
-            throw new IllegalArgumentException("invalid howLongUnits property value");
+            case Constants.ALERT_ACTION_ENABLE_UNITS_MINUTES:
+            case Constants.ALERT_ACTION_ENABLE_UNITS_HOURS:
+            case Constants.ALERT_ACTION_ENABLE_UNITS_DAYS:
+            case Constants.ALERT_ACTION_ENABLE_UNITS_WEEKS:
+                break;
+            default:
+                throw new IllegalArgumentException("invalid howLongUnits property value");
         }
         this.meetTimeUnitsTP = meetTimeUnitsTP;
     }
@@ -292,42 +291,42 @@ public class DefinitionForm
     public Integer getHowLongTP() {
         return howLongTP;
     }
-    
+
     public void setHowLongTP(Integer howLongTP) {
         this.howLongTP = howLongTP;
     }
 
     /**
-     * Get units for time period.  One of:
+     * Get units for time period. One of:
      * <ul>
-     *   <li>Constants.ALERT_ACTION_ENABLE_UNITS_MINUTES</li>
-     *   <li>Constants.ALERT_ACTION_ENABLE_UNITS_HOURS</li>
-     *   <li>Constants.ALERT_ACTION_ENABLE_UNITS_DAYS</li>
-     *   <li>Constants.ALERT_ACTION_ENABLE_UNITS_WEEKS</li>
+     * <li>Constants.ALERT_ACTION_ENABLE_UNITS_MINUTES</li>
+     * <li>Constants.ALERT_ACTION_ENABLE_UNITS_HOURS</li>
+     * <li>Constants.ALERT_ACTION_ENABLE_UNITS_DAYS</li>
+     * <li>Constants.ALERT_ACTION_ENABLE_UNITS_WEEKS</li>
      * </ul>
      */
     public int getHowLongUnitsTP() {
         return howLongUnitsTP;
     }
-    
+
     /**
-     * Set units for time period.  Must be one of:
+     * Set units for time period. Must be one of:
      * <ul>
-     *   <li>Constants.ALERT_ACTION_ENABLE_UNITS_MINUTES</li>
-     *   <li>Constants.ALERT_ACTION_ENABLE_UNITS_HOURS</li>
-     *   <li>Constants.ALERT_ACTION_ENABLE_UNITS_DAYS</li>
-     *   <li>Constants.ALERT_ACTION_ENABLE_UNITS_WEEKS</li>
+     * <li>Constants.ALERT_ACTION_ENABLE_UNITS_MINUTES</li>
+     * <li>Constants.ALERT_ACTION_ENABLE_UNITS_HOURS</li>
+     * <li>Constants.ALERT_ACTION_ENABLE_UNITS_DAYS</li>
+     * <li>Constants.ALERT_ACTION_ENABLE_UNITS_WEEKS</li>
      * </ul>
      */
     public void setHowLongUnitsTP(int howLongUnitsTP) {
         switch (howLongUnitsTP) {
-        case Constants.ALERT_ACTION_ENABLE_UNITS_MINUTES:
-        case Constants.ALERT_ACTION_ENABLE_UNITS_HOURS:
-        case Constants.ALERT_ACTION_ENABLE_UNITS_DAYS:
-        case Constants.ALERT_ACTION_ENABLE_UNITS_WEEKS:
-            break;
-        default:
-            throw new IllegalArgumentException("invalid howLongUnits property value");
+            case Constants.ALERT_ACTION_ENABLE_UNITS_MINUTES:
+            case Constants.ALERT_ACTION_ENABLE_UNITS_HOURS:
+            case Constants.ALERT_ACTION_ENABLE_UNITS_DAYS:
+            case Constants.ALERT_ACTION_ENABLE_UNITS_WEEKS:
+                break;
+            default:
+                throw new IllegalArgumentException("invalid howLongUnits property value");
         }
         this.howLongUnitsTP = howLongUnitsTP;
     }
@@ -372,13 +371,13 @@ public class DefinitionForm
      */
     public void setHowLongUnitsNT(int howLongUnitsNT) {
         switch (howLongUnitsNT) {
-        case Constants.ALERT_ACTION_ENABLE_UNITS_MINUTES:
-        case Constants.ALERT_ACTION_ENABLE_UNITS_HOURS:
-        case Constants.ALERT_ACTION_ENABLE_UNITS_DAYS:
-        case Constants.ALERT_ACTION_ENABLE_UNITS_WEEKS:
-            break;
-        default:
-            throw new IllegalArgumentException("invalid howLongUnits property value");
+            case Constants.ALERT_ACTION_ENABLE_UNITS_MINUTES:
+            case Constants.ALERT_ACTION_ENABLE_UNITS_HOURS:
+            case Constants.ALERT_ACTION_ENABLE_UNITS_DAYS:
+            case Constants.ALERT_ACTION_ENABLE_UNITS_WEEKS:
+                break;
+            default:
+                throw new IllegalArgumentException("invalid howLongUnits property value");
         }
         this.howLongUnitsNT = howLongUnitsNT;
     }
@@ -472,12 +471,9 @@ public class DefinitionForm
      * Import the conditions and enablement properties from the
      * AlertDefinitionValue to this form.
      */
-    public void importConditionsEnablement(AlertDefinitionValue adv, int sessionId, MeasurementBoss mb) throws MeasurementNotFoundException,
-                                                                                                       SessionNotFoundException,
-                                                                                                       SessionTimeoutException,
-                                                                                                       TemplateNotFoundException,
-                                                                                                       RemoteException
-    {
+    public void importConditionsEnablement(AlertDefinitionValue adv, int sessionId, MeasurementBoss mb)
+        throws MeasurementNotFoundException, SessionNotFoundException, SessionTimeoutException,
+        TemplateNotFoundException, RemoteException {
         // we import the id here, too, so that the update will work
         setAd(adv.getId());
 
@@ -517,16 +513,9 @@ public class DefinitionForm
      * Export the conditions and enablement properties from this form to the
      * AlertDefinitionValue.
      */
-    public void exportConditionsEnablement(AlertDefinitionValue adv,
-                                           HttpServletRequest request,
-                                           int sessionId,
-                                           MeasurementBoss mb,
-                                           boolean typeAlert) throws SessionTimeoutException,
-                                                             SessionNotFoundException,
-                                                             MeasurementNotFoundException,
-                                                             TemplateNotFoundException,
-                                                             RemoteException
-    {
+    public void exportConditionsEnablement(AlertDefinitionValue adv, HttpServletRequest request, int sessionId,
+                                           MeasurementBoss mb, boolean typeAlert) throws SessionTimeoutException,
+        SessionNotFoundException, MeasurementNotFoundException, TemplateNotFoundException, RemoteException {
         // ------------------------------------------------------------
         // -- conditions
         // ------------------------------------------------------------
@@ -603,8 +592,7 @@ public class DefinitionForm
         // only do this advanced validation if we are editing
         // conditions or creating a new definition
         if (mapping.getName().equals("NewAlertDefinitionForm") ||
-            mapping.getName().equals("EditAlertDefinitionConditionsForm"))
-        {
+            mapping.getName().equals("EditAlertDefinitionConditionsForm")) {
             for (int i = 0; i < getNumConditions(); ++i) {
                 ConditionBean cond = getCondition(i);
                 cond.validate(request, errs, i);

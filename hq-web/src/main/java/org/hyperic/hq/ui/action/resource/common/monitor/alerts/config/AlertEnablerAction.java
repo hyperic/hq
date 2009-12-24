@@ -43,29 +43,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * A class to enable or disable alerts for a resource and all its children
  */
-public class AlertEnablerAction extends BaseAction {
-    
+public class AlertEnablerAction
+    extends BaseAction {
+
     private EventsBoss eventsBoss;
-    
-    
+
     @Autowired
     public AlertEnablerAction(EventsBoss eventsBoss) {
         super();
         this.eventsBoss = eventsBoss;
     }
 
-
-
-    public ActionForward execute(ActionMapping mapping, ActionForm form,
-            HttpServletRequest request, HttpServletResponse response)
-            throws Exception {
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
         Integer sessionId = RequestUtils.getSessionId(request);
         AppdefEntityID eid = RequestUtils.getEntityId(request);
         String state = RequestUtils.getStringParameter(request, Constants.ALERT_STATE_PARAM);
-      
-       
+
         HashMap<String, Object> forwardParams = new HashMap<String, Object>(3);
-        
+
         forwardParams.put(Constants.RESOURCE_PARAM, eid.getId());
         forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, new Integer(eid.getType()));
         forwardParams.put(Constants.MODE_PARAM, Constants.MODE_LIST);
@@ -73,10 +69,8 @@ public class AlertEnablerAction extends BaseAction {
         if (state.equals(Constants.MODE_DISABLED)) {
             enabled = false;
         }
-        eventsBoss.activateAlertDefinitions(sessionId.intValue(),
-                new AppdefEntityID[] {eid}, enabled);
-        
-        return this.returnSuccess(request, mapping, 
-                                  forwardParams, BaseAction.YES_RETURN_PATH);
+        eventsBoss.activateAlertDefinitions(sessionId.intValue(), new AppdefEntityID[] { eid }, enabled);
+
+        return this.returnSuccess(request, mapping, forwardParams, BaseAction.YES_RETURN_PATH);
     }
 }

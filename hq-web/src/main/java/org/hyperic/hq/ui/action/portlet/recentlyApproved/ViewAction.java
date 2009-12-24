@@ -52,18 +52,18 @@ import org.hyperic.util.config.ConfigResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * An <code>Action</code> that loads the <code>Portal</code>
- * identified by the <code>PORTAL_PARAM</code> request parameter (or
- * the default portal, if the parameter is not specified) into the
- * <code>PORTAL_KEY</code> request attribute.
+ * An <code>Action</code> that loads the <code>Portal</code> identified by the
+ * <code>PORTAL_PARAM</code> request parameter (or the default portal, if the
+ * parameter is not specified) into the <code>PORTAL_KEY</code> request
+ * attribute.
  */
-public class ViewAction extends TilesAction {
-    
-    private final  Log log = LogFactory.getLog(ViewAction.class.getName());
+public class ViewAction
+    extends TilesAction {
+
+    private final Log log = LogFactory.getLog(ViewAction.class.getName());
     private AppdefBoss appdefBoss;
     private AuthzBoss authzBoss;
-    
-    
+
     @Autowired
     public ViewAction(AppdefBoss appdefBoss, AuthzBoss authzBoss) {
         super();
@@ -71,33 +71,23 @@ public class ViewAction extends TilesAction {
         this.authzBoss = authzBoss;
     }
 
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
 
-
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-       
-       
         HttpSession session = request.getSession();
         WebUser user = SessionUtils.getWebUser(session);
-        DashboardConfig dashConfig = DashboardUtils.findDashboard(
-        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, authzBoss);
+        DashboardConfig dashConfig = DashboardUtils.findDashboard((Integer) session
+            .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
-        
+
         int sessionId = user.getSessionId().intValue();
 
         Integer range = new Integer(dashPrefs.getValue(PropertiesForm.RANGE));
 
         try {
             // Hard code to look for platforms created in the last two days
-            List<PlatformValue> platforms =
-                appdefBoss.findRecentPlatforms(sessionId,
-                                               2 * MeasurementConstants.DAY,
-                                               range.intValue());
+            List<PlatformValue> platforms = appdefBoss.findRecentPlatforms(sessionId, 2 * MeasurementConstants.DAY,
+                range.intValue());
             context.putAttribute("recentlyAdded", platforms);
         } catch (Exception e) {
             List<PlatformValue> emptyList = new ArrayList<PlatformValue>();

@@ -28,19 +28,17 @@ package org.hyperic.hq.ui.action.portlet.availsummary;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.portlet.DashboardBaseForm;
 
-public class PropertiesForm extends DashboardBaseForm  {
+public class PropertiesForm
+    extends DashboardBaseForm {
 
-    public final static String RESOURCES =
-        Constants.USERPREF_KEY_AVAILABITY_RESOURCES;
-    public final static String NUM_TO_SHOW =
-        ".dashContent.availsummary.numToShow";
-    public final static String TITLE =
-        ".dashContent.availSummary.title";
+    public final static String RESOURCES = Constants.USERPREF_KEY_AVAILABITY_RESOURCES;
+    public final static String NUM_TO_SHOW = ".dashContent.availsummary.numToShow";
+    public final static String TITLE = ".dashContent.availSummary.title";
 
-    private Integer  _numberToShow;
+    private Integer _numberToShow;
     private String[] _ids;
-    private String   _title;
-    
+    private String _title;
+
     public PropertiesForm() {
         super();
     }

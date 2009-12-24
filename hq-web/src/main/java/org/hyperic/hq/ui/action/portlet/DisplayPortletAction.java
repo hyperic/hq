@@ -19,38 +19,34 @@ import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class DisplayPortletAction extends TilesAction {
-    
+public class DisplayPortletAction
+    extends TilesAction {
+
     private AuthzBoss authzBoss;
-    
-    
+
     @Autowired
-	public DisplayPortletAction(AuthzBoss authzBoss) {
+    public DisplayPortletAction(AuthzBoss authzBoss) {
         super();
         this.authzBoss = authzBoss;
     }
 
-
-
     @Override
-	public ActionForward execute(ActionMapping mapping, ActionForm form,
-			HttpServletRequest request, HttpServletResponse response)
-	throws Exception 
-	{
-		
-        HttpSession session = request.getSession();
-      
-		WebUser user = SessionUtils.getWebUser(session);
-		DashboardManager dashManager = DashboardManagerImpl.getOne();
-		AuthzSubject guestUser = authzBoss.findSubjectByName(user.getSessionId(), "guest");
-		DashboardConfig dashboardConfig = dashManager.getUserDashboard(guestUser, guestUser);
-			
-		String portletId = request.getParameter("pid");
-		Portlet portlet = new Portlet(portletId);
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
-		session.setAttribute("portlet", portlet);
-		session.setAttribute(Constants.SELECTED_DASHBOARD_ID, dashboardConfig.getId());
-		
-		return super.execute(mapping, form, request, response);
-	}
+        HttpSession session = request.getSession();
+
+        WebUser user = SessionUtils.getWebUser(session);
+        DashboardManager dashManager = DashboardManagerImpl.getOne();
+        AuthzSubject guestUser = authzBoss.findSubjectByName(user.getSessionId(), "guest");
+        DashboardConfig dashboardConfig = dashManager.getUserDashboard(guestUser, guestUser);
+
+        String portletId = request.getParameter("pid");
+        Portlet portlet = new Portlet(portletId);
+
+        session.setAttribute("portlet", portlet);
+        session.setAttribute(Constants.SELECTED_DASHBOARD_ID, dashboardConfig.getId());
+
+        return super.execute(mapping, form, request, response);
+    }
 }

@@ -43,26 +43,27 @@ import org.apache.struts.action.ActionMapping;
 /**
  * Represents the seleted resources for problem metrics display
  * 
- *
+ * 
  */
-public class ProblemMetricsDisplayForm extends MetricDisplayRangeForm {
+public class ProblemMetricsDisplayForm
+    extends MetricDisplayRangeForm {
 
     public static int TYPE_PROBLEMS = 1;
-    public static int TYPE_ALL      = 2;
-    
-    private String   mode;
+    public static int TYPE_ALL = 2;
+
+    private String mode;
     private String[] child;
     private String[] host;
     private String[] eids;
-    private int      showType;
-    private boolean  fresh;
-    
+    private int showType;
+    private boolean fresh;
+
     public ProblemMetricsDisplayForm() {
         super();
         setDefaults();
     }
 
-    //-------------------------------------public methods
+    // -------------------------------------public methods
 
     public String[] getChild() {
         return child;
@@ -100,6 +101,7 @@ public class ProblemMetricsDisplayForm extends MetricDisplayRangeForm {
     public String getMode() {
         return mode;
     }
+
     /**
      * @param mode The mode to set.
      */
@@ -110,23 +112,23 @@ public class ProblemMetricsDisplayForm extends MetricDisplayRangeForm {
     public int getShowType() {
         return showType;
     }
-    
+
     public void setShowType(int showType) {
         this.showType = showType;
     }
-    
+
     public boolean getFresh() {
         return fresh;
     }
-    
+
     public void setFresh(boolean fresh) {
         this.fresh = fresh;
     }
-    
+
     public void reset(ActionMapping mapping, HttpServletRequest request) {
         setDefaults();
         super.reset(mapping, request);
-    
+
         // Make sure mode is valid
         mode = request.getParameter(Constants.MODE_PARAM);
         if (mode == null || mode.length() == 0)
@@ -148,12 +150,12 @@ public class ProblemMetricsDisplayForm extends MetricDisplayRangeForm {
 
         if (child != null)
             s.append(" children=").append(Arrays.asList(child));
-        
+
         if (host != null)
             s.append(" hosts=").append(Arrays.asList(host));
-        
+
         s.append(" mode=").append(mode);
-        
+
         return s.toString();
     }
 }

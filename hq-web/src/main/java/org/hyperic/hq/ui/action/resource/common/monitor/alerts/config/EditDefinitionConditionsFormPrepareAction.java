@@ -40,15 +40,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Prepare the alert definition form for editConditions.
- *
+ * 
  */
 public class EditDefinitionConditionsFormPrepareAction
     extends DefinitionFormPrepareAction {
-    protected final Log log = LogFactory.getLog
-        (EditDefinitionConditionsFormPrepareAction.class.getName());
-    
+    protected final Log log = LogFactory.getLog(EditDefinitionConditionsFormPrepareAction.class.getName());
+
     private EventsBoss eventsBoss;
-    
+
     @Autowired
     public EditDefinitionConditionsFormPrepareAction(MeasurementBoss measurementBoss, ControlBoss controlBoss,
                                                      AppdefBoss appdefBoss, EventsBoss eventsBoss) {
@@ -56,20 +55,12 @@ public class EditDefinitionConditionsFormPrepareAction
         this.eventsBoss = eventsBoss;
     }
 
+    protected void setupConditions(HttpServletRequest request, DefinitionForm defForm) throws Exception {
 
-    protected void setupConditions(HttpServletRequest request,
-                                   DefinitionForm defForm)
-        throws Exception {
-        
         int sessionID = RequestUtils.getSessionId(request).intValue();
-       
-     
 
-        AlertDefinitionValue adv =
-            AlertDefUtil.getAlertDefinition(request, sessionID, eventsBoss);
+        AlertDefinitionValue adv = AlertDefUtil.getAlertDefinition(request, sessionID, eventsBoss);
 
-       
         defForm.importConditionsEnablement(adv, sessionID, measurementBoss);
     }
 }
-

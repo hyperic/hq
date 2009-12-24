@@ -43,40 +43,33 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * An <code>Action</code> subclass that prepares to
- * create a control action associated
- * with a server.
+ * An <code>Action</code> subclass that prepares to create a control action
+ * associated with a server.
  */
-public class NewFormPrepareAction extends BaseAction {
+public class NewFormPrepareAction
+    extends BaseAction {
 
     private ControlBoss controlBoss;
-    private final Log log = LogFactory.getLog(NewFormPrepareAction.class.getName());  
-    
-    
+    private final Log log = LogFactory.getLog(NewFormPrepareAction.class.getName());
+
     @Autowired
     public NewFormPrepareAction(ControlBoss controlBoss) {
         super();
         this.controlBoss = controlBoss;
     }
 
-
-
     /**
      * Create the control action and associate it with the server.
      * <code>NewForm</code> and save it into the session attribute
      * <code>Constants.ACTION_ATTR</code>.
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-         
-        log.trace("preparing new server control action" );                    
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
+
+        log.trace("preparing new server control action");
 
         int sessionId = RequestUtils.getSessionId(request).intValue();
-        ControlForm cForm = (ControlForm) form;        
-      
+        ControlForm cForm = (ControlForm) form;
 
         AppdefEntityID appdefId = RequestUtils.getEntityId(request);
 
@@ -87,5 +80,5 @@ public class NewFormPrepareAction extends BaseAction {
 
         return null;
 
-    } 
+    }
 }

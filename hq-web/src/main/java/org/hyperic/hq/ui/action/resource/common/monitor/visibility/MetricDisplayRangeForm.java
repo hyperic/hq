@@ -44,16 +44,16 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.ui.action.CalendarForm;
 
 /**
- * Represents the controls on various pages that display metrics
- * summaries.
+ * Represents the controls on various pages that display metrics summaries.
  * 
- *
+ * 
  */
-public class MetricDisplayRangeForm extends CalendarForm {
+public class MetricDisplayRangeForm
+    extends CalendarForm {
 
-    public static final Integer ACTION_LASTN      = new Integer(1);
+    public static final Integer ACTION_LASTN = new Integer(1);
     public static final Integer ACTION_DATE_RANGE = new Integer(2);
-    
+
     // action radio button: "1" (last n) or "2" (date range)
     private Integer a;
     private String ctype;
@@ -65,15 +65,15 @@ public class MetricDisplayRangeForm extends CalendarForm {
     private Integer type;
     protected ImageButtonBean prevRange;
     protected ImageButtonBean nextRange;
-    
-    //-------------------------------------constructors
+
+    // -------------------------------------constructors
 
     public MetricDisplayRangeForm() {
         super();
         setDefaults();
     }
 
-    //-------------------------------------public methods
+    // -------------------------------------public methods
 
     public Integer getA() {
         return a;
@@ -103,11 +103,11 @@ public class MetricDisplayRangeForm extends CalendarForm {
         if (rid != null) {
             return rid;
         }
-        
+
         if (eid.length == 1) {
             return new AppdefEntityID(eid[0]).getId();
         }
-        
+
         return null;
     }
 
@@ -137,11 +137,11 @@ public class MetricDisplayRangeForm extends CalendarForm {
         if (type != null) {
             return type;
         }
-        
+
         if (eid.length == 1) {
             return new Integer(new AppdefEntityID(eid[0]).getType());
         }
-        
+
         return null;
     }
 
@@ -152,8 +152,7 @@ public class MetricDisplayRangeForm extends CalendarForm {
     /**
      * Always check the end date.
      */
-    public boolean getWantEndDate()
-    {
+    public boolean getWantEndDate() {
         return true;
     }
 
@@ -189,7 +188,7 @@ public class MetricDisplayRangeForm extends CalendarForm {
         return s.toString();
     }
 
-    //-------------------------------------private methods
+    // -------------------------------------private methods
 
     protected void setDefaults() {
         a = null;
@@ -202,18 +201,16 @@ public class MetricDisplayRangeForm extends CalendarForm {
         prevRange = new ImageButtonBean();
         nextRange = new ImageButtonBean();
     }
-    
-    public ActionErrors validate(ActionMapping mapping,
-                                 HttpServletRequest request) {
+
+    public ActionErrors validate(ActionMapping mapping, HttpServletRequest request) {
         ActionErrors errors = super.validate(mapping, request);
         if (isLastnSelected()) {
             Integer lastN = this.getRn();
             if (lastN == null || lastN.intValue() == 0) {
                 if (errors == null)
                     errors = new ActionErrors();
-                
-                errors.add("rn", new ActionMessage(
-                    "resource.common.monitor.error.LastNInteger"));   
+
+                errors.add("rn", new ActionMessage("resource.common.monitor.error.LastNInteger"));
             }
         }
         return errors;

@@ -46,55 +46,47 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * Forward to chart page for a designated metric.
  */
-public class ViewDesignatedChartAction extends MetricDisplayRangeAction {
-    
+public class ViewDesignatedChartAction
+    extends MetricDisplayRangeAction {
+
     private MeasurementBoss measurementBoss;
-    
+
     @Autowired
     public ViewDesignatedChartAction(AuthzBoss authzBoss, MeasurementBoss measurementBoss) {
         super(authzBoss);
         this.measurementBoss = measurementBoss;
     }
 
-
     /**
      * Modify the metric chart as specified in the given <code>@{link
      * ViewActionForm}</code>.
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-    
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
+
         HashMap<String, Object> forwardParams = new HashMap<String, Object>(4);
         AppdefEntityID aeid = RequestUtils.getEntityId(request);
         forwardParams.put(Constants.ENTITY_ID_PARAM, aeid.getAppdefKey());
-      
-        int sessionId  = RequestUtils.getSessionId(request).intValue();
+
+        int sessionId = RequestUtils.getSessionId(request).intValue();
         MeasurementTemplate mt;
         try {
-            AppdefEntityTypeID ctype =
-                RequestUtils.getChildResourceTypeId(request);
-            
-            forwardParams.put(Constants.CHILD_RESOURCE_TYPE_ID_PARAM,
-                              ctype.getAppdefKey());
-            forwardParams.put(Constants.MODE_PARAM,
-                              Constants.MODE_MON_CHART_SMMR);
+            AppdefEntityTypeID ctype = RequestUtils.getChildResourceTypeId(request);
+
+            forwardParams.put(Constants.CHILD_RESOURCE_TYPE_ID_PARAM, ctype.getAppdefKey());
+            forwardParams.put(Constants.MODE_PARAM, Constants.MODE_MON_CHART_SMMR);
 
             // Now we have to look up the designated metric template ID
             mt = measurementBoss.getAvailabilityMetricTemplate(sessionId, aeid, ctype);
         } catch (ParameterNotFoundException e) {
-            forwardParams.put(Constants.MODE_PARAM,
-                              aeid.isGroup() ? Constants.MODE_MON_CHART_SMMR :
-                                               Constants.MODE_MON_CHART_SMSR);
+            forwardParams.put(Constants.MODE_PARAM, aeid.isGroup() ? Constants.MODE_MON_CHART_SMMR
+                                                                  : Constants.MODE_MON_CHART_SMSR);
             // Now we have to look up the designated metric template ID
             mt = measurementBoss.getAvailabilityMetricTemplate(sessionId, aeid);
         }
-        
+
         forwardParams.put(Constants.METRIC_PARAM, mt.getId());
-        
-        return constructForward(request, mapping, Constants.REDRAW_URL, 
-                                forwardParams, false);
+
+        return constructForward(request, mapping, Constants.REDRAW_URL, forwardParams, false);
     }
 }

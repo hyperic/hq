@@ -51,46 +51,38 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * modifies the controlAction data.
  */
-public class EditAction extends BaseAction {
-    
-    private final Log log = LogFactory.getLog(EditAction.class.getName()); 
+public class EditAction
+    extends BaseAction {
+
+    private final Log log = LogFactory.getLog(EditAction.class.getName());
     private ControlBoss controlBoss;
-    
-    
+
     @Autowired
     public EditAction(ControlBoss controlBoss) {
         super();
         this.controlBoss = controlBoss;
     }
 
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
-
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception 
-    {
-                   
-        log.trace("modifying Control action");                    
+        log.trace("modifying Control action");
 
         HashMap<String, Object> parms = new HashMap<String, Object>(2);
         try {
             int sessionId = RequestUtils.getSessionId(request).intValue();
             ControlForm cForm = (ControlForm) form;
             AppdefEntityID appdefId = RequestUtils.getEntityId(request);
-            
-            parms.put(Constants.RESOURCE_PARAM, appdefId.getId());
-            parms.put(Constants.RESOURCE_TYPE_ID_PARAM,
-                      new Integer(appdefId.getType()));
 
-            ActionForward forward 
-                = checkSubmit(request, mapping, form, parms);          
-            if (forward != null) {                
+            parms.put(Constants.RESOURCE_PARAM, appdefId.getId());
+            parms.put(Constants.RESOURCE_TYPE_ID_PARAM, new Integer(appdefId.getType()));
+
+            ActionForward forward = checkSubmit(request, mapping, form, parms);
+            if (forward != null) {
                 return forward;
             }
-            
-            // XXX This is not working as an "edit" until PR: 4815 is 
+
+            // XXX This is not working as an "edit" until PR: 4815 is
             // resolved. Currently
             // will delete that control action, and replace it with a new.
 
@@ -98,43 +90,36 @@ public class EditAction extends BaseAction {
             String action = cForm.getControlAction();
             List<String> validActions = controlBoss.getActions(sessionId, appdefId);
             if (!validActions.contains(action)) {
-                RequestUtils.setError(request,
-                    "resource.common.control.error.ControlActionNotValid",
-                    action);
+                RequestUtils.setError(request, "resource.common.control.error.ControlActionNotValid", action);
                 return returnFailure(request, mapping, parms);
             }
-            
-            Integer[] triggers = new Integer[] { 
-                 RequestUtils.getIntParameter(request, 
-                                             Constants.CONTROL_BATCH_ID_PARAM),
-            };            
+
+            Integer[] triggers = new Integer[] { RequestUtils
+                .getIntParameter(request, Constants.CONTROL_BATCH_ID_PARAM), };
             controlBoss.deleteControlJob(sessionId, triggers);
-            
+
             // create the new action to schedule
             ScheduleValue sv = cForm.createSchedule();
             sv.setDescription(cForm.getDescription());
 
             if (cForm.getStartTime().equals(ScheduleForm.START_NOW)) {
-                controlBoss.doAction(sessionId, appdefId, action, (String)null);
+                controlBoss.doAction(sessionId, appdefId, action, (String) null);
             } else {
                 controlBoss.doAction(sessionId, appdefId, action, sv);
             }
 
             // set confirmation message
-            SessionUtils.setConfirmation(request.getSession(), 
-                "resource.common.scheduled.Confirmation");
-            
+            SessionUtils.setConfirmation(request.getSession(), "resource.common.scheduled.Confirmation");
+
             return returnSuccess(request, mapping, parms);
         } catch (PluginNotFoundException pnfe) {
             log.trace("no plugin available", pnfe);
-            RequestUtils.setError(request,
-                "resource.common.error.PluginNotFound");
-            return returnFailure(request, mapping, parms);                 
+            RequestUtils.setError(request, "resource.common.error.PluginNotFound");
+            return returnFailure(request, mapping, parms);
         } catch (PluginException cpe) {
             log.trace("control not enabled", cpe);
-            RequestUtils.setError(request,
-                "resource.common.error.ControlNotEnabled");
-            return returnFailure(request, mapping, parms);  
+            RequestUtils.setError(request, "resource.common.error.ControlNotEnabled");
+            return returnFailure(request, mapping, parms);
         }
-    }               
+    }
 }

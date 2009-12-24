@@ -58,118 +58,91 @@ import org.hyperic.util.units.DateFormatter.DateSpecifics;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * An <code>Action</code> that loads the <code>Portal</code>
- * identified by the <code>PORTAL_PARAM</code> request parameter (or
- * the default portal, if the parameter is not specified) into the
- * <code>PORTAL_KEY</code> request attribute.
+ * An <code>Action</code> that loads the <code>Portal</code> identified by the
+ * <code>PORTAL_PARAM</code> request parameter (or the default portal, if the
+ * parameter is not specified) into the <code>PORTAL_KEY</code> request
+ * attribute.
  */
-public class RSSAction extends BaseRSSAction {
-    
+public class RSSAction
+    extends BaseRSSAction {
+
     private EventsBoss eventsBoss;
-    
+
     private AuthzBoss authzBoss;
-    
-    
+
     @Autowired
-    public RSSAction(DashboardManager dashboardManager, ConfigBoss configBoss, EventsBoss eventsBoss, AuthzBoss authzBoss) {
+    public RSSAction(DashboardManager dashboardManager, ConfigBoss configBoss, EventsBoss eventsBoss,
+                     AuthzBoss authzBoss) {
         super(dashboardManager, configBoss);
-       this.eventsBoss = eventsBoss;
-       this.authzBoss = authzBoss;
+        this.eventsBoss = eventsBoss;
+        this.authzBoss = authzBoss;
     }
 
-
-
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception 
-    {
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
         RSSFeed feed = getNewRSSFeed(request);
-        
+
         // Set title
         MessageResources res = getResources(request);
         feed.setTitle(res.getMessage("dash.home.CriticalAlerts"));
 
-       
-       
-            
         String user = getUsername(request);
         List<Escalatable> list;
         try {
             // Set the managingEditor
             setManagingEditor(request);
-            
+
             // Get user preferences
             ConfigResponse preferences = getUserPreferences(request, user);
 
-            int count = Integer.parseInt(preferences
-                .getValue(".dashContent.criticalalerts.numberOfAlerts").trim());
-            int priority = Integer.parseInt(preferences
-                .getValue(".dashContent.criticalalerts.priority").trim());
-            long timeRange = Long.parseLong(preferences
-                .getValue(".dashContent.criticalalerts.past").trim());
+            int count = Integer.parseInt(preferences.getValue(".dashContent.criticalalerts.numberOfAlerts").trim());
+            int priority = Integer.parseInt(preferences.getValue(".dashContent.criticalalerts.priority").trim());
+            long timeRange = Long.parseLong(preferences.getValue(".dashContent.criticalalerts.past").trim());
 
-            list = eventsBoss.findRecentAlerts(user, count, priority, timeRange, 
-                                         null);
+            list = eventsBoss.findRecentAlerts(user, count, priority, timeRange, null);
         } catch (Exception e) {
             throw new ServletException("Error finding recent alerts", e);
         }
 
-        for (Escalatable alert : list ) {
-            AlertDefinitionInterface defInfo = 
-                alert.getDefinition().getDefinitionInfo();
+        for (Escalatable alert : list) {
+            AlertDefinitionInterface defInfo = alert.getDefinition().getDefinitionInfo();
             AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(defInfo.getResource());
-                
+
             DateSpecifics specs = new DateSpecifics();
-            specs.setDateFormat(new SimpleDateFormat(res.getMessage(
-                Constants.UNIT_FORMAT_PREFIX_KEY + "epoch-millis")));
-            
-            FormattedNumber fmtd = UnitsFormat.format(
-                    new UnitNumber(alert.getAlertInfo().getTimestamp(),
-                                   UnitsConstants.UNIT_DATE,
-                                   UnitsConstants.SCALE_MILLI), 
-                                   request.getLocale(), specs);
+            specs
+                .setDateFormat(new SimpleDateFormat(res.getMessage(Constants.UNIT_FORMAT_PREFIX_KEY + "epoch-millis")));
+
+            FormattedNumber fmtd = UnitsFormat.format(new UnitNumber(alert.getAlertInfo().getTimestamp(),
+                UnitsConstants.UNIT_DATE, UnitsConstants.SCALE_MILLI), request.getLocale(), specs);
 
             String desc;
             if (alert.getAlertInfo().isFixed()) {
                 desc = fmtd.toString() + " " +
-                    res.getMessage("parenthesis", res.getMessage(
-                                   "resource.common.alert.action.fixed.label"));
-            }
-            else {
-                desc = "<table cellspacing=4><tr>" +
-                          "<td>" + fmtd.toString() + "</td>" +
-                          "<td><a href='" + feed.getBaseUrl() +
-                          "/alerts/Alerts.do?mode=FIXED&a=" +
-                          alert.getId() + "&eid=" + aeid.getAppdefKey() + "'>" +
-                          res.getMessage(
-                              "resource.common.alert.action.fixed.label") +
-                          "</a></td>";
-                
+                       res.getMessage("parenthesis", res.getMessage("resource.common.alert.action.fixed.label"));
+            } else {
+                desc = "<table cellspacing=4><tr>" + "<td>" + fmtd.toString() + "</td>" + "<td><a href='" +
+                       feed.getBaseUrl() + "/alerts/Alerts.do?mode=FIXED&a=" + alert.getId() + "&eid=" +
+                       aeid.getAppdefKey() + "'>" + res.getMessage("resource.common.alert.action.fixed.label") +
+                       "</a></td>";
+
                 if (alert.isAcknowledgeable()) {
-                    desc += "<td><a href='" + feed.getBaseUrl() +
-                          "/alerts/Alerts.do?mode=ACKNOWLEDGE&a=" +
-                          alert.getId() + "&eid=" + aeid.getAppdefKey() + "'>" +
-                          res.getMessage(
-                              "resource.common.alert.action.acknowledge.label")+
-                          "</a></td></tr></table>";
-                    
+                    desc += "<td><a href='" + feed.getBaseUrl() + "/alerts/Alerts.do?mode=ACKNOWLEDGE&a=" +
+                            alert.getId() + "&eid=" + aeid.getAppdefKey() + "'>" +
+                            res.getMessage("resource.common.alert.action.acknowledge.label") + "</a></td></tr></table>";
+
                 }
             }
-            
+
             AuthzSubject subject = authzBoss.getCurrentSubject(user);
-            AppdefEntityValue resource = new AppdefEntityValue(aeid, subject); 
+            AppdefEntityValue resource = new AppdefEntityValue(aeid, subject);
 
-            String link = feed.getBaseUrl() +
-                "/alerts/Alerts.do?mode=viewAlert&eid=" +
-                aeid.getAppdefKey() + "&a=" + alert.getId();
+            String link = feed.getBaseUrl() + "/alerts/Alerts.do?mode=viewAlert&eid=" + aeid.getAppdefKey() + "&a=" +
+                          alert.getId();
 
-            feed.addItem(resource.getName()+ " " + defInfo.getName(), link, 
-                         desc, alert.getAlertInfo().getTimestamp()); 
+            feed.addItem(resource.getName() + " " + defInfo.getName(), link, desc, alert.getAlertInfo().getTimestamp());
         }
         request.setAttribute("rssFeed", feed);
-        
+
         return mapping.findForward(Constants.RSS_URL);
     }
 }

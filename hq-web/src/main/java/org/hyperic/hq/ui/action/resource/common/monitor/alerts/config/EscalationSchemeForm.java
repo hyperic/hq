@@ -34,15 +34,16 @@ import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.ui.action.resource.ResourceForm;
 import org.hyperic.hq.ui.beans.EscalationActionBean;
 
-public class EscalationSchemeForm extends ResourceForm {
+public class EscalationSchemeForm
+    extends ResourceForm {
     private Integer _escId;
-    private String  _escName;
-    private List    _actions;
+    private String _escName;
+    private List _actions;
     private boolean _allowPause;
-    private long    _pauseRange;
-    private int     _notification;
-    private int     _ad;
-    private int     _gad;
+    private long _pauseRange;
+    private int _notification;
+    private int _ad;
+    private int _gad;
 
     public Integer getEscId() {
         return _escId;
@@ -108,8 +109,7 @@ public class EscalationSchemeForm extends ResourceForm {
     }
 
     public EscalationActionBean[] getActions() {
-        EscalationActionBean[] actions =
-            new EscalationActionBean[_actions.size()];
+        EscalationActionBean[] actions = new EscalationActionBean[_actions.size()];
         return (EscalationActionBean[]) _actions.toArray(actions);
     }
 
@@ -148,8 +148,7 @@ public class EscalationSchemeForm extends ResourceForm {
 
     public String toString() {
         StringBuffer strOut = new StringBuffer(super.toString());
-        strOut.append("\nescId=" + _escId)
-              .append("\nescName=" + _escName);
+        strOut.append("\nescId=" + _escId).append("\nescName=" + _escName);
         return strOut.toString();
     }
 }

@@ -45,15 +45,15 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- *
+ * 
  * Fetch the designated metrics for a resource
  */
-public class ResourceDesignatedMetricsAction extends TilesAction {
-    
-   
-    private final HashSet<String> categories =  new HashSet<String>();
+public class ResourceDesignatedMetricsAction
+    extends TilesAction {
+
+    private final HashSet<String> categories = new HashSet<String>();
     private MeasurementBoss measurementBoss;
-    
+
     @Autowired
     public ResourceDesignatedMetricsAction(MeasurementBoss measurementBoss) {
         super();
@@ -62,21 +62,15 @@ public class ResourceDesignatedMetricsAction extends TilesAction {
         categories.add(MeasurementConstants.CAT_UTILIZATION);
         categories.add(MeasurementConstants.CAT_THROUGHPUT);
     }
-    
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-        String appdefKey =
-            (String) context.getAttribute(Constants.ENTITY_ID_PARAM);
+
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
+        String appdefKey = (String) context.getAttribute(Constants.ENTITY_ID_PARAM);
         AppdefEntityID entityId = new AppdefEntityID(appdefKey);
 
         int sessionId = RequestUtils.getSessionId(request).intValue();
-       
-        List<MeasurementTemplate> designates =
-            measurementBoss.getDesignatedTemplates(sessionId, entityId, categories);
+
+        List<MeasurementTemplate> designates = measurementBoss.getDesignatedTemplates(sessionId, entityId, categories);
         context.putAttribute(Constants.CTX_SUMMARIES, designates);
 
         return null;

@@ -39,46 +39,40 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.util.RequestUtils;
 
 /**
- * An Action that retrieves data from the BizApp to facilitate display
- * of the <em>Edit Availability</em> pages for a compatible group's metrics.
+ * An Action that retrieves data from the BizApp to facilitate display of the
+ * <em>Edit Availability</em> pages for a compatible group's metrics.
  */
-public class EditAvailabilityFormPrepareAction extends Action {
-
-   
+public class EditAvailabilityFormPrepareAction
+    extends Action {
 
     /**
-     * Retrieve this data and store it in the specified request
-     * parameters:
-     *
+     * Retrieve this data and store it in the specified request parameters:
+     * 
      * <ul>
-     *   <li><code>AppdefEntityId</code> object identified by
-     *     <code>Constants.RESOURCE_ID_PARAM</code> and
-     *     <code>Constants.RESOURCE_TYPE_PARAM</code></li>
-     *   <li><code>List</code> of available <code>Metrics</code>
-     *     objects (those not already associated with the resource) in
-     *     <code>Constants.AVAIL_METRICS_ATTR</code></li>
-     *   <li><code>Integer</code> number of available metrics in
-     *     <code>Constants.NUM_AVAIL_METRICS_ATTR</code></li>
-     *   <li><code>List</code> of pending <code>Metrics</code>
-     *     objects (those in queue to be associated with the resource) in
-     *     <code>Constants.PENDING_METRICS_ATTR</code></li>
-     *   <li><code>Integer</code> number of pending metrics in
-     *     <code>Constants.NUM_PENDING_METRICS_ATTR</code></li>
+     * <li><code>AppdefEntityId</code> object identified by
+     * <code>Constants.RESOURCE_ID_PARAM</code> and
+     * <code>Constants.RESOURCE_TYPE_PARAM</code></li>
+     * <li><code>List</code> of available <code>Metrics</code> objects (those
+     * not already associated with the resource) in
+     * <code>Constants.AVAIL_METRICS_ATTR</code></li>
+     * <li><code>Integer</code> number of available metrics in
+     * <code>Constants.NUM_AVAIL_METRICS_ATTR</code></li>
+     * <li><code>List</code> of pending <code>Metrics</code> objects (those in
+     * queue to be associated with the resource) in
+     * <code>Constants.PENDING_METRICS_ATTR</code></li>
+     * <li><code>Integer</code> number of pending metrics in
+     * <code>Constants.NUM_PENDING_METRICS_ATTR</code></li>
      * </ul>
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-        
-        Log log =
-            LogFactory.getLog(EditAvailabilityFormPrepareAction.class.getName());
-        GroupMonitoringConfigForm addForm = (GroupMonitoringConfigForm)form;
-       
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
+
+        Log log = LogFactory.getLog(EditAvailabilityFormPrepareAction.class.getName());
+        GroupMonitoringConfigForm addForm = (GroupMonitoringConfigForm) form;
+
         Integer resourceId = addForm.getRid();
         Integer entityType = addForm.getType();
-        
+
         if (resourceId == null) {
             resourceId = RequestUtils.getResourceId(request);
         }
@@ -92,7 +86,6 @@ public class EditAvailabilityFormPrepareAction extends Action {
             return null;
         }
 
-       
         log.trace("Getting availability threshold metrics");
 
         // XXX actually set the availability and unavailability thresholds

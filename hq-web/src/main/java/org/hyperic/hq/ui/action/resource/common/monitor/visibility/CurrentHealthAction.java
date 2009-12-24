@@ -63,73 +63,65 @@ import org.hyperic.util.units.UnitsFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * An <code>TilesAction</code> that retrieves metric data to
- * facilitate display of a current health page. Concrete subclasses
- * provide methods to retrieve resource-type-specific data.
+ * An <code>TilesAction</code> that retrieves metric data to facilitate display
+ * of a current health page. Concrete subclasses provide methods to retrieve
+ * resource-type-specific data.
  */
-public class CurrentHealthAction extends TilesAction {
+public class CurrentHealthAction
+    extends TilesAction {
 
-    protected final Log log =
-        LogFactory.getLog(CurrentHealthAction.class.getName());
+    protected final Log log = LogFactory.getLog(CurrentHealthAction.class.getName());
 
     private final PageControl pc = new PageControl(0, Constants.DEFAULT_CHART_POINTS);
-    
+
     protected MeasurementBoss measurementBoss;
-    
-   
+
     @Autowired
     public CurrentHealthAction(MeasurementBoss measurementBoss) {
         super();
         this.measurementBoss = measurementBoss;
     }
 
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
         AppdefResourceValue resource = RequestUtils.getResource(request);
 
         if (resource == null) {
-            RequestUtils.setError(request,
-                                  Constants.ERR_RESOURCE_NOT_FOUND);
+            RequestUtils.setError(request, Constants.ERR_RESOURCE_NOT_FOUND);
             return null;
         }
-        
+
         AppdefEntityID aeid = resource.getEntityId();
-      
+
         ServletContext ctx = getServlet().getServletContext();
         // Check configuration
         InventoryHelper helper = InventoryHelper.getHelper(aeid);
         helper.isResourceConfigured(request, ctx, true);
-        
+
         // Set the views
         setupViews(request, (IndicatorViewsForm) form, aeid.getAppdefKey());
 
         // Get the resource availability
         int sessionId = RequestUtils.getSessionId(request).intValue();
-       
+
         WebUser user = RequestUtils.getWebUser(request);
 
         try {
-            MeasurementTemplate mt =
-                measurementBoss.getAvailabilityMetricTemplate(sessionId, aeid);
-            
-            Map<String,Object> pref = user.getMetricRangePreference(true);
+            MeasurementTemplate mt = measurementBoss.getAvailabilityMetricTemplate(sessionId, aeid);
+
+            Map<String, Object> pref = user.getMetricRangePreference(true);
             long begin = ((Long) pref.get(MonitorUtils.BEGIN)).longValue();
             long end = ((Long) pref.get(MonitorUtils.END)).longValue();
-            long interval = TimeUtil.getInterval(begin, end,
-                    Constants.DEFAULT_CHART_POINTS);
+            long interval = TimeUtil.getInterval(begin, end, Constants.DEFAULT_CHART_POINTS);
 
-            List<HighLowMetricValue> data = measurementBoss.findMeasurementData(sessionId, aeid, mt, begin,
-                                                 end, interval, true, pc);
+            List<HighLowMetricValue> data = measurementBoss.findMeasurementData(sessionId, aeid, mt, begin, end,
+                interval, true, pc);
 
             // Seems like sometimes Postgres does not average cleanly for
-            // groups, and the value ends up being like 0.9999999999.  We don't
+            // groups, and the value ends up being like 0.9999999999. We don't
             // want the insignificant amount to mess up our display.
             if (aeid.isGroup()) {
-                for (MetricValue val : data ) {
+                for (MetricValue val : data) {
                     if (val.toString().equals("1")) {
                         val.setValue(1);
                     }
@@ -137,54 +129,45 @@ public class CurrentHealthAction extends TilesAction {
             }
 
             request.setAttribute(Constants.CAT_AVAILABILITY_METRICS_ATTR, data);
-            request.setAttribute(Constants.AVAIL_METRICS_ATTR,
-                                 getFormattedAvailability(data));
+            request.setAttribute(Constants.AVAIL_METRICS_ATTR, getFormattedAvailability(data));
         } catch (MeasurementNotFoundException e) {
             // No utilization metric
-            log.debug(MeasurementConstants.CAT_AVAILABILITY +
-                      " not found for " + aeid);
+            log.debug(MeasurementConstants.CAT_AVAILABILITY + " not found for " + aeid);
         }
 
         return null;
     }
-    
+
     protected String getFormattedAvailability(List<? extends MetricValue> values) {
         double sum = 0;
         int count = 0;
-        for (MetricValue mv :  values) {
-            if (Double.isNaN(mv.getValue()) ||
-                mv.getValue() > 1 || mv.getValue() < 0) {
+        for (MetricValue mv : values) {
+            if (Double.isNaN(mv.getValue()) || mv.getValue() > 1 || mv.getValue() < 0) {
                 continue;
             }
             sum += mv.getValue();
             count++;
         }
-        
-        UnitNumber average = new UnitNumber(sum / count,
-                                            UnitsConstants.UNIT_PERCENTAGE);
+
+        UnitNumber average = new UnitNumber(sum / count, UnitsConstants.UNIT_PERCENTAGE);
         return UnitsFormat.format(average).toString();
     }
-    
+
     protected String getDefaultViewName(HttpServletRequest request) {
-        
-        
+
         MessageResources res = getResources(request);
         return res.getMessage(Constants.DEFAULT_INDICATOR_VIEW);
     }
 
-    protected void setupViews(HttpServletRequest request,
-                              IndicatorViewsForm ivf,
-                              String key) {
+    protected void setupViews(HttpServletRequest request, IndicatorViewsForm ivf, String key) {
         WebUser user = SessionUtils.getWebUser(request.getSession());
 
         String[] views;
         // Try to get the view names from user preferences
         try {
-            String viewsPref =
-                user.getPreference(Constants.INDICATOR_VIEWS + key);
-            StringTokenizer st =
-                new StringTokenizer(viewsPref, Constants.DASHBOARD_DELIMITER);
-            
+            String viewsPref = user.getPreference(Constants.INDICATOR_VIEWS + key);
+            StringTokenizer st = new StringTokenizer(viewsPref, Constants.DASHBOARD_DELIMITER);
+
             views = new String[st.countTokens()];
             for (int i = 0; st.hasMoreTokens(); i++)
                 views[i] = st.nextToken();
@@ -194,20 +177,18 @@ public class CurrentHealthAction extends TilesAction {
 
         ivf.setViews(views);
 
-        String viewName =
-            RequestUtils.getStringParameter(request, Constants.PARAM_VIEW,
-                                            views[0]);
-        
+        String viewName = RequestUtils.getStringParameter(request, Constants.PARAM_VIEW, views[0]);
+
         // Make sure that the view name is one of the views
         boolean validated = false;
         for (int i = 0; i < views.length; i++) {
             if (validated = viewName.equals(views[i]))
                 break;
         }
-        
+
         if (!validated)
             viewName = views[0];
-        
+
         ivf.setView(viewName);
     }
 }

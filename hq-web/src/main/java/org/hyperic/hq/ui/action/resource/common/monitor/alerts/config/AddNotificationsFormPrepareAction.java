@@ -50,41 +50,38 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 
-
 /**
- * An abstract base class for setting up the add notifications
- * form(s).
- *
+ * An abstract base class for setting up the add notifications form(s).
+ * 
  */
-public abstract class AddNotificationsFormPrepareAction extends TilesAction {
-    private final Log log = LogFactory.getLog( AddNotificationsFormPrepareAction.class.getName() );
+public abstract class AddNotificationsFormPrepareAction
+    extends TilesAction {
+    private final Log log = LogFactory.getLog(AddNotificationsFormPrepareAction.class.getName());
     private EventsBoss eventsBoss;
-    
-    
-   
 
     public AddNotificationsFormPrepareAction(EventsBoss eventBoss) {
         super();
         this.eventsBoss = eventBoss;
     }
 
-
-
-
     /**
-     * <p>Return the array of Integer ids for the given
+     * <p>
+     * Return the array of Integer ids for the given
      * <code>notificationType</code> contained in the alert definition
-     * notification actions.</p>
-     *
-     * <p>This method also sets the alert definition object on the
-     * form and places it in the request.  It also puts the resource
-     * id and resource type in the request.</p>
+     * notification actions.
+     * </p>
+     * 
+     * <p>
+     * This method also sets the alert definition object on the form and places
+     * it in the request. It also puts the resource id and resource type in the
+     * request.
+     * </p>
      * @param addForm the form being prepared
      * @param notificationType the type of notification
-     *
-     * @return the array of ids for already existing notifications
-     * based on the notificationType, or a zero-length array if there
-     * are not yet any notifications of this type
+     * 
+     * @return the array of ids for already existing notifications based on the
+     *         notificationType, or a zero-length array if there are not yet any
+     *         notifications of this type
      * @throws ServletException
      * @throws FinderException
      * @throws RemoteException
@@ -94,41 +91,33 @@ public abstract class AddNotificationsFormPrepareAction extends TilesAction {
      * @throws EncodingException
      * @throws InvalidActionDataException
      */
-    public Integer[] getNotificationIds(HttpServletRequest request,
-                                        AddNotificationsForm addForm,
-                                        AppdefEntityID aeid,
-                                        int notificationType)
-        throws ServletException, SessionNotFoundException,
-               SessionTimeoutException, PermissionException, RemoteException,
-               FinderException, EncodingException, InvalidActionDataException {
+    public Integer[] getNotificationIds(HttpServletRequest request, AddNotificationsForm addForm, AppdefEntityID aeid,
+                                        int notificationType) throws ServletException, SessionNotFoundException,
+        SessionTimeoutException, PermissionException, RemoteException, FinderException, EncodingException,
+        InvalidActionDataException {
         Integer[] ids = new Integer[0];
-       
-       
+
         Integer sessionId = RequestUtils.getSessionId(request);
-        
+
         Integer alertDefId = addForm.getAd();
         log.debug("(1) alertDefId=" + alertDefId);
         if (alertDefId == null)
             throw new ParameterNotFoundException("alert definition id not found");
 
         log.debug("(2) alertDefId=" + alertDefId);
-        AlertDefinitionValue alertDef = (AlertDefinitionValue)
-             request.getAttribute(Constants.ALERT_DEFS_ATTR);
+        AlertDefinitionValue alertDef = (AlertDefinitionValue) request.getAttribute(Constants.ALERT_DEFS_ATTR);
         if (alertDef == null) {
-            alertDef = eventsBoss.getAlertDefinition(sessionId.intValue(),
-                                                    alertDefId);
+            alertDef = eventsBoss.getAlertDefinition(sessionId.intValue(), alertDefId);
         }
         request.setAttribute(Constants.ALERT_DEFINITION_ATTR, alertDef);
-        
+
         ActionValue[] actions = alertDef.getActions();
         for (int i = 0; i < actions.length; ++i) {
-            if ( actions[i].classnameHasBeenSet() &&
-                 !(actions[i].getClassname().equals(null) ||
-               actions[i].getClassname().equals("") ) ) {
+            if (actions[i].classnameHasBeenSet() &&
+                !(actions[i].getClassname().equals(null) || actions[i].getClassname().equals(""))) {
                 EmailActionConfig emailCfg = new EmailActionConfig();
-                ConfigResponse configResponse =
-                    ConfigResponse.decode( actions[i].getConfig() );
-                
+                ConfigResponse configResponse = ConfigResponse.decode(actions[i].getConfig());
+
                 try {
                     emailCfg.init(configResponse);
                 } catch (InvalidActionDataException e) {
@@ -139,25 +128,21 @@ public abstract class AddNotificationsFormPrepareAction extends TilesAction {
 
                 if (emailCfg.getType() == notificationType) {
                     ids = new Integer[emailCfg.getUsers().size()];
-                    ids = (Integer[])emailCfg.getUsers().toArray(ids);
+                    ids = (Integer[]) emailCfg.getUsers().toArray(ids);
                     break;
                 }
             }
         }
-        
+
         if (aeid instanceof AppdefEntityTypeID) {
             addForm.setAetid(aeid.getAppdefKey());
-            request.setAttribute(Constants.APPDEF_RES_TYPE_ID,
-                                 aeid.getAppdefKey());
-        }
-        else {
+            request.setAttribute(Constants.APPDEF_RES_TYPE_ID, aeid.getAppdefKey());
+        } else {
             addForm.setRid(aeid.getId());
             addForm.setType(new Integer(aeid.getType()));
-            request.setAttribute(Constants.ENTITY_ID_PARAM,
-                                 aeid.getAppdefKey());
+            request.setAttribute(Constants.ENTITY_ID_PARAM, aeid.getAppdefKey());
         }
-        
+
         return ids;
     }
 }
-

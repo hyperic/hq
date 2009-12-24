@@ -39,23 +39,23 @@ import org.apache.struts.action.ActionMessage;
  * An extension of <code>BaseValidatorForm</code> representing the
  * <em>Add Others </em> form.
  */
-public class AddOthersForm extends AddNotificationsForm  {
+public class AddOthersForm
+    extends AddNotificationsForm {
 
-    private Log log = LogFactory.getLog( AddOthersForm.class.getName() );
+    private Log log = LogFactory.getLog(AddOthersForm.class.getName());
 
-    //-------------------------------------instance variables
+    // -------------------------------------instance variables
 
     private String emailAddresses;
     private Integer ad;
 
-    //-------------------------------------constructors
+    // -------------------------------------constructors
 
     public AddOthersForm() {
         super();
     }
 
-    //-------------------------------------public methods
-
+    // -------------------------------------public methods
 
     public String getEmailAddresses() {
         return this.emailAddresses;
@@ -65,13 +65,12 @@ public class AddOthersForm extends AddNotificationsForm  {
         this.emailAddresses = emailAddresses;
     }
 
-
     public Integer getAd() {
         return this.ad;
     }
 
     public void setAd(Integer ad) {
-        this.ad=ad;
+        this.ad = ad;
     }
 
     public String toString() {
@@ -85,19 +84,17 @@ public class AddOthersForm extends AddNotificationsForm  {
     }
 
     public void reset(ActionMapping mapping, HttpServletRequest request) {
-        this.emailAddresses  =  "";
+        this.emailAddresses = "";
         super.reset(mapping, request);
     }
 
-    public ActionErrors validate(ActionMapping mapping,
-                                 HttpServletRequest request) {
+    public ActionErrors validate(ActionMapping mapping, HttpServletRequest request) {
         if (!shouldValidate(mapping, request))
             return null;
-        
+
         log.debug("validating email addresses: " + emailAddresses);
         ActionErrors errs = super.validate(mapping, request);
-        if (null == errs &&
-            (emailAddresses == null || emailAddresses.length() == 0)) {
+        if (null == errs && (emailAddresses == null || emailAddresses.length() == 0)) {
             // A special case, BaseValidatorForm will return null if Ok is
             // clicked and input is null, indicating a PrepareForm
             // action is occurring. This is tricky. However, it also
@@ -112,14 +109,11 @@ public class AddOthersForm extends AddNotificationsForm  {
             InternetAddress[] addresses = InternetAddress.parse(emailAddresses);
         } catch (AddressException e) {
             if (e.getRef() == null) {
-                ActionMessage err = new ActionMessage(
-                        "alert.config.error.InvalidEmailAddresses",
-                        e.getMessage());
+                ActionMessage err = new ActionMessage("alert.config.error.InvalidEmailAddresses", e.getMessage());
                 errs.add("emailAddresses", err);
             } else {
-                ActionMessage err = new ActionMessage(
-                        "alert.config.error.InvalidEmailAddress",
-                        e.getRef(), e.getMessage());
+                ActionMessage err = new ActionMessage("alert.config.error.InvalidEmailAddress", e.getRef(), e
+                    .getMessage());
                 errs.add("emailAddresses", err);
             }
         }

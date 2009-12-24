@@ -58,7 +58,8 @@ import org.springframework.beans.factory.annotation.Autowired;
  * parameter is not specified) into the <code>PORTAL_KEY</code> request
  * attribute.
  */
-public class ViewAction extends TilesAction {
+public class ViewAction
+    extends TilesAction {
 
     private final Log log = LogFactory.getLog("DASHBOARD-TIMING");
     private AuthzBoss authzBoss;
@@ -69,46 +70,39 @@ public class ViewAction extends TilesAction {
         this.authzBoss = authzBoss;
     }
 
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
 
         StopWatch timer = new StopWatch();
 
-        
         HttpSession session = request.getSession();
         WebUser user = SessionUtils.getWebUser(session);
         ConfigResponse userPrefs = user.getPreferences();
         String key = Constants.USERPREF_KEY_RECENT_RESOURCES;
-        if(userPrefs.getValue(key, null) != null){
-	        Map<AppdefEntityID,Resource>  list;
-	        try {
-	            list = getStuff(key, user, userPrefs);
-	        } catch (Exception e) {
-	            DashboardUtils.verifyResources(key, getServlet().getServletContext(), userPrefs, user);
-	            list = getStuff(key, user, userPrefs);
-	        }
-	        
-	        context.putAttribute("resources", list);
-        }else{
-        	context.putAttribute("resources", new ArrayList());
+        if (userPrefs.getValue(key, null) != null) {
+            Map<AppdefEntityID, Resource> list;
+            try {
+                list = getStuff(key, user, userPrefs);
+            } catch (Exception e) {
+                DashboardUtils.verifyResources(key, getServlet().getServletContext(), userPrefs, user);
+                list = getStuff(key, user, userPrefs);
+            }
+
+            context.putAttribute("resources", list);
+        } else {
+            context.putAttribute("resources", new ArrayList());
         }
-        
+
         log.debug("ViewRecentResources - timing [" + timer.toString() + "]");
         return null;
     }
 
-    private Map<AppdefEntityID,Resource> getStuff(String key,  WebUser user,
-                          ConfigResponse dashPrefs)
-        throws Exception {
+    private Map<AppdefEntityID, Resource> getStuff(String key, WebUser user, ConfigResponse dashPrefs) throws Exception {
         List<AppdefEntityID> entityIds = DashboardUtils.preferencesAsEntityIds(key, dashPrefs);
-        Collections.reverse(entityIds);     // Most recent on top
+        Collections.reverse(entityIds); // Most recent on top
 
         AppdefEntityID[] arrayIds = new AppdefEntityID[entityIds.size()];
-        arrayIds =  entityIds.toArray(arrayIds);
+        arrayIds = entityIds.toArray(arrayIds);
 
         return authzBoss.findResourcesByIds(user.getSessionId().intValue(), arrayIds);
     }

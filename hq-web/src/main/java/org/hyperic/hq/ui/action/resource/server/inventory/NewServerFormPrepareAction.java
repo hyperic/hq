@@ -46,34 +46,25 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class NewServerFormPrepareAction 
+public class NewServerFormPrepareAction
     extends WorkflowPrepareAction {
-    
+
     private AppdefBoss appdefBoss;
-    
-    
+
     @Autowired
     public NewServerFormPrepareAction(AppdefBoss appdefBoss) {
         super();
         this.appdefBoss = appdefBoss;
     }
 
-
-
-    public ActionForward workflow(ComponentContext context,
-                                  ActionMapping mapping,
-                                  ActionForm form,
-                                  HttpServletRequest request,
-                                  HttpServletResponse response)
-        throws Exception
-    {
+    public ActionForward workflow(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                  HttpServletRequest request, HttpServletResponse response) throws Exception {
         ServerForm newForm = (ServerForm) form;
         Integer platformId = newForm.getRid();
         Integer resourceType = newForm.getType();
 
         try {
             Integer sessionId = RequestUtils.getSessionId(request);
-          
 
             if (platformId == null) {
                 platformId = RequestUtils.getResourceId(request);
@@ -81,19 +72,15 @@ public class NewServerFormPrepareAction
             if (resourceType == null) {
                 resourceType = RequestUtils.getResourceTypeId(request);
             }
-            
-            
-                        
+
             PlatformValue pValue = appdefBoss.findPlatformById(sessionId.intValue(), platformId);
 
-            List<ServerTypeValue> stValues =
-                appdefBoss.findServerTypesByPlatformType(sessionId.intValue(),
-                                                   pValue.getPlatformType().getId(),
-                                                   PageControl.PAGE_ALL);
+            List<ServerTypeValue> stValues = appdefBoss.findServerTypesByPlatformType(sessionId.intValue(), pValue
+                .getPlatformType().getId(), PageControl.PAGE_ALL);
 
             TreeMap<String, ServerTypeValue> returnMap = new TreeMap<String, ServerTypeValue>();
-            for( ServerTypeValue stv : stValues) {
-              
+            for (ServerTypeValue stv : stValues) {
+
                 if (!stv.getVirtual()) {
                     returnMap.put(stv.getSortName(), stv);
                 }

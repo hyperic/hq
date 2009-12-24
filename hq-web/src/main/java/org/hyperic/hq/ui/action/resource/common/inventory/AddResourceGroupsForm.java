@@ -43,11 +43,12 @@ import org.hyperic.hq.ui.action.BaseValidatorForm;
 /**
  * removes a list of groups from a resource
  * 
- *
+ * 
  */
-public class AddResourceGroupsForm extends BaseValidatorForm {
+public class AddResourceGroupsForm
+    extends BaseValidatorForm {
 
-    //-------------------------------------instance variables
+    // -------------------------------------instance variables
 
     private Integer[] availableGroups;
     private Integer[] pendingGroups;
@@ -55,14 +56,14 @@ public class AddResourceGroupsForm extends BaseValidatorForm {
     private Integer psp;
     private Integer rid;
     private Integer type;
-    
-    //-------------------------------------constructors
+
+    // -------------------------------------constructors
 
     public AddResourceGroupsForm() {
         super();
     }
 
-    //-------------------------------------public methods
+    // -------------------------------------public methods
 
     public Integer[] getAvailableGroup() {
         return this.availableGroups;
@@ -134,13 +135,13 @@ public class AddResourceGroupsForm extends BaseValidatorForm {
 
         return null;
     }
-    
+
     public void setEid(String eidStr) {
         AppdefEntityID eid = new AppdefEntityID(eidStr);
         rid = eid.getId();
         type = new Integer(eid.getType());
     }
-    
+
     public void reset(ActionMapping mapping, HttpServletRequest request) {
         super.reset(mapping, request);
         availableGroups = new Integer[0];

@@ -41,37 +41,33 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * An Action that retrieves data from the BizApp to facilitate display
- * of the form to add other emailAddresses( non-CAM) to an alert Definition
+ * An Action that retrieves data from the BizApp to facilitate display of the
+ * form to add other emailAddresses( non-CAM) to an alert Definition
  */
-public class AddOthersFormPrepareAction extends Action {
+public class AddOthersFormPrepareAction
+    extends Action {
 
-   private EventsBoss eventsBoss;
+    private EventsBoss eventsBoss;
 
-   @Autowired
+    @Autowired
     public AddOthersFormPrepareAction(EventsBoss eventsBoss) {
         super();
         this.eventsBoss = eventsBoss;
     }
 
     /**
-     * Retrieve this data and store it in the specified request
-     * parameters:
-     *
+     * Retrieve this data and store it in the specified request parameters:
+     * 
      * <ul>
-     *   <li><code>OwnedRoleValue</code> object identified by
-     *     <code>Constants.ROLE_PARAM</code> request parameter in in
-     *     <code>Constants.ROLE_ATTR</code></li>
-     *   <li><code>List</code> of available <code>AuthzSubjectValue</code>
-     *     objects (those not already associated with the role) in
+     * <li><code>OwnedRoleValue</code> object identified by
+     * <code>Constants.ROLE_PARAM</code> request parameter in in
+     * <code>Constants.ROLE_ATTR</code></li>
+     * <li><code>List</code> of available <code>AuthzSubjectValue</code> objects
+     * (those not already associated with the role) in
      * </ul>
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-      
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
         AddOthersForm addForm = (AddOthersForm) form;
         Integer alertDefId = addForm.getAd();
@@ -86,17 +82,13 @@ public class AddOthersFormPrepareAction extends Action {
             AppdefEntityID aeid = RequestUtils.getEntityId(request);
             addForm.setType(new Integer(aeid.getType()));
             addForm.setRid(aeid.getId());
-        }        
+        }
 
-      
         Integer sessionId = RequestUtils.getSessionId(request);
-      
 
-        AlertDefinitionValue alertDef = (AlertDefinitionValue)
-            request.getAttribute(Constants.ALERT_DEFS_ATTR);
+        AlertDefinitionValue alertDef = (AlertDefinitionValue) request.getAttribute(Constants.ALERT_DEFS_ATTR);
         if (alertDef == null) {
-            alertDef =
-                eventsBoss.getAlertDefinition(sessionId.intValue(), alertDefId);
+            alertDef = eventsBoss.getAlertDefinition(sessionId.intValue(), alertDefId);
         }
         addForm.setAd(alertDef.getId());
 

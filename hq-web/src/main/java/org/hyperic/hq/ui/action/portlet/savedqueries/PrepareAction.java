@@ -55,51 +55,40 @@ import org.springframework.beans.factory.annotation.Autowired;
  *prepairs the list and form for the saved queries properties page.
  */
 
-public class PrepareAction extends TilesAction {
+public class PrepareAction
+    extends TilesAction {
 
-    private final   Log log = LogFactory.getLog(PrepareAction.class.getName());
+    private final Log log = LogFactory.getLog(PrepareAction.class.getName());
     private AuthzBoss authzBoss;
-    
-    
-    
+
     @Autowired
     public PrepareAction(AuthzBoss authzBoss) {
         super();
         this.authzBoss = authzBoss;
     }
 
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
 
-
-
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-            
-      
         log.trace("getting saved charts associated with user ");
-       
+
         WebUser user = RequestUtils.getWebUser(request);
-      
-        DashboardConfig dashConfig = DashboardUtils.findDashboard(
-        		(Integer)request.getSession().getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, authzBoss);
+
+        DashboardConfig dashConfig = DashboardUtils.findDashboard((Integer) request.getSession().getAttribute(
+            Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
-        List<String> chartList = StringUtil.explode(
-        		dashPrefs.getValue(Constants.USER_DASHBOARD_CHARTS), 
+        List<String> chartList = StringUtil.explode(dashPrefs.getValue(Constants.USER_DASHBOARD_CHARTS),
             StringConstants.DASHBOARD_DELIMITER);
 
         ArrayList<KeyValuePair> charts = new ArrayList<KeyValuePair>();
 
-        for(Iterator<String> i = chartList.iterator(); i.hasNext();) {
-            StringTokenizer st = new StringTokenizer( i.next(), ",");
+        for (Iterator<String> i = chartList.iterator(); i.hasNext();) {
+            StringTokenizer st = new StringTokenizer(i.next(), ",");
             if (st.countTokens() >= 2)
                 charts.add(new KeyValuePair(st.nextToken(), st.nextToken()));
         }
-        request.setAttribute( "charts", charts );           
-        request.setAttribute( "chartsize", String.valueOf(charts.size()) );           
+        request.setAttribute("charts", charts);
+        request.setAttribute("chartsize", String.valueOf(charts.size()));
 
         return null;
     }

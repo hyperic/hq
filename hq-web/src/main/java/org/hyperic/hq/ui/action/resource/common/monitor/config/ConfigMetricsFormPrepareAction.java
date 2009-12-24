@@ -54,14 +54,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * This populates the ConfigMetrics/Update metrics pages' request attributes.
  */
-public class ConfigMetricsFormPrepareAction extends TilesAction {
-    
-    private final  Log log = LogFactory.getLog(ConfigMetricsFormPrepareAction.class);
-    
+public class ConfigMetricsFormPrepareAction
+    extends TilesAction {
+
+    private final Log log = LogFactory.getLog(ConfigMetricsFormPrepareAction.class);
+
     protected MeasurementBoss measurementBoss;
     protected AppdefBoss appdefBoss;
-    
-    
+
     @Autowired
     public ConfigMetricsFormPrepareAction(MeasurementBoss measurementBoss, AppdefBoss appdefBoss) {
         super();
@@ -69,111 +69,91 @@ public class ConfigMetricsFormPrepareAction extends TilesAction {
         this.appdefBoss = appdefBoss;
     }
 
-
-
     /**
      * Retrieve different resource metrics and store them in various request
      * attributes.
      */
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
 
-       
         log.trace("Preparing resource metrics action.");
-        
+
         int sessionId = RequestUtils.getSessionId(request).intValue();
-       
-      
-        
-        PageControl pca = RequestUtils.getPageControl(request, "ps", "pn",
-                            "soa", "sca");           
-        PageControl pcp = RequestUtils.getPageControl(request, "ps", "pn",
-                            "sop", "scp");   
-        PageControl pct = RequestUtils.getPageControl(request, "ps", "pn",
-                            "sot", "sct");   
-        PageControl pcu = RequestUtils.getPageControl(request, "ps", "pn",
-                            "sou", "scu");   
-        
+
+        PageControl pca = RequestUtils.getPageControl(request, "ps", "pn", "soa", "sca");
+        PageControl pcp = RequestUtils.getPageControl(request, "ps", "pn", "sop", "scp");
+        PageControl pct = RequestUtils.getPageControl(request, "ps", "pn", "sot", "sct");
+        PageControl pcu = RequestUtils.getPageControl(request, "ps", "pn", "sou", "scu");
+
         /* begin page control disablement, see PR's 8244 && 7821 */
         pca.setPagesize(-1);
         pcp.setPagesize(-1);
         pct.setPagesize(-1);
         pcu.setPagesize(-1);
         /* end page control disablement */
-        
+
         int totalSize = 0;
-        
-        List availMetrics, perfMetrics,throughMetrics,utilMetrics;
+
+        List availMetrics, perfMetrics, throughMetrics, utilMetrics;
         try {
-            AppdefEntityTypeID atid = new AppdefEntityTypeID(RequestUtils
-                .getStringParameter(request, Constants.APPDEF_RES_TYPE_ID));
+            AppdefEntityTypeID atid = new AppdefEntityTypeID(RequestUtils.getStringParameter(request,
+                Constants.APPDEF_RES_TYPE_ID));
 
-            AppdefResourceTypeValue resourceTypeVal =
-                appdefBoss.findResourceTypeById(sessionId, atid);
+            AppdefResourceTypeValue resourceTypeVal = appdefBoss.findResourceTypeById(sessionId, atid);
 
-            availMetrics = measurementBoss.findMeasurementTemplates(
-                sessionId, atid, MeasurementConstants.CAT_AVAILABILITY, pca);
-            perfMetrics = measurementBoss.findMeasurementTemplates(
-                sessionId, atid, MeasurementConstants.CAT_PERFORMANCE, pcp);
-            throughMetrics = measurementBoss.findMeasurementTemplates(
-                sessionId, atid, MeasurementConstants.CAT_THROUGHPUT, pct);
-            utilMetrics = measurementBoss.findMeasurementTemplates(
-                sessionId, atid, MeasurementConstants.CAT_UTILIZATION, pcu);
-            
+            availMetrics = measurementBoss.findMeasurementTemplates(sessionId, atid,
+                MeasurementConstants.CAT_AVAILABILITY, pca);
+            perfMetrics = measurementBoss.findMeasurementTemplates(sessionId, atid,
+                MeasurementConstants.CAT_PERFORMANCE, pcp);
+            throughMetrics = measurementBoss.findMeasurementTemplates(sessionId, atid,
+                MeasurementConstants.CAT_THROUGHPUT, pct);
+            utilMetrics = measurementBoss.findMeasurementTemplates(sessionId, atid,
+                MeasurementConstants.CAT_UTILIZATION, pcu);
+
             request.setAttribute(Constants.MONITOR_ENABLED_ATTR, Boolean.FALSE);
             request.setAttribute(Constants.RESOURCE_TYPE_ATTR, resourceTypeVal);
-            request.setAttribute("section", AppdefEntityConstants.typeToString(
-                resourceTypeVal.getAppdefType()));
-            
-        } catch(ParameterNotFoundException e) {
-	        AppdefEntityID appdefId = RequestUtils.getEntityId(request);
-	        // check to see if monitoring is configured for this resource
-	        boolean configEnabled = true;
-	        try {
-	            // Check configuration
-	            InventoryHelper helper = InventoryHelper.getHelper(appdefId);
-	            configEnabled = helper.isResourceConfigured(request, getServlet().getServletContext(), true);
-	        } finally {
-	            log.debug("config enabled: " + configEnabled);
-	        }
-	        request.setAttribute(Constants.MONITOR_ENABLED_ATTR,
-                                 Boolean.valueOf(configEnabled));
-	        
-	        // obtain the different categories of measurements
-	        log.debug("obtaining metrics for resource " + appdefId);
-	        availMetrics = measurementBoss.findEnabledMeasurements(sessionId, appdefId,
+            request.setAttribute("section", AppdefEntityConstants.typeToString(resourceTypeVal.getAppdefType()));
+
+        } catch (ParameterNotFoundException e) {
+            AppdefEntityID appdefId = RequestUtils.getEntityId(request);
+            // check to see if monitoring is configured for this resource
+            boolean configEnabled = true;
+            try {
+                // Check configuration
+                InventoryHelper helper = InventoryHelper.getHelper(appdefId);
+                configEnabled = helper.isResourceConfigured(request, getServlet().getServletContext(), true);
+            } finally {
+                log.debug("config enabled: " + configEnabled);
+            }
+            request.setAttribute(Constants.MONITOR_ENABLED_ATTR, Boolean.valueOf(configEnabled));
+
+            // obtain the different categories of measurements
+            log.debug("obtaining metrics for resource " + appdefId);
+            availMetrics = measurementBoss.findEnabledMeasurements(sessionId, appdefId,
                 MeasurementConstants.CAT_AVAILABILITY, pca);
-	        perfMetrics = measurementBoss.findEnabledMeasurements(sessionId, appdefId,
+            perfMetrics = measurementBoss.findEnabledMeasurements(sessionId, appdefId,
                 MeasurementConstants.CAT_PERFORMANCE, pcp);
-	        throughMetrics = measurementBoss.findEnabledMeasurements(sessionId, appdefId,
+            throughMetrics = measurementBoss.findEnabledMeasurements(sessionId, appdefId,
                 MeasurementConstants.CAT_THROUGHPUT, pct);
-	        utilMetrics = measurementBoss.findEnabledMeasurements(sessionId, appdefId,
+            utilMetrics = measurementBoss.findEnabledMeasurements(sessionId, appdefId,
                 MeasurementConstants.CAT_UTILIZATION, pcu);
         }
-        
+
         // finally set all the lists
-        request.setAttribute(Constants.CAT_AVAILABILITY_METRICS_ATTR,
-                             availMetrics);
+        request.setAttribute(Constants.CAT_AVAILABILITY_METRICS_ATTR, availMetrics);
         totalSize += availMetrics.size();
-        request.setAttribute(Constants.CAT_PERFORMANCE_METRICS_ATTR,
-                             perfMetrics);
+        request.setAttribute(Constants.CAT_PERFORMANCE_METRICS_ATTR, perfMetrics);
         totalSize += perfMetrics.size();
-        request.setAttribute(Constants.CAT_THROUGHPUT_METRICS_ATTR,
-                             throughMetrics);
+        request.setAttribute(Constants.CAT_THROUGHPUT_METRICS_ATTR, throughMetrics);
         totalSize += throughMetrics.size();
-        request.setAttribute(Constants.CAT_UTILIZATION_METRICS_ATTR,
-                             utilMetrics);
+        request.setAttribute(Constants.CAT_UTILIZATION_METRICS_ATTR, utilMetrics);
         totalSize += utilMetrics.size();
-        
+
         // set total size as aggregate of all
         request.setAttribute(Constants.LIST_SIZE_ATTR, new Integer(totalSize));
-        
+
         log.debug("Successfully completed preparing Config Metrics");
-        
+
         return null;
     }
 }

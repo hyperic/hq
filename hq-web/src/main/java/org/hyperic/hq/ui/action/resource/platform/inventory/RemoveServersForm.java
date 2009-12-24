@@ -30,17 +30,18 @@ import org.hyperic.hq.ui.action.resource.RemoveResourceForm;
 /**
  * A Form for removing servers from the inventory.
  */
-public class RemoveServersForm extends RemoveResourceForm {
+public class RemoveServersForm
+    extends RemoveResourceForm {
 
-    //-------------------------------------instance variables
-   
-    //-------------------------------------constructors
+    // -------------------------------------instance variables
+
+    // -------------------------------------constructors
 
     public RemoveServersForm() {
         super();
     }
 
-    //-------------------------------------public methods
+    // -------------------------------------public methods
 
     public Integer getFs() {
         return getF();

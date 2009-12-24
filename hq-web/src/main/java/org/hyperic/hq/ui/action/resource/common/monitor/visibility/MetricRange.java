@@ -51,24 +51,24 @@ public class MetricRange {
     }
 
     public Long getBegin() {
-	return begin;
+        return begin;
     }
 
     public void setBegin(Long l) {
-	begin = l;
+        begin = l;
     }
 
     public Long getEnd() {
-	return end;
+        return end;
     }
 
     public void setEnd(Long l) {
-	end = l;
+        end = l;
     }
 
     /**
-     * If the end date is after "now", reset the end to "now" and
-     * recalculate the range.
+     * If the end date is after "now", reset the end to "now" and recalculate
+     * the range.
      */
     public void shiftNow() {
         if (getBegin() == null || getEnd() == null) {
@@ -100,11 +100,11 @@ public class MetricRange {
     }
 
     public String toString() {
-	StringBuffer buf = new StringBuffer("{");
+        StringBuffer buf = new StringBuffer("{");
 
-	buf.append("begin=").append(begin);
-	buf.append(" end=").append(end);
+        buf.append("begin=").append(begin);
+        buf.append(" end=").append(end);
 
-	return buf.append("}").toString();
+        return buf.append("}").toString();
     }
 }

@@ -33,9 +33,10 @@ import org.apache.struts.action.ActionMapping;
  * An extension of <code>BaseValidatorForm</code> representing the
  * <em>Add Role Users</em> form.
  */
-public class AddUsersForm extends AddNotificationsForm  {
+public class AddUsersForm
+    extends AddNotificationsForm {
 
-    //-------------------------------------instance variables
+    // -------------------------------------instance variables
 
     private Integer[] availableUsers;
     private Integer[] pendingUsers;
@@ -43,19 +44,18 @@ public class AddUsersForm extends AddNotificationsForm  {
     private Integer psp;
     private Integer ad;
 
-    //-------------------------------------constructors
+    // -------------------------------------constructors
 
     public AddUsersForm() {
         super();
     }
 
-    //-------------------------------------public methods
-
+    // -------------------------------------public methods
 
     public Integer[] getAvailableUser() {
         return this.availableUsers;
     }
-    
+
     public Integer[] getAvailableUsers() {
         return getAvailableUser();
     }
@@ -69,11 +69,11 @@ public class AddUsersForm extends AddNotificationsForm  {
     }
 
     public Integer[] getPendingUser() {
-	return this.pendingUsers;
+        return this.pendingUsers;
     }
 
     public Integer[] getPendingUsers() {
-	return getPendingUser();
+        return getPendingUser();
     }
 
     public void setPendingUser(Integer[] pendingUsers) {
@@ -101,21 +101,20 @@ public class AddUsersForm extends AddNotificationsForm  {
     }
 
     public Integer getAd() {
-	return this.ad;
+        return this.ad;
     }
 
     public void setAd(Integer ad) {
-	this.ad = ad;
+        this.ad = ad;
     }
 
-    public void reset(ActionMapping mapping,
-                      HttpServletRequest request) {
+    public void reset(ActionMapping mapping, HttpServletRequest request) {
         this.availableUsers = new Integer[0];
         this.pendingUsers = new Integer[0];
         this.psa = null;
         this.psp = null;
         this.ad = null;
-	super.reset(mapping, request);
+        super.reset(mapping, request);
     }
 
     public String toString() {
@@ -137,9 +136,9 @@ public class AddUsersForm extends AddNotificationsForm  {
 
     private void listToString(StringBuffer s, Integer[] l) {
         if (l != null) {
-            for (int i=0; i<l.length; i++) {
+            for (int i = 0; i < l.length; i++) {
                 s.append(l[i]);
-                if (i<l.length-1) {
+                if (i < l.length - 1) {
                     s.append(", ");
                 }
             }

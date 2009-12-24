@@ -52,69 +52,56 @@ import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.pager.PageControl;
 
-public class EditAutoDiscoveryPrepAction extends NewAutoDiscoveryPrepAction {
+public class EditAutoDiscoveryPrepAction
+    extends NewAutoDiscoveryPrepAction {
 
     private static ThreadLocal schedule = new ThreadLocal();
-    
+
     /**
      * Create the platform with the attributes specified in the given
      * <code>PlatformForm</code>.
      */
-    public ActionForward workflow(ComponentContext context,
-                                  ActionMapping mapping,
-                                  ActionForm form,
-                                  HttpServletRequest request,
-                                  HttpServletResponse response)
-        throws Exception
-    {
+    public ActionForward workflow(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                  HttpServletRequest request, HttpServletResponse response) throws Exception {
         PlatformAutoDiscoveryForm aForm = (PlatformAutoDiscoveryForm) form;
 
         loadScanConfig(aForm, request);
 
-        return super.workflow(context, mapping, form, request,response);
+        return super.workflow(context, mapping, form, request, response);
     }
 
     /**
      * loads the ScanConfiguration into the form
      */
-    protected void loadScanConfig(PlatformAutoDiscoveryForm aForm, 
-                                  HttpServletRequest request)
-        throws Exception
-    {
-        AIScheduleValue sched = (AIScheduleValue)schedule.get();
+    protected void loadScanConfig(PlatformAutoDiscoveryForm aForm, HttpServletRequest request) throws Exception {
+        AIScheduleValue sched = (AIScheduleValue) schedule.get();
         ScanMethodConfig[] configs = sched.getConfigObj().getScanMethodConfigs();
 
         if (configs.length == 0)
             throw new RuntimeException("No ScanMethodConfig objects setup");
-            
+
         aForm.setName(sched.getScanName());
         aForm.setDescription(sched.getScanDesc());
         String smClass = configs[0].getMethodClass();
         ScanMethod scanMethod = (ScanMethod) Class.forName(smClass).newInstance();
         ConfigSchema schema = scanMethod.getConfigSchema();
-        
+
         HttpSession session = request.getSession();
         session.setAttribute(Constants.CURR_CONFIG_SCHEMA, schema);
         session.setAttribute(Constants.OLD_CONFIG_RESPONSE, configs[0].getConfig());
-    
-        aForm.buildConfigOptions(scanMethod.getConfigSchema(),
-                                 configs[0].getConfig());
+
+        aForm.buildConfigOptions(scanMethod.getConfigSchema(), configs[0].getConfig());
         aForm.setScanMethod(scanMethod.getName());
         // load the schedule
         aForm.populateFromSchedule(sched.getScheduleValue(), request.getLocale());
-        
-        PlatformValue pValue = (PlatformValue)RequestUtils.getResource(request);
+
+        PlatformValue pValue = (PlatformValue) RequestUtils.getResource(request);
 
         Integer sessionId = RequestUtils.getSessionId(request);
-        AppdefBoss boss =
-            ContextUtils.getAppdefBoss(getServlet().getServletContext());
-        List serverTypes =
-            boss.findServerTypesByPlatformType(sessionId.intValue(),
-                                               pValue.getPlatformType().getId(),
-                                               PageControl.PAGE_ALL);
-        List selSvrs =
-            buildSelectedServerTypes(serverTypes,
-                                     sched.getConfigObj().getServerSignatures());
+        AppdefBoss boss = ContextUtils.getAppdefBoss(getServlet().getServletContext());
+        List serverTypes = boss.findServerTypesByPlatformType(sessionId.intValue(), pValue.getPlatformType().getId(),
+            PageControl.PAGE_ALL);
+        List selSvrs = buildSelectedServerTypes(serverTypes, sched.getConfigObj().getServerSignatures());
         Integer[] selSvrIds = new Integer[selSvrs.size()];
         int i = 0;
         for (Iterator it = selSvrs.iterator(); it.hasNext(); i++) {
@@ -123,21 +110,16 @@ public class EditAutoDiscoveryPrepAction extends NewAutoDiscoveryPrepAction {
         }
         aForm.setSelectedServerTypeIds(selSvrIds);
     }
-    
+
     /**
-     * Get the selected server types. 
+     * Get the selected server types.
      */
-    private List buildSelectedServerTypes(List serverTypes,
-                                          ServerSignature[] serverSigs)
-        throws Exception 
-    {          
+    private List buildSelectedServerTypes(List serverTypes, ServerSignature[] serverSigs) throws Exception {
         List serverDetectorList = new ArrayList();
         CollectionUtils.addAll(serverDetectorList, serverSigs);
 
-        ServerTypeValue[] types = (ServerTypeValue[])
-            serverTypes.toArray(new ServerTypeValue[0]);
+        ServerTypeValue[] types = (ServerTypeValue[]) serverTypes.toArray(new ServerTypeValue[0]);
 
-        return BizappUtils.
-            buildServerTypesFromServerSig(types, serverDetectorList.iterator());
+        return BizappUtils.buildServerTypesFromServerSig(types, serverDetectorList.iterator());
     }
 }

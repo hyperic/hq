@@ -28,43 +28,46 @@ package org.hyperic.hq.ui.action.portlet.savedqueries;
 import org.hyperic.hq.ui.action.portlet.DashboardBaseForm;
 
 /**
- * A subclass of <code>ValidatorForm</code> that adds convenience
- * methods for dealing with image-based form buttons.
+ * A subclass of <code>ValidatorForm</code> that adds convenience methods for
+ * dealing with image-based form buttons.
  */
-public class PropertiesForm extends DashboardBaseForm  {
-    
+public class PropertiesForm
+    extends DashboardBaseForm {
+
     /** Holds value of property charts. */
     private String[] charts;
-    
+
     /** Holds value of property order. */
     private String order;
-    
-    //-------------------------------------instance variables
 
-    //-------------------------------------constructors
+    // -------------------------------------instance variables
+
+    // -------------------------------------constructors
 
     public PropertiesForm() {
         super();
     }
 
-    //-------------------------------------public methods
+    // -------------------------------------public methods
 
     public String toString() {
         StringBuffer s = new StringBuffer();
         return s.toString();
     }
-    
-    /** Getter for property groupId.
+
+    /**
+     * Getter for property groupId.
      * @return Value of property groupId.
-     *
+     * 
      */
     public String[] getCharts() {
         return this.charts;
     }
-    
-    /** Setter for property groupId.
+
+    /**
+     * Setter for property groupId.
      * @param groupId New value of property groupId.
-     *
+     * 
      */
     public void setCharts(String[] charts) {
         this.charts = charts;
@@ -77,5 +80,5 @@ public class PropertiesForm extends DashboardBaseForm  {
     public void setOrder(String order) {
         this.order = order;
     }
-    
+
 }

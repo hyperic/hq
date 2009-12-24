@@ -50,74 +50,59 @@ import org.hyperic.util.pager.PageList;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * An Action that retrieves all <em>ControlActionSchedule</em>'s
- * for a resource.
+ * An Action that retrieves all <em>ControlActionSchedule</em>'s for a resource.
  */
-public class ListScheduledAction extends TilesAction {
-    
+public class ListScheduledAction
+    extends TilesAction {
+
     private final Log log = LogFactory.getLog(ListScheduledAction.class.getName());
     private ControlBoss controlBoss;
-    
-    
+
     @Autowired
     public ListScheduledAction(ControlBoss controlBoss) {
         super();
         this.controlBoss = controlBoss;
     }
 
-
-
     /**
-     * Retrieve a <code>List</code> of all
-     * <code>ControlActionSchedule</code> objects and save it into the
-     * request attribute <code>Constants.CONTROL_ACTIONS_SERVER_ATTR</code>.
+     * Retrieve a <code>List</code> of all <code>ControlActionSchedule</code>
+     * objects and save it into the request attribute
+     * <code>Constants.CONTROL_ACTIONS_SERVER_ATTR</code>.
      */
-     public ActionForward execute(ComponentContext context,
-                                  ActionMapping mapping,
-                                  ActionForm form,
-                                  HttpServletRequest request,
-                                  HttpServletResponse response)
-    throws Exception {
-        
-        
-        
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
+
         try {
             log.trace("Getting all scheduled control actions for resource.");
-
-          
 
             Integer sessionId = RequestUtils.getSessionId(request);
             PageControl pc = RequestUtils.getPageControl(request);
             AppdefEntityID appdefId = RequestUtils.getEntityId(request);
 
-            PageList<ControlSchedule> jobs =
-                controlBoss.findScheduledJobs(sessionId.intValue(), appdefId, pc);           
-            
-            request.setAttribute( Constants.CONTROL_ACTIONS_SERVER_ATTR, jobs );
-            
+            PageList<ControlSchedule> jobs = controlBoss.findScheduledJobs(sessionId.intValue(), appdefId, pc);
+
+            request.setAttribute(Constants.CONTROL_ACTIONS_SERVER_ATTR, jobs);
+
             // have set page size by hand b/c of redirects
-            BaseValidatorForm sForm = (BaseValidatorForm)form;
+            BaseValidatorForm sForm = (BaseValidatorForm) form;
             try {
                 sForm.setPs(Constants.PAGESIZE_DEFAULT);
-                sForm.setPs(RequestUtils.getIntParameter(request, 
-                    Constants.PAGESIZE_PARAM));
-            } 
-            catch (NullPointerException npe) {}
-            catch (ParameterNotFoundException pnfe) {}
-            catch (NumberFormatException nfe) {}
+                sForm.setPs(RequestUtils.getIntParameter(request, Constants.PAGESIZE_PARAM));
+            } catch (NullPointerException npe) {
+            } catch (ParameterNotFoundException pnfe) {
+            } catch (NumberFormatException nfe) {
+            }
 
-            log.trace("Successfulling obtained all"
-                + " scheduled control actions for resource.");
-            
+            log.trace("Successfulling obtained all" + " scheduled control actions for resource.");
+
             return null;
         } catch (PluginException cpe) {
             log.trace("control not enabled", cpe);
-            RequestUtils.setError(request,
-                "resource.common.error.ControlNotEnabled");
-            return null;                 
+            RequestUtils.setError(request, "resource.common.error.ControlNotEnabled");
+            return null;
         } catch (ApplicationException t) {
-            throw new ServletException(ListHistoryAction.class.getName()
-                + "Can't get resource control history list.", t);
+            throw new ServletException(ListHistoryAction.class.getName() + "Can't get resource control history list.",
+                t);
         }
     }
 }

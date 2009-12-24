@@ -54,99 +54,79 @@ import org.hyperic.util.units.DateFormatter.DateSpecifics;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * An <code>Action</code> that loads the <code>Portal</code>
- * identified by the <code>PORTAL_PARAM</code> request parameter (or
- * the default portal, if the parameter is not specified) into the
- * <code>PORTAL_KEY</code> request attribute.
+ * An <code>Action</code> that loads the <code>Portal</code> identified by the
+ * <code>PORTAL_PARAM</code> request parameter (or the default portal, if the
+ * parameter is not specified) into the <code>PORTAL_KEY</code> request
+ * attribute.
  */
-public class RSSAction extends BaseRSSAction {
-  
+public class RSSAction
+    extends BaseRSSAction {
+
     private ControlBoss controlBoss;
-    
-    
+
     @Autowired
     public RSSAction(DashboardManager dashboardManager, ConfigBoss configBoss, ControlBoss controlBoss) {
-       super(dashboardManager, configBoss);
-       this.controlBoss = controlBoss;
+        super(dashboardManager, configBoss);
+        this.controlBoss = controlBoss;
     }
 
-
-
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
         RSSFeed feed = getNewRSSFeed(request);
-        
+
         // Set title
         MessageResources res = getResources(request);
         feed.setTitle(res.getMessage("dash.home.Subhead.Recent"));
 
         // Get the resources health
-      
 
         String user = getUsername(request);
         List<ControlHistory> list = null;
         try {
             // Set the managingEditor
             setManagingEditor(request);
-            
+
             // Get user preferences
             ConfigResponse preferences = getUserPreferences(request, user);
 
-            String rowsStr =
-                preferences.getValue(".dashContent.controlActions.lastCompleted");
-            
+            String rowsStr = preferences.getValue(".dashContent.controlActions.lastCompleted");
+
             int rows = 10;
             if (rowsStr != null) {
                 rows = Integer.parseInt(rowsStr);
             }
-            
-            String pastStr =
-                preferences.getValue(".dashContent.controlActions.past");
+
+            String pastStr = preferences.getValue(".dashContent.controlActions.past");
             long past = 604800000;
             if (pastStr != null) {
                 past = Long.parseLong(pastStr);
             }
             list = controlBoss.getRecentControlActions(user, rows, past);
         } catch (Exception e) {
-            throw new ServletException("Error finding recent control actions",
-                                       e);
+            throw new ServletException("Error finding recent control actions", e);
         }
 
         if (list != null) {
             int i = 0;
             for (Iterator<ControlHistory> it = list.iterator(); it.hasNext(); i++) {
-                ControlHistory hist =  it.next();
-                AppdefEntityID aeid =
-                    new AppdefEntityID(hist.getEntityType().intValue(),
-                                       hist.getEntityId());
-                
-                String link = feed.getBaseUrl() +
-                              "/ResourceControlHistory.do?eid=" +
-                              aeid.getAppdefKey();
+                ControlHistory hist = it.next();
+                AppdefEntityID aeid = new AppdefEntityID(hist.getEntityType().intValue(), hist.getEntityId());
+
+                String link = feed.getBaseUrl() + "/ResourceControlHistory.do?eid=" + aeid.getAppdefKey();
 
                 long current = System.currentTimeMillis();
 
                 DateSpecifics specs = new DateSpecifics();
-                specs.setDateFormat(new SimpleDateFormat(res.getMessage(
-                    Constants.UNIT_FORMAT_PREFIX_KEY + "epoch-millis")));
-                
-                FormattedNumber fmtd = UnitsFormat.format(
-                        new UnitNumber(hist.getStartTime(),
-                                       UnitsConstants.UNIT_DATE,
-                                       UnitsConstants.SCALE_MILLI), 
-                                       request.getLocale(), specs);
+                specs.setDateFormat(new SimpleDateFormat(res.getMessage(Constants.UNIT_FORMAT_PREFIX_KEY +
+                                                                        "epoch-millis")));
+
+                FormattedNumber fmtd = UnitsFormat.format(new UnitNumber(hist.getStartTime(), UnitsConstants.UNIT_DATE,
+                    UnitsConstants.SCALE_MILLI), request.getLocale(), specs);
 
                 StringBuffer desc = new StringBuffer(fmtd.toString());
-                desc.append(" ")
-                    .append(res.getMessage("common.label.Dash"))
-                    .append(" ")
-                    .append(hist.getAction());
-                
-                feed.addItem(hist.getEntityName(), link, desc.toString(),
-                             current);
+                desc.append(" ").append(res.getMessage("common.label.Dash")).append(" ").append(hist.getAction());
+
+                feed.addItem(hist.getEntityName(), link, desc.toString(), current);
             }
         }
         request.setAttribute("rssFeed", feed);

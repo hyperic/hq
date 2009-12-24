@@ -50,67 +50,51 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * List all alert definitions for this entity
- *
+ * 
  */
-public class ListDefinitionsAction extends TilesAction {
+public class ListDefinitionsAction
+    extends TilesAction {
 
     private final Log log = LogFactory.getLog(ListDefinitionsAction.class.getName());
     private EventsBoss eventsBoss;
-    
-    
+
     @Autowired
     public ListDefinitionsAction(EventsBoss eventsBoss) {
         super();
         this.eventsBoss = eventsBoss;
     }
 
-
-
     /**
      * Retrieve this data and store it in request attributes.
      */
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
         log.trace("in ListDefinitionAction");
         Integer sessionId = RequestUtils.getSessionId(request);
 
-      
         PageControl pc = RequestUtils.getPageControl(request);
-        
+
         AppdefEntityID appEntId;
-        PageList<AlertDefinitionValue> alertDefs;        
+        PageList<AlertDefinitionValue> alertDefs;
         try {
             appEntId = RequestUtils.getEntityTypeId(request);
-            request.setAttribute("section", AppdefEntityConstants.typeToString(
-                                 appEntId.getType()));
-            alertDefs = eventsBoss.findAlertDefinitions(sessionId.intValue(),
-                                                  (AppdefEntityTypeID) appEntId,
-                                                  pc);
+            request.setAttribute("section", AppdefEntityConstants.typeToString(appEntId.getType()));
+            alertDefs = eventsBoss.findAlertDefinitions(sessionId.intValue(), (AppdefEntityTypeID) appEntId, pc);
         } catch (ParameterNotFoundException e) {
             appEntId = RequestUtils.getEntityId(request);
             try {
-                alertDefs =
-                    eventsBoss.findAlertDefinitions(sessionId.intValue(), appEntId,
-                                              pc);
+                alertDefs = eventsBoss.findAlertDefinitions(sessionId.intValue(), appEntId, pc);
             } catch (PermissionException pe) {
                 // user cant manage alerts... set empty list
                 alertDefs = new PageList<AlertDefinitionValue>();
             }
-        }        
-        
-        context.putAttribute(Constants.RESOURCE_ATTR,
-                             RequestUtils.getResource(request));
-        context.putAttribute(Constants.RESOURCE_OWNER_ATTR, request
-                             .getAttribute(Constants.RESOURCE_OWNER_ATTR));
-        context.putAttribute(Constants.RESOURCE_MODIFIER_ATTR, request
-                             .getAttribute(Constants.RESOURCE_MODIFIER_ATTR));
-        request.setAttribute( Constants.ALERT_DEFS_ATTR, alertDefs );
+        }
+
+        context.putAttribute(Constants.RESOURCE_ATTR, RequestUtils.getResource(request));
+        context.putAttribute(Constants.RESOURCE_OWNER_ATTR, request.getAttribute(Constants.RESOURCE_OWNER_ATTR));
+        context.putAttribute(Constants.RESOURCE_MODIFIER_ATTR, request.getAttribute(Constants.RESOURCE_MODIFIER_ATTR));
+        request.setAttribute(Constants.ALERT_DEFS_ATTR, alertDefs);
 
         return null;
     }
 }
-

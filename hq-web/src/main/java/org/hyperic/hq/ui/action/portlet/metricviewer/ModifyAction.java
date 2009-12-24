@@ -44,12 +44,12 @@ import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.InvalidOptionException;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class ModifyAction extends BaseAction {
-    
+public class ModifyAction
+    extends BaseAction {
+
     private ConfigurationProxy configurationProxy;
     private AuthzBoss authzBoss;
-    
-    
+
     @Autowired
     public ModifyAction(ConfigurationProxy configurationProxy, AuthzBoss authzBoss) {
         super();
@@ -57,32 +57,21 @@ public class ModifyAction extends BaseAction {
         this.authzBoss = authzBoss;
     }
 
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
-
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-
-      
         PropertiesForm pForm = (PropertiesForm) form;
         HttpSession session = request.getSession();
         WebUser user = RequestUtils.getWebUser(request);
 
         String forwardStr = Constants.SUCCESS_URL;
-        DashboardConfig dashConfig = DashboardUtils.findDashboard(
-        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, authzBoss);
+        DashboardConfig dashConfig = DashboardUtils.findDashboard((Integer) session
+            .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
-        
-        if(pForm.isRemoveClicked()){
-            DashboardUtils
-                .removeResources(pForm.getIds(),
-                                 PropertiesForm.RESOURCES,
-                                 dashPrefs);
-            configurationProxy.setDashboardPreferences(session, user,
-            		dashPrefs);
+
+        if (pForm.isRemoveClicked()) {
+            DashboardUtils.removeResources(pForm.getIds(), PropertiesForm.RESOURCES, dashPrefs);
+            configurationProxy.setDashboardPreferences(session, user, dashPrefs);
             forwardStr = "review";
         }
 
@@ -101,7 +90,7 @@ public class ModifyAction extends BaseAction {
         String metricKey = PropertiesForm.METRIC;
         String descendingKey = PropertiesForm.DECSENDING;
         String titleKey = PropertiesForm.TITLE;
-        
+
         if (token != null) {
             numKey += token;
             resKey += token;
@@ -132,13 +121,12 @@ public class ModifyAction extends BaseAction {
         dashPrefs.setValue(descendingKey, descending);
         dashPrefs.setValue(titleKey, pForm.getTitle());
 
-        configurationProxy.setDashboardPreferences(session, user,
-        		 dashPrefs);
-        
+        configurationProxy.setDashboardPreferences(session, user, dashPrefs);
+
         session.removeAttribute(Constants.USERS_SES_PORTAL);
 
         if (!pForm.isOkClicked()) {
-            forwardStr="review";
+            forwardStr = "review";
         }
 
         return mapping.findForward(forwardStr);

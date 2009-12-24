@@ -46,43 +46,44 @@ import org.apache.struts.action.ActionMapping;
 /**
  * Form represents the auto-discovery results form
  * 
- *
+ * 
  */
-public class AutoDiscoveryResultsForm extends RemoveResourceForm {
+public class AutoDiscoveryResultsForm
+    extends RemoveResourceForm {
 
     /**
-     * filter on server type for discovered servers 
-     */    
+     * filter on server type for discovered servers
+     */
     private Integer serverTypeFilter;
 
     /**
-     * filter on ignored/New&modified discovered servers 
-     */    
+     * filter on ignored/New&modified discovered servers
+     */
     private Integer stdStatusFilter;
 
     /**
-     * filter on ignored/New&modified discovered ips 
-     */    
+     * filter on ignored/New&modified discovered ips
+     */
     private Integer ipsStatusFilter;
 
     /**
      * ai platform id
      */
     private Integer aiPid;
-    
+
     /**
      * ai resource id (platform properties, ai ips, ai servers)
      */
     private Integer aiRid;
 
     private Integer aiAction;
-    
+
     private List newModifiedActionOptions = null;
     private List removedActionOptions = null;
     private List unchangedActionOptions = null;
-    
+
     private List serverTypeFilterList = null;
-    
+
     /**
      * 
      */
@@ -188,35 +189,30 @@ public class AutoDiscoveryResultsForm extends RemoveResourceForm {
     /**
      * build the ai action options
      */
-    public void buildActionOptions(HttpServletRequest request)
-    {
-        newModifiedActionOptions = 
-                        buildAINewModifiedCommandOptions(request);
+    public void buildActionOptions(HttpServletRequest request) {
+        newModifiedActionOptions = buildAINewModifiedCommandOptions(request);
         removedActionOptions = buildAIRemovedActionOptions(request);
         unchangedActionOptions = buildAIUnchangedCommandOptions(request);
     }
+
     /**
      * build remove actions for AI resource
-     *  
-     * @return a list 
+     * 
+     * @return a list
      */
-    public static List buildAIRemovedActionOptions(HttpServletRequest request) 
-    {
-        
+    public static List buildAIRemovedActionOptions(HttpServletRequest request) {
+
         List groupTypes = new ArrayList();
 
         HashMap map2 = new HashMap(2);
-        map2.put("value", 
-                 new Integer(AIQueueConstants.Q_DECISION_UNIGNORE).toString());
-        map2.put("label", RequestUtils.message(request, 
-                                "resource.autodiscovery.action.uninstalled.DeleteFromInventory"));
+        map2.put("value", new Integer(AIQueueConstants.Q_DECISION_UNIGNORE).toString());
+        map2.put("label", RequestUtils
+            .message(request, "resource.autodiscovery.action.uninstalled.DeleteFromInventory"));
         groupTypes.add(map2);
 
         HashMap map1 = new HashMap(2);
-        map1.put("value", 
-                 new Integer(AIQueueConstants.Q_DECISION_IGNORE).toString());
-        map1.put("label", RequestUtils.message(request, 
-                                "resource.autodiscovery.action.uninstalled.KeepInInventrory"));
+        map1.put("value", new Integer(AIQueueConstants.Q_DECISION_IGNORE).toString());
+        map1.put("label", RequestUtils.message(request, "resource.autodiscovery.action.uninstalled.KeepInInventrory"));
         groupTypes.add(map1);
 
         return groupTypes;
@@ -224,19 +220,16 @@ public class AutoDiscoveryResultsForm extends RemoveResourceForm {
 
     /**
      * build unchanged commands for AI resource
-     *  
-     * @return a list 
+     * 
+     * @return a list
      */
-    public static List buildAIUnchangedCommandOptions(HttpServletRequest request) 
-    {
-        
+    public static List buildAIUnchangedCommandOptions(HttpServletRequest request) {
+
         List groupTypes = new ArrayList();
 
         HashMap map2 = new HashMap(2);
-        map2.put("value", 
-                 new Integer(AIQueueConstants.Q_DECISION_DEFER).toString());
-        map2.put("label", RequestUtils.message(request, 
-                                "resource.autodiscovery.action.unchanged.NoActions"));
+        map2.put("value", new Integer(AIQueueConstants.Q_DECISION_DEFER).toString());
+        map2.put("label", RequestUtils.message(request, "resource.autodiscovery.action.unchanged.NoActions"));
         groupTypes.add(map2);
 
         return groupTypes;
@@ -244,42 +237,36 @@ public class AutoDiscoveryResultsForm extends RemoveResourceForm {
 
     /**
      * build new/modified commands for AI resource
-     *  
-     * @return a list 
+     * 
+     * @return a list
      */
-    public static List buildAINewModifiedCommandOptions(HttpServletRequest request) 
-    {
-        
+    public static List buildAINewModifiedCommandOptions(HttpServletRequest request) {
+
         List groupTypes = new ArrayList();
 
         HashMap map2 = new HashMap(2);
-        map2.put("value", 
-                 new Integer(AIQueueConstants.Q_DECISION_UNIGNORE).toString());
-        map2.put("label", RequestUtils.message(request, 
-                                "resource.autodiscovery.action.new.ImportServer"));
+        map2.put("value", new Integer(AIQueueConstants.Q_DECISION_UNIGNORE).toString());
+        map2.put("label", RequestUtils.message(request, "resource.autodiscovery.action.new.ImportServer"));
         groupTypes.add(map2);
 
         HashMap map1 = new HashMap(2);
-        map1.put("value", 
-                 new Integer(AIQueueConstants.Q_DECISION_IGNORE).toString());
-        map1.put("label", RequestUtils.message(request, 
-                                "resource.autodiscovery.action.new.DoNotImport"));
+        map1.put("value", new Integer(AIQueueConstants.Q_DECISION_IGNORE).toString());
+        map1.put("label", RequestUtils.message(request, "resource.autodiscovery.action.new.DoNotImport"));
         groupTypes.add(map1);
 
         return groupTypes;
     }
 
-    public void reset(ActionMapping mapping,
-                      HttpServletRequest request) {
+    public void reset(ActionMapping mapping, HttpServletRequest request) {
         super.reset(mapping, request);
     }
-    
+
     public String toString() {
         StringBuffer s = new StringBuffer();
 
         return s.toString();
     }
-    
+
     /**
      * @return
      */
@@ -302,16 +289,16 @@ public class AutoDiscoveryResultsForm extends RemoveResourceForm {
     }
 
     /**
-     * This method returns 0 if there are not server types set.  No
-     * server types are set when a newly auto-discovered platform has 
-     * not been imported into the appdef.
+     * This method returns 0 if there are not server types set. No server types
+     * are set when a newly auto-discovered platform has not been imported into
+     * the appdef.
      * 
      * @return number of serverTypes
      */
     public Integer getServerTypeFilterListCount() {
         if (serverTypeFilterList == null)
             return new Integer(0);
-            
+
         return new Integer(serverTypeFilterList.size());
     }
 
@@ -319,7 +306,7 @@ public class AutoDiscoveryResultsForm extends RemoveResourceForm {
      * @param list
      */
     public void setServerTypeFilterList(AppdefResourceTypeValue[] serverTypes) {
-        
+
         serverTypeFilterList = new ArrayList();
         CollectionUtils.addAll(serverTypeFilterList, serverTypes);
     }

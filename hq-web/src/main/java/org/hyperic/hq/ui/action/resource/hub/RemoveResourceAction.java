@@ -59,17 +59,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * Removes resources in ResourceHub
  */
-public class RemoveResourceAction extends BaseAction {
+public class RemoveResourceAction
+    extends BaseAction {
 
-    private final Log log =
-        LogFactory.getLog(RemoveResourceAction.class.getName());
-    
+    private final Log log = LogFactory.getLog(RemoveResourceAction.class.getName());
+
     private EventsBoss eventsBoss;
-    
+
     private AppdefBoss appdefBoss;
-   
-    
-    
+
     @Autowired
     public RemoveResourceAction(EventsBoss eventsBoss, AppdefBoss appdefBoss) {
         super();
@@ -77,22 +75,17 @@ public class RemoveResourceAction extends BaseAction {
         this.appdefBoss = appdefBoss;
     }
 
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception{
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
         ResourceHubForm hubForm = (ResourceHubForm) form;
         if (hubForm.isGroupClicked()) {
             HttpSession session = request.getSession();
-            session.setAttribute(Constants.ENTITY_IDS_ATTR,
-                                 hubForm.getResources());
-            
+            session.setAttribute(Constants.ENTITY_IDS_ATTR, hubForm.getResources());
+
             session.setAttribute(Constants.RESOURCE_TYPE_ATTR, hubForm.getFf());
             return mapping.findForward("newgroup");
-        }
-        else if (hubForm.isDeleteClicked()) {
+        } else if (hubForm.isDeleteClicked()) {
             removeResources(request, hubForm.getResources());
         } else if (hubForm.getEnableAlerts().isSelected()) {
             activateAlerts(request, hubForm.getResources(), true);
@@ -102,75 +95,56 @@ public class RemoveResourceAction extends BaseAction {
         return returnSuccess(request, mapping);
     }
 
-    private void activateAlerts(HttpServletRequest request,
-                                String[] resourceItems,
-                                boolean enabled)
-        throws Exception {
-        
+    private void activateAlerts(HttpServletRequest request, String[] resourceItems, boolean enabled) throws Exception {
+
         Integer sessionId = RequestUtils.getSessionId(request);
-      
 
         List<String> resourceList = new ArrayList<String>();
         CollectionUtils.addAll(resourceList, resourceItems);
-        List<AppdefEntityID> entities =
-            BizappUtils.buildAppdefEntityIds(resourceList);
-        
-        eventsBoss.activateAlertDefinitions(
-                 sessionId.intValue(),
-                  entities
-                         .toArray(new AppdefEntityID[entities.size()]), 
-                 enabled);
+        List<AppdefEntityID> entities = BizappUtils.buildAppdefEntityIds(resourceList);
 
-        RequestUtils.setConfirmation(request,
-                        enabled ? "resource.common.confirm.AlertsEnabled"
-                                : "resource.common.confirm.AlertsDisabled");
+        eventsBoss.activateAlertDefinitions(sessionId.intValue(),
+            entities.toArray(new AppdefEntityID[entities.size()]), enabled);
+
+        RequestUtils.setConfirmation(request, enabled ? "resource.common.confirm.AlertsEnabled"
+                                                     : "resource.common.confirm.AlertsDisabled");
     }
-    
-    private void removeResources(HttpServletRequest request,
-                                 String[] resourceItems)
-        throws SessionNotFoundException, ApplicationException, VetoException,
-               RemoteException, ServletException {
+
+    private void removeResources(HttpServletRequest request, String[] resourceItems) throws SessionNotFoundException,
+        ApplicationException, VetoException, RemoteException, ServletException {
 
         Integer sessionId = RequestUtils.getSessionId(request);
-      
 
         List<String> resourceList = new ArrayList<String>();
         CollectionUtils.addAll(resourceList, resourceItems);
-        List<AppdefEntityID> entities =
-            BizappUtils.buildAppdefEntityIds(resourceList);
+        List<AppdefEntityID> entities = BizappUtils.buildAppdefEntityIds(resourceList);
         if (resourceItems != null && resourceItems.length > 0) {
             Set<AppdefEntityID> deleted = new HashSet<AppdefEntityID>();
             int vetoed = 0;
             // about the exception handling:
             // if someone either deleted the entity out from under our user
-            // or the user hit the back button, a derivative of 
-            // AppdefEntityNotFoundException gets thrown... we can still 
+            // or the user hit the back button, a derivative of
+            // AppdefEntityNotFoundException gets thrown... we can still
             // keep going on, trying to delete the other things in our list
             // (which is why the whole shebang isn't in one big
             // try / catch) but we only confirm that something was deleted
             // if something actually, um, was
             for (AppdefEntityID resourceId : entities) {
                 try {
-                    deleted.addAll(Arrays.asList(
-                            appdefBoss.removeAppdefEntity(sessionId.intValue(), resourceId)));
+                    deleted.addAll(Arrays.asList(appdefBoss.removeAppdefEntity(sessionId.intValue(), resourceId)));
                 } catch (AppdefEntityNotFoundException e) {
-                    log.error("Removing resource " + resourceId +
-                               "failed.");
+                    log.error("Removing resource " + resourceId + "failed.");
                 } catch (VetoException v) {
                     vetoed++;
                     log.info(v.getMessage());
                 }
             }
-            
+
             if (vetoed > 0) {
-                RequestUtils
-                    .setError(request,
-                             "resource.common.inventory.groups.error.RemoveVetoed");
+                RequestUtils.setError(request, "resource.common.inventory.groups.error.RemoveVetoed");
             } else if (deleted.size() > 0) {
-                RequestUtils
-                    .setConfirmation(request,
-                                    "resource.common.confirm.ResourcesRemoved");
-            }        
+                RequestUtils.setConfirmation(request, "resource.common.confirm.ResourcesRemoved");
+            }
         }
     }
 }

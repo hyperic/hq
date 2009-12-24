@@ -51,31 +51,25 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * On screen 2.1.6.4, a user can select one or more checkboxes 
- * (<code>resources</code>), for removal.  Handling that action
- * requires rewriting the {@link org.hyperic.hq.appdef.shared.DependencyTree} 
- * and saving it.
+ * On screen 2.1.6.4, a user can select one or more checkboxes (
+ * <code>resources</code>), for removal. Handling that action requires rewriting
+ * the {@link org.hyperic.hq.appdef.shared.DependencyTree} and saving it.
  */
-public class RemoveServiceDependenciesAction extends BaseAction {
+public class RemoveServiceDependenciesAction
+    extends BaseAction {
 
     private final Log log = LogFactory.getLog(RemoveServiceDependenciesAction.class.getName());
     private AppdefBoss appdefBoss;
-    
-    
+
     @Autowired
     public RemoveServiceDependenciesAction(AppdefBoss appdefBoss) {
         super();
         this.appdefBoss = appdefBoss;
     }
 
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
-
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-    throws Exception {
-                
         RemoveResourceForm cform = (RemoveResourceForm) form;
         Integer resourceId = cform.getRid();
         Integer entityType = cform.getType();
@@ -86,12 +80,10 @@ public class RemoveServiceDependenciesAction extends BaseAction {
         forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, entityType);
         forwardParams.put("appSvcId", appSvcId);
 
-       
-   
         Integer sessionId = RequestUtils.getSessionId(request);
 
         try {
-            DependencyTree tree = appdefBoss.getAppDependencyTree(sessionId.intValue(),resourceId);
+            DependencyTree tree = appdefBoss.getAppDependencyTree(sessionId.intValue(), resourceId);
             log.debug("got tree " + tree);
             // walk through the nodes to find the ones that are
             // to be removed as dependees
@@ -100,31 +92,32 @@ public class RemoveServiceDependenciesAction extends BaseAction {
             log.debug("will remove selected children from node " + depNode);
             List<AppService> children = depNode.getChildren();
             List<AppService> toRemove = new ArrayList<AppService>();
-            for(int i =0;i< resources.length; i++) {
-                for(AppService asv : children) {
-                  
-                    if(resources[i].equals(asv.getId())) {
+            for (int i = 0; i < resources.length; i++) {
+                for (AppService asv : children) {
+
+                    if (resources[i].equals(asv.getId())) {
                         // remove this one
                         toRemove.add(asv);
                     }
                 }
             }
-            for( AppService asv : toRemove) {
-              
+            for (AppService asv : toRemove) {
+
                 depNode.removeChild(asv);
             }
 
-            log.debug("saving tree " + tree);            
-            appdefBoss.setAppDependencyTree(sessionId.intValue(), tree);   
-            DependencyTree savedTree = appdefBoss.getAppDependencyTree(sessionId.intValue(), tree.getApplication().getId());
-            log.debug("retrieving saved tree " + savedTree);                     
+            log.debug("saving tree " + tree);
+            appdefBoss.setAppDependencyTree(sessionId.intValue(), tree);
+            DependencyTree savedTree = appdefBoss.getAppDependencyTree(sessionId.intValue(), tree.getApplication()
+                .getId());
+            log.debug("retrieving saved tree " + savedTree);
         } catch (PermissionException e) {
             log.debug("removing services from application failed:", e);
             throw new ServletException("can't remove services from application", e);
         } catch (ApplicationException e) {
             log.debug("removing services from application failed:", e);
             throw new ServletException("can't remove services from application", e);
-        }                
-        return returnSuccess(request, mapping, forwardParams);   
+        }
+        return returnSuccess(request, mapping, forwardParams);
     }
 }

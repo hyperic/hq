@@ -52,15 +52,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * View an alert definition.
- *
+ * 
  */
-public class ViewDefinitionAction extends TilesAction {
+public class ViewDefinitionAction
+    extends TilesAction {
 
     private final Log log = LogFactory.getLog(ViewDefinitionAction.class.getName());
     protected EventsBoss eventsBoss;
     protected MeasurementBoss measurementBoss;
-    
-    
+
     @Autowired
     public ViewDefinitionAction(EventsBoss eventsBoss, MeasurementBoss measurementBoss) {
         super();
@@ -68,19 +68,12 @@ public class ViewDefinitionAction extends TilesAction {
         this.measurementBoss = measurementBoss;
     }
 
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
-
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception
-    {            
-       
-        
         try {
             AppdefEntityID aeid = RequestUtils.getEntityId(request);
-            
+
             // If group entity, do nothing
             if (aeid.isGroup()) {
                 return null;
@@ -88,14 +81,11 @@ public class ViewDefinitionAction extends TilesAction {
         } catch (ParameterNotFoundException e) {
             // Global alert definition
         }
-        
-        Integer alertDefId =
-            RequestUtils.getIntParameter(request,
-                                         Constants.ALERT_DEFINITION_PARAM);
+
+        Integer alertDefId = RequestUtils.getIntParameter(request, Constants.ALERT_DEFINITION_PARAM);
         log.trace("alertDefId=" + alertDefId);
 
         int sessionID = RequestUtils.getSessionId(request).intValue();
-        
 
         // properties
         AlertDefinitionValue adv = eventsBoss.getAlertDefinition(sessionID, alertDefId);
@@ -110,41 +100,37 @@ public class ViewDefinitionAction extends TilesAction {
         boolean canEditConditions = true;
         for (int i = 0; i < acvList.length; ++i) {
             switch (acvList[i].getType()) {
-            case EventConstants.TYPE_ALERT:
-                recoverId = acvList[i].getMeasurementId();
-            case EventConstants.TYPE_THRESHOLD:
-            case EventConstants.TYPE_BASELINE:
-            case EventConstants.TYPE_CHANGE:
-            case EventConstants.TYPE_CONTROL:
-            case EventConstants.TYPE_CUST_PROP:
-            case EventConstants.TYPE_LOG:
-            case EventConstants.TYPE_CFG_CHG:
-                break;
-            default:
-                canEditConditions = false;
-                break;
+                case EventConstants.TYPE_ALERT:
+                    recoverId = acvList[i].getMeasurementId();
+                case EventConstants.TYPE_THRESHOLD:
+                case EventConstants.TYPE_BASELINE:
+                case EventConstants.TYPE_CHANGE:
+                case EventConstants.TYPE_CONTROL:
+                case EventConstants.TYPE_CUST_PROP:
+                case EventConstants.TYPE_LOG:
+                case EventConstants.TYPE_CFG_CHG:
+                    break;
+                default:
+                    canEditConditions = false;
+                    break;
             }
-            
+
             if (!canEditConditions)
                 break;
         }
-        request.setAttribute("canEditConditions",
-                             new Boolean(canEditConditions));
-        List<AlertConditionBean> alertDefConditions = AlertDefUtil.getAlertConditionBeanList(
-                sessionID, request, measurementBoss, acvList,
-                EventConstants.TYPE_ALERT_DEF_ID.equals(adv.getParentId()));
+        request.setAttribute("canEditConditions", new Boolean(canEditConditions));
+        List<AlertConditionBean> alertDefConditions = AlertDefUtil.getAlertConditionBeanList(sessionID, request,
+            measurementBoss, acvList, EventConstants.TYPE_ALERT_DEF_ID.equals(adv.getParentId()));
         request.setAttribute("alertDefConditions", alertDefConditions);
         request.setAttribute("openNMSEnabled", OpenNMSAction.isLoaded());
         if (recoverId > 0) {
-            AlertDefinitionValue primaryAdv = eventsBoss.getAlertDefinition(
-            		sessionID, Integer.valueOf(recoverId));        	
-        	request.setAttribute("primaryAlert", primaryAdv);
+            AlertDefinitionValue primaryAdv = eventsBoss.getAlertDefinition(sessionID, Integer.valueOf(recoverId));
+            request.setAttribute("primaryAlert", primaryAdv);
         }
 
         // enablement
         AlertDefUtil.setEnablementRequestAttributes(request, adv);
-        
+
         return null;
     }
 }
-

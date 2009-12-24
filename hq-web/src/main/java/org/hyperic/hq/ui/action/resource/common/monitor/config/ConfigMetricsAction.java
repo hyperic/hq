@@ -47,30 +47,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * modifies the metrics data.
  */
-public class ConfigMetricsAction extends BaseAction {
+public class ConfigMetricsAction
+    extends BaseAction {
     protected MeasurementBoss measurementBoss;
-    private final  Log log = LogFactory.getLog(ConfigMetricsAction.class.getName());  
-    
-    
+    private final Log log = LogFactory.getLog(ConfigMetricsAction.class.getName());
+
     @Autowired
     public ConfigMetricsAction(MeasurementBoss measurementBoss) {
         super();
         this.measurementBoss = measurementBoss;
     }
 
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
+        log.trace("modifying metrics action");
 
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-            
-        log.trace("modifying metrics action");                    
-
-        
         HashMap<String, Object> parms = new HashMap<String, Object>(2);
-        
+
         int sessionId = RequestUtils.getSessionId(request).intValue();
         MonitoringConfigForm mForm = (MonitoringConfigForm) form;
         // this action will be passed an entityTypeId OR an entityId
@@ -79,66 +73,58 @@ public class ConfigMetricsAction extends BaseAction {
         try {
             // check for appdef entity
             appdefId = RequestUtils.getEntityId(request);
-            
+
             parms.put(Constants.RESOURCE_PARAM, appdefId.getId());
-            parms.put(Constants.RESOURCE_TYPE_ID_PARAM,
-                      new Integer(appdefId.getType()));
-            
+            parms.put(Constants.RESOURCE_TYPE_ID_PARAM, new Integer(appdefId.getType()));
+
         } catch (ParameterNotFoundException e) {
-            // we better have a entityTypeId or this will throw an 
+            // we better have a entityTypeId or this will throw an
             // uncaught ParameterNotFOundException
-            aetid = new AppdefEntityTypeID(
-                RequestUtils.getStringParameter(request,
-                                                Constants.APPDEF_RES_TYPE_ID));
+            aetid = new AppdefEntityTypeID(RequestUtils.getStringParameter(request, Constants.APPDEF_RES_TYPE_ID));
             parms.put("aetid", aetid.getAppdefKey());
         }
-        
+
         Integer[] midsToUpdate = mForm.getMids();
-        
+
         ActionForward forward = checkSubmit(request, mapping, form, parms);
-                      
+
         if (forward != null) {
             if (mForm.isRemoveClicked()) {
-                
+
                 // don't make any back-end call if user has not selected any
                 // metrics.
                 if (midsToUpdate.length == 0)
                     return forward;
-                    
+
                 measurementBoss.disableMeasurements(sessionId, appdefId, midsToUpdate);
-                RequestUtils.setConfirmation(request, 
+                RequestUtils.setConfirmation(request,
                     "resource.common.monitor.visibility.config.RemoveMetrics.Confirmation");
             }
             return forward;
-        }        
-        
+        }
+
         // take the list of pending metric ids (mids),
         // and update them.);
         long interval = mForm.getIntervalTime();
-        
-        // don't make any back-end call if user has not selected any metrics.                      
+
+        // don't make any back-end call if user has not selected any metrics.
         if (midsToUpdate.length == 0)
             return returnSuccess(request, mapping, parms);
 
-        String confirmation =
-            "resource.common.monitor.visibility.config.ConfigMetrics.Confirmation";
+        String confirmation = "resource.common.monitor.visibility.config.ConfigMetrics.Confirmation";
         if (aetid == null) {
-            measurementBoss.updateMeasurements(sessionId, appdefId, midsToUpdate,
-                                     interval);
+            measurementBoss.updateMeasurements(sessionId, appdefId, midsToUpdate, interval);
         } else {
             if (mForm.isIndSelected()) {
                 measurementBoss.updateIndicatorMetrics(sessionId, aetid, midsToUpdate);
-                confirmation =
-                    "resource.common.monitor.visibility.config.IndicatorMetrics.Confirmation";
-            }
-            else
-                measurementBoss.updateMetricDefaultInterval(sessionId,  midsToUpdate,
-                                                  interval);
+                confirmation = "resource.common.monitor.visibility.config.IndicatorMetrics.Confirmation";
+            } else
+                measurementBoss.updateMetricDefaultInterval(sessionId, midsToUpdate, interval);
         }
         RequestUtils.setConfirmation(request, confirmation);
-        
+
         return returnSuccess(request, mapping, parms);
-      
-    }               
-    
+
+    }
+
 }

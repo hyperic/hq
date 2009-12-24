@@ -51,131 +51,98 @@ import org.hyperic.util.pager.PageControl;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * A <code>BaseDispatchAction</code> that sets up server
- * monitor portals.
+ * A <code>BaseDispatchAction</code> that sets up server monitor portals.
  */
-public class VisibilityPortalAction extends ResourceVisibilityPortalAction {
+public class VisibilityPortalAction
+    extends ResourceVisibilityPortalAction {
 
-    private static final String TITLE_CURRENT_HEALTH =
-        "resource.server.monitor.visibility.CurrentHealthTitle";
+    private static final String TITLE_CURRENT_HEALTH = "resource.server.monitor.visibility.CurrentHealthTitle";
 
-    private static final String PORTLET_CURRENT_HEALTH =
-        ".resource.server.monitor.visibility.CurrentHealth";
+    private static final String PORTLET_CURRENT_HEALTH = ".resource.server.monitor.visibility.CurrentHealth";
 
-    private static final String TITLE_SERVER_METRICS =
-        "resource.server.monitor.visibility.ServerMetricsTitle";
+    private static final String TITLE_SERVER_METRICS = "resource.server.monitor.visibility.ServerMetricsTitle";
 
-    private static final String PORTLET_SERVER_METRICS =
-        ".resource.server.monitor.visibility.ServerMetrics";
+    private static final String PORTLET_SERVER_METRICS = ".resource.server.monitor.visibility.ServerMetrics";
 
-    private static final String TITLE_PERFORMANCE =
-        "resource.server.monitor.visibility.PerformanceTitle";
+    private static final String TITLE_PERFORMANCE = "resource.server.monitor.visibility.PerformanceTitle";
 
-    private static final String PORTLET_PERFORMANCE =
-        ".resource.server.monitor.visibility.Performance";
+    private static final String PORTLET_PERFORMANCE = ".resource.server.monitor.visibility.Performance";
 
-    private static final String ERR_PLATFORM_PERMISSION =
-        "resource.server.monitor.visibility.error.PlatformPermission";
+    private static final String ERR_PLATFORM_PERMISSION = "resource.server.monitor.visibility.error.PlatformPermission";
 
-    private final Log log =
-        LogFactory.getLog(VisibilityPortalAction.class.getName());
-    
+    private final Log log = LogFactory.getLog(VisibilityPortalAction.class.getName());
+
     private MeasurementBoss measurementBoss;
-    
-    
+
     @Autowired
-    public VisibilityPortalAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss, MeasurementBoss measurementBoss) {
+    public VisibilityPortalAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss,
+                                  MeasurementBoss measurementBoss) {
         super(appdefBoss, authzBoss, controlBoss);
         this.measurementBoss = measurementBoss;
     }
 
-    public ActionForward currentHealth(ActionMapping mapping,
-                                       ActionForm form,
-                                       HttpServletRequest request,
-                                       HttpServletResponse response)
-        throws Exception {
-            
+    public ActionForward currentHealth(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                       HttpServletResponse response) throws Exception {
+
         setResource(request);
         findHostHealths(request);
 
-        super.currentHealth(mapping,form,request,response);
+        super.currentHealth(mapping, form, request, response);
 
-        Portal portal =
-            Portal.createPortal(TITLE_CURRENT_HEALTH,
-                                PORTLET_CURRENT_HEALTH);
+        Portal portal = Portal.createPortal(TITLE_CURRENT_HEALTH, PORTLET_CURRENT_HEALTH);
         request.setAttribute(Constants.PORTAL_KEY, portal);
 
         return null;
     }
 
-    public ActionForward resourceMetrics(ActionMapping mapping,
-                                         ActionForm form,
-                                         HttpServletRequest request,
-                                         HttpServletResponse response)
-        throws Exception {
-            
+    public ActionForward resourceMetrics(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                         HttpServletResponse response) throws Exception {
+
         setResource(request);
         findHostHealths(request);
-        
-        
-        super.resourceMetrics(mapping,form,request,response);
-        
-        Portal portal =
-            Portal.createPortal(TITLE_SERVER_METRICS,
-                                PORTLET_SERVER_METRICS);
+
+        super.resourceMetrics(mapping, form, request, response);
+
+        Portal portal = Portal.createPortal(TITLE_SERVER_METRICS, PORTLET_SERVER_METRICS);
         request.setAttribute(Constants.PORTAL_KEY, portal);
         return null;
     }
 
-    public ActionForward performance(ActionMapping mapping,
-                                     ActionForm form,
-                                     HttpServletRequest request,
-                                     HttpServletResponse response)
-        throws Exception {
-            
-        super.performance(mapping,form,request,response);            
-            
+    public ActionForward performance(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                     HttpServletResponse response) throws Exception {
+
+        super.performance(mapping, form, request, response);
+
         setResource(request);
 
-        Portal portal =
-            Portal.createPortal(TITLE_PERFORMANCE,
-                                PORTLET_PERFORMANCE);
+        Portal portal = Portal.createPortal(TITLE_PERFORMANCE, PORTLET_PERFORMANCE);
         request.setAttribute(Constants.PORTAL_KEY, portal);
         return null;
     }
 
-    private void findHostHealths(HttpServletRequest request)
-        throws Exception {
+    private void findHostHealths(HttpServletRequest request) throws Exception {
         Exception thrown = null;
         AppdefEntityID entityId = null;
         try {
             int sessionId = RequestUtils.getSessionId(request).intValue();
             entityId = RequestUtils.getEntityId(request);
 
-           
-
             // no need to page host platform health summaries, as
             // there can only be one
             PageControl pc = PageControl.PAGE_ALL;
 
             if (log.isDebugEnabled()) {
-                log.debug("getting host platform health for resource [" +
-                      entityId + "]");
+                log.debug("getting host platform health for resource [" + entityId + "]");
             }
-            List<ResourceDisplaySummary> healths =
-                measurementBoss.findPlatformsCurrentHealth(sessionId, entityId, pc);
-            request.setAttribute(Constants.HOST_HEALTH_SUMMARIES_ATTR,
-                                 healths);
-        }
-        catch (PermissionException e) {
+            List<ResourceDisplaySummary> healths = measurementBoss.findPlatformsCurrentHealth(sessionId, entityId, pc);
+            request.setAttribute(Constants.HOST_HEALTH_SUMMARIES_ATTR, healths);
+        } catch (PermissionException e) {
             thrown = e;
             request.setAttribute(Constants.ERR_PLATFORM_HEALTH_ATTR, ERR_PLATFORM_PERMISSION);
-        }        
-        catch (AppdefEntityNotFoundException e) {
+        } catch (AppdefEntityNotFoundException e) {
             thrown = e;
             RequestUtils.setError(request, Constants.ERR_RESOURCE_NOT_FOUND);
-        }        
-        finally { 
+        } finally {
             if (thrown != null && log.isDebugEnabled()) {
                 log.debug("resource [" + entityId + "] access error", thrown);
             }

@@ -43,49 +43,41 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 
-
 /**
  * An Action that the current status of actions on a resource.
  */
-public class UpdateStatusAction extends BaseAction {
+public class UpdateStatusAction
+    extends BaseAction {
 
-    private final  Log log = LogFactory.getLog(UpdateStatusAction.class.getName());
+    private final Log log = LogFactory.getLog(UpdateStatusAction.class.getName());
     private ControlBoss controlBoss;
-    
-    
+
     @Autowired
     public UpdateStatusAction(ControlBoss controlBoss) {
         super();
         this.controlBoss = controlBoss;
     }
 
-
-
-    /** 
-     * Displays state of current actions of a resource. 
+    /**
+     * Displays state of current actions of a resource.
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-       
-       
-                
-        log.trace("determining current status.");              
-        int sessionId = RequestUtils.getSessionId(request).intValue(); 
-       
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
+
+        log.trace("determining current status.");
+        int sessionId = RequestUtils.getSessionId(request).intValue();
+
         AppdefEntityID appId = RequestUtils.getEntityId(request);
 
         Integer batchId = null;
         try {
-            batchId = RequestUtils.getIntParameter(request,
-                        Constants.CONTROL_BATCH_ID_PARAM);
-        } 
+            batchId = RequestUtils.getIntParameter(request, Constants.CONTROL_BATCH_ID_PARAM);
+        }
         /* failed to get that param, that's ok, use current */
-        catch (NullPointerException npe) {}
-        catch (ParameterNotFoundException pnfe) {}
-        catch (NumberFormatException nfe) {}
+        catch (NullPointerException npe) {
+        } catch (ParameterNotFoundException pnfe) {
+        } catch (NumberFormatException nfe) {
+        }
 
         ControlHistory cValue = null;
         if (null == batchId) {
@@ -106,7 +98,7 @@ public class UpdateStatusAction extends BaseAction {
         obj.put("ctrlSched", cValue.getDateScheduled());
         obj.put("ctrlDuration", cValue.getDuration());
         request.setAttribute(Constants.AJAX_JSON, obj);
-        
+
         return returnSuccess(request, mapping);
     }
 }

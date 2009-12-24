@@ -51,41 +51,30 @@ import org.hyperic.util.pager.PageControl;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * An Action that retrieves data from the BizApp to facilitate display
- * of the form for editing a platform's type and network properties.
+ * An Action that retrieves data from the BizApp to facilitate display of the
+ * form for editing a platform's type and network properties.
  */
 public class EditPlatformTypeNetworkPropertiesFormPrepareAction
     extends TilesAction {
 
-    private final Log log = LogFactory
-    .getLog(EditPlatformTypeNetworkPropertiesFormPrepareAction
-        .class.getName());
+    private final Log log = LogFactory.getLog(EditPlatformTypeNetworkPropertiesFormPrepareAction.class.getName());
     private AppdefBoss appdefBoss;
-    
-    
+
     @Autowired
     public EditPlatformTypeNetworkPropertiesFormPrepareAction(AppdefBoss appdefBoss) {
         super();
         this.appdefBoss = appdefBoss;
     }
 
-
-
     /**
      * Retrieve the data necessary to display the
      * <code>TypeNetworkPropertiesForm</code> page.
-     *
+     * 
      */
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-        
-        
-        PlatformValue platform =
-            (PlatformValue) RequestUtils.getResource(request);
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
+
+        PlatformValue platform = (PlatformValue) RequestUtils.getResource(request);
         if (platform == null) {
             RequestUtils.setError(request, Constants.ERR_PLATFORM_NOT_FOUND);
             return null;
@@ -94,25 +83,18 @@ public class EditPlatformTypeNetworkPropertiesFormPrepareAction
         PlatformForm editForm = (PlatformForm) form;
         editForm.loadPlatformValue(platform);
 
-       
         Integer sessionId = RequestUtils.getSessionId(request);
-       
 
         log.trace("getting all platform types");
         List<PlatformTypeValue> platformTypes = appdefBoss.findAllPlatformTypes(sessionId.intValue(),
-                                                       PageControl.PAGE_ALL);
+            PageControl.PAGE_ALL);
         editForm.setResourceTypes(platformTypes);
 
         String usedIpPort = "";
-        if (platform.getAgent() != null) { 
-            usedIpPort =
-                platform.getAgent().getAddress() +
-                ":" + 
-                platform.getAgent().getPort();
+        if (platform.getAgent() != null) {
+            usedIpPort = platform.getAgent().getAddress() + ":" + platform.getAgent().getPort();
         }
-        BizappUtils.populateAgentConnections(sessionId.intValue(),
-                                             appdefBoss, request,
-                                             editForm, usedIpPort);
+        BizappUtils.populateAgentConnections(sessionId.intValue(), appdefBoss, request, editForm, usedIpPort);
 
         // respond to an add or remove click- we do this here
         // rather than in the edit Action because in between
@@ -126,7 +108,7 @@ public class EditPlatformTypeNetworkPropertiesFormPrepareAction
 
             int nextIndex = editForm.getNumIps();
             log.trace("ips next index: " + nextIndex);
-            for (int i=0; i<nextIndex+1; i++) {
+            for (int i = 0; i < nextIndex + 1; i++) {
                 IpValue oldIp = i < numSavedIps ? savedIps[i] : null;
                 if (oldIp == null) {
                     editForm.setIp(i, new IpValue());
@@ -135,30 +117,26 @@ public class EditPlatformTypeNetworkPropertiesFormPrepareAction
 
             editForm.setNumIps(nextIndex + 1);
             log.trace("add num ips: " + editForm.getNumIps());
-        }
-        else if (editForm.isRemoveClicked()) {
+        } else if (editForm.isRemoveClicked()) {
             int ri = Integer.parseInt(editForm.getRemove().getX());
 
             IpValue oldIps[] = editForm.getIps();
             if (oldIps != null) {
                 // remove the indicated ip, leaving all others
                 // intact
-                ArrayList<IpValue> oldIpsList =
-                    new ArrayList<IpValue>(Arrays.asList(oldIps));
+                ArrayList<IpValue> oldIpsList = new ArrayList<IpValue>(Arrays.asList(oldIps));
                 oldIpsList.remove(ri);
-                IpValue[] newIps =
-                    (IpValue[]) oldIpsList.toArray(new IpValue[0]);
+                IpValue[] newIps = (IpValue[]) oldIpsList.toArray(new IpValue[0]);
 
                 // automatically sets numIps
                 editForm.setIps(newIps);
             }
-        }
-        else if (! editForm.isOkClicked()) {
+        } else if (!editForm.isOkClicked()) {
             // the form is being set up for the first time.
             IpValue[] savedIps = platform.getIpValues();
             int numSavedIps = savedIps != null ? savedIps.length : 0;
 
-            for (int i=0; i<numSavedIps; i++) {
+            for (int i = 0; i < numSavedIps; i++) {
                 editForm.setIp(i, savedIps[i]);
             }
 
@@ -166,7 +144,7 @@ public class EditPlatformTypeNetworkPropertiesFormPrepareAction
         }
 
         // the OSType dropdown is NOT editable in edit mode hence the false
-        request.setAttribute(Constants.PLATFORM_OS_EDITABLE, Boolean.FALSE); 
+        request.setAttribute(Constants.PLATFORM_OS_EDITABLE, Boolean.FALSE);
         return null;
 
     }

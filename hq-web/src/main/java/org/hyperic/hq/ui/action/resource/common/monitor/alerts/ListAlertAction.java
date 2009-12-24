@@ -70,16 +70,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * List all alerts for this entity
- *
+ * 
  */
-public class ListAlertAction extends TilesAction {
+public class ListAlertAction
+    extends TilesAction {
 
     private final Log log = LogFactory.getLog(ListAlertAction.class.getName());
     private EventsBoss eventsBoss;
     private MeasurementBoss measurementBoss;
-    
-    
-    
+
     @Autowired
     public ListAlertAction(EventsBoss eventsBoss, MeasurementBoss measurementBoss) {
         super();
@@ -88,123 +87,97 @@ public class ListAlertAction extends TilesAction {
     }
 
     /**
-     * Create a list of AlertBean objects based on the AlertValue
-     * objects for this resource.
+     * Create a list of AlertBean objects based on the AlertValue objects for
+     * this resource.
      */
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception
-    {
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
         int sessionId = RequestUtils.getSessionId(request).intValue();
         AppdefEntityID appEntId = RequestUtils.getEntityId(request);
-        
-      
+
         GregorianCalendar cal = new GregorianCalendar();
-        
+
         try {
             Integer year = RequestUtils.getIntParameter(request, "year");
             Integer month = RequestUtils.getIntParameter(request, "month");
             Integer day = RequestUtils.getIntParameter(request, "day");
-            
+
             cal.set(Calendar.YEAR, year.intValue());
             cal.set(Calendar.MONTH, month.intValue());
             cal.set(Calendar.DAY_OF_MONTH, day.intValue());
         } catch (ParameterNotFoundException e) {
             // Ignore
         }
-        
+
         cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
 
         PageControl pc = RequestUtils.getPageControl(request);
-        
+
         try {
             RequestUtils.getIntParameter(request, Constants.SORTCOL_PARAM);
         } catch (ParameterNotFoundException e) {
             // By default we sort by descending ctime
             pc.setSortorder(PageControl.SORT_DESC);
         }
-        
+
         PageList<Alert> alerts;
-        
+
         try {
             long begin = cal.getTimeInMillis();
-            alerts = eventsBoss.findAlerts(sessionId, 
-            		               appEntId, 
-            		               begin, 
-            		               begin + Constants.DAYS, 
-            		               pc);
-        } catch(PermissionException e) {
-            // user is not allowed to see/manage alerts. 
+            alerts = eventsBoss.findAlerts(sessionId, appEntId, begin, begin + Constants.DAYS, pc);
+        } catch (PermissionException e) {
+            // user is not allowed to see/manage alerts.
             // return empty list for now
             alerts = new PageList<Alert>();
         }
 
         PageList<AlertBean> uiBeans = new PageList<AlertBean>();
-        
+
         for (Alert alert : alerts) {
-           
+
             AlertDefinition alertDefinition = alert.getAlertDefinition();
-            AlertBean bean = new AlertBean(alert.getId(), 
-            							   alert.getCtime(),
-            							   alertDefinition.getId(), 
-            							   alertDefinition.getName(),
-            							   alertDefinition.getPriority(), 
-            							   appEntId.getId(),
-                                           new Integer(appEntId.getType()),
-                                           alert.isFixed(), 
-                                           alert.isAckable());
+            AlertBean bean = new AlertBean(alert.getId(), alert.getCtime(), alertDefinition.getId(), alertDefinition
+                .getName(), alertDefinition.getPriority(), appEntId.getId(), new Integer(appEntId.getType()), alert
+                .isFixed(), alert.isAckable());
             Escalation escalation = alertDefinition.getEscalation();
-            
+
             if (escalation != null && escalation.isPauseAllowed()) {
-            	bean.setMaxPauseTime(escalation.getMaxPauseTime());
+                bean.setMaxPauseTime(escalation.getMaxPauseTime());
             }
-            
+
             // Determine whether or not this alert definition is viewable
-            bean.setViewable(!alertDefinition.isDeleted() && 
-                             alertDefinition.getResource() != null &&
+            bean.setViewable(!alertDefinition.isDeleted() && alertDefinition.getResource() != null &&
                              !alertDefinition.getResource().isInAsyncDeleteState());
-            
+
             Collection<AlertConditionLog> conditionLogs = alert.getConditionLog();
-            
+
             if (conditionLogs.size() > 1) {
                 setupMultiCondition(bean, request);
             } else if (conditionLogs.size() == 1) {
-            	AlertConditionLog conditionLog = 
-            		(AlertConditionLog) conditionLogs.iterator().next();
-                AlertConditionValue condition = 
-                	conditionLog.getCondition().getAlertConditionValue();
-                
-                setupCondition(bean, 
-                		        condition, 
-                		        conditionLog.getValue(), 
-                		        request,
-                                
-                                sessionId);
+                AlertConditionLog conditionLog = (AlertConditionLog) conditionLogs.iterator().next();
+                AlertConditionValue condition = conditionLog.getCondition().getAlertConditionValue();
+
+                setupCondition(bean, condition, conditionLog.getValue(), request,
+
+                sessionId);
             } else {
                 // fall back to alert definition conditions: PR 6992
-                Collection<AlertCondition> conditions = 
-                	alertDefinition.getConditions();
-                
+                Collection<AlertCondition> conditions = alertDefinition.getConditions();
+
                 if (conditions.size() > 1) {
                     setupMultiCondition(bean, request);
                 } else if (conditions.size() == 1) {
-                	AlertCondition condition = conditions.iterator().next();
-                	
-                    setupCondition(bean, 
-                    		        condition.getAlertConditionValue(),
-                    		        null, 
-                    		        request, 
-                    		       
-                    		        sessionId);
+                    AlertCondition condition = conditions.iterator().next();
+
+                    setupCondition(bean, condition.getAlertConditionValue(), null, request,
+
+                    sessionId);
                 } else {
                     // *serious* trouble
                     log.error("No condition logs for alert: " + alert.getId());
-                    
+
                     bean.setMultiCondition(true);
                     bean.setConditionName(Constants.UNKNOWN);
                     bean.setValue(Constants.UNKNOWN);
@@ -213,131 +186,108 @@ public class ListAlertAction extends TilesAction {
 
             uiBeans.add(bean);
         }
-        
-        context.putAttribute( Constants.RESOURCE_ATTR,
-                              RequestUtils.getResource(request) );
-        context.putAttribute( Constants.RESOURCE_OWNER_ATTR,
-                              request.getAttribute(Constants.RESOURCE_OWNER_ATTR) );
-        context.putAttribute( Constants.RESOURCE_MODIFIER_ATTR,
-                              request.getAttribute(Constants.RESOURCE_MODIFIER_ATTR) );
-        request.setAttribute( Constants.ALERTS_ATTR, uiBeans );
-        request.setAttribute( Constants.LIST_SIZE_ATTR,
-                              new Integer( alerts.getTotalSize() ) );
+
+        context.putAttribute(Constants.RESOURCE_ATTR, RequestUtils.getResource(request));
+        context.putAttribute(Constants.RESOURCE_OWNER_ATTR, request.getAttribute(Constants.RESOURCE_OWNER_ATTR));
+        context.putAttribute(Constants.RESOURCE_MODIFIER_ATTR, request.getAttribute(Constants.RESOURCE_MODIFIER_ATTR));
+        request.setAttribute(Constants.ALERTS_ATTR, uiBeans);
+        request.setAttribute(Constants.LIST_SIZE_ATTR, new Integer(alerts.getTotalSize()));
 
         return null;
     }
 
-    private void setupCondition(AlertBean bean, AlertConditionValue cond,
-                                 String value, HttpServletRequest request,
-                                 int sessionId)
-    throws SessionTimeoutException,
-           SessionNotFoundException,
-           MeasurementNotFoundException,
-           RemoteException
-    {
-        bean.setConditionName( cond.getName() );
+    private void setupCondition(AlertBean bean, AlertConditionValue cond, String value, HttpServletRequest request,
+                                int sessionId) throws SessionTimeoutException, SessionNotFoundException,
+        MeasurementNotFoundException, RemoteException {
+        bean.setConditionName(cond.getName());
 
-        switch( cond.getType() ) {
-        case EventConstants.TYPE_CONTROL:
-            bean.setComparator("");
-            bean.setThreshold( cond.getOption() );
-            bean.setValue
-                ( RequestUtils.message(request, "alert.current.list.ControlActualValue") );
-            break;
-
-        case EventConstants.TYPE_THRESHOLD:
-        case EventConstants.TYPE_BASELINE:
-        case EventConstants.TYPE_CHANGE:
-            FormatSpecifics precMax = new FormatSpecifics();
-            precMax.setPrecision(FormatSpecifics.PRECISION_MAX);
-
-            Measurement m = null;
-            if (cond.getType() == EventConstants.TYPE_THRESHOLD) {
-                m = measurementBoss.getMeasurement(sessionId,
-                                      new Integer(cond.getMeasurementId()));
-                bean.setComparator(cond.getComparator());
-                FormattedNumber th =
-                    UnitsConvert.convert(cond.getThreshold(),
-                                         m.getTemplate().getUnits(), precMax);
-                bean.setThreshold(th.toString());
-            } else if (cond.getType() == EventConstants.TYPE_BASELINE) {
-                bean.setComparator(cond.getComparator());
-                bean.setThreshold(cond.getThreshold() + "% of " +
-                                  cond.getOption());
-            } else if (cond.getType() == EventConstants.TYPE_CHANGE) {
+        switch (cond.getType()) {
+            case EventConstants.TYPE_CONTROL:
                 bean.setComparator("");
-                bean.setThreshold(RequestUtils
-                        .message(request, "alert.current.list.ValueChanged"));
-            }
+                bean.setThreshold(cond.getOption());
+                bean.setValue(RequestUtils.message(request, "alert.current.list.ControlActualValue"));
+                break;
 
-            // convert() can't handle Double.NaN -- just display ?? for the value
-            if ( value == null || value.length() == 0 ) {
-                bean.setValue(Constants.UNKNOWN);
-            } else {
-                String last = value.substring(value.length() - 1);
-                try {
-                    // This is legacy code, used to format a comma delimited
-                    // number in the logs.  However, we should be storing
-                    // fully formatted values into logs now.  Remove post 4.1
-                    Integer.parseInt(last);
+            case EventConstants.TYPE_THRESHOLD:
+            case EventConstants.TYPE_BASELINE:
+            case EventConstants.TYPE_CHANGE:
+                FormatSpecifics precMax = new FormatSpecifics();
+                precMax.setPrecision(FormatSpecifics.PRECISION_MAX);
 
-                    // format threshold and value
-                    if (m == null) {
-                        m = measurementBoss.getMeasurement(sessionId,
-                                          new Integer(cond.getMeasurementId()));
-
-                    }
-                    double dval =
-                        NumberUtil.stringAsNumber( value ).doubleValue();
-
-                    FormattedNumber val =
-                        UnitsConvert.convert(dval, m.getTemplate().getUnits());
-
-                    bean.setValue( val.toString() );
-                } catch (NumberFormatException e) {
-                    bean.setValue(value);
+                Measurement m = null;
+                if (cond.getType() == EventConstants.TYPE_THRESHOLD) {
+                    m = measurementBoss.getMeasurement(sessionId, new Integer(cond.getMeasurementId()));
+                    bean.setComparator(cond.getComparator());
+                    FormattedNumber th = UnitsConvert.convert(cond.getThreshold(), m.getTemplate().getUnits(), precMax);
+                    bean.setThreshold(th.toString());
+                } else if (cond.getType() == EventConstants.TYPE_BASELINE) {
+                    bean.setComparator(cond.getComparator());
+                    bean.setThreshold(cond.getThreshold() + "% of " + cond.getOption());
+                } else if (cond.getType() == EventConstants.TYPE_CHANGE) {
+                    bean.setComparator("");
+                    bean.setThreshold(RequestUtils.message(request, "alert.current.list.ValueChanged"));
                 }
-            }
 
-            break;
+                // convert() can't handle Double.NaN -- just display ?? for the
+                // value
+                if (value == null || value.length() == 0) {
+                    bean.setValue(Constants.UNKNOWN);
+                } else {
+                    String last = value.substring(value.length() - 1);
+                    try {
+                        // This is legacy code, used to format a comma delimited
+                        // number in the logs. However, we should be storing
+                        // fully formatted values into logs now. Remove post 4.1
+                        Integer.parseInt(last);
 
-        case EventConstants.TYPE_CUST_PROP:
-            bean.setComparator("");
-            bean.setThreshold
-                ( RequestUtils.message(request, "alert.current.list.ValueChanged") );
-            
-            if (value != null)
+                        // format threshold and value
+                        if (m == null) {
+                            m = measurementBoss.getMeasurement(sessionId, new Integer(cond.getMeasurementId()));
+
+                        }
+                        double dval = NumberUtil.stringAsNumber(value).doubleValue();
+
+                        FormattedNumber val = UnitsConvert.convert(dval, m.getTemplate().getUnits());
+
+                        bean.setValue(val.toString());
+                    } catch (NumberFormatException e) {
+                        bean.setValue(value);
+                    }
+                }
+
+                break;
+
+            case EventConstants.TYPE_CUST_PROP:
+                bean.setComparator("");
+                bean.setThreshold(RequestUtils.message(request, "alert.current.list.ValueChanged"));
+
+                if (value != null)
+                    bean.setValue(value);
+                else
+                    bean.setValue(Constants.UNKNOWN);
+                break;
+
+            case EventConstants.TYPE_LOG:
+                bean.setConditionName(RequestUtils.message(request, "alert.config.props.CB.LogLevel"));
+                bean.setComparator("=");
+                bean.setThreshold(ResourceLogEvent.getLevelString(Integer.parseInt(cond.getName())));
                 bean.setValue(value);
-            else
+                break;
+            case EventConstants.TYPE_CFG_CHG:
+                bean.setValue(value);
+                break;
+            default:
+                bean.setName(Constants.UNKNOWN);
+                bean.setComparator(Constants.UNKNOWN);
+                bean.setThreshold(Constants.UNKNOWN);
                 bean.setValue(Constants.UNKNOWN);
-            break;
-
-        case EventConstants.TYPE_LOG:
-            bean.setConditionName(
-                RequestUtils.message(request,"alert.config.props.CB.LogLevel"));
-            bean.setComparator("=");
-            bean.setThreshold(
-                ResourceLogEvent.getLevelString(
-                    Integer.parseInt(cond.getName())));
-            bean.setValue(value);
-            break;
-        case EventConstants.TYPE_CFG_CHG:
-            bean.setValue(value);
-            break;
-        default:
-            bean.setName(Constants.UNKNOWN);
-            bean.setComparator(Constants.UNKNOWN);
-            bean.setThreshold(Constants.UNKNOWN);
-            bean.setValue(Constants.UNKNOWN);
-            break;
+                break;
         }
     }
 
     private void setupMultiCondition(AlertBean bean, HttpServletRequest request) {
         bean.setMultiCondition(true);
-        bean.setConditionName
-            ( RequestUtils.message(request, "alert.current.list.MultiCondition") );
-        bean.setValue
-            ( RequestUtils.message(request, "alert.current.list.MultiConditionValue") );
+        bean.setConditionName(RequestUtils.message(request, "alert.current.list.MultiCondition"));
+        bean.setValue(RequestUtils.message(request, "alert.current.list.MultiConditionValue"));
     }
 }

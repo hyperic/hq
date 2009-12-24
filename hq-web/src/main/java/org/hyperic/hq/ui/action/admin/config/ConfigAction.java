@@ -58,13 +58,13 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class ConfigAction extends BaseDispatchAction {
+public class ConfigAction
+    extends BaseDispatchAction {
 
     private AuthzBoss authzBoss;
     private ConfigBoss configBoss;
     private AppdefBoss appdefBoss;
-    
-    
+
     @Autowired
     public ConfigAction(AuthzBoss authzBoss, ConfigBoss configBoss, AppdefBoss appdefBoss) {
         super();
@@ -79,80 +79,57 @@ public class ConfigAction extends BaseDispatchAction {
         return map;
     }
 
-    private void createPortal(HttpServletRequest request, boolean dialog,
-                              String title, String tile) {
+    private void createPortal(HttpServletRequest request, boolean dialog, String title, String tile) {
         // Create the portal
         Portal p = Portal.createPortal(title, tile);
         p.setDialog(dialog);
         request.setAttribute(Constants.PORTAL_KEY, p);
     }
 
-    public ActionForward editConfig(ActionMapping mapping,
-                                    ActionForm form,
-                                    HttpServletRequest request,
-                                    HttpServletResponse response)
-        throws Exception
-    {
+    public ActionForward editConfig(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                    HttpServletResponse response) throws Exception {
         Integer sessionId = RequestUtils.getSessionId(request);
-       
+
         if (!BizappUtils.canAdminHQ(sessionId, authzBoss)) {
-            throw new PermissionException("User not authorized to configure " +
-                                          "server settings");
+            throw new PermissionException("User not authorized to configure " + "server settings");
         }
-        
-        createPortal(request, true, "admin.settings.EditServerConfig.Title",
-                     ".admin.config.EditConfig");
+
+        createPortal(request, true, "admin.settings.EditServerConfig.Title", ".admin.config.EditConfig");
 
         return null;
     }
 
-    public ActionForward escalate(ActionMapping mapping,
-                                  ActionForm form,
-                                  HttpServletRequest request,
-                                  HttpServletResponse resp)
-        throws Exception
-    {
-        createPortal(request, false, "admin.home.EscalationSchemes",
-                     ".admin.config.EditEscalationConfig");
-        
+    public ActionForward escalate(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                  HttpServletResponse resp) throws Exception {
+        createPortal(request, false, "admin.home.EscalationSchemes", ".admin.config.EditEscalationConfig");
+
         Integer sessionId = RequestUtils.getSessionId(request);
-       
-        PageList<AuthzSubjectValue> availableUsers =
-            authzBoss.getAllSubjects(sessionId, null, PageControl.PAGE_ALL);
+
+        PageList<AuthzSubjectValue> availableUsers = authzBoss.getAllSubjects(sessionId, null, PageControl.PAGE_ALL);
         request.setAttribute(Constants.AVAIL_USERS_ATTR, availableUsers);
-        
-       
+
         Properties props = configBoss.getConfig();
-        
+
         // See if the property exists
         if (props.containsKey(HQConstants.SNMPVersion)) {
             String ver = props.getProperty(HQConstants.SNMPVersion);
             request.setAttribute("snmpEnabled", new Boolean(ver.length() > 0));
         }
-        return null;        
+        return null;
     }
 
-    public ActionForward monitor(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse resp)
-        throws Exception
-    {
+    public ActionForward monitor(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse resp) throws Exception {
         Integer sessionId = RequestUtils.getSessionId(request);
-       
+
         if (!BizappUtils.canAdminHQ(sessionId, authzBoss))
-            throw new PermissionException("User not authorized to configure " +
-                                          "monitor defaults");
-    
-       
+            throw new PermissionException("User not authorized to configure " + "monitor defaults");
 
         int session = sessionId.intValue();
-        List<PlatformTypeValue> platTypes = appdefBoss.findAllPlatformTypes(session,
-                                                     PageControl.PAGE_ALL);
+        List<PlatformTypeValue> platTypes = appdefBoss.findAllPlatformTypes(session, PageControl.PAGE_ALL);
         request.setAttribute(Constants.ALL_PLATFORM_TYPES_ATTR, platTypes);
 
-        List<ServerTypeValue> serverTypes = appdefBoss.findAllServerTypes(session,
-                                                     PageControl.PAGE_ALL);
+        List<ServerTypeValue> serverTypes = appdefBoss.findAllServerTypes(session, PageControl.PAGE_ALL);
 
         // Get the special service types sans windows special case
         // XXX: What special case?
@@ -161,30 +138,25 @@ public class ConfigAction extends BaseDispatchAction {
         LinkedHashMap<ServerTypeValue, List<ServiceTypeValue>> serverTypesMap = new LinkedHashMap<ServerTypeValue, List<ServiceTypeValue>>();
         for (int i = 0; i < serverTypes.size(); i++) {
             ServerTypeValue stv = serverTypes.get(i);
-            List<ServiceTypeValue> serviceTypes =
-                appdefBoss.findServiceTypesByServerType(session,
-                                                    stv.getId().intValue());
+            List<ServiceTypeValue> serviceTypes = appdefBoss.findServiceTypesByServerType(session, stv.getId()
+                .intValue());
             if (stv.getVirtual()) {
                 if (stv.getName().startsWith("Win")) {
                     winServices.addAll(serviceTypes);
                 } else {
                     platServices.addAll(serviceTypes);
                 }
-            }
-            else {
+            } else {
                 serverTypesMap.put(stv, serviceTypes);
             }
         }
         request.setAttribute(Constants.ALL_SERVER_TYPES_ATTR, serverTypesMap);
-        request.setAttribute(Constants.ALL_PLATFORM_SERVICE_TYPES_ATTR,
-                             platServices);
-        request.setAttribute(Constants.ALL_WINDOWS_SERVICE_TYPES_ATTR,
-                             winServices);
-        
+        request.setAttribute(Constants.ALL_PLATFORM_SERVICE_TYPES_ATTR, platServices);
+        request.setAttribute(Constants.ALL_WINDOWS_SERVICE_TYPES_ATTR, winServices);
+
         // Create the portal
-        createPortal(request, false, "admin.home.ResourceTemplates",
-                     ".admin.config.EditMonitorConfig");
-        
+        createPortal(request, false, "admin.home.ResourceTemplates", ".admin.config.EditMonitorConfig");
+
         return null;
     }
 }

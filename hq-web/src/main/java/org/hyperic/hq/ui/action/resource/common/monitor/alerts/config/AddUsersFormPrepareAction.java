@@ -48,16 +48,16 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.springframework.beans.factory.annotation.Autowired;
 
-
 /**
- * An Action that retrieves data from the BizApp to facilitate display
- * of the form to add users to AlertDefinition.
- *
+ * An Action that retrieves data from the BizApp to facilitate display of the
+ * form to add users to AlertDefinition.
+ * 
  */
-public class AddUsersFormPrepareAction extends AddNotificationsFormPrepareAction {
-   
+public class AddUsersFormPrepareAction
+    extends AddNotificationsFormPrepareAction {
+
     private AuthzBoss authzBoss;
-    
+
     @Autowired
     public AddUsersFormPrepareAction(EventsBoss eventBoss, AuthzBoss authzBoss) {
         super(eventBoss);
@@ -65,35 +65,27 @@ public class AddUsersFormPrepareAction extends AddNotificationsFormPrepareAction
     }
 
     /**
-     * Retrieve this data and store it in the specified request
-     * parameters:
-     *
+     * Retrieve this data and store it in the specified request parameters:
+     * 
      * <ul>
-     *   <li><code>AlertDefinitionValue</code> object identified by
-     *     <code>Constants.ALERT_DEFS_ATTR</code></li>
-     *   <li><code>List</code> of available <code>AuthzSubjectValue</code>
-     *     objects (those not already associated with the alert def) in
-     *     <code>Constants.AVAIL_USERS_ATTR</code></li>
-     *   <li><code>Integer</code> number of available users in
-     *     <code>Constants.NUM_AVAIL_USERS_ATTR</code></li>
-     *   <li><code>List</code> of pending <code>AuthzSubjectValue</code>
-     *     objects (those in queue to be associated with the definition) in
-     *     <code>Constants.PENDING_USERS_ATTR</code></li>
-     *   <li><code>Integer</code> number of pending users in
-     *     <code>Constants.NUM_PENDING_USERS_ATTR</code></li>
+     * <li><code>AlertDefinitionValue</code> object identified by
+     * <code>Constants.ALERT_DEFS_ATTR</code></li>
+     * <li><code>List</code> of available <code>AuthzSubjectValue</code> objects
+     * (those not already associated with the alert def) in
+     * <code>Constants.AVAIL_USERS_ATTR</code></li>
+     * <li><code>Integer</code> number of available users in
+     * <code>Constants.NUM_AVAIL_USERS_ATTR</code></li>
+     * <li><code>List</code> of pending <code>AuthzSubjectValue</code> objects
+     * (those in queue to be associated with the definition) in
+     * <code>Constants.PENDING_USERS_ATTR</code></li>
+     * <li><code>Integer</code> number of pending users in
+     * <code>Constants.NUM_PENDING_USERS_ATTR</code></li>
      * </ul>
      */
-    public ActionForward execute(ComponentContext context,
-                                  ActionMapping mapping,
-                                  ActionForm form,
-                                  HttpServletRequest request,
-                                  HttpServletResponse response)
-        throws Exception
-    {
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
         AddUsersForm addForm = (AddUsersForm) form;
- 
-       
-       
+
         Integer sessionId = RequestUtils.getSessionId(request);
 
         AppdefEntityID aeid;
@@ -104,42 +96,33 @@ public class AddUsersFormPrepareAction extends AddNotificationsFormPrepareAction
             aeid = RequestUtils.getEntityId(request);
             addForm.setType(new Integer(aeid.getType()));
             addForm.setRid(aeid.getId());
-        }        
+        }
 
         // pending users are those on the right side of the "add
         // to list" widget- awaiting association with the Alert
         // Definition when the form's "ok" button is clicked.
-        Integer[] pendingUserIds =
-            SessionUtils.getList(request.getSession(),
-                                 Constants.PENDING_USERS_SES_ATTR);
+        Integer[] pendingUserIds = SessionUtils.getList(request.getSession(), Constants.PENDING_USERS_SES_ATTR);
 
-        Integer[] userIds = getNotificationIds(request, addForm, aeid,
-                                               EmailActionConfig.TYPE_USERS);
+        Integer[] userIds = getNotificationIds(request, addForm, aeid, EmailActionConfig.TYPE_USERS);
 
-        PageControl pcp =
-            RequestUtils.getPageControl(request, "psp", "pnp", "sop", "scp");
-        PageList<AuthzSubjectValue> pendingUsers =
-            authzBoss.getSubjectsById(sessionId, pendingUserIds, pcp);
+        PageControl pcp = RequestUtils.getPageControl(request, "psp", "pnp", "sop", "scp");
+        PageList<AuthzSubjectValue> pendingUsers = authzBoss.getSubjectsById(sessionId, pendingUserIds, pcp);
 
         // available users are all users in the system that are
         // _not_ associated with the definition and are not
         // pending
-        PageControl pca =
-            RequestUtils.getPageControl(request, "psa", "pna", "soa", "sca");
-        
-        ArrayList<Integer> excludes =
-            new ArrayList<Integer>(pendingUserIds.length + userIds.length);
+        PageControl pca = RequestUtils.getPageControl(request, "psa", "pna", "soa", "sca");
+
+        ArrayList<Integer> excludes = new ArrayList<Integer>(pendingUserIds.length + userIds.length);
         excludes.addAll(Arrays.asList(pendingUserIds));
         excludes.addAll(Arrays.asList(userIds));
-        
-        PageList<AuthzSubjectValue> availableUsers =
-            authzBoss.getAllSubjects(sessionId, excludes, pca);
+
+        PageList<AuthzSubjectValue> availableUsers = authzBoss.getAllSubjects(sessionId, excludes, pca);
 
         request.setAttribute(Constants.PENDING_USERS_ATTR, pendingUsers);
         request.setAttribute(Constants.AVAIL_USERS_ATTR, availableUsers);
 
         return null;
     }
-    
-}
 
+}

@@ -46,46 +46,35 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * View an alert definition -- notified roles.
- *
+ * 
  */
-public class ViewDefinitionNotificationsUsersAction 
-    extends ViewDefinitionNotificationsAction
-{
+public class ViewDefinitionNotificationsUsersAction
+    extends ViewDefinitionNotificationsAction {
     private static final String[] SORT_ATTRS = { "name", "lastName", "firstName" };
 
     private final Log log = LogFactory.getLog(ViewDefinitionNotificationsUsersAction.class.getName());
-    
-    
+
     @Autowired
     public ViewDefinitionNotificationsUsersAction(EventsBoss eventsBoss, AuthzBoss authzBoss) {
         super(eventsBoss, authzBoss);
     }
 
-    public int getNotificationType() { return EmailActionConfig.TYPE_USERS; }
+    public int getNotificationType() {
+        return EmailActionConfig.TYPE_USERS;
+    }
 
-    protected PageList getPageList(int sessionID, 
-                                   EmailActionConfig ea, PageControl pc)
-        throws FinderException,
-               SessionTimeoutException,
-               SessionNotFoundException,
-               PermissionException,
-               RemoteException
-    {
-        log.debug( "userIds: " + ea.getUsers() );
+    protected PageList getPageList(int sessionID, EmailActionConfig ea, PageControl pc) throws FinderException,
+        SessionTimeoutException, SessionNotFoundException, PermissionException, RemoteException {
+        log.debug("userIds: " + ea.getUsers());
         Integer[] userIds = new Integer[ea.getUsers().size()];
-        userIds = (Integer[])ea.getUsers().toArray(userIds);
-        PageList<AuthzSubjectValue> notifyList = authzBoss.getSubjectsById
-            ( new Integer(sessionID), userIds, PageControl.PAGE_ALL );
+        userIds = (Integer[]) ea.getUsers().toArray(userIds);
+        PageList<AuthzSubjectValue> notifyList = authzBoss.getSubjectsById(new Integer(sessionID), userIds,
+            PageControl.PAGE_ALL);
 
-        int sortOrder = pc.isAscending() ?
-            JavaBeanPropertyComparator.ASCENDING :
-            JavaBeanPropertyComparator.DESCENDING;
-        JavaBeanPropertyComparator c =
-            new JavaBeanPropertyComparator(SORT_ATTRS[pc.getSortattribute()],
-                                           sortOrder);
+        int sortOrder = pc.isAscending() ? JavaBeanPropertyComparator.ASCENDING : JavaBeanPropertyComparator.DESCENDING;
+        JavaBeanPropertyComparator c = new JavaBeanPropertyComparator(SORT_ATTRS[pc.getSortattribute()], sortOrder);
         Collections.sort(notifyList, c);
 
         return notifyList;
     }
 }
-

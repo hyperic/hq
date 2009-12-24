@@ -45,93 +45,85 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * A portlet for problem metrics
  */
-public class ProblemMetricsDisplayAction extends TilesAction {
-   
+public class ProblemMetricsDisplayAction
+    extends TilesAction {
+
     private static final String RESOURCE_NAMES = "ProblemMetricsDisplayAction_resourceNames";
-   
-   private AppdefBoss appdefBoss;
-   private MeasurementBoss measurementBoss;
-   
-   
-   @Autowired
+
+    private AppdefBoss appdefBoss;
+    private MeasurementBoss measurementBoss;
+
+    @Autowired
     public ProblemMetricsDisplayAction(AppdefBoss appdefBoss, MeasurementBoss measurementBoss) {
         super();
         this.appdefBoss = appdefBoss;
         this.measurementBoss = measurementBoss;
     }
 
-
-
     /**
      * Fetch the list of problem metrics for a resource
      */
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response) 
-    throws Exception {
-     
-       
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
+
         WebUser user = RequestUtils.getWebUser(request);
         int sessionId = user.getSessionId().intValue();
         AppdefEntityID aeid = RequestUtils.getEntityId(request);
-        
+
         // Now fetch the display range
         Map<String, Object> range = user.getMetricRangePreference();
-        long begin = ((Long)range.get(MonitorUtils.BEGIN)).longValue();
-        long end = ((Long)range.get(MonitorUtils.END)).longValue();
+        long begin = ((Long) range.get(MonitorUtils.BEGIN)).longValue();
+        long end = ((Long) range.get(MonitorUtils.END)).longValue();
         ProblemMetricsDisplayForm probForm = (ProblemMetricsDisplayForm) form;
         String[] resStrs;
         AppdefEntityID[] hosts = null;
         Map<String, String> resourceNames = new HashMap<String, String>();
-        
+
         request.getSession().removeAttribute(RESOURCE_NAMES);
-        
+
         if ((resStrs = probForm.getHost()).length > 0) {
             hosts = new AppdefEntityID[resStrs.length];
-        
+
             for (int i = 0; i < resStrs.length; i++) {
                 hosts[i] = new AppdefEntityID(resStrs[i]);
             }
-            
-            
+
             PageList<AppdefResourceValue> resources = appdefBoss.findByIds(sessionId, hosts, null);
-            
+
             for (Iterator<AppdefResourceValue> i = resources.iterator(); i.hasNext();) {
                 AppdefResourceValue resource = i.next();
-                
+
                 resourceNames.put(resource.getEntityId().getAppdefKey(), resource.getName());
             }
-            
+
             if (!resourceNames.isEmpty()) {
                 request.getSession().setAttribute(RESOURCE_NAMES, resourceNames);
             }
         }
 
         AppdefEntityTypeID childTypeID = null;
-        
+
         if (probForm.getCtype() != null && probForm.getCtype().length() > 0) {
             // Autogroup
             childTypeID = new AppdefEntityTypeID(probForm.getCtype());
         }
 
         List<ProblemMetricSummary> problems;
-        
+
         if ((resStrs = probForm.getEids()).length > 0) {
             AppdefEntityID[] entities = new AppdefEntityID[resStrs.length];
 
             for (int i = 0; i < resStrs.length; i++) {
                 entities[i] = new AppdefEntityID(resStrs[i]);
             }
-            
+
             // Autogroups go by specific entities
             AppdefEntityTypeID[] childTypes = null;
 
             if (childTypeID != null) {
                 childTypes = new AppdefEntityTypeID[] { childTypeID };
             }
-            
+
             problems = measurementBoss.findAllMetrics(sessionId, aeid, hosts, childTypes, entities, begin, end);
             // Set the resources for the view
             request.getSession().setAttribute(aeid.getAppdefKey() + ".entities", entities);
@@ -149,10 +141,10 @@ public class ProblemMetricsDisplayAction extends TilesAction {
 
             if ((resStrs = probForm.getChild()).length > 0) {
                 children = new AppdefEntityTypeID[resStrs.length];
-            
+
                 for (int i = 0; i < resStrs.length; i++) {
                     children[i] = new AppdefEntityTypeID(resStrs[i]);
-                }                
+                }
             }
 
             problems = measurementBoss.findAllMetrics(sessionId, aeid, hosts, children, begin, end);

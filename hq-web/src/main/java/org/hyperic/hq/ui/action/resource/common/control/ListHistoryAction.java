@@ -51,79 +51,68 @@ import org.hyperic.util.pager.PageList;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * A tiles Controller that retrieves a history of control actions for
- * a server.
+ * A tiles Controller that retrieves a history of control actions for a server.
  */
-public class ListHistoryAction extends TilesAction {
-    
-    private final  Log log = LogFactory.getLog(ListHistoryAction.class.getName());
+public class ListHistoryAction
+    extends TilesAction {
+
+    private final Log log = LogFactory.getLog(ListHistoryAction.class.getName());
     private ControlBoss controlBoss;
-    
+
     @Autowired
     public ListHistoryAction(ControlBoss controlBoss) {
         super();
         this.controlBoss = controlBoss;
     }
 
-
     /**
-     * Retrieve a <code>PageList</code> of all
-     * <code>EventLogValue</code> objects and save it into the
-     * request attribute <code>Constants.CONTROL_HST_DETAIL_ATTR</code>.
-     */ 
-     public ActionForward execute(ComponentContext context,
-                                  ActionMapping mapping,
-                                  ActionForm form,
-                                  HttpServletRequest request,
-                                  HttpServletResponse response)
-    throws Exception {
-  
+     * Retrieve a <code>PageList</code> of all <code>EventLogValue</code>
+     * objects and save it into the request attribute
+     * <code>Constants.CONTROL_HST_DETAIL_ATTR</code>.
+     */
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
+
         try {
             log.trace("Getting resource control history list.");
 
             int sessionId = RequestUtils.getSessionId(request).intValue();
             PageControl pc = RequestUtils.getPageControl(request);
-            
+
             // Default control history to descending
-            if (!RequestUtils.parameterExists(request,
-                                              Constants.SORTORDER_PARAM))
+            if (!RequestUtils.parameterExists(request, Constants.SORTORDER_PARAM))
                 pc.setSortorder(PageControl.SORT_DESC);
-            
+
             AppdefEntityID appdefId = RequestUtils.getEntityId(request);
-  
-            PageList<ControlHistory> histList = controlBoss.findJobHistory(sessionId, appdefId, pc);           
-            
-            request.setAttribute( Constants.CONTROL_HST_DETAIL_ATTR, histList );
-            
+
+            PageList<ControlHistory> histList = controlBoss.findJobHistory(sessionId, appdefId, pc);
+
+            request.setAttribute(Constants.CONTROL_HST_DETAIL_ATTR, histList);
+
             // have set page size by hand b/c of redirects
-            BaseValidatorForm sForm = (BaseValidatorForm)form;
+            BaseValidatorForm sForm = (BaseValidatorForm) form;
             try {
                 sForm.setPs(Constants.PAGESIZE_DEFAULT);
-                sForm.setPs(RequestUtils.getIntParameter(request, 
-                    Constants.PAGESIZE_PARAM));
-            } 
-            catch (NullPointerException npe) {}
-            catch (ParameterNotFoundException pnfe) {}
-            catch (NumberFormatException nfe) {}
-            
+                sForm.setPs(RequestUtils.getIntParameter(request, Constants.PAGESIZE_PARAM));
+            } catch (NullPointerException npe) {
+            } catch (ParameterNotFoundException pnfe) {
+            } catch (NumberFormatException nfe) {
+            }
+
             log.trace("Successfuly retrieved resource control history list.");
 
             return null;
-        }
-        catch (PluginException cpe) {
+        } catch (PluginException cpe) {
             log.trace("control not enabled", cpe);
-            RequestUtils.setError(request,
-                "resource.common.error.ControlNotEnabled");
-            return null;                 
-        }
-        catch (PermissionException p) {
+            RequestUtils.setError(request, "resource.common.error.ControlNotEnabled");
+            return null;
+        } catch (PermissionException p) {
             // let struts handle the exception
             throw p;
-        }
-        catch (ApplicationException t) {
-            throw new ServletException(ListHistoryAction.class.getName()
-                + "Can't get resource control history list.", t);
+        } catch (ApplicationException t) {
+            throw new ServletException(ListHistoryAction.class.getName() + "Can't get resource control history list.",
+                t);
         }
     }
-    
+
 }

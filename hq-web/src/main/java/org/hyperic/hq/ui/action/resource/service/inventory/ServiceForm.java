@@ -34,41 +34,43 @@ import org.hyperic.hq.ui.action.resource.ResourceForm;
 import org.apache.struts.action.ActionMapping;
 
 /**
- * A subclass of <code>ResourceForm</code> that adds convenience
- * methods for dealing with Service.
+ * A subclass of <code>ResourceForm</code> that adds convenience methods for
+ * dealing with Service.
  */
-public class ServiceForm extends ResourceForm {
+public class ServiceForm
+    extends ResourceForm {
 
     /**
-     * @see org.apache.struts.action.ActionForm#reset(org.apache.struts.action.ActionMapping, javax.servlet.ServletRequest)
+     * @see org.apache.struts.action.ActionForm#reset(org.apache.struts.action.ActionMapping,
+     *      javax.servlet.ServletRequest)
      */
     public void reset(ActionMapping mapping, ServletRequest request) {
         super.reset(mapping, request);
     }
 
-    /** set the service type here.  Can't access the
-     * service type in the super class.
+    /**
+     * set the service type here. Can't access the service type in the super
+     * class.
      * 
      * @param sValue
-     */    
-    public void loadResourceValue(AppdefResourceValue rValue)
-    {
+     */
+    public void loadResourceValue(AppdefResourceValue rValue) {
         super.loadResourceValue(rValue);
 
-        ServiceValue sValue = (ServiceValue)rValue;
+        ServiceValue sValue = (ServiceValue) rValue;
 
         setResourceType(sValue.getServiceType().getId());
-        
+
     }
 
-    /** updates the service value
+    /**
+     * updates the service value
      * 
      * @param sValue
-     */    
-    public void updateServiceValue(ServiceValue sValue)
-    {
+     */
+    public void updateServiceValue(ServiceValue sValue) {
         super.updateResourceValue(sValue);
-        
+
     }
 
 }

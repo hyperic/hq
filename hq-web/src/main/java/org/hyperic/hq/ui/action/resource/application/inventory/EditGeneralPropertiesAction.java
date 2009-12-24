@@ -45,29 +45,23 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * This class handles saving the general properties editing performed
- * on screen 2.1.6.1
+ * This class handles saving the general properties editing performed on screen
+ * 2.1.6.1
  */
-public class EditGeneralPropertiesAction extends BaseAction {
-    private final Log log = LogFactory
-        .getLog(EditGeneralPropertiesAction.class.getName());
-    
+public class EditGeneralPropertiesAction
+    extends BaseAction {
+    private final Log log = LogFactory.getLog(EditGeneralPropertiesAction.class.getName());
+
     private AppdefBoss appdefBoss;
-    
-    
+
     @Autowired
     public EditGeneralPropertiesAction(AppdefBoss appdefBoss) {
         super();
         this.appdefBoss = appdefBoss;
     }
 
-
-
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-    throws Exception{
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
         ResourceForm editForm = (ResourceForm) form;
         Integer appId = editForm.getRid();
@@ -78,45 +72,33 @@ public class EditGeneralPropertiesAction extends BaseAction {
         forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, entityType);
 
         try {
-            ActionForward forward = checkSubmit(request, mapping, form,
-                forwardParams, BaseAction.YES_RETURN_PATH);
+            ActionForward forward = checkSubmit(request, mapping, form, forwardParams, BaseAction.YES_RETURN_PATH);
             if (forward != null) {
                 return forward;
             }
 
             Integer sessionId = RequestUtils.getSessionId(request);
-           
 
             // now set up the application
-            ApplicationValue app =
-                appdefBoss.findApplicationById(sessionId.intValue(), appId);
+            ApplicationValue app = appdefBoss.findApplicationById(sessionId.intValue(), appId);
             log.trace("in preparation to update it, retrieved app " + app);
             if (app == null) {
-                RequestUtils
-                    .setError(request,
-                              "resource.application.error.ApplicationNotFound");
+                RequestUtils.setError(request, "resource.application.error.ApplicationNotFound");
                 return returnFailure(request, mapping, forwardParams);
             }
 
             editForm.updateResourceValue(app);
 
-            log.trace("editing general properties of application [" +
-                      app.getName() + "]" + " with attributes " +
+            log.trace("editing general properties of application [" + app.getName() + "]" + " with attributes " +
                       editForm);
-           
-                appdefBoss.updateApplication(sessionId.intValue(), app);
 
-            RequestUtils
-                .setConfirmation(request,
-                                 "resource.application.inventory.confirm.EditGeneralProperties",
-                                 app.getName());
-            return returnSuccess(request, mapping, forwardParams,
-                BaseAction.YES_RETURN_PATH);
-        }        
-        catch (AppdefDuplicateNameException e1) {
-            RequestUtils
-                .setError(request,
-                          Constants.ERR_DUP_RESOURCE_FOUND);
+            appdefBoss.updateApplication(sessionId.intValue(), app);
+
+            RequestUtils.setConfirmation(request, "resource.application.inventory.confirm.EditGeneralProperties", app
+                .getName());
+            return returnSuccess(request, mapping, forwardParams, BaseAction.YES_RETURN_PATH);
+        } catch (AppdefDuplicateNameException e1) {
+            RequestUtils.setError(request, Constants.ERR_DUP_RESOURCE_FOUND);
             return returnFailure(request, mapping);
         }
     }

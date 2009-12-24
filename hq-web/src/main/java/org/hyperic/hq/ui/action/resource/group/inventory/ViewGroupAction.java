@@ -49,52 +49,38 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class ViewGroupAction extends TilesAction {
+public class ViewGroupAction
+    extends TilesAction {
 
-   private AppdefBoss appdefBoss;
-   
-   
-   @Autowired
+    private AppdefBoss appdefBoss;
+
+    @Autowired
     public ViewGroupAction(AppdefBoss appdefBoss) {
         super();
         this.appdefBoss = appdefBoss;
     }
 
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception
-    {
-      
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
+
         int sessionId = RequestUtils.getSessionIdInt(request);
-        
-        PageControl pc = RequestUtils.getPageControl(request,"ps",
-                                                     "pn","so","sc");
-        AppdefGroupValue group =
-            (AppdefGroupValue) RequestUtils.getResource(request);
+
+        PageControl pc = RequestUtils.getPageControl(request, "ps", "pn", "so", "sc");
+        AppdefGroupValue group = (AppdefGroupValue) RequestUtils.getResource(request);
 
         if (group == null) {
-            RequestUtils.setError(request,
-                "resource.group.inventory.error.GroupNotFound");
+            RequestUtils.setError(request, "resource.group.inventory.error.GroupNotFound");
             return null;
         }
 
-        List<AppdefResourceValue> appdefValues =
-            BizappUtils.buildGroupResources(appdefBoss, sessionId, group, pc);
+        List<AppdefResourceValue> appdefValues = BizappUtils.buildGroupResources(appdefBoss, sessionId, group, pc);
 
-        if (group.getGroupType() ==
-                AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP) {
-            Map<String,Integer> typeMap =
-                AppdefResourceValue.getResourceTypeCountMap(appdefValues);
+        if (group.getGroupType() == AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP) {
+            Map<String, Integer> typeMap = AppdefResourceValue.getResourceTypeCountMap(appdefValues);
             request.setAttribute(Constants.RESOURCE_TYPE_MAP_ATTR, typeMap);
-        }
-        else if (group.getGroupType() ==
-                AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS) {
-            request.setAttribute(Constants.RESOURCE_TYPE_MAP_ATTR,
-                                 appdefBoss.getResourceTypeCountMap(sessionId,
-                                                              group.getId()));
+        } else if (group.getGroupType() == AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS) {
+            request.setAttribute(Constants.RESOURCE_TYPE_MAP_ATTR, appdefBoss.getResourceTypeCountMap(sessionId, group
+                .getId()));
         }
 
         request.setAttribute(Constants.APPDEF_ENTRIES_ATTR, appdefValues);
@@ -106,35 +92,30 @@ public class ViewGroupAction extends TilesAction {
         int ps = RequestUtils.getPageSize(request, "ps");
         rmGroupForm.setPs(new Integer(ps));
 
-        request.setAttribute(Constants.GROUP_REMOVE_MEMBERS_FORM_ATTR,
-                             rmGroupForm);
-        
+        request.setAttribute(Constants.GROUP_REMOVE_MEMBERS_FORM_ATTR, rmGroupForm);
+
         // set the group type label
         List groupLabels = BizappUtils.buildGroupTypes(request);
 
         String groupType = getGroupTypeLabel(group, groupLabels, res, locale);
         request.setAttribute(Constants.GROUP_TYPE_LABEL, groupType);
-            
+
         return null;
     }
-    
+
     /**
      * @return a group type label from the list of group labels
      */
-    private String getGroupTypeLabel(AppdefGroupValue group, 
-                                           List groupLabels,
-                                           MessageResources res,
-                                           Locale locale)
-    {
+    private String getGroupTypeLabel(AppdefGroupValue group, List groupLabels, MessageResources res, Locale locale) {
         Iterator gIterator = groupLabels.iterator();
-        
+
         while (gIterator.hasNext()) {
-            Map item = (Map)gIterator.next();
-            Integer groupType = (Integer)item.get("value");
+            Map item = (Map) gIterator.next();
+            Integer groupType = (Integer) item.get("value");
             if (groupType.intValue() == group.getGroupType())
-                return (String)item.get("label");
+                return (String) item.get("label");
         }
-        
+
         return "";
     }
 }

@@ -50,45 +50,38 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * An Action that removes an alert
  */
-public class RemoveAction extends BaseAction {
+public class RemoveAction
+    extends BaseAction {
     private EventsBoss eventsBoss;
     private final Log log = LogFactory.getLog(RemoveAction.class.getName());
-    
-    
+
     @Autowired
     public RemoveAction(EventsBoss eventsBoss) {
         super();
         this.eventsBoss = eventsBoss;
     }
 
-    /** 
-     * removes alerts 
+    /**
+     * removes alerts
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-            
-        
-                
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
+
         RemoveForm nwForm = (RemoveForm) form;
         log.debug("entering removeAlertsAction");
         Integer type = nwForm.getType();
         Map<String, Object> params = new HashMap<String, Object>();
         params.put(Constants.ENTITY_ID_PARAM, nwForm.getEid());
-        
+
         ActionForward forward = checkSubmit(request, mapping, form, params);
         // if the remove button was clicked, we are coming from
         // the alerts list page and just want to continue
         // processing ...
-        if (forward != null && !forward.getName().equals(Constants.REMOVE_URL))
-        {
+        if (forward != null && !forward.getName().equals(Constants.REMOVE_URL)) {
             log.trace("returning " + forward);
             // if there is no resource type, there is probably no
             // resource -- go to dashboard on cancel
-            if ( forward.getName().equals(Constants.CANCEL_URL) &&
-                 type.intValue() == 0 ) {
+            if (forward.getName().equals(Constants.CANCEL_URL) && type.intValue() == 0) {
                 return returnNoResource(request, mapping);
             }
             return forward;
@@ -97,24 +90,20 @@ public class RemoveAction extends BaseAction {
         Integer[] alertIds = nwForm.getAlerts();
         String[] escalatables = nwForm.getEalerts();
 
-        if ( log.isDebugEnabled() ) {
+        if (log.isDebugEnabled()) {
             if (alertIds != null) {
-                log.debug("acting on alerts: " + Arrays.asList(alertIds) );
+                log.debug("acting on alerts: " + Arrays.asList(alertIds));
             }
             if (escalatables != null) {
-                log.debug("acting on ealerts: " + Arrays.asList(escalatables) );
+                log.debug("acting on ealerts: " + Arrays.asList(escalatables));
             }
         }
 
-        if ((alertIds == null || alertIds.length == 0) &&
-            (escalatables == null || escalatables.length == 0)){
+        if ((alertIds == null || alertIds.length == 0) && (escalatables == null || escalatables.length == 0)) {
             return returnSuccess(request, mapping, params);
         }
 
-        Integer sessionId =  RequestUtils.getSessionId(request);
-
-       
-      
+        Integer sessionId = RequestUtils.getSessionId(request);
 
         if (nwForm.isDeleteClicked()) {
             log.debug("!!!!!!!!!!!!!!!! removing alerts!!!!!!!!!!!!");
@@ -124,58 +113,46 @@ public class RemoveAction extends BaseAction {
                 log.debug("Acknowledge alerts");
 
                 if (alertIds != null) {
-                    for (int i=0; i<alertIds.length; i++) {
-                        // XXX:  This only works for classic alert types ATM
-                        eventsBoss.acknowledgeAlert(sessionId.intValue(),
-                                    ClassicEscalationAlertType.CLASSIC,
-                                    alertIds[i],
-                                    nwForm.getPauseTime(),
-                                    nwForm.getAckNote());
+                    for (int i = 0; i < alertIds.length; i++) {
+                        // XXX: This only works for classic alert types ATM
+                        eventsBoss.acknowledgeAlert(sessionId.intValue(), ClassicEscalationAlertType.CLASSIC,
+                            alertIds[i], nwForm.getPauseTime(), nwForm.getAckNote());
                     }
                 }
 
                 if (escalatables != null) {
                     log.debug("Escalatable alerts");
                     for (int i = 0; i < escalatables.length; i++) {
-                        StringTokenizer st =
-                            new StringTokenizer(escalatables[i], ":");
-                        
+                        StringTokenizer st = new StringTokenizer(escalatables[i], ":");
+
                         int code = Integer.parseInt(st.nextToken());
                         Integer alert = Integer.valueOf(st.nextToken());
-                        
-                        eventsBoss.acknowledgeAlert(sessionId.intValue(),
-                                      EscalationAlertType.findByCode(code),
-                                      alert,
-                                      nwForm.getPauseTime(),
-                                      nwForm.getAckNote());
+
+                        eventsBoss.acknowledgeAlert(sessionId.intValue(), EscalationAlertType.findByCode(code), alert,
+                            nwForm.getPauseTime(), nwForm.getAckNote());
                     }
                 }
-            } else if ("FIXED".equals(nwForm.getButtonAction())) { 
+            } else if ("FIXED".equals(nwForm.getButtonAction())) {
                 log.debug("Fixed alerts");
 
                 if (alertIds != null) {
                     for (int i = 0; i < alertIds.length; i++) {
                         // This only works for classic alert types
-                        eventsBoss.fixAlert(sessionId.intValue(), 
-                                      ClassicEscalationAlertType.CLASSIC,
-                                      alertIds[i], nwForm.getFixedNote(),
-                                      nwForm.isFixAll());
+                        eventsBoss.fixAlert(sessionId.intValue(), ClassicEscalationAlertType.CLASSIC, alertIds[i],
+                            nwForm.getFixedNote(), nwForm.isFixAll());
                     }
                 }
 
                 if (escalatables != null) {
                     log.debug("Escalatable alerts");
                     for (int i = 0; i < escalatables.length; i++) {
-                        StringTokenizer st =
-                            new StringTokenizer(escalatables[i], ":");
-                        
+                        StringTokenizer st = new StringTokenizer(escalatables[i], ":");
+
                         int code = Integer.parseInt(st.nextToken());
                         Integer alert = Integer.valueOf(st.nextToken());
-                        
-                        eventsBoss.fixAlert(sessionId.intValue(),
-                                      EscalationAlertType.findByCode(code),
-                                      alert,  nwForm.getFixedNote(),
-                                      nwForm.isFixAll());
+
+                        eventsBoss.fixAlert(sessionId.intValue(), EscalationAlertType.findByCode(code), alert, nwForm
+                            .getFixedNote(), nwForm.isFixAll());
                     }
                 }
             }
@@ -193,8 +170,7 @@ public class RemoveAction extends BaseAction {
 
     }
 
-    protected ActionForward returnNoResource(HttpServletRequest request, ActionMapping mapping)
-        throws Exception {
+    protected ActionForward returnNoResource(HttpServletRequest request, ActionMapping mapping) throws Exception {
         return constructForward(request, mapping, "noresource");
     }
 }

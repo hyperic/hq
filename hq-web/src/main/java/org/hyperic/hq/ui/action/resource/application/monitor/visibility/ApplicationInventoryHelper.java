@@ -50,101 +50,80 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
 
 /**
- * A class that provides application-specific implementations of utility
- * methods for common monitoring tasks.
+ * A class that provides application-specific implementations of utility methods
+ * for common monitoring tasks.
  */
-public class ApplicationInventoryHelper extends InventoryHelper {
+public class ApplicationInventoryHelper
+    extends InventoryHelper {
 
     private AppdefBoss appdefBoss;
-    
+
     public ApplicationInventoryHelper(AppdefEntityID entityId, AppdefBoss appdefBoss) {
         super(entityId);
         this.appdefBoss = appdefBoss;
     }
 
-
     /**
-     * Get the set of service types representing an application's
-     * services.
-     *
+     * Get the set of service types representing an application's services.
+     * 
      * @param request the http request
      * @param ctx the servlet context
      * @param resource the application
      */
-    public List<ServiceTypeValue> getChildResourceTypes(HttpServletRequest request,
-                                      ServletContext ctx,
-                                      AppdefResourceValue resource)
-        throws PermissionException, AppdefEntityNotFoundException,
-               RemoteException, SessionNotFoundException,
-               SessionException, ServletException {
+    public List<ServiceTypeValue> getChildResourceTypes(HttpServletRequest request, ServletContext ctx,
+                                                        AppdefResourceValue resource) throws PermissionException,
+        AppdefEntityNotFoundException, RemoteException, SessionNotFoundException, SessionException, ServletException {
         AppdefEntityID entityId = resource.getEntityId();
         int sessionId = RequestUtils.getSessionId(request).intValue();
-      
 
         log.trace("finding services for resource [" + entityId + "]");
-        List<AppdefResourceValue> services = appdefBoss
-            .findServiceInventoryByApplication(sessionId,
-                                               entityId.getId(),
-                                               PageControl.PAGE_ALL);
+        List<AppdefResourceValue> services = appdefBoss.findServiceInventoryByApplication(sessionId, entityId.getId(),
+            PageControl.PAGE_ALL);
         return MonitorUtils.findServiceTypes(services, null);
     }
 
     /**
      * Get a service type from the Bizapp.
-     *
+     * 
      * @param request the http request
      * @param ctx the servlet context
      * @param id the id of the service type
      */
-    public AppdefResourceType getChildResourceType(HttpServletRequest request,
-                                                   ServletContext ctx,
-                                                   AppdefEntityTypeID id)
-        throws PermissionException, AppdefEntityNotFoundException,
-        RemoteException, SessionNotFoundException, SessionTimeoutException,
-        ServletException {
+    public AppdefResourceType getChildResourceType(HttpServletRequest request, ServletContext ctx, AppdefEntityTypeID id)
+        throws PermissionException, AppdefEntityNotFoundException, RemoteException, SessionNotFoundException,
+        SessionTimeoutException, ServletException {
         int sessionId = RequestUtils.getSessionId(request).intValue();
-       
 
         log.trace("finding service type [" + id + "]");
         return appdefBoss.findServiceTypeById(sessionId, id.getId());
     }
 
     /**
-     * Get from the Bizapp the numbers of children of the given
-     * resource. Returns a <code>Map</code> of counts keyed by
-     * child resource type.
-     *
+     * Get from the Bizapp the numbers of children of the given resource.
+     * Returns a <code>Map</code> of counts keyed by child resource type.
+     * 
      * @param request the http request
-     * @param resource the appdef resource whose children we are
-     * counting
+     * @param resource the appdef resource whose children we are counting
      */
-    public Map<String,Integer> getChildCounts(HttpServletRequest request,
-                              ServletContext ctx,
-                              AppdefResourceValue resource)
-        throws PermissionException, AppdefEntityNotFoundException,
-        RemoteException, SessionException, 
-        ServletException {
-      
-        int sessionId = RequestUtils.getSessionId(request).intValue();
-       
+    public Map<String, Integer> getChildCounts(HttpServletRequest request, ServletContext ctx,
+                                               AppdefResourceValue resource) throws PermissionException,
+        AppdefEntityNotFoundException, RemoteException, SessionException, ServletException {
 
-        log.trace("finding service counts for application [" +
-		  resource.getEntityId() + "]");
-	   List<AppdefResourceValue> services = appdefBoss.findServiceInventoryByApplication(sessionId,
-						       resource.getId(),
-						       PageControl.PAGE_ALL);
-       return AppdefResourceValue.getServiceTypeCountMap(services);        
+        int sessionId = RequestUtils.getSessionId(request).intValue();
+
+        log.trace("finding service counts for application [" + resource.getEntityId() + "]");
+        List<AppdefResourceValue> services = appdefBoss.findServiceInventoryByApplication(sessionId, resource.getId(),
+            PageControl.PAGE_ALL);
+        return AppdefResourceValue.getServiceTypeCountMap(services);
     }
 
     /**
-     * Return a boolean indicating that the default subtab should not
-     * be selected, since the <em>Entry Points</em> subtab will be the
-     * default selection.
+     * Return a boolean indicating that the default subtab should not be
+     * selected, since the <em>Entry Points</em> subtab will be the default
+     * selection.
      */
     public boolean selectDefaultSubtab() {
         return false;
     }
 
-  
-    
 }

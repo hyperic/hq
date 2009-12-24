@@ -45,75 +45,56 @@ import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-    /**
-    * Edit the GeneralProperties of a server with the attributes specified in the given
-    * <code>ServerForm</code>.
-    *
-    */ 
+/**
+ * Edit the GeneralProperties of a server with the attributes specified in the
+ * given <code>ServerForm</code>.
+ * 
+ */
 
-public class EditGeneralAction extends BaseAction {
-    
+public class EditGeneralAction
+    extends BaseAction {
+
     private final Log log = LogFactory.getLog(EditGeneralAction.class.getName());
     private AppdefBoss appdefBoss;
-    
-    
-    
+
     @Autowired
     public EditGeneralAction(AppdefBoss appdefBoss) {
         super();
         this.appdefBoss = appdefBoss;
     }
 
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
-
-
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-        
         ServerForm serverForm = (ServerForm) form;
         Integer rid = serverForm.getRid();
         Integer entityType = serverForm.getType();
         Map<String, Object> forwardParams = new HashMap<String, Object>(2);
         forwardParams.put(Constants.RESOURCE_PARAM, rid);
         forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, entityType);
-        ActionForward forward = checkSubmit(request, mapping, form,
-                                                forwardParams, YES_RETURN_PATH);
+        ActionForward forward = checkSubmit(request, mapping, form, forwardParams, YES_RETURN_PATH);
         if (forward != null) {
             return forward;
-        }         
+        }
         try {
-           
+
             Integer sessionId = RequestUtils.getSessionId(request);
-          
+
             Integer serverId = RequestUtils.getResourceId(request);
             ServerValue sValue = appdefBoss.findServerById(sessionId.intValue(), serverId);
             serverForm.updateServerValue(sValue);
-            ServerValue updatedServer =
-              appdefBoss.updateServer(sessionId.intValue(), sValue, null);
+            ServerValue updatedServer = appdefBoss.updateServer(sessionId.intValue(), sValue, null);
             // XXX: enable when we have a confirmed functioning API
-            log.trace("saving server [" + sValue.getName()
-                               + "]" + " with attributes " + serverForm);
-            RequestUtils.setConfirmation(request,
-                     "resource.server.inventory.confirm.EditGeneralProperties",
-                     updatedServer.getName());
-                                         
-            return returnSuccess(request, mapping, Constants.RESOURCE_PARAM,
-                                 serverId, YES_RETURN_PATH);
-        }
-        catch (ObjectNotFoundException oe) {
-            RequestUtils
-                .setError(request,
-                          "resource.server.inventory.error.ServerNotFound",
-                          "resourceType");
+            log.trace("saving server [" + sValue.getName() + "]" + " with attributes " + serverForm);
+            RequestUtils.setConfirmation(request, "resource.server.inventory.confirm.EditGeneralProperties",
+                updatedServer.getName());
+
+            return returnSuccess(request, mapping, Constants.RESOURCE_PARAM, serverId, YES_RETURN_PATH);
+        } catch (ObjectNotFoundException oe) {
+            RequestUtils.setError(request, "resource.server.inventory.error.ServerNotFound", "resourceType");
             return returnFailure(request, mapping);
-        }
-        catch (AppdefDuplicateNameException e1) {
-            RequestUtils
-                .setError(request,
-                          Constants.ERR_DUP_RESOURCE_FOUND);
+        } catch (AppdefDuplicateNameException e1) {
+            RequestUtils.setError(request, Constants.ERR_DUP_RESOURCE_FOUND);
             return returnFailure(request, mapping);
         }
     }

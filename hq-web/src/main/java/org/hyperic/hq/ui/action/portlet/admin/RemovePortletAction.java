@@ -44,13 +44,13 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class RemovePortletAction extends BaseAction {
-    
+public class RemovePortletAction
+    extends BaseAction {
+
     private ConfigurationProxy configurationProxy;
-    
+
     private AuthzBoss authzBoss;
-    
-    
+
     @Autowired
     public RemovePortletAction(ConfigurationProxy configurationProxy, AuthzBoss authzBoss) {
         super();
@@ -58,32 +58,24 @@ public class RemovePortletAction extends BaseAction {
         this.authzBoss = authzBoss;
     }
 
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
-
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-        
-       
         HttpSession session = request.getSession();
         WebUser user = RequestUtils.getWebUser(session);
         String portletName = (String) request.getParameter(Constants.REM_PORTLET_PARAM);
-        DashboardConfig dashConfig = DashboardUtils.findDashboard(
-        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, authzBoss);
+        DashboardConfig dashConfig = DashboardUtils.findDashboard((Integer) session
+            .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
-        
-        DashboardUtils.removePortlet( dashPrefs, portletName);
-        
+
+        DashboardUtils.removePortlet(dashPrefs, portletName);
+
         configurationProxy.setDashboardPreferences(session, user, dashPrefs);
-        
-        LogFactory.getLog("user.preferences").trace("Invoking setUserPrefs"+
-            " in RemovePortletAction " +
-            " for " + user.getId() + " at "+System.currentTimeMillis() +
-            " user.prefs = " + dashPrefs.getKeys().toString());
-        
+
+        LogFactory.getLog("user.preferences").trace(
+            "Invoking setUserPrefs" + " in RemovePortletAction " + " for " + user.getId() + " at " +
+                System.currentTimeMillis() + " user.prefs = " + dashPrefs.getKeys().toString());
+
         session.removeAttribute(Constants.USERS_SES_PORTAL);
 
         return mapping.findForward(Constants.AJAX_URL);

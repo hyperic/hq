@@ -55,129 +55,103 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * A <code>BaseDispatchAction</code> that sets up autogroup
- * monitor portals.
+ * A <code>BaseDispatchAction</code> that sets up autogroup monitor portals.
  */
 public class VisibilityPortalAction
     extends ResourceVisibilityPortalAction {
 
-    private static final String TITLE_CURRENT_HEALTH =
-        "resource.autogroup.monitor.visibility.CurrentHealthTitle";
+    private static final String TITLE_CURRENT_HEALTH = "resource.autogroup.monitor.visibility.CurrentHealthTitle";
 
-    private static final String PORTLET_CURRENT_HEALTH =
-        ".resource.autogroup.monitor.visibility.CurrentHealth";
+    private static final String PORTLET_CURRENT_HEALTH = ".resource.autogroup.monitor.visibility.CurrentHealth";
 
-    private static final String TITLE_AUTOGROUP_METRICS =
-        "resource.autogroup.monitor.visibility.AutoGroupMetricsTitle";
+    private static final String TITLE_AUTOGROUP_METRICS = "resource.autogroup.monitor.visibility.AutoGroupMetricsTitle";
 
-    private static final String PORTLET_AUTOGROUP_METRICS =
-        ".resource.autogroup.monitor.visibility.AutoGroupMetrics";
+    private static final String PORTLET_AUTOGROUP_METRICS = ".resource.autogroup.monitor.visibility.AutoGroupMetrics";
 
-    public static final String PORTLET_PERFORMANCE =
-        ".resource.autogroup.monitor.visibility.Performance";
+    public static final String PORTLET_PERFORMANCE = ".resource.autogroup.monitor.visibility.Performance";
 
-    public static final String TITLE_PERFORMANCE =
-        "resource.autogroup.monitor.visibility.PerformanceTitle";
+    public static final String TITLE_PERFORMANCE = "resource.autogroup.monitor.visibility.PerformanceTitle";
 
-    private final Log log =
-        LogFactory.getLog(VisibilityPortalAction.class.getName());
-    
+    private final Log log = LogFactory.getLog(VisibilityPortalAction.class.getName());
+
     private MeasurementBoss measurementBoss;
-    
-    
+
     @Autowired
-    public VisibilityPortalAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss, MeasurementBoss measurementBoss) {
+    public VisibilityPortalAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss,
+                                  MeasurementBoss measurementBoss) {
         super(appdefBoss, authzBoss, controlBoss);
         this.measurementBoss = measurementBoss;
     }
 
-    public ActionForward currentHealth(ActionMapping mapping,
-                                       ActionForm form,
-                                       HttpServletRequest request,
-                                       HttpServletResponse response)
-        throws Exception {
-            
+    public ActionForward currentHealth(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                       HttpServletResponse response) throws Exception {
+
         // XXX: what if we have multiple parents?
         setResource(request);
         findServersHealths(request);
 
-        super.currentHealth(mapping,form,request,response);
+        super.currentHealth(mapping, form, request, response);
 
-        Portal portal = Portal.createPortal(TITLE_CURRENT_HEALTH,
-                                            PORTLET_CURRENT_HEALTH);
+        Portal portal = Portal.createPortal(TITLE_CURRENT_HEALTH, PORTLET_CURRENT_HEALTH);
         portal.setWorkflowParams(getWorkflowParams(request));
         request.setAttribute(Constants.PORTAL_KEY, portal);
         return null;
     }
 
-    public ActionForward resourceMetrics(ActionMapping mapping,
-                                          ActionForm form,
-                                          HttpServletRequest request,
-                                          HttpServletResponse response)
-        throws Exception {
+    public ActionForward resourceMetrics(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                         HttpServletResponse response) throws Exception {
 
         // XXX: what if we have multiple parents?
         setResource(request);
         findServersHealths(request);
-        
-        super.resourceMetrics(mapping,form,request,response);
-        
-        Portal portal = Portal.createPortal(TITLE_AUTOGROUP_METRICS,
-                                            PORTLET_AUTOGROUP_METRICS);
+
+        super.resourceMetrics(mapping, form, request, response);
+
+        Portal portal = Portal.createPortal(TITLE_AUTOGROUP_METRICS, PORTLET_AUTOGROUP_METRICS);
         portal.setWorkflowParams(getWorkflowParams(request));
         request.setAttribute(Constants.PORTAL_KEY, portal);
         return null;
     }
 
-    public ActionForward performance(ActionMapping mapping,
-                                     ActionForm form,
-                                     HttpServletRequest request,
-                                     HttpServletResponse response)
-        throws Exception {
+    public ActionForward performance(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                     HttpServletResponse response) throws Exception {
         setResource(request);
-    
-        super.performance(mapping,form,request,response);
-    
-        Portal portal =
-            Portal.createPortal(TITLE_PERFORMANCE,
-                                PORTLET_PERFORMANCE);
+
+        super.performance(mapping, form, request, response);
+
+        Portal portal = Portal.createPortal(TITLE_PERFORMANCE, PORTLET_PERFORMANCE);
         request.setAttribute(Constants.PORTAL_KEY, portal);
         return null;
     }
 
-    private void findServersHealths(HttpServletRequest request)
-        throws Exception {
-        
+    private void findServersHealths(HttpServletRequest request) throws Exception {
+
         AppdefEntityID entityId = null;
         Exception thrown = null;
-        
+
         try {
             int sessionId = RequestUtils.getSessionId(request).intValue();
             entityId = RequestUtils.getEntityId(request);
-    
+
             // get resource health
-            List<ResourceDisplaySummary> healths  = measurementBoss.findResourcesCurrentHealth(
-                sessionId, new AppdefEntityID[] { entityId });
+            List<ResourceDisplaySummary> healths = measurementBoss.findResourcesCurrentHealth(sessionId,
+                new AppdefEntityID[] { entityId });
 
             request.setAttribute(Constants.HOST_HEALTH_SUMMARIES_ATTR, healths);
-        } 
-        catch (AppdefEntityNotFoundException e) {
+        } catch (AppdefEntityNotFoundException e) {
             thrown = e;
             RequestUtils.setError(request, Constants.ERR_RESOURCE_NOT_FOUND);
-        }
-        catch (PermissionException e) {
+        } catch (PermissionException e) {
             thrown = e;
             request.setAttribute(Constants.ERR_SERVER_HEALTH_ATTR,
                 "resource.service.monitor.visibility.error.ServerPermission");
-        }
-        finally {
+        } finally {
             if (thrown != null && log.isDebugEnabled())
                 log.debug("resource [" + entityId + "] access error", thrown);
         }
     }
 
-    protected AppdefEntityID getAppdefEntityID(HttpServletRequest request)
-        throws ParameterNotFoundException {
+    protected AppdefEntityID getAppdefEntityID(HttpServletRequest request) throws ParameterNotFoundException {
 
         // when we've fully migrated CAM to eid, this method can go away
 
@@ -185,8 +159,7 @@ public class VisibilityPortalAction
             AppdefEntityID[] eids = RequestUtils.getEntityIds(request);
 
             // take this opportunity to cache the entity ids in the request
-            request.setAttribute(Constants.ENTITY_IDS_ATTR,
-                                 BizappUtils.stringifyEntityIds(eids));
+            request.setAttribute(Constants.ENTITY_IDS_ATTR, BizappUtils.stringifyEntityIds(eids));
 
             return eids[0];
         } catch (ParameterNotFoundException e) {
@@ -194,22 +167,19 @@ public class VisibilityPortalAction
             return null;
         }
     }
-    
-    protected Map<String,Object> getWorkflowParams(HttpServletRequest request)
-        throws Exception {
-        HashMap<String,Object> params = new HashMap<String, Object>();
+
+    protected Map<String, Object> getWorkflowParams(HttpServletRequest request) throws Exception {
+        HashMap<String, Object> params = new HashMap<String, Object>();
 
         try {
             // will not be found if auto-group of platforms -- still okay
             AppdefEntityID[] eids = RequestUtils.getEntityIds(request);
-            params.put(Constants.ENTITY_ID_PARAM,
-                       BizappUtils.stringifyEntityIds(eids));
+            params.put(Constants.ENTITY_ID_PARAM, BizappUtils.stringifyEntityIds(eids));
 
             // will not be found if not auto-group -- still okay
             AppdefEntityTypeID ctype = RequestUtils.getChildResourceTypeId(request);
             params.put(Constants.CHILD_RESOURCE_TYPE_ID_PARAM, ctype);
-        }
-        catch (ParameterNotFoundException e) {
+        } catch (ParameterNotFoundException e) {
             log.trace("param not found: " + e.getMessage());
             // keep on movin'
         }

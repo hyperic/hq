@@ -44,33 +44,28 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * An Action that removes a user from the application.
  */
-public class RemoveAction extends BaseAction {
+public class RemoveAction
+    extends BaseAction {
 
-   private final  Log log = LogFactory.getLog(RemoveAction.class.getName());
-   private AuthzBoss authzBoss;
-   
-   @Autowired
+    private final Log log = LogFactory.getLog(RemoveAction.class.getName());
+    private AuthzBoss authzBoss;
+
+    @Autowired
     public RemoveAction(AuthzBoss authzBoss) {
-    super();
-    this.authzBoss = authzBoss;
-}
+        super();
+        this.authzBoss = authzBoss;
+    }
 
-
-    /** Removes a user identified by the
-     * value of the request parameter <code>Constants.USER_PARAM</code>
-     * from the BizApp.
+    /**
+     * Removes a user identified by the value of the request parameter
+     * <code>Constants.USER_PARAM</code> from the BizApp.
      * @return
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-    throws Exception{
-            
-       
-                
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
+
         RemoveForm nwForm = (RemoveForm) form;
-        
+
         Integer[] users = nwForm.getUsers();
 
         // maintain sort after remove
@@ -78,16 +73,14 @@ public class RemoveAction extends BaseAction {
         RequestUtils.propogateParam(request, params, Constants.SORTORDER_PARAM);
         RequestUtils.propogateParam(request, params, Constants.SORTCOL_PARAM);
 
-        if (users == null || users.length == 0){
+        if (users == null || users.length == 0) {
             return returnSuccess(request, mapping, params, false);
         }
 
         Integer sessionId = RequestUtils.getSessionId(request);
 
-                
-
-        log.trace("removing users");                                                      
-        authzBoss.removeSubject(sessionId, users );                    
+        log.trace("removing users");
+        authzBoss.removeSubject(sessionId, users);
 
         RequestUtils.setConfirmation(request, "admin.role.confirm.RemoveUsers");
         return returnSuccess(request, mapping, params, false);

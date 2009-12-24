@@ -49,16 +49,16 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * action for stopping the auto-discovery scan.  This action
- * is only enabled when the auto-discovery scan is running.
+ * action for stopping the auto-discovery scan. This action is only enabled when
+ * the auto-discovery scan is running.
  * 
- *
+ * 
  */
-public class ScanControlAction extends BaseAction {
-    
+public class ScanControlAction
+    extends BaseAction {
+
     private AIBoss aiBoss;
-    
-    
+
     @Autowired
     public ScanControlAction(AIBoss aiBoss) {
         super();
@@ -69,60 +69,44 @@ public class ScanControlAction extends BaseAction {
      * Create a new auto-discovery with the attributes specified in the given
      * <code>ScanControlForm</code>.
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-      
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
+
         try {
             ResourceForm newForm = (ResourceForm) form;
-            
+
             Integer resourceId = newForm.getRid();
             Integer resourceType = newForm.getType();
-    
+
             HashMap<String, Object> forwardParams = new HashMap<String, Object>(2);
             forwardParams.put(Constants.RESOURCE_PARAM, resourceId);
-            forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, resourceType );
+            forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, resourceType);
 
             controlScan(request, resourceId);
-            
+
             return returnSuccess(request, mapping, forwardParams);
-            
+
+        } catch (AgentConnectionException e) {
+            RequestUtils.setError(request, "resource.platform.inventory.configProps.NoAgentConnection");
+            return returnFailure(request, mapping);
+        } catch (AgentNotFoundException e) {
+            RequestUtils.setError(request, "resource.platform.inventory.configProps.NoAgentConnection");
+            return returnFailure(request, mapping);
         }
-        catch (AgentConnectionException e) 
-        {
-            RequestUtils
-                .setError(request,
-                          "resource.platform.inventory.configProps.NoAgentConnection");
-            return returnFailure(request, mapping);
-        } 
-        catch (AgentNotFoundException e) 
-        {
-            RequestUtils
-                .setError(request,
-                          "resource.platform.inventory.configProps.NoAgentConnection");
-            return returnFailure(request, mapping);
-        } 
     }
 
     /**
      * control the auto-inventory scan
      */
-    private void controlScan(HttpServletRequest request, Integer resourceId)
-        throws
-            Exception 
-    {
-       
+    private void controlScan(HttpServletRequest request, Integer resourceId) throws Exception {
+
         Integer sessionId = RequestUtils.getSessionId(request);
-       
-        ScanStateCore scanStateCore = aiBoss.getScanStatus(sessionId.intValue(), 
-                                             resourceId.intValue());
+
+        ScanStateCore scanStateCore = aiBoss.getScanStatus(sessionId.intValue(), resourceId.intValue());
         ScanState scanState = new ScanState(scanStateCore);
-         
-        
+
         // stop the scan if the scan is still running.
-        if (!scanState.getIsInterrupted() && !scanState.getIsDone()) {                                                    
+        if (!scanState.getIsInterrupted() && !scanState.getIsDone()) {
             aiBoss.stopScan(sessionId.intValue(), resourceId.intValue());
         }
     }

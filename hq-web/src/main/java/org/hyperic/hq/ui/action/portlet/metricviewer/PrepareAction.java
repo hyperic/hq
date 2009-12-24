@@ -58,13 +58,13 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class PrepareAction extends TilesAction {
-    
+public class PrepareAction
+    extends TilesAction {
+
     private AuthzBoss authzBoss;
     private AppdefBoss appdefBoss;
     private MeasurementBoss measurementBoss;
-    
-    
+
     @Autowired
     public PrepareAction(AuthzBoss authzBoss, AppdefBoss appdefBoss, MeasurementBoss measurementBoss) {
         super();
@@ -73,26 +73,17 @@ public class PrepareAction extends TilesAction {
         this.measurementBoss = measurementBoss;
     }
 
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
 
-
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception
-    {
-       
         HttpSession session = request.getSession();
         WebUser user = RequestUtils.getWebUser(session);
         int sessionId = user.getSessionId().intValue();
-       
-        DashboardConfig dashConfig = DashboardUtils.findDashboard(
-        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, authzBoss);
+
+        DashboardConfig dashConfig = DashboardUtils.findDashboard((Integer) session
+            .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         PropertiesForm pForm = (PropertiesForm) form;
-      
 
         // this quarantees that the session dosen't contain any resources it
         // shouldnt
@@ -122,63 +113,52 @@ public class PrepareAction extends TilesAction {
         String resourceType = dashPrefs.getValue(resTypeKey, "");
         String metric = dashPrefs.getValue(metricKey, "");
         String descending = dashPrefs.getValue(descendingKey, "true");
-        
+
         pForm.setTitle(dashPrefs.getValue(titleKey, ""));
 
         pForm.setNumberToShow(numberToShow);
         pForm.setMetric(metric);
         pForm.setDescending(descending);
-        
-        List<AppdefEntityID> resourceList = DashboardUtils.preferencesAsEntityIds(resKey, dashPrefs);        
-        AppdefEntityID[] aeids = 
-            resourceList.toArray(new AppdefEntityID[resourceList.size()]);
+
+        List<AppdefEntityID> resourceList = DashboardUtils.preferencesAsEntityIds(resKey, dashPrefs);
+        AppdefEntityID[] aeids = resourceList.toArray(new AppdefEntityID[resourceList.size()]);
 
         PageControl pc = RequestUtils.getPageControl(request);
         PageList<AppdefResourceValue> resources = appdefBoss.findByIds(sessionId, aeids, pc);
         request.setAttribute("descending", descending);
         request.setAttribute("metricViewerList", resources);
 
-        PageList<PlatformTypeValue> viewablePlatformTypes =
-            appdefBoss.findViewablePlatformTypes(sessionId,
-                                                 PageControl.PAGE_ALL);
+        PageList<PlatformTypeValue> viewablePlatformTypes = appdefBoss.findViewablePlatformTypes(sessionId,
+            PageControl.PAGE_ALL);
         request.setAttribute("platformTypes", viewablePlatformTypes);
-        PageList<ServerTypeValue> viewableServerTypes =
-            appdefBoss.findViewableServerTypes(sessionId,
-                                               PageControl.PAGE_ALL);
+        PageList<ServerTypeValue> viewableServerTypes = appdefBoss.findViewableServerTypes(sessionId,
+            PageControl.PAGE_ALL);
         request.setAttribute("serverTypes", viewableServerTypes);
-        PageList<ServiceTypeValue> viewableServiceTypes =
-            appdefBoss.findViewableServiceTypes(sessionId,
-                                                PageControl.PAGE_ALL);
+        PageList<ServiceTypeValue> viewableServiceTypes = appdefBoss.findViewableServiceTypes(sessionId,
+            PageControl.PAGE_ALL);
         request.setAttribute("serviceTypes", viewableServiceTypes);
 
         AppdefResourceTypeValue typeVal = null;
         if (resourceType == null || resourceType.length() == 0) {
             if (viewablePlatformTypes.size() > 0) {
                 // Take the first platform type
-                typeVal =
-                    viewablePlatformTypes.get(0);
-            }
-            else if (viewableServerTypes.size() > 0) {
+                typeVal = viewablePlatformTypes.get(0);
+            } else if (viewableServerTypes.size() > 0) {
                 // Take the first server type
-                typeVal =
-                     viewableServerTypes.get(0);
-            }
-            else if (viewableServiceTypes.size() > 0) {
+                typeVal = viewableServerTypes.get(0);
+            } else if (viewableServiceTypes.size() > 0) {
                 // Take the first service type
-                typeVal =
-                    viewableServiceTypes.get(0);
+                typeVal = viewableServiceTypes.get(0);
             }
-        }
-        else {
+        } else {
             AppdefEntityTypeID typeId = new AppdefEntityTypeID(resourceType);
             typeVal = appdefBoss.findResourceTypeById(sessionId, typeId);
         }
-        
+
         if (typeVal != null) {
             pForm.setResourceType(typeVal.getAppdefTypeKey());
-            List<MeasurementTemplate> metrics = measurementBoss.findMeasurementTemplates(sessionId,
-                                                             typeVal.getName(),
-                                                             PageControl.PAGE_ALL);
+            List<MeasurementTemplate> metrics = measurementBoss.findMeasurementTemplates(sessionId, typeVal.getName(),
+                PageControl.PAGE_ALL);
             request.setAttribute("metrics", metrics);
         }
 

@@ -65,18 +65,17 @@ import org.hyperic.util.pager.SortAttribute;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * Action loads a server for viewing, including the General Properties,
- * Type and Host Properties and Configuration Properties.The 
- * Configuration Text specified in the general Properties are not loaded here.
+ * Action loads a server for viewing, including the General Properties, Type and
+ * Host Properties and Configuration Properties.The Configuration Text specified
+ * in the general Properties are not loaded here.
  */
-public class ViewServerAction extends TilesAction {
-    
-    private final  Log log =
-        LogFactory.getLog(ViewServerAction.class.getName());
+public class ViewServerAction
+    extends TilesAction {
+
+    private final Log log = LogFactory.getLog(ViewServerAction.class.getName());
     private AppdefBoss appdefBoss;
     private ProductBoss productBoss;
-    
-    
+
     @Autowired
     public ViewServerAction(AppdefBoss appdefBoss, ProductBoss productBoss) {
         super();
@@ -84,171 +83,135 @@ public class ViewServerAction extends TilesAction {
         this.productBoss = productBoss;
     }
 
-
-
     /**
-     * Retrieve this data and store it in the
-     * <code>NewServerForm</code>:
-     *
+     * Retrieve this data and store it in the <code>NewServerForm</code>:
+     * 
      */
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-       
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
 
         try {
-            ServerValue server =
-                (ServerValue) RequestUtils.getResource(request);
+            ServerValue server = (ServerValue) RequestUtils.getResource(request);
             if (server == null) {
-                RequestUtils.setError(request,
-                                      "resource.server.error.ServerNotFound");
+                RequestUtils.setError(request, "resource.server.error.ServerNotFound");
                 return null;
             }
-            // load the server groups            
-          
-           
-            int sessionId = RequestUtils.getSessionId(request).intValue(); 
-            
+            // load the server groups
+
+            int sessionId = RequestUtils.getSessionId(request).intValue();
+
             AppdefEntityID entityId = server.getEntityId();
             log.trace("getting service count for server");
             PageControl pc = new PageControl(0, -1, 1, SortAttribute.SERVICE_TYPE);
-            Collection<AppdefResourceValue> services = appdefBoss.findServicesByServer(sessionId,
-                                server.getId(), pc);
-            request.setAttribute(Constants.NUM_CHILD_RESOURCES_ATTR,
-                                 new Integer(services.size()));
+            Collection<AppdefResourceValue> services = appdefBoss.findServicesByServer(sessionId, server.getId(), pc);
+            request.setAttribute(Constants.NUM_CHILD_RESOURCES_ATTR, new Integer(services.size()));
 
             log.trace("getting service type map for server");
-            Map<String,Integer> typeMap = AppdefResourceValue.getServiceTypeCountMap(services);
+            Map<String, Integer> typeMap = AppdefResourceValue.getServiceTypeCountMap(services);
             request.setAttribute(Constants.RESOURCE_TYPE_MAP_ATTR, typeMap);
 
             BizappUtils.setRuntimeAIMessage(sessionId, request, server, appdefBoss);
-            
-            PageControl pcg =
-                RequestUtils.getPageControl(request, "psg", "png",
-                                            "sog", "scg");
 
-            List<AppdefGroupValue> groups = 
-                appdefBoss.findAllGroupsMemberInclusive(sessionId, pcg,
-                                                  server.getEntityId());
+            PageControl pcg = RequestUtils.getPageControl(request, "psg", "png", "sog", "scg");
+
+            List<AppdefGroupValue> groups = appdefBoss.findAllGroupsMemberInclusive(sessionId, pcg, server
+                .getEntityId());
 
             request.setAttribute(Constants.ALL_RESGRPS_ATTR, groups);
 
             // create and initialize the remove resource groups form
-            RemoveResourceGroupsForm rmGroupsForm =
-                new RemoveResourceGroupsForm();
+            RemoveResourceGroupsForm rmGroupsForm = new RemoveResourceGroupsForm();
             rmGroupsForm.setRid(server.getId());
             rmGroupsForm.setType(new Integer(server.getEntityId().getType()));
 
             int psg = RequestUtils.getPageSize(request, "psg");
             rmGroupsForm.setPsg(new Integer(psg));
 
-            request.setAttribute(Constants.RESOURCE_REMOVE_GROUPS_MEMBERS_FORM_ATTR,
-                                 rmGroupsForm);
-                                             
-           
-            
-            ConfigResponse oldResponse = productBoss.getMergedConfigResponse(
-                    sessionId, ProductPlugin.TYPE_PRODUCT, entityId, false);
+            request.setAttribute(Constants.RESOURCE_REMOVE_GROUPS_MEMBERS_FORM_ATTR, rmGroupsForm);
 
-            ConfigSchema config = productBoss.getConfigSchema(sessionId, entityId,
-                    ProductPlugin.TYPE_PRODUCT, oldResponse);
+            ConfigResponse oldResponse = productBoss.getMergedConfigResponse(sessionId, ProductPlugin.TYPE_PRODUCT,
+                entityId, false);
+
+            ConfigSchema config = productBoss.getConfigSchema(sessionId, entityId, ProductPlugin.TYPE_PRODUCT,
+                oldResponse);
 
             boolean platformWithAgent = false;
 
-           // it is no longer a ahack as we are doing the right thing now. 
+            // it is no longer a ahack as we are doing the right thing now.
             try {
-                if(appdefBoss.findResourceAgent(server.getPlatform().getEntityId()) 
-                                                                        != null)
+                if (appdefBoss.findResourceAgent(server.getPlatform().getEntityId()) != null)
                     platformWithAgent = true;
             } catch (AgentNotFoundException e) {
                 // do nothing as platformAithAgent is already false
             }
 
-            List<ConfigValues> uiProductOptions =
-                ActionUtils.getConfigValues(config, oldResponse);
-            
-            request.setAttribute(Constants.PRODUCT_CONFIG_OPTIONS,
-                                        uiProductOptions);
-            request.setAttribute(Constants.PRODUCT_CONFIG_OPTIONS_COUNT,
-                                        new Integer(uiProductOptions.size()));
+            List<ConfigValues> uiProductOptions = ActionUtils.getConfigValues(config, oldResponse);
+
+            request.setAttribute(Constants.PRODUCT_CONFIG_OPTIONS, uiProductOptions);
+            request.setAttribute(Constants.PRODUCT_CONFIG_OPTIONS_COUNT, new Integer(uiProductOptions.size()));
 
             config = new ConfigSchema();
             oldResponse = new ConfigResponse();
 
             try {
-                oldResponse = productBoss.getMergedConfigResponse(sessionId,
-                        ProductPlugin.TYPE_MEASUREMENT, entityId, false);
+                oldResponse = productBoss.getMergedConfigResponse(sessionId, ProductPlugin.TYPE_MEASUREMENT, entityId,
+                    false);
 
-                config = productBoss.getConfigSchema(sessionId, entityId,
-                        ProductPlugin.TYPE_MEASUREMENT, oldResponse);
+                config = productBoss.getConfigSchema(sessionId, entityId, ProductPlugin.TYPE_MEASUREMENT, oldResponse);
 
-                if(server.getWasAutodiscovered()) {
-                    request.setAttribute(Constants.SERVER_BASED_AUTO_INVENTORY, 
-                                new Integer(0)); 
+                if (server.getWasAutodiscovered()) {
+                    request.setAttribute(Constants.SERVER_BASED_AUTO_INVENTORY, new Integer(0));
                 } else {
-                    request.setAttribute(Constants.SERVER_BASED_AUTO_INVENTORY, 
-                                new Integer(1)); 
-                    request.setAttribute(Constants.SERVER_BASED_AUTO_INVENTORY_VALUE, 
-                                new Boolean(server.getRuntimeAutodiscovery()));
+                    request.setAttribute(Constants.SERVER_BASED_AUTO_INVENTORY, new Integer(1));
+                    request.setAttribute(Constants.SERVER_BASED_AUTO_INVENTORY_VALUE, new Boolean(server
+                        .getRuntimeAutodiscovery()));
                 }
             } catch (ConfigFetchException e) {
-                //do nothing
+                // do nothing
             } catch (PluginNotFoundException e) {
-                //do nothing
+                // do nothing
             }
 
-            List<ConfigValues> uiMonitorOptions =
-                ActionUtils.getConfigValues(config, oldResponse);
+            List<ConfigValues> uiMonitorOptions = ActionUtils.getConfigValues(config, oldResponse);
 
-            request.setAttribute(Constants.MONITOR_CONFIG_OPTIONS,uiMonitorOptions);
-            request.setAttribute(Constants.MONITOR_CONFIG_OPTIONS_COUNT,
-                                        new Integer(uiMonitorOptions.size()));
+            request.setAttribute(Constants.MONITOR_CONFIG_OPTIONS, uiMonitorOptions);
+            request.setAttribute(Constants.MONITOR_CONFIG_OPTIONS_COUNT, new Integer(uiMonitorOptions.size()));
 
             config = new ConfigSchema();
             oldResponse = new ConfigResponse();
 
             try {
-                oldResponse = productBoss.getMergedConfigResponse(sessionId,
-                        ProductPlugin.TYPE_CONTROL, entityId, false);
+                oldResponse = productBoss.getMergedConfigResponse(sessionId, ProductPlugin.TYPE_CONTROL, entityId,
+                    false);
 
-                config = productBoss.getConfigSchema(sessionId, entityId,
-                        ProductPlugin.TYPE_CONTROL, oldResponse);
+                config = productBoss.getConfigSchema(sessionId, entityId, ProductPlugin.TYPE_CONTROL, oldResponse);
             } catch (ConfigFetchException e) {
-                //do nothing
+                // do nothing
             } catch (PluginNotFoundException e) {
-                //do nothing
+                // do nothing
             }
 
-            List<ConfigValues> uiControlOptions =
-                ActionUtils.getConfigValues(config, oldResponse);
+            List<ConfigValues> uiControlOptions = ActionUtils.getConfigValues(config, oldResponse);
 
-            request.setAttribute(Constants.CONTROL_CONFIG_OPTIONS,uiControlOptions);
-            request.setAttribute(Constants.CONTROL_CONFIG_OPTIONS_COUNT,
-                                new Integer(uiControlOptions.size()));
-            request.setAttribute(Constants.AUTO_INVENTORY,
-                                new Boolean(server.getRuntimeAutodiscovery()));
+            request.setAttribute(Constants.CONTROL_CONFIG_OPTIONS, uiControlOptions);
+            request.setAttribute(Constants.CONTROL_CONFIG_OPTIONS_COUNT, new Integer(uiControlOptions.size()));
+            request.setAttribute(Constants.AUTO_INVENTORY, new Boolean(server.getRuntimeAutodiscovery()));
 
-            request.setAttribute(Constants.EDIT_CONFIG, 
-                                    new Boolean(platformWithAgent)); 
-            if(!platformWithAgent)
-                RequestUtils.setError(request,
-                        "resource.common.inventory.error.noAgent","noAgent");
+            request.setAttribute(Constants.EDIT_CONFIG, new Boolean(platformWithAgent));
+            if (!platformWithAgent)
+                RequestUtils.setError(request, "resource.common.inventory.error.noAgent", "noAgent");
             return null;
-            
-        } catch(ApplicationException e) {
-            RequestUtils.setError(request, 
-                    "resource.common.inventory.error.configRetrieveError");
-            request.setAttribute(Constants.PRODUCT_CONFIG_OPTIONS,new ArrayList());
-            request.setAttribute(Constants.PRODUCT_CONFIG_OPTIONS_COUNT,new Integer(0));
-            request.setAttribute(Constants.MONITOR_CONFIG_OPTIONS,new ArrayList());
-            request.setAttribute(Constants.MONITOR_CONFIG_OPTIONS_COUNT,new Integer(0));
-            request.setAttribute(Constants.CONTROL_CONFIG_OPTIONS,new ArrayList());
-            request.setAttribute(Constants.CONTROL_CONFIG_OPTIONS_COUNT,new Integer(0));
+
+        } catch (ApplicationException e) {
+            RequestUtils.setError(request, "resource.common.inventory.error.configRetrieveError");
+            request.setAttribute(Constants.PRODUCT_CONFIG_OPTIONS, new ArrayList());
+            request.setAttribute(Constants.PRODUCT_CONFIG_OPTIONS_COUNT, new Integer(0));
+            request.setAttribute(Constants.MONITOR_CONFIG_OPTIONS, new ArrayList());
+            request.setAttribute(Constants.MONITOR_CONFIG_OPTIONS_COUNT, new Integer(0));
+            request.setAttribute(Constants.CONTROL_CONFIG_OPTIONS, new ArrayList());
+            request.setAttribute(Constants.CONTROL_CONFIG_OPTIONS_COUNT, new Integer(0));
             return null;
-        } 
+        }
     }
-    
+
 }

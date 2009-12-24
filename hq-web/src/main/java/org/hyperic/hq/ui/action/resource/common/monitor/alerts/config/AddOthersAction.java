@@ -41,24 +41,20 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * An action that adds other email addresses ( those that are not in
- * CAM ) to an alert definition in the BizApp.
- *
+ * An action that adds other email addresses ( those that are not in CAM ) to an
+ * alert definition in the BizApp.
+ * 
  */
-public class AddOthersAction extends AddNotificationsAction {
+public class AddOthersAction
+    extends AddNotificationsAction {
 
-  
     @Autowired
     public AddOthersAction(EventsBoss eventsBoss) {
         super(eventsBoss);
     }
 
-    protected ActionForward preProcess(HttpServletRequest request,
-                                       ActionMapping mapping,
-                                       AddNotificationsForm form,
-                                       Map<String, Object> params,
-                                       HttpSession session)
-    throws Exception {
+    protected ActionForward preProcess(HttpServletRequest request, ActionMapping mapping, AddNotificationsForm form,
+                                       Map<String, Object> params, HttpSession session) throws Exception {
         return checkSubmit(request, mapping, form, params);
     }
 
@@ -67,17 +63,18 @@ public class AddOthersAction extends AddNotificationsAction {
     }
 
     protected Set<Object> getNotifications(AddNotificationsForm form, HttpSession session) {
-        AddOthersForm addForm = (AddOthersForm)form;
+        AddOthersForm addForm = (AddOthersForm) form;
         String emailAddresses = addForm.getEmailAddresses();
         StringTokenizer token = new StringTokenizer(emailAddresses, ",;");
         Set<Object> emails = new HashSet<Object>();
-        while ( token.hasMoreTokens() ) {
-            emails.add( token.nextToken().trim() );
+        while (token.hasMoreTokens()) {
+            emails.add(token.nextToken().trim());
         }
 
         return emails;
     }
 
-    public int getNotificationType() { return EmailActionConfig.TYPE_EMAILS; }
+    public int getNotificationType() {
+        return EmailActionConfig.TYPE_EMAILS;
+    }
 }
-

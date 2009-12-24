@@ -46,30 +46,27 @@ import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class NewGroupAction extends BaseAction {
+public class NewGroupAction
+    extends BaseAction {
 
     private final Log log = LogFactory.getLog(NewGroupAction.class.getName());
     private AppdefBoss appdefBoss;
-    
+
     @Autowired
     public NewGroupAction(AppdefBoss appdefBoss) {
         super();
         this.appdefBoss = appdefBoss;
     }
 
-
     /**
      * Create the group with the attributes specified in the given
      * <code>GroupForm</code>.
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
         final GroupForm newForm = (GroupForm) form;
-        
+
         // Clean up after ourselves first
         HttpSession session = request.getSession();
         session.removeAttribute(Constants.ENTITY_IDS_ATTR);
@@ -79,83 +76,53 @@ public class NewGroupAction extends BaseAction {
         if (forward != null) {
             return forward;
         }
-        
-        try {        
-           
+
+        try {
+
             Integer sessionId = RequestUtils.getSessionId(request);
             ResourceGroup newGroup;
-           
 
             final Integer entType = newForm.getEntityTypeId();
-            
+
             // Append username to private groups
             if (newForm.isPrivateGroup()) {
                 final WebUser user = RequestUtils.getWebUser(session);
-                final String privateName =
-                    RequestUtils.message(request,
-                                         "resource.group.name.private",
-                                         new Object[] { user.getName() });
+                final String privateName = RequestUtils.message(request, "resource.group.name.private",
+                    new Object[] { user.getName() });
                 newForm.setName(newForm.getName() + " " + privateName);
             }
-            
-            if (newForm.getGroupType() == Constants.APPDEF_TYPE_GROUP_COMPAT)
-            {
-                newGroup = appdefBoss.createGroup(sessionId, 
-                                            entType, 
-                                            newForm.getResourceTypeId(),
-                                            newForm.getName(),
-                                            newForm.getDescription(),
-                                            newForm.getLocation(),
-                                            newForm.getEntityIds(),
-                                            newForm.isPrivateGroup());
+
+            if (newForm.getGroupType() == Constants.APPDEF_TYPE_GROUP_COMPAT) {
+                newGroup = appdefBoss.createGroup(sessionId, entType, newForm.getResourceTypeId(), newForm.getName(),
+                    newForm.getDescription(), newForm.getLocation(), newForm.getEntityIds(), newForm.isPrivateGroup());
             } else {
                 // Constants.APPDEF_TYPE_GROUP_ADHOC
                 if (entType == AppdefEntityConstants.APPDEF_TYPE_APPLICATION ||
-                    entType == AppdefEntityConstants.APPDEF_TYPE_GROUP)
-                {
-                    newGroup = 
-                      appdefBoss.createGroup(sessionId,
-                                       entType, 
-                                       newForm.getName(), 
-                                       newForm.getDescription(),
-                                       newForm.getLocation(),
-                                       newForm.getEntityIds(),
-                                       newForm.isPrivateGroup());
+                    entType == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
+                    newGroup = appdefBoss.createGroup(sessionId, entType, newForm.getName(), newForm.getDescription(),
+                        newForm.getLocation(), newForm.getEntityIds(), newForm.isPrivateGroup());
                 } else {
                     // otherwise, create a mixed group
-                    newGroup = 
-                      appdefBoss.createGroup(sessionId, 
-                                       newForm.getName(),
-                                       newForm.getDescription(), 
-                                       newForm.getLocation(),
-                                       newForm.getEntityIds(),
-                                       newForm.isPrivateGroup());
+                    newGroup = appdefBoss.createGroup(sessionId, newForm.getName(), newForm.getDescription(), newForm
+                        .getLocation(), newForm.getEntityIds(), newForm.isPrivateGroup());
                 }
             }
-    
-              
-            log.trace("creating group [" + newForm.getName() +
-                      "] with attributes " + newForm);
-    
+
+            log.trace("creating group [" + newForm.getName() + "] with attributes " + newForm);
+
             HashMap<String, Object> forwardParams = new HashMap<String, Object>(2);
             forwardParams.put(Constants.RESOURCE_PARAM, newGroup.getId());
-            forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM,
-                              AppdefEntityConstants.APPDEF_TYPE_GROUP);
-            
+            forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, AppdefEntityConstants.APPDEF_TYPE_GROUP);
+
             newForm.setRid(newGroup.getId());
-    
-            RequestUtils.setConfirmation(request,
-                                         "resource.group.inventory.confirm.CreateGroup",
-                                          newForm.getName());
-    
+
+            RequestUtils.setConfirmation(request, "resource.group.inventory.confirm.CreateGroup", newForm.getName());
+
             return returnNew(request, mapping, forwardParams);
-        }
-        catch (GroupDuplicateNameException ex) {
+        } catch (GroupDuplicateNameException ex) {
             log.debug("group creation failed:", ex);
-            RequestUtils
-                .setError(request,
-                          "resource.group.inventory.error.DuplicateGroupName");
+            RequestUtils.setError(request, "resource.group.inventory.error.DuplicateGroupName");
             return returnFailure(request, mapping);
-        } 
+        }
     }
 }

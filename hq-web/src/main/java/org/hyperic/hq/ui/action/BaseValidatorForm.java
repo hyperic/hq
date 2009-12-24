@@ -33,12 +33,13 @@ import org.apache.struts.util.ImageButtonBean;
 import org.apache.struts.validator.ValidatorForm;
 
 /**
- * A subclass of <code>ValidatorForm</code> that adds convenience
- * methods for dealing with image-based form buttons.
+ * A subclass of <code>ValidatorForm</code> that adds convenience methods for
+ * dealing with image-based form buttons.
  */
-public class BaseValidatorForm extends ValidatorForm  {
+public class BaseValidatorForm
+    extends ValidatorForm {
 
-    //-------------------------------------instance variables
+    // -------------------------------------instance variables
 
     private ImageButtonBean add;
     private ImageButtonBean cancel;
@@ -54,8 +55,8 @@ public class BaseValidatorForm extends ValidatorForm  {
 
     /** Holds value of property pn. */
     private Integer pn;
-    
-    //-------------------------------------constructors
+
+    // -------------------------------------constructors
 
     private void setDefaults() {
         add = new ImageButtonBean();
@@ -76,7 +77,7 @@ public class BaseValidatorForm extends ValidatorForm  {
         setDefaults();
     }
 
-    //-------------------------------------public methods
+    // -------------------------------------public methods
 
     public void setAdd(ImageButtonBean add) {
         this.add = add;
@@ -119,7 +120,7 @@ public class BaseValidatorForm extends ValidatorForm  {
     }
 
     public Integer getPs() {
-	return this.pageSize;
+        return this.pageSize;
     }
 
     public void setPs(Integer pageSize) {
@@ -158,17 +159,19 @@ public class BaseValidatorForm extends ValidatorForm  {
         return this.userset;
     }
 
-    /** Setter for property p.
+    /**
+     * Setter for property p.
      * @param p New value of property p.
-     *
+     * 
      */
     public void setPn(Integer pn) {
         this.pn = pn;
     }
 
-    /** Getter for property p.
+    /**
+     * Getter for property p.
      * @return Value of property p.
-     *
+     * 
      */
     public Integer getPn() {
         return this.pn;
@@ -229,24 +232,21 @@ public class BaseValidatorForm extends ValidatorForm  {
         return getUserset().isSelected();
     }
 
-    public void reset(ActionMapping mapping,
-                      HttpServletRequest request) {
+    public void reset(ActionMapping mapping, HttpServletRequest request) {
         super.reset(mapping, request);
         setDefaults();
     }
 
-    /** 
-     * Only validate if
-     * 1) the form's ok or okassign button was clicked and
-     * 2) the mapping specifies an input form to return to.
-     *
-     * condition #2 can be false when a form has failed validation
-     * and has forwarded to the input page; the ok button request
-     * parameter will still be userset, but the prepare action for the
-     * input page will not have (another) input page specified.
+    /**
+     * Only validate if 1) the form's ok or okassign button was clicked and 2)
+     * the mapping specifies an input form to return to.
+     * 
+     * condition #2 can be false when a form has failed validation and has
+     * forwarded to the input page; the ok button request parameter will still
+     * be userset, but the prepare action for the input page will not have
+     * (another) input page specified.
      */
-    public ActionErrors validate(ActionMapping mapping,
-                                 HttpServletRequest request) {
+    public ActionErrors validate(ActionMapping mapping, HttpServletRequest request) {
 
         if (shouldValidate(mapping, request)) {
             ActionErrors errs = super.validate(mapping, request);
@@ -255,20 +255,18 @@ public class BaseValidatorForm extends ValidatorForm  {
             return null;
         }
     }
-    
-     /* Only validate if
-     * 1) the form's ok or okassign button was clicked and
-     * 2) the mapping specifies an input form to return to.
-     *
-     * Child classes should call this to decide whether or not
-     * to perform custom validation steps.
-     */    
-    protected boolean shouldValidate(ActionMapping mapping, 
-                                     HttpServletRequest request) {
-        return (isOkClicked() || isOkAssignClicked())
-            && mapping.getInput() != null;
+
+    /*
+     * Only validate if 1) the form's ok or okassign button was clicked and 2)
+     * the mapping specifies an input form to return to.
+     * 
+     * Child classes should call this to decide whether or not to perform custom
+     * validation steps.
+     */
+    protected boolean shouldValidate(ActionMapping mapping, HttpServletRequest request) {
+        return (isOkClicked() || isOkAssignClicked()) && mapping.getInput() != null;
     }
-    
+
     public String toString() {
         StringBuffer s = new StringBuffer();
 
@@ -295,5 +293,5 @@ public class BaseValidatorForm extends ValidatorForm  {
 
         return s.toString();
     }
-    
+
 }

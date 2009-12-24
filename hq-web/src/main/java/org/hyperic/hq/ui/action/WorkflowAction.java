@@ -36,58 +36,46 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 
 /**
- * This Action is designed to be part of a workflow, saving
- * it's current return path in the workflow stack.
+ * This Action is designed to be part of a workflow, saving it's current return
+ * path in the workflow stack.
  */
-public abstract class WorkflowAction extends BaseAction {
+public abstract class WorkflowAction
+    extends BaseAction {
 
     /**
-     * Starts workflow by taking what is currently stored
-     * in the session as returnPath (one of many possible
-     * origins of this workflow), and pushing it onto
-     * our workflow stack.
-     *
-     * Passes call to workflow() so that the child class
-     * can overload.
+     * Starts workflow by taking what is currently stored in the session as
+     * returnPath (one of many possible origins of this workflow), and pushing
+     * it onto our workflow stack.
+     * 
+     * Passes call to workflow() so that the child class can overload.
      */
-    public final ActionForward execute(ActionMapping mapping,
-                                       ActionForm form,
-                                       HttpServletRequest request,
-                                       HttpServletResponse response)
-    throws Exception {
-        
+    public final ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                       HttpServletResponse response) throws Exception {
+
         if (!(mapping instanceof BaseActionMapping)) {
-            throw new ServletException("mapping " + mapping.getName()
-                + "is not an instance of BaseActionMapping.");
+            throw new ServletException("mapping " + mapping.getName() + "is not an instance of BaseActionMapping.");
         }
-        BaseActionMapping smap = (BaseActionMapping)mapping;
+        BaseActionMapping smap = (BaseActionMapping) mapping;
 
         String workflowId = smap.getWorkflow();
         if (workflowId == null || "".equals(workflowId.trim())) {
-            throw new ServletException("workflow " + smap.getName()
-                + " has a null or invalid workflow attribute.");
+            throw new ServletException("workflow " + smap.getName() + " has a null or invalid workflow attribute.");
         }
 
-        // takes the current returnPath in the session and stores it 
+        // takes the current returnPath in the session and stores it
         // in the workflow.
-        SessionUtils.pushWorkflow(request.getSession(false), mapping,
-                                  workflowId);
+        SessionUtils.pushWorkflow(request.getSession(false), mapping, workflowId);
 
+        return workflow(mapping, form, request, response);
 
-        return workflow(mapping, form, request, response); 
-        
     }
 
     /**
-     * To participate in a workflow, simply implement this the same as 
-     * you would execute(). This will be called by SpiderWorkfowActions's
-     * execute() method after it saves the workflow context.
+     * To participate in a workflow, simply implement this the same as you would
+     * execute(). This will be called by SpiderWorkfowActions's execute() method
+     * after it saves the workflow context.
      */
-    public abstract ActionForward workflow(ActionMapping mapping,
-                                           ActionForm form,
-                                           HttpServletRequest request,
-                                           HttpServletResponse response)
-    throws Exception;
-   
-}
+    public abstract ActionForward workflow(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                           HttpServletResponse response) throws Exception;
 
+}

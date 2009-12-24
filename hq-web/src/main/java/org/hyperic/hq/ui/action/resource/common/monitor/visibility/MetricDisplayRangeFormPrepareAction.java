@@ -46,33 +46,26 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.InvalidOptionException;
 
 /**
- * An <code>Action</code> that retrieves data from the BizApp to
- * facilitate display of the various pages that provide metrics
- * summaries.
+ * An <code>Action</code> that retrieves data from the BizApp to facilitate
+ * display of the various pages that provide metrics summaries.
  */
-public class MetricDisplayRangeFormPrepareAction extends WorkflowPrepareAction {
+public class MetricDisplayRangeFormPrepareAction
+    extends WorkflowPrepareAction {
 
-    protected final Log log =  LogFactory
-        .getLog(MetricDisplayRangeFormPrepareAction.class.getName());
-
-  
+    protected final Log log = LogFactory.getLog(MetricDisplayRangeFormPrepareAction.class.getName());
 
     /**
-     * Retrieve data needed to display a Metrics Display Form. Respond
-     * to certain button clicks that alter the form display.
+     * Retrieve data needed to display a Metrics Display Form. Respond to
+     * certain button clicks that alter the form display.
      */
-    public ActionForward workflow(ComponentContext context, 
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-    throws Exception {
+    public ActionForward workflow(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                  HttpServletRequest request, HttpServletResponse response) throws Exception {
 
         MetricDisplayRangeForm rangeForm = (MetricDisplayRangeForm) form;
 
         try {
             WebUser user = RequestUtils.getWebUser(request);
-            Map<String,Object> pref = user.getMetricRangePreference(false);
+            Map<String, Object> pref = user.getMetricRangePreference(false);
 
             if (rangeForm.isResetClicked() || rangeForm.getRn() == null) {
                 rangeForm.setRn((Integer) pref.get(MonitorUtils.LASTN));
@@ -85,8 +78,7 @@ public class MetricDisplayRangeFormPrepareAction extends WorkflowPrepareAction {
                 Boolean readOnly = (Boolean) pref.get(MonitorUtils.RO);
                 if (readOnly.booleanValue()) {
                     rangeForm.setA(MetricDisplayRangeForm.ACTION_DATE_RANGE);
-                }
-                else {
+                } else {
                     rangeForm.setA(MetricDisplayRangeForm.ACTION_LASTN);
                 }
             }
@@ -96,21 +88,17 @@ public class MetricDisplayRangeFormPrepareAction extends WorkflowPrepareAction {
             Long end = (Long) pref.get(MonitorUtils.END);
             if (begin == null || end == null) {
                 // default date range to lastN timeframe
-                MetricRange range = getLastNRange(rangeForm.getRn(),
-                                                  rangeForm.getRu());
+                MetricRange range = getLastNRange(rangeForm.getRn(), rangeForm.getRu());
                 if (range != null) {
                     begin = range.getBegin();
                     end = range.getEnd();
-                }
-                else {
+                } else {
                     // finally, fall back to now
                     begin = end = new Long(System.currentTimeMillis());
                 }
             }
-            rangeForm.populateStartDate(new Date(begin.longValue()),
-                                        request.getLocale());
-            rangeForm.populateEndDate(new Date(end.longValue()),
-                                      request.getLocale());
+            rangeForm.populateStartDate(new Date(begin.longValue()), request.getLocale());
+            rangeForm.populateEndDate(new Date(end.longValue()), request.getLocale());
         } catch (InvalidOptionException ioe) {
             throw new ServletException(ioe);
         }
@@ -126,8 +114,7 @@ public class MetricDisplayRangeFormPrepareAction extends WorkflowPrepareAction {
     private MetricRange getLastNRange(Integer lastN, Integer unit) {
         MetricRange range = new MetricRange();
 
-        List<Long> timeframe = MonitorUtils.calculateTimeFrame(lastN.intValue(),
-                                                         unit.intValue());
+        List<Long> timeframe = MonitorUtils.calculateTimeFrame(lastN.intValue(), unit.intValue());
         if (timeframe != null) {
             range.setBegin((Long) timeframe.get(0));
             range.setEnd((Long) timeframe.get(1));

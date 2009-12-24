@@ -50,26 +50,25 @@ import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.action.resource.ResourceController;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
+
 /*
  * An abstract subclass of <code>ResourceControllerAction</code> that
  * provides common methods for resource control controller actions.
  */
-public abstract class ResourceControlController extends ResourceController {
+public abstract class ResourceControlController
+    extends ResourceController {
     private final Properties keyMethodMap = new Properties();
-    
-    protected final Log log =
-        LogFactory.getLog(ResourceControlController.class.getName());
+
+    protected final Log log = LogFactory.getLog(ResourceControlController.class.getName());
 
     protected Properties getKeyMethodMap() {
         return keyMethodMap;
     }
-    
-    
+
     public ResourceControlController(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss) {
         super(appdefBoss, authzBoss, controlBoss);
         initKeyMethodMap();
     }
-
 
     private void initKeyMethodMap() {
         keyMethodMap.setProperty(Constants.MODE_LIST, "currentControlStatus");
@@ -80,19 +79,15 @@ public abstract class ResourceControlController extends ResourceController {
         keyMethodMap.setProperty(Constants.MODE_EDIT, "editScheduledControlAction");
     }
 
-  
-    
     /**
      * Checks to see if control is enabled for this resource. Sets
      * Constants.CONTROL_ENABLED_ATTR in request scope.
      */
-    protected void checkControlEnabled(ActionMapping mapping,
-                                        ActionForm form,
-                                        HttpServletRequest request,
-                                        HttpServletResponse response) {
-        // check to see if control is enabled                                    
+    protected void checkControlEnabled(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                       HttpServletResponse response) {
+        // check to see if control is enabled
         try {
-            
+
             int sessionId = RequestUtils.getSessionId(request).intValue();
             AppdefEntityID appdefId = RequestUtils.getEntityId(request);
             int type = appdefId.getType();
@@ -107,13 +102,11 @@ public abstract class ResourceControlController extends ResourceController {
                 default:
                     isEnabled = controlBoss.isControlEnabled(sessionId, appdefId);
             }
-            request.setAttribute( Constants.CONTROL_ENABLED_ATTR, 
-                                  new Boolean(isEnabled) );
+            request.setAttribute(Constants.CONTROL_ENABLED_ATTR, new Boolean(isEnabled));
             if (isEnabled) {
                 try {
                     List<String> actions = controlBoss.getActions(sessionId, appdefId);
-                    Boolean hasControls
-                        = (actions.size() > 0) ? Boolean.TRUE : Boolean.FALSE;
+                    Boolean hasControls = (actions.size() > 0) ? Boolean.TRUE : Boolean.FALSE;
                     request.setAttribute("hasControlActions", hasControls);
                 } catch (PluginNotFoundException e) {
                     log.warn("Error loading plugin for " + appdefId + ": " + e);
@@ -123,93 +116,67 @@ public abstract class ResourceControlController extends ResourceController {
                 request.setAttribute("hasControlActions", Boolean.FALSE);
             }
         } catch (ServletException e) {
-            // couldn't get servlet context. oh well.   
+            // couldn't get servlet context. oh well.
             log.error("Unexpected exception: " + e, e);
         } catch (ApplicationException e) {
             log.error("Unexpected exception: " + e, e);
         }
     }
-    
-    private void storePortalDataInRequest(ActionMapping mapping,
-                                          ActionForm form,
-                                          HttpServletRequest request,
-                                          HttpServletResponse response,
-                                          Portal portal,
-                                          boolean checkControlEnabled,
-                                          boolean moveMessages,
-                                          boolean setNavMapLocation) 
-    throws Exception {
+
+    private void storePortalDataInRequest(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                          HttpServletResponse response, Portal portal, boolean checkControlEnabled,
+                                          boolean moveMessages, boolean setNavMapLocation) throws Exception {
         request.setAttribute(Constants.PORTAL_KEY, portal);
-        
+
         if (moveMessages) {
             // move messages and errors from session to request scope
             SessionUtils.moveAttribute(request, Globals.MESSAGE_KEY);
             SessionUtils.moveAttribute(request, Globals.ERROR_KEY);
         }
-        
+
         setResource(request);
-        
+
         if (checkControlEnabled) {
             checkControlEnabled(mapping, form, request, response);
         }
-        
+
         if (setNavMapLocation) {
-            super.setNavMapLocation(request,mapping, Constants.CONTROL_LOC);
+            super.setNavMapLocation(request, mapping, Constants.CONTROL_LOC);
         }
     }
-    
-    public ActionForward currentControlStatus(ActionMapping mapping,
-                                              ActionForm form,
-                                              HttpServletRequest request,
-                                              HttpServletResponse response,
-                                              Portal portal)
-    throws Exception {
+
+    public ActionForward currentControlStatus(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                              HttpServletResponse response, Portal portal) throws Exception {
         storePortalDataInRequest(mapping, form, request, response, portal, true, true, true);
-        
+
         return null;
     }
-    
-    public ActionForward controlStatusHistory(ActionMapping mapping,
-                                              ActionForm form,
-                                              HttpServletRequest request,
-                                              HttpServletResponse response,
-                                              Portal portal)
-    throws Exception {
+
+    public ActionForward controlStatusHistory(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                              HttpServletResponse response, Portal portal) throws Exception {
         storePortalDataInRequest(mapping, form, request, response, portal, true, false, true);
-        
+
         return null;
     }
-    
-    public ActionForward controlStatusHistoryDetail(ActionMapping mapping,
-                                                    ActionForm form,
-                                                    HttpServletRequest request,
-                                                    HttpServletResponse response,
-                                                    Portal portal)
-    throws Exception {
+
+    public ActionForward controlStatusHistoryDetail(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                                    HttpServletResponse response, Portal portal) throws Exception {
         storePortalDataInRequest(mapping, form, request, response, portal, true, false, false);
-       
+
         return null;
     }
-    
-    public ActionForward newScheduledControlAction(ActionMapping mapping,
-                                                   ActionForm form,
-                                                   HttpServletRequest request,
-                                                   HttpServletResponse response,
-                                                   Portal portal)
-    throws Exception {
+
+    public ActionForward newScheduledControlAction(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                                   HttpServletResponse response, Portal portal) throws Exception {
         storePortalDataInRequest(mapping, form, request, response, portal, false, false, false);
-        
+
         return null;
     }
-    
-    public ActionForward editScheduledControlAction(ActionMapping mapping,
-                                                    ActionForm form,
-                                                    HttpServletRequest request,
-                                                    HttpServletResponse response, 
-                                                    Portal portal)
-    throws Exception {
+
+    public ActionForward editScheduledControlAction(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                                    HttpServletResponse response, Portal portal) throws Exception {
         storePortalDataInRequest(mapping, form, request, response, portal, false, false, false);
-        
+
         return null;
     }
 }

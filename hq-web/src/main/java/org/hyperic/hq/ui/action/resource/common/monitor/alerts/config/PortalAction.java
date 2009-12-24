@@ -58,19 +58,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * A dispatcher for the alerts portal.
- *
+ * 
  */
-public class PortalAction extends ResourceController {
-    private final Log log =
-        LogFactory.getLog(PortalAction.class.getName());
+public class PortalAction
+    extends ResourceController {
+    private final Log log = LogFactory.getLog(PortalAction.class.getName());
 
     protected final Properties keyMethodMap = new Properties();
-    
+
     protected EventsBoss eventsBoss;
-    
+
     @Autowired
     public PortalAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss, EventsBoss eventsBoss) {
-        super(appdefBoss, authzBoss, controlBoss) ;
+        super(appdefBoss, authzBoss, controlBoss);
         this.eventsBoss = eventsBoss;
         initKeyMethodMap();
     }
@@ -78,7 +78,7 @@ public class PortalAction extends ResourceController {
     protected Properties getKeyMethodMap() {
         return keyMethodMap;
     }
-    
+
     private void initKeyMethodMap() {
         keyMethodMap.setProperty(Constants.MODE_LIST, "listDefinitions");
         keyMethodMap.setProperty(Constants.MODE_NEW, "newDefinition");
@@ -87,11 +87,10 @@ public class PortalAction extends ResourceController {
     }
 
     /**
-     * We override this in case the resource has been deleted
-     * ... simply ignore that fact.
+     * We override this in case the resource has been deleted ... simply ignore
+     * that fact.
      */
-    protected AppdefEntityID setResource(HttpServletRequest request)
-        throws Exception {
+    protected AppdefEntityID setResource(HttpServletRequest request) throws Exception {
         try {
             return super.setResource(request);
         } catch (ParameterNotFoundException e) {
@@ -100,9 +99,7 @@ public class PortalAction extends ResourceController {
         return null;
     }
 
-    private void setTitle(HttpServletRequest request, Portal portal,
-                          String titleName)
-        throws Exception {
+    private void setTitle(HttpServletRequest request, Portal portal, String titleName) throws Exception {
 
         AppdefEntityID aeid;
         try {
@@ -110,7 +107,7 @@ public class PortalAction extends ResourceController {
         } catch (ParameterNotFoundException e) {
             aeid = RequestUtils.getEntityId(request);
         }
-        
+
         titleName = BizappUtils.replacePlatform(titleName, aeid);
         portal.setName(titleName);
 
@@ -118,169 +115,126 @@ public class PortalAction extends ResourceController {
         // title parameter to its name
         try {
             int sessionId = RequestUtils.getSessionId(request).intValue();
-            
-            AlertDefinitionValue adv = AlertDefUtil.getAlertDefinition
-                (request, sessionId, eventsBoss);
-            request.setAttribute( Constants.TITLE_PARAM2_ATTR, adv.getName() );
+
+            AlertDefinitionValue adv = AlertDefUtil.getAlertDefinition(request, sessionId, eventsBoss);
+            request.setAttribute(Constants.TITLE_PARAM2_ATTR, adv.getName());
         } catch (ParameterNotFoundException e) {
             // it's okay
             log.trace("couldn't find alert definition: " + e.getMessage());
         }
     }
 
-    public ActionForward newDefinition(ActionMapping mapping,
-                                       ActionForm form,
-                                       HttpServletRequest request,
-                                       HttpServletResponse response)
-        throws Exception
-    {
+    public ActionForward newDefinition(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                       HttpServletResponse response) throws Exception {
         setResource(request);
         Portal portal = Portal.createPortal();
-        setTitle(request,portal,"alert.config.platform.edit.NewAlertDef.Title");
-        portal.addPortlet(new Portlet(".events.config.new"),1);
+        setTitle(request, portal, "alert.config.platform.edit.NewAlertDef.Title");
+        portal.addPortlet(new Portlet(".events.config.new"), 1);
         portal.setDialog(true);
         request.setAttribute(Constants.PORTAL_KEY, portal);
 
         return null;
     }
 
-    public ActionForward editProperties(ActionMapping mapping,
-                                        ActionForm form,
-                                        HttpServletRequest request,
-                                        HttpServletResponse response)
-        throws Exception
-    {
+    public ActionForward editProperties(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                        HttpServletResponse response) throws Exception {
         setResource(request);
         Portal portal = Portal.createPortal();
-        setTitle(request,portal,"alert.config.platform.edit.page.Title");
-        portal.addPortlet(new Portlet(".events.config.edit.properties"),1);
+        setTitle(request, portal, "alert.config.platform.edit.page.Title");
+        portal.addPortlet(new Portlet(".events.config.edit.properties"), 1);
         portal.setDialog(true);
         request.setAttribute(Constants.PORTAL_KEY, portal);
 
         return null;
     }
 
-    public ActionForward editConditions(ActionMapping mapping,
-                                        ActionForm form,
-                                        HttpServletRequest request,
-                                        HttpServletResponse response)
-        throws Exception
-    {
+    public ActionForward editConditions(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                        HttpServletResponse response) throws Exception {
         setResource(request);
         Portal portal = Portal.createPortal();
-        setTitle(request,portal,"alert.config.platform.edit.condition.Title");
-        portal.addPortlet(new Portlet(".events.config.edit.conditions"),1);
+        setTitle(request, portal, "alert.config.platform.edit.condition.Title");
+        portal.addPortlet(new Portlet(".events.config.edit.conditions"), 1);
         portal.setDialog(true);
         request.setAttribute(Constants.PORTAL_KEY, portal);
 
         return null;
     }
 
-    public ActionForward editControlAction(ActionMapping mapping,
-                                           ActionForm form,
-                                           HttpServletRequest request,
-                                           HttpServletResponse response)
-        throws Exception
-    {
+    public ActionForward editControlAction(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                           HttpServletResponse response) throws Exception {
         setResource(request);
         Portal portal = Portal.createPortal();
-        setTitle(request,portal,"alerts.config.platform.EditControlAction.Title");
-        portal.addPortlet(new Portlet(".events.config.edit.controlaction"),1);
+        setTitle(request, portal, "alerts.config.platform.EditControlAction.Title");
+        portal.addPortlet(new Portlet(".events.config.edit.controlaction"), 1);
         portal.setDialog(true);
         request.setAttribute(Constants.PORTAL_KEY, portal);
 
         return null;
     }
 
-    public ActionForward editSyslogAction(ActionMapping mapping,
-                                          ActionForm form,
-                                          HttpServletRequest request,
-                                          HttpServletResponse response)
-        throws Exception
-    {
+    public ActionForward editSyslogAction(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                          HttpServletResponse response) throws Exception {
         setResource(request);
         Portal portal = Portal.createPortal();
-        setTitle(request,portal,"alerts.config.platform.EditSyslogAction.Title");
-        portal.addPortlet(new Portlet(".events.config.edit.syslogaction"),1);
+        setTitle(request, portal, "alerts.config.platform.EditSyslogAction.Title");
+        portal.addPortlet(new Portlet(".events.config.edit.syslogaction"), 1);
         portal.setDialog(true);
         request.setAttribute(Constants.PORTAL_KEY, portal);
 
         return null;
     }
 
-    public ActionForward viewOthers(ActionMapping mapping,
-                                    ActionForm form,
-                                    HttpServletRequest request,
-                                    HttpServletResponse response)
-        throws Exception
-    {
+    public ActionForward viewOthers(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                    HttpServletResponse response) throws Exception {
         setResource(request);
         Portal portal = Portal.createPortal();
-        setTitle(request,portal,"alert.config.platform.props.ViewDef.email.Title");
-        portal.addPortlet(new Portlet(".events.config.view.others"),1);
+        setTitle(request, portal, "alert.config.platform.props.ViewDef.email.Title");
+        portal.addPortlet(new Portlet(".events.config.view.others"), 1);
         // JW - this shouldn't be a dialog ... portal.setDialog(true);
         request.setAttribute(Constants.PORTAL_KEY, portal);
 
         return null;
     }
 
-    public ActionForward viewUsers(ActionMapping mapping,
-                                   ActionForm form,
-                                   HttpServletRequest request,
-                                   HttpServletResponse response)
-        throws Exception
-    {
+    public ActionForward viewUsers(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                   HttpServletResponse response) throws Exception {
         setResource(request);
         Portal portal = Portal.createPortal();
-        setTitle(request,portal,"alert.config.platform.props.ViewDef.users.Title");
-        portal.addPortlet(new Portlet(".events.config.view.users"),1);
+        setTitle(request, portal, "alert.config.platform.props.ViewDef.users.Title");
+        portal.addPortlet(new Portlet(".events.config.view.users"), 1);
         // JW - this shouldn't be a dialog ... portal.setDialog(true);
         request.setAttribute(Constants.PORTAL_KEY, portal);
 
         return null;
     }
 
-    public ActionForward viewEscalation(ActionMapping mapping,
-                                        ActionForm form,
-                                        HttpServletRequest request,
-                                        HttpServletResponse response)
-        throws Exception
-    {
+    public ActionForward viewEscalation(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                        HttpServletResponse response) throws Exception {
         setResource(request);
         Portal portal = Portal.createPortal();
-        setTitle(request, portal,
-                 "alert.config.platform.props.ViewDef.escalation.Title");
-        portal.addPortlet(new Portlet(".events.config.view.escalation"),1);
+        setTitle(request, portal, "alert.config.platform.props.ViewDef.escalation.Title");
+        portal.addPortlet(new Portlet(".events.config.view.escalation"), 1);
         request.setAttribute(Constants.PORTAL_KEY, portal);
-        
+
         return null;
     }
 
-    public ActionForward viewOpenNMS(ActionMapping mapping,
-                                     ActionForm form,
-                                     HttpServletRequest request,
-                                     HttpServletResponse response)
-        throws Exception
-    {
+    public ActionForward viewOpenNMS(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                     HttpServletResponse response) throws Exception {
         setResource(request);
         Portal portal = Portal.createPortal();
-        setTitle(request, portal,
-                 "alert.config.platform.props.ViewDef.openNMS.Title");
-        portal.addPortlet(new Portlet(".events.config.view.opennms"),1);
+        setTitle(request, portal, "alert.config.platform.props.ViewDef.openNMS.Title");
+        portal.addPortlet(new Portlet(".events.config.view.opennms"), 1);
         request.setAttribute(Constants.PORTAL_KEY, portal);
-        
+
         return null;
     }
 
-    public ActionForward monitorConfigureAlerts(ActionMapping mapping,
-                                                ActionForm form,
-                                                HttpServletRequest request,
-                                                HttpServletResponse response)
-        throws Exception
-    {
+    public ActionForward monitorConfigureAlerts(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                                HttpServletResponse response) throws Exception {
         setResource(request);
         Portal portal = Portal.createPortal();
-        portal.addPortlet(new Portlet(".events.config.list"),1);
+        portal.addPortlet(new Portlet(".events.config.list"), 1);
         portal.setDialog(false);
 
         request.setAttribute(Constants.PORTAL_KEY, portal);
@@ -288,17 +242,13 @@ public class PortalAction extends ResourceController {
         return null;
     }
 
-    public ActionForward listDefinitions(ActionMapping mapping,
-                                         ActionForm form,
-                                         HttpServletRequest request,
-                                         HttpServletResponse response)
-        throws Exception
-    {
+    public ActionForward listDefinitions(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                         HttpServletResponse response) throws Exception {
         AppdefEntityID aeid = setResource(request);
 
         setNavMapLocation(request, mapping, Constants.ALERT_CONFIG_LOC);
-                                  
-        // clean out the return path 
+
+        // clean out the return path
         SessionUtils.resetReturnPath(request.getSession());
         // set the return path
         try {
@@ -308,18 +258,16 @@ public class PortalAction extends ResourceController {
         }
 
         Portal portal = Portal.createPortal();
-        setTitle(request,portal,"alerts.config.platform.DefinitionList.Title");
+        setTitle(request, portal, "alerts.config.platform.DefinitionList.Title");
         portal.setDialog(false);
 
         try {
-            RequestUtils.getStringParameter(request,
-                                            Constants.APPDEF_RES_TYPE_ID);
+            RequestUtils.getStringParameter(request, Constants.APPDEF_RES_TYPE_ID);
             portal.addPortlet(new Portlet(".admin.alerts.List"), 1);
         } catch (ParameterNotFoundException e) {
             if (aeid != null && aeid.isGroup()) {
                 portal.addPortlet(new Portlet(".events.group.config.list"), 1);
-            }
-            else {
+            } else {
                 portal.addPortlet(new Portlet(".events.config.list"), 1);
             }
         }
@@ -329,58 +277,45 @@ public class PortalAction extends ResourceController {
 
     }
 
-    public ActionForward addUsers(ActionMapping mapping,
-                                  ActionForm form,
-                                  HttpServletRequest request,
-                                  HttpServletResponse response)
-        throws Exception
-    {
+    public ActionForward addUsers(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                  HttpServletResponse response) throws Exception {
         setResource(request);
         Portal portal = Portal.createPortal();
-        setTitle(request,portal,
-                    "alerts.config.platform.AssignUsersToAlertDefinition.Title");
-        portal.addPortlet(new Portlet(".events.config.addusers"),1);
+        setTitle(request, portal, "alerts.config.platform.AssignUsersToAlertDefinition.Title");
+        portal.addPortlet(new Portlet(".events.config.addusers"), 1);
         portal.setDialog(false);
 
         request.setAttribute(Constants.PORTAL_KEY, portal);
         return null;
     }
 
-    public ActionForward addOthers(ActionMapping mapping,
-                                   ActionForm form,
-                                   HttpServletRequest request,
-                                   HttpServletResponse response)
-        throws Exception
-    {
+    public ActionForward addOthers(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                   HttpServletResponse response) throws Exception {
         setResource(request);
         Portal portal = Portal.createPortal();
-        setTitle(request,portal,
-                "alerts.config.platform.AssignOthersToAlertDefinition.Title");
-        portal.addPortlet(new Portlet(".events.config.addothers"),1);
+        setTitle(request, portal, "alerts.config.platform.AssignOthersToAlertDefinition.Title");
+        portal.addPortlet(new Portlet(".events.config.addothers"), 1);
         portal.setDialog(false);
 
         request.setAttribute(Constants.PORTAL_KEY, portal);
         return null;
     }
 
-    /** 
-     * This sets the return path for a ResourceAction by appending
-     * the type and resource id to the forward url.
+    /**
+     * This sets the return path for a ResourceAction by appending the type and
+     * resource id to the forward url.
      * 
      * @param request The current controller's request.
      * @param mapping The current controller's mapping that contains the input.
-     *
+     * 
      * @exception ParameterNotFoundException if the type or id are not found
      * @exception ServletException If there is not input defined for this form
      */
-    protected void setReturnPath(HttpServletRequest request,
-                                 ActionMapping mapping) 
-        throws Exception{
-        HashMap<String,Object> parms = new HashMap<String, Object>();
+    protected void setReturnPath(HttpServletRequest request, ActionMapping mapping) throws Exception {
+        HashMap<String, Object> parms = new HashMap<String, Object>();
         AppdefEntityID aeid = RequestUtils.getEntityId(request);
         parms.put(Constants.RESOURCE_PARAM, aeid.getId());
-        parms.put(Constants.RESOURCE_TYPE_ID_PARAM,
-                  new Integer(aeid.getType()));
+        parms.put(Constants.RESOURCE_TYPE_ID_PARAM, new Integer(aeid.getType()));
 
         try {
             Integer ad = RequestUtils.getIntParameter(request, Constants.ALERT_DEFINITION_PARAM);
@@ -396,9 +331,8 @@ public class PortalAction extends ResourceController {
         // sets the returnPath to match the mode we're in.
         String mode = request.getParameter(Constants.MODE_PARAM);
         parms.put(Constants.MODE_PARAM, mode);
-        
+
         String returnPath = ActionUtils.findReturnPath(mapping, parms);
-        SessionUtils.setReturnPath(request.getSession(), returnPath); 
+        SessionUtils.setReturnPath(request.getSession(), returnPath);
     }
 }
-

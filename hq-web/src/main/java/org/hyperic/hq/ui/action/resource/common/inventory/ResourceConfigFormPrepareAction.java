@@ -60,17 +60,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * A subclass of <code> TilesAction </code> that populates the
- * <code>ResourceConfigForm</code> form with configOptions from the
- * Product plugin.
+ * <code>ResourceConfigForm</code> form with configOptions from the Product
+ * plugin.
  */
-public class ResourceConfigFormPrepareAction extends BaseTilesAction {
-    private final Log log =
-        LogFactory.getLog(ResourceConfigFormPrepareAction.class.getName());
-    
+public class ResourceConfigFormPrepareAction
+    extends BaseTilesAction {
+    private final Log log = LogFactory.getLog(ResourceConfigFormPrepareAction.class.getName());
+
     protected AppdefBoss appdefBoss;
     protected ProductBoss productBoss;
-    
-    
+
     @Autowired
     public ResourceConfigFormPrepareAction(AppdefBoss appdefBoss, ProductBoss productBoss) {
         super();
@@ -78,49 +77,40 @@ public class ResourceConfigFormPrepareAction extends BaseTilesAction {
         this.productBoss = productBoss;
     }
 
-    //if this resource has help text, build up a map of all
-    //configuration values which can then be applied to variables
-    //in the help text.
-    protected void addHelpProperties(Map helpProps,
-                                   ConfigSchema schema,
-                                   ConfigResponse config) {
+    // if this resource has help text, build up a map of all
+    // configuration values which can then be applied to variables
+    // in the help text.
+    protected void addHelpProperties(Map helpProps, ConfigSchema schema, ConfigResponse config) {
 
         helpProps.putAll(schema.getDefaultProperties());
         helpProps.putAll(config.toProperties());
     }
 
-    protected void addExtraHelpProperties( Map<String,String> helpProps) {
-        String installpath =
-            (String)helpProps.get(ProductPlugin.PROP_INSTALLPATH);
+    protected void addExtraHelpProperties(Map<String, String> helpProps) {
+        String installpath = (String) helpProps.get(ProductPlugin.PROP_INSTALLPATH);
 
         if (installpath != null) {
-            //escaped version of installpath suitable for insertion
-            //into agent.properties
-            helpProps.put(ProductPlugin.PROP_INSTALLPATH + ".escaped",
-                          StringUtil.replace(installpath, "\\", "\\\\"));
+            // escaped version of installpath suitable for insertion
+            // into agent.properties
+            helpProps.put(ProductPlugin.PROP_INSTALLPATH + ".escaped", StringUtil.replace(installpath, "\\", "\\\\"));
         }
 
         try {
             // Version information
             helpProps.put(Constants.APP_VERSION, productBoss.getVersion());
-        } catch (Exception e) { }
+        } catch (Exception e) {
+        }
     }
 
-        
     /**
-     * Retrieve this data and store it in the
-     * <code>ResourceConfigForm</code>:
-     *
+     * Retrieve this data and store it in the <code>ResourceConfigForm</code>:
+     * 
      */
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
 
         checkModifyPermission(request);
-        
+
         // HACK for the ProblemResources portlet to tell us
         // to redirect back to dash when done
         if (request.getParameter("todash") != null) {
@@ -130,19 +120,14 @@ public class ResourceConfigFormPrepareAction extends BaseTilesAction {
         ResourceConfigForm resourceForm = (ResourceConfigForm) form;
 
         int sessionId = RequestUtils.getSessionId(request).intValue();
-        
 
         AppdefEntityID aeid = RequestUtils.getEntityId(request);
 
-        
-        
         AppdefResourceValue resource = appdefBoss.findById(sessionId, aeid);
 
         resourceForm.loadResourceValue(resource);
 
         RequestUtils.setResource(request, resource);
-
-    
 
         ConfigResponse oldResponse = new ConfigResponse();
         ConfigSchema config = new ConfigSchema();
@@ -150,57 +135,40 @@ public class ResourceConfigFormPrepareAction extends BaseTilesAction {
         Map<String, String> helpProps = new HashMap<String, String>();
 
         try {
-            oldResponse = productBoss
-                    .getMergedConfigResponse(sessionId,
-                                             ProductPlugin.TYPE_PRODUCT, aeid,
-                                             false);
+            oldResponse = productBoss.getMergedConfigResponse(sessionId, ProductPlugin.TYPE_PRODUCT, aeid, false);
 
-            config = productBoss.getConfigSchema(sessionId, aeid,
-                                           ProductPlugin.TYPE_PRODUCT,
-                                           oldResponse);
+            config = productBoss.getConfigSchema(sessionId, aeid, ProductPlugin.TYPE_PRODUCT, oldResponse);
 
             addHelpProperties(helpProps, config, oldResponse);
         } catch (ConfigFetchException e) {
             log.error("cannot retrieve product config", e);
-            RequestUtils
-                    .setError(request,
-                              "resource.common.inventory.error.productConfigNotSet");
+            RequestUtils.setError(request, "resource.common.inventory.error.productConfigNotSet");
             resourceForm.setResourceConfigOptions(new ArrayList());
-            request.setAttribute(Constants.PRODUCT_CONFIG_OPTIONS_COUNT,
-                                 new Integer(0));
+            request.setAttribute(Constants.PRODUCT_CONFIG_OPTIONS_COUNT, new Integer(0));
             resourceForm.setControlConfigOptions(new ArrayList());
-            request.setAttribute(Constants.CONTROL_CONFIG_OPTIONS_COUNT,
-                                 new Integer(0));
+            request.setAttribute(Constants.CONTROL_CONFIG_OPTIONS_COUNT, new Integer(0));
             resourceForm.setMonitorConfigOptions(new ArrayList());
-            request.setAttribute(Constants.MONITOR_CONFIG_OPTIONS_COUNT,
-                                 new Integer(0));
+            request.setAttribute(Constants.MONITOR_CONFIG_OPTIONS_COUNT, new Integer(0));
             return null;
 
         } catch (PluginNotFoundException e) {
             log.error("Plugin not found for the resource ", e);
-            RequestUtils
-                    .setError(request,
-                              "resource.common.inventory.error.PluginNotFound");
+            RequestUtils.setError(request, "resource.common.inventory.error.PluginNotFound");
             resourceForm.setResourceConfigOptions(new ArrayList());
-            request.setAttribute(Constants.PRODUCT_CONFIG_OPTIONS_COUNT,
-                                 new Integer(0));
+            request.setAttribute(Constants.PRODUCT_CONFIG_OPTIONS_COUNT, new Integer(0));
             resourceForm.setControlConfigOptions(new ArrayList());
-            request.setAttribute(Constants.CONTROL_CONFIG_OPTIONS_COUNT,
-                                 new Integer(0));
+            request.setAttribute(Constants.CONTROL_CONFIG_OPTIONS_COUNT, new Integer(0));
             resourceForm.setMonitorConfigOptions(new ArrayList());
-            request.setAttribute(Constants.MONITOR_CONFIG_OPTIONS_COUNT,
-                                 new Integer(0));
+            request.setAttribute(Constants.MONITOR_CONFIG_OPTIONS_COUNT, new Integer(0));
             return null;
         }
 
-        //XXX add the options through the builder and get them
+        // XXX add the options through the builder and get them
         String prefix = ProductPlugin.TYPE_PRODUCT + ".";
-        List<ConfigValues> uiResourceOptions = BizappUtils.buildLoadConfigOptions(prefix, 
-                                                        config, oldResponse);
+        List<ConfigValues> uiResourceOptions = BizappUtils.buildLoadConfigOptions(prefix, config, oldResponse);
 
         resourceForm.setResourceConfigOptions(uiResourceOptions);
-        request.setAttribute(Constants.PRODUCT_CONFIG_OPTIONS_COUNT,
-                                new Integer(uiResourceOptions.size()));
+        request.setAttribute(Constants.PRODUCT_CONFIG_OPTIONS_COUNT, new Integer(uiResourceOptions.size()));
 
         prefix = ProductPlugin.TYPE_MEASUREMENT + ".";
 
@@ -208,43 +176,33 @@ public class ResourceConfigFormPrepareAction extends BaseTilesAction {
         oldResponse = new ConfigResponse();
 
         try {
-            oldResponse = productBoss.getMergedConfigResponse(sessionId,
-                    ProductPlugin.TYPE_MEASUREMENT, aeid, false);
-            config = productBoss.getConfigSchema(sessionId, aeid,
-                    ProductPlugin.TYPE_MEASUREMENT, oldResponse);
+            oldResponse = productBoss.getMergedConfigResponse(sessionId, ProductPlugin.TYPE_MEASUREMENT, aeid, false);
+            config = productBoss.getConfigSchema(sessionId, aeid, ProductPlugin.TYPE_MEASUREMENT, oldResponse);
 
             addHelpProperties(helpProps, config, oldResponse);
 
-            if(aeid.getType() == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
-                ServerValue server = (ServerValue)resource;
-                if(server.getWasAutodiscovered()) { 
-                    request.setAttribute(Constants.SERVER_BASED_AUTO_INVENTORY,
-                                         new Integer(0));
+            if (aeid.getType() == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
+                ServerValue server = (ServerValue) resource;
+                if (server.getWasAutodiscovered()) {
+                    request.setAttribute(Constants.SERVER_BASED_AUTO_INVENTORY, new Integer(0));
                 } else {
-                    request.setAttribute(Constants.SERVER_BASED_AUTO_INVENTORY, 
-                                         new Integer(1));
-                    resourceForm.setServerBasedAutoInventory(
-                                         server.getRuntimeAutodiscovery());
+                    request.setAttribute(Constants.SERVER_BASED_AUTO_INVENTORY, new Integer(1));
+                    resourceForm.setServerBasedAutoInventory(server.getRuntimeAutodiscovery());
                 }
-                BizappUtils.setRuntimeAIMessage(sessionId, request, server,
-                                                appdefBoss);
+                BizappUtils.setRuntimeAIMessage(sessionId, request, server, appdefBoss);
             }
 
-        }catch(PluginNotFoundException e) {
-            //do nothing
+        } catch (PluginNotFoundException e) {
+            // do nothing
         }
-        
-        List<ConfigValues> uiMonitorOptions = BizappUtils.buildLoadConfigOptions(prefix,
-                                                                   config,
-                                                                   oldResponse); 
+
+        List<ConfigValues> uiMonitorOptions = BizappUtils.buildLoadConfigOptions(prefix, config, oldResponse);
 
         resourceForm.setMonitorConfigOptions(uiMonitorOptions);
-        request.setAttribute(Constants.MONITOR_CONFIG_OPTIONS_COUNT,
-                             new Integer(uiMonitorOptions.size()));
+        request.setAttribute(Constants.MONITOR_CONFIG_OPTIONS_COUNT, new Integer(uiMonitorOptions.size()));
 
-        if(aeid.getType() != AppdefEntityConstants.APPDEF_TYPE_PLATFORM) {
-            setUIOptions(aeid, request, resourceForm, uiMonitorOptions,
-                         helpProps);
+        if (aeid.getType() != AppdefEntityConstants.APPDEF_TYPE_PLATFORM) {
+            setUIOptions(aeid, request, resourceForm, uiMonitorOptions, helpProps);
         }
 
         addExtraHelpProperties(helpProps);
@@ -262,31 +220,24 @@ public class ResourceConfigFormPrepareAction extends BaseTilesAction {
         oldResponse = new ConfigResponse();
 
         try {
-            oldResponse = productBoss.getMergedConfigResponse(sessionId,
-                    ProductPlugin.TYPE_CONTROL, aeid, false);
-            config = productBoss.getConfigSchema(sessionId, aeid,
-                    ProductPlugin.TYPE_CONTROL, oldResponse);
+            oldResponse = productBoss.getMergedConfigResponse(sessionId, ProductPlugin.TYPE_CONTROL, aeid, false);
+            config = productBoss.getConfigSchema(sessionId, aeid, ProductPlugin.TYPE_CONTROL, oldResponse);
 
             addHelpProperties(helpProps, config, oldResponse);
-        }catch(PluginNotFoundException e) {
+        } catch (PluginNotFoundException e) {
             // do nothing
         }
 
-        List<ConfigValues> uiControlOptions =
-            BizappUtils.buildLoadConfigOptions(prefix, config, oldResponse);
+        List<ConfigValues> uiControlOptions = BizappUtils.buildLoadConfigOptions(prefix, config, oldResponse);
 
         resourceForm.setControlConfigOptions(uiControlOptions);
-        request.setAttribute(Constants.CONTROL_CONFIG_OPTIONS_COUNT,
-                             new Integer(uiControlOptions.size()));
-        
+        request.setAttribute(Constants.CONTROL_CONFIG_OPTIONS_COUNT, new Integer(uiControlOptions.size()));
+
         return null;
 
     }
 
-    protected void setUIOptions(AppdefEntityID aeid,
-                                HttpServletRequest request,
-                                ResourceConfigForm resourceForm,
-                                List<ConfigValues> uiMonitorOptions,
-                                Map<String,String> helpProps)
-        throws Exception {}
+    protected void setUIOptions(AppdefEntityID aeid, HttpServletRequest request, ResourceConfigForm resourceForm,
+                                List<ConfigValues> uiMonitorOptions, Map<String, String> helpProps) throws Exception {
+    }
 }

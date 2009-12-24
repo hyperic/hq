@@ -65,35 +65,32 @@ import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.EncodingException;
 
 /**
- * A class that provides utility methods for common monitoring
- * tasks.
- *
- * Typical usage: an action class uses the <code>getHelper</code>
- * factory method to obtain an <code>InventoryHelper</code> specific
- * to the entity type of a particular resource.
- *
+ * A class that provides utility methods for common monitoring tasks.
+ * 
+ * Typical usage: an action class uses the <code>getHelper</code> factory method
+ * to obtain an <code>InventoryHelper</code> specific to the entity type of a
+ * particular resource.
+ * 
  */
 public abstract class InventoryHelper {
 
     protected Log log = LogFactory.getLog(this.getClass().getName());
 
     protected AppdefEntityID entityId = null;
-      
-    private static final String CFG_ERR_RES =
-        "resource.common.inventory.configProps.Unconfigured.error";
-    private static final String CFG_INVALID_RES =
-        "resource.common.inventory.configProps.InvalidConfig.error";
+
+    private static final String CFG_ERR_RES = "resource.common.inventory.configProps.Unconfigured.error";
+    private static final String CFG_INVALID_RES = "resource.common.inventory.configProps.InvalidConfig.error";
 
     protected InventoryHelper(AppdefEntityID entityId) {
         this.entityId = entityId;
     }
 
     /**
-     * Return a subclass of <code>InventoryHelper</code> specific to
-     * the entity type of a particular resource.
+     * Return a subclass of <code>InventoryHelper</code> specific to the entity
+     * type of a particular resource.
      */
     public static InventoryHelper getHelper(AppdefEntityID entityId) {
-        switch(entityId.getType()) {
+        switch (entityId.getType()) {
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
                 return new PlatformInventoryHelper(entityId);
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
@@ -110,111 +107,94 @@ public abstract class InventoryHelper {
     }
 
     /**
-     * Get the set of child resource types representing a resource's
-     * child resources.
+     * Get the set of child resource types representing a resource's child
+     * resources.
      */
-    public abstract List getChildResourceTypes(HttpServletRequest request,
-                                               ServletContext ctx,
-                                               AppdefResourceValue resource)
-        throws Exception;
+    public abstract List getChildResourceTypes(HttpServletRequest request, ServletContext ctx,
+                                               AppdefResourceValue resource) throws Exception;
 
     /**
      * Get a child resource type from the Bizapp.
      * @param id the id of the child resource type
      */
-    public abstract AppdefResourceType getChildResourceType(HttpServletRequest req,
-                                                            ServletContext ctx,
-                                                            AppdefEntityTypeID atid)
-        throws Exception;
+    public abstract AppdefResourceType getChildResourceType(HttpServletRequest req, ServletContext ctx,
+                                                            AppdefEntityTypeID atid) throws Exception;
 
     /**
-     * Get from the Bizapp the numbers of children of the given
-     * resource. Returns a <code>Map</code> of counts keyed by
-     * child resource type.
-     * @param resource the appdef resource whose children we are
-     * counting
+     * Get from the Bizapp the numbers of children of the given resource.
+     * Returns a <code>Map</code> of counts keyed by child resource type.
+     * @param resource the appdef resource whose children we are counting
      */
-    public abstract Map getChildCounts(HttpServletRequest request,
-                                       ServletContext ctx,
-                                       AppdefResourceValue resource)
+    public abstract Map getChildCounts(HttpServletRequest request, ServletContext ctx, AppdefResourceValue resource)
         throws Exception;
 
     /**
-     * Retrieve the id of the selected child resource type from the
-     * request. If no selection was made, then return the default id
-     * if <code>selectDefaultSubtab</code> allows.
-     *
-     * @param childTypes the complete List of child resource types for
-     * this entity type
-     * @param childCounts the Map of child resource counts keyed by
-     * resource type
+     * Retrieve the id of the selected child resource type from the request. If
+     * no selection was made, then return the default id if
+     * <code>selectDefaultSubtab</code> allows.
+     * 
+     * @param childTypes the complete List of child resource types for this
+     *        entity type
+     * @param childCounts the Map of child resource counts keyed by resource
+     *        type
      * @param defaultOverride whether or not to override
-     * <code>selectDefaultSubtab</code>
+     *        <code>selectDefaultSubtab</code>
      */
-    public Integer getSelectedChildId(HttpServletRequest request,
-                                      List childTypes,
-                                      Map childCounts,
+    public Integer getSelectedChildId(HttpServletRequest request, List childTypes, Map childCounts,
                                       boolean defaultOverride) {
         AppdefEntityTypeID childTypeId = null;
         try {
             childTypeId = RequestUtils.getChildResourceTypeId(request);
-        }
-        catch (ParameterNotFoundException pnfe) {
+        } catch (ParameterNotFoundException pnfe) {
             ; // it's ok if the request param is not specified
         }
 
         if (defaultOverride && childTypeId == null) {
             // default to the first child type for which we
             // actually have some deployed childs
-            return MonitorUtils.findDefaultChildResourceId(childTypes,
-                                                           childCounts);
+            return MonitorUtils.findDefaultChildResourceId(childTypes, childCounts);
         }
-        
+
         if (childTypeId != null) {
             return childTypeId.getId();
         }
-        
+
         return null;
     }
 
     /**
-     * Retrieve the id of the selected child resource type from the
-     * request. If no selection was made, then return the default id
-     * if <code>selectDefaultSubtab</code> allows.
-     *
-     * @param childTypes the complete List of child resource types for
-     * this entity type
-     * @param childCounts the Map of child resource counts keyed by
-     * resource type
+     * Retrieve the id of the selected child resource type from the request. If
+     * no selection was made, then return the default id if
+     * <code>selectDefaultSubtab</code> allows.
+     * 
+     * @param childTypes the complete List of child resource types for this
+     *        entity type
+     * @param childCounts the Map of child resource counts keyed by resource
+     *        type
      */
-    public Integer getSelectedChildId(HttpServletRequest request,
-                                      List childTypes,
-                                      Map childCounts) {
+    public Integer getSelectedChildId(HttpServletRequest request, List childTypes, Map childCounts) {
         return getSelectedChildId(request, childTypes, childCounts, false);
     }
 
     /**
-     * Retrieve the <code>AppdefResourceTypeValue</code> representing
-     * the currently selected child resource type (or, if the
-     * <code>isPerformance</code> flag is not set, the default
-     * child resource type, if none is currently selected).
-     *
-     * @param childTypes the complete List of child resource types for
-     * this entity type
-     * @param childCounts the Map of child resource counts keyed by
-     * resource type
-     * @param isPerformance a Boolean indicating whether or not we are
-     * currently displaying a performance page
+     * Retrieve the <code>AppdefResourceTypeValue</code> representing the
+     * currently selected child resource type (or, if the
+     * <code>isPerformance</code> flag is not set, the default child resource
+     * type, if none is currently selected).
+     * 
+     * @param childTypes the complete List of child resource types for this
+     *        entity type
+     * @param childCounts the Map of child resource counts keyed by resource
+     *        type
+     * @param isPerformance a Boolean indicating whether or not we are currently
+     *        displaying a performance page
      */
-    public AppdefResourceTypeValue getSelectedChildType (
-        HttpServletRequest request,
-        List childTypes,
-        Map childCounts,
-        Integer selectedId) {
+    public AppdefResourceTypeValue getSelectedChildType(HttpServletRequest request, List childTypes, Map childCounts,
+                                                        Integer selectedId) {
 
         if (selectedId != null) {
-            
-            for  (Iterator i = childTypes.iterator(); i.hasNext();) {
+
+            for (Iterator i = childTypes.iterator(); i.hasNext();) {
                 AppdefResourceTypeValue t = (AppdefResourceTypeValue) i.next();
                 if (t.getId().intValue() == selectedId.intValue()) {
                     return t;
@@ -226,83 +206,70 @@ public abstract class InventoryHelper {
     }
 
     /**
-     * Return a boolean indicating whether or not performance pages
-     * should show child type subtabs. The default behavior is to show
-     * subtabs.
+     * Return a boolean indicating whether or not performance pages should show
+     * child type subtabs. The default behavior is to show subtabs.
      */
     public boolean showPerformanceSubtabs() {
         return true;
     }
 
     /**
-     * Return a boolean indicating whether or not performance pages
-     * should select the default subtab when none is selected. The
-     * default behavior is to select the default subtab.
+     * Return a boolean indicating whether or not performance pages should
+     * select the default subtab when none is selected. The default behavior is
+     * to select the default subtab.
      */
     public boolean selectDefaultSubtab() {
         return true;
     }
-    
-    public boolean isResourceConfigured(HttpServletRequest request,
-                                        ServletContext ctx, boolean setError)
-        throws ServletException, AppdefEntityNotFoundException,
-               SessionNotFoundException, SessionTimeoutException,
-               PermissionException, EncodingException, RemoteException {
+
+    public boolean isResourceConfigured(HttpServletRequest request, ServletContext ctx, boolean setError)
+        throws ServletException, AppdefEntityNotFoundException, SessionNotFoundException, SessionTimeoutException,
+        PermissionException, EncodingException, RemoteException {
         final String CONFIG_ATTR = "IsResourceUnconfigured";
 
         Boolean configured = (Boolean) request.getAttribute(CONFIG_ATTR);
         if (configured != null)
             return !configured.booleanValue();
-        
+
         if (entityId.isGroup())
             return true;
-        
+
         int sessionId = RequestUtils.getSessionId(request).intValue();
 
-        if (this instanceof ApplicationInventoryHelper) return true;
+        if (this instanceof ApplicationInventoryHelper)
+            return true;
 
         ProductBoss productBoss = Bootstrap.getBean(ProductBoss.class);
 
         String context = request.getContextPath();
         try {
-            productBoss.getMergedConfigResponse(sessionId,
-                    ProductPlugin.TYPE_MEASUREMENT, entityId, true);
+            productBoss.getMergedConfigResponse(sessionId, ProductPlugin.TYPE_MEASUREMENT, entityId, true);
         } catch (ConfigFetchException e) {
             if (setError) {
-                ActionMessage error
-                    = new ActionMessage(CFG_ERR_RES,
-                                        new String[] {
-                                            context,
-                                            String.valueOf(entityId.getType()),
-                                            String.valueOf(entityId.getID()) });
-                RequestUtils.setError(request, error, 
-                                      ActionMessages.GLOBAL_MESSAGE);
+                ActionMessage error = new ActionMessage(CFG_ERR_RES, new String[] { context,
+                                                                                   String.valueOf(entityId.getType()),
+                                                                                   String.valueOf(entityId.getID()) });
+                RequestUtils.setError(request, error, ActionMessages.GLOBAL_MESSAGE);
             }
             request.setAttribute(CONFIG_ATTR, Boolean.TRUE);
             return false;
         }
 
         // only check where the config is invalid
-        String validationError =
-            productBoss.getConfigResponse(sessionId, entityId).getValidationError();
+        String validationError = productBoss.getConfigResponse(sessionId, entityId).getValidationError();
 
         if (validationError == null) {
             request.setAttribute(CONFIG_ATTR, Boolean.FALSE);
             return true;
         }
         if (setError) {
-            ActionMessage error
-                = new ActionMessage(CFG_INVALID_RES,
-                                    new String[] {
-                                        StringUtil.replace(validationError, 
-                                                           "\n", 
-                                                          "<br>&nbsp;&nbsp;"
-                                                          + "&nbsp;&nbsp;"),
-                                        context,
-                                        String.valueOf(entityId.getType()),
-                                        String.valueOf(entityId.getID()) });
-            RequestUtils.setError(request, error, 
-                                  ActionMessages.GLOBAL_MESSAGE);
+            ActionMessage error = new ActionMessage(CFG_INVALID_RES, new String[] { StringUtil.replace(validationError,
+                                                                                       "\n", "<br>&nbsp;&nbsp;"
+                                                                                             + "&nbsp;&nbsp;"),
+                                                                                   context,
+                                                                                   String.valueOf(entityId.getType()),
+                                                                                   String.valueOf(entityId.getID()) });
+            RequestUtils.setError(request, error, ActionMessages.GLOBAL_MESSAGE);
         }
         request.setAttribute(CONFIG_ATTR, Boolean.TRUE);
         return false;

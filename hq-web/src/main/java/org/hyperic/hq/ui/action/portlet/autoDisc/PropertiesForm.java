@@ -30,19 +30,26 @@ import org.apache.struts.action.ActionMapping;
 
 import org.hyperic.hq.ui.action.portlet.DashboardBaseForm;
 
-public class PropertiesForm extends DashboardBaseForm {
-    
+public class PropertiesForm
+    extends DashboardBaseForm {
+
     private Integer range;
 
-    public PropertiesForm() { super(); }
+    public PropertiesForm() {
+        super();
+    }
 
-    public void reset(ActionMapping mapping,
-                      HttpServletRequest request) {
+    public void reset(ActionMapping mapping, HttpServletRequest request) {
         range = null;
         super.reset(mapping, request);
     }
 
-    public Integer getRange() { return this.range; }
-    public void setRange(Integer range) { this.range = range; }
-    
+    public Integer getRange() {
+        return this.range;
+    }
+
+    public void setRange(Integer range) {
+        this.range = range;
+    }
+
 }

@@ -53,13 +53,13 @@ import org.hyperic.util.units.FormattedNumber;
 
 /**
  * Bean that holds condition info.
- *
+ * 
  */
 public final class ConditionBean {
     private static final String DOUBLE_REGEX = "[0-9,.]+";
-    private static final String TYPE_ABS  = "absolute";
+    private static final String TYPE_ABS = "absolute";
     private static final String TYPE_PERC = "percentage";
-    private static final String TYPE_CHG  = "changed";
+    private static final String TYPE_CHG = "changed";
 
     private Log log = LogFactory.getLog(ConditionBean.class.getName());
 
@@ -77,27 +77,25 @@ public final class ConditionBean {
     private String controlAction;
     private String controlActionStatus;
     private String customProperty;
-    private int    logLevel;
+    private int logLevel;
     private String logMatch;
     private String fileMatch;
 
-
-    //-------------------------------------constructors
+    // -------------------------------------constructors
 
     public ConditionBean() {
         log.trace("creating new condition form");
         setDefaults();
     }
 
-
-    //-------------------------------------public methods
+    // -------------------------------------public methods
 
     public Integer getId() {
-	return id;
+        return id;
     }
 
     public void setId(Integer id) {
-	this.id = id;
+        this.id = id;
     }
 
     public boolean isRequired() {
@@ -111,21 +109,21 @@ public final class ConditionBean {
     public String getTrigger() {
         return trigger;
     }
-    
+
     public void setTrigger(String trigger) {
         this.trigger = trigger;
     }
-    
+
     public String getThresholdType() {
         return thresholdType;
     }
-    
+
     public void setThresholdType(String thresholdType) {
         this.thresholdType = thresholdType;
     }
 
     public String getComparator() {
-        if ( thresholdType.equals(TYPE_ABS) ) {
+        if (thresholdType.equals(TYPE_ABS)) {
             return absoluteComparator;
         } else {
             return percentageComparator;
@@ -159,7 +157,7 @@ public final class ConditionBean {
     public String getMetricName() {
         return metricName;
     }
-    
+
     public void setMetricName(String metricName) {
         this.metricName = metricName;
     }
@@ -167,19 +165,19 @@ public final class ConditionBean {
     public String getPercentage() {
         return percentage;
     }
-    
+
     public void setPercentage(String percentage) {
         int ind;
         if ((ind = percentage.indexOf('%')) > -1)
             percentage = percentage.substring(0, ind);
-        
+
         this.percentage = percentage;
     }
-    
+
     public String getAbsoluteValue() {
         return absoluteValue;
     }
-    
+
     public void setAbsoluteValue(String absoluteValue) {
         this.absoluteValue = absoluteValue;
     }
@@ -187,7 +185,7 @@ public final class ConditionBean {
     public String getBaselineOption() {
         return baselineOption;
     }
-    
+
     public void setBaselineOption(String baselineOption) {
         this.baselineOption = baselineOption;
     }
@@ -195,23 +193,23 @@ public final class ConditionBean {
     public String getControlAction() {
         return controlAction;
     }
-    
+
     public void setControlAction(String controlAction) {
         this.controlAction = controlAction;
     }
-    
+
     public String getControlActionStatus() {
         return controlActionStatus;
     }
-    
+
     public void setControlActionStatus(String controlActionStatus) {
         this.controlActionStatus = controlActionStatus;
     }
-    
+
     public String getCustomProperty() {
         return customProperty;
     }
-    
+
     public void setCustomProperty(String customProperty) {
         this.customProperty = customProperty;
     }
@@ -219,15 +217,15 @@ public final class ConditionBean {
     public int getLogLevel() {
         return logLevel;
     }
-    
+
     public void setLogLevel(int logLevel) {
         this.logLevel = logLevel;
     }
-    
+
     public String getLogMatch() {
         return logMatch;
     }
-    
+
     public void setLogMatch(String logMatch) {
         this.logMatch = logMatch;
     }
@@ -236,15 +234,13 @@ public final class ConditionBean {
         return fileMatch;
     }
 
-
     public void setFileMatch(String fileMatch) {
         this.fileMatch = fileMatch;
     }
 
-
     public double getThresholdValue() {
-        if ( trigger.equals("onMetric") ) {
-            if ( thresholdType.equals(TYPE_ABS) ) {
+        if (trigger.equals("onMetric")) {
+            if (thresholdType.equals(TYPE_ABS)) {
                 return NumberUtil.stringAsNumber(absoluteValue).doubleValue();
             } else if (thresholdType.equals(TYPE_PERC)) {
                 return NumberUtil.stringAsNumber(percentage).doubleValue();
@@ -252,56 +248,44 @@ public final class ConditionBean {
         }
         return 0d;
     }
-    public boolean validate(HttpServletRequest request, ActionErrors errs,
-                            int idx) {
+
+    public boolean validate(HttpServletRequest request, ActionErrors errs, int idx) {
         boolean valid = true;
         if (trigger.equals("onMetric")) {
             if (getMetricId().intValue() <= 0) {
                 // user didn't select a metric
-                ActionMessage err = new ActionMessage(
-                    "alert.config.error.NoMetricSelected");
+                ActionMessage err = new ActionMessage("alert.config.error.NoMetricSelected");
                 errs.add("condition[" + idx + "].metricId", err);
                 valid = false;
             }
             if (thresholdType.equals(TYPE_ABS)) {
-                if (!GenericValidator.matchRegexp(getAbsoluteValue(),
-                                                  DOUBLE_REGEX)) {
-                    String fieldName = RequestUtils.message(
-                        request, "alert.config.props.CB.AbsoluteValue");
-                    ActionMessage err =
-                        new ActionMessage("errors.double", fieldName);
+                if (!GenericValidator.matchRegexp(getAbsoluteValue(), DOUBLE_REGEX)) {
+                    String fieldName = RequestUtils.message(request, "alert.config.props.CB.AbsoluteValue");
+                    ActionMessage err = new ActionMessage("errors.double", fieldName);
                     errs.add("condition[" + idx + "].absoluteValue", err);
                     valid = false;
                 } else { // double
                     // do nothing
                 }
             } else if (thresholdType.equals(TYPE_PERC)) { // percentage
-                if (!GenericValidator.matchRegexp(getPercentage(),
-                                                  DOUBLE_REGEX)) {
-                    String fieldName = RequestUtils.message(
-                        request, "alert.config.props.CB.Percentage");
-                    ActionMessage err =
-                        new ActionMessage("errors.double", fieldName);
+                if (!GenericValidator.matchRegexp(getPercentage(), DOUBLE_REGEX)) {
+                    String fieldName = RequestUtils.message(request, "alert.config.props.CB.Percentage");
+                    ActionMessage err = new ActionMessage("errors.double", fieldName);
                     errs.add("condition[" + idx + "].percentage", err);
                     valid = false;
                 } else { // double
                     // 0-100 range
-                    double percentage = NumberUtil.stringAsNumber(
-                            getPercentage()).doubleValue();
+                    double percentage = NumberUtil.stringAsNumber(getPercentage()).doubleValue();
                     if (!GenericValidator.isInRange(percentage, 0d, 1000d)) {
-                        ActionMessage err = new ActionMessage(
-                            "errors.range",
-                            String.valueOf(percentage), String.valueOf(0d),
-                            String.valueOf(1000d));
+                        ActionMessage err = new ActionMessage("errors.range", String.valueOf(percentage), String
+                            .valueOf(0d), String.valueOf(1000d));
                         errs.add("condition[" + idx + "].percentage", err);
                         valid = false;
                     }
                 }
-                if (null == getBaselineOption() ||
-                    getBaselineOption().length() == 0) {
+                if (null == getBaselineOption() || getBaselineOption().length() == 0) {
                     log.debug("!!! NO BASELINE OPTION!");
-                    ActionMessage err = new ActionMessage(
-                        "alert.config.error.NoBaselineOptionSelected");
+                    ActionMessage err = new ActionMessage("alert.config.error.NoBaselineOptionSelected");
                     errs.add("condition[" + idx + "].baselineOption", err);
                     valid = false;
                 } else {
@@ -310,23 +294,20 @@ public final class ConditionBean {
             }
         } else if (trigger.equals("onCustProp")) {
             if (0 == getCustomProperty().length()) {
-                ActionMessage err = new ActionMessage(
-                    "alert.config.error.NoCustomPropertySelected");
+                ActionMessage err = new ActionMessage("alert.config.error.NoCustomPropertySelected");
                 errs.add("condition[" + idx + "].customProperty", err);
                 valid = false;
             }
         } else if (trigger.equals("onLog") || trigger.equals("onCfgChg")) {
-            // Nothing is required            
+            // Nothing is required
         } else { // on control action
             if (0 == getControlAction().length()) {
-                ActionMessage err = new ActionMessage(
-                    "alert.config.error.NoControlActionSelected");
+                ActionMessage err = new ActionMessage("alert.config.error.NoControlActionSelected");
                 errs.add("condition[" + idx + "].controlAction", err);
                 valid = false;
             }
             if (0 == getControlActionStatus().length()) {
-                ActionMessage err = new ActionMessage(
-                    "alert.config.error.NoControlActionStatusSelected");
+                ActionMessage err = new ActionMessage("alert.config.error.NoControlActionStatusSelected");
                 errs.add("condition[" + idx + "].controlActionStatus", err);
                 valid = false;
             }
@@ -335,45 +316,40 @@ public final class ConditionBean {
         return valid;
     }
 
-    public void importProperties(AlertConditionValue acv, boolean isTypeAlert,
-                                 int sessionId, MeasurementBoss mb)
-        throws MeasurementNotFoundException, SessionNotFoundException,
-               SessionTimeoutException, TemplateNotFoundException,
-               RemoteException {
+    public void importProperties(AlertConditionValue acv, boolean isTypeAlert, int sessionId, MeasurementBoss mb)
+        throws MeasurementNotFoundException, SessionNotFoundException, SessionTimeoutException,
+        TemplateNotFoundException, RemoteException {
         switch (acv.getType()) {
             case EventConstants.TYPE_THRESHOLD:
             case EventConstants.TYPE_BASELINE:
             case EventConstants.TYPE_CHANGE:
-                metricId = new Integer( acv.getMeasurementId() );
+                metricId = new Integer(acv.getMeasurementId());
                 metricName = acv.getName();
-                
+
                 trigger = "onMetric";
                 if (acv.getType() == EventConstants.TYPE_THRESHOLD) {
                     thresholdType = TYPE_ABS;
 
                     String unit;
-                    
+
                     if (isTypeAlert) {
-                        MeasurementTemplate mtv =
-                            mb.getMeasurementTemplate(sessionId, metricId);
+                        MeasurementTemplate mtv = mb.getMeasurementTemplate(sessionId, metricId);
                         unit = mtv.getUnits();
-                    }
-                    else {
+                    } else {
                         Measurement m = mb.getMeasurement(sessionId, metricId);
                         unit = m.getTemplate().getUnits();
                     }
-                    
+
                     if (unit.equals(MeasurementConstants.UNITS_NONE)) {
-                    	absoluteValue = String.valueOf(acv.getThreshold());
+                        absoluteValue = String.valueOf(acv.getThreshold());
                     } else {
-                    	FormattedNumber absoluteFmt = UnitsConvert.convert
-                        	( acv.getThreshold(), unit );
-                    	absoluteValue = absoluteFmt.toString();
+                        FormattedNumber absoluteFmt = UnitsConvert.convert(acv.getThreshold(), unit);
+                        absoluteValue = absoluteFmt.toString();
                     }
                 } else if (acv.getType() == EventConstants.TYPE_BASELINE) {
                     thresholdType = TYPE_PERC;
                     baselineOption = acv.getOption();
-                    percentage = NumberUtil.numberAsString( acv.getThreshold() );
+                    percentage = NumberUtil.numberAsString(acv.getThreshold());
                 } else if (acv.getType() == EventConstants.TYPE_CHANGE) {
                     thresholdType = TYPE_CHG;
                 }
@@ -400,7 +376,7 @@ public final class ConditionBean {
         }
 
         required = acv.getRequired();
-        if ( thresholdType.equals(TYPE_ABS) ) {
+        if (thresholdType.equals(TYPE_ABS)) {
             absoluteComparator = acv.getComparator();
             percentageComparator = null;
         } else if (thresholdType.equals(TYPE_PERC)) {
@@ -412,70 +388,58 @@ public final class ConditionBean {
         }
     }
 
-    public void exportProperties(AlertConditionValue acv,
-                                 HttpServletRequest request,
-                                 int sessionId, MeasurementBoss mb,
-                                 boolean typeAlert)
-        throws SessionTimeoutException, SessionNotFoundException,
-               MeasurementNotFoundException, RemoteException,
-               TemplateNotFoundException {
-        acv.setId( getId() );
-        if ( getTrigger().equals("onMetric") ) {
-            acv.setMeasurementId( getMetricId().intValue() );
-            if ( getThresholdType().equals(TYPE_ABS) ) {
+    public void exportProperties(AlertConditionValue acv, HttpServletRequest request, int sessionId,
+                                 MeasurementBoss mb, boolean typeAlert) throws SessionTimeoutException,
+        SessionNotFoundException, MeasurementNotFoundException, RemoteException, TemplateNotFoundException {
+        acv.setId(getId());
+        if (getTrigger().equals("onMetric")) {
+            acv.setMeasurementId(getMetricId().intValue());
+            if (getThresholdType().equals(TYPE_ABS)) {
                 acv.setType(EventConstants.TYPE_THRESHOLD);
 
                 String unit;
-                
+
                 if (typeAlert) {
-                    MeasurementTemplate mtv =
-                        mb.getMeasurementTemplate(sessionId, getMetricId());
+                    MeasurementTemplate mtv = mb.getMeasurementTemplate(sessionId, getMetricId());
                     unit = mtv.getUnits();
-                }
-                else {
+                } else {
                     // parse the value
                     Measurement m = mb.getMeasurement(sessionId, getMetricId());
                     unit = m.getTemplate().getUnits();
                 }
 
                 try {
-                	acv.setThreshold(
-                		BizappUtils.parseMeasurementValue(
-                			getAbsoluteValue(), 
-                            unit
-                        )
-                    );
+                    acv.setThreshold(BizappUtils.parseMeasurementValue(getAbsoluteValue(), unit));
                 } catch (ParseException e) {
                     acv.setThreshold(getThresholdValue());
                 }
-                
-                acv.setComparator( getComparator() );
+
+                acv.setComparator(getComparator());
             } else if (getThresholdType().equals(TYPE_PERC)) {
                 acv.setType(EventConstants.TYPE_BASELINE);
-                acv.setOption( getBaselineOption() );
-                acv.setThreshold( NumberUtil.stringAsNumber(percentage).doubleValue() );
-                acv.setComparator( getComparator() );
+                acv.setOption(getBaselineOption());
+                acv.setThreshold(NumberUtil.stringAsNumber(percentage).doubleValue());
+                acv.setComparator(getComparator());
             } else {
                 acv.setType(EventConstants.TYPE_CHANGE);
             }
-            acv.setName( getMetricName() );
-        } else if ( getTrigger().equals("onCustProp") ) {
+            acv.setName(getMetricName());
+        } else if (getTrigger().equals("onCustProp")) {
             acv.setType(EventConstants.TYPE_CUST_PROP);
-            acv.setName( getCustomProperty() );
-        } else if ( getTrigger().equals("onLog") ) {
+            acv.setName(getCustomProperty());
+        } else if (getTrigger().equals("onLog")) {
             acv.setType(EventConstants.TYPE_LOG);
-            acv.setName( String.valueOf(getLogLevel()) );
-            acv.setOption( getLogMatch() );
-        } else if ( getTrigger().equals("onCfgChg") ) {
+            acv.setName(String.valueOf(getLogLevel()));
+            acv.setOption(getLogMatch());
+        } else if (getTrigger().equals("onCfgChg")) {
             acv.setType(EventConstants.TYPE_CFG_CHG);
-            acv.setOption( getFileMatch() );
-        }
-        else {
+            acv.setOption(getFileMatch());
+        } else {
             acv.setType(EventConstants.TYPE_CONTROL);
-            acv.setName( getControlAction() );
-            acv.setOption( getControlActionStatus() );
+            acv.setName(getControlAction());
+            acv.setOption(getControlActionStatus());
         }
-        acv.setRequired( isRequired() );
+        acv.setRequired(isRequired());
     }
 
     private void setDefaults() {

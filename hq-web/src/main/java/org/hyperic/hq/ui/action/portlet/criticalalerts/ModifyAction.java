@@ -44,17 +44,17 @@ import org.hyperic.util.config.ConfigResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * An <code>Action</code> that loads the <code>Portal</code>
- * identified by the <code>PORTAL_PARAM</code> request parameter (or
- * the default portal, if the parameter is not specified) into the
- * <code>PORTAL_KEY</code> request attribute.
+ * An <code>Action</code> that loads the <code>Portal</code> identified by the
+ * <code>PORTAL_PARAM</code> request parameter (or the default portal, if the
+ * parameter is not specified) into the <code>PORTAL_KEY</code> request
+ * attribute.
  */
-public class ModifyAction extends BaseAction {
-    
+public class ModifyAction
+    extends BaseAction {
+
     private ConfigurationProxy configurationProxy;
     private AuthzBoss authzBoss;
-    
-    
+
     @Autowired
     public ModifyAction(ConfigurationProxy configurationProxy, AuthzBoss authzBoss) {
         super();
@@ -62,23 +62,18 @@ public class ModifyAction extends BaseAction {
         this.authzBoss = authzBoss;
     }
 
-
-
     /**
-     *
+     * 
      * @param mapping The ActionMapping used to select this instance
      * @param form The optional ActionForm bean for this request (if any)
      * @param request The HTTP request we are processing
      * @param response The HTTP response we are creating
-     *
-     * @exception Exception if the application business logic throws
-     *  an exception
+     * 
+     * @exception Exception if the application business logic throws an
+     *            exception
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
         PropertiesForm pForm = (PropertiesForm) form;
         HttpSession session = request.getSession();
@@ -95,7 +90,7 @@ public class ModifyAction extends BaseAction {
         String timeKey = PropertiesForm.PAST;
         String selOrAllKey = PropertiesForm.SELECTED_OR_ALL;
         String titleKey = PropertiesForm.TITLE;
-        
+
         if (token != null) {
             resKey += token;
             countKey += token;
@@ -104,15 +99,13 @@ public class ModifyAction extends BaseAction {
             selOrAllKey += token;
             titleKey += token;
         }
-        DashboardConfig dashConfig = DashboardUtils.findDashboard(
-        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, authzBoss);
+        DashboardConfig dashConfig = DashboardUtils.findDashboard((Integer) session
+            .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
-        
-        if(pForm.isRemoveClicked()){
+
+        if (pForm.isRemoveClicked()) {
             DashboardUtils.removeResources(pForm.getIds(), resKey, dashPrefs);
-            configurationProxy.setDashboardPreferences(session, user,
-                     dashPrefs);
+            configurationProxy.setDashboardPreferences(session, user, dashPrefs);
         }
 
         ActionForward forward = checkSubmit(request, mapping, form);
@@ -122,21 +115,19 @@ public class ModifyAction extends BaseAction {
         }
 
         Integer numberOfAlerts = pForm.getNumberOfAlerts();
-        String past            = String.valueOf(pForm.getPast());
-        String prioritity      = pForm.getPriority();
-        String selectedOrAll   = pForm.getSelectedOrAll();
-        
-        
+        String past = String.valueOf(pForm.getPast());
+        String prioritity = pForm.getPriority();
+        String selectedOrAll = pForm.getSelectedOrAll();
+
         dashPrefs.setValue(countKey, numberOfAlerts.toString());
         dashPrefs.setValue(timeKey, past);
         dashPrefs.setValue(priorityKey, prioritity);
         dashPrefs.setValue(selOrAllKey, selectedOrAll);
         dashPrefs.setValue(titleKey, pForm.getTitle());
-		
-       configurationProxy.setDashboardPreferences(session, user,
-        		 dashPrefs);
 
-		session.removeAttribute(Constants.USERS_SES_PORTAL);
+        configurationProxy.setDashboardPreferences(session, user, dashPrefs);
+
+        session.removeAttribute(Constants.USERS_SES_PORTAL);
         return mapping.findForward(forwardStr);
     }
 }

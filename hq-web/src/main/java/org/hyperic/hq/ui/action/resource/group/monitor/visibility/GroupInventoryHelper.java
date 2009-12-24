@@ -38,10 +38,11 @@ import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.ui.action.resource.common.monitor.visibility.InventoryHelper;
 
 /**
- * A class that provides application-specific implementations of utility
- * methods for common monitoring tasks.
+ * A class that provides application-specific implementations of utility methods
+ * for common monitoring tasks.
  */
-public class GroupInventoryHelper extends InventoryHelper {
+public class GroupInventoryHelper
+    extends InventoryHelper {
 
     public GroupInventoryHelper(AppdefEntityID entityId) {
         super(entityId);
@@ -50,50 +51,41 @@ public class GroupInventoryHelper extends InventoryHelper {
     // ---------------------------------------------------- Public Methods
 
     /**
-     * Get the set of child resource types representing a resource's
-     * child resources.
-     *
+     * Get the set of child resource types representing a resource's child
+     * resources.
+     * 
      * @param request the http request
      * @param ctx the servlet context
      * @param resource the resource
      */
-    public List getChildResourceTypes(HttpServletRequest request,
-                                      ServletContext ctx,
-                                      AppdefResourceValue resource)
-    throws Exception {
+    public List getChildResourceTypes(HttpServletRequest request, ServletContext ctx, AppdefResourceValue resource)
+        throws Exception {
         // groups have no children
         return null;
     }
 
     /**
-     * Get a child resource type from the Bizapp (returns
-     * <code>null</code>).
-     *
+     * Get a child resource type from the Bizapp (returns <code>null</code>).
+     * 
      * @param request the http request
      * @param ctx the servlet context
      * @param id the id of the server type
      */
-    public AppdefResourceType getChildResourceType(HttpServletRequest request,
-                                                   ServletContext ctx,
-                                                   AppdefEntityTypeID id)
-    throws Exception {
+    public AppdefResourceType getChildResourceType(HttpServletRequest request, ServletContext ctx, AppdefEntityTypeID id)
+        throws Exception {
         // groups have no children
         return null;
     }
 
     /**
-     * Get from the Bizapp the numbers of children of the given
-     * resource. Returns <code>null</code>, since groups have no
-     * children.
-     *
+     * Get from the Bizapp the numbers of children of the given resource.
+     * Returns <code>null</code>, since groups have no children.
+     * 
      * @param request the http request
-     * @param resource the appdef resource whose children we are
-     * counting
+     * @param resource the appdef resource whose children we are counting
      */
-    public Map getChildCounts(HttpServletRequest request,
-                              ServletContext ctx,
-                              AppdefResourceValue resource)
-    throws Exception {
+    public Map getChildCounts(HttpServletRequest request, ServletContext ctx, AppdefResourceValue resource)
+        throws Exception {
         // groups have no children
         return null;
     }

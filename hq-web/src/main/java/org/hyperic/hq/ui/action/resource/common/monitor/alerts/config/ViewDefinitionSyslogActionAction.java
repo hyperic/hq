@@ -43,42 +43,32 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * View an alert definition -- syslog action.
- *
+ * 
  */
-public class ViewDefinitionSyslogActionAction extends TilesAction {
+public class ViewDefinitionSyslogActionAction
+    extends TilesAction {
 
-   private ConfigBoss configBoss;
-   private EventsBoss eventsBoss;
-   
-   
-   @Autowired
+    private ConfigBoss configBoss;
+    private EventsBoss eventsBoss;
+
+    @Autowired
     public ViewDefinitionSyslogActionAction(ConfigBoss configBoss, EventsBoss eventsBoss) {
         super();
         this.configBoss = configBoss;
         this.eventsBoss = eventsBoss;
     }
 
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
-
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception
-    {            
-       
         int sessionID = RequestUtils.getSessionId(request).intValue();
-      
 
-        String enabledStr = configBoss.getConfig().getProperty
-            (HQConstants.SyslogActionsEnabled);
+        String enabledStr = configBoss.getConfig().getProperty(HQConstants.SyslogActionsEnabled);
         Boolean syslogActionsEnabled = Boolean.valueOf(enabledStr);
-        request.setAttribute(HQConstants.SyslogActionsEnabled,
-                             syslogActionsEnabled);
+        request.setAttribute(HQConstants.SyslogActionsEnabled, syslogActionsEnabled);
 
-        if ( syslogActionsEnabled.booleanValue() ) {
-            AlertDefinitionValue adv = AlertDefUtil.getAlertDefinition
-                (request, sessionID, eventsBoss);
+        if (syslogActionsEnabled.booleanValue()) {
+            AlertDefinitionValue adv = AlertDefUtil.getAlertDefinition(request, sessionID, eventsBoss);
             SyslogActionForm saForm = new SyslogActionForm();
             AlertDefUtil.prepareSyslogActionForm(adv, saForm);
             request.setAttribute("syslogActionForm", saForm);
@@ -87,4 +77,3 @@ public class ViewDefinitionSyslogActionAction extends TilesAction {
         return null;
     }
 }
-

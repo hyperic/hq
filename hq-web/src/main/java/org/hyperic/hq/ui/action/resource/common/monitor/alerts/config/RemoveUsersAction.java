@@ -40,49 +40,43 @@ import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
-
 /**
  * An Action that removes users for an alert definition.
- *
+ * 
  */
-public class RemoveUsersAction extends RemoveNotificationsAction {
+public class RemoveUsersAction
+    extends RemoveNotificationsAction {
     private final Log log = LogFactory.getLog(RemoveUsersAction.class.getName());
-    
-    
+
     @Autowired
     public RemoveUsersAction(EventsBoss eventsBoss) {
         super(eventsBoss);
     }
 
-    public int getNotificationType() { return EmailActionConfig.TYPE_USERS; }
+    public int getNotificationType() {
+        return EmailActionConfig.TYPE_USERS;
+    }
 
     /**
      * Handles the actual work of removing users from the action.
      */
-    protected ActionForward handleRemove(ActionMapping mapping,
-                                         HttpServletRequest request,
-                                         Map<String, Object> params,
-                                         Integer sessionID,
-                                         ActionValue action,
-                                         EmailActionConfig ea,
-                                         EventsBoss eb,
-                                         RemoveNotificationsForm rnForm)
-    throws Exception{
-    
+    protected ActionForward handleRemove(ActionMapping mapping, HttpServletRequest request, Map<String, Object> params,
+                                         Integer sessionID, ActionValue action, EmailActionConfig ea, EventsBoss eb,
+                                         RemoveNotificationsForm rnForm) throws Exception {
+
         Integer[] users = rnForm.getUsers();
         if (null != users) {
             log.debug("users.length=" + users.length);
             HashSet<Object> storedUsers = new HashSet<Object>();
             storedUsers.addAll(ea.getUsers());
-            for (int x=0; x<users.length; ++x) {
+            for (int x = 0; x < users.length; ++x) {
                 storedUsers.remove(users[x]);
             }
-            ea.setNames( StringUtil.iteratorToString(storedUsers.iterator(), ",") );
-            action.setConfig( ea.getConfigResponse().encode() );
+            ea.setNames(StringUtil.iteratorToString(storedUsers.iterator(), ","));
+            action.setConfig(ea.getConfigResponse().encode());
             eb.updateAction(sessionID.intValue(), action);
         }
 
-        return returnSuccess(request, mapping, params); 
+        return returnSuccess(request, mapping, params);
     }
 }
-

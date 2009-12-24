@@ -47,78 +47,64 @@ import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.springframework.beans.factory.annotation.Autowired;
 
-
 /**
- * For screen 2.1.6.4, an AppService's lists of dependencies (&quot;dependees&quot;)
- * and dependents (&quot;dependers&quot;) are displayed.  The dependee list can
- * be added to and removed from, the depender list is read-only.  The user can navigate
- * between the dependencies by clicking <b>View</b> in the UI. 
+ * For screen 2.1.6.4, an AppService's lists of dependencies
+ * (&quot;dependees&quot;) and dependents (&quot;dependers&quot;) are displayed.
+ * The dependee list can be added to and removed from, the depender list is
+ * read-only. The user can navigate between the dependencies by clicking
+ * <b>View</b> in the UI.
  */
-public class ListServiceDependenciesAction extends TilesAction {
+public class ListServiceDependenciesAction
+    extends TilesAction {
 
     private AppdefBoss appdefBoss;
-    
-    
+
     @Autowired
     public ListServiceDependenciesAction(AppdefBoss appdefBoss) {
         super();
         this.appdefBoss = appdefBoss;
     }
 
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
-
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-    throws Exception {
-                
         ListServiceDependenciesForm cform = (ListServiceDependenciesForm) form;
-        ApplicationValue app =
-            (ApplicationValue) RequestUtils.getResource(request);
+        ApplicationValue app = (ApplicationValue) RequestUtils.getResource(request);
         if (app == null) {
-            RequestUtils.setError(request,
-                                  "resource.application.error.inventory.ApplicationNotFound");
+            RequestUtils.setError(request, "resource.application.error.inventory.ApplicationNotFound");
             return null;
-        }        
-        
-        Integer appId = app.getId();
-       
-        Integer appSvcId = cform.getAppSvcId();
-        
-       
-        Integer sessionId = RequestUtils.getSessionId(request);
-      
-        List<AppdefResourceValue> services = 
-            appdefBoss.findServiceInventoryByApplication(sessionId.intValue(), appId,
-                                           PageControl.PAGE_ALL);
+        }
 
-        // get the dependency tree            
-        DependencyTree tree = appdefBoss.getAppDependencyTree(sessionId.intValue(),app.getId());
-        DependencyNode appSvcNode = DependencyTree.findAppServiceById(tree, appSvcId);            
-        //log.trace("Got dependency tree: " + appSvcNode);          
+        Integer appId = app.getId();
+
+        Integer appSvcId = cform.getAppSvcId();
+
+        Integer sessionId = RequestUtils.getSessionId(request);
+
+        List<AppdefResourceValue> services = appdefBoss.findServiceInventoryByApplication(sessionId.intValue(), appId,
+            PageControl.PAGE_ALL);
+
+        // get the dependency tree
+        DependencyTree tree = appdefBoss.getAppDependencyTree(sessionId.intValue(), app.getId());
+        DependencyNode appSvcNode = DependencyTree.findAppServiceById(tree, appSvcId);
+        // log.trace("Got dependency tree: " + appSvcNode);
         // build a list of AppServiceNodeBean's that this AppService depends on
         List<AppServiceNodeBean> dependeeList = DependencyTree.findDependees(tree, appSvcNode, services);
         // build a list of AppServiceNodeBean's that depend on this AppService
-        List<AppServiceNodeBean> dependerList = DependencyTree.findDependers(tree, appSvcId, services);            
+        List<AppServiceNodeBean> dependerList = DependencyTree.findDependers(tree, appSvcId, services);
         request.setAttribute(Constants.APPSVC_CURRENT_ATTR, appSvcNode.getAppService());
 
-        PageControl pc =
-            RequestUtils.getPageControl(request, "ps", "pn",
-                                        "so", "sc");          
-        Pager dependeePager = Pager.getDefaultPager();            
-        PageList<AppServiceNodeBean> pagedDependeeList = dependeePager.seek(dependeeList, 
-                                       pc.getPagenum(), 
-                                       pc.getPagesize() );  
+        PageControl pc = RequestUtils.getPageControl(request, "ps", "pn", "so", "sc");
+        Pager dependeePager = Pager.getDefaultPager();
+        PageList<AppServiceNodeBean> pagedDependeeList = dependeePager.seek(dependeeList, pc.getPagenum(), pc
+            .getPagesize());
 
         request.setAttribute(Constants.APPSVC_DEPENDEES_ATTR, pagedDependeeList);
         request.setAttribute(Constants.APPSVC_DEPENDERS_ATTR, dependerList);
-        request.setAttribute(Constants.NUM_APPSVC_DEPENDEES_ATTR,
-                             new Integer(dependeeList.size()));
-        request.setAttribute(Constants.NUM_APPSVC_DEPENDERS_ATTR,
-                             new Integer(dependerList.size()));
+        request.setAttribute(Constants.NUM_APPSVC_DEPENDEES_ATTR, new Integer(dependeeList.size()));
+        request.setAttribute(Constants.NUM_APPSVC_DEPENDERS_ATTR, new Integer(dependerList.size()));
 
         return null;
-    }        
-   
+    }
+
 }

@@ -58,15 +58,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Create a new alert definition.
- *
+ * 
  */
-public class NewDefinitionAction extends BaseAction {
+public class NewDefinitionAction
+    extends BaseAction {
 
     private final Log log = LogFactory.getLog(NewDefinitionAction.class.getName());
     private EventsBoss eventsBoss;
     private MeasurementBoss measurementBoss;
-    
-    
+
     @Autowired
     public NewDefinitionAction(EventsBoss eventsBoss, MeasurementBoss measurementBoss) {
         super();
@@ -74,27 +74,19 @@ public class NewDefinitionAction extends BaseAction {
         this.measurementBoss = measurementBoss;
     }
 
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception
-    {
-        DefinitionForm defForm = (DefinitionForm)form;
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
+        DefinitionForm defForm = (DefinitionForm) form;
 
         Map<String, Object> params = new HashMap<String, Object>();
         AppdefEntityID adeId;
         if (defForm.getRid() != null) {
-            adeId = new AppdefEntityID(defForm.getType().intValue(),
-                                       defForm.getRid());
+            adeId = new AppdefEntityID(defForm.getType().intValue(), defForm.getRid());
             params.put(Constants.ENTITY_ID_PARAM, adeId.getAppdefKey());
-        }
-        else {
-            adeId = new AppdefEntityTypeID(defForm.getType().intValue(),
-                    defForm.getResourceType());
+        } else {
+            adeId = new AppdefEntityTypeID(defForm.getType().intValue(), defForm.getResourceType());
             params.put(Constants.APPDEF_RES_TYPE_ID, adeId.getAppdefKey());
         }
-
 
         ActionForward forward = checkSubmit(request, mapping, form, params);
         if (forward != null) {
@@ -102,80 +94,68 @@ public class NewDefinitionAction extends BaseAction {
             return forward;
         }
 
-       
         int sessionID = RequestUtils.getSessionId(request).intValue();
-       
 
         AlertDefinitionValue adv = new AlertDefinitionValue();
         defForm.exportProperties(adv);
         defForm.exportConditionsEnablement(adv, request, sessionID, measurementBoss,
-                                           adeId instanceof AppdefEntityTypeID);
-        adv.setAppdefType( adeId.getType() );
-        adv.setAppdefId( adeId.getId() );
-        log.trace("adv="+adv);
-        
+            adeId instanceof AppdefEntityTypeID);
+        adv.setAppdefType(adeId.getType());
+        adv.setAppdefId(adeId.getId());
+        log.trace("adv=" + adv);
+
         if (adeId instanceof AppdefEntityTypeID)
             try {
-                adv = eventsBoss.createResourceTypeAlertDefinition(
-                        sessionID, (AppdefEntityTypeID) adeId, adv);
-            } catch(Exception e) {
-                return returnFailure(request, mapping, params); 
+                adv = eventsBoss.createResourceTypeAlertDefinition(sessionID, (AppdefEntityTypeID) adeId, adv);
+            } catch (Exception e) {
+                return returnFailure(request, mapping, params);
             }
         else
             adv = eventsBoss.createAlertDefinition(sessionID, adv);
 
-        params.put( Constants.ALERT_DEFINITION_PARAM, adv.getId() );
+        params.put(Constants.ALERT_DEFINITION_PARAM, adv.getId());
 
-        if ( areAnyMetricsDisabled(adv, adeId, sessionID) ) {
-            RequestUtils.setError
-                (request, "resource.common.monitor.alert.config.error.SomeMetricsDisabled");
+        if (areAnyMetricsDisabled(adv, adeId, sessionID)) {
+            RequestUtils.setError(request, "resource.common.monitor.alert.config.error.SomeMetricsDisabled");
         } else {
-            RequestUtils.setConfirmation
-                (request, "resource.common.monitor.alert.config.confirm.Create");
+            RequestUtils.setConfirmation(request, "resource.common.monitor.alert.config.confirm.Create");
         }
         return returnSuccess(request, mapping, params);
     }
 
-    private boolean areAnyMetricsDisabled(AlertDefinitionValue adv, AppdefEntityID adeId,
-                                           int sessionID)
-        throws SessionNotFoundException,
-               SessionTimeoutException,
-               AppdefEntityNotFoundException,
-               GroupNotCompatibleException,
-               PermissionException,
-               RemoteException
-    {
+    private boolean areAnyMetricsDisabled(AlertDefinitionValue adv, AppdefEntityID adeId, int sessionID)
+        throws SessionNotFoundException, SessionTimeoutException, AppdefEntityNotFoundException,
+        GroupNotCompatibleException, PermissionException, RemoteException {
         // create a map of metricId --> enabled for this resource
-        List metrics = measurementBoss.findMeasurements( sessionID, adeId, PageControl.PAGE_ALL );
-        Map<Integer, Boolean> metricEnabledFlags = new HashMap<Integer, Boolean>( metrics.size() );
-        for (Iterator it=metrics.iterator(); it.hasNext();) {
-            // Groups are handled differently here.  The list of
+        List metrics = measurementBoss.findMeasurements(sessionID, adeId, PageControl.PAGE_ALL);
+        Map<Integer, Boolean> metricEnabledFlags = new HashMap<Integer, Boolean>(metrics.size());
+        for (Iterator it = metrics.iterator(); it.hasNext();) {
+            // Groups are handled differently here. The list of
             // metrics that will be returned for a group will be
             // GroupMetricDisplaySummary beans instead of
-            // DerivedMeasurementValue beans.  We cannot check the
+            // DerivedMeasurementValue beans. We cannot check the
             // enabled status of these measurements for groups, so
             // don't do anything here.
             try {
-                Measurement m = (Measurement)it.next();
-                metricEnabledFlags.put( m.getId(), new Boolean(m.isEnabled()));
+                Measurement m = (Measurement) it.next();
+                metricEnabledFlags.put(m.getId(), new Boolean(m.isEnabled()));
             } catch (ClassCastException e) {
-              
+
             }
         }
 
         // iterate over alert conditions and see if any of the metrics
         // being used are disabled
-        for (int i=0; i<adv.getConditions().length; ++i) {
-            if ( adv.getConditions()[i].measurementIdHasBeenSet() ) {
-                Integer mid = new Integer( adv.getConditions()[i].getMeasurementId());
-                Boolean metricEnabled = (Boolean)metricEnabledFlags.get(mid);
+        for (int i = 0; i < adv.getConditions().length; ++i) {
+            if (adv.getConditions()[i].measurementIdHasBeenSet()) {
+                Integer mid = new Integer(adv.getConditions()[i].getMeasurementId());
+                Boolean metricEnabled = (Boolean) metricEnabledFlags.get(mid);
                 if (null != metricEnabled) {
                     return metricEnabled.equals(Boolean.FALSE);
                 }
             }
         }
-        
+
         return false;
     }
 }
-

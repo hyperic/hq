@@ -44,29 +44,22 @@ import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageList;
 
-public class RemoveResourcesAction extends TilesAction {
+public class RemoveResourcesAction
+    extends TilesAction {
 
-
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception
-    {
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
         ServletContext ctx = getServlet().getServletContext();
         HttpSession session = request.getSession();
         WebUser user = RequestUtils.getWebUser(session);
-        
-        List<String> resourceList = user.
-            getPreferenceAsList(Constants.USERPREF_KEY_FAVORITE_RESOURCES,
-                                Constants.DASHBOARD_DELIMITER);
 
-        PageList<AppdefResourceValue> resources =
-            new PageList<AppdefResourceValue>(DashboardUtils.listAsResources(resourceList, ctx, user),
-                         resourceList.size());
+        List<String> resourceList = user.getPreferenceAsList(Constants.USERPREF_KEY_FAVORITE_RESOURCES,
+            Constants.DASHBOARD_DELIMITER);
 
-        request.setAttribute(Constants.RESOURCE_HEALTH_LIST, resources);           
+        PageList<AppdefResourceValue> resources = new PageList<AppdefResourceValue>(DashboardUtils.listAsResources(
+            resourceList, ctx, user), resourceList.size());
+
+        request.setAttribute(Constants.RESOURCE_HEALTH_LIST, resources);
 
         return null;
     }

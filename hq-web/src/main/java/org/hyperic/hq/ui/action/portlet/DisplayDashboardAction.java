@@ -60,21 +60,21 @@ import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class DisplayDashboardAction extends TilesAction {
-    
+public class DisplayDashboardAction
+    extends TilesAction {
+
     private ConfigurationProxy configurationProxy;
-    
+
     private AuthzBoss authzBoss;
-    
+
     private DashboardManager dashboardManager;
-    
+
     private UpdateBoss updateBoss;
-    
+
     private AuthzSubjectManager authzSubjectManager;
-    
-    
+
     @Autowired
-	public DisplayDashboardAction(ConfigurationProxy configurationProxy, AuthzBoss authzBoss,
+    public DisplayDashboardAction(ConfigurationProxy configurationProxy, AuthzBoss authzBoss,
                                   DashboardManager dashboardManager, UpdateBoss updateBoss,
                                   AuthzSubjectManager authzSubjectManager) {
         super();
@@ -85,157 +85,157 @@ public class DisplayDashboardAction extends TilesAction {
         this.authzSubjectManager = authzSubjectManager;
     }
 
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
+        HttpSession session = request.getSession();
 
-
-    public ActionForward execute(ComponentContext context,
-			                     ActionMapping mapping, 
-			                     ActionForm form, 
-			                     HttpServletRequest request,
-			                     HttpServletResponse response) 
-	throws Exception {
-		HttpSession session = request.getSession();
-		
-		DashboardForm dForm = (DashboardForm) form;
+        DashboardForm dForm = (DashboardForm) form;
         WebUser user = RequestUtils.getWebUser(request);
-		
-		AuthzSubject me = authzBoss.findSubjectById(user.getSessionId(), user.getSubject().getId());
-		Portal portal = (Portal) session.getAttribute(Constants.USERS_SES_PORTAL);
-		portal = new Portal();
-		
-		portal.setName("dashboard.template.title");
-		portal.setColumns(2);
 
-		// Set dashboard string list for the dashboard select list
-		List<DashboardConfig> dashboardCollection = (ArrayList<DashboardConfig>) dashboardManager.getDashboards(me);
-		List<Dashboard> dashboards = new ArrayList<Dashboard>();
-        
-		for (Iterator<DashboardConfig> i = dashboardCollection.iterator(); i.hasNext();) {
-			DashboardConfig config = i.next();
-			Dashboard dashboard = new Dashboard();
-            
-			dashboard.setId(config.getId());
-			dashboard.set_name(config.getName());
-			dashboards.add(dashboard);
-		}
-		
-		if (dashboards.size() > 0) {
-			dForm.setDashboards(dashboards);
-		} else {
-			dashboards.add(new Dashboard(""));
-			dForm.setDashboards(dashboards);
-		}
+        AuthzSubject me = authzBoss.findSubjectById(user.getSessionId(), user.getSubject().getId());
+        Portal portal = (Portal) session.getAttribute(Constants.USERS_SES_PORTAL);
+        portal = new Portal();
 
-		// Check if there is a default dashboard, selected dashboard or none of
-		// the above
-		Integer selectedDashboard = SessionUtils.getIntegerAttribute(session, Constants.SELECTED_DASHBOARD_ID, null);
-		String defaultDashboard = user.getPreference(Constants.DEFAULT_DASHBOARD_ID, null);
-		DashboardConfig dashboardConfig = null;
-		
-		if (defaultDashboard != null && selectedDashboard == null) {
-			// If this is a fresh session, selected dashboard id won't be set so we'll need to 
-			// initially set it to the default dashboard id.
-			dashboardConfig = DashboardUtils.findDashboard((ArrayList<DashboardConfig>) dashboardCollection, Integer.valueOf(defaultDashboard));
+        portal.setName("dashboard.template.title");
+        portal.setColumns(2);
+
+        // Set dashboard string list for the dashboard select list
+        List<DashboardConfig> dashboardCollection = (ArrayList<DashboardConfig>) dashboardManager.getDashboards(me);
+        List<Dashboard> dashboards = new ArrayList<Dashboard>();
+
+        for (Iterator<DashboardConfig> i = dashboardCollection.iterator(); i.hasNext();) {
+            DashboardConfig config = i.next();
+            Dashboard dashboard = new Dashboard();
+
+            dashboard.setId(config.getId());
+            dashboard.set_name(config.getName());
+            dashboards.add(dashboard);
+        }
+
+        if (dashboards.size() > 0) {
+            dForm.setDashboards(dashboards);
+        } else {
+            dashboards.add(new Dashboard(""));
+            dForm.setDashboards(dashboards);
+        }
+
+        // Check if there is a default dashboard, selected dashboard or none of
+        // the above
+        Integer selectedDashboard = SessionUtils.getIntegerAttribute(session, Constants.SELECTED_DASHBOARD_ID, null);
+        String defaultDashboard = user.getPreference(Constants.DEFAULT_DASHBOARD_ID, null);
+        DashboardConfig dashboardConfig = null;
+
+        if (defaultDashboard != null && selectedDashboard == null) {
+            // If this is a fresh session, selected dashboard id won't be set so
+            // we'll need to
+            // initially set it to the default dashboard id.
+            dashboardConfig = DashboardUtils.findDashboard((ArrayList<DashboardConfig>) dashboardCollection, Integer
+                .valueOf(defaultDashboard));
         } else if (dashboardCollection.size() == 1) {
             // No need to select a default - only one available
             dashboardConfig = (DashboardConfig) dashboardCollection.get(0);
             defaultDashboard = dashboardConfig.getId().toString();
-		} else if (selectedDashboard != null) {
-			// If we have a selected dashboard id, find it in the list of dashboards
-			// if it has been removed, inform the user
-			dashboardConfig = DashboardUtils.findDashboard((ArrayList<DashboardConfig>) dashboardCollection, selectedDashboard);
-		} 
-		
-		if (dashboardConfig == null) {
-			// Either no default/selected dashboard or default dashboard no longer exists
-			// in both cases, we'll set default dashboard to the user dashboard
-			dashboardConfig = dashboardManager.getUserDashboard(me, me);
-			defaultDashboard = dashboardConfig.getId().toString();
-			
-			// update preferences
-			user.setPreference(Constants.DEFAULT_DASHBOARD_ID, defaultDashboard);
-			authzBoss.setUserPrefs(user.getSessionId(), user.getSubject().getId(), user.getPreferences());
-		}
+        } else if (selectedDashboard != null) {
+            // If we have a selected dashboard id, find it in the list of
+            // dashboards
+            // if it has been removed, inform the user
+            dashboardConfig = DashboardUtils.findDashboard((ArrayList<DashboardConfig>) dashboardCollection,
+                selectedDashboard);
+        }
 
-		// Update the sessions with the selected dashboard
-		session.setAttribute(Constants.SELECTED_DASHBOARD_ID, dashboardConfig.getId());
+        if (dashboardConfig == null) {
+            // Either no default/selected dashboard or default dashboard no
+            // longer exists
+            // in both cases, we'll set default dashboard to the user dashboard
+            dashboardConfig = dashboardManager.getUserDashboard(me, me);
+            defaultDashboard = dashboardConfig.getId().toString();
 
-		// Update the form with whatever values we figure out above
-		dForm.setSelectedDashboardId(dashboardConfig.getId().toString());
-		dForm.setDefaultDashboard(defaultDashboard);
+            // update preferences
+            user.setPreference(Constants.DEFAULT_DASHBOARD_ID, defaultDashboard);
+            authzBoss.setUserPrefs(user.getSessionId(), user.getSubject().getId(), user.getPreferences());
+        }
 
-		if (dashboardManager.isEditable(me, dashboardConfig)) {
-			session.setAttribute(Constants.IS_DASH_EDITABLE, "true");
-		} else {
-			session.removeAttribute(Constants.IS_DASH_EDITABLE);
-		}
-		
-		// Dashboard exists, display it
-		ConfigResponse dashPrefs = dashboardConfig.getConfig();
+        // Update the sessions with the selected dashboard
+        session.setAttribute(Constants.SELECTED_DASHBOARD_ID, dashboardConfig.getId());
 
-		// See if we need to initialize the dashboard (for Roles)
-		// we now check both columns for null-ness, instead of only the first
-		// TODO This typically will only occur if the role was created via API
-		//      We'll need to add some logic to role creation in hqapi so that
-		//      dashboard creation happens, however for 4.2 this is not something
-		//      we can squeeze in, this will suffice for the time being
-		if (dashPrefs.getValue(Constants.USER_PORTLETS_FIRST) == null && dashPrefs.getValue(Constants.USER_PORTLETS_SECOND) == null) {
-		    ConfigResponse defaultRoleDashPrefs = (ConfigResponse) getServlet().getServletContext().getAttribute(Constants.DEF_ROLE_DASH_PREFS);
-		    AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
-		    
-		    dashboardManager.configureDashboard(overlord, dashboardConfig, defaultRoleDashPrefs);
-		    dashPrefs.merge(defaultRoleDashPrefs, true); 
-		}
-		
-		portal.addPortletsFromString(dashPrefs.getValue(Constants.USER_PORTLETS_FIRST), 1);
-		portal.addPortletsFromString(dashPrefs.getValue(Constants.USER_PORTLETS_SECOND), 2);
+        // Update the form with whatever values we figure out above
+        dForm.setSelectedDashboardId(dashboardConfig.getId().toString());
+        dForm.setDefaultDashboard(defaultDashboard);
 
-		// Go through the portlets and see if they have descriptions
-		for (Iterator<Collection<Portlet>> pit = portal.getPortlets().iterator(); pit.hasNext();) {
-			Collection<Portlet> portlets = pit.next();
-			
-			for (Iterator<Portlet> it = portlets.iterator(); it.hasNext();) {
-				Portlet portlet = it.next();
-				String titleKey = portlet.getUrl() + ".title" + (portlet.getToken() != null ? portlet.getToken() : "");
-				
-				portlet.setDescription(dashPrefs.getValue(titleKey, ""));
-			}
-		}
-		
-		session.setAttribute(Constants.USERS_SES_PORTAL, portal);
+        if (dashboardManager.isEditable(me, dashboardConfig)) {
+            session.setAttribute(Constants.IS_DASH_EDITABLE, "true");
+        } else {
+            session.removeAttribute(Constants.IS_DASH_EDITABLE);
+        }
 
-		// Make sure there's a valid RSS auth token
-		ConfigResponse dashCfg = dashboardManager.getUserDashboard(me, me).getConfig();
-		String rssToken = dashCfg.getValue(Constants.RSS_TOKEN);
-		
-		if (rssToken == null) {
-			rssToken = String.valueOf(session.hashCode());
-			
-			dashCfg.setValue(Constants.RSS_TOKEN, rssToken);
-			// Now store the RSS auth token
-			configurationProxy.setUserDashboardPreferences(dashCfg, user);
-		}
-		
-		session.setAttribute("rssToken", rssToken);
-		request.setAttribute(Constants.PORTAL_KEY, portal);
+        // Dashboard exists, display it
+        ConfigResponse dashPrefs = dashboardConfig.getConfig();
 
-		Map<String, Object> userOpsMap = (Map<String, Object>) session.getAttribute(Constants.USER_OPERATIONS_ATTR);
+        // See if we need to initialize the dashboard (for Roles)
+        // we now check both columns for null-ness, instead of only the first
+        // TODO This typically will only occur if the role was created via API
+        // We'll need to add some logic to role creation in hqapi so that
+        // dashboard creation happens, however for 4.2 this is not something
+        // we can squeeze in, this will suffice for the time being
+        if (dashPrefs.getValue(Constants.USER_PORTLETS_FIRST) == null &&
+            dashPrefs.getValue(Constants.USER_PORTLETS_SECOND) == null) {
+            ConfigResponse defaultRoleDashPrefs = (ConfigResponse) getServlet().getServletContext().getAttribute(
+                Constants.DEF_ROLE_DASH_PREFS);
+            AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
 
-		if (userOpsMap.containsKey(AuthzConstants.rootOpCAMAdmin)) {
-			// Now check for updates
-			
+            dashboardManager.configureDashboard(overlord, dashboardConfig, defaultRoleDashPrefs);
+            dashPrefs.merge(defaultRoleDashPrefs, true);
+        }
 
-			try {
-				RequestUtils.getStringParameter(request, "update");
-				updateBoss.ignoreUpdate();
-			} catch (ParameterNotFoundException e) {
-				String update = updateBoss.getUpdateReport();
+        portal.addPortletsFromString(dashPrefs.getValue(Constants.USER_PORTLETS_FIRST), 1);
+        portal.addPortletsFromString(dashPrefs.getValue(Constants.USER_PORTLETS_SECOND), 2);
 
-				if (update != null) {
-					request.setAttribute("HQUpdateReport", update);
-				}
-			}
-		}
+        // Go through the portlets and see if they have descriptions
+        for (Iterator<Collection<Portlet>> pit = portal.getPortlets().iterator(); pit.hasNext();) {
+            Collection<Portlet> portlets = pit.next();
 
-		return null;
-	}
+            for (Iterator<Portlet> it = portlets.iterator(); it.hasNext();) {
+                Portlet portlet = it.next();
+                String titleKey = portlet.getUrl() + ".title" + (portlet.getToken() != null ? portlet.getToken() : "");
+
+                portlet.setDescription(dashPrefs.getValue(titleKey, ""));
+            }
+        }
+
+        session.setAttribute(Constants.USERS_SES_PORTAL, portal);
+
+        // Make sure there's a valid RSS auth token
+        ConfigResponse dashCfg = dashboardManager.getUserDashboard(me, me).getConfig();
+        String rssToken = dashCfg.getValue(Constants.RSS_TOKEN);
+
+        if (rssToken == null) {
+            rssToken = String.valueOf(session.hashCode());
+
+            dashCfg.setValue(Constants.RSS_TOKEN, rssToken);
+            // Now store the RSS auth token
+            configurationProxy.setUserDashboardPreferences(dashCfg, user);
+        }
+
+        session.setAttribute("rssToken", rssToken);
+        request.setAttribute(Constants.PORTAL_KEY, portal);
+
+        Map<String, Object> userOpsMap = (Map<String, Object>) session.getAttribute(Constants.USER_OPERATIONS_ATTR);
+
+        if (userOpsMap.containsKey(AuthzConstants.rootOpCAMAdmin)) {
+            // Now check for updates
+
+            try {
+                RequestUtils.getStringParameter(request, "update");
+                updateBoss.ignoreUpdate();
+            } catch (ParameterNotFoundException e) {
+                String update = updateBoss.getUpdateReport();
+
+                if (update != null) {
+                    request.setAttribute("HQUpdateReport", update);
+                }
+            }
+        }
+
+        return null;
+    }
 }

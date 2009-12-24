@@ -42,8 +42,9 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class PrepareAction extends BaseAction {
-    
+public class PrepareAction
+    extends BaseAction {
+
     private AuthzBoss authzBoss;
 
     @Autowired
@@ -52,27 +53,22 @@ public class PrepareAction extends BaseAction {
         this.authzBoss = authzBoss;
     }
 
-
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
         PropertiesForm pForm = (PropertiesForm) form;
 
         HttpSession session = request.getSession();
         WebUser user = RequestUtils.getWebUser(session);
-      
-        DashboardConfig dashConfig = DashboardUtils.findDashboard(
-        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, authzBoss);
+
+        DashboardConfig dashConfig = DashboardUtils.findDashboard((Integer) session
+            .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
 
         Integer range = new Integer(dashPrefs.getValue(PropertiesForm.RANGE));
 
         pForm.setRange(range);
 
-        return null;        
+        return null;
     }
 }

@@ -42,32 +42,26 @@ import org.hyperic.hq.ui.action.resource.RemoveResourceForm;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-
 /**
- * When the user selects one of the checkboxes in the services list on the
- * View Application page (2.1.6), this class handles removing the 
+ * When the user selects one of the checkboxes in the services list on the View
+ * Application page (2.1.6), this class handles removing the
  * {@link org.hyperic.hq.appdef.shared.AppService}.
  */
-public class RemoveServicesAction extends BaseAction {
+public class RemoveServicesAction
+    extends BaseAction {
 
     private final Log log = LogFactory.getLog(RemoveServicesAction.class.getName());
     private AppdefBoss appdefBoss;
-    
-    
+
     @Autowired
     public RemoveServicesAction(AppdefBoss appdefBoss) {
         super();
         this.appdefBoss = appdefBoss;
     }
 
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
-
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {                                 
- 
         RemoveResourceForm cform = (RemoveResourceForm) form;
         HashMap<String, Object> forwardParams = new HashMap<String, Object>(2);
         forwardParams.put(Constants.ENTITY_ID_PARAM, cform.getEid());
@@ -77,21 +71,16 @@ public class RemoveServicesAction extends BaseAction {
         if (appSvcIds != null && appSvcIds.length > 0) {
 
             Integer sessionId = RequestUtils.getSessionId(request);
-         
 
             for (int i = 0; i < appSvcIds.length; i++) {
-                Integer appSvcId= appSvcIds[i];
-                log.debug("Removing appSvc = " + appSvcId +
-                          "  from application " + cform.getRid());
-                appdefBoss.removeAppService(sessionId.intValue(), cform.getRid(),
-                                      appSvcId);                
+                Integer appSvcId = appSvcIds[i];
+                log.debug("Removing appSvc = " + appSvcId + "  from application " + cform.getRid());
+                appdefBoss.removeAppService(sessionId.intValue(), cform.getRid(), appSvcId);
             }
 
-            RequestUtils
-                .setConfirmation(request,
-                                 "resource.application.inventory.confirm.RemoveServices");            
-            
+            RequestUtils.setConfirmation(request, "resource.application.inventory.confirm.RemoveServices");
+
         }
-        return returnSuccess(request, mapping, forwardParams);   
+        return returnSuccess(request, mapping, forwardParams);
     }
 }

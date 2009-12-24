@@ -45,33 +45,25 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * A <code>BaseAction</code> that removes servers from the
- * inventory.
+ * A <code>BaseAction</code> that removes servers from the inventory.
  */
-public class RemoveServersAction extends BaseAction {
-    
+public class RemoveServersAction
+    extends BaseAction {
+
     private final Log log = LogFactory.getLog(RemoveServersAction.class.getName());
     private AppdefBoss appdefBoss;
-    
-    
+
     @Autowired
     public RemoveServersAction(AppdefBoss appdefBoss) {
         super();
         this.appdefBoss = appdefBoss;
     }
 
-
-
     /**
-     * Removes the servers identified in the
-     * <code>RemoveServersForm</code>.
+     * Removes the servers identified in the <code>RemoveServersForm</code>.
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-        
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
         RemoveServersForm rmForm = (RemoveServersForm) form;
         Integer platformId = rmForm.getRid();
@@ -80,26 +72,22 @@ public class RemoveServersAction extends BaseAction {
         HashMap<String, Object> forwardParams = new HashMap<String, Object>(2);
         forwardParams.put(Constants.RESOURCE_PARAM, platformId);
         forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, resourceType);
- 
+
         Integer sessionId = RequestUtils.getSessionId(request);
 
         Integer[] resources = rmForm.getResources();
         if (resources != null && resources.length > 0) {
             List<Integer> servers = Arrays.asList(resources);
-            log.trace("removing servers " + servers +
-                      " for platform [" + platformId + "]");
-           
+            log.trace("removing servers " + servers + " for platform [" + platformId + "]");
+
             for (Integer serverId : servers) {
-                appdefBoss.removeAppdefEntity(sessionId.intValue(),
-                                        AppdefEntityID.newServerID(serverId));
+                appdefBoss.removeAppdefEntity(sessionId.intValue(), AppdefEntityID.newServerID(serverId));
             }
 
-            RequestUtils
-                .setConfirmation(request,
-                                 "resource.platform.inventory.confirm.RemoveServers");
+            RequestUtils.setConfirmation(request, "resource.platform.inventory.confirm.RemoveServers");
         }
 
         return returnSuccess(request, mapping, forwardParams);
-                
+
     }
 }

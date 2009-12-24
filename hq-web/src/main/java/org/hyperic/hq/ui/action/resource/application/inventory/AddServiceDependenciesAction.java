@@ -55,34 +55,26 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-
 /**
- * When the list of pending service dependencies on the Add 
- * Dependencies page (2.1.6.5) is grown, shrunk or committed 
- * (by selecting from the checkbox lists and clicking add, 
- * remove or ok) this class manages the pending list and  
+ * When the list of pending service dependencies on the Add Dependencies page
+ * (2.1.6.5) is grown, shrunk or committed (by selecting from the checkbox lists
+ * and clicking add, remove or ok) this class manages the pending list and
  * commitment.
  */
-public class AddServiceDependenciesAction extends BaseAction {
+public class AddServiceDependenciesAction
+    extends BaseAction {
 
-    private final Log log =
-        LogFactory.getLog(AddServiceDependenciesAction.class.getName());
+    private final Log log = LogFactory.getLog(AddServiceDependenciesAction.class.getName());
     private AppdefBoss appdefBoss;
-    
-    
+
     @Autowired
     public AddServiceDependenciesAction(AppdefBoss appdefBoss) {
         super();
         this.appdefBoss = appdefBoss;
     }
 
-
-
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-    throws Exception {
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
         HttpSession session = request.getSession();
 
         AddApplicationServicesForm addForm = (AddApplicationServicesForm) form;
@@ -93,31 +85,21 @@ public class AddServiceDependenciesAction extends BaseAction {
         HashMap<String, Object> forwardParams = new HashMap<String, Object>(2);
         forwardParams.put(Constants.RESOURCE_PARAM, resourceId);
         forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, entityType);
-        forwardParams.put("appSvcId",appSvcId);
-        
-        ActionForward forward =
-            checkSubmit(request, mapping, form, forwardParams);
+        forwardParams.put("appSvcId", appSvcId);
+
+        ActionForward forward = checkSubmit(request, mapping, form, forwardParams);
         if (forward != null) {
             BaseValidatorForm spiderForm = (BaseValidatorForm) form;
 
-            if (spiderForm.isCancelClicked() ||
-                spiderForm.isResetClicked()) {
+            if (spiderForm.isCancelClicked() || spiderForm.isResetClicked()) {
                 log.trace("removing pending service list");
-                SessionUtils.removeList(session,
-                                        Constants.PENDING_SVCDEPS_SES_ATTR);
-            }
-            else if (spiderForm.isAddClicked()) {
-                log.trace("adding to pending service list " +
-                          Arrays.asList(addForm.getAvailableServices()));
-                SessionUtils.addToList(session,
-                                       Constants.PENDING_SVCDEPS_SES_ATTR,
-                                       addForm.getAvailableServices());
-            }
-            else if (spiderForm.isRemoveClicked()) {
+                SessionUtils.removeList(session, Constants.PENDING_SVCDEPS_SES_ATTR);
+            } else if (spiderForm.isAddClicked()) {
+                log.trace("adding to pending service list " + Arrays.asList(addForm.getAvailableServices()));
+                SessionUtils.addToList(session, Constants.PENDING_SVCDEPS_SES_ATTR, addForm.getAvailableServices());
+            } else if (spiderForm.isRemoveClicked()) {
                 log.trace("removing from pending service list");
-                SessionUtils.removeFromList(session,
-                                            Constants.PENDING_SVCDEPS_SES_ATTR,
-                                            addForm.getPendingServices());
+                SessionUtils.removeFromList(session, Constants.PENDING_SVCDEPS_SES_ATTR, addForm.getPendingServices());
             }
             return forward;
         }
@@ -125,78 +107,61 @@ public class AddServiceDependenciesAction extends BaseAction {
         Integer sessionId = RequestUtils.getSessionId(request);
 
         log.trace("getting pending service list");
-        List<String> uiPendings =
-            SessionUtils.getListAsListStr(session,
-                                          Constants.PENDING_SVCDEPS_SES_ATTR);
+        List<String> uiPendings = SessionUtils.getListAsListStr(session, Constants.PENDING_SVCDEPS_SES_ATTR);
         List<AppdefEntityID> pendingServiceIdList = new ArrayList<AppdefEntityID>();
 
-        for(int i = 0;i< uiPendings.size(); i++) {
-            StringTokenizer tok =
-                new StringTokenizer((String) uiPendings.get(i), " ");
+        for (int i = 0; i < uiPendings.size(); i++) {
+            StringTokenizer tok = new StringTokenizer((String) uiPendings.get(i), " ");
             if (tok.countTokens() > 1) {
-                pendingServiceIdList.add(
-                    new AppdefEntityID(
-                        AppdefEntityConstants.stringToType(tok.nextToken()),
-                        Integer.parseInt(tok.nextToken())));
-            }
-            else {
+                pendingServiceIdList.add(new AppdefEntityID(AppdefEntityConstants.stringToType(tok.nextToken()),
+                    Integer.parseInt(tok.nextToken())));
+            } else {
                 pendingServiceIdList.add(new AppdefEntityID(tok.nextToken()));
             }
         }
 
-        DependencyTree tree =
-            appdefBoss.getAppDependencyTree(sessionId.intValue(), resourceId);
+        DependencyTree tree = appdefBoss.getAppDependencyTree(sessionId.intValue(), resourceId);
 
         Map<Integer, AppServiceValue> depNodeChildren = new HashMap<Integer, AppServiceValue>();
-        DependencyNode depNode =
-            DependencyTree.findAppServiceById(tree, appSvcId);
-        //TODO this looks suspicious.  Seems like depNode.getChildren returns list of AppService, not AppServiceValue
-        for (Iterator iter = depNode.getChildren().iterator(); iter.hasNext();){
+        DependencyNode depNode = DependencyTree.findAppServiceById(tree, appSvcId);
+        // TODO this looks suspicious. Seems like depNode.getChildren returns
+        // list of AppService, not AppServiceValue
+        for (Iterator iter = depNode.getChildren().iterator(); iter.hasNext();) {
             AppServiceValue anAppSvc = (AppServiceValue) iter.next();
-            if(anAppSvc.getIsCluster())
-                depNodeChildren.put(anAppSvc.getServiceCluster().getGroupId(),
-                                    anAppSvc);
+            if (anAppSvc.getIsCluster())
+                depNodeChildren.put(anAppSvc.getServiceCluster().getGroupId(), anAppSvc);
             else
-                depNodeChildren.put(anAppSvc.getService().getId(),anAppSvc);
+                depNodeChildren.put(anAppSvc.getService().getId(), anAppSvc);
         }
 
         if (log.isTraceEnabled())
-            log.trace("adding servicess " + uiPendings.toString() +
-                  " for application [" + resourceId + "]");            
+            log.trace("adding servicess " + uiPendings.toString() + " for application [" + resourceId + "]");
 
         // look through the tree's DependencyNodes to find the ones
         // we have pending (identified by their service ids)
-        for ( DependencyNode node : tree.getNodes()) {
-          
+        for (DependencyNode node : tree.getNodes()) {
+
             AppdefEntityID lookFor;
-            
+
             if (node.isCluster())
-                lookFor =
-                    AppdefEntityID.newGroupID(node.getAppService()
-                        .getResourceGroup().getId());
+                lookFor = AppdefEntityID.newGroupID(node.getAppService().getResourceGroup().getId());
             else
                 lookFor = node.getAppService().getService().getEntityId();
-            if (pendingServiceIdList.contains(lookFor) && 
-                !depNodeChildren.containsKey(lookFor)) {
+            if (pendingServiceIdList.contains(lookFor) && !depNodeChildren.containsKey(lookFor)) {
                 depNode.addChild(node.getAppService());
-            }                                
+            }
         }
         log.trace("Saving tree: " + tree);
         appdefBoss.setAppDependencyTree(sessionId.intValue(), tree);
         // XXX remember to kill this, this is just to demonstrate for Javier
-        DependencyTree savedTree =
-            appdefBoss.getAppDependencyTree(sessionId.intValue(),
-                                      tree.getApplication().getId());
+        DependencyTree savedTree = appdefBoss.getAppDependencyTree(sessionId.intValue(), tree.getApplication().getId());
         log.trace("Saved tree: " + savedTree);
 
         log.trace("removing pending service list");
-        SessionUtils.removeList(session,
-                                Constants.PENDING_SVCDEPS_SES_ATTR);
+        SessionUtils.removeList(session, Constants.PENDING_SVCDEPS_SES_ATTR);
 
-        RequestUtils.setConfirmation(request,
-                                     "resource.application.inventory.confirm." +
-                                     "AddedServices");
-        return returnSuccess(request, mapping, forwardParams);        
+        RequestUtils.setConfirmation(request, "resource.application.inventory.confirm." + "AddedServices");
+        return returnSuccess(request, mapping, forwardParams);
 
     }
 }

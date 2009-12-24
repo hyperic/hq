@@ -31,58 +31,72 @@ import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.ui.action.BaseValidatorForm;
 
 /**
- *
+ * 
  * The form object which captures the view name used for the indicator charts
  */
-public class IndicatorViewsForm extends BaseValidatorForm {
+public class IndicatorViewsForm
+    extends BaseValidatorForm {
 
-    private String   action;
-    private String   view;
+    private String action;
+    private String view;
     private String[] views;
     private String[] metric;
-    private String   addMetric;
-    private long     timeToken;
-    private String   update;
+    private String addMetric;
+    private long timeToken;
+    private String update;
 
     public String getAction() {
         return action;
     }
+
     public void setAction(String action) {
         this.action = action;
     }
+
     public String getView() {
         return view;
     }
+
     public void setView(String view) {
         this.view = view;
     }
+
     public String[] getViews() {
         return views;
     }
+
     public void setViews(String[] views) {
         this.views = views;
     }
+
     public String[] getMetric() {
         return metric;
     }
+
     public void setMetric(String[] metric) {
         this.metric = metric;
     }
+
     public void setAddMetric(String addMetric) {
         this.addMetric = addMetric;
     }
+
     public String getAddMetric() {
         return addMetric;
     }
+
     public long getTimeToken() {
         return timeToken;
     }
+
     public void setTimeToken(long timeToken) {
         this.timeToken = timeToken;
     }
+
     public String getUpdate() {
         return update;
     }
+
     public void setUpdate(String update) {
         this.update = update;
     }
@@ -94,7 +108,7 @@ public class IndicatorViewsForm extends BaseValidatorForm {
         this.addMetric = null;
         this.timeToken = System.currentTimeMillis();
     }
-    
+
     public void reset(ActionMapping mapping, HttpServletRequest request) {
         setDefaults();
         super.reset(mapping, request);

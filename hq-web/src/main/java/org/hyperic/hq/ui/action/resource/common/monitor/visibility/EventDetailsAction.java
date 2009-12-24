@@ -55,126 +55,103 @@ import org.hyperic.util.units.UnitsConstants;
 import org.hyperic.util.units.UnitsFormat;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+
 /**
- *
+ * 
  * Set an array for the timeline display
  */
-public class EventDetailsAction extends BaseAction {
-    
+public class EventDetailsAction
+    extends BaseAction {
+
     private EventLogBoss eventLogBoss;
-    
-    
+
     @Autowired
     public EventDetailsAction(EventLogBoss eventLogBoss) {
         super();
         this.eventLogBoss = eventLogBoss;
     }
 
-
-
-    /* (non-Javadoc)
-     * @see org.apache.struts.action.Action#execute(org.apache.struts.action.ActionMapping, org.apache.struts.action.ActionForm, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+    /*
+     * (non-Javadoc)
+     * 
+     * @seeorg.apache.struts.action.Action#execute(org.apache.struts.action.
+     * ActionMapping, org.apache.struts.action.ActionForm,
+     * javax.servlet.http.HttpServletRequest,
+     * javax.servlet.http.HttpServletResponse)
      */
-    public ActionForward execute(ActionMapping mapping, ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
         WebUser user = RequestUtils.getWebUser(request);
-        Map<String,Object> range = user.getMetricRangePreference();
+        Map<String, Object> range = user.getMetricRangePreference();
         long begin = ((Long) range.get(MonitorUtils.BEGIN)).longValue();
         long end = ((Long) range.get(MonitorUtils.END)).longValue();
-        long interval = TimeUtil.getInterval(begin, end,
-                Constants.DEFAULT_CHART_POINTS);
+        long interval = TimeUtil.getInterval(begin, end, Constants.DEFAULT_CHART_POINTS);
 
-        begin =
-            Long.parseLong(RequestUtils.getStringParameter(request, "begin"));
-        
+        begin = Long.parseLong(RequestUtils.getStringParameter(request, "begin"));
+
         AppdefEntityID aeid = RequestUtils.getEntityId(request);
 
-       
-       
         int sessionId = user.getSessionId().intValue();
-        
+
         List<EventLog> events;
         try {
             String status = RequestUtils.getStringParameter(request, "status");
-            
+
             // Control logs are different, they store their return status
             // So we have to look it up by the type
             if (status.equals("CTL")) {
-                events = eventLogBoss.getEvents(sessionId, ControlEvent.class.getName(),
-                                        aeid, begin, begin + interval);
-            }
-            else {
-                events = eventLogBoss.getEvents(sessionId, aeid, status,
-                                        begin, begin + interval);
+                events = eventLogBoss.getEvents(sessionId, ControlEvent.class.getName(), aeid, begin, begin + interval);
+            } else {
+                events = eventLogBoss.getEvents(sessionId, aeid, status, begin, begin + interval);
             }
         } catch (ParameterNotFoundException e) {
             String[] types = null;
-            events = eventLogBoss.getEvents(user.getSessionId().intValue(), aeid, types,
-                                    begin, begin + interval);
+            events = eventLogBoss.getEvents(user.getSessionId().intValue(), aeid, types, begin, begin + interval);
         }
-        
+
         MessageResources res = getResources(request);
-        String formatString = res.getMessage(
-                Constants.UNIT_FORMAT_PREFIX_KEY + "epoch-millis");
+        String formatString = res.getMessage(Constants.UNIT_FORMAT_PREFIX_KEY + "epoch-millis");
         DateFormatter.DateSpecifics dateSpecs;
 
         dateSpecs = new DateFormatter.DateSpecifics();
         dateSpecs.setDateFormat(new SimpleDateFormat(formatString));
-        
+
         StringBuffer html;
-        
+
         if (events.size() == 0) {
-            html = new StringBuffer(
-                res.getMessage("resource.common.monitor.text.events.None"));
-        }
-        else {
+            html = new StringBuffer(res.getMessage("resource.common.monitor.text.events.None"));
+        } else {
             html = new StringBuffer("<ul class=\"eventDetails\">");
-        
-            for ( EventLog elv : events) {
-             
+
+            for (EventLog elv : events) {
+
                 html.append("<li ");
-            
+
                 String status = elv.getStatus();
-                if (status.equals("EMR") ||
-                    status.equals("ALR") ||
-                    status.equals("CRT") ||
-                    status.equals("ERR") ) {
+                if (status.equals("EMR") || status.equals("ALR") || status.equals("CRT") || status.equals("ERR")) {
                     html.append("class=\"red\"");
-                } else
-                if (status.equals("WRN")) {
+                } else if (status.equals("WRN")) {
                     html.append("class=\"yellow\"");
-                } else
-                if (status.equals("NTC") ||
-                    status.equals("INF") ||
-                    status.equals("DBG")) {
+                } else if (status.equals("NTC") || status.equals("INF") || status.equals("DBG")) {
                     html.append("class=\"green\"");
                 } else {
                     html.append("class=\"navy\"");
                 }
-            
+
                 html.append('>');
 
-            
-                FormattedNumber fmtd =
-                    UnitsFormat.format(new UnitNumber(elv.getTimestamp(),
-                                       UnitsConstants.UNIT_DATE,
-                                       UnitsConstants.SCALE_MILLI),
-                                       request.getLocale(), dateSpecs);
+                FormattedNumber fmtd = UnitsFormat.format(new UnitNumber(elv.getTimestamp(), UnitsConstants.UNIT_DATE,
+                    UnitsConstants.SCALE_MILLI), request.getLocale(), dateSpecs);
 
-                          
-
-                html.append(StringEscapeUtils.escapeHtml(res.getMessage(elv
-                        .getType(), fmtd.toString(), elv.getDetail(), elv
-                        .getSubject(), elv.getStatus())));
+                html.append(StringEscapeUtils.escapeHtml(res.getMessage(elv.getType(), fmtd.toString(),
+                    elv.getDetail(), elv.getSubject(), elv.getStatus())));
 
                 html.append("</li>");
             }
-        
+
             html.append("</ul>");
         }
-        
+
         JSONObject details = new JSONObject();
         details.put("id", begin);
         details.put("html", html);

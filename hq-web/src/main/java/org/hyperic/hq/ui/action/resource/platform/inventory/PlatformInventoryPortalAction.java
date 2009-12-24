@@ -47,16 +47,15 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 
 /**
- * A <code>BaseDispatchAction</code> that sets up platform
- * inventory portals.
+ * A <code>BaseDispatchAction</code> that sets up platform inventory portals.
  */
-public class PlatformInventoryPortalAction extends ResourceInventoryPortalAction {
+public class PlatformInventoryPortalAction
+    extends ResourceInventoryPortalAction {
 
-    private final Log log =
-        LogFactory.getLog(PlatformInventoryPortalAction.class.getName());
+    private final Log log = LogFactory.getLog(PlatformInventoryPortalAction.class.getName());
 
     private final Properties keyMethodMap = new Properties();
-   
+
     @Autowired
     public PlatformInventoryPortalAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss) {
         super(appdefBoss, authzBoss, controlBoss);
@@ -64,143 +63,109 @@ public class PlatformInventoryPortalAction extends ResourceInventoryPortalAction
     }
 
     private void initKeyMethodMap() {
-        keyMethodMap.setProperty(
-            Constants.MODE_NEW, "newPlatform");
-        keyMethodMap.setProperty(
-            Constants.MODE_VIEW, "viewPlatform");
-        keyMethodMap.setProperty(
-            Constants.MODE_EDIT, "editPlatformGeneralProperties");
-        keyMethodMap.setProperty(
-            Constants.MODE_EDIT_TYPE, "editPlatformTypeNetworkProperties");
-        keyMethodMap.setProperty(
-            Constants.MODE_EDIT_CONFIG, "editConfig");
-        keyMethodMap.setProperty(
-            Constants.MODE_CHANGE_OWNER, "changePlatformOwner");
-        keyMethodMap.setProperty(
-            Constants.MODE_ADD_GROUPS, "addPlatformGroups");
+        keyMethodMap.setProperty(Constants.MODE_NEW, "newPlatform");
+        keyMethodMap.setProperty(Constants.MODE_VIEW, "viewPlatform");
+        keyMethodMap.setProperty(Constants.MODE_EDIT, "editPlatformGeneralProperties");
+        keyMethodMap.setProperty(Constants.MODE_EDIT_TYPE, "editPlatformTypeNetworkProperties");
+        keyMethodMap.setProperty(Constants.MODE_EDIT_CONFIG, "editConfig");
+        keyMethodMap.setProperty(Constants.MODE_CHANGE_OWNER, "changePlatformOwner");
+        keyMethodMap.setProperty(Constants.MODE_ADD_GROUPS, "addPlatformGroups");
     }
 
     protected Properties getKeyMethodMap() {
         return keyMethodMap;
     }
 
-    public ActionForward newPlatform(ActionMapping mapping,
-                                     ActionForm form,
-                                     HttpServletRequest request,
-                                     HttpServletResponse response)
-        throws Exception {
-        Portal portal = Portal
-            .createPortal("resource.platform.inventory.NewPlatformTitle",
-                          ".resource.platform.inventory.NewPlatform");
+    public ActionForward newPlatform(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                     HttpServletResponse response) throws Exception {
+        Portal portal = Portal.createPortal("resource.platform.inventory.NewPlatformTitle",
+            ".resource.platform.inventory.NewPlatform");
         portal.setDialog(true);
         request.setAttribute(Constants.PORTAL_KEY, portal);
 
         return null;
     }
 
-    public ActionForward viewPlatform(ActionMapping mapping,
-                                      ActionForm form,
-                                      HttpServletRequest request,
-                                      HttpServletResponse response)
-        throws Exception {
+    public ActionForward viewPlatform(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                      HttpServletResponse response) throws Exception {
         setResource(request);
-                        
-        Portal portal = Portal
-            .createPortal("resource.platform.inventory.ViewPlatformTitle",
-                          ".resource.platform.inventory.ViewPlatform");
+
+        Portal portal = Portal.createPortal("resource.platform.inventory.ViewPlatformTitle",
+            ".resource.platform.inventory.ViewPlatform");
         request.setAttribute(Constants.PORTAL_KEY, portal);
 
         return super.viewResource(mapping, form, request, response);
     }
 
-    public ActionForward editPlatformGeneralProperties(ActionMapping mapping,
-                                                       ActionForm form,
-                                                       HttpServletRequest request,
-                                                       HttpServletResponse response)
+    public ActionForward editPlatformGeneralProperties(ActionMapping mapping, ActionForm form,
+                                                       HttpServletRequest request, HttpServletResponse response)
         throws Exception {
 
         setResource(request);
 
-        Portal portal = Portal
-            .createPortal("resource.platform.inventory.EditPlatformGeneralPropertiesTitle",
-                          ".resource.platform.inventory.EditPlatformGeneralProperties");
+        Portal portal = Portal.createPortal("resource.platform.inventory.EditPlatformGeneralPropertiesTitle",
+            ".resource.platform.inventory.EditPlatformGeneralProperties");
         portal.setDialog(true);
         request.setAttribute(Constants.PORTAL_KEY, portal);
 
         return null;
     }
 
-    public ActionForward editPlatformTypeNetworkProperties(ActionMapping mapping,
-                                                           ActionForm form,
-                                                           HttpServletRequest request,
-                                                           HttpServletResponse response)
+    public ActionForward editPlatformTypeNetworkProperties(ActionMapping mapping, ActionForm form,
+                                                           HttpServletRequest request, HttpServletResponse response)
         throws Exception {
 
         setResource(request);
 
-        Portal portal = Portal
-            .createPortal("resource.platform.inventory.EditPlatformTypeNetworkPropertiesTitle",
-                          ".resource.platform.inventory.EditPlatformTypeNetworkProperties");
+        Portal portal = Portal.createPortal("resource.platform.inventory.EditPlatformTypeNetworkPropertiesTitle",
+            ".resource.platform.inventory.EditPlatformTypeNetworkProperties");
         portal.setDialog(true);
         request.setAttribute(Constants.PORTAL_KEY, portal);
 
         return null;
     }
 
-    public ActionForward changePlatformOwner(ActionMapping mapping,
-                                             ActionForm form,
-                                             HttpServletRequest request,
-                                             HttpServletResponse response)
-        throws Exception {
+    public ActionForward changePlatformOwner(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                             HttpServletResponse response) throws Exception {
 
         setResource(request);
 
-        Portal portal = Portal
-            .createPortal(Constants.CHANGE_OWNER_TITLE,
-                          ".resource.platform.inventory.changePlatformOwner");
+        Portal portal = Portal.createPortal(Constants.CHANGE_OWNER_TITLE,
+            ".resource.platform.inventory.changePlatformOwner");
         portal.setDialog(true);
         request.setAttribute(Constants.PORTAL_KEY, portal);
 
         return null;
     }
 
-    public ActionForward addPlatformGroups(ActionMapping mapping,
-                                           ActionForm form,
-                                           HttpServletRequest request,
-                                           HttpServletResponse response)
-        throws Exception {
+    public ActionForward addPlatformGroups(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                           HttpServletResponse response) throws Exception {
 
         setResource(request);
 
-        // clean out the return path 
+        // clean out the return path
         SessionUtils.resetReturnPath(request.getSession());
         // set the return path
         try {
             setReturnPath(request, mapping);
-        }
-        catch (ParameterNotFoundException pne) {
+        } catch (ParameterNotFoundException pne) {
             if (log.isDebugEnabled())
-                 log.debug("returnPath error:", pne);
+                log.debug("returnPath error:", pne);
         }
-        
-        Portal portal = Portal
-            .createPortal("resource.platform.inventory.AddToGroupsTitle",
-                          ".resource.platform.inventory.addPlatformGroups");
+
+        Portal portal = Portal.createPortal("resource.platform.inventory.AddToGroupsTitle",
+            ".resource.platform.inventory.addPlatformGroups");
         portal.setDialog(true);
         request.setAttribute(Constants.PORTAL_KEY, portal);
 
         return null;
     }
 
-    public ActionForward editConfig(ActionMapping mapping,
-                                    ActionForm form,
-                                    HttpServletRequest request,
-                                    HttpServletResponse response)
-        throws Exception {
+    public ActionForward editConfig(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                    HttpServletResponse response) throws Exception {
 
-        Portal portal = Portal
-             .createPortal("resource.platform.inventory.ConfigurationPropertiesTitle",
-                          ".resource.platform.inventory.EditConfigProperties");
+        Portal portal = Portal.createPortal("resource.platform.inventory.ConfigurationPropertiesTitle",
+            ".resource.platform.inventory.EditConfigProperties");
 
         super.editConfig(request, portal);
 

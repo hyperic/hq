@@ -28,20 +28,15 @@ package org.hyperic.hq.ui.action.portlet.metricviewer;
 import org.hyperic.hq.ui.action.portlet.DashboardBaseForm;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 
-public class PropertiesForm extends DashboardBaseForm {
+public class PropertiesForm
+    extends DashboardBaseForm {
 
-    protected final static String RESOURCES =
-        ".dashContent.metricviewer.resources";
-    protected final static String NUM_TO_SHOW =
-        ".dashContent.metricviewer.numToShow";
-    protected final static String RES_TYPE =
-        ".dashContent.metricviewer.resType";
-    protected final static String METRIC =
-        ".dashContent.metricviewer.metric";
-    protected final static String DECSENDING =
-        ".dashContent.metricviewer.descending";
-    protected final static String TITLE =
-        ".dashContent.metricViewer.title";
+    protected final static String RESOURCES = ".dashContent.metricviewer.resources";
+    protected final static String NUM_TO_SHOW = ".dashContent.metricviewer.numToShow";
+    protected final static String RES_TYPE = ".dashContent.metricviewer.resType";
+    protected final static String METRIC = ".dashContent.metricviewer.metric";
+    protected final static String DECSENDING = ".dashContent.metricviewer.descending";
+    protected final static String TITLE = ".dashContent.metricViewer.title";
 
     private String _resType;
     private String _metric;

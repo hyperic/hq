@@ -49,20 +49,14 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 
-
 /**
- * Abstract base class for adding notifications to an alert
- * definition.
- *
+ * Abstract base class for adding notifications to an alert definition.
+ * 
  */
 public abstract class AddNotificationsAction
-    extends BaseAction
-    implements NotificationsAction
-{
+    extends BaseAction implements NotificationsAction {
     private final Log log = LogFactory.getLog(AddNotificationsAction.class);
     private EventsBoss eventsBoss;
-    
-    
 
     public AddNotificationsAction(EventsBoss eventsBoss) {
         super();
@@ -73,18 +67,14 @@ public abstract class AddNotificationsAction
      * Add roles to the alert definition specified in the given
      * <code>AddRolesForm</code>.
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception 
-    {
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
         HttpSession session = request.getSession();
 
-        AddNotificationsForm addForm = (AddNotificationsForm)form;
+        AddNotificationsForm addForm = (AddNotificationsForm) form;
         Integer alertDefId = addForm.getAd();
 
-        Map<String, Object> params = new HashMap<String,Object>();
+        Map<String, Object> params = new HashMap<String, Object>();
         params.put(Constants.ALERT_DEFINITION_PARAM, alertDefId);
 
         if (addForm.getAetid() != null && addForm.getAetid().length() > 0)
@@ -94,38 +84,33 @@ public abstract class AddNotificationsAction
             params.put(Constants.ENTITY_ID_PARAM, aeid.getAppdefKey());
         }
 
-        ActionForward forward = preProcess(request, mapping, addForm, params, 
-                                           session);
+        ActionForward forward = preProcess(request, mapping, addForm, params, session);
         if (forward != null) {
             return forward;
         }
 
-       
-        
         Integer sessionId = RequestUtils.getSessionId(request);
 
-        AlertDefinitionValue ad  =
-            eventsBoss.getAlertDefinition(sessionId.intValue(), alertDefId);
+        AlertDefinitionValue ad = eventsBoss.getAlertDefinition(sessionId.intValue(), alertDefId);
 
         Set<Object> notifs = getNotifications(addForm, session);
-        if (! notifs.isEmpty() ) {
+        if (!notifs.isEmpty()) {
             // We'll try to get the appropriate email action for
             // the alert definition and update it if it already
-            // exists.  If not, we'll just create a new one.
+            // exists. If not, we'll just create a new one.
             Object[] actionObjs = getActionObjects(ad);
             if (null == actionObjs) {
                 EmailActionConfig ea = new EmailActionConfig();
-                ea.setType( getNotificationType() );
+                ea.setType(getNotificationType());
                 log.debug("new notifs=" + notifs);
-                ea.setNames( StringUtil.iteratorToString(notifs.iterator(), ",", "") );
-                eventsBoss.createAction( sessionId.intValue(), alertDefId,
-                                 ea.getImplementor(), ea.getConfigResponse() );
+                ea.setNames(StringUtil.iteratorToString(notifs.iterator(), ",", ""));
+                eventsBoss.createAction(sessionId.intValue(), alertDefId, ea.getImplementor(), ea.getConfigResponse());
             } else {
-                ActionValue action = (ActionValue)actionObjs[0];
-                EmailActionConfig ea = (EmailActionConfig)actionObjs[1];
-                notifs.addAll( ea.getUsers() );
+                ActionValue action = (ActionValue) actionObjs[0];
+                EmailActionConfig ea = (EmailActionConfig) actionObjs[1];
+                notifs.addAll(ea.getUsers());
                 log.debug("all notifs=" + notifs);
-                ea.setNames( StringUtil.iteratorToString(notifs.iterator(), ",", "") );
+                ea.setNames(StringUtil.iteratorToString(notifs.iterator(), ",", ""));
                 byte[] configSchema = ea.getConfigResponse().encode();
                 action.setConfig(configSchema);
                 eventsBoss.updateAction(sessionId.intValue(), action);
@@ -134,38 +119,30 @@ public abstract class AddNotificationsAction
 
         postProcess(request, session);
 
-        return returnSuccess(request, mapping, Constants.ALERT_DEFINITION_PARAM,
-                                 alertDefId);
+        return returnSuccess(request, mapping, Constants.ALERT_DEFINITION_PARAM, alertDefId);
     }
 
-    protected abstract ActionForward preProcess(HttpServletRequest request,
-                                                ActionMapping mapping,
-                                                AddNotificationsForm form,
-                                                Map<String, Object> params,
-                                                HttpSession session)
-        throws Exception;
-    
-    protected abstract void postProcess(HttpServletRequest request, 
-                                        HttpSession session);
-    protected abstract Set<Object> getNotifications(AddNotificationsForm form, 
-                                            HttpSession session);
+    protected abstract ActionForward preProcess(HttpServletRequest request, ActionMapping mapping,
+                                                AddNotificationsForm form, Map<String, Object> params,
+                                                HttpSession session) throws Exception;
 
-    private Object[] getActionObjects(AlertDefinitionValue ad)
-        throws Exception 
-    {
+    protected abstract void postProcess(HttpServletRequest request, HttpSession session);
+
+    protected abstract Set<Object> getNotifications(AddNotificationsForm form, HttpSession session);
+
+    private Object[] getActionObjects(AlertDefinitionValue ad) throws Exception {
         ActionValue[] actions = ad.getActions();
-        for (int i=0; i<actions.length; i++) {
-            if ( actions[i].classnameHasBeenSet() &&
-                 !( actions[i].getClassname().equals(null) ||
-                    actions[i].getClassname().equals("") ) ) {
+        for (int i = 0; i < actions.length; i++) {
+            if (actions[i].classnameHasBeenSet() &&
+                !(actions[i].getClassname().equals(null) || actions[i].getClassname().equals(""))) {
                 Object obj = Class.forName(actions[i].getClassname()).newInstance();
                 if (obj instanceof EmailActionConfig) {
-                    EmailActionConfig ea = (EmailActionConfig)obj;
-                    ConfigResponse configResponse =
-                        ConfigResponse.decode( actions[i].getConfig() );
+                    EmailActionConfig ea = (EmailActionConfig) obj;
+                    ConfigResponse configResponse = ConfigResponse.decode(actions[i].getConfig());
                     ea.init(configResponse);
-                    if ( ea.getType() == getNotificationType() ) {
-                        // as soon as we find the right notification type, return
+                    if (ea.getType() == getNotificationType()) {
+                        // as soon as we find the right notification type,
+                        // return
                         log.debug("found action: action=" + actions[i] + ", ea=" + ea);
                         return new Object[] { actions[i], ea };
                     }

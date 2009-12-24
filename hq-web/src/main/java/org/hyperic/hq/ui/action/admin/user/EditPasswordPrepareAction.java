@@ -40,48 +40,38 @@ import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class EditPasswordPrepareAction extends TilesAction{
+public class EditPasswordPrepareAction
+    extends TilesAction {
 
-   private AuthzBoss authzBoss;
-   
-   
-   
-   @Autowired
-   public EditPasswordPrepareAction(AuthzBoss authzBoss) {
-    super();
-    this.authzBoss = authzBoss;
-}
+    private AuthzBoss authzBoss;
 
+    @Autowired
+    public EditPasswordPrepareAction(AuthzBoss authzBoss) {
+        super();
+        this.authzBoss = authzBoss;
+    }
 
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
 
-
-public ActionForward execute(ComponentContext context,
-                        ActionMapping mapping,
-                        ActionForm form,
-                        HttpServletRequest request,
-                        HttpServletResponse response)
-    throws Exception {
-        
-        
         WebUser user = RequestUtils.getWebUser(request);
-        
-        Integer sessionId = user.getSessionId();
-                            
-        boolean admin = false;                
 
-        for(Operation operation : authzBoss.getAllOperations( sessionId )){          
-            if( admin = AuthzConstants.subjectOpModifySubject
-                    .equals(operation.getName()) ){
+        Integer sessionId = user.getSessionId();
+
+        boolean admin = false;
+
+        for (Operation operation : authzBoss.getAllOperations(sessionId)) {
+            if (admin = AuthzConstants.subjectOpModifySubject.equals(operation.getName())) {
                 break;
-            }            
+            }
         }
 
-        if(admin) {
+        if (admin) {
             context.putAttribute("administrator", "true");
         }
-        
+
         return null;
-            
+
     }
-    
+
 }

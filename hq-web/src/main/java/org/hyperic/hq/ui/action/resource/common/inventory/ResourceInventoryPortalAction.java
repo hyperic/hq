@@ -43,24 +43,20 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 
-public abstract class ResourceInventoryPortalAction extends ResourceController {
-    
+public abstract class ResourceInventoryPortalAction
+    extends ResourceController {
+
     public ResourceInventoryPortalAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss) {
         super(appdefBoss, authzBoss, controlBoss);
     }
 
-    public ActionForward viewResource(ActionMapping mapping,
-                                      ActionForm form,
-                                      HttpServletRequest request,
-                                      HttpServletResponse response)
-        throws Exception {
-        super.setNavMapLocation(request,mapping,
-                                 Constants.INVENTORY_LOC_TYPE);
+    public ActionForward viewResource(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                      HttpServletResponse response) throws Exception {
+        super.setNavMapLocation(request, mapping, Constants.INVENTORY_LOC_TYPE);
         return null;
     }
-    
-    protected void editConfig(HttpServletRequest request, Portal portal)
-        throws Exception {
+
+    protected void editConfig(HttpServletRequest request, Portal portal) throws Exception {
         setResource(request, true);
         portal.setDialog(true);
         request.setAttribute(Constants.PORTAL_KEY, portal);

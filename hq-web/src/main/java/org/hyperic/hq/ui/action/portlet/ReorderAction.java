@@ -43,13 +43,12 @@ import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 
+public class ReorderAction
+    extends BaseAction {
 
-public class ReorderAction extends BaseAction {
-    
     private ConfigurationProxy configurationProxy;
     private AuthzBoss authzBoss;
-    
-    
+
     @Autowired
     public ReorderAction(ConfigurationProxy configurationProxy, AuthzBoss authzBoss) {
         super();
@@ -57,21 +56,13 @@ public class ReorderAction extends BaseAction {
         this.authzBoss = authzBoss;
     }
 
-
-
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception
-    {
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
         HttpSession session = request.getSession();
         WebUser user = SessionUtils.getWebUser(session);
-       
-        String[] narrowPortlets =
-            request.getParameterValues("narrowList_true[]");
-        String[] widePortlets =
-            request.getParameterValues( "narrowList_false[]" );
+
+        String[] narrowPortlets = request.getParameterValues("narrowList_true[]");
+        String[] widePortlets = request.getParameterValues("narrowList_false[]");
 
         String columnKey;
         StringBuffer ordPortlets = new StringBuffer();
@@ -79,32 +70,27 @@ public class ReorderAction extends BaseAction {
         if (narrowPortlets != null) {
             columnKey = Constants.USER_PORTLETS_FIRST;
             portlets = narrowPortlets;
-        }
-        else if (widePortlets != null) {
+        } else if (widePortlets != null) {
             columnKey = Constants.USER_PORTLETS_SECOND;
             portlets = widePortlets;
-        }
-        else {
+        } else {
             return mapping.findForward(Constants.AJAX_URL);
         }
 
         for (String portlet : portlets) {
-            if (portlet.startsWith("narrowList_") ||
-                portlet.startsWith(".dashContent.addContent"))
+            if (portlet.startsWith("narrowList_") || portlet.startsWith(".dashContent.addContent"))
                 continue;
-            
+
             ordPortlets.append(Constants.DASHBOARD_DELIMITER);
             ordPortlets.append(portlet);
         }
-        DashboardConfig dashConfig = DashboardUtils.findDashboard(
-        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, authzBoss);
+        DashboardConfig dashConfig = DashboardUtils.findDashboard((Integer) session
+            .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         // tokenize and reshuffle
         if (!dashPrefs.getValue(columnKey).equals(ordPortlets.toString())) {
-        	dashPrefs.setValue(columnKey, ordPortlets.toString());
-        	configurationProxy.setDashboardPreferences(session,
-        			user,  dashPrefs);
+            dashPrefs.setValue(columnKey, ordPortlets.toString());
+            configurationProxy.setDashboardPreferences(session, user, dashPrefs);
             session.removeAttribute(Constants.USERS_SES_PORTAL);
         }
         return mapping.findForward(Constants.AJAX_URL);

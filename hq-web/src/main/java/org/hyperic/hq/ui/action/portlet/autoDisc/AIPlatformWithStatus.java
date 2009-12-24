@@ -29,33 +29,37 @@ import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.autoinventory.ScanStateCore;
 import org.hyperic.hq.autoinventory.ScanMethodState;
 
-public class AIPlatformWithStatus extends AIPlatformValue {
+public class AIPlatformWithStatus
+    extends AIPlatformValue {
 
     private ScanStateCore state = null;
 
-    public AIPlatformWithStatus (AIPlatformValue aip,
-                                 ScanStateCore state) {
+    public AIPlatformWithStatus(AIPlatformValue aip, ScanStateCore state) {
         super(aip);
         this.state = state;
     }
 
-    public boolean getIsAgentReachable () { return state != null; }
+    public boolean getIsAgentReachable() {
+        return state != null;
+    }
 
-    public boolean getIsScanning () { 
+    public boolean getIsScanning() {
         return state != null && !state.getIsDone();
     }
 
-    public String getStatus () {
-        if (state == null) return "Agent is not responding";
+    public String getStatus() {
+        if (state == null)
+            return "Agent is not responding";
         if (state.getGlobalException() != null) {
             return state.getGlobalException().getMessage();
         }
         ScanMethodState[] methstates = state.getScanMethodStates();
         String rval = "";
         String status;
-        for (int i=0; i<methstates.length; i++) {
+        for (int i = 0; i < methstates.length; i++) {
             status = methstates[i].getStatus();
-            if (status != null) rval += status.trim();
+            if (status != null)
+                rval += status.trim();
         }
         rval = rval.trim();
         if (rval.length() == 0) {

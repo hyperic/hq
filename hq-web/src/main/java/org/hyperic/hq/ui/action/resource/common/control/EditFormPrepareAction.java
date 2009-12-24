@@ -47,46 +47,40 @@ import org.hyperic.hq.ui.beans.OptionItem;
 import org.hyperic.hq.ui.util.RequestUtils;
 
 /**
- * This populates the EditForm associated with a server
- * control action.
+ * This populates the EditForm associated with a server control action.
  */
-public class EditFormPrepareAction extends TilesAction {
-    
-    private final  Log log = LogFactory.getLog(EditFormPrepareAction.class.getName()); 
+public class EditFormPrepareAction
+    extends TilesAction {
+
+    private final Log log = LogFactory.getLog(EditFormPrepareAction.class.getName());
     private ControlBoss controlBoss;
 
     /**
      * Retrieve server action data and store it in the specified request
      * parameters.
      */
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-    throws Exception {
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
 
-          
         log.trace("Preparing to modify server control properties action.");
-        
-        ControlForm cForm = (ControlForm)form;
+
+        ControlForm cForm = (ControlForm) form;
 
         // populate the control form from that ControlActionSchedule.
-        
+
         try {
             int sessionId = RequestUtils.getSessionId(request).intValue();
-        
-            Integer trigger 
-                = RequestUtils.getIntParameter(request, Constants.CONTROL_BATCH_ID_PARAM);
+
+            Integer trigger = RequestUtils.getIntParameter(request, Constants.CONTROL_BATCH_ID_PARAM);
 
             ControlSchedule job = controlBoss.getControlJob(sessionId, trigger);
-            
+
             cForm.populateFromSchedule(job.getScheduleValue(), request.getLocale());
             cForm.setControlAction(job.getAction());
             cForm.setDescription(job.getScheduleValue().getDescription());
- 
+
             AppdefEntityID appdefId = RequestUtils.getEntityId(request);
-            
+
             List<String> actions = controlBoss.getActions(sessionId, appdefId);
             List<OptionItem> options = OptionItem.createOptionsList(actions);
             cForm.setControlActions(options);
@@ -95,13 +89,11 @@ public class EditFormPrepareAction extends TilesAction {
             return null;
         } catch (PluginNotFoundException pnfe) {
             log.trace("no plugin available", pnfe);
-            RequestUtils.setError(request,
-                "resource.common.error.PluginNotFound");
+            RequestUtils.setError(request, "resource.common.error.PluginNotFound");
             return null;
         } catch (PluginException cpe) {
             log.trace("could not find trigger", cpe);
-            RequestUtils.setError(request,
-                "resource.common.error.ControlNotEnabled");
+            RequestUtils.setError(request, "resource.common.error.ControlNotEnabled");
             return null;
         }
     }

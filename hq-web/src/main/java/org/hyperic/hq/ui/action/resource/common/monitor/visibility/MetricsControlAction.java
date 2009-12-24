@@ -49,17 +49,15 @@ import org.hyperic.hq.ui.util.SessionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * A <code>BaseAction</code> that handles metrics control form
- * submissions.
+ * A <code>BaseAction</code> that handles metrics control form submissions.
  */
-public class MetricsControlAction extends BaseAction {
+public class MetricsControlAction
+    extends BaseAction {
 
-    private final Log log =
-        LogFactory.getLog(MetricsControlAction.class.getName());
+    private final Log log = LogFactory.getLog(MetricsControlAction.class.getName());
 
     protected AuthzBoss authzBoss;
-    
-    
+
     @Autowired
     public MetricsControlAction(AuthzBoss authzBoss) {
         super();
@@ -70,11 +68,8 @@ public class MetricsControlAction extends BaseAction {
      * Modify the metrics summary display as specified in the given
      * <code>MetricsControlForm</code>.
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
         MetricsControlForm controlForm = (MetricsControlForm) form;
 
         HttpSession session = request.getSession();
@@ -90,108 +85,88 @@ public class MetricsControlAction extends BaseAction {
         }
 
         Integer sessionId = user.getSessionId();
-     
-       
 
         Map<String, Object> forwardParams = controlForm.getForwardParams();
         if (controlForm.isEditRangeClicked()) {
             return returnEditRange(request, mapping, forwardParams);
-        }
-        else {
+        } else {
             Date begin = controlForm.getStartDate();
             Date end = controlForm.getEndDate();
             long beginTime = begin.getTime();
             long endTime = end.getTime();
 
-            if (controlForm.isPrevRangeClicked() ||
-                controlForm.isNextRangeClicked()) {
-                // Figure out what it's currently set to and go backwards/forwards
+            if (controlForm.isPrevRangeClicked() || controlForm.isNextRangeClicked()) {
+                // Figure out what it's currently set to and go
+                // backwards/forwards
                 long diff = endTime - beginTime;
                 List<Long> range = new ArrayList<Long>();
                 if (controlForm.isPrevRangeClicked()) {
                     range.add(new Long(beginTime - diff));
                     range.add(new Long(beginTime));
-                }
-                else {
+                } else {
                     range.add(new Long(endTime));
                     range.add(new Long(endTime + diff));
                 }
 
-                log.trace("updating metric display date range [" + begin +  ":" +
-                          end + "]");
+                log.trace("updating metric display date range [" + begin + ":" + end + "]");
                 user.setPreference(WebUser.PREF_METRIC_RANGE, range);
                 user.setPreference(WebUser.PREF_METRIC_RANGE_LASTN, null);
                 user.setPreference(WebUser.PREF_METRIC_RANGE_UNIT, null);
 
                 // set advanced mode
                 user.setPreference(WebUser.PREF_METRIC_RANGE_RO, Boolean.TRUE);
-            }
-            else if (controlForm.isLastnSelected()) {
+            } else if (controlForm.isLastnSelected()) {
                 Integer lastN = controlForm.getRn();
                 Integer unit = controlForm.getRu();
 
-                log.trace("updating metric display .. lastN [" + lastN +
-                          "] .. unit [" + unit + "]");
+                log.trace("updating metric display .. lastN [" + lastN + "] .. unit [" + unit + "]");
                 user.setPreference(WebUser.PREF_METRIC_RANGE_LASTN, lastN);
                 user.setPreference(WebUser.PREF_METRIC_RANGE_UNIT, unit);
                 user.setPreference(WebUser.PREF_METRIC_RANGE, null);
 
                 // set simple mode
                 user.setPreference(WebUser.PREF_METRIC_RANGE_RO, Boolean.FALSE);
-                
+
                 if (controlForm.isRangeClicked() && log.isDebugEnabled()) {
-                    log.debug("updating metric display .. lastN [" + lastN +
-                              "] .. unit [" + unit + "]");
+                    log.debug("updating metric display .. lastN [" + lastN + "] .. unit [" + unit + "]");
                     LogFactory.getLog("user.preferences").debug(
-                      "Invoking setUserPrefs in MetricsControlAction " +
-                      " for " + user.getId() + " at "+System.currentTimeMillis()
-                      + " user.prefs = " + user.getPreferences());
+                        "Invoking setUserPrefs in MetricsControlAction " + " for " + user.getId() + " at " +
+                            System.currentTimeMillis() + " user.prefs = " + user.getPreferences());
                 }
             }
-            
+
             if (controlForm.isAdvancedClicked()) {
                 if (controlForm.isDateRangeSelected()) {
                     List<Long> range = new ArrayList<Long>();
                     range.add(new Long(beginTime));
                     range.add(new Long(endTime));
 
-                    log.trace("updating metric display date range [" +
-                              begin +  ":" + end + "]");
+                    log.trace("updating metric display date range [" + begin + ":" + end + "]");
                     user.setPreference(WebUser.PREF_METRIC_RANGE, range);
                     user.setPreference(WebUser.PREF_METRIC_RANGE_LASTN, null);
                     user.setPreference(WebUser.PREF_METRIC_RANGE_UNIT, null);
 
                     // set advanced mode
-                    user.setPreference(WebUser.PREF_METRIC_RANGE_RO,
-                                       Boolean.TRUE);
-                }
-                else if (!controlForm.isLastnSelected()) {
-                    throw new ServletException("invalid date range action [" +
-                                               controlForm.getA() + "] selected");
+                    user.setPreference(WebUser.PREF_METRIC_RANGE_RO, Boolean.TRUE);
+                } else if (!controlForm.isLastnSelected()) {
+                    throw new ServletException("invalid date range action [" + controlForm.getA() + "] selected");
                 }
 
-                log.trace("Invoking setUserPrefs"+
-                    " in MetricDisplayRangeAction " +
-                    " for " + user.getId() + " at "+System.currentTimeMillis() +
-                    " user.prefs = " + user.getPreferences());
-            }
-            else {
+                log.trace("Invoking setUserPrefs" + " in MetricDisplayRangeAction " + " for " + user.getId() + " at " +
+                          System.currentTimeMillis() + " user.prefs = " + user.getPreferences());
+            } else {
                 if (controlForm.isSimpleClicked()) {
-                    user.setPreference(WebUser.PREF_METRIC_RANGE_RO,
-                                       Boolean.FALSE);
-                    
+                    user.setPreference(WebUser.PREF_METRIC_RANGE_RO, Boolean.FALSE);
+
                     if (log.isDebugEnabled()) {
                         LogFactory.getLog("user.preferences").debug(
-                            "Invoking setUserPrefs in MetricsControlAction " +
-                            " for " + user.getId() + " at " +
-                            System.currentTimeMillis() + " user.prefs = " +
-                            user.getPreferences());
+                            "Invoking setUserPrefs in MetricsControlAction " + " for " + user.getId() + " at " +
+                                System.currentTimeMillis() + " user.prefs = " + user.getPreferences());
                     }
                 }
             }
             authzBoss.setUserPrefs(sessionId, user.getId(), user.getPreferences());
         }
-
 
         // assume the return path has been set- don't use forwardParams
         return returnSuccess(request, mapping);
@@ -199,11 +174,8 @@ public class MetricsControlAction extends BaseAction {
 
     // ---------------------------------------------------- Private Methods
 
-    private ActionForward returnEditRange(HttpServletRequest request,
-                                          ActionMapping mapping,
-                                          Map<String, Object> params)
+    private ActionForward returnEditRange(HttpServletRequest request, ActionMapping mapping, Map<String, Object> params)
         throws Exception {
-        return constructForward(request, mapping, Constants.EDIT_RANGE_URL,
-                                params, NO_RETURN_PATH);
+        return constructForward(request, mapping, Constants.EDIT_RANGE_URL, params, NO_RETURN_PATH);
     }
 }

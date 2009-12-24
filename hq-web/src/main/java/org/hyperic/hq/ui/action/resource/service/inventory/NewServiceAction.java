@@ -46,31 +46,26 @@ import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-    /**
-    * Create the service with the attributes specified in the given
-    * <code>ServiceForm</code>.
-    *
-    */
-public class NewServiceAction extends BaseAction {
+/**
+ * Create the service with the attributes specified in the given
+ * <code>ServiceForm</code>.
+ * 
+ */
+public class NewServiceAction
+    extends BaseAction {
 
     private final Log log = LogFactory.getLog(NewServiceAction.class.getName());
     private AppdefBoss appdefBoss;
-    
-    
-        @Autowired
+
+    @Autowired
     public NewServiceAction(AppdefBoss appdefBoss) {
         super();
         this.appdefBoss = appdefBoss;
     }
 
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
-
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-        
         Map<String, Object> forwardParams = new HashMap<String, Object>(2);
         try {
             ServiceForm newForm = (ServiceForm) form;
@@ -78,45 +73,37 @@ public class NewServiceAction extends BaseAction {
             AppdefEntityID aeid = RequestUtils.getEntityId(request);
 
             forwardParams.put(Constants.ENTITY_ID_PARAM, aeid.getAppdefKey());
-            
+
             switch (aeid.getType()) {
-            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                forwardParams.put(Constants.ACCORDION_PARAM, "3");
-                break;
+                case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                    forwardParams.put(Constants.ACCORDION_PARAM, "3");
+                    break;
             }
 
-            ActionForward forward =
-                checkSubmit(request, mapping, form, forwardParams,
-                            YES_RETURN_PATH);
+            ActionForward forward = checkSubmit(request, mapping, form, forwardParams, YES_RETURN_PATH);
             if (forward != null) {
                 return forward;
-            }         
+            }
 
-           
             Integer sessionId = RequestUtils.getSessionId(request);
-           
 
             ServiceValue service = new ServiceValue();
-            
+
             service.setName(newForm.getName());
             service.setDescription(newForm.getDescription());
 
             Integer stPk = newForm.getResourceType();
-            ServiceValue newService =
-                appdefBoss.createService(sessionId.intValue(), service, stPk, aeid);
-              
-            log.trace("creating service [" + service.getName() +
-                      "] with attributes " + newForm);
+            ServiceValue newService = appdefBoss.createService(sessionId.intValue(), service, stPk, aeid);
+
+            log.trace("creating service [" + service.getName() + "] with attributes " + newForm);
 
             Integer serviceId = newService.getId();
             newForm.setRid(serviceId);
-            
-            RequestUtils.setConfirmation(request,
-                                         "resource.service.inventory.confirm.CreateService",
-                                         service.getName());
 
-            forwardParams.put(Constants.ENTITY_ID_PARAM,
-                              newService.getEntityId().getAppdefKey());
+            RequestUtils
+                .setConfirmation(request, "resource.service.inventory.confirm.CreateService", service.getName());
+
+            forwardParams.put(Constants.ENTITY_ID_PARAM, newService.getEntityId().getAppdefKey());
             forwardParams.put(Constants.ACCORDION_PARAM, "0");
 
             return returnNew(request, mapping, forwardParams);

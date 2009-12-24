@@ -48,18 +48,18 @@ import org.apache.struts.util.LabelValueBean;
 /**
  * Form for fetching and working with the set of resources for the Resource Hub.
  * 
- *
+ * 
  */
-public class ResourceHubForm extends BaseValidatorForm {
-    
-    public static final Log log =
-        LogFactory.getLog(ResourceHubForm.class.getName());
+public class ResourceHubForm
+    extends BaseValidatorForm {
 
-    //-------------------------------------static constant variables
+    public static final Log log = LogFactory.getLog(ResourceHubForm.class.getName());
+
+    // -------------------------------------static constant variables
     public static final String CHART_VIEW = "chart";
-    public static final String LIST_VIEW  = "list";
+    public static final String LIST_VIEW = "list";
 
-    //-------------------------------------query param strings
+    // -------------------------------------query param strings
     public static final String ENTITY_TYPE_ID_PARAM = "ff";
     public static final String RESOURCE_TYPE_ID_PARAM = "ft";
     public static final String GROUP_TYPE_ID_PARAM = "g";
@@ -69,34 +69,34 @@ public class ResourceHubForm extends BaseValidatorForm {
     public static final String ANY_FLAG_PARAM = "any";
     public static final String OWNER_FLAG_PARAM = "own";
     public static final String UNAVAILABLE_FLAG_PARAM = "unavail";
-    
-    //-------------------------------------instance variables
 
-    private Integer  _ff;
-    private String   _ft;      // Resource type to filter by
-    private List     _functions;
-    private Integer  _g;       // Group type
+    // -------------------------------------instance variables
+
+    private Integer _ff;
+    private String _ft; // Resource type to filter by
+    private List _functions;
+    private Integer _g; // Group type
     private String[] _resources;
-    private List     _types;
-    private String   _keywords;
-    private String   _view;
-    private String   _fg;      // The group to filter by
-    private boolean  _any;     // Meet any criteria (vs. all)
-    private boolean  _own;
-    private boolean  _unavail;
+    private List _types;
+    private String _keywords;
+    private String _view;
+    private String _fg; // The group to filter by
+    private boolean _any; // Meet any criteria (vs. all)
+    private boolean _own;
+    private boolean _unavail;
 
     private ImageButtonBean _group = null;
     private ImageButtonBean _enableAlerts = null;
     private ImageButtonBean _disableAlerts = null;
-    
-    //-------------------------------------constructors
+
+    // -------------------------------------constructors
 
     public ResourceHubForm() {
         super();
         setDefaults();
     }
 
-    //-------------------------------------public methods
+    // -------------------------------------public methods
 
     public Integer getFf() {
         return _ff;
@@ -139,11 +139,11 @@ public class ResourceHubForm extends BaseValidatorForm {
     public String[] getResources() {
         return _resources;
     }
-    
+
     public void setResources(String[] resources) {
         _resources = resources;
     }
-    
+
     public List getTypes() {
         return _types;
     }
@@ -169,7 +169,7 @@ public class ResourceHubForm extends BaseValidatorForm {
     public String getView() {
         return _view;
     }
-    
+
     public void setView(String view) {
         _view = view;
     }
@@ -181,7 +181,7 @@ public class ResourceHubForm extends BaseValidatorForm {
     public void setGroup(ImageButtonBean group) {
         _group = group;
     }
-    
+
     public boolean isGroupClicked() {
         return getGroup().isSelected();
     }
@@ -189,7 +189,7 @@ public class ResourceHubForm extends BaseValidatorForm {
     public ImageButtonBean getEnableAlerts() {
         return _enableAlerts;
     }
-    
+
     public void setEnableAlerts(ImageButtonBean enableAlerts) {
         _enableAlerts = enableAlerts;
     }
@@ -197,11 +197,11 @@ public class ResourceHubForm extends BaseValidatorForm {
     public ImageButtonBean getDisableAlerts() {
         return _disableAlerts;
     }
-    
+
     public void setDisableAlerts(ImageButtonBean disableAlerts) {
         _disableAlerts = disableAlerts;
     }
-    
+
     public String getFg() {
         return _fg;
     }
@@ -259,30 +259,10 @@ public class ResourceHubForm extends BaseValidatorForm {
     public String toString() {
         StringBuffer s = new StringBuffer(super.toString());
 
-        s.append(" ff=")
-         .append(_ff)
-         .append(" ft=")
-         .append(_ft)
-         .append(" functions=")
-         .append(_functions)
-         .append(" g=")
-         .append(_g)
-         .append(" resources=")
-         .append(_resources)
-         .append(" types=")
-         .append(_types)
-         .append(" view=")
-         .append(_view)
-         .append(" group=")
-         .append(_group)
-         .append(" fg=")
-         .append(_fg)
-         .append(" any=")
-         .append(_any)
-         .append(" own=")
-         .append(_own)
-         .append(" unavail=")
-         .append(_unavail);
+        s.append(" ff=").append(_ff).append(" ft=").append(_ft).append(" functions=").append(_functions).append(" g=")
+            .append(_g).append(" resources=").append(_resources).append(" types=").append(_types).append(" view=")
+            .append(_view).append(" group=").append(_group).append(" fg=").append(_fg).append(" any=").append(_any)
+            .append(" own=").append(_own).append(" unavail=").append(_unavail);
 
         return s.toString();
     }

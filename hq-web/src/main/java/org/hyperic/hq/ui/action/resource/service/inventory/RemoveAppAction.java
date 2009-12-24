@@ -42,45 +42,38 @@ import org.hyperic.hq.ui.util.RequestUtils;
 /**
  * removes an application
  * 
- *
+ * 
  */
-public class RemoveAppAction extends BaseAction {
-    private final  Log log = LogFactory.getLog(RemoveAppAction.class.getName());
+public class RemoveAppAction
+    extends BaseAction {
+    private final Log log = LogFactory.getLog(RemoveAppAction.class.getName());
 
-    /** Removes a application identified by the
-     * value of the request parameter <code>Constants.RESOURCE_PARAM</code>
-     * from the BizApp.
+    /**
+     * Removes a application identified by the value of the request parameter
+     * <code>Constants.RESOURCE_PARAM</code> from the BizApp.
      * @return
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-            
-       
-                
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
+
         RemoveResourceForm nwForm = (RemoveResourceForm) form;
 
         Integer[] resources = nwForm.getResources();
 
-        if (resources == null || resources.length == 0){
+        if (resources == null || resources.length == 0) {
             return buildSuccessForwardMapping(request, mapping);
         }
 
-       
+        log.trace("removing resource");
 
-        log.trace("removing resource");                                                      
-   
-
-        for (int i = 0; i < resources.length; i++){
-            //boss.removeService(sessionId.intValue(), resources[i], false);
+        for (int i = 0; i < resources.length; i++) {
+            // boss.removeService(sessionId.intValue(), resources[i], false);
         }
 
         return buildSuccessForwardMapping(request, mapping);
 
     }
-    
+
     /**
      * returns the server action for this action
      * 
@@ -90,13 +83,11 @@ public class RemoveAppAction extends BaseAction {
      * @throws ParameterNotFoundException
      * @throws Exception
      */
-    private ActionForward buildSuccessForwardMapping(HttpServletRequest request,
-                                            ActionMapping mapping)
-    throws ParameterNotFoundException, Exception{
-            
+    private ActionForward buildSuccessForwardMapping(HttpServletRequest request, ActionMapping mapping)
+        throws ParameterNotFoundException, Exception {
+
         Integer serviceId = RequestUtils.getResourceId(request);
-            
-        return returnSuccess(request, mapping, Constants.RESOURCE_PARAM,
-                             serviceId);
+
+        return returnSuccess(request, mapping, Constants.RESOURCE_PARAM, serviceId);
     }
 }

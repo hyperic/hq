@@ -42,11 +42,12 @@ import org.apache.struts.action.ActionMapping;
 /**
  * Resource form without a schedule attached to it.
  * 
- *
+ * 
  */
-public class NonScheduleResourceForm extends BaseValidatorForm {
+public class NonScheduleResourceForm
+    extends BaseValidatorForm {
 
-    //-------------------------------------instance variables
+    // -------------------------------------instance variables
     private String name;
     private String description;
     private String location;
@@ -56,71 +57,80 @@ public class NonScheduleResourceForm extends BaseValidatorForm {
     private Integer resourceType;
     private List resourceTypes;
 
-    //-------------------------------------constructors
+    // -------------------------------------constructors
 
-    //-------------------------------------public methods
+    // -------------------------------------public methods
 
-    /** Returns the name.
+    /**
+     * Returns the name.
      * @return String
      */
     public String getName() {
         return name;
     }
 
-    /** sets the name.
+    /**
+     * sets the name.
      * @return String
      */
     public void setName(String name) {
         this.name = name;
     }
 
-    /** Returns the description.
+    /**
+     * Returns the description.
      * @return String
      */
     public String getDescription() {
-    return description;
+        return description;
     }
 
-    /** Sets the description.
+    /**
+     * Sets the description.
      * @param description The description to set
      */
     public void setDescription(String description) {
-    this.description = description;
+        this.description = description;
     }
 
-    /** Returns the location.
+    /**
+     * Returns the location.
      * @return Integer
      */
     public String getLocation() {
-    return location;
+        return location;
     }
 
-    /** Sets the location.
+    /**
+     * Sets the location.
      * @param location The location to set
      */
     public void setLocation(String location) {
-    this.location = location;
+        this.location = location;
     }
 
-    /** Returns the resourceTypes.
+    /**
+     * Returns the resourceTypes.
      * @return List
      */
     public List getResourceTypes() {
-    return resourceTypes;
+        return resourceTypes;
     }
 
-    /** Sets the resourceTypes.
+    /**
+     * Sets the resourceTypes.
      * @param resourceTypes The resourceTypes to set
      */
     public void setResourceTypes(List resourceTypes) {
-    this.resourceTypes = resourceTypes;
+        this.resourceTypes = resourceTypes;
     }
 
-    /** Returns the resourceType.
+    /**
+     * Returns the resourceType.
      * @return Integer
      */
     public Integer getResourceType() {
-    return resourceType;
+        return resourceType;
     }
 
     /**
@@ -128,7 +138,7 @@ public class NonScheduleResourceForm extends BaseValidatorForm {
      * @param resourceType The resourceType to set
      */
     public void setResourceType(Integer resourceType) {
-    this.resourceType = resourceType;
+        this.resourceType = resourceType;
     }
 
     /**
@@ -136,7 +146,7 @@ public class NonScheduleResourceForm extends BaseValidatorForm {
      * @return String
      */
     public Integer getRid() {
-    return rid;
+        return rid;
     }
 
     /**
@@ -144,7 +154,7 @@ public class NonScheduleResourceForm extends BaseValidatorForm {
      * @param rid The rid to set
      */
     public void setRid(Integer rid) {
-    this.rid = rid;
+        this.rid = rid;
     }
 
     /**
@@ -167,7 +177,7 @@ public class NonScheduleResourceForm extends BaseValidatorForm {
      * loads the server value
      * 
      * @param sValue
-     */    
+     */
     public void loadResourceValue(AppdefResourceValue sValue) {
         this.name = sValue.getName();
         this.description = sValue.getDescription();
@@ -180,7 +190,7 @@ public class NonScheduleResourceForm extends BaseValidatorForm {
      * loads the server value
      * 
      * @param sValue
-     */    
+     */
     public void updateResourceValue(AppdefResourceValue rValue) {
         if (name != null)
             rValue.setName(name);
@@ -204,17 +214,17 @@ public class NonScheduleResourceForm extends BaseValidatorForm {
 
     public ActionErrors validate(ActionMapping mapping, HttpServletRequest request) {
         ActionErrors errors = super.validate(mapping, request);
-        
+
         if (errors == null) {
             errors = new ActionErrors();
         }
-        
+
         if (errors.isEmpty()) {
             return null;
         }
         return errors;
     }
-    
+
     public String toString() {
         StringBuffer s = new StringBuffer(super.toString());
 

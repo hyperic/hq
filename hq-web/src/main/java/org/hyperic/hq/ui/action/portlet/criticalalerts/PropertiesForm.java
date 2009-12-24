@@ -28,19 +28,16 @@ package org.hyperic.hq.ui.action.portlet.criticalalerts;
 import org.hyperic.hq.ui.action.portlet.DashboardBaseForm;
 
 /**
- * A subclass of <code>ValidatorForm</code> that adds convenience
- * methods for dealing with image-based form buttons.
+ * A subclass of <code>ValidatorForm</code> that adds convenience methods for
+ * dealing with image-based form buttons.
  */
-public class PropertiesForm extends DashboardBaseForm  {
-    public final static String ALERT_NUMBER =
-        ".dashContent.criticalalerts.numberOfAlerts";
+public class PropertiesForm
+    extends DashboardBaseForm {
+    public final static String ALERT_NUMBER = ".dashContent.criticalalerts.numberOfAlerts";
     public final static String PAST = ".dashContent.criticalalerts.past";
-    public final static String PRIORITY =
-        ".dashContent.criticalalerts.priority";
-    public final static String SELECTED_OR_ALL =
-        ".dashContent.criticalalerts.selectedOrAll";
-    public final static String TITLE =
-        ".dashContent.criticalAlerts.title";
+    public final static String PRIORITY = ".dashContent.criticalalerts.priority";
+    public final static String SELECTED_OR_ALL = ".dashContent.criticalalerts.selectedOrAll";
+    public final static String TITLE = ".dashContent.criticalAlerts.title";
 
     private Integer _numberOfAlerts;
     private String _priority;
@@ -49,7 +46,7 @@ public class PropertiesForm extends DashboardBaseForm  {
     private String _key;
     private String[] _ids;
     private String _title;
-    
+
     public PropertiesForm() {
         super();
     }

@@ -30,10 +30,11 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionMapping;
 
-public class MetricMetadataForm extends ActionForm {
-    private Integer m;           /* template id */
-    private String ctype;        /* autogroup's child resource type, if any */
-    private String eid;          /* AppdefEntityID */
+public class MetricMetadataForm
+    extends ActionForm {
+    private Integer m; /* template id */
+    private String ctype; /* autogroup's child resource type, if any */
+    private String eid; /* AppdefEntityID */
 
     /**
      * @return String
@@ -79,7 +80,6 @@ public class MetricMetadataForm extends ActionForm {
     public void setM(Integer m) {
         this.m = m;
     }
-
 
     public void reset(ActionMapping mapping, HttpServletRequest request) {
         super.reset(mapping, request);

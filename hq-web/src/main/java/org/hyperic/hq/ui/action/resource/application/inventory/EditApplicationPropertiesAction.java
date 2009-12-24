@@ -46,80 +46,64 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * This class handles saving edit operations performed on Application
- * Properties (screen 2.1.6.2)
+ * This class handles saving edit operations performed on Application Properties
+ * (screen 2.1.6.2)
  */
-public class EditApplicationPropertiesAction extends BaseAction {
+public class EditApplicationPropertiesAction
+    extends BaseAction {
 
-    private final Log log = LogFactory
-        .getLog(EditApplicationPropertiesAction.class.getName());
+    private final Log log = LogFactory.getLog(EditApplicationPropertiesAction.class.getName());
     private AppdefBoss appdefBoss;
-    
-    
+
     @Autowired
     public EditApplicationPropertiesAction(AppdefBoss appdefBoss) {
         super();
         this.appdefBoss = appdefBoss;
     }
 
-
-
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
         ApplicationForm appForm = (ApplicationForm) form;
-        AppdefEntityID aeid = new AppdefEntityID(appForm.getType().intValue(),
-                                                 appForm.getRid());
+        AppdefEntityID aeid = new AppdefEntityID(appForm.getType().intValue(), appForm.getRid());
 
         HashMap<String, Object> forwardParams = new HashMap<String, Object>(2);
         forwardParams.put(Constants.ENTITY_ID_PARAM, aeid.getAppdefKey());
         forwardParams.put(Constants.ACCORDION_PARAM, "1");
 
-        ActionForward forward = checkSubmit(request, mapping, form,
-                                            forwardParams);
+        ActionForward forward = checkSubmit(request, mapping, form, forwardParams);
         if (forward != null) {
             return forward;
         }
 
-       
         Integer sessionId = RequestUtils.getSessionId(request);
-       
 
         Integer applicationTypeId = appForm.getResourceType();
         // XXX there is no findApplicationTypeById(...) boss signature, so
         // we'll hope for the best .... when the api is updated, we'll use it
         /*
          */
-        //List applicationTypes = appdefBoss.findAllApplicationTypes(sessionId.intValue());
+        // List applicationTypes =
+        // appdefBoss.findAllApplicationTypes(sessionId.intValue());
         log.trace("finding application type [" + applicationTypeId + "]");
-        ApplicationType applicationType =
-            appdefBoss.findApplicationTypeById(sessionId.intValue(),
-                                         applicationTypeId);
+        ApplicationType applicationType = appdefBoss.findApplicationTypeById(sessionId.intValue(), applicationTypeId);
 
         // now set up the application
-        ApplicationValue appVal =
-            appdefBoss.findApplicationById(sessionId.intValue(), aeid.getId());
+        ApplicationValue appVal = appdefBoss.findApplicationById(sessionId.intValue(), aeid.getId());
         if (appVal == null) {
-            RequestUtils
-                .setError(request,
-                          "resource.application.error.ApplicationNotFound");
+            RequestUtils.setError(request, "resource.application.error.ApplicationNotFound");
             return returnFailure(request, mapping, forwardParams);
         }
 
         appForm.updateResourceValue(appVal);
         appVal.setApplicationType(applicationType);
 
-        log.trace("updating general properties of application [" +
-                  appVal.getName() + "]" + " with attributes " + appVal);
+        log.trace("updating general properties of application [" + appVal.getName() + "]" + " with attributes " +
+                  appVal);
         appdefBoss.updateApplication(sessionId.intValue(), appVal);
 
-        RequestUtils
-            .setConfirmation(request,
-                             "resource.application.inventory.confirm.EditGeneralProperties",
-                             appVal.getName());
+        RequestUtils.setConfirmation(request, "resource.application.inventory.confirm.EditGeneralProperties", appVal
+            .getName());
         return returnSuccess(request, mapping, forwardParams);
 
     }

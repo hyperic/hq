@@ -58,20 +58,20 @@ import org.hyperic.util.pager.PageControl;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * Action class which saves an auto-discovery.  The autodiscovery
- * can be an new/edit auto-discovery.
+ * Action class which saves an auto-discovery. The autodiscovery can be an
+ * new/edit auto-discovery.
  * 
  */
-public class NewAutoDiscoveryAction extends BaseAction {
-    
+public class NewAutoDiscoveryAction
+    extends BaseAction {
+
     public final static long TIMEOUT = 5000;
     public final static long INTERVAL = 500;
-    
+
     private AppdefBoss appdefBoss;
     private AIBoss aiBoss;
-    
-    
-    @Autowired    
+
+    @Autowired
     public NewAutoDiscoveryAction(AppdefBoss appdefBoss, AIBoss aiBoss) {
         super();
         this.appdefBoss = appdefBoss;
@@ -82,160 +82,130 @@ public class NewAutoDiscoveryAction extends BaseAction {
      * Create a new auto-discovery with the attributes specified in the given
      * <code>AutoDiscoveryForm</code>.
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception 
-    { 
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
         ActionErrors errors = new ActionErrors();
         try {
             PlatformAutoDiscoveryForm newForm = (PlatformAutoDiscoveryForm) form;
 
             Integer platformId = newForm.getRid();
             Integer platformType = newForm.getType();
-            
-            HashMap<String, Object> forwardParams = new HashMap<String,Object>(3);
-            forwardParams.put(Constants.RESOURCE_PARAM, platformId);
-            forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, platformType );
 
-            ActionForward forward =
-                checkSubmit(request, mapping, form,
-                            forwardParams, YES_RETURN_PATH);
+            HashMap<String, Object> forwardParams = new HashMap<String, Object>(3);
+            forwardParams.put(Constants.RESOURCE_PARAM, platformId);
+            forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, platformType);
+
+            ActionForward forward = checkSubmit(request, mapping, form, forwardParams, YES_RETURN_PATH);
 
             if (forward != null) {
                 return forward;
-            }         
+            }
 
-           
             int sessionId = RequestUtils.getSessionIdInt(request);
-            
-            PlatformValue pValue =
-                appdefBoss.findPlatformById(sessionId, platformId);
-            buildAutoDiscoveryScan(request, newForm, pValue, errors); 
 
-            RequestUtils.setConfirmation(request,
-                "resource.platform.inventory.autoinventory.status.NewScan");
+            PlatformValue pValue = appdefBoss.findPlatformById(sessionId, platformId);
+            buildAutoDiscoveryScan(request, newForm, pValue, errors);
+
+            RequestUtils.setConfirmation(request, "resource.platform.inventory.autoinventory.status.NewScan");
 
             // See if there is an existing report
-          
+
             try {
-                AIPlatformValue aip =
-                    aiBoss.findAIPlatformByPlatformID(sessionId,
-                                                        platformId.intValue());
+                AIPlatformValue aip = aiBoss.findAIPlatformByPlatformID(sessionId, platformId.intValue());
                 request.setAttribute(Constants.AIPLATFORM_ATTR, aip);
             } catch (PlatformNotFoundException e) {
                 // Don't worry about it then
             }
-            
+
             return returnNew(request, mapping, forwardParams);
         } catch (AgentConnectionException e) {
-            RequestUtils
-                .setError(request,
-                          "resource.platform.inventory.configProps.NoAgentConnection");
+            RequestUtils.setError(request, "resource.platform.inventory.configProps.NoAgentConnection");
             return returnFailure(request, mapping);
         } catch (AgentNotFoundException e) {
-            RequestUtils
-                .setError(request,
-                          "resource.platform.inventory.configProps.NoAgentConnection");
+            RequestUtils.setError(request, "resource.platform.inventory.configProps.NoAgentConnection");
             return returnFailure(request, mapping);
         } catch (InvalidOptionValsFoundException e) {
-            RequestUtils.setErrors(request,errors);
+            RequestUtils.setErrors(request, errors);
             return returnFailure(request, mapping);
-                
+
         } catch (DuplicateObjectException e1) {
-            RequestUtils
-                .setError(request,
-                          Constants.ERR_DUP_RESOURCE_FOUND);
+            RequestUtils.setError(request, Constants.ERR_DUP_RESOURCE_FOUND);
             return returnFailure(request, mapping);
         }
     }
 
     /**
-     * Return an <code>ActionForward</code> if the form has been
-     * cancelled or reset; otherwise return <code>null</code> so that
-     * the subclass can continue to execute.
+     * Return an <code>ActionForward</code> if the form has been cancelled or
+     * reset; otherwise return <code>null</code> so that the subclass can
+     * continue to execute.
      */
-    protected ActionForward checkSubmit(HttpServletRequest request,
-                                        ActionMapping mapping, ActionForm form,
-                                        Map<String,Object> params, boolean doReturnPath)
-        throws Exception {
+    protected ActionForward checkSubmit(HttpServletRequest request, ActionMapping mapping, ActionForm form,
+                                        Map<String, Object> params, boolean doReturnPath) throws Exception {
         PlatformAutoDiscoveryForm aiForm = (PlatformAutoDiscoveryForm) form;
 
         if (aiForm.isScheduleTypeChgSelected()) {
             return returnScheduleTypeChg(request, mapping, params, false);
         }
-        
-        return super.checkSubmit(request,mapping,form,params,doReturnPath);
+
+        return super.checkSubmit(request, mapping, form, params, doReturnPath);
     }
 
     /**
-     * Return an <code>ActionForward</code> representing the
-     * <em>cancel</em> form gesture.
+     * Return an <code>ActionForward</code> representing the <em>cancel</em>
+     * form gesture.
      */
-    private ActionForward returnScheduleTypeChg(HttpServletRequest request,
-                                         ActionMapping mapping,
-                                         Map<String,Object> params, boolean doReturnPath)
-        throws Exception {
-            return constructForward(request, mapping,
-                                    Constants.SCHEDULE_TYPE_CHG_URL,
-                                    params, doReturnPath);
+    private ActionForward returnScheduleTypeChg(HttpServletRequest request, ActionMapping mapping,
+                                                Map<String, Object> params, boolean doReturnPath) throws Exception {
+        return constructForward(request, mapping, Constants.SCHEDULE_TYPE_CHG_URL, params, doReturnPath);
     }
 
-    private void buildAutoDiscoveryScan(HttpServletRequest request,
-                                        PlatformAutoDiscoveryForm newForm,        
-                                        PlatformValue pValue,
-                                        ActionErrors errors)
-        throws Exception
-    {
-        
+    private void buildAutoDiscoveryScan(HttpServletRequest request, PlatformAutoDiscoveryForm newForm,
+                                        PlatformValue pValue, ActionErrors errors) throws Exception {
+
         int sessionId = RequestUtils.getSessionIdInt(request);
-        
+
         // update the ScanConfiguration from the form obect
-        List<ServerTypeValue> stValues =
-            appdefBoss.findServerTypesByPlatformType(sessionId,
-                                               pValue.getPlatformType().getId(),
-                                               PageControl.PAGE_ALL);
-        ServerTypeValue[] stArray = 
-            stValues.toArray(new ServerTypeValue[0]);
-        
-        Map<String,ServerSignature> serverDetectors =
-            aiBoss.getServerSignatures(sessionId,
-                                       newForm.getSelectedServerTypes(stArray));
-        
-        ServerSignature[] serverDetectorArray =
-            new ServerSignature[serverDetectors.size()];
+        List<ServerTypeValue> stValues = appdefBoss.findServerTypesByPlatformType(sessionId, pValue.getPlatformType()
+            .getId(), PageControl.PAGE_ALL);
+        ServerTypeValue[] stArray = stValues.toArray(new ServerTypeValue[0]);
+
+        Map<String, ServerSignature> serverDetectors = aiBoss.getServerSignatures(sessionId, newForm
+            .getSelectedServerTypes(stArray));
+
+        ServerSignature[] serverDetectorArray = new ServerSignature[serverDetectors.size()];
         serverDetectors.values().toArray(serverDetectorArray);
-        
+
         String ptName = pValue.getPlatformType().getName();
-        ScanMethod scanMethod
-            = NewAutoDiscoveryPrepAction.getScanMethod(ptName);
+        ScanMethod scanMethod = NewAutoDiscoveryPrepAction.getScanMethod(ptName);
         ScanConfiguration scanConfig = new ScanConfiguration();
-        ConfigResponse oldCr
-            = NewAutoDiscoveryPrepAction.getConfigResponse(ptName);
-        ConfigResponse cr =
-            BizappUtils.buildSaveConfigOptions(request, oldCr,
-                                               scanMethod.getConfigSchema(),
-                                               errors);
-        
+        ConfigResponse oldCr = NewAutoDiscoveryPrepAction.getConfigResponse(ptName);
+        ConfigResponse cr = BizappUtils.buildSaveConfigOptions(request, oldCr, scanMethod.getConfigSchema(), errors);
+
         // Only setup the FileScan if server types were actually selected
         if (serverDetectorArray.length > 0) {
             scanConfig.setScanMethodConfig(scanMethod, cr);
-        }        
+        }
         scanConfig.setServerSignatures(serverDetectorArray);
 
-        aiBoss.startScan(sessionId,
-                         pValue.getId().intValue(), 
-                         scanConfig.getCore(),
-                         null, null, /* No scanName or scanDesc for 
-                                        immediate, one-time scans */
-                         null);
-                         
+        aiBoss.startScan(sessionId, pValue.getId().intValue(), scanConfig.getCore(), null, null, /*
+                                                                                                  * No
+                                                                                                  * scanName
+                                                                                                  * or
+                                                                                                  * scanDesc
+                                                                                                  * for
+                                                                                                  * immediate
+                                                                                                  * ,
+                                                                                                  * one
+                                                                                                  * -
+                                                                                                  * time
+                                                                                                  * scans
+                                                                                                  */
+        null);
+
         waitForScanStart(sessionId, aiBoss, pValue.getId().intValue());
     }
 
-    private void waitForScanStart(int sessionId, AIBoss boss, int platformId)
-        throws Exception {
+    private void waitForScanStart(int sessionId, AIBoss boss, int platformId) throws Exception {
         Thread.sleep(2000);
     }
 }

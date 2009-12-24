@@ -29,7 +29,6 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-
 import org.apache.struts.action.ActionErrors;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.ui.action.resource.common.control.ControlForm;
@@ -37,32 +36,33 @@ import org.hyperic.hq.ui.action.resource.common.control.ControlForm;
 /**
  * A subclass of <code>ControlForm</code> representing the
  * <em>EditUserProperties</em> form.
- *
+ * 
  * @see org.hyperic.hq.ui.resource.common.control.ControlForm
  */
-public final class GroupControlForm extends ControlForm  {
+public final class GroupControlForm
+    extends ControlForm {
 
     public static final Boolean IN_PARALLEL = Boolean.TRUE;
     public static final Boolean IN_ORDER = Boolean.FALSE;
-    
-    //-------------------------------------instance variables
+
+    // -------------------------------------instance variables
     /** Holds value of property inParallel. */
     private Boolean inParallel;
-    
+
     /** Holds value of property order. */
     private Integer[] resourceOrdering;
-    
+
     /** Holds value of property resourceOrderingOptions. */
     private List resourceOrderingOptions;
-    
-    //-------------------------------------constructors
+
+    // -------------------------------------constructors
 
     public GroupControlForm() {
     }
 
-    //-------------------------------------public methods
+    // -------------------------------------public methods
 
-    //-------- form methods-------------------------
+    // -------- form methods-------------------------
 
     // for validation, please see web/WEB-INF/validation/validation.xml
     public void reset(ActionMapping mapping, HttpServletRequest request) {
@@ -70,24 +70,23 @@ public final class GroupControlForm extends ControlForm  {
         inParallel = Boolean.TRUE;
         resourceOrdering = new Integer[0];
     }
-    
+
     // Checks super class's custom validation rules. This
     // This is primarily for ResourceForm's custom validation.
-    public ActionErrors validate(ActionMapping mapping, 
-                                 HttpServletRequest request) {
+    public ActionErrors validate(ActionMapping mapping, HttpServletRequest request) {
         ActionErrors errs = super.validate(mapping, request);
         if (null == errs) {
-                errs = new ActionErrors();
+            errs = new ActionErrors();
         }
-        
+
         // custom validation
-        
+
         if (errs.isEmpty()) {
             return null;
         }
         return errs;
     }
-    
+
     public String toString() {
         StringBuffer s = new StringBuffer();
         s.append(super.toString());
@@ -95,53 +94,60 @@ public final class GroupControlForm extends ControlForm  {
         s.append("resourceOrdering=").append(resourceOrdering);
         return s.toString();
     }
-    
-    /** Getter for property parallel.
+
+    /**
+     * Getter for property parallel.
      * @return Value of property parallel.
-     *
+     * 
      */
     public Boolean getInParallel() {
         return this.inParallel;
     }
-    
-    /** Setter for property parallel.
+
+    /**
+     * Setter for property parallel.
      * @param parallel New value of property parallel.
-     *
+     * 
      */
     public void setInParallel(Boolean inParallel) {
         this.inParallel = inParallel;
     }
-    
-    /** Getter for property orde.
+
+    /**
+     * Getter for property orde.
      * @return Value of property orde.
-     *
+     * 
      */
     public Integer[] getResourceOrdering() {
         return this.resourceOrdering;
     }
-    
-    /** Setter for property orde.
+
+    /**
+     * Setter for property orde.
      * @param orde New value of property orde.
-     *
+     * 
      */
     public void setResourceOrdering(Integer[] order) {
         this.resourceOrdering = order;
     }
-    
-    /** Getter for property resourceOrderingOptions.
+
+    /**
+     * Getter for property resourceOrderingOptions.
      * @return Value of property resourceOrderingOptions.
-     *
+     * 
      */
     public List getResourceOrderingOptions() {
         return this.resourceOrderingOptions;
     }
-    
-    /** Setter for property resourceOrderingOptions.
-     * @param resourceOrderingOptions New value of property resourceOrderingOptions.
-     *
+
+    /**
+     * Setter for property resourceOrderingOptions.
+     * @param resourceOrderingOptions New value of property
+     *        resourceOrderingOptions.
+     * 
      */
     public void setResourceOrderingOptions(List resourceOrderingOptions) {
         this.resourceOrderingOptions = resourceOrderingOptions;
     }
-    
+
 }

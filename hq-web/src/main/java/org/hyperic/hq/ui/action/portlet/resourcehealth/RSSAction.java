@@ -53,54 +53,49 @@ import org.hyperic.util.units.UnitsFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * An <code>Action</code> that loads the <code>Portal</code>
- * identified by the <code>PORTAL_PARAM</code> request parameter (or
- * the default portal, if the parameter is not specified) into the
- * <code>PORTAL_KEY</code> request attribute.
+ * An <code>Action</code> that loads the <code>Portal</code> identified by the
+ * <code>PORTAL_PARAM</code> request parameter (or the default portal, if the
+ * parameter is not specified) into the <code>PORTAL_KEY</code> request
+ * attribute.
  */
-public class RSSAction extends BaseRSSAction {
-    
+public class RSSAction
+    extends BaseRSSAction {
+
     private MeasurementBoss measurementBoss;
-    
+
     @Autowired
     public RSSAction(DashboardManager dashboardManager, ConfigBoss configBoss, MeasurementBoss measurementBoss) {
         super(dashboardManager, configBoss);
         this.measurementBoss = measurementBoss;
     }
 
-
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
         RSSFeed feed = getNewRSSFeed(request);
-        
+
         // Set title
         MessageResources res = getResources(request);
         feed.setTitle(res.getMessage("dash.home.ResourceHealth"));
 
         // Get the resources health
-      
 
         String user = getUsername(request);
         List<ResourceDisplaySummary> list = null;
         try {
             // Set the managingEditor
             setManagingEditor(request);
-            
+
             // Get user preferences
             ConfigResponse preferences = getUserPreferences(request, user);
 
-            String favIds =
-                preferences.getValue(Constants.USERPREF_KEY_FAVORITE_RESOURCES);
+            String favIds = preferences.getValue(Constants.USERPREF_KEY_FAVORITE_RESOURCES);
 
             if (favIds != null) {
-                List<AppdefEntityID> ids = DashboardUtils.listAsEntityIds(
-                    StringUtil.explode(favIds, Constants.DASHBOARD_DELIMITER));
+                List<AppdefEntityID> ids = DashboardUtils.listAsEntityIds(StringUtil.explode(favIds,
+                    Constants.DASHBOARD_DELIMITER));
                 AppdefEntityID[] arrayIds = new AppdefEntityID[ids.size()];
-                arrayIds =  ids.toArray(arrayIds);
-                
+                arrayIds = ids.toArray(arrayIds);
+
                 list = measurementBoss.findResourcesCurrentHealth(user, arrayIds);
             }
         } catch (Exception e) {
@@ -110,43 +105,30 @@ public class RSSAction extends BaseRSSAction {
         if (list != null) {
             int i = 0;
             for (Iterator<ResourceDisplaySummary> it = list.iterator(); it.hasNext(); i++) {
-                ResourceDisplaySummary summary =
-                    it.next();
+                ResourceDisplaySummary summary = it.next();
                 AppdefEntityID aeid = summary.getEntityId();
-                
-                String link = feed.getBaseUrl() + "/Resource.do?eid=" +
-                              aeid.getAppdefKey();
+
+                String link = feed.getBaseUrl() + "/Resource.do?eid=" + aeid.getAppdefKey();
 
                 long current = System.currentTimeMillis();
 
-                StringBuffer desc =
-                    new StringBuffer("<table><tr><td align=center>");
-                if (Boolean.FALSE.equals(summary.getMonitorable()) ||
-                    summary.getAvailability() == null) {
+                StringBuffer desc = new StringBuffer("<table><tr><td align=center>");
+                if (Boolean.FALSE.equals(summary.getMonitorable()) || summary.getAvailability() == null) {
                     desc.append(res.getMessage("common.value.notavail"));
+                } else {
+                    UnitNumber avail = new UnitNumber(summary.getAvailability().doubleValue(),
+                        UnitsConstants.UNIT_PERCENTAGE);
+                    desc.append(
+                        res.getMessage("dash.home.ResourceHealth.rss.item.availability", UnitsFormat.format(avail)
+                            .toString())).append("</td></tr><tr><td>").append("<img src=\"").append(feed.getBaseUrl())
+                        .append("/resource/AvailHealthChart?eid=").append(aeid.getAppdefKey()).append("&tid=").append(
+                            summary.getAvailTempl()).append("&user=").append(user).append("&").append(current).append(
+                            "\">");
                 }
-                else {
-                    UnitNumber avail =
-                        new UnitNumber(summary.getAvailability().doubleValue(),
-                                       UnitsConstants.UNIT_PERCENTAGE);
-                    desc.append(res.getMessage(
-                        "dash.home.ResourceHealth.rss.item.availability",
-                        UnitsFormat.format(avail).toString()))
-                        .append("</td></tr><tr><td>")
-                        .append("<img src=\"")
-                        .append(feed.getBaseUrl())
-                        .append("/resource/AvailHealthChart?eid=")
-                        .append(aeid.getAppdefKey())
-                        .append("&tid=").append(summary.getAvailTempl())
-                        .append("&user=").append(user)
-                        .append("&").append(current)
-                        .append("\">");
-                }
-                
+
                 desc.append("</td></tr></table>");
-                
-                feed.addItem(summary.getResourceName(), link, desc.toString(),
-                             current);
+
+                feed.addItem(summary.getResourceName(), link, desc.toString(), current);
             }
         }
         request.setAttribute("rssFeed", feed);

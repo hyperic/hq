@@ -47,15 +47,13 @@ import org.hyperic.hq.ui.util.SessionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * A <code>BaseAction</code> that handles metrics display form
- * submissions.
+ * A <code>BaseAction</code> that handles metrics display form submissions.
  */
-public class MetricsDisplayAction extends MetricsControlAction {
+public class MetricsDisplayAction
+    extends MetricsControlAction {
 
-    private final Log log =  LogFactory
-        .getLog(MetricsDisplayAction.class.getName());
+    private final Log log = LogFactory.getLog(MetricsDisplayAction.class.getName());
     private MeasurementBoss measurementBoss;
-    
 
     @Autowired
     public MetricsDisplayAction(AuthzBoss authzBoss, MeasurementBoss measurementBoss) {
@@ -67,11 +65,8 @@ public class MetricsDisplayAction extends MetricsControlAction {
      * Modify the metrics summary display as specified in the given
      * <code>MetricsDisplayForm</code>.
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
         MetricsDisplayForm displayForm = (MetricsDisplayForm) form;
 
         AppdefEntityID entityId = displayForm.getEntityId();
@@ -79,74 +74,59 @@ public class MetricsDisplayAction extends MetricsControlAction {
 
         WebUser user = RequestUtils.getWebUser(request);
         Integer sessionId = user.getSessionId();
-       
 
         if (displayForm.isCompareClicked()) {
             return returnCompare(request, mapping, forwardParams);
-        }
-        else if (displayForm.isChartClicked()) {
-            forwardParams.put( Constants.METRIC_PARAM, displayForm.getM() );
+        } else if (displayForm.isChartClicked()) {
+            forwardParams.put(Constants.METRIC_PARAM, displayForm.getM());
             return returnChart(request, mapping, forwardParams);
-        }
-        else if (displayForm.isThresholdClicked()) {
+        } else if (displayForm.isThresholdClicked()) {
             Integer threshold = displayForm.getT();
-            user.setPreference(WebUser.PREF_METRIC_THRESHOLD,
-                               threshold);
+            user.setPreference(WebUser.PREF_METRIC_THRESHOLD, threshold);
             log.trace("saving threshold pref [" + threshold + "]");
-            LogFactory.getLog("user.preferences").trace("Invoking setUserPrefs"+
-                " in MetricsDisplayAction " +
-                " for " + user.getId() + " at "+System.currentTimeMillis() +
-                " user.prefs = " + user.getPreferences());
-           
+            LogFactory.getLog("user.preferences").trace(
+                "Invoking setUserPrefs" + " in MetricsDisplayAction " + " for " + user.getId() + " at " +
+                    System.currentTimeMillis() + " user.prefs = " + user.getPreferences());
+
             authzBoss.setUserPrefs(sessionId, user.getId(), user.getPreferences());
-            
+
             return returnSuccess(request, mapping);
-        }
-        else if (displayForm.isOkClicked()) {
+        } else if (displayForm.isOkClicked()) {
             Integer[] m = displayForm.getM();
             long interval = displayForm.getIntervalTime();
 
             // Don't make any back-end call if user has not selected any metrics
             if (m != null && m.length > 0) {
-              
+
                 if (displayForm.getCtype() == null || entityId.isGroup())
-                    measurementBoss.updateMeasurements(sessionId.intValue(), entityId, m,
-                                             interval);
+                    measurementBoss.updateMeasurements(sessionId.intValue(), entityId, m, interval);
                 else {
-                    AppdefEntityTypeID ctid =
-                        new AppdefEntityTypeID(displayForm.getCtype());
-                
-                    measurementBoss.updateAGMeasurements(sessionId.intValue(), entityId,
-                                               ctid, m, interval);
+                    AppdefEntityTypeID ctid = new AppdefEntityTypeID(displayForm.getCtype());
+
+                    measurementBoss.updateAGMeasurements(sessionId.intValue(), entityId, ctid, m, interval);
                 }
 
             }
-            RequestUtils.setConfirmation(request,
-                "resource.common.monitor.visibility.config.ConfigMetrics." +
-                "Confirmation");
-            
+            RequestUtils.setConfirmation(request, "resource.common.monitor.visibility.config.ConfigMetrics."
+                                                  + "Confirmation");
+
             return returnSuccess(request, mapping);
-        }
-        else if (displayForm.isRemoveClicked()) {
+        } else if (displayForm.isRemoveClicked()) {
             Integer[] m = displayForm.getM();
             // Don't make any back-end call if user has not selected any metrics
             if (m != null && m.length > 0) {
-                
 
                 if (displayForm.getCtype() == null || entityId.isGroup())
-                    measurementBoss.disableMeasurements(sessionId.intValue(), entityId,m);
+                    measurementBoss.disableMeasurements(sessionId.intValue(), entityId, m);
                 else {
-                    AppdefEntityTypeID ctid =
-                        new AppdefEntityTypeID(displayForm.getCtype());
-                    measurementBoss.disableAGMeasurements(sessionId.intValue(), entityId,
-                                                ctid, m);
+                    AppdefEntityTypeID ctid = new AppdefEntityTypeID(displayForm.getCtype());
+                    measurementBoss.disableAGMeasurements(sessionId.intValue(), entityId, ctid, m);
                 }
 
-                RequestUtils.setConfirmation(request, 
-                    "resource.common.monitor.visibility.config.RemoveMetrics." +
-                    "Confirmation");
+                RequestUtils.setConfirmation(request, "resource.common.monitor.visibility.config.RemoveMetrics."
+                                                      + "Confirmation");
             }
-            
+
             return returnSuccess(request, mapping);
         }
 
@@ -155,27 +135,21 @@ public class MetricsDisplayAction extends MetricsControlAction {
 
     // ---------------------------------------------------- Private Methods
 
-    private ActionForward returnCompare(HttpServletRequest request,
-                                        ActionMapping mapping,
-                                        Map<String, Object> params)
-    throws Exception {
+    private ActionForward returnCompare(HttpServletRequest request, ActionMapping mapping, Map<String, Object> params)
+        throws Exception {
         // set return path
         String returnPath = ActionUtils.findReturnPath(mapping, params);
         SessionUtils.setReturnPath(request.getSession(), returnPath);
 
-        return constructForward(request, mapping, Constants.COMPARE_URL,
-                                params, NO_RETURN_PATH);
+        return constructForward(request, mapping, Constants.COMPARE_URL, params, NO_RETURN_PATH);
     }
 
-    private ActionForward returnChart(HttpServletRequest request,
-                                      ActionMapping mapping,
-                                      Map<String, Object> params)
-    throws Exception {
+    private ActionForward returnChart(HttpServletRequest request, ActionMapping mapping, Map<String, Object> params)
+        throws Exception {
         // set return path
         String returnPath = ActionUtils.findReturnPath(mapping, params);
         SessionUtils.setReturnPath(request.getSession(), returnPath);
 
-        return constructForward(request, mapping, Constants.CHART_URL,
-                                params, NO_RETURN_PATH);
+        return constructForward(request, mapping, Constants.CHART_URL, params, NO_RETURN_PATH);
     }
 }

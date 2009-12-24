@@ -53,36 +53,30 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
 
 /**
- * A class that provides an implementation of some auto-group
- * monitoring functions for auto-groups of platforms.  We call it
- * "root" because there is no parent resource(s) in this case.
- *
+ * A class that provides an implementation of some auto-group monitoring
+ * functions for auto-groups of platforms. We call it "root" because there is no
+ * parent resource(s) in this case.
+ * 
  */
-public class RootInventoryHelper extends InventoryHelper {
+public class RootInventoryHelper
+    extends InventoryHelper {
 
-    private final Log log =
-        LogFactory.getLog( RootInventoryHelper.class.getName() );
+    private final Log log = LogFactory.getLog(RootInventoryHelper.class.getName());
 
     public RootInventoryHelper() {
-        super(null); 
+        super(null);
     }
-
-  
 
     /**
      * Get the set of server types representing a platform's servers.
-     *
+     * 
      * @param request the http request
      * @param ctx the servlet context
      * @param resource the platform
      */
-    public List getChildResourceTypes(HttpServletRequest request,
-                                      ServletContext ctx,
-                                      AppdefResourceValue resource/*ignored*/)
-        throws PermissionException, AppdefEntityNotFoundException,
-               RemoteException, SessionNotFoundException,
-               SessionTimeoutException, ServletException
-    {
+    public List getChildResourceTypes(HttpServletRequest request, ServletContext ctx, AppdefResourceValue resource/* ignored */)
+        throws PermissionException, AppdefEntityNotFoundException, RemoteException, SessionNotFoundException,
+        SessionTimeoutException, ServletException {
         int sessionId = RequestUtils.getSessionId(request).intValue();
         AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
         log.trace("finding all platform types");
@@ -91,18 +85,14 @@ public class RootInventoryHelper extends InventoryHelper {
 
     /**
      * Get a platform type from the Bizapp.
-     *
+     * 
      * @param request the http request
      * @param ctx the servlet context
      * @param id the id of the server type
      */
-    public AppdefResourceType getChildResourceType(HttpServletRequest request,
-                                                   ServletContext ctx,
-                                                   AppdefEntityTypeID id)
-        throws PermissionException, AppdefEntityNotFoundException,
-               RemoteException, SessionNotFoundException,
-               SessionTimeoutException, ServletException
-    {
+    public AppdefResourceType getChildResourceType(HttpServletRequest request, ServletContext ctx, AppdefEntityTypeID id)
+        throws PermissionException, AppdefEntityNotFoundException, RemoteException, SessionNotFoundException,
+        SessionTimeoutException, ServletException {
         int sessionId = RequestUtils.getSessionId(request).intValue();
         AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
 
@@ -111,25 +101,19 @@ public class RootInventoryHelper extends InventoryHelper {
     }
 
     /**
-     * Get from the Bizapp the numbers of children of the given
-     * resource. Returns a <code>Map</code> of counts keyed by
-     * child resource type.
-     *
+     * Get from the Bizapp the numbers of children of the given resource.
+     * Returns a <code>Map</code> of counts keyed by child resource type.
+     * 
      * @param request the http request
-     * @param resource the appdef resource whose children we are
-     * counting
+     * @param resource the appdef resource whose children we are counting
      */
-    public Map getChildCounts(HttpServletRequest request,
-                              ServletContext ctx,
-                              AppdefResourceValue resource/*ignored*/)
-        throws PermissionException, AppdefEntityNotFoundException,
-               RemoteException, SessionNotFoundException,
-               SessionTimeoutException, ServletException
-    {
+    public Map getChildCounts(HttpServletRequest request, ServletContext ctx, AppdefResourceValue resource/* ignored */)
+        throws PermissionException, AppdefEntityNotFoundException, RemoteException, SessionNotFoundException,
+        SessionTimeoutException, ServletException {
         int sessionId = RequestUtils.getSessionId(request).intValue();
         AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
         try {
-            Collection<PlatformValue> arvs = boss.findAllPlatforms( sessionId, PageControl.PAGE_ALL );
+            Collection<PlatformValue> arvs = boss.findAllPlatforms(sessionId, PageControl.PAGE_ALL);
             return AppdefResourceValue.getPlatformTypeCountMap(arvs);
         } catch (FinderException e) {
             throw new PlatformNotFoundException("couldn't find all platforms");

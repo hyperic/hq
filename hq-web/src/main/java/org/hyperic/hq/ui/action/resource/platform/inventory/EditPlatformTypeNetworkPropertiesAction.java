@@ -50,100 +50,73 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * A <code>BaseAction</code> subclass that edits the type and
- * network properties of a platform in the BizApp.
+ * A <code>BaseAction</code> subclass that edits the type and network properties
+ * of a platform in the BizApp.
  */
-public class EditPlatformTypeNetworkPropertiesAction extends BaseAction {
+public class EditPlatformTypeNetworkPropertiesAction
+    extends BaseAction {
 
-    private final  Log log = LogFactory
-    .getLog(EditPlatformTypeNetworkPropertiesAction.class.getName());
-    
+    private final Log log = LogFactory.getLog(EditPlatformTypeNetworkPropertiesAction.class.getName());
+
     private AppdefBoss appdefBoss;
-    
-    
+
     @Autowired
     public EditPlatformTypeNetworkPropertiesAction(AppdefBoss appdefBoss) {
         super();
         this.appdefBoss = appdefBoss;
     }
 
-
-
     /**
      * Edit the platform with the attributes specified in the given
      * <code>PlatformForm</code>.
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-        
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
         PlatformForm editForm = (PlatformForm) form;
-        AppdefEntityID aeid = new AppdefEntityID(editForm.getType().intValue(),
-                                                 editForm.getRid());
+        AppdefEntityID aeid = new AppdefEntityID(editForm.getType().intValue(), editForm.getRid());
 
         HashMap<String, Object> forwardParams = new HashMap<String, Object>(2);
         forwardParams.put(Constants.ENTITY_ID_PARAM, aeid.getAppdefKey());
         forwardParams.put(Constants.ACCORDION_PARAM, "1");
 
         try {
-            ActionForward forward = checkSubmit(request, mapping, form,
-                                                forwardParams);
+            ActionForward forward = checkSubmit(request, mapping, form, forwardParams);
             if (forward != null) {
                 return forward;
             }
 
-           
             Integer sessionId = RequestUtils.getSessionId(request);
-          
 
             // now set up the platform
-            PlatformValue platform =
-                appdefBoss.findPlatformById(sessionId.intValue(), aeid.getId());
-            
+            PlatformValue platform = appdefBoss.findPlatformById(sessionId.intValue(), aeid.getId());
+
             if (platform == null) {
-                RequestUtils
-                    .setError(request,
-                              "resource.platform.error.PlatformNotFound");
+                RequestUtils.setError(request, "resource.platform.error.PlatformNotFound");
                 return returnFailure(request, mapping, forwardParams);
             }
 
             editForm.updatePlatformValue(platform);
 
-            Agent agent =
-                BizappUtils.getAgentConnection(sessionId.intValue(), appdefBoss,
-                                               request, editForm);
+            Agent agent = BizappUtils.getAgentConnection(sessionId.intValue(), appdefBoss, request, editForm);
             if (agent != null) {
                 platform.setAgent(agent);
             }
 
-            log.trace("editing general properties of platform [" +
-                      platform.getName() + "]" + " with attributes " +
-                      platform + " and ips " +
-                      Arrays.asList(platform.getIpValues())); 
+            log.trace("editing general properties of platform [" + platform.getName() + "]" + " with attributes " +
+                      platform + " and ips " + Arrays.asList(platform.getIpValues()));
             appdefBoss.updatePlatform(sessionId.intValue(), platform);
-            
-            RequestUtils
-                .setConfirmation(request,
-                                 "resource.platform.inventory.confirm.EditTypeNetworkProperties",
-                                 platform.getName());
+
+            RequestUtils.setConfirmation(request, "resource.platform.inventory.confirm.EditTypeNetworkProperties",
+                platform.getName());
             return returnSuccess(request, mapping, forwardParams);
-        }        
-        catch (AppdefDuplicateFQDNException e) {
-            RequestUtils
-                .setError(request,
-                          "resource.platform.inventory.error.DuplicateFQDN",
-                          "platformType");
+        } catch (AppdefDuplicateFQDNException e) {
+            RequestUtils.setError(request, "resource.platform.inventory.error.DuplicateFQDN", "platformType");
             return returnFailure(request, mapping, forwardParams);
 
-        }
-        catch (ApplicationException e) {
-            RequestUtils
-                .setErrorObject(request,"dash.autoDiscovery.import.Error",
-                                e.getMessage());
+        } catch (ApplicationException e) {
+            RequestUtils.setErrorObject(request, "dash.autoDiscovery.import.Error", e.getMessage());
             return returnFailure(request, mapping);
-        }        
+        }
     }
 }

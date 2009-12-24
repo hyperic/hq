@@ -32,16 +32,17 @@ import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.ui.action.ScheduleForm;
 
 /**
- * A subclass of <code>ScheduleForm</code> representing the
- * <em>Control</em> form data. 
- *
+ * A subclass of <code>ScheduleForm</code> representing the <em>Control</em>
+ * form data.
+ * 
  * @see org.hyperic.hq.ui.action.ScheduleForm
  */
-public class ControlForm extends ScheduleForm  {
+public class ControlForm
+    extends ScheduleForm {
 
     private String controlAction;
     private String description;
-    
+
     public String getControlAction() {
         return this.controlAction;
     }
@@ -64,22 +65,21 @@ public class ControlForm extends ScheduleForm  {
         super.reset(mapping, request);
     }
 
-    public ActionErrors validate(ActionMapping mapping, 
-        HttpServletRequest request) {
+    public ActionErrors validate(ActionMapping mapping, HttpServletRequest request) {
         ActionErrors errs = null;
-        
+
         if (!shouldValidate(mapping, request)) {
             return null;
         }
-        
-        errs = super.validate(mapping, request);        
-        if (errs == null ) {
+
+        errs = super.validate(mapping, request);
+        if (errs == null) {
             errs = new ActionErrors();
         }
-        
+
         return errs;
     }
-    
+
     public String toString() {
         StringBuffer buf = new StringBuffer();
         buf.append("controlAction= ").append(controlAction);

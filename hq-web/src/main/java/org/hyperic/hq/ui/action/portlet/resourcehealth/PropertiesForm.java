@@ -34,10 +34,11 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.action.portlet.DashboardBaseForm;
 
 /**
- * A subclass of <code>ValidatorForm</code> that adds convenience
- * methods for dealing with image-based form buttons.
+ * A subclass of <code>ValidatorForm</code> that adds convenience methods for
+ * dealing with image-based form buttons.
  */
-public class PropertiesForm extends DashboardBaseForm  {
+public class PropertiesForm
+    extends DashboardBaseForm {
 
     private String[] ids;
     private String order;
@@ -54,7 +55,7 @@ public class PropertiesForm extends DashboardBaseForm  {
     public String[] getIds() {
         return this.ids;
     }
-    
+
     public void setIds(String[] ids) {
         this.ids = ids;
     }

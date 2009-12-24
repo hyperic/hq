@@ -59,17 +59,17 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * This action class is used by the Critical Alerts portlet.  It's main
- * use is to generate the JSON objects required for display into the UI.
+ * This action class is used by the Critical Alerts portlet. It's main use is to
+ * generate the JSON objects required for display into the UI.
  */
-public class ViewAction extends BaseAction {
+public class ViewAction
+    extends BaseAction {
 
     static final String RESOURCES_KEY = Constants.USERPREF_KEY_CRITICAL_ALERTS_RESOURCES;
-    
+
     private AuthzBoss authzBoss;
     private EventsBoss eventsBoss;
-    
-    
+
     @Autowired
     public ViewAction(AuthzBoss authzBoss, EventsBoss eventsBoss) {
         super();
@@ -77,23 +77,15 @@ public class ViewAction extends BaseAction {
         this.eventsBoss = eventsBoss;
     }
 
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
-
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception
-    {
-       
         HttpSession session = request.getSession();
         WebUser user = RequestUtils.getWebUser(session);
-        DashboardConfig dashConfig = DashboardUtils.findDashboard(
-        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, authzBoss);
+        DashboardConfig dashConfig = DashboardUtils.findDashboard((Integer) session
+            .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
-        
-        
+
         String token;
 
         try {
@@ -109,7 +101,7 @@ public class ViewAction extends BaseAction {
         String timeKey = PropertiesForm.PAST;
         String selOrAllKey = PropertiesForm.SELECTED_OR_ALL;
         String titleKey = PropertiesForm.TITLE;
-        
+
         if (token != null) {
             resKey += token;
             countKey += token;
@@ -120,8 +112,7 @@ public class ViewAction extends BaseAction {
         }
 
         List<AppdefEntityID> entityIds = DashboardUtils.preferencesAsEntityIds(resKey, dashPrefs);
-        AppdefEntityID[] arrayIds =
-           entityIds.toArray(new AppdefEntityID[0]);
+        AppdefEntityID[] arrayIds = entityIds.toArray(new AppdefEntityID[0]);
 
         int count = Integer.parseInt(dashPrefs.getValue(countKey));
         int priority = Integer.parseInt(dashPrefs.getValue(priorityKey).trim());
@@ -134,29 +125,25 @@ public class ViewAction extends BaseAction {
             arrayIds = null;
         }
 
-        List<Escalatable> criticalAlerts = eventsBoss.findRecentAlerts(sessionID, count, 
-                                                         priority, timeRange, 
-                                                         arrayIds); 
+        List<Escalatable> criticalAlerts = eventsBoss.findRecentAlerts(sessionID, count, priority, timeRange, arrayIds);
 
         JSONObject alerts = new JSONObject();
         List<JSONObject> a = new ArrayList<JSONObject>();
 
         MessageResources res = getResources(request);
-        String formatString =
-            res.getMessage(Constants.UNIT_FORMAT_PREFIX_KEY + "epoch-millis");
+        String formatString = res.getMessage(Constants.UNIT_FORMAT_PREFIX_KEY + "epoch-millis");
 
-        AuthzSubject subject = authzBoss.getCurrentSubject(sessionID); 
+        AuthzSubject subject = authzBoss.getCurrentSubject(sessionID);
         SimpleDateFormat df = new SimpleDateFormat(formatString);
-        for (Escalatable alert : criticalAlerts ) {
-           
+        for (Escalatable alert : criticalAlerts) {
+
             AlertDefinitionInterface def;
             AppdefEntityValue aVal;
             AppdefEntityID eid;
             Escalation escalation;
             long maxPauseTime = 0;
-            
-            String date = 
-                df.format(new Date(alert.getAlertInfo().getTimestamp()));
+
+            String date = df.format(new Date(alert.getAlertInfo().getTimestamp()));
             def = alert.getDefinition().getDefinitionInfo();
             escalation = alert.getDefinition().getEscalation();
             if (escalation != null && escalation.isPauseAllowed()) {
@@ -164,17 +151,16 @@ public class ViewAction extends BaseAction {
             }
             eid = AppdefUtil.newAppdefEntityId(def.getResource());
             aVal = new AppdefEntityValue(eid, subject);
-            
+
             JSONObject jAlert = new JSONObject();
             jAlert.put("alertId", alert.getId());
             jAlert.put("appdefKey", eid.getAppdefKey());
             jAlert.put("resourceName", aVal.getName());
-            jAlert.put("alertDefName", def.getName()); 
+            jAlert.put("alertDefName", def.getName());
             jAlert.put("cTime", date);
-            jAlert.put("fixed", alert.getAlertInfo().isFixed()); 
+            jAlert.put("fixed", alert.getAlertInfo().isFixed());
             jAlert.put("acknowledgeable", alert.isAcknowledgeable());
-            jAlert.put("alertType",
-                       alert.getDefinition().getAlertType().getCode());
+            jAlert.put("alertType", alert.getDefinition().getAlertType().getCode());
             jAlert.put("maxPauseTime", maxPauseTime);
 
             a.add(jAlert);
@@ -188,7 +174,7 @@ public class ViewAction extends BaseAction {
         }
 
         alerts.put("title", dashPrefs.getValue(titleKey, ""));
-        
+
         response.getWriter().write(alerts.toString());
 
         return null;

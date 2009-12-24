@@ -42,7 +42,8 @@ import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class EditConfigAction extends BaseAction {
+public class EditConfigAction
+    extends BaseAction {
 
     private final Log log = LogFactory.getLog(EditConfigAction.class.getName());
     private ConfigBoss configBoss;
@@ -55,26 +56,20 @@ public class EditConfigAction extends BaseAction {
         this.updateBoss = updateBoss;
     }
 
-
     /**
      * Create the cam config with the attributes specified in the given
      * <code>ConfigForm</code>.
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception 
-    {
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
         ActionForward forward = checkSubmit(request, mapping, form);
         if (forward != null) {
             return forward;
         }
 
         int sessionId = RequestUtils.getSessionIdInt(request);
-        SystemConfigForm cForm = (SystemConfigForm)form;    
-       
-        
+        SystemConfigForm cForm = (SystemConfigForm) form;
+
         if (cForm.isOkClicked()) {
             if (log.isTraceEnabled())
                 log.trace("Getting config");
@@ -89,13 +84,11 @@ public class EditConfigAction extends BaseAction {
             configBoss.restartConfig();
 
             // Set the update mode
-          
-            updateBoss.setUpdateMode(sessionId,
-                UpdateStatusMode.findByCode(cForm.getUpdateMode()));            
+
+            updateBoss.setUpdateMode(sessionId, UpdateStatusMode.findByCode(cForm.getUpdateMode()));
         }
 
-        RequestUtils.setConfirmation(request,
-                                     "admin.config.confirm.saveSettings");
+        RequestUtils.setConfirmation(request, "admin.config.confirm.saveSettings");
         return returnSuccess(request, mapping);
     }
 }

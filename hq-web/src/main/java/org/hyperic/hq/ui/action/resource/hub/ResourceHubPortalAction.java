@@ -82,12 +82,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * An <code>Action</code> that sets up the Resource Hub portal.
  */
-public class ResourceHubPortalAction extends BaseAction {
+public class ResourceHubPortalAction
+    extends BaseAction {
 
     private static final String BLANK_LABEL = "";
     private static final String BLANK_VAL = "";
-    private static final String PLATFORM_KEY =
-        "resource.hub.filter.PlatformType";
+    private static final String PLATFORM_KEY = "resource.hub.filter.PlatformType";
     private static final String SERVER_KEY = "resource.hub.filter.ServerType";
     private static final String SERVICE_KEY = "resource.hub.filter.ServiceType";
     public static final int SELECTOR_GROUP_COMPAT = 1;
@@ -101,15 +101,13 @@ public class ResourceHubPortalAction extends BaseAction {
     private static final String SEPARATOR = "&nbsp;&rsaquo;&nbsp;";
     private static final String VIEW_ATTRIB = "Resource Hub View";
     private static final String TYPE_ATTRIB = "Resource Hub Apppdef Type";
-    private static final String GRP_ATTRIB  = "Resource Hub Group Type";
-    
-    private final Log log =
-        LogFactory.getLog(ResourceHubPortalAction.class.getName());
+    private static final String GRP_ATTRIB = "Resource Hub Group Type";
+
+    private final Log log = LogFactory.getLog(ResourceHubPortalAction.class.getName());
     private AppdefBoss appdefBoss;
-    private  AuthzBoss authzBoss;
+    private AuthzBoss authzBoss;
     private MeasurementBoss measurementBoss;
-    
-    
+
     @Autowired
     public ResourceHubPortalAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, MeasurementBoss measurementBoss) {
         super();
@@ -121,74 +119,66 @@ public class ResourceHubPortalAction extends BaseAction {
     /**
      * Set up the Resource Hub portal.
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
         boolean prefChanged = false;
-        
+
         ResourceHubForm hubForm = (ResourceHubForm) form;
-        
+
         int sessionId = RequestUtils.getSessionId(request).intValue();
-      
 
         // Set the view in the form
         HttpSession session = request.getSession();
         WebUser user = SessionUtils.getWebUser(session);
         PageControl pc = RequestUtils.getPageControl(request);
-        
+
         String view = hubForm.getView();
-        if (!ResourceHubForm.LIST_VIEW.equals(view) &&
-            !ResourceHubForm.CHART_VIEW.equals(view)) { // Invalid view
+        if (!ResourceHubForm.LIST_VIEW.equals(view) && !ResourceHubForm.CHART_VIEW.equals(view)) { // Invalid
+                                                                                                   // view
             view = null;
         }
-        
+
         String prefView;
         try {
             prefView = user.getPreference(VIEW_ATTRIB);
         } catch (InvalidOptionException e) {
             prefView = ResourceHubForm.LIST_VIEW;
         }
-        
+
         if (view == null) {
             hubForm.setView(prefView);
-        }
-        else if (!view.equals(prefView)) {
+        } else if (!view.equals(prefView)) {
             user.setPreference(VIEW_ATTRIB, view);
-            prefChanged = true;                         // Save new preference
+            prefChanged = true; // Save new preference
         }
-        
+
         String navHierarchy = null;
-        
+
         // find resources specified by entity type and potentially
         // resource type. collect query parameters and replace invalid
         // ones with defaults.
         int entityType;
-        
+
         try {
             String prefFFStr = user.getPreference(TYPE_ATTRIB);
             entityType = Integer.parseInt(prefFFStr);
         } catch (InvalidOptionException e) {
             entityType = DEFAULT_ENTITY_TYPE;
         }
-        
+
         Integer ff = hubForm.getFf();
         if (ff == null || ff.intValue() == 0) {
             ff = new Integer(entityType);
             hubForm.setFf(ff);
-        }
-        else if (ff.intValue() != entityType) {
+        } else if (ff.intValue() != entityType) {
             entityType = ff.intValue();
             user.setPreference(TYPE_ATTRIB, new Integer(entityType));
-            prefChanged = true;                         // Save new preference
+            prefChanged = true; // Save new preference
         }
-        
+
         // start the navHierarchy with the ff type
-        navHierarchy = StringUtil.toUpperCaseAt(
-                AppdefEntityConstants.typeToString(entityType), 0) + "s"
-                + SEPARATOR;
-        
+        navHierarchy = StringUtil.toUpperCaseAt(AppdefEntityConstants.typeToString(entityType), 0) + "s" + SEPARATOR;
+
         // are we looking at a group? check now, because if we *are*
         // looking at a group, we're going to override the entity
         // type.
@@ -198,8 +188,8 @@ public class ResourceHubPortalAction extends BaseAction {
         int resourceType = DEFAULT_RESOURCE_TYPE;
         String ft = hubForm.getFt();
         AppdefEntityTypeID aetid = null;
-        if (ff.intValue() != AppdefEntityConstants.APPDEF_TYPE_APPLICATION &&
-            ft != null && ft.length() > 0 && !ft.equals(String.valueOf(DEFAULT_RESOURCE_TYPE))) {
+        if (ff.intValue() != AppdefEntityConstants.APPDEF_TYPE_APPLICATION && ft != null && ft.length() > 0 &&
+            !ft.equals(String.valueOf(DEFAULT_RESOURCE_TYPE))) {
             try {
                 // compat groups use the entity id format for ft
                 aetid = new AppdefEntityTypeID(ft);
@@ -209,23 +199,19 @@ public class ResourceHubPortalAction extends BaseAction {
                 // the one specified by ff (which is just
                 // APPDEF_TYPE_GROUP anyway).
                 entityType = aetid.getType();
-            }
-            catch (InvalidAppdefTypeException e) {
+            } catch (InvalidAppdefTypeException e) {
                 // what we got from the menu was not an entity id at
                 // all, but rather an integer
                 resourceType = (new Integer(ft)).intValue();
             }
-            
+
             if (aetid != null) {
-                String typeName = appdefBoss.findResourceTypeById(
-                    sessionId, new AppdefEntityTypeID(ft)).getName();
+                String typeName = appdefBoss.findResourceTypeById(sessionId, new AppdefEntityTypeID(ft)).getName();
                 navHierarchy += typeName;
             }
-        }
-        else {
+        } else {
             hubForm.setFt(new Integer(resourceType).toString());
-            navHierarchy += "All " + StringUtil.toUpperCaseAt(
-                    AppdefEntityConstants.typeToString(entityType), 0) + "s";
+            navHierarchy += "All " + StringUtil.toUpperCaseAt(AppdefEntityConstants.typeToString(entityType), 0) + "s";
         }
 
         Integer g = hubForm.getG();
@@ -238,29 +224,25 @@ public class ResourceHubPortalAction extends BaseAction {
                 groupType = DEFAULT_GROUP_TYPE;
             }
             hubForm.setG(new Integer(groupType));
-        }
-        else {
+        } else {
             groupType = g.intValue();
             user.setPreference(GRP_ATTRIB, new Integer(groupType));
-            prefChanged = true;                         // Save new preference
+            prefChanged = true; // Save new preference
         }
 
         MessageResources res = getResources(request);
-        String jsInserted =
-            res.getMessage("resource.hub.search.KeywordSearchText");
+        String jsInserted = res.getMessage("resource.hub.search.KeywordSearchText");
         String resourceName = hubForm.getKeywords();
-        if (resourceName != null &&
-            (resourceName.equals("") || resourceName.equals(jsInserted))) {
+        if (resourceName != null && (resourceName.equals("") || resourceName.equals(jsInserted))) {
             resourceName = DEFAULT_RESOURCE_NAME;
             hubForm.setKeywords(resourceName);
         }
 
-     
         StopWatch watch = new StopWatch();
         watch.markTimeBegin("findCompatInventory");
         Integer gid = null;
         int[] groupSubtype = null;
-        
+
         if (isGroupSelected) {
             // as far as the backend is concerned, the resource type
             // is the actual group type we want. our groupType just
@@ -268,129 +250,107 @@ public class ResourceHubPortalAction extends BaseAction {
             if (isCompatGroupSelected(groupType)) {
                 // entity type tells us which type of compat group was
                 // chosen
-                groupSubtype = new int[] {
-                        AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS,
-                        AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC
-                };
-            }
-            else if (isAdhocGroupSelected(groupType)) {
+                groupSubtype = new int[] { AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS,
+                                          AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC };
+            } else if (isAdhocGroupSelected(groupType)) {
                 if (resourceType != DEFAULT_RESOURCE_TYPE) {
-                    // resourceType straight up tells us what groupsubtype was 
+                    // resourceType straight up tells us what groupsubtype was
                     // chosen
                     groupSubtype = new int[] { resourceType };
-                }
-                else {
-                    groupSubtype = new int[] {
-                            AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS,
-                            AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP,
-                            AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP
-                    };
+                } else {
+                    groupSubtype = new int[] { AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS,
+                                              AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP,
+                                              AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP };
                 }
 
                 // for findCompatInventory, resourceType always need
                 // to be this, for whatever reason
                 resourceType = DEFAULT_RESOURCE_TYPE;
-            }
-            else {
+            } else {
                 throw new ServletException("Invalid group type: " + groupType);
             }
-        }
-        else {
+        } else {
             // Look up groups
             Collection<ResourceGroup> groups = appdefBoss.findAllGroupPojos(sessionId);
-            
+
             if (groups.size() > 0) {
                 ArrayList<LabelValueBean> groupOptions = new ArrayList<LabelValueBean>(groups.size());
-                
-                for ( ResourceGroup group : groups ) {
-                  
 
-                    String appdefKey =
-                        AppdefEntityID.newGroupID(group.getId()).getAppdefKey();
-                    groupOptions.add(new LabelValueBean(group.getName(),
-                                                        appdefKey));
+                for (ResourceGroup group : groups) {
+
+                    String appdefKey = AppdefEntityID.newGroupID(group.getId()).getAppdefKey();
+                    groupOptions.add(new LabelValueBean(group.getName(), appdefKey));
                 }
-                
+
                 // Set the group options in request
-                request.setAttribute(Constants.AVAIL_RESGRPS_ATTR,
-                                     groupOptions);
+                request.setAttribute(Constants.AVAIL_RESGRPS_ATTR, groupOptions);
             }
-            
+
             // Lastly, check for group to filter by
             if (hubForm.getFg() != null && hubForm.getFg().length() > 0) {
                 AppdefEntityID geid = new AppdefEntityID(hubForm.getFg());
                 gid = geid.getId();
             }
-            
-        }
-        
-        // TODO: Pass groupSubType as int[]
-        PageList<AppdefResourceValue> resources = appdefBoss.search(sessionId, entityType, 
-        							  org.hyperic.util.StringUtil
-        							  		.escapeForRegex(resourceName, true),
-                                      aetid, gid, groupSubtype, 
-                                      hubForm.isAny(), hubForm.isOwn(),
-                                      hubForm.isUnavail(), pc);
 
-        // Generate root breadcrumb url based on the filter criteria submitted...
+        }
+
+        // TODO: Pass groupSubType as int[]
+        PageList<AppdefResourceValue> resources = appdefBoss.search(sessionId, entityType, org.hyperic.util.StringUtil
+            .escapeForRegex(resourceName, true), aetid, gid, groupSubtype, hubForm.isAny(), hubForm.isOwn(), hubForm
+            .isUnavail(), pc);
+
+        // Generate root breadcrumb url based on the filter criteria
+        // submitted...
         String rootBrowseUrl = BreadcrumbUtil.createRootBrowseURL(mapping.getInput(), hubForm, pc);
-        
+
         // ...store it in the session, so that the bread crumb tag can get at it
         session.setAttribute(Constants.ROOT_BREADCRUMB_URL_ATTR_NAME, rootBrowseUrl);
-        
+
         watch.markTimeEnd("findCompatInventory");
 
         request.setAttribute(Constants.ALL_RESOURCES_ATTR, resources);
 
         ArrayList<AppdefEntityID> ids = new ArrayList<AppdefEntityID>();
         if (resources != null) {
-            for (AppdefResourceValue rv :  resources) {
+            for (AppdefResourceValue rv : resources) {
                 ids.add(rv.getEntityId());
             }
         }
-        
+
         watch.markTimeBegin("batchGetIndicators");
         if (ids.size() > 0) {
-            if (prefView.equals(ResourceHubForm.LIST_VIEW) &&
-                !isGroupSelected && resourceType != DEFAULT_RESOURCE_TYPE) {
+            if (prefView.equals(ResourceHubForm.LIST_VIEW) && !isGroupSelected && resourceType != DEFAULT_RESOURCE_TYPE) {
                 // Get the indicator templates
-               
 
                 HashSet<String> cats = new HashSet<String>(3);
                 cats.add(MeasurementConstants.CAT_UTILIZATION);
                 cats.add(MeasurementConstants.CAT_THROUGHPUT);
                 cats.add(MeasurementConstants.CAT_PERFORMANCE);
 
-               Collection<MeasurementTemplate> templates = null;
-                
+                Collection<MeasurementTemplate> templates = null;
+
                 Map<AppdefEntityID, String[]> metricsMap = new HashMap<AppdefEntityID, String[]>(ids.size());
-                for (AppdefEntityID entityId : ids ) {
+                for (AppdefEntityID entityId : ids) {
                     if (templates == null || templates.size() == 0) {
-                        templates =
-                            measurementBoss.getDesignatedTemplates(sessionId,
-                                                         entityId,
-                                                         cats);
-                
+                        templates = measurementBoss.getDesignatedTemplates(sessionId, entityId, cats);
+
                         if (templates.size() > 0) {
                             request.setAttribute("Indicators", templates);
                         }
                     }
-                    
-                    String[] metrics = getResourceMetrics(request, sessionId,
-                                                          measurementBoss, templates,
-                                                          entityId);
+
+                    String[] metrics = getResourceMetrics(request, sessionId, measurementBoss, templates, entityId);
                     metricsMap.put(entityId, metrics);
                 }
                 request.setAttribute("indicatorsMap", metricsMap);
             }
         }
-        
+
         watch.markTimeEnd("batchGetIndicators");
 
         // retrieve inventory summary
         watch.markTimeBegin("getInventorySummary");
-        AppdefInventorySummary summary =
-            appdefBoss.getInventorySummary(sessionId, false);
+        AppdefInventorySummary summary = appdefBoss.getInventorySummary(sessionId, false);
         request.setAttribute(Constants.RESOURCE_SUMMARY_ATTR, summary);
         watch.markTimeEnd("getInventorySummary");
 
@@ -404,37 +364,27 @@ public class ResourceHubPortalAction extends BaseAction {
                 // combined menu containing all platform, server and
                 // service types
 
-                List<PlatformTypeValue> platformTypes =
-                    appdefBoss.findViewablePlatformTypes(sessionId, pc);
-                addCompatTypeOptions(hubForm, platformTypes,
-                                     msg(request, PLATFORM_KEY));
+                List<PlatformTypeValue> platformTypes = appdefBoss.findViewablePlatformTypes(sessionId, pc);
+                addCompatTypeOptions(hubForm, platformTypes, msg(request, PLATFORM_KEY));
 
-                List<ServerTypeValue> serverTypes =
-                    appdefBoss.findViewableServerTypes(sessionId, pc);
-                addCompatTypeOptions(hubForm, serverTypes,
-                                     msg(request, SERVER_KEY));
+                List<ServerTypeValue> serverTypes = appdefBoss.findViewableServerTypes(sessionId, pc);
+                addCompatTypeOptions(hubForm, serverTypes, msg(request, SERVER_KEY));
 
-                List<ServiceTypeValue> serviceTypes =
-                    appdefBoss.findViewableServiceTypes(sessionId, pc);
-                addCompatTypeOptions(hubForm, serviceTypes,
-                                     msg(request, SERVICE_KEY));
-            }
-            else if (isAdhocGroupSelected(groupType)) {
+                List<ServiceTypeValue> serviceTypes = appdefBoss.findViewableServiceTypes(sessionId, pc);
+                addCompatTypeOptions(hubForm, serviceTypes, msg(request, SERVICE_KEY));
+            } else if (isAdhocGroupSelected(groupType)) {
                 // the entity is an adhoc group- we offer no adhoc group
                 // options
                 addMixedTypeOptions(hubForm, res);
-            }
-            else {
+            } else {
                 throw new ServletException("invalid group type: " + groupType);
             }
-        }
-        else {
+        } else {
             // the entity is not a group- this is easy.
-            List<AppdefResourceTypeValue> types =
-                appdefBoss.findAllResourceTypes(sessionId, entityType, pc);
+            List<AppdefResourceTypeValue> types = appdefBoss.findAllResourceTypes(sessionId, entityType, pc);
             addTypeOptions(hubForm, types);
         }
-        
+
         watch.markTimeEnd("findAllResourceTypes");
         if (log.isDebugEnabled()) {
             log.debug("ResourceHubPortalAction: " + watch);
@@ -442,35 +392,30 @@ public class ResourceHubPortalAction extends BaseAction {
 
         // Save the preferences if necessary
         if (prefChanged) {
-          
-            authzBoss.setUserPrefs(user.getSessionId(), user.getId(),
-                              user.getPreferences());
+
+            authzBoss.setUserPrefs(user.getSessionId(), user.getId(), user.getPreferences());
         }
-        
-        // clean out the return path 
+
+        // clean out the return path
         SessionUtils.resetReturnPath(request.getSession());
-        
-        Portal portal = Portal.createPortal("resource.hub.ResourceHubTitle",
-                                            ".resource.hub");
+
+        Portal portal = Portal.createPortal("resource.hub.ResourceHubTitle", ".resource.hub");
         request.setAttribute(Constants.PORTAL_KEY, portal);
 
         request.setAttribute(Constants.INVENTORY_HIERARCHY_ATTR, navHierarchy);
-        
+
         return null;
     }
 
-    private String[] getResourceMetrics(HttpServletRequest request,
-                                        int sessionId, MeasurementBoss mboss,
-                                        Collection<MeasurementTemplate> templates,
-                                        final AppdefEntityID entityId)
+    private String[] getResourceMetrics(HttpServletRequest request, int sessionId, MeasurementBoss mboss,
+                                        Collection<MeasurementTemplate> templates, final AppdefEntityID entityId)
         throws RemoteException {
-        Map<Integer,MetricValue> vals = mboss.getLastIndicatorValues(sessionId, entityId);
+        Map<Integer, MetricValue> vals = mboss.getLastIndicatorValues(sessionId, entityId);
 
         // Format the values
         String[] metrics = new String[templates.size()];
         if (vals.size() == 0) {
-            Arrays.fill(metrics, RequestUtils.message(request,
-                                                      "common.value.notavail"));
+            Arrays.fill(metrics, RequestUtils.message(request, "common.value.notavail"));
         } else {
             int i = 0;
             for (Iterator<MeasurementTemplate> it = templates.iterator(); it.hasNext(); i++) {
@@ -478,12 +423,10 @@ public class ResourceHubPortalAction extends BaseAction {
 
                 if (vals.containsKey(mt.getId())) {
                     MetricValue mv = vals.get(mt.getId());
-                    FormattedNumber fn = UnitsConvert.convert(mv.getValue(), mt
-                            .getUnits());
+                    FormattedNumber fn = UnitsConvert.convert(mv.getValue(), mt.getUnits());
                     metrics[i] = fn.toString();
                 } else {
-                    metrics[i] = RequestUtils.message(request,
-                                                      "common.value.notavail");
+                    metrics[i] = RequestUtils.message(request, "common.value.notavail");
                 }
             }
         }
@@ -491,36 +434,27 @@ public class ResourceHubPortalAction extends BaseAction {
     }
 
     private void addTypeOptions(ResourceHubForm form, List<? extends AppdefResourceTypeValue> types) {
-       
-            for ( AppdefResourceTypeValue value : types) {
-                form.addType(new LabelValueBean(value.getName(),
-                                                value.getAppdefTypeKey()));
-            }
+
+        for (AppdefResourceTypeValue value : types) {
+            form.addType(new LabelValueBean(value.getName(), value.getAppdefTypeKey()));
+        }
     }
 
-    private void addCompatTypeOptions(ResourceHubForm form, List<? extends AppdefResourceTypeValue> types,
-                                      String label) {
+    private void addCompatTypeOptions(ResourceHubForm form, List<? extends AppdefResourceTypeValue> types, String label) {
         if (types.size() > 0) {
             form.addType(new LabelValueBean(BLANK_LABEL, BLANK_VAL));
             form.addType(new LabelValueBean(label, BLANK_VAL));
             addTypeOptions(form, types);
         }
     }
-    
-    private void addMixedTypeOptions(ResourceHubForm form, MessageResources mr)
-    {
-        form.addType(
-            new LabelValueBean(
-                mr.getMessage("resource.group.inventory.New.props.GroupOfGroups"),
-                String.valueOf(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP)));
-        form.addType(
-            new LabelValueBean(
-                mr.getMessage("resource.group.inventory.New.props.GroupOfMixed"),
-                String.valueOf(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS)));
-        form.addType(
-            new LabelValueBean(
-                mr.getMessage("resource.group.inventory.New.props.GroupOfApplications"),
-                String.valueOf(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP)));
+
+    private void addMixedTypeOptions(ResourceHubForm form, MessageResources mr) {
+        form.addType(new LabelValueBean(mr.getMessage("resource.group.inventory.New.props.GroupOfGroups"), String
+            .valueOf(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP)));
+        form.addType(new LabelValueBean(mr.getMessage("resource.group.inventory.New.props.GroupOfMixed"), String
+            .valueOf(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS)));
+        form.addType(new LabelValueBean(mr.getMessage("resource.group.inventory.New.props.GroupOfApplications"), String
+            .valueOf(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP)));
     }
 
     private boolean isAdhocGroupSelected(int type) {

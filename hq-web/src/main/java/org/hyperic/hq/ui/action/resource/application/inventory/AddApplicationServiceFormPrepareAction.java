@@ -48,42 +48,32 @@ import org.hyperic.util.pager.PageList;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * This classes manages the setup for displaying the Add Services
- * page (2.1.6.4) including putting the pending list in the request scope,
- * paging setup for the available list and filtering by the service type.
+ * This classes manages the setup for displaying the Add Services page (2.1.6.4)
+ * including putting the pending list in the request scope, paging setup for the
+ * available list and filtering by the service type.
  */
-public class AddApplicationServiceFormPrepareAction extends TilesAction {
-    private final Log log = LogFactory
-        .getLog(AddApplicationServiceFormPrepareAction.class.getName());
+public class AddApplicationServiceFormPrepareAction
+    extends TilesAction {
+    private final Log log = LogFactory.getLog(AddApplicationServiceFormPrepareAction.class.getName());
     private AppdefBoss appdefBoss;
-    
-    
+
     @Autowired
     public AddApplicationServiceFormPrepareAction(AppdefBoss appdefBoss) {
         super();
         this.appdefBoss = appdefBoss;
     }
 
-
-
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-
-       
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
         AddApplicationServicesForm addForm = (AddApplicationServicesForm) form;
         String nameFilter = addForm.getNameFilter();
         AppdefResourceValue resource = RequestUtils.getResource(request);
         AppdefEntityID entityId = resource.getEntityId();
         Integer sessionId = RequestUtils.getSessionId(request);
-        PageControl pca =
-            RequestUtils.getPageControl(request, "psa", "pna", "soa", "sca");
-        PageControl pcp =
-            RequestUtils.getPageControl(request, "psp", "pnp", "sop", "scp");
-        
+        PageControl pca = RequestUtils.getPageControl(request, "psa", "pna", "soa", "sca");
+        PageControl pcp = RequestUtils.getPageControl(request, "psp", "pnp", "sop", "scp");
+
         addForm.setRid(resource.getId());
         addForm.setType(new Integer(entityId.getType()));
 
@@ -92,62 +82,52 @@ public class AddApplicationServiceFormPrepareAction extends TilesAction {
         // when the form's "ok" button is clicked.
         // 
         // available services are all services in the system that are
-        //  _not_ associated with the application and are not pending
-       
+        // _not_ associated with the application and are not pending
+
         PageList<AppdefResourceValue> pendingServices;
         AppdefEntityID[] pendingServiceIds = null;
 
         // Pending Services
-        // Find pending services that aren't yet assigned but that 
+        // Find pending services that aren't yet assigned but that
         // need to be displayed as such.
-     
-        if (request.getSession().getAttribute(
-                Constants.PENDING_APPSVCS_SES_ATTR) != null &&
-            (SessionUtils.getListAsListStr(request.getSession(),
-                Constants.PENDING_APPSVCS_SES_ATTR)).size() > 0) {
-            List<String> uiPendings = SessionUtils.getListAsListStr(
-                request.getSession(), Constants.PENDING_APPSVCS_SES_ATTR);
 
-            pendingServiceIds  = new AppdefEntityID[uiPendings.size()];
+        if (request.getSession().getAttribute(Constants.PENDING_APPSVCS_SES_ATTR) != null &&
+            (SessionUtils.getListAsListStr(request.getSession(), Constants.PENDING_APPSVCS_SES_ATTR)).size() > 0) {
+            List<String> uiPendings = SessionUtils.getListAsListStr(request.getSession(),
+                Constants.PENDING_APPSVCS_SES_ATTR);
+
+            pendingServiceIds = new AppdefEntityID[uiPendings.size()];
 
             for (int i = 0; i < uiPendings.size(); i++) {
                 String fromList = (String) uiPendings.get(i);
                 StringTokenizer tok = new StringTokenizer(fromList, " ");
-                while(tok.hasMoreTokens()) {
+                while (tok.hasMoreTokens()) {
                     pendingServiceIds[i] = new AppdefEntityID(tok.nextToken());
-                    log.debug("pendingServiceIds = "  + pendingServiceIds[i]);
+                    log.debug("pendingServiceIds = " + pendingServiceIds[i]);
                 }
             }
 
             log.debug("pendingServiceIds = " + pendingServiceIds);
 
-            pendingServices = appdefBoss.findByIds(sessionId.intValue(),
-                                             pendingServiceIds, pcp);
+            pendingServices = appdefBoss.findByIds(sessionId.intValue(), pendingServiceIds, pcp);
 
-            log.trace("Pending Services for [" + entityId + "]: "+
-                pendingServices.toString());
+            log.trace("Pending Services for [" + entityId + "]: " + pendingServices.toString());
         } else {
             pendingServices = new PageList<AppdefResourceValue>();
         }
-        request.setAttribute(Constants.PENDING_APPSVCS_REQ_ATTR,
-                             pendingServices);
-        request.setAttribute(Constants.NUM_PENDING_APPSVCS_REQ_ATTR,
-                             new Integer(pendingServices.getTotalSize()));
+        request.setAttribute(Constants.PENDING_APPSVCS_REQ_ATTR, pendingServices);
+        request.setAttribute(Constants.NUM_PENDING_APPSVCS_REQ_ATTR, new Integer(pendingServices.getTotalSize()));
 
         // Available Services
         // Find all services that aren't already assigned to this
         // application and that aren't in our pending list.
-     
-        PageList<AppdefResourceValue> availableServices = appdefBoss.findAvailableServicesForApplication(
-            sessionId.intValue(), resource.getId(), pendingServiceIds,
-            nameFilter, pca);
 
-        log.trace("Available Services for [" + entityId + "]: "+
-                  availableServices.toString());
-        request.setAttribute(Constants.AVAIL_APPSVCS_REQ_ATTR,
-                             availableServices);            
-        request.setAttribute(Constants.NUM_AVAIL_APPSVCS_REQ_ATTR,
-             new Integer(availableServices.getTotalSize()));
+        PageList<AppdefResourceValue> availableServices = appdefBoss.findAvailableServicesForApplication(sessionId
+            .intValue(), resource.getId(), pendingServiceIds, nameFilter, pca);
+
+        log.trace("Available Services for [" + entityId + "]: " + availableServices.toString());
+        request.setAttribute(Constants.AVAIL_APPSVCS_REQ_ATTR, availableServices);
+        request.setAttribute(Constants.NUM_AVAIL_APPSVCS_REQ_ATTR, new Integer(availableServices.getTotalSize()));
 
         return null;
     }

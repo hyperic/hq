@@ -47,45 +47,38 @@ import org.hyperic.hq.hqu.server.session.ViewMastheadCategory;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class HeaderAction extends TilesAction {
+public class HeaderAction
+    extends TilesAction {
 
     private ProductBoss productBoss;
-    
-    
+
     @Autowired
-	public HeaderAction(ProductBoss productBoss) {
+    public HeaderAction(ProductBoss productBoss) {
         super();
         this.productBoss = productBoss;
     }
 
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws ServletException,
+        RemoteException, SessionException {
 
+        Integer sessionId = RequestUtils.getSessionId(request);
+        Collection<AttachmentDescriptor> mastheadAttachments = productBoss.findAttachments(sessionId.intValue(),
+            AttachType.MASTHEAD);
 
-    public ActionForward execute(ComponentContext context,
-			ActionMapping mapping, ActionForm form, HttpServletRequest request,
-			HttpServletResponse response) throws ServletException,
-			RemoteException, SessionException 
-    {
-		
-		Integer sessionId = RequestUtils.getSessionId(request);
-		Collection<AttachmentDescriptor> mastheadAttachments = 
-            productBoss.findAttachments(sessionId.intValue(), AttachType.MASTHEAD);
-                                  
-		ArrayList<AttachmentDescriptor> resourceAttachments = new ArrayList<AttachmentDescriptor>();
-		ArrayList<AttachmentDescriptor> trackerAttachments = new ArrayList<AttachmentDescriptor>();
-		for (AttachmentDescriptor d  : mastheadAttachments) {
-			AttachmentMasthead attachment = (AttachmentMasthead) d
-					.getAttachment();
-			if (attachment.getCategory().equals(ViewMastheadCategory.RESOURCE)) {
-				resourceAttachments.add(d);
-			} else if (attachment.getCategory().equals(
-					ViewMastheadCategory.TRACKER)) {
-				trackerAttachments.add(d);
-			}
-		}
-		
-		request.setAttribute("mastheadResourceAttachments",
-						resourceAttachments);
-		request.setAttribute("mastheadTrackerAttachments", trackerAttachments);
-		return null;
-	}
+        ArrayList<AttachmentDescriptor> resourceAttachments = new ArrayList<AttachmentDescriptor>();
+        ArrayList<AttachmentDescriptor> trackerAttachments = new ArrayList<AttachmentDescriptor>();
+        for (AttachmentDescriptor d : mastheadAttachments) {
+            AttachmentMasthead attachment = (AttachmentMasthead) d.getAttachment();
+            if (attachment.getCategory().equals(ViewMastheadCategory.RESOURCE)) {
+                resourceAttachments.add(d);
+            } else if (attachment.getCategory().equals(ViewMastheadCategory.TRACKER)) {
+                trackerAttachments.add(d);
+            }
+        }
+
+        request.setAttribute("mastheadResourceAttachments", resourceAttachments);
+        request.setAttribute("mastheadTrackerAttachments", trackerAttachments);
+        return null;
+    }
 }

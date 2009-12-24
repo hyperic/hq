@@ -32,43 +32,54 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
 
-public class AIQueueForm extends ActionForm {
+public class AIQueueForm
+    extends ActionForm {
 
     private Integer[] platformsToProcess;
     private Integer[] serversToProcess;
     private int queueAction = AIQueueConstants.Q_DECISION_DEFER;
 
-    public AIQueueForm () { 
+    public AIQueueForm() {
         super();
     }
 
-    public Integer[] getPlatformsToProcess () {
+    public Integer[] getPlatformsToProcess() {
         return platformsToProcess;
     }
+
     public void setPlatformsToProcess(Integer[] platforms) {
         platformsToProcess = platforms;
     }
-    public Integer[] getServersToProcess () {
+
+    public Integer[] getServersToProcess() {
         return serversToProcess;
     }
+
     public void setServersToProcess(Integer[] servers) {
         serversToProcess = servers;
     }
+
     public void setServersToProcess(List servers) {
         serversToProcess = new Integer[servers.size()];
         servers.toArray(serversToProcess);
     }
-    public int getQueueAction() { return queueAction; }
-    public void setQueueAction (int a) { queueAction = a; }
 
-    public void reset(ActionMapping mapping,
-                      HttpServletRequest request) {
+    public int getQueueAction() {
+        return queueAction;
+    }
+
+    public void setQueueAction(int a) {
+        queueAction = a;
+    }
+
+    public void reset(ActionMapping mapping, HttpServletRequest request) {
         reset();
     }
-    public void reset(ActionMapping mapping,
-                      ServletRequest request) {
+
+    public void reset(ActionMapping mapping, ServletRequest request) {
         reset();
     }
+
     private void reset() {
         platformsToProcess = new Integer[0];
         serversToProcess = new Integer[0];

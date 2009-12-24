@@ -30,7 +30,8 @@ import org.hyperic.hq.ui.action.resource.RemoveResourceForm;
 /**
  * A Formbean for facilitating the extended paging paramter names.
  */
-public class RemoveAppServicesForm extends RemoveResourceForm {
+public class RemoveAppServicesForm
+    extends RemoveResourceForm {
 
     public RemoveAppServicesForm() {
         super();
@@ -48,7 +49,7 @@ public class RemoveAppServicesForm extends RemoveResourceForm {
         return getPn();
     }
 
-    public void setPns (Integer pageNumber) {
+    public void setPns(Integer pageNumber) {
         setPn(pageNumber);
     }
 

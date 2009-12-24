@@ -51,99 +51,74 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class NewServiceFormPrepareAction extends WorkflowPrepareAction {
-    
+public class NewServiceFormPrepareAction
+    extends WorkflowPrepareAction {
+
     private AppdefBoss appdefBoss;
-    
-    
+
     @Autowired
     public NewServiceFormPrepareAction(AppdefBoss appdefBoss) {
         super();
         this.appdefBoss = appdefBoss;
     }
 
-
-
-    public ActionForward workflow(ComponentContext context,
-                                  ActionMapping mapping,
-                                  ActionForm form,
-                                  HttpServletRequest request,
-                                  HttpServletResponse response)
-        throws Exception
-    {
+    public ActionForward workflow(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                  HttpServletRequest request, HttpServletResponse response) throws Exception {
         ResourceForm newForm = (ResourceForm) form;
 
         int sessionId = RequestUtils.getSessionId(request).intValue();
-      
-        
+
         AppdefEntityID aeid = RequestUtils.getEntityId(request);
         Integer parentId = aeid.getId();
         List serviceTypeVals = new ArrayList();
         ServerTypeValue svrType = null;
         ServerValue svrVal = null;
         try {
-            AppdefEntityTypeID atid =
-                RequestUtils.getChildResourceTypeId(request);
-            
-           
-            
+            AppdefEntityTypeID atid = RequestUtils.getChildResourceTypeId(request);
+
             // parent is a platform, we're creating a platform service
             if (atid.getType() == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
-                List<ServerValue> servers =
-                    appdefBoss.findServersByTypeAndPlatform(sessionId,
-                                                      parentId,
-                                                      atid.getID(),
-                                                      PageControl.PAGE_ALL);
+                List<ServerValue> servers = appdefBoss.findServersByTypeAndPlatform(sessionId, parentId, atid.getID(),
+                    PageControl.PAGE_ALL);
                 // look for the correct server parent
                 svrVal = (ServerValue) servers.get(0);
                 svrType = svrVal.getServerType();
             } else {
                 // Just get the service type
-                serviceTypeVals.add(appdefBoss.findServiceTypeById(sessionId,
-                                                             atid.getId()));
+                serviceTypeVals.add(appdefBoss.findServiceTypeById(sessionId, atid.getId()));
                 newForm.setResourceType(atid.getId());
 
-                svrVal =
-                    appdefBoss.findVirtualServerByPlatformServiceType(sessionId,
-                                                                parentId,
-                                                                atid.getId());
-            }            
+                svrVal = appdefBoss.findVirtualServerByPlatformServiceType(sessionId, parentId, atid.getId());
+            }
         } catch (ParameterNotFoundException e) {
             if (aeid.getType() == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
                 svrVal = appdefBoss.findServerById(sessionId, parentId);
                 svrType = svrVal.getServerType();
             } else {
-                serviceTypeVals.addAll(
-                    appdefBoss.findViewablePlatformServiceTypes(sessionId,
-                                                          aeid.getId()));
+                serviceTypeVals.addAll(appdefBoss.findViewablePlatformServiceTypes(sessionId, aeid.getId()));
 
             }
         }
 
         // Set the server value
         request.setAttribute(Constants.PARENT_RESOURCE_ATTR, svrVal);
-        
+
         if (svrVal != null) {
             newForm.setRid(svrVal.getId());
-            newForm.setType(
-                new Integer(AppdefEntityConstants.APPDEF_TYPE_SERVER));
-        }
-        else {
+            newForm.setType(new Integer(AppdefEntityConstants.APPDEF_TYPE_SERVER));
+        } else {
             newForm.setRid(aeid.getId());
             newForm.setType(new Integer(aeid.getType()));
         }
-            
 
         if (svrType != null) {
-            List<ServiceTypeValue> serviceTypes =
-                appdefBoss.findServiceTypesByServerType(sessionId,
-                                                  svrType.getId().intValue());
-            CollectionUtils.addAll(serviceTypeVals,
-                                   serviceTypes.toArray());
+            List<ServiceTypeValue> serviceTypes = appdefBoss.findServiceTypesByServerType(sessionId, svrType.getId()
+                .intValue());
+            CollectionUtils.addAll(serviceTypeVals, serviceTypes.toArray());
         }
-        
+
         newForm.setResourceTypes(serviceTypeVals);
- 
+
         return null;
     }
 }

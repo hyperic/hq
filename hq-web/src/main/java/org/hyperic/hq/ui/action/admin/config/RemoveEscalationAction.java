@@ -41,36 +41,30 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * An Action that removes an escalation
  */
-public class RemoveEscalationAction extends BaseAction {
+public class RemoveEscalationAction
+    extends BaseAction {
 
     private final Log log = LogFactory.getLog(RemoveEscalationAction.class.getName());
     private EventsBoss eventsBoss;
-    
-    
+
     @Autowired
     public RemoveEscalationAction(EventsBoss eventsBoss) {
         super();
         this.eventsBoss = eventsBoss;
     }
 
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
-
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-     
         log.debug("entering RemoveEscalationAction");
         Integer escId = RequestUtils.getIntParameter(request, "esc");
-        
+
         Integer sessionId = RequestUtils.getSessionId(request);
 
         try {
             eventsBoss.deleteEscalationById(sessionId.intValue(), escId);
-        } catch(Exception e) {
-            RequestUtils.setError(request,
-                "admin.config.error.escalation.CannotDelete");
+        } catch (Exception e) {
+            RequestUtils.setError(request, "admin.config.error.escalation.CannotDelete");
         }
 
         return returnSuccess(request, mapping);

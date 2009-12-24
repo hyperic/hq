@@ -41,19 +41,17 @@ import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.config.ConfigResponse;
 
 /**
- * Base RSSAction class to extend.  Provides utility methods.
+ * Base RSSAction class to extend. Provides utility methods.
  */
-public abstract class BaseRSSAction extends BaseAction {
-   
-    
+public abstract class BaseRSSAction
+    extends BaseAction {
+
     protected DashboardManager dashboardManager;
-    
+
     protected ConfigBoss configBoss;
-    
+
     private Properties configProps = null;
-    
-    
-    
+
     public BaseRSSAction(DashboardManager dashboardManager, ConfigBoss configBoss) {
         super();
         this.dashboardManager = dashboardManager;
@@ -64,54 +62,46 @@ public abstract class BaseRSSAction extends BaseAction {
         return RequestUtils.getStringParameter(request, "user");
     }
 
-    protected ConfigResponse getUserPreferences(HttpServletRequest request,
-                                                String user)
-        throws LoginException, RemoteException, ConfigPropertyException {
-     
+    protected ConfigResponse getUserPreferences(HttpServletRequest request, String user) throws LoginException,
+        RemoteException, ConfigPropertyException {
 
         // Let's make sure that the rss auth token matches
         String rssToken = RequestUtils.getStringParameter(request, "token");
 
         // Get user preferences
-        ConfigResponse preferences = dashboardManager
-            .getRssUserPreferences(user, rssToken);
+        ConfigResponse preferences = dashboardManager.getRssUserPreferences(user, rssToken);
 
-        ConfigResponse defaultPreferences =
-            (ConfigResponse) getServlet().getServletContext().getAttribute(Constants.DEF_USER_PREFS);
+        ConfigResponse defaultPreferences = (ConfigResponse) getServlet().getServletContext().getAttribute(
+            Constants.DEF_USER_PREFS);
 
         preferences.merge(defaultPreferences, false);
-        
+
         return preferences;
     }
-    
-    protected void setManagingEditor(HttpServletRequest request)
-        throws RemoteException, ConfigPropertyException {
+
+    protected void setManagingEditor(HttpServletRequest request) throws RemoteException, ConfigPropertyException {
         Properties props = getConfigProps(request);
-        
+
         // Get "from" sender for managingEditor field
-        request.setAttribute("managingEditor",
-                             props.getProperty(HQConstants.EmailSender));
+        request.setAttribute("managingEditor", props.getProperty(HQConstants.EmailSender));
     }
-    
-    private String getBaseURL(HttpServletRequest request)
-        throws RemoteException, ConfigPropertyException {
+
+    private String getBaseURL(HttpServletRequest request) throws RemoteException, ConfigPropertyException {
         Properties props = getConfigProps(request);
         return props.getProperty(HQConstants.BaseURL);
     }
-    
-    private Properties getConfigProps(HttpServletRequest request)
-        throws RemoteException, ConfigPropertyException {
+
+    private Properties getConfigProps(HttpServletRequest request) throws RemoteException, ConfigPropertyException {
         if (configProps == null) {
-            synchronized(this) {
+            synchronized (this) {
                 configProps = configBoss.getConfig();
             }
         }
-        
+
         return configProps;
     }
-    
-    protected RSSFeed getNewRSSFeed(HttpServletRequest request)
-        throws RemoteException, ConfigPropertyException {
+
+    protected RSSFeed getNewRSSFeed(HttpServletRequest request) throws RemoteException, ConfigPropertyException {
         return new RSSFeed(getBaseURL(request));
     }
 }

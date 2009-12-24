@@ -44,10 +44,11 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.ui.action.resource.common.monitor.visibility.InventoryHelper;
 
 /**
- * A class that provides application-specific implementations of utility
- * methods for common monitoring tasks.
+ * A class that provides application-specific implementations of utility methods
+ * for common monitoring tasks.
  */
-public class ServiceInventoryHelper extends InventoryHelper {
+public class ServiceInventoryHelper
+    extends InventoryHelper {
 
     public ServiceInventoryHelper(AppdefEntityID entityId) {
         super(entityId);
@@ -56,55 +57,43 @@ public class ServiceInventoryHelper extends InventoryHelper {
     // ---------------------------------------------------- Public Methods
 
     /**
-     * Get the set of child resource types representing a resource's
-     * child resources.
-     *
+     * Get the set of child resource types representing a resource's child
+     * resources.
+     * 
      * @param request the http request
      * @param ctx the servlet context
      * @param resource the resource
      */
-    public List getChildResourceTypes(HttpServletRequest request,
-                                      ServletContext ctx,
-                                      AppdefResourceValue resource)
-        throws PermissionException, AppdefEntityNotFoundException,
-        RemoteException, SessionNotFoundException,
+    public List getChildResourceTypes(HttpServletRequest request, ServletContext ctx, AppdefResourceValue resource)
+        throws PermissionException, AppdefEntityNotFoundException, RemoteException, SessionNotFoundException,
         SessionTimeoutException, ServletException {
         // services have no children
         return null;
     }
 
     /**
-     * Get a child resource type from the Bizapp (returns
-     * <code>null</code>).
-     *
+     * Get a child resource type from the Bizapp (returns <code>null</code>).
+     * 
      * @param request the http request
      * @param ctx the servlet context
      * @param id the id of the server type
      */
-    public AppdefResourceType getChildResourceType(HttpServletRequest request,
-                                                   ServletContext ctx,
-                                                   AppdefEntityTypeID id)
-        throws PermissionException, AppdefEntityNotFoundException,
-        RemoteException, SessionNotFoundException, SessionTimeoutException,
-        ServletException {
+    public AppdefResourceType getChildResourceType(HttpServletRequest request, ServletContext ctx, AppdefEntityTypeID id)
+        throws PermissionException, AppdefEntityNotFoundException, RemoteException, SessionNotFoundException,
+        SessionTimeoutException, ServletException {
         return null;
     }
 
     /**
-     * Get from the Bizapp the numbers of children of the given
-     * resource. Returns <code>null</code>, since services have no
-     * children.
-     *
+     * Get from the Bizapp the numbers of children of the given resource.
+     * Returns <code>null</code>, since services have no children.
+     * 
      * @param request the http request
-     * @param resource the appdef resource whose children we are
-     * counting
+     * @param resource the appdef resource whose children we are counting
      */
-    public Map getChildCounts(HttpServletRequest request,
-                                 ServletContext ctx,
-                                 AppdefResourceValue resource)
-        throws PermissionException, AppdefEntityNotFoundException,
-        RemoteException, SessionNotFoundException, SessionTimeoutException,
-        ServletException {
+    public Map getChildCounts(HttpServletRequest request, ServletContext ctx, AppdefResourceValue resource)
+        throws PermissionException, AppdefEntityNotFoundException, RemoteException, SessionNotFoundException,
+        SessionTimeoutException, ServletException {
         // services have no children
         return null;
     }

@@ -42,13 +42,13 @@ import org.hyperic.hq.bizapp.shared.ConfigBoss;
 import org.hyperic.hq.bizapp.shared.UpdateBoss;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class EditConfigPrepAction extends TilesAction {
+public class EditConfigPrepAction
+    extends TilesAction {
 
     private final Log log = LogFactory.getLog(EditConfigPrepAction.class.getName());
     private ConfigBoss configBoss;
     private UpdateBoss updateBoss;
-    
-    
+
     @Autowired
     public EditConfigPrepAction(ConfigBoss configBoss, UpdateBoss updateBoss) {
         super();
@@ -56,28 +56,21 @@ public class EditConfigPrepAction extends TilesAction {
         this.updateBoss = updateBoss;
     }
 
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
+        SystemConfigForm cForm = (SystemConfigForm) form;
 
-
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-        SystemConfigForm cForm = (SystemConfigForm) form;    
-       
-        
         if (log.isTraceEnabled()) {
             log.trace("getting config");
         }
-        
+
         Properties props = configBoss.getConfig();
         cForm.loadConfigProperties(props);
-        
+
         // Set the update mode
         UpdateStatusMode upMode = updateBoss.getUpdateMode();
         cForm.setUpdateMode(upMode.getCode());
-        
+
         return null;
     }
 }

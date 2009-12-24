@@ -31,16 +31,17 @@ import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.ui.action.resource.ResourceForm;
 
 /**
- * A subclass of <code>ResourceForm</code> representing the
- * <em>RemoveAlert</em> form.
+ * A subclass of <code>ResourceForm</code> representing the <em>RemoveAlert</em>
+ * form.
  */
-public class RemoveForm extends ResourceForm  {
+public class RemoveForm
+    extends ResourceForm {
 
-    /** Holds value of  alerts. */
+    /** Holds value of alerts. */
     private Integer[] _alerts;
     private String[] _ealerts;
     private Integer _ad;
-    
+
     private String _buttonAction;
     private String _output;
     private String _ackNote;
@@ -55,20 +56,22 @@ public class RemoveForm extends ResourceForm  {
         if (_alerts == null)
             return "empty";
         else
-            return _alerts.toString();    
+            return _alerts.toString();
     }
-    
-    /** Getter for alerts
-     * @return alerts in an array 
-     *
+
+    /**
+     * Getter for alerts
+     * @return alerts in an array
+     * 
      */
     public Integer[] getAlerts() {
         return _alerts;
     }
-    
-    /** Setter for alerts
-     * @param alerts As an Integer array  
-     *
+
+    /**
+     * Setter for alerts
+     * @param alerts As an Integer array
+     * 
      */
     public void setAlerts(Integer[] alerts) {
         _alerts = alerts;
@@ -85,7 +88,7 @@ public class RemoveForm extends ResourceForm  {
     public Integer getAd() {
         return _ad;
     }
-    
+
     public void setAd(Integer ad) {
         _ad = ad;
     }
@@ -97,15 +100,15 @@ public class RemoveForm extends ResourceForm  {
     public void setButtonAction(String action) {
         _buttonAction = action;
     }
-    
+
     public String getOutput() {
         return _output;
     }
-    
+
     public void setOutput(String output) {
         _output = output;
     }
-    
+
     public String getAckNote() {
         return _ackNote;
     }
@@ -121,19 +124,19 @@ public class RemoveForm extends ResourceForm  {
     public void setFixedNote(String fixedNote) {
         this._fixedNote = fixedNote;
     }
-    
+
     public boolean isFixAll() {
         return _fixAll;
     }
-    
+
     public void setFixAll(boolean fixAll) {
         _fixAll = fixAll;
     }
-    
+
     public long getPauseTime() {
         return _pauseTime;
     }
-    
+
     public void setPauseTime(long pauseTime) {
         _pauseTime = pauseTime;
     }

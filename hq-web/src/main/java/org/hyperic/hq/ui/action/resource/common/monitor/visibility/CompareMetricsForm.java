@@ -33,11 +33,11 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.util.ImageButtonBean;
 
 /**
- * Implementation notes:
- * Rather than force a boss lookup just to find a name to display for the link back, 
- * (I mean, c'mon) it'll be stuffed into the request
+ * Implementation notes: Rather than force a boss lookup just to find a name to
+ * display for the link back, (I mean, c'mon) it'll be stuffed into the request
  */
-public class CompareMetricsForm extends MetricsControlForm {
+public class CompareMetricsForm
+    extends MetricsControlForm {
 
     /* measurement template ids for the metrics to line up */
     public Integer[] mtids;
@@ -48,26 +48,25 @@ public class CompareMetricsForm extends MetricsControlForm {
     public Integer appdefTypeId;
 
     private String name;
-    
+
     private ImageButtonBean back;
 
     /**
-     * keys are MeasurementTemplateValue's
-     * values are List's of MetricDisplaySummary's for each resource
-     * - the list length will not always be the same, in fact they'll
-     *   only be the same if each of the resources has all of the same
-     *   metrics configured
+     * keys are MeasurementTemplateValue's values are List's of
+     * MetricDisplaySummary's for each resource - the list length will not
+     * always be the same, in fact they'll only be the same if each of the
+     * resources has all of the same metrics configured
      */
     public Map metrics;
 
-    //-------------------------------------constructors
+    // -------------------------------------constructors
 
     public CompareMetricsForm() {
         super();
         setDefaults();
     }
 
-    //-------------------------------------public methods
+    // -------------------------------------public methods
 
     /**
      * @return
@@ -140,6 +139,7 @@ public class CompareMetricsForm extends MetricsControlForm {
     public void setAppdefType(Integer integer) {
         appdefTypeId = integer;
     }
+
     /**
      * @return String
      */
@@ -172,7 +172,7 @@ public class CompareMetricsForm extends MetricsControlForm {
         setDefaults();
     }
 
-    //-------------------------------------private methods    
+    // -------------------------------------private methods
 
     protected void setDefaults() {
         super.setDefaults();
@@ -184,4 +184,3 @@ public class CompareMetricsForm extends MetricsControlForm {
         back = new ImageButtonBean();
     }
 }
-

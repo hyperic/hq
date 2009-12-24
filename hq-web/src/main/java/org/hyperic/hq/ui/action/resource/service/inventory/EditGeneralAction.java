@@ -44,78 +44,64 @@ import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-    /**
-    * Edit the General Properties of a Service with the attributes specified in the given
-    * <code>ServiceForm</code>.
-    *
-    */
+/**
+ * Edit the General Properties of a Service with the attributes specified in the
+ * given <code>ServiceForm</code>.
+ * 
+ */
 
-public class EditGeneralAction extends BaseAction {
-    
-    private final  Log log = LogFactory.getLog(EditGeneralAction.class.getName());
-    
+public class EditGeneralAction
+    extends BaseAction {
+
+    private final Log log = LogFactory.getLog(EditGeneralAction.class.getName());
+
     private AppdefBoss appdefBoss;
-    
-    
+
     @Autowired
     public EditGeneralAction(AppdefBoss appdefBoss) {
         super();
         this.appdefBoss = appdefBoss;
     }
 
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
-
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-    throws Exception {
-       
         try {
             ServiceForm rForm = (ServiceForm) form;
 
             Integer rid = rForm.getRid();
             Integer entityType = rForm.getType();
-            
+
             Map<String, Object> forwardParams = new HashMap<String, Object>(2);
             forwardParams.put(Constants.RESOURCE_PARAM, rid);
             forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, entityType);
-            ActionForward forward = checkSubmit(request, mapping, form,
-                                                    forwardParams, YES_RETURN_PATH);
-            
+            ActionForward forward = checkSubmit(request, mapping, form, forwardParams, YES_RETURN_PATH);
+
             if (forward != null) {
                 return forward;
-            }         
+            }
 
-          
             Integer sessionId = RequestUtils.getSessionId(request);
-           
 
             Integer serviceId = RequestUtils.getResourceId(request);
 
             ServiceValue sValue = appdefBoss.findServiceById(sessionId.intValue(), serviceId);
 
-            rForm.updateServiceValue(sValue);            
-            
-            ServiceValue updatedServer =
-              appdefBoss.updateService(sessionId.intValue(), sValue, null);
-              
-            // XXX: enable when we have a confirmed functioning API
-            log.trace("saving service [" + sValue.getName()
-                               + "]" + " with attributes " + rForm);
+            rForm.updateServiceValue(sValue);
 
-            RequestUtils.setConfirmation(request,
-                 "resource.service.inventory.confirm.EditGeneralProperties",
-                 updatedServer.getName());
-                                         
-            return returnSuccess(request, mapping, forwardParams,YES_RETURN_PATH);
-        }        
-        catch (AppdefDuplicateNameException e1) {
-            RequestUtils
-                .setError(request,
-                          Constants.ERR_DUP_RESOURCE_FOUND);
+            ServiceValue updatedServer = appdefBoss.updateService(sessionId.intValue(), sValue, null);
+
+            // XXX: enable when we have a confirmed functioning API
+            log.trace("saving service [" + sValue.getName() + "]" + " with attributes " + rForm);
+
+            RequestUtils.setConfirmation(request, "resource.service.inventory.confirm.EditGeneralProperties",
+                updatedServer.getName());
+
+            return returnSuccess(request, mapping, forwardParams, YES_RETURN_PATH);
+        } catch (AppdefDuplicateNameException e1) {
+            RequestUtils.setError(request, Constants.ERR_DUP_RESOURCE_FOUND);
             return returnFailure(request, mapping);
         }
-        
+
     }
 }

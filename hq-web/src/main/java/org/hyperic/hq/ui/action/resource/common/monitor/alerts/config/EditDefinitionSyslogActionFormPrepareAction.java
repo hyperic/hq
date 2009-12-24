@@ -39,38 +39,28 @@ import org.hyperic.hq.ui.action.resource.common.monitor.alerts.AlertDefUtil;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-
 /**
- * An Action that retrieves data from the BizApp to facilitate display
- * of the <em>Edit Alert Definition Syslog Action</em> form.
- *
+ * An Action that retrieves data from the BizApp to facilitate display of the
+ * <em>Edit Alert Definition Syslog Action</em> form.
+ * 
  */
-public class EditDefinitionSyslogActionFormPrepareAction extends TilesAction {
-   
+public class EditDefinitionSyslogActionFormPrepareAction
+    extends TilesAction {
 
-   private EventsBoss eventsBoss;
-   
-   
-   @Autowired
+    private EventsBoss eventsBoss;
+
+    @Autowired
     public EditDefinitionSyslogActionFormPrepareAction(EventsBoss eventsBoss) {
         super();
         this.eventsBoss = eventsBoss;
-   }
+    }
 
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
 
-
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception
-    {
-       
         int sessionID = RequestUtils.getSessionId(request).intValue();
-       
 
-        SyslogActionForm saForm = (SyslogActionForm)form;
+        SyslogActionForm saForm = (SyslogActionForm) form;
 
         // properties
         AlertDefinitionValue adv = AlertDefUtil.getAlertDefinition(request, sessionID, eventsBoss);

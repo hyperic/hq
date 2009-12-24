@@ -48,51 +48,45 @@ import org.springframework.beans.factory.annotation.Autowired;
  * 
  * Set an array for the timeline display
  */
-public class TimelineAction extends TilesAction {
-    
+public class TimelineAction
+    extends TilesAction {
+
     private EventLogBoss eventLogBoss;
-    
-    
+
     @Autowired
     public TimelineAction(EventLogBoss eventLogBoss) {
         super();
         this.eventLogBoss = eventLogBoss;
     }
 
-
-
     /*
      * (non-Javadoc)
      * 
-     * @see org.apache.struts.action.Action#execute(org.apache.struts.action.ActionMapping,
-     *      org.apache.struts.action.ActionForm,
-     *      javax.servlet.http.HttpServletRequest,
-     *      javax.servlet.http.HttpServletResponse)
+     * @seeorg.apache.struts.action.Action#execute(org.apache.struts.action.
+     * ActionMapping, org.apache.struts.action.ActionForm,
+     * javax.servlet.http.HttpServletRequest,
+     * javax.servlet.http.HttpServletResponse)
      */
-    public ActionForward execute(ActionMapping mapping, ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
         WebUser user = RequestUtils.getWebUser(request);
-        Map<String,Object> range = user.getMetricRangePreference();
+        Map<String, Object> range = user.getMetricRangePreference();
         long begin = ((Long) range.get(MonitorUtils.BEGIN)).longValue();
         long end = ((Long) range.get(MonitorUtils.END)).longValue();
         long[] intervals = new long[Constants.DEFAULT_CHART_POINTS];
 
         // Get the events count
-       
+
         AppdefEntityID aeid = RequestUtils.getEntityId(request);
 
-        boolean[] logsExist = eventLogBoss.logsExistPerInterval(user.getSessionId().intValue(),
-                                                       aeid, begin, end,
-                                                       intervals.length);
+        boolean[] logsExist = eventLogBoss.logsExistPerInterval(user.getSessionId().intValue(), aeid, begin, end,
+            intervals.length);
 
         // Create the time intervals beans
         TimelineBean[] beans = new TimelineBean[intervals.length];
-        long interval = TimeUtil.getInterval(begin, end,
-                                             Constants.DEFAULT_CHART_POINTS);
+        long interval = TimeUtil.getInterval(begin, end, Constants.DEFAULT_CHART_POINTS);
         for (int i = 0; i < intervals.length; i++) {
-            beans[i] = new TimelineBean(begin + (interval * i),logsExist[i]);
+            beans[i] = new TimelineBean(begin + (interval * i), logsExist[i]);
         }
 
         request.setAttribute(Constants.TIME_INTERVALS_ATTR, beans);

@@ -68,18 +68,18 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * This action class is used by the Availability Summary portlet.  It's main
- * use is to generate the JSON objects required for display into the UI.
+ * This action class is used by the Availability Summary portlet. It's main use
+ * is to generate the JSON objects required for display into the UI.
  */
-public class ViewAction extends BaseAction {
+public class ViewAction
+    extends BaseAction {
 
-   private final Log log = LogFactory.getLog(ViewAction.class.getName());
-   private AuthzBoss authzBoss;
-   private MeasurementBoss measurementBoss;
-   private AppdefBoss appdefBoss;
-   
-   
-   @Autowired
+    private final Log log = LogFactory.getLog(ViewAction.class.getName());
+    private AuthzBoss authzBoss;
+    private MeasurementBoss measurementBoss;
+    private AppdefBoss appdefBoss;
+
+    @Autowired
     public ViewAction(AuthzBoss authzBoss, MeasurementBoss measurementBoss, AppdefBoss appdefBoss) {
         super();
         this.authzBoss = authzBoss;
@@ -87,21 +87,16 @@ public class ViewAction extends BaseAction {
         this.appdefBoss = appdefBoss;
     }
 
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception
-    {
-        
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
+
         HttpSession session = request.getSession();
         WebUser user = RequestUtils.getWebUser(session);
-       
-        DashboardConfig dashConfig = DashboardUtils.findDashboard(
-        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, authzBoss);
+
+        DashboardConfig dashConfig = DashboardUtils.findDashboard((Integer) session
+            .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
-        
+
         String token;
         long ts = System.currentTimeMillis();
 
@@ -114,29 +109,27 @@ public class ViewAction extends BaseAction {
         String resKey = PropertiesForm.RESOURCES;
         String numKey = PropertiesForm.NUM_TO_SHOW;
         String titleKey = PropertiesForm.TITLE;
-        
+
         if (token != null) {
             resKey += token;
             numKey += token;
             titleKey += token;
         }
 
-        List<AppdefEntityID> entityIds =
-            DashboardUtils.preferencesAsEntityIds(resKey, dashPrefs);
-        
+        List<AppdefEntityID> entityIds = DashboardUtils.preferencesAsEntityIds(resKey, dashPrefs);
+
         // Can only do Platforms, Servers, and Services
-        for (Iterator<AppdefEntityID> it = entityIds.iterator(); it.hasNext(); ) {
-            AppdefEntityID aeid =  it.next();
-            
+        for (Iterator<AppdefEntityID> it = entityIds.iterator(); it.hasNext();) {
+            AppdefEntityID aeid = it.next();
+
             if (aeid.isPlatform() || aeid.isServer() || aeid.isService()) {
                 continue;
             }
-            
+
             it.remove();
         }
 
-        AppdefEntityID[] arrayIds =
-            entityIds.toArray(new AppdefEntityID[entityIds.size()]);
+        AppdefEntityID[] arrayIds = entityIds.toArray(new AppdefEntityID[entityIds.size()]);
         int count = Integer.parseInt(dashPrefs.getValue(numKey, "10"));
         int sessionId = user.getSessionId().intValue();
 
@@ -163,8 +156,7 @@ public class ViewAction extends BaseAction {
             }
         }
 
-        MetricValue[] vals = measurementBoss.getLastMetricValue(sessionId, measurements,
-                                                      interval);
+        MetricValue[] vals = measurementBoss.getLastMetricValue(sessionId, measurements, interval);
 
         for (int i = 0; i < ents.length; i++) {
             CacheEntry ent = ents[i];
@@ -184,11 +176,10 @@ public class ViewAction extends BaseAction {
             // If no avail measurement is scheduled, skip this resource
             if (ent != null) {
                 if (ent.getType() == null) {
-                    AppdefResourceValue resVal = appdefBoss.findById(sessionId,
-                                                                arrayIds[i]);
+                    AppdefResourceValue resVal = appdefBoss.findById(sessionId, arrayIds[i]);
                     ent.setType(resVal.getAppdefResourceTypeValue());
                 }
-                
+
                 String name = ent.getType().getName();
                 AvailSummary summary = (AvailSummary) res.get(name);
                 if (summary == null) {
@@ -205,7 +196,7 @@ public class ViewAction extends BaseAction {
         TreeSet<AvailSummary> sortedSet = new TreeSet<AvailSummary>(new AvailSummaryComparator());
         sortedSet.addAll(res.values());
 
-        for (Iterator<AvailSummary> i = sortedSet.iterator(); i.hasNext() && count-- > 0; ) {
+        for (Iterator<AvailSummary> i = sortedSet.iterator(); i.hasNext() && count-- > 0;) {
             AvailSummary summary = i.next();
             JSONObject typeSummary = new JSONObject();
             typeSummary.put("resourceTypeName", summary.getTypeName());
@@ -225,16 +216,14 @@ public class ViewAction extends BaseAction {
             availSummary.put("token", JSONObject.NULL);
         }
         availSummary.put("title", dashPrefs.getValue(titleKey, ""));
-        
+
         response.getWriter().write(availSummary.toString());
 
-        log.debug("Availability summary loaded in " +
-                   (System.currentTimeMillis() - ts) + " ms");
+        log.debug("Availability summary loaded in " + (System.currentTimeMillis() - ts) + " ms");
 
         if (toRemove.size() > 0) {
             log.debug("Removing " + toRemove.size() + " missing resources.");
-            DashboardUtils.removeResources((String[]) toRemove.toArray(new String[toRemove.size()]),
-                                           resKey, dashPrefs);
+            DashboardUtils.removeResources((String[]) toRemove.toArray(new String[toRemove.size()]), resKey, dashPrefs);
         }
 
         return null;
@@ -278,14 +267,14 @@ public class ViewAction extends BaseAction {
         }
 
         public double getAvailPercentage() {
-            return (double)_numUp/(_numDown + _numUp);
+            return (double) _numUp / (_numDown + _numUp);
         }
     }
 
     private class AvailSummaryComparator implements Comparator<AvailSummary> {
 
         public int compare(AvailSummary s1, AvailSummary s2) {
-          
+
             if (s1.getAvailPercentage() == s2.getAvailPercentage()) {
                 // Sort on the actual number
                 if (s1.getNumDown() != s2.getNumDown()) {
@@ -301,18 +290,16 @@ public class ViewAction extends BaseAction {
         }
     }
 
-    private CacheEntry loadData(int sessionId, AppdefEntityID id)
-        throws AppdefEntityNotFoundException
-    {
+    private CacheEntry loadData(int sessionId, AppdefEntityID id) throws AppdefEntityNotFoundException {
         Cache cache = CacheManager.getInstance().getCache("AvailabilitySummary");
         Element e = cache.get(id);
 
         if (e != null) {
-            return (CacheEntry)e.getObjectValue();
+            return (CacheEntry) e.getObjectValue();
         }
 
         // Otherwise, load from the backend
-       
+
         try {
             Measurement m = measurementBoss.findAvailabilityMetric(sessionId, id);
 

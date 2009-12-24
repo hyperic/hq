@@ -42,48 +42,38 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * An Action that retrieves data from the BizApp to facilitate display
- * of the <em>Edit Alert Definition Properties</em> form.
- *
+ * An Action that retrieves data from the BizApp to facilitate display of the
+ * <em>Edit Alert Definition Properties</em> form.
+ * 
  */
-public class EditDefinitionPropertiesFormPrepareAction extends TilesAction {
-    private final Log log = LogFactory.getLog(EditDefinitionPropertiesFormPrepareAction.class.getName());    
+public class EditDefinitionPropertiesFormPrepareAction
+    extends TilesAction {
+    private final Log log = LogFactory.getLog(EditDefinitionPropertiesFormPrepareAction.class.getName());
     private EventsBoss eventsBoss;
-  
-    
+
     @Autowired
     public EditDefinitionPropertiesFormPrepareAction(EventsBoss eventsBoss) {
         super();
         this.eventsBoss = eventsBoss;
     }
 
-
-
     /**
      * Prepare the form for a new alert definition.
      */
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
 
         log.debug("in edit definition properties form prepare ...");
 
         DefinitionForm defForm = (DefinitionForm) form;
         log.trace("alertDefId=" + defForm.getAd());
 
-       
         int sessionID = RequestUtils.getSessionId(request).intValue();
-       
 
-        AlertDefinitionValue adv =
-            eventsBoss.getAlertDefinition(sessionID, defForm.getAd());
+        AlertDefinitionValue adv = eventsBoss.getAlertDefinition(sessionID, defForm.getAd());
         request.setAttribute(Constants.ALERT_DEFINITION_ATTR, adv);
         defForm.importProperties(adv);
 
         return null;
     }
 }
-

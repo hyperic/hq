@@ -41,39 +41,30 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 
 /**
- * This populates the GroupConfigMetrics/Update metrics pages' request attributes.
+ * This populates the GroupConfigMetrics/Update metrics pages' request
+ * attributes.
  */
-public class GroupConfigMetricsFormPrepareAction 
+public class GroupConfigMetricsFormPrepareAction
     extends ConfigMetricsFormPrepareAction {
-    
-    private final  Log log = LogFactory.getLog(
-        GroupConfigMetricsFormPrepareAction.class.getName()); 
-    
-    
+
+    private final Log log = LogFactory.getLog(GroupConfigMetricsFormPrepareAction.class.getName());
+
     @Autowired
     public GroupConfigMetricsFormPrepareAction(MeasurementBoss measurementBoss, AppdefBoss appdefBoss) {
         super(measurementBoss, appdefBoss);
     }
 
-
-
     /**
      * Retrieve different resource metrics and store them in various request
      * attributes.
      */
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
 
-          
         log.trace("Preparing group resource metrics action.");
-        
-        ActionForward fwd =
-            super.execute(context, mapping, form, request, response);
-        
+
+        ActionForward fwd = super.execute(context, mapping, form, request, response);
+
         if (fwd != null) {
             return null;
         }

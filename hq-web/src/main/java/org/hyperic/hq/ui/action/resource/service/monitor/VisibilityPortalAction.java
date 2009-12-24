@@ -52,120 +52,96 @@ import org.hyperic.util.pager.PageControl;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * A <code>BaseDispatchAction</code> that sets up service
- * monitor portals.
+ * A <code>BaseDispatchAction</code> that sets up service monitor portals.
  */
-public class VisibilityPortalAction extends ResourceVisibilityPortalAction {
+public class VisibilityPortalAction
+    extends ResourceVisibilityPortalAction {
 
-    private final Log log =
-        LogFactory.getLog(VisibilityPortalAction.class.getName());
-    private static final String ERR_SERVER_PERMISSION =
-        "resource.service.monitor.visibility.error.ServerPermission";
-    
+    private final Log log = LogFactory.getLog(VisibilityPortalAction.class.getName());
+    private static final String ERR_SERVER_PERMISSION = "resource.service.monitor.visibility.error.ServerPermission";
+
     private MeasurementBoss measurementBoss;
-    
+
     @Autowired
-    public VisibilityPortalAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss, MeasurementBoss measurementBoss) {
+    public VisibilityPortalAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss,
+                                  MeasurementBoss measurementBoss) {
         super(appdefBoss, authzBoss, controlBoss);
         this.measurementBoss = measurementBoss;
     }
 
-
-    public ActionForward currentHealth(ActionMapping mapping,
-                                       ActionForm form,
-                                       HttpServletRequest request,
-                                       HttpServletResponse response)
-        throws Exception {
+    public ActionForward currentHealth(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                       HttpServletResponse response) throws Exception {
         setResource(request);
 
         findServersHealths(request);
-        
-        super.currentHealth(mapping,form,request,response);
 
-        Portal portal =
-            Portal.createPortal("resource.service.monitor.visibility.CurrentHealthTitle",
+        super.currentHealth(mapping, form, request, response);
+
+        Portal portal = Portal.createPortal("resource.service.monitor.visibility.CurrentHealthTitle",
             ".resource.service.monitor.visibility.CurrentHealth");
         request.setAttribute(Constants.PORTAL_KEY, portal);
         return null;
     }
 
-    public ActionForward resourceMetrics(ActionMapping mapping,
-                                         ActionForm form,
-                                         HttpServletRequest request,
-                                         HttpServletResponse response)
-        throws Exception {
+    public ActionForward resourceMetrics(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                         HttpServletResponse response) throws Exception {
         setResource(request);
 
         findServersHealths(request);
-        
-        super.resourceMetrics(mapping,form,request,response);
-        
-       //findHostHealths(request);
-        Portal portal =
-            Portal.createPortal("resource.service.monitor.visibility.ServiceMetricsTitle",
+
+        super.resourceMetrics(mapping, form, request, response);
+
+        // findHostHealths(request);
+        Portal portal = Portal.createPortal("resource.service.monitor.visibility.ServiceMetricsTitle",
             ".resource.service.monitor.visibility.ServiceMetrics");
         request.setAttribute(Constants.PORTAL_KEY, portal);
         return null;
     }
 
-    public ActionForward performance(ActionMapping mapping,
-                                     ActionForm form,
-                                     HttpServletRequest request,
-                                     HttpServletResponse response)
-        throws Exception {
+    public ActionForward performance(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                     HttpServletResponse response) throws Exception {
         setResource(request);
-        
-        super.performance(mapping,form,request,response);
-        
-        Portal portal =
-            Portal.createPortal("resource.service.monitor.visibility.PerformanceTitle",
+
+        super.performance(mapping, form, request, response);
+
+        Portal portal = Portal.createPortal("resource.service.monitor.visibility.PerformanceTitle",
             ".resource.service.monitor.visibility.Performance");
         request.setAttribute(Constants.PORTAL_KEY, portal);
         return null;
     }
 
-    private void findServersHealths(HttpServletRequest request)
-            throws Exception {
+    private void findServersHealths(HttpServletRequest request) throws Exception {
         AppdefEntityID entityId = null;
         Exception thrown = null;
-        
+
         try {
             int sessionId = RequestUtils.getSessionId(request).intValue();
             entityId = RequestUtils.getEntityId(request);
-    
-    
+
             // for a regular service, there can only be one
             PageControl pc = PageControl.PAGE_ALL;
-           
+
             ServiceValue sv = appdefBoss.findServiceById(sessionId, entityId.getId());
             // check for platform services
             List<ResourceDisplaySummary> healths = null;
-            if(sv.getServer().getServerType().getVirtual()) {
+            if (sv.getServer().getServerType().getVirtual()) {
                 request.setAttribute(Constants.PLATFORM_SERVICE_ATTR, "true");
-                AppdefEntityID platId = 
-                    appdefBoss.findPlatformByDependentID(sessionId, entityId).getEntityId();
-                healths = 
-                    measurementBoss.findPlatformsCurrentHealth(sessionId,
-                                                    platId, pc);
+                AppdefEntityID platId = appdefBoss.findPlatformByDependentID(sessionId, entityId).getEntityId();
+                healths = measurementBoss.findPlatformsCurrentHealth(sessionId, platId, pc);
             } else {
                 // for a "clustered services" there'd be many... does
                 // that get handled here or the group monitoring?
-                healths =
-                    measurementBoss.findServersCurrentHealth(sessionId, entityId, pc);
-                
+                healths = measurementBoss.findServersCurrentHealth(sessionId, entityId, pc);
+
             }
-            request.setAttribute(Constants.HOST_HEALTH_SUMMARIES_ATTR,
-                    healths);
-        } 
-        catch (AppdefEntityNotFoundException e) {
+            request.setAttribute(Constants.HOST_HEALTH_SUMMARIES_ATTR, healths);
+        } catch (AppdefEntityNotFoundException e) {
             thrown = e;
             RequestUtils.setError(request, Constants.ERR_RESOURCE_NOT_FOUND);
-        }
-        catch (PermissionException e) {
+        } catch (PermissionException e) {
             thrown = e;
             request.setAttribute(Constants.ERR_SERVER_HEALTH_ATTR, ERR_SERVER_PERMISSION);
-        }
-        finally {
+        } finally {
             if (thrown != null && log.isDebugEnabled()) {
                 log.debug("resource [" + entityId + "] access error", thrown);
             }

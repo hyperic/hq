@@ -46,17 +46,17 @@ import org.hyperic.util.config.ConfigResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * An <code>Action</code> that loads the <code>Portal</code>
- * identified by the <code>PORTAL_PARAM</code> request parameter (or
- * the default portal, if the parameter is not specified) into the
- * <code>PORTAL_KEY</code> request attribute.
+ * An <code>Action</code> that loads the <code>Portal</code> identified by the
+ * <code>PORTAL_PARAM</code> request parameter (or the default portal, if the
+ * parameter is not specified) into the <code>PORTAL_KEY</code> request
+ * attribute.
  */
-public class ModifyAction extends BaseAction {
+public class ModifyAction
+    extends BaseAction {
 
     private ConfigurationProxy configurationProxy;
     private AuthzBoss authzBoss;
-    
-    
+
     @Autowired
     public ModifyAction(ConfigurationProxy configurationProxy, AuthzBoss authzBoss) {
         super();
@@ -64,24 +64,19 @@ public class ModifyAction extends BaseAction {
         this.authzBoss = authzBoss;
     }
 
-
-
     /**
-     *
+     * 
      * @param mapping The ActionMapping used to select this instance
      * @param actionForm The optional ActionForm bean for this request (if any)
      * @param request The HTTP request we are processing
      * @param response The HTTP response we are creating
-     *
-     * @exception Exception if the application business logic throws
-     *  an exception
+     * 
+     * @exception Exception if the application business logic throws an
+     *            exception
      */
-    public ActionForward execute(ActionMapping mapping,
-                            ActionForm form,
-                            HttpServletRequest request,
-                            HttpServletResponse response)
-    throws Exception {
-       
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
+
         PropertiesForm pForm = (PropertiesForm) form;
         HttpSession session = request.getSession();
 
@@ -92,51 +87,48 @@ public class ModifyAction extends BaseAction {
         }
 
         WebUser user = RequestUtils.getWebUser(request);
-        DashboardConfig dashConfig = DashboardUtils.findDashboard(
-        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, authzBoss);
+        DashboardConfig dashConfig = DashboardUtils.findDashboard((Integer) session
+            .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
-        
-        
-        String application = Boolean.toString( pForm.isApplication() );
-        String platform = Boolean.toString( pForm.isPlatform() );
-        String cluster = Boolean.toString( pForm.isCluster() );
-        String server = Boolean.toString( pForm.isServer() );
-        String service = Boolean.toString( pForm.isService() );
 
-        dashPrefs.setValue(".dashContent.summaryCounts.application", application );
-        dashPrefs.setValue(".dashContent.summaryCounts.platform", platform );
-        dashPrefs.setValue(".dashContent.summaryCounts.group.cluster", cluster );           
-        dashPrefs.setValue(".dashContent.summaryCounts.server", server );
-        dashPrefs.setValue(".dashContent.summaryCounts.service", service );
+        String application = Boolean.toString(pForm.isApplication());
+        String platform = Boolean.toString(pForm.isPlatform());
+        String cluster = Boolean.toString(pForm.isCluster());
+        String server = Boolean.toString(pForm.isServer());
+        String service = Boolean.toString(pForm.isService());
 
-        String groupMixed= Boolean.toString( pForm.isGroupMixed() );            
-        String groupGroups = Boolean.toString( pForm.isGroupGroups() );  
-        String groupPlatServerService = Boolean.toString( pForm.isGroupPlatServerService() );            
-        String groupApplication = Boolean.toString( pForm.isGroupApplication() );           
+        dashPrefs.setValue(".dashContent.summaryCounts.application", application);
+        dashPrefs.setValue(".dashContent.summaryCounts.platform", platform);
+        dashPrefs.setValue(".dashContent.summaryCounts.group.cluster", cluster);
+        dashPrefs.setValue(".dashContent.summaryCounts.server", server);
+        dashPrefs.setValue(".dashContent.summaryCounts.service", service);
+
+        String groupMixed = Boolean.toString(pForm.isGroupMixed());
+        String groupGroups = Boolean.toString(pForm.isGroupGroups());
+        String groupPlatServerService = Boolean.toString(pForm.isGroupPlatServerService());
+        String groupApplication = Boolean.toString(pForm.isGroupApplication());
 
         dashPrefs.setValue(".dashContent.summaryCounts.group.mixed", groupMixed);
         dashPrefs.setValue(".dashContent.summaryCounts.group.groups", groupGroups);
         dashPrefs.setValue(".dashContent.summaryCounts.group.plat.server.service", groupPlatServerService);
         dashPrefs.setValue(".dashContent.summaryCounts.group.application", groupApplication);
 
-        String applicationTypes = StringUtil.arrayToString( pForm.getApplicationTypes() );
-        String platformTypes    = StringUtil.arrayToString( pForm.getPlatformTypes() );
-        String clusterTypes     = StringUtil.arrayToString( pForm.getClusterTypes() );
-        String serverTypes      = StringUtil.arrayToString( pForm.getServerTypes() );
-        String serviceTypes     = StringUtil.arrayToString( pForm.getServiceTypes() );
+        String applicationTypes = StringUtil.arrayToString(pForm.getApplicationTypes());
+        String platformTypes = StringUtil.arrayToString(pForm.getPlatformTypes());
+        String clusterTypes = StringUtil.arrayToString(pForm.getClusterTypes());
+        String serverTypes = StringUtil.arrayToString(pForm.getServerTypes());
+        String serviceTypes = StringUtil.arrayToString(pForm.getServiceTypes());
 
-        dashPrefs.setValue(".dashContent.summaryCounts.serviceTypes", serviceTypes );
-        dashPrefs.setValue(".dashContent.summaryCounts.serverTypes", serverTypes );
-        dashPrefs.setValue(".dashContent.summaryCounts.group.clusterTypes", clusterTypes );
+        dashPrefs.setValue(".dashContent.summaryCounts.serviceTypes", serviceTypes);
+        dashPrefs.setValue(".dashContent.summaryCounts.serverTypes", serverTypes);
+        dashPrefs.setValue(".dashContent.summaryCounts.group.clusterTypes", clusterTypes);
         dashPrefs.setValue(".dashContent.summaryCounts.platformTypes", platformTypes);
         dashPrefs.setValue(".dashContent.summaryCounts.applicationTypes", applicationTypes);
 
-        configurationProxy.setDashboardPreferences(session, user,  dashPrefs);
-        LogFactory.getLog("user.preferences").trace("Invoking setUserPrefs"+
-            " in summaryCounts/ModifyAction " +
-            " for " + user.getId() + " at "+System.currentTimeMillis() +
-            " user.prefs = " + dashPrefs.getKeys().toString());
+        configurationProxy.setDashboardPreferences(session, user, dashPrefs);
+        LogFactory.getLog("user.preferences").trace(
+            "Invoking setUserPrefs" + " in summaryCounts/ModifyAction " + " for " + user.getId() + " at " +
+                System.currentTimeMillis() + " user.prefs = " + dashPrefs.getKeys().toString());
         session.removeAttribute(Constants.USERS_SES_PORTAL);
         return mapping.findForward("success");
 

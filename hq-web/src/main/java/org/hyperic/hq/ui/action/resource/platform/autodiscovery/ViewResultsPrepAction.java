@@ -23,7 +23,7 @@
  * USA.
  */
 
-    /*
+/*
  * Created on Mar 3, 2003
  *
  */
@@ -56,47 +56,36 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageList;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class ViewResultsPrepAction extends WorkflowPrepareAction {
-    
+public class ViewResultsPrepAction
+    extends WorkflowPrepareAction {
+
     private AppdefBoss appdefBoss;
-    
-    
-    
+
     @Autowired
     public ViewResultsPrepAction(AppdefBoss appdefBoss) {
         super();
         this.appdefBoss = appdefBoss;
     }
 
-    public ActionForward workflow(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
+    public ActionForward workflow(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                  HttpServletRequest request, HttpServletResponse response) throws Exception {
 
         AutoDiscoveryResultsForm aForm = (AutoDiscoveryResultsForm) form;
-        
-        AIPlatformValue aiVal = 
-            (AIPlatformValue) request.getAttribute(Constants.AIPLATFORM_ATTR);
-        
+
+        AIPlatformValue aiVal = (AIPlatformValue) request.getAttribute(Constants.AIPLATFORM_ATTR);
+
         ServletContext ctx = getServlet().getServletContext();
         Integer sessionId = RequestUtils.getSessionId(request);
-      
-        
+
         AppdefResourceTypeValue[] supportedSTypeFilter;
-        supportedSTypeFilter =
-            BizappUtils.buildSupportedAIServerTypes(ctx, request,
-                                                    aiVal.getPlatformTypeName());
-        
-        AppdefResourceTypeValue[] serverTypeFilter = 
-                    BizappUtils.buildfilteredAIServerTypes(supportedSTypeFilter, 
-                                        aiVal.getAIServerValues());
-                                        
+        supportedSTypeFilter = BizappUtils.buildSupportedAIServerTypes(ctx, request, aiVal.getPlatformTypeName());
+
+        AppdefResourceTypeValue[] serverTypeFilter = BizappUtils.buildfilteredAIServerTypes(supportedSTypeFilter, aiVal
+            .getAIServerValues());
+
         aForm.setServerTypeFilterList(serverTypeFilter);
-        
-        PlatformValue pValue =
-            (PlatformValue) RequestUtils.getResource(request);
+
+        PlatformValue pValue = (PlatformValue) RequestUtils.getResource(request);
         if (pValue != null) {
             aForm.setEid(pValue.getEntityId().getAppdefKey());
         }
@@ -104,44 +93,35 @@ public class ViewResultsPrepAction extends WorkflowPrepareAction {
         aForm.setAiRid(aiVal.getId());
 
         aForm.buildActionOptions(request);
-        
-                                         
+
         List<AIServerValue> newModifiedServers = new PageList<AIServerValue>();
         AIServerValue[] aiServerVals = aiVal.getAIServerValues();
-        CollectionUtils.addAll(newModifiedServers,aiServerVals);
-        
-        List<AIAppdefResourceValue> filteredNewServers =
-            BizappUtils.filterAIResourcesByStatus(newModifiedServers, 
-                                                  aForm.getStdStatusFilter());
-       
+        CollectionUtils.addAll(newModifiedServers, aiServerVals);
+
+        List<AIAppdefResourceValue> filteredNewServers = BizappUtils.filterAIResourcesByStatus(newModifiedServers,
+            aForm.getStdStatusFilter());
+
         String name = "";
 
-        if (aForm.getServerTypeFilter() != null &&
-            aForm.getServerTypeFilter().intValue() != -1)
-        {                
-            ServerType sTypeVal =
-                appdefBoss.findServerTypeById(sessionId.intValue(), 
-                                              aForm.getServerTypeFilter());
-            name = sTypeVal.getName();                                                                 
+        if (aForm.getServerTypeFilter() != null && aForm.getServerTypeFilter().intValue() != -1) {
+            ServerType sTypeVal = appdefBoss.findServerTypeById(sessionId.intValue(), aForm.getServerTypeFilter());
+            name = sTypeVal.getName();
         }
-        
-        List<AIServerValue> filteredServers2 =
-            BizappUtils.filterAIResourcesByServerType(filteredNewServers, 
-                                                      name);
-        
+
+        List<AIServerValue> filteredServers2 = BizappUtils.filterAIResourcesByServerType(filteredNewServers, name);
+
         List<AIIpValue> newIps = new ArrayList<AIIpValue>();
 
         AIIpValue[] aiIpVals = aiVal.getAIIpValues();
         CollectionUtils.addAll(newIps, aiIpVals);
 
-        List<AIAppdefResourceValue> filteredIps =
-            BizappUtils.filterAIResourcesByStatus(newIps, 
-                                                  aForm.getIpsStatusFilter());
+        List<AIAppdefResourceValue> filteredIps = BizappUtils.filterAIResourcesByStatus(newIps, aForm
+            .getIpsStatusFilter());
 
         List sortedFilteredIps = BizappUtils.sortAIResource(filteredIps);
         request.setAttribute(Constants.AI_IPS, sortedFilteredIps);
         request.setAttribute(Constants.AI_SERVERS, filteredServers2);
-                                   
+
         return null;
     }
 }

@@ -50,50 +50,40 @@ import org.springframework.beans.factory.annotation.Autowired;
  * Create the server with the attributes specified in the given
  * <code>ServerForm</code>.
  */
-public class NewServerAction extends BaseAction {
-    
-    private final  Log log = LogFactory.getLog(NewServerAction.class.getName());
-    
+public class NewServerAction
+    extends BaseAction {
+
+    private final Log log = LogFactory.getLog(NewServerAction.class.getName());
+
     private AppdefBoss appdefBoss;
-    
-    
+
     @Autowired
     public NewServerAction(AppdefBoss appdefBoss) {
         super();
         this.appdefBoss = appdefBoss;
     }
 
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
-
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-       
         Map<String, Object> forwardParams = new HashMap<String, Object>(2);
         try {
             ServerForm newForm = (ServerForm) form;
-            AppdefEntityID aeid =
-                new AppdefEntityID(newForm.getType().intValue(),
-                                   newForm.getRid());
+            AppdefEntityID aeid = new AppdefEntityID(newForm.getType().intValue(), newForm.getRid());
 
             forwardParams.put(Constants.ENTITY_ID_PARAM, aeid.getAppdefKey());
             forwardParams.put(Constants.ACCORDION_PARAM, "2");
 
-            ActionForward forward = checkSubmit(request, mapping, form,
-						forwardParams, YES_RETURN_PATH);
-            
+            ActionForward forward = checkSubmit(request, mapping, form, forwardParams, YES_RETURN_PATH);
+
             if (forward != null) {
                 return forward;
-            }         
+            }
 
-           
             Integer sessionId = RequestUtils.getSessionId(request);
-           
 
             ServerValue server = new ServerValue();
-            
+
             server.setName(newForm.getName());
             server.setDescription(newForm.getDescription());
             server.setInstallPath(newForm.getInstallPath());
@@ -101,36 +91,28 @@ public class NewServerAction extends BaseAction {
             // AUTOINVENTORY SHOULD EVER SET THIS VALUE.
             // FOR OTHER SERVERS, IT WILL BE SET AUTOMAGICALLY TO A UNIQUE VALUE
             // server.setAutoinventoryIdentifier(newForm.getInstallPath());
-            
+
             Integer platformId = RequestUtils.getResourceId(request);
             Integer ppk = platformId;
             Integer stPk = newForm.getResourceType();
 
-            log.trace("creating server [" + server.getName()
-                               + "]" + " with attributes " + newForm);
-            
-            ServerValue newServer =
-            appdefBoss.createServer(sessionId.intValue(), server, ppk,stPk, null);
+            log.trace("creating server [" + server.getName() + "]" + " with attributes " + newForm);
+
+            ServerValue newServer = appdefBoss.createServer(sessionId.intValue(), server, ppk, stPk, null);
             Integer serverId = newServer.getId();
             AppdefEntityID entityId = newServer.getEntityId();
 
             newForm.setRid(serverId);
 
-            RequestUtils.setConfirmation(request,
-                                         "resource.server.inventory.confirm.CreateServer",
-                                         server.getName());
- 
-            forwardParams.put(Constants.ENTITY_ID_PARAM,
-                              entityId.getAppdefKey());
+            RequestUtils.setConfirmation(request, "resource.server.inventory.confirm.CreateServer", server.getName());
+
+            forwardParams.put(Constants.ENTITY_ID_PARAM, entityId.getAppdefKey());
             forwardParams.put(Constants.ACCORDION_PARAM, "0");
- 
+
             return returnNew(request, mapping, forwardParams);
-        }
-        catch (AppdefDuplicateNameException e1) {
-            RequestUtils
-                .setError(request,
-                          Constants.ERR_DUP_RESOURCE_FOUND);
+        } catch (AppdefDuplicateNameException e1) {
+            RequestUtils.setError(request, Constants.ERR_DUP_RESOURCE_FOUND);
             return returnFailure(request, mapping);
-        }                  
+        }
     }
 }

@@ -41,26 +41,28 @@ import org.hyperic.hq.ui.action.resource.common.monitor.config.MonitoringConfigF
 import org.hyperic.hq.ui.Constants;
 
 /**
- * Form for setting the collection interval for metrics in 
- * resource/group/monitoring/configuration areas of the application,
- * and for adding metrics to a group.
- *
+ * Form for setting the collection interval for metrics in
+ * resource/group/monitoring/configuration areas of the application, and for
+ * adding metrics to a group.
+ * 
  */
-public class GroupMonitoringConfigForm extends MonitoringConfigForm {
-    
+public class GroupMonitoringConfigForm
+    extends MonitoringConfigForm {
+
     /** Holds value of property availabilityThreshold. */
     private String availabilityThreshold;
-    
+
     /** Holds value of property unavailabilityThreshold. */
     private String unavailabilityThreshold;
-    
+
     /** Creates new MonitoringConfigForm */
     public GroupMonitoringConfigForm() {
     }
 
     public void reset(ActionMapping mapping, HttpServletRequest request) {
         this.availabilityThreshold = "100";
-        this.unavailabilityThreshold = "0";;
+        this.unavailabilityThreshold = "0";
+        ;
         super.reset(mapping, request);
     }
 
@@ -70,37 +72,42 @@ public class GroupMonitoringConfigForm extends MonitoringConfigForm {
         buf.append(" unvailabilityThreshold: ").append(unavailabilityThreshold);
         return super.toString() + buf.toString();
     }
-    
-    /** Getter for property availabilityThreshold.
+
+    /**
+     * Getter for property availabilityThreshold.
      * @return Value of property availabilityThreshold.
-     *
+     * 
      */
     public String getAvailabilityThreshold() {
         return this.availabilityThreshold;
     }
-    
-    /** Setter for property availabilityThreshold.
+
+    /**
+     * Setter for property availabilityThreshold.
      * @param availabilityThreshold New value of property availabilityThreshold.
-     *
+     * 
      */
     public void setAvailabilityThreshold(String availabilityThreshold) {
         this.availabilityThreshold = availabilityThreshold;
     }
-    
-    /** Getter for property unavailabilityThreshold.
+
+    /**
+     * Getter for property unavailabilityThreshold.
      * @return Value of property unavailabilityThreshold.
-     *
+     * 
      */
     public String getUnavailabilityThreshold() {
         return this.unavailabilityThreshold;
     }
-    
-    /** Setter for property unavailabilityThreshold.
-     * @param unavailabilityThreshold New value of property unavailabilityThreshold.
-     *
+
+    /**
+     * Setter for property unavailabilityThreshold.
+     * @param unavailabilityThreshold New value of property
+     *        unavailabilityThreshold.
+     * 
      */
     public void setUnavailabilityThreshold(String unavailabilityThreshold) {
         this.unavailabilityThreshold = unavailabilityThreshold;
     }
-    
+
 }

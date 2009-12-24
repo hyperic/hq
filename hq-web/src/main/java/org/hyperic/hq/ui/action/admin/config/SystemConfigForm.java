@@ -35,7 +35,8 @@ import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseValidatorForm;
 
-public class SystemConfigForm extends BaseValidatorForm {
+public class SystemConfigForm
+    extends BaseValidatorForm {
 
     private String senderEmail = "";
     private String baseUrl = "";
@@ -47,9 +48,9 @@ public class SystemConfigForm extends BaseValidatorForm {
     private String maintIntervalVal = "0";
     private String maintInterval = "";
     private String alertPurgeVal = "0";
-    private String alertPurge    = "";
+    private String alertPurge = "";
     private boolean reindex = false;
-    private int    updateMode = 0;
+    private int updateMode = 0;
     private String elPurgeVal = "0";
     private boolean externDocs = true;
     private boolean _alertsAllowed = true;
@@ -71,12 +72,12 @@ public class SystemConfigForm extends BaseValidatorForm {
 
         return buf.toString();
     }
-    
+
     /*
      * (non-Javadoc)
      * 
-     * @see org.apache.struts.action.ActionForm#reset(org.apache.struts.action.ActionMapping,
-     *      javax.servlet.http.HttpServletRequest)
+     * @seeorg.apache.struts.action.ActionForm#reset(org.apache.struts.action.
+     * ActionMapping, javax.servlet.http.HttpServletRequest)
      */
     public void reset(ActionMapping mapping, HttpServletRequest request) {
         super.reset(mapping, request);
@@ -93,27 +94,26 @@ public class SystemConfigForm extends BaseValidatorForm {
         updateMode = 0;
     }
 
-    public void loadConfigProperties (Properties prop){
+    public void loadConfigProperties(Properties prop) {
         senderEmail = prop.getProperty(HQConstants.EmailSender);
         baseUrl = prop.getProperty(HQConstants.BaseURL);
         arcURL = prop.getProperty(Constants.CONFIG_PROP_ARC_SERVER_URL);
         helpUserId = prop.getProperty(HQConstants.HelpUser);
         helpPassword = prop.getProperty(HQConstants.HelpUserPassword);
-        
+
         String deleteUnitsValStr = prop.getProperty(HQConstants.DataPurgeRaw);
         Long deleteUnitInt = new Long(deleteUnitsValStr);
         deleteUnits = findTimeUnit(deleteUnitInt.longValue());
         deleteUnitsVal = calcTimeUnit(deleteUnitInt.longValue());
 
-        String maintIntervalValStr =
-            prop.getProperty(HQConstants.DataMaintenance);
+        String maintIntervalValStr = prop.getProperty(HQConstants.DataMaintenance);
         Long maintIntervalLong = new Long(maintIntervalValStr);
         maintInterval = findTimeUnit(maintIntervalLong.longValue());
         maintIntervalVal = calcTimeUnit(maintIntervalLong.longValue());
 
         String nightlyReindexStr = prop.getProperty(HQConstants.DataReindex);
         reindex = Boolean.valueOf(nightlyReindexStr).booleanValue();
-        
+
         String alertPurgeValStr = prop.getProperty(HQConstants.AlertPurge);
         Long alertPurgeLong = new Long(alertPurgeValStr);
         alertPurge = findTimeUnit(alertPurgeLong.longValue());
@@ -122,19 +122,19 @@ public class SystemConfigForm extends BaseValidatorForm {
         String elPurgeValStr = prop.getProperty(HQConstants.EventLogPurge);
         Long elPurgeLong = new Long(elPurgeValStr);
         elPurgeVal = calcTimeUnit(elPurgeLong.longValue());
-        
+
         String externDocsStr = prop.getProperty(HQConstants.ExternalHelp);
         if (externDocsStr != null) {
             externDocs = Boolean.valueOf(externDocsStr).booleanValue();
         }
-        
+
         String alertsAllowedStr = prop.getProperty(HQConstants.AlertsEnabled, "true");
         _alertsAllowed = Boolean.valueOf(alertsAllowedStr).booleanValue();
-        
+
         String alertNotificationsAllowedStr = prop.getProperty(HQConstants.AlertNotificationsEnabled, "true");
         _alertNotificationsAllowed = Boolean.valueOf(alertNotificationsAllowedStr).booleanValue();
     }
-    
+
     /**
      * find the proper time unit associated with the timeUnit
      * 
@@ -149,7 +149,7 @@ public class SystemConfigForm extends BaseValidatorForm {
             return Constants.MINUTES_LABEL;
         }
     }
-    
+
     /**
      * find the proper time unit associated with the timeUnit
      * 
@@ -164,7 +164,7 @@ public class SystemConfigForm extends BaseValidatorForm {
             return String.valueOf(timeUnitInt / Constants.MINUTES);
         }
     }
-    
+
     /**
      * find the proper time unit associated with the timeUnit
      * 
@@ -179,49 +179,38 @@ public class SystemConfigForm extends BaseValidatorForm {
             return val * Constants.MINUTES;
         }
     }
-    
-    public Properties saveConfigProperties(Properties prop)
-    {
+
+    public Properties saveConfigProperties(Properties prop) {
         prop.setProperty(HQConstants.EmailSender, senderEmail);
         prop.setProperty(HQConstants.BaseURL, baseUrl);
         prop.setProperty(Constants.CONFIG_PROP_ARC_SERVER_URL, arcURL);
         prop.setProperty(HQConstants.HelpUser, helpUserId);
         prop.setProperty(HQConstants.HelpUserPassword, helpPassword);
 
-        long deleteUnitInt =
-            convertToMillisecond(Integer.parseInt(deleteUnitsVal), deleteUnits);
+        long deleteUnitInt = convertToMillisecond(Integer.parseInt(deleteUnitsVal), deleteUnits);
         prop.setProperty(HQConstants.DataPurgeRaw, String.valueOf(deleteUnitInt));
         prop.setProperty(HQConstants.DataReindex, String.valueOf(reindex));
 
-        long maintIntervalLong =
-            convertToMillisecond(Integer.parseInt(maintIntervalVal),
-                                 maintInterval);
-        prop.setProperty(HQConstants.DataMaintenance,
-                 String.valueOf(maintIntervalLong));
+        long maintIntervalLong = convertToMillisecond(Integer.parseInt(maintIntervalVal), maintInterval);
+        prop.setProperty(HQConstants.DataMaintenance, String.valueOf(maintIntervalLong));
 
-        long alertPurgeLong =
-            convertToMillisecond(Long.parseLong(alertPurgeVal), alertPurge);
-        
+        long alertPurgeLong = convertToMillisecond(Long.parseLong(alertPurgeVal), alertPurge);
+
         prop.setProperty(HQConstants.AlertPurge, String.valueOf(alertPurgeLong));
 
-        long elPurgeLong =
-            convertToMillisecond(Long.parseLong(elPurgeVal),
-                                 Constants.DAYS_LABEL);
-        
-        prop.setProperty(HQConstants.EventLogPurge,
-                         String.valueOf(elPurgeLong));
+        long elPurgeLong = convertToMillisecond(Long.parseLong(elPurgeVal), Constants.DAYS_LABEL);
+
+        prop.setProperty(HQConstants.EventLogPurge, String.valueOf(elPurgeLong));
         prop.setProperty(HQConstants.ExternalHelp, String.valueOf(externDocs));
-        
-        prop.setProperty(HQConstants.AlertsEnabled,
-                         String.valueOf(_alertsAllowed));
-        prop.setProperty(HQConstants.AlertNotificationsEnabled, 
-                         String.valueOf(_alertNotificationsAllowed));
+
+        prop.setProperty(HQConstants.AlertsEnabled, String.valueOf(_alertsAllowed));
+        prop.setProperty(HQConstants.AlertNotificationsEnabled, String.valueOf(_alertNotificationsAllowed));
 
         return prop;
     }
-    
+
     public String getHelpPassword() {
-        return helpPassword; 
+        return helpPassword;
     }
 
     public String getHelpUserId() {
@@ -283,7 +272,7 @@ public class SystemConfigForm extends BaseValidatorForm {
     public void setAlertPurge(String s) {
         alertPurge = s;
     }
-    
+
     public String getBaseUrl() {
         return baseUrl;
     }
@@ -311,7 +300,7 @@ public class SystemConfigForm extends BaseValidatorForm {
     public boolean getReindex() {
         return reindex;
     }
-    
+
     public void setReindex(boolean reindex) {
         this.reindex = reindex;
     }
@@ -347,24 +336,26 @@ public class SystemConfigForm extends BaseValidatorForm {
     public void setAlertsAllowed(boolean alertsAllowed) {
         _alertsAllowed = alertsAllowed;
     }
-    
+
     public boolean isAlertNotificationsAllowed() {
         return _alertNotificationsAllowed;
     }
-    
+
     public void setAlertNotificationsAllowed(boolean alertNotificationsAllowed) {
         _alertNotificationsAllowed = alertNotificationsAllowed;
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.struts.action.ActionForm#validate(org.apache.struts.action.ActionMapping, javax.servlet.http.HttpServletRequest)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.apache.struts.action.ActionForm#validate(org.apache.struts.action
+     * .ActionMapping, javax.servlet.http.HttpServletRequest)
      */
-    public ActionErrors validate(
-        ActionMapping mapping,
-        HttpServletRequest request) {
-        
+    public ActionErrors validate(ActionMapping mapping, HttpServletRequest request) {
+
         ActionErrors errors = super.validate(mapping, request);
-                    
+
         return errors;
     }
 }

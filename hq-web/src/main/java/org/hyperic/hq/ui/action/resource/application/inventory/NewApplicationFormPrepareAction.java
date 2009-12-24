@@ -45,46 +45,36 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- *This class prepares the data to display the application
- * creation screen (2.1.1)
+ *This class prepares the data to display the application creation screen
+ * (2.1.1)
  */
-public class NewApplicationFormPrepareAction extends TilesAction {
-    
-    private final  Log log =
-        LogFactory.getLog(NewApplicationFormPrepareAction.class.getName());
+public class NewApplicationFormPrepareAction
+    extends TilesAction {
+
+    private final Log log = LogFactory.getLog(NewApplicationFormPrepareAction.class.getName());
     private AppdefBoss appdefBoss;
-    
-    
+
     @Autowired
     public NewApplicationFormPrepareAction(AppdefBoss appdefBoss) {
         super();
         this.appdefBoss = appdefBoss;
     }
 
-
-
     /**
-     * Retrieve data necessary to display the
-     * <code>ApplicationForm</code>.
+     * Retrieve data necessary to display the <code>ApplicationForm</code>.
      */
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-       
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
 
         ApplicationForm newForm = (ApplicationForm) form;
 
         Integer sessionId = RequestUtils.getSessionId(request);
-       
+
         log.trace("getting all application types");
         List<AppdefResourceTypeValue> applicationTypes = appdefBoss.findAllApplicationTypes(sessionId.intValue());
         newForm.setResourceTypes(applicationTypes);
-        request.setAttribute(Constants.NUM_CHILD_RESOURCES_ATTR,
-                             new Integer(1));
+        request.setAttribute(Constants.NUM_CHILD_RESOURCES_ATTR, new Integer(1));
         return null;
-      
+
     }
 }

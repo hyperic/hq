@@ -51,52 +51,40 @@ import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class PrepareAction extends TilesAction {
+public class PrepareAction
+    extends TilesAction {
     private AuthzBoss authzBoss;
-    
-    
+
     @Autowired
     public PrepareAction(AuthzBoss authzBoss) {
         super();
         this.authzBoss = authzBoss;
     }
 
-
-
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception
-    {
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
         ServletContext ctx = getServlet().getServletContext();
         HttpSession session = request.getSession();
         WebUser user = RequestUtils.getWebUser(session);
-       
-        DashboardConfig dashConfig = DashboardUtils.findDashboard(
-        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, authzBoss);
+
+        DashboardConfig dashConfig = DashboardUtils.findDashboard((Integer) session
+            .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
 
-        DashboardUtils.verifyResources(
-        		Constants.USERPREF_KEY_FAVORITE_RESOURCES,
-        		ctx, dashPrefs, user);
+        DashboardUtils.verifyResources(Constants.USERPREF_KEY_FAVORITE_RESOURCES, ctx, dashPrefs, user);
         // this quarantees that the session dosen't contain any resources it
         // shouldnt
         SessionUtils.removeList(session, Constants.PENDING_RESOURCES_SES_ATTR);
         List<AppdefResourceValue> resources = DashboardUtils.preferencesAsResources(
-        		Constants.USERPREF_KEY_FAVORITE_RESOURCES, 
-        		ctx, user, dashPrefs);
+            Constants.USERPREF_KEY_FAVORITE_RESOURCES, ctx, user, dashPrefs);
 
         Pager pendingPager = Pager.getDefaultPager();
-        PageList viewableResourses = pendingPager.seek(resources,
-                                                       PageControl.PAGE_ALL);
+        PageList viewableResourses = pendingPager.seek(resources, PageControl.PAGE_ALL);
 
         viewableResourses.setTotalSize(resources.size());
 
-        request.setAttribute(Constants.RESOURCE_HEALTH_LIST, viewableResourses);           
-        
+        request.setAttribute(Constants.RESOURCE_HEALTH_LIST, viewableResourses);
+
         return null;
     }
 }

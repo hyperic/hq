@@ -54,13 +54,13 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class ProcessQueueAction extends BaseAction {
+public class ProcessQueueAction
+    extends BaseAction {
 
     private AIBoss aiBoss;
     private AppdefBoss appdefBoss;
     private AuthzBoss authzBoss;
-    
-    
+
     @Autowired
     public ProcessQueueAction(AIBoss aiBoss, AppdefBoss appdefBoss, AuthzBoss authzBoss) {
         super();
@@ -69,13 +69,9 @@ public class ProcessQueueAction extends BaseAction {
         this.authzBoss = authzBoss;
     }
 
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-       throws Exception {
-       
-       
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
+
         WebUser user = RequestUtils.getWebUser(request);
         int sessionId = user.getSessionId().intValue();
 
@@ -83,84 +79,73 @@ public class ProcessQueueAction extends BaseAction {
         Integer[] aiPlatformIds = queueForm.getPlatformsToProcess();
         Integer[] aiServerIds = queueForm.getServersToProcess();
         int queueAction = queueForm.getQueueAction();
-        boolean isApproval
-            = (queueAction == AIQueueConstants.Q_DECISION_APPROVE);
-        boolean isIgnore
-            = (queueAction == AIQueueConstants.Q_DECISION_IGNORE);
+        boolean isApproval = (queueAction == AIQueueConstants.Q_DECISION_APPROVE);
+        boolean isIgnore = (queueAction == AIQueueConstants.Q_DECISION_IGNORE);
 
         List<Integer> aiPlatformList = new ArrayList<Integer>();
-        List<Integer> aiIpList       = new ArrayList<Integer>();
-        List<Integer> aiServerList   = new ArrayList<Integer>();
+        List<Integer> aiIpList = new ArrayList<Integer>();
+        List<Integer> aiServerList = new ArrayList<Integer>();
 
         // Refresh the queue items this user can see.
         HttpSession session = request.getSession();
         PageControl page = new PageControl();
-       
-        DashboardConfig dashConfig = DashboardUtils.findDashboard(
-        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, authzBoss);
+
+        DashboardConfig dashConfig = DashboardUtils.findDashboard((Integer) session
+            .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
-        page.setPagesize(Integer.parseInt(
-        		dashPrefs.getValue(".dashContent.autoDiscovery.range") ) );
+        page.setPagesize(Integer.parseInt(dashPrefs.getValue(".dashContent.autoDiscovery.range")));
 
-        PageList<AIPlatformValue> aiQueue = aiBoss.getQueue(sessionId, true, false, true,
-                                           page);
+        PageList<AIPlatformValue> aiQueue = aiBoss.getQueue(sessionId, true, false, true, page);
 
-        // Walk the queue.  For each platform in the queue:
+        // Walk the queue. For each platform in the queue:
         // 
         // 1. If it's selected for processing, add all of its IPs (and later,
-        //    all of it's virtual servers) for processing.  If it's selected
-        //    for removal, remove all servers, not just virtual ones.
+        // all of it's virtual servers) for processing. If it's selected
+        // for removal, remove all servers, not just virtual ones.
         //
         // 2. If any of its servers are selected for APPROVAL, then select
-        //    the platform for approval as well.
+        // the platform for approval as well.
         // 
         int pidx, sidx;
-        for (int i=0; i<aiQueue.size(); i++) {
+        for (int i = 0; i < aiQueue.size(); i++) {
             AIPlatformValue aiPlatform = (AIPlatformValue) aiQueue.get(i);
             pidx = isSelectedForProcessing(aiPlatform, aiPlatformIds);
             if (pidx == -1) {
                 // platform isnt selected
                 continue;
             }
-            
+
             aiPlatformList.add(aiPlatformIds[pidx]);
 
             AIIpValue[] ips = aiPlatform.getAIIpValues();
-            for (int j=0; j<ips.length; j++) aiIpList.add(ips[j].getId());
+            for (int j = 0; j < ips.length; j++)
+                aiIpList.add(ips[j].getId());
 
             AIServerValue[] aiServers = aiPlatform.getAIServerValues();
             // Now check servers on this platform
-            for (int j=0; j<aiServers.length; j++) {
+            for (int j = 0; j < aiServers.length; j++) {
                 sidx = isSelectedForProcessing(aiServers[j], aiServerIds);
                 if (sidx != -1) {
-                    // If we're approving stuff, and this platform's not 
+                    // If we're approving stuff, and this platform's not
                     // already in the list, add it
-                    if (isApproval 
-                        && !aiPlatformList.contains(aiPlatform.getId())) {
+                    if (isApproval && !aiPlatformList.contains(aiPlatform.getId())) {
                         aiPlatformList.add(aiPlatform.getId());
                     }
 
-                    // Add the server (XXX: Maybe we shouldn't add it if the server
+                    // Add the server (XXX: Maybe we shouldn't add it if the
+                    // server
                     // is ignored?)
                     aiServerList.add(aiServers[j].getId());
 
                     // Set error flag if the server is modified and the user
                     // tries to ignore it.
-                    if (isIgnore &&
-                        aiServers[j].getQueueStatus() !=
-                        AIQueueConstants.Q_STATUS_ADDED) {
-                        
-                        request.getSession().
-                            setAttribute(Constants.IMPORT_IGNORE_ERROR_ATTR,
-                                         Boolean.TRUE);
+                    if (isIgnore && aiServers[j].getQueueStatus() != AIQueueConstants.Q_STATUS_ADDED) {
+
+                        request.getSession().setAttribute(Constants.IMPORT_IGNORE_ERROR_ATTR, Boolean.TRUE);
                     }
-                } else if (isApproval && 
-                           BizappUtils.isAutoApprovedServer(sessionId,
-                                                            appdefBoss,
-                                                            aiServers[j])) {
+                } else if (isApproval && BizappUtils.isAutoApprovedServer(sessionId, appdefBoss, aiServers[j])) {
                     // All virtual servers are approved when their platform
-                    // is approved.  The HQ agent is also auto-approved.
+                    // is approved. The HQ agent is also auto-approved.
                     aiServerList.add(aiServers[j].getId());
                 }
             }
@@ -170,13 +155,9 @@ public class ProcessQueueAction extends BaseAction {
             // Change to purge
             queueAction = AIQueueConstants.Q_DECISION_PURGE;
         }
-        
+
         try {
-            aiBoss.processQueue(sessionId,
-                    aiPlatformList,
-                    aiServerList,
-                    aiIpList,
-                    queueAction);
+            aiBoss.processQueue(sessionId, aiPlatformList, aiServerList, aiIpList, queueAction);
         } catch (Exception e) {
             request.getSession().setAttribute(Constants.IMPORT_ERROR_ATTR, e);
         }
@@ -184,20 +165,20 @@ public class ProcessQueueAction extends BaseAction {
         return returnSuccess(request, mapping);
     }
 
-    private int isSelectedForProcessing ( AIPlatformValue aiPlatform,
-                                          Integer[] platformsToProcess ) {
+    private int isSelectedForProcessing(AIPlatformValue aiPlatform, Integer[] platformsToProcess) {
         Integer id = aiPlatform.getId();
-        for (int i=0; i<platformsToProcess.length; i++) {
-            if (platformsToProcess[i].equals(id)) return i;
+        for (int i = 0; i < platformsToProcess.length; i++) {
+            if (platformsToProcess[i].equals(id))
+                return i;
         }
         return -1;
     }
 
-    private int isSelectedForProcessing ( AIServerValue aiServer,
-                                          Integer[] serversToProcess ) {
+    private int isSelectedForProcessing(AIServerValue aiServer, Integer[] serversToProcess) {
         Integer id = aiServer.getId();
-        for (int i=0; i<serversToProcess.length; i++) {
-            if (serversToProcess[i].equals(id)) return i;
+        for (int i = 0; i < serversToProcess.length; i++) {
+            if (serversToProcess[i].equals(id))
+                return i;
         }
         return -1;
     }

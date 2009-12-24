@@ -40,43 +40,37 @@ import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class MastheadAction extends BaseAction {
-    
+public class MastheadAction
+    extends BaseAction {
+
     private ProductBoss productBoss;
-    
-    
+
     @Autowired
     public MastheadAction(ProductBoss productBoss) {
         super();
         this.productBoss = productBoss;
     }
 
-
-
-    public ActionForward execute(ActionMapping mapping, ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
         // Look up the id
         Integer id = RequestUtils.getIntParameter(request, "typeId");
-      
+
         int sessionId = RequestUtils.getSessionIdInt(request);
         AttachmentDescriptor attachDesc = productBoss.findAttachment(sessionId, id);
-        if(attachDesc != null){
-        	Attachment attachment = attachDesc.getAttachment();
-        	String title = attachDesc.getHTML();
+        if (attachDesc != null) {
+            Attachment attachment = attachDesc.getAttachment();
+            String title = attachDesc.getHTML();
             request.setAttribute(Constants.TITLE_PARAM_ATTR, title);
-           
-            request.setAttribute("attachment",
-                productBoss.findViewById(sessionId, attachment.getView().getId()));
-            
-            request.setAttribute(Constants.PAGE_TITLE_KEY, 
-                                 attachDesc.getHelpTag());
+
+            request.setAttribute("attachment", productBoss.findViewById(sessionId, attachment.getView().getId()));
+
+            request.setAttribute(Constants.PAGE_TITLE_KEY, attachDesc.getHelpTag());
             Portal portal = Portal.createPortal("attachment.title", "");
             request.setAttribute(Constants.PORTAL_KEY, portal);
 
         }
-        
+
         return null;
     }
 

@@ -46,43 +46,37 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Create a new alert definition.
- *
+ * 
  */
-public class EditDefinitionPropertiesAction extends BaseAction {
+public class EditDefinitionPropertiesAction
+    extends BaseAction {
 
     private final Log log = LogFactory.getLog(EditDefinitionPropertiesAction.class.getName());
 
-   private EventsBoss eventsBoss;
-   
-   
-   @Autowired
-    public EditDefinitionPropertiesAction(EventsBoss eventsBoss) {
-       super();
-       this.eventsBoss = eventsBoss;
-   }
+    private EventsBoss eventsBoss;
 
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-            
-        DefinitionForm defForm = (DefinitionForm)form;
+    @Autowired
+    public EditDefinitionPropertiesAction(EventsBoss eventsBoss) {
+        super();
+        this.eventsBoss = eventsBoss;
+    }
+
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
+
+        DefinitionForm defForm = (DefinitionForm) form;
         log.trace("defForm.id=" + defForm.getAd());
 
         Map<String, Object> params = new HashMap<String, Object>();
         AppdefEntityID adeId;
         if (defForm.getRid() != null) {
-            adeId = new AppdefEntityID(defForm.getType().intValue(),
-                                       defForm.getRid());
+            adeId = new AppdefEntityID(defForm.getType().intValue(), defForm.getRid());
             params.put(Constants.ENTITY_ID_PARAM, adeId.getAppdefKey());
-        }
-        else {
-            adeId = new AppdefEntityTypeID(defForm.getType().intValue(),
-                                           defForm.getResourceType());
+        } else {
+            adeId = new AppdefEntityTypeID(defForm.getType().intValue(), defForm.getResourceType());
             params.put(Constants.APPDEF_RES_TYPE_ID, adeId.getAppdefKey());
         }
-        params.put( "ad", defForm.getAd() );
+        params.put("ad", defForm.getAd());
 
         ActionForward forward = checkSubmit(request, mapping, form, params);
         if (forward != null) {
@@ -90,17 +84,13 @@ public class EditDefinitionPropertiesAction extends BaseAction {
             return forward;
         }
 
-
-     
         int sessionID = RequestUtils.getSessionId(request).intValue();
-       
-        eventsBoss.updateAlertDefinitionBasic( sessionID, defForm.getAd(), defForm.getName(),
-                                       defForm.getDescription(), defForm.getPriority(),
-                                       defForm.isActive() );
+
+        eventsBoss.updateAlertDefinitionBasic(sessionID, defForm.getAd(), defForm.getName(), defForm.getDescription(),
+            defForm.getPriority(), defForm.isActive());
 
         log.trace("returning success");
         return returnSuccess(request, mapping, params);
 
     }
 }
-

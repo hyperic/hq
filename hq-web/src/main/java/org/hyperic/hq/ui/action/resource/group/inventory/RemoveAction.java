@@ -51,12 +51,12 @@ import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class RemoveAction extends BaseAction {
+public class RemoveAction
+    extends BaseAction {
 
     private ResourceManager resourceManager;
     private AppdefBoss appdefBoss;
-    
-    
+
     @Autowired
     public RemoveAction(ResourceManager resourceManager, AppdefBoss appdefBoss) {
         super();
@@ -64,56 +64,42 @@ public class RemoveAction extends BaseAction {
         this.appdefBoss = appdefBoss;
     }
 
-
-
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception
-    {
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
         RemoveGroupResourcesForm nwForm = (RemoveGroupResourcesForm) form;
         HashMap<String, Object> forwardParams = new HashMap<String, Object>(2);
         forwardParams.put(Constants.ENTITY_ID_PARAM, nwForm.getEid());
         forwardParams.put(Constants.ACCORDION_PARAM, "1");
-        
+
         try {
             String[] rsrcIds = nwForm.getResources();
-            
-            if (rsrcIds == null || rsrcIds.length == 0) {
-                return returnSuccess(request, mapping,forwardParams);
-            }
-            
-            Integer groupId   = RequestUtils.getResourceId(request);
-            Integer sessionId = RequestUtils.getSessionId(request);
-            
-                    
-           
-            
-            ResourceGroup group = appdefBoss.findGroupById(sessionId.intValue(), 
-                                                     groupId);
 
-          
+            if (rsrcIds == null || rsrcIds.length == 0) {
+                return returnSuccess(request, mapping, forwardParams);
+            }
+
+            Integer groupId = RequestUtils.getResourceId(request);
+            Integer sessionId = RequestUtils.getSessionId(request);
+
+            ResourceGroup group = appdefBoss.findGroupById(sessionId.intValue(), groupId);
+
             List<Resource> resources = new ArrayList<Resource>(rsrcIds.length);
             for (int i = 0; i < rsrcIds.length; i++) {
                 AppdefEntityID entity = new AppdefEntityID(rsrcIds[i]);
-                
+
                 resources.add(resourceManager.findResource(entity));
             }
 
-            appdefBoss.removeResourcesFromGroup(sessionId.intValue(), group,
-                                          resources);
-            
-            return returnSuccess(request, mapping,forwardParams);
+            appdefBoss.removeResourcesFromGroup(sessionId.intValue(), group, resources);
+
+            return returnSuccess(request, mapping, forwardParams);
         } catch (ParameterNotFoundException e2) {
-            RequestUtils.setError(request,
-                                  Constants.ERR_RESOURCE_ID_FOUND);
+            RequestUtils.setError(request, Constants.ERR_RESOURCE_ID_FOUND);
             return returnFailure(request, mapping, forwardParams);
         } catch (AppdefGroupNotFoundException e) {
-            RequestUtils.setError(request,
-                          "resource.common.inventory.error.ResourceNotFound");
-                     
+            RequestUtils.setError(request, "resource.common.inventory.error.ResourceNotFound");
+
             return returnFailure(request, mapping, forwardParams);
-        } 
+        }
     }
 }

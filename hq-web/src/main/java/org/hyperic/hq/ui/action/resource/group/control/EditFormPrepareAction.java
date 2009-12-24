@@ -60,12 +60,12 @@ import org.springframework.beans.factory.annotation.Autowired;
  * An <code>Action</code> subclass that prepares a control action associated
  * with a group for editing.
  */
-public class EditFormPrepareAction extends TilesAction {
+public class EditFormPrepareAction
+    extends TilesAction {
     private ControlBoss controlBoss;
     private AppdefBoss appdefBoss;
-    private final  Log log = LogFactory.getLog(EditFormPrepareAction.class.getName());   
-    
-    
+    private final Log log = LogFactory.getLog(EditFormPrepareAction.class.getName());
+
     @Autowired
     public EditFormPrepareAction(ControlBoss controlBoss, AppdefBoss appdefBoss) {
         super();
@@ -73,26 +73,16 @@ public class EditFormPrepareAction extends TilesAction {
         this.appdefBoss = appdefBoss;
     }
 
-
-
     /**
-     * Find the control action and
-     * populate the GroupControlForm.
+     * Find the control action and populate the GroupControlForm.
      */
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-        
-                
-        log.trace("preparing edit group control action" );                    
-        
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
+
+        log.trace("preparing edit group control action");
+
         int sessionId = RequestUtils.getSessionId(request).intValue();
-        GroupControlForm gForm = (GroupControlForm)form;        
-       
-    
+        GroupControlForm gForm = (GroupControlForm) form;
 
         AppdefEntityID appdefId = RequestUtils.getEntityId(request);
 
@@ -101,8 +91,7 @@ public class EditFormPrepareAction extends TilesAction {
         gForm.setControlActions(options);
         gForm.setNumControlActions(new Integer(options.size()));
 
-        Integer trigger 
-            = RequestUtils.getIntParameter(request, Constants.CONTROL_BATCH_ID_PARAM);
+        Integer trigger = RequestUtils.getIntParameter(request, Constants.CONTROL_BATCH_ID_PARAM);
 
         ControlSchedule job = controlBoss.getControlJob(sessionId, trigger);
         // populate control actions
@@ -112,29 +101,26 @@ public class EditFormPrepareAction extends TilesAction {
 
         // get the resource ids associated with this group,
         // create an options list, and associate it with the form
-        
+
         AppdefGroupValue group = appdefBoss.findGroup(sessionId, appdefId.getId());
-        List<AppdefResourceValue> groupMembers =
-            BizappUtils.buildGroupResources(appdefBoss, sessionId, group,
-                                            PageControl.PAGE_ALL);
-        
+        List<AppdefResourceValue> groupMembers = BizappUtils.buildGroupResources(appdefBoss, sessionId, group,
+            PageControl.PAGE_ALL);
+
         ArrayList<LabelValueBean> groupOptions = new ArrayList<LabelValueBean>();
         HashMap<String, String> mapOfGroupMembers = new HashMap<String, String>();
         for (AppdefResourceValue arv : groupMembers) {
-            
-            LabelValueBean lvb 
-                = new LabelValueBean(arv.getName(), arv.getId().toString());
+
+            LabelValueBean lvb = new LabelValueBean(arv.getName(), arv.getId().toString());
             groupOptions.add(lvb);
 
             // create a set for ordering, later.
             mapOfGroupMembers.put(arv.getId().toString(), arv.getName());
-        }           
+        }
         gForm.setResourceOrderingOptions(groupOptions);
 
         // if this is an ordered control action
         String resourceOrdering = job.getJobOrderData();
-        if (resourceOrdering != null 
-                && !"".equals(resourceOrdering.trim())) {
+        if (resourceOrdering != null && !"".equals(resourceOrdering.trim())) {
             gForm.setInParallel(GroupControlForm.IN_ORDER);
 
             groupOptions = new ArrayList<LabelValueBean>();
@@ -146,17 +132,15 @@ public class EditFormPrepareAction extends TilesAction {
                 gmemberId = tok.nextToken();
                 if (!mapOfGroupMembers.containsKey(gmemberId)) {
                     // weird, in ordering, but not in group
-                    log.warn("Group control ordering contains id"
-                        + " of non group member.");
+                    log.warn("Group control ordering contains id" + " of non group member.");
                 } else {
-                    LabelValueBean lvb 
-                        = new LabelValueBean((String)mapOfGroupMembers.get(gmemberId), gmemberId);
+                    LabelValueBean lvb = new LabelValueBean((String) mapOfGroupMembers.get(gmemberId), gmemberId);
                     groupOptions.add(lvb);
                     mapOfGroupMembers.remove(gmemberId);
                 }
             }
 
-            // there are members of the group, that were not contained 
+            // there are members of the group, that were not contained
             // in the ordering for some reason
             if (mapOfGroupMembers.size() != 0) {
                 Set<String> memberIds = mapOfGroupMembers.keySet();
@@ -164,16 +148,15 @@ public class EditFormPrepareAction extends TilesAction {
 
                 while (idIterator.hasNext()) {
                     gmemberId = idIterator.next();
-                    LabelValueBean lvb 
-                        = new LabelValueBean((String)mapOfGroupMembers.get(gmemberId), gmemberId);
+                    LabelValueBean lvb = new LabelValueBean((String) mapOfGroupMembers.get(gmemberId), gmemberId);
                     groupOptions.add(lvb);
                 }
             }
 
             gForm.setResourceOrderingOptions(groupOptions);
-        } 
+        }
 
         return null;
 
-    } 
+    }
 }

@@ -49,16 +49,16 @@ import org.apache.struts.util.ImageButtonBean;
 import org.apache.struts.util.LabelValueBean;
 
 /**
- * Represents the common set of controls on various pages that display
- * metrics.
+ * Represents the common set of controls on various pages that display metrics.
  * 
- *
+ * 
  */
-public class MetricsControlForm extends MetricDisplayRangeForm {
+public class MetricsControlForm
+    extends MetricDisplayRangeForm {
 
     private static int[] RN_OPTS = { 4, 8, 12, 24, 30, 48, 60, 90, 120 };
 
-    //-------------------------------------instance variables
+    // -------------------------------------instance variables
 
     // switches to advanced metric display range
     private ImageButtonBean advanced;
@@ -72,12 +72,13 @@ public class MetricsControlForm extends MetricDisplayRangeForm {
     private Long re;
     // switches to simple metric display range
     private ImageButtonBean simple;
+
     public MetricsControlForm() {
         super();
         setDefaults();
     }
 
-    //-------------------------------------public methods
+    // -------------------------------------public methods
 
     public String toString() {
         StringBuffer s = new StringBuffer(super.toString());
@@ -97,8 +98,7 @@ public class MetricsControlForm extends MetricDisplayRangeForm {
         return s.toString();
     }
 
-
-    //-------------------------------------public accessors
+    // -------------------------------------public accessors
 
     public ImageButtonBean getAdvanced() {
         return advanced;
@@ -175,8 +175,7 @@ public class MetricsControlForm extends MetricDisplayRangeForm {
     }
 
     public boolean isAnythingClicked() {
-        return isAdvancedClicked() || isEditRangeClicked() ||
-            isRangeClicked() || isSimpleClicked();
+        return isAdvancedClicked() || isEditRangeClicked() || isRangeClicked() || isSimpleClicked();
     }
 
     public Date getRbDate() {
@@ -238,14 +237,12 @@ public class MetricsControlForm extends MetricDisplayRangeForm {
     public AppdefEntityID getEntityId() {
         if (getEid().length > 1) {
             // multiparent autogroup; the jsp should never allow us to perform
-            // an operation on a single parent, so we leave entityId null to 
+            // an operation on a single parent, so we leave entityId null to
             // provoke an NPE and piss off the guy writing the jsp
             return null;
-        }
-        else if (getEid().length == 1) {
+        } else if (getEid().length == 1) {
             return new AppdefEntityID(getEid()[0]);
-        }
-        else {
+        } else {
             return new AppdefEntityID(getType().intValue(), getRid());
         }
     }
@@ -256,27 +253,23 @@ public class MetricsControlForm extends MetricDisplayRangeForm {
         if (this.getEid().length > 1) {
             forwardParams = new HashMap(1);
             forwardParams.put(Constants.ENTITY_ID_PARAM, this.getEid());
-        }
-        else if (this.getEid().length == 1) {
+        } else if (this.getEid().length == 1) {
             forwardParams = new HashMap(1);
             forwardParams.put(Constants.ENTITY_ID_PARAM, this.getEid()[0]);
-        }
-        else {
+        } else {
             forwardParams = new HashMap(2);
             forwardParams.put(Constants.RESOURCE_PARAM, this.getRid());
             forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, this.getType());
         }
 
         if (this.getCtype() != null) {
-            forwardParams.put(Constants.CHILD_RESOURCE_TYPE_ID_PARAM,
-                              this.getCtype());
+            forwardParams.put(Constants.CHILD_RESOURCE_TYPE_ID_PARAM, this.getCtype());
         }
 
         return forwardParams;
     }
 
-
-    //-------------------------------------private methods    
+    // -------------------------------------private methods
 
     protected void setDefaults() {
         super.setDefaults();
@@ -289,11 +282,10 @@ public class MetricsControlForm extends MetricDisplayRangeForm {
         simple = new ImageButtonBean();
     }
 
-    protected boolean shouldValidate(ActionMapping mapping,
-                                     HttpServletRequest request) {
+    protected boolean shouldValidate(ActionMapping mapping, HttpServletRequest request) {
         if (super.shouldValidate(mapping, request))
             return true;
-        
+
         return isAdvancedClicked() && mapping.getInput() != null;
     }
 }

@@ -40,78 +40,58 @@ import org.hyperic.hq.ui.action.resource.common.monitor.visibility.ResourceVisib
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * A <code>BaseDispatchAction</code> that sets up platform
- * monitor portals.
+ * A <code>BaseDispatchAction</code> that sets up platform monitor portals.
  */
-public class VisibilityPortalAction extends ResourceVisibilityPortalAction {
+public class VisibilityPortalAction
+    extends ResourceVisibilityPortalAction {
 
-    private static final String TITLE_CURRENT_HEALTH =
-        "resource.platform.monitor.visibility.CurrentHealthTitle";
+    private static final String TITLE_CURRENT_HEALTH = "resource.platform.monitor.visibility.CurrentHealthTitle";
 
-    private static final String PORTLET_CURRENT_HEALTH =
-        ".resource.platform.monitor.visibility.CurrentHealth";
+    private static final String PORTLET_CURRENT_HEALTH = ".resource.platform.monitor.visibility.CurrentHealth";
 
-    private static final String TITLE_PLATFORM_METRICS =
-        "resource.platform.monitor.visibility.PlatformMetricsTitle";
+    private static final String TITLE_PLATFORM_METRICS = "resource.platform.monitor.visibility.PlatformMetricsTitle";
 
-    private static final String PORTLET_PLATFORM_METRICS =
-        ".resource.platform.monitor.visibility.PlatformMetrics";
+    private static final String PORTLET_PLATFORM_METRICS = ".resource.platform.monitor.visibility.PlatformMetrics";
 
-    private static final String TITLE_PERFORMANCE =
-        "resource.platform.monitor.visibility.PerformanceTitle";
+    private static final String TITLE_PERFORMANCE = "resource.platform.monitor.visibility.PerformanceTitle";
 
-    private static final String PORTLET_PERFORMANCE =
-        ".resource.platform.monitor.visibility.Performance";
+    private static final String PORTLET_PERFORMANCE = ".resource.platform.monitor.visibility.Performance";
 
     @Autowired
     public VisibilityPortalAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss) {
         super(appdefBoss, authzBoss, controlBoss);
     }
 
-    public ActionForward currentHealth(ActionMapping mapping,
-                                       ActionForm form,
-                                       HttpServletRequest request,
-                                       HttpServletResponse response)
-        throws Exception {
+    public ActionForward currentHealth(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                       HttpServletResponse response) throws Exception {
         setResource(request);
 
-        super.currentHealth(mapping,form,request,response);
-        
-        Portal portal =
-            Portal.createPortal(TITLE_CURRENT_HEALTH,
-                                PORTLET_CURRENT_HEALTH);
+        super.currentHealth(mapping, form, request, response);
+
+        Portal portal = Portal.createPortal(TITLE_CURRENT_HEALTH, PORTLET_CURRENT_HEALTH);
         request.setAttribute(Constants.PORTAL_KEY, portal);
         return null;
     }
 
-    public ActionForward resourceMetrics(ActionMapping mapping,
-                                         ActionForm form,
-                                         HttpServletRequest request,
-                                         HttpServletResponse response)
-        throws Exception {
+    public ActionForward resourceMetrics(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                         HttpServletResponse response) throws Exception {
         setResource(request);
-        
-        super.resourceMetrics(mapping,form,request,response);
-        
-        Portal portal = Portal.createPortal(TITLE_PLATFORM_METRICS,
-                                            PORTLET_PLATFORM_METRICS);
+
+        super.resourceMetrics(mapping, form, request, response);
+
+        Portal portal = Portal.createPortal(TITLE_PLATFORM_METRICS, PORTLET_PLATFORM_METRICS);
         request.setAttribute(Constants.PORTAL_KEY, portal);
         return null;
     }
 
-    public ActionForward performance(ActionMapping mapping,
-                                     ActionForm form,
-                                     HttpServletRequest request,
-                                     HttpServletResponse response)
-        throws Exception {
-            
+    public ActionForward performance(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                     HttpServletResponse response) throws Exception {
+
         setResource(request);
 
-        Portal portal =
-            Portal.createPortal(TITLE_PERFORMANCE,
-                                PORTLET_PERFORMANCE);
+        Portal portal = Portal.createPortal(TITLE_PERFORMANCE, PORTLET_PERFORMANCE);
         request.setAttribute(Constants.PORTAL_KEY, portal);
-        
-        return null;            
+
+        return null;
     }
 }

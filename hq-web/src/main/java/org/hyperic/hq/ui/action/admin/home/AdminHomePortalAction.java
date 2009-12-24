@@ -43,27 +43,23 @@ import org.apache.struts.action.ActionMapping;
 /**
  * An <code>Action</code> that sets up the Admin Home portal
  */
-public class AdminHomePortalAction extends BaseAction {
+public class AdminHomePortalAction
+    extends BaseAction {
 
     private static final String TITLE_HOME = "user.admin.page.title";
-    private static final String PORTLET_HOME   = ".admin.home";
+    private static final String PORTLET_HOME = ".admin.home";
 
-    private final Log log =
-        LogFactory.getLog(AdminHomePortalAction.class.getName());
+    private final Log log = LogFactory.getLog(AdminHomePortalAction.class.getName());
 
-   
-
-    /** Set up the Admin Home portal.
-     *  
+    /**
+     * Set up the Admin Home portal.
+     * 
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-      
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
+
         Portal portal = Portal.createPortal(TITLE_HOME, PORTLET_HOME);
-        request.setAttribute( Constants.PORTAL_KEY, portal );               
+        request.setAttribute(Constants.PORTAL_KEY, portal);
 
         String returnPath = ActionUtils.findReturnPath(mapping, null);
         if (log.isTraceEnabled()) {

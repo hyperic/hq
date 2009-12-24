@@ -31,21 +31,22 @@ import org.hyperic.hq.ui.action.BaseValidatorForm;
 
 import org.apache.struts.action.ActionMapping;
 
-public class ChangeResourceOwnerForm extends BaseValidatorForm  {
+public class ChangeResourceOwnerForm
+    extends BaseValidatorForm {
 
-    //-------------------------------------instance variables
+    // -------------------------------------instance variables
 
     private Integer owner;
     private Integer rid;
     private Integer type;
 
-    //-------------------------------------constructors
+    // -------------------------------------constructors
 
     public ChangeResourceOwnerForm() {
         super();
     }
 
-    //-------------------------------------public methods
+    // -------------------------------------public methods
 
     public Integer getRid() {
         return this.rid;
@@ -56,7 +57,7 @@ public class ChangeResourceOwnerForm extends BaseValidatorForm  {
     }
 
     public Integer getO() {
-	return this.owner;
+        return this.owner;
     }
 
     public Integer getOwner() {

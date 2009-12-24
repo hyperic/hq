@@ -48,20 +48,15 @@ import org.hyperic.sigar.OperatingSystem;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 
-public class NewAutoDiscoveryPrepAction extends WorkflowPrepareAction {
-
-   
+public class NewAutoDiscoveryPrepAction
+    extends WorkflowPrepareAction {
 
     /**
      * Create the platform with the attributes specified in the given
      * <code>AutoDiscoveryForm</code>.
      */
-    public ActionForward workflow(ComponentContext context,
-                                  ActionMapping mapping,
-                                  ActionForm form,
-                                  HttpServletRequest request,
-                                  HttpServletResponse response)
-        throws Exception {
+    public ActionForward workflow(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                  HttpServletRequest request, HttpServletResponse response) throws Exception {
 
         PlatformAutoDiscoveryForm newForm = (PlatformAutoDiscoveryForm) form;
 
@@ -72,31 +67,24 @@ public class NewAutoDiscoveryPrepAction extends WorkflowPrepareAction {
             newForm.setRid(aeid.getId());
             newForm.setType(new Integer(aeid.getType()));
 
-            PlatformValue pValue =
-                (PlatformValue) RequestUtils.getResource(request);
+            PlatformValue pValue = (PlatformValue) RequestUtils.getResource(request);
             String platType = pValue.getPlatformType().getName();
-            newForm.setServerTypes(BizappUtils
-                    .buildSupportedAIServerTypes(ctx, request, platType));
+            newForm.setServerTypes(BizappUtils.buildSupportedAIServerTypes(ctx, request, platType));
 
             loadScanConfig(newForm, request, platType);
-            request.setAttribute("platformSpecificScanMsg",
-                                 getPSScanMessage(false, platType));
+            request.setAttribute("platformSpecificScanMsg", getPSScanMessage(false, platType));
         } catch (AgentConnectionException e) {
-            RequestUtils
-                    .setError(request,
-                              "resource.platform.inventory.configProps.NoAgentConnection");
+            RequestUtils.setError(request, "resource.platform.inventory.configProps.NoAgentConnection");
             return null;
         } catch (AgentNotFoundException e) {
-            RequestUtils
-                    .setError(request,
-                              "resource.platform.inventory.configProps.NoAgentConnection");
+            RequestUtils.setError(request, "resource.platform.inventory.configProps.NoAgentConnection");
             return null;
         }
         return null;
     }
 
     protected static final FileScan FILESCAN_WIN32 = new FileScan(true);
-    protected static final FileScan FILESCAN_UNIX  = new FileScan(false);
+    protected static final FileScan FILESCAN_UNIX = new FileScan(false);
     protected static final ConfigSchema FILESCAN_CFG_WIN32;
     protected static final ConfigSchema FILESCAN_CFG_UNIX;
     static {
@@ -104,8 +92,7 @@ public class NewAutoDiscoveryPrepAction extends WorkflowPrepareAction {
             FILESCAN_CFG_WIN32 = FILESCAN_WIN32.getConfigSchema();
             FILESCAN_CFG_UNIX = FILESCAN_UNIX.getConfigSchema();
         } catch (Exception e) {
-            throw new IllegalStateException("Error initializing FILESCAN_CFG: "
-                                            + e);
+            throw new IllegalStateException("Error initializing FILESCAN_CFG: " + e);
         }
     }
     protected static final String FILESCAN_NAME = FILESCAN_UNIX.getName();
@@ -113,53 +100,48 @@ public class NewAutoDiscoveryPrepAction extends WorkflowPrepareAction {
     private static boolean isWindows(String osName) {
         return osName.equals(OperatingSystem.NAME_WIN32);
     }
-    
-    protected static ScanMethod getScanMethod (String osName) {
+
+    protected static ScanMethod getScanMethod(String osName) {
         if (isWindows(osName)) {
             return FILESCAN_WIN32;
         } else {
             return FILESCAN_UNIX;
         }
     }
-    protected static ConfigSchema getConfigSchema (String osName) {
+
+    protected static ConfigSchema getConfigSchema(String osName) {
         if (isWindows(osName)) {
             return FILESCAN_CFG_WIN32;
         } else {
             return FILESCAN_CFG_UNIX;
         }
     }
-    protected static ConfigResponse getConfigResponse(String osName)
-        throws Exception {
+
+    protected static ConfigResponse getConfigResponse(String osName) throws Exception {
         ConfigSchema schema = getConfigSchema(osName);
         return new ConfigResponse(schema);
     }
 
+    private void loadScanConfig(PlatformAutoDiscoveryForm aForm, HttpServletRequest request, String osName)
+        throws Exception {
 
-    private void loadScanConfig(PlatformAutoDiscoveryForm aForm,
-                                HttpServletRequest request,
-                                String osName) throws Exception {
-        
         ConfigSchema schema = getConfigSchema(osName);
         ConfigResponse resp = getConfigResponse(osName);
 
         aForm.setScanMethod(FILESCAN_NAME);
-        
+
         HttpSession session = request.getSession();
         session.setAttribute(Constants.CURR_CONFIG_SCHEMA, schema);
         session.setAttribute(Constants.OLD_CONFIG_RESPONSE, resp);
-        
+
         aForm.setScanMethod(FILESCAN_NAME);
         aForm.buildConfigOptions(schema, resp);
     }
-    
-    private static final String WINDOWS_MSG
-        = "resource.autodiscovery.AutoDiscoveryHeader.windows";
-    private static final String UNIX_MSG
-        = "resource.autodiscovery.AutoDiscoveryHeader.unix";
-    private static final String WINDOWS_AIONLY_MSG
-        = "resource.autodiscovery.AutoDiscoveryHeader.windows.AIonly";
-    private static final String UNIX_AIONLY_MSG
-        = "resource.autodiscovery.AutoDiscoveryHeader.unix.AIonly";
+
+    private static final String WINDOWS_MSG = "resource.autodiscovery.AutoDiscoveryHeader.windows";
+    private static final String UNIX_MSG = "resource.autodiscovery.AutoDiscoveryHeader.unix";
+    private static final String WINDOWS_AIONLY_MSG = "resource.autodiscovery.AutoDiscoveryHeader.windows.AIonly";
+    private static final String UNIX_AIONLY_MSG = "resource.autodiscovery.AutoDiscoveryHeader.unix.AIonly";
 
     /** Generate a platform specific scan message. */
     private String getPSScanMessage(boolean isAIonly, String ptype) {

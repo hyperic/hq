@@ -46,36 +46,27 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * A <code>BaseAction</code> subclass that edits the general properties of
- * a platform in the BizApp.
+ * A <code>BaseAction</code> subclass that edits the general properties of a
+ * platform in the BizApp.
  */
-public class EditPlatformGeneralPropertiesAction extends BaseAction {
+public class EditPlatformGeneralPropertiesAction
+    extends BaseAction {
 
-    private final  Log log = LogFactory
-    .getLog(EditPlatformGeneralPropertiesAction.class.getName());
+    private final Log log = LogFactory.getLog(EditPlatformGeneralPropertiesAction.class.getName());
     private AppdefBoss appdefBoss;
-    
-    
-    
+
     @Autowired
     public EditPlatformGeneralPropertiesAction(AppdefBoss appdefBoss) {
         super();
         this.appdefBoss = appdefBoss;
     }
 
-
-
-
     /**
      * Edit the platform with the attributes specified in the given
      * <code>ResourceForm</code>.
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-        
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
         ResourceForm editForm = (ResourceForm) form;
         Integer platformId = editForm.getRid();
@@ -86,51 +77,35 @@ public class EditPlatformGeneralPropertiesAction extends BaseAction {
         forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, entityType);
 
         try {
-            ActionForward forward = checkSubmit(request, mapping, form,
-                forwardParams, BaseAction.YES_RETURN_PATH);
+            ActionForward forward = checkSubmit(request, mapping, form, forwardParams, BaseAction.YES_RETURN_PATH);
             if (forward != null) {
                 return forward;
             }
 
-            
             Integer sessionId = RequestUtils.getSessionId(request);
-           
 
             // now set up the platform
-            PlatformValue platform =
-                appdefBoss.findPlatformById(sessionId.intValue(), platformId);
+            PlatformValue platform = appdefBoss.findPlatformById(sessionId.intValue(), platformId);
             if (platform == null) {
-                RequestUtils
-                    .setError(request,
-                              "resource.platform.error.PlatformNotFound");
+                RequestUtils.setError(request, "resource.platform.error.PlatformNotFound");
                 return returnFailure(request, mapping, forwardParams);
             }
 
             editForm.updateResourceValue(platform);
 
-            log.trace("editing general properties of platform [" +
-                      platform.getName() + "]" + " with attributes " +
+            log.trace("editing general properties of platform [" + platform.getName() + "]" + " with attributes " +
                       editForm);
-          
-                appdefBoss.updatePlatform(sessionId.intValue(), platform);
 
-            RequestUtils
-                .setConfirmation(request,
-                                 "resource.platform.inventory.confirm.EditGeneralProperties",
-                                 platform.getName());
-            return returnSuccess(request, mapping, forwardParams,
-                BaseAction.YES_RETURN_PATH);
-        }        
-        catch (AppdefDuplicateNameException e1) {
-            RequestUtils
-                .setError(request,
-                          Constants.ERR_DUP_RESOURCE_FOUND);
+            appdefBoss.updatePlatform(sessionId.intValue(), platform);
+
+            RequestUtils.setConfirmation(request, "resource.platform.inventory.confirm.EditGeneralProperties", platform
+                .getName());
+            return returnSuccess(request, mapping, forwardParams, BaseAction.YES_RETURN_PATH);
+        } catch (AppdefDuplicateNameException e1) {
+            RequestUtils.setError(request, Constants.ERR_DUP_RESOURCE_FOUND);
             return returnFailure(request, mapping);
-        }        
-        catch (ApplicationException e) {
-            RequestUtils
-                .setErrorObject(request,"dash.autoDiscovery.import.Error",
-                                e.getMessage());
+        } catch (ApplicationException e) {
+            RequestUtils.setErrorObject(request, "dash.autoDiscovery.import.Error", e.getMessage());
             return returnFailure(request, mapping);
         }
     }

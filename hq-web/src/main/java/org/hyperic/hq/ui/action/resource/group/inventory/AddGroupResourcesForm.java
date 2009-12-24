@@ -36,10 +36,11 @@ import org.apache.struts.action.ActionMapping;
 
 /**
  * A subclass of <code>ResourceForm</code> representing the
- * <em>AddGroupResources</em> form. The purpose of this form is
- * to add AppdefResourceValues to a AppdefGroupValue
+ * <em>AddGroupResources</em> form. The purpose of this form is to add
+ * AppdefResourceValues to a AppdefGroupValue
  */
-public class AddGroupResourcesForm extends NonScheduleResourceForm  {
+public class AddGroupResourcesForm
+    extends NonScheduleResourceForm {
 
     private String[] _availableResources;
     private String[] _pendingResources;
@@ -48,13 +49,13 @@ public class AddGroupResourcesForm extends NonScheduleResourceForm  {
     private List _availResourceTypes;
     private String _filterBy;
     private String _nameFilter;
-    
+
     public AddGroupResourcesForm() {
         super();
     }
 
     public String[] getAvailableResource() {
-	   return _availableResources;
+        return _availableResources;
     }
 
     public String[] getAvailableResources() {
@@ -70,7 +71,7 @@ public class AddGroupResourcesForm extends NonScheduleResourceForm  {
     }
 
     public String[] getPendingResource() {
-	    return _pendingResources;
+        return _pendingResources;
     }
 
     public String[] getPendingResources() {
@@ -101,8 +102,7 @@ public class AddGroupResourcesForm extends NonScheduleResourceForm  {
         _psp = ps;
     }
 
-    public void reset(ActionMapping mapping,
-                      HttpServletRequest request) {
+    public void reset(ActionMapping mapping, HttpServletRequest request) {
         _availResourceTypes = null;
         _availableResources = new String[0];
         _pendingResources = new String[0];
@@ -114,19 +114,18 @@ public class AddGroupResourcesForm extends NonScheduleResourceForm  {
 
     // Checks super class's custom validation rules.
     // This is primarily for ResourceForm's custom validation.
-    public ActionErrors validate(ActionMapping mapping, 
-                                 HttpServletRequest request) {
+    public ActionErrors validate(ActionMapping mapping, HttpServletRequest request) {
         ActionErrors errs = super.validate(mapping, request);
         if (null == errs) {
             errs = new ActionErrors();
         }
-        
+
         if (errs.isEmpty()) {
             return null;
         }
         return errs;
     }
-    
+
     public String toString() {
         StringBuffer s = new StringBuffer(super.toString());
         s.append("psa=" + _psa + " ");
@@ -146,9 +145,9 @@ public class AddGroupResourcesForm extends NonScheduleResourceForm  {
 
     private void listToString(StringBuffer s, String[] l) {
         if (l != null) {
-            for (int i=0; i<l.length; i++) {
+            for (int i = 0; i < l.length; i++) {
                 s.append(l[i]);
-                if (i<l.length-1) {
+                if (i < l.length - 1) {
                     s.append(", ");
                 }
             }
@@ -170,11 +169,11 @@ public class AddGroupResourcesForm extends NonScheduleResourceForm  {
     public void setFilterBy(String fs) {
         _filterBy = fs;
     }
-    
+
     public String getNameFilter() {
         return _nameFilter;
     }
-    
+
     public void setNameFilter(String s) {
         _nameFilter = s;
     }

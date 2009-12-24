@@ -42,45 +42,38 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class PrepareAction extends BaseAction {
-    
+public class PrepareAction
+    extends BaseAction {
+
     private AuthzBoss authzBoss;
-    
-    
+
     @Autowired
     public PrepareAction(AuthzBoss authzBoss) {
         super();
         this.authzBoss = authzBoss;
     }
 
-
-
     /**
      * @param mapping The ActionMapping used to select this instance
      * @param form The optional ActionForm bean for this request (if any)
      * @param request The HTTP request we are processing
      * @param response The HTTP response we are creating
-     *
-     * @exception Exception if the application business logic throws
-     *  an exception
+     * 
+     * @exception Exception if the application business logic throws an
+     *            exception
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
         PropertiesForm pForm = (PropertiesForm) form;
         HttpSession session = request.getSession();
-      
+
         WebUser user = RequestUtils.getWebUser(session);
-			
-        DashboardConfig dashConfig = DashboardUtils.findDashboard(
-        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, authzBoss);
-		ConfigResponse dashPrefs = dashConfig.getConfig();
-        Integer range =
-            new Integer(dashPrefs.getValue(".dashContent.autoDiscovery.range"));
+
+        DashboardConfig dashConfig = DashboardUtils.findDashboard((Integer) session
+            .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
+        ConfigResponse dashPrefs = dashConfig.getConfig();
+        Integer range = new Integer(dashPrefs.getValue(".dashContent.autoDiscovery.range"));
 
         pForm.setRange(range);
         return null;

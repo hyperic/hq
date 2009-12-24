@@ -62,39 +62,31 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * A <code>TilesAction</code> that retrieves data from the Bizapp to be
- * displayed on an <code>AutoGroup Current Health</code> page.  Ths is the
- * only resource type that needs its own CurrentHealthAction due to the
- * different APIs it calls.
+ * displayed on an <code>AutoGroup Current Health</code> page. Ths is the only
+ * resource type that needs its own CurrentHealthAction due to the different
+ * APIs it calls.
  */
-public class AutoGroupCurrentHealthAction extends CurrentHealthAction {
+public class AutoGroupCurrentHealthAction
+    extends CurrentHealthAction {
 
-    private final Log log =
-        LogFactory.getLog(AutoGroupCurrentHealthAction.class.getName());
+    private final Log log = LogFactory.getLog(AutoGroupCurrentHealthAction.class.getName());
 
     private final PageControl pc = new PageControl(0, Constants.DEFAULT_CHART_POINTS);
-    
-    
+
     @Autowired
     public AutoGroupCurrentHealthAction(MeasurementBoss measurementBoss) {
         super(measurementBoss);
     }
 
-
-
     /**
-     * Retrieve data needed to display an autogroup's current health
-     * summary.
+     * Retrieve data needed to display an autogroup's current health summary.
      */
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
         ServletContext ctx = getServlet().getServletContext();
         Integer sessionId = RequestUtils.getSessionId(request);
 
-        // There are two possibilities for an auto-group.  Either it
+        // There are two possibilities for an auto-group. Either it
         // is an auto-group of platforms, in which case there will be
         // no parent entity ids, or it is an auto-group of servers or
         // services.
@@ -110,7 +102,7 @@ public class AutoGroupCurrentHealthAction extends CurrentHealthAction {
             // find the resource type of the autogrouped resources
             typeHolder = entityIds[0];
             helper = InventoryHelper.getHelper(typeHolder);
-            
+
             parentKey = typeHolder.getAppdefKey();
         } catch (ParameterNotFoundException e) {
             // if we get here, we are dealing with an auto-group of
@@ -128,54 +120,45 @@ public class AutoGroupCurrentHealthAction extends CurrentHealthAction {
             // REMOVE ME?
             throw e1;
         }
-        
-        AppdefResourceType selectedType =
-            helper.getChildResourceType(request, ctx, childTypeId);
+
+        AppdefResourceType selectedType = helper.getChildResourceType(request, ctx, childTypeId);
         request.setAttribute(Constants.CHILD_RESOURCE_TYPE_ATTR, selectedType);
-        
+
         // Set the views
-        setupViews(request, (IndicatorViewsForm) form,
-                   parentKey + "." + childTypeId.getAppdefKey());
+        setupViews(request, (IndicatorViewsForm) form, parentKey + "." + childTypeId.getAppdefKey());
 
         // Get the resource availability
-       
+
         WebUser user = RequestUtils.getWebUser(request);
 
         try {
-            MeasurementTemplate mt =
-                measurementBoss.getAvailabilityMetricTemplate(sessionId.intValue(),
-                                                   entityIds[0], childTypeId);
-            
-            Map<String,Object> pref = user.getMetricRangePreference(true);
+            MeasurementTemplate mt = measurementBoss.getAvailabilityMetricTemplate(sessionId.intValue(), entityIds[0],
+                childTypeId);
+
+            Map<String, Object> pref = user.getMetricRangePreference(true);
             long begin = ((Long) pref.get(MonitorUtils.BEGIN)).longValue();
             long end = ((Long) pref.get(MonitorUtils.END)).longValue();
-            long interval = TimeUtil.getInterval(begin, end,
-                    Constants.DEFAULT_CHART_POINTS);
+            long interval = TimeUtil.getInterval(begin, end, Constants.DEFAULT_CHART_POINTS);
 
-            List<HighLowMetricValue> data =
-                measurementBoss.findAGMeasurementData(sessionId.intValue(), entityIds,
-                                           mt, childTypeId, begin, end,
-                                           interval, true, pc);
-            
+            List<HighLowMetricValue> data = measurementBoss.findAGMeasurementData(sessionId.intValue(), entityIds, mt,
+                childTypeId, begin, end, interval, true, pc);
+
             // Seems like sometimes Postgres does not average cleanly, and
-            // the value ends up being like 0.9999999999.  We don't want the
+            // the value ends up being like 0.9999999999. We don't want the
             // insignificant amount to mess up our display.
-            for (MetricValue val : data ) {
+            for (MetricValue val : data) {
                 if (val.toString().equals("1")) {
                     val.setValue(1);
                 }
             }
 
             request.setAttribute(Constants.CAT_AVAILABILITY_METRICS_ATTR, data);
-            request.setAttribute(Constants.AVAIL_METRICS_ATTR,
-                                 getFormattedAvailability(data));
+            request.setAttribute(Constants.AVAIL_METRICS_ATTR, getFormattedAvailability(data));
         } catch (MeasurementNotFoundException e) {
             // No utilization metric
-            log.debug(MeasurementConstants.CAT_AVAILABILITY +
-                      " not found for autogroup" + childTypeId);
+            log.debug(MeasurementConstants.CAT_AVAILABILITY + " not found for autogroup" + childTypeId);
         }
-        
+
         return null;
     }
 }
-

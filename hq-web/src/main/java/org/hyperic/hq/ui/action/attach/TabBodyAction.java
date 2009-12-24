@@ -44,52 +44,48 @@ import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class TabBodyAction extends BaseAction {
-    
+public class TabBodyAction
+    extends BaseAction {
+
     private ProductBoss productBoss;
-    
-    
+
     @Autowired
-	public TabBodyAction(ProductBoss productBoss) {
+    public TabBodyAction(ProductBoss productBoss) {
         super();
         this.productBoss = productBoss;
     }
 
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
+        // Look up the id
+        Integer id;
+        try {
+            id = RequestUtils.getIntParameter(request, "id");
+        } catch (Exception e) {
+            id = null;
+        }
+        AppdefEntityID eid = RequestUtils.getEntityId(request);
 
-    public ActionForward execute(ActionMapping mapping, ActionForm form,
-			HttpServletRequest request, HttpServletResponse response)
-			throws Exception {
-		// Look up the id
-		Integer id;
-		try {
-			id = RequestUtils.getIntParameter(request, "id");
-		} catch (Exception e) {
-			id = null;
-		}
-		AppdefEntityID eid = RequestUtils.getEntityId(request);
-       
-		int sessionId = RequestUtils.getSessionIdInt(request);
-		Collection<AttachmentDescriptor> availAttachents = 
-            productBoss.findAttachments(sessionId, eid, ViewResourceCategory.VIEWS);
-            
-		// Set the list of avail attachments
-		request.setAttribute("resourceViewTabAttachments", availAttachents);
-		for (AttachmentDescriptor attach : availAttachents) {
+        int sessionId = RequestUtils.getSessionIdInt(request);
+        Collection<AttachmentDescriptor> availAttachents = productBoss.findAttachments(sessionId, eid,
+            ViewResourceCategory.VIEWS);
+
+        // Set the list of avail attachments
+        request.setAttribute("resourceViewTabAttachments", availAttachents);
+        for (AttachmentDescriptor attach : availAttachents) {
             Attachment a = attach.getAttachment();
-			if (a.getId().equals(id)) {
-				// Set the requested view
-				String title = attach.getHTML();
-				request.setAttribute(Constants.TITLE_PARAM_ATTR, title);
-				request.setAttribute("resourceViewTabAttachment", productBoss.findViewById(
-						RequestUtils.getSessionId(request).intValue(), 
-						a.getView().getId()));
-				request.setAttribute(Constants.PAGE_TITLE_KEY, 
-                                     attach.getHelpTag());
-				break;
-			}
-		}
-		Portal portal = Portal.createPortal("attachment.title", "");
-		request.setAttribute(Constants.PORTAL_KEY, portal);
-		return null;
-	}
+            if (a.getId().equals(id)) {
+                // Set the requested view
+                String title = attach.getHTML();
+                request.setAttribute(Constants.TITLE_PARAM_ATTR, title);
+                request.setAttribute("resourceViewTabAttachment", productBoss.findViewById(RequestUtils.getSessionId(
+                    request).intValue(), a.getView().getId()));
+                request.setAttribute(Constants.PAGE_TITLE_KEY, attach.getHelpTag());
+                break;
+            }
+        }
+        Portal portal = Portal.createPortal("attachment.title", "");
+        request.setAttribute(Constants.PORTAL_KEY, portal);
+        return null;
+    }
 }

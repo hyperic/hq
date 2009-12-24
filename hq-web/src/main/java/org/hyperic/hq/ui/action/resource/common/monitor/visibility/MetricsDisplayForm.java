@@ -48,14 +48,14 @@ import org.apache.struts.util.ImageButtonBean;
 import org.apache.struts.util.LabelValueBean;
 
 /**
- * Represents the controls on various pages that display metrics
- * summaries.
+ * Represents the controls on various pages that display metrics summaries.
  * 
- *
+ * 
  */
-public class MetricsDisplayForm extends MetricsFilterForm {
+public class MetricsDisplayForm
+    extends MetricsFilterForm {
 
-    //-------------------------------------instance variables
+    // -------------------------------------instance variables
 
     // clears highlight state
     private ImageButtonBean clear;
@@ -84,77 +84,72 @@ public class MetricsDisplayForm extends MetricsFilterForm {
 
     /** Holds value of property collectionInterval */
     private Long collectionInterval;
-    
+
     /** Holds value of property collectionUnit. */
     private long collectionUnit;
-    
+
     private List categoryList = new ArrayList();
 
     private Boolean displayBaseline;
     private Boolean displayHighRange;
     private Boolean displayLowRange;
 
-    // for each category present, this is the order that the metric 
+    // for each category present, this is the order that the metric
     // categories should be displayed in
-    public static final String[] METRIC_CATEGORIES = {
-        MeasurementConstants.CAT_AVAILABILITY,
-        MeasurementConstants.CAT_PERFORMANCE,
-        MeasurementConstants.CAT_THROUGHPUT,
-        MeasurementConstants.CAT_UTILIZATION
-    };
+    public static final String[] METRIC_CATEGORIES = { MeasurementConstants.CAT_AVAILABILITY,
+                                                      MeasurementConstants.CAT_PERFORMANCE,
+                                                      MeasurementConstants.CAT_THROUGHPUT,
+                                                      MeasurementConstants.CAT_UTILIZATION };
 
     /**
-     * In the cases where this bean holds MetricDisplaySummary's that
-     * are aggregates we show the number collecting/unavailable/total.
+     * In the cases where this bean holds MetricDisplaySummary's that are
+     * aggregates we show the number collecting/unavailable/total.
      */
     private Boolean showNumberCollecting = Boolean.FALSE;
 
     /**
-     * When the MetricDisplaySummary's are for a single resource, we
-     * show the baseline, high range and low range.
+     * When the MetricDisplaySummary's are for a single resource, we show the
+     * baseline, high range and low range.
      */
     private Boolean showBaseline = Boolean.FALSE;
 
     /*
-     * Note: on the favorite metrics display pages <i>both</i> can be
-     * true!  Everywhere else it's usually one or the other.
-     */ 
+     * Note: on the favorite metrics display pages <i>both</i> can be true!
+     * Everywhere else it's usually one or the other.
+     */
 
     /**
-     * On favorite metrics pages, we need to show the specific
-     * resource type for each metric.
+     * On favorite metrics pages, we need to show the specific resource type for
+     * each metric.
      */
     private Boolean showMetricSource = Boolean.FALSE;
-            
-    //-------------------------------------constructors
+
+    // -------------------------------------constructors
 
     public MetricsDisplayForm() {
         super();
         setDefaults();
     }
 
-
-    //-------------------------------------public methods
+    // -------------------------------------public methods
 
     /**
      * Method setupCategoryList.
      * 
-     * The Map of MetricDisplaySummarys from the backend
-     * (Map( categories => List(MetricDisplaySummary)) is an
-     * unordered data structure - we want the the UI to display
-     * the categorized metrics in a consistent order so we make
-     * a list of the keys here.
+     * The Map of MetricDisplaySummarys from the backend (Map( categories =>
+     * List(MetricDisplaySummary)) is an unordered data structure - we want the
+     * the UI to display the categorized metrics in a consistent order so we
+     * make a list of the keys here.
      * 
      * @param metricMap
      */
     public void setupCategoryList(Map metricMap) {
         for (int i = 0; i < METRIC_CATEGORIES.length; i++) {
             if (metricMap.containsKey(METRIC_CATEGORIES[i])) {
-                Collection metrics =
-                    (Collection) metricMap.get(METRIC_CATEGORIES[i]);
+                Collection metrics = (Collection) metricMap.get(METRIC_CATEGORIES[i]);
                 if (metrics.size() > 0) {
                     getCategoryList().add(METRIC_CATEGORIES[i]);
-                }            
+                }
             }
         }
     }
@@ -162,7 +157,7 @@ public class MetricsDisplayForm extends MetricsFilterForm {
     public Integer getCategoryListSize() {
         return new Integer(getCategoryList().size());
     }
-    
+
     public String toString() {
         StringBuffer s = new StringBuffer(super.toString());
         s.append(" showNumberCollecting=").append(showNumberCollecting);
@@ -184,8 +179,7 @@ public class MetricsDisplayForm extends MetricsFilterForm {
         return s.toString();
     }
 
-
-    //-------------------------------------public accessors
+    // -------------------------------------public accessors
 
     public ImageButtonBean getClear() {
         return clear;
@@ -323,65 +317,66 @@ public class MetricsDisplayForm extends MetricsFilterForm {
         super.reset(mapping, request);
         setDefaults();
     }
+
     /**
-      * @return Boolean
-      */
-     public Boolean getShowNumberCollecting() {
-         return showNumberCollecting;
-     }
+     * @return Boolean
+     */
+    public Boolean getShowNumberCollecting() {
+        return showNumberCollecting;
+    }
 
-     /**
-      * Sets the showNumberCollecting.
-      * @param showNumberCollecting The showNumberCollecting to set
-      */
-     public void setShowNumberCollecting(Boolean showNumberCollecting) {
-         this.showNumberCollecting = showNumberCollecting;
-     }
+    /**
+     * Sets the showNumberCollecting.
+     * @param showNumberCollecting The showNumberCollecting to set
+     */
+    public void setShowNumberCollecting(Boolean showNumberCollecting) {
+        this.showNumberCollecting = showNumberCollecting;
+    }
 
-     /**
-      * @return Boolean
-      */
-     public Boolean getShowBaseline() {
-         return showBaseline;
-     }
+    /**
+     * @return Boolean
+     */
+    public Boolean getShowBaseline() {
+        return showBaseline;
+    }
 
-     /**
-      * Sets the showBaseline.
-      * @param showBaseline The showBaseline to set
-      */
-     public void setShowBaseline(Boolean showBaseline) {
-         this.showBaseline = showBaseline;
-     }
-    
-     /**
-      * @return Boolean
-      */
-     public Boolean getShowMetricSource() {
-         return showMetricSource;
-     }
+    /**
+     * Sets the showBaseline.
+     * @param showBaseline The showBaseline to set
+     */
+    public void setShowBaseline(Boolean showBaseline) {
+        this.showBaseline = showBaseline;
+    }
 
-     /**
-      * Sets the showMetricSource.
-      * @param showMetricSource The showMetricSource to set
-      */
-     public void setShowMetricSource(Boolean showMetricSource) {
-         this.showMetricSource = showMetricSource;
-     }
-    
-     /**
-      * @return List
-      */
-     public List getCategoryList() {
-         return categoryList;
-     }
+    /**
+     * @return Boolean
+     */
+    public Boolean getShowMetricSource() {
+        return showMetricSource;
+    }
 
-     /**
-      * Sets the categoryList.
-      * @param categoryList The categoryList to set
-      */
-     public void setCategoryList(List categoryList) {
-         this.categoryList = categoryList;
-     }
+    /**
+     * Sets the showMetricSource.
+     * @param showMetricSource The showMetricSource to set
+     */
+    public void setShowMetricSource(Boolean showMetricSource) {
+        this.showMetricSource = showMetricSource;
+    }
+
+    /**
+     * @return List
+     */
+    public List getCategoryList() {
+        return categoryList;
+    }
+
+    /**
+     * Sets the categoryList.
+     * @param categoryList The categoryList to set
+     */
+    public void setCategoryList(List categoryList) {
+        this.categoryList = categoryList;
+    }
 
     /**
      * @return Boolean
@@ -431,15 +426,15 @@ public class MetricsDisplayForm extends MetricsFilterForm {
     public Long getCollectionInterval() {
         return collectionInterval;
     }
-    
+
     public void setCollectionInterval(Long collectionInterval) {
         this.collectionInterval = collectionInterval;
     }
-    
+
     public long getCollectionUnit() {
         return collectionUnit;
     }
-    
+
     public void setCollectionUnit(long collectionUnit) {
         this.collectionUnit = collectionUnit;
     }
@@ -450,8 +445,8 @@ public class MetricsDisplayForm extends MetricsFilterForm {
      */
     public long getIntervalTime() {
         return collectionInterval.longValue() * collectionUnit;
-    }     
-    
+    }
+
     public List getThresholdMenu() {
         return MonitorUtils.getThresholdMenu();
     }
@@ -464,14 +459,14 @@ public class MetricsDisplayForm extends MetricsFilterForm {
 
         if (getT() != null) {
             switch (getT().intValue()) {
-            case MonitorUtils.THRESHOLD_HIGH_RANGE_VALUE:
-                underLabel = "UnderHighRange";
-                overLabel = "OverHighRange";
-                break;
-            case MonitorUtils.THRESHOLD_LOW_RANGE_VALUE:
-                underLabel = "UnderLowRange";
-                overLabel = "OverLowRange";
-                break;
+                case MonitorUtils.THRESHOLD_HIGH_RANGE_VALUE:
+                    underLabel = "UnderHighRange";
+                    overLabel = "OverHighRange";
+                    break;
+                case MonitorUtils.THRESHOLD_LOW_RANGE_VALUE:
+                    underLabel = "UnderLowRange";
+                    overLabel = "OverLowRange";
+                    break;
             }
         }
 
@@ -479,20 +474,18 @@ public class MetricsDisplayForm extends MetricsFilterForm {
             underLabel = "UnderBaseline";
             overLabel = "OverBaseline";
         }
-            
-        Integer underValue =
-            new Integer(MonitorUtils.THRESHOLD_UNDER_VALUE);
-        Integer overValue =
-            new Integer(MonitorUtils.THRESHOLD_OVER_VALUE);
-        
+
+        Integer underValue = new Integer(MonitorUtils.THRESHOLD_UNDER_VALUE);
+        Integer overValue = new Integer(MonitorUtils.THRESHOLD_OVER_VALUE);
+
         items.add(new LabelValueBean(underLabel, underValue.toString()));
         items.add(new LabelValueBean(overLabel, overValue.toString()));
 
         return items;
     }
 
-    //-------------------------------------private methods    
- 
+    // -------------------------------------private methods
+
     protected void setDefaults() {
         super.setDefaults();
         clear = new ImageButtonBean();

@@ -41,16 +41,17 @@ import org.hyperic.hq.ui.util.RequestUtils;
 
 /**
  * Base TilesAction class
- *
+ * 
  */
-public abstract class BaseTilesAction extends TilesAction {
-    
-    protected void checkModifyPermission(HttpServletRequest request) 
-        throws ParameterNotFoundException, PermissionException {
-        
+public abstract class BaseTilesAction
+    extends TilesAction {
+
+    protected void checkModifyPermission(HttpServletRequest request) throws ParameterNotFoundException,
+        PermissionException {
+
         AppdefEntityID aeid = RequestUtils.getEntityId(request);
         String opName = null;
-        
+
         switch (aeid.getType()) {
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
                 opName = AuthzConstants.platformOpModifyPlatform;
@@ -67,21 +68,17 @@ public abstract class BaseTilesAction extends TilesAction {
             default:
                 throw new InvalidAppdefTypeException("Unknown type: " + aeid.getType());
         }
-        
+
         checkPermission(request, opName);
     }
-    
-    protected void checkPermission(HttpServletRequest request, String opName)
-        throws PermissionException {
-        
+
+    protected void checkPermission(HttpServletRequest request, String opName) throws PermissionException {
+
         // See if user can access this action
-        Map userOpsMap = (Map) request.getSession()
-                .getAttribute(Constants.USER_OPERATIONS_ATTR);
-        
+        Map userOpsMap = (Map) request.getSession().getAttribute(Constants.USER_OPERATIONS_ATTR);
+
         if (userOpsMap == null || !userOpsMap.containsKey(opName)) {
-            throw new PermissionException(
-                    "User does not have permission [" 
-                    + opName + "] to access this page.");
+            throw new PermissionException("User does not have permission [" + opName + "] to access this page.");
         }
     }
 }

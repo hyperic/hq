@@ -50,66 +50,70 @@ import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * An <code>Action</code> that loads the <code>Portal</code>
- * identified by the <code>PORTAL_PARAM</code> request parameter (or
- * the default portal, if the parameter is not specified) into the
- * <code>PORTAL_KEY</code> request attribute.
+ * An <code>Action</code> that loads the <code>Portal</code> identified by the
+ * <code>PORTAL_PARAM</code> request parameter (or the default portal, if the
+ * parameter is not specified) into the <code>PORTAL_KEY</code> request
+ * attribute.
  */
-public class ViewAction extends TilesAction {
-    
+public class ViewAction
+    extends TilesAction {
+
     private AuthzBoss authzBoss;
     private AppdefBoss appdefBoss;
     private final Log timingLog = LogFactory.getLog("DASHBOARD-TIMING");
-    
+
     @Autowired
-   public ViewAction(AuthzBoss authzBoss, AppdefBoss appdefBoss) {
+    public ViewAction(AuthzBoss authzBoss, AppdefBoss appdefBoss) {
         super();
         this.authzBoss = authzBoss;
         this.appdefBoss = appdefBoss;
     }
 
-    public ActionForward execute(ComponentContext context,
-			ActionMapping mapping, ActionForm form, HttpServletRequest request,
-			HttpServletResponse response) throws Exception {
-      
-	    StopWatch timer = new StopWatch();
-		
-		
-		HttpSession session = request.getSession();
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
+
+        StopWatch timer = new StopWatch();
+
+        HttpSession session = request.getSession();
         WebUser user = SessionUtils.getWebUser(session);
-		DashboardConfig dashConfig = DashboardUtils.findDashboard(
-				(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID), 
-						user, authzBoss);
-		ConfigResponse dashPrefs = dashConfig.getConfig();
-		
-		AppdefInventorySummary summary = appdefBoss.getInventorySummary( 
-		                                    user.getSessionId().intValue(), true );
+        DashboardConfig dashConfig = DashboardUtils.findDashboard((Integer) session
+            .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
+        ConfigResponse dashPrefs = dashConfig.getConfig();
 
-        context.putAttribute("summary", summary);            
+        AppdefInventorySummary summary = appdefBoss.getInventorySummary(user.getSessionId().intValue(), true);
 
-        //get all the displayed subtypes
-        context.putAttribute("application", new Boolean( dashPrefs.getValue(".dashContent.summaryCounts.application") ) );
-        context.putAttribute("applicationTypes", StringUtil.explode( dashPrefs.getValue(".dashContent.summaryCounts.applicationTypes"), "," ) );
+        context.putAttribute("summary", summary);
 
-        context.putAttribute("platform", new Boolean( dashPrefs.getValue(".dashContent.summaryCounts.platform") ) ); 
-        context.putAttribute("platformTypes", StringUtil.explode( dashPrefs.getValue(".dashContent.summaryCounts.platformTypes"), "," ) );                        
+        // get all the displayed subtypes
+        context.putAttribute("application", new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.application")));
+        context.putAttribute("applicationTypes", StringUtil.explode(dashPrefs
+            .getValue(".dashContent.summaryCounts.applicationTypes"), ","));
 
-        context.putAttribute("server", new Boolean( dashPrefs.getValue(".dashContent.summaryCounts.server") ) );
-        context.putAttribute("serverTypes", StringUtil.explode( dashPrefs.getValue(".dashContent.summaryCounts.serverTypes"), "," ) );
+        context.putAttribute("platform", new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.platform")));
+        context.putAttribute("platformTypes", StringUtil.explode(dashPrefs
+            .getValue(".dashContent.summaryCounts.platformTypes"), ","));
 
-        context.putAttribute("service", new Boolean( dashPrefs.getValue(".dashContent.summaryCounts.service") ) );
-        context.putAttribute("serviceTypes", StringUtil.explode( dashPrefs.getValue(".dashContent.summaryCounts.serviceTypes"), "," ) );            
+        context.putAttribute("server", new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.server")));
+        context.putAttribute("serverTypes", StringUtil.explode(dashPrefs
+            .getValue(".dashContent.summaryCounts.serverTypes"), ","));
 
-        context.putAttribute("cluster", new Boolean( dashPrefs.getValue(".dashContent.summaryCounts.group.cluster" ) ) );
-        context.putAttribute("clusterTypes", StringUtil.explode( dashPrefs.getValue(".dashContent.summaryCounts.group.clusterTypes"), "," ) );
+        context.putAttribute("service", new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.service")));
+        context.putAttribute("serviceTypes", StringUtil.explode(dashPrefs
+            .getValue(".dashContent.summaryCounts.serviceTypes"), ","));
 
-        context.putAttribute("groupMixed", new Boolean( dashPrefs.getValue(".dashContent.summaryCounts.group.mixed") ) );
-        context.putAttribute("groupGroups", new Boolean( dashPrefs.getValue(".dashContent.summaryCounts.group.groups") ) );
-        context.putAttribute("groupPlatServerService", new Boolean( dashPrefs.getValue(".dashContent.summaryCounts.group.plat.server.service") ) );
-        context.putAttribute("groupApplication", new Boolean( dashPrefs.getValue(".dashContent.summaryCounts.group.application") ) );
+        context.putAttribute("cluster", new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.group.cluster")));
+        context.putAttribute("clusterTypes", StringUtil.explode(dashPrefs
+            .getValue(".dashContent.summaryCounts.group.clusterTypes"), ","));
 
-        timingLog.trace("SummaryCounts - timing ["+timer.toString()+"]");
+        context.putAttribute("groupMixed", new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.group.mixed")));
+        context.putAttribute("groupGroups", new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.group.groups")));
+        context.putAttribute("groupPlatServerService", new Boolean(dashPrefs
+            .getValue(".dashContent.summaryCounts.group.plat.server.service")));
+        context.putAttribute("groupApplication", new Boolean(dashPrefs
+            .getValue(".dashContent.summaryCounts.group.application")));
+
+        timingLog.trace("SummaryCounts - timing [" + timer.toString() + "]");
         return null;
     }
-    
+
 }

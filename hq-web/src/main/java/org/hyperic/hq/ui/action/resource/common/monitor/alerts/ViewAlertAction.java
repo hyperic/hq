@@ -65,14 +65,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * View an alert.
- *
+ * 
  */
-public class ViewAlertAction extends TilesAction {
+public class ViewAlertAction
+    extends TilesAction {
     private EventsBoss eventsBoss;
     private MeasurementBoss measurementBoss;
     private AuthzBoss authzBoss;
-    
-    
+
     @Autowired
     public ViewAlertAction(EventsBoss eventsBoss, MeasurementBoss measurementBoss, AuthzBoss authzBoss) {
         super();
@@ -81,129 +81,118 @@ public class ViewAlertAction extends TilesAction {
         this.authzBoss = authzBoss;
     }
 
-
-
     /**
      * Retrieve this data and store it in request attributes.
      */
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-    throws Exception
-    {
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
         // pass-through the alertId
         Integer alertId = RequestUtils.getIntParameter(request, "a");
-      
+
         int sessionID = RequestUtils.getSessionId(request).intValue();
-       
+
         Alert alert = eventsBoss.getAlert(sessionID, alertId);
-        
+
         request.setAttribute("alert", alert);
-        
+
         AlertDefinition alertDefinition = alert.getAlertDefinition();
-        
-        assert(alertDefinition != null);
-        
+
+        assert (alertDefinition != null);
+
         request.setAttribute(Constants.ALERT_DEFINITION_ATTR, alertDefinition.getAlertDefinitionValue());
-        
+
         Escalation escalation = alertDefinition.getEscalation();
-        
+
         if (escalation != null) {
             request.setAttribute("escalation", escalation);
-            
+
             JSONObject escJson = Escalation.getJSON(escalation);
-            
+
             request.setAttribute("escalationJSON", escJson.toString());
-        }            
+        }
 
         // conditions
         Collection<AlertConditionLog> conditionLogs = alert.getConditionLog();
         AlertConditionValue[] conditionValues = new AlertConditionValue[conditionLogs.size()];
         int index = 0;
-        
+
         for (Iterator<AlertConditionLog> i = conditionLogs.iterator(); i.hasNext(); index++) {
-        	AlertConditionLog conditionLog = i.next();
-        	
-        	conditionValues[index] = conditionLog.getCondition().getAlertConditionValue();
+            AlertConditionLog conditionLog = i.next();
+
+            conditionValues[index] = conditionLog.getCondition().getAlertConditionValue();
         }
 
         boolean template = false;
         AlertDefinition parentAlertDefinition = alertDefinition.getParent();
-        
+
         if (parentAlertDefinition != null) {
-        	template = EventConstants.TYPE_ALERT_DEF_ID.equals(parentAlertDefinition.getId());
+            template = EventConstants.TYPE_ALERT_DEF_ID.equals(parentAlertDefinition.getId());
         }
-        
-        List<AlertConditionBean> conditionBeans = 
-        	AlertDefUtil.getAlertConditionBeanList(sessionID, 
-        			                               request, 
-        			                               measurementBoss,
-        			                               conditionValues,
-        			                               template);
+
+        List<AlertConditionBean> conditionBeans = AlertDefUtil.getAlertConditionBeanList(sessionID, request,
+            measurementBoss, conditionValues, template);
 
         index = 0;
-        
+
         AlertConditionLog[] conditionLogsArr = conditionLogs.toArray(new AlertConditionLog[conditionLogs.size()]);
-        
+
         for (Iterator<AlertConditionBean> i = conditionBeans.iterator(); i.hasNext(); index++) {
             AlertConditionBean conditionBean = i.next();
             AlertConditionLogValue conditionLogValue = conditionLogsArr[index].getAlertConditionLogValue();
             final String logVal = conditionLogValue.getValue();
-            
-            switch ( conditionValues[index].getType() ) {
-            	case EventConstants.TYPE_CONTROL:
-            		conditionBean.setActualValue( RequestUtils.message(request, "alert.current.list.ControlActualValue") );
-            		break;
 
-            	case EventConstants.TYPE_THRESHOLD:
-            	case EventConstants.TYPE_BASELINE:
-            	case EventConstants.TYPE_CHANGE:
-            		String last = logVal.substring(logVal.length() - 1);
-                
-            		try {
-            			Integer.parseInt(last);
-            			
-            			// Let's actually format the value
-            			double value = NumberUtil.stringAsNumber(logVal).doubleValue();
+            switch (conditionValues[index].getType()) {
+                case EventConstants.TYPE_CONTROL:
+                    conditionBean
+                        .setActualValue(RequestUtils.message(request, "alert.current.list.ControlActualValue"));
+                    break;
 
-            			if ( Double.isNaN(value) ) {
-            				conditionBean.setActualValue(Constants.UNKNOWN);
-            			} else {
-	                        // This is legacy code, used to format a comma delimited
-	                        // number in the logs.  However, we should be storing
-	                        // fully formatted values into logs now.  Remove post
-	                        // 4.1
-	
-	                        // format threshold and value
-            				Integer mid = new Integer(conditionLogValue.getCondition()
-                                                                       .getMeasurementId());
-            				Measurement m = measurementBoss.getMeasurement(sessionID, mid);
-            				FormatSpecifics precMax = new FormatSpecifics();
-                        
-            				precMax.setPrecision(FormatSpecifics.PRECISION_MAX);
-    
-            				FormattedNumber val = UnitsConvert.convert(value,
-                                                 					   m.getTemplate().getUnits());
-                        
-            				conditionBean.setActualValue( val.toString() );
-            			}
-            		} catch (NumberFormatException e) {
-            			conditionBean.setActualValue(logVal);
-            		}
-                
-            		break;
+                case EventConstants.TYPE_THRESHOLD:
+                case EventConstants.TYPE_BASELINE:
+                case EventConstants.TYPE_CHANGE:
+                    String last = logVal.substring(logVal.length() - 1);
 
-            	case EventConstants.TYPE_CUST_PROP:
-            	case EventConstants.TYPE_LOG:
-            	case EventConstants.TYPE_CFG_CHG:
-            		conditionBean.setActualValue(logVal);
+                    try {
+                        Integer.parseInt(last);
 
-            		break;
+                        // Let's actually format the value
+                        double value = NumberUtil.stringAsNumber(logVal).doubleValue();
 
-            	default:
-            		conditionBean.setActualValue(Constants.UNKNOWN);
+                        if (Double.isNaN(value)) {
+                            conditionBean.setActualValue(Constants.UNKNOWN);
+                        } else {
+                            // This is legacy code, used to format a comma
+                            // delimited
+                            // number in the logs. However, we should be storing
+                            // fully formatted values into logs now. Remove post
+                            // 4.1
+
+                            // format threshold and value
+                            Integer mid = new Integer(conditionLogValue.getCondition().getMeasurementId());
+                            Measurement m = measurementBoss.getMeasurement(sessionID, mid);
+                            FormatSpecifics precMax = new FormatSpecifics();
+
+                            precMax.setPrecision(FormatSpecifics.PRECISION_MAX);
+
+                            FormattedNumber val = UnitsConvert.convert(value, m.getTemplate().getUnits());
+
+                            conditionBean.setActualValue(val.toString());
+                        }
+                    } catch (NumberFormatException e) {
+                        conditionBean.setActualValue(logVal);
+                    }
+
+                    break;
+
+                case EventConstants.TYPE_CUST_PROP:
+                case EventConstants.TYPE_LOG:
+                case EventConstants.TYPE_CFG_CHG:
+                    conditionBean.setActualValue(logVal);
+
+                    break;
+
+                default:
+                    conditionBean.setActualValue(Constants.UNKNOWN);
             }
         }
 
@@ -212,36 +201,35 @@ public class ViewAlertAction extends TilesAction {
         // if alert is fixed, then there should be a fixed log
         if (alert.isFixed()) {
             Collection<AlertActionLog> actionLogs = alert.getActionLog();
-            
+
             // Reverse the order, the most recent log is first
             Collections.reverse(conditionBeans);
-            
+
             for (Iterator<AlertActionLog> i = actionLogs.iterator(); i.hasNext();) {
-            	AlertActionLog actionLog = i.next();
-            	
-            	if (actionLog.getAction() == null) {
+                AlertActionLog actionLog = i.next();
+
+                if (actionLog.getAction() == null) {
                     request.setAttribute("fixedNote", actionLog.getDetail());
-                    
+
                     break;
                 }
             }
         } else {
             // See if there might be a previous fixed log
             String fixedNote = eventsBoss.getLastFix(sessionID, alertDefinition.getId());
-            
+
             if (fixedNote != null) {
                 request.setAttribute("fixedNote", fixedNote);
             }
         }
-        
+
         // enablement
         AlertDefUtil.setEnablementRequestAttributes(request, alertDefinition.getAlertDefinitionValue());
 
         // Get the list of users
-        
-        PageList<AuthzSubjectValue> availableUsers =
-            authzBoss.getAllSubjects(new Integer(sessionID), null,
-                                     PageControl.PAGE_ALL);
+
+        PageList<AuthzSubjectValue> availableUsers = authzBoss.getAllSubjects(new Integer(sessionID), null,
+            PageControl.PAGE_ALL);
         request.setAttribute(Constants.AVAIL_USERS_ATTR, availableUsers);
 
         return null;

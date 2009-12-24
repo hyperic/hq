@@ -47,52 +47,38 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class ViewAutoDiscoveryAction extends TilesAction {
-    
+public class ViewAutoDiscoveryAction
+    extends TilesAction {
+
     private AIBoss aiBoss;
-    
-    
+
     @Autowired
     public ViewAutoDiscoveryAction(AIBoss aiBoss) {
         super();
         this.aiBoss = aiBoss;
     }
 
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
 
-
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-
-        PlatformValue platform =
-            (PlatformValue) RequestUtils.getResource(request);
+        PlatformValue platform = (PlatformValue) RequestUtils.getResource(request);
         if (platform == null) {
-            RequestUtils.setError(request,
-                                  "resource.platform.error.PlatformNotFound");
+            RequestUtils.setError(request, "resource.platform.error.PlatformNotFound");
             return null;
         }
-        
-        Integer sessionId = RequestUtils.getSessionId(request);
-       
-        
-        PageControl pc = RequestUtils.getPageControl(request, "ps", 
-                                                     "pn", "so", "sc");
 
-        PageList<AIScheduleValue> list = aiBoss.
-                          findScheduledJobs(sessionId.intValue(), 
-                                            platform.getEntityId(),
-                                            pc);
+        Integer sessionId = RequestUtils.getSessionId(request);
+
+        PageControl pc = RequestUtils.getPageControl(request, "ps", "pn", "so", "sc");
+
+        PageList<AIScheduleValue> list = aiBoss.findScheduledJobs(sessionId.intValue(), platform.getEntityId(), pc);
 
         RemoveResourceForm rmSchedForm = new RemoveResourceForm();
         int ps = RequestUtils.getPageSize(request, "ps");
         rmSchedForm.setPs(new Integer(ps));
 
-        request.setAttribute(Constants.RESOURCE_REMOVE_FORM_ATTR,
-                             rmSchedForm);
-        
+        request.setAttribute(Constants.RESOURCE_REMOVE_FORM_ATTR, rmSchedForm);
+
         request.setAttribute(Constants.ALL_SCHEDULES_ATTR, list);
         return null;
     }

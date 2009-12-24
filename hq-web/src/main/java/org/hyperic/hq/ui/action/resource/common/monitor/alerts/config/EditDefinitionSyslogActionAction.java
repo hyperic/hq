@@ -51,48 +51,35 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Update the syslog action for an alert definition.
- *
+ * 
  */
-public class EditDefinitionSyslogActionAction extends BaseAction {
+public class EditDefinitionSyslogActionAction
+    extends BaseAction {
 
     private final Log log = LogFactory.getLog(EditDefinitionSyslogActionAction.class.getName());
 
     private EventsBoss eventsBoss;
-    
-    
+
     @Autowired
     public EditDefinitionSyslogActionAction(EventsBoss eventsBoss) {
         super();
         this.eventsBoss = eventsBoss;
     }
 
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
+        SyslogActionForm saForm = (SyslogActionForm) form;
 
-
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception
-    {
-        SyslogActionForm saForm = (SyslogActionForm)form;
-
-        
         int sessionID = RequestUtils.getSessionId(request).intValue();
-        
+
         Map<String, Object> params = new HashMap<String, Object>(2);
-        
+
         if (saForm.getAetid() != null) {
-            params.put(Constants.APPDEF_RES_TYPE_ID,
-                       new AppdefEntityTypeID(saForm.getAetid()));
-        }
-        else {
-            params.put(Constants.ENTITY_ID_PARAM,
-                       new AppdefEntityID(saForm.getEid()));
+            params.put(Constants.APPDEF_RES_TYPE_ID, new AppdefEntityTypeID(saForm.getAetid()));
+        } else {
+            params.put(Constants.ENTITY_ID_PARAM, new AppdefEntityID(saForm.getEid()));
         }
         params.put("ad", saForm.getAd());
-        
-        
-
 
         ActionForward forward = checkSubmit(request, mapping, form, params);
         if (forward != null) {
@@ -100,25 +87,23 @@ public class EditDefinitionSyslogActionAction extends BaseAction {
             return forward;
         }
 
-        AlertDefinitionValue adv =
-            eventsBoss.getAlertDefinition( sessionID, saForm.getAd() );
+        AlertDefinitionValue adv = eventsBoss.getAlertDefinition(sessionID, saForm.getAd());
         ActionValue actionValue = AlertDefUtil.getSyslogActionValue(adv);
-        if ( saForm.getShouldBeRemoved() ) {
+        if (saForm.getShouldBeRemoved()) {
             if (null != actionValue) {
                 adv.removeAction(actionValue);
                 eventsBoss.updateAlertDefinition(sessionID, adv);
             }
         } else {
             SyslogActionConfig sa = new SyslogActionConfig();
-            sa.setMeta( saForm.getMetaProject() );
-            sa.setProduct( saForm.getProject() );
-            sa.setVersion( saForm.getVersion() );
+            sa.setMeta(saForm.getMetaProject());
+            sa.setProduct(saForm.getProject());
+            sa.setVersion(saForm.getVersion());
             ConfigResponse configResponse = sa.getConfigResponse();
             if (null == actionValue) {
-                eventsBoss.createAction( sessionID, saForm.getAd(),
-                                 sa.getImplementor(), configResponse );
+                eventsBoss.createAction(sessionID, saForm.getAd(), sa.getImplementor(), configResponse);
             } else {
-                actionValue.setConfig( configResponse.encode() );
+                actionValue.setConfig(configResponse.encode());
                 eventsBoss.updateAction(sessionID, actionValue);
             }
         }
@@ -126,4 +111,3 @@ public class EditDefinitionSyslogActionAction extends BaseAction {
         return returnSuccess(request, mapping, params);
     }
 }
-

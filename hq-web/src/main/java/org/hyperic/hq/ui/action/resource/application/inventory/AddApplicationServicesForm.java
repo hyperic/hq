@@ -33,7 +33,8 @@ import org.apache.struts.action.ActionMapping;
 
 import org.hyperic.hq.ui.action.BaseValidatorForm;
 
-public class AddApplicationServicesForm extends BaseValidatorForm {
+public class AddApplicationServicesForm
+    extends BaseValidatorForm {
     private String[] availableServices;
     private String[] pendingServices;
     private Integer psa;
@@ -42,7 +43,7 @@ public class AddApplicationServicesForm extends BaseValidatorForm {
     private Integer type;
     private Integer appSvcId;
     private String nameFilter;
-    
+
     public AddApplicationServicesForm() {
         super();
     }
@@ -94,7 +95,7 @@ public class AddApplicationServicesForm extends BaseValidatorForm {
     public void setType(Integer type) {
         this.type = type;
     }
-    
+
     /**
      * @return
      */
@@ -110,13 +111,13 @@ public class AddApplicationServicesForm extends BaseValidatorForm {
     }
 
     public String getNameFilter() {
-        return nameFilter;   
+        return nameFilter;
     }
-    
+
     public void setNameFilter(String s) {
         this.nameFilter = s;
     }
-    
+
     public void reset(ActionMapping mapping, HttpServletRequest request) {
         super.reset(mapping, request);
         availableServices = new String[0];
@@ -150,7 +151,7 @@ public class AddApplicationServicesForm extends BaseValidatorForm {
             s.append(Arrays.asList(availableServices));
         }
         s.append(" pendingServices=");
-        if (pendingServices== null) {
+        if (pendingServices == null) {
             s.append("<NULL>");
         } else {
             s.append(Arrays.asList(pendingServices));

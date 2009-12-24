@@ -41,30 +41,24 @@ import org.hyperic.hq.ui.Constants;
 
 /**
  * An <code>RequestProcessor</code> subclass that adds properties to the request
- * for help and page name
- * these properties live in struts-config.xml
+ * for help and page name these properties live in struts-config.xml
  */
-public class BaseRequestProcessor extends TilesRequestProcessor {
+public class BaseRequestProcessor
+    extends TilesRequestProcessor {
 
-    protected ActionForward
-        processActionPerform(HttpServletRequest request,
-                             HttpServletResponse response,
-                             Action action,
-                             ActionForm form,
-                             ActionMapping mapping)
+    protected ActionForward processActionPerform(HttpServletRequest request, HttpServletResponse response,
+                                                 Action action, ActionForm form, ActionMapping mapping)
         throws IOException, ServletException {
-        
+
         BaseActionMapping smapping = null;
         try {
-            smapping = (BaseActionMapping) mapping;                
-            if(smapping.getTitle() != null){
-                request.setAttribute(Constants.PAGE_TITLE_KEY, smapping.getTitle() );
+            smapping = (BaseActionMapping) mapping;
+            if (smapping.getTitle() != null) {
+                request.setAttribute(Constants.PAGE_TITLE_KEY, smapping.getTitle());
             }
             return (action.execute(mapping, form, request, response));
         } catch (Exception e) {
-            return (processException(request, response,
-                                     e, form, mapping));
+            return (processException(request, response, e, form, mapping));
         }
     }
 }
-

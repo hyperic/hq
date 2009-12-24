@@ -34,7 +34,8 @@ import org.hyperic.hq.ui.action.resource.RemoveGroupForm;
 /**
  *
  */
-public class RemoveResourceGroupsForm extends RemoveGroupForm {
+public class RemoveResourceGroupsForm
+    extends RemoveGroupForm {
 
     public Integer getPsg() {
         return getPs();

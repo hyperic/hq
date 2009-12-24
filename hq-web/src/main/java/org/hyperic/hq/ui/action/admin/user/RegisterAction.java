@@ -51,41 +51,34 @@ import org.hyperic.util.config.ConfigResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * An <code>WorkflowAction</code> subclass that registers a user
- * in the BizApp.
+ * An <code>WorkflowAction</code> subclass that registers a user in the BizApp.
  */
-public class RegisterAction extends BaseAction {
+public class RegisterAction
+    extends BaseAction {
 
-   private final Log log = LogFactory.getLog(RegisterAction.class.getName());
-   private AuthzBoss authzBoss;
-   private AuthBoss authBoss;
-   private AuthzSubjectManager authzSubjectManager;
-   
-   
-   @Autowired
+    private final Log log = LogFactory.getLog(RegisterAction.class.getName());
+    private AuthzBoss authzBoss;
+    private AuthBoss authBoss;
+    private AuthzSubjectManager authzSubjectManager;
+
+    @Autowired
     public RegisterAction(AuthzBoss authzBoss, AuthBoss authBoss, AuthzSubjectManager authzSubjectManager) {
-    super();
-    this.authzBoss = authzBoss;
-    this.authBoss = authBoss;
-    this.authzSubjectManager = authzSubjectManager;
-}
-
-
+        super();
+        this.authzBoss = authzBoss;
+        this.authBoss = authBoss;
+        this.authzSubjectManager = authzSubjectManager;
+    }
 
     /**
      * Create the user with the attributes specified in the given
      * <code>NewForm</code> and save it into the session attribute
      * <code>Constants.USER_ATTR</code>.
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-    throws Exception {
-        
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
-        Integer sessionId =  RequestUtils.getSessionId(request);
-        EditForm userForm = (EditForm)form;
+        Integer sessionId = RequestUtils.getSessionId(request);
+        EditForm userForm = (EditForm) form;
         HttpSession session = request.getSession(false);
 
         ActionForward forward = checkSubmit(request, mapping, form);
@@ -93,43 +86,33 @@ public class RegisterAction extends BaseAction {
             return forward;
         }
 
-
         WebUser webUser = RequestUtils.getWebUser(session);
 
         // password was saved off when the user logged in
-        String password =
-            (String) session.getAttribute(Constants.PASSWORD_SES_ATTR);
+        String password = (String) session.getAttribute(Constants.PASSWORD_SES_ATTR);
         session.removeAttribute(Constants.PASSWORD_SES_ATTR);
 
         // use the overlord to register the subject, and don't add
         // a principal
         log.trace("registering subject [" + webUser.getUsername() + "]");
-        
-        AuthzSubject target = 
-            authzSubjectManager.findSubjectById(userForm.getId()); 
-        authzBoss.updateSubject(sessionId, target, Boolean.TRUE,
-                                HQConstants.ApplicationName,
-                                userForm.getDepartment(),
-                                userForm.getEmailAddress(),
-                                userForm.getFirstName(),
-                                userForm.getLastName(),
-                                userForm.getPhoneNumber(),
-                                userForm.getSmsAddress(), null);
-                                
+
+        AuthzSubject target = authzSubjectManager.findSubjectById(userForm.getId());
+        authzBoss.updateSubject(sessionId, target, Boolean.TRUE, HQConstants.ApplicationName, userForm.getDepartment(),
+            userForm.getEmailAddress(), userForm.getFirstName(), userForm.getLastName(), userForm.getPhoneNumber(),
+            userForm.getSmsAddress(), null);
 
         // nuke the temporary bizapp session and establish a new
         // one for this subject.. must be done before pulling the
         // new subject in order to do it with his own credentials
         authBoss.logout(sessionId.intValue());
-        sessionId = new Integer(authBoss.login(webUser.getUsername(),
-                                               password));
+        sessionId = new Integer(authBoss.login(webUser.getUsername(), password));
 
         log.trace("finding subject [" + webUser.getUsername() + "]");
 
         // the new user has no prefs, but we still want to pick up
         // the defaults
-        ConfigResponse preferences = 
-            (ConfigResponse)getServlet().getServletContext().getAttribute(Constants.DEF_USER_PREFS);
+        ConfigResponse preferences = (ConfigResponse) getServlet().getServletContext().getAttribute(
+            Constants.DEF_USER_PREFS);
 
         // look up the user's permissions
         log.trace("getting all operations");

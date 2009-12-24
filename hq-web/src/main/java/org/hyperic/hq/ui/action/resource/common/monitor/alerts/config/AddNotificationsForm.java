@@ -29,35 +29,36 @@ import org.hyperic.hq.ui.action.resource.ResourceForm;
 
 /**
  * A base class for forms dealing with adding notifications.
- *
+ * 
  */
-public class AddNotificationsForm extends ResourceForm  {
+public class AddNotificationsForm
+    extends ResourceForm {
 
-    //-------------------------------------instance variables
+    // -------------------------------------instance variables
 
     private Integer ad;
     private String aetid;
 
-    //-------------------------------------constructors
+    // -------------------------------------constructors
 
     public AddNotificationsForm() {
         super();
     }
 
-    //-------------------------------------public methods
+    // -------------------------------------public methods
 
     public Integer getAd() {
         return this.ad;
     }
 
     public void setAd(Integer ad) {
-        this.ad=ad;
+        this.ad = ad;
     }
-    
+
     public String getAetid() {
         return aetid;
     }
-    
+
     public void setAetid(String aetid) {
         this.aetid = aetid;
     }

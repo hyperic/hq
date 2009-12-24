@@ -43,58 +43,39 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * Edits a <code>AuthzSubjectValue</code>.
  */
-public class EditAction extends BaseAction {
-    
+public class EditAction
+    extends BaseAction {
+
     private final Log log = LogFactory.getLog(EditAction.class.getName());
     private AuthzBoss authzBoss;
-    
-    
+
     @Autowired
     public EditAction(AuthzBoss authzBoss) {
         super();
         this.authzBoss = authzBoss;
     }
 
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
+        log.trace("modifying user properties action");
+        EditForm userForm = (EditForm) form;
 
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-    throws Exception {
-
-                   
-        log.trace("modifying user properties action");                    
-        EditForm userForm = (EditForm)form;
-            
         Integer sessionId = RequestUtils.getSessionId(request);
-      
-      
-        AuthzSubject user = authzBoss
-            .findSubjectById(RequestUtils.getSessionId(request),
-                             userForm.getId() );
 
-        ActionForward forward = checkSubmit(request, mapping, form,
-                                            Constants.USER_PARAM, 
-                                            userForm.getId() );
+        AuthzSubject user = authzBoss.findSubjectById(RequestUtils.getSessionId(request), userForm.getId());
+
+        ActionForward forward = checkSubmit(request, mapping, form, Constants.USER_PARAM, userForm.getId());
 
         if (forward != null) {
             request.setAttribute(Constants.USER_ATTR, user);
             return forward;
-        }                                                                     
+        }
 
-        authzBoss.updateSubject(sessionId, user, 
-                                new Boolean(userForm.getEnableLogin().equals("yes")), 
-                                null,
-                                userForm.getDepartment(), 
-                                userForm.getEmailAddress(),
-                                userForm.getFirstName(),
-                                userForm.getLastName(),
-                                userForm.getPhoneNumber(),
-                                userForm.getSmsAddress(),
-                                new Boolean(userForm.isHtmlEmail()));
+        authzBoss.updateSubject(sessionId, user, new Boolean(userForm.getEnableLogin().equals("yes")), null, userForm
+            .getDepartment(), userForm.getEmailAddress(), userForm.getFirstName(), userForm.getLastName(), userForm
+            .getPhoneNumber(), userForm.getSmsAddress(), new Boolean(userForm.isHtmlEmail()));
 
-        return returnSuccess(request, mapping, Constants.USER_PARAM,
-                             userForm.getId());
-    }               
+        return returnSuccess(request, mapping, Constants.USER_PARAM, userForm.getId());
+    }
 }

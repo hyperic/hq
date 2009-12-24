@@ -40,141 +40,89 @@ import org.hyperic.hq.ui.action.BaseDispatchAction;
 /**
  * A <code>Controller</code> that sets up dashboard portlets
  */
-public class DashboardAdminController extends BaseDispatchAction {
+public class DashboardAdminController
+    extends BaseDispatchAction {
 
-    protected final Log log =
-        LogFactory.getLog(DashboardAdminController.class.getName());
-    
-    private ActionForward setPortal(HttpServletRequest request, String title,
-                                    String content) {
+    protected final Log log = LogFactory.getLog(DashboardAdminController.class.getName());
+
+    private ActionForward setPortal(HttpServletRequest request, String title, String content) {
         Portal portal = Portal.createPortal(title, content);
-        portal.setDialog(true);        
+        portal.setDialog(true);
         request.setAttribute(Constants.PORTAL_KEY, portal);
         return null;
     }
-    
-    public ActionForward savedQueries(ActionMapping mapping,
-                                      ActionForm form,
-                                      HttpServletRequest request,
-                                      HttpServletResponse response)
-        throws Exception {
-        return setPortal(request, "dash.settings.PageTitle.SQ",
-                  ".dashContent.admin.savedQueries");
+
+    public ActionForward savedQueries(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                      HttpServletResponse response) throws Exception {
+        return setPortal(request, "dash.settings.PageTitle.SQ", ".dashContent.admin.savedQueries");
     }
 
-    public ActionForward resourceHealth(ActionMapping mapping,
-                                        ActionForm form,
-                                        HttpServletRequest request,
-                                        HttpServletResponse response)
-        throws Exception {
-        return setPortal(request, "dash.settings.PageTitle.RH",
-                  ".dashContent.admin.resourceHealth");
+    public ActionForward resourceHealth(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                        HttpServletResponse response) throws Exception {
+        return setPortal(request, "dash.settings.PageTitle.RH", ".dashContent.admin.resourceHealth");
     }
 
-    public ActionForward recentlyApproved(ActionMapping mapping,
-                                          ActionForm form,
-                                          HttpServletRequest request,
-                                          HttpServletResponse response)
-        throws Exception {
-        return setPortal(request, "dash.settings.PageTitle.RA",
-                  ".dashContent.admin.recentlyApproved");
+    public ActionForward recentlyApproved(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                          HttpServletResponse response) throws Exception {
+        return setPortal(request, "dash.settings.PageTitle.RA", ".dashContent.admin.recentlyApproved");
     }
 
-    public ActionForward criticalAlerts(ActionMapping mapping,
-                                        ActionForm form,
-                                        HttpServletRequest request,
-                                        HttpServletResponse response)
-        throws Exception {
-        return setPortal(request, "dash.settings.PageTitle.A",
-                  ".dashContent.admin.criticalAlerts");
+    public ActionForward criticalAlerts(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                        HttpServletResponse response) throws Exception {
+        return setPortal(request, "dash.settings.PageTitle.A", ".dashContent.admin.criticalAlerts");
     }
-    public ActionForward summaryCounts(ActionMapping mapping,
-                                       ActionForm form,
-                                       HttpServletRequest request,
-                                       HttpServletResponse response)
-        throws Exception {
-        return setPortal(request, "dash.settings.PageTitle.SC",
-                  ".dashContent.admin.summaryCounts");
+
+    public ActionForward summaryCounts(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                       HttpServletResponse response) throws Exception {
+        return setPortal(request, "dash.settings.PageTitle.SC", ".dashContent.admin.summaryCounts");
     }
-    
-    public ActionForward autoDiscovery(ActionMapping mapping,
-                                       ActionForm form,
-                                       HttpServletRequest request,
-                                       HttpServletResponse response)
-        throws Exception {
-        return setPortal(request, "dash.settings.PageTitle.AD",
-                  ".dashContent.admin.autoDiscovery");
+
+    public ActionForward autoDiscovery(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                       HttpServletResponse response) throws Exception {
+        return setPortal(request, "dash.settings.PageTitle.AD", ".dashContent.admin.autoDiscovery");
     }
-    
-    public ActionForward resourceHealthAddResources(ActionMapping mapping,
-                                                    ActionForm form,
-                                                    HttpServletRequest request,
-                                                    HttpServletResponse response)
-        throws Exception {
+
+    public ActionForward resourceHealthAddResources(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                                    HttpServletResponse response) throws Exception {
         return setPortal(request, "dash.settings.PageTitle.RH.addResources",
-                  ".dashContent.admin.resourcehealth.addResources");
+            ".dashContent.admin.resourcehealth.addResources");
     }
-        
-    public ActionForward criticalAlertsAddResources(ActionMapping mapping,
-                                                    ActionForm form,
-                                                    HttpServletRequest request,
-                                                    HttpServletResponse response)
-        throws Exception {
+
+    public ActionForward criticalAlertsAddResources(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                                    HttpServletResponse response) throws Exception {
         return setPortal(request, "dash.settings.PageTitle.A.addResources",
-                  ".dashContent.admin.criticalAlerts.addResources");
-    }
-    
-    public ActionForward changeLayout(ActionMapping mapping,
-                                      ActionForm form,
-                                      HttpServletRequest request,
-                                      HttpServletResponse response)
-        throws Exception {
-        return setPortal(request, "dash.settings.PageTitle.PL",
-                  ".dashContent.admin.changeLayout");
+            ".dashContent.admin.criticalAlerts.addResources");
     }
 
-    public ActionForward controlActions(ActionMapping mapping,
-                                        ActionForm form,
-                                        HttpServletRequest request,
-                                        HttpServletResponse response)
-        throws Exception {
-        return setPortal(request, "dash.settings.PageTitle.CA",
-                  ".dashContent.admin.controlActions");
+    public ActionForward changeLayout(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                      HttpServletResponse response) throws Exception {
+        return setPortal(request, "dash.settings.PageTitle.PL", ".dashContent.admin.changeLayout");
     }
 
-    public ActionForward availSummary(ActionMapping mapping,
-                                      ActionForm form,
-                                      HttpServletRequest request,
-                                      HttpServletResponse response)
-        throws Exception {
-        return setPortal(request, "dash.settings.PageTitle.AS",
-                  ".dashContent.admin.availSummary");
+    public ActionForward controlActions(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                        HttpServletResponse response) throws Exception {
+        return setPortal(request, "dash.settings.PageTitle.CA", ".dashContent.admin.controlActions");
     }
 
-    public ActionForward availSummaryAddResources(ActionMapping mapping,
-                                                  ActionForm form,
-                                                  HttpServletRequest request,
-                                                  HttpServletResponse response)
-        throws Exception {
+    public ActionForward availSummary(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                      HttpServletResponse response) throws Exception {
+        return setPortal(request, "dash.settings.PageTitle.AS", ".dashContent.admin.availSummary");
+    }
+
+    public ActionForward availSummaryAddResources(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                                  HttpServletResponse response) throws Exception {
         return setPortal(request, "dash.settings.PageTitle.AS.addResources",
-                  ".dashContent.admin.availSummary.addResources");
+            ".dashContent.admin.availSummary.addResources");
     }
 
-    public ActionForward metricViewer(ActionMapping mapping,
-                                      ActionForm form,
-                                      HttpServletRequest request,
-                                      HttpServletResponse response)
-        throws Exception {
-        return setPortal(request, "dash.settings.PageTitle.MV",
-                  ".dashContent.admin.metricViewer");
+    public ActionForward metricViewer(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                      HttpServletResponse response) throws Exception {
+        return setPortal(request, "dash.settings.PageTitle.MV", ".dashContent.admin.metricViewer");
     }
 
-    public ActionForward metricViewerAddResources(ActionMapping mapping,
-                                                  ActionForm form,
-                                                  HttpServletRequest request,
-                                                  HttpServletResponse response)
-        throws Exception {
+    public ActionForward metricViewerAddResources(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                                  HttpServletResponse response) throws Exception {
         return setPortal(request, "dash.settings.PageTitle.MV.addResources",
-                  ".dashContent.admin.metricViewer.addResources");
+            ".dashContent.admin.metricViewer.addResources");
     }
 }

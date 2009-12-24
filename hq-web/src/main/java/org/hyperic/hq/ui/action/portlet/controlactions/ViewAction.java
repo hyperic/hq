@@ -55,108 +55,92 @@ import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * An <code>Action</code> that loads the <code>Portal</code>
- * identified by the <code>PORTAL_PARAM</code> request parameter (or
- * the default portal, if the parameter is not specified) into the
- * <code>PORTAL_KEY</code> request attribute.
+ * An <code>Action</code> that loads the <code>Portal</code> identified by the
+ * <code>PORTAL_PARAM</code> request parameter (or the default portal, if the
+ * parameter is not specified) into the <code>PORTAL_KEY</code> request
+ * attribute.
  */
-public class ViewAction extends TilesAction {
-    
+public class ViewAction
+    extends TilesAction {
+
     private AuthzBoss authzBoss;
     private ControlBoss controlBoss;
     private AppdefBoss appdefBoss;
-    
-    
-   @Autowired 
-   public ViewAction(AuthzBoss authzBoss, ControlBoss controlBoss, AppdefBoss appdefBoss) {
+
+    @Autowired
+    public ViewAction(AuthzBoss authzBoss, ControlBoss controlBoss, AppdefBoss appdefBoss) {
         super();
         this.authzBoss = authzBoss;
         this.controlBoss = controlBoss;
         this.appdefBoss = appdefBoss;
     }
 
-   public ActionForward execute(ComponentContext context,
-			ActionMapping mapping, ActionForm form, HttpServletRequest request,
-			HttpServletResponse response) throws Exception {
-	   
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
+
         StopWatch timer = new StopWatch();
         Log timingLog = LogFactory.getLog("DASHBOARD-TIMING");
-       
+
         HttpSession session = request.getSession();
         WebUser user = RequestUtils.getWebUser(session);
-        DashboardConfig dashConfig = DashboardUtils.findDashboard(
-        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, authzBoss);
+        DashboardConfig dashConfig = DashboardUtils.findDashboard((Integer) session
+            .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
-        
+
         int sessionId = user.getSessionId().intValue();
 
-        Boolean lastCompleted = Boolean.valueOf(dashPrefs.
-        		getValue(".dashContent.controlActions.useLastCompleted",
-                               Boolean.TRUE.toString()));
+        Boolean lastCompleted = Boolean.valueOf(dashPrefs.getValue(".dashContent.controlActions.useLastCompleted",
+            Boolean.TRUE.toString()));
         context.putAttribute("displayLastCompleted", lastCompleted);
 
-        Boolean mostFrequent = new Boolean(dashPrefs.
-        		getValue(".dashContent.controlActions.useMostFrequent",
-                               Boolean.FALSE.toString()));
+        Boolean mostFrequent = new Boolean(dashPrefs.getValue(".dashContent.controlActions.useMostFrequent",
+            Boolean.FALSE.toString()));
         context.putAttribute("displayMostFrequent", mostFrequent);
 
-        Boolean nextScheduled = new Boolean(dashPrefs.
-        		getValue(".dashContent.controlActions.useNextScheduled",
-                               Boolean.TRUE.toString()));
+        Boolean nextScheduled = new Boolean(dashPrefs.getValue(".dashContent.controlActions.useNextScheduled",
+            Boolean.TRUE.toString()));
         context.putAttribute("displayNextScheduled", nextScheduled);
 
         if (lastCompleted.booleanValue()) {
-            int rows = Integer.parseInt(dashPrefs.
-            		getValue(".dashContent.controlActions.lastCompleted",
-                                   "5"));
-            long past = Long.parseLong(dashPrefs.
-            		getValue(".dashContent.controlActions.past",
-                                   "604800000"));
-            PageList<ControlHistory> pageList = controlBoss.getRecentControlActions(sessionId, rows,
-                                                             past);
+            int rows = Integer.parseInt(dashPrefs.getValue(".dashContent.controlActions.lastCompleted", "5"));
+            long past = Long.parseLong(dashPrefs.getValue(".dashContent.controlActions.past", "604800000"));
+            PageList<ControlHistory> pageList = controlBoss.getRecentControlActions(sessionId, rows, past);
             context.putAttribute("lastCompleted", pageList);
         }
-        
+
         if (nextScheduled.booleanValue()) {
-            int rows = Integer.parseInt(dashPrefs.
-            		getValue(".dashContent.controlActions.nextScheduled",
-                                   "5"));                                 
-            PageList<ControlSchedule> pageList = controlBoss.getPendingControlActions(sessionId, rows);                
-          
+            int rows = Integer.parseInt(dashPrefs.getValue(".dashContent.controlActions.nextScheduled", "5"));
+            PageList<ControlSchedule> pageList = controlBoss.getPendingControlActions(sessionId, rows);
 
             PageList<DashboardControlBean> pendingList = new PageList<DashboardControlBean>();
             pendingList.setTotalSize(pageList.getTotalSize());
 
-            for( ControlSchedule control : pageList){
-              
-                DashboardControlBean bean = new DashboardControlBean();     
-                try{
-                    AppdefEntityID entity =
-                        new AppdefEntityID(control.getEntityType().intValue(),
-                                           control.getEntityId());                    
-                    bean.setResource( appdefBoss.findById(sessionId,  entity) );
-                    bean.setControl(control);                    
+            for (ControlSchedule control : pageList) {
+
+                DashboardControlBean bean = new DashboardControlBean();
+                try {
+                    AppdefEntityID entity = new AppdefEntityID(control.getEntityType().intValue(), control
+                        .getEntityId());
+                    bean.setResource(appdefBoss.findById(sessionId, entity));
+                    bean.setControl(control);
                     pendingList.add(bean);
-                }catch(NullPointerException e){
-                  //ignore the error don't add it to the page this is 
-                  //added as a result of bug #7596
+                } catch (NullPointerException e) {
+                    // ignore the error don't add it to the page this is
+                    // added as a result of bug #7596
                 }
             }
 
-            context.putAttribute("nextScheduled", pendingList);                
+            context.putAttribute("nextScheduled", pendingList);
         }
-        
+
         if (mostFrequent.booleanValue()) {
-        	
-            int size = Integer.parseInt( 
-            		dashPrefs.getValue(".dashContent.controlActions.mostFrequent"));
-            PageList<ControlFrequencyValue> pageList = controlBoss.getOnDemandControlFrequency(sessionId, 
-                                                                 size);                
-            context.putAttribute("mostFrequent", pageList);                
-        }                        
-        timingLog.trace("ViewControl- timing ["+timer.toString()+"]");
+
+            int size = Integer.parseInt(dashPrefs.getValue(".dashContent.controlActions.mostFrequent"));
+            PageList<ControlFrequencyValue> pageList = controlBoss.getOnDemandControlFrequency(sessionId, size);
+            context.putAttribute("mostFrequent", pageList);
+        }
+        timingLog.trace("ViewControl- timing [" + timer.toString() + "]");
         return null;
     }
-    
+
 }

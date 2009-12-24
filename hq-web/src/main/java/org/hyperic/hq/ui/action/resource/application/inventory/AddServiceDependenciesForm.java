@@ -34,16 +34,17 @@ import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.ui.action.BaseValidatorForm;
 
 /**
- * Form bean for  the Add Dependencies page (2.1.6.5)
+ * Form bean for the Add Dependencies page (2.1.6.5)
  */
-public class AddServiceDependenciesForm extends BaseValidatorForm {
+public class AddServiceDependenciesForm
+    extends BaseValidatorForm {
     private Integer[] availableServices;
     private Integer[] pendingServices;
     private Integer psa;
     private Integer psp;
     private Integer rid;
     private Integer type;
-    
+
     public AddServiceDependenciesForm() {
         super();
     }

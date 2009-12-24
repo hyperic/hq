@@ -36,40 +36,43 @@ import org.apache.struts.action.ActionMapping;
 /**
  * removes a list of groups from a resource
  * 
- *
+ * 
  */
-public class RemoveGroupForm extends BaseValidatorForm {
+public class RemoveGroupForm
+    extends BaseValidatorForm {
 
-    //-------------------------------------instance variables
+    // -------------------------------------instance variables
 
     private Integer[] g;
     private Integer rid;
     private Integer type;
-    
-    //-------------------------------------constructors
+
+    // -------------------------------------constructors
 
     public RemoveGroupForm() {
         super();
     }
 
-    //-------------------------------------public methods
+    // -------------------------------------public methods
 
-    /** Getter for property g.
+    /**
+     * Getter for property g.
      * @return Value of property g.
-     *
+     * 
      */
-    public Integer[]  getG() {
+    public Integer[] getG() {
         return this.g;
     }
-    
-    /** Setter for property g.
+
+    /**
+     * Setter for property g.
      * @param groups New value of property g.
-     *
+     * 
      */
     public void setG(Integer[] groups) {
         this.g = groups;
     }
-    
+
     /**
      * Returns the rid.
      * @return String

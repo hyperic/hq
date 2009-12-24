@@ -45,41 +45,33 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * An Action that removes a control event from a resource.
  */
-public class RemoveHistoryAction extends BaseAction {
-    
-    private final  Log log = LogFactory.getLog(RemoveHistoryAction.class);
-    
+public class RemoveHistoryAction
+    extends BaseAction {
+
+    private final Log log = LogFactory.getLog(RemoveHistoryAction.class);
+
     private ControlBoss controlBoss;
-    
-    
+
     @Autowired
     public RemoveHistoryAction(ControlBoss controlBoss) {
         super();
         this.controlBoss = controlBoss;
     }
 
-
-
-    /** 
+    /**
      * removes controlactions from a resource
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-            
-       
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
-        HashMap<String,Object> parms = new HashMap<String,Object>(2);
-        
-        RemoveHistoryForm rmForm = (RemoveHistoryForm)form;
+        HashMap<String, Object> parms = new HashMap<String, Object>(2);
+
+        RemoveHistoryForm rmForm = (RemoveHistoryForm) form;
         Integer[] actions = rmForm.getControlActions();
         AppdefEntityID aeid = RequestUtils.getEntityId(request);
 
         parms.put(Constants.RESOURCE_PARAM, aeid.getId());
-        parms.put(Constants.RESOURCE_TYPE_ID_PARAM,
-                  new Integer(aeid.getType()));
+        parms.put(Constants.RESOURCE_TYPE_ID_PARAM, new Integer(aeid.getType()));
 
         ActionForward forward = checkSubmit(request, mapping, form, parms);
 
@@ -87,18 +79,16 @@ public class RemoveHistoryAction extends BaseAction {
             return forward;
         }
 
-        if (actions == null || actions.length == 0){
+        if (actions == null || actions.length == 0) {
             return this.returnSuccess(request, mapping, parms);
         }
 
         Integer sessionId = RequestUtils.getSessionId(request);
-       
 
         controlBoss.deleteJobHistory(sessionId.intValue(), actions);
 
-        log.trace("Removed server control events.");     
-        RequestUtils.setConfirmation(request, 
-            "resource.server.ControlHistory.Confirmation");
+        log.trace("Removed server control events.");
+        RequestUtils.setConfirmation(request, "resource.server.ControlHistory.Confirmation");
 
         return this.returnSuccess(request, mapping, parms);
 

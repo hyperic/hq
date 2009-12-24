@@ -63,19 +63,17 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * A <code>MetricsDisplayFormPrepareAction</code> that retrieves data
- * from the Bizapp to be displayed on an <code>AutoGroup
+ * A <code>MetricsDisplayFormPrepareAction</code> that retrieves data from the
+ * Bizapp to be displayed on an <code>AutoGroup
  * Metrics</code> page.
  */
 public class AutoGroupMetricsFormPrepareAction
     extends MetricsDisplayFormPrepareAction {
 
-    private final Log log = LogFactory
-            .getLog(AutoGroupMetricsFormPrepareAction.class.getName());
+    private final Log log = LogFactory.getLog(AutoGroupMetricsFormPrepareAction.class.getName());
 
     private MeasurementBoss measurementBoss;
-    
-    
+
     @Autowired
     public AutoGroupMetricsFormPrepareAction(MeasurementBoss measurementBoss) {
         super();
@@ -85,11 +83,8 @@ public class AutoGroupMetricsFormPrepareAction
     /**
      * Retrieve data needed to display an autogroup's metrics page
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
         MetricsDisplayForm displayForm = (MetricsDisplayForm) form;
         displayForm.setShowNumberCollecting(Boolean.TRUE);
@@ -97,7 +92,7 @@ public class AutoGroupMetricsFormPrepareAction
         Long begin = null;
         Long end = null;
 
-        // There are two possibilities for an auto-group.  Either it
+        // There are two possibilities for an auto-group. Either it
         // is an auto-group of platforms, in which case there will be
         // no parent entity ids, or it is an auto-group of servers or
         // services.
@@ -131,26 +126,23 @@ public class AutoGroupMetricsFormPrepareAction
             // REMOVE ME?
             throw e1;
         }
-        
-        AppdefResourceType selectedType =
-            helper.getChildResourceType(request, ctx, childTypeID);
+
+        AppdefResourceType selectedType = helper.getChildResourceType(request, ctx, childTypeID);
         request.setAttribute(Constants.CHILD_RESOURCE_TYPE_ATTR, selectedType);
 
         // get the "metric range" user pref
         WebUser user = RequestUtils.getWebUser(request);
-        Map<String,Object> range = user.getMetricRangePreference();
+        Map<String, Object> range = user.getMetricRangePreference();
         begin = (Long) range.get(MonitorUtils.BEGIN);
         end = (Long) range.get(MonitorUtils.END);
 
         // prepare form
         // XXX: needs to go away when the rest of monitoring supports eids
         if (null != typeHolder) {
-            displayForm.setRid( typeHolder.getId() );
-            displayForm.setType( new Integer( typeHolder.getType() ) );
+            displayForm.setRid(typeHolder.getId());
+            displayForm.setType(new Integer(typeHolder.getType()));
         }
-        displayForm.setCtype(new AppdefEntityTypeID(selectedType.getAppdefType(),
-                                                    selectedType.getId())
-                            .getAppdefKey());
+        displayForm.setCtype(new AppdefEntityTypeID(selectedType.getAppdefType(), selectedType.getId()).getAppdefKey());
 
         return super.execute(mapping, form, request, response, begin, end);
     }
@@ -162,39 +154,37 @@ public class AutoGroupMetricsFormPrepareAction
     }
 
     /**
-     * Get from the Bizapp the set of metric summaries for the
-     * specified entities that will be displayed on the page. Returns a
-     * <code>Map</code> keyed by metric category.
-     *
+     * Get from the Bizapp the set of metric summaries for the specified
+     * entities that will be displayed on the page. Returns a <code>Map</code>
+     * keyed by metric category.
+     * 
      * @param request the http request
      * @param entityId the entity id of the currently viewed resource
-     * @param begin the time (in milliseconds since the epoch) that
-     *  begins the timeframe for which the metrics are summarized
-     * @param end the time (in milliseconds since the epoch) that
-     *  ends the timeframe for which the metrics are summarized
-     * @return Map keyed on the category (String), values are List's of 
-     * MetricDisplaySummary beans
+     * @param begin the time (in milliseconds since the epoch) that begins the
+     *        timeframe for which the metrics are summarized
+     * @param end the time (in milliseconds since the epoch) that ends the
+     *        timeframe for which the metrics are summarized
+     * @return Map keyed on the category (String), values are List's of
+     *         MetricDisplaySummary beans
      */
-    protected Map<String,Set<MetricDisplaySummary>> getMetrics(HttpServletRequest request,
-                             AppdefEntityID entityId,
-                             long filters, String keyword,
-                             Long begin, Long end, boolean showAll)
-        throws Exception {
+    protected Map<String, Set<MetricDisplaySummary>> getMetrics(HttpServletRequest request, AppdefEntityID entityId,
+                                                                long filters, String keyword, Long begin, Long end,
+                                                                boolean showAll) throws Exception {
         // XXX: this can go away when we finish the conversion to eids
         return null;
     }
 
     /**
-     * Get from the Bizapp the set of metric summaries for the
-     * specified entities that will be displayed on the page. Returns a
-     * <code>Map</code> keyed by metric category.
-     *
+     * Get from the Bizapp the set of metric summaries for the specified
+     * entities that will be displayed on the page. Returns a <code>Map</code>
+     * keyed by metric category.
+     * 
      * @param request the http request
      * @param entityId the entity id of the currently viewed resource
-     * @param begin the time (in milliseconds since the epoch) that
-     *  begins the timeframe for which the metrics are summarized
-     * @param end the time (in milliseconds since the epoch) that
-     *  ends the timeframe for which the metrics are summarized
+     * @param begin the time (in milliseconds since the epoch) that begins the
+     *        timeframe for which the metrics are summarized
+     * @param end the time (in milliseconds since the epoch) that ends the
+     *        timeframe for which the metrics are summarized
      * @throws SessionTimeoutException
      * @throws SessionNotFoundException
      * @throws AppdefEntityNotFoundException
@@ -203,45 +193,30 @@ public class AutoGroupMetricsFormPrepareAction
      * @throws InvalidAppdefTypeException
      * @throws AppdefCompatException
      */
-    protected Map<String,Set<MetricDisplaySummary>> getMetrics(HttpServletRequest request,
-                             AppdefEntityID[] entityIds,
-                             long filters, String keyword,
-                             Long begin, Long end, boolean showAll)
-        throws ServletException, SessionTimeoutException,
-               SessionNotFoundException, AppdefEntityNotFoundException,
-               PermissionException, AppdefCompatException,
-               InvalidAppdefTypeException, RemoteException
-    {
+    protected Map<String, Set<MetricDisplaySummary>> getMetrics(HttpServletRequest request, AppdefEntityID[] entityIds,
+                                                                long filters, String keyword, Long begin, Long end,
+                                                                boolean showAll) throws ServletException,
+        SessionTimeoutException, SessionNotFoundException, AppdefEntityNotFoundException, PermissionException,
+        AppdefCompatException, InvalidAppdefTypeException, RemoteException {
         int sessionId = RequestUtils.getSessionId(request).intValue();
-       
-       
-        AppdefResourceType childType = (AppdefResourceType)
-            request.getAttribute(Constants.CHILD_RESOURCE_TYPE_ATTR);
+
+        AppdefResourceType childType = (AppdefResourceType) request.getAttribute(Constants.CHILD_RESOURCE_TYPE_ATTR);
         Integer selectedId = childType.getId();
 
-        AppdefEntityTypeID atid =
-            new AppdefEntityTypeID(childType.getAppdefType(), childType.getId());
+        AppdefEntityTypeID atid = new AppdefEntityTypeID(childType.getAppdefType(), childType.getId());
 
         if (null == entityIds) {
             // auto-group of platforms
-            log.trace("finding metric summaries for autogrouped platforms " +
-                      "of type " + selectedId + " for range " + begin +
-                      ":" + end);
-            return measurementBoss.findAGPlatformMetricsByType(sessionId, atid,
-                                                    begin.longValue(),
-                                                    end.longValue(),
-                                                    showAll);
+            log.trace("finding metric summaries for autogrouped platforms " + "of type " + selectedId + " for range " +
+                      begin + ":" + end);
+            return measurementBoss.findAGPlatformMetricsByType(sessionId, atid, begin.longValue(), end.longValue(),
+                showAll);
         } else {
             if (log.isTraceEnabled())
-                log.trace("finding metric summaries for autogrouped servers " +
-                        "or services of type " + atid +
-                        " for resources " + Arrays.asList(entityIds) +
-                        " for range " + begin + ":" + end);
-            return measurementBoss.findAGMetricsByType(sessionId, entityIds, atid,
-                                            filters, keyword,
-                                            begin.longValue(), end.longValue(),
-                                            showAll);
+                log.trace("finding metric summaries for autogrouped servers " + "or services of type " + atid +
+                          " for resources " + Arrays.asList(entityIds) + " for range " + begin + ":" + end);
+            return measurementBoss.findAGMetricsByType(sessionId, entityIds, atid, filters, keyword, begin.longValue(),
+                end.longValue(), showAll);
         }
     }
 }
-

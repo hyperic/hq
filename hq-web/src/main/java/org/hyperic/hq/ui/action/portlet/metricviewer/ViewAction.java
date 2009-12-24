@@ -73,18 +73,18 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * This action class is used by the Metric Viewer portlet.  It's main
- * use is to generate the JSON objects required for display into the UI.
+ * This action class is used by the Metric Viewer portlet. It's main use is to
+ * generate the JSON objects required for display into the UI.
  */
-public class ViewAction extends BaseAction {
+public class ViewAction
+    extends BaseAction {
 
     private final Log log = LogFactory.getLog(ViewAction.class);
 
     private AuthzBoss authzBoss;
     private MeasurementBoss measurementBoss;
     private AppdefBoss appdefBoss;
-    
-    
+
     @Autowired
     public ViewAction(AuthzBoss authzBoss, MeasurementBoss measurementBoss, AppdefBoss appdefBoss) {
         super();
@@ -93,20 +93,15 @@ public class ViewAction extends BaseAction {
         this.appdefBoss = appdefBoss;
     }
 
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception
-    {
-       
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
+
         HttpSession session = request.getSession();
         WebUser user = SessionUtils.getWebUser(session);
-        DashboardConfig dashConfig = DashboardUtils.findDashboard(
-        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, authzBoss);
+        DashboardConfig dashConfig = DashboardUtils.findDashboard((Integer) session
+            .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
-        
+
         int sessionId = user.getSessionId().intValue();
         long ts = System.currentTimeMillis();
         String token;
@@ -141,15 +136,13 @@ public class ViewAction extends BaseAction {
         }
 
         res.put("title", dashPrefs.getValue(titleKey, ""));
-        
+
         // Load resources
         List<AppdefEntityID> entityIds = DashboardUtils.preferencesAsEntityIds(resKey, dashPrefs);
-        AppdefEntityID[] arrayIds = 
-            entityIds.toArray(new AppdefEntityID[entityIds.size()]);
+        AppdefEntityID[] arrayIds = entityIds.toArray(new AppdefEntityID[entityIds.size()]);
         int count = Integer.parseInt(dashPrefs.getValue(numKey, "10"));
         String metric = dashPrefs.getValue(metricKey, "");
-        boolean isDescending =
-            Boolean.valueOf(dashPrefs.getValue(descendingKey, "true")).booleanValue();
+        boolean isDescending = Boolean.valueOf(dashPrefs.getValue(descendingKey, "true")).booleanValue();
 
         // Validate
         if (arrayIds.length == 0 || count == 0 || metric.length() == 0) {
@@ -160,14 +153,12 @@ public class ViewAction extends BaseAction {
 
         Integer[] tids = new Integer[] { new Integer(metric) };
         List<MeasurementTemplate> metricTemplates = measurementBoss.findMeasurementTemplates(sessionId, tids,
-                                                              PageControl.PAGE_ALL);
-        MeasurementTemplate template =
-            (MeasurementTemplate)metricTemplates.get(0);
+            PageControl.PAGE_ALL);
+        MeasurementTemplate template = (MeasurementTemplate) metricTemplates.get(0);
 
         String resource = dashPrefs.getValue(resTypeKey);
         AppdefEntityTypeID typeId = new AppdefEntityTypeID(resource);
-        AppdefResourceTypeValue typeVal =
-            appdefBoss.findResourceTypeById(sessionId, typeId);
+        AppdefResourceTypeValue typeVal = appdefBoss.findResourceTypeById(sessionId, typeId);
         CacheData[] data = new CacheData[arrayIds.length];
         List<Measurement> measurements = new ArrayList<Measurement>(arrayIds.length);
         long interval = 0;
@@ -189,15 +180,12 @@ public class ViewAction extends BaseAction {
             }
         }
 
-        MetricValue[] vals = measurementBoss.getLastMetricValue(sessionId, measurements,
-                                                      interval);
-        TreeSet<MetricSummary> sortedSet =
-            new TreeSet<MetricSummary>(new MetricSummaryComparator(isDescending));
+        MetricValue[] vals = measurementBoss.getLastMetricValue(sessionId, measurements, interval);
+        TreeSet<MetricSummary> sortedSet = new TreeSet<MetricSummary>(new MetricSummaryComparator(isDescending));
         for (int i = 0; i < data.length; i++) {
             // Only show resources with data
             if (vals[i] != null) {
-                MetricSummary summary = new MetricSummary(data[i].getResource(),
-                                                          template, vals[i]);
+                MetricSummary summary = new MetricSummary(data[i].getResource(), template, vals[i]);
                 sortedSet.add(summary);
             }
         }
@@ -206,13 +194,12 @@ public class ViewAction extends BaseAction {
         metricValues.put("resourceTypeName", typeVal.getName());
         metricValues.put("metricName", template.getName());
         ArrayList<JSONObject> values = new ArrayList<JSONObject>();
-        for (Iterator<MetricSummary> i = sortedSet.iterator(); i.hasNext() && count-- > 0; ) {
+        for (Iterator<MetricSummary> i = sortedSet.iterator(); i.hasNext() && count-- > 0;) {
             MetricSummary s = i.next();
             JSONObject val = new JSONObject();
             val.put("value", s.getFormattedValue());
             val.put("resourceId", s.getAppdefResourceValue().getId());
-            val.put("resourceTypeId",
-                    s.getAppdefResourceValue().getEntityId().getType());
+            val.put("resourceTypeId", s.getAppdefResourceValue().getEntityId().getType());
             val.put("resourceName", StringEscapeUtils.escapeHtml(s.getAppdefResourceValue().getName()));
             values.add(val);
         }
@@ -221,13 +208,11 @@ public class ViewAction extends BaseAction {
 
         response.getWriter().write(res.toString());
 
-        log.debug("Metric viewer loaded in " +
-                   (System.currentTimeMillis() - ts) + " ms.");
+        log.debug("Metric viewer loaded in " + (System.currentTimeMillis() - ts) + " ms.");
 
         if (toRemove.size() > 0) {
             log.debug("Removing " + toRemove.size() + " missing resources.");
-            DashboardUtils.removeResources((String[]) toRemove.toArray(new String[toRemove.size()]),
-                                           resKey, dashPrefs);
+            DashboardUtils.removeResources((String[]) toRemove.toArray(new String[toRemove.size()]), resKey, dashPrefs);
         }
 
         return null;
@@ -238,9 +223,7 @@ public class ViewAction extends BaseAction {
         private MeasurementTemplate _template;
         private MetricValue _val;
 
-        public MetricSummary(AppdefResourceValue resource,
-                             MeasurementTemplate template,
-                             MetricValue val) {
+        public MetricSummary(AppdefResourceValue resource, MeasurementTemplate template, MetricValue val) {
             _resource = resource;
             _template = template;
             _val = val;
@@ -255,8 +238,7 @@ public class ViewAction extends BaseAction {
         }
 
         public String getFormattedValue() {
-            FormattedNumber fn = UnitsConvert.convert(_val.getValue(),
-                                                      _template.getUnits());
+            FormattedNumber fn = UnitsConvert.convert(_val.getValue(), _template.getUnits());
             return fn.toString();
         }
 
@@ -274,7 +256,7 @@ public class ViewAction extends BaseAction {
         }
 
         public int compare(MetricSummary s1, MetricSummary s2) {
-           
+
             MetricValue m1 = s1.getMetricValue();
             MetricValue m2 = s2.getMetricValue();
 
@@ -298,25 +280,21 @@ public class ViewAction extends BaseAction {
         }
     }
 
-    private CacheData loadData(int sessionId, AppdefEntityID id,
-                               MeasurementTemplate template)
-        throws AppdefEntityNotFoundException
-    {
+    private CacheData loadData(int sessionId, AppdefEntityID id, MeasurementTemplate template)
+        throws AppdefEntityNotFoundException {
         Cache cache = CacheManager.getInstance().getCache("MetricViewer");
         CacheKey key = new CacheKey(sessionId, id, template);
         Element e = cache.get(key);
 
         if (e != null) {
-            return (CacheData)e.getObjectValue();
+            return (CacheData) e.getObjectValue();
         }
 
         // Otherwise, load from the backend
-      
 
         try {
             AppdefResourceValue val = appdefBoss.findById(sessionId, id);
-            Measurement m = measurementBoss.findMeasurement(sessionId, template.getId(),
-                                                  id);
+            Measurement m = measurementBoss.findMeasurement(sessionId, template.getId(), id);
             CacheData data = new CacheData(val, m);
             cache.put(new Element(key, data));
             return data;
@@ -329,7 +307,7 @@ public class ViewAction extends BaseAction {
             return null;
         }
     }
-    
+
     // Classes for caching dashboard data
 
     public class CacheKey {
@@ -337,18 +315,15 @@ public class ViewAction extends BaseAction {
         private AppdefEntityID _id;
         private MeasurementTemplate _template;
 
-        public CacheKey(int sessionId, AppdefEntityID id,
-                        MeasurementTemplate template) {
+        public CacheKey(int sessionId, AppdefEntityID id, MeasurementTemplate template) {
             _sessionId = sessionId;
             _id = id;
             _template = template;
         }
 
         public boolean equals(Object o) {
-            return (o instanceof CacheKey) &&
-                ((CacheKey)o)._id.equals(_id) &&
-                ((CacheKey)o)._template.equals(_template) &&
-                ((CacheKey)o)._sessionId == _sessionId;
+            return (o instanceof CacheKey) && ((CacheKey) o)._id.equals(_id) &&
+                   ((CacheKey) o)._template.equals(_template) && ((CacheKey) o)._sessionId == _sessionId;
         }
 
         public int hashCode() {
@@ -360,8 +335,7 @@ public class ViewAction extends BaseAction {
         private AppdefResourceValue _resource;
         private Measurement _m;
 
-        public CacheData(AppdefResourceValue resource,
-                         Measurement m) {
+        public CacheData(AppdefResourceValue resource, Measurement m) {
             _resource = resource;
             _m = m;
         }

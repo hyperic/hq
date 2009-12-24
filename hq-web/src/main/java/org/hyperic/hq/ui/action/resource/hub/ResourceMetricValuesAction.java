@@ -49,65 +49,51 @@ import org.hyperic.util.units.FormattedNumber;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- *
+ * 
  * Fetch the designated metrics for a resource
  */
-public class ResourceMetricValuesAction extends TilesAction {
-    
+public class ResourceMetricValuesAction
+    extends TilesAction {
+
     private MeasurementBoss measurementBoss;
-    
-    
-    
-    
+
     @Autowired
     public ResourceMetricValuesAction(MeasurementBoss measurementBoss) {
         super();
         this.measurementBoss = measurementBoss;
     }
 
-
     @SuppressWarnings("unchecked")
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-        AppdefEntityID entityId =
-            (AppdefEntityID) context.getAttribute(Constants.ENTITY_ID_PARAM);
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
+        AppdefEntityID entityId = (AppdefEntityID) context.getAttribute(Constants.ENTITY_ID_PARAM);
 
         List<MeasurementTemplate> templates = (List<MeasurementTemplate>) context.getAttribute("Indicators");
-        
-        int sessionId = RequestUtils.getSessionId(request);
-     
 
-        Map<Integer,MetricValue> vals = measurementBoss.getLastIndicatorValues(sessionId, entityId);
-        
+        int sessionId = RequestUtils.getSessionId(request);
+
+        Map<Integer, MetricValue> vals = measurementBoss.getLastIndicatorValues(sessionId, entityId);
+
         // Format the values
         String[] metrics = new String[templates.size()];
         if (vals.size() == 0) {
-            Arrays.fill(metrics,
-                        RequestUtils.message(request, "common.value.notavail"));
-        }
-        else {
+            Arrays.fill(metrics, RequestUtils.message(request, "common.value.notavail"));
+        } else {
             int i = 0;
             for (Iterator<MeasurementTemplate> it = templates.iterator(); it.hasNext(); i++) {
                 MeasurementTemplate mt = (MeasurementTemplate) it.next();
                 if (vals.containsKey(mt.getId())) {
                     MetricValue mv = (MetricValue) vals.get(mt.getId());
-                    FormattedNumber fn =
-                        UnitsConvert.convert(mv.getValue(), mt.getUnits());
+                    FormattedNumber fn = UnitsConvert.convert(mv.getValue(), mt.getUnits());
                     metrics[i] = fn.toString();
+                } else {
+                    metrics[i] = RequestUtils.message(request, "common.value.notavail");
                 }
-                else {
-                    metrics[i] =
-                        RequestUtils.message(request, "common.value.notavail");
-                 }
             }
         }
-        
+
         request.setAttribute("metrics", metrics);
-        
+
         return null;
     }
 }

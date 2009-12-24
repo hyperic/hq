@@ -34,19 +34,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Prepare the alert definition form for new.
- *
+ * 
  */
-public class NewDefinitionFormPrepareAction extends DefinitionFormPrepareAction
-{
-  
+public class NewDefinitionFormPrepareAction
+    extends DefinitionFormPrepareAction {
+
     @Autowired
     public NewDefinitionFormPrepareAction(MeasurementBoss measurementBoss, ControlBoss controlBoss,
                                           AppdefBoss appdefBoss) {
         super(measurementBoss, controlBoss, appdefBoss);
     }
 
-    protected void setupConditions(HttpServletRequest request,
-                                   DefinitionForm defForm)
-        throws Exception {}
+    protected void setupConditions(HttpServletRequest request, DefinitionForm defForm) throws Exception {
+    }
 }
-

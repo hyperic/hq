@@ -47,68 +47,61 @@ import org.hyperic.util.config.ConfigResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * An <code>Action</code> that loads the <code>Portal</code>
- * identified by the <code>PORTAL_PARAM</code> request parameter (or
- * the default portal, if the parameter is not specified) into the
- * <code>PORTAL_KEY</code> request attribute.
+ * An <code>Action</code> that loads the <code>Portal</code> identified by the
+ * <code>PORTAL_PARAM</code> request parameter (or the default portal, if the
+ * parameter is not specified) into the <code>PORTAL_KEY</code> request
+ * attribute.
  */
-public class ViewAction extends TilesAction {
-    
+public class ViewAction
+    extends TilesAction {
+
     private AuthzBoss authzBoss;
-    
-    
+
     @Autowired
-   public ViewAction(AuthzBoss authzBoss) {
+    public ViewAction(AuthzBoss authzBoss) {
         super();
         this.authzBoss = authzBoss;
     }
 
-
-
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping, ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
 
         List<String> portlets = (List<String>) context.getAttribute("portlets");
         WebUser user = RequestUtils.getWebUser(request);
-		
+
         List<String> availablePortlets = new ArrayList<String>();
         String userPortlets = new String();
         Boolean wide = new Boolean((String) context.getAttribute("wide"));
         HttpSession session = request.getSession();
-       
-        DashboardConfig dashConfig = DashboardUtils.findDashboard(
-        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, authzBoss);
+
+        DashboardConfig dashConfig = DashboardUtils.findDashboard((Integer) session
+            .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         List<String> multi;
 
         if (wide.booleanValue()) {
-            userPortlets = dashPrefs.getValue( Constants.USER_PORTLETS_SECOND );
+            userPortlets = dashPrefs.getValue(Constants.USER_PORTLETS_SECOND);
             multi = (List<String>) context.getAttribute("multi.wide");
         } else {
-            userPortlets = dashPrefs.getValue( Constants.USER_PORTLETS_FIRST );
+            userPortlets = dashPrefs.getValue(Constants.USER_PORTLETS_FIRST);
             multi = (List<String>) context.getAttribute("multi.narrow");
         }
-        
+
         // Populate available portlets list...
         for (String portlet : portlets) {
-        	// Add portlet to the list if...
-        	// ...user doesn't have any portlets, or...
-            if (userPortlets == null || 
-           		// ...user doesn't have this particular portlet, or...
-            	userPortlets.indexOf(portlet) == -1 || 
-            	// ...this portlet can be added more than once
-                (multi != null && multi.contains(portlet))) 
-            {
+            // Add portlet to the list if...
+            // ...user doesn't have any portlets, or...
+            if (userPortlets == null ||
+            // ...user doesn't have this particular portlet, or...
+                userPortlets.indexOf(portlet) == -1 ||
+                // ...this portlet can be added more than once
+                (multi != null && multi.contains(portlet))) {
                 availablePortlets.add(portlet);
             }
         }
 
         context.putAttribute("availablePortlets", availablePortlets);
-        
+
         return null;
     }
 }

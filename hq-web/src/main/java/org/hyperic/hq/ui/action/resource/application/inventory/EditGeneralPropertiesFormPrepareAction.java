@@ -37,28 +37,23 @@ import org.hyperic.hq.ui.action.resource.common.inventory.ResourceGeneralFormPre
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- *This class handles preparing the general properties data displayed
- * on screen 2.1.6.1
+ *This class handles preparing the general properties data displayed on screen
+ * 2.1.6.1
  * 
- * TODO: should just change the struts mappng to call 
+ * TODO: should just change the struts mappng to call
  * {@link org.hyperic.hq.ui.action.resource.common.inventory.ResourceGeneralFormPrepareAction}
- *  directly and delete this class.
+ * directly and delete this class.
  */
 public class EditGeneralPropertiesFormPrepareAction
-        extends ResourceGeneralFormPrepareAction {
-    
-    
+    extends ResourceGeneralFormPrepareAction {
+
     @Autowired
     public EditGeneralPropertiesFormPrepareAction(AppdefBoss appdefBoss) {
         super(appdefBoss);
     }
 
-    public ActionForward workflow(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-    throws Exception {
+    public ActionForward workflow(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                  HttpServletRequest request, HttpServletResponse response) throws Exception {
         return super.workflow(context, mapping, form, request, response);
     }
 }

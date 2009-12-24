@@ -46,14 +46,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * The portal manager class for the tiles in handled in this package.
  */
-public class ApplicationInventoryPortalAction extends ResourceInventoryPortalAction {
+public class ApplicationInventoryPortalAction
+    extends ResourceInventoryPortalAction {
     public static final String EMPTY_VALS_ATTR = "EmptyValues";
-    
-    private final Log log =
-        LogFactory.getLog(ApplicationInventoryPortalAction.class.getName());
+
+    private final Log log = LogFactory.getLog(ApplicationInventoryPortalAction.class.getName());
 
     private final Properties keyMethodMap = new Properties();
-    
+
     @Autowired
     public ApplicationInventoryPortalAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss) {
         super(appdefBoss, authzBoss, controlBoss);
@@ -65,158 +65,112 @@ public class ApplicationInventoryPortalAction extends ResourceInventoryPortalAct
         keyMethodMap.setProperty(Constants.MODE_VIEW, "viewResource");
         keyMethodMap.setProperty(Constants.MODE_EDIT, "editGeneralProperties");
         keyMethodMap.setProperty(Constants.MODE_CHANGE_OWNER, "changeOwner");
-        keyMethodMap.setProperty(
-            Constants.MODE_EDIT_RESOURCE, "editApplicationProperties");
-        keyMethodMap.setProperty(
-            Constants.MODE_ADD_GROUPS, "addApplicationGroups");
-        keyMethodMap.setProperty(
-            Constants.MODE_ADD_SERVICES, "addApplicationServices");
+        keyMethodMap.setProperty(Constants.MODE_EDIT_RESOURCE, "editApplicationProperties");
+        keyMethodMap.setProperty(Constants.MODE_ADD_GROUPS, "addApplicationGroups");
+        keyMethodMap.setProperty(Constants.MODE_ADD_SERVICES, "addApplicationServices");
         // XXX
-        keyMethodMap.setProperty(
-            "listServiceDependencies", "listServiceDependencies");
+        keyMethodMap.setProperty("listServiceDependencies", "listServiceDependencies");
         keyMethodMap.setProperty("addDependencies", "addDependencies");
     }
-    
-	protected Properties getKeyMethodMap() {
-        return keyMethodMap;
-	}
 
-    public ActionForward newResource(ActionMapping mapping,
-                                     ActionForm form,
-                                     HttpServletRequest request,
-                                     HttpServletResponse response)
-        throws Exception
-    {
+    protected Properties getKeyMethodMap() {
+        return keyMethodMap;
+    }
+
+    public ActionForward newResource(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                     HttpServletResponse response) throws Exception {
         log.debug("newResource(...) creating new application");
-        Portal portal = Portal
-             .createPortal("resource.application.inventory.NewApplicationTitle",
-                          ".resource.application.inventory.NewApplication");
+        Portal portal = Portal.createPortal("resource.application.inventory.NewApplicationTitle",
+            ".resource.application.inventory.NewApplication");
         portal.setDialog(true);
         request.setAttribute(Constants.PORTAL_KEY, portal);
 
         return null;
     }
 
-    public ActionForward viewResource(ActionMapping mapping,
-                                      ActionForm form,
-                                      HttpServletRequest request,
-                                      HttpServletResponse response)
-        throws Exception
-    {
+    public ActionForward viewResource(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                      HttpServletResponse response) throws Exception {
         setResource(request);
-        
-        Portal portal = Portal
-            .createPortal("resource.application.inventory.ViewApplicationTitle",
-                          ".resource.application.inventory.ViewApplication");
+
+        Portal portal = Portal.createPortal("resource.application.inventory.ViewApplicationTitle",
+            ".resource.application.inventory.ViewApplication");
         request.setAttribute(Constants.PORTAL_KEY, portal);
 
         return super.viewResource(mapping, form, request, response);
     }
 
-    public ActionForward editGeneralProperties(ActionMapping mapping,
-                                      ActionForm form,
-                                      HttpServletRequest request,
-                                      HttpServletResponse response)
-            throws Exception
-    {
+    public ActionForward editGeneralProperties(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                               HttpServletResponse response) throws Exception {
         setResource(request);
-        Portal portal = Portal
-            .createPortal("resource.application.inventory.EditGeneralPropertiesTitle",
-                          ".resource.application.inventory.EditGeneralProperties");
+        Portal portal = Portal.createPortal("resource.application.inventory.EditGeneralPropertiesTitle",
+            ".resource.application.inventory.EditGeneralProperties");
         portal.setDialog(true);
         request.setAttribute(Constants.PORTAL_KEY, portal);
         return null;
     }
 
-    public ActionForward editApplicationProperties(ActionMapping mapping,
-                                      ActionForm form,
-                                      HttpServletRequest request,
-                                      HttpServletResponse response)
-            throws Exception
-    {
+    public ActionForward editApplicationProperties(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                                   HttpServletResponse response) throws Exception {
         setResource(request);
-        Portal portal = Portal
-            .createPortal("resource.application.inventory.EditApplicationPropertiesTitle",
-                          ".resource.application.inventory.EditApplicationProperties");
+        Portal portal = Portal.createPortal("resource.application.inventory.EditApplicationPropertiesTitle",
+            ".resource.application.inventory.EditApplicationProperties");
         portal.setDialog(true);
         request.setAttribute(Constants.PORTAL_KEY, portal);
         return null;
     }
 
-    public ActionForward changeOwner(ActionMapping mapping,
-                                             ActionForm form,
-                                             HttpServletRequest request,
-                                             HttpServletResponse response)
-        throws Exception
-    {
+    public ActionForward changeOwner(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                     HttpServletResponse response) throws Exception {
         setResource(request);
         Portal portal = Portal
-            .createPortal(Constants.CHANGE_OWNER_TITLE,
-                          ".resource.application.inventory.changeOwner");
+            .createPortal(Constants.CHANGE_OWNER_TITLE, ".resource.application.inventory.changeOwner");
         portal.setDialog(true);
         request.setAttribute(Constants.PORTAL_KEY, portal);
 
         return null;
     }
 
-    public ActionForward addApplicationGroups(ActionMapping mapping,
-                                           ActionForm form,
-                                           HttpServletRequest request,
-                                           HttpServletResponse response)
-        throws Exception
-    {
+    public ActionForward addApplicationGroups(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                              HttpServletResponse response) throws Exception {
         setResource(request);
 
-        Portal portal = Portal
-            .createPortal("resource.application.inventory.AddToGroupsTitle",
-                          ".resource.application.inventory.addApplicationGroups");
+        Portal portal = Portal.createPortal("resource.application.inventory.AddToGroupsTitle",
+            ".resource.application.inventory.addApplicationGroups");
         portal.setDialog(true);
         request.setAttribute(Constants.PORTAL_KEY, portal);
 
         return null;
     }
 
-    public ActionForward addApplicationServices(ActionMapping mapping,
-                                           ActionForm form,
-                                           HttpServletRequest request,
-                                           HttpServletResponse response)
-        throws Exception {
+    public ActionForward addApplicationServices(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                                HttpServletResponse response) throws Exception {
         setResource(request);
-        Portal portal = Portal
-            .createPortal("common.title.Edit",
-                          ".resource.application.inventory.addApplicationServices");
+        Portal portal = Portal.createPortal("common.title.Edit",
+            ".resource.application.inventory.addApplicationServices");
         portal.setDialog(true);
         request.setAttribute(Constants.PORTAL_KEY, portal);
 
         return null;
     }
 
-    public ActionForward listServiceDependencies(ActionMapping mapping,
-                                           ActionForm form,
-                                           HttpServletRequest request,
-                                           HttpServletResponse response)
-        throws Exception {
+    public ActionForward listServiceDependencies(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                                 HttpServletResponse response) throws Exception {
         setResource(request);
         // XXX put the right title in or refactor to use a common title...
-        Portal portal = Portal
-            .createPortal("resource.application.inventory.AddDependenciesTitle",
-                          ".resource.application.inventory.listServiceDependencies");
+        Portal portal = Portal.createPortal("resource.application.inventory.AddDependenciesTitle",
+            ".resource.application.inventory.listServiceDependencies");
         portal.setDialog(true);
         request.setAttribute(Constants.PORTAL_KEY, portal);
 
         return null;
     }
 
-    public ActionForward addDependencies(ActionMapping mapping,
-                                           ActionForm form,
-                                           HttpServletRequest request,
-                                           HttpServletResponse response)
-        throws Exception {
+    public ActionForward addDependencies(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                         HttpServletResponse response) throws Exception {
         setResource(request);
         // XXX put the right title in or refactor to use a common title...
-        Portal portal = Portal
-            .createPortal("resource.application.inventory.AddDependenciesPageTitle",
-                          ".resource.application.inventory.addServiceDependencies");
+        Portal portal = Portal.createPortal("resource.application.inventory.AddDependenciesPageTitle",
+            ".resource.application.inventory.addServiceDependencies");
         portal.setDialog(true);
         request.setAttribute(Constants.PORTAL_KEY, portal);
 

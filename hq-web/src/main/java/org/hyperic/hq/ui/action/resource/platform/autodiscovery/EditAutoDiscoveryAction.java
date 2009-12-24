@@ -34,9 +34,9 @@ import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class EditAutoDiscoveryAction extends NewAutoDiscoveryAction {
-    
-   
+public class EditAutoDiscoveryAction
+    extends NewAutoDiscoveryAction {
+
     @Autowired
     public EditAutoDiscoveryAction(AppdefBoss appdefBoss, AIBoss aiBoss) {
         super(appdefBoss, aiBoss);
@@ -45,27 +45,19 @@ public class EditAutoDiscoveryAction extends NewAutoDiscoveryAction {
     /**
      * load the AIScheduleValue if needed
      */
-    private AIScheduleValue getAIScheduleValue(AIBoss aiboss,
-                                               int sessionId, 
-                                               Integer scheduleId)
-        throws Exception {
+    private AIScheduleValue getAIScheduleValue(AIBoss aiboss, int sessionId, Integer scheduleId) throws Exception {
         return aiboss.findScheduledJobById(sessionId, scheduleId);
     }
-    
+
     /**
      * assume there are only one ScanMethodConfig
      * 
      * @return a ConfigResponse to a ScanMethodConfig
      */
-    protected ConfigResponse getConfigResponse(AIBoss aiboss,
-                                               int sessionId,
-                                               Integer scheduleId,
-                                               ScanConfiguration scanConfig,
-                                               ScanMethod scanMethod )
-        throws Exception {
+    protected ConfigResponse getConfigResponse(AIBoss aiboss, int sessionId, Integer scheduleId,
+                                               ScanConfiguration scanConfig, ScanMethod scanMethod) throws Exception {
 
-        AIScheduleValue sched
-            = getAIScheduleValue(aiboss, sessionId, scheduleId);
+        AIScheduleValue sched = getAIScheduleValue(aiboss, sessionId, scheduleId);
         ScanMethodConfig[] configs = sched.getConfigObj().getScanMethodConfigs();
         if (configs.length > 0)
             return configs[0].getConfig();

@@ -49,11 +49,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * An Action that removes an alert definition
  */
-public class RemoveDefinitionAction extends BaseAction {
+public class RemoveDefinitionAction
+    extends BaseAction {
     private EventsBoss eventsBoss;
     private GalertBoss galertBoss;
-    
-    
+
     @Autowired
     public RemoveDefinitionAction(EventsBoss eventsBoss, GalertBoss galertBoss) {
         super();
@@ -61,43 +61,35 @@ public class RemoveDefinitionAction extends BaseAction {
         this.galertBoss = galertBoss;
     }
 
-
-
-    /** 
-     * removes alert definitions 
+    /**
+     * removes alert definitions
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-            
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
+
         Log log = LogFactory.getLog(RemoveDefinitionAction.class.getName());
-                
+
         RemoveDefinitionForm rdForm = (RemoveDefinitionForm) form;
         AppdefEntityID adeId;
         Map<String, Object> params = new HashMap<String, Object>();
         if (rdForm.getRid() != null) {
-            adeId = new AppdefEntityID(rdForm.getType().intValue(),
-                                       rdForm.getRid());
+            adeId = new AppdefEntityID(rdForm.getType().intValue(), rdForm.getRid());
             params.put(Constants.ENTITY_ID_PARAM, adeId.getAppdefKey());
             log.debug("###eid = " + adeId.getAppdefKey());
-        }
-        else {
+        } else {
             adeId = new AppdefEntityTypeID(rdForm.getAetid());
             params.put(Constants.APPDEF_RES_TYPE_ID, adeId.getAppdefKey());
             log.debug("###aetid = " + adeId.getAppdefKey());
         }
-        
+
         Integer[] defs = rdForm.getDefinitions();
 
-        if (defs == null || defs.length == 0){
-            return returnSuccess(request,mapping, params);
+        if (defs == null || defs.length == 0) {
+            return returnSuccess(request, mapping, params);
         }
 
-        Integer sessionId =  RequestUtils.getSessionId(request);
+        Integer sessionId = RequestUtils.getSessionId(request);
 
-      
         boolean enable = false;
 
         if (rdForm.getSetActiveInactive().equals("y")) {
@@ -106,50 +98,41 @@ public class RemoveDefinitionAction extends BaseAction {
             if (adeId.isGroup()) {
                 GalertDef[] defPojos = new GalertDef[defs.length];
                 for (int i = 0; i < defs.length; i++) {
-                    defPojos[i] = galertBoss.findDefinition(sessionId.intValue(),
-                                                       defs[i]);
+                    defPojos[i] = galertBoss.findDefinition(sessionId.intValue(), defs[i]);
                 }
                 galertBoss.enable(sessionId.intValue(), defPojos, enable);
             } else {
                 eventsBoss.activateAlertDefinitions(sessionId.intValue(), defs, enable);
             }
-                
-            RequestUtils.setConfirmation(request,
-                "alerts.config.confirm.activeInactive");
+
+            RequestUtils.setConfirmation(request, "alerts.config.confirm.activeInactive");
             return returnSuccess(request, mapping, params);
         }
-        
+
         if (rdForm.isDeleteClicked()) {
             if (rdForm.getAetid() != null) {
                 eventsBoss.deleteAlertDefinitions(sessionId.intValue(), defs);
                 params.put(Constants.APPDEF_RES_TYPE_ID, rdForm.getAetid());
-            }
-            else {
-                if (adeId.isGroup())
-                {
+            } else {
+                if (adeId.isGroup()) {
                     galertBoss.markDefsDeleted(sessionId.intValue(), defs);
                 } else {
                     eventsBoss.deleteAlertDefinitions(sessionId.intValue(), defs);
                 }
             }
-            
-            RequestUtils.setConfirmation(request,
-                "alerts.config.confirm.deleteConfig");
-        }
-        else {
+
+            RequestUtils.setConfirmation(request, "alerts.config.confirm.deleteConfig");
+        } else {
             // Delete the alerts for the definitions
             if (adeId.isGroup()) {
                 // XXX - implement alert deletion in gBoss
-            }
-            else {
+            } else {
                 eventsBoss.deleteAlertsForDefinitions(sessionId.intValue(), defs);
             }
 
-            RequestUtils.setConfirmation(request,
-                "alerts.config.confirm.deleteAlerts");
+            RequestUtils.setConfirmation(request, "alerts.config.confirm.deleteAlerts");
         }
 
-
-        return returnSuccess(request, mapping, params);            
+        return returnSuccess(request, mapping, params);
     }
 }

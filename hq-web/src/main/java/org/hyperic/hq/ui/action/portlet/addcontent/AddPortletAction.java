@@ -49,18 +49,18 @@ import org.hyperic.util.config.ConfigResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * An <code>Action</code> that loads the <code>Portal</code>
- * identified by the <code>PORTAL_PARAM</code> request parameter (or
- * the default portal, if the parameter is not specified) into the
- * <code>PORTAL_KEY</code> request attribute.
+ * An <code>Action</code> that loads the <code>Portal</code> identified by the
+ * <code>PORTAL_PARAM</code> request parameter (or the default portal, if the
+ * parameter is not specified) into the <code>PORTAL_KEY</code> request
+ * attribute.
  */
 
-public class AddPortletAction extends BaseAction {
-    
+public class AddPortletAction
+    extends BaseAction {
+
     private ConfigurationProxy configurationProxy;
     private AuthzBoss authzBoss;
-    
-    
+
     @Autowired
     public AddPortletAction(ConfigurationProxy configurationProxy, AuthzBoss authzBoss) {
         super();
@@ -68,81 +68,68 @@ public class AddPortletAction extends BaseAction {
         this.authzBoss = authzBoss;
     }
 
-
-
     /**
      * @param mapping The ActionMapping used to select this instance
      * @param form The optional ActionForm bean for this request (if any)
      * @param request The HTTP request we are processing
      * @param response The HTTP response we are creating
-     *
-     * @exception Exception if the application business logic throws
-     *  an exception
+     * 
+     * @exception Exception if the application business logic throws an
+     *            exception
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-    throws Exception {
-    
-       
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
+
         HttpSession session = request.getSession();
         WebUser user = RequestUtils.getWebUser(request);
-        DashboardConfig dashConfig = DashboardUtils.findDashboard(
-        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, authzBoss);
+        DashboardConfig dashConfig = DashboardUtils.findDashboard((Integer) session
+            .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         PropertiesForm pForm = (PropertiesForm) form;
 
-        if( pForm.getPortlet() == null || "bad".equals( pForm.getPortlet() ) ) {
+        if (pForm.getPortlet() == null || "bad".equals(pForm.getPortlet())) {
             return mapping.findForward(Constants.SUCCESS_URL);
         }
-        
+
         String prefKey;
         if (pForm.isWide()) {
             prefKey = Constants.USER_PORTLETS_SECOND;
-        }                            
-        else{
+        } else {
             prefKey = Constants.USER_PORTLETS_FIRST;
         }
 
         String userPrefs = dashPrefs.getValue(prefKey);
-        
+
         String portlet = pForm.getPortlet();
-        
+
         while (userPrefs != null && userPrefs.indexOf(portlet) > -1) {
             // We need to add a multi portlet
             StringBuffer portletName = new StringBuffer(pForm.getPortlet());
             // 1. Generate random token
             NumberFormat nf = NumberFormat.getIntegerInstance();
-            nf.setMinimumIntegerDigits(3);      // Exactly 3 digits
+            nf.setMinimumIntegerDigits(3); // Exactly 3 digits
             nf.setMaximumIntegerDigits(3);
-            portletName.append(DashboardUtils.MULTI_PORTLET_TOKEN)
-                       .append(nf.format(new Random().nextInt(1000)));
+            portletName.append(DashboardUtils.MULTI_PORTLET_TOKEN).append(nf.format(new Random().nextInt(1000)));
             // 2. Create unique portlet name based on the new random token
             portlet = portletName.toString();
         }
-        
-        String preferences = Constants.DASHBOARD_DELIMITER + portlet +
-                             Constants.DASHBOARD_DELIMITER;
-        // Clean up the delimiters
-		preferences = StringUtil.replace(preferences,
-				Constants.EMPTY_DELIMITER, Constants.DASHBOARD_DELIMITER);
 
-		LogFactory.getLog("user.preferences").trace(
-				"Invoking setUserPrefs" + " in AddPortletAction " + " for "
-						+ user.getId() + " at " + System.currentTimeMillis()
-						+ " user.prefs = " + userPrefs);
-		
-		// If there are existing userprefs, prepend it to the string of preferences
-		// otherwise, this is the first preference in the list
-		if (userPrefs != null) {
-			preferences = userPrefs + preferences;
-		}
-		
-		configurationProxy.setPreference(session, user,
-				prefKey, preferences);
-        
+        String preferences = Constants.DASHBOARD_DELIMITER + portlet + Constants.DASHBOARD_DELIMITER;
+        // Clean up the delimiters
+        preferences = StringUtil.replace(preferences, Constants.EMPTY_DELIMITER, Constants.DASHBOARD_DELIMITER);
+
+        LogFactory.getLog("user.preferences").trace(
+            "Invoking setUserPrefs" + " in AddPortletAction " + " for " + user.getId() + " at " +
+                System.currentTimeMillis() + " user.prefs = " + userPrefs);
+
+        // If there are existing userprefs, prepend it to the string of
+        // preferences
+        // otherwise, this is the first preference in the list
+        if (userPrefs != null) {
+            preferences = userPrefs + preferences;
+        }
+
+        configurationProxy.setPreference(session, user, prefKey, preferences);
 
         session.removeAttribute(Constants.USERS_SES_PORTAL);
 

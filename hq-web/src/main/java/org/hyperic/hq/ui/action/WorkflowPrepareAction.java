@@ -38,56 +38,44 @@ import org.apache.struts.tiles.ComponentContext;
 import org.hyperic.hq.ui.util.SessionUtils;
 
 /**
- * This Action is designed to be the start of a workflow. It is for
- * prepare actions. It duplicates code in WorkflowPrepareAction.
+ * This Action is designed to be the start of a workflow. It is for prepare
+ * actions. It duplicates code in WorkflowPrepareAction.
  */
-public abstract class WorkflowPrepareAction extends TilesAction {
+public abstract class WorkflowPrepareAction
+    extends TilesAction {
 
     /**
-     * Starts workflow by taking what is currently stored
-     * in the session as returnPath (one of many possible
-     * origins of this workflow), and pushing it onto
-     * our workflow stack.
-     *
-     * Passes call to workflow() so that the child class
-     * can overload.
+     * Starts workflow by taking what is currently stored in the session as
+     * returnPath (one of many possible origins of this workflow), and pushing
+     * it onto our workflow stack.
+     * 
+     * Passes call to workflow() so that the child class can overload.
      */
-    public final ActionForward execute(ComponentContext context,
-                                       ActionMapping mapping,
-                                       ActionForm form,
-                                       HttpServletRequest request,
-                                       HttpServletResponse response)
-        throws Exception {
-        
+    public final ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                       HttpServletRequest request, HttpServletResponse response) throws Exception {
+
         if (!(mapping instanceof BaseActionMapping)) {
-            throw new ServletException("mapping " + mapping.getName()
-                + "is not an instance of BaseActionMapping.");
+            throw new ServletException("mapping " + mapping.getName() + "is not an instance of BaseActionMapping.");
         }
-        BaseActionMapping smap = (BaseActionMapping)mapping;
-        
+        BaseActionMapping smap = (BaseActionMapping) mapping;
+
         String workflowId = smap.getWorkflow();
         if (workflowId == null || "".equals(workflowId.trim())) {
-            throw new ServletException("workflow " + smap.getName()
-                + " has a null or invalid workflow attribute.");
+            throw new ServletException("workflow " + smap.getName() + " has a null or invalid workflow attribute.");
         }
-        
-        // takes the current returnPath in the session and stores it 
+
+        // takes the current returnPath in the session and stores it
         // in the workflow.
-        SessionUtils.pushWorkflow(request.getSession(false), mapping,
-                                  workflowId);
-        
-        return workflow(context, mapping, form, request, response); 
+        SessionUtils.pushWorkflow(request.getSession(false), mapping, workflowId);
+
+        return workflow(context, mapping, form, request, response);
     }
 
     /**
-     * To participate in a workflow, simply implement this the same as 
-     * you would execute(). This will be called by WorkflowActions's
-     * execute() method after it saves the workflow context.
+     * To participate in a workflow, simply implement this the same as you would
+     * execute(). This will be called by WorkflowActions's execute() method
+     * after it saves the workflow context.
      */
-    public abstract ActionForward workflow(ComponentContext context,
-                                           ActionMapping mapping,
-                                           ActionForm form,
-                                           HttpServletRequest request,
-                                           HttpServletResponse response)
-        throws Exception;
+    public abstract ActionForward workflow(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                           HttpServletRequest request, HttpServletResponse response) throws Exception;
 }

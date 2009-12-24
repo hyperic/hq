@@ -44,60 +44,52 @@ import org.hyperic.hq.ui.action.resource.RemoveResourceForm;
 import org.hyperic.hq.ui.util.RequestUtils;
 
 /**
- * Action which deletes services from the services list within 
- * a server 
+ * Action which deletes services from the services list within a server
  * 
- *
- *
+ * 
+ * 
  */
-public class RemoveServiceAction extends BaseAction {
-    
+public class RemoveServiceAction
+    extends BaseAction {
+
     private AppdefBoss appdefBoss;
 
-    /** Removes a server identified by the
-     * value of the request parameter <code>Constants.SERVER_PARAM</code>
-     * from the BizApp.
+    /**
+     * Removes a server identified by the value of the request parameter
+     * <code>Constants.SERVER_PARAM</code> from the BizApp.
      * @return
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-            
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
+
         Log log = LogFactory.getLog(RemoveServiceAction.class.getName());
-                
+
         RemoveResourceForm nwForm = (RemoveResourceForm) form;
 
         AppdefEntityID aeid = new AppdefEntityID(nwForm.getEid());
         Integer[] resources = nwForm.getResources();
         Map<String, Object> params = new HashMap<String, Object>(2);
         params.put(Constants.ENTITY_ID_PARAM, aeid);
-        
+
         if (aeid.isPlatform()) {
             params.put(Constants.ACCORDION_PARAM, "3");
-        }
-        else {
+        } else {
             params.put(Constants.ACCORDION_PARAM, "1");
         }
-            
+
         if (resources == null || resources.length == 0) {
-            returnSuccess(request, mapping, params); 
+            returnSuccess(request, mapping, params);
         }
 
-        Integer sessionId =  RequestUtils.getSessionId(request);
+        Integer sessionId = RequestUtils.getSessionId(request);
 
-              
-        
-        log.trace("removing resource");                                                      
-        
+        log.trace("removing resource");
 
         for (int i = 0; i < resources.length; i++) {
-            appdefBoss.removeAppdefEntity(sessionId.intValue(),
-                                    AppdefEntityID.newServiceID(resources[i]));
+            appdefBoss.removeAppdefEntity(sessionId.intValue(), AppdefEntityID.newServiceID(resources[i]));
         }
 
-        return returnSuccess(request, mapping, params);        
+        return returnSuccess(request, mapping, params);
     }
-    
+
 }

@@ -42,42 +42,30 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  *
  */
-public class ServerGeneralFormPrepareAction 
+public class ServerGeneralFormPrepareAction
     extends WorkflowPrepareAction {
-    
+
     private AppdefBoss appdefBoss;
-    
-    
+
     @Autowired
     public ServerGeneralFormPrepareAction(AppdefBoss appdefBoss) {
         super();
         this.appdefBoss = appdefBoss;
     }
 
-
-
     /**
-     * Retrieve this data and store it in the
-     * <code>GroupForm</code>:
-     *
+     * Retrieve this data and store it in the <code>GroupForm</code>:
+     * 
      */
-    public ActionForward workflow(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
+    public ActionForward workflow(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                  HttpServletRequest request, HttpServletResponse response) throws Exception {
         ServerForm serverForm = (ServerForm) form;
 
         Integer sessionId = RequestUtils.getSessionId(request);
-       
 
         Integer resourceId = RequestUtils.getResourceId(request);
 
-       
-
-        ServerValue server =
-            appdefBoss.findServerById(sessionId.intValue(), resourceId);
+        ServerValue server = appdefBoss.findServerById(sessionId.intValue(), resourceId);
 
         serverForm.loadResourceValue(server);
 

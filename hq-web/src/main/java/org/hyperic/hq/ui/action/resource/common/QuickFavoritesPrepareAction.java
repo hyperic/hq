@@ -45,42 +45,36 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class QuickFavoritesPrepareAction extends WorkflowPrepareAction {
+public class QuickFavoritesPrepareAction
+    extends WorkflowPrepareAction {
 
     private AuthzBoss authzBoss;
-    
-    
+
     @Autowired
     public QuickFavoritesPrepareAction(AuthzBoss authzBoss) {
         super();
         this.authzBoss = authzBoss;
     }
 
-
-
-    public ActionForward workflow(ComponentContext context,
-                                  ActionMapping mapping,
-                                  ActionForm form,
-                                  HttpServletRequest request,
-                                  HttpServletResponse response)
-    throws Exception {
+    public ActionForward workflow(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                  HttpServletRequest request, HttpServletResponse response) throws Exception {
         WebUser user = RequestUtils.getWebUser(request);
-		Boolean isFavorite = Boolean.FALSE;
-		AppdefResourceValue arv = (AppdefResourceValue) context.getAttribute("resource");
+        Boolean isFavorite = Boolean.FALSE;
+        AppdefResourceValue arv = (AppdefResourceValue) context.getAttribute("resource");
 
-		// check our preferences to see if this resource is in there.
-       
+        // check our preferences to see if this resource is in there.
+
         ConfigResponse dashConfig = DashboardUtils.findUserDashboardConfig(user, authzBoss);
-		isFavorite = QuickFavoritesUtil.isFavorite(dashConfig, arv.getEntityId());
+        isFavorite = QuickFavoritesUtil.isFavorite(dashConfig, arv.getEntityId());
 
-		request.setAttribute(Constants.ENTITY_ID_PARAM, arv.getEntityId().getAppdefKey());
-		request.setAttribute(Constants.IS_FAVORITE_PARAM, isFavorite);
-	
-		List<Dashboard> editableDashboards = DashboardUtils.findEditableDashboards(user, authzBoss);
-		
-		request.setAttribute(Constants.EDITABLE_DASHBOARDS_PARAM, editableDashboards);
-		request.setAttribute(Constants.HAS_MULTIPLE_DASHBOARDS_PARAM, editableDashboards.size() > 1);
-		
-		return null;
+        request.setAttribute(Constants.ENTITY_ID_PARAM, arv.getEntityId().getAppdefKey());
+        request.setAttribute(Constants.IS_FAVORITE_PARAM, isFavorite);
+
+        List<Dashboard> editableDashboards = DashboardUtils.findEditableDashboards(user, authzBoss);
+
+        request.setAttribute(Constants.EDITABLE_DASHBOARDS_PARAM, editableDashboards);
+        request.setAttribute(Constants.HAS_MULTIPLE_DASHBOARDS_PARAM, editableDashboards.size() > 1);
+
+        return null;
     }
 }

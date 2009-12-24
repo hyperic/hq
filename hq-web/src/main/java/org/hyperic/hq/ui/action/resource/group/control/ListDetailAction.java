@@ -49,55 +49,45 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * Retrieves details for a group control history or current event.
  */
-public class ListDetailAction extends TilesAction {
+public class ListDetailAction
+    extends TilesAction {
 
     private ControlBoss controlBoss;
-   
-    
+
     @Autowired
     public ListDetailAction(ControlBoss controlBoss) {
         super();
         this.controlBoss = controlBoss;
     }
 
-
-
-    /** 
+    /**
      * Retrieves details of history event.
      */
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-        
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
+
         Log log = LogFactory.getLog(ListDetailAction.class.getName());
-        
+
         log.trace("getting group control history details");
 
-          
-      
         int sessionId = RequestUtils.getSessionId(request).intValue();
         AppdefEntityID appdefId = RequestUtils.getEntityId(request);
         int batchId = RequestUtils.getIntParameter(request, Constants.CONTROL_BATCH_ID_PARAM).intValue();
         PageControl pc = RequestUtils.getPageControl(request);
 
         PageList<ControlHistory> histList = controlBoss.findGroupJobHistory(sessionId, appdefId, batchId, pc);
-        request.setAttribute( Constants.CONTROL_HST_DETAIL_ATTR, histList );
-        request.setAttribute( Constants.LIST_SIZE_ATTR, 
-            new Integer(histList.getTotalSize()));
+        request.setAttribute(Constants.CONTROL_HST_DETAIL_ATTR, histList);
+        request.setAttribute(Constants.LIST_SIZE_ATTR, new Integer(histList.getTotalSize()));
 
         // have set page size by hand b/c of redirects
-        BaseValidatorForm sForm = (BaseValidatorForm)form;
+        BaseValidatorForm sForm = (BaseValidatorForm) form;
         try {
             sForm.setPs(Constants.PAGESIZE_DEFAULT);
-            sForm.setPs(RequestUtils.getIntParameter(request, 
-                Constants.PAGESIZE_PARAM));
-        } 
-        catch (NullPointerException npe) {}
-        catch (ParameterNotFoundException pnfe) {}
-        catch (NumberFormatException nfe) {}
+            sForm.setPs(RequestUtils.getIntParameter(request, Constants.PAGESIZE_PARAM));
+        } catch (NullPointerException npe) {
+        } catch (ParameterNotFoundException pnfe) {
+        } catch (NumberFormatException nfe) {
+        }
 
         log.trace("successfully obtained group control history");
 

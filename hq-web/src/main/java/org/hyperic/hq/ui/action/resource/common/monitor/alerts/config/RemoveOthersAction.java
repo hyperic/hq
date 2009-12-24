@@ -40,50 +40,44 @@ import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
-
 /**
  * An Action that removes emails for an alert definition.
- *
+ * 
  */
-public class RemoveOthersAction extends RemoveNotificationsAction {
+public class RemoveOthersAction
+    extends RemoveNotificationsAction {
     private final Log log = LogFactory.getLog(RemoveOthersAction.class.getName());
-    
-    
+
     @Autowired
     public RemoveOthersAction(EventsBoss eventsBoss) {
         super(eventsBoss);
     }
 
-    public int getNotificationType() { return EmailActionConfig.TYPE_EMAILS; }
+    public int getNotificationType() {
+        return EmailActionConfig.TYPE_EMAILS;
+    }
 
     /**
      * Handles the actual work of removing emails from the action.
      */
-    protected ActionForward handleRemove(ActionMapping mapping,
-                                         HttpServletRequest request,
-                                         Map<String, Object> params,
-                                         Integer sessionID,
-                                         ActionValue action,
-                                         EmailActionConfig ea,
-                                         EventsBoss eb,
-                                         RemoveNotificationsForm rnForm)
-     throws Exception {
+    protected ActionForward handleRemove(ActionMapping mapping, HttpServletRequest request, Map<String, Object> params,
+                                         Integer sessionID, ActionValue action, EmailActionConfig ea, EventsBoss eb,
+                                         RemoveNotificationsForm rnForm) throws Exception {
         String[] emails = rnForm.getEmails();
         if (null != emails) {
             log.debug("emails.length=" + emails.length);
             HashSet<Object> storedEmails = new HashSet<Object>();
-            storedEmails.addAll( ea.getUsers() );
+            storedEmails.addAll(ea.getUsers());
             log.debug("storedEmails (pre): " + storedEmails);
-            for (int i=0; i<emails.length; ++i) {
+            for (int i = 0; i < emails.length; ++i) {
                 storedEmails.remove(emails[i]);
             }
             log.debug("storedEmails (post): " + storedEmails);
-            ea.setNames( StringUtil.iteratorToString(storedEmails.iterator(), ",") );
-            action.setConfig( ea.getConfigResponse().encode() );
+            ea.setNames(StringUtil.iteratorToString(storedEmails.iterator(), ","));
+            action.setConfig(ea.getConfigResponse().encode());
             eb.updateAction(sessionID.intValue(), action);
         }
 
-        return returnSuccess(request, mapping, params); 
+        return returnSuccess(request, mapping, params);
     }
 }
-

@@ -53,16 +53,15 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * A <code>BaseAction</code> subclass that creates a platform in the
- * BizApp.
+ * A <code>BaseAction</code> subclass that creates a platform in the BizApp.
  */
-public class NewPlatformAction extends BaseAction {
+public class NewPlatformAction
+    extends BaseAction {
 
-   private final  Log log = LogFactory.getLog(NewPlatformAction.class.getName());
-   private AppdefBoss appdefBoss;
-   
-   
-   @Autowired
+    private final Log log = LogFactory.getLog(NewPlatformAction.class.getName());
+    private AppdefBoss appdefBoss;
+
+    @Autowired
     public NewPlatformAction(AppdefBoss appdefBoss) {
         super();
         this.appdefBoss = appdefBoss;
@@ -72,12 +71,8 @@ public class NewPlatformAction extends BaseAction {
      * Create the platform with the attributes specified in the given
      * <code>PlatformForm</code>.
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-       
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
 
         PlatformForm newForm = (PlatformForm) form;
 
@@ -87,73 +82,52 @@ public class NewPlatformAction extends BaseAction {
                 return forward;
             }
 
-            
             Integer sessionId = RequestUtils.getSessionId(request);
-           
-
 
             // first make sure the form's "machine type" represents a
             // valid platform type
             Integer platformTypeId = newForm.getResourceType();
             log.trace("finding platform type [" + platformTypeId + "]");
-            PlatformType platformType =
-                appdefBoss.findPlatformTypeById(sessionId.intValue(), platformTypeId);
+            PlatformType platformType = appdefBoss.findPlatformTypeById(sessionId.intValue(), platformTypeId);
 
             // now set up the new platform
             PlatformValue platform = new PlatformValue();
             newForm.updatePlatformValue(platform);
-            platform.setCpuCount(new Integer(1)); //at least
-            
-            log.trace("creating platform [" + platform.getName() + "]" +
-                      " with attributes " + newForm);
+            platform.setCpuCount(new Integer(1)); // at least
 
-            Agent agent =
-                BizappUtils.getAgentConnection(sessionId.intValue(),
-                                               appdefBoss, request,
-                                               newForm);
+            log.trace("creating platform [" + platform.getName() + "]" + " with attributes " + newForm);
 
-            Platform newPlatform =
-                appdefBoss.createPlatform(sessionId.intValue(),
-                                    platform, platformType.getId(),
-                                    agent.getId());
+            Agent agent = BizappUtils.getAgentConnection(sessionId.intValue(), appdefBoss, request, newForm);
+
+            Platform newPlatform = appdefBoss.createPlatform(sessionId.intValue(), platform, platformType.getId(),
+                agent.getId());
 
             Integer platformId = newPlatform.getId();
             newForm.setRid(platformId);
-            
+
             AppdefEntityID entityId = newPlatform.getEntityId();
 
             ServletContext ctx = getServlet().getServletContext();
             BizappUtils.startAutoScan(ctx, sessionId.intValue(), entityId);
 
-            Integer entityType =
-                new Integer(newPlatform.getEntityId().getType());
+            Integer entityType = new Integer(newPlatform.getEntityId().getType());
             newForm.setType(entityType);
 
-            RequestUtils
-                .setConfirmation(request,
-                                 "resource.platform.inventory.confirm.Create",
-                                 platform.getName());
+            RequestUtils.setConfirmation(request, "resource.platform.inventory.confirm.Create", platform.getName());
 
             HashMap<String, Object> forwardParams = new HashMap<String, Object>(2);
             forwardParams.put(Constants.RESOURCE_PARAM, platformId);
             forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, entityType);
 
             return returnNew(request, mapping, forwardParams);
-        }        
-        catch (AppdefDuplicateNameException e1) {
-            RequestUtils
-                .setError(request,"resource.platform.inventory.error.DuplicateName");
+        } catch (AppdefDuplicateNameException e1) {
+            RequestUtils.setError(request, "resource.platform.inventory.error.DuplicateName");
             return returnFailure(request, mapping);
-        }
-        catch (AppdefDuplicateFQDNException e1) {
-            RequestUtils
-                .setError(request,"resource.platform.inventory.error.DuplicateFQDN");
+        } catch (AppdefDuplicateFQDNException e1) {
+            RequestUtils.setError(request, "resource.platform.inventory.error.DuplicateFQDN");
             return returnFailure(request, mapping);
-        }                
-        catch (ApplicationException e) {
-            RequestUtils
-                .setErrorObject(request,"dash.autoDiscovery.import.Error",
-                                e.getMessage());
+        } catch (ApplicationException e) {
+            RequestUtils.setErrorObject(request, "dash.autoDiscovery.import.Error", e.getMessage());
             return returnFailure(request, mapping);
         }
     }

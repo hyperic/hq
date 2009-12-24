@@ -42,7 +42,8 @@ import org.apache.struts.action.ActionMessage;
 /**
  *
  */
-public class GroupForm extends NonScheduleResourceForm {
+public class GroupForm
+    extends NonScheduleResourceForm {
 
     /**
      * contains the [appdef_type]:[appdef_resource_type] value
@@ -58,34 +59,31 @@ public class GroupForm extends NonScheduleResourceForm {
     private String _typeName;
     private boolean _privateGroup;
 
-    public Integer getCompatibleCount()
-    {
-        if (_platformTypes == null || _serverTypes == null ||
-            _serviceTypes == null || _applicationTypes == null)
+    public Integer getCompatibleCount() {
+        if (_platformTypes == null || _serverTypes == null || _serviceTypes == null || _applicationTypes == null)
             return new Integer(0);
-            
-        return new Integer(_platformTypes.size() + _serverTypes.size() +
-            _serviceTypes.size() + _applicationTypes.size());
+
+        return new Integer(_platformTypes.size() + _serverTypes.size() + _serviceTypes.size() +
+                           _applicationTypes.size());
     }
 
-    public Integer getClusterCount()
-    {
+    public Integer getClusterCount() {
         if (_serviceTypes == null) {
             return new Integer(0);
         }
-            
+
         return new Integer(_serviceTypes.size());
     }
 
     public List getPlatformTypes() {
-	    return _platformTypes;
+        return _platformTypes;
     }
 
     public Integer getPlatformTypeCount() {
         if (_platformTypes == null) {
             return new Integer(0);
         }
-            
+
         return new Integer(_platformTypes.size());
     }
 
@@ -94,72 +92,59 @@ public class GroupForm extends NonScheduleResourceForm {
     }
 
     public List getServerTypes() {
-	    return _serverTypes;
+        return _serverTypes;
     }
 
     public Integer getServerTypeCount() {
         if (_serverTypes == null) {
             return new Integer(0);
         }
-            
+
         return new Integer(_serverTypes.size());
     }
 
     public List getServiceTypes() {
-	   return _serviceTypes;
+        return _serviceTypes;
     }
 
     public Integer getServiceTypeCount() {
         if (_serviceTypes == null) {
             return new Integer(0);
         }
-            
+
         return new Integer(_serviceTypes.size());
     }
 
-    public void setPlatformTypes(List platformTypes)
-        throws InvalidAppdefTypeException 
-    {
-    	_platformTypes = BizappUtils.buildAppdefOptionList(platformTypes,
-                                                           true);
+    public void setPlatformTypes(List platformTypes) throws InvalidAppdefTypeException {
+        _platformTypes = BizappUtils.buildAppdefOptionList(platformTypes, true);
     }
 
-    public void setApplicationTypes(List applicationTypes)
-        throws InvalidAppdefTypeException 
-    {
-        _applicationTypes = BizappUtils.buildAppdefOptionList(applicationTypes,
-                                                              true);
+    public void setApplicationTypes(List applicationTypes) throws InvalidAppdefTypeException {
+        _applicationTypes = BizappUtils.buildAppdefOptionList(applicationTypes, true);
     }
 
-    public void setServerTypes(List serverTypes) 
-        throws InvalidAppdefTypeException 
-    {
-	   _serverTypes = BizappUtils.buildAppdefOptionList(serverTypes,
-                                                        true);
+    public void setServerTypes(List serverTypes) throws InvalidAppdefTypeException {
+        _serverTypes = BizappUtils.buildAppdefOptionList(serverTypes, true);
     }
 
-    public void setServiceTypes(List serviceTypes) 
-        throws InvalidAppdefTypeException 
-    {
-	   _serviceTypes = BizappUtils.buildAppdefOptionList(serviceTypes, true);
+    public void setServiceTypes(List serviceTypes) throws InvalidAppdefTypeException {
+        _serviceTypes = BizappUtils.buildAppdefOptionList(serviceTypes, true);
     }
-
 
     public String getTypeAndResourceTypeId() {
-	    return _typeAndResourceTypeId;
+        return _typeAndResourceTypeId;
     }
 
     /**
      * Returns the entity type id in [entity type id]:[resource type id]
      */
-    public Integer getEntityTypeId()
-    {
+    public Integer getEntityTypeId() {
         if (_typeAndResourceTypeId.equals("-1")) {
             return new Integer("-1");
         }
-            
+
         List typeList = StringUtil.explode(_typeAndResourceTypeId, ":");
-        return new Integer((String)typeList.get(0));
+        return new Integer((String) typeList.get(0));
     }
 
     /**
@@ -168,24 +153,24 @@ public class GroupForm extends NonScheduleResourceForm {
     public Integer getResourceTypeId() {
         if (_typeAndResourceTypeId.equals("-1"))
             return new Integer("-1");
-            
+
         List typeList = StringUtil.explode(_typeAndResourceTypeId, ":");
-        return new Integer((String)typeList.get(1));
+        return new Integer((String) typeList.get(1));
     }
 
     /**
      * Sets the typeAndResourceTypeId.
      */
     public void setTypeAndResourceTypeId(String typeAndResourceTypeId) {
-	    _typeAndResourceTypeId = typeAndResourceTypeId;
+        _typeAndResourceTypeId = typeAndResourceTypeId;
     }
 
     public Integer getGroupType() {
-	    return _groupType;
+        return _groupType;
     }
 
     public void setGroupType(Integer groupType) {
-	    _groupType = groupType;
+        _groupType = groupType;
     }
 
     public List getGroupTypes() {
@@ -199,19 +184,19 @@ public class GroupForm extends NonScheduleResourceForm {
     public String[] getEntityIds() {
         return _entityIds;
     }
-    
+
     public void setEntityIds(String[] entityIds) {
         _entityIds = entityIds;
     }
-    
+
     public String getTypeName() {
         return _typeName;
     }
-    
+
     public void setTypeName(String typeName) {
         _typeName = typeName;
     }
-    
+
     public boolean isPrivateGroup() {
         return _privateGroup;
     }
@@ -220,24 +205,22 @@ public class GroupForm extends NonScheduleResourceForm {
         _privateGroup = privateGroup;
     }
 
-    /** 
-     * Overide the validate method.  need to do validation.
+    /**
+     * Overide the validate method. need to do validation.
      */
-    public ActionErrors validate(ActionMapping mapping,
-                                 HttpServletRequest request) {
+    public ActionErrors validate(ActionMapping mapping, HttpServletRequest request) {
         ActionErrors errors = super.validate(mapping, request);
 
         if (shouldValidate(mapping, request)) {
             if (errors == null) {
                 errors = new ActionErrors();
             }
-            
+
             if (_groupType.intValue() == Constants.APPDEF_TYPE_GROUP_ADHOC ||
-                _groupType.intValue()  == Constants.APPDEF_TYPE_GROUP_COMPAT ) {
-                 if (_typeAndResourceTypeId.equals("-1"))
-                    errors.add("typeAndResourceTypeId",
-                        new ActionMessage("resource.group.inventory.error." +
-                                          "ResourceTypeIsRequired"));
+                _groupType.intValue() == Constants.APPDEF_TYPE_GROUP_COMPAT) {
+                if (_typeAndResourceTypeId.equals("-1"))
+                    errors.add("typeAndResourceTypeId", new ActionMessage("resource.group.inventory.error."
+                                                                          + "ResourceTypeIsRequired"));
             }
         }
         return errors;

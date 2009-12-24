@@ -45,33 +45,26 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * A <code>BaseAction</code> that handles metrics-specific form
- * gestures.
+ * A <code>BaseAction</code> that handles metrics-specific form gestures.
  */
-public class MetricDisplayRangeAction extends BaseAction {
+public class MetricDisplayRangeAction
+    extends BaseAction {
 
-    private final Log log =
-        LogFactory.getLog(MetricDisplayRangeAction.class.getName());
+    private final Log log = LogFactory.getLog(MetricDisplayRangeAction.class.getName());
     private AuthzBoss authzBoss;
-    
-    
+
     @Autowired
     public MetricDisplayRangeAction(AuthzBoss authzBoss) {
         super();
         this.authzBoss = authzBoss;
     }
 
-
-
     /**
      * Modify the metrics summary display as specified in the given
      * <code>MetricDisplayRangeForm</code>.
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
         MetricDisplayRangeForm displayForm = (MetricDisplayRangeForm) form;
 
         // Redirect user back to where they came if cancelled
@@ -86,22 +79,19 @@ public class MetricDisplayRangeAction extends BaseAction {
 
         WebUser user = RequestUtils.getWebUser(request);
         Integer sessionId = user.getSessionId();
-       
 
         if (displayForm.isLastnSelected()) {
             Integer lastN = displayForm.getRn();
             Integer unit = displayForm.getRu();
 
-            log.trace("updating metric display .. lastN [" + lastN +
-                      "] .. unit [" + unit + "]");
+            log.trace("updating metric display .. lastN [" + lastN + "] .. unit [" + unit + "]");
             user.setPreference(WebUser.PREF_METRIC_RANGE_LASTN, lastN);
             user.setPreference(WebUser.PREF_METRIC_RANGE_UNIT, unit);
             user.setPreference(WebUser.PREF_METRIC_RANGE, null);
 
             // set simple mode
             user.setPreference(WebUser.PREF_METRIC_RANGE_RO, Boolean.FALSE);
-        }
-        else if (displayForm.isDateRangeSelected()) {
+        } else if (displayForm.isDateRangeSelected()) {
             Date begin = displayForm.getStartDate();
             Date end = displayForm.getEndDate();
 
@@ -109,25 +99,19 @@ public class MetricDisplayRangeAction extends BaseAction {
             range.add(new Long(begin.getTime()));
             range.add(new Long(end.getTime()));
 
-            log.trace("updating metric display date range [" +
-                      begin +  ":" + end + "]");
+            log.trace("updating metric display date range [" + begin + ":" + end + "]");
             user.setPreference(WebUser.PREF_METRIC_RANGE, range);
             user.setPreference(WebUser.PREF_METRIC_RANGE_LASTN, null);
             user.setPreference(WebUser.PREF_METRIC_RANGE_UNIT, null);
 
             // set advanced mode
-            user.setPreference(WebUser.PREF_METRIC_RANGE_RO,
-                               Boolean.TRUE);
-        }
-        else {
-            throw new ServletException("invalid date range action [" +
-                                       displayForm.getA() + "] selected");
+            user.setPreference(WebUser.PREF_METRIC_RANGE_RO, Boolean.TRUE);
+        } else {
+            throw new ServletException("invalid date range action [" + displayForm.getA() + "] selected");
         }
 
-        log.trace("Invoking setUserPrefs"+
-            " in MetricDisplayRangeAction " +
-            " for " + user.getId() + " at "+System.currentTimeMillis() +
-            " user.prefs = " + user.getPreferences());
+        log.trace("Invoking setUserPrefs" + " in MetricDisplayRangeAction " + " for " + user.getId() + " at " +
+                  System.currentTimeMillis() + " user.prefs = " + user.getPreferences());
         authzBoss.setUserPrefs(sessionId, user.getId(), user.getPreferences());
 
         // XXX: assume return path is set, don't use forward params

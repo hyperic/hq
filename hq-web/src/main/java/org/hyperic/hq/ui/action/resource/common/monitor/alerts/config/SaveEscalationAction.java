@@ -40,34 +40,26 @@ import org.hyperic.hq.ui.action.BaseAction;
 
 /**
  * An Action that saves escalation scheme for an alert definition.
- *
+ * 
  */
-public class SaveEscalationAction extends BaseAction {
-   
+public class SaveEscalationAction
+    extends BaseAction {
 
-    /** 
-     * removes alert definitions 
+    /**
+     * removes alert definitions
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-    throws Exception {
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
         EscalationSchemeForm rnForm = (EscalationSchemeForm) form;
         Map<String, Object> params = new HashMap<String, Object>();
-        
+
         if (rnForm.getAetid() != null) {
             params.put(Constants.APPDEF_RES_TYPE_ID, rnForm.getAetid());
-        }
-        else {
-            AppdefEntityID aeid =
-                new AppdefEntityID(rnForm.getType().intValue(),rnForm.getRid());
+        } else {
+            AppdefEntityID aeid = new AppdefEntityID(rnForm.getType().intValue(), rnForm.getRid());
             params.put(Constants.ENTITY_ID_PARAM, aeid.getAppdefKey());
         }
-        params.put( "ad", new Integer(rnForm.getAd()) );
-        
-       
-       
+        params.put("ad", new Integer(rnForm.getAd()));
 
         // XXX Save stuff from the form
 
@@ -75,4 +67,3 @@ public class SaveEscalationAction extends BaseAction {
 
     }
 }
-

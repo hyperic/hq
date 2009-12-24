@@ -50,54 +50,46 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  *
  */
-public class RemoveScheduleAction extends BaseAction {
-    
+public class RemoveScheduleAction
+    extends BaseAction {
+
     private AIBoss aiBoss;
-    private final  Log log = LogFactory.getLog(RemoveScheduleAction.class.getName());
-    
-    
+    private final Log log = LogFactory.getLog(RemoveScheduleAction.class.getName());
+
     @Autowired
     public RemoveScheduleAction(AIBoss aiBoss) {
         super();
         this.aiBoss = aiBoss;
     }
 
-
-
-    /** Removes a server identified by the
-     * value of the request parameter <code>Constants.SERVER_PARAM</code>
-     * from the BizApp.
+    /**
+     * Removes a server identified by the value of the request parameter
+     * <code>Constants.SERVER_PARAM</code> from the BizApp.
      * @return
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-            
- 
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
+
         RemoveResourceForm nwForm = (RemoveResourceForm) form;
-        
+
         Integer[] resources = nwForm.getResources();
         Integer rid = nwForm.getRid();
         Integer type = nwForm.getType();
         Map<String, Object> params = new HashMap<String, Object>();
         params.put(Constants.RESOURCE_PARAM, rid);
         params.put(Constants.RESOURCE_TYPE_ID_PARAM, type);
-        
-        if (resources == null || resources.length == 0){
-            returnSuccess(request, mapping, params); 
+
+        if (resources == null || resources.length == 0) {
+            returnSuccess(request, mapping, params);
         }
-        
-        Integer sessionId =  RequestUtils.getSessionId(request);
-                
-        
-        log.trace("removing resource");                                                      
-      
-        
+
+        Integer sessionId = RequestUtils.getSessionId(request);
+
+        log.trace("removing resource");
+
         aiBoss.deleteAIJob(sessionId.intValue(), resources);
 
         return returnSuccess(request, mapping, params);
-            
+
     }
 }

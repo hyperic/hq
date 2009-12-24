@@ -45,14 +45,12 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.springframework.beans.factory.annotation.Autowired;
 
-
 /**
  * View an alert definition -- notified roles.
- *
+ * 
  */
 public class ViewDefinitionNotificationsOthersAction
-    extends ViewDefinitionNotificationsAction
-{
+    extends ViewDefinitionNotificationsAction {
     private static final String[] SORT_ATTRS = { "label" };
 
     @Autowired
@@ -60,32 +58,23 @@ public class ViewDefinitionNotificationsOthersAction
         super(eventsBoss, authzBoss);
     }
 
-    public int getNotificationType() { return EmailActionConfig.TYPE_EMAILS; }
+    public int getNotificationType() {
+        return EmailActionConfig.TYPE_EMAILS;
+    }
 
-    protected PageList getPageList(int sessionID, 
-                                   EmailActionConfig ea, PageControl pc)
-        throws FinderException,
-               SessionTimeoutException,
-               SessionNotFoundException,
-               PermissionException,
-               RemoteException
-    {
+    protected PageList getPageList(int sessionID, EmailActionConfig ea, PageControl pc) throws FinderException,
+        SessionTimeoutException, SessionNotFoundException, PermissionException, RemoteException {
         PageList<LabelValueBean> notifyList = new PageList<LabelValueBean>();
-        for (Iterator it=ea.getUsers().iterator(); it.hasNext();) {
-            String email = (String)it.next();
+        for (Iterator it = ea.getUsers().iterator(); it.hasNext();) {
+            String email = (String) it.next();
             LabelValueBean lvb = new LabelValueBean(email, email);
             notifyList.add(lvb);
         }
 
-        int sortOrder = pc.isAscending() ?
-            JavaBeanPropertyComparator.ASCENDING :
-            JavaBeanPropertyComparator.DESCENDING;
-        JavaBeanPropertyComparator c =
-            new JavaBeanPropertyComparator(SORT_ATTRS[pc.getSortattribute()],
-                                           sortOrder);
+        int sortOrder = pc.isAscending() ? JavaBeanPropertyComparator.ASCENDING : JavaBeanPropertyComparator.DESCENDING;
+        JavaBeanPropertyComparator c = new JavaBeanPropertyComparator(SORT_ATTRS[pc.getSortattribute()], sortOrder);
         Collections.sort(notifyList, c);
 
         return notifyList;
     }
 }
-

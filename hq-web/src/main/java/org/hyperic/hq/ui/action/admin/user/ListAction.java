@@ -42,35 +42,30 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.springframework.beans.factory.annotation.Autowired;
+
 /**
  * An Action that retrieves all users from the BizApp.
  */
-public class ListAction extends TilesAction {
-    
+public class ListAction
+    extends TilesAction {
+
     private final Log log = LogFactory.getLog(ListAction.class.getName());
-    
+
     private AuthzBoss authzBoss;
-    
-    
+
     @Autowired
     public ListAction(AuthzBoss authzBoss) {
         super();
         this.authzBoss = authzBoss;
     }
 
-
-
     /**
-     * Retrieve a <code>List</code> of all
-     * <code>AuthzSubjectValue</code> objects and save it into the
-     * request attribute <code>Constants.ALL_USERS_PARAM</code>.
+     * Retrieve a <code>List</code> of all <code>AuthzSubjectValue</code>
+     * objects and save it into the request attribute
+     * <code>Constants.ALL_USERS_PARAM</code>.
      */
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
         Integer sessionId = RequestUtils.getSessionId(request);
         PageControl pc = RequestUtils.getPageControl(request);
 

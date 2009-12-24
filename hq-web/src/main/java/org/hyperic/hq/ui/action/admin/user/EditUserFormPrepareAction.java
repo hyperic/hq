@@ -37,52 +37,46 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 
 /**
- * An Action that retrieves a specific user from the BizApp to
- * facilitate display of the <em>Edit Role</em> form.
+ * An Action that retrieves a specific user from the BizApp to facilitate
+ * display of the <em>Edit Role</em> form.
  */
-public class EditUserFormPrepareAction extends TilesAction {
-
-  
+public class EditUserFormPrepareAction
+    extends TilesAction {
 
     /**
-     * Retrieve User data and store it in the specified request
-     * parameters.
+     * Retrieve User data and store it in the specified request parameters.
      */
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-    throws Exception {
-       
-        EditForm userForm = (EditForm)form;
+    public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
+                                 HttpServletRequest request, HttpServletResponse response) throws Exception {
+
+        EditForm userForm = (EditForm) form;
 
         WebUser user = (WebUser) request.getAttribute(Constants.USER_ATTR);
 
         if (userForm.getFirstName() == null) {
-            userForm.setFirstName( user.getFirstName() );
+            userForm.setFirstName(user.getFirstName());
         }
-        if(userForm.getLastName() == null) {
-            userForm.setLastName( user.getLastName() );
+        if (userForm.getLastName() == null) {
+            userForm.setLastName(user.getLastName());
         }
-        if(userForm.getDepartment() == null) {
-            userForm.setDepartment( user.getDepartment() );
+        if (userForm.getDepartment() == null) {
+            userForm.setDepartment(user.getDepartment());
         }
-        if(userForm.getName() == null) {
-            userForm.setName( user.getName() );
+        if (userForm.getName() == null) {
+            userForm.setName(user.getName());
         }
-        if(userForm.getEmailAddress() == null) {
-            userForm.setEmailAddress( user.getEmailAddress() );
+        if (userForm.getEmailAddress() == null) {
+            userForm.setEmailAddress(user.getEmailAddress());
         }
-        if(userForm.getPhoneNumber() == null) {
-            userForm.setPhoneNumber( user.getPhoneNumber() );
+        if (userForm.getPhoneNumber() == null) {
+            userForm.setPhoneNumber(user.getPhoneNumber());
         }
-        if(userForm.getSmsAddress() == null) {
-            userForm.setSmsAddress( user.getSmsaddress());    
+        if (userForm.getSmsAddress() == null) {
+            userForm.setSmsAddress(user.getSmsaddress());
         }
 
         userForm.setHtmlEmail(user.isHtmlEmail());
-        if ( user.getActive() ) {
+        if (user.getActive()) {
             userForm.setEnableLogin("yes");
         } else {
             userForm.setEnableLogin("no");

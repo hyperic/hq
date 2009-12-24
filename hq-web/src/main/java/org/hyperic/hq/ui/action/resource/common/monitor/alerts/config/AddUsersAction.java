@@ -45,46 +45,36 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An action that adds users to an alert definition in the BizApp.
- *
+ * 
  */
-public class AddUsersAction extends AddNotificationsAction {
+public class AddUsersAction
+    extends AddNotificationsAction {
 
-    private final Log log = LogFactory.getLog( AddUsersAction.class.getName() );
-    
-    
+    private final Log log = LogFactory.getLog(AddUsersAction.class.getName());
+
     @Autowired
     public AddUsersAction(EventsBoss eventsBoss) {
         super(eventsBoss);
     }
 
-    protected ActionForward preProcess(HttpServletRequest request,
-                                       ActionMapping mapping,
-                                       AddNotificationsForm form,
-                                       Map<String, Object> params,
-                                       HttpSession session)
-        throws Exception 
-    {
-        AddUsersForm addForm = (AddUsersForm)form;
+    protected ActionForward preProcess(HttpServletRequest request, ActionMapping mapping, AddNotificationsForm form,
+                                       Map<String, Object> params, HttpSession session) throws Exception {
+        AddUsersForm addForm = (AddUsersForm) form;
         ActionForward forward = checkSubmit(request, mapping, form, params);
         if (forward != null) {
-            if ( addForm.isCancelClicked() || addForm.isResetClicked() ) {
+            if (addForm.isCancelClicked() || addForm.isResetClicked()) {
                 log.debug("removing pending user list");
-                SessionUtils.removeList(session,
-                                        Constants.PENDING_USERS_SES_ATTR);
-            } else if ( addForm.isAddClicked() ) {
+                SessionUtils.removeList(session, Constants.PENDING_USERS_SES_ATTR);
+            } else if (addForm.isAddClicked()) {
                 log.debug("adding to pending user list");
-                SessionUtils.addToList( session,
-                                        Constants.PENDING_USERS_SES_ATTR,
-                                        addForm.getAvailableUsers() );
-                log.debug("@@@@@@@@@@"+ addForm.getAvailableUsers().toString());
-                for(int i=0;i<addForm.getAvailableUsers().length;i++) {
+                SessionUtils.addToList(session, Constants.PENDING_USERS_SES_ATTR, addForm.getAvailableUsers());
+                log.debug("@@@@@@@@@@" + addForm.getAvailableUsers().toString());
+                for (int i = 0; i < addForm.getAvailableUsers().length; i++) {
                     log.debug("Avalilable Users " + addForm.getAvailableUsers()[i]);
                 }
-            } else if ( addForm.isRemoveClicked() ) {
+            } else if (addForm.isRemoveClicked()) {
                 log.debug("removing from pending user list");
-                SessionUtils.removeFromList( session,
-                                             Constants.PENDING_USERS_SES_ATTR,
-                                             addForm.getPendingUsers() );
+                SessionUtils.removeFromList(session, Constants.PENDING_USERS_SES_ATTR, addForm.getPendingUsers());
             }
         }
 
@@ -99,10 +89,9 @@ public class AddUsersAction extends AddNotificationsAction {
 
     protected Set<Object> getNotifications(AddNotificationsForm form, HttpSession session) {
         log.debug("getting pending user list");
-        Integer[] pendingUserIds =
-            SessionUtils.getList(session, Constants.PENDING_USERS_SES_ATTR);
+        Integer[] pendingUserIds = SessionUtils.getList(session, Constants.PENDING_USERS_SES_ATTR);
         Set<Object> userIds = new HashSet<Object>();
-        for (int i=0; i<pendingUserIds.length; i++) {
+        for (int i = 0; i < pendingUserIds.length; i++) {
             userIds.add(pendingUserIds[i]);
             log.debug("adding user [" + pendingUserIds[i] + "]");
         }
@@ -110,5 +99,7 @@ public class AddUsersAction extends AddNotificationsAction {
         return userIds;
     }
 
-    public int getNotificationType() { return EmailActionConfig.TYPE_USERS; }
+    public int getNotificationType() {
+        return EmailActionConfig.TYPE_USERS;
+    }
 }

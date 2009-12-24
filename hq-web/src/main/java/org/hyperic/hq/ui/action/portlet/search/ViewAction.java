@@ -38,40 +38,37 @@ import org.hyperic.hq.ui.action.resource.hub.ResourceHubForm;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * An <code>TilesAction</code> that sets up for searching the Resource Hub portal.
+ * An <code>TilesAction</code> that sets up for searching the Resource Hub
+ * portal.
  */
-public class ViewAction extends TilesAction {
+public class ViewAction
+    extends TilesAction {
 
     private AppdefBoss appdefBoss;
-    
+
     @Autowired
     public ViewAction(AppdefBoss appdefBoss) {
         super();
         this.appdefBoss = appdefBoss;
     }
 
-
     /**
      * Set up the Resource Hub portal.
      */
-    public ActionForward execute(ActionMapping mapping,
-                                ActionForm form,
-                                HttpServletRequest request,
-                                HttpServletResponse response)
-    throws Exception {
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
         ResourceHubForm hubForm = (ResourceHubForm) form;
-       
+
         String[][] entityTypes = appdefBoss.getAppdefTypeStrArrMap();
 
-        if (entityTypes != null){
-            for (int i=0; i<entityTypes.length; i++) {
-                if(!entityTypes[i][0].equals("5") ){
-                    hubForm.addFunction(new LabelValueBean(entityTypes[i][1],
-                                                           entityTypes[i][0]));
+        if (entityTypes != null) {
+            for (int i = 0; i < entityTypes.length; i++) {
+                if (!entityTypes[i][0].equals("5")) {
+                    hubForm.addFunction(new LabelValueBean(entityTypes[i][1], entityTypes[i][0]));
                 }
             }
-            hubForm.addFunction( new LabelValueBean("mixedGroups", "5" ) );
-            hubForm.addFunction( new LabelValueBean("compatibleGroups", "5" ) );
+            hubForm.addFunction(new LabelValueBean("mixedGroups", "5"));
+            hubForm.addFunction(new LabelValueBean("compatibleGroups", "5"));
         }
         return null;
     }

@@ -44,56 +44,53 @@ import org.springframework.beans.factory.annotation.Autowired;
  * A <code>BaseAction</code> that handles alert metrics control form
  * submissions.
  */
-public class AlertMetricsControlAction extends MetricsControlAction {
+public class AlertMetricsControlAction
+    extends MetricsControlAction {
 
-  
     @Autowired
     public AlertMetricsControlAction(AuthzBoss authzBoss) {
         super(authzBoss);
-       
+
     }
 
     /**
      * Modify the metrics summary display as specified in the given
      * <code>MetricsControlForm</code>.
      */
-    public ActionForward execute(ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-    	    	
-        AlertMetricsControlForm controlForm = (AlertMetricsControlForm) form;        
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) throws Exception {
+
+        AlertMetricsControlForm controlForm = (AlertMetricsControlForm) form;
         HttpSession session = request.getSession();
         WebUser user = SessionUtils.getWebUser(session);
-       
+
         if (controlForm.getAlertDefaults().equals(Boolean.FALSE)) {
-        	Map<String,Object> pref = user.getMetricRangePreference();
-        	Boolean ro = (Boolean) pref.get(MonitorUtils.RO);
-        	
-        	if (ro.booleanValue()) {
-            	controlForm.setAlertDefaults(Boolean.TRUE);
-        	} else {
-        		Integer lastN = (Integer) pref.get(MonitorUtils.LASTN);
-        		Integer unit = (Integer) pref.get(MonitorUtils.UNIT);
-        		long rangeMillis = lastN.longValue();
-        		
+            Map<String, Object> pref = user.getMetricRangePreference();
+            Boolean ro = (Boolean) pref.get(MonitorUtils.RO);
+
+            if (ro.booleanValue()) {
+                controlForm.setAlertDefaults(Boolean.TRUE);
+            } else {
+                Integer lastN = (Integer) pref.get(MonitorUtils.LASTN);
+                Integer unit = (Integer) pref.get(MonitorUtils.UNIT);
+                long rangeMillis = lastN.longValue();
+
                 if (unit.intValue() == MonitorUtils.UNIT_DAYS) {
-                	rangeMillis = rangeMillis * 86400000;
+                    rangeMillis = rangeMillis * 86400000;
                 } else if (unit.intValue() == MonitorUtils.UNIT_HOURS) {
-                	rangeMillis = rangeMillis * 3600000;
+                    rangeMillis = rangeMillis * 3600000;
                 } else if (unit.intValue() == MonitorUtils.UNIT_MINUTES) {
-                	rangeMillis = rangeMillis * 60000;
+                    rangeMillis = rangeMillis * 60000;
                 }
                 // If the user's global metric range preference is greater than
                 // 48 hours, then automatically reset their preference to the
                 // default settings
                 if (rangeMillis > 172800000) {
-                	controlForm.setAlertDefaults(Boolean.TRUE);
+                    controlForm.setAlertDefaults(Boolean.TRUE);
                 }
-        	}
+            }
         }
-        
+
         return super.execute(mapping, form, request, response);
     }
 
