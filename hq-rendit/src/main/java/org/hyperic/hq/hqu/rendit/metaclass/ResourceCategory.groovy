@@ -12,6 +12,7 @@ import org.hyperic.hq.appdef.Agent
 import org.hyperic.hq.appdef.shared.AppdefEntityID
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants
 import org.hyperic.hq.appdef.shared.AppdefEntityValue
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.server.session.Platform
 import org.hyperic.hq.appdef.shared.PlatformValue
 import org.hyperic.hq.appdef.server.session.Server
@@ -395,7 +396,7 @@ class ResourceCategory {
     }
     
     static Resource getPlatform(Resource r) {
-        def aeid = new AppdefEntityID(r)
+        def aeid = AppdefUtil.newAppdefEntityId(r)
         def aeval = new AppdefEntityValue(aeid, authzMan.overlordPojo)
         def plats = aeval.getAssociatedPlatforms(PageControl.PAGE_ALL);
         def plat = plats[0]
