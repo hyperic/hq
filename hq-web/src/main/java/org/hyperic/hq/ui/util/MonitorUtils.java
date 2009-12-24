@@ -153,10 +153,10 @@ public class MonitorUtils {
      * particular resource type that is being currently viewed
      8 @return List
      */
-    public static List getSubMiniTabs(List resourceTypes,
-                                      Map resourceCounts,
+    public static List<SubMiniTab> getSubMiniTabs(List<AppdefResourceTypeValue> resourceTypes,
+                                      Map<String,Object> resourceCounts,
                                       Integer selectedId) {
-        List subtabs = new ArrayList();
+        List<SubMiniTab> subtabs = new ArrayList<SubMiniTab>();
 
 	if (resourceTypes != null & resourceCounts != null) {
 	    for (Iterator i = resourceTypes.iterator(); i.hasNext();) {
