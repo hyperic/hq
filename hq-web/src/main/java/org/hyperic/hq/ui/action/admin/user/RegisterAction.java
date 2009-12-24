@@ -26,10 +26,8 @@
 package org.hyperic.hq.ui.action.admin.user;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -40,17 +38,17 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
 import org.hyperic.hq.authz.server.session.Operation;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An <code>WorkflowAction</code> subclass that registers a user
@@ -58,7 +56,21 @@ import org.hyperic.util.config.ConfigResponse;
  */
 public class RegisterAction extends BaseAction {
 
-    // ---------------------------------------------------- Public Methods
+   private final Log log = LogFactory.getLog(RegisterAction.class.getName());
+   private AuthzBoss authzBoss;
+   private AuthBoss authBoss;
+   private AuthzSubjectManager authzSubjectManager;
+   
+   
+   @Autowired
+    public RegisterAction(AuthzBoss authzBoss, AuthBoss authBoss, AuthzSubjectManager authzSubjectManager) {
+    super();
+    this.authzBoss = authzBoss;
+    this.authBoss = authBoss;
+    this.authzSubjectManager = authzSubjectManager;
+}
+
+
 
     /**
      * Create the user with the attributes specified in the given
@@ -70,7 +82,7 @@ public class RegisterAction extends BaseAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
     throws Exception {
-        Log log = LogFactory.getLog(RegisterAction.class.getName());
+        
 
         Integer sessionId =  RequestUtils.getSessionId(request);
         EditForm userForm = (EditForm)form;
@@ -81,10 +93,6 @@ public class RegisterAction extends BaseAction {
             return forward;
         }
 
-        //get the spiderSubjectValue of the user to be deleated.
-        ServletContext ctx = getServlet().getServletContext();            
-        AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);             
-        AuthBoss authBoss = ContextUtils.getAuthBoss(ctx); 
 
         WebUser webUser = RequestUtils.getWebUser(session);
 
@@ -98,7 +106,7 @@ public class RegisterAction extends BaseAction {
         log.trace("registering subject [" + webUser.getUsername() + "]");
         
         AuthzSubject target = 
-            AuthzSubjectManagerImpl.getOne().findSubjectById(userForm.getId()); 
+            authzSubjectManager.findSubjectById(userForm.getId()); 
         authzBoss.updateSubject(sessionId, target, Boolean.TRUE,
                                 HQConstants.ApplicationName,
                                 userForm.getDepartment(),
@@ -121,14 +129,13 @@ public class RegisterAction extends BaseAction {
         // the new user has no prefs, but we still want to pick up
         // the defaults
         ConfigResponse preferences = 
-            (ConfigResponse)ctx.getAttribute(Constants.DEF_USER_PREFS);
+            (ConfigResponse)getServlet().getServletContext().getAttribute(Constants.DEF_USER_PREFS);
 
         // look up the user's permissions
         log.trace("getting all operations");
-        HashMap userOpsMap = new HashMap();
-        List userOps = authzBoss.getAllOperations(sessionId);
-        for (Iterator it=userOps.iterator(); it.hasNext();) {
-            Operation op = (Operation)it.next();
+        HashMap<String, Boolean> userOpsMap = new HashMap<String, Boolean>();
+        List<Operation> userOps = authzBoss.getAllOperations(sessionId);
+        for (Operation op : userOps) {
             userOpsMap.put(op.getName(), Boolean.TRUE);
         }
 
@@ -137,7 +144,7 @@ public class RegisterAction extends BaseAction {
         session.setAttribute(Constants.WEBUSER_SES_ATTR, webUser);
         session.setAttribute(Constants.USER_OPERATIONS_ATTR, userOpsMap);
 
-        HashMap parms = new HashMap(1);
+        HashMap<String, Object> parms = new HashMap<String, Object>(1);
         parms.put(Constants.USER_PARAM, target.getId());
 
         return returnSuccess(request, mapping, parms, false);

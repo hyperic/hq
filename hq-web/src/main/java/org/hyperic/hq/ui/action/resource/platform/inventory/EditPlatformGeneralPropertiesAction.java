@@ -27,10 +27,14 @@ package org.hyperic.hq.ui.action.resource.platform.inventory;
 
 import java.util.HashMap;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
@@ -38,20 +42,29 @@ import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.action.resource.ResourceForm;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * A <code>BaseAction</code> subclass that edits the general properties of
  * a platform in the BizApp.
  */
 public class EditPlatformGeneralPropertiesAction extends BaseAction {
+
+    private final  Log log = LogFactory
+    .getLog(EditPlatformGeneralPropertiesAction.class.getName());
+    private AppdefBoss appdefBoss;
+    
+    
+    
+    @Autowired
+    public EditPlatformGeneralPropertiesAction(AppdefBoss appdefBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+    }
+
+
+
 
     /**
      * Edit the platform with the attributes specified in the given
@@ -62,14 +75,13 @@ public class EditPlatformGeneralPropertiesAction extends BaseAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-         Log log = LogFactory
-             .getLog(EditPlatformGeneralPropertiesAction.class.getName());
+        
 
         ResourceForm editForm = (ResourceForm) form;
         Integer platformId = editForm.getRid();
         Integer entityType = editForm.getType();
 
-        HashMap forwardParams = new HashMap(2);
+        HashMap<String, Object> forwardParams = new HashMap<String, Object>(2);
         forwardParams.put(Constants.RESOURCE_PARAM, platformId);
         forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, entityType);
 
@@ -80,13 +92,13 @@ public class EditPlatformGeneralPropertiesAction extends BaseAction {
                 return forward;
             }
 
-            ServletContext ctx = getServlet().getServletContext();
+            
             Integer sessionId = RequestUtils.getSessionId(request);
-            AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+           
 
             // now set up the platform
             PlatformValue platform =
-                boss.findPlatformById(sessionId.intValue(), platformId);
+                appdefBoss.findPlatformById(sessionId.intValue(), platformId);
             if (platform == null) {
                 RequestUtils
                     .setError(request,
@@ -99,8 +111,8 @@ public class EditPlatformGeneralPropertiesAction extends BaseAction {
             log.trace("editing general properties of platform [" +
                       platform.getName() + "]" + " with attributes " +
                       editForm);
-            PlatformValue newPlatform =
-                boss.updatePlatform(sessionId.intValue(), platform);
+          
+                appdefBoss.updatePlatform(sessionId.intValue(), platform);
 
             RequestUtils
                 .setConfirmation(request,

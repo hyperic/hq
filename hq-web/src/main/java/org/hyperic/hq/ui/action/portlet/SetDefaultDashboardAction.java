@@ -1,6 +1,5 @@
 package org.hyperic.hq.ui.action.portlet;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -12,16 +11,28 @@ import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class SetDefaultDashboardAction extends BaseAction {
-	@Override
+	private AuthzBoss authzBoss;
+	
+	
+	
+    @Autowired
+    public SetDefaultDashboardAction(AuthzBoss authzBoss) {
+        super();
+        this.authzBoss = authzBoss;
+    }
+
+
+
+
+    @Override
 	public ActionForward execute(ActionMapping mapping, ActionForm form,
 								 HttpServletRequest request, HttpServletResponse response)
 	throws Exception {
-		ServletContext ctx = getServlet().getServletContext();
-        AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
+		
         HttpSession session = request.getSession();
         DashboardForm dForm = (DashboardForm) form;
         WebUser user = RequestUtils.getWebUser(session);

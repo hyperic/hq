@@ -28,7 +28,6 @@ package org.hyperic.hq.ui.action.resource.group.inventory;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -42,15 +41,16 @@ import org.apache.struts.util.LabelValueBean;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.util.BizappUtils;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An Action that retrieves data from the BizApp to facilitate display
@@ -58,8 +58,15 @@ import org.hyperic.util.pager.Pager;
  */
 public class AddGroupResourcesFormPrepareAction extends Action {
     
-    // ---------------------------------------------------- Public Methods
+  
+    private AppdefBoss appdefBoss;
     
+    @Autowired
+    public AddGroupResourcesFormPrepareAction(AppdefBoss appdefBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+    }
+
     /**
      * Retrieve this data and store it in the specified request
      * parameters:
@@ -105,11 +112,10 @@ public class AddGroupResourcesFormPrepareAction extends Action {
         if (groupId == null) {
             groupId = RequestUtils.getResourceId(request);
         }
-        
-        ServletContext ctx = getServlet().getServletContext();
+      
         
         int sessionId = RequestUtils.getSessionIdInt(request);
-        AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+        
         
         PageControl pcAvail =
             RequestUtils.getPageControl(request, "psa", "pna","soa", "sca");
@@ -135,7 +141,7 @@ public class AddGroupResourcesFormPrepareAction extends Action {
         /* pending resources are those on the right side of the "add
            to list" widget- awaiting association with the group
            when the form's "ok" button is clicked. */
-        List pendingResourceIds =
+        List<String> pendingResourceIds =
             SessionUtils.getListAsListStr(request.getSession(),
                 Constants.PENDING_RESOURCES_SES_ATTR);
         
@@ -144,7 +150,7 @@ public class AddGroupResourcesFormPrepareAction extends Action {
         
         log.trace("getting pending resources for group [" + groupId + "]");
         
-        List entities = BizappUtils.buildAppdefEntityIds(pendingResourceIds);
+        List<AppdefEntityID> entities = BizappUtils.buildAppdefEntityIds(pendingResourceIds);
         
         AppdefEntityID[] pendingResItems;
         
@@ -156,12 +162,12 @@ public class AddGroupResourcesFormPrepareAction extends Action {
             pendingResItems = null;
         }        
         
-        List pendingResources =
-            BizappUtils.buildAppdefResources(sessionId, boss, pendingResItems);
+        List<AppdefResourceValue> pendingResources =
+            BizappUtils.buildAppdefResources(sessionId, appdefBoss, pendingResItems);
         
-        List sortedPendingResource =
+        List<AppdefResourceValue> sortedPendingResource =
             BizappUtils.sortAppdefResource(pendingResources, pcPending);
-        PageList pendingList = new PageList();
+        PageList<AppdefResourceValue> pendingList = new PageList<AppdefResourceValue>();
         
         pendingList.setTotalSize(  sortedPendingResource.size() );
         
@@ -200,7 +206,7 @@ public class AddGroupResourcesFormPrepareAction extends Action {
         else
             p = new PrepareMixedGroup();
         
-        p.loadGroupMembers(sessionId, addForm, group, boss, appdefType,
+        p.loadGroupMembers(sessionId, addForm, group, appdefBoss, appdefType,
                            nameFilter, pendingResItems, pcAvail);
         PageList availResources = p.getAvailResources();
         
@@ -375,8 +381,8 @@ public class AddGroupResourcesFormPrepareAction extends Action {
      *
      * @return a list of group types from the list
      */
-    public static List buildResourceTypes() {
-        List gTypes = new ArrayList();
+    private List<LabelValueBean> buildResourceTypes() {
+        List<LabelValueBean> gTypes = new ArrayList<LabelValueBean>();
         
         LabelValueBean bv = null;
         int type = -1;
@@ -406,8 +412,8 @@ public class AddGroupResourcesFormPrepareAction extends Action {
      *
      * @return a unique list of group types from the list
      */
-    public static List buildGroupTypes() {
-        List gTypes = new ArrayList();
+    private List<LabelValueBean> buildGroupTypes() {
+        List<LabelValueBean> gTypes = new ArrayList<LabelValueBean>();
         
         LabelValueBean bv = null;
         int type = -1;

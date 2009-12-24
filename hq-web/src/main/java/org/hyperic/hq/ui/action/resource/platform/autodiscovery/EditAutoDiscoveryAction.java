@@ -25,19 +25,22 @@
 
 package org.hyperic.hq.ui.action.resource.platform.autodiscovery;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.autoinventory.ScanConfiguration;
 import org.hyperic.hq.autoinventory.ScanMethod;
 import org.hyperic.hq.autoinventory.ScanMethodConfig;
 import org.hyperic.hq.autoinventory.shared.AIScheduleValue;
 import org.hyperic.hq.bizapp.shared.AIBoss;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.util.config.ConfigResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class EditAutoDiscoveryAction extends NewAutoDiscoveryAction {
     
-    private static final Log log
-        = LogFactory.getLog(EditAutoDiscoveryAction.class.getName());
+   
+    @Autowired
+    public EditAutoDiscoveryAction(AppdefBoss appdefBoss, AIBoss aiBoss) {
+        super(appdefBoss, aiBoss);
+    }
 
     /**
      * load the AIScheduleValue if needed

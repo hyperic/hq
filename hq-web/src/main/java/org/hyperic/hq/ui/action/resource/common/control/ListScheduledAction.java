@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.ui.action.resource.common.control;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -40,14 +39,15 @@ import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.control.server.session.ControlSchedule;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseValidatorForm;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An Action that retrieves all <em>ControlActionSchedule</em>'s
@@ -55,8 +55,18 @@ import org.hyperic.util.pager.PageList;
  */
 public class ListScheduledAction extends TilesAction {
     
-    // ---------------------------------------------------- Public Methods
+    private final Log log = LogFactory.getLog(ListScheduledAction.class.getName());
+    private ControlBoss controlBoss;
     
+    
+    @Autowired
+    public ListScheduledAction(ControlBoss controlBoss) {
+        super();
+        this.controlBoss = controlBoss;
+    }
+
+
+
     /**
      * Retrieve a <code>List</code> of all
      * <code>ControlActionSchedule</code> objects and save it into the
@@ -69,20 +79,19 @@ public class ListScheduledAction extends TilesAction {
                                   HttpServletResponse response)
     throws Exception {
         
-        Log log = LogFactory.getLog(ListScheduledAction.class.getName());
+        
         
         try {
             log.trace("Getting all scheduled control actions for resource.");
 
-            ServletContext ctx = getServlet().getServletContext();
-            ControlBoss cBoss = ContextUtils.getControlBoss(ctx);
+          
 
             Integer sessionId = RequestUtils.getSessionId(request);
             PageControl pc = RequestUtils.getPageControl(request);
             AppdefEntityID appdefId = RequestUtils.getEntityId(request);
 
-            PageList jobs =
-                cBoss.findScheduledJobs(sessionId.intValue(), appdefId, pc);           
+            PageList<ControlSchedule> jobs =
+                controlBoss.findScheduledJobs(sessionId.intValue(), appdefId, pc);           
             
             request.setAttribute( Constants.CONTROL_ACTIONS_SERVER_ATTR, jobs );
             

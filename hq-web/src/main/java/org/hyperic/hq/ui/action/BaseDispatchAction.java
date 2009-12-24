@@ -108,9 +108,9 @@ public abstract class BaseDispatchAction extends DispatchAction {
         try {
             Portal tmpPortal = (Portal)request.getAttribute(Constants.PORTAL_KEY);
             if (tmpPortal.doWorkflow()) {
-                Map params = tmpPortal.getWorkflowParams();
+                Map<String,Object> params = tmpPortal.getWorkflowParams();
                 if (params == null) {
-                    params = new HashMap();
+                    params = new HashMap<String,Object>();
                     params.put(Constants.MODE_PARAM, name);
                 }
                 setReturnPath(request ,mapping, params);
@@ -150,7 +150,7 @@ public abstract class BaseDispatchAction extends DispatchAction {
      */
     protected void setReturnPath(HttpServletRequest request,
                                  ActionMapping mapping,
-                                 Map params) 
+                                 Map<String, Object> params) 
         throws Exception {
         String returnPath = ActionUtils.findReturnPath(mapping, params);
         if (log.isTraceEnabled()) {
@@ -162,6 +162,6 @@ public abstract class BaseDispatchAction extends DispatchAction {
     protected void setReturnPath(HttpServletRequest request,
                                  ActionMapping mapping)
         throws Exception {
-        setReturnPath(request, mapping, new HashMap());
+        setReturnPath(request, mapping, new HashMap<String, Object>());
     }
 }

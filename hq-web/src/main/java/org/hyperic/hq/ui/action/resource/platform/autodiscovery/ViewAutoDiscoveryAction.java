@@ -29,30 +29,36 @@
  */
 package org.hyperic.hq.ui.action.resource.platform.autodiscovery;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.hyperic.hq.appdef.shared.PlatformValue;
-import org.hyperic.hq.bizapp.shared.AIBoss;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.action.resource.RemoveResourceForm;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.util.pager.PageControl;
-import org.hyperic.util.pager.PageList;
-import org.hyperic.util.pager.SortAttribute;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
-import org.hyperic.util.timer.StopWatch;
+import org.hyperic.hq.appdef.shared.PlatformValue;
+import org.hyperic.hq.autoinventory.shared.AIScheduleValue;
+import org.hyperic.hq.bizapp.shared.AIBoss;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.action.resource.RemoveResourceForm;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.util.pager.PageControl;
+import org.hyperic.util.pager.PageList;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class ViewAutoDiscoveryAction extends TilesAction {
+    
+    private AIBoss aiBoss;
+    
+    
+    @Autowired
+    public ViewAutoDiscoveryAction(AIBoss aiBoss) {
+        super();
+        this.aiBoss = aiBoss;
+    }
+
+
 
     public ActionForward execute(ComponentContext context,
                                  ActionMapping mapping,
@@ -70,13 +76,12 @@ public class ViewAutoDiscoveryAction extends TilesAction {
         }
         
         Integer sessionId = RequestUtils.getSessionId(request);
-        ServletContext ctx = getServlet().getServletContext();
-        AIBoss aiboss = ContextUtils.getAIBoss(ctx);
+       
         
         PageControl pc = RequestUtils.getPageControl(request, "ps", 
                                                      "pn", "so", "sc");
 
-        PageList list = aiboss.
+        PageList<AIScheduleValue> list = aiBoss.
                           findScheduledJobs(sessionId.intValue(), 
                                             platform.getEntityId(),
                                             pc);

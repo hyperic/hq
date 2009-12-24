@@ -25,38 +25,40 @@
 
 package org.hyperic.hq.ui.action.resource.group.inventory;
 
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
-import org.hyperic.hq.appdef.shared.AppdefGroupValue;
-import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.util.BizappUtils;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.util.pager.PageControl;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
 import org.apache.struts.util.MessageResources;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.appdef.shared.AppdefGroupValue;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.util.BizappUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.util.pager.PageControl;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class ViewGroupAction extends TilesAction {
 
-    Log log = LogFactory.getLog(ViewGroupAction.class.getName());
+   private AppdefBoss appdefBoss;
+   
+   
+   @Autowired
+    public ViewGroupAction(AppdefBoss appdefBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+    }
 
     public ActionForward execute(ComponentContext context,
                                  ActionMapping mapping,
@@ -65,9 +67,9 @@ public class ViewGroupAction extends TilesAction {
                                  HttpServletResponse response)
         throws Exception
     {
-        ServletContext ctx = getServlet().getServletContext();
+      
         int sessionId = RequestUtils.getSessionIdInt(request);
-        AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+        
         PageControl pc = RequestUtils.getPageControl(request,"ps",
                                                      "pn","so","sc");
         AppdefGroupValue group =
@@ -79,19 +81,19 @@ public class ViewGroupAction extends TilesAction {
             return null;
         }
 
-        List appdefValues =
-            BizappUtils.buildGroupResources(boss, sessionId, group, pc);
+        List<AppdefResourceValue> appdefValues =
+            BizappUtils.buildGroupResources(appdefBoss, sessionId, group, pc);
 
         if (group.getGroupType() ==
                 AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP) {
-            Map typeMap =
+            Map<String,Integer> typeMap =
                 AppdefResourceValue.getResourceTypeCountMap(appdefValues);
             request.setAttribute(Constants.RESOURCE_TYPE_MAP_ATTR, typeMap);
         }
         else if (group.getGroupType() ==
                 AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS) {
             request.setAttribute(Constants.RESOURCE_TYPE_MAP_ATTR,
-                                 boss.getResourceTypeCountMap(sessionId,
+                                 appdefBoss.getResourceTypeCountMap(sessionId,
                                                               group.getId()));
         }
 
@@ -119,7 +121,7 @@ public class ViewGroupAction extends TilesAction {
     /**
      * @return a group type label from the list of group labels
      */
-    public static String getGroupTypeLabel(AppdefGroupValue group, 
+    private String getGroupTypeLabel(AppdefGroupValue group, 
                                            List groupLabels,
                                            MessageResources res,
                                            Locale locale)

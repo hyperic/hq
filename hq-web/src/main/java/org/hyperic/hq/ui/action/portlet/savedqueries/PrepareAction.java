@@ -30,7 +30,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -46,12 +45,11 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.StringConstants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *prepairs the list and form for the saved queries properties page.
@@ -59,8 +57,19 @@ import org.hyperic.util.config.ConfigResponse;
 
 public class PrepareAction extends TilesAction {
 
-    // --------------------------------------------------------- Public Methods
+    private final   Log log = LogFactory.getLog(PrepareAction.class.getName());
+    private AuthzBoss authzBoss;
     
+    
+    
+    @Autowired
+    public PrepareAction(AuthzBoss authzBoss) {
+        super();
+        this.authzBoss = authzBoss;
+    }
+
+
+
 
     public ActionForward execute(ComponentContext context,
                                  ActionMapping mapping,
@@ -69,23 +78,23 @@ public class PrepareAction extends TilesAction {
                                  HttpServletResponse response)
         throws Exception {
             
-        Log log = LogFactory.getLog(PrepareAction.class.getName());
+      
         log.trace("getting saved charts associated with user ");
-        ServletContext ctx = getServlet().getServletContext();
+       
         WebUser user = RequestUtils.getWebUser(request);
-        AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
+      
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
         		(Integer)request.getSession().getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, aBoss);
+        		user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
-        List chartList = StringUtil.explode(
+        List<String> chartList = StringUtil.explode(
         		dashPrefs.getValue(Constants.USER_DASHBOARD_CHARTS), 
             StringConstants.DASHBOARD_DELIMITER);
 
-        ArrayList charts = new ArrayList();
+        ArrayList<KeyValuePair> charts = new ArrayList<KeyValuePair>();
 
-        for(Iterator i = chartList.iterator(); i.hasNext();) {
-            StringTokenizer st = new StringTokenizer((String) i.next(), ",");
+        for(Iterator<String> i = chartList.iterator(); i.hasNext();) {
+            StringTokenizer st = new StringTokenizer( i.next(), ",");
             if (st.countTokens() >= 2)
                 charts.add(new KeyValuePair(st.nextToken(), st.nextToken()));
         }

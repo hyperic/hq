@@ -27,11 +27,9 @@ package org.hyperic.hq.ui.action.resource.group.inventory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -47,17 +45,15 @@ import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
-import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.action.BaseValidatorForm;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An Action that adds Resources to a Group in the BizApp. This is first
@@ -68,8 +64,20 @@ import org.hyperic.hq.ui.util.SessionUtils;
  * @see org.hyperic.hq.ui.action.resource.group.inventory.AddGroupResourcesFormPrepareAction
  */
 public class AddGroupResourcesAction extends BaseAction {
-    private static Log log = LogFactory.getLog(AddGroupResourcesAction.class.getName());    
+    private final Log log = LogFactory.getLog(AddGroupResourcesAction.class.getName());  
+    private ResourceGroupManager resourceGroupManager;
+    private ResourceManager resourceManager;
+    private AppdefBoss appdefBoss;
     
+    @Autowired
+    public AddGroupResourcesAction(ResourceGroupManager resourceGroupManager, ResourceManager resourceManager,
+                                   AppdefBoss appdefBoss) {
+        super();
+        this.resourceGroupManager = resourceGroupManager;
+        this.resourceManager = resourceManager;
+        this.appdefBoss = appdefBoss;
+    }
+
     /**
      * Add roles to the user specified in the given
      * <code>AddGroupResourcesForm</code>.
@@ -82,7 +90,7 @@ public class AddGroupResourcesAction extends BaseAction {
         HttpSession session = request.getSession();
         AddGroupResourcesForm addForm = (AddGroupResourcesForm) form;
         AppdefEntityID aeid = new AppdefEntityID(addForm.getType().intValue(), addForm.getRid());
-        Map<String, String> forwardParams = new HashMap<String, String>(2);
+        Map<String, Object> forwardParams = new HashMap<String, Object>(2);
         
         forwardParams.put(Constants.ENTITY_ID_PARAM, aeid.getAppdefKey());
         forwardParams.put(Constants.ACCORDION_PARAM, "1");
@@ -96,42 +104,39 @@ public class AddGroupResourcesAction extends BaseAction {
                 return forward;
             }
 
-            ServletContext ctx = getServlet().getServletContext();
-            AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+           
             Integer sessionId = RequestUtils.getSessionId(request);
 
             log.trace("getting pending resource list");
-            List pendingResourceIds =
+            List<String> pendingResourceIds =
                 SessionUtils.getListAsListStr(request.getSession(),
                                      Constants.PENDING_RESOURCES_SES_ATTR);
             
-            if (pendingResourceIds.size() == 0)
+            if (pendingResourceIds.size() == 0) {
                 return returnSuccess(request, mapping, forwardParams);
-                            
+            }
             log.trace("getting group [" + aeid.getID() + "]");
-            AppdefGroupValue agroup = boss.findGroup(sessionId.intValue(),
+            AppdefGroupValue agroup = appdefBoss.findGroup(sessionId.intValue(),
                                                      aeid.getId());
-            ResourceGroup group = boss.findGroupById(sessionId.intValue(), 
+            ResourceGroup group = appdefBoss.findGroupById(sessionId.intValue(), 
                                                      agroup.getId());
             
-            List newIds = new ArrayList();
-            ResourceGroupManager groupMan = 
-                ResourceGroupManagerImpl.getOne();
-            ResourceManager resourceMan = 
-                ResourceManagerImpl.getOne();
-            for (Iterator i=pendingResourceIds.iterator(); i.hasNext(); ) {
-                String id = (String) i.next();
+            List<AppdefEntityID> newIds = new ArrayList<AppdefEntityID>();
+          
+           
+            for (String id : pendingResourceIds ) {
+              
                 AppdefEntityID entity = new AppdefEntityID(id);
-                Resource r = resourceMan.findResource(entity);
+                Resource r = resourceManager.findResource(entity);
                 
-                if (!groupMan.isMember(group, r)) {
+                if (!resourceGroupManager.isMember(group, r)) {
                     newIds.add(entity);
                 }            
             }
 
             // XXX:  We have the list of resources above.  Should use this
             //       instead of passing in IDs.. waste of effort.
-            boss.addResourcesToGroup(sessionId.intValue(), group, newIds);
+            appdefBoss.addResourcesToGroup(sessionId.intValue(), group, newIds);
 
             log.trace("removing pending user list");
             
@@ -156,7 +161,7 @@ public class AddGroupResourcesAction extends BaseAction {
     protected ActionForward checkSubmit(HttpServletRequest request, 
                                         ActionMapping mapping, 
                                         ActionForm form,
-                                        Map params, 
+                                        Map<String, Object> params, 
                                         boolean doReturnPath)
     throws Exception {
         HttpSession session = request.getSession();

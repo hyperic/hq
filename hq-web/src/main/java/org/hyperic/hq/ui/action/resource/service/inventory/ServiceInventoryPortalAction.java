@@ -27,8 +27,6 @@ package org.hyperic.hq.ui.action.resource.service.inventory;
 
 import java.util.Properties;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -39,21 +37,22 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.appdef.shared.ServerValue;
+import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.action.resource.common.inventory.ResourceInventoryPortalAction;
 import org.hyperic.hq.ui.action.resource.server.inventory.ServerInventoryPortalAction;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
-import org.hyperic.util.pager.Pager;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * A <code>ResourceControllerAction</code> that sets up server
@@ -70,26 +69,15 @@ public class ServiceInventoryPortalAction extends ResourceInventoryPortalAction 
      */
     public static final String EMPTY_VALS_ATTR = "EmptyValues";
     
-    protected static Log log =
+    private final Log log =
         LogFactory.getLog(ServerInventoryPortalAction.class.getName());
-        
-    //-------------------------------------instance variables
-    private final String RESOURCE_PAGER = "org.hyperic.hq.appdef.server.session.PagerProcessor_service";
-    private static Pager resourcePager = null;
-
-    //-------------------------------------constructors
-    private void init()
-        throws Exception {
+       
     
-        try {
-            if (resourcePager == null)
-                resourcePager = Pager.getPager(RESOURCE_PAGER);
-        } catch (Exception e) {
-            throw new ServletException("Could not create Pager: " + e);
-        }
-    
+    @Autowired
+    public ServiceInventoryPortalAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss) {
+        super(appdefBoss, authzBoss, controlBoss);
     }
-    
+
     protected Properties getKeyMethodMap() {
         Properties map = new Properties();
         map.setProperty(Constants.MODE_NEW,         "newResource");
@@ -136,8 +124,8 @@ public class ServiceInventoryPortalAction extends ResourceInventoryPortalAction 
         AppdefResourceValue service = RequestUtils.getResource(request);
 
         Integer sessionId = RequestUtils.getSessionId(request);
-        ServletContext ctx = getServlet().getServletContext();
-        ServerValue server = ContextUtils.getAppdefBoss(ctx)
+       
+        appdefBoss
             .findServerByService(sessionId.intValue(), service.getId());
         
         return null;
@@ -223,15 +211,13 @@ public class ServiceInventoryPortalAction extends ResourceInventoryPortalAction 
     private void findAndSetResource(HttpServletRequest request) 
         throws Exception {
 
-        init();
-
         Integer sessionId = RequestUtils.getSessionId(request);
         AppdefEntityID aeid = RequestUtils.getEntityId(request);
         Integer serviceId = aeid.getId();
 
         log.trace("getting service [" + serviceId + "]");
-        ServletContext ctx = getServlet().getServletContext();
-        ServiceValue service = ContextUtils.getAppdefBoss(ctx)
+       
+        ServiceValue service = appdefBoss
             .findServiceById(RequestUtils.getSessionId(request).intValue(),
                           serviceId);
         // XXX: if server == null, throw ServerNotFoundException
@@ -239,13 +225,13 @@ public class ServiceInventoryPortalAction extends ResourceInventoryPortalAction 
         request.setAttribute(Constants.TITLE_PARAM_ATTR, service.getName());
 
         log.trace("getting owner for service");            
-        AuthzSubject owner = ContextUtils.getAuthzBoss(ctx)
+        AuthzSubject owner = authzBoss
             .findSubjectByNameNoAuthz(sessionId, service.getOwner());
         request.setAttribute(Constants.RESOURCE_OWNER_ATTR, owner);
 
         PageControl pc = RequestUtils.getPageControl(request, "pss", "pns",
                                                      "sos", "scs");
-        PageList appValues = ContextUtils.getAppdefBoss(ctx)
+        PageList<ApplicationValue> appValues = appdefBoss
                 .findApplications(sessionId.intValue(), aeid, pc);
         request.setAttribute( Constants.APPLICATIONS_ATTR, appValues );
 

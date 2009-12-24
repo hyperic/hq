@@ -28,23 +28,21 @@ package org.hyperic.hq.ui.action.resource.common.monitor.alerts.config;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
-import org.hyperic.hq.bizapp.shared.EventsBoss;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
+import org.hyperic.hq.bizapp.shared.EventsBoss;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.action.BaseAction;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Create a new alert definition.
@@ -52,9 +50,16 @@ import org.apache.struts.action.ActionMapping;
  */
 public class EditDefinitionPropertiesAction extends BaseAction {
 
-    private Log log = LogFactory.getLog(EditDefinitionPropertiesAction.class.getName());
+    private final Log log = LogFactory.getLog(EditDefinitionPropertiesAction.class.getName());
 
-    // ---------------------------------------------------- Public Methods
+   private EventsBoss eventsBoss;
+   
+   
+   @Autowired
+    public EditDefinitionPropertiesAction(EventsBoss eventsBoss) {
+       super();
+       this.eventsBoss = eventsBoss;
+   }
 
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
@@ -65,7 +70,7 @@ public class EditDefinitionPropertiesAction extends BaseAction {
         DefinitionForm defForm = (DefinitionForm)form;
         log.trace("defForm.id=" + defForm.getAd());
 
-        Map params = new HashMap();
+        Map<String, Object> params = new HashMap<String, Object>();
         AppdefEntityID adeId;
         if (defForm.getRid() != null) {
             adeId = new AppdefEntityID(defForm.getType().intValue(),
@@ -86,10 +91,10 @@ public class EditDefinitionPropertiesAction extends BaseAction {
         }
 
 
-        ServletContext ctx = getServlet().getServletContext();
+     
         int sessionID = RequestUtils.getSessionId(request).intValue();
-        EventsBoss eb = ContextUtils.getEventsBoss(ctx);
-        eb.updateAlertDefinitionBasic( sessionID, defForm.getAd(), defForm.getName(),
+       
+        eventsBoss.updateAlertDefinitionBasic( sessionID, defForm.getAd(), defForm.getName(),
                                        defForm.getDescription(), defForm.getPriority(),
                                        defForm.isActive() );
 
@@ -99,4 +104,3 @@ public class EditDefinitionPropertiesAction extends BaseAction {
     }
 }
 
-// EOF

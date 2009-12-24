@@ -304,7 +304,7 @@ public class WebUser {
      * @param key the name of the preference
      * @return <code>List</code> of <code>String</code> tokens
      */
-    public List getPreferenceAsList(String key, String delimiter)
+    public List<String> getPreferenceAsList(String key, String delimiter)
         throws InvalidOptionException {
         return StringUtil.explode(getPreference(key), delimiter);
     }
@@ -375,9 +375,9 @@ public class WebUser {
      *   <li><code>MonitorUtils.END</code>: Long
      * </ul>
      */
-    public Map getMetricRangePreference(boolean defaultRange)
+    public Map<String,Object> getMetricRangePreference(boolean defaultRange)
         throws InvalidOptionException {
-        Map m = new HashMap();
+        Map<String, Object> m = new HashMap<String,Object>();
 
         //  properties may be empty or unparseable strings (ex:
         //  "null"). if so, use their default values.
@@ -439,7 +439,7 @@ public class WebUser {
         return m;
     }
     
-    public Map getMetricRangePreference() throws InvalidOptionException {
+    public Map<String,Object> getMetricRangePreference() throws InvalidOptionException {
         return getMetricRangePreference(true);
     }
 

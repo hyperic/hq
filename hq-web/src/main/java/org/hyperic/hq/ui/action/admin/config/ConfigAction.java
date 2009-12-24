@@ -34,14 +34,16 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Properties;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
+import org.hyperic.hq.appdef.shared.ServiceTypeValue;
+import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
@@ -51,12 +53,25 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.action.BaseDispatchAction;
 import org.hyperic.hq.ui.util.BizappUtils;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class ConfigAction extends BaseDispatchAction {
+
+    private AuthzBoss authzBoss;
+    private ConfigBoss configBoss;
+    private AppdefBoss appdefBoss;
+    
+    
+    @Autowired
+    public ConfigAction(AuthzBoss authzBoss, ConfigBoss configBoss, AppdefBoss appdefBoss) {
+        super();
+        this.authzBoss = authzBoss;
+        this.configBoss = configBoss;
+        this.appdefBoss = appdefBoss;
+    }
 
     protected Properties getKeyMethodMap() {
         Properties map = new Properties();
@@ -79,10 +94,11 @@ public class ConfigAction extends BaseDispatchAction {
         throws Exception
     {
         Integer sessionId = RequestUtils.getSessionId(request);
-        ServletContext ctx = getServlet().getServletContext();
-        if (!BizappUtils.canAdminHQ(sessionId, ContextUtils.getAuthzBoss(ctx)))
+       
+        if (!BizappUtils.canAdminHQ(sessionId, authzBoss)) {
             throw new PermissionException("User not authorized to configure " +
                                           "server settings");
+        }
         
         createPortal(request, true, "admin.settings.EditServerConfig.Title",
                      ".admin.config.EditConfig");
@@ -100,16 +116,13 @@ public class ConfigAction extends BaseDispatchAction {
                      ".admin.config.EditEscalationConfig");
         
         Integer sessionId = RequestUtils.getSessionId(request);
-        ServletContext ctx = getServlet().getServletContext();
-
-        // Get the list of users
-        AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
-        PageList availableUsers =
+       
+        PageList<AuthzSubjectValue> availableUsers =
             authzBoss.getAllSubjects(sessionId, null, PageControl.PAGE_ALL);
         request.setAttribute(Constants.AVAIL_USERS_ATTR, availableUsers);
         
-        ConfigBoss boss = ContextUtils.getConfigBoss(ctx);
-        Properties props = boss.getConfig();
+       
+        Properties props = configBoss.getConfig();
         
         // See if the property exists
         if (props.containsKey(HQConstants.SNMPVersion)) {
@@ -126,30 +139,30 @@ public class ConfigAction extends BaseDispatchAction {
         throws Exception
     {
         Integer sessionId = RequestUtils.getSessionId(request);
-        ServletContext ctx = getServlet().getServletContext();
-        if (!BizappUtils.canAdminHQ(sessionId, ContextUtils.getAuthzBoss(ctx)))
+       
+        if (!BizappUtils.canAdminHQ(sessionId, authzBoss))
             throw new PermissionException("User not authorized to configure " +
                                           "monitor defaults");
     
-        AppdefBoss apBoss = ContextUtils.getAppdefBoss(ctx);
+       
 
         int session = sessionId.intValue();
-        List platTypes = apBoss.findAllPlatformTypes(session,
+        List<PlatformTypeValue> platTypes = appdefBoss.findAllPlatformTypes(session,
                                                      PageControl.PAGE_ALL);
         request.setAttribute(Constants.ALL_PLATFORM_TYPES_ATTR, platTypes);
 
-        List serverTypes = apBoss.findAllServerTypes(session,
+        List<ServerTypeValue> serverTypes = appdefBoss.findAllServerTypes(session,
                                                      PageControl.PAGE_ALL);
 
         // Get the special service types sans windows special case
         // XXX: What special case?
-        List platServices = new ArrayList();
-        List winServices = new ArrayList();
-        LinkedHashMap serverTypesMap = new LinkedHashMap();
+        List<ServiceTypeValue> platServices = new ArrayList<ServiceTypeValue>();
+        List<ServiceTypeValue> winServices = new ArrayList<ServiceTypeValue>();
+        LinkedHashMap<ServerTypeValue, List<ServiceTypeValue>> serverTypesMap = new LinkedHashMap<ServerTypeValue, List<ServiceTypeValue>>();
         for (int i = 0; i < serverTypes.size(); i++) {
-            ServerTypeValue stv = (ServerTypeValue) serverTypes.get(i);
-            List serviceTypes =
-                apBoss.findServiceTypesByServerType(session,
+            ServerTypeValue stv = serverTypes.get(i);
+            List<ServiceTypeValue> serviceTypes =
+                appdefBoss.findServiceTypesByServerType(session,
                                                     stv.getId().intValue());
             if (stv.getVirtual()) {
                 if (stv.getName().startsWith("Win")) {

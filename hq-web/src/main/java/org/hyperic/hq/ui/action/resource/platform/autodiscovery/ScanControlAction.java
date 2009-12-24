@@ -31,10 +31,12 @@ package org.hyperic.hq.ui.action.resource.platform.autodiscovery;
 
 import java.util.HashMap;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.autoinventory.ScanState;
@@ -43,15 +45,8 @@ import org.hyperic.hq.bizapp.shared.AIBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.action.resource.ResourceForm;
-import org.hyperic.hq.ui.action.resource.server.inventory.NewServerAction;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * action for stopping the auto-discovery scan.  This action
@@ -60,6 +55,15 @@ import org.apache.struts.action.ActionMapping;
  *
  */
 public class ScanControlAction extends BaseAction {
+    
+    private AIBoss aiBoss;
+    
+    
+    @Autowired
+    public ScanControlAction(AIBoss aiBoss) {
+        super();
+        this.aiBoss = aiBoss;
+    }
 
     /**
      * Create a new auto-discovery with the attributes specified in the given
@@ -70,14 +74,14 @@ public class ScanControlAction extends BaseAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-        Log log = LogFactory.getLog(NewServerAction.class.getName());
+      
         try {
             ResourceForm newForm = (ResourceForm) form;
             
             Integer resourceId = newForm.getRid();
             Integer resourceType = newForm.getType();
     
-            HashMap forwardParams = new HashMap(2);
+            HashMap<String, Object> forwardParams = new HashMap<String, Object>(2);
             forwardParams.put(Constants.RESOURCE_PARAM, resourceId);
             forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, resourceType );
 
@@ -109,20 +113,18 @@ public class ScanControlAction extends BaseAction {
         throws
             Exception 
     {
-        ServletContext ctx = getServlet().getServletContext();
+       
         Integer sessionId = RequestUtils.getSessionId(request);
-        AIBoss aiboss = ContextUtils.getAIBoss(ctx);
-        
-        ScanState scanState;
-        ScanStateCore scanStateCore;
-        scanStateCore = aiboss.getScanStatus(sessionId.intValue(), 
+       
+        ScanStateCore scanStateCore = aiBoss.getScanStatus(sessionId.intValue(), 
                                              resourceId.intValue());
-        scanState = new ScanState(scanStateCore);
+        ScanState scanState = new ScanState(scanStateCore);
          
         
         // stop the scan if the scan is still running.
-        if (!scanState.getIsInterrupted() && !scanState.getIsDone())                                                         
-            aiboss.stopScan(sessionId.intValue(), resourceId.intValue());
+        if (!scanState.getIsInterrupted() && !scanState.getIsDone()) {                                                    
+            aiBoss.stopScan(sessionId.intValue(), resourceId.intValue());
+        }
     }
 
 }

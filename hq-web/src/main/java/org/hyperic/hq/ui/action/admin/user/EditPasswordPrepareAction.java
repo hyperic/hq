@@ -25,9 +25,6 @@
 
 package org.hyperic.hq.ui.action.admin.user;
 
-import java.util.Iterator;
-
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -40,13 +37,25 @@ import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.WebUser;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class EditPasswordPrepareAction extends TilesAction{
-    // --------------------------------------------------------- Public Methods
 
-   public ActionForward execute(ComponentContext context,
+   private AuthzBoss authzBoss;
+   
+   
+   
+   @Autowired
+   public EditPasswordPrepareAction(AuthzBoss authzBoss) {
+    super();
+    this.authzBoss = authzBoss;
+}
+
+
+
+
+public ActionForward execute(ComponentContext context,
                         ActionMapping mapping,
                         ActionForm form,
                         HttpServletRequest request,
@@ -55,24 +64,21 @@ public class EditPasswordPrepareAction extends TilesAction{
         
         
         WebUser user = RequestUtils.getWebUser(request);
-        ServletContext ctx = getServlet().getServletContext();
-        Integer sessionId = user.getSessionId();
-        AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
-                        
         
+        Integer sessionId = user.getSessionId();
+                            
         boolean admin = false;                
 
-        for(Iterator i = authzBoss.getAllOperations( sessionId ).iterator();
-            i.hasNext();){
-            Operation operation = (Operation) i.next();            
+        for(Operation operation : authzBoss.getAllOperations( sessionId )){          
             if( admin = AuthzConstants.subjectOpModifySubject
                     .equals(operation.getName()) ){
                 break;
             }            
         }
 
-        if(admin)
+        if(admin) {
             context.putAttribute("administrator", "true");
+        }
         
         return null;
             

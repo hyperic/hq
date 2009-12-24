@@ -31,7 +31,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -41,17 +40,17 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
-import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.StringConstants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.server.session.DashboardConfig;
+import org.hyperic.hq.ui.util.ConfigurationProxy;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.hq.ui.util.ConfigurationProxy;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An <code>Action</code> that loads the <code>Portal</code>
@@ -61,8 +60,19 @@ import org.hyperic.util.config.ConfigResponse;
  */
 public class ModifyAction extends BaseAction {
     
-    // --------------------------------------------------------- Public Methods
+    private ConfigurationProxy configurationProxy;
+    private AuthzBoss authzBoss;
     
+    
+    @Autowired
+    public ModifyAction(ConfigurationProxy configurationProxy, AuthzBoss authzBoss) {
+        super();
+        this.configurationProxy = configurationProxy;
+        this.authzBoss = authzBoss;
+    }
+
+
+
     /**
      *
      * @param mapping The ActionMapping used to select this instance
@@ -78,13 +88,12 @@ public class ModifyAction extends BaseAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
     throws Exception {
-        ServletContext ctx = getServlet().getServletContext();
         HttpSession session = request.getSession();
         WebUser user = RequestUtils.getWebUser(request);
-        AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
+       
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
         		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, boss);
+        		user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         
         PropertiesForm pForm = (PropertiesForm) form;
@@ -106,11 +115,11 @@ public class ModifyAction extends BaseAction {
             returnString = "remove";
         } else {
             // Sort by order
-            List chartList = new ArrayList();
+            List<String> chartList = new ArrayList<String>();
             chartList.add(dashPrefs.getValue(Constants.USER_DASHBOARD_CHARTS));
             chartList.add(dashPrefs.getValue(StringConstants.DASHBOARD_DELIMITER));
             
-            for (Iterator it = chartList.iterator(); it.hasNext(); ) {
+            for (Iterator<String> it = chartList.iterator(); it.hasNext(); ) {
                 if ("null".equals(it.next()))
                     it.remove();
             }
@@ -130,7 +139,7 @@ public class ModifyAction extends BaseAction {
                                          .DASHBOARD_DELIMITER.charAt(0)));
         }
 
-        ConfigurationProxy.getInstance().setDashboardPreferences(session, user, boss, dashPrefs );
+        configurationProxy.setDashboardPreferences(session, user, dashPrefs );
         
         LogFactory.getLog("user.preferences").trace("Invoking setUserPrefs"+
             " in savedqueries/ModifyAction " +

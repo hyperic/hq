@@ -30,7 +30,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -45,9 +44,9 @@ import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.units.FormattedNumber;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *
@@ -55,6 +54,19 @@ import org.hyperic.util.units.FormattedNumber;
  */
 public class ResourceMetricValuesAction extends TilesAction {
     
+    private MeasurementBoss measurementBoss;
+    
+    
+    
+    
+    @Autowired
+    public ResourceMetricValuesAction(MeasurementBoss measurementBoss) {
+        super();
+        this.measurementBoss = measurementBoss;
+    }
+
+
+    @SuppressWarnings("unchecked")
     public ActionForward execute(ComponentContext context,
                                  ActionMapping mapping,
                                  ActionForm form,
@@ -64,13 +76,12 @@ public class ResourceMetricValuesAction extends TilesAction {
         AppdefEntityID entityId =
             (AppdefEntityID) context.getAttribute(Constants.ENTITY_ID_PARAM);
 
-        List templates = (List) context.getAttribute("Indicators");
+        List<MeasurementTemplate> templates = (List<MeasurementTemplate>) context.getAttribute("Indicators");
         
         int sessionId = RequestUtils.getSessionId(request);
-        ServletContext ctx = getServlet().getServletContext();
-        MeasurementBoss boss = ContextUtils.getMeasurementBoss(ctx);
+     
 
-        Map vals = boss.getLastIndicatorValues(sessionId, entityId);
+        Map<Integer,MetricValue> vals = measurementBoss.getLastIndicatorValues(sessionId, entityId);
         
         // Format the values
         String[] metrics = new String[templates.size()];
@@ -80,7 +91,7 @@ public class ResourceMetricValuesAction extends TilesAction {
         }
         else {
             int i = 0;
-            for (Iterator it = templates.iterator(); it.hasNext(); i++) {
+            for (Iterator<MeasurementTemplate> it = templates.iterator(); it.hasNext(); i++) {
                 MeasurementTemplate mt = (MeasurementTemplate) it.next();
                 if (vals.containsKey(mt.getId())) {
                     MetricValue mv = (MetricValue) vals.get(mt.getId());

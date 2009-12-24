@@ -26,10 +26,8 @@
 package org.hyperic.hq.ui.action.resource.group.control;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -47,9 +45,9 @@ import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.beans.OptionItem;
 import org.hyperic.hq.ui.util.BizappUtils;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An <code>Action</code> subclass that prepares a control action associated
@@ -57,7 +55,19 @@ import org.hyperic.util.pager.PageControl;
  */
 public class NewFormPrepareAction extends BaseAction {
 
-    // ---------------------------------------------------- Public Methods
+    private final   Log log = LogFactory.getLog(NewFormPrepareAction.class.getName());  
+    private AppdefBoss appdefBoss;
+    private ControlBoss controlBoss;
+    
+    
+    @Autowired
+    public NewFormPrepareAction(AppdefBoss appdefBoss, ControlBoss controlBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+        this.controlBoss = controlBoss;
+    }
+
+
 
     /**
      * Create the control action and associate it with the group.
@@ -69,32 +79,30 @@ public class NewFormPrepareAction extends BaseAction {
                                  HttpServletResponse response)
         throws Exception {
         
-        Log log = LogFactory.getLog(NewFormPrepareAction.class.getName());            
+                
         log.trace("preparing new group control action" );                    
 
         int sessionId = RequestUtils.getSessionId(request).intValue();
         GroupControlForm gForm = (GroupControlForm)form;        
-        ServletContext ctx = getServlet().getServletContext();
-        ControlBoss cBoss = ContextUtils.getControlBoss(getServlet().getServletContext());
-
+       
         AppdefEntityID appdefId = RequestUtils.getEntityId(request);
 
-        List actions = cBoss.getActions(sessionId, appdefId);
-        actions = OptionItem.createOptionsList(actions);
-        gForm.setControlActions(actions);
-        gForm.setNumControlActions(new Integer(actions.size()));
+        List<String> actions = controlBoss.getActions(sessionId, appdefId);
+        List<OptionItem> options = OptionItem.createOptionsList(actions);
+        gForm.setControlActions(options);
+        gForm.setNumControlActions(new Integer(options.size()));
 
         // get the resource ids associated with this group,
         // create an options list, and associate it with the form
-        AppdefBoss aBoss = ContextUtils.getAppdefBoss(ctx);
-        AppdefGroupValue group = aBoss.findGroup(sessionId, appdefId.getId());
-        List groupMembers =
-            BizappUtils.buildGroupResources(aBoss, sessionId, group,
+       
+        AppdefGroupValue group = appdefBoss.findGroup(sessionId, appdefId.getId());
+        List<AppdefResourceValue> groupMembers =
+            BizappUtils.buildGroupResources(appdefBoss, sessionId, group,
                                             PageControl.PAGE_ALL);
-        Iterator i = groupMembers.iterator();
-        ArrayList groupOptions = new ArrayList();
-        while (i.hasNext()) {
-            AppdefResourceValue arv = (AppdefResourceValue)i.next();
+        
+        ArrayList<LabelValueBean> groupOptions = new ArrayList<LabelValueBean>();
+        for (AppdefResourceValue arv : groupMembers) {
+           
             LabelValueBean lvb 
                 = new LabelValueBean(arv.getName(), arv.getId().toString());
             groupOptions.add(lvb);

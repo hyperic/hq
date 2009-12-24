@@ -25,10 +25,8 @@
 
 package org.hyperic.hq.ui.action.portlet.search;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
@@ -37,12 +35,21 @@ import org.apache.struts.tiles.actions.TilesAction;
 import org.apache.struts.util.LabelValueBean;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.action.resource.hub.ResourceHubForm;
-import org.hyperic.hq.ui.util.ContextUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An <code>TilesAction</code> that sets up for searching the Resource Hub portal.
  */
 public class ViewAction extends TilesAction {
+
+    private AppdefBoss appdefBoss;
+    
+    @Autowired
+    public ViewAction(AppdefBoss appdefBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+    }
+
 
     /**
      * Set up the Resource Hub portal.
@@ -53,9 +60,8 @@ public class ViewAction extends TilesAction {
                                 HttpServletResponse response)
     throws Exception {
         ResourceHubForm hubForm = (ResourceHubForm) form;
-        ServletContext ctx = getServlet().getServletContext();
-        AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
-        String[][] entityTypes = boss.getAppdefTypeStrArrMap();
+       
+        String[][] entityTypes = appdefBoss.getAppdefTypeStrArrMap();
 
         if (entityTypes != null){
             for (int i=0; i<entityTypes.length; i++) {

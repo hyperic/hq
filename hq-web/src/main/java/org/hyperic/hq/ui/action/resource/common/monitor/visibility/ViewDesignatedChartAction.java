@@ -30,27 +30,32 @@ import java.util.HashMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Forward to chart page for a designated metric.
  */
 public class ViewDesignatedChartAction extends MetricDisplayRangeAction {
-    protected static Log log =
-        LogFactory.getLog( ViewDesignatedChartAction.class.getName() );
+    
+    private MeasurementBoss measurementBoss;
+    
+    @Autowired
+    public ViewDesignatedChartAction(AuthzBoss authzBoss, MeasurementBoss measurementBoss) {
+        super(authzBoss);
+        this.measurementBoss = measurementBoss;
+    }
+
 
     /**
      * Modify the metric chart as specified in the given <code>@{link
@@ -62,12 +67,10 @@ public class ViewDesignatedChartAction extends MetricDisplayRangeAction {
                                  HttpServletResponse response)
         throws Exception {
     
-        HashMap forwardParams = new HashMap(4);
+        HashMap<String, Object> forwardParams = new HashMap<String, Object>(4);
         AppdefEntityID aeid = RequestUtils.getEntityId(request);
         forwardParams.put(Constants.ENTITY_ID_PARAM, aeid.getAppdefKey());
-        
-        MeasurementBoss boss =
-            ContextUtils.getMeasurementBoss(getServlet().getServletContext());
+      
         int sessionId  = RequestUtils.getSessionId(request).intValue();
         MeasurementTemplate mt;
         try {
@@ -80,13 +83,13 @@ public class ViewDesignatedChartAction extends MetricDisplayRangeAction {
                               Constants.MODE_MON_CHART_SMMR);
 
             // Now we have to look up the designated metric template ID
-            mt = boss.getAvailabilityMetricTemplate(sessionId, aeid, ctype);
+            mt = measurementBoss.getAvailabilityMetricTemplate(sessionId, aeid, ctype);
         } catch (ParameterNotFoundException e) {
             forwardParams.put(Constants.MODE_PARAM,
                               aeid.isGroup() ? Constants.MODE_MON_CHART_SMMR :
                                                Constants.MODE_MON_CHART_SMSR);
             // Now we have to look up the designated metric template ID
-            mt = boss.getAvailabilityMetricTemplate(sessionId, aeid);
+            mt = measurementBoss.getAvailabilityMetricTemplate(sessionId, aeid);
         }
         
         forwardParams.put(Constants.METRIC_PARAM, mt.getId());

@@ -29,7 +29,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -48,14 +47,25 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.action.resource.ResourceForm;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.util.pager.PageList;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Action which saves the general properties for a group
  */
 public class EditGeneralAction extends BaseAction {
+    
+    private final  Log log = LogFactory.getLog(EditGeneralAction.class.getName());
+    private AppdefBoss appdefBoss;
+    
+    
+    @Autowired
+    public EditGeneralAction(AppdefBoss appdefBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+    }
+
+
 
     /**
      * Create the server with the attributes specified in the given
@@ -66,13 +76,13 @@ public class EditGeneralAction extends BaseAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-        Log log = LogFactory.getLog(EditGeneralAction.class.getName());
+       
         
         ResourceForm rForm = (ResourceForm) form;
 
         Integer rid;
         Integer entityType;
-        HashMap forwardParams = new HashMap(2);
+        HashMap<String, Object> forwardParams = new HashMap<String, Object>(2);
             
         rid = rForm.getRid();
         entityType = rForm.getType();
@@ -87,25 +97,25 @@ public class EditGeneralAction extends BaseAction {
         }
                  
         AppdefGroupValue rValue;
-        ServletContext ctx = getServlet().getServletContext();
+     
 
         try {
             Integer sessionId = RequestUtils.getSessionId(request);
-            AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+            
             
             Integer groupId = RequestUtils.getResourceId(request);
             
-            rValue = boss.findGroup(sessionId.intValue(), groupId);
+            rValue = appdefBoss.findGroup(sessionId.intValue(), groupId);
 
-            ResourceGroup group = boss.findGroupById(sessionId.intValue(), 
+            ResourceGroup group = appdefBoss.findGroupById(sessionId.intValue(), 
                                                      groupId);
             
             // See if this is a private group
             boolean isPrivate = true;
-            Collection groups = 
-                boss.getGroupsForResource(sessionId, group.getResource());
-            for (Iterator it = groups.iterator(); it.hasNext(); ) {
-                ResourceGroup g = (ResourceGroup) it.next();
+            Collection<ResourceGroup> groups = 
+                appdefBoss.getGroupsForResource(sessionId, group.getResource());
+            for (Iterator<ResourceGroup> it = groups.iterator(); it.hasNext(); ) {
+                ResourceGroup g =  it.next();
                 isPrivate =
                     !g.getId().equals(AuthzConstants.rootResourceGroupId);
                 if (!isPrivate)
@@ -124,7 +134,7 @@ public class EditGeneralAction extends BaseAction {
                 }
             }
             
-            boss.updateGroup(sessionId.intValue(), group,
+            appdefBoss.updateGroup(sessionId.intValue(), group,
                              rForm.getName(), rForm.getDescription(),
                              rForm.getLocation());
               

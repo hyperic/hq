@@ -26,17 +26,17 @@
 package org.hyperic.hq.ui.action.resource.common.monitor.visibility;
 
 import java.util.Map;
+import java.util.Set;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
-
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.bizapp.shared.MeasurementBoss;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.bizapp.shared.MeasurementBoss;
+import org.hyperic.hq.bizapp.shared.uibeans.MetricDisplaySummary;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An <code>Action</code> that retrieves data from the BizApp to
@@ -48,10 +48,17 @@ import org.apache.commons.logging.LogFactory;
 public class ResourceMetricsFormPrepareAction
     extends MetricsDisplayFormPrepareAction {
 
-    protected static Log log =
+    protected final Log log =
         LogFactory.getLog(ResourceMetricsFormPrepareAction.class.getName());
 
-    // ---------------------------------------------------- Protected Methods
+   private MeasurementBoss measurementBoss;
+   
+   
+   @Autowired
+    public ResourceMetricsFormPrepareAction(MeasurementBoss measurementBoss) {
+       super();
+       this.measurementBoss = measurementBoss;
+   }
 
     /**
      * Do we show the baseline column on this page? The answer is no (for now).
@@ -74,27 +81,25 @@ public class ResourceMetricsFormPrepareAction
      * @return Map keyed on the category (String), values are List's of 
      * MetricDisplaySummary beans
      */
-    protected Map getMetrics(HttpServletRequest request,
+    protected Map<String,Set<MetricDisplaySummary>> getMetrics(HttpServletRequest request,
                              AppdefEntityID entityId,
                              long filters, String keyword,
                              Long begin, Long end, boolean showAll)
     throws Exception {
         int sessionId = RequestUtils.getSessionId(request).intValue();
-        ServletContext ctx = getServlet().getServletContext();
-        MeasurementBoss boss = ContextUtils.getMeasurementBoss(ctx);
-
-        if (log.isTraceEnabled())
+      
+        if (log.isTraceEnabled()) {
             log.trace("finding metric summaries for resource [" + entityId +
                       "] for range " + begin + ":" + end + " filters value: " +
                       filters + " and keyword: " + keyword);
+        }
 
         AppdefEntityID[] entIds = new AppdefEntityID[] { entityId };
-        Map metrics =
-            boss.findMetrics(sessionId, entIds, filters, keyword,
+        Map<String,Set<MetricDisplaySummary>> metrics =
+            measurementBoss.findMetrics(sessionId, entIds, filters, keyword,
                              begin.longValue(), end.longValue(), showAll);
         
-//        if (log.isTraceEnabled())
-//            MonitorUtils.traceMetricDisplaySummaryMap(log, metrics);
+
 
         return metrics;
     }

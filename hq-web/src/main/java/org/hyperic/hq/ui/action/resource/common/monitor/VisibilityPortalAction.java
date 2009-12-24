@@ -41,6 +41,9 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.action.resource.ResourceController;
@@ -48,6 +51,7 @@ import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.ActionUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * A <code>BaseDispatchAction</code> that sets up common
@@ -85,8 +89,14 @@ public class VisibilityPortalAction extends ResourceController {
     private static final String TITLE_METRIC_METADATA =
         "resource.common.monitor.visibility.MetricMetadata";
 
-    protected static Log log =
+    private final Log log =
         LogFactory.getLog(VisibilityPortalAction.class.getName());
+    
+    
+    @Autowired
+    public VisibilityPortalAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss) {
+        super(appdefBoss, authzBoss, controlBoss);
+    }
 
     protected Properties getKeyMethodMap() {
         Properties map = new Properties();
@@ -268,8 +278,8 @@ public class VisibilityPortalAction extends ResourceController {
         return null;
     }
 
-    private Map makeCompareWorkflowParams(HttpServletRequest request) {
-        Map params = new HashMap();
+    private Map<String,Object> makeCompareWorkflowParams(HttpServletRequest request) {
+        Map<String, Object> params = new HashMap<String,Object>();
         AppdefEntityID aeid = RequestUtils.getEntityId(request);
         params.put(Constants.MODE_PARAM, RequestUtils.getMode(request));
         params.put(Constants.RESOURCE_PARAM, aeid.getId());
@@ -282,8 +292,8 @@ public class VisibilityPortalAction extends ResourceController {
 
         // make sure none of these values are duplicated
         String[] raw = request.getParameterValues("r");
-        ArrayList cooked = new ArrayList();
-        HashMap idx = new HashMap();
+        ArrayList<String> cooked = new ArrayList<String>();
+        HashMap<String, String> idx = new HashMap<String, String>();
         for (int i=0; i<raw.length; i++) {
             String val = raw[i];
             if (idx.get(val) == null) {
@@ -308,7 +318,7 @@ public class VisibilityPortalAction extends ResourceController {
      */
     protected void setReturnPath(HttpServletRequest request,
                                  ActionMapping mapping,
-                                 Map params) 
+                                 Map<String,Object> params) 
         throws Exception {
         this.fetchReturnPathParams(request, params);
         String mode = (String) params.get(Constants.MODE_PARAM);

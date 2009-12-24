@@ -25,38 +25,43 @@
 
 package org.hyperic.hq.ui.action.resource.application.inventory;
 
-import java.io.IOException;
 import java.util.HashMap;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
-import org.hyperic.hq.appdef.shared.ApplicationValue;
-import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.common.ObjectNotFoundException;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.action.resource.ResourceForm;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
+import org.hyperic.hq.appdef.shared.ApplicationValue;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.action.BaseAction;
+import org.hyperic.hq.ui.action.resource.ResourceForm;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * This class handles saving the general properties editing performed
  * on screen 2.1.6.1
  */
 public class EditGeneralPropertiesAction extends BaseAction {
-    private static Log log = LogFactory
+    private final Log log = LogFactory
         .getLog(EditGeneralPropertiesAction.class.getName());
+    
+    private AppdefBoss appdefBoss;
+    
+    
+    @Autowired
+    public EditGeneralPropertiesAction(AppdefBoss appdefBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+    }
+
+
 
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
@@ -68,7 +73,7 @@ public class EditGeneralPropertiesAction extends BaseAction {
         Integer appId = editForm.getRid();
         Integer entityType = editForm.getType();
 
-        HashMap forwardParams = new HashMap(2);
+        HashMap<String, Object> forwardParams = new HashMap<String, Object>(2);
         forwardParams.put(Constants.RESOURCE_PARAM, appId);
         forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, entityType);
 
@@ -79,13 +84,12 @@ public class EditGeneralPropertiesAction extends BaseAction {
                 return forward;
             }
 
-            ServletContext ctx = getServlet().getServletContext();
             Integer sessionId = RequestUtils.getSessionId(request);
-            AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+           
 
             // now set up the application
             ApplicationValue app =
-                boss.findApplicationById(sessionId.intValue(), appId);
+                appdefBoss.findApplicationById(sessionId.intValue(), appId);
             log.trace("in preparation to update it, retrieved app " + app);
             if (app == null) {
                 RequestUtils
@@ -99,8 +103,8 @@ public class EditGeneralPropertiesAction extends BaseAction {
             log.trace("editing general properties of application [" +
                       app.getName() + "]" + " with attributes " +
                       editForm);
-            ApplicationValue newApp =
-                boss.updateApplication(sessionId.intValue(), app);
+           
+                appdefBoss.updateApplication(sessionId.intValue(), app);
 
             RequestUtils
                 .setConfirmation(request,

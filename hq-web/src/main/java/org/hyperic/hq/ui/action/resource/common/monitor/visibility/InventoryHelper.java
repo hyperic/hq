@@ -49,7 +49,9 @@ import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.ui.action.resource.application.monitor.visibility.ApplicationInventoryHelper;
 import org.hyperic.hq.ui.action.resource.group.monitor.visibility.GroupInventoryHelper;
@@ -57,7 +59,6 @@ import org.hyperic.hq.ui.action.resource.platform.monitor.visibility.PlatformInv
 import org.hyperic.hq.ui.action.resource.server.monitor.visibility.ServerInventoryHelper;
 import org.hyperic.hq.ui.action.resource.service.monitor.visibility.ServiceInventoryHelper;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.MonitorUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.StringUtil;
@@ -77,7 +78,7 @@ public abstract class InventoryHelper {
     protected Log log = LogFactory.getLog(this.getClass().getName());
 
     protected AppdefEntityID entityId = null;
-    
+      
     private static final String CFG_ERR_RES =
         "resource.common.inventory.configProps.Unconfigured.error";
     private static final String CFG_INVALID_RES =
@@ -100,7 +101,7 @@ public abstract class InventoryHelper {
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
                 return new ServiceInventoryHelper(entityId);
             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-                return new ApplicationInventoryHelper(entityId);
+                return new ApplicationInventoryHelper(entityId, Bootstrap.getBean(AppdefBoss.class));
             case AppdefEntityConstants.APPDEF_TYPE_GROUP:
                 return new GroupInventoryHelper(entityId);
             default:
@@ -169,8 +170,9 @@ public abstract class InventoryHelper {
                                                            childCounts);
         }
         
-        if (childTypeId != null)
+        if (childTypeId != null) {
             return childTypeId.getId();
+        }
         
         return null;
     }
@@ -259,11 +261,11 @@ public abstract class InventoryHelper {
 
         if (this instanceof ApplicationInventoryHelper) return true;
 
-        ProductBoss pboss = ContextUtils.getProductBoss(ctx);
+        ProductBoss productBoss = Bootstrap.getBean(ProductBoss.class);
 
         String context = request.getContextPath();
         try {
-            pboss.getMergedConfigResponse(sessionId,
+            productBoss.getMergedConfigResponse(sessionId,
                     ProductPlugin.TYPE_MEASUREMENT, entityId, true);
         } catch (ConfigFetchException e) {
             if (setError) {
@@ -282,7 +284,7 @@ public abstract class InventoryHelper {
 
         // only check where the config is invalid
         String validationError =
-            pboss.getConfigResponse(sessionId, entityId).getValidationError();
+            productBoss.getConfigResponse(sessionId, entityId).getValidationError();
 
         if (validationError == null) {
             request.setAttribute(CONFIG_ATTR, Boolean.FALSE);

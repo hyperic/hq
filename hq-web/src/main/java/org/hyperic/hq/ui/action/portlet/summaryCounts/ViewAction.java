@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.ui.action.portlet.summaryCounts;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -43,12 +42,12 @@ import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.timer.StopWatch;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An <code>Action</code> that loads the <code>Portal</code>
@@ -58,21 +57,29 @@ import org.hyperic.util.timer.StopWatch;
  */
 public class ViewAction extends TilesAction {
     
+    private AuthzBoss authzBoss;
+    private AppdefBoss appdefBoss;
+    private final Log timingLog = LogFactory.getLog("DASHBOARD-TIMING");
     
-   public ActionForward execute(ComponentContext context,
+    @Autowired
+   public ViewAction(AuthzBoss authzBoss, AppdefBoss appdefBoss) {
+        super();
+        this.authzBoss = authzBoss;
+        this.appdefBoss = appdefBoss;
+    }
+
+    public ActionForward execute(ComponentContext context,
 			ActionMapping mapping, ActionForm form, HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
       
 	    StopWatch timer = new StopWatch();
-		Log timingLog = LogFactory.getLog("DASHBOARD-TIMING");
-		ServletContext ctx = getServlet().getServletContext();
-		AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
-		AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
+		
+		
 		HttpSession session = request.getSession();
         WebUser user = SessionUtils.getWebUser(session);
 		DashboardConfig dashConfig = DashboardUtils.findDashboard(
 				(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID), 
-						user, aBoss);
+						user, authzBoss);
 		ConfigResponse dashPrefs = dashConfig.getConfig();
 		
 		AppdefInventorySummary summary = appdefBoss.getInventorySummary( 

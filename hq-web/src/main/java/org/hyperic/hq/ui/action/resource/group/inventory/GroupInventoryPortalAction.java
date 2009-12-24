@@ -27,7 +27,6 @@ package org.hyperic.hq.ui.action.resource.group.inventory;
 
 import java.util.Properties;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -37,17 +36,22 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.ApplicationValue;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.action.resource.common.inventory.ResourceInventoryPortalAction;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class GroupInventoryPortalAction extends ResourceInventoryPortalAction {
+   
 
     /**
      * The request scope attribute under which actions store the
@@ -58,14 +62,23 @@ public class GroupInventoryPortalAction extends ResourceInventoryPortalAction {
      */
     public static final String EMPTY_VALS_ATTR = "EmptyValues";
     
-    protected static Log log =
+    protected final Log log =
         LogFactory.getLog(GroupInventoryPortalAction.class.getName());
 
     /**
 	 * @see org.apache.struts.actions.LookupDispatchAction#getKeyMethodMap()
 	 */
-    private static Properties keyMethodMap = new Properties();
-    static {
+    private final Properties keyMethodMap = new Properties();
+    
+    
+    
+    @Autowired
+   public GroupInventoryPortalAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss) {
+        super(appdefBoss, authzBoss, controlBoss);
+        initKeyMethodMap();
+    }
+
+   private void initKeyMethodMap() {
         keyMethodMap.setProperty(Constants.MODE_NEW, "newResource");
         keyMethodMap.setProperty(Constants.MODE_EDIT, "editResourceGeneral");
         keyMethodMap.setProperty(Constants.MODE_EDIT_TYPE,
@@ -212,13 +225,13 @@ public class GroupInventoryPortalAction extends ResourceInventoryPortalAction {
         
         // If this is a cluster, then it's possible that it's also part of an
         // application
-        ServletContext ctx = getServlet().getServletContext();
         Integer sessionId = RequestUtils.getSessionId(request);
-        PageList appValues =
-            ContextUtils.getAppdefBoss(ctx).findApplications(
+        PageList<ApplicationValue> appValues =
+           appdefBoss.findApplications(
                 sessionId.intValue(), aeid, PageControl.PAGE_ALL);
         
-        if (appValues.getTotalSize() > 0)
+        if (appValues.getTotalSize() > 0) {
             request.setAttribute(Constants.APPLICATIONS_ATTR, appValues);
+        }
     }
 }

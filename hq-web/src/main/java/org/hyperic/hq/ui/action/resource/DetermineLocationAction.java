@@ -25,31 +25,36 @@
 
 package org.hyperic.hq.ui.action.resource;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An <code>Action</code> that sets up the Resource Hub portal.
  */
 public class DetermineLocationAction extends BaseAction {
 
-    // ---------------------------------------------------- Public Methods
+  private AppdefBoss appdefBoss;
+  
+   
+  @Autowired
+    public DetermineLocationAction(AppdefBoss appdefBoss) {
+    super();
+    this.appdefBoss = appdefBoss;
+}
+
+
 
     /**
      * determines what resource default page to go to.
@@ -59,7 +64,7 @@ public class DetermineLocationAction extends BaseAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-        Log log = LogFactory.getLog(DetermineLocationAction.class.getName());
+        
 
         // We need to support auto-groups here, too.  If there's a
         // ctype, we'll assume it's an autogroup.
@@ -75,10 +80,9 @@ public class DetermineLocationAction extends BaseAction {
 
             if(aeid.isGroup()){
                 int sessionId = RequestUtils.getSessionId(request).intValue();
-                ServletContext ctx = getServlet().getServletContext();
-                AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+              
                 AppdefGroupValue group =
-                    boss.findGroup(sessionId, aeid.getId());
+                    appdefBoss.findGroup(sessionId, aeid.getId());
 
                 if (AppdefEntityConstants.isGroupAdhoc(group.getGroupType())) {
                     type = "adhocGroup";
@@ -96,4 +100,3 @@ public class DetermineLocationAction extends BaseAction {
     }
 }
 
-// EOF

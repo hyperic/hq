@@ -28,7 +28,6 @@ package org.hyperic.hq.ui.action.portlet.addresource;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -38,16 +37,15 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.StringConstants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.action.BaseValidatorForm;
 import org.hyperic.hq.ui.util.ConfigurationProxy;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An Action that adds resources to a dashboard widget
@@ -57,7 +55,15 @@ import org.hyperic.hq.ui.util.SessionUtils;
  */
 public class AddResourcesAction extends BaseAction {
 
-    // ---------------------------------------------------- Public Methods
+    private final  Log log = LogFactory.getLog(AddResourcesAction.class.getName());   
+    private ConfigurationProxy configurationProxy;
+    
+    @Autowired
+    public AddResourcesAction(ConfigurationProxy configurationProxy) {
+        super();
+        this.configurationProxy = configurationProxy;
+    }
+
 
     /**
      * Add resources to the user specified in the given
@@ -68,7 +74,7 @@ public class AddResourcesAction extends BaseAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-        Log log = LogFactory.getLog(AddResourcesAction.class.getName());    
+        
         HttpSession session = request.getSession();
         WebUser user = SessionUtils.getWebUser(session);
 
@@ -102,17 +108,16 @@ public class AddResourcesAction extends BaseAction {
             return forward;
         }
 
-        ServletContext ctx = getServlet().getServletContext();
-        AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
+       
         
         log.trace("getting pending resources list");
-        List pendingResourceIds = SessionUtils.getListAsListStr(
+        List<String> pendingResourceIds = SessionUtils.getListAsListStr(
                                     request.getSession(),
                                     Constants.PENDING_RESOURCES_SES_ATTR);
 
         StringBuffer resourcesAsString = new StringBuffer();
 
-        for(Iterator i = pendingResourceIds.iterator(); i.hasNext(); ){
+        for(Iterator<String> i = pendingResourceIds.iterator(); i.hasNext(); ){
             resourcesAsString.append( StringConstants.DASHBOARD_DELIMITER );
             resourcesAsString.append( i.next() );            
         }
@@ -121,7 +126,7 @@ public class AddResourcesAction extends BaseAction {
 
         RequestUtils.setConfirmation(request, "admin.user.confirm.AddResource");
 
-        ConfigurationProxy.getInstance().setPreference(session, user, boss,
+        configurationProxy.setPreference(session, user, 
         		addForm.getKey(), resourcesAsString.toString());
 
         return returnSuccess(request, mapping);

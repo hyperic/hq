@@ -27,7 +27,6 @@ package org.hyperic.hq.ui.action.resource.common.monitor.visibility;
 
 import java.util.Map;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -40,16 +39,27 @@ import org.hyperic.hq.bizapp.shared.EventLogBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.beans.TimelineBean;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.MonitorUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.TimeUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * 
  * Set an array for the timeline display
  */
 public class TimelineAction extends TilesAction {
+    
+    private EventLogBoss eventLogBoss;
+    
+    
+    @Autowired
+    public TimelineAction(EventLogBoss eventLogBoss) {
+        super();
+        this.eventLogBoss = eventLogBoss;
+    }
+
+
 
     /*
      * (non-Javadoc)
@@ -64,17 +74,16 @@ public class TimelineAction extends TilesAction {
                                  HttpServletResponse response)
         throws Exception {
         WebUser user = RequestUtils.getWebUser(request);
-        Map range = user.getMetricRangePreference();
+        Map<String,Object> range = user.getMetricRangePreference();
         long begin = ((Long) range.get(MonitorUtils.BEGIN)).longValue();
         long end = ((Long) range.get(MonitorUtils.END)).longValue();
         long[] intervals = new long[Constants.DEFAULT_CHART_POINTS];
 
         // Get the events count
-        ServletContext ctx = getServlet().getServletContext();
-        EventLogBoss boss = ContextUtils.getEventLogBoss(ctx);
+       
         AppdefEntityID aeid = RequestUtils.getEntityId(request);
 
-        boolean[] logsExist = boss.logsExistPerInterval(user.getSessionId().intValue(),
+        boolean[] logsExist = eventLogBoss.logsExistPerInterval(user.getSessionId().intValue(),
                                                        aeid, begin, end,
                                                        intervals.length);
 

@@ -26,17 +26,18 @@
 package org.hyperic.hq.ui.action.resource.group.monitor.visibility;
 
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
+import org.hyperic.hq.bizapp.shared.MeasurementBoss;
+import org.hyperic.hq.bizapp.shared.uibeans.MetricDisplaySummary;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.resource.common.monitor.visibility.ResourceMetricsFormPrepareAction;
 import org.hyperic.hq.ui.util.RequestUtils;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * This is for the "Group Metrics" page
@@ -47,10 +48,12 @@ import org.apache.commons.logging.LogFactory;
 public class GroupMetricsFormPrepareAction
     extends ResourceMetricsFormPrepareAction {
 
-    protected static Log log =
-        LogFactory.getLog(GroupMetricsFormPrepareAction.class.getName());
+    
+    @Autowired
+    public GroupMetricsFormPrepareAction(MeasurementBoss measurementBoss) {
+        super(measurementBoss);
+    }
 
-    // ---------------------------------------------------- Protected Methods
 
     /* (non-Javadoc)
      * @see org.hyperic.hq.ui.action.resource.common.monitor.visibility.MetricsDisplayFormPrepareAction#getShowNumberCollecting()
@@ -63,7 +66,7 @@ public class GroupMetricsFormPrepareAction
     /* (non-Javadoc)
      * @see org.hyperic.hq.ui.action.resource.common.monitor.visibility.MetricsDisplayFormPrepareAction#getMetrics(javax.servlet.http.HttpServletRequest, org.hyperic.hq.appdef.shared.AppdefEntityID, java.lang.Long, java.lang.Long)
      */
-    protected Map getMetrics(HttpServletRequest request, long filters,
+    protected Map<String,Set<MetricDisplaySummary>> getMetrics(HttpServletRequest request, long filters,
                              String keyword, AppdefEntityID entityId,
                              Long begin, Long end, boolean showAll)
         throws Exception{

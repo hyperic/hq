@@ -28,30 +28,29 @@ package org.hyperic.hq.ui.action.resource.server.inventory;
 import java.util.List;
 import java.util.Properties;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.ServerValue;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.Portal;
-import org.hyperic.hq.ui.action.resource.RemoveResourceForm;
-import org.hyperic.hq.ui.action.resource.common.inventory.ResourceInventoryPortalAction;
-import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.hq.ui.util.SessionUtils;
-import org.hyperic.util.pager.PageControl;
-import org.hyperic.util.pager.Pager;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.appdef.shared.ServerValue;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.bizapp.shared.ControlBoss;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.Portal;
+import org.hyperic.hq.ui.action.resource.RemoveResourceForm;
+import org.hyperic.hq.ui.action.resource.common.inventory.ResourceInventoryPortalAction;
+import org.hyperic.hq.ui.exception.ParameterNotFoundException;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.hq.ui.util.SessionUtils;
+import org.hyperic.util.pager.PageControl;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * A <code>ResourceController</code> that sets up server inventory
@@ -68,27 +67,20 @@ public class ServerInventoryPortalAction extends ResourceInventoryPortalAction {
      */
     public static final String EMPTY_VALS_ATTR = "EmptyValues";
     
-    protected static Log log =
+    private final Log log =
         LogFactory.getLog(ServerInventoryPortalAction.class.getName());
-        
-    //-------------------------------------instance variables
-    private final String RESOURCE_PAGER = "org.hyperic.hq.appdef.server.session.PagerProcessor_server";
-    private static Pager resourcePager = null;
 
-    //-------------------------------------constructors
-    private void init()
-        throws Exception {
-        try {
-            if (resourcePager == null)
-                resourcePager = Pager.getPager(RESOURCE_PAGER);
-        } catch (Exception e) {
-            throw new ServletException("Could not create Pager: " + e);
-        }
     
+    private final Properties keyMethodMap = new Properties();
+    
+    
+    @Autowired
+    public ServerInventoryPortalAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss) {
+        super(appdefBoss, authzBoss, controlBoss);
+        initKeyMethodMap();
     }
-    
-    private static Properties keyMethodMap = new Properties();
-    static {
+
+    private void initKeyMethodMap() {
         keyMethodMap.setProperty(
             Constants.MODE_NEW,         "newResource");
         keyMethodMap.setProperty(
@@ -250,16 +242,13 @@ public class ServerInventoryPortalAction extends ResourceInventoryPortalAction {
 
     private void findAndSetResource(HttpServletRequest request)
         throws Exception {
-
-        init();
+        
         Integer sessionId = RequestUtils.getSessionId(request);
         AppdefEntityID aeid = RequestUtils.getEntityId(request);
         log.trace("getting server [" + aeid + "]");
-        ServletContext ctx = getServlet().getServletContext();
-
-        AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+       
         ServerValue server =
-            boss.findServerById(sessionId.intValue(), aeid.getId());
+            appdefBoss.findServerById(sessionId.intValue(), aeid.getId());
 
         RequestUtils.setResource(request, server);
         request.setAttribute(Constants.TITLE_PARAM_ATTR, server.getName());
@@ -278,8 +267,8 @@ public class ServerInventoryPortalAction extends ResourceInventoryPortalAction {
             request.setAttribute(Constants.RESOURCE_REMOVE_FORM_ATTR,
                                  rmServicesForm);
 
-        List serviceList =
-            boss.findServicesByServer(sessionId.intValue(), aeid.getId(), pcs);
+        List<AppdefResourceValue> serviceList =
+            appdefBoss.findServicesByServer(sessionId.intValue(), aeid.getId(), pcs);
         request.setAttribute( Constants.SERVICES_ATTR, serviceList );
 
         setResource(request);

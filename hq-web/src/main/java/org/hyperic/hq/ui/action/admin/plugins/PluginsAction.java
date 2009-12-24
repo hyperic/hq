@@ -37,22 +37,36 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.auth.shared.SessionException;
-import org.hyperic.hq.bizapp.server.session.ProductBossImpl;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
+import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.server.session.AttachType;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class PluginsAction extends TilesAction {
+    
+    private ProductBoss productBoss;
+    
+    
+    
+    @Autowired
+	public PluginsAction(ProductBoss productBoss) {
+        super();
+        this.productBoss = productBoss;
+    }
 
-	public ActionForward execute(ComponentContext context,
+
+
+
+    public ActionForward execute(ComponentContext context,
 			ActionMapping mapping, ActionForm form, HttpServletRequest request,
 			HttpServletResponse response) 
         throws SessionException, ServletException
     {
 
-        ProductBoss pboss = ProductBossImpl.getOne();
-		Collection a = 
-            pboss.findAttachments(RequestUtils.getSessionIdInt(request),
+       
+		Collection<AttachmentDescriptor> a = 
+            productBoss.findAttachments(RequestUtils.getSessionIdInt(request),
                                   AttachType.ADMIN);
                                   
                                   

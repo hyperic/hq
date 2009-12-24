@@ -28,7 +28,6 @@ package org.hyperic.hq.ui.action.resource.common.monitor.alerts.config;
 import java.util.HashMap;
 import java.util.Properties;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -38,9 +37,11 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.ui.Constants;
@@ -51,28 +52,38 @@ import org.hyperic.hq.ui.action.resource.common.monitor.alerts.AlertDefUtil;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.ActionUtils;
 import org.hyperic.hq.ui.util.BizappUtils;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * A dispatcher for the alerts portal.
  *
  */
 public class PortalAction extends ResourceController {
-    protected static Log log =
+    private final Log log =
         LogFactory.getLog(PortalAction.class.getName());
 
-    protected static Properties keyMethodMap = new Properties();
-    static {
-        keyMethodMap.setProperty(Constants.MODE_LIST, "listDefinitions");
-        keyMethodMap.setProperty(Constants.MODE_NEW, "newDefinition");
-        keyMethodMap.setProperty(Constants.MODE_VIEW, "listDefinitions");
-        keyMethodMap.setProperty("viewDefinition", "viewEscalation");
+    protected final Properties keyMethodMap = new Properties();
+    
+    protected EventsBoss eventsBoss;
+    
+    @Autowired
+    public PortalAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss, EventsBoss eventsBoss) {
+        super(appdefBoss, authzBoss, controlBoss) ;
+        this.eventsBoss = eventsBoss;
+        initKeyMethodMap();
     }
 
     protected Properties getKeyMethodMap() {
         return keyMethodMap;
+    }
+    
+    private void initKeyMethodMap() {
+        keyMethodMap.setProperty(Constants.MODE_LIST, "listDefinitions");
+        keyMethodMap.setProperty(Constants.MODE_NEW, "newDefinition");
+        keyMethodMap.setProperty(Constants.MODE_VIEW, "listDefinitions");
+        keyMethodMap.setProperty("viewDefinition", "viewEscalation");
     }
 
     /**
@@ -107,10 +118,9 @@ public class PortalAction extends ResourceController {
         // title parameter to its name
         try {
             int sessionId = RequestUtils.getSessionId(request).intValue();
-            ServletContext ctx = getServlet().getServletContext();
-            EventsBoss eb = ContextUtils.getEventsBoss(ctx);
+            
             AlertDefinitionValue adv = AlertDefUtil.getAlertDefinition
-                (request, sessionId, eb);
+                (request, sessionId, eventsBoss);
             request.setAttribute( Constants.TITLE_PARAM2_ATTR, adv.getName() );
         } catch (ParameterNotFoundException e) {
             // it's okay
@@ -366,7 +376,7 @@ public class PortalAction extends ResourceController {
     protected void setReturnPath(HttpServletRequest request,
                                  ActionMapping mapping) 
         throws Exception{
-        HashMap parms = new HashMap();
+        HashMap<String,Object> parms = new HashMap<String, Object>();
         AppdefEntityID aeid = RequestUtils.getEntityId(request);
         parms.put(Constants.RESOURCE_PARAM, aeid.getId());
         parms.put(Constants.RESOURCE_TYPE_ID_PARAM,
@@ -392,4 +402,3 @@ public class PortalAction extends ResourceController {
     }
 }
 
-// EOF

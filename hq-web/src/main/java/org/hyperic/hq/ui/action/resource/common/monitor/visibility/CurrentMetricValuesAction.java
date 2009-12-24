@@ -25,13 +25,11 @@
 
 package org.hyperic.hq.ui.action.resource.common.monitor.visibility;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -49,11 +47,11 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.MonitorUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.json.JSONObject;
 import org.json.JSONArray;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An <code>Action</code> that retrieves data from the BizApp to
@@ -62,11 +60,21 @@ import org.json.JSONArray;
  */
 public class CurrentMetricValuesAction extends BaseAction {
 
-    protected static Log log =
+    private final Log log =
         LogFactory.getLog(CurrentMetricValuesAction.class.getName());
 
+    private MeasurementBoss measurementBoss;
+    
+    
+   
+    @Autowired
+    public CurrentMetricValuesAction(MeasurementBoss measurementBoss) {
+        super();
+        this.measurementBoss = measurementBoss;
+    }
 
-    // ---------------------------------------------------- Public Methods
+
+
 
     /**
      * Retrieve data needed to display a Metrics Display Form. Respond
@@ -93,7 +101,7 @@ public class CurrentMetricValuesAction extends BaseAction {
         
         // get the "metric range" user pref
         WebUser user = RequestUtils.getWebUser(request);
-        Map range = user.getMetricRangePreference();
+        Map<String,Object> range = user.getMetricRangePreference();
         if (range != null) {    
             begin = (Long) range.get(MonitorUtils.BEGIN);
             end = (Long) range.get(MonitorUtils.END);
@@ -102,26 +110,26 @@ public class CurrentMetricValuesAction extends BaseAction {
         }
 
         int sessionId = RequestUtils.getSessionId(request).intValue();
-        ServletContext ctx = getServlet().getServletContext();
-        MeasurementBoss boss = ContextUtils.getMeasurementBoss(ctx);
+       
+     
 
-        Map metrics;
+        Map<String,Set<MetricDisplaySummary>> metrics;
         
         if (ctype == null) {
-            metrics = boss.findMetrics(sessionId, entityIds,
+            metrics = measurementBoss.findMetrics(sessionId, entityIds,
                                        MeasurementConstants.FILTER_NONE, null,
                                        begin.longValue(), end.longValue(),
                                        false);
         }
         else {
             if (null == entityIds) {
-                metrics = boss.findAGPlatformMetricsByType(sessionId, ctype,
+                metrics = measurementBoss.findAGPlatformMetricsByType(sessionId, ctype,
                                                            begin.longValue(),
                                                            end.longValue(),
                                                            false);
             } else {
                 metrics =
-                    boss.findAGMetricsByType(sessionId, entityIds, ctype,
+                    measurementBoss.findAGMetricsByType(sessionId, entityIds, ctype,
                                              MeasurementConstants.FILTER_NONE,
                                              null, begin.longValue(),
                                              end.longValue(), false);
@@ -134,10 +142,10 @@ public class CurrentMetricValuesAction extends BaseAction {
 
             // Create an array list of map objects for the attributes
             JSONArray objects = new JSONArray();
-            for (Iterator it = metrics.values().iterator(); it.hasNext(); ) {
-                Collection metricList = (Collection) it.next();
-                for (Iterator m = metricList.iterator(); m.hasNext();) {
-                    MetricDisplaySummary mds = (MetricDisplaySummary) m.next();
+            for (Iterator<Set<MetricDisplaySummary>> it = metrics.values().iterator(); it.hasNext(); ) {
+                Collection<MetricDisplaySummary> metricList =  it.next();
+                for (Iterator<MetricDisplaySummary> m = metricList.iterator(); m.hasNext();) {
+                    MetricDisplaySummary mds =  m.next();
                     JSONObject values = new JSONObject();
                     values.put("mid", mds.getTemplateId());
                     values.put("alertCount", new Integer(mds.getAlertCount()));

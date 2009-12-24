@@ -28,33 +28,29 @@ package org.hyperic.hq.ui.action.resource.application.inventory;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.appdef.shared.DependencyNode;
-import org.hyperic.hq.appdef.shared.DependencyTree;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.action.BaseValidatorForm;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.hq.ui.util.SessionUtils;
-import org.hyperic.util.pager.PageControl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.appdef.shared.DependencyTree;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.action.BaseAction;
+import org.hyperic.hq.ui.action.BaseValidatorForm;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.hq.ui.util.SessionUtils;
+import org.hyperic.util.pager.PageControl;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * When the list of pending services on the Add Services page (2.1.6.4)  
@@ -64,8 +60,18 @@ import org.apache.struts.action.ActionMapping;
  */
 public class AddApplicationServiceAction extends BaseAction {
     
-    private static Log log =
+    private final Log log =
         LogFactory.getLog(AddApplicationServiceAction.class.getName());
+    private AppdefBoss appdefBoss;
+    
+    
+    @Autowired
+    public AddApplicationServiceAction(AppdefBoss appdefBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+    }
+
+
 
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
@@ -78,7 +84,7 @@ public class AddApplicationServiceAction extends BaseAction {
         AppdefEntityID aeid = new AppdefEntityID(addForm.getType().intValue(),
                                                  addForm.getRid());
 
-        HashMap forwardParams = new HashMap(2);
+        HashMap<String, Object> forwardParams = new HashMap<String, Object>(2);
         forwardParams.put(Constants.ENTITY_ID_PARAM, aeid.getAppdefKey());
         forwardParams.put(Constants.ACCORDION_PARAM, "3");
 
@@ -110,19 +116,17 @@ public class AddApplicationServiceAction extends BaseAction {
             return forward;
         }
 
-        ServletContext ctx = getServlet().getServletContext();
-        AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
         Integer sessionId = RequestUtils.getSessionId(request);
 
         log.trace("getting pending service list");
-        List uiPendings = SessionUtils.getListAsListStr(session,
+        List<String> uiPendings = SessionUtils.getListAsListStr(session,
                                  Constants.PENDING_APPSVCS_SES_ATTR);
-        List svcList = new ArrayList();
+        List<AppdefEntityID> svcList = new ArrayList<AppdefEntityID>();
 
         for(int pRcs=0;pRcs<uiPendings.size();pRcs++) {
             log.debug("uiPendings = " + uiPendings.get(pRcs));
             StringTokenizer tok =
-                new StringTokenizer((String) uiPendings.get(pRcs)," ");
+                new StringTokenizer( uiPendings.get(pRcs)," ");
             svcList.add(new AppdefEntityID(tok.nextToken()));
         }
         // when we call boss.setApplicationServices(...) our map must
@@ -131,13 +135,13 @@ public class AddApplicationServiceAction extends BaseAction {
 
         // first, get the existing ones            
         PageControl nullPc = new PageControl(-1, -1);
-        List existingServices =
-            boss.findServiceInventoryByApplication(sessionId.intValue(),
+        List<AppdefResourceValue> existingServices =
+            appdefBoss.findServiceInventoryByApplication(sessionId.intValue(),
                                                    aeid.getId(), nullPc);
-        DependencyTree tree = boss.getAppDependencyTree(sessionId.intValue(),
+        DependencyTree tree = appdefBoss.getAppDependencyTree(sessionId.intValue(),
                                                         aeid.getId());
-        for (Iterator iter = existingServices.iterator(); iter.hasNext();) {
-            AppdefResourceValue service = (AppdefResourceValue) iter.next();
+        for (AppdefResourceValue service : existingServices) {
+           
             log.debug("service =" + service.getClass().getName());
             
             tree.findAppService(service);
@@ -152,7 +156,7 @@ public class AddApplicationServiceAction extends BaseAction {
 
         log.trace("adding servicess " + svcList + 
                   " for application [" + aeid.getID() + "]");            
-        boss.setApplicationServices(sessionId.intValue(), aeid.getId(),
+        appdefBoss.setApplicationServices(sessionId.intValue(), aeid.getId(),
                                     svcList);            
         log.trace("removing pending service list");
         SessionUtils.removeList(session, Constants.PENDING_APPSVCS_SES_ATTR);

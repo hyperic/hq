@@ -28,7 +28,6 @@ package org.hyperic.hq.ui.action.resource.common.monitor.alerts.config;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -43,27 +42,38 @@ import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.action.resource.common.monitor.alerts.AlertDefUtil;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Edit an alert definition -- OpenNMS action.
  *
  */
 public class OpenNMSFormAction extends BaseAction {
+    
+    private EventsBoss eventsBoss;
+    
+    
+    @Autowired
+    public OpenNMSFormAction(EventsBoss eventsBoss) {
+        super();
+        this.eventsBoss = eventsBoss;
+    }
+
+
 
     public ActionForward execute(ActionMapping mapping, ActionForm form,
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
         
-        ServletContext ctx = getServlet().getServletContext();
+      
         int sessionID = RequestUtils.getSessionId(request).intValue();
-        EventsBoss eb = ContextUtils.getEventsBoss(ctx);
+       
 
         OpenNMSForm oForm = (OpenNMSForm) form;
         AlertDefinitionValue adv =
-            AlertDefUtil.getAlertDefinition(request, sessionID, eb);
+            AlertDefUtil.getAlertDefinition(request, sessionID, eventsBoss);
         
         // See if there is already an OpenNMSAction
         ActionValue[] actions = adv.getActions();
@@ -88,7 +98,7 @@ public class OpenNMSFormAction extends BaseAction {
             nmsAction.setPort(oForm.getPort());
 
             if (existing == null) {
-                eb.createAction(sessionID, oForm.getAd(),
+                eventsBoss.createAction(sessionID, oForm.getAd(),
                                 nmsAction.getImplementor(),
                                 nmsAction.getConfigResponse());
             }
@@ -100,10 +110,10 @@ public class OpenNMSFormAction extends BaseAction {
         }
 
         if (existing != null) {
-            eb.updateAction(sessionID, existing);
+            eventsBoss.updateAction(sessionID, existing);
         }
         
-        Map params = new HashMap();
+        Map<String, Object> params = new HashMap<String, Object>();
         params.put(Constants.ALERT_DEFINITION_PARAM, oForm.getAd());
 
         if (oForm.getAetid() != null && oForm.getAetid().length() > 0)

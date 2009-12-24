@@ -30,10 +30,15 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import javax.servlet.ServletContext;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
@@ -42,20 +47,14 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
-import org.hyperic.hq.bizapp.shared.uibeans.GroupMetricDisplaySummary;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Create a new alert definition.
@@ -63,7 +62,17 @@ import org.apache.struts.action.ActionMapping;
  */
 public class NewDefinitionAction extends BaseAction {
 
-    private Log log = LogFactory.getLog(NewDefinitionAction.class.getName());
+    private final Log log = LogFactory.getLog(NewDefinitionAction.class.getName());
+    private EventsBoss eventsBoss;
+    private MeasurementBoss measurementBoss;
+    
+    
+    @Autowired
+    public NewDefinitionAction(EventsBoss eventsBoss, MeasurementBoss measurementBoss) {
+        super();
+        this.eventsBoss = eventsBoss;
+        this.measurementBoss = measurementBoss;
+    }
 
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
@@ -73,7 +82,7 @@ public class NewDefinitionAction extends BaseAction {
     {
         DefinitionForm defForm = (DefinitionForm)form;
 
-        Map params = new HashMap();
+        Map<String, Object> params = new HashMap<String, Object>();
         AppdefEntityID adeId;
         if (defForm.getRid() != null) {
             adeId = new AppdefEntityID(defForm.getType().intValue(),
@@ -93,14 +102,13 @@ public class NewDefinitionAction extends BaseAction {
             return forward;
         }
 
-        ServletContext ctx = getServlet().getServletContext();
+       
         int sessionID = RequestUtils.getSessionId(request).intValue();
-        EventsBoss eb = ContextUtils.getEventsBoss(ctx);
-        MeasurementBoss mb = ContextUtils.getMeasurementBoss(ctx);
+       
 
         AlertDefinitionValue adv = new AlertDefinitionValue();
         defForm.exportProperties(adv);
-        defForm.exportConditionsEnablement(adv, request, sessionID, mb,
+        defForm.exportConditionsEnablement(adv, request, sessionID, measurementBoss,
                                            adeId instanceof AppdefEntityTypeID);
         adv.setAppdefType( adeId.getType() );
         adv.setAppdefId( adeId.getId() );
@@ -108,17 +116,17 @@ public class NewDefinitionAction extends BaseAction {
         
         if (adeId instanceof AppdefEntityTypeID)
             try {
-                adv = eb.createResourceTypeAlertDefinition(
+                adv = eventsBoss.createResourceTypeAlertDefinition(
                         sessionID, (AppdefEntityTypeID) adeId, adv);
             } catch(Exception e) {
                 return returnFailure(request, mapping, params); 
             }
         else
-            adv = eb.createAlertDefinition(sessionID, adv);
+            adv = eventsBoss.createAlertDefinition(sessionID, adv);
 
         params.put( Constants.ALERT_DEFINITION_PARAM, adv.getId() );
 
-        if ( _areAnyMetricsDisabled(adv, adeId, sessionID, mb) ) {
+        if ( areAnyMetricsDisabled(adv, adeId, sessionID) ) {
             RequestUtils.setError
                 (request, "resource.common.monitor.alert.config.error.SomeMetricsDisabled");
         } else {
@@ -128,8 +136,8 @@ public class NewDefinitionAction extends BaseAction {
         return returnSuccess(request, mapping, params);
     }
 
-    private boolean _areAnyMetricsDisabled(AlertDefinitionValue adv, AppdefEntityID adeId,
-                                           int sessionID, MeasurementBoss mb)
+    private boolean areAnyMetricsDisabled(AlertDefinitionValue adv, AppdefEntityID adeId,
+                                           int sessionID)
         throws SessionNotFoundException,
                SessionTimeoutException,
                AppdefEntityNotFoundException,
@@ -138,8 +146,8 @@ public class NewDefinitionAction extends BaseAction {
                RemoteException
     {
         // create a map of metricId --> enabled for this resource
-        List metrics = mb.findMeasurements( sessionID, adeId, PageControl.PAGE_ALL );
-        Map metricEnabledFlags = new HashMap( metrics.size() );
+        List metrics = measurementBoss.findMeasurements( sessionID, adeId, PageControl.PAGE_ALL );
+        Map<Integer, Boolean> metricEnabledFlags = new HashMap<Integer, Boolean>( metrics.size() );
         for (Iterator it=metrics.iterator(); it.hasNext();) {
             // Groups are handled differently here.  The list of
             // metrics that will be returned for a group will be
@@ -151,7 +159,7 @@ public class NewDefinitionAction extends BaseAction {
                 Measurement m = (Measurement)it.next();
                 metricEnabledFlags.put( m.getId(), new Boolean(m.isEnabled()));
             } catch (ClassCastException e) {
-                GroupMetricDisplaySummary gds = (GroupMetricDisplaySummary)it.next();
+              
             }
         }
 
@@ -171,4 +179,3 @@ public class NewDefinitionAction extends BaseAction {
     }
 }
 
-// EOF

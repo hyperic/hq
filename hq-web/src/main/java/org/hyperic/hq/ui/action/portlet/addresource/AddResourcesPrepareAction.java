@@ -26,10 +26,8 @@
 package org.hyperic.hq.ui.action.portlet.addresource;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -47,6 +45,9 @@ import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
+import org.hyperic.hq.appdef.shared.PlatformTypeValue;
+import org.hyperic.hq.appdef.shared.ServerTypeValue;
+import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
@@ -54,8 +55,6 @@ import org.hyperic.hq.ui.StringConstants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseActionMapping;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
-import org.hyperic.hq.ui.util.BizappUtils;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
@@ -63,6 +62,7 @@ import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An Action that retrieves data from the user preferences
@@ -74,7 +74,7 @@ import org.hyperic.util.pager.Pager;
  */
 public class AddResourcesPrepareAction extends Action {
  
-    // ---------------------------------------------------- Public Methods
+  
     private static final String BLANK_LABEL = "";
     private static final String BLANK_VAL = "";
     private static final String PLATFORM_KEY =
@@ -97,7 +97,20 @@ public class AddResourcesPrepareAction extends Action {
         new Integer(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP).toString();
     
     private static final int DEFAULT_RESOURCE_TYPE = -1;
+    private final Log log = LogFactory.getLog(AddResourcesPrepareAction.class.getName());
+    private AuthzBoss authzBoss;
+    private AppdefBoss appdefBoss;
     
+    
+    @Autowired
+    public AddResourcesPrepareAction(AuthzBoss authzBoss, AppdefBoss appdefBoss) {
+        super();
+        this.authzBoss = authzBoss;
+        this.appdefBoss = appdefBoss;
+    }
+
+
+
     /**
      * Retrieve this data and store it in the specified request
      * parameters:
@@ -132,19 +145,18 @@ public class AddResourcesPrepareAction extends Action {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-        Log log = LogFactory.getLog(AddResourcesPrepareAction.class.getName());
+       
 
         AddResourcesForm addForm = (AddResourcesForm)form;
             
-        ServletContext ctx = getServlet().getServletContext();
-        AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+       
         HttpSession session = request.getSession();            
         WebUser user = RequestUtils.getWebUser(session);
         Integer sessionId = user.getSessionId();
-        AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
+      
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
         		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, aBoss);
+        		user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         
         PageControl pcAvail = RequestUtils.getPageControl(request, "psa", "pna",
@@ -179,7 +191,7 @@ public class AddResourcesPrepareAction extends Action {
         log.debug("get page of pending resources selected by user");
         Pager pendingPager = Pager.getDefaultPager(); 
         List pendingResources =
-            DashboardUtils.listAsResources(pendingResourcesIds, ctx, user);
+            DashboardUtils.listAsResources(pendingResourcesIds, getServlet().getServletContext(), user);
 
         PageList pageOfPendingResources = pendingPager. 
                                 seek(pendingResources, 
@@ -225,13 +237,13 @@ public class AddResourcesPrepareAction extends Action {
             compat = true;
         }
         
-        List pendingEntityIds =
+        List<AppdefEntityID> pendingEntityIds =
             DashboardUtils.listAsEntityIds(pendingResourcesIds); 
 
         AppdefEntityID[] pendingEntities =
-            (AppdefEntityID[]) pendingEntityIds.toArray(new AppdefEntityID[0]);
+             pendingEntityIds.toArray(new AppdefEntityID[0]);
 
-        PageList avail;
+        PageList<AppdefResourceValue> avail;
         if (appdefType == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
             int groupSubtype = -1;
             
@@ -248,7 +260,7 @@ public class AddResourcesPrepareAction extends Action {
                 resourceType = DEFAULT_RESOURCE_TYPE;
             }
 
-            avail = boss.findCompatInventory(sessionId.intValue(),
+            avail = appdefBoss.findCompatInventory(sessionId.intValue(),
                                              groupSubtype,
                                              appdefType, 
                                              ft == null ? DEFAULT_RESOURCE_TYPE:
@@ -259,7 +271,7 @@ public class AddResourcesPrepareAction extends Action {
                                              pcAvail);
         }
         else{
-            avail = boss.findCompatInventory(sessionId.intValue(), 
+            avail = appdefBoss.findCompatInventory(sessionId.intValue(), 
                                              appdefType, 
                                              resourceType, 
                                              null, 
@@ -281,78 +293,16 @@ public class AddResourcesPrepareAction extends Action {
                              new Integer(filteredAvailList.getTotalSize()));
 
         log.debug("get the available resources user can filter by");                                                
-        setDropDowns(boss, addForm, request, sessionId.intValue(), appdefType,
+        setDropDowns(addForm, request, sessionId.intValue(), appdefType,
                      compat, (BaseActionMapping) mapping); 
 
         return null;
 
     }
 
-    /**
-     * returns a filtered subset of available resources for a given resource based on 
-     * the the resource type 
-     * type
-     * 
-     * @return a list of AppdefResourceValue objects
-     */
-    public static List subsetAvailableResources(List avail, Integer filterType) {
-        List resources = new ArrayList();
-        Iterator aIterator = avail.iterator();
-        while (aIterator.hasNext())
-        {
-            AppdefResourceValue aVal = (AppdefResourceValue)aIterator.next();
-            AppdefResourceTypeValue rVal = aVal.getAppdefResourceTypeValue();
-            if (rVal == null)
-                continue;
-            int id = rVal.getAppdefType();
-            if (id == filterType.intValue())
-                resources.add(aVal);
-        }
-                    
-        return resources;
-    }
-
-    /**
-     * builds a unique list of AppdefResourceTypeValue objects
-     * 
-     * @return a unique list of AppdefResourceTypeValue objects
-     */
-    public List buildAvailableResourceTypes(List avail) {
-        List resourceTypes = new ArrayList();
-        Iterator aIterator = avail.iterator();
-        while (aIterator.hasNext())
-        {
-            AppdefResourceValue aVal = (AppdefResourceValue)aIterator.next();
-            AppdefResourceTypeValue  aType = 
-                    findAppdefResourceType(resourceTypes,
-                        aVal.getAppdefResourceTypeValue());
-            if (aType == null && aVal.getAppdefResourceTypeValue() != null)
-                resourceTypes.add(aVal.getAppdefResourceTypeValue());
-        }
-        
-        List resType = BizappUtils.buildAppdefOptionList(resourceTypes, false);            
-        return resType;
-    }
 
     
-    private AppdefResourceTypeValue findAppdefResourceType(
-                                    List resourceType, 
-                                    AppdefResourceTypeValue compare)
-    {
-        Iterator rIterator = resourceType.iterator();
-        while (rIterator.hasNext())
-        {
-            AppdefResourceTypeValue val = 
-                    (AppdefResourceTypeValue)rIterator.next();
-            if (val != null && compare != null && val.getId() != null && 
-                        val.getId().equals(compare.getId()))
-                return val;
-        }
-        
-        return null;
-    }
-    
-    private void setDropDowns(AppdefBoss boss, 
+    private void setDropDowns(
                               AddResourcesForm addForm, 
                               HttpServletRequest request,
                               int sessionId,
@@ -365,7 +315,7 @@ public class AddResourcesPrepareAction extends Action {
         PageControl pc = PageControl.PAGE_ALL;
         
         // set up resource "functions" (appdef entity s)
-        String[][] entityTypes = boss.getAppdefTypeStrArrMap();
+        String[][] entityTypes = appdefBoss.getAppdefTypeStrArrMap();
 
         // CAM's group constructs suck, so we do sucky things to support them
         boolean pss = "platform-server-service".equals(mapping.getWorkflow());
@@ -400,16 +350,16 @@ public class AddResourcesPrepareAction extends Action {
                 // the entity is a compatible group- we build a
                 // combined menu containing all platform, server and
                 // service types
-                List platformTypes =
-                    boss.findViewablePlatformTypes(sessionId, pc);
+                List<PlatformTypeValue> platformTypes =
+                    appdefBoss.findViewablePlatformTypes(sessionId, pc);
                 addCompatTypeOptions(addForm, platformTypes,
                                      msg(request, PLATFORM_KEY));
-                List serverTypes =
-                    boss.findViewableServerTypes(sessionId, pc);
+                List<ServerTypeValue> serverTypes =
+                    appdefBoss.findViewableServerTypes(sessionId, pc);
                 addCompatTypeOptions(addForm, serverTypes,
                                      msg(request, SERVER_KEY));
-                List serviceTypes =
-                    boss.findViewableServiceTypes(sessionId, pc);
+                List<ServiceTypeValue> serviceTypes =
+                    appdefBoss.findViewableServiceTypes(sessionId, pc);
                 addCompatTypeOptions(addForm, serviceTypes,
                                      msg(request, SERVICE_KEY));
                 
@@ -429,9 +379,8 @@ public class AddResourcesPrepareAction extends Action {
         
         }
         else{    
-            List types = boss.findAllResourceTypes(sessionId, appdefType, pc);
-            for (Iterator itr=types.iterator();itr.hasNext();) {
-                AppdefResourceTypeValue value=(AppdefResourceTypeValue)itr.next();
+            List<AppdefResourceTypeValue> types = appdefBoss.findAllResourceTypes(sessionId, appdefType, pc);
+            for (AppdefResourceTypeValue value : types) {
                 addForm.addType(new LabelValueBean(value.getName(), value.getId().toString()));
             }        
         }
@@ -441,7 +390,7 @@ public class AddResourcesPrepareAction extends Action {
             
     }
     
-    private void addCompatTypeOptions(AddResourcesForm form, List types,
+    private void addCompatTypeOptions(AddResourcesForm form, List<? extends AppdefResourceTypeValue> types,
                                       String label) {
         if (types.size() > 0) {
             form.addType(new LabelValueBean(BLANK_LABEL, BLANK_VAL));
@@ -450,11 +399,9 @@ public class AddResourcesPrepareAction extends Action {
         }
     }
     
-    private void addTypeOptions(AddResourcesForm form, List types) {
+    private void addTypeOptions(AddResourcesForm form, List<? extends AppdefResourceTypeValue> types) {
         if (types.size() > 0) {
-            for (Iterator itr = types.iterator(); itr.hasNext(); ) {
-                AppdefResourceTypeValue value =
-                    (AppdefResourceTypeValue) itr.next();
+            for (AppdefResourceTypeValue value  : types) {
                 form.addType(new LabelValueBean(value.getName(),
                                                 value.getAppdefTypeKey()));
             }

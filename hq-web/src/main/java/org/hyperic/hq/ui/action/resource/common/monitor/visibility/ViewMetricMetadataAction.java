@@ -27,32 +27,42 @@ package org.hyperic.hq.ui.action.resource.common.monitor.visibility;
 
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
-import org.hyperic.hq.bizapp.shared.MeasurementBoss;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
 
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
+import org.hyperic.hq.bizapp.shared.MeasurementBoss;
+import org.hyperic.hq.bizapp.shared.uibeans.MeasurementMetadataSummary;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class ViewMetricMetadataAction extends TilesAction {
+    
+    private MeasurementBoss measurementBoss;
+    
+    
+    @Autowired
+    public ViewMetricMetadataAction(MeasurementBoss measurementBoss) {
+        super();
+        this.measurementBoss = measurementBoss;
+    }
+
+
 
     public ActionForward execute(ComponentContext cc, ActionMapping mapping,
              ActionForm form, HttpServletRequest request,
              HttpServletResponse response) throws Exception {
         MetricMetadataForm cform = (MetricMetadataForm)form;
-        ServletContext ctx = getServlet().getServletContext();
+      
         int sessionId = RequestUtils.getSessionId(request).intValue();
-        MeasurementBoss mb = ContextUtils.getMeasurementBoss(ctx);
+      
         AppdefEntityID aid = new AppdefEntityID(cform.getEid());
         
         AppdefEntityTypeID atid = null;
@@ -60,7 +70,7 @@ public class ViewMetricMetadataAction extends TilesAction {
             atid = new AppdefEntityTypeID(cform.getCtype());
         }
         
-        List mdss = mb.findMetricMetadata(sessionId, aid, atid, cform.getM());
+        List<MeasurementMetadataSummary> mdss = measurementBoss.findMetricMetadata(sessionId, aid, atid, cform.getM());
         request.setAttribute(Constants.METRIC_SUMMARIES_ATTR, mdss);
         return null; 
    }

@@ -61,8 +61,8 @@ public class OptionItem extends LabelValueBean implements java.io.Serializable {
      * @return A list of OptionItem objects with
      *         value and label set.
      */
-    public static List createOptionsList(List lofs) {
-        ArrayList newList = new ArrayList(lofs.size());
+    public static List<OptionItem> createOptionsList(List<String> lofs) {
+        ArrayList<OptionItem> newList = new ArrayList<OptionItem>(lofs.size());
         Iterator i = lofs.iterator();
         OptionItem item;
         while (i.hasNext()) {

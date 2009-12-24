@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.ui.action.resource.common.monitor.alerts.config;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -39,9 +38,9 @@ import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.events.InvalidActionDataException;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.ui.action.resource.common.monitor.alerts.AlertDefUtil;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.EncodingException;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * View an alert definition -- OpenNMS action.
@@ -49,7 +48,17 @@ import org.hyperic.util.config.EncodingException;
  */
 public class OpenNMSFormPrepareAction extends TilesAction {
 
-    private Log _log = LogFactory.getLog(OpenNMSFormPrepareAction.class);
+    private final Log log = LogFactory.getLog(OpenNMSFormPrepareAction.class);
+    private EventsBoss eventsBoss;
+    
+    
+    @Autowired
+    public OpenNMSFormPrepareAction(EventsBoss eventsBoss) {
+        super();
+        this.eventsBoss = eventsBoss;
+    }
+
+
 
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
@@ -57,19 +66,18 @@ public class OpenNMSFormPrepareAction extends TilesAction {
                                  HttpServletResponse response)
         throws Exception
     {            
-        ServletContext ctx = getServlet().getServletContext();
+       
         int sessionID = RequestUtils.getSessionId(request).intValue();
-        EventsBoss eb = ContextUtils.getEventsBoss(ctx);
 
         AlertDefinitionValue adv = AlertDefUtil.getAlertDefinition
-            (request, sessionID, eb);
+            (request, sessionID, eventsBoss);
         OpenNMSForm oForm = (OpenNMSForm) form;
         try {
             oForm.importAction(adv);
         } catch (InvalidActionDataException e) {
-            _log.error("Invalid OpenNMSAction", e);
+            log.error("Invalid OpenNMSAction", e);
         } catch (EncodingException e) {
-            _log.error("Invalid OpenNMSAction", e);
+            log.error("Invalid OpenNMSAction", e);
         }
 
         return null;

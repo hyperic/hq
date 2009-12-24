@@ -28,7 +28,6 @@ package org.hyperic.hq.ui.action.resource.group.control;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -45,9 +44,9 @@ import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.scheduler.ScheduleValue;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * A <code>BaseAction</code> subclass that creates a group control
@@ -55,7 +54,16 @@ import org.hyperic.hq.ui.util.SessionUtils;
  */
 public class NewAction extends BaseAction {
 
-    // ---------------------------------------------------- Public Methods
+  private ControlBoss controlBoss;
+  
+  
+      @Autowired
+    public NewAction(ControlBoss controlBoss) {
+        super();
+        this.controlBoss = controlBoss;
+    }
+
+
 
     /**
      * Create the group control action with the attributes specified in the given
@@ -69,7 +77,7 @@ public class NewAction extends BaseAction {
         Log log = LogFactory.getLog(NewAction.class.getName());
 
         GroupControlForm gForm = (GroupControlForm) form;
-        HashMap parms = new HashMap(2);
+        HashMap<String, Object> parms = new HashMap<String, Object>(2);
         
         try {
              
@@ -86,15 +94,13 @@ public class NewAction extends BaseAction {
                 return forward;
             }
 
-            ServletContext ctx = getServlet().getServletContext();            
-            ControlBoss cBoss = ContextUtils.getControlBoss(ctx);
-
+         
             ScheduleValue sv = gForm.createSchedule();
             sv.setDescription(gForm.getDescription());
             
             // make sure that the ControlAction is valid.
             String action = gForm.getControlAction();
-            List validActions = cBoss.getActions(sessionId, appdefId);
+            List<String> validActions = controlBoss.getActions(sessionId, appdefId);
             if (!validActions.contains(action)) {
                 RequestUtils.setError(request,
                     "resource.common.control.error.ControlActionNotValid",
@@ -113,11 +119,11 @@ public class NewAction extends BaseAction {
                 }
             }
             
-            if (gForm.getStartTime().equals(gForm.START_NOW)) {
-                cBoss.doGroupAction(sessionId, appdefId, action, (String)null,
+            if (gForm.getStartTime().equals(GroupControlForm.START_NOW)) {
+                controlBoss.doGroupAction(sessionId, appdefId, action, (String)null,
                                     newOrderSpec);
             } else {
-                cBoss.doGroupAction(sessionId, appdefId, action,
+                controlBoss.doGroupAction(sessionId, appdefId, action,
                                     newOrderSpec, sv);
             }
 

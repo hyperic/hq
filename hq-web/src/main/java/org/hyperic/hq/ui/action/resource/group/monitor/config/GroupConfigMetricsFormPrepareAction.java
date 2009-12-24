@@ -28,7 +28,10 @@ package org.hyperic.hq.ui.action.resource.group.monitor.config;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.ui.action.resource.common.monitor.config.ConfigMetricsFormPrepareAction;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,6 +45,17 @@ import org.apache.struts.tiles.ComponentContext;
  */
 public class GroupConfigMetricsFormPrepareAction 
     extends ConfigMetricsFormPrepareAction {
+    
+    private final  Log log = LogFactory.getLog(
+        GroupConfigMetricsFormPrepareAction.class.getName()); 
+    
+    
+    @Autowired
+    public GroupConfigMetricsFormPrepareAction(MeasurementBoss measurementBoss, AppdefBoss appdefBoss) {
+        super(measurementBoss, appdefBoss);
+    }
+
+
 
     /**
      * Retrieve different resource metrics and store them in various request
@@ -54,8 +68,7 @@ public class GroupConfigMetricsFormPrepareAction
                                  HttpServletResponse response)
         throws Exception {
 
-        Log log = LogFactory.getLog(
-            GroupConfigMetricsFormPrepareAction.class.getName());    
+          
         log.trace("Preparing group resource metrics action.");
         
         ActionForward fwd =

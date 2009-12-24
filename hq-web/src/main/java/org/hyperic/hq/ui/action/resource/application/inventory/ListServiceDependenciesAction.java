@@ -27,27 +27,25 @@ package org.hyperic.hq.ui.action.resource.application.inventory;
 
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.actions.TilesAction;
-
+import org.hyperic.hq.appdef.shared.AppServiceNodeBean;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.DependencyNode;
 import org.hyperic.hq.appdef.shared.DependencyTree;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
+import org.springframework.beans.factory.annotation.Autowired;
 
 
 /**
@@ -58,8 +56,17 @@ import org.hyperic.util.pager.Pager;
  */
 public class ListServiceDependenciesAction extends TilesAction {
 
-    private static Log log = LogFactory.getLog(ListServiceDependenciesAction.class.getName());
+    private AppdefBoss appdefBoss;
     
+    
+    @Autowired
+    public ListServiceDependenciesAction(AppdefBoss appdefBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+    }
+
+
+
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
                                  HttpServletRequest request,
@@ -76,31 +83,31 @@ public class ListServiceDependenciesAction extends TilesAction {
         }        
         
         Integer appId = app.getId();
-        Integer appdefType = new Integer(app.getEntityId().getType());
+       
         Integer appSvcId = cform.getAppSvcId();
         
-        ServletContext ctx = getServlet().getServletContext();
+       
         Integer sessionId = RequestUtils.getSessionId(request);
-        AppdefBoss boss = ContextUtils.getAppdefBoss(ctx); 
-        List services = 
-            boss.findServiceInventoryByApplication(sessionId.intValue(), appId,
+      
+        List<AppdefResourceValue> services = 
+            appdefBoss.findServiceInventoryByApplication(sessionId.intValue(), appId,
                                            PageControl.PAGE_ALL);
 
         // get the dependency tree            
-        DependencyTree tree = boss.getAppDependencyTree(sessionId.intValue(),app.getId());
+        DependencyTree tree = appdefBoss.getAppDependencyTree(sessionId.intValue(),app.getId());
         DependencyNode appSvcNode = DependencyTree.findAppServiceById(tree, appSvcId);            
         //log.trace("Got dependency tree: " + appSvcNode);          
         // build a list of AppServiceNodeBean's that this AppService depends on
-        List dependeeList = DependencyTree.findDependees(tree, appSvcNode, services);
+        List<AppServiceNodeBean> dependeeList = DependencyTree.findDependees(tree, appSvcNode, services);
         // build a list of AppServiceNodeBean's that depend on this AppService
-        List dependerList = DependencyTree.findDependers(tree, appSvcId, services);            
+        List<AppServiceNodeBean> dependerList = DependencyTree.findDependers(tree, appSvcId, services);            
         request.setAttribute(Constants.APPSVC_CURRENT_ATTR, appSvcNode.getAppService());
 
         PageControl pc =
             RequestUtils.getPageControl(request, "ps", "pn",
                                         "so", "sc");          
         Pager dependeePager = Pager.getDefaultPager();            
-        PageList pagedDependeeList = dependeePager.seek(dependeeList, 
+        PageList<AppServiceNodeBean> pagedDependeeList = dependeePager.seek(dependeeList, 
                                        pc.getPagenum(), 
                                        pc.getPagesize() );  
 

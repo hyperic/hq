@@ -39,17 +39,28 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
-import org.hyperic.hq.ui.server.session.DashboardManagerImpl;
 import org.hyperic.hq.ui.server.session.RoleDashboardConfig;
 import org.hyperic.hq.ui.server.session.UserDashboardConfig;
-import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.hq.ui.util.ConfigurationProxy;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class QuickFavoritesAction extends BaseAction {
+    
+    private ConfigurationProxy configurationProxy;
+    private AuthzBoss authzBoss;
+    
+    
+    @Autowired
+    public QuickFavoritesAction(ConfigurationProxy configurationProxy, AuthzBoss authzBoss) {
+        super();
+        this.configurationProxy = configurationProxy;
+        this.authzBoss = authzBoss;
+    }
+
+
 
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
@@ -58,24 +69,23 @@ public class QuickFavoritesAction extends BaseAction {
         throws Exception {
 
     	WebUser user = RequestUtils.getWebUser(request);
-        AuthzBoss boss = ContextUtils.getAuthzBoss(getServlet().getServletContext());
+       
         AppdefEntityID aeid = RequestUtils.getEntityId(request);
         String mode = request.getParameter(Constants.MODE_PARAM);
         String[] dashboardIds = request.getParameterValues(Constants.DASHBOARD_ID_PARAM);
-        HashMap forwardParams = new HashMap(2);
+        HashMap<String, Object> forwardParams = new HashMap<String, Object>(2);
 
         forwardParams.put(Constants.ENTITY_ID_PARAM, aeid.getAppdefKey());
 
-        if (mode == null) return returnFailure(request, mapping, forwardParams);
+        if (mode == null) {
+            return returnFailure(request, mapping, forwardParams);
+        }
 
-        //Boolean isFavorite = QuickFavoritesUtil.isFavorite(dashPrefs, aeid);
-        DashboardManager dashManager = DashboardManagerImpl.getOne();
-        
         if (mode.equals(Constants.MODE_ADD)) {
         	if (dashboardIds != null) {
         		for (int x = 0; x < dashboardIds.length; x++) {
         			Integer dashId = Integer.valueOf(dashboardIds[x]);
-        			DashboardConfig dashboardConfig = DashboardUtils.findDashboard(dashId, user, boss);
+        			DashboardConfig dashboardConfig = DashboardUtils.findDashboard(dashId, user, authzBoss);
         			ConfigResponse configResponse = dashboardConfig.getConfig();
         			Boolean isFavorite = QuickFavoritesUtil.isFavorite(configResponse, aeid);
         			
@@ -86,16 +96,16 @@ public class QuickFavoritesAction extends BaseAction {
         			if (dashboardConfig instanceof RoleDashboardConfig) {
         				RoleDashboardConfig roleDashboardConfig = (RoleDashboardConfig) dashboardConfig;
          			
-        				ConfigurationProxy.getInstance().setRoleDashboardPreferences(configResponse, boss, user, roleDashboardConfig.getRole());
+        				configurationProxy.setRoleDashboardPreferences(configResponse,  user, roleDashboardConfig.getRole());
         			} else if (dashboardConfig instanceof UserDashboardConfig) {
-        				ConfigurationProxy.getInstance().setUserDashboardPreferences(configResponse, boss, user);
+        				configurationProxy.setUserDashboardPreferences(configResponse,  user);
         			} else {
         	            // Neither role or user dashboard. This shouldn't happen, but if it somehow does, treat it as an error.
         	            return returnFailure(request, mapping, forwardParams);        				
         			}
         		}
         	} else {
-        		ConfigResponse configResponse = DashboardUtils.findUserDashboardConfig(user, boss);
+        		ConfigResponse configResponse = DashboardUtils.findUserDashboardConfig(user, authzBoss);
                 Boolean isFavorite = QuickFavoritesUtil.isFavorite(configResponse, aeid);
         				
         		// Is this already in the favorites list?  Should not happen
@@ -106,10 +116,10 @@ public class QuickFavoritesAction extends BaseAction {
             
 	            // Add to favorites and save
 	            DashboardUtils.addEntityToPreferences(Constants.USERPREF_KEY_FAVORITE_RESOURCES, configResponse, aeid, Integer.MAX_VALUE);
-	            ConfigurationProxy.getInstance().setUserDashboardPreferences(configResponse, boss, user);
+	           configurationProxy.setUserDashboardPreferences(configResponse,  user);
         	}
         } else if (mode.equals(Constants.MODE_REMOVE) ) {
-       		ConfigResponse configResponse = DashboardUtils.findUserDashboardConfig(user, boss);
+       		ConfigResponse configResponse = DashboardUtils.findUserDashboardConfig(user, authzBoss);
             Boolean isFavorite = QuickFavoritesUtil.isFavorite(configResponse, aeid);
 
             // Is this not in the favorites list?  Should not happen
@@ -120,7 +130,7 @@ public class QuickFavoritesAction extends BaseAction {
             
             // Remove from favorites and save
             DashboardUtils.removeResources(new String[] { aeid.getAppdefKey() }, Constants.USERPREF_KEY_FAVORITE_RESOURCES, configResponse);
-            ConfigurationProxy.getInstance().setUserDashboardPreferences(configResponse, boss, user);
+            configurationProxy.setUserDashboardPreferences(configResponse,  user);
         } else {
             // Not an add or remove, what the heck is it?  It's an error.
             return returnFailure(request, mapping, forwardParams);

@@ -25,32 +25,20 @@
 
 package org.hyperic.hq.ui.action.resource.common.monitor.visibility;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
-import org.hyperic.hq.common.server.session.ServerConfigManagerImpl;
-import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
-import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.action.BaseActionMapping;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.MonitorUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * A <code>BaseAction</code> that handles alert metrics control form
@@ -58,8 +46,12 @@ import org.hyperic.hq.ui.util.SessionUtils;
  */
 public class AlertMetricsControlAction extends MetricsControlAction {
 
-    private static Log log =
-        LogFactory.getLog(AlertMetricsControlAction.class.getName());
+  
+    @Autowired
+    public AlertMetricsControlAction(AuthzBoss authzBoss) {
+        super(authzBoss);
+       
+    }
 
     /**
      * Modify the metrics summary display as specified in the given
@@ -76,7 +68,7 @@ public class AlertMetricsControlAction extends MetricsControlAction {
         WebUser user = SessionUtils.getWebUser(session);
        
         if (controlForm.getAlertDefaults().equals(Boolean.FALSE)) {
-        	Map pref = user.getMetricRangePreference();
+        	Map<String,Object> pref = user.getMetricRangePreference();
         	Boolean ro = (Boolean) pref.get(MonitorUtils.RO);
         	
         	if (ro.booleanValue()) {

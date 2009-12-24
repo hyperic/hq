@@ -186,7 +186,7 @@ public class BizappUtils {
      * 
      * @param resources List of AIAppdefResources to filter
      */
-    public static List filterAIResourcesByStatus(List resources, Integer status)
+    public static List<AIAppdefResourceValue> filterAIResourcesByStatus(List resources, Integer status)
     {
         if (status == null || status.intValue() == -1)
             return resources;
@@ -210,7 +210,7 @@ public class BizappUtils {
     /**
      * filter on a list of AIAppdefResourceValue by Server Type.
      */
-    public static List filterAIResourcesByServerType(List resources, String name)
+    public static List<AIServerValue> filterAIResourcesByServerType(List resources, String name)
     {
         if (name == null || name.equals("") )
             return resources;
@@ -281,9 +281,9 @@ public class BizappUtils {
      * builds a list of ids of ai resources for resources which are not
      * ignored.
      */
-    public static List buildAIResourceIds(AIAppdefResourceValue[] aiResources,
+    public static List<Integer> buildAIResourceIds(AIAppdefResourceValue[] aiResources,
                                           boolean ignored) {
-        List listServerIds = new ArrayList();
+        List<Integer> listServerIds = new ArrayList<Integer>();
         
         for (int i = 0; i < aiResources.length; i++)
             if (aiResources[i].getIgnored() == ignored )
@@ -497,7 +497,7 @@ public class BizappUtils {
      * 
      * @return a list of AppdefResourceValue objects
      */
-    public static List buildAppdefResources(int sessionId, AppdefBoss boss,
+    public static List<AppdefResourceValue> buildAppdefResources(int sessionId, AppdefBoss boss,
                                             AppdefEntityID[] entities) 
         throws ObjectNotFoundException, RemoteException,
                SessionTimeoutException, SessionNotFoundException,
@@ -514,7 +514,7 @@ public class BizappUtils {
      * 
      * @return a list of AppdefResourceValue objects
      */
-    public static List sortAppdefResource(List appdefList, PageControl pc) 
+    public static List<AppdefResourceValue> sortAppdefResource(List appdefList, PageControl pc) 
     {
         List sortedList = new ArrayList();
         SortedSet sSet =
@@ -553,9 +553,9 @@ public class BizappUtils {
      * 
      * @param entityIds list of [entityType]:[resourceTypeId] strings
      */
-    public static List buildAppdefEntityIds(List entityIds)
+    public static List<AppdefEntityID> buildAppdefEntityIds(List entityIds)
     {
-        List entities = new ArrayList();
+        List<AppdefEntityID> entities = new ArrayList<AppdefEntityID>();
         for (Iterator rIterator = entityIds.iterator(); rIterator.hasNext(); ) {
             entities.add(new AppdefEntityID((String) rIterator.next()));
         }
@@ -646,7 +646,7 @@ public class BizappUtils {
      * 
      * @return a list of AppdefResourceValue objects
      */
-    public static PageList buildGroupResources(AppdefBoss boss, int sessionId,
+    public static PageList<AppdefResourceValue> buildGroupResources(AppdefBoss boss, int sessionId,
                                                AppdefGroupValue group,
                                                PageControl pc) 
         throws ObjectNotFoundException, RemoteException,
@@ -686,7 +686,7 @@ public class BizappUtils {
      * @param all the list to operate on
      * @param matches the list to grep out
      */
-    public static List grepSubjects(List all, List matches) {
+    public static List<AuthzSubjectValue> grepSubjects(List all, List matches) {
         if (all == null || matches == null) {
             return new ArrayList(0);
         }
@@ -796,7 +796,7 @@ public class BizappUtils {
     /**
      * build a list of UI option using a list of ConfigOptions
      */
-    public static List buildLoadConfigOptions( String prefix,
+    public static List<ConfigValues> buildLoadConfigOptions( String prefix,
                                                ConfigSchema config,
                                                ConfigResponse oldResponse)
     {

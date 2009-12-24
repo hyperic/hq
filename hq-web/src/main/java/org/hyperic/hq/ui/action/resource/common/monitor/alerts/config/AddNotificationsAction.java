@@ -29,11 +29,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
@@ -41,16 +45,9 @@ import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
 
 
 /**
@@ -62,7 +59,15 @@ public abstract class AddNotificationsAction
     extends BaseAction
     implements NotificationsAction
 {
-    private Log log = LogFactory.getLog(AddNotificationsAction.class);
+    private final Log log = LogFactory.getLog(AddNotificationsAction.class);
+    private EventsBoss eventsBoss;
+    
+    
+
+    public AddNotificationsAction(EventsBoss eventsBoss) {
+        super();
+        this.eventsBoss = eventsBoss;
+    }
 
     /**
      * Add roles to the alert definition specified in the given
@@ -79,7 +84,7 @@ public abstract class AddNotificationsAction
         AddNotificationsForm addForm = (AddNotificationsForm)form;
         Integer alertDefId = addForm.getAd();
 
-        Map params = new HashMap();
+        Map<String, Object> params = new HashMap<String,Object>();
         params.put(Constants.ALERT_DEFINITION_PARAM, alertDefId);
 
         if (addForm.getAetid() != null && addForm.getAetid().length() > 0)
@@ -95,14 +100,14 @@ public abstract class AddNotificationsAction
             return forward;
         }
 
-        ServletContext ctx = getServlet().getServletContext();
-        EventsBoss eb = ContextUtils.getEventsBoss(ctx);
+       
+        
         Integer sessionId = RequestUtils.getSessionId(request);
 
         AlertDefinitionValue ad  =
-            eb.getAlertDefinition(sessionId.intValue(), alertDefId);
+            eventsBoss.getAlertDefinition(sessionId.intValue(), alertDefId);
 
-        Set notifs = getNotifications(addForm, session);
+        Set<Object> notifs = getNotifications(addForm, session);
         if (! notifs.isEmpty() ) {
             // We'll try to get the appropriate email action for
             // the alert definition and update it if it already
@@ -113,7 +118,7 @@ public abstract class AddNotificationsAction
                 ea.setType( getNotificationType() );
                 log.debug("new notifs=" + notifs);
                 ea.setNames( StringUtil.iteratorToString(notifs.iterator(), ",", "") );
-                eb.createAction( sessionId.intValue(), alertDefId,
+                eventsBoss.createAction( sessionId.intValue(), alertDefId,
                                  ea.getImplementor(), ea.getConfigResponse() );
             } else {
                 ActionValue action = (ActionValue)actionObjs[0];
@@ -123,7 +128,7 @@ public abstract class AddNotificationsAction
                 ea.setNames( StringUtil.iteratorToString(notifs.iterator(), ",", "") );
                 byte[] configSchema = ea.getConfigResponse().encode();
                 action.setConfig(configSchema);
-                eb.updateAction(sessionId.intValue(), action);
+                eventsBoss.updateAction(sessionId.intValue(), action);
             }
         }
 
@@ -136,13 +141,13 @@ public abstract class AddNotificationsAction
     protected abstract ActionForward preProcess(HttpServletRequest request,
                                                 ActionMapping mapping,
                                                 AddNotificationsForm form,
-                                                Map params,
+                                                Map<String, Object> params,
                                                 HttpSession session)
         throws Exception;
     
     protected abstract void postProcess(HttpServletRequest request, 
                                         HttpSession session);
-    protected abstract Set getNotifications(AddNotificationsForm form, 
+    protected abstract Set<Object> getNotifications(AddNotificationsForm form, 
                                             HttpSession session);
 
     private Object[] getActionObjects(AlertDefinitionValue ad)

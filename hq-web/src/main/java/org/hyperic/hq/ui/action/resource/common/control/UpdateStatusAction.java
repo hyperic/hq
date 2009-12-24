@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.ui.action.resource.common.control;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -40,9 +39,9 @@ import org.hyperic.hq.control.server.session.ControlHistory;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 
 
 /**
@@ -50,7 +49,17 @@ import org.json.JSONObject;
  */
 public class UpdateStatusAction extends BaseAction {
 
-    // ---------------------------------------------------- Public Methods
+    private final  Log log = LogFactory.getLog(UpdateStatusAction.class.getName());
+    private ControlBoss controlBoss;
+    
+    
+    @Autowired
+    public UpdateStatusAction(ControlBoss controlBoss) {
+        super();
+        this.controlBoss = controlBoss;
+    }
+
+
 
     /** 
      * Displays state of current actions of a resource. 
@@ -60,12 +69,12 @@ public class UpdateStatusAction extends BaseAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-        ServletContext ctx = getServlet().getServletContext();
-        Log log = LogFactory.getLog(UpdateStatusAction.class.getName());
+       
+       
                 
         log.trace("determining current status.");              
         int sessionId = RequestUtils.getSessionId(request).intValue(); 
-        ControlBoss cBoss = ContextUtils.getControlBoss(ctx);
+       
         AppdefEntityID appId = RequestUtils.getEntityId(request);
 
         Integer batchId = null;
@@ -80,13 +89,13 @@ public class UpdateStatusAction extends BaseAction {
 
         ControlHistory cValue = null;
         if (null == batchId) {
-            cValue = cBoss.getCurrentJob(sessionId, appId);
+            cValue = controlBoss.getCurrentJob(sessionId, appId);
         } else {
-            cValue = cBoss.getJobByJobId(sessionId, batchId);
+            cValue = controlBoss.getJobByJobId(sessionId, batchId);
         }
 
         if (cValue == null /* no current job */) {
-            cValue = cBoss.getLastJob(sessionId, appId);
+            cValue = controlBoss.getLastJob(sessionId, appId);
         }
         JSONObject obj = new JSONObject();
         obj.put("ctrlAction", cValue.getAction());

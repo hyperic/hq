@@ -25,33 +25,20 @@
 
 package org.hyperic.hq.ui.action.resource.common.monitor.alerts.config;
 
-import java.rmi.RemoteException;
 import java.util.HashSet;
 import java.util.Map;
 
-import javax.ejb.CreateException;
-import javax.ejb.FinderException;
-import javax.naming.NamingException;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-
-import org.hyperic.hq.auth.shared.SessionNotFoundException;
-import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
-import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.events.InvalidActionDataException;
 import org.hyperic.hq.events.shared.ActionValue;
-import org.hyperic.hq.ui.exception.ServiceLocatorException;
 import org.hyperic.util.StringUtil;
-import org.hyperic.util.config.EncodingException;
-import org.hyperic.util.config.InvalidOptionException;
-import org.hyperic.util.config.InvalidOptionValueException;
+import org.springframework.beans.factory.annotation.Autowired;
 
 
 /**
@@ -59,7 +46,13 @@ import org.hyperic.util.config.InvalidOptionValueException;
  *
  */
 public class RemoveOthersAction extends RemoveNotificationsAction {
-    Log log = LogFactory.getLog(RemoveOthersAction.class.getName());
+    private final Log log = LogFactory.getLog(RemoveOthersAction.class.getName());
+    
+    
+    @Autowired
+    public RemoveOthersAction(EventsBoss eventsBoss) {
+        super(eventsBoss);
+    }
 
     public int getNotificationType() { return EmailActionConfig.TYPE_EMAILS; }
 
@@ -68,7 +61,7 @@ public class RemoveOthersAction extends RemoveNotificationsAction {
      */
     protected ActionForward handleRemove(ActionMapping mapping,
                                          HttpServletRequest request,
-                                         Map params,
+                                         Map<String, Object> params,
                                          Integer sessionID,
                                          ActionValue action,
                                          EmailActionConfig ea,
@@ -78,7 +71,7 @@ public class RemoveOthersAction extends RemoveNotificationsAction {
         String[] emails = rnForm.getEmails();
         if (null != emails) {
             log.debug("emails.length=" + emails.length);
-            HashSet storedEmails = new HashSet();
+            HashSet<Object> storedEmails = new HashSet<Object>();
             storedEmails.addAll( ea.getUsers() );
             log.debug("storedEmails (pre): " + storedEmails);
             for (int i=0; i<emails.length; ++i) {
@@ -94,4 +87,3 @@ public class RemoveOthersAction extends RemoveNotificationsAction {
     }
 }
 
-// EOF

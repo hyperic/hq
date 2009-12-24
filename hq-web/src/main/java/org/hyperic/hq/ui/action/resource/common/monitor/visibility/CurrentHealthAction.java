@@ -25,13 +25,11 @@
 
 package org.hyperic.hq.ui.action.resource.common.monitor.visibility;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -49,10 +47,10 @@ import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
+import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.MonitorUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
@@ -62,6 +60,7 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.units.UnitNumber;
 import org.hyperic.util.units.UnitsConstants;
 import org.hyperic.util.units.UnitsFormat;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An <code>TilesAction</code> that retrieves metric data to
@@ -70,12 +69,19 @@ import org.hyperic.util.units.UnitsFormat;
  */
 public class CurrentHealthAction extends TilesAction {
 
-    protected static Log log =
+    protected final Log log =
         LogFactory.getLog(CurrentHealthAction.class.getName());
 
-    private PageControl pc = new PageControl(0, Constants.DEFAULT_CHART_POINTS);
+    private final PageControl pc = new PageControl(0, Constants.DEFAULT_CHART_POINTS);
     
-    private String defaultView = null;
+    protected MeasurementBoss measurementBoss;
+    
+   
+    @Autowired
+    public CurrentHealthAction(MeasurementBoss measurementBoss) {
+        super();
+        this.measurementBoss = measurementBoss;
+    }
 
     public ActionForward execute(ComponentContext context,
                                  ActionMapping mapping,
@@ -92,8 +98,8 @@ public class CurrentHealthAction extends TilesAction {
         }
         
         AppdefEntityID aeid = resource.getEntityId();
+      
         ServletContext ctx = getServlet().getServletContext();
-
         // Check configuration
         InventoryHelper helper = InventoryHelper.getHelper(aeid);
         helper.isResourceConfigured(request, ctx, true);
@@ -103,30 +109,30 @@ public class CurrentHealthAction extends TilesAction {
 
         // Get the resource availability
         int sessionId = RequestUtils.getSessionId(request).intValue();
-        MeasurementBoss boss = ContextUtils.getMeasurementBoss(ctx);
+       
         WebUser user = RequestUtils.getWebUser(request);
 
         try {
             MeasurementTemplate mt =
-                boss.getAvailabilityMetricTemplate(sessionId, aeid);
+                measurementBoss.getAvailabilityMetricTemplate(sessionId, aeid);
             
-            Map pref = user.getMetricRangePreference(true);
+            Map<String,Object> pref = user.getMetricRangePreference(true);
             long begin = ((Long) pref.get(MonitorUtils.BEGIN)).longValue();
             long end = ((Long) pref.get(MonitorUtils.END)).longValue();
             long interval = TimeUtil.getInterval(begin, end,
                     Constants.DEFAULT_CHART_POINTS);
 
-            List data = boss.findMeasurementData(sessionId, aeid, mt, begin,
+            List<HighLowMetricValue> data = measurementBoss.findMeasurementData(sessionId, aeid, mt, begin,
                                                  end, interval, true, pc);
 
             // Seems like sometimes Postgres does not average cleanly for
             // groups, and the value ends up being like 0.9999999999.  We don't
             // want the insignificant amount to mess up our display.
             if (aeid.isGroup()) {
-                for (Iterator it = data.iterator(); it.hasNext(); ) {
-                    MetricValue val = (MetricValue) it.next();
-                    if (val.toString().equals("1"))
+                for (MetricValue val : data ) {
+                    if (val.toString().equals("1")) {
                         val.setValue(1);
+                    }
                 }
             }
 
@@ -142,15 +148,14 @@ public class CurrentHealthAction extends TilesAction {
         return null;
     }
     
-    protected String getFormattedAvailability(List values) {
+    protected String getFormattedAvailability(List<? extends MetricValue> values) {
         double sum = 0;
         int count = 0;
-        for (Iterator it = values.iterator(); it.hasNext(); ) {
-            MetricValue mv = (MetricValue) it.next();
+        for (MetricValue mv :  values) {
             if (Double.isNaN(mv.getValue()) ||
-                mv.getValue() > 1 || mv.getValue() < 0)
+                mv.getValue() > 1 || mv.getValue() < 0) {
                 continue;
-            
+            }
             sum += mv.getValue();
             count++;
         }
@@ -161,8 +166,7 @@ public class CurrentHealthAction extends TilesAction {
     }
     
     protected String getDefaultViewName(HttpServletRequest request) {
-        if (defaultView != null)
-            return defaultView;
+        
         
         MessageResources res = getResources(request);
         return res.getMessage(Constants.DEFAULT_INDICATOR_VIEW);

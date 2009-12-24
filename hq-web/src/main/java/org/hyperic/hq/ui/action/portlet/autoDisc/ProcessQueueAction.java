@@ -28,7 +28,6 @@ package org.hyperic.hq.ui.action.portlet.autoDisc;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -48,14 +47,27 @@ import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.util.BizappUtils;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class ProcessQueueAction extends BaseAction {
+
+    private AIBoss aiBoss;
+    private AppdefBoss appdefBoss;
+    private AuthzBoss authzBoss;
+    
+    
+    @Autowired
+    public ProcessQueueAction(AIBoss aiBoss, AppdefBoss appdefBoss, AuthzBoss authzBoss) {
+        super();
+        this.aiBoss = aiBoss;
+        this.appdefBoss = appdefBoss;
+        this.authzBoss = authzBoss;
+    }
 
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
@@ -63,9 +75,7 @@ public class ProcessQueueAction extends BaseAction {
                                  HttpServletResponse response)
        throws Exception {
        
-        ServletContext ctx = getServlet().getServletContext();
-        AIBoss aiBoss = ContextUtils.getAIBoss(ctx);
-        AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
+       
         WebUser user = RequestUtils.getWebUser(request);
         int sessionId = user.getSessionId().intValue();
 
@@ -78,22 +88,22 @@ public class ProcessQueueAction extends BaseAction {
         boolean isIgnore
             = (queueAction == AIQueueConstants.Q_DECISION_IGNORE);
 
-        List aiPlatformList = new ArrayList();
-        List aiIpList       = new ArrayList();
-        List aiServerList   = new ArrayList();
+        List<Integer> aiPlatformList = new ArrayList<Integer>();
+        List<Integer> aiIpList       = new ArrayList<Integer>();
+        List<Integer> aiServerList   = new ArrayList<Integer>();
 
         // Refresh the queue items this user can see.
         HttpSession session = request.getSession();
         PageControl page = new PageControl();
-        AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
+       
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
         		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, aBoss);
+        		user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         page.setPagesize(Integer.parseInt(
         		dashPrefs.getValue(".dashContent.autoDiscovery.range") ) );
 
-        PageList aiQueue = aiBoss.getQueue(sessionId, true, false, true,
+        PageList<AIPlatformValue> aiQueue = aiBoss.getQueue(sessionId, true, false, true,
                                            page);
 
         // Walk the queue.  For each platform in the queue:

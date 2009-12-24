@@ -27,7 +27,6 @@ package org.hyperic.hq.ui.action.resource.common.control;
 
 import java.util.HashMap;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -40,13 +39,26 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An Action that removes a control event from a resource.
  */
 public class RemoveHistoryAction extends BaseAction {
+    
+    private final  Log log = LogFactory.getLog(RemoveHistoryAction.class);
+    
+    private ControlBoss controlBoss;
+    
+    
+    @Autowired
+    public RemoveHistoryAction(ControlBoss controlBoss) {
+        super();
+        this.controlBoss = controlBoss;
+    }
+
+
 
     /** 
      * removes controlactions from a resource
@@ -57,9 +69,9 @@ public class RemoveHistoryAction extends BaseAction {
                                  HttpServletResponse response)
         throws Exception {
             
-        Log log = LogFactory.getLog(RemoveHistoryAction.class);
+       
 
-        HashMap parms = new HashMap(2);
+        HashMap<String,Object> parms = new HashMap<String,Object>(2);
         
         RemoveHistoryForm rmForm = (RemoveHistoryForm)form;
         Integer[] actions = rmForm.getControlActions();
@@ -80,10 +92,9 @@ public class RemoveHistoryAction extends BaseAction {
         }
 
         Integer sessionId = RequestUtils.getSessionId(request);
-        ServletContext ctx = getServlet().getServletContext();            
-        ControlBoss cBoss = ContextUtils.getControlBoss(ctx);
+       
 
-        cBoss.deleteJobHistory(sessionId.intValue(), actions);
+        controlBoss.deleteJobHistory(sessionId.intValue(), actions);
 
         log.trace("Removed server control events.");     
         RequestUtils.setConfirmation(request, 

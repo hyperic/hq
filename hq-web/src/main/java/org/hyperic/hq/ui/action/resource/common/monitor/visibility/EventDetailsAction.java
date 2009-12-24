@@ -26,15 +26,13 @@
 package org.hyperic.hq.ui.action.resource.common.monitor.visibility;
 
 import java.text.SimpleDateFormat;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
@@ -47,10 +45,8 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.MonitorUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.util.StringUtil;
 import org.hyperic.util.TimeUtil;
 import org.hyperic.util.units.DateFormatter;
 import org.hyperic.util.units.FormattedNumber;
@@ -58,12 +54,23 @@ import org.hyperic.util.units.UnitNumber;
 import org.hyperic.util.units.UnitsConstants;
 import org.hyperic.util.units.UnitsFormat;
 import org.json.JSONObject;
-import org.apache.commons.lang.StringEscapeUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 /**
  *
  * Set an array for the timeline display
  */
 public class EventDetailsAction extends BaseAction {
+    
+    private EventLogBoss eventLogBoss;
+    
+    
+    @Autowired
+    public EventDetailsAction(EventLogBoss eventLogBoss) {
+        super();
+        this.eventLogBoss = eventLogBoss;
+    }
+
+
 
     /* (non-Javadoc)
      * @see org.apache.struts.action.Action#execute(org.apache.struts.action.ActionMapping, org.apache.struts.action.ActionForm, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
@@ -73,7 +80,7 @@ public class EventDetailsAction extends BaseAction {
                                  HttpServletResponse response)
         throws Exception {
         WebUser user = RequestUtils.getWebUser(request);
-        Map range = user.getMetricRangePreference();
+        Map<String,Object> range = user.getMetricRangePreference();
         long begin = ((Long) range.get(MonitorUtils.BEGIN)).longValue();
         long end = ((Long) range.get(MonitorUtils.END)).longValue();
         long interval = TimeUtil.getInterval(begin, end,
@@ -84,25 +91,27 @@ public class EventDetailsAction extends BaseAction {
         
         AppdefEntityID aeid = RequestUtils.getEntityId(request);
 
-        ServletContext ctx = getServlet().getServletContext();
-        EventLogBoss boss = ContextUtils.getEventLogBoss(ctx);
+       
+       
         int sessionId = user.getSessionId().intValue();
         
-        List events;
+        List<EventLog> events;
         try {
             String status = RequestUtils.getStringParameter(request, "status");
             
             // Control logs are different, they store their return status
             // So we have to look it up by the type
-            if (status.equals("CTL"))
-                events = boss.getEvents(sessionId, ControlEvent.class.getName(),
+            if (status.equals("CTL")) {
+                events = eventLogBoss.getEvents(sessionId, ControlEvent.class.getName(),
                                         aeid, begin, begin + interval);
-            else
-                events = boss.getEvents(sessionId, aeid, status,
+            }
+            else {
+                events = eventLogBoss.getEvents(sessionId, aeid, status,
                                         begin, begin + interval);
+            }
         } catch (ParameterNotFoundException e) {
             String[] types = null;
-            events = boss.getEvents(user.getSessionId().intValue(), aeid, types,
+            events = eventLogBoss.getEvents(user.getSessionId().intValue(), aeid, types,
                                     begin, begin + interval);
         }
         
@@ -123,9 +132,8 @@ public class EventDetailsAction extends BaseAction {
         else {
             html = new StringBuffer("<ul class=\"eventDetails\">");
         
-            for (Iterator it = events.iterator(); it.hasNext(); ) {
-                EventLog elv = (EventLog) it.next();
-
+            for ( EventLog elv : events) {
+             
                 html.append("<li ");
             
                 String status = elv.getStatus();
@@ -155,9 +163,7 @@ public class EventDetailsAction extends BaseAction {
                                        UnitsConstants.SCALE_MILLI),
                                        request.getLocale(), dateSpecs);
 
-                           /* html.append(res.getMessage(elv.getType(), fmtd.toString(),
-                            ridBadChars(elv.getDetail()), elv.getSubject(),
-                            elv.getStatus()));*/
+                          
 
                 html.append(StringEscapeUtils.escapeHtml(res.getMessage(elv
                         .getType(), fmtd.toString(), elv.getDetail(), elv

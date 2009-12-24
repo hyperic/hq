@@ -25,9 +25,6 @@
 
 package org.hyperic.hq.ui.action.portlet.controlactions;
 
-import java.util.Iterator;
-
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -43,18 +40,19 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.ControlBoss;
+import org.hyperic.hq.control.server.session.ControlHistory;
 import org.hyperic.hq.control.server.session.ControlSchedule;
+import org.hyperic.hq.control.shared.ControlFrequencyValue;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.beans.DashboardControlBean;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.timer.StopWatch;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An <code>Action</code> that loads the <code>Portal</code>
@@ -64,20 +62,31 @@ import org.hyperic.util.timer.StopWatch;
  */
 public class ViewAction extends TilesAction {
     
+    private AuthzBoss authzBoss;
+    private ControlBoss controlBoss;
+    private AppdefBoss appdefBoss;
+    
+    
+   @Autowired 
+   public ViewAction(AuthzBoss authzBoss, ControlBoss controlBoss, AppdefBoss appdefBoss) {
+        super();
+        this.authzBoss = authzBoss;
+        this.controlBoss = controlBoss;
+        this.appdefBoss = appdefBoss;
+    }
+
    public ActionForward execute(ComponentContext context,
 			ActionMapping mapping, ActionForm form, HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
 	   
         StopWatch timer = new StopWatch();
         Log timingLog = LogFactory.getLog("DASHBOARD-TIMING");
-        ServletContext ctx = getServlet().getServletContext();
-        ControlBoss boss = ContextUtils.getControlBoss(ctx);
-        AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
+       
         HttpSession session = request.getSession();
         WebUser user = RequestUtils.getWebUser(session);
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
         		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, aBoss);
+        		user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         
         int sessionId = user.getSessionId().intValue();
@@ -104,7 +113,7 @@ public class ViewAction extends TilesAction {
             long past = Long.parseLong(dashPrefs.
             		getValue(".dashContent.controlActions.past",
                                    "604800000"));
-            PageList pageList = boss.getRecentControlActions(sessionId, rows,
+            PageList<ControlHistory> pageList = controlBoss.getRecentControlActions(sessionId, rows,
                                                              past);
             context.putAttribute("lastCompleted", pageList);
         }
@@ -113,14 +122,14 @@ public class ViewAction extends TilesAction {
             int rows = Integer.parseInt(dashPrefs.
             		getValue(".dashContent.controlActions.nextScheduled",
                                    "5"));                                 
-            PageList pageList = boss.getPendingControlActions(sessionId, rows);                
-            AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);  
+            PageList<ControlSchedule> pageList = controlBoss.getPendingControlActions(sessionId, rows);                
+          
 
-            PageList pendingList = new PageList();
+            PageList<DashboardControlBean> pendingList = new PageList<DashboardControlBean>();
             pendingList.setTotalSize(pageList.getTotalSize());
 
-            for(Iterator i = pageList.iterator(); i.hasNext();){
-                ControlSchedule control = (ControlSchedule) i.next();
+            for( ControlSchedule control : pageList){
+              
                 DashboardControlBean bean = new DashboardControlBean();     
                 try{
                     AppdefEntityID entity =
@@ -142,7 +151,7 @@ public class ViewAction extends TilesAction {
         	
             int size = Integer.parseInt( 
             		dashPrefs.getValue(".dashContent.controlActions.mostFrequent"));
-            PageList pageList = boss.getOnDemandControlFrequency(sessionId, 
+            PageList<ControlFrequencyValue> pageList = controlBoss.getOnDemandControlFrequency(sessionId, 
                                                                  size);                
             context.putAttribute("mostFrequent", pageList);                
         }                        

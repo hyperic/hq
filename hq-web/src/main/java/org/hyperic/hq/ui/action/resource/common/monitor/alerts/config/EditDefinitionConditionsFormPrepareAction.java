@@ -25,17 +25,18 @@
 
 package org.hyperic.hq.ui.action.resource.common.monitor.alerts.config;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.ui.action.resource.common.monitor.alerts.AlertDefUtil;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Prepare the alert definition form for editConditions.
@@ -43,23 +44,32 @@ import org.hyperic.hq.ui.util.RequestUtils;
  */
 public class EditDefinitionConditionsFormPrepareAction
     extends DefinitionFormPrepareAction {
-    protected Log log = LogFactory.getLog
+    protected final Log log = LogFactory.getLog
         (EditDefinitionConditionsFormPrepareAction.class.getName());
+    
+    private EventsBoss eventsBoss;
+    
+    @Autowired
+    public EditDefinitionConditionsFormPrepareAction(MeasurementBoss measurementBoss, ControlBoss controlBoss,
+                                                     AppdefBoss appdefBoss, EventsBoss eventsBoss) {
+        super(measurementBoss, controlBoss, appdefBoss);
+        this.eventsBoss = eventsBoss;
+    }
+
 
     protected void setupConditions(HttpServletRequest request,
                                    DefinitionForm defForm)
         throws Exception {
         
         int sessionID = RequestUtils.getSessionId(request).intValue();
-        ServletContext ctx = getServlet().getServletContext();
-        EventsBoss eb = ContextUtils.getEventsBoss(ctx);
+       
+     
 
         AlertDefinitionValue adv =
-            AlertDefUtil.getAlertDefinition(request, sessionID, eb);
+            AlertDefUtil.getAlertDefinition(request, sessionID, eventsBoss);
 
-        MeasurementBoss mb = ContextUtils.getMeasurementBoss(ctx);
-        defForm.importConditionsEnablement(adv, sessionID, mb);
+       
+        defForm.importConditionsEnablement(adv, sessionID, measurementBoss);
     }
 }
 
-// EOF

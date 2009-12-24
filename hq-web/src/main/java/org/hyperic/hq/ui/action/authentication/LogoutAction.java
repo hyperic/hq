@@ -43,8 +43,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * and establishes his identity.
  */
 
-public class LogoutAction
-    extends Action {
+public class LogoutAction extends Action {
 
     private AuthBoss authBoss;
 

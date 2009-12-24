@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.ui.action.portlet.autoDisc;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -33,18 +32,28 @@ import javax.servlet.http.HttpSession;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class PrepareAction extends BaseAction {
+    
+    private AuthzBoss authzBoss;
+    
+    
+    @Autowired
+    public PrepareAction(AuthzBoss authzBoss) {
+        super();
+        this.authzBoss = authzBoss;
+    }
+
+
 
     /**
      * @param mapping The ActionMapping used to select this instance
@@ -63,12 +72,12 @@ public class PrepareAction extends BaseAction {
 
         PropertiesForm pForm = (PropertiesForm) form;
         HttpSession session = request.getSession();
-        ServletContext ctx = getServlet().getServletContext();
+      
         WebUser user = RequestUtils.getWebUser(session);
-		AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);	
+			
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
         		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, aBoss);
+        		user, authzBoss);
 		ConfigResponse dashPrefs = dashConfig.getConfig();
         Integer range =
             new Integer(dashPrefs.getValue(".dashContent.autoDiscovery.range"));

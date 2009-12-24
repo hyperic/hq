@@ -28,7 +28,6 @@ package org.hyperic.hq.ui.action.resource.common.monitor.alerts.config;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -44,13 +43,25 @@ import org.hyperic.hq.bizapp.shared.GalertBoss;
 import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An Action that removes an alert definition
  */
 public class RemoveDefinitionAction extends BaseAction {
+    private EventsBoss eventsBoss;
+    private GalertBoss galertBoss;
+    
+    
+    @Autowired
+    public RemoveDefinitionAction(EventsBoss eventsBoss, GalertBoss galertBoss) {
+        super();
+        this.eventsBoss = eventsBoss;
+        this.galertBoss = galertBoss;
+    }
+
+
 
     /** 
      * removes alert definitions 
@@ -65,7 +76,7 @@ public class RemoveDefinitionAction extends BaseAction {
                 
         RemoveDefinitionForm rdForm = (RemoveDefinitionForm) form;
         AppdefEntityID adeId;
-        Map params = new HashMap();
+        Map<String, Object> params = new HashMap<String, Object>();
         if (rdForm.getRid() != null) {
             adeId = new AppdefEntityID(rdForm.getType().intValue(),
                                        rdForm.getRid());
@@ -86,10 +97,7 @@ public class RemoveDefinitionAction extends BaseAction {
 
         Integer sessionId =  RequestUtils.getSessionId(request);
 
-        ServletContext ctx = getServlet().getServletContext();
-        EventsBoss boss = ContextUtils.getEventsBoss(ctx);
-        GalertBoss gBoss = ContextUtils.getGalertBoss(ctx);
-
+      
         boolean enable = false;
 
         if (rdForm.getSetActiveInactive().equals("y")) {
@@ -98,12 +106,12 @@ public class RemoveDefinitionAction extends BaseAction {
             if (adeId.isGroup()) {
                 GalertDef[] defPojos = new GalertDef[defs.length];
                 for (int i = 0; i < defs.length; i++) {
-                    defPojos[i] = gBoss.findDefinition(sessionId.intValue(),
+                    defPojos[i] = galertBoss.findDefinition(sessionId.intValue(),
                                                        defs[i]);
                 }
-                gBoss.enable(sessionId.intValue(), defPojos, enable);
+                galertBoss.enable(sessionId.intValue(), defPojos, enable);
             } else {
-                boss.activateAlertDefinitions(sessionId.intValue(), defs, enable);
+                eventsBoss.activateAlertDefinitions(sessionId.intValue(), defs, enable);
             }
                 
             RequestUtils.setConfirmation(request,
@@ -113,15 +121,15 @@ public class RemoveDefinitionAction extends BaseAction {
         
         if (rdForm.isDeleteClicked()) {
             if (rdForm.getAetid() != null) {
-                boss.deleteAlertDefinitions(sessionId.intValue(), defs);
+                eventsBoss.deleteAlertDefinitions(sessionId.intValue(), defs);
                 params.put(Constants.APPDEF_RES_TYPE_ID, rdForm.getAetid());
             }
             else {
                 if (adeId.isGroup())
                 {
-                    gBoss.markDefsDeleted(sessionId.intValue(), defs);
+                    galertBoss.markDefsDeleted(sessionId.intValue(), defs);
                 } else {
-                    boss.deleteAlertDefinitions(sessionId.intValue(), defs);
+                    eventsBoss.deleteAlertDefinitions(sessionId.intValue(), defs);
                 }
             }
             
@@ -134,7 +142,7 @@ public class RemoveDefinitionAction extends BaseAction {
                 // XXX - implement alert deletion in gBoss
             }
             else {
-                boss.deleteAlertsForDefinitions(sessionId.intValue(), defs);
+                eventsBoss.deleteAlertsForDefinitions(sessionId.intValue(), defs);
             }
 
             RequestUtils.setConfirmation(request,

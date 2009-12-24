@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -42,8 +41,8 @@ import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * A <code>BaseAction</code> that handles metrics-specific form
@@ -51,8 +50,18 @@ import org.hyperic.hq.ui.util.RequestUtils;
  */
 public class MetricDisplayRangeAction extends BaseAction {
 
-    private static Log log =
+    private final Log log =
         LogFactory.getLog(MetricDisplayRangeAction.class.getName());
+    private AuthzBoss authzBoss;
+    
+    
+    @Autowired
+    public MetricDisplayRangeAction(AuthzBoss authzBoss) {
+        super();
+        this.authzBoss = authzBoss;
+    }
+
+
 
     /**
      * Modify the metrics summary display as specified in the given
@@ -77,8 +86,7 @@ public class MetricDisplayRangeAction extends BaseAction {
 
         WebUser user = RequestUtils.getWebUser(request);
         Integer sessionId = user.getSessionId();
-        ServletContext ctx = getServlet().getServletContext();
-        AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
+       
 
         if (displayForm.isLastnSelected()) {
             Integer lastN = displayForm.getRn();
@@ -97,7 +105,7 @@ public class MetricDisplayRangeAction extends BaseAction {
             Date begin = displayForm.getStartDate();
             Date end = displayForm.getEndDate();
 
-            List range = new ArrayList();
+            List<Long> range = new ArrayList<Long>();
             range.add(new Long(begin.getTime()));
             range.add(new Long(end.getTime()));
 
@@ -120,7 +128,7 @@ public class MetricDisplayRangeAction extends BaseAction {
             " in MetricDisplayRangeAction " +
             " for " + user.getId() + " at "+System.currentTimeMillis() +
             " user.prefs = " + user.getPreferences());
-        boss.setUserPrefs(sessionId, user.getId(), user.getPreferences());
+        authzBoss.setUserPrefs(sessionId, user.getId(), user.getPreferences());
 
         // XXX: assume return path is set, don't use forward params
         return returnSuccess(request, mapping);

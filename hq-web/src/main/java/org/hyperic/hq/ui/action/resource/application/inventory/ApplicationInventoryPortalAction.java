@@ -30,16 +30,18 @@ import java.util.Properties;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.Portal;
-import org.hyperic.hq.ui.action.resource.common.inventory.ResourceInventoryPortalAction;
-import org.hyperic.util.pager.Pager;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.bizapp.shared.ControlBoss;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.Portal;
+import org.hyperic.hq.ui.action.resource.common.inventory.ResourceInventoryPortalAction;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * The portal manager class for the tiles in handled in this package.
@@ -47,11 +49,18 @@ import org.apache.struts.action.ActionMapping;
 public class ApplicationInventoryPortalAction extends ResourceInventoryPortalAction {
     public static final String EMPTY_VALS_ATTR = "EmptyValues";
     
-    protected static Log log =
+    private final Log log =
         LogFactory.getLog(ApplicationInventoryPortalAction.class.getName());
 
-    private static Properties keyMethodMap = new Properties();
-    static {
+    private final Properties keyMethodMap = new Properties();
+    
+    @Autowired
+    public ApplicationInventoryPortalAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss) {
+        super(appdefBoss, authzBoss, controlBoss);
+        initKeyMethodMap();
+    }
+
+    private void initKeyMethodMap() {
         keyMethodMap.setProperty(Constants.MODE_NEW, "newResource");
         keyMethodMap.setProperty(Constants.MODE_VIEW, "viewResource");
         keyMethodMap.setProperty(Constants.MODE_EDIT, "editGeneralProperties");

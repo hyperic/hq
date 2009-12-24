@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.ui.action.portlet.admin;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -40,12 +39,26 @@ import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.util.ConfigurationProxy;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class RemovePortletAction extends BaseAction {
+    
+    private ConfigurationProxy configurationProxy;
+    
+    private AuthzBoss authzBoss;
+    
+    
+    @Autowired
+    public RemovePortletAction(ConfigurationProxy configurationProxy, AuthzBoss authzBoss) {
+        super();
+        this.configurationProxy = configurationProxy;
+        this.authzBoss = authzBoss;
+    }
+
+
 
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
@@ -53,19 +66,18 @@ public class RemovePortletAction extends BaseAction {
                                  HttpServletResponse response)
         throws Exception {
         
-        ServletContext ctx = getServlet().getServletContext();
-        AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
+       
         HttpSession session = request.getSession();
         WebUser user = RequestUtils.getWebUser(session);
         String portletName = (String) request.getParameter(Constants.REM_PORTLET_PARAM);
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
         		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, boss);
+        		user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         
         DashboardUtils.removePortlet( dashPrefs, portletName);
         
-        ConfigurationProxy.getInstance().setDashboardPreferences(session, user, boss, dashPrefs);
+        configurationProxy.setDashboardPreferences(session, user, dashPrefs);
         
         LogFactory.getLog("user.preferences").trace("Invoking setUserPrefs"+
             " in RemovePortletAction " +

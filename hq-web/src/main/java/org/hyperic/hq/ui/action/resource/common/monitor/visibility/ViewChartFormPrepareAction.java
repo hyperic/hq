@@ -28,12 +28,12 @@ package org.hyperic.hq.ui.action.resource.common.monitor.visibility;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -76,7 +76,6 @@ import org.hyperic.hq.ui.beans.ChartedMetricBean;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.util.ConfigurationProxy;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.MonitorUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
@@ -88,6 +87,7 @@ import org.hyperic.util.TimeUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An <code>Action</code> that retrieves data from the BizApp to
@@ -96,8 +96,27 @@ import org.hyperic.util.pager.PageList;
  *
  */
 public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAction {
-    protected static Log log =
+    protected final Log log =
         LogFactory.getLog( ViewChartFormPrepareAction.class.getName() );
+    private ConfigurationProxy configurationProxy;
+    private AuthzBoss authzBoss;
+    private AppdefBoss appdefBoss;
+    protected MeasurementBoss measurementBoss;
+    private EventLogBoss eventLogBoss;
+
+    
+    @Autowired
+    public ViewChartFormPrepareAction(ConfigurationProxy configurationProxy, AuthzBoss authzBoss,
+                                      AppdefBoss appdefBoss, MeasurementBoss measurementBoss, EventLogBoss eventLogBoss) {
+        super();
+        this.configurationProxy = configurationProxy;
+        this.authzBoss = authzBoss;
+        this.appdefBoss = appdefBoss;
+        this.measurementBoss = measurementBoss;
+        this.eventLogBoss = eventLogBoss;
+    }
+
+
 
     /**
      * Retrieve data needed to display a Metrics Display Form. Respond
@@ -115,8 +134,9 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
         ServletContext ctx = getServlet().getServletContext();
 
         AppdefResourceValue resource = RequestUtils.getResource(request);
-        if (resource == null)
+        if (resource == null) {
             return removeBadDashboardLink(request, ctx);
+        }
         
         AppdefEntityID adeId = resource.getEntityId();
         chartForm.setRid( resource.getId() );
@@ -133,32 +153,31 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
         // These private methods have side-effects and must be
         // called in this order.  Lame, I know, but I wanted to
         // have this stuff in easier-to-manage code blocks (JW).
-        _setupDateRange(request, chartForm);
-        _setupMetricIds(request, chartForm);
+        setupDateRange(request, chartForm);
+        setupMetricIds(request, chartForm);
         
-        MeasurementBoss mb = ContextUtils.getMeasurementBoss(ctx);
+        
 
         AppdefResourceValue[][] resources =
-            _setupResources(request, sessionId, chartForm, resource, mb);
+            setupResources(request, sessionId, chartForm, resource);
 
         try {
             if (resources.length == 0 || resources[0].length == 0)
                 throw new MeasurementNotFoundException(
                     "No resources found for chart");
 
-            _setupMetricData(request, sessionId, chartForm, resources[1], mb,
+            setupMetricData(request, sessionId, chartForm, resources[1],
                              ctx);
         } catch (MeasurementNotFoundException e) {
             return removeBadDashboardLink(request, ctx);
         }
 
-        _setupPageData(request, sessionId, chartForm, resources[0], mb);
+        setupPageData(request, sessionId, chartForm, resources[0]);
 
         return null;
     }
 
-
-    // ---------------------------------------------------- Private Methods
+  
     
     private ActionForward removeBadDashboardLink(HttpServletRequest request,
                                                  ServletContext ctx)
@@ -168,25 +187,25 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
         String query = request.getQueryString();
         HttpSession session = request.getSession();
         WebUser user = SessionUtils.getWebUser(session);
-        AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
+        
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
         		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, aBoss);
+        		user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         String userCharts = dashPrefs.getValue(Constants.USER_DASHBOARD_CHARTS);
-        List chartList =
+        List<String> chartList =
             StringUtil.explode(userCharts, Constants.DASHBOARD_DELIMITER);
-        for (Iterator i = chartList.iterator(); i.hasNext();) {
-            String chart = (String) i.next();
+        for (Iterator<String> i = chartList.iterator(); i.hasNext();) {
+            String chart =  i.next();
             if (chart.indexOf(query) > 0) {
-                AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
+              
                 
                 // Remove this and direct user to dash
                 userCharts = StringUtil.remove(userCharts, chart);
 
                 dashPrefs.setValue(Constants.USER_DASHBOARD_CHARTS, userCharts);
                 
-                ConfigurationProxy.getInstance().setUserDashboardPreferences(dashPrefs, boss, user );
+                configurationProxy.setUserDashboardPreferences(dashPrefs,  user );
                 request.setAttribute("toDashboard", "true");
                 return null;
             }
@@ -194,7 +213,7 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
         return null;
     }
 
-    private void _setupDateRange(HttpServletRequest request,
+    private void setupDateRange(HttpServletRequest request,
                                  ViewChartForm chartForm) {
         // decide what timeframe we're showing. it may have been
         // shifted on previous views of this page.
@@ -218,7 +237,7 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
         chartForm.synchronizeDisplayRange();
     }
 
-    private void _setupMetricIds(HttpServletRequest request,
+    private void setupMetricIds(HttpServletRequest request,
                                  ViewChartForm chartForm) {
         // metric ids
         String[] metricTemplateIds = request.getParameterValues
@@ -236,24 +255,24 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
         }
     }
 
-    private AppdefResourceValue[][] _setupResources(HttpServletRequest request,
+    private AppdefResourceValue[][] setupResources(HttpServletRequest request,
                                                     int sessionId,
                                                     ViewChartForm chartForm,
-                                                    AppdefResourceValue resource,
-                                                    MeasurementBoss mb)
+                                                    AppdefResourceValue resource
+                                                    )
         throws SessionTimeoutException, SessionException,
                AppdefEntityNotFoundException, PermissionException,
                RemoteException, MeasurementNotFoundException {
-        ServletContext ctx = getServlet().getServletContext();
+       
         // get list of all child resources
         AppdefResourceValue[] resources = null;
         if ( null != chartForm.getCtype() &&
              !chartForm.getCtype().equals(ViewChartForm.NO_CHILD_TYPE) ) {
             AppdefEntityID adeId = resource.getEntityId();
-            AppdefBoss ab = ContextUtils.getAppdefBoss(ctx);
+          
             AppdefEntityTypeID atid =
                 new AppdefEntityTypeID(chartForm.getCtype());
-            PageList children = ab.findChildResources( sessionId, adeId,
+            PageList<? extends AppdefResourceValue> children = appdefBoss.findChildResources( sessionId, adeId,
                                                        atid,
                                                        PageControl.PAGE_ALL );
             String[] rids = request.getParameterValues("r");
@@ -263,8 +282,8 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
             // resources corresponding to the passed-in resource ids
             if (null != r) {
                 log.debug("r=" + StringUtil.arrayToString(r));
-                for (Iterator it=children.iterator(); it.hasNext();) {
-                    AppdefResourceValue res = (AppdefResourceValue)it.next();
+                for (Iterator<? extends AppdefResourceValue> it=children.iterator(); it.hasNext();) {
+                    AppdefResourceValue res = it.next();
                     boolean found = false;
                     for (int i = 0; i < r.length; ++i) {
                         if ( found = res.getId().equals(r[i]) )
@@ -286,15 +305,15 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
             grpMembers = (AppdefEntityID[])
                 grpVal.getAppdefGroupEntries().toArray(grpMembers);
 
-            AppdefBoss ab = ContextUtils.getAppdefBoss(ctx);
-            List memVals = ab.findByIds(sessionId, grpMembers,
+          
+            List<AppdefResourceValue> memVals = appdefBoss.findByIds(sessionId, grpMembers,
                                         PageControl.PAGE_ALL);
             resources = new AppdefResourceValue[memVals.size()];
-            resources = (AppdefResourceValue[]) memVals.toArray(resources);
+            resources = memVals.toArray(resources);
         } else {
             resources = new AppdefResourceValue[] { resource };
         }
-        resources = mb.pruneResourcesNotCollecting(sessionId, resources,
+        resources = measurementBoss.pruneResourcesNotCollecting(sessionId, resources,
                                                    chartForm.getM()[0]);
         request.setAttribute("resources", resources);
         request.setAttribute( "resourcesSize", new Integer(resources.length) );
@@ -304,7 +323,7 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
         // all resource ids
         String[] resourceIds = request.getParameterValues("resourceIds");
         if (null == resourceIds || resourceIds.length == 0) {
-            int maxResources = _getMaxResources(request, resources.length);
+            int maxResources = getMaxResources(request, resources.length);
             log.debug("maxResources=" + maxResources);
             AppdefResourceValue[] checkedResources =
                 new AppdefResourceValue[maxResources];
@@ -344,17 +363,17 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
         }
     }
 
-    private void _setupMetricData(HttpServletRequest request, int sessionId,
+    private void setupMetricData(HttpServletRequest request, int sessionId,
                                   ViewChartForm chartForm,
                                   AppdefResourceValue[] resources,
-                                  MeasurementBoss mb, ServletContext ctx)
+                                  ServletContext ctx)
         throws SessionNotFoundException, SessionTimeoutException,
                MeasurementNotFoundException,
                RemoteException, AppdefEntityNotFoundException,
                PermissionException {
         
-        EventLogBoss eb = ContextUtils.getEventLogBoss(ctx);
-        List eventPointsList = new ArrayList(resources.length);
+       
+        List<List<EventLog>> eventPointsList = new ArrayList<List<EventLog>>(resources.length);
 
         // Get data for charts and put it in session.  In reality only
         // one of either resources or metrics can have more than one
@@ -387,7 +406,7 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
 
                 if (i == 0) {
                     if (interval > 0) {
-                        List controlActions = eb.getEvents(sessionId,
+                        List<EventLog> controlActions = eventLogBoss.getEvents(sessionId,
                                  ControlEvent.class.getName(),
                                  resources[j].getEntityId(),
                                  chartForm.getStartDate().getTime(),
@@ -395,9 +414,8 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
                         // We need to make sure that the event IDs get set
                         // for the legend.
                         int k = 0;
-                        for (Iterator it = controlActions.iterator();
-                             it.hasNext(); ) {
-                            EventLog event = (EventLog) it.next();
+                        for (EventLog event : controlActions) {
+                            
                             event.setEventID(++k);
                         }
                         eventPointsList.add(controlActions);
@@ -412,10 +430,9 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
     }
 
     private static final class BaseMetricDisplayComparator
-        implements Comparator {
-        public int compare(Object o1, Object o2) {
-            BaseMetricDisplay bmd1 = (BaseMetricDisplay)o1;
-            BaseMetricDisplay bmd2 = (BaseMetricDisplay)o2;
+        implements Comparator<BaseMetricDisplay> {
+        public int compare(BaseMetricDisplay bmd1, BaseMetricDisplay bmd2) {
+           
             return bmd1.getLabel().compareTo( bmd2.getLabel() );
         }
 
@@ -426,26 +443,25 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
     protected static final BaseMetricDisplayComparator comp =
         new BaseMetricDisplayComparator();
 
-    protected void _setupPageData(HttpServletRequest request,
+    protected void setupPageData(HttpServletRequest request,
                                   int sessionId,
                                   ViewChartForm chartForm,
-                                  AppdefResourceValue[] resources,
-                                  MeasurementBoss mb)
+                                  AppdefResourceValue[] resources)
         throws SessionTimeoutException, SessionNotFoundException,
                AppdefEntityNotFoundException, PermissionException,
                AppdefCompatException, RemoteException,
                MeasurementNotFoundException, BaselineCreationException {
-        List mtids = Arrays.asList( chartForm.getOrigM() );
-        ArrayList metricSummaries = new ArrayList();
+        List<Integer> mtids = Arrays.asList( chartForm.getOrigM() );
+        ArrayList<MetricDisplaySummary> metricSummaries = new ArrayList<MetricDisplaySummary>();
         for (int i=0; i<resources.length; ++i) {
-            Map metrics =
-                mb.findMetrics(sessionId, resources[i].getEntityId(),
+            Map<String,Set<MetricDisplaySummary>> metrics =
+                measurementBoss.findMetrics(sessionId, resources[i].getEntityId(),
                                mtids, chartForm.getStartDate().getTime(),
                                chartForm.getEndDate().getTime() );
             MonitorUtils.formatMetrics( metrics, request.getLocale(),
                                         getResources(request) );
-            for (Iterator it = metrics.values().iterator(); it.hasNext();) {
-                metricSummaries.addAll( (Collection) it.next() );
+            for (Iterator<Set<MetricDisplaySummary>> it = metrics.values().iterator(); it.hasNext();) {
+                metricSummaries.addAll(  it.next() );
             }
         }
         Collections.sort(metricSummaries, comp);
@@ -474,16 +490,15 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
         }
         request.setAttribute("chartedMetrics", chartedMetrics);
 
-        _setupBaselineExpectedRange(request, sessionId, chartForm, resources,
-                                    chartedMetrics, mb);
+        setupBaselineExpectedRange(request, sessionId, chartForm, resources,
+                                    chartedMetrics);
     }
 
-    protected void _setupBaselineExpectedRange(HttpServletRequest request,
+    protected void setupBaselineExpectedRange(HttpServletRequest request,
                                                int sessionId,
                                                ViewChartForm chartForm,
                                                AppdefResourceValue[] resources,
-                                               ChartedMetricBean[] chartedMetrics,
-                                               MeasurementBoss mb)
+                                               ChartedMetricBean[] chartedMetrics)
         throws SessionTimeoutException,
                SessionNotFoundException,
                MeasurementNotFoundException,
@@ -496,7 +511,7 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
         
         if (chartForm.getMode().equals(Constants.MODE_MON_CHART_SMSR) ||
             chartForm.getMode().equals(Constants.MODE_MON_CHART_SMMR)) {
-            m = mb.findMeasurement(sessionId, chartForm.getM()[0],
+            m = measurementBoss.findMeasurement(sessionId, chartForm.getM()[0],
                                    resources[0].getEntityId());
             request.setAttribute("metric", m);
         
@@ -508,7 +523,7 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
                 if (chartedMetrics[i] == null)
                     continue;
                 
-                m = mb.findMeasurement(sessionId,
+                m = measurementBoss.findMeasurement(sessionId,
                                        chartedMetrics[i].getTemplateId(),
                                        aeid);
                 if (null != m) {
@@ -531,7 +546,7 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
         }
     }
 
-    private int _getMaxResources(HttpServletRequest request,
+    private int getMaxResources(HttpServletRequest request,
                                  int allResourcesLength) {
         int maxResources = LineChart.getNumColors();
         String maxResourcesS =
@@ -555,4 +570,3 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
     }
 }
 
-// EOF

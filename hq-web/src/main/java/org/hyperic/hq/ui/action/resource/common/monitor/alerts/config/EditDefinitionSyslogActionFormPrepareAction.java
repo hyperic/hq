@@ -25,23 +25,19 @@
 
 package org.hyperic.hq.ui.action.resource.common.monitor.alerts.config;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.hyperic.hq.bizapp.shared.EventsBoss;
-import org.hyperic.hq.events.shared.AlertDefinitionValue;
-import org.hyperic.hq.ui.action.resource.common.monitor.alerts.AlertDefUtil;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
+import org.hyperic.hq.bizapp.shared.EventsBoss;
+import org.hyperic.hq.events.shared.AlertDefinitionValue;
+import org.hyperic.hq.ui.action.resource.common.monitor.alerts.AlertDefUtil;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 
 /**
@@ -50,9 +46,18 @@ import org.apache.struts.tiles.actions.TilesAction;
  *
  */
 public class EditDefinitionSyslogActionFormPrepareAction extends TilesAction {
-    protected Log log = LogFactory.getLog(EditDefinitionSyslogActionFormPrepareAction.class.getName());    
+   
 
-    // ---------------------------------------------------- Public Methods
+   private EventsBoss eventsBoss;
+   
+   
+   @Autowired
+    public EditDefinitionSyslogActionFormPrepareAction(EventsBoss eventsBoss) {
+        super();
+        this.eventsBoss = eventsBoss;
+   }
+
+
 
     public ActionForward execute(ComponentContext context,
                                  ActionMapping mapping,
@@ -61,18 +66,16 @@ public class EditDefinitionSyslogActionFormPrepareAction extends TilesAction {
                                  HttpServletResponse response)
         throws Exception
     {
-        ServletContext ctx = getServlet().getServletContext();
+       
         int sessionID = RequestUtils.getSessionId(request).intValue();
-        EventsBoss eb = ContextUtils.getEventsBoss(ctx);
+       
 
         SyslogActionForm saForm = (SyslogActionForm)form;
 
         // properties
-        AlertDefinitionValue adv = AlertDefUtil.getAlertDefinition(request, sessionID, eb);
+        AlertDefinitionValue adv = AlertDefUtil.getAlertDefinition(request, sessionID, eventsBoss);
         AlertDefUtil.prepareSyslogActionForm(adv, saForm);
 
         return null;
     }
 }
-
-// EOF

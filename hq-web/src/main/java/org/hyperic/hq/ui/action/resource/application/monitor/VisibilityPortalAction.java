@@ -28,7 +28,6 @@ package org.hyperic.hq.ui.action.resource.application.monitor;
 import java.util.List;
 import java.util.Properties;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -41,13 +40,17 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
+import org.hyperic.hq.bizapp.shared.uibeans.ResourceDisplaySummary;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.action.resource.common.monitor.visibility.ResourceVisibilityPortalAction;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
+import org.springframework.beans.factory.annotation.Autowired;
 
 
 /**
@@ -59,11 +62,18 @@ import org.hyperic.util.pager.PageControl;
  */
 public class VisibilityPortalAction extends ResourceVisibilityPortalAction {
 
-    protected static Log log =
+    private final Log log =
         LogFactory.getLog(VisibilityPortalAction.class.getName());
     // XXX duplicated from the ServiceVisibilityPortalAction... refactoring needed
     private static final String ERR_SERVER_PERMISSION =
         "resource.service.monitor.visibility.error.ServerPermission";
+    private MeasurementBoss measurementBoss;
+    
+    @Autowired
+    public VisibilityPortalAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss, MeasurementBoss measurementBoss) {
+        super(appdefBoss, authzBoss, controlBoss);
+        this.measurementBoss = measurementBoss;
+    }
 
     /* (non-Javadoc)
      * @see org.hyperic.hq.ui.action.BaseDispatchAction#getKeyMethodMap()
@@ -158,16 +168,14 @@ public class VisibilityPortalAction extends ResourceVisibilityPortalAction {
             // against services in a variable timeframe -- so have the
             // MonitorUtil's give us a timeframe for the default retrospective
             // window
-            ServletContext ctx = getServlet().getServletContext();
-            MeasurementBoss boss = ContextUtils.getMeasurementBoss(ctx); 
-            
+         
             if (log.isTraceEnabled()) {
                 log.trace("finding servers current health for resource [" +
                           app.getEntityId() + "]");
             }
 
-            List servers =
-                boss.findServersCurrentHealth(
+            List<ResourceDisplaySummary> servers =
+                measurementBoss.findServersCurrentHealth(
                     RequestUtils.getSessionId(request).intValue(), 
                     app.getEntityId(), PageControl.PAGE_ALL);
             

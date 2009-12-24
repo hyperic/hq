@@ -35,7 +35,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -55,6 +54,9 @@ import org.hyperic.hq.appdef.shared.AppdefInventorySummary;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
+import org.hyperic.hq.appdef.shared.PlatformTypeValue;
+import org.hyperic.hq.appdef.shared.ServerTypeValue;
+import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
@@ -68,7 +70,6 @@ import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.taglib.display.StringUtil;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.InvalidOptionException;
@@ -76,6 +77,7 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.timer.StopWatch;
 import org.hyperic.util.units.FormattedNumber;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An <code>Action</code> that sets up the Resource Hub portal.
@@ -101,8 +103,20 @@ public class ResourceHubPortalAction extends BaseAction {
     private static final String TYPE_ATTRIB = "Resource Hub Apppdef Type";
     private static final String GRP_ATTRIB  = "Resource Hub Group Type";
     
-    protected Log log =
+    private final Log log =
         LogFactory.getLog(ResourceHubPortalAction.class.getName());
+    private AppdefBoss appdefBoss;
+    private  AuthzBoss authzBoss;
+    private MeasurementBoss measurementBoss;
+    
+    
+    @Autowired
+    public ResourceHubPortalAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, MeasurementBoss measurementBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+        this.authzBoss = authzBoss;
+        this.measurementBoss = measurementBoss;
+    }
 
     /**
      * Set up the Resource Hub portal.
@@ -117,8 +131,7 @@ public class ResourceHubPortalAction extends BaseAction {
         ResourceHubForm hubForm = (ResourceHubForm) form;
         
         int sessionId = RequestUtils.getSessionId(request).intValue();
-        ServletContext ctx = getServlet().getServletContext();
-        AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
+      
 
         // Set the view in the form
         HttpSession session = request.getSession();
@@ -242,7 +255,7 @@ public class ResourceHubPortalAction extends BaseAction {
             hubForm.setKeywords(resourceName);
         }
 
-        PageList resources = null;
+     
         StopWatch watch = new StopWatch();
         watch.markTimeBegin("findCompatInventory");
         Integer gid = null;
@@ -284,13 +297,13 @@ public class ResourceHubPortalAction extends BaseAction {
         }
         else {
             // Look up groups
-            Collection groups = appdefBoss.findAllGroupPojos(sessionId);
+            Collection<ResourceGroup> groups = appdefBoss.findAllGroupPojos(sessionId);
             
             if (groups.size() > 0) {
-                ArrayList groupOptions = new ArrayList(groups.size());
+                ArrayList<LabelValueBean> groupOptions = new ArrayList<LabelValueBean>(groups.size());
                 
-                for (Iterator it = groups.iterator(); it.hasNext(); ) {
-                    ResourceGroup group = (ResourceGroup) it.next();
+                for ( ResourceGroup group : groups ) {
+                  
 
                     String appdefKey =
                         AppdefEntityID.newGroupID(group.getId()).getAppdefKey();
@@ -312,7 +325,7 @@ public class ResourceHubPortalAction extends BaseAction {
         }
         
         // TODO: Pass groupSubType as int[]
-        resources = appdefBoss.search(sessionId, entityType, 
+        PageList<AppdefResourceValue> resources = appdefBoss.search(sessionId, entityType, 
         							  org.hyperic.util.StringUtil
         							  		.escapeForRegex(resourceName, true),
                                       aetid, gid, groupSubtype, 
@@ -329,10 +342,9 @@ public class ResourceHubPortalAction extends BaseAction {
 
         request.setAttribute(Constants.ALL_RESOURCES_ATTR, resources);
 
-        ArrayList ids = new ArrayList();
+        ArrayList<AppdefEntityID> ids = new ArrayList<AppdefEntityID>();
         if (resources != null) {
-            for (Iterator it = resources.iterator(); it.hasNext();) {
-                AppdefResourceValue rv = (AppdefResourceValue) it.next();
+            for (AppdefResourceValue rv :  resources) {
                 ids.add(rv.getEntityId());
             }
         }
@@ -342,21 +354,20 @@ public class ResourceHubPortalAction extends BaseAction {
             if (prefView.equals(ResourceHubForm.LIST_VIEW) &&
                 !isGroupSelected && resourceType != DEFAULT_RESOURCE_TYPE) {
                 // Get the indicator templates
-                MeasurementBoss mboss = ContextUtils.getMeasurementBoss(ctx);
+               
 
-                HashSet cats = new HashSet(3);
+                HashSet<String> cats = new HashSet<String>(3);
                 cats.add(MeasurementConstants.CAT_UTILIZATION);
                 cats.add(MeasurementConstants.CAT_THROUGHPUT);
                 cats.add(MeasurementConstants.CAT_PERFORMANCE);
 
-                Collection templates = null;
+               Collection<MeasurementTemplate> templates = null;
                 
-                Map metricsMap = new HashMap(ids.size());
-                for (Iterator it = ids.iterator(); it.hasNext(); ) {
-                    final AppdefEntityID entityId = (AppdefEntityID) it.next();
+                Map<AppdefEntityID, String[]> metricsMap = new HashMap<AppdefEntityID, String[]>(ids.size());
+                for (AppdefEntityID entityId : ids ) {
                     if (templates == null || templates.size() == 0) {
                         templates =
-                            mboss.getDesignatedTemplates(sessionId,
+                            measurementBoss.getDesignatedTemplates(sessionId,
                                                          entityId,
                                                          cats);
                 
@@ -366,21 +377,12 @@ public class ResourceHubPortalAction extends BaseAction {
                     }
                     
                     String[] metrics = getResourceMetrics(request, sessionId,
-                                                          mboss, templates,
+                                                          measurementBoss, templates,
                                                           entityId);
                     metricsMap.put(entityId, metrics);
                 }
                 request.setAttribute("indicatorsMap", metricsMap);
             }
-
-            /*
-            // Set additional flags
-            ControlBoss controlBoss = ContextUtils.getControlBoss(ctx);
-            List controllableResources =
-                controlBoss.batchCheckControlPermissions(sessionId, idArr);
-            request.setAttribute(Constants.ALL_RESOURCES_CONTROLLABLE,
-                                 controllableResources);
-                                 */
         }
         
         watch.markTimeEnd("batchGetIndicators");
@@ -402,17 +404,17 @@ public class ResourceHubPortalAction extends BaseAction {
                 // combined menu containing all platform, server and
                 // service types
 
-                List platformTypes =
+                List<PlatformTypeValue> platformTypes =
                     appdefBoss.findViewablePlatformTypes(sessionId, pc);
                 addCompatTypeOptions(hubForm, platformTypes,
                                      msg(request, PLATFORM_KEY));
 
-                List serverTypes =
+                List<ServerTypeValue> serverTypes =
                     appdefBoss.findViewableServerTypes(sessionId, pc);
                 addCompatTypeOptions(hubForm, serverTypes,
                                      msg(request, SERVER_KEY));
 
-                List serviceTypes =
+                List<ServiceTypeValue> serviceTypes =
                     appdefBoss.findViewableServiceTypes(sessionId, pc);
                 addCompatTypeOptions(hubForm, serviceTypes,
                                      msg(request, SERVICE_KEY));
@@ -428,7 +430,7 @@ public class ResourceHubPortalAction extends BaseAction {
         }
         else {
             // the entity is not a group- this is easy.
-            List types =
+            List<AppdefResourceTypeValue> types =
                 appdefBoss.findAllResourceTypes(sessionId, entityType, pc);
             addTypeOptions(hubForm, types);
         }
@@ -440,8 +442,8 @@ public class ResourceHubPortalAction extends BaseAction {
 
         // Save the preferences if necessary
         if (prefChanged) {
-            AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
-            boss.setUserPrefs(user.getSessionId(), user.getId(),
+          
+            authzBoss.setUserPrefs(user.getSessionId(), user.getId(),
                               user.getPreferences());
         }
         
@@ -459,10 +461,10 @@ public class ResourceHubPortalAction extends BaseAction {
 
     private String[] getResourceMetrics(HttpServletRequest request,
                                         int sessionId, MeasurementBoss mboss,
-                                        Collection templates,
+                                        Collection<MeasurementTemplate> templates,
                                         final AppdefEntityID entityId)
         throws RemoteException {
-        Map vals = mboss.getLastIndicatorValues(sessionId, entityId);
+        Map<Integer,MetricValue> vals = mboss.getLastIndicatorValues(sessionId, entityId);
 
         // Format the values
         String[] metrics = new String[templates.size()];
@@ -471,11 +473,11 @@ public class ResourceHubPortalAction extends BaseAction {
                                                       "common.value.notavail"));
         } else {
             int i = 0;
-            for (Iterator it = templates.iterator(); it.hasNext(); i++) {
-                MeasurementTemplate mt = (MeasurementTemplate) it.next();
+            for (Iterator<MeasurementTemplate> it = templates.iterator(); it.hasNext(); i++) {
+                MeasurementTemplate mt = it.next();
 
                 if (vals.containsKey(mt.getId())) {
-                    MetricValue mv = (MetricValue) vals.get(mt.getId());
+                    MetricValue mv = vals.get(mt.getId());
                     FormattedNumber fn = UnitsConvert.convert(mv.getValue(), mt
                             .getUnits());
                     metrics[i] = fn.toString();
@@ -488,18 +490,15 @@ public class ResourceHubPortalAction extends BaseAction {
         return metrics;
     }
 
-    private void addTypeOptions(ResourceHubForm form, List types) {
-        if (types.size() > 0) {
-            for (Iterator itr = types.iterator(); itr.hasNext(); ) {
-                AppdefResourceTypeValue value =
-                    (AppdefResourceTypeValue) itr.next();
+    private void addTypeOptions(ResourceHubForm form, List<? extends AppdefResourceTypeValue> types) {
+       
+            for ( AppdefResourceTypeValue value : types) {
                 form.addType(new LabelValueBean(value.getName(),
                                                 value.getAppdefTypeKey()));
             }
-        }
     }
 
-    private void addCompatTypeOptions(ResourceHubForm form, List types,
+    private void addCompatTypeOptions(ResourceHubForm form, List<? extends AppdefResourceTypeValue> types,
                                       String label) {
         if (types.size() > 0) {
             form.addType(new LabelValueBean(BLANK_LABEL, BLANK_VAL));

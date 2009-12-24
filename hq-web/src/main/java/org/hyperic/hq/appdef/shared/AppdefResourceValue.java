@@ -103,8 +103,8 @@ public abstract class AppdefResourceValue
     public abstract AppdefEntityID getEntityId();
 
     // get a map of resource types and instances
-    public static Map getResourceTypeCountMap(Collection objColl) {
-        Map aMap = new HashMap();
+    public static Map<String,Integer> getResourceTypeCountMap(Collection objColl) {
+        Map<String, Integer> aMap = new HashMap<String, Integer>();
                 
         // try using the AppdefResourceValue & AppdefResourceTypeValue
         for(Iterator i = objColl.iterator();i.hasNext();) {
@@ -172,17 +172,16 @@ public abstract class AppdefResourceValue
      * @return map with key: serverTypeValue, value: a <code>List</code> 
      * of ServerLightValues matching that type
      */
-    public static Map getServerTypeCountMap(Collection serverColl) {
+    public static Map<String,Integer> getServerTypeCountMap(Collection<? extends AppdefResourceValue> serverColl) {
         // remove any virtual servers
-        Collection nonVirtual = new ArrayList(serverColl.size());
+        Collection<AppdefResourceValue> nonVirtual = new ArrayList<AppdefResourceValue>(serverColl.size());
         
-        for (Iterator i = serverColl.iterator(); i.hasNext();) {
-            AppdefResourceValue av = (AppdefResourceValue)i.next();
+        for (AppdefResourceValue av : serverColl) {
             ServerTypeValue st =
                 (ServerTypeValue) av.getAppdefResourceTypeValue();
-
-            if (!st.getVirtual())
+            if (!st.getVirtual()) {
                 nonVirtual.add(av);
+            }
         }
 
         return getResourceTypeCountMap(nonVirtual);
@@ -194,7 +193,7 @@ public abstract class AppdefResourceValue
      * @return map with key: serviceTypeValue, value: a <code>List</code> 
      * of ServiceLightValues matching that type
      */
-    public static Map getServiceTypeCountMap(Collection serviceColl) {
+    public static Map<String,Integer> getServiceTypeCountMap(Collection serviceColl) {
         return getResourceTypeCountMap(serviceColl);
     }
     

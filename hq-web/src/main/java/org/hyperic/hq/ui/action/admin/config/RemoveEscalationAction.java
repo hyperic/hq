@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.ui.action.admin.config;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -36,32 +35,39 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An Action that removes an escalation
  */
 public class RemoveEscalationAction extends BaseAction {
 
+    private final Log log = LogFactory.getLog(RemoveEscalationAction.class.getName());
+    private EventsBoss eventsBoss;
+    
+    
+    @Autowired
+    public RemoveEscalationAction(EventsBoss eventsBoss) {
+        super();
+        this.eventsBoss = eventsBoss;
+    }
+
+
+
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-            
-        Log log = LogFactory.getLog(RemoveEscalationAction.class.getName());
-
+     
         log.debug("entering RemoveEscalationAction");
         Integer escId = RequestUtils.getIntParameter(request, "esc");
         
         Integer sessionId = RequestUtils.getSessionId(request);
 
-        ServletContext ctx = getServlet().getServletContext();
-        EventsBoss boss = ContextUtils.getEventsBoss(ctx);
-
         try {
-            boss.deleteEscalationById(sessionId.intValue(), escId);
+            eventsBoss.deleteEscalationById(sessionId.intValue(), escId);
         } catch(Exception e) {
             RequestUtils.setError(request,
                 "admin.config.error.escalation.CannotDelete");

@@ -26,16 +26,12 @@
 package org.hyperic.hq.ui.action.portlet.criticalalerts;
 
 import java.text.SimpleDateFormat;
-import java.util.Iterator;
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
@@ -45,19 +41,21 @@ import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.bizapp.shared.ConfigBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.portlet.BaseRSSAction;
 import org.hyperic.hq.ui.action.portlet.RSSFeed;
-import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.units.FormattedNumber;
 import org.hyperic.util.units.UnitNumber;
 import org.hyperic.util.units.UnitsConstants;
 import org.hyperic.util.units.UnitsFormat;
 import org.hyperic.util.units.DateFormatter.DateSpecifics;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An <code>Action</code> that loads the <code>Portal</code>
@@ -66,8 +64,21 @@ import org.hyperic.util.units.DateFormatter.DateSpecifics;
  * <code>PORTAL_KEY</code> request attribute.
  */
 public class RSSAction extends BaseRSSAction {
-    private static final Log log = LogFactory.getLog(RSSAction.class.getName());
     
+    private EventsBoss eventsBoss;
+    
+    private AuthzBoss authzBoss;
+    
+    
+    @Autowired
+    public RSSAction(DashboardManager dashboardManager, ConfigBoss configBoss, EventsBoss eventsBoss, AuthzBoss authzBoss) {
+        super(dashboardManager, configBoss);
+       this.eventsBoss = eventsBoss;
+       this.authzBoss = authzBoss;
+    }
+
+
+
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
                                  HttpServletRequest request,
@@ -80,13 +91,11 @@ public class RSSAction extends BaseRSSAction {
         MessageResources res = getResources(request);
         feed.setTitle(res.getMessage("dash.home.CriticalAlerts"));
 
-        // Get the recent alerts
-        ServletContext ctx = getServlet().getServletContext();
-        EventsBoss boss = ContextUtils.getEventsBoss(ctx);
-        AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx); 
+       
+       
             
         String user = getUsername(request);
-        List list;
+        List<Escalatable> list;
         try {
             // Set the managingEditor
             setManagingEditor(request);
@@ -101,14 +110,13 @@ public class RSSAction extends BaseRSSAction {
             long timeRange = Long.parseLong(preferences
                 .getValue(".dashContent.criticalalerts.past").trim());
 
-            list = boss.findRecentAlerts(user, count, priority, timeRange, 
+            list = eventsBoss.findRecentAlerts(user, count, priority, timeRange, 
                                          null);
         } catch (Exception e) {
             throw new ServletException("Error finding recent alerts", e);
         }
 
-        for (Iterator i = list.iterator(); i.hasNext(); ) {
-            Escalatable alert = (Escalatable) i.next();
+        for (Escalatable alert : list ) {
             AlertDefinitionInterface defInfo = 
                 alert.getDefinition().getDefinitionInfo();
             AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(defInfo.getResource());
@@ -150,7 +158,7 @@ public class RSSAction extends BaseRSSAction {
                 }
             }
             
-            AuthzSubject subject = aBoss.getCurrentSubject(user);
+            AuthzSubject subject = authzBoss.getCurrentSubject(user);
             AppdefEntityValue resource = new AppdefEntityValue(aeid, subject); 
 
             String link = feed.getBaseUrl() +

@@ -28,21 +28,9 @@ package org.hyperic.hq.ui.action.resource.platform.monitor.visibility;
 import java.rmi.RemoteException;
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.auth.shared.SessionNotFoundException;
-import org.hyperic.hq.auth.shared.SessionTimeoutException;
-import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.bizapp.shared.MeasurementBoss;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -51,6 +39,17 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.auth.shared.SessionNotFoundException;
+import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.bizapp.shared.MeasurementBoss;
+import org.hyperic.hq.bizapp.shared.uibeans.ResourceTypeDisplaySummary;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *
@@ -58,8 +57,17 @@ import org.apache.struts.tiles.actions.TilesAction;
  */
 public class ListChildrenAction extends TilesAction {
     
-    protected static Log log =
+    private final Log log =
         LogFactory.getLog(ListChildrenAction.class.getName());
+    
+    private MeasurementBoss measurementBoss;
+    
+    
+    @Autowired
+    public ListChildrenAction(MeasurementBoss measurementBoss) {
+        super();
+        this.measurementBoss = measurementBoss;
+    }
 
     public ActionForward execute(ComponentContext context,
                                  ActionMapping mapping,
@@ -77,14 +85,13 @@ public class ListChildrenAction extends TilesAction {
         AppdefEntityID entityId = resource.getEntityId();
 
         int sessionId = RequestUtils.getSessionId(request).intValue();
-        ServletContext ctx = getServlet().getServletContext();
-        MeasurementBoss boss = ContextUtils.getMeasurementBoss(ctx);
+     
 
         Boolean isInternal =
             new Boolean((String) context.getAttribute(Constants.CTX_INTERNAL));
         
-        List internalHealths = getChildHealthSummaries(
-            request, boss, sessionId, entityId, isInternal.booleanValue());
+        List<ResourceTypeDisplaySummary> internalHealths = getChildHealthSummaries(
+            request, sessionId, entityId, isInternal.booleanValue());
 
         context.putAttribute(Constants.CTX_SUMMARIES, internalHealths);
 
@@ -110,8 +117,7 @@ public class ListChildrenAction extends TilesAction {
      *            deployed child resources
      * @return List
      */
-    protected List getChildHealthSummaries(HttpServletRequest request,
-                                           MeasurementBoss boss,
+    protected List<ResourceTypeDisplaySummary> getChildHealthSummaries(HttpServletRequest request,
                                            int sessionId,
                                            AppdefEntityID entityId,
                                            boolean isInternal)
@@ -122,13 +128,13 @@ public class ListChildrenAction extends TilesAction {
         if (isInternal) {
             // cheat and treat platform services as internal so as to not 
             // disturb the whackadocious action class hierarchy
-            return boss.findSummarizedPlatformServiceCurrentHealth(sessionId,
+            return measurementBoss.findSummarizedPlatformServiceCurrentHealth(sessionId,
                                                                    entityId);
         }
 
         log.trace("getting deployed server healths for resource [" +
                   entityId + "]");
 
-        return boss.findSummarizedServerCurrentHealth(sessionId, entityId);
+        return measurementBoss.findSummarizedServerCurrentHealth(sessionId, entityId);
     }
 }

@@ -28,7 +28,6 @@ package org.hyperic.hq.ui.action.resource.platform.inventory;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -37,18 +36,18 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateFQDNException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.PlatformValue;
-import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.action.resource.platform.PlatformForm;
 import org.hyperic.hq.ui.util.BizappUtils;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * A <code>BaseAction</code> subclass that edits the type and
@@ -56,7 +55,19 @@ import org.hyperic.hq.ui.util.RequestUtils;
  */
 public class EditPlatformTypeNetworkPropertiesAction extends BaseAction {
 
-    // ---------------------------------------------------- Public Methods
+    private final  Log log = LogFactory
+    .getLog(EditPlatformTypeNetworkPropertiesAction.class.getName());
+    
+    private AppdefBoss appdefBoss;
+    
+    
+    @Autowired
+    public EditPlatformTypeNetworkPropertiesAction(AppdefBoss appdefBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+    }
+
+
 
     /**
      * Edit the platform with the attributes specified in the given
@@ -67,14 +78,13 @@ public class EditPlatformTypeNetworkPropertiesAction extends BaseAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-         Log log = LogFactory
-             .getLog(EditPlatformTypeNetworkPropertiesAction.class.getName());
+        
 
         PlatformForm editForm = (PlatformForm) form;
         AppdefEntityID aeid = new AppdefEntityID(editForm.getType().intValue(),
                                                  editForm.getRid());
 
-        HashMap forwardParams = new HashMap(2);
+        HashMap<String, Object> forwardParams = new HashMap<String, Object>(2);
         forwardParams.put(Constants.ENTITY_ID_PARAM, aeid.getAppdefKey());
         forwardParams.put(Constants.ACCORDION_PARAM, "1");
 
@@ -85,26 +95,13 @@ public class EditPlatformTypeNetworkPropertiesAction extends BaseAction {
                 return forward;
             }
 
-            ServletContext ctx = getServlet().getServletContext();
+           
             Integer sessionId = RequestUtils.getSessionId(request);
-            AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
-
-            // first make sure the form's "machine type" represents a
-            // valid platform type
-            
-            // XXX The code below is commented since we should not be 
-            // editing the platform's machine type once the platform is created
-            
-            /*
-            Integer platformTypeId = editForm.getResourceType();
-            log.trace("finding platform type [" + platformTypeId + "]");
-            PlatformTypeValue platformType =
-                boss.findPlatformTypeById(sessionId.intValue(),
-                                          platformTypeId); */
+          
 
             // now set up the platform
             PlatformValue platform =
-                boss.findPlatformById(sessionId.intValue(), aeid.getId());
+                appdefBoss.findPlatformById(sessionId.intValue(), aeid.getId());
             
             if (platform == null) {
                 RequestUtils
@@ -116,7 +113,7 @@ public class EditPlatformTypeNetworkPropertiesAction extends BaseAction {
             editForm.updatePlatformValue(platform);
 
             Agent agent =
-                BizappUtils.getAgentConnection(sessionId.intValue(), boss,
+                BizappUtils.getAgentConnection(sessionId.intValue(), appdefBoss,
                                                request, editForm);
             if (agent != null) {
                 platform.setAgent(agent);
@@ -126,13 +123,7 @@ public class EditPlatformTypeNetworkPropertiesAction extends BaseAction {
                       platform.getName() + "]" + " with attributes " +
                       platform + " and ips " +
                       Arrays.asList(platform.getIpValues())); 
-            boss.updatePlatform(sessionId.intValue(), platform);
-
-            /* XXX - Not sure why it's the job of the UI to start an auto scan
-            BizappUtils.startAutoScan(ctx,
-                                      sessionId.intValue(),
-                                      newPlatform.getEntityId());
-             */
+            appdefBoss.updatePlatform(sessionId.intValue(), platform);
             
             RequestUtils
                 .setConfirmation(request,

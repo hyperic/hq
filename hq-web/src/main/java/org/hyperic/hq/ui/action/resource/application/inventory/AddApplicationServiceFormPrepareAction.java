@@ -28,19 +28,8 @@ package org.hyperic.hq.ui.action.resource.application.inventory;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.hq.ui.util.SessionUtils;
-import org.hyperic.util.pager.PageControl;
-import org.hyperic.util.pager.PageList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -48,6 +37,15 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.actions.TilesAction;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.hq.ui.util.SessionUtils;
+import org.hyperic.util.pager.PageControl;
+import org.hyperic.util.pager.PageList;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * This classes manages the setup for displaying the Add Services
@@ -55,8 +53,18 @@ import org.apache.struts.tiles.actions.TilesAction;
  * paging setup for the available list and filtering by the service type.
  */
 public class AddApplicationServiceFormPrepareAction extends TilesAction {
-    private static Log log = LogFactory
+    private final Log log = LogFactory
         .getLog(AddApplicationServiceFormPrepareAction.class.getName());
+    private AppdefBoss appdefBoss;
+    
+    
+    @Autowired
+    public AddApplicationServiceFormPrepareAction(AppdefBoss appdefBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+    }
+
+
 
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
@@ -64,7 +72,7 @@ public class AddApplicationServiceFormPrepareAction extends TilesAction {
                                  HttpServletResponse response)
         throws Exception {
 
-        AppdefBoss boss;
+       
 
         AddApplicationServicesForm addForm = (AddApplicationServicesForm) form;
         String nameFilter = addForm.getNameFilter();
@@ -75,7 +83,7 @@ public class AddApplicationServiceFormPrepareAction extends TilesAction {
             RequestUtils.getPageControl(request, "psa", "pna", "soa", "sca");
         PageControl pcp =
             RequestUtils.getPageControl(request, "psp", "pnp", "sop", "scp");
-        ServletContext ctx = getServlet().getServletContext();
+        
         addForm.setRid(resource.getId());
         addForm.setType(new Integer(entityId.getType()));
 
@@ -85,21 +93,19 @@ public class AddApplicationServiceFormPrepareAction extends TilesAction {
         // 
         // available services are all services in the system that are
         //  _not_ associated with the application and are not pending
-        PageList availableServices; // services available for addition
-        PageList pendingServices;
-        AppdefEntityID[] pendingServiceIds;
-
-        boss = ContextUtils.getAppdefBoss(ctx);
+       
+        PageList<AppdefResourceValue> pendingServices;
+        AppdefEntityID[] pendingServiceIds = null;
 
         // Pending Services
         // Find pending services that aren't yet assigned but that 
         // need to be displayed as such.
-        pendingServiceIds = null;
+     
         if (request.getSession().getAttribute(
                 Constants.PENDING_APPSVCS_SES_ATTR) != null &&
             (SessionUtils.getListAsListStr(request.getSession(),
                 Constants.PENDING_APPSVCS_SES_ATTR)).size() > 0) {
-            List uiPendings = SessionUtils.getListAsListStr(
+            List<String> uiPendings = SessionUtils.getListAsListStr(
                 request.getSession(), Constants.PENDING_APPSVCS_SES_ATTR);
 
             pendingServiceIds  = new AppdefEntityID[uiPendings.size()];
@@ -115,13 +121,13 @@ public class AddApplicationServiceFormPrepareAction extends TilesAction {
 
             log.debug("pendingServiceIds = " + pendingServiceIds);
 
-            pendingServices = boss.findByIds(sessionId.intValue(),
+            pendingServices = appdefBoss.findByIds(sessionId.intValue(),
                                              pendingServiceIds, pcp);
 
             log.trace("Pending Services for [" + entityId + "]: "+
                 pendingServices.toString());
         } else {
-            pendingServices = new PageList();
+            pendingServices = new PageList<AppdefResourceValue>();
         }
         request.setAttribute(Constants.PENDING_APPSVCS_REQ_ATTR,
                              pendingServices);
@@ -131,12 +137,8 @@ public class AddApplicationServiceFormPrepareAction extends TilesAction {
         // Available Services
         // Find all services that aren't already assigned to this
         // application and that aren't in our pending list.
-        //availableServices = boss.findServices (
-        //                        sessionId.intValue(), 
-        //                        new Integer(entityId.getID()),
-        //                        pendingServiceIds, 
-        //                        pca);
-        availableServices = boss.findAvailableServicesForApplication(
+     
+        PageList<AppdefResourceValue> availableServices = appdefBoss.findAvailableServicesForApplication(
             sessionId.intValue(), resource.getId(), pendingServiceIds,
             nameFilter, pca);
 

@@ -29,7 +29,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -49,15 +48,14 @@ import org.hyperic.hq.autoinventory.ServerSignature;
 import org.hyperic.hq.bizapp.shared.AIBoss;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.common.DuplicateObjectException;
-import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.exception.InvalidOptionValsFoundException;
 import org.hyperic.hq.ui.util.BizappUtils;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Action class which saves an auto-discovery.  The autodiscovery
@@ -68,7 +66,18 @@ public class NewAutoDiscoveryAction extends BaseAction {
     
     public final static long TIMEOUT = 5000;
     public final static long INTERVAL = 500;
-        
+    
+    private AppdefBoss appdefBoss;
+    private AIBoss aiBoss;
+    
+    
+    @Autowired    
+    public NewAutoDiscoveryAction(AppdefBoss appdefBoss, AIBoss aiBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+        this.aiBoss = aiBoss;
+    }
+
     /**
      * Create a new auto-discovery with the attributes specified in the given
      * <code>AutoDiscoveryForm</code>.
@@ -86,7 +95,7 @@ public class NewAutoDiscoveryAction extends BaseAction {
             Integer platformId = newForm.getRid();
             Integer platformType = newForm.getType();
             
-            HashMap forwardParams = new HashMap(3);
+            HashMap<String, Object> forwardParams = new HashMap<String,Object>(3);
             forwardParams.put(Constants.RESOURCE_PARAM, platformId);
             forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, platformType );
 
@@ -98,8 +107,7 @@ public class NewAutoDiscoveryAction extends BaseAction {
                 return forward;
             }         
 
-            ServletContext ctx = getServlet().getServletContext();
-            AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
+           
             int sessionId = RequestUtils.getSessionIdInt(request);
             
             PlatformValue pValue =
@@ -110,10 +118,10 @@ public class NewAutoDiscoveryAction extends BaseAction {
                 "resource.platform.inventory.autoinventory.status.NewScan");
 
             // See if there is an existing report
-            AIBoss aiboss = ContextUtils.getAIBoss(ctx);
+          
             try {
                 AIPlatformValue aip =
-                    aiboss.findAIPlatformByPlatformID(sessionId,
+                    aiBoss.findAIPlatformByPlatformID(sessionId,
                                                         platformId.intValue());
                 request.setAttribute(Constants.AIPLATFORM_ATTR, aip);
             } catch (PlatformNotFoundException e) {
@@ -150,7 +158,7 @@ public class NewAutoDiscoveryAction extends BaseAction {
      */
     protected ActionForward checkSubmit(HttpServletRequest request,
                                         ActionMapping mapping, ActionForm form,
-                                        Map params, boolean doReturnPath)
+                                        Map<String,Object> params, boolean doReturnPath)
         throws Exception {
         PlatformAutoDiscoveryForm aiForm = (PlatformAutoDiscoveryForm) form;
 
@@ -167,7 +175,7 @@ public class NewAutoDiscoveryAction extends BaseAction {
      */
     private ActionForward returnScheduleTypeChg(HttpServletRequest request,
                                          ActionMapping mapping,
-                                         Map params, boolean doReturnPath)
+                                         Map<String,Object> params, boolean doReturnPath)
         throws Exception {
             return constructForward(request, mapping,
                                     Constants.SCHEDULE_TYPE_CHG_URL,
@@ -180,21 +188,19 @@ public class NewAutoDiscoveryAction extends BaseAction {
                                         ActionErrors errors)
         throws Exception
     {
-        ServletContext ctx = getServlet().getServletContext();
-        AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
-        AIBoss aiboss = ContextUtils.getAIBoss(ctx);
+        
         int sessionId = RequestUtils.getSessionIdInt(request);
         
         // update the ScanConfiguration from the form obect
-        List stValues =
-            boss.findServerTypesByPlatformType(sessionId,
+        List<ServerTypeValue> stValues =
+            appdefBoss.findServerTypesByPlatformType(sessionId,
                                                pValue.getPlatformType().getId(),
                                                PageControl.PAGE_ALL);
-        ServerTypeValue[] stArray = (ServerTypeValue[])
+        ServerTypeValue[] stArray = 
             stValues.toArray(new ServerTypeValue[0]);
         
-        Map serverDetectors =
-            aiboss.getServerSignatures(sessionId,
+        Map<String,ServerSignature> serverDetectors =
+            aiBoss.getServerSignatures(sessionId,
                                        newForm.getSelectedServerTypes(stArray));
         
         ServerSignature[] serverDetectorArray =
@@ -218,14 +224,14 @@ public class NewAutoDiscoveryAction extends BaseAction {
         }        
         scanConfig.setServerSignatures(serverDetectorArray);
 
-        aiboss.startScan(sessionId,
+        aiBoss.startScan(sessionId,
                          pValue.getId().intValue(), 
                          scanConfig.getCore(),
                          null, null, /* No scanName or scanDesc for 
                                         immediate, one-time scans */
                          null);
                          
-        waitForScanStart(sessionId, aiboss, pValue.getId().intValue());
+        waitForScanStart(sessionId, aiBoss, pValue.getId().intValue());
     }
 
     private void waitForScanStart(int sessionId, AIBoss boss, int platformId)

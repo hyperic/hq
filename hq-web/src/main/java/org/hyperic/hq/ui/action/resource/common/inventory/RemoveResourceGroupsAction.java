@@ -27,7 +27,6 @@ package org.hyperic.hq.ui.action.resource.common.inventory;
 
 import java.util.HashMap;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -40,13 +39,26 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *
  */
 public class RemoveResourceGroupsAction extends BaseAction {
+    private final  Log log =
+        LogFactory.getLog(RemoveResourceGroupsAction.class.getName());
+    private AppdefBoss appdefBoss;
+    
+    
+    @Autowired
+    public RemoveResourceGroupsAction(AppdefBoss appdefBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+    }
+
+
+
     /**
      * Removes the servers identified in the
      * <code>RemoveResourceGroupsForm</code>.
@@ -56,19 +68,18 @@ public class RemoveResourceGroupsAction extends BaseAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-        Log log =
-            LogFactory.getLog(RemoveResourceGroupsAction.class.getName());
+       
 
         RemoveResourceGroupsForm rmForm = (RemoveResourceGroupsForm) form;
         Integer resourceId = rmForm.getRid();
         Integer resourceType = rmForm.getType();
 
-        HashMap forwardParams = new HashMap(2);
+        HashMap<String, Object> forwardParams = new HashMap<String, Object>(2);
         forwardParams.put(Constants.RESOURCE_PARAM, resourceId);
         forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, resourceType);
 
-        ServletContext ctx = getServlet().getServletContext();
-        AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);            
+        
+                  
         Integer sessionId = RequestUtils.getSessionId(request);
         AppdefEntityID entityId = new AppdefEntityID(resourceType.intValue(), 
                                                      resourceId);
@@ -77,7 +88,7 @@ public class RemoveResourceGroupsAction extends BaseAction {
         if (groups != null) {
             log.trace("removing groups " + groups +
                       " for resource [" + resourceId + "]");
-            boss.batchGroupRemove(sessionId.intValue(), entityId,
+            appdefBoss.batchGroupRemove(sessionId.intValue(), entityId,
                                   groups);
 
             RequestUtils

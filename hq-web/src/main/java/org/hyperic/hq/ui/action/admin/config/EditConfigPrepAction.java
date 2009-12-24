@@ -27,7 +27,6 @@ package org.hyperic.hq.ui.action.admin.config;
 
 import java.util.Properties;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -41,13 +40,24 @@ import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.bizapp.server.session.UpdateStatusMode;
 import org.hyperic.hq.bizapp.shared.ConfigBoss;
 import org.hyperic.hq.bizapp.shared.UpdateBoss;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class EditConfigPrepAction extends TilesAction {
 
-    Log log = LogFactory.getLog(EditConfigPrepAction.class.getName());
-        
+    private final Log log = LogFactory.getLog(EditConfigPrepAction.class.getName());
+    private ConfigBoss configBoss;
+    private UpdateBoss updateBoss;
+    
+    
+    @Autowired
+    public EditConfigPrepAction(ConfigBoss configBoss, UpdateBoss updateBoss) {
+        super();
+        this.configBoss = configBoss;
+        this.updateBoss = updateBoss;
+    }
+
+
+
     public ActionForward execute(ComponentContext context,
                                  ActionMapping mapping,
                                  ActionForm form,
@@ -55,19 +65,17 @@ public class EditConfigPrepAction extends TilesAction {
                                  HttpServletResponse response)
         throws Exception {
         SystemConfigForm cForm = (SystemConfigForm) form;    
-        ServletContext ctx     = getServlet().getServletContext();
-        ConfigBoss boss = ContextUtils.getConfigBoss(ctx);
+       
         
         if (log.isTraceEnabled()) {
             log.trace("getting config");
         }
         
-        Properties props = boss.getConfig();
+        Properties props = configBoss.getConfig();
         cForm.loadConfigProperties(props);
         
         // Set the update mode
-        UpdateBoss uboss = ContextUtils.getUpdateBoss(ctx);
-        UpdateStatusMode upMode = uboss.getUpdateMode();
+        UpdateStatusMode upMode = updateBoss.getUpdateMode();
         cForm.setUpdateMode(upMode.getCode());
         
         return null;

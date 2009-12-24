@@ -41,16 +41,28 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.ui.beans.OptionItem;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * This populates the server control list. "Start," "Stop," etc.
  */
 public class QuickControlPrepareAction extends TilesAction {
 
-    private static final Log log
-        = LogFactory.getLog(QuickControlPrepareAction.class.getName());    
+    private  final Log log
+        = LogFactory.getLog(QuickControlPrepareAction.class.getName());
+    private ControlBoss controlBoss;
+
+   
+
+    @Autowired
+    public QuickControlPrepareAction(ControlBoss controlBoss) {
+        super();
+        this.controlBoss = controlBoss;
+    }
+
+
+
 
     public ActionForward execute(ComponentContext context,
                                  ActionMapping mapping,
@@ -65,16 +77,15 @@ public class QuickControlPrepareAction extends TilesAction {
         
         try {
             int sessionId = RequestUtils.getSessionIdInt(request);           
-            ControlBoss cBoss =
-                ContextUtils.getControlBoss(getServlet().getServletContext());
+            
             
             AppdefEntityID appdefId = RequestUtils.getEntityId(request);
             
-            List actions = cBoss.getActions(sessionId, appdefId);
-            actions = OptionItem.createOptionsList(actions);
+            List<String> actions = controlBoss.getActions(sessionId, appdefId);
+            List<OptionItem> options = OptionItem.createOptionsList(actions);
 
-            qForm.setControlActions(actions);
-            qForm.setNumControlActions(new Integer(actions.size()));
+            qForm.setControlActions(options);
+            qForm.setNumControlActions(new Integer(options.size()));
 
             return null;
         } catch (PluginNotFoundException cpe) {

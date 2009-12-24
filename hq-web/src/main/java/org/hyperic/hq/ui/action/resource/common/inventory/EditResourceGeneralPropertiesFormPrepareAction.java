@@ -28,18 +28,15 @@ package org.hyperic.hq.ui.action.resource.common.inventory;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+import org.apache.struts.tiles.ComponentContext;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.WorkflowPrepareAction;
 import org.hyperic.hq.ui.action.resource.ResourceForm;
 import org.hyperic.hq.ui.util.RequestUtils;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.tiles.ComponentContext;
 
 /**
  * An Action that retrieves data from the BizApp to facilitate display
@@ -59,9 +56,6 @@ public class EditResourceGeneralPropertiesFormPrepareAction
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-        Log log = LogFactory
-            .getLog(EditResourceGeneralPropertiesFormPrepareAction
-                    .class.getName());
         
         AppdefResourceValue resource = RequestUtils.getResource(request);
         if (resource == null) {

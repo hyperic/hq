@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.ui.action.admin.user;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -38,31 +37,40 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Edits a <code>AuthzSubjectValue</code>.
  */
 public class EditAction extends BaseAction {
     
+    private final Log log = LogFactory.getLog(EditAction.class.getName());
+    private AuthzBoss authzBoss;
+    
+    
+    @Autowired
+    public EditAction(AuthzBoss authzBoss) {
+        super();
+        this.authzBoss = authzBoss;
+    }
+
+
+
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
                                  HttpServletRequest request,
                                  HttpServletResponse response)
     throws Exception {
 
-        Log log = LogFactory.getLog(EditAction.class.getName());            
+                   
         log.trace("modifying user properties action");                    
         EditForm userForm = (EditForm)form;
             
         Integer sessionId = RequestUtils.getSessionId(request);
-
-
-        //get the spiderSubjectValue of the user to be edited.
-        ServletContext ctx = getServlet().getServletContext();            
-        AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
-        AuthzSubject user = ContextUtils.getAuthzBoss(ctx)
+      
+      
+        AuthzSubject user = authzBoss
             .findSubjectById(RequestUtils.getSessionId(request),
                              userForm.getId() );
 

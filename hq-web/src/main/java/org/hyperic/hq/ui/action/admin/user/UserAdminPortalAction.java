@@ -28,7 +28,6 @@ package org.hyperic.hq.ui.action.admin.user;
 import java.util.HashMap;
 import java.util.Properties;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -38,6 +37,8 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.bizapp.shared.AuthBoss;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.WebUser;
@@ -45,9 +46,9 @@ import org.hyperic.hq.ui.action.BaseDispatchAction;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.ActionUtils;
 import org.hyperic.hq.ui.util.BizappUtils;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * A <code>BaseDispatchAction</code> that sets up user admin
@@ -84,11 +85,24 @@ public class UserAdminPortalAction extends BaseDispatchAction {
 
     private static final String PORTLET_REGISTER = ".admin.user.RegisterUser";
 
-    protected static Log log =
+    protected final Log log =
         LogFactory.getLog(UserAdminPortalAction.class.getName());
 
-    private static Properties keyMethodMap = new Properties();
-    static {
+    private final Properties keyMethodMap = new Properties();
+  
+    private AuthBoss authBoss;
+    
+    private AuthzBoss authzBoss;
+
+    @Autowired
+    public UserAdminPortalAction(AuthBoss authBoss, AuthzBoss authzBoss) {
+        super();
+        this.authBoss = authBoss;
+        this.authzBoss = authzBoss;
+        initializeKeyMethodMap();
+    }
+
+   private void initializeKeyMethodMap() {
         keyMethodMap.setProperty(Constants.MODE_LIST,     "listUsers");
         keyMethodMap.setProperty(Constants.MODE_ADD_ROLES,"addUserRoles");
         keyMethodMap.setProperty(Constants.MODE_EDIT,     "editUser");
@@ -97,7 +111,7 @@ public class UserAdminPortalAction extends BaseDispatchAction {
         keyMethodMap.setProperty(Constants.MODE_EDIT_PASS,"changeUserPassword");
         keyMethodMap.setProperty(Constants.MODE_REGISTER, "registerUser");
     }
-
+    
     protected Properties getKeyMethodMap() {
         return keyMethodMap;
     }
@@ -208,14 +222,13 @@ public class UserAdminPortalAction extends BaseDispatchAction {
      */
     protected void setUser(HttpServletRequest request) throws Exception {
         Integer userId = RequestUtils.getUserId(request);
-        ServletContext ctx = getServlet().getServletContext();
         Integer sessionId = RequestUtils.getSessionId(request);
 
         if (log.isTraceEnabled()) {
             log.trace("finding user [" + userId + "]");
         }
         AuthzSubject user =
-            ContextUtils.getAuthzBoss(ctx).findSubjectById(sessionId, userId);
+           authzBoss.findSubjectById(sessionId, userId);
 
         // when CAM is in LDAP mode, we may still have
         // users logging in with JDBC. the only way we can
@@ -223,7 +236,7 @@ public class UserAdminPortalAction extends BaseDispatchAction {
         // if they have an entry in the principals table.
         WebUser webUser = new WebUser(user.getAuthzSubjectValue());
         boolean hasPrincipal =
-            ContextUtils.getAuthBoss(ctx).isUser(sessionId.intValue(),
+            authBoss.isUser(sessionId.intValue(),
                                                  user.getName());
         webUser.setHasPrincipal(hasPrincipal);
 
@@ -246,7 +259,7 @@ public class UserAdminPortalAction extends BaseDispatchAction {
                                  ActionMapping mapping,
                                  String mode)
         throws Exception {
-            HashMap params = new HashMap();
+            HashMap<String, Object> params = new HashMap<String,Object>();
             params.put(Constants.MODE_PARAM, mode);
             try {
                 params.put(Constants.USER_PARAM,

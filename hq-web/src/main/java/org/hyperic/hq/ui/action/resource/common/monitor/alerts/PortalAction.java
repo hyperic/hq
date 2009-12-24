@@ -29,7 +29,6 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Properties;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -40,6 +39,9 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.util.MessageResources;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.GalertBoss;
 import org.hyperic.hq.escalation.server.session.Escalatable;
@@ -47,8 +49,6 @@ import org.hyperic.hq.events.AlertNotFoundException;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
-import org.hyperic.hq.events.shared.AlertDefinitionValue;
-import org.hyperic.hq.events.shared.AlertValue;
 import org.hyperic.hq.galerts.server.session.GalertEscalationAlertType;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
@@ -56,17 +56,26 @@ import org.hyperic.hq.ui.Portlet;
 import org.hyperic.hq.ui.action.resource.ResourceController;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.BizappUtils;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * A dispatcher for the alerts portal.
  *
  */
 public class PortalAction extends ResourceController {
-    protected static Log log =
+    private final Log log =
         LogFactory.getLog(PortalAction.class.getName());
+    private GalertBoss galertBoss;
+    private EventsBoss eventsBoss;
+    
+    @Autowired
+    public PortalAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss, GalertBoss galertBoss, EventsBoss eventsBoss) {
+        super(appdefBoss, authzBoss, controlBoss);
+        this.galertBoss = galertBoss;
+        this.eventsBoss = eventsBoss;
+    }
 
     protected Properties getKeyMethodMap() {
         log.trace("Building method map ...");
@@ -125,12 +134,12 @@ public class PortalAction extends ResourceController {
             portal.addPortlet(new Portlet(".events.group.alert.list"), 1);
             
             // Set the total alerts
-            ServletContext ctx = getServlet().getServletContext();
+          
             int sessionId = RequestUtils.getSessionId(request).intValue();
-            GalertBoss gBoss = ContextUtils.getGalertBoss(ctx);
+            
             
             request.setAttribute("listSize",
-                new Integer(gBoss.countAlertLogs(sessionId,
+                new Integer(galertBoss.countAlertLogs(sessionId,
                                                  aeid.getId(),
                                                  cal.getTimeInMillis(),
                                                  cal.getTimeInMillis() +
@@ -149,9 +158,9 @@ public class PortalAction extends ResourceController {
                                    HttpServletResponse response)
         throws Exception {
         // Get alert definition name
-        ServletContext ctx = getServlet().getServletContext();
+       
         int sessionID = RequestUtils.getSessionId(request).intValue();
-        EventsBoss eb = ContextUtils.getEventsBoss(ctx);
+      
         AppdefEntityID aeid = setResource(request);
         Integer alertId = new Integer( request.getParameter("a") );
 
@@ -159,17 +168,17 @@ public class PortalAction extends ResourceController {
             Portal portal = Portal.createPortal();
             
             if (aeid != null && aeid.isGroup()) {
-                GalertBoss gb = ContextUtils.getGalertBoss(ctx);
+                
                 
                 // properties
-                Escalatable av = gb.findEscalatableAlert(sessionID, alertId);
+                Escalatable av = galertBoss.findEscalatableAlert(sessionID, alertId);
 
                 request.setAttribute(Constants.TITLE_PARAM2_ATTR,
                                      av.getDefinition().getName());
                 
                 portal.addPortlet(new Portlet(".events.group.alert.view"), 1);
             } else {
-                Alert alert = eb.getAlert(sessionID, alertId);
+                Alert alert = eventsBoss.getAlert(sessionID, alertId);
                 AlertDefinition alertDefinition = alert.getAlertDefinition();
 
                 assert(alertDefinition != null);
@@ -204,9 +213,9 @@ public class PortalAction extends ResourceController {
                                           HttpServletRequest request,
                                           HttpServletResponse response)
         throws Exception {
-        ServletContext ctx = getServlet().getServletContext();
+       
         int sessionID = RequestUtils.getSessionId(request).intValue();
-        EventsBoss eb = ContextUtils.getEventsBoss(ctx);
+       
 
         Integer alertId = new Integer( request.getParameter("a") );
         String ackNote = RequestUtils.getStringParameter(request, "ackNote", "");
@@ -228,7 +237,7 @@ public class PortalAction extends ResourceController {
             aeid = RequestUtils.getEntityId(request);
             
             if (aeid.isGroup()) {
-                ackOk = eb.acknowledgeAlert(sessionID, GalertEscalationAlertType.GALERT,
+                ackOk = eventsBoss.acknowledgeAlert(sessionID, GalertEscalationAlertType.GALERT,
                                             alertId, pause, ackNote);
             }
         } catch (ParameterNotFoundException e) {
@@ -237,7 +246,7 @@ public class PortalAction extends ResourceController {
 
         if (aeid == null || !aeid.isGroup()) {
             // Classic alerts
-            ackOk = eb.acknowledgeAlert(sessionID, 
+            ackOk = eventsBoss.acknowledgeAlert(sessionID, 
                                         ClassicEscalationAlertType.CLASSIC,
                                         alertId, pause, ackNote);
         }
@@ -258,9 +267,9 @@ public class PortalAction extends ResourceController {
                                   HttpServletResponse response)
         throws Exception 
     {
-        ServletContext ctx = getServlet().getServletContext();
+       
         int sessionID = RequestUtils.getSessionId(request).intValue();
-        EventsBoss eb = ContextUtils.getEventsBoss(ctx);
+       
 
         Integer alertId = RequestUtils.getIntParameter(request, "a");
         String note =
@@ -277,7 +286,7 @@ public class PortalAction extends ResourceController {
             aeid = RequestUtils.getEntityId(request);
             
             if (aeid.isGroup()) {
-                eb.fixAlert(sessionID, GalertEscalationAlertType.GALERT,
+                eventsBoss.fixAlert(sessionID, GalertEscalationAlertType.GALERT,
                             alertId, fixNote);
             }
         } catch (ParameterNotFoundException e) {
@@ -286,7 +295,7 @@ public class PortalAction extends ResourceController {
 
         if (aeid == null || !aeid.isGroup()) {
             // Fix alert the old fashion way
-            eb.fixAlert(sessionID, ClassicEscalationAlertType.CLASSIC, alertId,
+            eventsBoss.fixAlert(sessionID, ClassicEscalationAlertType.CLASSIC, alertId,
                         fixNote); 
         }
 

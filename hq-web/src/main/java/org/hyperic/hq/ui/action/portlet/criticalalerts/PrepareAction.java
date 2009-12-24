@@ -27,7 +27,6 @@ package org.hyperic.hq.ui.action.portlet.criticalalerts;
 
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -38,20 +37,34 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class PrepareAction extends TilesAction {
+    
+    private AppdefBoss appdefBoss;
+    private AuthzBoss authzBoss;
+    
+    
+    @Autowired
+    public PrepareAction(AppdefBoss appdefBoss, AuthzBoss authzBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+        this.authzBoss = authzBoss;
+    }
+
+
 
     public ActionForward execute(ComponentContext context,
                                  ActionMapping mapping,
@@ -62,18 +75,17 @@ public class PrepareAction extends TilesAction {
 
         PropertiesForm pForm = (PropertiesForm) form;
 
-        ServletContext ctx = getServlet().getServletContext();
-        AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
+        
 
         HttpSession session = request.getSession();
         WebUser user = RequestUtils.getWebUser(session);
         Integer sessionId = user.getSessionId();
-        AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
+      
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
         		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, aBoss);
+        		user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
-        PageList resources = new PageList();
+        
         
         String token = pForm.getToken();
 
@@ -120,19 +132,19 @@ public class PrepareAction extends TilesAction {
         selectedOrAll = dashPrefs.getValue(selOrAllKey,
                             dashPrefs.getValue(PropertiesForm.SELECTED_OR_ALL));
 
-        DashboardUtils.verifyResources(resKey, ctx, dashPrefs, user);
+        DashboardUtils.verifyResources(resKey,getServlet().getServletContext(), dashPrefs, user);
 
         pForm.setNumberOfAlerts(numberOfAlerts);
         pForm.setPast(past);
         pForm.setPriority(priority);
         pForm.setSelectedOrAll(selectedOrAll);
 
-        List entityIds = DashboardUtils.preferencesAsEntityIds(resKey, dashPrefs);
-        AppdefEntityID[] aeids = (AppdefEntityID[])
+        List<AppdefEntityID> entityIds = DashboardUtils.preferencesAsEntityIds(resKey, dashPrefs);
+        AppdefEntityID[] aeids = 
             entityIds.toArray(new AppdefEntityID[entityIds.size()]);
 
         PageControl pc = RequestUtils.getPageControl(request);
-        resources = appdefBoss.findByIds(sessionId.intValue(), aeids, pc);
+        PageList<AppdefResourceValue> resources = appdefBoss.findByIds(sessionId.intValue(), aeids, pc);
         request.setAttribute("criticalAlertsList", resources);
         return null;
     }

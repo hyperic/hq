@@ -25,20 +25,8 @@
 
 package org.hyperic.hq.ui.action.resource.common.monitor.alerts.config;
 
-import java.util.Iterator;
-import java.util.List;
-
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.bizapp.shared.EventsBoss;
-import org.hyperic.hq.events.shared.AlertDefinitionValue;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.util.pager.PageControl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -47,6 +35,11 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
+import org.hyperic.hq.bizapp.shared.EventsBoss;
+import org.hyperic.hq.events.shared.AlertDefinitionValue;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An Action that retrieves data from the BizApp to facilitate display
@@ -54,9 +47,17 @@ import org.apache.struts.tiles.actions.TilesAction;
  *
  */
 public class EditDefinitionPropertiesFormPrepareAction extends TilesAction {
-    protected Log log = LogFactory.getLog(EditDefinitionPropertiesFormPrepareAction.class.getName());    
+    private final Log log = LogFactory.getLog(EditDefinitionPropertiesFormPrepareAction.class.getName());    
+    private EventsBoss eventsBoss;
+  
+    
+    @Autowired
+    public EditDefinitionPropertiesFormPrepareAction(EventsBoss eventsBoss) {
+        super();
+        this.eventsBoss = eventsBoss;
+    }
 
-    // ---------------------------------------------------- Public Methods
+
 
     /**
      * Prepare the form for a new alert definition.
@@ -73,12 +74,12 @@ public class EditDefinitionPropertiesFormPrepareAction extends TilesAction {
         DefinitionForm defForm = (DefinitionForm) form;
         log.trace("alertDefId=" + defForm.getAd());
 
-        ServletContext ctx = getServlet().getServletContext();
+       
         int sessionID = RequestUtils.getSessionId(request).intValue();
-        EventsBoss eb = ContextUtils.getEventsBoss(ctx);
+       
 
         AlertDefinitionValue adv =
-            eb.getAlertDefinition(sessionID, defForm.getAd());
+            eventsBoss.getAlertDefinition(sessionID, defForm.getAd());
         request.setAttribute(Constants.ALERT_DEFINITION_ATTR, adv);
         defForm.importProperties(adv);
 
@@ -86,4 +87,3 @@ public class EditDefinitionPropertiesFormPrepareAction extends TilesAction {
     }
 }
 
-// EOF

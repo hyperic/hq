@@ -32,11 +32,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+import org.apache.struts.tiles.ComponentContext;
+import org.apache.struts.tiles.actions.TilesAction;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
@@ -44,14 +49,19 @@ import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
-
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.tiles.ComponentContext;
-import org.apache.struts.tiles.actions.TilesAction;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class PrepareAction extends TilesAction {
+    private AuthzBoss authzBoss;
+    
+    
+    @Autowired
+    public PrepareAction(AuthzBoss authzBoss) {
+        super();
+        this.authzBoss = authzBoss;
+    }
+
+
 
     public ActionForward execute(ComponentContext context,
                                  ActionMapping mapping,
@@ -63,10 +73,10 @@ public class PrepareAction extends TilesAction {
         ServletContext ctx = getServlet().getServletContext();
         HttpSession session = request.getSession();
         WebUser user = RequestUtils.getWebUser(session);
-        AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
+       
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
         		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, aBoss);
+        		user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
 
         DashboardUtils.verifyResources(
@@ -75,7 +85,7 @@ public class PrepareAction extends TilesAction {
         // this quarantees that the session dosen't contain any resources it
         // shouldnt
         SessionUtils.removeList(session, Constants.PENDING_RESOURCES_SES_ATTR);
-        List resources = DashboardUtils.preferencesAsResources(
+        List<AppdefResourceValue> resources = DashboardUtils.preferencesAsResources(
         		Constants.USERPREF_KEY_FAVORITE_RESOURCES, 
         		ctx, user, dashPrefs);
 

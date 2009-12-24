@@ -28,28 +28,26 @@ package org.hyperic.hq.ui.action.portlet.resourcehealth;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.logging.LogFactory;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.StringConstants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.ConfigurationProxy;
+import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
-
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An <code>Action</code> that loads the <code>Portal</code>
@@ -59,6 +57,19 @@ import org.apache.struts.action.ActionMapping;
  */
 public class ModifyAction extends BaseAction {
     
+    private ConfigurationProxy configurationProxy;
+    private AuthzBoss authzBoss;
+    
+    
+    @Autowired
+    public ModifyAction(ConfigurationProxy configurationProxy, AuthzBoss authzBoss) {
+        super();
+        this.configurationProxy = configurationProxy;
+        this.authzBoss = authzBoss;
+    }
+
+
+
     /**
      *
      * @param mapping The ActionMapping used to select this instance
@@ -75,16 +86,14 @@ public class ModifyAction extends BaseAction {
                             HttpServletResponse response)
         throws Exception {
 
-        ServletContext ctx = getServlet().getServletContext();
-        AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
         PropertiesForm pForm = (PropertiesForm) form;
         HttpSession session = request.getSession();
         WebUser user = RequestUtils.getWebUser(request);
 
-        AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
+       
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
         		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, aBoss);
+        		user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         String forwardStr = "success";
 
@@ -94,8 +103,8 @@ public class ModifyAction extends BaseAction {
                                 Constants.USERPREF_KEY_FAVORITE_RESOURCES,
                                 dashPrefs);
             forwardStr = "review";
-            ConfigurationProxy.getInstance().setDashboardPreferences(session,
-					user, boss, dashPrefs);
+            configurationProxy.setDashboardPreferences(session,
+					user,  dashPrefs);
         }
 
         ActionForward forward = checkSubmit(request, mapping, form);
@@ -107,12 +116,12 @@ public class ModifyAction extends BaseAction {
         // Set the order of resources
         String order = StringUtil.replace(pForm.getOrder(), "%3A", ":");
         StringTokenizer orderTK = new StringTokenizer(order, "=&");
-        ArrayList resources = new ArrayList();
+        ArrayList<String> resources = new ArrayList<String>();
         while (orderTK.hasMoreTokens()) {
             orderTK.nextToken();
             resources.add(orderTK.nextToken());
         }
-        ConfigurationProxy.getInstance().setPreference(session, user, boss,
+        configurationProxy.setPreference(session, user, 
         		Constants.USERPREF_KEY_FAVORITE_RESOURCES,
                            StringUtil.listToString(resources, StringConstants
                                                    .DASHBOARD_DELIMITER));

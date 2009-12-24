@@ -49,8 +49,8 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.action.resource.platform.PlatformForm;
 import org.hyperic.hq.ui.util.BizappUtils;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * A <code>BaseAction</code> subclass that creates a platform in the
@@ -58,7 +58,15 @@ import org.hyperic.hq.ui.util.RequestUtils;
  */
 public class NewPlatformAction extends BaseAction {
 
-    // ---------------------------------------------------- Public Methods
+   private final  Log log = LogFactory.getLog(NewPlatformAction.class.getName());
+   private AppdefBoss appdefBoss;
+   
+   
+   @Autowired
+    public NewPlatformAction(AppdefBoss appdefBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+    }
 
     /**
      * Create the platform with the attributes specified in the given
@@ -69,7 +77,7 @@ public class NewPlatformAction extends BaseAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-        Log log = LogFactory.getLog(NewPlatformAction.class.getName());
+       
 
         PlatformForm newForm = (PlatformForm) form;
 
@@ -79,9 +87,9 @@ public class NewPlatformAction extends BaseAction {
                 return forward;
             }
 
-            ServletContext ctx = getServlet().getServletContext();
+            
             Integer sessionId = RequestUtils.getSessionId(request);
-            AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+           
 
 
             // first make sure the form's "machine type" represents a
@@ -89,7 +97,7 @@ public class NewPlatformAction extends BaseAction {
             Integer platformTypeId = newForm.getResourceType();
             log.trace("finding platform type [" + platformTypeId + "]");
             PlatformType platformType =
-                boss.findPlatformTypeById(sessionId.intValue(), platformTypeId);
+                appdefBoss.findPlatformTypeById(sessionId.intValue(), platformTypeId);
 
             // now set up the new platform
             PlatformValue platform = new PlatformValue();
@@ -101,11 +109,11 @@ public class NewPlatformAction extends BaseAction {
 
             Agent agent =
                 BizappUtils.getAgentConnection(sessionId.intValue(),
-                                               boss, request,
+                                               appdefBoss, request,
                                                newForm);
 
             Platform newPlatform =
-                boss.createPlatform(sessionId.intValue(),
+                appdefBoss.createPlatform(sessionId.intValue(),
                                     platform, platformType.getId(),
                                     agent.getId());
 
@@ -114,6 +122,7 @@ public class NewPlatformAction extends BaseAction {
             
             AppdefEntityID entityId = newPlatform.getEntityId();
 
+            ServletContext ctx = getServlet().getServletContext();
             BizappUtils.startAutoScan(ctx, sessionId.intValue(), entityId);
 
             Integer entityType =
@@ -125,7 +134,7 @@ public class NewPlatformAction extends BaseAction {
                                  "resource.platform.inventory.confirm.Create",
                                  platform.getName());
 
-            HashMap forwardParams = new HashMap(2);
+            HashMap<String, Object> forwardParams = new HashMap<String, Object>(2);
             forwardParams.put(Constants.RESOURCE_PARAM, platformId);
             forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, entityType);
 

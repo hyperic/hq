@@ -31,7 +31,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -42,15 +41,23 @@ import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQApprovalException;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
-import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.bizapp.shared.AIBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.BizappUtils;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class ImportAIResourcesAction extends BaseAction {
+    
+    private AIBoss aiBoss;
+    
+    
+    @Autowired
+    public ImportAIResourcesAction(AIBoss aiBoss) {
+        super();
+        this.aiBoss = aiBoss;
+    }
 
     /**
      * Process the results of an AutoDiscovery scan based on 
@@ -64,7 +71,7 @@ public class ImportAIResourcesAction extends BaseAction {
         AutoDiscoveryResultsForm aiForm = (AutoDiscoveryResultsForm) form;
         
         // Set the parameters if available
-        Map params = new HashMap();
+        Map<String, Object> params = new HashMap<String, Object>();
         if (aiForm.getRid() != null && aiForm.getRid().intValue() > 0) {
             params.put(Constants.ENTITY_ID_PARAM, aiForm.getEid());
         }
@@ -95,8 +102,7 @@ public class ImportAIResourcesAction extends BaseAction {
                                   Integer aiPlatformId)
         throws Exception 
     {
-        ServletContext ctx = getServlet().getServletContext();
-        AIBoss aiBoss = ContextUtils.getAIBoss(ctx);            
+                
         Integer sessionId = RequestUtils.getSessionId(request);
         int sessionInt = sessionId.intValue();
 
@@ -109,39 +115,42 @@ public class ImportAIResourcesAction extends BaseAction {
 
         // build the list of platforms to be ignored. This *could* happen from the ui
         // by clicking from the dashboard.
-        List aiPlatformIds = buildResources(request,
+        List<Integer> aiPlatformIds = buildResources(request,
                                             AIQueueConstants.Q_DECISION_IGNORE,
                                             aiPlatform);
 
         // if not empty process this request.
-        if(!aiPlatformIds.isEmpty()) 
+        if(!aiPlatformIds.isEmpty()) {
             aiBoss.processQueue(sessionInt, aiPlatformIds, null, null , 
                                 AIQueueConstants.Q_DECISION_IGNORE);
+        }
         
         aiPlatformIds = buildResources(request,
                                        AIQueueConstants.Q_DECISION_UNIGNORE,
                                        aiPlatform);
-        if(!aiPlatformIds.isEmpty()) 
+        if(!aiPlatformIds.isEmpty()) {
             aiBoss.processQueue(sessionInt, aiPlatformIds, null, null , 
                                 AIQueueConstants.Q_DECISION_UNIGNORE);
-
+        }
         // Similarly build lists of ignored and unignored AIServers and AIIps in the
         // code below.
-        List servers = buildResources(request,
+        List<Integer> servers = buildResources(request,
                                       AIQueueConstants.Q_DECISION_IGNORE,
                                       aiServer);
-        List ips = buildResources(request, AIQueueConstants.Q_DECISION_IGNORE,
+        List<Integer> ips = buildResources(request, AIQueueConstants.Q_DECISION_IGNORE,
                                   aiIp);
-        if(!(servers.isEmpty() && ips.isEmpty()))
+        if(!(servers.isEmpty() && ips.isEmpty())) {
             aiBoss.processQueue(sessionInt, null, servers, ips , 
                                 AIQueueConstants.Q_DECISION_IGNORE);
+        }
         
         servers = buildResources(request, AIQueueConstants.Q_DECISION_UNIGNORE, 
                                  aiServer);
         ips = buildResources(request, AIQueueConstants.Q_DECISION_UNIGNORE,aiIp);
-        if(!(servers.isEmpty() && ips.isEmpty()))
+        if(!(servers.isEmpty() && ips.isEmpty())) {
             aiBoss.processQueue(sessionInt, null, servers, ips, 
                                 AIQueueConstants.Q_DECISION_UNIGNORE);
+        }
         AIPlatformValue aiVal = 
                 aiBoss.findAIPlatformById(sessionInt, aiPlatformId.intValue());
 
@@ -149,15 +158,16 @@ public class ImportAIResourcesAction extends BaseAction {
         aiPlatformIds.clear();
 
         // add the curremt platform to the list only if it is not ignored.
-        if (!aiVal.getIgnored() )
+        if (!aiVal.getIgnored() ) {
             aiPlatformIds.add(aiPlatformId);
+        }
 
         // build the ai ip ids
-        List aiIpIds = BizappUtils.buildAIResourceIds(aiVal.getAIIpValues(),
+        List<Integer> aiIpIds = BizappUtils.buildAIResourceIds(aiVal.getAIIpValues(),
                                                       false);
 
         // build the server ids
-        List aiServerIds = BizappUtils.buildAIResourceIds(aiVal.getAIServerValues(), 
+        List<Integer> aiServerIds = BizappUtils.buildAIResourceIds(aiVal.getAIServerValues(), 
                                                           false);
 
         aiBoss.processQueue(sessionInt, aiPlatformIds,
@@ -175,10 +185,10 @@ public class ImportAIResourcesAction extends BaseAction {
     * @return ret a List
     */
 
-    private List buildResources(HttpServletRequest request, int comparator, 
+    private List<Integer> buildResources(HttpServletRequest request, int comparator, 
                                 String resourceType) 
     {
-        List ret = new ArrayList();
+        List<Integer> ret = new ArrayList<Integer>();
         Enumeration values = request.getParameterNames();
         while (values.hasMoreElements()) {
             String name = (String)values.nextElement();

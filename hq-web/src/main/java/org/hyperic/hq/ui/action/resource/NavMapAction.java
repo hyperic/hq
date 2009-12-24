@@ -28,12 +28,9 @@ package org.hyperic.hq.ui.action.resource;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
@@ -46,8 +43,8 @@ import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.action.resource.application.monitor.VisibilityPortalAction;
 import org.hyperic.hq.ui.util.ActionUtils;
 import org.hyperic.hq.ui.util.BizappUtils;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Action class to figure out which page to go to based on a
@@ -55,7 +52,16 @@ import org.hyperic.hq.ui.util.RequestUtils;
  *
  */
 public class NavMapAction extends BaseAction {
-    private Log log = LogFactory.getLog( NavMapAction.class.getName() );
+    private VisibilityPortalAction visibilityPortalAction;
+    private AppdefBoss appdefBoss;
+    
+    
+    @Autowired
+    public NavMapAction(VisibilityPortalAction visibilityPortalAction, AppdefBoss appdefBoss) {
+        super();
+        this.visibilityPortalAction = visibilityPortalAction;
+        this.appdefBoss = appdefBoss;
+    }
 
     // ---------------------------------------------------- Public Methods
 
@@ -70,18 +76,16 @@ public class NavMapAction extends BaseAction {
         
         String mode = request.getParameter("currentMode");
 
-        AppdefEntityID[] eids = null;
-        String resType ="";
-        eids = RequestUtils.getEntityIds(request);
+        AppdefEntityID[] eids = RequestUtils.getEntityIds(request);
         
-        ServletContext ctx = getServlet().getServletContext();
+       
         Integer sessionId = RequestUtils.getSessionId(request); 
-        AppdefResourceValue resVal = null;
         
-        resType = AppdefEntityConstants.typeToString(eids[0].getType());
+        
+        String resType = AppdefEntityConstants.typeToString(eids[0].getType());
     
-        AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
-        resVal = boss.findById(sessionId.intValue(), eids[0]);
+      
+        AppdefResourceValue resVal = appdefBoss.findById(sessionId.intValue(), eids[0]);
         
         boolean useDefaultPage = useDefaultPage(request, resVal);
         String currentResType = request.getParameter("currentResType");
@@ -100,10 +104,11 @@ public class NavMapAction extends BaseAction {
             RequestUtils.getStringParameter(request,
                                             Constants.AUTOGROUP_TYPE_ID_PARAM,
                                             null);
-        if (autogrouptype != null)
+        if (autogrouptype != null) {
             ctype = autogrouptype;
+        }
             
-        HashMap params = new HashMap();
+        HashMap<String, Object> params = new HashMap<String,Object>();
         if (null == eids) {
             // platform auto-group
             params.put(Constants.CHILD_RESOURCE_TYPE_ID_PARAM, ctype);
@@ -117,8 +122,9 @@ public class NavMapAction extends BaseAction {
                 params.put( Constants.ENTITY_ID_PARAM, BizappUtils.stringifyEntityIds(eids) );
                 params.put(Constants.CHILD_RESOURCE_TYPE_ID_PARAM, ctype);
 				// add the autogroup type if available
-                if (autogrouptype != null)
+                if (autogrouptype != null) {
                     params.put(Constants.AUTOGROUP_TYPE_ID_PARAM, autogrouptype);
+                }
                 
                 // need to set the auto-group type - this type is not part
                 // of the resource type
@@ -182,12 +188,12 @@ public class NavMapAction extends BaseAction {
             
             if (Constants.MONITOR_VISIBILITY_LOC
                     .equalsIgnoreCase(currentResType)) {
-                VisibilityPortalAction portal =
-                    new VisibilityPortalAction();
-                Map tabs = portal.getKeyMethodMap();
+             
+                Map tabs = visibilityPortalAction.getKeyMethodMap();
 
-                if (!tabs.containsKey(mode))
+                if (!tabs.containsKey(mode)) {
                     return false;
+                }
             }
 
             if (Constants.ALERT_LOC.equalsIgnoreCase(currentResType) ||
@@ -203,4 +209,3 @@ public class NavMapAction extends BaseAction {
     }
 }
 
-// EOF

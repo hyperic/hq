@@ -27,7 +27,6 @@ package org.hyperic.hq.ui.action.resource.application.inventory;
 
 import java.util.HashMap;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -43,8 +42,8 @@ import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.action.resource.application.ApplicationForm;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * This class handles saving edit operations performed on Application
@@ -52,8 +51,18 @@ import org.hyperic.hq.ui.util.RequestUtils;
  */
 public class EditApplicationPropertiesAction extends BaseAction {
 
-    private static Log log = LogFactory
+    private final Log log = LogFactory
         .getLog(EditApplicationPropertiesAction.class.getName());
+    private AppdefBoss appdefBoss;
+    
+    
+    @Autowired
+    public EditApplicationPropertiesAction(AppdefBoss appdefBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+    }
+
+
 
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
@@ -65,7 +74,7 @@ public class EditApplicationPropertiesAction extends BaseAction {
         AppdefEntityID aeid = new AppdefEntityID(appForm.getType().intValue(),
                                                  appForm.getRid());
 
-        HashMap forwardParams = new HashMap(2);
+        HashMap<String, Object> forwardParams = new HashMap<String, Object>(2);
         forwardParams.put(Constants.ENTITY_ID_PARAM, aeid.getAppdefKey());
         forwardParams.put(Constants.ACCORDION_PARAM, "1");
 
@@ -75,24 +84,24 @@ public class EditApplicationPropertiesAction extends BaseAction {
             return forward;
         }
 
-        ServletContext ctx = getServlet().getServletContext();
+       
         Integer sessionId = RequestUtils.getSessionId(request);
-        AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+       
 
         Integer applicationTypeId = appForm.getResourceType();
         // XXX there is no findApplicationTypeById(...) boss signature, so
         // we'll hope for the best .... when the api is updated, we'll use it
         /*
          */
-        //List applicationTypes = boss.findAllApplicationTypes(sessionId.intValue());
+        //List applicationTypes = appdefBoss.findAllApplicationTypes(sessionId.intValue());
         log.trace("finding application type [" + applicationTypeId + "]");
         ApplicationType applicationType =
-            boss.findApplicationTypeById(sessionId.intValue(),
+            appdefBoss.findApplicationTypeById(sessionId.intValue(),
                                          applicationTypeId);
 
         // now set up the application
         ApplicationValue appVal =
-            boss.findApplicationById(sessionId.intValue(), aeid.getId());
+            appdefBoss.findApplicationById(sessionId.intValue(), aeid.getId());
         if (appVal == null) {
             RequestUtils
                 .setError(request,
@@ -105,7 +114,7 @@ public class EditApplicationPropertiesAction extends BaseAction {
 
         log.trace("updating general properties of application [" +
                   appVal.getName() + "]" + " with attributes " + appVal);
-        boss.updateApplication(sessionId.intValue(), appVal);
+        appdefBoss.updateApplication(sessionId.intValue(), appVal);
 
         RequestUtils
             .setConfirmation(request,

@@ -28,9 +28,7 @@ package org.hyperic.hq.ui.action.common;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -46,26 +44,35 @@ import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.server.session.AttachType;
 import org.hyperic.hq.hqu.server.session.AttachmentMasthead;
 import org.hyperic.hq.hqu.server.session.ViewMastheadCategory;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class HeaderAction extends TilesAction {
 
-	public ActionForward execute(ComponentContext context,
+    private ProductBoss productBoss;
+    
+    
+    @Autowired
+	public HeaderAction(ProductBoss productBoss) {
+        super();
+        this.productBoss = productBoss;
+    }
+
+
+
+    public ActionForward execute(ComponentContext context,
 			ActionMapping mapping, ActionForm form, HttpServletRequest request,
 			HttpServletResponse response) throws ServletException,
 			RemoteException, SessionException 
     {
-		ServletContext ctx = getServlet().getServletContext();
-		ProductBoss pBoss = ContextUtils.getProductBoss(ctx);
+		
 		Integer sessionId = RequestUtils.getSessionId(request);
-		Collection mastheadAttachments = 
-            pBoss.findAttachments(sessionId.intValue(), AttachType.MASTHEAD);
+		Collection<AttachmentDescriptor> mastheadAttachments = 
+            productBoss.findAttachments(sessionId.intValue(), AttachType.MASTHEAD);
                                   
-		ArrayList resourceAttachments = new ArrayList();
-		ArrayList trackerAttachments = new ArrayList();
-		for (Iterator itr = mastheadAttachments.iterator(); itr.hasNext();) {
-			AttachmentDescriptor d = (AttachmentDescriptor) itr.next();
+		ArrayList<AttachmentDescriptor> resourceAttachments = new ArrayList<AttachmentDescriptor>();
+		ArrayList<AttachmentDescriptor> trackerAttachments = new ArrayList<AttachmentDescriptor>();
+		for (AttachmentDescriptor d  : mastheadAttachments) {
 			AttachmentMasthead attachment = (AttachmentMasthead) d
 					.getAttachment();
 			if (attachment.getCategory().equals(ViewMastheadCategory.RESOURCE)) {
@@ -75,7 +82,7 @@ public class HeaderAction extends TilesAction {
 				trackerAttachments.add(d);
 			}
 		}
-		//session.setAttribute("mastheadAttachments", mastheadAttachments);
+		
 		request.setAttribute("mastheadResourceAttachments",
 						resourceAttachments);
 		request.setAttribute("mastheadTrackerAttachments", trackerAttachments);

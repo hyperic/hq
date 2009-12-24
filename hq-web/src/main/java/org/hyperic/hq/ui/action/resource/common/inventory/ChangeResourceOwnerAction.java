@@ -27,7 +27,6 @@ package org.hyperic.hq.ui.action.resource.common.inventory;
 
 import java.util.HashMap;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -38,17 +37,29 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An Action that changes the owner of a resource in the inventory.
  */
 public class ChangeResourceOwnerAction extends BaseAction {
 
-    // ---------------------------------------------------- Public Methods
+   private final  Log log =
+       LogFactory.getLog(ChangeResourceOwnerAction.class.getName());
+   private AppdefBoss appdefBoss;
+   
+   
+   @Autowired
+    public ChangeResourceOwnerAction(AppdefBoss appdefBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+    }
+
+
 
     /**
      * Change the owner of the resource to the user specified in the the
@@ -59,15 +70,14 @@ public class ChangeResourceOwnerAction extends BaseAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
     throws Exception {
-        Log log =
-            LogFactory.getLog(ChangeResourceOwnerAction.class.getName());    
+       
 
         ChangeResourceOwnerForm chownForm = (ChangeResourceOwnerForm) form;
         Integer resourceId = chownForm.getRid();
         Integer resourceType = chownForm.getType();
         Integer ownerId = chownForm.getOwner();
 
-        HashMap forwardParams = new HashMap(2);
+        HashMap<String, Object> forwardParams = new HashMap<String, Object>(2);
         forwardParams.put(Constants.RESOURCE_PARAM, resourceId);
         forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, resourceType);
 
@@ -77,14 +87,14 @@ public class ChangeResourceOwnerAction extends BaseAction {
             return forward;
         }
 
-        ServletContext ctx = getServlet().getServletContext();
+       
         Integer sessionId = RequestUtils.getSessionId(request);
 
         AppdefEntityID entityId =
             new AppdefEntityID(resourceType.intValue(), resourceId);
         log.trace("setting owner [" + ownerId + "] for resource [" +
                   entityId + "]");
-        ContextUtils.getAppdefBoss(ctx)
+        appdefBoss
             .changeResourceOwner(sessionId.intValue(), entityId, ownerId);
 
         RequestUtils.setConfirmation(request,
@@ -92,7 +102,7 @@ public class ChangeResourceOwnerAction extends BaseAction {
         // fix for 5265. Check if we've lost viewability of the 
         // resource. If we have, then return to the resource hub
         try {
-            ContextUtils.getAppdefBoss(ctx)
+            appdefBoss
                 .findById(sessionId.intValue(), entityId);                                         
         } catch (PermissionException e) {
             // looks like we cant see the thing anymore...

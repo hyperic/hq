@@ -28,34 +28,22 @@ package org.hyperic.hq.ui.action.resource.common.monitor.alerts.config;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.bizapp.shared.EventsBoss;
-import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
-import org.hyperic.hq.events.InvalidActionDataException;
-import org.hyperic.hq.events.shared.ActionValue;
-import org.hyperic.hq.events.shared.AlertDefinitionValue;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.util.config.ConfigResponse;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.action.BaseAction;
 
 /**
  * An Action that saves escalation scheme for an alert definition.
  *
  */
 public class SaveEscalationAction extends BaseAction {
-    private Log log = LogFactory.getLog(SaveEscalationAction.class.getName());
+   
 
     /** 
      * removes alert definitions 
@@ -66,10 +54,11 @@ public class SaveEscalationAction extends BaseAction {
                                  HttpServletResponse response)
     throws Exception {
         EscalationSchemeForm rnForm = (EscalationSchemeForm) form;
-        Map params = new HashMap();
+        Map<String, Object> params = new HashMap<String, Object>();
         
-        if (rnForm.getAetid() != null)
+        if (rnForm.getAetid() != null) {
             params.put(Constants.APPDEF_RES_TYPE_ID, rnForm.getAetid());
+        }
         else {
             AppdefEntityID aeid =
                 new AppdefEntityID(rnForm.getType().intValue(),rnForm.getRid());
@@ -77,9 +66,8 @@ public class SaveEscalationAction extends BaseAction {
         }
         params.put( "ad", new Integer(rnForm.getAd()) );
         
-        Integer sessionID =  RequestUtils.getSessionId(request);
-        ServletContext ctx = getServlet().getServletContext();
-        EventsBoss eb = ContextUtils.getEventsBoss(ctx);
+       
+       
 
         // XXX Save stuff from the form
 
@@ -88,4 +76,3 @@ public class SaveEscalationAction extends BaseAction {
     }
 }
 
-// EOF

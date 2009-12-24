@@ -27,7 +27,6 @@ package org.hyperic.hq.ui.action.resource.group.monitor;
 
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -41,16 +40,19 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.bizapp.shared.uibeans.ResourceDisplaySummary;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.action.resource.common.monitor.visibility.ResourceVisibilityPortalAction;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.ListPageFetcher;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.timer.StopWatch;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * A <code>BaseDispatchAction</code> that sets up compatible group monitor
@@ -70,17 +72,25 @@ public class VisibilityPortalAction extends ResourceVisibilityPortalAction {
 
     private static final String PORTLET_PERFORMANCE = ".resource.group.monitor.visibility.Performance";
 
-    protected static Log log =
+    private final Log log =
         LogFactory.getLog(VisibilityPortalAction.class.getName());
 
-    private static final String host_type = "hostType";
+    private static final String HOST_TYPE = "hostType";
+    
+    private MeasurementBoss measurementBoss;
+    
+    @Autowired
+    public VisibilityPortalAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss, MeasurementBoss measurementBoss) {
+        super(appdefBoss, authzBoss, controlBoss);
+        this.measurementBoss = measurementBoss;
+    }
 
     public ActionForward currentHealth(ActionMapping mapping, ActionForm form,
                                        HttpServletRequest request,
                                        HttpServletResponse response)
         throws Exception {
         setResource(request);
-        List healths = findResourceHealths(request);
+        List<ResourceDisplaySummary> healths = findResourceHealths(request);
         
         if (healths != null) {
             request.setAttribute(Constants.GROUP_MEMBER_HEALTH_SUMMARIES_ATTR,
@@ -103,7 +113,7 @@ public class VisibilityPortalAction extends ResourceVisibilityPortalAction {
                                          HttpServletResponse response)
         throws Exception {
         setResource(request);
-        List healths = findResourceHealths(request);
+        List<ResourceDisplaySummary> healths = findResourceHealths(request);
         
         if (healths != null) {
             request.setAttribute(Constants.GROUP_MEMBER_HEALTH_SUMMARIES_ATTR,
@@ -147,14 +157,13 @@ public class VisibilityPortalAction extends ResourceVisibilityPortalAction {
         return null;
     }
 
-    private List findResourceHealths(HttpServletRequest request)
+    private List<ResourceDisplaySummary> findResourceHealths(HttpServletRequest request)
         throws Exception {
         AppdefEntityID entityId = null;
 
         int sessionId = RequestUtils.getSessionId(request).intValue();
         entityId = RequestUtils.getEntityId(request);
-        ServletContext ctx = getServlet().getServletContext();
-        MeasurementBoss boss = ContextUtils.getMeasurementBoss(ctx);
+       
 
         // for a "clustered services" there'd be many... does
         // that get handled here or the group monitoring?
@@ -167,7 +176,7 @@ public class VisibilityPortalAction extends ResourceVisibilityPortalAction {
         
         StopWatch watch = new StopWatch();
         watch.markTimeBegin("findGroupCurrentHealth");
-        List healths = boss.findGroupCurrentHealth(sessionId, entityId.getId());
+        List<ResourceDisplaySummary> healths = measurementBoss.findGroupCurrentHealth(sessionId, entityId.getId());
         watch.markTimeEnd("findGroupCurrentHealth");
 
         if (log.isDebugEnabled()) {
@@ -194,8 +203,7 @@ public class VisibilityPortalAction extends ResourceVisibilityPortalAction {
             // against services in a variable timeframe -- so have the
             // MonitorUtil's give us a timeframe for the default retrospective
             // window
-            ServletContext ctx = getServlet().getServletContext();
-            MeasurementBoss boss = ContextUtils.getMeasurementBoss(ctx);
+           
 
             if (log.isTraceEnabled()) {
                 log.trace("finding servers current health for resource ["
@@ -204,7 +212,7 @@ public class VisibilityPortalAction extends ResourceVisibilityPortalAction {
 
             int sessionId = RequestUtils.getSessionId(request).intValue();
 
-            List hosts = boss.findHostsCurrentHealth(sessionId,
+            List<ResourceDisplaySummary> hosts = measurementBoss.findHostsCurrentHealth(sessionId,
                                                      group.getEntityId(),
                                                      PageControl.PAGE_ALL);
             if (hosts.size() > 0) {
@@ -213,24 +221,24 @@ public class VisibilityPortalAction extends ResourceVisibilityPortalAction {
                 
                 switch (rds.getEntityId().getType()) {
                 case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                    request.setAttribute(host_type, "Platform");
+                    request.setAttribute(HOST_TYPE, "Platform");
                     break;
                 case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                    request.setAttribute(host_type, "Server");
+                    request.setAttribute(HOST_TYPE, "Server");
                     break;
                 }
                 request.setAttribute(Constants.HOST_HEALTH_SUMMARIES_ATTR,
                                      hosts);
             }
         } catch (PermissionException e) {
-            if (log.isDebugEnabled())
+            if (log.isDebugEnabled()) {
                 log.debug("resource [" + entityId + "] access error", e);
-            // request.setAttribute(Constants.ERR_SERVER_HEALTH_ATTR,
-            // ERR_SERVER_PERMISSION);
+            }
+            
         } catch (AppdefEntityNotFoundException e) {
-            if (log.isDebugEnabled())
+            if (log.isDebugEnabled()) {
                 log.debug("resource [" + entityId + "] access error", e);
-            // RequestUtils.setError(request, Constants.ERR_RESOURCE_NOT_FOUND);
+            }
         }
     }
 

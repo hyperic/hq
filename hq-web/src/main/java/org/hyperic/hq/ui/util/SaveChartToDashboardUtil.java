@@ -15,6 +15,7 @@ import org.apache.struts.action.ActionForward;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.resource.common.monitor.visibility.ViewChartForm;
@@ -24,8 +25,10 @@ import org.hyperic.hq.ui.server.session.RoleDashboardConfig;
 import org.hyperic.hq.ui.server.session.UserDashboardConfig;
 import org.hyperic.util.config.ConfigResponse;
 
-public class SaveChartToDashboardUtil {
+abstract public class SaveChartToDashboardUtil {
 	private static Log log = LogFactory.getLog(SaveChartToDashboardUtil.class.getName());
+	
+	
 	
 	private static Pattern AEID_PATTERN_A = 
 	    Pattern.compile(".*[?&]type=(\\d+).*&rid=(\\d+).*",
@@ -146,9 +149,9 @@ public class SaveChartToDashboardUtil {
 		if (dashboardConfig instanceof RoleDashboardConfig) {
 			RoleDashboardConfig roleDashboardConfig = (RoleDashboardConfig) dashboardConfig;
 			
-			ConfigurationProxy.getInstance().setRoleDashboardPreferences(configResponse, boss, user, roleDashboardConfig.getRole());
+			Bootstrap.getBean(ConfigurationProxy.class).setRoleDashboardPreferences(configResponse,  user, roleDashboardConfig.getRole());
 		} else if (dashboardConfig instanceof UserDashboardConfig) {
-			ConfigurationProxy.getInstance().setUserDashboardPreferences(configResponse, boss, user);
+		    Bootstrap.getBean(ConfigurationProxy.class).setUserDashboardPreferences(configResponse,  user);
 		} else {
             // Neither role or user dashboard. This shouldn't happen, but if it somehow does, treat it as an error.
 			return ResultCode.ERROR;

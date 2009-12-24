@@ -37,6 +37,7 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.util.DashboardUtils;
@@ -57,12 +58,12 @@ public class RemoveResourcesAction extends TilesAction {
         HttpSession session = request.getSession();
         WebUser user = RequestUtils.getWebUser(session);
         
-        List resourceList = user.
+        List<String> resourceList = user.
             getPreferenceAsList(Constants.USERPREF_KEY_FAVORITE_RESOURCES,
                                 Constants.DASHBOARD_DELIMITER);
 
-        PageList resources =
-            new PageList(DashboardUtils.listAsResources(resourceList, ctx, user),
+        PageList<AppdefResourceValue> resources =
+            new PageList<AppdefResourceValue>(DashboardUtils.listAsResources(resourceList, ctx, user),
                          resourceList.size());
 
         request.setAttribute(Constants.RESOURCE_HEALTH_LIST, resources);           

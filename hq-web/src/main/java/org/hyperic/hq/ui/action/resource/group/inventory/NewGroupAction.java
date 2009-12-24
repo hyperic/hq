@@ -27,7 +27,6 @@ package org.hyperic.hq.ui.action.resource.group.inventory;
 
 import java.util.HashMap;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -44,12 +43,21 @@ import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class NewGroupAction extends BaseAction {
 
-    private static Log log = LogFactory.getLog(NewGroupAction.class.getName());
+    private final Log log = LogFactory.getLog(NewGroupAction.class.getName());
+    private AppdefBoss appdefBoss;
+    
+    @Autowired
+    public NewGroupAction(AppdefBoss appdefBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+    }
+
+
     /**
      * Create the group with the attributes specified in the given
      * <code>GroupForm</code>.
@@ -73,10 +81,10 @@ public class NewGroupAction extends BaseAction {
         }
         
         try {        
-            ServletContext ctx = getServlet().getServletContext();
+           
             Integer sessionId = RequestUtils.getSessionId(request);
             ResourceGroup newGroup;
-            AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+           
 
             final Integer entType = newForm.getEntityTypeId();
             
@@ -92,7 +100,7 @@ public class NewGroupAction extends BaseAction {
             
             if (newForm.getGroupType() == Constants.APPDEF_TYPE_GROUP_COMPAT)
             {
-                newGroup = boss.createGroup(sessionId, 
+                newGroup = appdefBoss.createGroup(sessionId, 
                                             entType, 
                                             newForm.getResourceTypeId(),
                                             newForm.getName(),
@@ -106,7 +114,7 @@ public class NewGroupAction extends BaseAction {
                     entType == AppdefEntityConstants.APPDEF_TYPE_GROUP)
                 {
                     newGroup = 
-                      boss.createGroup(sessionId,
+                      appdefBoss.createGroup(sessionId,
                                        entType, 
                                        newForm.getName(), 
                                        newForm.getDescription(),
@@ -116,7 +124,7 @@ public class NewGroupAction extends BaseAction {
                 } else {
                     // otherwise, create a mixed group
                     newGroup = 
-                      boss.createGroup(sessionId, 
+                      appdefBoss.createGroup(sessionId, 
                                        newForm.getName(),
                                        newForm.getDescription(), 
                                        newForm.getLocation(),
@@ -129,7 +137,7 @@ public class NewGroupAction extends BaseAction {
             log.trace("creating group [" + newForm.getName() +
                       "] with attributes " + newForm);
     
-            HashMap forwardParams = new HashMap(2);
+            HashMap<String, Object> forwardParams = new HashMap<String, Object>(2);
             forwardParams.put(Constants.RESOURCE_PARAM, newGroup.getId());
             forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM,
                               AppdefEntityConstants.APPDEF_TYPE_GROUP);

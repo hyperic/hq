@@ -25,27 +25,33 @@
 
 package org.hyperic.hq.ui.action.attach;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-import org.hyperic.hq.bizapp.server.session.ProductBossImpl;
-import org.hyperic.hq.bizapp.shared.ProductBoss;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
 import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.server.session.Attachment;
-import org.hyperic.hq.hqu.server.session.UIPluginManagerImpl;
-import org.hyperic.hq.hqu.shared.UIPluginManager;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class MastheadAction extends BaseAction {
+    
+    private ProductBoss productBoss;
+    
+    
+    @Autowired
+    public MastheadAction(ProductBoss productBoss) {
+        super();
+        this.productBoss = productBoss;
+    }
+
+
 
     public ActionForward execute(ActionMapping mapping, ActionForm form,
                                  HttpServletRequest request,
@@ -53,16 +59,16 @@ public class MastheadAction extends BaseAction {
         throws Exception {
         // Look up the id
         Integer id = RequestUtils.getIntParameter(request, "typeId");
-        ProductBoss pBoss = ProductBossImpl.getOne();
+      
         int sessionId = RequestUtils.getSessionIdInt(request);
-        AttachmentDescriptor attachDesc = pBoss.findAttachment(sessionId, id);
+        AttachmentDescriptor attachDesc = productBoss.findAttachment(sessionId, id);
         if(attachDesc != null){
         	Attachment attachment = attachDesc.getAttachment();
         	String title = attachDesc.getHTML();
             request.setAttribute(Constants.TITLE_PARAM_ATTR, title);
-            ServletContext ctx = getServlet().getServletContext();
+           
             request.setAttribute("attachment",
-                pBoss.findViewById(sessionId, attachment.getView().getId()));
+                productBoss.findViewById(sessionId, attachment.getView().getId()));
             
             request.setAttribute(Constants.PAGE_TITLE_KEY, 
                                  attachDesc.getHelpTag());

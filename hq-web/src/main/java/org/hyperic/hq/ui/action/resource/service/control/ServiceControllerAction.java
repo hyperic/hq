@@ -23,8 +23,12 @@ import java.util.ArrayList;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.action.resource.common.control.ResourceControlController;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
@@ -39,6 +43,13 @@ import org.apache.struts.action.ActionMapping;
  * love struts.
  */
 public class ServiceControllerAction extends ResourceControlController {
+    
+    
+    @Autowired
+    public ServiceControllerAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss) {
+        super(appdefBoss, authzBoss, controlBoss);
+    }
+
     public ActionForward currentControlStatus(ActionMapping mapping,
                                               ActionForm form,
                                               HttpServletRequest request,

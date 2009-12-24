@@ -26,6 +26,7 @@
 package org.hyperic.hq.ui.action.resource.common.monitor.visibility;
 
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -36,6 +37,7 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.bizapp.shared.uibeans.MetricDisplaySummary;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
@@ -52,11 +54,11 @@ import org.hyperic.hq.ui.util.SessionUtils;
 public abstract class MetricsDisplayFormPrepareAction
     extends MetricsControlFormPrepareAction {
 
-    protected static Log log =
+    protected final Log log =
         LogFactory.getLog(MetricsDisplayFormPrepareAction.class.getName());
 
 
-    // ---------------------------------------------------- Public Methods
+   
 
     /**
      * Retrieve data needed to display a Metrics Display Form. Respond
@@ -85,7 +87,7 @@ public abstract class MetricsDisplayFormPrepareAction
         if (begin == null || end == null) {
             // get the "metric range" user pref
             WebUser user = RequestUtils.getWebUser(request);
-            Map range = user.getMetricRangePreference();
+            Map<String,Object> range = user.getMetricRangePreference();
             if (range != null) {    
                 begin = (Long) range.get(MonitorUtils.BEGIN);
                 end = (Long) range.get(MonitorUtils.END);
@@ -102,7 +104,7 @@ public abstract class MetricsDisplayFormPrepareAction
             keyword = displayForm.getKeyword();
         }
 
-        Map metrics =
+        Map<String,Set<MetricDisplaySummary>> metrics =
             getMetrics(request, entityIds, filters, keyword, begin, end,
                        displayForm.getShowAll());
 
@@ -111,17 +113,14 @@ public abstract class MetricsDisplayFormPrepareAction
                 MonitorUtils.formatMetrics(metrics, request.getLocale(),
                                            getResources(request));
 
-//            if (log.isTraceEnabled()) {
-//                log.trace("Got formatted metrics");
-//                MonitorUtils.traceMetricDisplaySummaryMap(log, metrics);
-//            }
+
 
            request.setAttribute(Constants.NUM_CHILD_RESOURCES_ATTR, resourceCount);
            request.setAttribute(Constants.METRIC_SUMMARIES_ATTR, metrics);
 
            // populate the form
            displayForm.setupCategoryList(metrics);
-           // prepareForm(request, displayForm);
+          
         } else {
             log.trace("no metrics were returned by getMetrics(...)");
         }
@@ -182,7 +181,7 @@ public abstract class MetricsDisplayFormPrepareAction
      * @return Map keyed on the category (String), values are List's of 
      * MetricDisplaySummary beans
      */
-    protected abstract Map getMetrics(HttpServletRequest request,
+    protected abstract Map<String,Set<MetricDisplaySummary>> getMetrics(HttpServletRequest request,
                                       AppdefEntityID entityId,
                                       long filters, String keyword,
                                       Long begin, Long end, boolean showAll)
@@ -202,7 +201,7 @@ public abstract class MetricsDisplayFormPrepareAction
      * @return Map keyed on the category (String), values are List's of 
      * MetricDisplaySummary beans
      */
-    protected Map getMetrics(HttpServletRequest request,
+    protected Map<String,Set<MetricDisplaySummary>> getMetrics(HttpServletRequest request,
                              AppdefEntityID[] entityIds,
                              long filters, String keyword,
                              Long begin, Long end, boolean showAll)
@@ -210,9 +209,10 @@ public abstract class MetricsDisplayFormPrepareAction
         // XXX when we finish migrating to eids, the other form of
         // getMetrics will go away and this one will become abstract
         // in the meantime, preserve friggin backwards compatibility
-        if (entityIds != null && entityIds.length == 1)
+        if (entityIds != null && entityIds.length == 1) {
             return getMetrics(request, entityIds[0], filters, keyword,
                               begin, end, showAll);
+        }
         return null;
     }
 }

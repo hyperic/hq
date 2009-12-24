@@ -36,10 +36,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An action that adds users to an alert definition in the BizApp.
@@ -47,12 +49,18 @@ import org.hyperic.hq.ui.util.SessionUtils;
  */
 public class AddUsersAction extends AddNotificationsAction {
 
-    private Log log = LogFactory.getLog( AddUsersAction.class.getName() );
+    private final Log log = LogFactory.getLog( AddUsersAction.class.getName() );
+    
+    
+    @Autowired
+    public AddUsersAction(EventsBoss eventsBoss) {
+        super(eventsBoss);
+    }
 
     protected ActionForward preProcess(HttpServletRequest request,
                                        ActionMapping mapping,
                                        AddNotificationsForm form,
-                                       Map params,
+                                       Map<String, Object> params,
                                        HttpSession session)
         throws Exception 
     {
@@ -89,11 +97,11 @@ public class AddUsersAction extends AddNotificationsAction {
         RequestUtils.setConfirmation(request, "alerts.config.confirm.AddUsers");
     }
 
-    protected Set getNotifications(AddNotificationsForm form, HttpSession session) {
+    protected Set<Object> getNotifications(AddNotificationsForm form, HttpSession session) {
         log.debug("getting pending user list");
         Integer[] pendingUserIds =
             SessionUtils.getList(session, Constants.PENDING_USERS_SES_ATTR);
-        Set userIds = new HashSet();
+        Set<Object> userIds = new HashSet<Object>();
         for (int i=0; i<pendingUserIds.length; i++) {
             userIds.add(pendingUserIds[i]);
             log.debug("adding user [" + pendingUserIds[i] + "]");

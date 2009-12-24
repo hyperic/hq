@@ -28,7 +28,6 @@ package org.hyperic.hq.ui.action.portlet.addcontent;
 import java.text.NumberFormat;
 import java.util.Random;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -43,11 +42,11 @@ import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.util.ConfigurationProxy;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An <code>Action</code> that loads the <code>Portal</code>
@@ -57,6 +56,19 @@ import org.hyperic.util.config.ConfigResponse;
  */
 
 public class AddPortletAction extends BaseAction {
+    
+    private ConfigurationProxy configurationProxy;
+    private AuthzBoss authzBoss;
+    
+    
+    @Autowired
+    public AddPortletAction(ConfigurationProxy configurationProxy, AuthzBoss authzBoss) {
+        super();
+        this.configurationProxy = configurationProxy;
+        this.authzBoss = authzBoss;
+    }
+
+
 
     /**
      * @param mapping The ActionMapping used to select this instance
@@ -73,13 +85,12 @@ public class AddPortletAction extends BaseAction {
                                  HttpServletResponse response)
     throws Exception {
     
-        ServletContext ctx = getServlet().getServletContext();
-        AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
+       
         HttpSession session = request.getSession();
         WebUser user = RequestUtils.getWebUser(request);
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
         		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, boss);
+        		user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         PropertiesForm pForm = (PropertiesForm) form;
 
@@ -129,7 +140,7 @@ public class AddPortletAction extends BaseAction {
 			preferences = userPrefs + preferences;
 		}
 		
-		ConfigurationProxy.getInstance().setPreference(session, user, boss,
+		configurationProxy.setPreference(session, user,
 				prefKey, preferences);
         
 

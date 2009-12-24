@@ -28,7 +28,6 @@ package org.hyperic.hq.ui.action.portlet.resourcehealth;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -37,6 +36,7 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
@@ -48,19 +48,34 @@ import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.util.CheckPermissionsUtil;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.units.FormattedNumber;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * This action class is used by the Favorite Resources portlet.  It's main
  * use is to generate the JSON objects required for display into the UI.
  */
 public class ViewAction extends BaseAction {
+    
+    private AuthzBoss authzBoss;
+    private AppdefBoss appdefBoss;
+    private EventsBoss eventsBoss;
+    private MeasurementBoss measurementBoss;
+    
+    
+    @Autowired
+    public ViewAction(AuthzBoss authzBoss, AppdefBoss appdefBoss, EventsBoss eventsBoss, MeasurementBoss measurementBoss) {
+        super();
+        this.authzBoss = authzBoss;
+        this.appdefBoss = appdefBoss;
+        this.eventsBoss = eventsBoss;
+        this.measurementBoss = measurementBoss;
+    }
 
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
@@ -68,15 +83,13 @@ public class ViewAction extends BaseAction {
                                  HttpServletResponse response)
        throws Exception
     {
-        ServletContext ctx = getServlet().getServletContext();
-        MeasurementBoss boss = ContextUtils.getMeasurementBoss(ctx);
-        EventsBoss eBoss = ContextUtils.getEventsBoss(ctx);
-        AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
+        
+     
         HttpSession session = request.getSession();
         WebUser user = SessionUtils.getWebUser(session);
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
         		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, aBoss);
+        		user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         
         String key = Constants.USERPREF_KEY_FAVORITE_RESOURCES;
@@ -87,7 +100,7 @@ public class ViewAction extends BaseAction {
         List<AppdefEntityID> entityIds = CheckPermissionsUtil.filterEntityIdsByViewPermission(
         											RequestUtils.getSessionId(request).intValue(), 
         											DashboardUtils.preferencesAsEntityIds(key, dashPrefs), 
-        		                                    ContextUtils.getAppdefBoss(ctx));
+        		                                   appdefBoss);
         
         AppdefEntityID[] arrayIds = new AppdefEntityID[entityIds.size()];
         arrayIds = (AppdefEntityID[]) entityIds.toArray(arrayIds);
@@ -95,14 +108,14 @@ public class ViewAction extends BaseAction {
         List<ResourceDisplaySummary> list;
         int sessionID = user.getSessionId().intValue();
         try{
-            list = boss.findResourcesCurrentHealth(sessionID, arrayIds);
+            list = measurementBoss.findResourcesCurrentHealth(sessionID, arrayIds);
         } catch(Exception e) {
-            DashboardUtils.verifyResources(key, ctx, dashPrefs, user);
-            list = boss.findResourcesCurrentHealth(sessionID, arrayIds);
+            DashboardUtils.verifyResources(key, getServlet().getServletContext(), dashPrefs, user);
+            list = measurementBoss.findResourcesCurrentHealth(sessionID, arrayIds);
         }
 
         // Get alert counts for each resource
-        int alerts[] = eBoss.getAlertCount(sessionID, arrayIds);
+        int alerts[] = eventsBoss.getAlertCount(sessionID, arrayIds);
 
         // Due to the complexity of the UIBeans, we need to construct the
         // JSON objects by hand.

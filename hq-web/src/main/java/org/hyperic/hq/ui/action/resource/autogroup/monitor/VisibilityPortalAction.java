@@ -29,7 +29,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -42,14 +41,18 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
+import org.hyperic.hq.bizapp.shared.uibeans.ResourceDisplaySummary;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.action.resource.common.monitor.visibility.ResourceVisibilityPortalAction;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.BizappUtils;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * A <code>BaseDispatchAction</code> that sets up autogroup
@@ -76,8 +79,17 @@ public class VisibilityPortalAction
     public static final String TITLE_PERFORMANCE =
         "resource.autogroup.monitor.visibility.PerformanceTitle";
 
-    private static Log log =
+    private final Log log =
         LogFactory.getLog(VisibilityPortalAction.class.getName());
+    
+    private MeasurementBoss measurementBoss;
+    
+    
+    @Autowired
+    public VisibilityPortalAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss, MeasurementBoss measurementBoss) {
+        super(appdefBoss, authzBoss, controlBoss);
+        this.measurementBoss = measurementBoss;
+    }
 
     public ActionForward currentHealth(ActionMapping mapping,
                                        ActionForm form,
@@ -143,12 +155,8 @@ public class VisibilityPortalAction
             int sessionId = RequestUtils.getSessionId(request).intValue();
             entityId = RequestUtils.getEntityId(request);
     
-            ServletContext ctx = getServlet().getServletContext();
-            MeasurementBoss boss = ContextUtils.getMeasurementBoss(ctx);
-    
             // get resource health
-            List healths = null;
-            healths = boss.findResourcesCurrentHealth(
+            List<ResourceDisplaySummary> healths  = measurementBoss.findResourcesCurrentHealth(
                 sessionId, new AppdefEntityID[] { entityId });
 
             request.setAttribute(Constants.HOST_HEALTH_SUMMARIES_ATTR, healths);
@@ -187,9 +195,9 @@ public class VisibilityPortalAction
         }
     }
     
-    protected Map getWorkflowParams(HttpServletRequest request)
+    protected Map<String,Object> getWorkflowParams(HttpServletRequest request)
         throws Exception {
-        HashMap params = new HashMap();
+        HashMap<String,Object> params = new HashMap<String, Object>();
 
         try {
             // will not be found if auto-group of platforms -- still okay

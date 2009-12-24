@@ -26,25 +26,9 @@
 package org.hyperic.hq.ui.action.resource.common.inventory;
 
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.hq.ui.util.SessionUtils;
-import org.hyperic.util.pager.PageControl;
-import org.hyperic.util.pager.PageList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -52,6 +36,18 @@ import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefGroupValue;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.shared.ResourceManager;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.hq.ui.util.SessionUtils;
+import org.hyperic.util.pager.PageControl;
+import org.hyperic.util.pager.PageList;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An <code>Action</code> that retrieves data from the BizApp to
@@ -60,7 +56,22 @@ import org.apache.struts.action.ActionMapping;
  */
 public class AddResourceGroupsFormPrepareAction extends Action {
 
-    // ---------------------------------------------------- Public Methods
+    private final Log log = LogFactory
+    .getLog(AddResourceGroupsFormPrepareAction.class.getName());
+    
+    private AppdefBoss appdefBoss;
+    
+    private ResourceManager resourceManager;
+    
+    
+    @Autowired
+    public AddResourceGroupsFormPrepareAction(AppdefBoss appdefBoss, ResourceManager resourceManager) {
+        super();
+        this.appdefBoss = appdefBoss;
+        this.resourceManager = resourceManager;
+    }
+
+
 
     /**
      * Retrieve this data and store it in the specified request
@@ -84,8 +95,7 @@ public class AddResourceGroupsFormPrepareAction extends Action {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-        Log log = LogFactory
-            .getLog(AddResourceGroupsFormPrepareAction.class.getName());
+        
 
         AddResourceGroupsForm addForm = (AddResourceGroupsForm) form;
         AppdefEntityID entityId = new AppdefEntityID(addForm.getEid());
@@ -99,8 +109,7 @@ public class AddResourceGroupsFormPrepareAction extends Action {
         addForm.setRid(resource.getId());
         addForm.setType(new Integer(entityId.getType()));
 
-        ServletContext ctx = getServlet().getServletContext();
-        AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+       
         Integer sessionId = RequestUtils.getSessionId(request);
         PageControl pca =
             RequestUtils.getPageControl(request, "psa", "pna", "soa", "sca");
@@ -124,10 +133,10 @@ public class AddResourceGroupsFormPrepareAction extends Action {
             SessionUtils.getList(request.getSession(),
                                  Constants.PENDING_RESGRPS_SES_ATTR);
 
-        Resource r = ResourceManagerImpl.getOne()
+        Resource r = resourceManager
                          .findResource(resource.getEntityId()); 
-        PageList availableGroups = 
-            boss.findAllGroupsMemberExclusive(
+        PageList<AppdefGroupValue> availableGroups = 
+            appdefBoss.findAllGroupsMemberExclusive(
                 sessionId.intValue(), pca, entityId, pendingGroupIds, 
                 r.getPrototype());
 
@@ -137,8 +146,8 @@ public class AddResourceGroupsFormPrepareAction extends Action {
 
         if (groupsArePending) {            
             log.trace("getting pending groups for resource [" + entityId + "]");
-            PageList pendingGroups =
-                boss.findGroups(sessionId.intValue(), pendingGroupIds, pcp);
+            PageList<AppdefGroupValue> pendingGroups =
+                appdefBoss.findGroups(sessionId.intValue(), pendingGroupIds, pcp);
             request.setAttribute(Constants.PENDING_RESGRPS_ATTR, pendingGroups);
             request.setAttribute(Constants.NUM_PENDING_RESGRPS_ATTR,
                                  new Integer(pendingGroups.getTotalSize()));
@@ -147,7 +156,7 @@ public class AddResourceGroupsFormPrepareAction extends Action {
         } else {
             // nothing is pending, so we'll initialize the attributes
             request.setAttribute(Constants.PENDING_RESGRPS_ATTR,
-                                 new ArrayList());
+                                 new ArrayList<AppdefGroupValue>());
             request.setAttribute(Constants.NUM_PENDING_RESGRPS_ATTR,
                                  new Integer(0));
         }

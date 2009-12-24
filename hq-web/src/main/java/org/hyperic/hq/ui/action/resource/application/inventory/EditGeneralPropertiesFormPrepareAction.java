@@ -25,18 +25,16 @@
 
 package org.hyperic.hq.ui.action.resource.application.inventory;
 
-import java.io.IOException;
-
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.hyperic.hq.ui.action.resource.common.inventory.ResourceGeneralFormPrepareAction;
 
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.ui.action.resource.common.inventory.ResourceGeneralFormPrepareAction;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *This class handles preparing the general properties data displayed
@@ -48,6 +46,12 @@ import org.apache.struts.tiles.ComponentContext;
  */
 public class EditGeneralPropertiesFormPrepareAction
         extends ResourceGeneralFormPrepareAction {
+    
+    
+    @Autowired
+    public EditGeneralPropertiesFormPrepareAction(AppdefBoss appdefBoss) {
+        super(appdefBoss);
+    }
 
     public ActionForward workflow(ComponentContext context,
                                  ActionMapping mapping,

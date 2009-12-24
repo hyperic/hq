@@ -166,7 +166,7 @@ public class SessionUtils {
      * @param session the http session
      * @param attr the name of the session attribute
      */
-    public static List getListAsListStr(HttpSession session, String attr) {
+    public static List<String> getListAsListStr(HttpSession session, String attr) {
         Object list = session.getAttribute(attr);
         List pendingIds = null;
         try {

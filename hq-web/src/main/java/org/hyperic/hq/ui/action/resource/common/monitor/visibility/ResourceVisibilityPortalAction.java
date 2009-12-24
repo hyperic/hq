@@ -32,6 +32,9 @@ package org.hyperic.hq.ui.action.resource.common.monitor.visibility;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.resource.ResourceController;
 
@@ -46,6 +49,12 @@ import org.apache.struts.action.ActionMapping;
  * 
  */
 public abstract class ResourceVisibilityPortalAction extends ResourceController {
+    
+    
+
+    public ResourceVisibilityPortalAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss) {
+        super(appdefBoss, authzBoss, controlBoss);
+    }
 
     public ActionForward currentHealth(ActionMapping mapping,
                                        ActionForm form,

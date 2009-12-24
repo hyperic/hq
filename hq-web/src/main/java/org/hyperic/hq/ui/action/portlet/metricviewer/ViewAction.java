@@ -31,7 +31,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.TreeSet;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -64,7 +63,6 @@ import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
@@ -72,6 +70,7 @@ import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.units.FormattedNumber;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * This action class is used by the Metric Viewer portlet.  It's main
@@ -79,7 +78,20 @@ import org.json.JSONObject;
  */
 public class ViewAction extends BaseAction {
 
-    private static Log _log = LogFactory.getLog(ViewAction.class);
+    private final Log log = LogFactory.getLog(ViewAction.class);
+
+    private AuthzBoss authzBoss;
+    private MeasurementBoss measurementBoss;
+    private AppdefBoss appdefBoss;
+    
+    
+    @Autowired
+    public ViewAction(AuthzBoss authzBoss, MeasurementBoss measurementBoss, AppdefBoss appdefBoss) {
+        super();
+        this.authzBoss = authzBoss;
+        this.measurementBoss = measurementBoss;
+        this.appdefBoss = appdefBoss;
+    }
 
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
@@ -87,15 +99,12 @@ public class ViewAction extends BaseAction {
                                  HttpServletResponse response)
         throws Exception
     {
-        ServletContext ctx = getServlet().getServletContext();
-        MeasurementBoss mBoss = ContextUtils.getMeasurementBoss(ctx);
-        AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
-        AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
+       
         HttpSession session = request.getSession();
         WebUser user = SessionUtils.getWebUser(session);
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
         		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, aBoss);
+        		user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         
         int sessionId = user.getSessionId().intValue();
@@ -134,8 +143,8 @@ public class ViewAction extends BaseAction {
         res.put("title", dashPrefs.getValue(titleKey, ""));
         
         // Load resources
-        List entityIds = DashboardUtils.preferencesAsEntityIds(resKey, dashPrefs);
-        AppdefEntityID[] arrayIds = (AppdefEntityID[])
+        List<AppdefEntityID> entityIds = DashboardUtils.preferencesAsEntityIds(resKey, dashPrefs);
+        AppdefEntityID[] arrayIds = 
             entityIds.toArray(new AppdefEntityID[entityIds.size()]);
         int count = Integer.parseInt(dashPrefs.getValue(numKey, "10"));
         String metric = dashPrefs.getValue(metricKey, "");
@@ -150,7 +159,7 @@ public class ViewAction extends BaseAction {
         }
 
         Integer[] tids = new Integer[] { new Integer(metric) };
-        List metricTemplates = mBoss.findMeasurementTemplates(sessionId, tids,
+        List<MeasurementTemplate> metricTemplates = measurementBoss.findMeasurementTemplates(sessionId, tids,
                                                               PageControl.PAGE_ALL);
         MeasurementTemplate template =
             (MeasurementTemplate)metricTemplates.get(0);
@@ -160,9 +169,9 @@ public class ViewAction extends BaseAction {
         AppdefResourceTypeValue typeVal =
             appdefBoss.findResourceTypeById(sessionId, typeId);
         CacheData[] data = new CacheData[arrayIds.length];
-        List measurements = new ArrayList(arrayIds.length);
+        List<Measurement> measurements = new ArrayList<Measurement>(arrayIds.length);
         long interval = 0;
-        ArrayList toRemove = new ArrayList();
+        ArrayList<String> toRemove = new ArrayList<String>();
         for (int i = 0; i < arrayIds.length; i++) {
             AppdefEntityID id = arrayIds[i];
             try {
@@ -180,10 +189,10 @@ public class ViewAction extends BaseAction {
             }
         }
 
-        MetricValue[] vals = mBoss.getLastMetricValue(sessionId, measurements,
+        MetricValue[] vals = measurementBoss.getLastMetricValue(sessionId, measurements,
                                                       interval);
-        TreeSet sortedSet =
-            new TreeSet(new MetricSummaryComparator(isDescending));
+        TreeSet<MetricSummary> sortedSet =
+            new TreeSet<MetricSummary>(new MetricSummaryComparator(isDescending));
         for (int i = 0; i < data.length; i++) {
             // Only show resources with data
             if (vals[i] != null) {
@@ -196,9 +205,9 @@ public class ViewAction extends BaseAction {
         JSONObject metricValues = new JSONObject();
         metricValues.put("resourceTypeName", typeVal.getName());
         metricValues.put("metricName", template.getName());
-        ArrayList values = new ArrayList();
-        for (Iterator i = sortedSet.iterator(); i.hasNext() && count-- > 0; ) {
-            MetricSummary s = (MetricSummary)i.next();
+        ArrayList<JSONObject> values = new ArrayList<JSONObject>();
+        for (Iterator<MetricSummary> i = sortedSet.iterator(); i.hasNext() && count-- > 0; ) {
+            MetricSummary s = i.next();
             JSONObject val = new JSONObject();
             val.put("value", s.getFormattedValue());
             val.put("resourceId", s.getAppdefResourceValue().getId());
@@ -212,11 +221,11 @@ public class ViewAction extends BaseAction {
 
         response.getWriter().write(res.toString());
 
-        _log.debug("Metric viewer loaded in " +
+        log.debug("Metric viewer loaded in " +
                    (System.currentTimeMillis() - ts) + " ms.");
 
         if (toRemove.size() > 0) {
-            _log.debug("Removing " + toRemove.size() + " missing resources.");
+            log.debug("Removing " + toRemove.size() + " missing resources.");
             DashboardUtils.removeResources((String[]) toRemove.toArray(new String[toRemove.size()]),
                                            resKey, dashPrefs);
         }
@@ -256,7 +265,7 @@ public class ViewAction extends BaseAction {
         }
     }
 
-    private class MetricSummaryComparator implements Comparator {
+    private class MetricSummaryComparator implements Comparator<MetricSummary> {
 
         private boolean _decending;
 
@@ -264,10 +273,8 @@ public class ViewAction extends BaseAction {
             _decending = decending;
         }
 
-        public int compare(Object o1, Object o2) {
-            MetricSummary s1 = (MetricSummary)o1;
-            MetricSummary s2 = (MetricSummary)o2;
-
+        public int compare(MetricSummary s1, MetricSummary s2) {
+           
             MetricValue m1 = s1.getMetricValue();
             MetricValue m2 = s2.getMetricValue();
 
@@ -304,13 +311,11 @@ public class ViewAction extends BaseAction {
         }
 
         // Otherwise, load from the backend
-        ServletContext  ctx = getServlet().getServletContext();
-        AppdefBoss      aBoss = ContextUtils.getAppdefBoss(ctx);
-        MeasurementBoss mBoss = ContextUtils.getMeasurementBoss(ctx);
+      
 
         try {
-            AppdefResourceValue val = aBoss.findById(sessionId, id);
-            Measurement m = mBoss.findMeasurement(sessionId, template.getId(),
+            AppdefResourceValue val = appdefBoss.findById(sessionId, id);
+            Measurement m = measurementBoss.findMeasurement(sessionId, template.getId(),
                                                   id);
             CacheData data = new CacheData(val, m);
             cache.put(new Element(key, data));
@@ -320,7 +325,7 @@ public class ViewAction extends BaseAction {
         } catch (MeasurementNotFoundException ex) {
             return null; // No metric scheduled.
         } catch (Exception ex) {
-            _log.debug("Caught exception loading data: " + ex, ex);
+            log.debug("Caught exception loading data: " + ex, ex);
             return null;
         }
     }

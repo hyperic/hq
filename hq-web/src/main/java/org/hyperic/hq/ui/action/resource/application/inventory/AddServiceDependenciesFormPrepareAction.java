@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -50,12 +49,12 @@ import org.hyperic.hq.appdef.shared.DependencyNode;
 import org.hyperic.hq.appdef.shared.DependencyTree;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
+import org.springframework.beans.factory.annotation.Autowired;
 
 
 /**
@@ -75,9 +74,20 @@ import org.hyperic.util.pager.Pager;
  */
 public class AddServiceDependenciesFormPrepareAction extends TilesAction {
 
-    private static Log log = LogFactory
+    private final Log log = LogFactory
         .getLog(AddServiceDependenciesFormPrepareAction.class.getName());
-        
+    
+    private AppdefBoss appdefBoss;
+    
+    
+    @Autowired    
+    public AddServiceDependenciesFormPrepareAction(AppdefBoss appdefBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+    }
+
+
+
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
                                  HttpServletRequest request,
@@ -93,9 +103,7 @@ public class AddServiceDependenciesFormPrepareAction extends TilesAction {
             RequestUtils.getPageControl(request, "psa", "pna", "soa", "sca");
         PageControl pcp =
             RequestUtils.getPageControl(request, "psp", "pnp", "sop", "scp");
-        ServletContext ctx = getServlet().getServletContext();
-        
-        AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+       
         // pending services are those on the right side of the "add
         // to list" widget- awaiting association with the resource
         // when the form's "ok" button is clicked.
@@ -110,28 +118,27 @@ public class AddServiceDependenciesFormPrepareAction extends TilesAction {
             log.trace("getting AppServices for application [" + entityId + "]");
         // get the dependency tree            
         DependencyTree tree =
-            boss.getAppDependencyTree(sessionId.intValue(),resource.getId());
+            appdefBoss.getAppDependencyTree(sessionId.intValue(),resource.getId());
         DependencyNode appSvcNode =
             DependencyTree.findAppServiceById(tree, appSvcId);
-        List services = 
-            boss.findServiceInventoryByApplication(sessionId.intValue(),
+        List<AppdefResourceValue> services = 
+            appdefBoss.findServiceInventoryByApplication(sessionId.intValue(),
                                                    resource.getId(),
                                                    PageControl.PAGE_ALL);                                    
-        Map serviceMap = DependencyTree.mapServices(services);
+        Map<AppdefEntityID,AppdefResourceValue> serviceMap = DependencyTree.mapServices(services);
         log.debug("Map contains " + serviceMap.toString());
-        List availableServices = new ArrayList();
-        List potentialDeps =
+        List<DependencyNode> availableServices = new ArrayList<DependencyNode>();
+        List<DependencyNode> potentialDeps =
             DependencyTree.findPotentialDependees(tree, appSvcNode, services);
         log.debug("The list contains " + potentialDeps);
-        for (Iterator iter = potentialDeps.iterator(); iter.hasNext();) {
-            DependencyNode candidateNode = (DependencyNode) iter.next();
+        for (DependencyNode candidateNode : potentialDeps) {
             availableServices.add(candidateNode);
         }
 
         // filter out the pending ones, if there are any            
         if (servicesArePending) {            
 
-            List uiPendings =
+            List<String> uiPendings =
                 SessionUtils.getListAsListStr(request.getSession(),
                                               Constants.PENDING_SVCDEPS_SES_ATTR);
 
@@ -157,13 +164,13 @@ public class AddServiceDependenciesFormPrepareAction extends TilesAction {
                           entityId + "] that service [" + appSvcId +
                           "] depends on");
 
-            List pendingServiceIdList = Arrays.asList(pendingServiceIds);
-            PageList pendingServices = new PageList();
+            List<AppdefEntityID> pendingServiceIdList = Arrays.asList(pendingServiceIds);
+            PageList<AppdefResourceValue> pendingServices = new PageList<AppdefResourceValue>();
             for (int i = 0; i < pendingServiceIds.length; i++) {
                 pendingServices.add(serviceMap.get(pendingServiceIds[i]));
             }
 
-            PageList pagedPendingList = new PageList(); 
+            PageList<AppdefResourceValue> pagedPendingList = new PageList<AppdefResourceValue>(); 
             Pager pendingPager = Pager.getDefaultPager();            
             pagedPendingList = pendingPager.seek(pendingServices, 
                                                  pcp.getPagenum(), 
@@ -176,9 +183,9 @@ public class AddServiceDependenciesFormPrepareAction extends TilesAction {
 
             // begin filtering
 
-            for (Iterator iter = availableServices.iterator(); iter.hasNext();)
+            for (Iterator<DependencyNode> iter = availableServices.iterator(); iter.hasNext();)
             {
-                DependencyNode element = (DependencyNode)iter.next();
+                DependencyNode element = iter.next();
                 if (pendingServiceIdList.contains(element.getEntityId())) {
                     iter.remove();
                 }
@@ -187,7 +194,7 @@ public class AddServiceDependenciesFormPrepareAction extends TilesAction {
         } else {
             // nothing is pending, so we'll initialize the attributes
             request.setAttribute(Constants.PENDING_SVCDEPS_REQ_ATTR,
-                                 new ArrayList());
+                                 new ArrayList<AppdefResourceValue>());
             request.setAttribute(Constants.NUM_PENDING_SVCDEPS_REQ_ATTR,
                                  new Integer(0));
         }
@@ -195,7 +202,7 @@ public class AddServiceDependenciesFormPrepareAction extends TilesAction {
         // Sort list
         Collections.sort(availableServices);
         
-        PageList pagedAvailabileList = new PageList();
+        PageList<DependencyNode> pagedAvailabileList = new PageList<DependencyNode>();
         Pager pendingPager = Pager.getDefaultPager();
         pagedAvailabileList = pendingPager.seek(availableServices,
                                                 pca.getPagenum(),

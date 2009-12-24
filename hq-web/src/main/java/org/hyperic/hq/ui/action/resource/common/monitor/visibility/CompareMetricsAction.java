@@ -32,22 +32,23 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.action.BaseActionMapping;
-import org.hyperic.hq.ui.util.SessionUtils;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.action.BaseActionMapping;
+import org.hyperic.hq.ui.util.SessionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class CompareMetricsAction extends MetricsControlAction {
 
-    protected static Log log =
-    LogFactory.getLog(CompareMetricsAction.class.getName());
-
-    // ---------------------------------------------------- Public Methods
+   
+   
+    @Autowired
+    public CompareMetricsAction(AuthzBoss authzBoss) {
+        super(authzBoss);
+    }
 
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
@@ -57,7 +58,7 @@ public class CompareMetricsAction extends MetricsControlAction {
         CompareMetricsForm compareForm = (CompareMetricsForm) form;
 
         if (compareForm.isBackClicked()) {
-            return returnBack(request, mapping, new HashMap());
+            return returnBack(request, mapping, new HashMap<String,Object>());
         }
 
         return super.execute(mapping, form, request, response);
@@ -65,7 +66,7 @@ public class CompareMetricsAction extends MetricsControlAction {
 
     private ActionForward returnBack(HttpServletRequest request,
                                      ActionMapping mapping,
-                                     Map params)
+                                     Map<String, Object> params)
         throws Exception {
         whackMyReturnPath(request, (BaseActionMapping) mapping);
         return constructForward(request, mapping, Constants.BACK_URL,

@@ -25,57 +25,62 @@
 
 package org.hyperic.hq.ui.action.resource.common.control;
 
-import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Properties;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.struts.Globals;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.action.resource.ResourceController;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.Portal;
+import org.hyperic.hq.ui.action.resource.ResourceController;
+import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
-
-import org.apache.struts.Globals;
 /*
  * An abstract subclass of <code>ResourceControllerAction</code> that
  * provides common methods for resource control controller actions.
  */
 public abstract class ResourceControlController extends ResourceController {
-    private Properties keyMethodMap = null;
+    private final Properties keyMethodMap = new Properties();
+    
+    protected final Log log =
+        LogFactory.getLog(ResourceControlController.class.getName());
 
     protected Properties getKeyMethodMap() {
-        if (keyMethodMap == null) {
-            keyMethodMap = new Properties();
-            
-            keyMethodMap.setProperty(Constants.MODE_LIST, "currentControlStatus");
-            keyMethodMap.setProperty(Constants.MODE_VIEW, "currentControlStatus");
-            keyMethodMap.setProperty(Constants.MODE_HST, "controlStatusHistory");
-            keyMethodMap.setProperty(Constants.MODE_HST_DETAIL, "controlStatusHistory");
-            keyMethodMap.setProperty(Constants.MODE_NEW, "newScheduledControlAction");
-            keyMethodMap.setProperty(Constants.MODE_EDIT, "editScheduledControlAction");
-        }
-        
         return keyMethodMap;
     }
+    
+    
+    public ResourceControlController(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss) {
+        super(appdefBoss, authzBoss, controlBoss);
+        initKeyMethodMap();
+    }
 
-    protected static final Log log =
-        LogFactory.getLog(ResourceControlController.class.getName());
+
+    private void initKeyMethodMap() {
+        keyMethodMap.setProperty(Constants.MODE_LIST, "currentControlStatus");
+        keyMethodMap.setProperty(Constants.MODE_VIEW, "currentControlStatus");
+        keyMethodMap.setProperty(Constants.MODE_HST, "controlStatusHistory");
+        keyMethodMap.setProperty(Constants.MODE_HST_DETAIL, "controlStatusHistory");
+        keyMethodMap.setProperty(Constants.MODE_NEW, "newScheduledControlAction");
+        keyMethodMap.setProperty(Constants.MODE_EDIT, "editScheduledControlAction");
+    }
+
+  
     
     /**
      * Checks to see if control is enabled for this resource. Sets
@@ -87,8 +92,7 @@ public abstract class ResourceControlController extends ResourceController {
                                         HttpServletResponse response) {
         // check to see if control is enabled                                    
         try {
-            ServletContext ctx = getServlet().getServletContext();
-            ControlBoss cBoss = ContextUtils.getControlBoss(ctx);
+            
             int sessionId = RequestUtils.getSessionId(request).intValue();
             AppdefEntityID appdefId = RequestUtils.getEntityId(request);
             int type = appdefId.getType();
@@ -98,17 +102,16 @@ public abstract class ResourceControlController extends ResourceController {
                 case AppdefEntityConstants.APPDEF_TYPE_GROUP:
                 case AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC:
                 case AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS:
-                    isEnabled = cBoss.isGroupControlEnabled(sessionId, appdefId);
+                    isEnabled = controlBoss.isGroupControlEnabled(sessionId, appdefId);
                     break;
                 default:
-                    isEnabled = cBoss.isControlEnabled(sessionId, appdefId);
+                    isEnabled = controlBoss.isControlEnabled(sessionId, appdefId);
             }
             request.setAttribute( Constants.CONTROL_ENABLED_ATTR, 
                                   new Boolean(isEnabled) );
             if (isEnabled) {
-                List actions;
                 try {
-                    actions = cBoss.getActions(sessionId, appdefId);
+                    List<String> actions = controlBoss.getActions(sessionId, appdefId);
                     Boolean hasControls
                         = (actions.size() > 0) ? Boolean.TRUE : Boolean.FALSE;
                     request.setAttribute("hasControlActions", hasControls);

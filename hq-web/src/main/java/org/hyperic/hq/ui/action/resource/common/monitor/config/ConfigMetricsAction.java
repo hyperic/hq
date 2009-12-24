@@ -27,43 +27,49 @@ package org.hyperic.hq.ui.action.resource.common.monitor.config;
 
 import java.util.HashMap;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
-import org.hyperic.hq.bizapp.shared.MeasurementBoss;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
+import org.hyperic.hq.bizapp.shared.MeasurementBoss;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.action.BaseAction;
+import org.hyperic.hq.ui.exception.ParameterNotFoundException;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * modifies the metrics data.
  */
 public class ConfigMetricsAction extends BaseAction {
+    protected MeasurementBoss measurementBoss;
+    private final  Log log = LogFactory.getLog(ConfigMetricsAction.class.getName());  
     
+    
+    @Autowired
+    public ConfigMetricsAction(MeasurementBoss measurementBoss) {
+        super();
+        this.measurementBoss = measurementBoss;
+    }
+
+
+
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-        
-        Log log = LogFactory.getLog(ConfigMetricsAction.class.getName());            
+            
         log.trace("modifying metrics action");                    
 
-        ServletContext ctx = getServlet().getServletContext();
-        MeasurementBoss mBoss = ContextUtils.getMeasurementBoss(ctx);        
         
-        HashMap parms = new HashMap(2);
+        HashMap<String, Object> parms = new HashMap<String, Object>(2);
         
         int sessionId = RequestUtils.getSessionId(request).intValue();
         MonitoringConfigForm mForm = (MonitoringConfigForm) form;
@@ -99,7 +105,7 @@ public class ConfigMetricsAction extends BaseAction {
                 if (midsToUpdate.length == 0)
                     return forward;
                     
-                mBoss.disableMeasurements(sessionId, appdefId, midsToUpdate);
+                measurementBoss.disableMeasurements(sessionId, appdefId, midsToUpdate);
                 RequestUtils.setConfirmation(request, 
                     "resource.common.monitor.visibility.config.RemoveMetrics.Confirmation");
             }
@@ -117,16 +123,16 @@ public class ConfigMetricsAction extends BaseAction {
         String confirmation =
             "resource.common.monitor.visibility.config.ConfigMetrics.Confirmation";
         if (aetid == null) {
-            mBoss.updateMeasurements(sessionId, appdefId, midsToUpdate,
+            measurementBoss.updateMeasurements(sessionId, appdefId, midsToUpdate,
                                      interval);
         } else {
             if (mForm.isIndSelected()) {
-                mBoss.updateIndicatorMetrics(sessionId, aetid, midsToUpdate);
+                measurementBoss.updateIndicatorMetrics(sessionId, aetid, midsToUpdate);
                 confirmation =
                     "resource.common.monitor.visibility.config.IndicatorMetrics.Confirmation";
             }
             else
-                mBoss.updateMetricDefaultInterval(sessionId,  midsToUpdate,
+                measurementBoss.updateMetricDefaultInterval(sessionId,  midsToUpdate,
                                                   interval);
         }
         RequestUtils.setConfirmation(request, confirmation);

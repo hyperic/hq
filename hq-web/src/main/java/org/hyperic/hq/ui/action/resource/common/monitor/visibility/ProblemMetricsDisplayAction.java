@@ -22,12 +22,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
@@ -38,23 +35,32 @@ import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
+import org.hyperic.hq.bizapp.shared.uibeans.ProblemMetricSummary;
 import org.hyperic.hq.ui.WebUser;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.MonitorUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.hq.bizapp.shared.uibeans.ProblemMetricSummary;
 import org.hyperic.util.pager.PageList;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * A portlet for problem metrics
  */
 public class ProblemMetricsDisplayAction extends TilesAction {
-    private static Log log = LogFactory.getLog(ProblemMetricsDisplayAction.class.getName());
-
+   
     private static final String RESOURCE_NAMES = "ProblemMetricsDisplayAction_resourceNames";
    
-    // ---------------------------------------------------- Public
-    // ---------------------------------------------------- Methods
+   private AppdefBoss appdefBoss;
+   private MeasurementBoss measurementBoss;
+   
+   
+   @Autowired
+    public ProblemMetricsDisplayAction(AppdefBoss appdefBoss, MeasurementBoss measurementBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+        this.measurementBoss = measurementBoss;
+    }
+
+
 
     /**
      * Fetch the list of problem metrics for a resource
@@ -65,16 +71,16 @@ public class ProblemMetricsDisplayAction extends TilesAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response) 
     throws Exception {
-        ServletContext ctx = getServlet().getServletContext();
-        MeasurementBoss boss = ContextUtils.getMeasurementBoss(ctx);
+     
+       
         WebUser user = RequestUtils.getWebUser(request);
         int sessionId = user.getSessionId().intValue();
         AppdefEntityID aeid = RequestUtils.getEntityId(request);
         
         // Now fetch the display range
-        Map<String, Long> range = user.getMetricRangePreference();
-        long begin = range.get(MonitorUtils.BEGIN).longValue();
-        long end = range.get(MonitorUtils.END).longValue();
+        Map<String, Object> range = user.getMetricRangePreference();
+        long begin = ((Long)range.get(MonitorUtils.BEGIN)).longValue();
+        long end = ((Long)range.get(MonitorUtils.END)).longValue();
         ProblemMetricsDisplayForm probForm = (ProblemMetricsDisplayForm) form;
         String[] resStrs;
         AppdefEntityID[] hosts = null;
@@ -89,8 +95,8 @@ public class ProblemMetricsDisplayAction extends TilesAction {
                 hosts[i] = new AppdefEntityID(resStrs[i]);
             }
             
-            AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
-            PageList resources = appdefBoss.findByIds(sessionId, hosts, null);
+            
+            PageList<AppdefResourceValue> resources = appdefBoss.findByIds(sessionId, hosts, null);
             
             for (Iterator<AppdefResourceValue> i = resources.iterator(); i.hasNext();) {
                 AppdefResourceValue resource = i.next();
@@ -126,7 +132,7 @@ public class ProblemMetricsDisplayAction extends TilesAction {
                 childTypes = new AppdefEntityTypeID[] { childTypeID };
             }
             
-            problems = boss.findAllMetrics(sessionId, aeid, hosts, childTypes, entities, begin, end);
+            problems = measurementBoss.findAllMetrics(sessionId, aeid, hosts, childTypes, entities, begin, end);
             // Set the resources for the view
             request.getSession().setAttribute(aeid.getAppdefKey() + ".entities", entities);
         } else if (childTypeID != null) { // Autogroup
@@ -134,9 +140,9 @@ public class ProblemMetricsDisplayAction extends TilesAction {
                 // Host selected, make ctype the children array
                 AppdefEntityTypeID[] children = new AppdefEntityTypeID[] { childTypeID };
 
-                problems = boss.findAllMetrics(sessionId, aeid, null, children, begin, end);
+                problems = measurementBoss.findAllMetrics(sessionId, aeid, null, children, begin, end);
             } else {
-                problems = boss.findAllMetrics(sessionId, aeid, childTypeID, begin, end);
+                problems = measurementBoss.findAllMetrics(sessionId, aeid, childTypeID, begin, end);
             }
         } else {
             AppdefEntityTypeID[] children = null;
@@ -149,7 +155,7 @@ public class ProblemMetricsDisplayAction extends TilesAction {
                 }                
             }
 
-            problems = boss.findAllMetrics(sessionId, aeid, hosts, children, begin, end);
+            problems = measurementBoss.findAllMetrics(sessionId, aeid, hosts, children, begin, end);
             // Clear the resources for the view
             request.getSession().removeAttribute(aeid.getAppdefKey() + ".entities");
         }

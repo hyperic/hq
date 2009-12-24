@@ -28,7 +28,6 @@ package org.hyperic.hq.ui.action.resource.common.inventory;
 import java.util.HashMap;
 
 import javax.ejb.FinderException;
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -37,13 +36,13 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
 import org.hyperic.hq.appdef.shared.ServerValue;
-import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.bizapp.shared.AllConfigResponses;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
@@ -53,12 +52,12 @@ import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.BizappUtils;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.config.InvalidOptionValueException;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * This class will set the ConfigResponse for resources.This is applicable for
@@ -71,6 +70,17 @@ public class EditConfigPropertiesAction extends BaseAction {
         = "resource.common.error.ConfigError.NoMessage";
     public static final String ERR_CONFIG
         = "resource.common.error.ConfigError";
+    private final  Log log = LogFactory.getLog(EditConfigPropertiesAction.class.getName());
+    private AppdefBoss appdefBoss;
+    private ProductBoss productBoss;
+    
+    
+    @Autowired
+    public EditConfigPropertiesAction(AppdefBoss appdefBoss, ProductBoss productBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+        this.productBoss = productBoss;
+    }
 
     /**
      * Edit the resource Configuration properties with
@@ -82,12 +92,12 @@ public class EditConfigPropertiesAction extends BaseAction {
                                  HttpServletResponse response)
         throws Exception {
 
-        Log log = LogFactory.getLog(EditConfigPropertiesAction.class.getName());
+       
         ResourceConfigForm cfgForm = (ResourceConfigForm) form;
         AppdefEntityID aeid = new AppdefEntityID(cfgForm.getType().intValue(),
                                                  cfgForm.getRid());
         
-        HashMap forwardParams = new HashMap(2);
+        HashMap<String, Object> forwardParams = new HashMap<String, Object>(2);
         forwardParams.put(Constants.ENTITY_ID_PARAM, aeid.getAppdefKey());
 
         switch (aeid.getType()) {
@@ -117,11 +127,10 @@ public class EditConfigPropertiesAction extends BaseAction {
         }    
         
         try {
-            ServletContext ctx = getServlet().getServletContext();
+            
             Integer sessionId = RequestUtils.getSessionId(request);
             int sessionInt = sessionId.intValue();
-            AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
-            ProductBoss pboss = ContextUtils.getProductBoss(ctx);
+           
 
             String[] cfgTypes = ProductPlugin.CONFIGURABLE_TYPES;
             int i, numConfigs = cfgTypes.length;
@@ -134,7 +143,7 @@ public class EditConfigPropertiesAction extends BaseAction {
             allConfigsRollback.setResource(aeid);
 
             ConfigResponseDB oldConfig =
-                pboss.getConfigResponse(sessionInt, aeid);
+                productBoss.getConfigResponse(sessionInt, aeid);
             
             // get the configSchemas and existing configs
             for (i = 0; i < numConfigs; i++) {
@@ -155,12 +164,14 @@ public class EditConfigPropertiesAction extends BaseAction {
                         oldCfgBytes = oldConfig.getResponseTimeResponse();
                     }
                     
-                    if (oldCfgBytes == null)
+                    if (oldCfgBytes == null) {
                         oldConfigs[i] = new ConfigResponse();
-                    else
+                    }
+                    else {
                         oldConfigs[i] = ConfigResponse.decode(oldCfgBytes);
+                    }
                     
-                    schemas[i] = pboss.getConfigSchema(
+                    schemas[i] = productBoss.getConfigSchema(
                             sessionInt, aeid, cfgTypes[i], oldConfigs[i]);
                     allConfigsRollback.setConfig(i, oldConfigs[i]);
                     allConfigsRollback.setSupports(i, true);
@@ -175,7 +186,7 @@ public class EditConfigPropertiesAction extends BaseAction {
             }
 
             AppdefResourceValue updatedResource =
-                boss.findById(sessionInt, aeid);
+                appdefBoss.findById(sessionInt, aeid);
                     
             // get the new configs based on UI form fields
             for ( i=0; i<numConfigs; i++ ) {
@@ -255,7 +266,7 @@ public class EditConfigPropertiesAction extends BaseAction {
                         // changed when in fact it has.  See bug 8251.
                         boolean reallyWereChanges = false;
                         try {
-                            pboss.getMergedConfigResponse(sessionInt, cfgTypes[i],
+                            productBoss.getMergedConfigResponse(sessionInt, cfgTypes[i],
                                                           aeid, true);
                         } catch (ConfigFetchException cfe) {
                             // OK, so there really were changes because the config doesn't
@@ -312,7 +323,7 @@ public class EditConfigPropertiesAction extends BaseAction {
             }
 
             // call the uber setter in the AppdefBoss 
-            boss.setAllConfigResponses(sessionInt, allConfigs, allConfigsRollback);
+            appdefBoss.setAllConfigResponses(sessionInt, allConfigs, allConfigsRollback);
 
             RequestUtils.setConfirmation(request,
                      "resource."+ aeid.getTypeName() +

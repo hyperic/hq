@@ -27,7 +27,6 @@ package org.hyperic.hq.ui.action.resource.common.monitor.visibility;
 
 import java.util.Map;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -36,7 +35,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
@@ -44,9 +42,9 @@ import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.util.ActionUtils;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * A <code>BaseAction</code> that handles metrics display form
@@ -54,11 +52,16 @@ import org.hyperic.hq.ui.util.SessionUtils;
  */
 public class MetricsDisplayAction extends MetricsControlAction {
 
-    protected static Log log =  LogFactory
+    private final Log log =  LogFactory
         .getLog(MetricsDisplayAction.class.getName());
+    private MeasurementBoss measurementBoss;
+    
 
-    // ---------------------------------------------------- Public
-    // ---------------------------------------------------- Methods
+    @Autowired
+    public MetricsDisplayAction(AuthzBoss authzBoss, MeasurementBoss measurementBoss) {
+        super(authzBoss);
+        this.measurementBoss = measurementBoss;
+    }
 
     /**
      * Modify the metrics summary display as specified in the given
@@ -72,11 +75,11 @@ public class MetricsDisplayAction extends MetricsControlAction {
         MetricsDisplayForm displayForm = (MetricsDisplayForm) form;
 
         AppdefEntityID entityId = displayForm.getEntityId();
-        Map forwardParams = displayForm.getForwardParams();
+        Map<String, Object> forwardParams = displayForm.getForwardParams();
 
         WebUser user = RequestUtils.getWebUser(request);
         Integer sessionId = user.getSessionId();
-        ServletContext ctx = getServlet().getServletContext();
+       
 
         if (displayForm.isCompareClicked()) {
             return returnCompare(request, mapping, forwardParams);
@@ -94,8 +97,8 @@ public class MetricsDisplayAction extends MetricsControlAction {
                 " in MetricsDisplayAction " +
                 " for " + user.getId() + " at "+System.currentTimeMillis() +
                 " user.prefs = " + user.getPreferences());
-            AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
-            boss.setUserPrefs(sessionId, user.getId(), user.getPreferences());
+           
+            authzBoss.setUserPrefs(sessionId, user.getId(), user.getPreferences());
             
             return returnSuccess(request, mapping);
         }
@@ -105,15 +108,15 @@ public class MetricsDisplayAction extends MetricsControlAction {
 
             // Don't make any back-end call if user has not selected any metrics
             if (m != null && m.length > 0) {
-                MeasurementBoss mBoss = ContextUtils.getMeasurementBoss(ctx);
+              
                 if (displayForm.getCtype() == null || entityId.isGroup())
-                    mBoss.updateMeasurements(sessionId.intValue(), entityId, m,
+                    measurementBoss.updateMeasurements(sessionId.intValue(), entityId, m,
                                              interval);
                 else {
                     AppdefEntityTypeID ctid =
                         new AppdefEntityTypeID(displayForm.getCtype());
                 
-                    mBoss.updateAGMeasurements(sessionId.intValue(), entityId,
+                    measurementBoss.updateAGMeasurements(sessionId.intValue(), entityId,
                                                ctid, m, interval);
                 }
 
@@ -128,14 +131,14 @@ public class MetricsDisplayAction extends MetricsControlAction {
             Integer[] m = displayForm.getM();
             // Don't make any back-end call if user has not selected any metrics
             if (m != null && m.length > 0) {
-                MeasurementBoss mBoss = ContextUtils.getMeasurementBoss(ctx);
+                
 
                 if (displayForm.getCtype() == null || entityId.isGroup())
-                    mBoss.disableMeasurements(sessionId.intValue(), entityId,m);
+                    measurementBoss.disableMeasurements(sessionId.intValue(), entityId,m);
                 else {
                     AppdefEntityTypeID ctid =
                         new AppdefEntityTypeID(displayForm.getCtype());
-                    mBoss.disableAGMeasurements(sessionId.intValue(), entityId,
+                    measurementBoss.disableAGMeasurements(sessionId.intValue(), entityId,
                                                 ctid, m);
                 }
 
@@ -154,7 +157,7 @@ public class MetricsDisplayAction extends MetricsControlAction {
 
     private ActionForward returnCompare(HttpServletRequest request,
                                         ActionMapping mapping,
-                                        Map params)
+                                        Map<String, Object> params)
     throws Exception {
         // set return path
         String returnPath = ActionUtils.findReturnPath(mapping, params);
@@ -166,7 +169,7 @@ public class MetricsDisplayAction extends MetricsControlAction {
 
     private ActionForward returnChart(HttpServletRequest request,
                                       ActionMapping mapping,
-                                      Map params)
+                                      Map<String, Object> params)
     throws Exception {
         // set return path
         String returnPath = ActionUtils.findReturnPath(mapping, params);

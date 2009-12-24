@@ -27,13 +27,16 @@ package org.hyperic.hq.ui.action.resource.platform.inventory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+import org.apache.struts.tiles.ComponentContext;
+import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.appdef.shared.IpValue;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
@@ -41,17 +44,9 @@ import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.resource.platform.PlatformForm;
 import org.hyperic.hq.ui.util.BizappUtils;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.tiles.ComponentContext;
-import org.apache.struts.tiles.actions.TilesAction;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An Action that retrieves data from the BizApp to facilitate display
@@ -59,7 +54,14 @@ import org.apache.struts.tiles.actions.TilesAction;
  */
 public class NewPlatformFormPrepareAction extends TilesAction {
 
-    // ---------------------------------------------------- Public Methods
+    private AppdefBoss appdefBoss;
+    
+    
+    @Autowired
+    public NewPlatformFormPrepareAction(AppdefBoss appdefBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+    }
 
     /**
      * Retrieve data necessary to display the
@@ -71,21 +73,18 @@ public class NewPlatformFormPrepareAction extends TilesAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-        Log log =
-            LogFactory.getLog(NewPlatformFormPrepareAction.class.getName());
-
+       
         PlatformForm newForm = (PlatformForm) form;
 
-        ServletContext ctx = getServlet().getServletContext();
+       
         Integer sessionId = RequestUtils.getSessionId(request);
-        AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+        
 
-        List resourceTypes = new ArrayList();
-        List platformTypes = boss.findAllPlatformTypes(sessionId.intValue(),
+        List<PlatformTypeValue> resourceTypes = new ArrayList<PlatformTypeValue>();
+        List<PlatformTypeValue> platformTypes = appdefBoss.findAllPlatformTypes(sessionId.intValue(),
                                                        PageControl.PAGE_ALL);
         //XXX need a finder for device types, this will do for the moment.
-        for (Iterator it=platformTypes.iterator(); it.hasNext();) {
-            PlatformTypeValue pType = (PlatformTypeValue)it.next(); 
+        for (PlatformTypeValue pType : platformTypes) {
             if (PlatformDetector.isSupportedPlatform(pType.getName())) {
                 continue;
             }
@@ -94,7 +93,7 @@ public class NewPlatformFormPrepareAction extends TilesAction {
         newForm.setResourceTypes(resourceTypes);
 
         BizappUtils.populateAgentConnections(sessionId.intValue(),
-                                             boss, request,
+                                             appdefBoss, request,
                                              newForm, "");
 
         // respond to an add or remove click- we do this here
@@ -121,11 +120,11 @@ public class NewPlatformFormPrepareAction extends TilesAction {
             if (oldIps != null) {
                 // remove the indicated ip, leaving all others
                 // intact
-                ArrayList oldIpsList =
-                    new ArrayList(Arrays.asList(oldIps));
+                ArrayList<IpValue> oldIpsList =
+                    new ArrayList<IpValue>(Arrays.asList(oldIps));
                 oldIpsList.remove(ri);
                 IpValue[] newIps =
-                    (IpValue[]) oldIpsList.toArray(new IpValue[0]);
+                     oldIpsList.toArray(new IpValue[0]);
 
                 // automatically sets numIps
                 newForm.setIps(newIps);

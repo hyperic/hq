@@ -27,7 +27,6 @@ package org.hyperic.hq.ui.action.admin.config;
 
 import java.util.Properties;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -40,12 +39,22 @@ import org.hyperic.hq.bizapp.server.session.UpdateStatusMode;
 import org.hyperic.hq.bizapp.shared.ConfigBoss;
 import org.hyperic.hq.bizapp.shared.UpdateBoss;
 import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class EditConfigAction extends BaseAction {
 
-    Log log = LogFactory.getLog(EditConfigAction.class.getName());
+    private final Log log = LogFactory.getLog(EditConfigAction.class.getName());
+    private ConfigBoss configBoss;
+    private UpdateBoss updateBoss;
+
+    @Autowired
+    public EditConfigAction(ConfigBoss configBoss, UpdateBoss updateBoss) {
+        super();
+        this.configBoss = configBoss;
+        this.updateBoss = updateBoss;
+    }
+
 
     /**
      * Create the cam config with the attributes specified in the given
@@ -64,25 +73,24 @@ public class EditConfigAction extends BaseAction {
 
         int sessionId = RequestUtils.getSessionIdInt(request);
         SystemConfigForm cForm = (SystemConfigForm)form;    
-        ServletContext ctx     = getServlet().getServletContext();
-        ConfigBoss boss = ContextUtils.getConfigBoss(ctx);
+       
         
         if (cForm.isOkClicked()) {
             if (log.isTraceEnabled())
                 log.trace("Getting config");
-            Properties props = cForm.saveConfigProperties(boss.getConfig());
+            Properties props = cForm.saveConfigProperties(configBoss.getConfig());
 
             if (log.isTraceEnabled())
                 log.trace("Setting config");
-            boss.setConfig(sessionId, props);
+            configBoss.setConfig(sessionId, props);
 
             if (log.isTraceEnabled())
                 log.trace("Restarting config service");
-            boss.restartConfig();
+            configBoss.restartConfig();
 
             // Set the update mode
-            UpdateBoss uboss = ContextUtils.getUpdateBoss(ctx);
-            uboss.setUpdateMode(sessionId,
+          
+            updateBoss.setUpdateMode(sessionId,
                 UpdateStatusMode.findByCode(cForm.getUpdateMode()));            
         }
 
