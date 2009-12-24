@@ -25,28 +25,19 @@
 
 package org.hyperic.hq.ui.action.resource.service.inventory;
 
-import java.io.IOException;
-
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.bizapp.shared.AuthzBoss;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.action.resource.RemoveResourceForm;
-import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.ActionUtils;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.action.BaseAction;
+import org.hyperic.hq.ui.action.resource.RemoveResourceForm;
+import org.hyperic.hq.ui.exception.ParameterNotFoundException;
+import org.hyperic.hq.ui.util.RequestUtils;
 
 /**
  * removes an application
@@ -54,6 +45,7 @@ import org.apache.struts.action.ActionMapping;
  *
  */
 public class RemoveAppAction extends BaseAction {
+    private final  Log log = LogFactory.getLog(RemoveAppAction.class.getName());
 
     /** Removes a application identified by the
      * value of the request parameter <code>Constants.RESOURCE_PARAM</code>
@@ -66,7 +58,7 @@ public class RemoveAppAction extends BaseAction {
                                  HttpServletResponse response)
         throws Exception {
             
-        Log log = LogFactory.getLog(RemoveAppAction.class.getName());
+       
                 
         RemoveResourceForm nwForm = (RemoveResourceForm) form;
 
@@ -76,14 +68,10 @@ public class RemoveAppAction extends BaseAction {
             return buildSuccessForwardMapping(request, mapping);
         }
 
-        Integer sessionId =  RequestUtils.getSessionId(request);
-
-        //get the spiderSubjectValue of the user to be deleated.
-        ServletContext ctx = getServlet().getServletContext();            
-        AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);            
+       
 
         log.trace("removing resource");                                                      
-        AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+   
 
         for (int i = 0; i < resources.length; i++){
             //boss.removeService(sessionId.intValue(), resources[i], false);

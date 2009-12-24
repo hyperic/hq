@@ -28,31 +28,41 @@ package org.hyperic.hq.ui.action.resource.service.inventory;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+import org.apache.struts.tiles.ComponentContext;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServerValue;
+import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.WorkflowPrepareAction;
 import org.hyperic.hq.ui.action.resource.ResourceForm;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
-
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.tiles.ComponentContext;
-import org.apache.commons.collections.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class NewServiceFormPrepareAction extends WorkflowPrepareAction {
+    
+    private AppdefBoss appdefBoss;
+    
+    
+    @Autowired
+    public NewServiceFormPrepareAction(AppdefBoss appdefBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+    }
+
+
 
     public ActionForward workflow(ComponentContext context,
                                   ActionMapping mapping,
@@ -64,8 +74,7 @@ public class NewServiceFormPrepareAction extends WorkflowPrepareAction {
         ResourceForm newForm = (ResourceForm) form;
 
         int sessionId = RequestUtils.getSessionId(request).intValue();
-        ServletContext ctx = getServlet().getServletContext();
-        AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+      
         
         AppdefEntityID aeid = RequestUtils.getEntityId(request);
         Integer parentId = aeid.getId();
@@ -76,12 +85,12 @@ public class NewServiceFormPrepareAction extends WorkflowPrepareAction {
             AppdefEntityTypeID atid =
                 RequestUtils.getChildResourceTypeId(request);
             
-            List servers;
+           
             
             // parent is a platform, we're creating a platform service
             if (atid.getType() == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
-                servers =
-                    boss.findServersByTypeAndPlatform(sessionId,
+                List<ServerValue> servers =
+                    appdefBoss.findServersByTypeAndPlatform(sessionId,
                                                       parentId,
                                                       atid.getID(),
                                                       PageControl.PAGE_ALL);
@@ -90,22 +99,22 @@ public class NewServiceFormPrepareAction extends WorkflowPrepareAction {
                 svrType = svrVal.getServerType();
             } else {
                 // Just get the service type
-                serviceTypeVals.add(boss.findServiceTypeById(sessionId,
+                serviceTypeVals.add(appdefBoss.findServiceTypeById(sessionId,
                                                              atid.getId()));
                 newForm.setResourceType(atid.getId());
 
                 svrVal =
-                    boss.findVirtualServerByPlatformServiceType(sessionId,
+                    appdefBoss.findVirtualServerByPlatformServiceType(sessionId,
                                                                 parentId,
                                                                 atid.getId());
             }            
         } catch (ParameterNotFoundException e) {
             if (aeid.getType() == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
-                svrVal = boss.findServerById(sessionId, parentId);
+                svrVal = appdefBoss.findServerById(sessionId, parentId);
                 svrType = svrVal.getServerType();
             } else {
                 serviceTypeVals.addAll(
-                    boss.findViewablePlatformServiceTypes(sessionId,
+                    appdefBoss.findViewablePlatformServiceTypes(sessionId,
                                                           aeid.getId()));
 
             }
@@ -126,8 +135,8 @@ public class NewServiceFormPrepareAction extends WorkflowPrepareAction {
             
 
         if (svrType != null) {
-            List serviceTypes =
-                boss.findServiceTypesByServerType(sessionId,
+            List<ServiceTypeValue> serviceTypes =
+                appdefBoss.findServiceTypesByServerType(sessionId,
                                                   svrType.getId().intValue());
             CollectionUtils.addAll(serviceTypeVals,
                                    serviceTypes.toArray());

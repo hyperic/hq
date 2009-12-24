@@ -28,23 +28,20 @@ package org.hyperic.hq.ui.action.resource.server.inventory;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.action.resource.RemoveResourceForm;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.action.BaseAction;
+import org.hyperic.hq.ui.action.resource.RemoveResourceForm;
+import org.hyperic.hq.ui.util.RequestUtils;
 
 /**
  * Action which deletes services from the services list within 
@@ -54,6 +51,8 @@ import org.apache.struts.action.ActionMapping;
  *
  */
 public class RemoveServiceAction extends BaseAction {
+    
+    private AppdefBoss appdefBoss;
 
     /** Removes a server identified by the
      * value of the request parameter <code>Constants.SERVER_PARAM</code>
@@ -72,7 +71,7 @@ public class RemoveServiceAction extends BaseAction {
 
         AppdefEntityID aeid = new AppdefEntityID(nwForm.getEid());
         Integer[] resources = nwForm.getResources();
-        Map params = new HashMap(2);
+        Map<String, Object> params = new HashMap<String, Object>(2);
         params.put(Constants.ENTITY_ID_PARAM, aeid);
         
         if (aeid.isPlatform()) {
@@ -88,14 +87,13 @@ public class RemoveServiceAction extends BaseAction {
 
         Integer sessionId =  RequestUtils.getSessionId(request);
 
-        //get the spiderSubjectValue of the user to be deleated.
-        ServletContext ctx = getServlet().getServletContext();            
+              
         
         log.trace("removing resource");                                                      
-        AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+        
 
         for (int i = 0; i < resources.length; i++) {
-            boss.removeAppdefEntity(sessionId.intValue(),
+            appdefBoss.removeAppdefEntity(sessionId.intValue(),
                                     AppdefEntityID.newServiceID(resources[i]));
         }
 

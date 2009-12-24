@@ -25,30 +25,24 @@
 
 package org.hyperic.hq.ui.action.resource.service.inventory;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.ejb.ObjectNotFoundException;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
-import org.hyperic.hq.appdef.shared.ServiceValue;
-import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
+import org.hyperic.hq.appdef.shared.ServiceValue;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.action.BaseAction;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
     /**
     * Edit the General Properties of a Service with the attributes specified in the given
@@ -57,20 +51,33 @@ import org.apache.struts.action.ActionMapping;
     */
 
 public class EditGeneralAction extends BaseAction {
+    
+    private final  Log log = LogFactory.getLog(EditGeneralAction.class.getName());
+    
+    private AppdefBoss appdefBoss;
+    
+    
+    @Autowired
+    public EditGeneralAction(AppdefBoss appdefBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+    }
+
+
 
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
                                  HttpServletRequest request,
                                  HttpServletResponse response)
     throws Exception {
-        Log log = LogFactory.getLog(EditGeneralAction.class.getName());
+       
         try {
             ServiceForm rForm = (ServiceForm) form;
 
             Integer rid = rForm.getRid();
             Integer entityType = rForm.getType();
             
-            Map forwardParams = new HashMap(2);
+            Map<String, Object> forwardParams = new HashMap<String, Object>(2);
             forwardParams.put(Constants.RESOURCE_PARAM, rid);
             forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, entityType);
             ActionForward forward = checkSubmit(request, mapping, form,
@@ -80,18 +87,18 @@ public class EditGeneralAction extends BaseAction {
                 return forward;
             }         
 
-            ServletContext ctx = getServlet().getServletContext();
+          
             Integer sessionId = RequestUtils.getSessionId(request);
-            AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+           
 
             Integer serviceId = RequestUtils.getResourceId(request);
 
-            ServiceValue sValue = boss.findServiceById(sessionId.intValue(), serviceId);
+            ServiceValue sValue = appdefBoss.findServiceById(sessionId.intValue(), serviceId);
 
             rForm.updateServiceValue(sValue);            
             
             ServiceValue updatedServer =
-              boss.updateService(sessionId.intValue(), sValue, null);
+              appdefBoss.updateService(sessionId.intValue(), sValue, null);
               
             // XXX: enable when we have a confirmed functioning API
             log.trace("saving service [" + sValue.getName()

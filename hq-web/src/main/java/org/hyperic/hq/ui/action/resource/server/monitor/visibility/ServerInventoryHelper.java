@@ -78,7 +78,7 @@ public class ServerInventoryHelper extends InventoryHelper {
         AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
 
         log.trace("finding services for resource [" + entityId + "]");
-        List services = boss
+        List<AppdefResourceValue> services = boss
             .findServicesByServer(sessionId, entityId.getId(),
                                   PageControl.PAGE_ALL);
         return MonitorUtils.findServiceTypes(services, null);
@@ -123,7 +123,7 @@ public class ServerInventoryHelper extends InventoryHelper {
         int sessionId = RequestUtils.getSessionId(request).intValue();
 
         AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
-        Collection services = boss.findServicesByServer(sessionId,
+        Collection<AppdefResourceValue> services = boss.findServicesByServer(sessionId,
                                                         resource.getId(),
                                                         PageControl.PAGE_ALL);
         return AppdefResourceValue.getServiceTypeCountMap(services);

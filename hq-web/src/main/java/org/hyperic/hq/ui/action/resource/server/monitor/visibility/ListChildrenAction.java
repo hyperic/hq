@@ -27,24 +27,21 @@ package org.hyperic.hq.ui.action.resource.server.monitor.visibility;
 
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.bizapp.shared.MeasurementBoss;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.bizapp.shared.MeasurementBoss;
+import org.hyperic.hq.bizapp.shared.uibeans.ResourceTypeDisplaySummary;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *
@@ -52,8 +49,16 @@ import org.apache.struts.tiles.actions.TilesAction;
  */
 public class ListChildrenAction extends TilesAction {
     
-    protected static Log log =
-        LogFactory.getLog(ListChildrenAction.class.getName());
+      private MeasurementBoss measurementBoss;
+      
+      
+      @Autowired
+    public ListChildrenAction(MeasurementBoss measurementBoss) {
+        super();
+        this.measurementBoss = measurementBoss;
+    }
+
+
 
     public ActionForward execute(ComponentContext context,
                                  ActionMapping mapping,
@@ -71,11 +76,10 @@ public class ListChildrenAction extends TilesAction {
         AppdefEntityID entityId = resource.getEntityId();
 
         int sessionId = RequestUtils.getSessionId(request).intValue();
-        ServletContext ctx = getServlet().getServletContext();
-        MeasurementBoss boss = ContextUtils.getMeasurementBoss(ctx);
+       
 
-        List internalHealths =
-            boss.findSummarizedServiceCurrentHealth(sessionId, entityId);
+        List<ResourceTypeDisplaySummary> internalHealths =
+            measurementBoss.findSummarizedServiceCurrentHealth(sessionId, entityId);
 
         context.putAttribute(Constants.CTX_SUMMARIES, internalHealths);
 

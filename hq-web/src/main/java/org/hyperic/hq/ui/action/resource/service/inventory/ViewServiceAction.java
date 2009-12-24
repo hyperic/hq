@@ -28,7 +28,6 @@ package org.hyperic.hq.ui.action.resource.service.inventory;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -40,6 +39,7 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
@@ -51,12 +51,13 @@ import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.resource.common.inventory.RemoveResourceGroupsForm;
+import org.hyperic.hq.ui.beans.ConfigValues;
 import org.hyperic.hq.ui.util.ActionUtils;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.pager.PageControl;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Action loads a service for viewing, including the General Properties,
@@ -64,6 +65,17 @@ import org.hyperic.util.pager.PageControl;
  * Configuration Text specified in the general Properties are not loaded here.
  */
 public class ViewServiceAction extends TilesAction {
+    
+    protected AppdefBoss appdefBoss;
+    protected ProductBoss productBoss;
+    
+    @Autowired
+    public ViewServiceAction(AppdefBoss appdefBoss, ProductBoss productBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+        this.productBoss = productBoss;
+    }
+
     /**
      * Retrieve this data and store it in the
      * <code>ServerForm</code>:
@@ -82,23 +94,23 @@ public class ViewServiceAction extends TilesAction {
             ServiceValue service =
                 (ServiceValue) RequestUtils.getResource(request);
             
-            ServletContext ctx = getServlet().getServletContext();
-            AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+           
+           
             Integer sessionId = RequestUtils.getSessionId(request);
             AppdefEntityID entityId = service.getEntityId();
 
             PageControl pcg =
                 RequestUtils.getPageControl(request, "psg", "png", "sog", "scg");
 
-            List groups = 
-                boss.findAllGroupsMemberInclusive(sessionId.intValue(), pcg,
+            List<AppdefGroupValue> groups = 
+                appdefBoss.findAllGroupsMemberInclusive(sessionId.intValue(), pcg,
                                                   service.getEntityId());
             // check to see if this thing is a platform service
             if(service.getServer().getServerType().getVirtual()) {
                 // find the platform resource and add it to the request scope
                 try {
                 	PlatformValue pv =
-                		boss.findPlatformByDependentID(sessionId.intValue(), entityId);
+                		appdefBoss.findPlatformByDependentID(sessionId.intValue(), entityId);
                 	request.setAttribute(Constants.PARENT_RESOURCE_ATTR, pv);
                 } catch (PermissionException pe) {
                 	// TODO Would like to able to fall back and grab the name through other means
@@ -139,7 +151,7 @@ public class ViewServiceAction extends TilesAction {
             request.setAttribute(Constants.RESOURCE_REMOVE_GROUPS_MEMBERS_FORM_ATTR,
                                  rmGroupsForm);
             
-            ProductBoss pboss = ContextUtils.getProductBoss(ctx);
+           
             
             log.debug("AppdefEntityID = " + entityId.toString()); 
             
@@ -149,9 +161,9 @@ public class ViewServiceAction extends TilesAction {
             
             try {
                 oldResponse =
-                    pboss.getMergedConfigResponse(sessionId.intValue(),
+                    productBoss.getMergedConfigResponse(sessionId.intValue(),
                             ProductPlugin.TYPE_PRODUCT, entityId, false);
-                config = pboss.getConfigSchema(sessionId.intValue(), entityId,
+                config = productBoss.getConfigSchema(sessionId.intValue(), entityId,
                         ProductPlugin.TYPE_PRODUCT, oldResponse);
 
                 editConfig = true;
@@ -163,7 +175,7 @@ public class ViewServiceAction extends TilesAction {
                         + e.toString());
             }
 
-            List uiProductOptions =
+            List<ConfigValues> uiProductOptions =
                 ActionUtils.getConfigValues(config, oldResponse);
             
             request.setAttribute(Constants.PRODUCT_CONFIG_OPTIONS,
@@ -176,9 +188,9 @@ public class ViewServiceAction extends TilesAction {
 
             try {
                 oldResponse =
-                    pboss.getMergedConfigResponse(sessionId.intValue(),
+                    productBoss.getMergedConfigResponse(sessionId.intValue(),
                             ProductPlugin.TYPE_MEASUREMENT, entityId, false);
-                config = pboss.getConfigSchema(sessionId.intValue(), entityId,
+                config = productBoss.getConfigSchema(sessionId.intValue(), entityId,
                         ProductPlugin.TYPE_MEASUREMENT, oldResponse);
             } catch (ConfigFetchException e) {
                 // do nothing
@@ -190,16 +202,16 @@ public class ViewServiceAction extends TilesAction {
             
             config = new ConfigSchema();
 
-            oldResponse = pboss.getMergedConfigResponse(sessionId.intValue(),
+            oldResponse = productBoss.getMergedConfigResponse(sessionId.intValue(),
                     ProductPlugin.TYPE_CONTROL, entityId, false);
             try {
-                config = pboss.getConfigSchema(sessionId.intValue(), entityId,
+                config = productBoss.getConfigSchema(sessionId.intValue(), entityId,
                         ProductPlugin.TYPE_CONTROL, oldResponse);
             } catch (PluginNotFoundException e) {
                 // do nothing
             }
 
-            List uiControlOptions =
+            List<ConfigValues> uiControlOptions =
                 ActionUtils.getConfigValues(config, oldResponse);
 
             request.setAttribute(Constants.CONTROL_CONFIG_OPTIONS,
@@ -238,7 +250,7 @@ public class ViewServiceAction extends TilesAction {
                                 HttpServletRequest request,
                                 ConfigSchema config,
                                 ConfigResponse oldResponse) {
-        List uiMonitorOptions =
+        List<ConfigValues> uiMonitorOptions =
             ActionUtils.getConfigValues(config, oldResponse);
         
         request.setAttribute(Constants.MONITOR_CONFIG_OPTIONS, uiMonitorOptions);

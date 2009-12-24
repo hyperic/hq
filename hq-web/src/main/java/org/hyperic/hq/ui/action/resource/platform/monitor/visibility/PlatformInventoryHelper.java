@@ -40,6 +40,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -78,7 +79,7 @@ public class PlatformInventoryHelper extends InventoryHelper {
         int sessionId = RequestUtils.getSessionId(request).intValue();
         AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
 
-        List servers =
+        List<ServerValue> servers =
             boss.findServersByPlatform(sessionId, entityId.getId(),
                                        PageControl.PAGE_ALL);
         return MonitorUtils.findServerTypes(servers);
@@ -133,7 +134,7 @@ public class PlatformInventoryHelper extends InventoryHelper {
         int sessionId = RequestUtils.getSessionId(request).intValue();
         AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
 
-        Collection servers = boss.findServersByPlatform(sessionId,
+        Collection<ServerValue> servers = boss.findServersByPlatform(sessionId,
                                                         resource.getId(),
                                                         PageControl.PAGE_ALL);
         return AppdefResourceValue.getServerTypeCountMap(servers);

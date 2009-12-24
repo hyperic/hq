@@ -50,7 +50,7 @@ import org.hyperic.hq.ui.util.RequestUtils;
  */
 public class EditAvailabilityAction extends BaseAction {
 
-    // ---------------------------------------------------- Public Methods
+    private final Log log = LogFactory.getLog(EditAvailabilityAction.class.getName()); 
 
     /**
      * Add metrics to the resource specified in the given
@@ -61,13 +61,13 @@ public class EditAvailabilityAction extends BaseAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-        Log log = LogFactory.getLog(EditAvailabilityAction.class.getName());    
+           
         
         GroupMonitoringConfigForm addForm = (GroupMonitoringConfigForm)form;
         Integer resourceId = addForm.getRid();
         Integer resourceType = addForm.getType();
       
-        HashMap parms = new HashMap();
+        HashMap<String, Object> parms = new HashMap<String, Object>();
         
         int id = resourceId.intValue();
         int type = resourceType.intValue();      

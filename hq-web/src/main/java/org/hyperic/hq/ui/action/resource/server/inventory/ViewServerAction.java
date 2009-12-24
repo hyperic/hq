@@ -25,38 +25,14 @@
 
 package org.hyperic.hq.ui.action.resource.server.inventory;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.appdef.shared.AgentNotFoundException;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.ConfigFetchException;
-import org.hyperic.hq.appdef.shared.ServerValue;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.bizapp.shared.ProductBoss;
-import org.hyperic.hq.common.ApplicationException;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.action.resource.common.inventory.RemoveResourceGroupsForm;
-import org.hyperic.hq.ui.util.ActionUtils;
-import org.hyperic.hq.ui.util.BizappUtils;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
-
-import org.hyperic.hq.product.ProductPlugin;
-import org.hyperic.hq.product.PluginNotFoundException;
-
-import org.hyperic.util.pager.PageControl;
-import org.hyperic.util.pager.SortAttribute;
-
-import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.config.ConfigSchema;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -65,6 +41,28 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
+import org.hyperic.hq.appdef.shared.AgentNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefGroupValue;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.appdef.shared.ConfigFetchException;
+import org.hyperic.hq.appdef.shared.ServerValue;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.ProductBoss;
+import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.product.PluginNotFoundException;
+import org.hyperic.hq.product.ProductPlugin;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.action.resource.common.inventory.RemoveResourceGroupsForm;
+import org.hyperic.hq.ui.beans.ConfigValues;
+import org.hyperic.hq.ui.util.ActionUtils;
+import org.hyperic.hq.ui.util.BizappUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.config.ConfigSchema;
+import org.hyperic.util.pager.PageControl;
+import org.hyperic.util.pager.SortAttribute;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Action loads a server for viewing, including the General Properties,
@@ -72,7 +70,22 @@ import org.apache.struts.tiles.actions.TilesAction;
  * Configuration Text specified in the general Properties are not loaded here.
  */
 public class ViewServerAction extends TilesAction {
- 
+    
+    private final  Log log =
+        LogFactory.getLog(ViewServerAction.class.getName());
+    private AppdefBoss appdefBoss;
+    private ProductBoss productBoss;
+    
+    
+    @Autowired
+    public ViewServerAction(AppdefBoss appdefBoss, ProductBoss productBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+        this.productBoss = productBoss;
+    }
+
+
+
     /**
      * Retrieve this data and store it in the
      * <code>NewServerForm</code>:
@@ -84,8 +97,7 @@ public class ViewServerAction extends TilesAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-        Log log =
-            LogFactory.getLog(ViewServerAction.class.getName());
+       
 
         try {
             ServerValue server =
@@ -96,30 +108,30 @@ public class ViewServerAction extends TilesAction {
                 return null;
             }
             // load the server groups            
-            ServletContext ctx = getServlet().getServletContext();
-            AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+          
+           
             int sessionId = RequestUtils.getSessionId(request).intValue(); 
             
             AppdefEntityID entityId = server.getEntityId();
             log.trace("getting service count for server");
             PageControl pc = new PageControl(0, -1, 1, SortAttribute.SERVICE_TYPE);
-            Collection services = boss.findServicesByServer(sessionId,
+            Collection<AppdefResourceValue> services = appdefBoss.findServicesByServer(sessionId,
                                 server.getId(), pc);
             request.setAttribute(Constants.NUM_CHILD_RESOURCES_ATTR,
                                  new Integer(services.size()));
 
             log.trace("getting service type map for server");
-            Map typeMap = AppdefResourceValue.getServiceTypeCountMap(services);
+            Map<String,Integer> typeMap = AppdefResourceValue.getServiceTypeCountMap(services);
             request.setAttribute(Constants.RESOURCE_TYPE_MAP_ATTR, typeMap);
 
-            BizappUtils.setRuntimeAIMessage(sessionId, request, server, boss);
+            BizappUtils.setRuntimeAIMessage(sessionId, request, server, appdefBoss);
             
             PageControl pcg =
                 RequestUtils.getPageControl(request, "psg", "png",
                                             "sog", "scg");
 
-            List groups = 
-                boss.findAllGroupsMemberInclusive(sessionId, pcg,
+            List<AppdefGroupValue> groups = 
+                appdefBoss.findAllGroupsMemberInclusive(sessionId, pcg,
                                                   server.getEntityId());
 
             request.setAttribute(Constants.ALL_RESGRPS_ATTR, groups);
@@ -136,26 +148,26 @@ public class ViewServerAction extends TilesAction {
             request.setAttribute(Constants.RESOURCE_REMOVE_GROUPS_MEMBERS_FORM_ATTR,
                                  rmGroupsForm);
                                              
-            ProductBoss pboss = ContextUtils.getProductBoss(ctx);
+           
             
-            ConfigResponse oldResponse = pboss.getMergedConfigResponse(
+            ConfigResponse oldResponse = productBoss.getMergedConfigResponse(
                     sessionId, ProductPlugin.TYPE_PRODUCT, entityId, false);
 
-            ConfigSchema config = pboss.getConfigSchema(sessionId, entityId,
+            ConfigSchema config = productBoss.getConfigSchema(sessionId, entityId,
                     ProductPlugin.TYPE_PRODUCT, oldResponse);
 
             boolean platformWithAgent = false;
 
            // it is no longer a ahack as we are doing the right thing now. 
             try {
-                if(boss.findResourceAgent(server.getPlatform().getEntityId()) 
+                if(appdefBoss.findResourceAgent(server.getPlatform().getEntityId()) 
                                                                         != null)
                     platformWithAgent = true;
             } catch (AgentNotFoundException e) {
                 // do nothing as platformAithAgent is already false
             }
 
-            List uiProductOptions =
+            List<ConfigValues> uiProductOptions =
                 ActionUtils.getConfigValues(config, oldResponse);
             
             request.setAttribute(Constants.PRODUCT_CONFIG_OPTIONS,
@@ -167,10 +179,10 @@ public class ViewServerAction extends TilesAction {
             oldResponse = new ConfigResponse();
 
             try {
-                oldResponse = pboss.getMergedConfigResponse(sessionId,
+                oldResponse = productBoss.getMergedConfigResponse(sessionId,
                         ProductPlugin.TYPE_MEASUREMENT, entityId, false);
 
-                config = pboss.getConfigSchema(sessionId, entityId,
+                config = productBoss.getConfigSchema(sessionId, entityId,
                         ProductPlugin.TYPE_MEASUREMENT, oldResponse);
 
                 if(server.getWasAutodiscovered()) {
@@ -188,7 +200,7 @@ public class ViewServerAction extends TilesAction {
                 //do nothing
             }
 
-            List uiMonitorOptions =
+            List<ConfigValues> uiMonitorOptions =
                 ActionUtils.getConfigValues(config, oldResponse);
 
             request.setAttribute(Constants.MONITOR_CONFIG_OPTIONS,uiMonitorOptions);
@@ -199,10 +211,10 @@ public class ViewServerAction extends TilesAction {
             oldResponse = new ConfigResponse();
 
             try {
-                oldResponse = pboss.getMergedConfigResponse(sessionId,
+                oldResponse = productBoss.getMergedConfigResponse(sessionId,
                         ProductPlugin.TYPE_CONTROL, entityId, false);
 
-                config = pboss.getConfigSchema(sessionId, entityId,
+                config = productBoss.getConfigSchema(sessionId, entityId,
                         ProductPlugin.TYPE_CONTROL, oldResponse);
             } catch (ConfigFetchException e) {
                 //do nothing
@@ -210,7 +222,7 @@ public class ViewServerAction extends TilesAction {
                 //do nothing
             }
 
-            List uiControlOptions =
+            List<ConfigValues> uiControlOptions =
                 ActionUtils.getConfigValues(config, oldResponse);
 
             request.setAttribute(Constants.CONTROL_CONFIG_OPTIONS,uiControlOptions);
