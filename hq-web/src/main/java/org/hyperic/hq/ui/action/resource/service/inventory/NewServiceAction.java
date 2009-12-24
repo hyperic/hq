@@ -28,7 +28,6 @@ package org.hyperic.hq.ui.action.resource.service.inventory;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -44,8 +43,8 @@ import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
     /**
     * Create the service with the attributes specified in the given
@@ -54,13 +53,25 @@ import org.hyperic.hq.ui.util.RequestUtils;
     */
 public class NewServiceAction extends BaseAction {
 
+    private final Log log = LogFactory.getLog(NewServiceAction.class.getName());
+    private AppdefBoss appdefBoss;
+    
+    
+        @Autowired
+    public NewServiceAction(AppdefBoss appdefBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+    }
+
+
+
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-        Log log = LogFactory.getLog(NewServiceAction.class.getName());
-        Map forwardParams = new HashMap(2);
+        
+        Map<String, Object> forwardParams = new HashMap<String, Object>(2);
         try {
             ServiceForm newForm = (ServiceForm) form;
 
@@ -81,9 +92,9 @@ public class NewServiceAction extends BaseAction {
                 return forward;
             }         
 
-            ServletContext ctx = getServlet().getServletContext();
+           
             Integer sessionId = RequestUtils.getSessionId(request);
-            AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+           
 
             ServiceValue service = new ServiceValue();
             
@@ -92,7 +103,7 @@ public class NewServiceAction extends BaseAction {
 
             Integer stPk = newForm.getResourceType();
             ServiceValue newService =
-                boss.createService(sessionId.intValue(), service, stPk, aeid);
+                appdefBoss.createService(sessionId.intValue(), service, stPk, aeid);
               
             log.trace("creating service [" + service.getName() +
                       "] with attributes " + newForm);

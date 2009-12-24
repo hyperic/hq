@@ -42,6 +42,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
+import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -59,14 +60,14 @@ import org.hyperic.util.pager.PageControl;
  */
 public class RootInventoryHelper extends InventoryHelper {
 
-    protected static Log log =
+    private final Log log =
         LogFactory.getLog( RootInventoryHelper.class.getName() );
 
     public RootInventoryHelper() {
         super(null); 
     }
 
-    // ---------------------------------------------------- Public Methods
+  
 
     /**
      * Get the set of server types representing a platform's servers.
@@ -128,7 +129,7 @@ public class RootInventoryHelper extends InventoryHelper {
         int sessionId = RequestUtils.getSessionId(request).intValue();
         AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
         try {
-            Collection arvs = boss.findAllPlatforms( sessionId, PageControl.PAGE_ALL );
+            Collection<PlatformValue> arvs = boss.findAllPlatforms( sessionId, PageControl.PAGE_ALL );
             return AppdefResourceValue.getPlatformTypeCountMap(arvs);
         } catch (FinderException e) {
             throw new PlatformNotFoundException("couldn't find all platforms");

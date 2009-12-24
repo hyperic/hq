@@ -26,31 +26,39 @@
 package org.hyperic.hq.ui.action.resource.server.inventory;
 
 import java.util.ArrayList;
-import java.util.TreeMap;
 import java.util.List;
-import java.util.Iterator;
+import java.util.TreeMap;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.hyperic.hq.appdef.shared.PlatformValue;
-import org.hyperic.hq.appdef.shared.ServerTypeValue;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.action.WorkflowPrepareAction;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.util.pager.PageControl;
 
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
+import org.hyperic.hq.appdef.shared.PlatformValue;
+import org.hyperic.hq.appdef.shared.ServerTypeValue;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.action.WorkflowPrepareAction;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.util.pager.PageControl;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class NewServerFormPrepareAction 
     extends WorkflowPrepareAction {
+    
+    private AppdefBoss appdefBoss;
+    
+    
+    @Autowired
+    public NewServerFormPrepareAction(AppdefBoss appdefBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+    }
+
+
 
     public ActionForward workflow(ComponentContext context,
                                   ActionMapping mapping,
@@ -65,7 +73,7 @@ public class NewServerFormPrepareAction
 
         try {
             Integer sessionId = RequestUtils.getSessionId(request);
-            ServletContext ctx = getServlet().getServletContext();
+          
 
             if (platformId == null) {
                 platformId = RequestUtils.getResourceId(request);
@@ -74,23 +82,23 @@ public class NewServerFormPrepareAction
                 resourceType = RequestUtils.getResourceTypeId(request);
             }
             
-            AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+            
                         
-            PlatformValue pValue = boss.findPlatformById(sessionId.intValue(), platformId);
+            PlatformValue pValue = appdefBoss.findPlatformById(sessionId.intValue(), platformId);
 
-            List stValues =
-                boss.findServerTypesByPlatformType(sessionId.intValue(),
+            List<ServerTypeValue> stValues =
+                appdefBoss.findServerTypesByPlatformType(sessionId.intValue(),
                                                    pValue.getPlatformType().getId(),
                                                    PageControl.PAGE_ALL);
 
-            TreeMap returnMap = new TreeMap();
-            for(Iterator i = stValues.iterator(); i.hasNext();) {
-                ServerTypeValue stv = (ServerTypeValue)i.next();
+            TreeMap<String, ServerTypeValue> returnMap = new TreeMap<String, ServerTypeValue>();
+            for( ServerTypeValue stv : stValues) {
+              
                 if (!stv.getVirtual()) {
                     returnMap.put(stv.getSortName(), stv);
                 }
             }
-            newForm.setResourceTypes(new ArrayList(returnMap.values()));
+            newForm.setResourceTypes(new ArrayList<ServerTypeValue>(returnMap.values()));
             request.setAttribute(Constants.PARENT_RESOURCE_ATTR, pValue);
             newForm.setRid(platformId);
             newForm.setType(resourceType);

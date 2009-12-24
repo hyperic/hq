@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.ui.action.resource.service.inventory;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -36,8 +35,8 @@ import org.apache.struts.tiles.ComponentContext;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.action.WorkflowPrepareAction;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *
@@ -45,6 +44,17 @@ import org.hyperic.hq.ui.util.RequestUtils;
  */
 public class ServiceGeneralFormPrepareAction 
     extends WorkflowPrepareAction {
+    
+    private AppdefBoss appdefBoss;
+    
+    
+    @Autowired
+    public ServiceGeneralFormPrepareAction(AppdefBoss appdefBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+    }
+
+
 
     /**
      * Retrieve this data and store it in the
@@ -60,14 +70,14 @@ public class ServiceGeneralFormPrepareAction
         ServiceForm serviceForm = (ServiceForm) form;
 
         Integer sessionId = RequestUtils.getSessionId(request);
-        ServletContext ctx = getServlet().getServletContext();
+      
 
         Integer resourceId = RequestUtils.getResourceId(request);
 
-        AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+       
 
         ServiceValue service =
-            boss.findServiceById(sessionId.intValue(), resourceId);
+            appdefBoss.findServiceById(sessionId.intValue(), resourceId);
 
         serviceForm.loadResourceValue(service);
 

@@ -25,35 +25,39 @@
 
 package org.hyperic.hq.ui.action.resource.server.inventory;
 
-import java.io.IOException;
 import java.util.HashMap;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
+import javax.ejb.ObjectNotFoundException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import javax.ejb.ObjectNotFoundException;
-
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.ServerValue;
-import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.ServerValue;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.action.BaseAction;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *
  */
 public class EditTypeHostAction extends BaseAction {
+
+    private final   Log log = LogFactory.getLog(EditTypeHostAction.class.getName());
+    private AppdefBoss appdefBoss;
+    
+    @Autowired
+    public EditTypeHostAction(AppdefBoss appdefBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+    }
+
 
     /**
      * Create the server with the attributes specified in the given
@@ -64,14 +68,14 @@ public class EditTypeHostAction extends BaseAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-        Log log = LogFactory.getLog(EditTypeHostAction.class.getName());
+      
         try {
             ServerForm serverForm = (ServerForm) form;
             AppdefEntityID aeid =
                 new AppdefEntityID(serverForm.getType().intValue(),
                                    serverForm.getRid());
             
-            HashMap forwardParams = new HashMap(2);
+            HashMap<String, Object> forwardParams = new HashMap<String, Object>(2);
             forwardParams.put(Constants.ENTITY_ID_PARAM, aeid.getAppdefKey());
 
             ActionForward forward = checkSubmit(request, mapping, form,
@@ -81,17 +85,17 @@ public class EditTypeHostAction extends BaseAction {
                 return forward;
             }         
 
-            ServletContext ctx = getServlet().getServletContext();
+           
             Integer sessionId = RequestUtils.getSessionId(request);
-            AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+          
 
-            ServerValue server = boss.findServerById(sessionId.intValue(),
+            ServerValue server = appdefBoss.findServerById(sessionId.intValue(),
                                                     serverForm.getRid());
             
             serverForm.updateServerValue(server); 
 
-            ServerValue updatedServer =
-              boss.updateServer(sessionId.intValue(), server);
+          
+              appdefBoss.updateServer(sessionId.intValue(), server);
               
             // XXX: enable when we have a confirmed functioning API
             log.trace("saving server [" + server.getName()

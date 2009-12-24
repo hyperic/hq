@@ -25,52 +25,53 @@
 
 package org.hyperic.hq.ui.action.resource.server.inventory;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.List;
 
-import javax.ejb.CreateException;
-import javax.ejb.FinderException;
-import javax.naming.NamingException;
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
-import org.hyperic.hq.appdef.shared.ServerValue;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.auth.shared.SessionException;
-import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.common.ApplicationException;
-import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.ServerValue;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.action.BaseAction;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Create the server with the attributes specified in the given
  * <code>ServerForm</code>.
  */
 public class NewServerAction extends BaseAction {
+    
+    private final  Log log = LogFactory.getLog(NewServerAction.class.getName());
+    
+    private AppdefBoss appdefBoss;
+    
+    
+    @Autowired
+    public NewServerAction(AppdefBoss appdefBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+    }
+
+
 
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-        Log log = LogFactory.getLog(NewServerAction.class.getName());
-        Map forwardParams = new HashMap(2);
+       
+        Map<String, Object> forwardParams = new HashMap<String, Object>(2);
         try {
             ServerForm newForm = (ServerForm) form;
             AppdefEntityID aeid =
@@ -87,9 +88,9 @@ public class NewServerAction extends BaseAction {
                 return forward;
             }         
 
-            ServletContext ctx = getServlet().getServletContext();
+           
             Integer sessionId = RequestUtils.getSessionId(request);
-            AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+           
 
             ServerValue server = new ServerValue();
             
@@ -109,7 +110,7 @@ public class NewServerAction extends BaseAction {
                                + "]" + " with attributes " + newForm);
             
             ServerValue newServer =
-            boss.createServer(sessionId.intValue(), server, ppk,stPk, null);
+            appdefBoss.createServer(sessionId.intValue(), server, ppk,stPk, null);
             Integer serverId = newServer.getId();
             AppdefEntityID entityId = newServer.getEntityId();
 

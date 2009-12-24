@@ -25,18 +25,8 @@
 
 package org.hyperic.hq.ui.action.resource.group.monitor.config;
 
-import java.util.HashMap;
-
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.bizapp.shared.MeasurementBoss;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,6 +34,9 @@ import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.util.RequestUtils;
 
 /**
  * An Action that retrieves data from the BizApp to facilitate display
@@ -51,7 +44,7 @@ import org.apache.struts.action.ActionMapping;
  */
 public class EditAvailabilityFormPrepareAction extends Action {
 
-    // ---------------------------------------------------- Public Methods
+   
 
     /**
      * Retrieve this data and store it in the specified request
@@ -82,7 +75,7 @@ public class EditAvailabilityFormPrepareAction extends Action {
         Log log =
             LogFactory.getLog(EditAvailabilityFormPrepareAction.class.getName());
         GroupMonitoringConfigForm addForm = (GroupMonitoringConfigForm)form;
-        HashMap parms = new HashMap();
+       
         Integer resourceId = addForm.getRid();
         Integer entityType = addForm.getType();
         
@@ -99,12 +92,7 @@ public class EditAvailabilityFormPrepareAction extends Action {
             return null;
         }
 
-        AppdefEntityID appdefId = new AppdefEntityID(entityType.intValue(), 
-            resourceId.intValue());
-        ServletContext ctx = getServlet().getServletContext();
-        MeasurementBoss mBoss = ContextUtils.getMeasurementBoss(ctx);
-        int sessionId = RequestUtils.getSessionId(request).intValue();
-
+       
         log.trace("Getting availability threshold metrics");
 
         // XXX actually set the availability and unavailability thresholds

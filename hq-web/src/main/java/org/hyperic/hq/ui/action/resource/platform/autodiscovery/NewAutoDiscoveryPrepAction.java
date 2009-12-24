@@ -25,44 +25,32 @@
 
 package org.hyperic.hq.ui.action.resource.platform.autodiscovery;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+import org.apache.struts.tiles.ComponentContext;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.autoinventory.ScanMethod;
 import org.hyperic.hq.autoinventory.scanimpl.FileScan;
-import org.hyperic.hq.bizapp.shared.AIBoss;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.WorkflowPrepareAction;
 import org.hyperic.hq.ui.util.BizappUtils;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.sigar.OperatingSystem;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.tiles.ComponentContext;
-
 public class NewAutoDiscoveryPrepAction extends WorkflowPrepareAction {
 
-    private static final Log log
-        = LogFactory.getLog(NewAutoDiscoveryPrepAction.class.getName());
+   
 
     /**
      * Create the platform with the attributes specified in the given

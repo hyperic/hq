@@ -25,23 +25,19 @@
 
 package org.hyperic.hq.ui.action.resource.server.inventory;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.hyperic.hq.appdef.shared.ServerValue;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
+import org.hyperic.hq.appdef.shared.ServerValue;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * edit type & hold properties
@@ -49,6 +45,17 @@ import org.apache.struts.tiles.actions.TilesAction;
  *
  */
 public class EditTypeHostPrepareAction extends TilesAction {
+    
+    private AppdefBoss appdefBoss;
+    
+    
+    @Autowired
+    public EditTypeHostPrepareAction(AppdefBoss appdefBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+    }
+
+
 
     /**
      * Retrieve this data and store it in the
@@ -61,19 +68,18 @@ public class EditTypeHostPrepareAction extends TilesAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-        Log log =
-            LogFactory.getLog(EditTypeHostPrepareAction.class.getName());
+      
 
         ServerForm serverForm = (ServerForm) form;
 
         Integer sessionId = RequestUtils.getSessionId(request);
-        ServletContext ctx = getServlet().getServletContext();
+       
 
         Integer serverId = RequestUtils.getResourceId(request);
 
-        AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+      
 
-        ServerValue sValue = boss.findServerById(sessionId.intValue(), serverId);
+        ServerValue sValue = appdefBoss.findServerById(sessionId.intValue(), serverId);
 
         serverForm.loadResourceValue(sValue);
 
