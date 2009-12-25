@@ -25,8 +25,6 @@
 
 package org.hyperic.hq.ui.taglib;
 
-import java.rmi.RemoteException;
-
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -39,8 +37,8 @@ import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 
 /**
@@ -56,7 +54,7 @@ public class NavMapSupportedTag extends VarSetterBaseTag {
     
             HttpServletRequest request = (HttpServletRequest)pageContext.getRequest();
             ServletContext ctx = pageContext.getServletContext();
-            AppdefBoss ab = ContextUtils.getAppdefBoss(ctx);
+            AppdefBoss ab = Bootstrap.getBean(AppdefBoss.class);
 
             boolean navMapSupported = true;
 

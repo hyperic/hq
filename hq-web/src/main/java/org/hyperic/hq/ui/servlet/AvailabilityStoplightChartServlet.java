@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.ui.servlet;
 
-import java.rmi.RemoteException;
 import java.util.Iterator;
 
 import javax.servlet.ServletException;
@@ -33,12 +32,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import org.hyperic.image.chart.AvailabilityReportChart;
-import org.hyperic.image.chart.Chart;
-import org.hyperic.image.chart.DataPointCollection;
-import org.hyperic.util.config.InvalidOptionException;
-
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
@@ -47,10 +40,14 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.bizapp.shared.uibeans.MeasurementSummary;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.ui.action.resource.common.monitor.visibility.AvailabilityDataPoint;
 import org.hyperic.hq.ui.beans.ChartDataBean;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.image.chart.AvailabilityReportChart;
+import org.hyperic.image.chart.Chart;
+import org.hyperic.image.chart.DataPointCollection;
+import org.hyperic.util.config.InvalidOptionException;
 
 public class AvailabilityStoplightChartServlet extends ChartServlet {
     
@@ -87,7 +84,7 @@ public class AvailabilityStoplightChartServlet extends ChartServlet {
         // the child resource type
         AppdefEntityTypeID ctype = RequestUtils.getChildResourceTypeId(request);
 
-        MeasurementBoss boss = ContextUtils.getMeasurementBoss( getServletContext() );
+        MeasurementBoss boss = Bootstrap.getBean(MeasurementBoss.class);
         try {
             MeasurementSummary summary = boss.getSummarizedResourceAvailability(sessionId, 
                 entId, ctype.getType(), ctype.getId());

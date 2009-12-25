@@ -42,12 +42,12 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.EventLogBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.control.ControlEvent;
 import org.hyperic.hq.events.server.session.EventLog;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.beans.ChartDataBean;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.image.chart.Chart;
 import org.hyperic.image.chart.ColumnChart;
@@ -272,9 +272,9 @@ public class MetricChartServlet extends VerticalChartServlet {
                PermissionException, ServletException {
         int sessionId = RequestUtils.getSessionId(request).intValue();
         MeasurementBoss mb =
-            ContextUtils.getMeasurementBoss(getServletContext());
+            Bootstrap.getBean(MeasurementBoss.class);
         EventLogBoss eb =
-            ContextUtils.getEventLogBoss(getServletContext());
+            Bootstrap.getBean(EventLogBoss.class);
     
         String[] eids = request.getParameterValues( Constants.ENTITY_ID_PARAM );
         AppdefEntityID[] resources = new AppdefEntityID[eids.length];

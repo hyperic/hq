@@ -34,9 +34,9 @@ import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.ui.json.action.JsonActionContext;
 import org.hyperic.hq.ui.json.action.escalation.BaseAction;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.json.JSONException;
 
 /**
@@ -49,7 +49,7 @@ public class RemoveAction extends BaseAction {
                SessionNotFoundException, JSONException, RemoteException
     {
         ServletContext sctx = context.getServletContext();
-        EventsBoss eBoss  = ContextUtils.getEventsBoss(sctx);
+        EventsBoss eBoss  = Bootstrap.getBean(EventsBoss.class);
         int sessId = context.getSessionId();
 
         Integer id    = context.getId();

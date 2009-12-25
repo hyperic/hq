@@ -29,7 +29,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
@@ -46,12 +45,12 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.ControlBoss;
+import org.hyperic.hq.common.ProductProperties;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseDispatchAction;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.ActionUtils;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
@@ -147,12 +146,12 @@ public abstract class ResourceController
 
                     request.setAttribute(Constants.CONTROL_ENABLED_ATTR, new Boolean(isControllable));
                 }
-                ServletContext ctx = getServlet().getServletContext();
+             
                 // Set additional flags
-                UIUtils utils = ContextUtils.getUIUtils(ctx);
-                if (utils != null) {
-                    utils.setResourceFlags(resource, config, request);
-                }
+                UIUtils utils = (UIUtils) ProductProperties.getPropertyInstance("hyperic.hq.ui.utils");
+                
+                utils.setResourceFlags(resource, config, request, getServlet().getServletContext());
+                
 
                 // Get the custom properties
                 Properties cprops = appdefBoss.getCPropDescEntries(sessionId.intValue(), entityId);

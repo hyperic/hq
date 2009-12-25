@@ -37,7 +37,7 @@ import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.StringUtil;
 
@@ -93,7 +93,7 @@ public class InventoryHierarchyTag extends TagSupport {
 					.getRequest();
 			ServletContext ctx = pageContext.getServletContext();
 			String webapp = request.getContextPath();
-			AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
+			AppdefBoss appdefBoss = Bootstrap.getBean(AppdefBoss.class);
 			int sessionId = RequestUtils.getSessionId(request).intValue();
 			AppdefResourceValue arv = appdefBoss
 					.findById(sessionId, resourceId);

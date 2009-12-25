@@ -31,10 +31,10 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.resource.hub.BreadcrumbUtil;
 import org.hyperic.hq.ui.action.resource.hub.ResourceHubForm;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 
 public class ResourceBreadcrumbTag extends TagSupport {
@@ -151,7 +151,7 @@ public class ResourceBreadcrumbTag extends TagSupport {
         HttpServletRequest request = (HttpServletRequest) pageContext.getRequest();
         HttpSession session = request.getSession();
         ServletContext ctx = pageContext.getServletContext();
-        AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
+        AppdefBoss appdefBoss = Bootstrap.getBean(AppdefBoss.class);
         int sessionId = RequestUtils.getSessionId(request).intValue();
         AppdefEntityID appdefEntityId = new AppdefEntityID(resourceId);
         AppdefResourceValue resource = appdefBoss.findById(sessionId, appdefEntityId);
@@ -408,7 +408,7 @@ public class ResourceBreadcrumbTag extends TagSupport {
              member.isServer())) {
             HttpServletRequest request = (HttpServletRequest) pageContext.getRequest();
             ServletContext ctx = pageContext.getServletContext();
-            AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
+            AppdefBoss appdefBoss = Bootstrap.getBean(AppdefBoss.class);
             int sessionId = RequestUtils.getSessionId(request).intValue();
             ResourceManager resourceManager = ResourceManagerImpl.getOne();
             AppdefResourceTypeValue autoGroupResourceType = appdefBoss.findResourceTypeById(sessionId, (AppdefEntityTypeID) group.getAppdefEntityId());

@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.ui.taglib;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspTagException;
@@ -33,9 +32,9 @@ import javax.servlet.jsp.tagext.BodyTagSupport;
 
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.util.BizappUtils;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 
 public class SkipIfAutoApprovedTag extends BodyTagSupport {
@@ -45,8 +44,8 @@ public class SkipIfAutoApprovedTag extends BodyTagSupport {
 
 	public int doStartTag() throws JspException {
 		try {
-			ServletContext ctx = pageContext.getServletContext();
-			AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
+			
+			AppdefBoss appdefBoss = Bootstrap.getBean(AppdefBoss.class);
 			WebUser user = SessionUtils
 					.getWebUser(((HttpServletRequest) pageContext.getRequest())
 							.getSession());

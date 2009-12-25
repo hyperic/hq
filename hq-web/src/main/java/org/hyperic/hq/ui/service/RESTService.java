@@ -1,7 +1,6 @@
 package org.hyperic.hq.ui.service;
 
 import java.io.IOException;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -38,10 +37,10 @@ import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.server.session.AppdefBossImpl;
 import org.hyperic.hq.bizapp.server.session.DashboardPortletBossImpl;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
-import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.DashboardPortletBoss;
-import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.ui.Constants;
@@ -51,7 +50,6 @@ import org.hyperic.hq.ui.server.session.DashboardManagerImpl;
 import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.hq.ui.util.CheckPermissionsUtil;
 import org.hyperic.hq.ui.util.ConfigurationProxy;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SaveChartToDashboardUtil;
@@ -139,7 +137,7 @@ public class RESTService extends BaseService {
         //Get the AuthzSubject
         WebUser user    = (WebUser) _request.getSession()
             .getAttribute(Constants.WEBUSER_SES_ATTR);
-        AuthzBoss boss  = ContextUtils.getAuthzBoss(_servletContext);
+        AuthzBoss boss  = Bootstrap.getBean(AuthzBoss.class);
         AuthzSubject me = getAuthzSubject(user, boss);
         if (me == null)
             return ERROR_GENERIC;
@@ -283,7 +281,7 @@ public class RESTService extends BaseService {
         // Get the AuthzSubject
         WebUser user = (WebUser) _request.getSession()
                 .getAttribute(Constants.WEBUSER_SES_ATTR);
-        AuthzBoss boss = ContextUtils.getAuthzBoss(_servletContext);
+        AuthzBoss boss = Bootstrap.getBean(AuthzBoss.class);
         AuthzSubject me = getAuthzSubject(user, boss);
         if (me == null)
             return ERROR_GENERIC;
@@ -466,7 +464,7 @@ public class RESTService extends BaseService {
             		        // for now doing it here...
             				if (CheckPermissionsUtil.canUserViewChart(RequestUtils.getSessionId(_request).intValue(),
             						                                  (String) chart.get(1),
-            						                                  ContextUtils.getAppdefBoss(_servletContext))) 
+            						                                  Bootstrap.getBean(AppdefBoss.class))) 
             				{
 	
 	                            
@@ -530,7 +528,7 @@ public class RESTService extends BaseService {
         // Get the AuthzSubject
         WebUser user = (WebUser) _request.getSession()
                 .getAttribute(Constants.WEBUSER_SES_ATTR);
-        AuthzBoss boss = ContextUtils.getAuthzBoss(_servletContext);
+        AuthzBoss boss = Bootstrap.getBean(AuthzBoss.class);
         AuthzSubject me = getAuthzSubject(user, boss);
         if (me == null)
             return ERROR_GENERIC;
@@ -613,7 +611,7 @@ public class RESTService extends BaseService {
         // Get the AuthzSubject
         WebUser user = (WebUser) _request.getSession()
                 .getAttribute(Constants.WEBUSER_SES_ATTR);
-        AuthzBoss boss = ContextUtils.getAuthzBoss(_servletContext);
+        AuthzBoss boss = Bootstrap.getBean(AuthzBoss.class);
         AuthzSubject me = getAuthzSubject(user, boss);
         if (me == null)
             return ERROR_GENERIC;
@@ -621,7 +619,7 @@ public class RESTService extends BaseService {
         JSONObject jRes = new JSONObject();
         
         try {
-            EventsBoss eb = ContextUtils.getEventsBoss(_servletContext);
+            EventsBoss eb = Bootstrap.getBean(EventsBoss.class);
             MaintenanceEvent event = null;
             Integer groupId = Integer.valueOf(groupIdParam);
 
@@ -686,7 +684,7 @@ public class RESTService extends BaseService {
         // Get the AuthzSubject
         WebUser user = (WebUser) _request.getSession()
                 .getAttribute(Constants.WEBUSER_SES_ATTR);
-        AuthzBoss boss = ContextUtils.getAuthzBoss(_servletContext);
+        AuthzBoss boss = Bootstrap.getBean(AuthzBoss.class);
         AuthzSubject me = getAuthzSubject(user, boss);
         if (me == null)
             return ERROR_GENERIC;

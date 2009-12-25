@@ -78,6 +78,7 @@ import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.common.ObjectNotFoundException;
 import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.measurement.server.session.Baseline;
@@ -300,8 +301,8 @@ public class BizappUtils {
          HttpServletRequest request,
          String platType) throws Exception {
 
-        AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
-        AIBoss aiBoss = ContextUtils.getAIBoss(ctx);
+        AppdefBoss appdefBoss = Bootstrap.getBean(AppdefBoss.class);
+        AIBoss aiBoss = Bootstrap.getBean(AIBoss.class);
         int sessionId = RequestUtils.getSessionIdInt(request);
 
         // Build support ai server types
@@ -453,10 +454,10 @@ public class BizappUtils {
     /**
      * builds a list of server types from ServerSignature objects
      */
-    public static List buildServerTypesFromServerSig(AppdefResourceTypeValue[] sTypes, 
-                                                     Iterator sigIterator) 
+    public static List<AppdefResourceTypeValue> buildServerTypesFromServerSig(AppdefResourceTypeValue[] sTypes, 
+                                                     Iterator<ServerSignature> sigIterator) 
     {
-        List serverTypes = new ArrayList();
+        List<AppdefResourceTypeValue> serverTypes = new ArrayList<AppdefResourceTypeValue>();
         synchronized(serverTypes) {
             while (sigIterator.hasNext()) {
                 ServerSignature st = (ServerSignature)sigIterator.next();
@@ -1184,7 +1185,7 @@ public class BizappUtils {
                                      int sessionId,
                                      AppdefEntityID entityId) {
         try {
-            AIBoss aiboss = ContextUtils.getAIBoss(ctx);
+            AIBoss aiboss = Bootstrap.getBean(AIBoss.class);
 
             aiboss.startScan(sessionId, entityId.getID(),
                              new ScanConfigurationCore(),

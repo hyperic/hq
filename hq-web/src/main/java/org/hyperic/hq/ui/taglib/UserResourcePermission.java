@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.ui.taglib;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspTagException;
@@ -35,7 +34,7 @@ import javax.servlet.jsp.tagext.TagSupport;
 import org.hyperic.hq.appdef.shared.AppdefResourcePermissions;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.ui.util.RequestUtils;
 
 /**
@@ -65,8 +64,8 @@ public class UserResourcePermission extends TagSupport {
 		try {
 			HttpServletRequest request = (HttpServletRequest) pageContext
 					.getRequest();
-			ServletContext ctx = pageContext.getServletContext();
-			AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
+		
+			AppdefBoss appdefBoss = Bootstrap.getBean(AppdefBoss.class);
 			Boolean debug = getDebug();
 			AppdefResourceValue resource = getResource();
 			int sessionId = RequestUtils.getSessionId(request).intValue();

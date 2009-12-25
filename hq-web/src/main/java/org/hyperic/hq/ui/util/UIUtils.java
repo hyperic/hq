@@ -25,12 +25,31 @@
 
 package org.hyperic.hq.ui.util;
 
+import java.rmi.RemoteException;
+import java.util.List;
+
+import javax.ejb.CreateException;
+import javax.ejb.FinderException;
+import javax.naming.NamingException;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.auth.shared.SessionNotFoundException;
+import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.ui.WebUser;
 
 public interface UIUtils {
     public void setResourceFlags(AppdefResourceValue resource, boolean config,
-                                 HttpServletRequest request)
+                                 HttpServletRequest request, ServletContext ctx)
         throws Exception;
+    
+    List<AppdefResourceValue> getFavoriteResources(ServletContext ctx, WebUser user);
+    
+    List getResourceTypes(ServletContext ctx,
+                               Integer sessionId)
+    throws NamingException, FinderException,
+    CreateException, PermissionException, SessionTimeoutException,
+    SessionNotFoundException, RemoteException;
 }

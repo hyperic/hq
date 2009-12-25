@@ -37,14 +37,13 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.file.FileUtil;
@@ -108,7 +107,7 @@ public abstract class AvailabilityBaseServlet extends HttpServlet {
             StopWatch timer = new StopWatch();
 
             MeasurementBoss boss =
-                ContextUtils.getMeasurementBoss(getServletContext());
+                Bootstrap.getBean(MeasurementBoss.class);
             if (null == ctype) {
                 val = boss.getAvailability(sessionId, eids[0]);
             } else {

@@ -44,6 +44,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Dashboard;
 import org.hyperic.hq.ui.WebUser;
@@ -65,7 +66,7 @@ public class DashboardUtils {
     public static List<AppdefResourceValue> listAsResources(List list, ServletContext ctx,
                                        WebUser user)
         throws Exception {
-        AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
+        AppdefBoss appdefBoss = Bootstrap.getBean(AppdefBoss.class);
         List entityIds = listAsEntityIds(list);
         ArrayList<AppdefResourceValue> resources = new ArrayList<AppdefResourceValue>();
         for (Iterator i = entityIds.iterator(); i.hasNext();) {
@@ -287,8 +288,8 @@ public class DashboardUtils {
                                        WebUser user)
         throws Exception {
         List resourcelist = preferencesAsEntityIds(key, user);
-        AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
-        AuthzBoss authzboss = ContextUtils.getAuthzBoss(ctx);
+        AppdefBoss appdefBoss = Bootstrap.getBean(AppdefBoss.class);
+        AuthzBoss authzboss = Bootstrap.getBean(AuthzBoss.class);
         ArrayList toRemove = new ArrayList();
         for (Iterator i = resourcelist.iterator(); i.hasNext();) {
             AppdefEntityID entityID = (AppdefEntityID) i.next();
@@ -310,8 +311,8 @@ public class DashboardUtils {
     public static void verifyResources(String key, ServletContext ctx,
 			ConfigResponse config, WebUser user) throws Exception {
 		List resourcelist = preferencesAsEntityIds(key, config);
-		AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
-		AuthzBoss authzboss = ContextUtils.getAuthzBoss(ctx);
+		AppdefBoss appdefBoss = Bootstrap.getBean(AppdefBoss.class);
+		AuthzBoss authzboss = Bootstrap.getBean(AuthzBoss.class);
 		ArrayList toRemove = new ArrayList();
 		for (Iterator i = resourcelist.iterator(); i.hasNext();) {
 			AppdefEntityID entityID = (AppdefEntityID) i.next();

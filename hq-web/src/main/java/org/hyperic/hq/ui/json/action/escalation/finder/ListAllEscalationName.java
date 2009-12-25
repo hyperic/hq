@@ -26,15 +26,15 @@
 package org.hyperic.hq.ui.json.action.escalation.finder;
 
 import org.hyperic.hq.bizapp.shared.EventsBoss;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.ui.json.JSONResult;
 import org.hyperic.hq.ui.json.action.JsonActionContext;
 import org.hyperic.hq.ui.json.action.escalation.BaseAction;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.json.JSONArray;
 
 public class ListAllEscalationName extends BaseAction {
     public void execute(JsonActionContext ctx) throws Exception {
-        EventsBoss eBoss = ContextUtils.getEventsBoss(ctx.getServletContext());
+        EventsBoss eBoss = Bootstrap.getBean(EventsBoss.class);
         
         JSONArray array = eBoss.listAllEscalationName(ctx.getSessionId());
         ctx.setJSONResult(new JSONResult(array));

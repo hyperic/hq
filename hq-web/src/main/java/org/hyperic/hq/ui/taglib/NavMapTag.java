@@ -37,6 +37,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.TagSupport;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -45,17 +47,14 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.uibeans.ResourceTreeNode;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.beans.ImageMapRectAreaBean;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.servlet.NavMapImageServlet;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.image.widget.ResourceTree;
 import org.hyperic.util.data.IResourceTreeNode;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * <p>
@@ -275,7 +274,7 @@ public class NavMapTag extends TagSupport {
 				.getRequest();
 		ServletContext ctx = pageContext.getServletContext();
 		int sessionId = RequestUtils.getSessionId(request).intValue();
-		AppdefBoss ab = ContextUtils.getAppdefBoss(ctx);
+		AppdefBoss ab = Bootstrap.getBean(AppdefBoss.class);
 		ResourceTree tree = new ResourceTree(imageWidth);
 		ResourceTreeNode[] data = null;
 

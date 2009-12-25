@@ -26,18 +26,16 @@
 package org.hyperic.hq.ui.taglib;
 
 import java.io.IOException;
-import java.rmi.RemoteException;
 import java.util.Properties;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspWriter;
 
 import org.hyperic.hq.bizapp.shared.ConfigBoss;
 import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.util.ConfigPropertyException;
 
 /**
@@ -61,8 +59,8 @@ public class HelpTag extends VarSetterBaseTag {
         
         // See if help is internal or external
         boolean external = true;
-        ServletContext ctx = pageContext.getServletContext();
-        ConfigBoss boss = ContextUtils.getConfigBoss(ctx);
+     
+        ConfigBoss boss = Bootstrap.getBean(ConfigBoss.class);
         Properties props;
         try {
             props = boss.getConfig();

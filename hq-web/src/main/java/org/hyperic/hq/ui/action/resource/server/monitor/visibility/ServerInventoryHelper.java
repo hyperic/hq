@@ -45,7 +45,6 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.action.resource.common.monitor.visibility.InventoryHelper;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.MonitorUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
@@ -57,8 +56,11 @@ import org.hyperic.util.pager.PageControl;
 public class ServerInventoryHelper
     extends InventoryHelper {
 
-    public ServerInventoryHelper(AppdefEntityID entityId) {
+    private AppdefBoss appdefBoss;
+    
+    public ServerInventoryHelper(AppdefEntityID entityId, AppdefBoss appdefBoss) {
         super(entityId);
+        this.appdefBoss = appdefBoss;
     }
 
     /**
@@ -72,10 +74,10 @@ public class ServerInventoryHelper
         throws PermissionException, AppdefEntityNotFoundException, RemoteException, SessionException, ServletException {
         AppdefEntityID entityId = resource.getEntityId();
         int sessionId = RequestUtils.getSessionId(request).intValue();
-        AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+      
 
         log.trace("finding services for resource [" + entityId + "]");
-        List<AppdefResourceValue> services = boss.findServicesByServer(sessionId, entityId.getId(),
+        List<AppdefResourceValue> services = appdefBoss.findServicesByServer(sessionId, entityId.getId(),
             PageControl.PAGE_ALL);
         return MonitorUtils.findServiceTypes(services, null);
     }
@@ -91,10 +93,10 @@ public class ServerInventoryHelper
         throws PermissionException, AppdefEntityNotFoundException, RemoteException, SessionNotFoundException,
         SessionTimeoutException, ServletException {
         int sessionId = RequestUtils.getSessionId(request).intValue();
-        AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+       
 
         log.trace("finding service type [" + id + "]");
-        return boss.findServiceTypeById(sessionId, id.getId());
+        return appdefBoss.findServiceTypeById(sessionId, id.getId());
     }
 
     /**
@@ -108,8 +110,8 @@ public class ServerInventoryHelper
         throws PermissionException, AppdefEntityNotFoundException, RemoteException, SessionException, ServletException {
         int sessionId = RequestUtils.getSessionId(request).intValue();
 
-        AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
-        Collection<AppdefResourceValue> services = boss.findServicesByServer(sessionId, resource.getId(),
+       
+        Collection<AppdefResourceValue> services = appdefBoss.findServicesByServer(sessionId, resource.getId(),
             PageControl.PAGE_ALL);
         return AppdefResourceValue.getServiceTypeCountMap(services);
     }

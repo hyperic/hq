@@ -32,11 +32,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.common.DuplicateObjectException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.ui.json.JSONResult;
 import org.hyperic.hq.ui.json.action.JsonActionContext;
 import org.hyperic.hq.ui.json.action.escalation.BaseAction;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.util.ArrayUtil;
 import org.json.JSONObject;
 
@@ -70,7 +70,7 @@ public class UpdateEscalation
         Integer id = Integer.valueOf(((String[]) p.get(ID))[0]);
 
         EventsBoss eBoss = 
-            ContextUtils.getEventsBoss(context.getServletContext());
+           Bootstrap.getBean(EventsBoss.class);
         Escalation escalation = eBoss.findEscalationById(context.getSessionId(),
                                                          id);
         JSONObject result;
