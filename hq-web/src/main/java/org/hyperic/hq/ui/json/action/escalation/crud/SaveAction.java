@@ -42,12 +42,12 @@ import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
 import org.hyperic.hq.bizapp.shared.action.SnmpActionConfig;
 import org.hyperic.hq.bizapp.shared.action.SyslogActionConfig;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.events.ActionConfigInterface;
 import org.hyperic.hq.events.NoOpAction;
 import org.hyperic.hq.ui.json.action.JsonActionContext;
 import org.hyperic.hq.ui.json.action.escalation.BaseAction;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.util.StringUtil;
 import org.json.JSONException;
 
@@ -69,7 +69,7 @@ public class SaveAction extends BaseAction {
         Map        map    = context.getParameterMap();
         String     action = ((String[])map.get("action"))[0];
         Integer    escId  = Integer.valueOf(((String[])map.get("EscId"))[0]); 
-        EventsBoss eBoss  = ContextUtils.getEventsBoss(sctx);
+        EventsBoss eBoss  = Bootstrap.getBean(EventsBoss.class);
         int        sessId = context.getSessionId();
         Escalation e      = eBoss.findEscalationById(sessId, escId);
         long       wait   = Long.parseLong(((String[])map.get("waittime"))[0]);

@@ -25,18 +25,15 @@
 
 package org.hyperic.hq.ui.taglib;
 
-import java.rmi.RemoteException;
 import java.util.Properties;
 
-import javax.servlet.ServletContext;
 import javax.servlet.jsp.JspException;
-
-import org.hyperic.hq.bizapp.shared.ConfigBoss;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.util.ConfigPropertyException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.bizapp.shared.ConfigBoss;
+import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.util.ConfigPropertyException;
 
 /**
  * A JSP tag that looks up a named CAM config property and returns the
@@ -85,8 +82,8 @@ public class ConfigTag extends VarSetterBaseTag {
      */
     public final int doStartTag() throws JspException {
         try {
-        	ServletContext ctx = pageContext.getServletContext();
-            ConfigBoss configBoss = ContextUtils.getConfigBoss(ctx);
+        	
+            ConfigBoss configBoss = Bootstrap.getBean(ConfigBoss.class);
 
             log.trace("getting CAM config property [" + prop + "]");
 

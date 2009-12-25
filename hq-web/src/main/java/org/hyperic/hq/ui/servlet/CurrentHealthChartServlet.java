@@ -32,6 +32,8 @@ import javax.security.auth.login.LoginException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
@@ -40,6 +42,7 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.UnitsConvert;
@@ -47,7 +50,6 @@ import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.beans.ChartDataBean;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.image.chart.Chart;
 import org.hyperic.image.chart.DataPointCollection;
@@ -55,9 +57,6 @@ import org.hyperic.image.chart.VerticalChart;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.pager.PageControl;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * <p>CurrentHealth chart servlet.  The default <code>imageWidth</code>
@@ -151,7 +150,7 @@ public abstract class CurrentHealthChartServlet extends VerticalChartServlet {
             long beginTime = endTime - (8l * Constants.HOURS);
 
             MeasurementBoss mb =
-                ContextUtils.getMeasurementBoss( getServletContext() );
+                Bootstrap.getBean(MeasurementBoss.class);
             
             List data = null;
             try {

@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.ui;
 
+import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.Properties;
 
@@ -35,7 +36,6 @@ import javax.servlet.ServletContextListener;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.common.shared.ProductProperties;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.util.config.ConfigResponse;
 
 /**
@@ -97,7 +97,7 @@ public class Configurator implements ServletContextListener {
     public void loadConfig(ServletContext ctx) {
         Properties props = null;
         try {
-            props = ContextUtils.loadProperties(ctx,
+            props = loadProperties(ctx,
                                                 Constants.PROPS_FILE_NAME);
         }
         catch (Exception e) {
@@ -145,7 +145,7 @@ public class Configurator implements ServletContextListener {
         try{
         	// Load User Preferences
             Properties userProps =
-                ContextUtils.loadProperties(ctx, getPreferenceFile()); 
+                loadProperties(ctx, getPreferenceFile()); 
             Enumeration keys = userProps.keys();
             while (keys.hasMoreElements()){
                 String key = (String) keys.nextElement();
@@ -154,7 +154,7 @@ public class Configurator implements ServletContextListener {
             ctx.setAttribute(Constants.DEF_USER_PREFS, userPrefs);
             
             // Load User Dashboard Preferences
-            Properties userDashProps = ContextUtils.loadProperties(ctx, getUserDashboardPreferenceFile());
+            Properties userDashProps = loadProperties(ctx, getUserDashboardPreferenceFile());
             keys = userDashProps.keys();
             while(keys.hasMoreElements()){
             	String key = (String) keys.nextElement();
@@ -165,7 +165,7 @@ public class Configurator implements ServletContextListener {
             // Load Role Dashboard Preferences
             Properties roleDashProps;
 			try {
-				roleDashProps = ContextUtils.loadProperties(ctx,
+				roleDashProps = loadProperties(ctx,
 						getRoleDashboardPreferenceFile());
 			} catch (Exception e) {
 				roleDashProps = null;
@@ -189,7 +189,7 @@ public class Configurator implements ServletContextListener {
     private void loadTablePreferences(ServletContext ctx){
         try{
             
-            Properties tableProps = ContextUtils.loadProperties(ctx, Constants.PROPS_TAGLIB);
+            Properties tableProps = loadProperties(ctx, Constants.PROPS_TAGLIB);
             ctx.setAttribute(Constants.PROPS_TAGLIB_NAME, tableProps );
         }
         catch (Exception e) {
@@ -197,6 +197,26 @@ public class Configurator implements ServletContextListener {
             
         }
     
+    }
+    
+    /**
+     * Load the specified properties file and return the properties.
+     *
+     * @param ctx the <code>ServletContext</code>
+     * @param filename the fully qualifed name of the properties file
+     * @exception Exception if a problem occurs while loading the file
+     */
+    private  Properties loadProperties(ServletContext ctx,
+                                            String filename)
+        throws Exception {
+        Properties props = new Properties();
+        InputStream is = ctx.getResourceAsStream(filename);
+        if (is != null) {
+            props.load(is);
+            is.close();
+        }
+    
+        return props;
     }
         
     private void loadBuildNumber(ServletContext ctx){

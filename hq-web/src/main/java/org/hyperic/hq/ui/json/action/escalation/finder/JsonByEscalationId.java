@@ -26,11 +26,11 @@
 package org.hyperic.hq.ui.json.action.escalation.finder;
 
 import org.hyperic.hq.bizapp.shared.EventsBoss;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.ui.json.JSONResult;
 import org.hyperic.hq.ui.json.action.JsonActionContext;
 import org.hyperic.hq.ui.json.action.escalation.BaseAction;
-import org.hyperic.hq.ui.util.ContextUtils;
 
 public class JsonByEscalationId 
     extends BaseAction
@@ -38,7 +38,7 @@ public class JsonByEscalationId
     public void execute(JsonActionContext ctx)
         throws Exception
     {
-        EventsBoss eBoss = ContextUtils.getEventsBoss(ctx.getServletContext());
+        EventsBoss eBoss = Bootstrap.getBean(EventsBoss.class);
 
         Escalation e = eBoss.findEscalationById(ctx.getSessionId(), 
                                                 ctx.getId());

@@ -46,7 +46,6 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.action.resource.common.monitor.visibility.InventoryHelper;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.MonitorUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
@@ -58,8 +57,11 @@ import org.hyperic.util.pager.PageControl;
 public class PlatformInventoryHelper
     extends InventoryHelper {
 
-    public PlatformInventoryHelper(AppdefEntityID entityId) {
+    private AppdefBoss appdefBoss;
+    
+    public PlatformInventoryHelper(AppdefEntityID entityId, AppdefBoss appdefBoss) {
         super(entityId);
+        this.appdefBoss = appdefBoss;
     }
 
     /**
@@ -74,9 +76,9 @@ public class PlatformInventoryHelper
         SessionTimeoutException, ServletException {
         AppdefEntityID entityId = resource.getEntityId();
         int sessionId = RequestUtils.getSessionId(request).intValue();
-        AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+      
 
-        List<ServerValue> servers = boss.findServersByPlatform(sessionId, entityId.getId(), PageControl.PAGE_ALL);
+        List<ServerValue> servers = appdefBoss.findServersByPlatform(sessionId, entityId.getId(), PageControl.PAGE_ALL);
         return MonitorUtils.findServerTypes(servers);
     }
 
@@ -91,15 +93,15 @@ public class PlatformInventoryHelper
         throws PermissionException, AppdefEntityNotFoundException, RemoteException, SessionNotFoundException,
         SessionTimeoutException, ServletException {
         int sessionId = RequestUtils.getSessionId(request).intValue();
-        AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+        
 
         switch (id.getType()) {
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                return boss.findPlatformTypeById(sessionId, id.getId());
+                return appdefBoss.findPlatformTypeById(sessionId, id.getId());
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                return boss.findServerTypeById(sessionId, id.getId());
+                return appdefBoss.findServerTypeById(sessionId, id.getId());
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                return boss.findServiceTypeById(sessionId, id.getId());
+                return appdefBoss.findServiceTypeById(sessionId, id.getId());
             default:
                 throw new IllegalArgumentException("Unknown appdef entity type id: " + id);
         }
@@ -116,9 +118,9 @@ public class PlatformInventoryHelper
         throws PermissionException, AppdefEntityNotFoundException, RemoteException, SessionNotFoundException,
         SessionTimeoutException, ServletException {
         int sessionId = RequestUtils.getSessionId(request).intValue();
-        AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+       
 
-        Collection<ServerValue> servers = boss.findServersByPlatform(sessionId, resource.getId(), PageControl.PAGE_ALL);
+        Collection<ServerValue> servers = appdefBoss.findServersByPlatform(sessionId, resource.getId(), PageControl.PAGE_ALL);
         return AppdefResourceValue.getServerTypeCountMap(servers);
     }
 }

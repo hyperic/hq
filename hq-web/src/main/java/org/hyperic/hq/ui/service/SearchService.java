@@ -14,9 +14,9 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.uibeans.SearchResult;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.json.JSONArray;
@@ -86,8 +86,8 @@ public class SearchService extends BaseService {
 
         WebUser user = (WebUser)
             _request.getSession().getAttribute(Constants.WEBUSER_SES_ATTR);
-        AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(_servletContext);
-        AuthzBoss authzBoss = ContextUtils.getAuthzBoss(_servletContext);
+        AppdefBoss appdefBoss = Bootstrap.getBean(AppdefBoss.class);
+        AuthzBoss authzBoss = Bootstrap.getBean(AuthzBoss.class);
 
         PageList res;
         PageList users;

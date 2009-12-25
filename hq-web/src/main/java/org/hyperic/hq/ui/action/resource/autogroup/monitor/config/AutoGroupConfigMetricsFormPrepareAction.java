@@ -93,7 +93,7 @@ public class AutoGroupConfigMetricsFormPrepareAction
         } catch (ParameterNotFoundException e) {
             // if we get here, we are dealing with an auto-group of
             // platforms
-            helper = new RootInventoryHelper();
+            helper = new RootInventoryHelper(appdefBoss);
         }
 
         AppdefEntityTypeID childTypeId;

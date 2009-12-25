@@ -35,8 +35,9 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.bizapp.shared.ControlBoss;
+import org.hyperic.hq.common.ProductProperties;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 
 public class QuicknavUtil {
@@ -76,7 +77,8 @@ public class QuicknavUtil {
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
                 return true;
             case AppdefEntityConstants.APPDEF_TYPE_GROUP:
-                if (ContextUtils.getUIUtils(ctx.getServletContext()) != null) {
+                //TODO below if stmt is how we know we are running in EE.  We need a better way
+                if (ProductProperties.getPropertyInstance("eeUiUtils") != null) {
                     AppdefGroupValue group = (AppdefGroupValue) rv;
                     return AppdefEntityConstants
                                 .isGroupCompat(group.getGroupType());
@@ -93,7 +95,7 @@ public class QuicknavUtil {
         HttpServletRequest request =
             (HttpServletRequest)context.getRequest();
         ServletContext ctx = context.getServletContext();
-        ControlBoss boss = ContextUtils.getControlBoss(ctx);
+        ControlBoss boss = Bootstrap.getBean(ControlBoss.class);
         int sessionId = RequestUtils.getSessionId(request).intValue();
         
         return boss.isControlSupported(sessionId, rv);

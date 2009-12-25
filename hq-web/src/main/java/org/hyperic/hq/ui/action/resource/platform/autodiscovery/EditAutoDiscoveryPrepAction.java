@@ -38,24 +38,33 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
+import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.autoinventory.ScanMethod;
 import org.hyperic.hq.autoinventory.ScanMethodConfig;
 import org.hyperic.hq.autoinventory.ServerSignature;
 import org.hyperic.hq.autoinventory.shared.AIScheduleValue;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.pager.PageControl;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class EditAutoDiscoveryPrepAction
     extends NewAutoDiscoveryPrepAction {
 
-    private static ThreadLocal schedule = new ThreadLocal();
+    private static ThreadLocal<AIScheduleValue> schedule = new ThreadLocal<AIScheduleValue>();
+    private AppdefBoss appdefBoss;
+    
+    
+    @Autowired
+    public EditAutoDiscoveryPrepAction(AppdefBoss appdefBoss) {
+        super();
+        this.appdefBoss = appdefBoss;
+    }
 
     /**
      * Create the platform with the attributes specified in the given
@@ -74,7 +83,7 @@ public class EditAutoDiscoveryPrepAction
      * loads the ScanConfiguration into the form
      */
     protected void loadScanConfig(PlatformAutoDiscoveryForm aForm, HttpServletRequest request) throws Exception {
-        AIScheduleValue sched = (AIScheduleValue) schedule.get();
+        AIScheduleValue sched =  schedule.get();
         ScanMethodConfig[] configs = sched.getConfigObj().getScanMethodConfigs();
 
         if (configs.length == 0)
@@ -98,13 +107,13 @@ public class EditAutoDiscoveryPrepAction
         PlatformValue pValue = (PlatformValue) RequestUtils.getResource(request);
 
         Integer sessionId = RequestUtils.getSessionId(request);
-        AppdefBoss boss = ContextUtils.getAppdefBoss(getServlet().getServletContext());
-        List serverTypes = boss.findServerTypesByPlatformType(sessionId.intValue(), pValue.getPlatformType().getId(),
+        
+        List<ServerTypeValue> serverTypes = appdefBoss.findServerTypesByPlatformType(sessionId.intValue(), pValue.getPlatformType().getId(),
             PageControl.PAGE_ALL);
-        List selSvrs = buildSelectedServerTypes(serverTypes, sched.getConfigObj().getServerSignatures());
+        List<AppdefResourceTypeValue> selSvrs = buildSelectedServerTypes(serverTypes, sched.getConfigObj().getServerSignatures());
         Integer[] selSvrIds = new Integer[selSvrs.size()];
         int i = 0;
-        for (Iterator it = selSvrs.iterator(); it.hasNext(); i++) {
+        for (Iterator<AppdefResourceTypeValue> it = selSvrs.iterator(); it.hasNext(); i++) {
             ServerTypeValue stv = (ServerTypeValue) it.next();
             selSvrIds[i] = stv.getId();
         }
@@ -114,11 +123,11 @@ public class EditAutoDiscoveryPrepAction
     /**
      * Get the selected server types.
      */
-    private List buildSelectedServerTypes(List serverTypes, ServerSignature[] serverSigs) throws Exception {
-        List serverDetectorList = new ArrayList();
+    private List<AppdefResourceTypeValue> buildSelectedServerTypes(List<ServerTypeValue> serverTypes, ServerSignature[] serverSigs) throws Exception {
+        List<ServerSignature> serverDetectorList = new ArrayList<ServerSignature>();
         CollectionUtils.addAll(serverDetectorList, serverSigs);
 
-        ServerTypeValue[] types = (ServerTypeValue[]) serverTypes.toArray(new ServerTypeValue[0]);
+        ServerTypeValue[] types = serverTypes.toArray(new ServerTypeValue[0]);
 
         return BizappUtils.buildServerTypesFromServerSig(types, serverDetectorList.iterator());
     }

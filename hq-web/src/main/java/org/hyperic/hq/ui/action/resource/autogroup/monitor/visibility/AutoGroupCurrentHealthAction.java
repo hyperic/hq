@@ -41,6 +41,7 @@ import org.apache.struts.tiles.ComponentContext;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
@@ -72,10 +73,13 @@ public class AutoGroupCurrentHealthAction
     private final Log log = LogFactory.getLog(AutoGroupCurrentHealthAction.class.getName());
 
     private final PageControl pc = new PageControl(0, Constants.DEFAULT_CHART_POINTS);
+    
+    private AppdefBoss appdefBoss;
 
     @Autowired
-    public AutoGroupCurrentHealthAction(MeasurementBoss measurementBoss) {
+    public AutoGroupCurrentHealthAction(MeasurementBoss measurementBoss, AppdefBoss appdefBoss) {
         super(measurementBoss);
+        this.appdefBoss = appdefBoss;
     }
 
     /**
@@ -107,7 +111,7 @@ public class AutoGroupCurrentHealthAction
         } catch (ParameterNotFoundException e) {
             // if we get here, we are dealing with an auto-group of
             // platforms
-            helper = new RootInventoryHelper();
+            helper = new RootInventoryHelper(appdefBoss);
             parentKey = "autogroup";
         }
 

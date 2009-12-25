@@ -45,12 +45,14 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.MeasurementBoss;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.MonitorUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
@@ -103,7 +105,7 @@ public class MetricDataServlet extends HttpServlet {
         List resources = new ArrayList();
         if (typeId != null) {
             try {
-                resources.addAll(ContextUtils.getAppdefBoss(getServletContext()).findChildResources(sessionId, id, typeId,
+                resources.addAll(Bootstrap.getBean(AppdefBoss.class).findChildResources(sessionId, id, typeId,
                                                          PageControl.PAGE_ALL));
             } catch (Exception e) {
                 throw new ServletException("Error finding child resources.", e);
@@ -112,7 +114,7 @@ public class MetricDataServlet extends HttpServlet {
             List entities;
             AppdefGroupValue gval;
             try {
-                gval = ContextUtils.getAppdefBoss(getServletContext()).findGroup(sessionId, id.getId());
+                gval = Bootstrap.getBean(AppdefBoss.class).findGroup(sessionId, id.getId());
                 entities = gval.getAppdefGroupEntries();
             } catch (Exception e) {
                 throw new ServletException("Error finding group=" + id, e);
@@ -142,7 +144,7 @@ public class MetricDataServlet extends HttpServlet {
             
             for (Iterator i = entities.iterator(); i.hasNext();) {
                 try {
-                    resources.add(ContextUtils.getAppdefBoss(getServletContext()).findById(sessionId,
+                    resources.add(Bootstrap.getBean(AppdefBoss.class).findById(sessionId,
                                                   (AppdefEntityID) i.next()));  
                 } catch (Exception e) {
                     throw new ServletException("Error finding group members",
@@ -152,7 +154,7 @@ public class MetricDataServlet extends HttpServlet {
         } else if (id.isPlatform() || id.isServer() || id.isService()) {
             AppdefResourceValue val;
             try {
-                val = ContextUtils.getAppdefBoss(getServletContext()).findById(sessionId, id);
+                val = Bootstrap.getBean(AppdefBoss.class).findById(sessionId, id);
                 resources.add(val);
             } catch (Exception e) {
                 throw new ServletException("Error finding id=" + id);
@@ -166,7 +168,7 @@ public class MetricDataServlet extends HttpServlet {
         // Load template
         MeasurementTemplate templ;
         try {
-            Measurement m = ContextUtils.getMeasurementBoss(getServletContext()).getMeasurement(sessionId, mid);
+            Measurement m = Bootstrap.getBean(MeasurementBoss.class).getMeasurement(sessionId, mid);
             templ = m.getTemplate();
         } catch (Exception e) {
             throw new ServletException("Error looking up measurement.", e);
@@ -176,10 +178,10 @@ public class MetricDataServlet extends HttpServlet {
         for (int i = 0; i < resources.size(); i++) {
             AppdefResourceValue rValue = (AppdefResourceValue) resources.get(i);
             try {
-                Measurement m = ContextUtils.getMeasurementBoss(getServletContext()).findMeasurement(sessionId, templ.getId(),
+                Measurement m = Bootstrap.getBean(MeasurementBoss.class).findMeasurement(sessionId, templ.getId(),
                                                        rValue.getEntityId());
                 List<HighLowMetricValue> list =
-                    ContextUtils.getMeasurementBoss(getServletContext()).findMeasurementData(sessionId,
+                    Bootstrap.getBean(MeasurementBoss.class).findMeasurementData(sessionId,
                                                m,
                                                begin.longValue(),
                                                end.longValue(),

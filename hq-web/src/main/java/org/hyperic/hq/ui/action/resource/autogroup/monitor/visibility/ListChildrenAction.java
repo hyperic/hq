@@ -44,6 +44,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.bizapp.shared.uibeans.ResourceDisplaySummary;
 import org.hyperic.hq.ui.Constants;
@@ -64,11 +65,14 @@ public class ListChildrenAction
     private final Log log = LogFactory.getLog(ListChildrenAction.class.getName());
 
     private MeasurementBoss measurementBoss;
+    
+    private AppdefBoss appdefBoss;
 
     @Autowired
-    public ListChildrenAction(MeasurementBoss measurementBoss) {
+    public ListChildrenAction(MeasurementBoss measurementBoss, AppdefBoss appdefBoss) {
         super();
         this.measurementBoss = measurementBoss;
+        this.appdefBoss = appdefBoss;
     }
 
     public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
@@ -110,7 +114,7 @@ public class ListChildrenAction
         } catch (ParameterNotFoundException e) {
             // if we get here, we are dealing with an auto-group of
             // platforms
-            helper = new RootInventoryHelper();
+            helper = new RootInventoryHelper(appdefBoss);
         }
 
         AppdefEntityTypeID childTypeId;

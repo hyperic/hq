@@ -14,6 +14,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForward;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.ui.Constants;
@@ -47,7 +48,7 @@ abstract public class SaveChartToDashboardUtil {
 	public static ResultCode saveChartToDashboard(ServletContext ctx, HttpServletRequest request, ActionForward success, ViewChartForm chartForm, AppdefEntityID adeId, String chartName, boolean isEE)
 	throws Exception 
 	{
-        AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
+        AuthzBoss boss = Bootstrap.getBean(AuthzBoss.class);
         WebUser user = RequestUtils.getWebUser(request);
         String[] dashboardIds = request.getParameterValues(Constants.DASHBOARD_ID_PARAM);
         String url = generateChartUrl(success, chartForm, adeId, isEE);

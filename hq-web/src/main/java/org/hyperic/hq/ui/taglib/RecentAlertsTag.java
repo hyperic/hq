@@ -45,11 +45,11 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.ui.beans.RecentAlertBean;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 
 /**
@@ -123,8 +123,8 @@ public class RecentAlertsTag extends TagSupport {
                 (HttpServletRequest) pageContext.getRequest();
             ServletContext ctx = pageContext.getServletContext();
 
-            EventsBoss eb = ContextUtils.getEventsBoss(ctx);
-            AuthzBoss ab = ContextUtils.getAuthzBoss(ctx);
+            EventsBoss eb = Bootstrap.getBean(EventsBoss.class);
+            AuthzBoss ab = Bootstrap.getBean(AuthzBoss.class);
 
             int sessionId = RequestUtils.getSessionId(request).intValue();
             // Recent alerts in the last two hours

@@ -49,6 +49,7 @@ import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.bizapp.shared.uibeans.MetricDisplaySummary;
 import org.hyperic.hq.ui.Constants;
@@ -73,11 +74,14 @@ public class AutoGroupMetricsFormPrepareAction
     private final Log log = LogFactory.getLog(AutoGroupMetricsFormPrepareAction.class.getName());
 
     private MeasurementBoss measurementBoss;
+    
+    private AppdefBoss appdefBoss;
 
     @Autowired
-    public AutoGroupMetricsFormPrepareAction(MeasurementBoss measurementBoss) {
+    public AutoGroupMetricsFormPrepareAction(MeasurementBoss measurementBoss, AppdefBoss appdefBoss) {
         super();
         this.measurementBoss = measurementBoss;
+        this.appdefBoss = appdefBoss;
     }
 
     /**
@@ -110,7 +114,7 @@ public class AutoGroupMetricsFormPrepareAction
         } catch (ParameterNotFoundException e) {
             // if we get here, we are dealing with an auto-group of
             // platforms
-            helper = new RootInventoryHelper();
+            helper = new RootInventoryHelper(appdefBoss);
         }
 
         ServletContext ctx = getServlet().getServletContext();

@@ -32,9 +32,9 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationState;
@@ -42,7 +42,6 @@ import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.ui.json.JSONResult;
 import org.hyperic.hq.ui.json.action.JsonActionContext;
 import org.hyperic.hq.ui.json.action.escalation.BaseAction;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -50,8 +49,8 @@ public class ListActiveEscalations extends BaseAction {
     public void execute(JsonActionContext ctx) 
         throws Exception 
     {
-        EventsBoss eBoss = ContextUtils.getEventsBoss(ctx.getServletContext());
-        AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx.getServletContext());
+        EventsBoss eBoss = Bootstrap.getBean(EventsBoss.class);
+        AuthzBoss aBoss = Bootstrap.getBean(AuthzBoss.class);
         AuthzSubject me = aBoss.getCurrentSubject(ctx.getSessionId());
         List states = eBoss.getActiveEscalations(ctx.getSessionId(),
                                                  10);  // XXX

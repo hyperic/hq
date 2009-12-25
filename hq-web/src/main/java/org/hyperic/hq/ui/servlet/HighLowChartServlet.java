@@ -39,11 +39,11 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.beans.ChartDataBean;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.MonitorUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.image.chart.Chart;
@@ -95,7 +95,7 @@ public class HighLowChartServlet extends ChartServlet {
         AppdefEntityID aeid = RequestUtils.getEntityId(request);
         
         ServletContext ctx = this.getServletContext();
-        MeasurementBoss boss = ContextUtils.getMeasurementBoss(ctx);
+        MeasurementBoss boss = Bootstrap.getBean(MeasurementBoss.class);
         WebUser user = RequestUtils.getWebUser(request);
         int sessionId = user.getSessionId().intValue();
 

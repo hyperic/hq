@@ -30,6 +30,7 @@ import org.apache.tapestry.engine.IEngineService;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.bizapp.shared.ConfigBoss;
 import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.ui.RequestKeyConstants;
 import org.hyperic.ui.tapestry.page.PageListing;
@@ -75,7 +76,7 @@ public class URLUtils {
     public static String getHQBaseURL(ServletContext ctx)
             throws org.hyperic.util.ConfigPropertyException,
             java.rmi.RemoteException {
-        ConfigBoss cboss = ContextUtils.getConfigBoss(ctx);
+        ConfigBoss cboss = Bootstrap.getBean(ConfigBoss.class);
         return (String) cboss.getConfig().getProperty(HQConstants.BaseURL);
     }
 }

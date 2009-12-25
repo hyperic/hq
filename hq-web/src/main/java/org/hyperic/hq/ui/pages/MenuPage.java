@@ -39,13 +39,14 @@ import org.apache.tapestry.event.PageBeginRenderListener;
 import org.apache.tapestry.event.PageEvent;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
+import org.hyperic.hq.common.ProductProperties;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.server.session.AttachType;
 import org.hyperic.hq.hqu.server.session.AttachmentMasthead;
 import org.hyperic.hq.hqu.server.session.ViewMastheadCategory;
 import org.hyperic.hq.ui.util.CSSUtils;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.UIUtilsImpl;
+import org.hyperic.hq.ui.util.UIUtils;
 import org.hyperic.hq.ui.util.URLUtils;
 import org.hyperic.ui.tapestry.components.navigation.MenuItem;
 import org.hyperic.ui.tapestry.components.navigation.NavigationMenu;
@@ -73,7 +74,7 @@ public abstract class MenuPage extends BasePage implements PageBeginRenderListen
         // Construct the list of HQU plugins for the main menu
         buildHQUMenuItems();
         // Construct the list of Recent and Favorite resources for the main menu
-        buildFavoriteResourceMenuItems(UIUtilsImpl.getFavoriteResources(
+        buildFavoriteResourceMenuItems(((UIUtils)ProductProperties.getPropertyInstance("hyperic.hq.ui.utils")).getFavoriteResources(
                 getServletContext(), getBaseSessionBean().getWebUser()));
     }
 
@@ -83,7 +84,7 @@ public abstract class MenuPage extends BasePage implements PageBeginRenderListen
     
     private void buildHQUMenuItems() {
         ServletContext ctx = getServletContext();
-        ProductBoss pBoss = ContextUtils.getProductBoss(ctx);
+        ProductBoss pBoss = Bootstrap.getBean(ProductBoss.class);
         Collection<AttachmentDescriptor> mastheadAttachments = null;
         try {
             Integer sessionId = getBaseSessionBean().getSessionId();

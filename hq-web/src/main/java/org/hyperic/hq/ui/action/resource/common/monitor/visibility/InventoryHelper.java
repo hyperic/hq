@@ -92,9 +92,9 @@ public abstract class InventoryHelper {
     public static InventoryHelper getHelper(AppdefEntityID entityId) {
         switch (entityId.getType()) {
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                return new PlatformInventoryHelper(entityId);
+                return new PlatformInventoryHelper(entityId, Bootstrap.getBean(AppdefBoss.class));
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                return new ServerInventoryHelper(entityId);
+                return new ServerInventoryHelper(entityId, Bootstrap.getBean(AppdefBoss.class));
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
                 return new ServiceInventoryHelper(entityId);
             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:

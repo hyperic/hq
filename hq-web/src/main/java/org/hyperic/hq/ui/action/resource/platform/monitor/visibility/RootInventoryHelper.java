@@ -48,7 +48,6 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.action.resource.common.monitor.visibility.InventoryHelper;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
 
@@ -62,9 +61,12 @@ public class RootInventoryHelper
     extends InventoryHelper {
 
     private final Log log = LogFactory.getLog(RootInventoryHelper.class.getName());
+    
+    private AppdefBoss appdefBoss;
 
-    public RootInventoryHelper() {
+    public RootInventoryHelper(AppdefBoss appdefBoss) {
         super(null);
+        this.appdefBoss = appdefBoss;
     }
 
     /**
@@ -78,9 +80,9 @@ public class RootInventoryHelper
         throws PermissionException, AppdefEntityNotFoundException, RemoteException, SessionNotFoundException,
         SessionTimeoutException, ServletException {
         int sessionId = RequestUtils.getSessionId(request).intValue();
-        AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+      
         log.trace("finding all platform types");
-        return boss.findAllPlatformTypes(sessionId, PageControl.PAGE_ALL);
+        return appdefBoss.findAllPlatformTypes(sessionId, PageControl.PAGE_ALL);
     }
 
     /**
@@ -94,10 +96,10 @@ public class RootInventoryHelper
         throws PermissionException, AppdefEntityNotFoundException, RemoteException, SessionNotFoundException,
         SessionTimeoutException, ServletException {
         int sessionId = RequestUtils.getSessionId(request).intValue();
-        AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+       
 
         log.trace("finding platform type [" + id + "]");
-        return boss.findPlatformTypeById(sessionId, id.getId());
+        return appdefBoss.findPlatformTypeById(sessionId, id.getId());
     }
 
     /**
@@ -111,9 +113,9 @@ public class RootInventoryHelper
         throws PermissionException, AppdefEntityNotFoundException, RemoteException, SessionNotFoundException,
         SessionTimeoutException, ServletException {
         int sessionId = RequestUtils.getSessionId(request).intValue();
-        AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+      
         try {
-            Collection<PlatformValue> arvs = boss.findAllPlatforms(sessionId, PageControl.PAGE_ALL);
+            Collection<PlatformValue> arvs = appdefBoss.findAllPlatforms(sessionId, PageControl.PAGE_ALL);
             return AppdefResourceValue.getPlatformTypeCountMap(arvs);
         } catch (FinderException e) {
             throw new PlatformNotFoundException("couldn't find all platforms");

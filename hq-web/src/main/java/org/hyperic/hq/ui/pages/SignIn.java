@@ -32,11 +32,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import javax.ejb.FinderException;
 import javax.security.auth.login.LoginException;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import javax.ejb.FinderException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,30 +44,25 @@ import org.apache.tapestry.IRequestCycle;
 import org.apache.tapestry.RedirectException;
 import org.apache.tapestry.annotations.Component;
 import org.apache.tapestry.annotations.InitialValue;
-import org.apache.tapestry.annotations.InjectObject;
 import org.apache.tapestry.annotations.Meta;
 import org.apache.tapestry.annotations.Persist;
-import org.apache.tapestry.callback.ICallback;
-import org.apache.tapestry.engine.IEngineService;
 import org.apache.tapestry.engine.ILink;
 import org.apache.tapestry.link.PageLink;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
 import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.server.session.DashboardManagerImpl;
 import org.hyperic.hq.ui.server.session.UserDashboardConfig;
-import org.hyperic.hq.ui.service.SearchService;
 import org.hyperic.hq.ui.shared.DashboardManager;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.image.widget.ResourceTree;
 import org.hyperic.ui.tapestry.page.PageListing;
 import org.hyperic.util.ConfigPropertyException;
@@ -108,7 +103,7 @@ public abstract class SignIn extends BasePage {
         HttpSession session = getRequest().getSession(true);
         WebUser webUser;
         Map userOpsMap = new HashMap();
-        AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
+        AuthzBoss authzBoss = Bootstrap.getBean(AuthzBoss.class);
         try {
             webUser = loginUser(ctx, getUserName(), getPassword());
 
@@ -236,8 +231,8 @@ public abstract class SignIn extends BasePage {
                                     String password)
         throws RemoteException, SecurityException, LoginException,
                ApplicationException, ConfigPropertyException, FinderException {
-        AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
-        AuthBoss authBoss = ContextUtils.getAuthBoss(ctx);
+        AuthzBoss authzBoss = Bootstrap.getBean(AuthzBoss.class);
+        AuthBoss authBoss = Bootstrap.getBean(AuthBoss.class);
         boolean needsRegistration = false;
         // authenticate the credentials
         int sid = authBoss.login(username, password);
@@ -274,11 +269,11 @@ public abstract class SignIn extends BasePage {
     
     public static WebUser loginGuest(ServletContext ctx,
                                      HttpServletRequest request) {
-        AuthBoss authBoss = ContextUtils.getAuthBoss(ctx);
+        AuthBoss authBoss = Bootstrap.getBean(AuthBoss.class);
         try {
             int sid = authBoss.loginGuest();
     
-            AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
+            AuthzBoss authzBoss = Bootstrap.getBean(AuthzBoss.class);
             AuthzSubject subject = authzBoss.getCurrentSubject(sid);
     
             Integer sessionId = new Integer(sid);
