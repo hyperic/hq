@@ -28,8 +28,12 @@ package org.hyperic.hq.plugin.websphere;
 import org.hyperic.hq.product.PluginException;
 
 import com.ibm.websphere.management.AdminClient;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class ApplicationCollector extends WebsphereCollector {
+
+    private static final Log log = LogFactory.getLog(ApplicationCollector.class.getName());
 
     protected void init(AdminClient mServer) throws PluginException {
         super.init(mServer);
@@ -60,11 +64,13 @@ public class ApplicationCollector extends WebsphereCollector {
         Object state =
             getAttribute(getMBeanServer(), this.name, "state");
 
-        if (state == null) {
+        log.debug("[collect] name='"+name.getKeyProperty("name")+"' state='"+state+"("+state.getClass()+")'");
+
+        if ((state == null) || (!(state instanceof Integer))) {
             setAvailability(false);
         }
         else {
-            setAvailability(true);
+            setAvailability(((Integer)state).intValue()==1);
         }
     }
 }
