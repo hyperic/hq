@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<project name="HQ" default="build" basedir=".">
+<project name="HQ" basedir=".">
 	<property environment="ENV" />
 
 	<!-- User defined overrides -->
