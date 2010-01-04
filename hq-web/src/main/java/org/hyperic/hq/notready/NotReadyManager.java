@@ -40,7 +40,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class NotReadyManager
-    implements NotReadyManagerMBean
+    
 {
     private Log         _log = LogFactory.getLog(NotReadyManager.class);
    
