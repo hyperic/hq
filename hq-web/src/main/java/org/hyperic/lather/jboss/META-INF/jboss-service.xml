@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE server>
-
-<server>
-  <mbean code="org.hyperic.util.notReady.NotReadyManager"
-         name="hyperic.jmx:service=NotReadyManager">
-  </mbean>
-</server>
