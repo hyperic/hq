@@ -29,8 +29,6 @@ public interface HQInternalServiceMBean {
     double getMetricInsertsPerMinute();
     int getPlatformCount();
     int getAgentCount();
-    long getTransactionCount();
-    long getTransactionFailureCount();
     double getMetricsCollectedPerMinute();
     int getAgentConnections();
     long getAgentRequests();

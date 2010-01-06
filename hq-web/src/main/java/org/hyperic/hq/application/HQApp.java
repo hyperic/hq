@@ -29,12 +29,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
@@ -71,15 +68,10 @@ public class HQApp  {
     private final Scheduler    _scheduler;
     private final ServerTransport _serverTransport;
 
-    private final Object       STAT_LOCK = new Object();
+   
     private final Object initLock = new Object();
-    private long               _numTx;
-    private long               _numTxErrors;
+   
 
-    private long               _methWarnTime;
-
-    private Map _methInvokeStats      = new HashMap();
-    private AtomicBoolean _collectMethStats = new AtomicBoolean();
     
 
     
@@ -119,36 +111,12 @@ public class HQApp  {
             }
         });
 
-        try {
-            Properties p = HQApp.readTweakProperties();
-            String prop = p.getProperty("hq.methodWarn.time");
-            if (prop == null) {
-                _log.warn("Failed to read tweak properties.  Setting method " +
-                          "warn time to 60000");
-                _methWarnTime = 60 * 1000;
-            } else {
-                _methWarnTime = Long.parseLong(prop);
-            }
-        } catch(Exception e) {
-            _log.error("Unable to read tweak properties", e);
-            _methWarnTime = 60 * 1000;
-        }
+       
 
         _hiberLogger = new HQHibernateLogger();
     }
 
-    public void setMethodWarnTime(long warnTime) {
-        synchronized (STAT_LOCK) {
-            _methWarnTime = warnTime;
-        }
-    }
-
-    public long getMethodWarnTime() {
-        synchronized (STAT_LOCK) {
-            return _methWarnTime;
-        }
-    }
-
+   
     public ThreadWatchdog getWatchdog() {
         synchronized (_watchdog) {
             return _watchdog;
@@ -232,86 +200,26 @@ public class HQApp  {
     }
 
    
-
-    void incrementTxCount(boolean txFailed) {
-        synchronized (STAT_LOCK) {
-            _numTx++;
-            if (txFailed)
-                _numTxErrors++;
-        }
-    }
-
-    /**
-     * Get the # of transactions which have been run since the start of the
-     * application
-     */
-    public long getTransactions() {
-        synchronized (STAT_LOCK) {
-            return _numTx;
-        }
-    }
-
-    /**
-     * Get the # of transactions which have failed since the start of the
-     * application
-     */
-    public long getTransactionsFailed() {
-        synchronized (STAT_LOCK) {
-            return _numTxErrors;
-        }
-    }
-
-   
-
-
-    public void setCollectMethodStats(boolean enable) {
-        _collectMethStats.set(enable);
-    }
-
-    public boolean isCollectingMethodStats() {
-        return _collectMethStats.get();
-    }
-
-    public void clearMethodStats() {
-        synchronized (STAT_LOCK) {
-            _methInvokeStats.clear();
-        }
-    }
-
-   
-
-    public List getMethodStats() {
-        synchronized (STAT_LOCK) {
-            return new ArrayList(_methInvokeStats.values());
-        }
-    }
-
-   
-
-   
-
-   
-
     private void scheduleCommitCallback() {
         Transaction t =
             Util.getSessionFactory().getCurrentSession().getTransaction();
-        final long commitNo = getTransactions();
+       
         final boolean debug = _log.isDebugEnabled();
 
         if (debug) {
-            _log.debug("Scheduling commit callback " + commitNo);
+            _log.debug("Scheduling commit callback ");
         }
         t.registerSynchronization(new Synchronization() {
             public void afterCompletion(int status) {
                 if (debug) {
-                    _log.debug("Running post-commit for commitNo: " + commitNo);
+                    _log.debug("Running post-commit");
                 }
                 runPostCommitListeners(status == Status.STATUS_COMMITTED);
             }
 
             public void beforeCompletion() {
                 if (debug) {
-                    _log.debug("Running pre-commit for commitNo: " + commitNo);
+                    _log.debug("Running pre-commit");
                 }
                 runPreCommitListeners();
             }

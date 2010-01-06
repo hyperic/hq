@@ -29,7 +29,6 @@ import java.util.List;
 
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.PlatformManager;
-import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.measurement.server.session.CollectionSummary;
 import org.hyperic.hq.measurement.server.session.ReportStatsCollector;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
@@ -44,17 +43,15 @@ public class HQInternalService implements HQInternalServiceMBean {
     
     private AgentManager agentManager;
     private MeasurementManager measurementManager;
-    private HQApp hqApp;
     private PlatformManager platformManager;
     private ZeventEnqueuer zEventManager;
     
     
     @Autowired
-    public HQInternalService(AgentManager agentManager, MeasurementManager measurementManager, HQApp hqApp,
+    public HQInternalService(AgentManager agentManager, MeasurementManager measurementManager, 
                              PlatformManager platformManager, ZeventEnqueuer zEventManager) {
         this.agentManager = agentManager;
         this.measurementManager = measurementManager;
-        this.hqApp = hqApp;
         this.platformManager = platformManager;
         this.zEventManager = zEventManager;
     }
@@ -86,13 +83,7 @@ public class HQInternalService implements HQInternalServiceMBean {
         return platformManager.getPlatformCount().intValue();
     }
 
-    public long getTransactionCount() {
-        return hqApp.getTransactions();
-    }
-
-    public long getTransactionFailureCount() {
-        return hqApp.getTransactionsFailed();
-    }
+  
 
     public long getAgentRequests() {
         return agentManager.getTotalConnectedAgents();
