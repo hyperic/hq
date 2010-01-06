@@ -536,7 +536,7 @@ public class EmailAction extends EmailActionConfig
                     StringUtil.implode(Arrays.asList(recipients), ",") +
                     ',' + " msg: " + msg);
             }
-            EmailFilter.sendEmail(recipients, subject, message,
+            getEmailMan().sendEmail(recipients, subject, message,
                 message, new Integer(EventConstants.PRIORITY_HIGH));
         }
 

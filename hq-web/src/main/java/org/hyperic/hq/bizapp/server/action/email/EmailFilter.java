@@ -30,18 +30,6 @@ import java.util.GregorianCalendar;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Properties;
-
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.rmi.PortableRemoteObject;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -54,16 +42,10 @@ import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
-import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.server.session.ServerConfigManagerImpl;
-import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.common.shared.ServerConfigManager;
+import org.hyperic.hq.bizapp.server.session.EmailManagerImpl;
 import org.hyperic.hq.context.Bootstrap;
-import org.hyperic.hq.events.EventConstants;
-import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.collection.IntHashMap;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
@@ -72,20 +54,12 @@ import org.quartz.SimpleTrigger;
 import org.quartz.Trigger;
 
 public class EmailFilter {
-    private Log _log = LogFactory.getLog(EmailFilter.class);
+    private Log log = LogFactory.getLog(EmailFilter.class);
 
     public  static final String     JOB_GROUP      = "EmailFilterGroup";
     private static final IntHashMap _alertBuffer   = new IntHashMap();
     public  static final Object     SCHEDULER_LOCK = new Object();
 
-    public EmailFilter() {}
-
-    public String getAppdefEntityName(AppdefEntityID appEnt) {
-        Resource res = ResourceManagerImpl.getOne().findResource(appEnt);
-        if (res != null)
-            return res.getName();
-        return appEnt.getAppdefKey();
-    }
     
     private void replaceAppdefEntityHolders(AppdefEntityID appEnt,
                                             String[] strs) {
@@ -109,10 +83,10 @@ public class EmailFilter {
                                              desc);
             }
         } catch (AppdefEntityNotFoundException e) {
-            _log.error("Entity ID invalid", e);
+            log.error("Entity ID invalid", e);
         } catch (PermissionException e) {
             // Should never happen, because we are overlord
-            _log.error("Overlord not allowed to lookup resource", e);
+            log.error("Overlord not allowed to lookup resource", e);
         }
     }
     
@@ -196,107 +170,25 @@ public class EmailFilter {
                     scheduleJob(platId);
                 } catch (SchedulerException e) {
                     //  Job probably already exists
-                    _log.error("Unable to reschedule job " + platId, e);
+                    log.error("Unable to reschedule job " + platId, e);
                 }
     
                 if (filter)
                     return;
             } catch (PlatformNotFoundException e) {
-                _log.error("Entity ID invalid: " + e);
+                log.error("Entity ID invalid: " + e);
             }
         }
             
         sendEmail(addresses, subject, body, htmlBody, new Integer(priority));
     }
     
-    private static InternetAddress getFromAddress() {
-        final Log log = LogFactory.getLog(EmailFilter.class);
-        final ServerConfigManager configMan =
-            ServerConfigManagerImpl.getOne();
-        try {
-            Properties props = configMan.getConfig();
-            String from = props.getProperty(HQConstants.EmailSender);
-            if (from != null) {
-                return new InternetAddress(from);
-            }
-        } catch (ConfigPropertyException e) {
-            log.error("ConfigPropertyException fetch FROM address", e);
-        } catch (AddressException e) {
-            log.error("Bad FROM address", e);
-        }
-        return null;
-    }
     
-    public static void sendEmail(EmailRecipient[] addresses, String subject, 
-                                 String[] body, String[] htmlBody,
-                                 Integer priority)
-    {
-        final Log log = LogFactory.getLog(EmailFilter.class);
-        final Session session;
-        try {
-            session = (Session) 
-                PortableRemoteObject.narrow(
-                               new InitialContext().lookup("java:/SpiderMail"),
-                               Session.class);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
-
-        MimeMessage m = new MimeMessage(session);
+    private void sendEmail(EmailRecipient[] addresses, String subject, String[] body, String[] htmlBody, Integer priority) {
+        EmailManagerImpl.getOne().sendEmail(addresses, subject, body, htmlBody, priority);
         
-        try {
-            InternetAddress from = getFromAddress();
-            if (from == null) {
-                m.setFrom();
-            } else {
-                m.setFrom(from);
-            }
-
-            m.setSubject(subject);
-
-            // If priority not null, set it in body
-            if (priority != null) {
-                switch (priority.intValue()) {
-                case EventConstants.PRIORITY_HIGH:
-                    m.addHeader("X-Priority", "1");
-                    break;
-                case EventConstants.PRIORITY_MEDIUM:
-                    m.addHeader("X-Priority", "2");
-                    break;
-                default:
-                    break;
-                }
-            }
-            
-            // Send to each recipient individually (for D.B. SMS)
-            for (int i = 0; i < addresses.length; i++) {
-                m.setRecipient(Message.RecipientType.TO, 
-                               addresses[i].getAddress());
-                
-                if (addresses[i].useHtml()) {
-                    m.setContent(htmlBody[i], "text/html");
-                    if (log.isDebugEnabled()) {
-                        log.debug("Sending HTML Alert notification: " +
-                                   subject + " to " +
-                                   addresses[i].getAddress().getAddress());
-                    }
-                } else {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Sending Alert notification: " + subject +
-                                   " to " +
-                                   addresses[i].getAddress().getAddress());
-                    }
-                    m.setContent(body[i], "text/plain");
-                }
-                
-                Transport.send(m);
-            }
-        } catch (MessagingException e) {
-            log.error("Error sending email: " + subject);
-            log.debug("Messaging Error sending email", e);
-        }
     }
-    
+
     void sendFiltered(Integer pid) {
         Hashtable cache;
         int platId = pid.intValue();    // Convert to int for convenience
@@ -315,7 +207,7 @@ public class EmailFilter {
         }
         
         AppdefEntityID platEntId = AppdefEntityID.newPlatformID(pid); 
-        String platName = getAppdefEntityName(platEntId);
+        String platName = ResourceManagerImpl.getOne().getAppdefEntityName(platEntId);
     
         // The cache is organized by addresses
         for (Iterator i = cache.entrySet().iterator(); i.hasNext(); ) {
@@ -362,11 +254,11 @@ public class EmailFilter {
                                                     next.getTime());
 
                 Date nextfire = scheduler.scheduleJob(jobDetail, t);
-                _log.debug("Will queue alerts for platform " +
+                log.debug("Will queue alerts for platform " +
                            platId + " until " + nextfire);
             } else {
                 // Already scheduled, there will only be a single trigger.
-                _log.debug("Already queing alerts for platform " +
+                log.debug("Already queing alerts for platform " +
                            platId + ", will fire at " +
                            triggers[0].getNextFireTime());
             }

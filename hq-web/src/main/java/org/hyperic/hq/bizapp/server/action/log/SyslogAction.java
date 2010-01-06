@@ -37,6 +37,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
+import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.bizapp.server.action.email.EmailFilter;
 import org.hyperic.hq.bizapp.shared.action.SyslogActionConfig;
 import org.hyperic.hq.escalation.server.session.Escalatable;
@@ -92,11 +93,10 @@ public class SyslogAction extends SyslogActionConfig
     public String execute(AlertInterface alert, ActionExecutionInfo info) 
         throws ActionExecuteException 
     {
-        EmailFilter filter = new EmailFilter();
         AlertDefinitionInterface alertDef =
             alert.getAlertDefinitionInterface();
         AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(alertDef.getResource());
-        String resName = filter.getAppdefEntityName(aeid);
+        String resName = ResourceManagerImpl.getOne().getAppdefEntityName(aeid);
         resName = hackDBString(resName);
 
         _log.info("DB_1 " + convertToDBPriority(alertDef.getPriority()) +

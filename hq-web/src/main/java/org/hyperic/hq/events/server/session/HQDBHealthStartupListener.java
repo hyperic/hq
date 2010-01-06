@@ -49,8 +49,8 @@ import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.Scheduler;
 import org.hyperic.hq.application.StartupListener;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.bizapp.server.action.email.EmailFilter;
 import org.hyperic.hq.bizapp.server.action.email.EmailRecipient;
+import org.hyperic.hq.bizapp.server.session.EmailManagerImpl;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.util.jdbc.DBUtil;
@@ -247,7 +247,7 @@ public class HQDBHealthStartupListener implements StartupListener {
 
                 Arrays.fill(body, sb.toString());
 
-                EmailFilter.sendEmail(addresses, ResourceBundle.getBundle(BUNDLE).getString(
+                EmailManagerImpl.getOne().sendEmail(addresses, ResourceBundle.getBundle(BUNDLE).getString(
                     "event.hqdbhealth.email.subject"), body, null, null);
             } catch (AddressException e) {
                 _log.error("Invalid email address: " + hqadminEmail);

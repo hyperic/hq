@@ -25,10 +25,13 @@
 
 package org.hyperic.hq.bizapp.server.session;
 
-import javax.annotation.PostConstruct;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-import javax.xml.parsers.DocumentBuilderFactory;
+import java.util.Properties;
+
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -36,60 +39,107 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.server.action.email.EmailFilter;
 import org.hyperic.hq.bizapp.server.action.email.EmailRecipient;
 import org.hyperic.hq.bizapp.shared.EmailManager;
+import org.hyperic.hq.common.server.session.ServerConfigManagerImpl;
+import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.context.Bootstrap;
-import org.jboss.mail.MailService;
+import org.hyperic.hq.events.EventConstants;
+import org.hyperic.util.ConfigPropertyException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 /**
- * This SessionEJB is used to ensure that EmailFilter does not fail since it
- * requires an associated session. Class uses transaction type NotSupported so
- * that callers don't get hung up on Email since it is an I/O operation.
  */
 @Service
-@Transactional
-// Really? TODO
 public class EmailManagerImpl implements EmailManager {
+    private JavaMailSender mailSender;
+    private ServerConfigManager serverConfigManager;
+    final Log log = LogFactory.getLog(EmailManagerImpl.class);
 
-    private final Log log = LogFactory.getLog(EmailManagerImpl.class.getName());
-    private MBeanServer server;
 
     @Autowired
-    public EmailManagerImpl(MBeanServer server) {
-        this.server = server;
+    public EmailManagerImpl(JavaMailSender mailSender, ServerConfigManager serverConfigManager) {
+        this.mailSender = mailSender;
+        this.serverConfigManager = serverConfigManager;
     }
 
-    @PostConstruct
-    public void initJBossMailServer() {
-        MailService mailService = new MailService();
-        mailService.setJNDIName("java:/SpiderMail");
-        mailService.setUser("EAM Application");
-        mailService.setPassword("password");
-        try {
-            Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(
-                getClass().getClassLoader().getResourceAsStream("jboss-mail-config.xml"));
-            Element config = (Element) document.getFirstChild();
-            mailService.setConfiguration(config);
-        } catch (Exception e) {
-            log.error("Error parsing JBoss mail service configuration.  Unable to create mail service.", e);
-            return;
-        }
-        try {
-            server.registerMBean(mailService, new ObjectName("jboss:service=SpiderMail"));
-        } catch (Exception e) {
-            log.error("Error registering JBoss mail service MBean", e);
-        }
-
-    }
-
-    /**
-     */
     public void sendAlert(EmailFilter filter, AppdefEntityID appEnt, EmailRecipient[] addresses, String subject,
                           String[] body, String[] htmlBody, int priority, boolean filterNotifications) {
         filter.sendAlert(appEnt, addresses, subject, body, htmlBody, priority, filterNotifications);
+    }
+
+    public void sendEmail(EmailRecipient[] addresses, String subject, String[] body, String[] htmlBody,
+                          Integer priority) {
+        final Log log = LogFactory.getLog(EmailFilter.class);
+
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        try {
+            InternetAddress from = getFromAddress();
+            if (from == null) {
+                mimeMessage.setFrom();
+            } else {
+                mimeMessage.setFrom(from);
+            }
+
+            mimeMessage.setSubject(subject);
+
+            // If priority not null, set it in body
+            if (priority != null) {
+                switch (priority.intValue()) {
+                    case EventConstants.PRIORITY_HIGH:
+                        mimeMessage.addHeader("X-Priority", "1");
+                        break;
+                    case EventConstants.PRIORITY_MEDIUM:
+                        mimeMessage.addHeader("X-Priority", "2");
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            // Send to each recipient individually (for D.B. SMS)
+            for (int i = 0; i < addresses.length; i++) {
+                mimeMessage.setRecipient(Message.RecipientType.TO,
+                                         addresses[i].getAddress());
+
+                if (addresses[i].useHtml()) {
+                    mimeMessage.setContent(htmlBody[i], "text/html");
+                    if (log.isDebugEnabled()) {
+                        log.debug("Sending HTML Alert notification: " +
+                                  subject + " to " +
+                                  addresses[i].getAddress().getAddress());
+                    }
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Sending Alert notification: " + subject +
+                                  " to " +
+                                  addresses[i].getAddress().getAddress());
+                    }
+                    mimeMessage.setContent(body[i], "text/plain");
+                }
+
+                mailSender.send(mimeMessage);
+            }
+        } catch (MessagingException e) {
+            log.error("Error sending email: " + subject);
+            log.debug("Messaging Error sending email", e);
+        }
+    }
+
+    private InternetAddress getFromAddress() {
+        try {
+            Properties props = serverConfigManager.getConfig();
+            String from = props.getProperty(HQConstants.EmailSender);
+            if (from != null) {
+                return new InternetAddress(from);
+            }
+        } catch (ConfigPropertyException e) {
+            log.error("ConfigPropertyException fetch FROM address", e);
+        } catch (AddressException e) {
+            log.error("Bad FROM address", e);
+        }
+        return null;
     }
 
     public static EmailManager getOne() {

@@ -15,4 +15,9 @@ public interface EmailManager {
                           EmailRecipient[] addresses,
                           String subject, String[] body, String[] htmlBody, int priority,
                           boolean filterNotifications);
+    
+    public void sendEmail(EmailRecipient[] addresses, String subject, 
+                          String[] body, String[] htmlBody,
+                          Integer priority);
+
 }

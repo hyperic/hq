@@ -981,6 +981,15 @@ public class ResourceManagerImpl implements ResourceManager {
     public ResourceRelation getNetworkRelation() {
         return resourceRelationDAO.findById(AuthzConstants.RELATION_NETWORK_ID);
     }
+    
+    public String getAppdefEntityName(AppdefEntityID appEnt) {
+        Resource res = findResource(appEnt);
+        if (res != null) {
+            return res.getName();
+        }
+        return appEnt.getAppdefKey();
+    }
+
 
     public static ResourceManager getOne() {
         return Bootstrap.getBean(ResourceManager.class);

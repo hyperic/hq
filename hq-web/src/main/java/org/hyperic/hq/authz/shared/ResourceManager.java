@@ -235,4 +235,5 @@ public interface ResourceManager {
     void removeAuthzResource(AuthzSubject subject, AppdefEntityID aeid, Resource r) throws RemoveException,
     PermissionException, VetoException;
 
+    public String getAppdefEntityName(AppdefEntityID appEnt);
 }
