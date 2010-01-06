@@ -1,18 +1,19 @@
 /*
- * NOTE: This copyright does *not* cover user programs that use HQ program
- * services by normal system calls through the application program interfaces
- * provided as part of the Hyperic Plug-in Development Kit or the Hyperic Client
- * Development Kit - this is merely considered normal use of the program, and
- * does *not* fall under the heading of "derived work". Copyright (C) [2004,
- * 2005, 2006], Hyperic, Inc. This file is part of HQ. HQ is free software; you
- * can redistribute it and/or modify it under the terms version 2 of the GNU
- * General Public License as published by the Free Software Foundation. This
- * program is distributed in the hope that it will be useful, but WITHOUT ANY
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc., 59 Temple
- * Place, Suite 330, Boston, MA 02111-1307 USA.
+ * 'MIBTree.java' NOTE: This copyright does *not* cover user programs that use
+ * HQ program services by normal system calls through the application program
+ * interfaces provided as part of the Hyperic Plug-in Development Kit or the
+ * Hyperic Client Development Kit - this is merely considered normal use of the
+ * program, and does *not* fall under the heading of "derived work". Copyright
+ * (C) [2004, 2005, 2006, 2007, 2008, 2009], Hyperic, Inc. This file is part of
+ * HQ. HQ is free software; you can redistribute it and/or modify it under the
+ * terms version 2 of the GNU General Public License as published by the Free
+ * Software Foundation. This program is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+ * Public License for more details. You should have received a copy of the GNU
+ * General Public License along with this program; if not, write to the Free
+ * Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ * USA.
  */
 
 package org.hyperic.snmp;
@@ -38,7 +39,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.snmp4j.smi.OctetString;
 
-/**
+/*
  * MIB file parser intended ONLY for OBJECT-TYPE name -> OID conversion For
  * example, converting: "wwwServiceDescription" to: "1.3.6.1.2.1.65.1.1.1.1.2"
  * IMPORTS are ignored and parse() order of MIBs does not matter, provided all
@@ -57,23 +58,30 @@ public class MIBTree {
     private static final int MAX_OID_LEN = 127;
     private static final String QUOTE = "\"";
     private static final String ASSIGN = "::=";
+
     private static MIBTree instance = null;
+
     private HashMap parsedFiles = new HashMap();
     private HashMap table = new HashMap(); // parsed MIBs
     private HashMap oids = new HashMap(); // cache OID conversion
+
     private LineNumberReader reader;
-    private List tokens = new ArrayList(); // lexx/yakk/hakk
+
+    private List tokens = new ArrayList(); // lexx / yakk / hakk
     private List previous = new ArrayList();
+
     private StringTokenizer tokenizer;
+
     private String currentMIB;
-    private boolean inDescription = false;
     private String lastLookupFailure;
+
+    private boolean inDescription = false;
 
     private static final int T_NAME = 0;
     private static final int T_PARENT = 1;
     private static final int T_OID = 2;
 
-    // every MIB depends on SNMPv2-SMI
+    // Every MIB depends on SNMPv2-SMI...
     private static final String[][] SNMPv2_SMI = { { "org", "iso", "3" },
                                                   { "dod", "org", "6" },
                                                   { "internet", "dod", "1" },
@@ -90,7 +98,7 @@ public class MIBTree {
                                                   { "snmpProxys", "snmpV2", "2" },
                                                   { "snmpModules", "snmpV2", "3" }, };
 
-    // commonly used objects from SNMPv2-MIB
+    // Commonly used objects from SNMPv2-MIB...
     private static final String[][] SNMPv2_MIB = { { "sysDescr", "system", "1" },
                                                   { "sysObjectID", "system", "2" },
                                                   { "sysUpTime", "system", "3" },
@@ -102,6 +110,7 @@ public class MIBTree {
     class MIBNode {
         String parent;
         String oid;
+
         int flags = 0;
 
         MIBNode(String oid, String parent) {
@@ -121,30 +130,35 @@ public class MIBTree {
             return (this.flags & flag) != 0;
         }
 
-        // to keep the MIBNode objects as small as possible,
+        // To keep the MIBNode objects as small as possible,
         // we work backwards here to compose the full oid
-        // only when they are asked for. parser will cache
-        // so this is a one-time expense.
+        // only when they are asked for. Parser will cache
+        // so this is a one-time expense...
         int[] getOID(String name) {
             int[] scratch = new int[MAX_OID_LEN];
             int ix = scratch.length;
+
             MIBNode node = this;
+
             boolean indexApplies = !hasFlag(IDENTIFIER) && !hasFlag(NO_ACCESS);
             boolean hasIndex = false;
             boolean isDebug = log.isDebugEnabled();
 
             while ((node != null) && (ix > 0)) {
                 scratch[--ix] = Integer.parseInt(node.oid);
+
                 MIBNode parent = node.getParent();
 
                 if (parent == null) {
                     if (node.getClass() != ISONode.class) {
                         lastLookupFailure = node.parent;
+
                         return null;
                     } else {
                         break;
                     }
                 }
+
                 if (parent.hasFlag(INDEX)) {
                     hasIndex = true;
                 }
@@ -152,16 +166,18 @@ public class MIBTree {
                 node = parent;
             }
 
-            int len = scratch.length - ix;
             boolean addIndex = indexApplies && !hasIndex;
+
+            int len = scratch.length - ix;
             int alloc = addIndex ? len + 1 : len;
             int[] oid = new int[alloc];
 
             System.arraycopy(scratch, ix, oid, 0, len);
 
-            // sysUpTime.0
+            // sysUpTime.0...
             if (addIndex) {
                 oid[len] = 0;
+
                 if (isDebug) {
                     log.debug(getMIB() + "." + name + " has no index, appending .0");
                 }
@@ -176,6 +192,7 @@ public class MIBTree {
     {
         ISONode() {
             super("1", null);
+
             this.flags = IDENTIFIER;
         }
     }
@@ -187,6 +204,7 @@ public class MIBTree {
 
         DebugMIBNode(String oid, String parent) {
             super(oid, parent);
+
             if (instance != null) {
                 this.mib = instance.currentMIB;
             }
@@ -203,17 +221,21 @@ public class MIBTree {
 
     public void init() {
         this.currentMIB = "SNMPv2-SMI";
+
         add(SNMPv2_SMI, IDENTIFIER);
 
         this.currentMIB = "SNMPv2-MIB";
+
         add("system", "mib-2", "1", IDENTIFIER);
         add(SNMPv2_MIB, 0);
 
         this.currentMIB = null;
 
         String dir = System.getProperty(PROP_MIBS_DIR);
+
         if (dir != null) {
             File mibs = new File(dir);
+
             if (!mibs.exists()) {
                 log.debug(mibs + " MIB dir does not exist");
             }
@@ -228,8 +250,10 @@ public class MIBTree {
     public synchronized static MIBTree getInstance() {
         if (instance == null) {
             instance = new MIBTree();
+
             instance.init();
         }
+
         return instance;
     }
 
@@ -243,6 +267,7 @@ public class MIBTree {
 
     public static String toString(int[] oid) {
         StringBuffer buffer = new StringBuffer(oid.length * 2);
+
         buffer.append(oid[0]);
 
         for (int i = 1; i < oid.length; i++) {
@@ -254,13 +279,15 @@ public class MIBTree {
 
     public int[] getOID(String name) {
         int[] oid = (int[]) this.oids.get(name);
+
         if (oid != null) {
             return oid;
         }
 
         if (name.indexOf('.') != -1) {
-            // handle "cpmCPUTotal5sec.1"
+            // Handle "cpmCPUTotal5sec.1"...
             StringTokenizer tok = new StringTokenizer(name, ".");
+
             int[] scratch = new int[MAX_OID_LEN];
             int ix = 0;
 
@@ -272,33 +299,44 @@ public class MIBTree {
                 } else {
                     int[] subnode;
                     int len = node.length() - 1;
-                    // see:
-                    // http://www.snmp4j.org/doc/org/snmp4j/smi/OID.html#OID(java.lang.String)
+
+                    // See:
+                    // http://www.snmp4j.org/doc/org/snmp4j/smi/OID.html#OID(java.lang.String)...
                     final char quote = '\'';
+
                     if ((node.charAt(0) == quote) && (node.charAt(len) == quote)) {
                         node = node.substring(1, len);
                         subnode = new OctetString(node).toSubIndex(false).getValue();
                     } else {
                         subnode = getOID(node);
                     }
+
                     if (subnode == null) {
                         return null;
                     }
+
                     System.arraycopy(subnode, 0, scratch, ix, subnode.length);
+
                     ix += subnode.length;
                 }
             }
+
             oid = new int[ix];
+
             System.arraycopy(scratch, 0, oid, 0, ix);
         } else {
             MIBNode mibnode = lookup(name);
+
             if (mibnode == null) {
                 return null;
             }
+
             oid = mibnode.getOID(name);
+
             if (oid == null) {
                 log.warn(name + " found in tree but unable to resolve OID." + " lastLookupFailure=" +
                          this.lastLookupFailure);
+
                 return null;
             }
         }
@@ -307,7 +345,7 @@ public class MIBTree {
             log.debug(name + " resolved to: " + toString(oid));
         }
 
-        this.oids.put(name, oid); // cache result
+        this.oids.put(name, oid); // Cache result...
 
         return oid;
     }
@@ -322,14 +360,17 @@ public class MIBTree {
 
     private void add(String name, String parent, String oid, int flags) {
         boolean isDebug = log.isDebugEnabled();
+
         MIBNode node = (MIBNode) this.table.get(name);
 
         if (node != null) {
             if (isDebug) {
                 log.debug(this.currentMIB + "." + name + " already added by " + node.getMIB());
             }
+
             return;
         }
+
         node = isDebug ? new DebugMIBNode(oid, parent) : new MIBNode(oid, parent);
 
         node.flags = flags;
@@ -337,19 +378,23 @@ public class MIBTree {
         this.table.put(name, node);
     }
 
-    // on-demand StringTokenizer.nextToken()
+    // On-demand StringTokenizer.nextToken ( )...
     private String token(int ix) {
         if (ix < this.tokens.size()) {
             return (String) this.tokens.get(ix);
         }
+
         while (this.tokenizer.hasMoreTokens()) {
             String token = this.tokenizer.nextToken();
+
             this.tokens.add(token);
+
             if (ix + 1 == this.tokens.size()) {
                 return token;
             }
         }
-        return ""; // avoid NPE and goofy "CONST".equals(val)
+
+        return ""; // Avoid NPE and goofy "CONST".equals ( val )...
     }
 
     private String where(int start) {
@@ -364,12 +409,13 @@ public class MIBTree {
         if (line == null) {
             line = "";
         }
+
         this.tokenizer = new StringTokenizer(line);
     }
 
     private String readToLine(String contains) throws IOException {
-
         int start = this.reader.getLineNumber();
+
         String line;
 
         while ((line = readLine()) != null) {
@@ -381,20 +427,22 @@ public class MIBTree {
         throw new IOException("Expecting '" + contains + "'" + " not found" + where(start));
     }
 
-    // skip all text within DESCRIPTION "..."
+    // Skip all text within DESCRIPTION "..."
     // since certain MIBs have text which we would
-    // otherwise get parsed, which we dont want.
+    // otherwise get parsed, which we dont want...
     private String skipDescription(String line) throws IOException {
-
-        // flag to prevent recursing on ourselves
+        // Flag to prevent recursing on ourselves...
         this.inDescription = true;
+
         try {
             if (line.indexOf(QUOTE) == -1) {
                 line = readToLine(QUOTE);
             }
+
             if (!line.endsWith(QUOTE)) {
                 line = readToLine(QUOTE);
             }
+
             return readLine();
         } finally {
             this.inDescription = false;
@@ -406,17 +454,22 @@ public class MIBTree {
 
         while ((line = this.reader.readLine()) != null) {
             line = line.trim();
-            if ((line.length() == 0) || line.startsWith("--")) // skip comments
+
+            if ((line.length() == 0) || line.startsWith("--")) // Skip
+                                                               // comments...
             {
                 continue;
             }
+
             int ix = line.indexOf("--");
+
             if (ix != -1) {
                 line = line.substring(0, ix).trim();
             }
+
             if (line.length() != 0) {
                 if (!this.inDescription && line.startsWith("DESCRIPTION")) {
-                    // this will recurse.
+                    // This will recurse...
                     return skipDescription(line);
                 } else {
                     return line;
@@ -428,24 +481,25 @@ public class MIBTree {
     }
 
     private void parseId(String name, String line, int flags) throws IOException {
-
         if (line.endsWith(ASSIGN)) {
             line = readLine();
         }
 
         int start = line.indexOf('{');
         int end = line.indexOf('}');
+
         if ((start != -1) && (end == -1)) {
             // e.g. cisco LAN-EMULATION-CLIENT-MIB.my
             // atmfLanEmulation OBJECT IDENTIFIER ::= {
             // enterprises
             // atmForum(353)
             // atmForumNetworkManagement(5)
-            // 3
-            // }
+            // 3 }
             String nextLine;
+
             do {
                 nextLine = readLine();
+
                 line += " " + nextLine;
             } while ((end = line.indexOf('}')) == -1);
         }
@@ -453,33 +507,45 @@ public class MIBTree {
         if ((start == -1) || (end == -1)) {
             throw new IOException("Expecting ::= {...} " + " in " + line + where(0));
         }
+
         line = line.substring(start + 1, end).trim();
+
         StringTokenizer tok = new StringTokenizer(line);
+
         int numTokens = tok.countTokens();
+
         if (numTokens < 2) {
-            throw new IOException("Invalid ID " + " in " + line + where(0));
+            throw new IOException("Invalid ID in " + line + where(0));
         }
+
         if (numTokens == 2) {
-            // common case ::= { wwwServiceEntry 4 }
+            // Common case ::= { wwwServiceEntry 4 }...
             String parent = tok.nextToken();
             String number = tok.nextToken();
+
             add(name, parent, number, flags);
         } else {
             // ::= { iso org(3) dod(6) 1 }
             // atmfLanEmulation ... ::= (above)
             String parent = tok.nextToken();
+
             while (tok.hasMoreTokens()) {
                 String next = tok.nextToken();
 
                 int openParen = next.indexOf('(');
+
                 if (openParen != -1) {
                     int closeParen = next.indexOf(')');
+
                     if (closeParen == -1) {
-                        throw new IOException("Expecting ')' " + " in " + line + where(0));
+                        throw new IOException("Expecting ')' in " + line + where(0));
                     }
+
                     String subName = next.substring(0, openParen);
                     String subNum = next.substring(openParen + 1, closeParen);
+
                     add(subName, parent, subNum, IDENTIFIER);
+
                     parent = subName;
                 } else {
                     add(name, parent, next, flags);
@@ -492,11 +558,14 @@ public class MIBTree {
         // :: = { wwwService 65 }
         String name = token(0);
         String line;
+
         int flags = NO_ACCESS;
+
         while ((line = readLine()) != null) {
             if (line.indexOf(ASSIGN) != -1) {
                 break;
             }
+
             if (line.startsWith("INDEX")) {
                 flags |= INDEX;
             } else if (line.startsWith("SYNTAX")) {
@@ -516,18 +585,22 @@ public class MIBTree {
     private void parseObjectIdentifier(String line) throws IOException {
         // wwwMIBObjects OBJECT IDENTIFIER ::= { wwwMIB 1 }
         String name = token(0);
+
         if (line.indexOf(ASSIGN) == -1) {
             line = readToLine(ASSIGN);
         }
+
         parseId(name, line, IDENTIFIER);
     }
 
     private boolean hasParsedFile(File file) {
         String name = file.getName();
+
         if (this.parsedFiles.get(name) != null) {
             return true;
         } else {
             this.parsedFiles.put(name, Boolean.TRUE);
+
             return false;
         }
     }
@@ -555,31 +628,35 @@ public class MIBTree {
     }
 
     public boolean parse(JarFile jar) throws IOException {
-
         return parse(jar, null);
     }
 
     public boolean parse(JarFile jar, String[] accept) throws IOException {
-
         AcceptFilter filter = new AcceptFilter(accept);
 
         for (Enumeration e = jar.entries(); e.hasMoreElements();) {
             JarEntry entry = (JarEntry) e.nextElement();
+
             if (entry.isDirectory()) {
                 continue;
             }
+
             if (!entry.getName().startsWith("mibs/")) {
                 continue;
             }
+
             String name = entry.getName().substring(5);
+
             if (!filter.accept(name)) {
                 continue;
             }
+
             if (hasParsedFile(new File(name))) {
                 continue;
             }
 
             String where = jar.getName() + "!" + entry.getName();
+
             parse(where, jar.getInputStream(entry));
         }
 
@@ -587,36 +664,45 @@ public class MIBTree {
     }
 
     public boolean parse(File file) throws IOException {
-
         return parse(file, null);
     }
 
     public boolean parse(File file, String[] accept) throws IOException {
-
         if (hasParsedFile(file)) {
             return true;
         }
+
         if (file.isDirectory()) {
             File[] mibs = file.listFiles();
+
             if ((mibs == null) || (mibs.length == 0)) {
                 log.debug("No MIBs in directory: " + file);
+
                 return false;
             }
+
             AcceptFilter filter = new AcceptFilter(accept);
+
             log.debug("Loading MIBs in directory: " + file);
+
             for (int i = 0; i < mibs.length; i++) {
                 File mib = mibs[i];
+
                 if (mib.isDirectory()) {
                     continue;
                 }
+
                 if (!filter.accept(mib.getName())) {
                     continue;
                 }
+
                 parseFile(mib);
             }
+
             return true;
         } else if (file.getName().endsWith(".jar")) {
             JarFile jar = new JarFile(file);
+
             try {
                 return parse(jar, accept);
             } finally {
@@ -631,12 +717,13 @@ public class MIBTree {
         if (hasParsedFile(new File(url.getFile()))) {
             return true;
         }
+
         return parse(url.toString(), url.openStream());
     }
 
     public boolean parse(String name, InputStream is) throws IOException {
-
         boolean isSuccess = false;
+
         try {
             isSuccess = parse(is);
         } catch (IOException e) {
@@ -650,6 +737,7 @@ public class MIBTree {
 
     public boolean parse(InputStream is) throws IOException {
         this.lastLookupFailure = null;
+
         try {
             return parseMIB(is);
         } catch (IOException e) {
@@ -659,6 +747,7 @@ public class MIBTree {
         } finally {
             this.tokens.clear();
             this.previous.clear();
+
             try {
                 is.close();
             } catch (IOException e) {
@@ -672,23 +761,29 @@ public class MIBTree {
 
     private boolean parseMIB(InputStream is) throws IOException {
         String line;
+
         this.reader = new LineNumberReader(new InputStreamReader(is));
+
         this.currentMIB = "";
 
         tokenize(readLine());
+
         if (!token(1).equals("DEFINITIONS")) {
             return false;
         }
 
         this.currentMIB = token(0);
+
         int size = this.table.size();
 
         while ((line = readLine()) != null) {
             tokenize(line);
+
             String first = token(0);
 
             if (first.equals("IMPORTS") || first.equals("EXPORTS")) {
                 readToLine(";");
+
                 continue;
             }
 
@@ -697,6 +792,7 @@ public class MIBTree {
             }
 
             String second = token(1);
+
             if (second == null) {
                 continue;
             }
@@ -709,8 +805,11 @@ public class MIBTree {
                 // snmpFrameworkAdmin
                 // OBJECT IDENTIFIER ::= { snmpFrameworkMIB 1 }
                 Object name = this.previous.get(0);
+
                 line = name + " " + line;
+
                 this.tokens.add(0, name);
+
                 parseObjectIdentifier(line);
             } else if (second.equals("OBJECT-TYPE") || second.equals("MODULE-IDENTITY") ||
                        second.equals("OBJECT-IDENTITY"))
@@ -728,10 +827,12 @@ public class MIBTree {
 
     public static void main(String[] args) throws Exception {
         ArrayList names = new ArrayList();
+
         MIBTree tree = MIBTree.getInstance();
 
         for (int i = 0; i < args.length; i++) {
             File file = new File(args[i]);
+
             if (file.exists()) {
                 if (!tree.parse(file)) {
                     System.out.println(args[i] + " is not valid MIB");
@@ -749,7 +850,9 @@ public class MIBTree {
 
         for (int i = 0; i < names.size(); i++) {
             String name = (String) names.get(i);
+
             int[] oid = tree.getOID(name);
+
             if (oid == null) {
                 System.out.println("Failed to get oid for: " + name + " (lastLookupFailure=" + tree.lastLookupFailure +
                                    ")");

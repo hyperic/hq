@@ -1,18 +1,19 @@
 /*
- * NOTE: This copyright does *not* cover user programs that use HQ program
- * services by normal system calls through the application program interfaces
- * provided as part of the Hyperic Plug-in Development Kit or the Hyperic Client
- * Development Kit - this is merely considered normal use of the program, and
- * does *not* fall under the heading of "derived work". Copyright (C) [2004,
- * 2005, 2006], Hyperic, Inc. This file is part of HQ. HQ is free software; you
- * can redistribute it and/or modify it under the terms version 2 of the GNU
- * General Public License as published by the Free Software Foundation. This
- * program is distributed in the hope that it will be useful, but WITHOUT ANY
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc., 59 Temple
- * Place, Suite 330, Boston, MA 02111-1307 USA.
+ * 'SNMPValue.java' NOTE: This copyright does *not* cover user programs that use
+ * HQ program services by normal system calls through the application program
+ * interfaces provided as part of the Hyperic Plug-in Development Kit or the
+ * Hyperic Client Development Kit - this is merely considered normal use of the
+ * program, and does *not* fall under the heading of "derived work". Copyright
+ * (C) [2004, 2005, 2006, 2007, 2008, 2009], Hyperic, Inc. This file is part of
+ * HQ. HQ is free software; you can redistribute it and/or modify it under the
+ * terms version 2 of the GNU General Public License as published by the Free
+ * Software Foundation. This program is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+ * Public License for more details. You should have received a copy of the GNU
+ * General Public License along with this program; if not, write to the Free
+ * Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ * USA.
  */
 
 package org.hyperic.snmp;
@@ -28,7 +29,6 @@ import org.snmp4j.smi.Variable;
 import org.snmp4j.smi.VariableBinding;
 
 public class SNMPValue {
-
     private static Log log = LogFactory.getLog(SNMPValue.class);
 
     public static final int TYPE_LONG = 0;
@@ -36,6 +36,7 @@ public class SNMPValue {
     public static final int TYPE_LONG_CONVERTABLE = 2;
 
     OID oid;
+
     Variable var;
 
     private SNMPValue() {
@@ -60,7 +61,7 @@ public class SNMPValue {
 
     public String toString() {
         if (isOctetString()) {
-            // avoid OctetString.toString() hex encoding
+            // Avoid OctetString.toString() hex encoding
             // if bytes contain any ISO control chars
             return new String(getBytes());
         } else {
@@ -72,7 +73,7 @@ public class SNMPValue {
         return Integer.toHexString(val & 0xff);
     }
 
-    // from SNMPv2-TC:
+    // From SNMPv2-TC:
     // PhysAddress ::= TEXTUAL-CONVENTION
     // DISPLAY-HINT "1x:"
     // STATUS current
@@ -83,7 +84,7 @@ public class SNMPValue {
         byte[] data = getBytes();
 
         if (data.length == 0) {
-            return "0:0:0:0:0:0"; // e.g. loopback
+            return "0:0:0:0:0:0"; // e.g. loopback...
         }
 
         StringBuffer buffer = new StringBuffer();
@@ -104,40 +105,52 @@ public class SNMPValue {
     public int getType() {
         switch (this.var.getSyntax()) {
         case SMIConstants.SYNTAX_INTEGER32:
+
         case SMIConstants.SYNTAX_COUNTER32:
+
         case SMIConstants.SYNTAX_COUNTER64:
+
         case SMIConstants.SYNTAX_TIMETICKS:
+
         case SMIConstants.SYNTAX_GAUGE32:
+
             return TYPE_LONG;
+
         case SMIConstants.SYNTAX_OCTET_STRING:
-            // XXX while we are able to convert long
+
+            // While we are able to convert long
             // does not mean we should. treat as a string
             // for now.
             // return TYPE_LONG_CONVERTABLE;
             return TYPE_STRING;
+
         default:
+
             return TYPE_STRING;
         }
     }
 
-    // XXX A bit of a hack - if it is an OctetString, treat
+    // A bit of a hack - if it is an OctetString, treat
     // it like a DateAndTime (from the SNMPv2-TC MIB)
     private long convertDateAndTimeToLong() throws SNMPException {
-
         byte[] bytes = getBytes();
 
         if (bytes.length < 8) {
             String msg = "OctetString is not in DateAndTime syntax";
+
             throw new SNMPException(msg);
         }
 
         Calendar cal = Calendar.getInstance();
 
         int ix = 0;
+
         int year = (bytes[ix] > 0) ? bytes[ix] : (256 + bytes[ix]);
 
         year <<= 8;
+
         ix++;
+
         year += (bytes[ix] > 0) ? bytes[ix] : (256 + bytes[ix]);
 
         ix++;
@@ -174,6 +187,7 @@ public class SNMPValue {
                 return this.var.toLong();
             } catch (UnsupportedOperationException e) {
                 String msg = "Cannot convert " + this.var.getSyntaxString() + " to long";
+
                 throw new SNMPException(msg);
             }
         }
