@@ -116,7 +116,6 @@
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/com.springsource.javax.transaction-1.1.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/com.springsource.javax.servlet.jsp-2.1.0.jar"/>
 	<classpathentry exported="true" kind="var" path="JBOSS_HOME/server/default/lib/jbosssx.jar"/>
-	<classpathentry exported="true" kind="var" path="JBOSS_HOME/server/default/lib/mail-plugin.jar"/>
 	<classpathentry exported="true" kind="var" path="JBOSS_HOME/server/default/lib/scheduler-plugin.jar"/>
 	<classpathentry exported="true" kind="var" path="JBOSS_HOME/lib/jboss-system.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/jboss-jmx.jar"/>

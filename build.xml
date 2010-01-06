@@ -99,7 +99,7 @@
 		<fileset dir="${thirdparty.lib}/tapestry" includes="*.jar" />
 		<fileset dir="${wrapper.lib}" includes="*.jar" />
 		<fileset dir="${hibernate.lib}" includes="*.jar" />
-		<fileset dir="${jboss.home}/server/default/lib" includes="jbosssx.jar,mail-plugin.jar,scheduler-plugin.jar" />
+		<fileset dir="${jboss.home}/server/default/lib" includes="jbosssx.jar,scheduler-plugin.jar" />
 		<fileset dir="${jboss.home}/lib" includes="jboss-system.jar" />
 		<fileset dir="${hq.plugins}" includes="**/build-lib/*.jar" />
 		<fileset dir="${hq.plugins}" includes="**/lib/*.jar" />
@@ -501,7 +501,6 @@
 				<include name="log4j-1.2.14.jar" />
 				<include name="quartz-1.6.5.jar" />
 				<include name="quartz-oracle-1.6.5.jar" />
-				<include name="quartz-jboss-1.6.5.jar" />
 				<include name="snmp4j.jar" />
 				<include name="dnsjava-2.0.3.jar" />
 				<include name="ehcache-1.5.0.jar" />
