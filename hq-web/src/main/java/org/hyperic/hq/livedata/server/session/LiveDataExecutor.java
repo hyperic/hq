@@ -62,7 +62,7 @@ public class LiveDataExecutor extends ThreadPoolExecutor {
 
     public LiveDataResult[] getResult() {
         try {
-            awaitTermination(1, TimeUnit.MINUTES);
+            awaitTermination(60, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             _log.warn("Executor interrputed!");
         }
