@@ -1,29 +1,18 @@
 /*
- * 'NetworkHostDetector.java'
- *
- *
- * NOTE: This copyright does *not* cover user programs that use HQ
- * program services by normal system calls through the application
- * program interfaces provided as part of the Hyperic Plug-in Development
- * Kit or the Hyperic Client Development Kit - this is merely considered
- * normal use of the program, and does *not* fall under the heading of
- * "derived work".
- * 
- * Copyright (C) [2004, 2005, 2006, 2007, 2008, 2009], Hyperic, Inc.
- * This file is part of HQ.
- * 
- * HQ is free software; you can redistribute it and/or modify
- * it under the terms version 2 of the GNU General Public License as
- * published by the Free Software Foundation. This program is distributed
- * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
- * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
- * PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- * USA.
+ * NOTE: This copyright does *not* cover user programs that use HQ program
+ * services by normal system calls through the application program interfaces
+ * provided as part of the Hyperic Plug-in Development Kit or the Hyperic Client
+ * Development Kit - this is merely considered normal use of the program, and
+ * does *not* fall under the heading of "derived work". Copyright (C) [2004,
+ * 2005, 2006], Hyperic, Inc. This file is part of HQ. HQ is free software; you
+ * can redistribute it and/or modify it under the terms version 2 of the GNU
+ * General Public License as published by the Free Software Foundation. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+ * Place, Suite 330, Boston, MA 02111-1307 USA.
  */
 
 package org.hyperic.hq.plugin.netdevice;
@@ -34,42 +23,40 @@ import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServiceResource;
 import org.hyperic.util.config.ConfigResponse;
 
-public class NetworkHostDetector extends NetworkDeviceDetector
+public class NetworkHostDetector
+    extends NetworkDeviceDetector
 {
-   private static final String STORAGE_NAME   = "Storage";
-   private static final String PROP_STORAGE   = STORAGE_NAME.toLowerCase ( );
-   private static final String STORAGE_COLUMN = "hrStorageDescr";
-    
-   public List discoverServices ( ConfigResponse serverConfig ) throws PluginException
-   {
-      List services = super.discoverServices ( serverConfig );
 
-      openSession ( serverConfig );
+    private static final String STORAGE_NAME = "Storage";
+    private static final String PROP_STORAGE = STORAGE_NAME.toLowerCase();
+    private static final String STORAGE_COLUMN = "hrStorageDescr";
 
-      List storageDesc = getColumn ( STORAGE_COLUMN );
+    public List discoverServices(ConfigResponse serverConfig) throws PluginException {
 
-      for ( int i = 0; i < storageDesc.size ( ); i++ )
-      {
-         ConfigResponse config = new ConfigResponse ( );
+        List services = super.discoverServices(serverConfig);
 
-         String name = storageDesc.get(i).toString().trim ( );
+        openSession(serverConfig);
 
-         ServiceResource service = createServiceResource ( STORAGE_NAME );
+        List storageDesc = getColumn(STORAGE_COLUMN);
 
-         config.setValue ( PROP_STORAGE, name );
+        for (int i = 0; i < storageDesc.size(); i++) {
+            ConfigResponse config = new ConfigResponse();
+            String name = storageDesc.get(i).toString().trim();
 
-         service.setProductConfig ( config );
+            ServiceResource service = createServiceResource(STORAGE_NAME);
 
-         // Required to auto-enable metric...
-         service.setMeasurementConfig ( );
-            
-         service.setServiceName ( name + " " + STORAGE_NAME );
+            config.setValue(PROP_STORAGE, name);
+            service.setProductConfig(config);
+            // required to auto-enable metric
+            service.setMeasurementConfig();
 
-         services.add ( service );
-      }
+            service.setServiceName(name + " " + STORAGE_NAME);
 
-      closeSession ( );
+            services.add(service);
+        }
 
-      return services;
-   }
+        closeSession();
+
+        return services;
+    }
 }
