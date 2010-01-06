@@ -24,8 +24,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import javax.annotation.PostConstruct;
-import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -155,7 +153,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
      * to remove this alert definition and any of its' child alert definitions.
      */
     private boolean deleteAlertDefinition(AuthzSubject subj, AlertDefinition alertdef, boolean force)
-        throws RemoveException, PermissionException {
+        throws PermissionException {
         StopWatch watch = new StopWatch();
 
         if (force) { // Used when resources are being deleted
@@ -364,7 +362,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
      * Update an alert definition
      */
     public AlertDefinitionValue updateAlertDefinition(AlertDefinitionValue adval) throws AlertConditionCreateException,
-        ActionCreateException, RemoveException {
+        ActionCreateException {
 
         AlertDefinition aldef = alertDefDao.findById(adval.getId());
 
@@ -539,7 +537,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
      * @return <code>true</code> if the enable/disable succeeded.
      */
     public boolean updateAlertDefinitionInternalEnable(AuthzSubject subj, Integer defId, boolean enable)
-        throws FinderException, PermissionException {
+        throws PermissionException {
 
         AlertDefinition def = alertDefDao.get(defId);
 
@@ -580,7 +578,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
     /**
      * Remove alert definitions
      */
-    public void deleteAlertDefinitions(AuthzSubject subj, Integer[] ids) throws RemoveException, PermissionException {
+    public void deleteAlertDefinitions(AuthzSubject subj, Integer[] ids) throws PermissionException {
         for (int i = 0; i < ids.length; i++) {
             AlertDefinition alertdef = alertDefDao.findById(ids[i]);
 
@@ -707,7 +705,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
      * @param id The alert def Id.
      * @return <code>true</code> if the alert definition is a resource type
      *         alert definition.
-     * @throws FinderException
+     *
      */
     public boolean isResourceTypeAlertDefinition(Integer id) {
         AlertDefinition ad = alertDefDao.get(id);
@@ -725,7 +723,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
      * Get an alert definition's name
      * 
      */
-    public String getNameById(Integer id) throws FinderException {
+    public String getNameById(Integer id) {
         return alertDefDao.get(id).getName();
     }
 
@@ -733,7 +731,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
      * Get an alert definition's conditions
      * 
      */
-    public AlertConditionValue[] getConditionsById(Integer id) throws FinderException {
+    public AlertConditionValue[] getConditionsById(Integer id) {
         AlertDefinition def = alertDefDao.get(id);
         Collection<AlertCondition> conds = def.getConditions();
         AlertConditionValue[] condVals = new AlertConditionValue[conds.size()];

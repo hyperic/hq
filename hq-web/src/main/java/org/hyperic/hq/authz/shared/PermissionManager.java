@@ -30,7 +30,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.ejb.FinderException;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
@@ -50,6 +49,8 @@ import org.hyperic.hq.authz.server.session.ResourceDAO;
 import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.server.session.ResourceTypeDAO;
+import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.shared.HierarchicalAlertingManager;
@@ -152,12 +153,8 @@ public abstract class PermissionManager {
     private void checkAIScanPermissionForPlatform(AuthzSubject subject, AppdefEntityID platformID)
         throws PermissionException {
 
-        AppdefResourcePermissions arp;
-        try {
-            arp = getResourcePermissions(subject, platformID);
-        } catch (FinderException e) {
-            throw new SystemException("Unexpected error reading " + "permissions: " + e, e);
-        }
+        AppdefResourcePermissions arp = getResourcePermissions(subject, platformID);
+        
         if (arp.canCreateChild() && arp.canModify()) {
             // ok, legal operation
         } else {
@@ -171,23 +168,24 @@ public abstract class PermissionManager {
      * Check for createPlatform permission for a resource
      * @param subject
      * @throws PermissionException
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
+     * 
+     * 
      */
     public void checkCreatePlatformPermission(AuthzSubject subject) throws PermissionException {
-        try {
-            checkPermission(subject, getResourceType(AuthzConstants.rootResType), AuthzConstants.rootResourceId,
-                AuthzConstants.platformOpCreatePlatform);
-        } catch (FinderException e) {
-            // seed data error if this is not there
-            throw new SystemException(e);
-        }
+            try {
+                checkPermission(subject, getResourceType(AuthzConstants.rootResType), AuthzConstants.rootResourceId,
+                    AuthzConstants.platformOpCreatePlatform);
+            } catch (NotFoundException e) {
+                // seed data error if this is not there
+                throw new SystemException(e);
+            }
+       
     }
 
     /**
      * Check for control permission for a given resource
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
+     * 
+     * 
      */
     public void checkControlPermission(AuthzSubject subject, AppdefEntityID id) throws PermissionException {
         int type = id.getType();
@@ -217,15 +215,14 @@ public abstract class PermissionManager {
 
     /**
      * Get the AppdefResourcePermissions for a given resource
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
+     * 
+     * 
      * 
      *                  XXX: DON'T USE THIS!!
      * @deprecated Use the individual check*Permission methods instead.
      * 
      */
-    public AppdefResourcePermissions getResourcePermissions(AuthzSubject who, AppdefEntityID eid)
-        throws FinderException {
+    public AppdefResourcePermissions getResourcePermissions(AuthzSubject who, AppdefEntityID eid){
         boolean canView = false;
         boolean canModify = false;
         boolean canCreateChild = false;
@@ -278,8 +275,8 @@ public abstract class PermissionManager {
 
     /**
      * Check for control permission for a given resource
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
+     * 
+     * 
      */
     public void checkRemovePermission(AuthzSubject subject, AppdefEntityID id) throws PermissionException {
         int type = id.getType();
@@ -309,8 +306,8 @@ public abstract class PermissionManager {
 
     /**
      * Check for monitor permission for a given resource
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
+     * 
+     * 
      */
     public void checkMonitorPermission(AuthzSubject subject, AppdefEntityID id) throws PermissionException {
         int type = id.getType();
@@ -340,8 +337,8 @@ public abstract class PermissionManager {
 
     /**
      * Check for manage alerts permission for a given resource
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
+     * 
+     * 
      */
     public void checkAlertingPermission(AuthzSubject subject, AppdefEntityID id) throws PermissionException {
         int type = id.getType();
@@ -420,8 +417,8 @@ public abstract class PermissionManager {
      * @param subject
      * @param id - what
      * @param subject - who
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
+     * 
+     * 
      */
     public void checkCreateChildPermission(AuthzSubject subject, AppdefEntityID id) throws PermissionException {
         int type = id.getType();
@@ -448,9 +445,8 @@ public abstract class PermissionManager {
      * @throws PermissionException - if the op is not found
      */
     private Integer getOpIdByResourceType(ResourceType rtV, String opName) throws PermissionException {
-        Collection ops = rtV.getOperations();
-        for (Iterator it = ops.iterator(); it.hasNext();) {
-            Operation op = (Operation) it.next();
+        Collection<Operation> ops = rtV.getOperations();
+        for ( Operation op : ops) {
             if (op.getName().equals(opName)) {
                 return op.getId();
             }
@@ -460,8 +456,8 @@ public abstract class PermissionManager {
 
     /**
      * Check for modify permission for a given resource
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
+     * 
+     * 
      */
     public void checkModifyPermission(AuthzSubject subject, AppdefEntityID id) throws PermissionException {
         int type = id.getType();
@@ -535,7 +531,7 @@ public abstract class PermissionManager {
     /**
      * Get the authz resource type by AppdefEntityId
      */
-    protected ResourceType getAuthzResourceType(AppdefEntityID id) throws FinderException {
+    protected ResourceType getAuthzResourceType(AppdefEntityID id) throws NotFoundException {
         int type = id.getType();
         switch (type) {
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
@@ -557,7 +553,7 @@ public abstract class PermissionManager {
      * Get the platform resource type
      * @return platformResType
      */
-    protected ResourceType getPlatformResourceType() throws FinderException {
+    protected ResourceType getPlatformResourceType() throws NotFoundException {
         return getResourceType(AuthzConstants.platformResType);
     }
 
@@ -565,7 +561,7 @@ public abstract class PermissionManager {
      * Get the application resource type
      * @return applicationResType
      */
-    protected ResourceType getApplicationResourceType() throws FinderException {
+    protected ResourceType getApplicationResourceType() throws NotFoundException {
         return getResourceType(AuthzConstants.applicationResType);
     }
 
@@ -573,7 +569,7 @@ public abstract class PermissionManager {
      * Get the Server Resource Type
      * @return ResourceTypeValye
      */
-    protected ResourceType getServerResourceType() throws FinderException {
+    protected ResourceType getServerResourceType() throws NotFoundException {
         return getResourceType(AuthzConstants.serverResType);
     }
 
@@ -581,7 +577,7 @@ public abstract class PermissionManager {
      * Get the Service Resource Type
      * @return ResourceTypeValye
      */
-    protected ResourceType getServiceResourceType() throws FinderException {
+    protected ResourceType getServiceResourceType() throws NotFoundException {
         return getResourceType(AuthzConstants.serviceResType);
     }
 
@@ -589,7 +585,7 @@ public abstract class PermissionManager {
      * Get the Authz Resource Type for a Group
      * @return ResourceTypeValue
      */
-    public ResourceType getGroupResourceType() throws FinderException {
+    public ResourceType getGroupResourceType() throws NotFoundException {
         return getResourceType(AuthzConstants.groupResourceTypeName);
     }
 
@@ -598,14 +594,14 @@ public abstract class PermissionManager {
      * @param resType - the constant indicating the resource type (from
      *        AuthzConstants)
      */
-    protected ResourceType getResourceType(String resType) throws FinderException {
+    protected ResourceType getResourceType(String resType) throws NotFoundException{
         return ResourceManagerImpl.getOne().findResourceTypeByName(resType);
     }
 
     /**
      * Check for view permission for a given resource
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
+     * 
+     * 
      */
     public void checkViewPermission(AuthzSubject subject, AppdefEntityID id) throws PermissionException {
         int type = id.getType();
@@ -697,15 +693,15 @@ public abstract class PermissionManager {
      * @return List of integer instance ids
      */
     public abstract List<Integer> findOperationScopeBySubject(AuthzSubject subj, String opName, String resType)
-        throws FinderException, PermissionException;
+        throws PermissionException, NotFoundException;
 
     /**
      * Find the list of instance ids for which a given subject id has a given
      * operation.
      * @return List of integer instance ids
      */
-    public abstract List<Integer> findOperationScopeBySubject(AuthzSubject subj, Integer opId) throws FinderException,
-        PermissionException;
+    public abstract List<Integer> findOperationScopeBySubject(AuthzSubject subj, Integer opId) throws 
+        PermissionException, NotFoundException;
 
     /**
      * Find the list of resources for which a given subject id can perform
@@ -718,10 +714,10 @@ public abstract class PermissionManager {
      * @param resArr - batch of resources to verify
      * @param opArr - corresponding batch of operations
      * @return array of authz Resources
-     * @exception FinderException
+     * @exception ApplicationException
      */
     public abstract Resource[] findOperationScopeBySubjectBatch(AuthzSubject whoami, ResourceValue[] resArr,
-                                                                String[] opArr) throws FinderException;
+                                                                String[] opArr) throws ApplicationException;
 
     /**
      * Get viewable resources of a specific type
@@ -757,8 +753,7 @@ public abstract class PermissionManager {
      * 
      * @return a list of Integers representing instance ids
      */
-    public abstract List<Operation> getAllOperations(AuthzSubject subject, PageControl pc) throws PermissionException,
-        FinderException;
+    public abstract List<Operation> getAllOperations(AuthzSubject subject, PageControl pc) throws PermissionException;
 
     public abstract String getResourceTypeSQL(String instanceId, Integer subjectId, String resType, String op);
 

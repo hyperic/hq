@@ -33,8 +33,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.FinderException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.PageInfo;
@@ -495,7 +493,7 @@ public class GalertManagerImpl implements GalertManager {
      */
     public int[] fillAlertCount(AuthzSubject subj, AppdefEntityID[] ids,
                                 int[] counts)
-        throws PermissionException, FinderException {
+        throws PermissionException {
         for (int i = 0; i < ids.length; i++) {
             if (ids[i].isGroup()) {
                 ResourceGroup group =

@@ -5,9 +5,6 @@ package org.hyperic.hq.appdef.shared;
 
 import java.util.List;
 
-import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
-
 import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -108,7 +105,7 @@ public interface AIQueueManager {
      */
     public List<AppdefResource> processQueue(AuthzSubject subject, List<Integer> platformList,
                                              List<Integer> serverList, List<Integer> ipList, int action)
-        throws FinderException, PermissionException, ValidationException, RemoveException, AIQApprovalException;
+        throws PermissionException, ValidationException, AIQApprovalException;
 
     /**
      * Remove an AI platform from the queue.
@@ -118,8 +115,8 @@ public interface AIQueueManager {
     /**
      * Find a platform given an AI platform id
      */
-    public PlatformValue getPlatformByAI(AuthzSubject subject, int aiPlatformID) throws FinderException,
-        PermissionException, PlatformNotFoundException;
+    public PlatformValue getPlatformByAI(AuthzSubject subject, int aiPlatformID) throws PermissionException,
+        PlatformNotFoundException;
 
     /**
      * Get a platform given an AI platform, returns null if none found

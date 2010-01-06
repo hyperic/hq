@@ -27,8 +27,6 @@ package org.hyperic.hq.appdef.server.session;
 
 import java.util.Collection;
 
-import javax.ejb.FinderException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.ConfigResponseDB;
@@ -435,7 +433,7 @@ public class ConfigManagerImpl implements ConfigManager {
     @Transactional
     public AppdefEntityID setConfigResponse(AuthzSubject subject, AppdefEntityID id, ConfigResponse response,
                                             String type, boolean sendConfigEvent) throws ConfigFetchException,
-        AppdefEntityNotFoundException, PermissionException, EncodingException, FinderException {
+        AppdefEntityNotFoundException, PermissionException, EncodingException {
         byte[] productBytes = null;
         byte[] measurementBytes = null;
         byte[] controlBytes = null;

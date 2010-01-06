@@ -35,7 +35,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.ejb.FinderException;
 import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
@@ -51,6 +50,8 @@ import org.hyperic.hq.authz.server.session.ResourceGroupDAO;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.authz.server.session.RoleDAO;
+import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.context.Bootstrap;
@@ -119,12 +120,12 @@ public class PermissionManagerImpl
         this.dbUtil = dbUtil;
         try {
             conn = getConnection();
-            _falseToken = dbUtil.getBooleanValue(false, conn);
+            _falseToken = DBUtil.getBooleanValue(false, conn);
         } catch (Exception e) {
             throw new SystemException("Unable to initialize " +
                                       "PermissionManager:" + e, e);
         } finally {
-            dbUtil.closeConnection(PermissionManagerImpl.class, conn);
+            DBUtil.closeConnection(PermissionManagerImpl.class, conn);
         }
     }
 
@@ -148,7 +149,7 @@ public class PermissionManagerImpl
 
     public List<Integer> findOperationScopeBySubject(AuthzSubject subj, String opName,
                                             String resType)
-        throws FinderException, PermissionException
+        throws NotFoundException, PermissionException
     {
         if (_log.isDebugEnabled()) {
             _log.debug("Checking Scope for Operation: " + opName +
@@ -170,7 +171,7 @@ public class PermissionManagerImpl
     }
 
     public List<Integer> findOperationScopeBySubject(AuthzSubject subj, Integer opId)
-        throws FinderException, PermissionException
+        throws NotFoundException, PermissionException
     {
         if (_log.isDebugEnabled()) {
             _log.debug("Checking Scope for Operation: " + opId + " subject: " +
@@ -190,7 +191,7 @@ public class PermissionManagerImpl
         findOperationScopeBySubjectBatch(AuthzSubject whoami,
                                          ResourceValue[] resArr,
                                          String[] opArr)
-        throws FinderException
+        throws ApplicationException
     {
         if (resArr == null) {
             throw new IllegalArgumentException("At least one resource required");
@@ -377,7 +378,7 @@ public class PermissionManagerImpl
     }
 
     private List<Integer> findScopeBySQL(AuthzSubject subj, Integer opId)
-        throws FinderException, PermissionException
+        throws NotFoundException, PermissionException
     {
         Pager defaultPager = Pager.getDefaultPager();
         Connection conn = null;
@@ -398,9 +399,9 @@ public class PermissionManagerImpl
             return instanceIds;
         } catch (SQLException e) {
             _log.error("Error getting scope by SQL", e);
-            throw new FinderException("Error getting scope: " + e.getMessage());
+            throw new NotFoundException("Error getting scope: " + e.getMessage());
         } finally {
-            dbUtil.closeJDBCObjects(PermissionManagerImpl.class, conn, stmt, rs);
+            DBUtil.closeJDBCObjects(PermissionManagerImpl.class, conn, stmt, rs);
         }
     }
 
@@ -416,7 +417,7 @@ public class PermissionManagerImpl
     }
 
     public List getAllOperations(AuthzSubject subject, PageControl pc)
-        throws PermissionException, FinderException
+        throws PermissionException
     {
         Role rootRole = getRoleDAO().findById(AuthzConstants.rootRoleId);
         Set ops = new HashSet();

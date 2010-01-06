@@ -27,8 +27,6 @@ package org.hyperic.hq.appdef.server.session;
 
 import java.util.List;
 
-import javax.ejb.CreateException;
-import javax.ejb.FinderException;
 import javax.naming.NamingException;
 
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
@@ -87,7 +85,7 @@ public class CloningBossImpl implements CloningBoss {
      * 
      */
     public void clonePlatform(AuthzSubject subj, Platform master, Platform clone) throws AppdefEntityNotFoundException,
-        ConfigFetchException, PermissionException, FinderException, CreateException, NamingException,
+        ConfigFetchException, PermissionException,  NamingException,
         SessionNotFoundException, SessionTimeoutException, SessionException, VetoException,
         AppdefDuplicateNameException, ValidationException, GroupNotCompatibleException, UpdateException,
         EncodingException {

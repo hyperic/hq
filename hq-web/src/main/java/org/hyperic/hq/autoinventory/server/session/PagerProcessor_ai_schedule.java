@@ -67,7 +67,7 @@ public class PagerProcessor_ai_schedule implements PagerProcessorExt {
                                 .remove(s);
                             return null;
                         } catch (Exception e) {
-                        // Ignore RemoveException
+                        // Ignore
                         }
                     }
                 } catch (Exception e) {

@@ -29,10 +29,6 @@ import java.rmi.RemoteException;
 import java.util.Collections;
 import java.util.Iterator;
 
-import javax.ejb.FinderException;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.struts.util.LabelValueBean;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
@@ -62,7 +58,7 @@ public class ViewDefinitionNotificationsOthersAction
         return EmailActionConfig.TYPE_EMAILS;
     }
 
-    protected PageList getPageList(int sessionID, EmailActionConfig ea, PageControl pc) throws FinderException,
+    protected PageList getPageList(int sessionID, EmailActionConfig ea, PageControl pc) throws 
         SessionTimeoutException, SessionNotFoundException, PermissionException, RemoteException {
         PageList<LabelValueBean> notifyList = new PageList<LabelValueBean>();
         for (Iterator it = ea.getUsers().iterator(); it.hasNext();) {

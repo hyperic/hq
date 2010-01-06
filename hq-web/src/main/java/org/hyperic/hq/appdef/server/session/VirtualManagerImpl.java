@@ -30,8 +30,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.ejb.FinderException;
-
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -50,6 +48,7 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.Virtual;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
+import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.context.Bootstrap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -176,7 +175,7 @@ public class VirtualManagerImpl implements VirtualManager {
      * 
      * 
      */
-    public void associateEntities(AuthzSubject subj, Integer processId, AppdefEntityID[] aeids) throws FinderException {
+    public void associateEntities(AuthzSubject subj, Integer processId, AppdefEntityID[] aeids)  {
 
         for (int i = 0; i < aeids.length; i++) {
             String typeStr = AppdefUtil.appdefTypeIdToAuthzTypeStr(aeids[i].getType());
@@ -188,11 +187,11 @@ public class VirtualManagerImpl implements VirtualManager {
 
     /**
      * Associate an array of entities to a VM
-     * @throws FinderException
+     * @throws NotFoundException
      * 
      * 
      */
-    public void associateToPhysical(AuthzSubject subj, Integer physicalId, AppdefEntityID aeid) throws FinderException {
+    public void associateToPhysical(AuthzSubject subj, Integer physicalId, AppdefEntityID aeid) throws NotFoundException {
         Resource resource;
         switch (aeid.getType()) {
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
@@ -213,7 +212,7 @@ public class VirtualManagerImpl implements VirtualManager {
             Virtual virt = virtualDAO.findByResource(resource.getId());
             virt.setPhysicalId(physicalId);
         } else {
-            throw new FinderException(aeid.toString() + " is not registered as a virtual resource");
+            throw new NotFoundException(aeid.toString() + " is not registered as a virtual resource");
         }
     }
 

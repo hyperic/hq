@@ -31,9 +31,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-import javax.ejb.FinderException;
-
 import net.sf.ehcache.CacheManager;
 
 import org.apache.commons.logging.Log;
@@ -239,7 +236,7 @@ public class ProductBossImpl implements ProductBoss {
      */
     public ConfigSchema getConfigSchema(int sessionId, AppdefEntityID id,
                                         String type)
-        throws ConfigFetchException, FinderException, EncodingException,
+        throws ConfigFetchException,  EncodingException,
         PluginNotFoundException, PluginException,
         SessionTimeoutException, SessionNotFoundException,
         PermissionException, AppdefEntityNotFoundException {
@@ -358,7 +355,7 @@ public class ProductBossImpl implements ProductBoss {
      */
     public void setConfigResponse(int sessionId, AppdefEntityID id,
                                   ConfigResponse response, String type)
-        throws FinderException, InvalidConfigException, SessionTimeoutException,
+        throws InvalidConfigException, SessionTimeoutException,
         EncodingException, PermissionException, ConfigFetchException,
         AppdefEntityNotFoundException, SessionNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
@@ -369,7 +366,7 @@ public class ProductBossImpl implements ProductBoss {
      */
     public void setConfigResponse(AuthzSubject subject, AppdefEntityID id,
                                   ConfigResponse response, String type)
-        throws EncodingException, FinderException, PermissionException,
+        throws EncodingException, PermissionException,
         InvalidConfigException, ConfigFetchException,
         AppdefEntityNotFoundException {
         this.setConfigResponse(subject, id, response, type, true);
@@ -383,7 +380,7 @@ public class ProductBossImpl implements ProductBoss {
                                                ConfigResponse response,
                                                String type,
                                                boolean shouldValidate)
-        throws EncodingException, FinderException, PermissionException,
+        throws EncodingException, PermissionException,
         InvalidConfigException, ConfigFetchException,
         AppdefEntityNotFoundException {
         boolean doRollback = true;

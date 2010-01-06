@@ -25,9 +25,8 @@
 
 package org.hyperic.hq.appdef.shared;
 
-import javax.ejb.FinderException;
-
 import org.hyperic.hq.appdef.server.session.ServerType;
+import org.hyperic.hq.common.NotFoundException;
 
 /**
  * A utility for converting value objects from AI to appdef.
@@ -86,8 +85,8 @@ public class AIConversionUtil {
      * @return an equivalent ServerValue object.
      */
     public static ServerValue convertAIServerToServer(AIServerValue aiserver,
-                                                      ServerManager serverMgr)
-        throws FinderException {
+                                                      ServerManager serverMgr) throws NotFoundException
+        {
 
         ServerType stype =
             serverMgr.findServerTypeByName(aiserver.getServerTypeName());

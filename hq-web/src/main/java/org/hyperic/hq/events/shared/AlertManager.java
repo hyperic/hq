@@ -48,14 +48,14 @@ public interface AlertManager {
      * @throws PermissionException
      */
     public int deleteAlerts(AuthzSubject subj, AppdefEntityID id)
-        throws org.hyperic.hq.authz.shared.PermissionException;
+        throws PermissionException;
 
     /**
      * Remove alerts for an alert definition
      * @throws PermissionException
      */
-    public int deleteAlerts(AuthzSubject subj, AlertDefinition ad) throws javax.ejb.RemoveException,
-        org.hyperic.hq.authz.shared.PermissionException;
+    public int deleteAlerts(AuthzSubject subj, AlertDefinition ad) throws 
+        PermissionException;
 
     /**
      * Remove alerts for a range of time
@@ -106,21 +106,21 @@ public interface AlertManager {
      * @throws PermissionException
      */
     public PageList<Alert> findAlerts(AuthzSubject subj, AppdefEntityID id, PageControl pc)
-        throws org.hyperic.hq.authz.shared.PermissionException;
+        throws PermissionException;
 
     /**
      * Get a collection of alerts for an AppdefEntityID and time range
      * @throws PermissionException
      */
     public PageList<Alert> findAlerts(AuthzSubject subj, AppdefEntityID id, long begin, long end, PageControl pc)
-        throws org.hyperic.hq.authz.shared.PermissionException;
+        throws PermissionException;
 
     /**
      * A more optimized look up which includes the permission checking
      */
     public List<Alert> findAlerts(Integer subj, int priority, long timeRange, long endTime, boolean inEsc,
                                   boolean notFixed, Integer groupId, PageInfo pageInfo)
-        throws org.hyperic.hq.authz.shared.PermissionException;
+        throws PermissionException;
 
     /**
      * A more optimized look up which includes the permission checking
@@ -128,7 +128,7 @@ public interface AlertManager {
      */
     public List<Alert> findAlerts(Integer subj, int priority, long timeRange, long endTime, boolean inEsc,
                                   boolean notFixed, Integer groupId, Integer alertDefId, PageInfo pageInfo)
-        throws org.hyperic.hq.authz.shared.PermissionException;
+        throws PermissionException;
 
     /**
      * Search alerts given a set of criteria
@@ -140,7 +140,7 @@ public interface AlertManager {
      *        null for all.
      */
     public List<Alert> findAlerts(AuthzSubject subj, int count, int priority, long timeRange, long endTime,
-                                  List<AppdefEntityID> includes) throws org.hyperic.hq.authz.shared.PermissionException;
+                                  List<AppdefEntityID> includes) throws PermissionException;
 
     /**
      * Find escalatables for a resource in a given time range.
@@ -148,13 +148,13 @@ public interface AlertManager {
      */
     public List<Escalatable> findEscalatables(AuthzSubject subj, int count, int priority, long timeRange, long endTime,
                                               List<AppdefEntityID> includes)
-        throws org.hyperic.hq.authz.shared.PermissionException;
+        throws PermissionException;
 
     /**
      * A more optimized look up which includes the permission checking
      */
     public int getUnfixedCount(Integer subj, long timeRange, long endTime, Integer groupId)
-        throws org.hyperic.hq.authz.shared.PermissionException;
+        throws PermissionException;
 
     /**
      * Get the long reason for an alert

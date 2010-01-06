@@ -7,9 +7,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.SortedMap;
 
-import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
-
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
@@ -49,7 +46,7 @@ public interface AlertDefinitionManager {
      * Update an alert definition
      */
     public AlertDefinitionValue updateAlertDefinition(AlertDefinitionValue adval) throws AlertConditionCreateException,
-        ActionCreateException, RemoveException;
+        ActionCreateException;
 
     /**
      * Activate/deactivate an alert
@@ -79,7 +76,7 @@ public interface AlertDefinitionManager {
      * @return <code>true</code> if the enable/disable
      */
     public boolean updateAlertDefinitionInternalEnable(AuthzSubject subj, java.lang.Integer defId, boolean enable)
-        throws FinderException, PermissionException;
+        throws PermissionException;
 
     /**
      * Set the escalation on the alert definition
@@ -95,8 +92,7 @@ public interface AlertDefinitionManager {
     /**
      * Remove alert definitions
      */
-    public void deleteAlertDefinitions(AuthzSubject subj, java.lang.Integer[] ids) throws RemoveException,
-        PermissionException;
+    public void deleteAlertDefinitions(AuthzSubject subj, java.lang.Integer[] ids) throws PermissionException;
 
     /**
      * Set Resource to null on entity's alert definitions
@@ -134,7 +130,7 @@ public interface AlertDefinitionManager {
      * @param id The alert def
      * @return <code>true</code> if the alert definition is a resource type
      *         alert
-     * @throws FinderException
+     * 
      */
     public boolean isResourceTypeAlertDefinition(Integer id);
 
@@ -143,12 +139,12 @@ public interface AlertDefinitionManager {
     /**
      * Get an alert definition's name
      */
-    public String getNameById(Integer id) throws FinderException;
+    public String getNameById(Integer id);
 
     /**
      * Get an alert definition's conditions
      */
-    public AlertConditionValue[] getConditionsById(Integer id) throws FinderException;
+    public AlertConditionValue[] getConditionsById(Integer id);
 
     /**
      * Get list of alert conditions for a resource or resource type
@@ -215,8 +211,8 @@ public interface AlertDefinitionManager {
         throws PermissionException;
 
     public PageList<AlertDefinitionValue> findAlertDefinitions(AuthzSubject subj,
-                                                          org.hyperic.hq.appdef.shared.AppdefEntityID id,
-                                                          org.hyperic.util.pager.PageControl pc)
+                                                               org.hyperic.hq.appdef.shared.AppdefEntityID id,
+                                                               org.hyperic.util.pager.PageControl pc)
         throws PermissionException;
 
     /**
@@ -230,8 +226,8 @@ public interface AlertDefinitionManager {
      * Get list of alert conditions for a resource or resource type
      */
     public PageList<AlertDefinitionValue> findAlertDefinitions(AuthzSubject subj,
-                                                          org.hyperic.hq.appdef.shared.AppdefEntityTypeID aetid,
-                                                          org.hyperic.util.pager.PageControl pc)
+                                                               org.hyperic.hq.appdef.shared.AppdefEntityTypeID aetid,
+                                                               org.hyperic.util.pager.PageControl pc)
         throws PermissionException;
 
     /**

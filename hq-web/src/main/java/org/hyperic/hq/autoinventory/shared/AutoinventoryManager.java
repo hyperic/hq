@@ -6,8 +6,6 @@ package org.hyperic.hq.autoinventory.shared;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.FinderException;
-
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.Agent;
@@ -44,7 +42,7 @@ public interface AutoinventoryManager {
      *         the values are the ServerSignature objects.
      */
     public Map<String, ServerSignature> getServerSignatures(AuthzSubject subject, List<ServerTypeValue> serverTypes)
-        throws FinderException, AutoinventoryException;
+        throws AutoinventoryException;
 
     /**
      * Check if a given Appdef entity supports runtime auto-discovery.

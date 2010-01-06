@@ -6,8 +6,6 @@ package org.hyperic.hq.bizapp.shared;
 import java.util.Collection;
 import java.util.Map;
 
-import javax.ejb.FinderException;
-
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -90,8 +88,8 @@ public interface ProductBoss {
         AppdefEntityNotFoundException;
 
     public ConfigSchema getConfigSchema(int sessionId, AppdefEntityID id, String type) throws ConfigFetchException,
-        FinderException, EncodingException, PluginNotFoundException, PluginException, SessionTimeoutException,
-        SessionNotFoundException, PermissionException, AppdefEntityNotFoundException;
+        EncodingException, PluginNotFoundException, PluginException, SessionTimeoutException, SessionNotFoundException,
+        PermissionException, AppdefEntityNotFoundException;
 
     /**
      * Get a configuration schema.
@@ -122,11 +120,11 @@ public interface ProductBoss {
      * @throws SessionNotFoundException
      */
     public void setConfigResponse(int sessionId, AppdefEntityID id, ConfigResponse response, String type)
-        throws FinderException, InvalidConfigException, SessionTimeoutException, EncodingException,
-        PermissionException, ConfigFetchException, AppdefEntityNotFoundException, SessionNotFoundException;
+        throws InvalidConfigException, SessionTimeoutException, EncodingException, PermissionException,
+        ConfigFetchException, AppdefEntityNotFoundException, SessionNotFoundException;
 
     public void setConfigResponse(AuthzSubject subject, AppdefEntityID id, ConfigResponse response, String type)
-        throws EncodingException, FinderException, PermissionException, InvalidConfigException, ConfigFetchException,
+        throws EncodingException, PermissionException, InvalidConfigException, ConfigFetchException,
         AppdefEntityNotFoundException;
 
     /**

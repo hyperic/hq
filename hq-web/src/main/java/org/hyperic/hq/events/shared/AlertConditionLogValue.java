@@ -28,13 +28,6 @@
  */
 package org.hyperic.hq.events.shared;
 
-import java.rmi.RemoteException;
-import javax.ejb.CreateException;
-import javax.ejb.EntityBean;
-import javax.ejb.EntityContext;
-import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
-import javax.naming.NamingException;
 
 /**
  * Value object for AlertConditionLog.

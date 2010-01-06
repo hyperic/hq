@@ -39,7 +39,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import javax.ejb.RemoveException;
 import javax.security.auth.login.LoginException;
 
 import org.apache.commons.logging.Log;
@@ -630,7 +629,7 @@ public class MeasurementBossImpl implements MeasurementBoss
      */
     public void disableMeasurements(int sessionId, AppdefEntityID id,
                                     Integer[] tids)
-        throws SessionException, RemoveException, AppdefEntityNotFoundException,
+        throws SessionException, AppdefEntityNotFoundException,
                GroupNotCompatibleException, PermissionException
     {
         final AuthzSubject subject = sessionManager.getSubject(sessionId);
@@ -661,7 +660,7 @@ public class MeasurementBossImpl implements MeasurementBoss
                                       AppdefEntityTypeID childType,
                                       Integer[] tids)
         throws SessionTimeoutException, SessionNotFoundException,
-               RemoveException, AppdefEntityNotFoundException,
+                AppdefEntityNotFoundException,
                GroupNotCompatibleException, PermissionException {
         final AuthzSubject subject = sessionManager.getSubject(sessionId);
     

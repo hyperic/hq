@@ -64,7 +64,7 @@ public class PagerProcessor_control_schedule implements PagerProcessorExt {
                             cdao.remove(s);
                             return null;
                         } catch (Exception e) {
-                        // Ignore RemoveException
+                        // Ignore Exception
                         }
                     }
                 } catch (Exception e) {

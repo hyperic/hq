@@ -6,8 +6,6 @@ package org.hyperic.hq.bizapp.shared;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
 import javax.security.auth.login.LoginException;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -56,7 +54,7 @@ public interface EventsBoss {
      * Get the number of alerts for the given array of AppdefEntityID's
      */
     public int[] getAlertCount(int sessionID, org.hyperic.hq.appdef.shared.AppdefEntityID[] ids)
-        throws SessionNotFoundException, SessionTimeoutException, PermissionException, FinderException;
+        throws SessionNotFoundException, SessionTimeoutException, PermissionException;
 
     /**
      * Create an alert definition
@@ -78,14 +76,13 @@ public interface EventsBoss {
         InvalidOptionValueException, AlertDefinitionCreateException;
 
     public Action createAction(int sessionID, Integer adid, String className, ConfigResponse config)
-        throws SessionNotFoundException, SessionTimeoutException, ActionCreateException, RemoveException,
-        FinderException, PermissionException;
+        throws SessionNotFoundException, SessionTimeoutException, ActionCreateException, PermissionException;
 
     /**
      * Activate/deactivate a collection of alert definitions
      */
     public void activateAlertDefinitions(int sessionID, java.lang.Integer[] ids, boolean activate)
-        throws SessionNotFoundException, SessionTimeoutException, FinderException, PermissionException;
+        throws SessionNotFoundException, SessionTimeoutException, PermissionException;
 
     /**
      * Activate or deactivate alert definitions by AppdefEntityID.
@@ -99,11 +96,11 @@ public interface EventsBoss {
      */
     public void updateAlertDefinitionBasic(int sessionID, Integer alertDefId, String name, String desc, int priority,
                                            boolean activate) throws SessionNotFoundException, SessionTimeoutException,
-        FinderException, RemoveException, PermissionException;
+        PermissionException;
 
     public void updateAlertDefinition(int sessionID, AlertDefinitionValue adval) throws TriggerCreateException,
         InvalidOptionException, InvalidOptionValueException, AlertConditionCreateException, ActionCreateException,
-        FinderException, RemoveException, SessionNotFoundException, SessionTimeoutException;
+        SessionNotFoundException, SessionTimeoutException;
 
     /**
      * Get actions for a given alert.
@@ -121,38 +118,38 @@ public interface EventsBoss {
      * Delete a collection of alert definitions
      */
     public void deleteAlertDefinitions(int sessionID, java.lang.Integer[] ids) throws SessionNotFoundException,
-        SessionTimeoutException, RemoveException, PermissionException;
+        SessionTimeoutException, PermissionException;
 
     /**
      * Delete list of alerts
      */
     public void deleteAlerts(int sessionID, java.lang.Integer[] ids) throws SessionNotFoundException,
-        SessionTimeoutException, RemoveException, PermissionException;
+        SessionTimeoutException, PermissionException;
 
     /**
      * Delete all alerts for a resource
      */
     public int deleteAlerts(int sessionID, AppdefEntityID aeid) throws SessionNotFoundException,
-        SessionTimeoutException, RemoveException, PermissionException;
+        SessionTimeoutException, PermissionException;
 
     /**
      * Delete all alerts for a given period of time
      */
     public int deleteAlerts(int sessionID, long begin, long end) throws SessionNotFoundException,
-        SessionTimeoutException, RemoveException, PermissionException;
+        SessionTimeoutException, PermissionException;
 
     /**
      * Delete all alerts for a list of alert definitions
-     * @throws FinderException if alert definition is not found
+     *
      */
     public int deleteAlertsForDefinitions(int sessionID, java.lang.Integer[] adids) throws SessionNotFoundException,
-        SessionTimeoutException, RemoveException, PermissionException, FinderException;
+        SessionTimeoutException, PermissionException;
 
     /**
      * Get an alert definition by ID
      */
     public AlertDefinitionValue getAlertDefinition(int sessionID, Integer id) throws SessionNotFoundException,
-        SessionTimeoutException, FinderException, PermissionException;
+        SessionTimeoutException, PermissionException;
 
     /**
      * Find an alert by ID
@@ -251,7 +248,7 @@ public interface EventsBoss {
      * retrieve escalation name by alert definition id.
      */
     public Integer getEscalationIdByAlertDefId(int sessionID, Integer id, EscalationAlertType alertType)
-        throws SessionTimeoutException, SessionNotFoundException, PermissionException, FinderException;
+        throws SessionTimeoutException, SessionNotFoundException, PermissionException;
 
     /**
      * set escalation name by alert definition id.
@@ -269,7 +266,7 @@ public interface EventsBoss {
      * retrieve escalation JSONObject by alert definition id.
      */
     public JSONObject jsonEscalationByAlertDefId(int sessionID, Integer id, EscalationAlertType alertType)
-        throws org.hyperic.hq.auth.shared.SessionException, PermissionException, JSONException, FinderException;
+        throws org.hyperic.hq.auth.shared.SessionException, PermissionException, JSONException;
 
     /**
      * retrieve escalation object by escalation id.
@@ -344,7 +341,7 @@ public interface EventsBoss {
      * Get the last fix if available
      */
     public String getLastFix(int sessionID, Integer defId) throws SessionNotFoundException, SessionTimeoutException,
-        PermissionException, FinderException;
+        PermissionException;
 
     /**
      * Get a maintenance event by group id

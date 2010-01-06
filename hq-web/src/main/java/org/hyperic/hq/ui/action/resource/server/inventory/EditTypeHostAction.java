@@ -27,7 +27,6 @@ package org.hyperic.hq.ui.action.resource.server.inventory;
 
 import java.util.HashMap;
 
-import javax.ejb.ObjectNotFoundException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -66,7 +65,7 @@ public class EditTypeHostAction
     public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                  HttpServletResponse response) throws Exception {
 
-        try {
+       
             ServerForm serverForm = (ServerForm) form;
             AppdefEntityID aeid = new AppdefEntityID(serverForm.getType().intValue(), serverForm.getRid());
 
@@ -96,9 +95,6 @@ public class EditTypeHostAction
             RequestUtils.setConfirmation(request, "resource.server.inventory.confirm.SaveServer", server.getName());
 
             return returnSuccess(request, mapping, forwardParams);
-        } catch (ObjectNotFoundException oe) {
-            RequestUtils.setError(request, "resource.server.inventory.error.ServerNotFound", "resourceType");
-            return returnFailure(request, mapping);
-        }
+        
     }
 }

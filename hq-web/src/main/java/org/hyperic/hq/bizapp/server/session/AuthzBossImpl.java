@@ -30,9 +30,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.CreateException;
-import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
 import javax.security.auth.login.LoginException;
 
 import org.apache.commons.logging.Log;
@@ -61,6 +58,7 @@ import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.ui.shared.DashboardManager;
@@ -119,7 +117,7 @@ public class AuthzBossImpl implements AuthzBoss {
      * @return true - if user has adminsterCAM op false otherwise
      * 
      */
-    public boolean hasAdminPermission(int sessionId) throws FinderException, SessionTimeoutException,
+    public boolean hasAdminPermission(int sessionId) throws  SessionTimeoutException,
         SessionNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         return permissionManager.hasAdminPermission(subject.getId());
@@ -132,8 +130,7 @@ public class AuthzBossImpl implements AuthzBoss {
      * 
      * 
      */
-    public List<ResourceType> getAllResourceTypes(Integer sessionId, PageControl pc) throws CreateException,
-        FinderException, PermissionException, SessionTimeoutException, SessionNotFoundException {
+    public List<ResourceType> getAllResourceTypes(Integer sessionId, PageControl pc) throws PermissionException, SessionTimeoutException, SessionNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         return resourceManager.getAllResourceTypes(subject, pc);
     }
@@ -145,7 +142,7 @@ public class AuthzBossImpl implements AuthzBoss {
      * 
      * 
      */
-    public List<ResourceType> getAllResourceTypes(Integer sessionId) throws CreateException, FinderException,
+    public List<ResourceType> getAllResourceTypes(Integer sessionId) throws 
         PermissionException, SessionTimeoutException, SessionNotFoundException {
         return getAllResourceTypes(sessionId, null);
     }
@@ -157,7 +154,7 @@ public class AuthzBossImpl implements AuthzBoss {
      * 
      * 
      */
-    public List<Operation> getAllOperations(Integer sessionId, PageControl pc) throws FinderException,
+    public List<Operation> getAllOperations(Integer sessionId, PageControl pc) throws 
         PermissionException, SessionTimeoutException, SessionNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         return permissionManager.getAllOperations(subject, pc);
@@ -170,7 +167,7 @@ public class AuthzBossImpl implements AuthzBoss {
      * 
      * 
      */
-    public List<Operation> getAllOperations(Integer sessionId) throws FinderException, PermissionException,
+    public List<Operation> getAllOperations(Integer sessionId) throws  PermissionException,
         SessionTimeoutException, SessionNotFoundException {
         return getAllOperations(sessionId, null);
     }
@@ -183,7 +180,7 @@ public class AuthzBossImpl implements AuthzBoss {
      * 
      */
     public PageList<AuthzSubjectValue> getAllSubjects(Integer sessionId, Collection<Integer> excludes, PageControl pc)
-        throws FinderException, SessionTimeoutException, SessionNotFoundException, PermissionException {
+        throws  SessionTimeoutException, SessionNotFoundException, PermissionException, NotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         return authzSubjectManager.getAllSubjects(subject, excludes, pc);
     }
@@ -220,7 +217,7 @@ public class AuthzBossImpl implements AuthzBoss {
      * 
      * 
      */
-    public List<ResourceGroupValue> getAllResourceGroups(Integer sessionId, PageControl pc) throws FinderException,
+    public List<ResourceGroupValue> getAllResourceGroups(Integer sessionId, PageControl pc) throws 
         PermissionException, SessionTimeoutException, SessionNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         return resourceGroupManager.getAllResourceGroups(subject, pc);
@@ -234,7 +231,7 @@ public class AuthzBossImpl implements AuthzBoss {
      * 
      */
     public PageList<ResourceGroupValue> getResourceGroupsById(Integer sessionId, Integer[] ids, PageControl pc)
-        throws FinderException, PermissionException, SessionTimeoutException, SessionNotFoundException {
+        throws  PermissionException, SessionTimeoutException, SessionNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         return resourceGroupManager.getResourceGroupsById(subject, ids, pc);
     }
@@ -270,8 +267,8 @@ public class AuthzBossImpl implements AuthzBoss {
      * 
      * 
      */
-    public void removeSubject(Integer sessionId, Integer[] ids) throws FinderException, RemoveException,
-        PermissionException, SessionTimeoutException, SessionNotFoundException {
+    public void removeSubject(Integer sessionId, Integer[] ids) throws 
+        PermissionException, SessionTimeoutException, SessionNotFoundException, ApplicationException {
         // check for timeout
         AuthzSubject whoami = sessionManager.getSubject(sessionId);
         try {
@@ -282,7 +279,7 @@ public class AuthzBossImpl implements AuthzBoss {
                  * consensus is that a user should be able to be deleted if they
                  * are logged in. Therefore, this fix may not be needed ...
                  * BUG-4169 - DSE if (isLoggedIn(username)) { throw new
-                 * RemoveException ("User is logged in"); }
+                 * Exception ("User is logged in"); }
                  */
 
                 // Verify that the user is not trying to delete themself.
@@ -301,9 +298,9 @@ public class AuthzBossImpl implements AuthzBoss {
                 authzSubjectManager.removeSubject(whoami, ids[i]);
             }
         } catch (UpdateException e) {
-            throw new RemoveException("Unable to reset ownership of owned resources: " + e.getMessage());
+            throw new ApplicationException("Unable to reset ownership of owned resources: " + e.getMessage());
         } catch (AppdefEntityNotFoundException e) {
-            throw new RemoveException("Unable to reset ownership of owned resources: " + e.getMessage());
+            throw new ApplicationException("Unable to reset ownership of owned resources: " + e.getMessage());
         }
     }
 
@@ -315,7 +312,7 @@ public class AuthzBossImpl implements AuthzBoss {
      * @param subject- the user about to be removed
      * 
      */
-    private void resetResourceOwnership(Integer sessionId, AuthzSubject currentOwner) throws FinderException,
+    private void resetResourceOwnership(Integer sessionId, AuthzSubject currentOwner) throws 
         UpdateException, PermissionException {
         // first look up the resources by owner
         Collection<Resource> resources = resourceManager.findResourceByOwner(currentOwner);
@@ -348,7 +345,7 @@ public class AuthzBossImpl implements AuthzBoss {
      */
     public AuthzSubject createSubject(Integer sessionId, String name, boolean active, String dsn, String dept,
                                       String email, String first, String last, String phone, String sms, boolean useHtml)
-        throws PermissionException, CreateException, SessionException {
+        throws PermissionException, SessionException, ApplicationException {
         // check for timeout
         AuthzSubject whoami = sessionManager.getSubject(sessionId);
 
@@ -393,7 +390,7 @@ public class AuthzBossImpl implements AuthzBoss {
      * 
      * 
      */
-    public AuthzSubject findSubjectByName(Integer sessionId, String subjectName) throws FinderException,
+    public AuthzSubject findSubjectByName(Integer sessionId, String subjectName) throws 
         SessionTimeoutException, SessionNotFoundException, PermissionException {
         // check for timeout
         AuthzSubject subj = sessionManager.getSubject(sessionId);
@@ -409,7 +406,7 @@ public class AuthzBossImpl implements AuthzBoss {
      * more information
      * 
      */
-    public AuthzSubject findSubjectByNameNoAuthz(Integer sessionId, String subjectName) throws FinderException,
+    public AuthzSubject findSubjectByNameNoAuthz(Integer sessionId, String subjectName) throws 
         SessionTimeoutException, SessionNotFoundException, PermissionException {
         // check for timeout
         sessionManager.authenticate(sessionId.intValue());
@@ -468,7 +465,7 @@ public class AuthzBossImpl implements AuthzBoss {
      * Get the email of a user by name
      * 
      */
-    public String getEmailByName(Integer sessionId, String userName) throws FinderException, SessionTimeoutException,
+    public String getEmailByName(Integer sessionId, String userName) throws  SessionTimeoutException,
         SessionNotFoundException {
         sessionManager.authenticate(sessionId.intValue());
         return authzSubjectManager.getEmailByName(userName);
@@ -478,7 +475,7 @@ public class AuthzBossImpl implements AuthzBoss {
      * Get the email of a user by id
      * 
      */
-    public String getEmailById(Integer sessionId, Integer userId) throws FinderException, SessionTimeoutException,
+    public String getEmailById(Integer sessionId, Integer userId) throws  SessionTimeoutException,
         SessionNotFoundException {
         sessionManager.authenticate(sessionId.intValue());
         return authzSubjectManager.getEmailById(userId);

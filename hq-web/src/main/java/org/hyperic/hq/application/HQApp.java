@@ -28,12 +28,6 @@ package org.hyperic.hq.application;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Serializable;
-import java.lang.reflect.Method;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -42,29 +36,19 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hyperic.hibernate.HibernateInterceptorChain;
 import org.hyperic.hibernate.HypericInterceptor;
 import org.hyperic.hibernate.Util;
-import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.context.Bootstrap;
-import org.hyperic.hq.hibernate.SessionManager;
 import org.hyperic.hq.transport.AgentProxyFactory;
 import org.hyperic.hq.transport.ServerTransport;
-import org.hyperic.txsnatch.TxSnatch;
 import org.hyperic.util.callback.CallbackDispatcher;
-import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.thread.ThreadWatchdog;
-import org.jboss.invocation.Invocation;
 
 
 /**
@@ -75,13 +59,13 @@ public class HQApp  {
     private static final Log _log = LogFactory.getLog(HQApp.class);
     private static final HQApp INSTANCE = new HQApp();
 
-    private static Map         _txSynchs       = new HashMap();
+    
     private ThreadLocal        _txListeners    = new ThreadLocal();
    
     private CallbackDispatcher _callbacks;
     private ShutdownCallback   _shutdown;
     private File               _restartStorage;
-    private File               _resourceDir;
+   
     private File               _webAccessibleDir;
     private ThreadWatchdog     _watchdog;
     private final Scheduler    _scheduler;
@@ -96,7 +80,7 @@ public class HQApp  {
 
     private Map _methInvokeStats      = new HashMap();
     private AtomicBoolean _collectMethStats = new AtomicBoolean();
-    private static AtomicBoolean _isShutdown = new AtomicBoolean(false);
+    
 
     
 
@@ -105,9 +89,7 @@ public class HQApp  {
     
 
 
-    static {
-        TxSnatch.setSnatcher(new Snatcher());
-    }
+   
 
     private HQApp() {
         _callbacks = new CallbackDispatcher();
@@ -279,67 +261,8 @@ public class HQApp  {
         }
     }
 
-    private void warnMethodTooLong(long total, long warnTime,
-                                   Invocation v, Object methodRes,
-                                   boolean failed, String methName,
-                                   String className)
-    {
-        Map txPayload = v.getTransientPayload();
+   
 
-        if (txPayload.containsKey("hq.methodWarned"))
-            return;
-
-        txPayload.put("hq.methodWarned", Boolean.TRUE);
-        StringBuffer warn = new StringBuffer("Method ran a long time.\n");
-        warn.append("Class:   ")
-            .append(className)
-            .append("\nMethod:  ")
-            .append(methName)
-            .append("\nRunTime: ")
-            .append(total)
-            .append("\n");
-
-        if (!_log.isDebugEnabled()) {
-            _log.warn(warn);
-            return;
-        }
-
-        // if debug is enabled, log a lot more verbose stuff
-        if (methodRes == null) {
-            warn.append("Result:  null");
-        } else {
-            warn.append("Result:  (")
-                .append(methodRes.getClass())
-                .append(") ")
-                .append(methodRes.toString());
-        }
-        warn.append("\nArguments: \n");
-
-        Object[] args = v.getArguments();
-        for (int i=0; i<args.length; i++) {
-            warn.append("    Arg[")
-                .append(i)
-                .append("]: (")
-                .append(args[i].getClass())
-                .append(") ")
-                .append(args[i].toString())
-                .append("\n");
-        }
-        _log.warn(warn);
-    }
-
-
-    private String makeMethodStatKey(Class c, Method meth) {
-        StringBuffer key = new StringBuffer();
-        key.append(c.getName())
-           .append("#")
-           .append(meth.getName());
-        Class[] params = meth.getParameterTypes();
-        for (int i=0; i<params.length; i++) {
-            key.append(params[i].getName());
-        }
-        return key.toString();
-    }
 
     public void setCollectMethodStats(boolean enable) {
         _collectMethStats.set(enable);
@@ -355,26 +278,7 @@ public class HQApp  {
         }
     }
 
-    private void updateMethodStats(Class c, Method meth, long total,
-                                   boolean txFailed)
-    {
-        if (!_collectMethStats.get()) {
-            return;
-        }
-
-        String key = makeMethodStatKey(c, meth);
-
-        MethodStats stats;
-        synchronized (STAT_LOCK) {
-            stats = (MethodStats)_methInvokeStats.get(key);
-            if (stats == null) {
-                stats = new MethodStats(c, meth);
-                _methInvokeStats.put(key, stats);
-            }
-        }
-        if (stats != null)
-            stats.update(total, txFailed);
-    }
+   
 
     public List getMethodStats() {
         synchronized (STAT_LOCK) {
@@ -382,233 +286,11 @@ public class HQApp  {
         }
     }
 
-    private TxSynch createTxSynch(javax.transaction.Transaction tx) {
-        return new TxSynch(tx);
-    }
-
-    private class TxSynch implements Synchronization, Serializable {
-        private javax.transaction.Transaction _me;
-
-        private TxSynch(javax.transaction.Transaction me) {
-            _me   = me;
-        }
-
-        public void afterCompletion(int status) {
-            synchronized (_txSynchs) {
-                if (_txSynchs.remove(_me) == null) {
-                    _log.error("Strange.  I was a registered synchronization " +
-                               "but can't find myself.  Where am I?");
-                }
-            }
-
-            if (status != Status.STATUS_COMMITTED) {
-                incrementTxCount(true);
-                if (_log.isTraceEnabled()) {
-                    _log.trace("Transaction [" + _me + "] failed!");
-                }
-            } else {
-                incrementTxCount(false);
-            }
-        }
-
-        public void beforeCompletion() {
-        }
-    }
-
-    private static class Snatcher implements TxSnatch.Snatcher  {
-        private final Object SNATCH_LOCK = new Object();
-        private HQApp _app;
-
-        private HQApp getAppInstance() {
-            synchronized (SNATCH_LOCK) {
-                if (_app == null)
-                    _app = HQApp.getInstance();
-                return _app;
-            }
-        }
-        private void attemptRegisterSynch(javax.transaction.Transaction tx,
-                                          Session s)
-        {
-            boolean newSynch = false;
-
-            synchronized (_txSynchs) {
-                if (_txSynchs.containsKey(tx))
-                    return;
-
-                newSynch = true;
-                _txSynchs.put(tx, s);
-            }
-            if (newSynch) {
-                try {
-                    HQApp app = getAppInstance();
-                    tx.registerSynchronization(app.createTxSynch(tx));
-                } catch(Exception e) {
-                    synchronized (_txSynchs) {
-                        _txSynchs.remove(tx);
-                    }
-
-                    _log.error("Unable to register synchronization!", e);
-                }
-            }
-        }
-
-        private Object invokeNextBoth(org.jboss.ejb.Interceptor next,
-                                      org.jboss.proxy.Interceptor proxyNext,
-                                      Invocation v, boolean isHome)
-            throws Throwable
-        {
-            Method meth           = v.getMethod();
-            String methName       = meth.getName();
-            Class c               = meth.getDeclaringClass();
-            String className      = meth.getClass().getName();
-            boolean readWrite     = false;
-            boolean flush         = true;
-           
-            try {
-                if (_log.isTraceEnabled()) {
-                    _log.trace("invokeNext: tx=" + v.getTransaction() +
-                               " meth=" + methName);
-                }
-                if (v.getTransaction() != null &&
-                    (v.getTransaction().getStatus() == Status.STATUS_ACTIVE ||
-                     v.getTransaction().getStatus() == Status.STATUS_PREPARING)) {
-                    attemptRegisterSynch(v.getTransaction(),
-                                         SessionManager.currentSession());
-                }
-
-              
-
-                long startTime = System.currentTimeMillis();
-                Object res = null;
-                boolean failed = true;
-                try {
-                    if (proxyNext != null)
-                        res = proxyNext.invoke(v);
-                    else if (isHome)
-                        res = next.invokeHome(v);
-                    else
-                        res = next.invoke(v);
-                    failed = false;
-                } finally {
-                    HQApp app = getAppInstance();
-                    long total = System.currentTimeMillis() - startTime;
-                    long warnTime = app.getMethodWarnTime();
-
-                    app.updateMethodStats(c, meth, total, failed);
-                    if (warnTime != -1 && total > warnTime) {
-                        try {
-                            app.warnMethodTooLong(total, warnTime, v, res,
-                                                  failed, methName,
-                                                  c.getName());
-                        } catch(Throwable t) {
-                            _log.warn("Error while warning.  Ugly", t);
-                        }
-                    }
-                }
-                return res;
-            } catch(Throwable e) {
-                flush = false;
-                throw e;
-            } 
-        }
-
-        private boolean methIsReadOnly(String methName) {
-            return // 'create' is part of EJB session bean creation
-                   methName.equals("create") ||
-                   methName.equals("disconnectAgent") ||
-                   // recent alerts & indicators
-                   methName.equals("fillAlertCount") ||
-                   // gather agent metrics
-                   methName.equals("handleMeasurementReport") ||
-                   // For HQU methods
-                   methName.equals("login") ||
-                   methName.equals("loginGuest") ||
-                   // indicators
-                   methName.equals("logsExistPerInterval") ||
-                   // JMS
-                   methName.equals("onMessage") ||
-                   // masthead
-                   methName.equals("resourcesExistOfType") ||
-                   methName.equals("search") ||
-                   methName.startsWith("are") ||
-                   methName.startsWith("check") ||
-                   methName.startsWith("dispatch") ||
-                   methName.startsWith("find") ||
-                   methName.startsWith("get") ||
-                   methName.startsWith("is") ||
-                   methName.startsWith("list");
-        }
-
-        public Object invokeProxyNext(org.jboss.proxy.Interceptor next,
-                                      Invocation v)
-            throws Throwable
-        {
-            return invokeNextBoth(null, next, v, false);
-        }
-
-        public Object invokeNext(org.jboss.ejb.Interceptor next, Invocation v)
-            throws Exception
-        {
-            try {
-                return invokeNextBoth(next, null, v, false);
-            } catch(Exception e) {
-                throw e;
-            } catch(Throwable t) {
-                throw new RuntimeException(t);
-            }
-
-        }
-
-        public Object invokeHomeNext(org.jboss.ejb.Interceptor next,
-                                     Invocation v)
-            throws Exception
-        {
-            try {
-                return invokeNextBoth(next, null, v, true);
-            } catch(Exception e) {
-                throw e;
-            } catch(Throwable t) {
-                throw new RuntimeException(t);
-            }
-        }
-    }
+   
 
    
 
-    private void checkDBSchemaState() {
-        Connection conn = null;
-        Statement stmt  = null;
-        ResultSet rs    = null;
-        DBUtil dbUtil = Bootstrap.getBean(DBUtil.class);
-        try {
-            conn = dbUtil.getConnByContext(
-                new InitialContext(), HQConstants.DATASOURCE);
-            stmt = conn.createStatement();
-            final String sql = "select propvalue from EAM_CONFIG_PROPS " +
-                "WHERE propkey = '" + HQConstants.SchemaVersion + "'";
-            rs = stmt.executeQuery(sql);
-            if (rs.next()) {
-                final String currSchema = rs.getString("propvalue");
-                if (currSchema.contains(HQConstants.SCHEMA_MOD_IN_PROGRESS)) {
-                    _log.fatal("HQ DB schema is in a bad state: '" + currSchema +
-                        "'.  This is most likely due to a failed upgrade.  " +
-                        "Please either restore from backups and start your " +
-                        "previous version of HQ or contact HQ support.  " +
-                        "HQ cannot start while the current DB Schema version " +
-                        "is in a this state");
-                    _isShutdown.set(true);
-                    System.exit(1);
-                    throw new SystemException("HQ is shutdown");
-                }
-            }
-        } catch (SQLException e) {
-            _log.error(e, e);
-        } catch (NamingException e) {
-            _log.error(e, e);
-        } finally {
-            dbUtil.closeJDBCObjects(HQApp.class.getName(), conn, stmt, rs);
-        }
-    }
+   
 
     private void scheduleCommitCallback() {
         Transaction t =

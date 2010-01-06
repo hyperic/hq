@@ -32,7 +32,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import javax.ejb.FinderException;
 import javax.security.auth.login.LoginException;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -215,7 +214,7 @@ public abstract class SignIn extends BasePage {
     
     private static Map loadUserPermissions(Integer sessionId,
                                            AuthzBoss authzBoss)
-        throws FinderException, PermissionException, SessionTimeoutException,
+        throws  PermissionException, SessionTimeoutException,
                SessionNotFoundException, RemoteException {
         // look up the user's permissions
         HashMap userOpsMap = new HashMap();
@@ -230,7 +229,7 @@ public abstract class SignIn extends BasePage {
     public static WebUser loginUser(ServletContext ctx, String username,
                                     String password)
         throws RemoteException, SecurityException, LoginException,
-               ApplicationException, ConfigPropertyException, FinderException {
+               ApplicationException, ConfigPropertyException{
         AuthzBoss authzBoss = Bootstrap.getBean(AuthzBoss.class);
         AuthBoss authBoss = Bootstrap.getBean(AuthBoss.class);
         boolean needsRegistration = false;

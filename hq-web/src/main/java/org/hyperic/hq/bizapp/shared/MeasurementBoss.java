@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.ejb.RemoveException;
 import javax.security.auth.login.LoginException;
 
 import org.hyperic.hq.appdef.shared.AppdefCompatException;
@@ -52,33 +51,26 @@ public interface MeasurementBoss {
     /**
      * Get Autogroup member ids
      */
-    public AppdefEntityID [] getAutoGroupMemberIDs(
-                                                                               AuthzSubject subject,
-                                                                               AppdefEntityID [] aids,
-                                                                               AppdefEntityTypeID ctype)
-        throws AppdefEntityNotFoundException ,
-        PermissionException ;
+    public AppdefEntityID[] getAutoGroupMemberIDs(AuthzSubject subject, AppdefEntityID[] aids, AppdefEntityTypeID ctype)
+        throws AppdefEntityNotFoundException, PermissionException;
 
     /**
      * Update the default interval for a list of template ids
      */
-    public void updateMetricDefaultInterval(int sessionId, Integer [] tids, long interval)
-        throws SessionException ;
+    public void updateMetricDefaultInterval(int sessionId, Integer[] tids, long interval) throws SessionException;
 
     /**
      * Update the templates to be indicators or not
      */
-    public void updateIndicatorMetrics(int sessionId, AppdefEntityTypeID aetid, Integer [] tids)
-        throws TemplateNotFoundException ,
-        SessionTimeoutException , SessionNotFoundException ;
+    public void updateIndicatorMetrics(int sessionId, AppdefEntityTypeID aetid, Integer[] tids)
+        throws TemplateNotFoundException, SessionTimeoutException, SessionNotFoundException;
 
     public List<MeasurementTemplate> findMeasurementTemplates(int sessionId, AppdefEntityTypeID typeId,
                                                               String category, PageControl pc)
-        throws SessionTimeoutException , SessionNotFoundException ;
+        throws SessionTimeoutException, SessionNotFoundException;
 
     public List<MeasurementTemplate> findMeasurementTemplates(int sessionId, AppdefEntityID aeid)
-        throws SessionTimeoutException , SessionNotFoundException ,
-        AppdefEntityNotFoundException , PermissionException ;
+        throws SessionTimeoutException, SessionNotFoundException, AppdefEntityNotFoundException, PermissionException;
 
     /**
      * Retrieve list of measurement templates applicable to a monitorable type
@@ -86,47 +78,42 @@ public interface MeasurementBoss {
      * @return a List of MeasurementTemplateValue objects
      */
     public List<MeasurementTemplate> findMeasurementTemplates(int sessionId, String mtype, PageControl pc)
-        throws SessionTimeoutException , SessionNotFoundException ;
+        throws SessionTimeoutException, SessionNotFoundException;
 
     /**
      * Retrieve list of measurement templates given specific IDs
      */
-    public List<MeasurementTemplate> findMeasurementTemplates(String user, Integer [] ids, PageControl pc)
-        throws LoginException , ApplicationException ,
-        ConfigPropertyException ;
+    public List<MeasurementTemplate> findMeasurementTemplates(String user, Integer[] ids, PageControl pc)
+        throws LoginException, ApplicationException, ConfigPropertyException;
 
     /**
      * Retrieve list of measurement templates given specific IDs
      * @return a List of MeasurementTemplateValue objects
      */
-    public List<MeasurementTemplate> findMeasurementTemplates(int sessionId, Integer [] ids, PageControl pc)
-        throws SessionTimeoutException , SessionNotFoundException ,
-        TemplateNotFoundException ;
+    public List<MeasurementTemplate> findMeasurementTemplates(int sessionId, Integer[] ids, PageControl pc)
+        throws SessionTimeoutException, SessionNotFoundException, TemplateNotFoundException;
 
     /**
      * Retrieve a measurement template given specific ID
      */
-    public MeasurementTemplate getMeasurementTemplate(int sessionId, Integer id)
-        throws SessionNotFoundException , SessionTimeoutException ,
-        TemplateNotFoundException ;
+    public MeasurementTemplate getMeasurementTemplate(int sessionId, Integer id) throws SessionNotFoundException,
+        SessionTimeoutException, TemplateNotFoundException;
 
     /**
      * Get the the availability metric template for the given autogroup
      * @return The availabililty metric template.
      */
     public MeasurementTemplate getAvailabilityMetricTemplate(int sessionId, AppdefEntityID aid, AppdefEntityTypeID ctype)
-        throws SessionNotFoundException , SessionTimeoutException ,
-        MeasurementNotFoundException ,
-        AppdefEntityNotFoundException , PermissionException ;
+        throws SessionNotFoundException, SessionTimeoutException, MeasurementNotFoundException,
+        AppdefEntityNotFoundException, PermissionException;
 
     /**
      * Get the the availability metric template for the given resource
      * @return template of availabililty metric
      */
     public MeasurementTemplate getAvailabilityMetricTemplate(int sessionId, AppdefEntityID aeid)
-        throws MeasurementNotFoundException ,
-        SessionNotFoundException , SessionTimeoutException ,
-        AppdefEntityNotFoundException , PermissionException ;
+        throws MeasurementNotFoundException, SessionNotFoundException, SessionTimeoutException,
+        AppdefEntityNotFoundException, PermissionException;
 
     /**
      * Get the the designated measurement template for the given resource and
@@ -153,14 +140,10 @@ public interface MeasurementBoss {
      * @param tids the array of template ID's
      * @param interval the new interval value
      */
-    public void updateMeasurements(int sessionId, AppdefEntityID id, Integer [] tids, long interval)
-        throws MeasurementNotFoundException ,
-        SessionTimeoutException , SessionNotFoundException ,
-        TemplateNotFoundException ,
-        AppdefEntityNotFoundException ,
-        GroupNotCompatibleException ,
-        MeasurementCreateException , ConfigFetchException ,
-        PermissionException , EncodingException ;
+    public void updateMeasurements(int sessionId, AppdefEntityID id, Integer[] tids, long interval)
+        throws MeasurementNotFoundException, SessionTimeoutException, SessionNotFoundException,
+        TemplateNotFoundException, AppdefEntityNotFoundException, GroupNotCompatibleException,
+        MeasurementCreateException, ConfigFetchException, PermissionException, EncodingException;
 
     /**
      * Update measurements for the members of an autogroup
@@ -169,60 +152,48 @@ public interface MeasurementBoss {
      * @param tids - template ids to update
      * @param interval - the interval to set
      */
-    public void updateAGMeasurements(int sessionId, AppdefEntityID parentid, AppdefEntityTypeID ctype,
-                                     Integer [] tids, long interval)
-        throws MeasurementNotFoundException ,
-        SessionTimeoutException , SessionNotFoundException ,
-        TemplateNotFoundException ,
-        AppdefEntityNotFoundException ,
-        GroupNotCompatibleException ,
-        MeasurementCreateException , ConfigFetchException ,
-        PermissionException , EncodingException ;
+    public void updateAGMeasurements(int sessionId, AppdefEntityID parentid, AppdefEntityTypeID ctype, Integer[] tids,
+                                     long interval) throws MeasurementNotFoundException, SessionTimeoutException,
+        SessionNotFoundException, TemplateNotFoundException, AppdefEntityNotFoundException,
+        GroupNotCompatibleException, MeasurementCreateException, ConfigFetchException, PermissionException,
+        EncodingException;
 
     /**
      * Disable all measurements for an instance
      * @param id the resource's ID
      */
-    public void disableMeasurements(int sessionId, AppdefEntityID id)
-        throws SessionTimeoutException , SessionNotFoundException ,
-        PermissionException ;
+    public void disableMeasurements(int sessionId, AppdefEntityID id) throws SessionTimeoutException,
+        SessionNotFoundException, PermissionException;
 
     /**
      * Disable all measurements for a resource
      * @param id the resource's ID
      * @param tids the array of measurement ID's
      */
-    public void disableMeasurements(int sessionId, AppdefEntityID id, Integer [] tids)
-        throws SessionException , RemoveException ,
-        AppdefEntityNotFoundException ,
-        GroupNotCompatibleException , PermissionException ;
+    public void disableMeasurements(int sessionId, AppdefEntityID id, Integer[] tids) throws SessionException,
+        AppdefEntityNotFoundException, GroupNotCompatibleException, PermissionException;
 
     /**
      * Disable all measurements for a resource
      * @param tids the array of measurement ID's
      */
     public void disableAGMeasurements(int sessionId, AppdefEntityID parentId, AppdefEntityTypeID childType,
-                                      Integer [] tids)
-        throws SessionTimeoutException , SessionNotFoundException ,
-        RemoveException , AppdefEntityNotFoundException ,
-        GroupNotCompatibleException , PermissionException ;
+                                      Integer[] tids) throws SessionTimeoutException, SessionNotFoundException,
+        AppdefEntityNotFoundException, GroupNotCompatibleException, PermissionException;
 
     /**
      * Find a measurement using measurement id
      * @param id measurement id
      */
-    public Measurement getMeasurement(int sessionID, Integer id)
-        throws SessionTimeoutException , SessionNotFoundException ,
-        MeasurementNotFoundException ;
+    public Measurement getMeasurement(int sessionID, Integer id) throws SessionTimeoutException,
+        SessionNotFoundException, MeasurementNotFoundException;
 
     /**
      * Get the last metric values for the given template IDs.
      * @param tids The template IDs to get
      */
-    public MetricValue [] getLastMetricValue(int sessionId, AppdefEntityID aeid,
-                                                                   Integer [] tids)
-        throws SessionTimeoutException , SessionNotFoundException ,
-        PermissionException ;
+    public MetricValue[] getLastMetricValue(int sessionId, AppdefEntityID aeid, Integer[] tids)
+        throws SessionTimeoutException, SessionNotFoundException, PermissionException;
 
     /**
      * Get the last metric data for the array of measurement ids.
@@ -239,19 +210,15 @@ public interface MeasurementBoss {
     /**
      * Retrieve a Measurement for a specific instance
      */
-    public Measurement findMeasurement(int sessionId, Integer tid, AppdefEntityID id)
-        throws SessionNotFoundException , SessionTimeoutException ,
-        PermissionException , MeasurementNotFoundException ,
-        AppdefEntityNotFoundException ;
+    public Measurement findMeasurement(int sessionId, Integer tid, AppdefEntityID id) throws SessionNotFoundException,
+        SessionTimeoutException, PermissionException, MeasurementNotFoundException, AppdefEntityNotFoundException;
 
     /**
      * Retrieve List of measurements for a specific instance
      * @return List of Measurement objects
      */
-    public List findMeasurements(int sessionId, AppdefEntityID id, PageControl pc)
-        throws SessionNotFoundException , SessionTimeoutException ,
-        AppdefEntityNotFoundException ,
-        GroupNotCompatibleException , PermissionException ;
+    public List findMeasurements(int sessionId, AppdefEntityID id, PageControl pc) throws SessionNotFoundException,
+        SessionTimeoutException, AppdefEntityNotFoundException, GroupNotCompatibleException, PermissionException;
 
     /**
      * Retrieve list of measurements for a specific template and entities
@@ -259,11 +226,9 @@ public interface MeasurementBoss {
      * @param entIds the array of entity IDs
      * @return a List of Measurement objects
      */
-    public List<Measurement> findMeasurements(int sessionId, Integer tid,
-                                              AppdefEntityID [] entIds)
-        throws SessionTimeoutException , SessionNotFoundException ,
-        MeasurementNotFoundException ,
-        AppdefEntityNotFoundException , PermissionException ;
+    public List<Measurement> findMeasurements(int sessionId, Integer tid, AppdefEntityID[] entIds)
+        throws SessionTimeoutException, SessionNotFoundException, MeasurementNotFoundException,
+        AppdefEntityNotFoundException, PermissionException;
 
     /**
      * Get the enabled measurements for an auto group
@@ -273,19 +238,16 @@ public interface MeasurementBoss {
      */
     public List<MetricConfigSummary> findEnabledAGMeasurements(int sessionId, AppdefEntityID parentId,
                                                                AppdefEntityTypeID childType, String cat, PageControl pc)
-        throws SessionNotFoundException , SessionTimeoutException ,
-        AppdefEntityNotFoundException ,
-        GroupNotCompatibleException , PermissionException ;
+        throws SessionNotFoundException, SessionTimeoutException, AppdefEntityNotFoundException,
+        GroupNotCompatibleException, PermissionException;
 
     /**
      * Retrieve list of measurements for a specific instance and category
      * @return a PageList of Measurement objects
      */
     public PageList<MetricConfigSummary> findEnabledMeasurements(int sessionId, AppdefEntityID id, String cat,
-                                                                 PageControl pc)
-        throws SessionNotFoundException , SessionTimeoutException ,
-        AppdefEntityNotFoundException ,
-        GroupNotCompatibleException , PermissionException ;
+                                                                 PageControl pc) throws SessionNotFoundException,
+        SessionTimeoutException, AppdefEntityNotFoundException, GroupNotCompatibleException, PermissionException;
 
     /**
      * Dumps data for a specific measurement
@@ -307,9 +269,8 @@ public interface MeasurementBoss {
      */
     public PageList<HighLowMetricValue> findMeasurementData(int sessionId, Integer tid, AppdefEntityID aid, long begin,
                                                             long end, long interval, boolean returnNulls, PageControl pc)
-        throws SessionNotFoundException , SessionTimeoutException ,
-        AppdefEntityNotFoundException , PermissionException ,
-        MeasurementNotFoundException ;
+        throws SessionNotFoundException, SessionTimeoutException, AppdefEntityNotFoundException, PermissionException,
+        MeasurementNotFoundException;
 
     /**
      * Dumps data for a specific measurement template for an auto-group based on
@@ -326,9 +287,8 @@ public interface MeasurementBoss {
     public PageList<HighLowMetricValue> findMeasurementData(int sessionId, Integer tid, AppdefEntityID aid,
                                                             AppdefEntityTypeID ctype, long begin, long end,
                                                             long interval, boolean returnNulls, PageControl pc)
-        throws SessionNotFoundException , SessionTimeoutException ,
-        AppdefEntityNotFoundException , PermissionException ,
-        MeasurementNotFoundException ;
+        throws SessionNotFoundException, SessionTimeoutException, AppdefEntityNotFoundException, PermissionException,
+        MeasurementNotFoundException;
 
     /**
      * Dumps data for a specific measurement template for an auto-group based on
@@ -358,9 +318,8 @@ public interface MeasurementBoss {
      */
     public PageList<HighLowMetricValue> findMeasurementData(String user, AppdefEntityID aid, MeasurementTemplate tmpl,
                                                             long begin, long end, long interval, boolean returnNulls,
-                                                            PageControl pc)
-        throws LoginException , ApplicationException ,
-        ConfigPropertyException ;
+                                                            PageControl pc) throws LoginException,
+        ApplicationException, ConfigPropertyException;
 
     /**
      * Dumps data for a specific measurement template for an instance based on
@@ -376,9 +335,8 @@ public interface MeasurementBoss {
     public PageList<HighLowMetricValue> findMeasurementData(int sessionId, AppdefEntityID aid,
                                                             MeasurementTemplate tmpl, long begin, long end,
                                                             long interval, boolean returnNulls, PageControl pc)
-        throws SessionNotFoundException , SessionTimeoutException ,
-        AppdefEntityNotFoundException , PermissionException ,
-        MeasurementNotFoundException ;
+        throws SessionNotFoundException, SessionTimeoutException, AppdefEntityNotFoundException, PermissionException,
+        MeasurementNotFoundException;
 
     /**
      * Dumps data for a specific measurement template for an auto-group based on
@@ -393,13 +351,11 @@ public interface MeasurementBoss {
      * @throws ApplicationException
      * @throws LoginException
      */
-    public PageList<HighLowMetricValue> findAGMeasurementData(String user,
-                                                              AppdefEntityID [] aids,
+    public PageList<HighLowMetricValue> findAGMeasurementData(String user, AppdefEntityID[] aids,
                                                               MeasurementTemplate tmpl, AppdefEntityTypeID ctype,
                                                               long begin, long end, long interval, boolean returnNulls,
-                                                              PageControl pc)
-        throws LoginException , ApplicationException ,
-        ConfigPropertyException ;
+                                                              PageControl pc) throws LoginException,
+        ApplicationException, ConfigPropertyException;
 
     /**
      * Dumps data for a specific measurement template for an auto-group based on
@@ -411,25 +367,19 @@ public interface MeasurementBoss {
      * @param returnNulls whether or not to return nulls
      * @return a PageList of MetricValue objects
      */
-    public PageList<HighLowMetricValue> findAGMeasurementData(int sessionId,
-                                                              AppdefEntityID [] aids,
+    public PageList<HighLowMetricValue> findAGMeasurementData(int sessionId, AppdefEntityID[] aids,
                                                               MeasurementTemplate tmpl, AppdefEntityTypeID ctype,
                                                               long begin, long end, long interval, boolean returnNulls,
-                                                              PageControl pc)
-        throws SessionNotFoundException , SessionTimeoutException ,
-        AppdefEntityNotFoundException , PermissionException ,
-        MeasurementNotFoundException ;
+                                                              PageControl pc) throws SessionNotFoundException,
+        SessionTimeoutException, AppdefEntityNotFoundException, PermissionException, MeasurementNotFoundException;
 
     /**
      * Returns metadata for particular measurement
      */
     public List<MeasurementMetadataSummary> findMetricMetadata(int sessionId, AppdefEntityID aid,
                                                                AppdefEntityTypeID ctype, Integer tid)
-        throws SessionNotFoundException , SessionTimeoutException ,
-        GroupNotCompatibleException ,
-        AppdefEntityNotFoundException ,
-        ApplicationNotFoundException ,
-        TemplateNotFoundException , PermissionException ;
+        throws SessionNotFoundException, SessionTimeoutException, GroupNotCompatibleException,
+        AppdefEntityNotFoundException, ApplicationNotFoundException, TemplateNotFoundException, PermissionException;
 
     List<ProblemMetricSummary> findAllMetrics(int sessionId, AppdefEntityID aeid, long begin, long end)
         throws SessionTimeoutException, SessionNotFoundException, AppdefEntityNotFoundException, PermissionException,
@@ -442,7 +392,7 @@ public interface MeasurementBoss {
     double[] getAvailability(AuthzSubject subject, AppdefEntityID[] ids) throws AppdefEntityNotFoundException,
         PermissionException;
 
-    List<AppdefEntityID>  getAGMemberIds(AuthzSubject subject, AppdefEntityID parentAid, AppdefEntityTypeID ctype)
+    List<AppdefEntityID> getAGMemberIds(AuthzSubject subject, AppdefEntityID parentAid, AppdefEntityTypeID ctype)
         throws AppdefEntityNotFoundException, PermissionException;
 
     public MetricDisplaySummary getMetricDisplaySummary(MeasurementTemplate tmpl, Long interval, long begin, long end,
@@ -475,13 +425,12 @@ public interface MeasurementBoss {
      * </p>
      * @return Map keyed on the category (String), values are List's of
      *         MetricDisplaySummary beans
-     * @see MetricDisplaySummary 
+     * @see MetricDisplaySummary
      */
     public MetricDisplaySummary findMetric(int sessionId, AppdefEntityID aeid, AppdefEntityTypeID ctype, Integer tid,
-                                           long begin, long end)
-        throws SessionTimeoutException , SessionNotFoundException ,
-        PermissionException , AppdefEntityNotFoundException ,
-        AppdefCompatException , MeasurementNotFoundException ;
+                                           long begin, long end) throws SessionTimeoutException,
+        SessionNotFoundException, PermissionException, AppdefEntityNotFoundException, AppdefCompatException,
+        MeasurementNotFoundException;
 
     /**
      * Method findMetrics. When the entId is a server, return all of the metrics
@@ -505,12 +454,11 @@ public interface MeasurementBoss {
      * </p>
      * @return Map keyed on the category (String), values are List's of
      *         MetricDisplaySummary beans
-     * @see MetricDisplaySummary 
+     * @see MetricDisplaySummary
      */
     public MetricDisplaySummary findMetric(int sessionId, List resources, Integer tid, long begin, long end)
-        throws SessionTimeoutException , SessionNotFoundException ,
-        PermissionException , AppdefEntityNotFoundException ,
-        AppdefCompatException , MeasurementNotFoundException ;
+        throws SessionTimeoutException, SessionNotFoundException, PermissionException, AppdefEntityNotFoundException,
+        AppdefCompatException, MeasurementNotFoundException;
 
     /**
      * Prunes from the list of passed-in AppdefEntityValue array those resources
@@ -520,13 +468,9 @@ public interface MeasurementBoss {
      * @param tid the metric template id
      * @return an array of resources
      */
-    public AppdefResourceValue [] pruneResourcesNotCollecting(
-                                                                                          int sessionId,
-                                                                                          AppdefResourceValue [] resources,
-                                                                                          Integer tid)
-        throws SessionNotFoundException , SessionTimeoutException ,
-        AppdefEntityNotFoundException ,
-        MeasurementNotFoundException , PermissionException ;
+    public AppdefResourceValue[] pruneResourcesNotCollecting(int sessionId, AppdefResourceValue[] resources, Integer tid)
+        throws SessionNotFoundException, SessionTimeoutException, AppdefEntityNotFoundException,
+        MeasurementNotFoundException, PermissionException;
 
     /**
      * Method findResourceMetricSummary. For metric comparisons, the
@@ -548,11 +492,11 @@ public interface MeasurementBoss {
      * @param end the end of the timeframe of interest
      * @return Map of measure templates and resource metric lists
      */
-    public Map<MeasurementTemplate, List<MetricDisplaySummary>> findResourceMetricSummary(int sessionId, AppdefEntityID [] entIds,
-                                         long begin, long end)
-        throws SessionTimeoutException , SessionNotFoundException ,
-        AppdefEntityNotFoundException ,
-        MeasurementNotFoundException , PermissionException ;
+    public Map<MeasurementTemplate, List<MetricDisplaySummary>> findResourceMetricSummary(int sessionId,
+                                                                                          AppdefEntityID[] entIds,
+                                                                                          long begin, long end)
+        throws SessionTimeoutException, SessionNotFoundException, AppdefEntityNotFoundException,
+        MeasurementNotFoundException, PermissionException;
 
     /**
      * Return a MetricSummary bean for each of the metrics (template) for the
@@ -562,13 +506,11 @@ public interface MeasurementBoss {
      * @return a list of ResourceTypeDisplaySummary beans
      * @throws AppdefCompatException
      */
-    public Map<String, Set<MetricDisplaySummary>> findMetrics(int sessionId,
-                                                              AppdefEntityID [] entIds,
-                                                              long filters, String keyword, long begin, long end,
-                                                              boolean showNoCollect)
-        throws SessionTimeoutException , SessionNotFoundException ,
-        InvalidAppdefTypeException , PermissionException ,
-        AppdefEntityNotFoundException , AppdefCompatException ;
+    public Map<String, Set<MetricDisplaySummary>> findMetrics(int sessionId, AppdefEntityID[] entIds, long filters,
+                                                              String keyword, long begin, long end,
+                                                              boolean showNoCollect) throws SessionTimeoutException,
+        SessionNotFoundException, InvalidAppdefTypeException, PermissionException, AppdefEntityNotFoundException,
+        AppdefCompatException;
 
     /**
      * Method findMetrics. When the entId is a server, return all of the metrics
@@ -593,13 +535,11 @@ public interface MeasurementBoss {
      * @return Map keyed on the category (String), values are List's of
      *         MetricDisplaySummary beans
      * @throws AppdefCompatException
-     * @see MetricDisplaySummary 
+     * @see MetricDisplaySummary
      */
-    public Map<String, Set<MetricDisplaySummary>> findMetrics(int sessionId, AppdefEntityID entId,
-                                                              List <Integer> mtids, long begin, long end)
-        throws SessionTimeoutException , SessionNotFoundException ,
-        PermissionException , AppdefEntityNotFoundException ,
-        AppdefCompatException ;
+    public Map<String, Set<MetricDisplaySummary>> findMetrics(int sessionId, AppdefEntityID entId, List<Integer> mtids,
+                                                              long begin, long end) throws SessionTimeoutException,
+        SessionNotFoundException, PermissionException, AppdefEntityNotFoundException, AppdefCompatException;
 
     /**
      * Return a MetricSummary bean for each of the servers of a specific type.
@@ -608,11 +548,11 @@ public interface MeasurementBoss {
      * @return a list of ResourceTypeDisplaySummary beans
      * @throws AppdefCompatException
      */
-    public Map<String,Set<MetricDisplaySummary>> findAGPlatformMetricsByType(int sessionId, AppdefEntityTypeID platTypeId, long begin, long end,
-                                           boolean showAll) throws SessionTimeoutException ,
-        SessionNotFoundException , InvalidAppdefTypeException ,
-        AppdefEntityNotFoundException , PermissionException ,
-        AppdefCompatException ;
+    public Map<String, Set<MetricDisplaySummary>> findAGPlatformMetricsByType(int sessionId,
+                                                                              AppdefEntityTypeID platTypeId,
+                                                                              long begin, long end, boolean showAll)
+        throws SessionTimeoutException, SessionNotFoundException, InvalidAppdefTypeException,
+        AppdefEntityNotFoundException, PermissionException, AppdefCompatException;
 
     /**
      * Return a Metric summary bean for each of the services of a specific type
@@ -638,12 +578,12 @@ public interface MeasurementBoss {
      * @return a list of CurrentHealthDisplaySummary beans
      * @throws AppdefCompatException
      */
-    public Map<String,Set<MetricDisplaySummary>> findAGMetricsByType(int sessionId, AppdefEntityID [] entIds,
-                                   AppdefEntityTypeID typeId, long filters, String keyword, long begin, long end,
-                                   boolean showAll) throws SessionTimeoutException ,
-        SessionNotFoundException , InvalidAppdefTypeException ,
-        PermissionException , AppdefEntityNotFoundException ,
-        AppdefCompatException ;
+    public Map<String, Set<MetricDisplaySummary>> findAGMetricsByType(int sessionId, AppdefEntityID[] entIds,
+                                                                      AppdefEntityTypeID typeId, long filters,
+                                                                      String keyword, long begin, long end,
+                                                                      boolean showAll) throws SessionTimeoutException,
+        SessionNotFoundException, InvalidAppdefTypeException, PermissionException, AppdefEntityNotFoundException,
+        AppdefCompatException;
 
     /**
      * Return a MeasurementSummary bean for the resource's associated resources
@@ -655,10 +595,8 @@ public interface MeasurementBoss {
      * @return a MeasurementSummary bean
      */
     public MeasurementSummary getSummarizedResourceAvailability(int sessionId, AppdefEntityID entId, int appdefType,
-                                                                Integer typeId)
-        throws AppdefEntityNotFoundException ,
-        PermissionException , SessionNotFoundException ,
-        SessionTimeoutException , InvalidOptionException ;
+                                                                Integer typeId) throws AppdefEntityNotFoundException,
+        PermissionException, SessionNotFoundException, SessionTimeoutException, InvalidOptionException;
 
     /**
      * Method findSummarizedServerCurrentHealth.
@@ -673,8 +611,7 @@ public interface MeasurementBoss {
      * @return List of ResourceTypeDisplaySummary beans
      */
     public List<ResourceTypeDisplaySummary> findSummarizedServerCurrentHealth(int sessionId, AppdefEntityID entId)
-        throws SessionTimeoutException , SessionNotFoundException ,
-        AppdefEntityNotFoundException , PermissionException ;
+        throws SessionTimeoutException, SessionNotFoundException, AppdefEntityNotFoundException, PermissionException;
 
     /**
      * Method findSummarizedServiceCurrentHealth.
@@ -696,13 +633,12 @@ public interface MeasurementBoss {
      * @param entId the appdef entity with child services
      * @return List a list of ResourceTypeDisplaySummary beans
      */
-    public List<ResourceTypeDisplaySummary> findSummarizedPlatformServiceCurrentHealth(int sessionId, AppdefEntityID entId)
-        throws SessionTimeoutException , SessionNotFoundException ,
-        PermissionException , AppdefEntityNotFoundException ;
+    public List<ResourceTypeDisplaySummary> findSummarizedPlatformServiceCurrentHealth(int sessionId,
+                                                                                       AppdefEntityID entId)
+        throws SessionTimeoutException, SessionNotFoundException, PermissionException, AppdefEntityNotFoundException;
 
     public List<ResourceTypeDisplaySummary> findSummarizedServiceCurrentHealth(int sessionId, AppdefEntityID entId)
-        throws SessionTimeoutException , SessionNotFoundException ,
-        PermissionException , AppdefEntityNotFoundException ;
+        throws SessionTimeoutException, SessionNotFoundException, PermissionException, AppdefEntityNotFoundException;
 
     /**
      * Method findGroupCurrentHealth.
@@ -717,8 +653,7 @@ public interface MeasurementBoss {
      * @return List of ResourceDisplaySummary beans
      */
     public List<ResourceDisplaySummary> findGroupCurrentHealth(int sessionId, Integer id)
-        throws SessionTimeoutException , SessionNotFoundException ,
-        AppdefEntityNotFoundException , PermissionException ;
+        throws SessionTimeoutException, SessionNotFoundException, AppdefEntityNotFoundException, PermissionException;
 
     /**
      * Return a ResourceDisplaySummary bean for each of the resource's virtual
@@ -730,9 +665,8 @@ public interface MeasurementBoss {
      * @return List of ResourceDisplaySummary beans
      */
     public List<ResourceDisplaySummary> findVirtualsCurrentHealth(int sessionId, AppdefEntityID entId)
-        throws SessionTimeoutException , SessionNotFoundException ,
-        AppdefEntityNotFoundException ,
-        GroupNotCompatibleException , PermissionException ;
+        throws SessionTimeoutException, SessionNotFoundException, AppdefEntityNotFoundException,
+        GroupNotCompatibleException, PermissionException;
 
     /**
      * Method findResourcesCurrentHealth. The size of the list of
@@ -743,10 +677,9 @@ public interface MeasurementBoss {
      * @throws LoginException if user account has been disabled
      * @return PageList of ResourceDisplaySummary beans
      */
-    public List<ResourceDisplaySummary> findResourcesCurrentHealth(String user, AppdefEntityID [] entIds)
-        throws LoginException , ApplicationException ,
-        PermissionException , AppdefEntityNotFoundException ,
-        SessionNotFoundException , SessionTimeoutException ;
+    public List<ResourceDisplaySummary> findResourcesCurrentHealth(String user, AppdefEntityID[] entIds)
+        throws LoginException, ApplicationException, PermissionException, AppdefEntityNotFoundException,
+        SessionNotFoundException, SessionTimeoutException;
 
     /**
      * Method findResourcesCurrentHealth. The size of the list of
@@ -754,18 +687,15 @@ public interface MeasurementBoss {
      * the entity ID's passed in.
      * @return PageList of ResourceDisplaySummary beans
      */
-    public List<ResourceDisplaySummary> findResourcesCurrentHealth(int sessionId, AppdefEntityID [] entIds)
-        throws AppdefEntityNotFoundException ,
-        PermissionException , SessionNotFoundException ,
-        SessionTimeoutException ;
+    public List<ResourceDisplaySummary> findResourcesCurrentHealth(int sessionId, AppdefEntityID[] entIds)
+        throws AppdefEntityNotFoundException, PermissionException, SessionNotFoundException, SessionTimeoutException;
 
     /**
      * Find the current health of the entity's host(s)
      * @return PageList of ResourceDisplaySummary beans
      */
     public List<ResourceDisplaySummary> findHostsCurrentHealth(int sessionId, AppdefEntityID entId, PageControl pc)
-        throws SessionNotFoundException , SessionTimeoutException ,
-        PermissionException , AppdefEntityNotFoundException ;
+        throws SessionNotFoundException, SessionTimeoutException, PermissionException, AppdefEntityNotFoundException;
 
     /**
      * Method findPlatformsCurrentHealth. The population of the list of
@@ -778,9 +708,9 @@ public interface MeasurementBoss {
      * hosts.
      * @return PageList of ResourceDisplaySummary beans
      */
-    public PageList<ResourceDisplaySummary> findPlatformsCurrentHealth(int sessionId, AppdefEntityID entId, PageControl pc)
-        throws SessionTimeoutException , SessionNotFoundException ,
-        AppdefEntityNotFoundException , PermissionException ;
+    public PageList<ResourceDisplaySummary> findPlatformsCurrentHealth(int sessionId, AppdefEntityID entId,
+                                                                       PageControl pc) throws SessionTimeoutException,
+        SessionNotFoundException, AppdefEntityNotFoundException, PermissionException;
 
     /**
      * Method findAGPlatformsCurrentHealthByType For autogroup of platforms. If
@@ -789,9 +719,8 @@ public interface MeasurementBoss {
      * @return a list of ResourceDisplaySummary beans
      */
     public List<ResourceDisplaySummary> findAGPlatformsCurrentHealthByType(int sessionId, Integer platTypeId)
-        throws SessionTimeoutException , SessionNotFoundException ,
-        InvalidAppdefTypeException , PermissionException ,
-        AppdefEntityNotFoundException ;
+        throws SessionTimeoutException, SessionNotFoundException, InvalidAppdefTypeException, PermissionException,
+        AppdefEntityNotFoundException;
 
     /**
      * Method findServersCurrentHealth For the screens that rely on this API,
@@ -816,9 +745,8 @@ public interface MeasurementBoss {
      * @return a list of ResourceDisplaySummary beans
      */
     public PageList<ResourceDisplaySummary> findServersCurrentHealth(int sessionId, AppdefEntityID entId, PageControl pc)
-        throws SessionTimeoutException , SessionNotFoundException ,
-        InvalidAppdefTypeException ,
-        AppdefEntityNotFoundException , PermissionException ;
+        throws SessionTimeoutException, SessionNotFoundException, InvalidAppdefTypeException,
+        AppdefEntityNotFoundException, PermissionException;
 
     /**
      * Method findServersCurrentHealth For platform's autogroup of servers. If
@@ -826,11 +754,10 @@ public interface MeasurementBoss {
      * health of servers.
      * @return a list of ResourceDisplaySummary beans
      */
-    public List<ResourceDisplaySummary> findAGServersCurrentHealthByType(int sessionId, AppdefEntityID [] entIds,
-                                                 Integer serverTypeId)
-        throws SessionTimeoutException , SessionNotFoundException ,
-        InvalidAppdefTypeException ,
-        AppdefEntityNotFoundException , PermissionException ;
+    public List<ResourceDisplaySummary> findAGServersCurrentHealthByType(int sessionId, AppdefEntityID[] entIds,
+                                                                         Integer serverTypeId)
+        throws SessionTimeoutException, SessionNotFoundException, InvalidAppdefTypeException,
+        AppdefEntityNotFoundException, PermissionException;
 
     /**
      * Return a ResourceDisplaySummary bean for each of the resource's services.
@@ -838,35 +765,30 @@ public interface MeasurementBoss {
      * services...)
      * @return a list of ResourceDisplaySummary beans
      */
-    public List<ResourceDisplaySummary> findAGServicesCurrentHealthByType(int sessionId, AppdefEntityID [] entIds,
-                                                  Integer serviceTypeId)
-        throws SessionTimeoutException , SessionNotFoundException ,
-        InvalidAppdefTypeException ,
-        AppdefEntityNotFoundException , PermissionException ;
+    public List<ResourceDisplaySummary> findAGServicesCurrentHealthByType(int sessionId, AppdefEntityID[] entIds,
+                                                                          Integer serviceTypeId)
+        throws SessionTimeoutException, SessionNotFoundException, InvalidAppdefTypeException,
+        AppdefEntityNotFoundException, PermissionException;
 
     /**
      * Get Availability measurement for a given entitiy
      */
-    public double getAvailability(AuthzSubject subj, AppdefEntityID id)
-        throws AppdefEntityNotFoundException ,
-        PermissionException ;
+    public double getAvailability(AuthzSubject subj, AppdefEntityID id) throws AppdefEntityNotFoundException,
+        PermissionException;
 
     /**
      * Get the availability of the resource
      * @param id the Appdef entity ID
      */
-    public double getAvailability(int sessionId, AppdefEntityID id)
-        throws SessionTimeoutException , SessionNotFoundException ,
-        AppdefEntityNotFoundException , PermissionException ;
+    public double getAvailability(int sessionId, AppdefEntityID id) throws SessionTimeoutException,
+        SessionNotFoundException, AppdefEntityNotFoundException, PermissionException;
 
     /**
      * Get the availability of autogroup resources
      * @return a MetricValue for the availability
      */
-    public double getAGAvailability(int sessionId, AppdefEntityID [] aids,
-                                    AppdefEntityTypeID ctype)
-        throws SessionTimeoutException , SessionNotFoundException ,
-        AppdefEntityNotFoundException , PermissionException ;
+    public double getAGAvailability(int sessionId, AppdefEntityID[] aids, AppdefEntityTypeID ctype)
+        throws SessionTimeoutException, SessionNotFoundException, AppdefEntityNotFoundException, PermissionException;
 
     /**
      * Returns a list of problem metrics for an autogroup, return a summarized
@@ -878,36 +800,33 @@ public interface MeasurementBoss {
      * @throws InvalidAppdefTypeException
      * @throws AppdefCompatException
      */
-    public List<ProblemMetricSummary> findAllMetrics(int sessionId, AppdefEntityID aeid, AppdefEntityTypeID ctype, long begin, long end)
-        throws SessionTimeoutException , SessionNotFoundException ,
-        AppdefEntityNotFoundException , PermissionException ,
-        AppdefCompatException , InvalidAppdefTypeException ;
+    public List<ProblemMetricSummary> findAllMetrics(int sessionId, AppdefEntityID aeid, AppdefEntityTypeID ctype,
+                                                     long begin, long end) throws SessionTimeoutException,
+        SessionNotFoundException, AppdefEntityNotFoundException, PermissionException, AppdefCompatException,
+        InvalidAppdefTypeException;
 
     /**
      * Returns a list of problem metrics for a resource, and the selected
      * children and hosts of that resource. Return a summarized list of UI beans
      */
-    public List findAllMetrics(int sessionId, AppdefEntityID aeid, AppdefEntityID [] hosts,
-                               AppdefEntityTypeID [] children,
-                               AppdefEntityID [] members, long begin, long end)
-        throws SessionTimeoutException , SessionNotFoundException ,
-        AppdefEntityNotFoundException , PermissionException ,
-        AppdefCompatException , InvalidAppdefTypeException ;
+    public List findAllMetrics(int sessionId, AppdefEntityID aeid, AppdefEntityID[] hosts,
+                               AppdefEntityTypeID[] children, AppdefEntityID[] members, long begin, long end)
+        throws SessionTimeoutException, SessionNotFoundException, AppdefEntityNotFoundException, PermissionException,
+        AppdefCompatException, InvalidAppdefTypeException;
 
     /**
      * Returns a list of problem metrics for a resource, and the selected
      * children and hosts of that resource. Return a summarized list of UI beans
      */
-    public List findAllMetrics(int sessionId, AppdefEntityID aeid, AppdefEntityID [] hosts,
-                               AppdefEntityTypeID [] children, long begin, long end)
-        throws SessionTimeoutException , SessionNotFoundException ,
-        AppdefEntityNotFoundException , PermissionException ,
-        AppdefCompatException , InvalidAppdefTypeException ;
+    public List findAllMetrics(int sessionId, AppdefEntityID aeid, AppdefEntityID[] hosts,
+                               AppdefEntityTypeID[] children, long begin, long end) throws SessionTimeoutException,
+        SessionNotFoundException, AppdefEntityNotFoundException, PermissionException, AppdefCompatException,
+        InvalidAppdefTypeException;
 
     /**
      * Get the availability metric for a given resource
      */
-    public Measurement findAvailabilityMetric(int sessionId, AppdefEntityID id)
-        throws SessionTimeoutException , SessionNotFoundException ;
+    public Measurement findAvailabilityMetric(int sessionId, AppdefEntityID id) throws SessionTimeoutException,
+        SessionNotFoundException;
 
 }

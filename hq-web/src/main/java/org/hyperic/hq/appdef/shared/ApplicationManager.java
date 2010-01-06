@@ -6,10 +6,6 @@ package org.hyperic.hq.appdef.shared;
 import java.util.Collection;
 import java.util.List;
 
-import javax.ejb.CreateException;
-import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
-
 import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.ApplicationType;
 import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
@@ -17,6 +13,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -29,7 +26,7 @@ public interface ApplicationManager {
      * Get all Application types
      * @return list of ApplicationTypeValue objects
      */
-    public List<AppdefResourceTypeValue> getAllApplicationTypes(AuthzSubject who) throws FinderException;
+    public List<AppdefResourceTypeValue> getAllApplicationTypes(AuthzSubject who);
 
     /**
      * Get ApplicationType by ID
@@ -46,7 +43,7 @@ public interface ApplicationManager {
      */
     public Application createApplication(AuthzSubject subject, ApplicationValue newApp,
                                          Collection<ServiceValue> services) throws ValidationException,
-        PermissionException, CreateException, AppdefDuplicateNameException;
+        PermissionException, AppdefDuplicateNameException, NotFoundException;
 
     /**
      * Update the basic properties of an application. Will NOT update service
@@ -54,13 +51,13 @@ public interface ApplicationManager {
      */
     public ApplicationValue updateApplication(AuthzSubject subject, ApplicationValue newValue)
         throws ApplicationNotFoundException, PermissionException, UpdateException,
-        org.hyperic.hq.appdef.shared.AppdefDuplicateNameException, javax.ejb.FinderException;
+        org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 
     /**
      * Remove an application
      */
     public void removeApplication(AuthzSubject subject, Integer id) throws ApplicationNotFoundException,
-        PermissionException, RemoveException, VetoException;
+        PermissionException, VetoException;
 
     /**
      * Remove an application service.
@@ -95,7 +92,7 @@ public interface ApplicationManager {
      * @param subject
      */
     public void setServiceDepsForApp(AuthzSubject subject, DependencyTree depTree) throws ApplicationNotFoundException,
-        RemoveException, PermissionException, CreateException;
+        PermissionException;
 
     /**
      * Get application pojo by id.
@@ -111,8 +108,8 @@ public interface ApplicationManager {
      * @return A List of ApplicationValue objects representing all of the
      *         applications that the given subject is allowed to view.
      */
-    public PageList<ApplicationValue> getAllApplications(AuthzSubject subject, PageControl pc) throws FinderException,
-        PermissionException;
+    public PageList<ApplicationValue> getAllApplications(AuthzSubject subject, PageControl pc)
+        throws PermissionException, NotFoundException;
 
     /**
      * Get all the application services for this application
@@ -130,7 +127,7 @@ public interface ApplicationManager {
      *        service is an entry point
      */
     public void setApplicationServices(AuthzSubject subject, Integer appId, java.util.List<AppdefEntityID> entityIds)
-        throws ApplicationNotFoundException, CreateException, AppdefGroupNotFoundException, PermissionException;
+        throws ApplicationNotFoundException, AppdefGroupNotFoundException, PermissionException;
 
     /**
      * Get all applications for a resource.
