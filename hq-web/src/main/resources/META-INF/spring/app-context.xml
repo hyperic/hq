@@ -15,7 +15,7 @@
 	<!-- Must be the first bean of the first context file loaded, so that application context is made available to Bootstrap before any other bean is instantiated -->
 	<bean class="org.hyperic.hq.context.Bootstrap" />
 
-	<context:property-placeholder location="classpath:/spring-jdbc.properties" />
+	<context:property-placeholder location="classpath:/spring-jdbc.properties, classpath:/mail-config.properties" />
 
 	<bean id="dataSource"
 		class="org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy">
