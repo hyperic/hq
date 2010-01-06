@@ -29,9 +29,6 @@ import java.text.ParseException;
 import java.util.Collection;
 import java.util.Date;
 
-import javax.ejb.CreateException;
-import javax.ejb.FinderException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.server.session.Platform;
@@ -46,6 +43,7 @@ import org.hyperic.hq.autoinventory.DuplicateAIScanNameException;
 import org.hyperic.hq.autoinventory.ScanConfigurationCore;
 import org.hyperic.hq.autoinventory.shared.AIScheduleManager;
 import org.hyperic.hq.autoinventory.shared.AIScheduleValue;
+import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.dao.AIHistoryDAO;
@@ -157,7 +155,7 @@ public class AIScheduleManagerImpl
     @Transactional
     public void doScheduledScan(AuthzSubject subject, AppdefEntityID id, ScanConfigurationCore scanConfig,
                                 String scanName, String scanDesc, ScheduleValue schedule)
-        throws AutoinventoryException, CreateException, DuplicateAIScanNameException, ScheduleWillNeverFireException {
+        throws AutoinventoryException, DuplicateAIScanNameException, ScheduleWillNeverFireException {
         // find the os for the platform
         Platform pValue = null;
         try {
@@ -260,8 +258,7 @@ public class AIScheduleManagerImpl
      * 
      */
     @Transactional
-    public PageList<AIScheduleValue> findScheduledJobs(AuthzSubject subject, AppdefEntityID id, PageControl pc)
-        throws FinderException {
+    public PageList<AIScheduleValue> findScheduledJobs(AuthzSubject subject, AppdefEntityID id, PageControl pc) throws NotFoundException {
 
         // default the sorting to the next fire time
         pc = PageControl.initDefaults(pc, SortAttribute.CONTROL_NEXTFIRE);
@@ -277,7 +274,7 @@ public class AIScheduleManagerImpl
                 break;
 
             default:
-                throw new FinderException("Unknown sort attribute: " + sortAttr);
+                throw new NotFoundException("Unknown sort attribute: " + sortAttr);
         }
 
         // The pager will remove any stale data
@@ -293,7 +290,7 @@ public class AIScheduleManagerImpl
      * 
      */
     @Transactional
-    public AISchedule findScheduleByID(AuthzSubject subject, Integer id) throws FinderException, CreateException {
+    public AISchedule findScheduleByID(AuthzSubject subject, Integer id) {
 
         return aiScheduleDao.findById(id);
     }
@@ -305,8 +302,7 @@ public class AIScheduleManagerImpl
      * 
      */
     @Transactional
-    public PageList<AIHistory> findJobHistory(AuthzSubject subject, AppdefEntityID id, PageControl pc)
-        throws FinderException {
+    public PageList<AIHistory> findJobHistory(AuthzSubject subject, AppdefEntityID id, PageControl pc) throws NotFoundException {
 
         // default the sorting to the date started
         pc = PageControl.initDefaults(pc, SortAttribute.CONTROL_STARTED);
@@ -331,7 +327,7 @@ public class AIScheduleManagerImpl
                 hist = aiHistoryDao.findByEntity(id.getType(), id.getID());
                 break;
             default:
-                throw new FinderException("Unknown sort attribute: " + sortAttr);
+                throw new NotFoundException("Unknown sort attribute: " + sortAttr);
         }
 
         PageList<AIHistory> list = this.historyPager.seek(hist, pc.getPagenum(), pc.getPagesize());

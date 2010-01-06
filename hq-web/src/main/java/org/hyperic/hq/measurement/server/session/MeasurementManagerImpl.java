@@ -36,8 +36,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.ejb.FinderException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
@@ -73,6 +71,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
+import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementCreateException;
@@ -711,18 +710,18 @@ public class MeasurementManagerImpl implements MeasurementManager {
                     .findResource(id), cat);
 
                 if (metrics.size() == 0) {
-                    throw new FinderException("No metrics found");
+                    throw new NotFoundException("No metrics found");
                 }
 
                 Measurement m = metrics.get(0);
                 midMap.put(id, m);
-            } catch (FinderException e) {
+           } catch (NotFoundException e) {
                 // Throw an exception if we're only looking for one
                 // measurement
                 if (ids.length == 1) {
                     throw new MeasurementNotFoundException(cat + " metric for " + id + " not found");
                 }
-            }
+           }
         }
         return midMap;
     }

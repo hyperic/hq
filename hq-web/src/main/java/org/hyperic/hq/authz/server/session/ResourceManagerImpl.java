@@ -31,9 +31,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
@@ -65,6 +62,7 @@ import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceEdgeCreateException;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.server.session.AppdefBossImpl;
+import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.ResourceAudit;
 import org.hyperic.hq.context.Bootstrap;
@@ -139,14 +137,14 @@ public class ResourceManagerImpl implements ResourceManager {
      * Find the type that has the given name.
      * @param name The name of the type you're looking for.
      * @return The value-object of the type of the given name.
-     * @throws FinderException Unable to find a given or dependent entities.
+     * @throws NotFoundException Unable to find a given or dependent entities.
      * 
      */
-    public ResourceType findResourceTypeByName(String name) throws FinderException {
+    public ResourceType findResourceTypeByName(String name) throws NotFoundException{
         ResourceType rt = resourceTypeDAO.findByName(name);
 
         if (rt == null) {
-            throw new FinderException("ResourceType " + name + " not found");
+            throw new NotFoundException("ResourceType " + name + " not found");
         }
 
         return rt;
@@ -155,7 +153,7 @@ public class ResourceManagerImpl implements ResourceManager {
     /**
      * remove the authz resource entry
      */
-    public void removeAuthzResource(AuthzSubject subject, AppdefEntityID aeid, Resource r) throws RemoveException,
+    public void removeAuthzResource(AuthzSubject subject, AppdefEntityID aeid, Resource r) throws 
         PermissionException, VetoException {
         if (log.isDebugEnabled())
             log.debug("Removing authz resource: " + aeid);

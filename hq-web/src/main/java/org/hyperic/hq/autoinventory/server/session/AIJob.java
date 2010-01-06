@@ -28,8 +28,6 @@ package org.hyperic.hq.autoinventory.server.session;
 import java.io.IOException;
 import java.util.Date;
 
-import javax.ejb.CreateException;
-import javax.ejb.FinderException;
 import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
@@ -115,9 +113,7 @@ public abstract class AIJob extends BaseJob {
             errorMsg = "System error";
         } catch (NamingException e) {
             errorMsg = "System error";
-        } catch (CreateException e) {
-            errorMsg = "System error";
-        } finally {
+        }  finally {
         
             if (errorMsg != null) {
                 this.log.error("Unable to execute command: " + errorMsg);
@@ -149,7 +145,7 @@ public abstract class AIJob extends BaseJob {
     }
 
     protected void removeHistory(AIHistory history)
-        throws NamingException, CreateException
+        throws NamingException
     {
         AutoinventoryManager alocal = getAutoInventoryManager();
         alocal.removeHistory(history);
@@ -168,7 +164,7 @@ public abstract class AIJob extends BaseJob {
                                       long scheduleTime,
                                       String status,
                                       String errorMessage)
-        throws CreateException, NamingException, AutoinventoryException
+        throws  NamingException, AutoinventoryException
     {
         AutoinventoryManager alocal = getAutoInventoryManager();
         return alocal.createAIHistory(id, groupId, batchId, subjectName,
@@ -181,7 +177,7 @@ public abstract class AIJob extends BaseJob {
 
     protected void updateHistory(Integer jobId, long endTime,
                                  String status, String message)
-        throws FinderException, CreateException, NamingException
+        throws  NamingException
     {
         AutoinventoryManager alocal = getAutoInventoryManager();
         alocal.updateAIHistory(jobId, endTime, status, message);
@@ -190,7 +186,7 @@ public abstract class AIJob extends BaseJob {
     private AutoinventoryManager aimanager = null;
 
     protected AutoinventoryManager getAutoInventoryManager()
-        throws NamingException, CreateException {
+        throws NamingException {
         if (aimanager == null) {
             aimanager = AutoinventoryManagerImpl.getOne();
         }

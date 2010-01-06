@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
-import javax.ejb.FinderException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -56,6 +55,7 @@ import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.DuplicateObjectException;
+import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.context.Bootstrap;
@@ -403,7 +403,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
      * 
      */
     public List<ResourceGroupValue> getAllResourceGroups(AuthzSubject subject, PageControl pc)
-        throws PermissionException, FinderException {
+        throws PermissionException {
         return getAllResourceGroups(subject, pc, false);
     }
 
@@ -571,9 +571,9 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
             groupIds = pm.findOperationScopeBySubject(subject,
                                                       AuthzConstants.groupOpViewResourceGroup,
                                                       AuthzConstants.groupResourceTypeName);
-        } catch (FinderException e) {
+        } catch (NotFoundException e) {
             // Makes no sense
-            throw new SystemException(e);
+           throw new SystemException(e);
         }
 
         // now build a collection for all of them
@@ -610,7 +610,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
      */
     public Collection<ResourceGroup> getCompatibleResourceGroups(AuthzSubject subject,
                                                                  Resource resProto)
-        throws FinderException, PermissionException {
+        throws PermissionException, NotFoundException {
         // first get the list of groups subject can view
         PermissionManager pm = PermissionManagerFactory.getInstance();
         List<Integer> groupIds =
@@ -636,7 +636,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
     private PageList<ResourceGroupValue> getAllResourceGroups(AuthzSubject subject,
                                                          PageControl pc,
                                                          boolean excludeRoot)
-        throws PermissionException, FinderException {
+        throws PermissionException {
         Collection<ResourceGroup> groups = getAllResourceGroups(subject, excludeRoot);
         // TODO: G
         return _ownedGroupPager.seek(groups, pc.getPagenum(), pc.getPagesize());
@@ -651,7 +651,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
     public PageList<ResourceGroupValue> getResourceGroupsById(AuthzSubject whoami,
                                                          Integer[] ids,
                                                          PageControl pc)
-        throws PermissionException, FinderException {
+        throws PermissionException {
         if (ids.length == 0)
             return new PageList<ResourceGroupValue>();
 
@@ -700,11 +700,10 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
     /**
      * Get a ResourceGroup owner's AuthzSubjectValue
      * @param gid The group id
-     * @exception FinderException Unable to find a group by id
+     * @exception NotFoundException Unable to find a group by id
      * 
      */
-    public AuthzSubject getResourceGroupOwner(Integer gid)
-        throws FinderException {
+    public AuthzSubject getResourceGroupOwner(Integer gid) throws NotFoundException {
         Resource gResource =
                              resourceManager
                                             .findResourceByInstanceId(

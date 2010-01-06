@@ -6,10 +6,6 @@ package org.hyperic.hq.appdef.shared;
 import java.util.Collection;
 import java.util.List;
 
-import javax.ejb.CreateException;
-import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
-
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.server.session.Platform;
@@ -18,6 +14,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -57,7 +54,7 @@ public interface PlatformManager {
      * @return List of PlatformTypeValues
      */
     public PageList<PlatformTypeValue> getViewablePlatformTypes(AuthzSubject subject, PageControl pc)
-        throws FinderException, PermissionException;
+        throws  PermissionException, NotFoundException;
 
     /**
      * Get PlatformPluginName for an entity id. There is no authz in this method
@@ -73,7 +70,7 @@ public interface PlatformManager {
      * @param subject The user performing the delete operation.
      * @param id - The id of the Platform
      */
-    public void removePlatform(AuthzSubject subject, Platform platform) throws RemoveException,
+    public void removePlatform(AuthzSubject subject, Platform platform) throws 
         PlatformNotFoundException, PermissionException, VetoException;
 
     public void handleResourceDelete(Resource resource);
@@ -82,15 +79,14 @@ public interface PlatformManager {
      * Create a Platform of a specified type
      */
     public Platform createPlatform(AuthzSubject subject, Integer platformTypeId, PlatformValue pValue, Integer agentPK)
-        throws CreateException, ValidationException, PermissionException, AppdefDuplicateNameException,
+        throws  ValidationException, PermissionException, AppdefDuplicateNameException,
         AppdefDuplicateFQDNException, ApplicationException;
 
     /**
      * Create a Platform from an AIPlatform
      * @param aipValue the AIPlatform to create as a regular appdef platform.
      */
-    public Platform createPlatform(AuthzSubject subject, AIPlatformValue aipValue) throws ApplicationException,
-        CreateException;
+    public Platform createPlatform(AuthzSubject subject, AIPlatformValue aipValue) throws ApplicationException;
 
     /**
      * Get all platforms.
@@ -100,8 +96,8 @@ public interface PlatformManager {
      * @return A List of PlatformValue objects representing all of the platforms
      *         that the given subject is allowed to view.
      */
-    public PageList<PlatformValue> getAllPlatforms(AuthzSubject subject, PageControl pc) throws FinderException,
-        PermissionException;
+    public PageList<PlatformValue> getAllPlatforms(AuthzSubject subject, PageControl pc) throws 
+        PermissionException, NotFoundException;
 
     /**
      * Get platforms created within a given time range.
@@ -113,7 +109,7 @@ public interface PlatformManager {
      *         within the given range.
      */
     public PageList<PlatformValue> getRecentPlatforms(AuthzSubject subject, long range, int size)
-        throws FinderException, PermissionException;
+        throws  PermissionException, NotFoundException;
 
     /**
      * Get platform light value by id. Does not check permission.
@@ -280,13 +276,13 @@ public interface PlatformManager {
      * DevNote: This method was refactored out of updatePlatformTypes. It does
      * not work.
      */
-    public void deletePlatformType(PlatformType pt) throws org.hyperic.hq.common.VetoException, RemoveException;
+    public void deletePlatformType(PlatformType pt) throws org.hyperic.hq.common.VetoException;
 
     /**
      * Update platform types
      */
     public void updatePlatformTypes(String plugin, org.hyperic.hq.product.PlatformTypeInfo[] infos)
-        throws CreateException, FinderException, RemoveException, VetoException;
+        throws    VetoException, NotFoundException;
 
     /**
      * Update an existing appdef platform with data from an AI platform.

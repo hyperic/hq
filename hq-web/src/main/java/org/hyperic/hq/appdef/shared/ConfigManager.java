@@ -3,14 +3,9 @@
  */
 package org.hyperic.hq.appdef.shared;
 
-import javax.ejb.CreateException;
-import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
-
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.common.VetoException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 
@@ -82,7 +77,7 @@ public interface ConfigManager {
      */
     public AppdefEntityID setConfigResponse(AuthzSubject subject, AppdefEntityID id, ConfigResponse response,
                                             String type, boolean sendConfigEvent) throws ConfigFetchException,
-        AppdefEntityNotFoundException, PermissionException, EncodingException, FinderException;
+        AppdefEntityNotFoundException, PermissionException, EncodingException;
 
     public AppdefEntityID configureResponse(AuthzSubject subject, ConfigResponseDB existingConfig,
                                             AppdefEntityID appdefID, byte[] productConfig, byte[] measurementConfig,

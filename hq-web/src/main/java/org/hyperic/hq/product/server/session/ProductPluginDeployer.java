@@ -62,7 +62,7 @@ import org.hyperic.hq.product.shared.ProductManager;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.util.file.FileUtil;
 import org.hyperic.util.jdbc.DBUtil;
-import org.jboss.deployment.DeploymentException;
+
 import org.jboss.system.server.ServerConfig;
 import org.jboss.system.server.ServerConfigLocator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -236,11 +236,7 @@ public class ProductPluginDeployer implements Comparator<String> {
         Collections.sort(_plugins, this);
 
         for (String pluginName : _plugins) {
-            try {
-                deployPlugin(pluginName);
-            } catch (DeploymentException e) {
-                _log.error("Unable to deploy plugin [" + pluginName + "]", e);
-            }
+            deployPlugin(pluginName);
         }
         
         _plugins.clear();
@@ -454,7 +450,7 @@ public class ProductPluginDeployer implements Comparator<String> {
         }
     }
 
-    private void deployPlugin(String plugin) throws DeploymentException {
+    private void deployPlugin(String plugin)  {
         try {
             productManager.deploymentNotify(plugin);
         } catch (Exception e) {

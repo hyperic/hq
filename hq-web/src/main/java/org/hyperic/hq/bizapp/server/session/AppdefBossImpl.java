@@ -37,11 +37,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.PatternSyntaxException;
-
-import javax.ejb.CreateException;
-import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.PageInfo;
@@ -143,6 +138,7 @@ import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.uibeans.ResourceTreeNode;
 import org.hyperic.hq.bizapp.shared.uibeans.SearchResult;
 import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.ProductProperties;
@@ -229,7 +225,7 @@ public class AppdefBossImpl implements AppdefBoss {
     private TrackerManager trackerManager;
 
     private AppdefManager appdefManager;
-    
+
     private ZeventEnqueuer zEventManager;
 
     protected Log log = LogFactory.getLog(AppdefBossImpl.class.getName());
@@ -244,10 +240,9 @@ public class AppdefBossImpl implements AppdefBoss {
                           AuthzSubjectManager authzSubjectManager, AutoinventoryManager autoinventoryManager,
                           AvailabilityManager availabilityManager, ConfigManager configManager,
                           CPropManager cPropManager, PermissionManager permissionManager,
-                          MeasurementManager measurementManager, PlatformManager platformManager,
-                          AIBoss aiBoss, ResourceGroupManager resourceGroupManager,
-                          ResourceManager resourceManager, ServerManager serverManager,
-                          ServiceManager serviceManager, TrackerManager trackerManager,
+                          MeasurementManager measurementManager, PlatformManager platformManager, AIBoss aiBoss,
+                          ResourceGroupManager resourceGroupManager, ResourceManager resourceManager,
+                          ServerManager serverManager, ServiceManager serviceManager, TrackerManager trackerManager,
                           AppdefManager appdefManager, ZeventEnqueuer zEventManager) {
         this.sessionManager = sessionManager;
         this.agentManager = agentManager;
@@ -357,7 +352,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * 
      */
     public PageList<PlatformTypeValue> findViewablePlatformTypes(int sessionID, PageControl pc)
-        throws SessionTimeoutException, SessionNotFoundException, PermissionException, FinderException {
+        throws SessionTimeoutException, SessionNotFoundException, PermissionException, NotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         PageList<PlatformTypeValue> platTypeList = platformManager.getViewablePlatformTypes(subject, pc);
 
@@ -370,8 +365,8 @@ public class AppdefBossImpl implements AppdefBoss {
      * @return A list of ServerTypeValue objects.
      * 
      */
-    public PageList<ServerTypeValue> findAllServerTypes(int sessionID, PageControl pc) throws FinderException,
-        SessionNotFoundException, SessionTimeoutException, PermissionException {
+    public PageList<ServerTypeValue> findAllServerTypes(int sessionID, PageControl pc) throws SessionNotFoundException,
+        SessionTimeoutException, PermissionException {
 
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         return serverManager.getAllServerTypes(subject, pc);
@@ -383,8 +378,8 @@ public class AppdefBossImpl implements AppdefBoss {
      * @return A list of ServerTypeValue objects.
      * 
      */
-    public PageList<ServerTypeValue> findViewableServerTypes(int sessionID, PageControl pc) throws FinderException,
-        SessionNotFoundException, SessionTimeoutException, PermissionException {
+    public PageList<ServerTypeValue> findViewableServerTypes(int sessionID, PageControl pc)
+        throws SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         return serverManager.getViewableServerTypes(subject, pc);
     }
@@ -394,11 +389,9 @@ public class AppdefBossImpl implements AppdefBoss {
      */
     public List<AppdefResourceTypeValue> findAllApplicationTypes(int sessionID) throws ApplicationException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
-        try {
-            return applicationManager.getAllApplicationTypes(subject);
-        } catch (FinderException e) {
-            throw new SystemException(e);
-        }
+
+        return applicationManager.getAllApplicationTypes(subject);
+
     }
 
     /**
@@ -421,8 +414,8 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
-    public PageList<ServiceTypeValue> findViewableServiceTypes(int sessionID, PageControl pc) throws FinderException,
-        SessionTimeoutException, SessionNotFoundException, PermissionException {
+    public PageList<ServiceTypeValue> findViewableServiceTypes(int sessionID, PageControl pc)
+        throws SessionTimeoutException, SessionNotFoundException, PermissionException, NotFoundException {
 
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         return serviceManager.getViewableServiceTypes(subject, pc);
@@ -735,8 +728,8 @@ public class AppdefBossImpl implements AppdefBoss {
      * @return A List of PlatformValue objects representing all of the platforms
      *         that the given subject is allowed to view.
      */
-    public PageList<PlatformValue> findAllPlatforms(int sessionID, PageControl pc) throws FinderException,
-        SessionTimeoutException, SessionNotFoundException, PermissionException {
+    public PageList<PlatformValue> findAllPlatforms(int sessionID, PageControl pc) throws SessionTimeoutException,
+        SessionNotFoundException, PermissionException, NotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         return platformManager.getAllPlatforms(subject, pc);
     }
@@ -750,8 +743,8 @@ public class AppdefBossImpl implements AppdefBoss {
      *         that the given subject is allowed to view that was created in the
      *         past time range specified.
      */
-    public PageList<PlatformValue> findRecentPlatforms(int sessionID, long range, int size) throws FinderException,
-        SessionTimeoutException, SessionNotFoundException, PermissionException {
+    public PageList<PlatformValue> findRecentPlatforms(int sessionID, long range, int size)
+        throws SessionTimeoutException, SessionNotFoundException, PermissionException, NotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         return platformManager.getRecentPlatforms(subject, range, size);
     }
@@ -910,11 +903,11 @@ public class AppdefBossImpl implements AppdefBoss {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
 
         List<AppdefResourceTypeValue> toBePaged = new ArrayList<AppdefResourceTypeValue>(); // at
-                                                                                            // very
-                                                                                            // least,
-                                                                                            // return
-                                                                                            // empty
-                                                                                            // list.
+        // very
+        // least,
+        // return
+        // empty
+        // list.
         Pager defaultPager = Pager.getDefaultPager();
 
         try {
@@ -952,8 +945,8 @@ public class AppdefBossImpl implements AppdefBoss {
                     toBePaged.add(tvo);
                 }
             }
-        } catch (FinderException e) {
-            log.debug("Caught harmless FinderException no resource " + "types defined.");
+        } catch (NotFoundException e) {
+            log.debug("Caught harmless NotFoundException no resource " + "types defined.");
         }
         // TODO: G
         return defaultPager.seek(toBePaged, pc.getPagenum(), pc.getPagesize());
@@ -965,16 +958,13 @@ public class AppdefBossImpl implements AppdefBoss {
      * 
      */
     public Platform createPlatform(int sessionID, PlatformValue platformVal, Integer platTypePK, Integer agent)
-        throws CreateException, ValidationException, SessionTimeoutException, SessionNotFoundException,
-        PermissionException, AppdefDuplicateNameException, AppdefDuplicateFQDNException, ApplicationException {
+        throws ValidationException, SessionTimeoutException, SessionNotFoundException, PermissionException,
+        AppdefDuplicateNameException, AppdefDuplicateFQDNException, ApplicationException {
         try {
             // Get the AuthzSubject for the user's session
             AuthzSubject subject = sessionManager.getSubject(sessionID);
             Platform platform = platformManager.createPlatform(subject, platTypePK, platformVal, agent);
             return platform;
-        } catch (CreateException e) {
-            log.error("Unable to create platform. Rolling back", e);
-            throw e;
         } catch (AppdefDuplicateNameException e) {
             log.error("Unable to create platform. Rolling back", e);
             throw e;
@@ -983,7 +973,7 @@ public class AppdefBossImpl implements AppdefBoss {
             throw e;
         } catch (PlatformNotFoundException e) {
             log.error("Unable to create platform. Rolling back", e);
-            throw new CreateException("Error occurred creating platform:" + e.getMessage());
+            throw new SystemException("Error occurred creating platform:" + e.getMessage());
         } catch (ApplicationException e) {
             log.error("Unable to create platform. Rolling back", e);
             throw e;
@@ -1085,9 +1075,9 @@ public class AppdefBossImpl implements AppdefBoss {
      * 
      */
     public ServerValue createServer(int sessionID, ServerValue serverVal, Integer platformPK, Integer serverTypePK,
-                                    Map<String, String> cProps) throws CreateException, ValidationException,
-        SessionTimeoutException, SessionNotFoundException, PermissionException, AppdefDuplicateNameException,
-        CPropKeyNotFoundException {
+                                    Map<String, String> cProps) throws ValidationException, SessionTimeoutException,
+        SessionNotFoundException, PermissionException, AppdefDuplicateNameException, CPropKeyNotFoundException,
+        NotFoundException {
         try {
             // Get the AuthzSubject for the user's session
             AuthzSubject subject = sessionManager.getSubject(sessionID);
@@ -1114,8 +1104,8 @@ public class AppdefBossImpl implements AppdefBoss {
      */
     public ApplicationValue createApplication(int sessionID, ApplicationValue appVal,
                                               Collection<ServiceValue> services, ConfigResponse protoProps)
-        throws CreateException, ValidationException, SessionTimeoutException, SessionNotFoundException,
-        PermissionException, AppdefDuplicateNameException {
+        throws ValidationException, SessionTimeoutException, SessionNotFoundException, PermissionException,
+        AppdefDuplicateNameException, NotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
 
         Application pk = applicationManager.createApplication(subject, appVal, services);
@@ -1130,7 +1120,7 @@ public class AppdefBossImpl implements AppdefBoss {
      */
     public ServiceValue createService(int sessionID, ServiceValue serviceVal, Integer serviceTypePK, AppdefEntityID aeid)
         throws SessionNotFoundException, SessionTimeoutException, ServerNotFoundException, PlatformNotFoundException,
-        PermissionException, AppdefDuplicateNameException, ValidationException, CreateException {
+        PermissionException, AppdefDuplicateNameException, ValidationException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         try {
             Integer serverPK;
@@ -1165,7 +1155,7 @@ public class AppdefBossImpl implements AppdefBoss {
     public Service createService(AuthzSubject subject, ServiceValue serviceVal, Integer serviceTypePK,
                                  Integer serverPK, Map<String, String> cProps) throws SessionNotFoundException,
         SessionTimeoutException, AppdefDuplicateNameException, ValidationException, PermissionException,
-        CreateException, CPropKeyNotFoundException {
+        CPropKeyNotFoundException {
         try {
 
             Service savedService = serviceManager.createService(subject, serverPK, serviceTypePK, serviceVal.getName(),
@@ -1215,32 +1205,30 @@ public class AppdefBossImpl implements AppdefBoss {
             return new AppdefEntityID[0];
         }
         AppdefEntityID[] removed = resourceManager.removeResourcePerms(subject, res, false);
-        try {
-            final Integer id = aeid.getId();
-            switch (aeid.getType()) {
-                case AppdefEntityConstants.APPDEF_TYPE_SERVER:
 
-                    serverManager.removeServer(subject, serverManager.findServerById(id));
-                    break;
-                case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                    removePlatform(subject, platformManager.findPlatformById(id));
-                    break;
-                case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+        final Integer id = aeid.getId();
+        switch (aeid.getType()) {
+            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
 
-                    serviceManager.removeService(subject, serviceManager.findServiceById(id));
-                    break;
-                case AppdefEntityConstants.APPDEF_TYPE_GROUP:
-                    resourceGroupManager.removeResourceGroup(subject, resourceGroupManager.findResourceGroupById(id));
-                    break;
-                case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-                    applicationManager.removeApplication(subject, id);
-                    break;
-                default:
-                    break;
-            }
-        } catch (RemoveException e) {
-            throw new ApplicationException(e);
+                serverManager.removeServer(subject, serverManager.findServerById(id));
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                removePlatform(subject, platformManager.findPlatformById(id));
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+
+                serviceManager.removeService(subject, serviceManager.findServiceById(id));
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_GROUP:
+                resourceGroupManager.removeResourceGroup(subject, resourceGroupManager.findResourceGroupById(id));
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
+                applicationManager.removeApplication(subject, id);
+                break;
+            default:
+                break;
         }
+
         if (log.isDebugEnabled()) {
             log.debug("removeAppdefEntity() for " + aeid + " executed in " + timer.getElapsed());
         }
@@ -1257,7 +1245,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * need for a transaction in this context.
      * 
      */
-    public void removeDeletedResources() throws ApplicationException, VetoException, RemoveException {
+    public void removeDeletedResources() throws ApplicationException, VetoException {
         final StopWatch watch = new StopWatch();
         final AuthzSubject subject = authzSubjectManager.findSubjectById(AuthzConstants.overlordId);
 
@@ -1425,15 +1413,10 @@ public class AppdefBossImpl implements AppdefBoss {
                 }
             } catch (AIQApprovalException e) {
                 log.error("Error removing from AI queue", e);
-            } catch (FinderException e) {
-                log.debug("AIPlatform resources not found: " + platform.getId());
             }
 
             // now, remove the platform.
             platformManager.removePlatform(subject, platform);
-        } catch (RemoveException e) {
-            log.error("Caught EJB RemoveException", e);
-            throw new SystemException(e);
         } catch (PermissionException e) {
             log.error("Caught PermissionException while removing platform: " + platform.getId(), e);
             throw e;
@@ -1454,9 +1437,7 @@ public class AppdefBossImpl implements AppdefBoss {
             }
             // finally, remove the server
             serverManager.removeServer(subject, server);
-        } catch (RemoveException e) {
-
-            throw new SystemException(e);
+           
         } catch (PermissionException e) {
 
             log.error("Caught permission exception: [server:" + server.getId() + "]");
@@ -1477,7 +1458,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * 
      */
     public void _removeServiceInNewTran(AuthzSubject subject, Service service) throws VetoException,
-        PermissionException, RemoveException {
+        PermissionException {
         try {
             // now remove any measurements associated with the service
             disableMeasurements(subject, service.getResource());
@@ -1486,9 +1467,6 @@ public class AppdefBossImpl implements AppdefBoss {
         } catch (PermissionException e) {
 
             throw (PermissionException) e;
-        } catch (RemoveException e) {
-
-            throw (RemoveException) e;
         }
     }
 
@@ -1507,18 +1485,14 @@ public class AppdefBossImpl implements AppdefBoss {
      */
     public void _removeApplicationInNewTran(AuthzSubject subject, Application app) throws ApplicationException,
         PermissionException, SessionException, VetoException {
-        try {
-            applicationManager.removeApplication(subject, app.getId());
-        } catch (RemoveException e) {
-            throw new ApplicationException(e);
-        }
+        applicationManager.removeApplication(subject, app.getId());
     }
 
     /**
      * 
      */
     public ServerValue updateServer(int sessionId, ServerValue aServer) throws PermissionException,
-        ValidationException, SessionTimeoutException, SessionNotFoundException, FinderException, UpdateException,
+        ValidationException, SessionTimeoutException, SessionNotFoundException, UpdateException,
         AppdefDuplicateNameException {
         try {
             return updateServer(sessionId, aServer, null);
@@ -1534,8 +1508,8 @@ public class AppdefBossImpl implements AppdefBoss {
      * 
      */
     public ServerValue updateServer(int sessionId, ServerValue aServer, Map<String, String> cProps)
-        throws FinderException, ValidationException, SessionTimeoutException, SessionNotFoundException,
-        PermissionException, UpdateException, AppdefDuplicateNameException, CPropKeyNotFoundException {
+        throws ValidationException, SessionTimeoutException, SessionNotFoundException, PermissionException,
+        UpdateException, AppdefDuplicateNameException, CPropKeyNotFoundException {
         try {
             try {
                 AuthzSubject subject = sessionManager.getSubject(sessionId);
@@ -1551,15 +1525,14 @@ public class AppdefBossImpl implements AppdefBoss {
                 log.error("Error updating server: " + aServer.getId());
                 throw e;
             }
-        } catch (CreateException e) {
+            // } catch (CreateException e) {
             // change to a update exception as this only occurs
             // if there was a failure instantiating the session
             // bean
-            throw new UpdateException("Error creating manager session bean: " + e.getMessage());
+            // throw new UpdateException("Error creating manager session bean: "
+            // + e.getMessage());
         } catch (PermissionException e) {
             throw (PermissionException) e;
-        } catch (FinderException e) {
-            throw (FinderException) e;
         } catch (AppdefDuplicateNameException e) {
             throw (AppdefDuplicateNameException) e;
         } catch (CPropKeyNotFoundException e) {
@@ -1575,8 +1548,8 @@ public class AppdefBossImpl implements AppdefBoss {
      * 
      */
     public ServiceValue updateService(int sessionId, ServiceValue aService) throws PermissionException,
-        ValidationException, SessionTimeoutException, SessionNotFoundException, FinderException, UpdateException,
-        AppdefDuplicateNameException {
+        ValidationException, SessionTimeoutException, SessionNotFoundException, UpdateException,
+        AppdefDuplicateNameException, NotFoundException {
         try {
             return updateService(sessionId, aService, null);
         } catch (CPropKeyNotFoundException exc) {
@@ -1591,8 +1564,8 @@ public class AppdefBossImpl implements AppdefBoss {
      * 
      */
     public ServiceValue updateService(int sessionId, ServiceValue aService, Map<String, String> cProps)
-        throws FinderException, ValidationException, SessionTimeoutException, SessionNotFoundException,
-        PermissionException, UpdateException, AppdefDuplicateNameException, CPropKeyNotFoundException {
+        throws ValidationException, SessionTimeoutException, SessionNotFoundException, PermissionException,
+        UpdateException, AppdefDuplicateNameException, CPropKeyNotFoundException, NotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         return updateService(subject, aService, cProps);
     }
@@ -1603,8 +1576,8 @@ public class AppdefBossImpl implements AppdefBoss {
      * 
      */
     public ServiceValue updateService(AuthzSubject subject, ServiceValue aService, Map<String, String> cProps)
-        throws FinderException, ValidationException, SessionTimeoutException, SessionNotFoundException,
-        PermissionException, UpdateException, AppdefDuplicateNameException, CPropKeyNotFoundException {
+        throws ValidationException, SessionTimeoutException, SessionNotFoundException, PermissionException,
+        UpdateException, AppdefDuplicateNameException, CPropKeyNotFoundException, NotFoundException {
         try {
             Service updated = serviceManager.updateService(subject, aService);
 
@@ -1616,15 +1589,10 @@ public class AppdefBossImpl implements AppdefBoss {
         } catch (Exception e) {
             log.error("Error updating service: " + aService.getId());
 
-            if (e instanceof CreateException) {
-                // change to a update exception as this only occurs
-                // if there was a failure instantiating the session
-                // bean
-                throw new UpdateException("Error creating manager session " + "bean:" + e.getMessage());
-            } else if (e instanceof PermissionException) {
+            if (e instanceof PermissionException) {
                 throw (PermissionException) e;
-            } else if (e instanceof FinderException) {
-                throw (FinderException) e;
+            } else if (e instanceof NotFoundException) {
+                throw (NotFoundException) e;
             } else if (e instanceof AppdefDuplicateNameException) {
                 throw (AppdefDuplicateNameException) e;
             } else if (e instanceof CPropKeyNotFoundException) {
@@ -1640,9 +1608,9 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
-    public PlatformValue updatePlatform(int sessionId, PlatformValue aPlatform) throws FinderException,
-        ValidationException, PermissionException, SessionTimeoutException, SessionNotFoundException, UpdateException,
-        ApplicationException, AppdefDuplicateNameException, AppdefDuplicateFQDNException {
+    public PlatformValue updatePlatform(int sessionId, PlatformValue aPlatform) throws ValidationException,
+        PermissionException, SessionTimeoutException, SessionNotFoundException, UpdateException, ApplicationException,
+        AppdefDuplicateNameException, AppdefDuplicateFQDNException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         return updatePlatform(subject, aPlatform);
     }
@@ -1650,22 +1618,16 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
-    public PlatformValue updatePlatform(AuthzSubject subject, PlatformValue aPlatform) throws FinderException,
-        ValidationException, PermissionException, SessionTimeoutException, SessionNotFoundException, UpdateException,
-        ApplicationException, AppdefDuplicateNameException, AppdefDuplicateFQDNException {
+    public PlatformValue updatePlatform(AuthzSubject subject, PlatformValue aPlatform) throws ValidationException,
+        PermissionException, SessionTimeoutException, SessionNotFoundException, UpdateException, ApplicationException,
+        AppdefDuplicateNameException, AppdefDuplicateFQDNException {
         try {
             return platformManager.updatePlatform(subject, aPlatform).getPlatformValue();
         } catch (Exception e) {
             log.error("Error updating platform: " + aPlatform.getId());
             // rollback();
-            if (e instanceof CreateException) {
-                // change to a update exception as this only occurs
-                // if there was a failure instantiating the session bean
-                throw new UpdateException("Error creating manager session " + "bean:" + e.getMessage());
-            } else if (e instanceof PermissionException) {
+            if (e instanceof PermissionException) {
                 throw (PermissionException) e;
-            } else if (e instanceof FinderException) {
-                throw (FinderException) e;
             } else if (e instanceof AppdefDuplicateNameException) {
                 throw (AppdefDuplicateNameException) e;
             } else if (e instanceof AppdefDuplicateFQDNException) {
@@ -1686,9 +1648,6 @@ public class AppdefBossImpl implements AppdefBoss {
         try {
             AuthzSubject caller = sessionManager.getSubject(sessionId);
             return applicationManager.updateApplication(caller, app);
-        } catch (FinderException e) {
-
-            throw new ApplicationException(e);
         } catch (Exception e) {
 
             throw new SystemException(e);
@@ -2763,7 +2722,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * 
      */
     public AppdefResourcePermissions getResourcePermissions(int sessionId, AppdefEntityID id)
-        throws SessionNotFoundException, SessionTimeoutException, FinderException {
+        throws SessionNotFoundException, SessionTimeoutException {
         AuthzSubject who = sessionManager.getSubject(sessionId);
         return permissionManager.getResourcePermissions(who, id);
     }

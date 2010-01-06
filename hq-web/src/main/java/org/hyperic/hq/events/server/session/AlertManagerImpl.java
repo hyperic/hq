@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
-import javax.ejb.RemoveException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -51,7 +50,6 @@ import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.util.MessagePublisher;
-import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.EscalatableCreator;
@@ -67,11 +65,11 @@ import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEvent;
 import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEventSource;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementDAO;
+import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
-import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -128,7 +126,7 @@ public class AlertManagerImpl implements AlertManager {
         this.alertDefinitionManager = alertDefinitionManager;
         this.authzSubjectManager = authzSubjectManager;
         this.escalationManager = escalationManager;
-        
+
         this.messagePublisher = messagePublisher;
     }
 
@@ -218,7 +216,7 @@ public class AlertManagerImpl implements AlertManager {
      * @throws PermissionException
      * 
      */
-    public int deleteAlerts(AuthzSubject subj, AlertDefinition ad) throws RemoveException, PermissionException {
+    public int deleteAlerts(AuthzSubject subj, AlertDefinition ad) throws PermissionException {
         alertPermissionManager.canManageAlerts(subj, ad);
         return alertDAO.deleteByAlertDefinition(ad);
     }
@@ -340,7 +338,8 @@ public class AlertManagerImpl implements AlertManager {
                     alertDef, false);
             }
 
-            EscalatableCreator creator = new ClassicEscalatableCreator(alertDef, event, messagePublisher, AlertManagerImpl.getOne());
+            EscalatableCreator creator = new ClassicEscalatableCreator(alertDef, event, messagePublisher,
+                AlertManagerImpl.getOne());
             Resource res = creator.getAlertDefinition().getResource();
             if (res == null || res.isInAsyncDeleteState()) {
                 return;

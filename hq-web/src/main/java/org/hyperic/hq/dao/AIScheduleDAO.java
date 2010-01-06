@@ -3,11 +3,10 @@ package org.hyperic.hq.dao;
 import java.io.IOException;
 import java.util.Collection;
 
-import javax.ejb.CreateException;
-
 import org.hibernate.SessionFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.autoinventory.AISchedule;
+import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.scheduler.ScheduleValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -65,26 +64,26 @@ public class AIScheduleDAO extends HibernateDAO<AISchedule>
                              String scanDesc,
                              ScheduleValue schedule,
                              long nextFire, String triggerName,
-                             String jobName)
-        throws CreateException
+                             String jobName) throws ApplicationException
+       
     {
-        try {
-            AISchedule s = new AISchedule();
-            s.setEntityId(entityId.getId());
-            s.setEntityType(new Integer(entityId.getType()));
-            s.setSubject(subject);
-            s.setScheduleValue(schedule);
-            s.setNextFireTime(nextFire);
-            s.setTriggerName(triggerName);
-            s.setJobName(jobName);
-            s.setJobOrderData(null);
-            s.setScanName(scanName);
-            s.setScanDesc(scanDesc);
-            save(s);
-            return s;
-        } catch (IOException e) {
-            throw new CreateException(e.getMessage());
-        }
+            try {
+                AISchedule s = new AISchedule();
+                s.setEntityId(entityId.getId());
+                s.setEntityType(new Integer(entityId.getType()));
+                s.setSubject(subject);
+                s.setScheduleValue(schedule);
+                s.setNextFireTime(nextFire);
+                s.setTriggerName(triggerName);
+                s.setJobName(jobName);
+                s.setJobOrderData(null);
+                s.setScanName(scanName);
+                s.setScanDesc(scanDesc);
+                save(s);
+                return s;
+            } catch (IOException e) {
+                throw new ApplicationException(e.getMessage());
+            }
     }
 
     public AISchedule findByScanName(String name)

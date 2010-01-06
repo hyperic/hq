@@ -6,13 +6,10 @@ package org.hyperic.hq.product.shared;
 import java.util.Map;
 import java.util.Set;
 
-import javax.ejb.CreateException;
-import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
-
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginManager;
@@ -33,17 +30,16 @@ public interface ProductManager {
 
     public PluginManager getPluginManager(String type) throws PluginException;
 
-    public String getMonitoringHelp(AppdefEntityValue entityVal, Map<?,?> props) throws PluginNotFoundException,
+    public String getMonitoringHelp(AppdefEntityValue entityVal, Map<?, ?> props) throws PluginNotFoundException,
         PermissionException, AppdefEntityNotFoundException;
 
     public ConfigSchema getConfigSchema(String type, String name, AppdefEntityValue entityVal,
                                         ConfigResponse baseResponse) throws PluginException,
         AppdefEntityNotFoundException, PermissionException;
 
-    public void deploymentNotify(String pluginName) throws PluginNotFoundException, FinderException, CreateException,
-        RemoveException, VetoException;
+    public void deploymentNotify(String pluginName) throws PluginNotFoundException, VetoException, NotFoundException;
 
     public void updateDynamicServiceTypePlugin(String pluginName, Set<ServiceType> serviceTypes)
-        throws PluginNotFoundException, FinderException, RemoveException, CreateException, VetoException;
+        throws PluginNotFoundException, VetoException, NotFoundException;
 
 }

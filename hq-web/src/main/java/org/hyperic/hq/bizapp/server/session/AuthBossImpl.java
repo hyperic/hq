@@ -28,8 +28,6 @@ package org.hyperic.hq.bizapp.server.session;
 import java.util.HashSet;
 import java.util.List;
 
-import javax.ejb.AccessLocalException;
-import javax.ejb.FinderException;
 import javax.security.auth.login.LoginException;
 
 import org.apache.commons.logging.Log;
@@ -136,15 +134,13 @@ public class AuthBossImpl implements AuthBoss {
      */
     public int login(String username, String password) throws SecurityException, LoginException, ApplicationException,
         ConfigPropertyException {
-        try {
-            int res = authManager.getSessionId(username, password);
-            AuthzSubject s = sessionManager.getSubject(res);
-            UserLoginZevent evt = new UserLoginZevent(s.getId());
-            zEventManager.enqueueEventAfterCommit(evt);
-            return res;
-        } catch (AccessLocalException e) {
-            throw new LoginException(e.getMessage());
-        }
+
+        int res = authManager.getSessionId(username, password);
+        AuthzSubject s = sessionManager.getSubject(res);
+        UserLoginZevent evt = new UserLoginZevent(s.getId());
+        zEventManager.enqueueEventAfterCommit(evt);
+        return res;
+
     }
 
     /**
@@ -154,16 +150,14 @@ public class AuthBossImpl implements AuthBoss {
      * 
      */
     public int loginGuest() throws SecurityException, LoginException, ApplicationException, ConfigPropertyException {
-        try {
-            AuthzSubject guest = authzSubjectManager.getSubjectById(AuthzConstants.guestId);
 
-            if (guest != null && guest.getActive()) {
-                return sessionManager.put(guest);
-            }
-            throw new LoginException("Guest account not enabled");
-        } catch (AccessLocalException e) {
-            throw new LoginException(e.getMessage());
+        AuthzSubject guest = authzSubjectManager.getSubjectById(AuthzConstants.guestId);
+
+        if (guest != null && guest.getActive()) {
+            return sessionManager.put(guest);
         }
+        throw new LoginException("Guest account not enabled");
+
     }
 
     /**
@@ -220,8 +214,8 @@ public class AuthBossImpl implements AuthBoss {
      * 
      * 
      */
-    public void changePassword(int sessionID, String username, String password) throws FinderException,
-        PermissionException, SessionException {
+    public void changePassword(int sessionID, String username, String password) throws PermissionException,
+        SessionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         authManager.changePassword(subject, username, password);
     }

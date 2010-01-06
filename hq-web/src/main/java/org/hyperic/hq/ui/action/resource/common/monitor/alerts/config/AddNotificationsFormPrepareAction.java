@@ -27,7 +27,6 @@ package org.hyperic.hq.ui.action.resource.common.monitor.alerts.config;
 
 import java.rmi.RemoteException;
 
-import javax.ejb.FinderException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
@@ -83,7 +82,6 @@ public abstract class AddNotificationsFormPrepareAction
      *         notificationType, or a zero-length array if there are not yet any
      *         notifications of this type
      * @throws ServletException
-     * @throws FinderException
      * @throws RemoteException
      * @throws PermissionException
      * @throws SessionTimeoutException
@@ -93,7 +91,7 @@ public abstract class AddNotificationsFormPrepareAction
      */
     public Integer[] getNotificationIds(HttpServletRequest request, AddNotificationsForm addForm, AppdefEntityID aeid,
                                         int notificationType) throws ServletException, SessionNotFoundException,
-        SessionTimeoutException, PermissionException, RemoteException, FinderException, EncodingException,
+        SessionTimeoutException, PermissionException, RemoteException,  EncodingException,
         InvalidActionDataException {
         Integer[] ids = new Integer[0];
 

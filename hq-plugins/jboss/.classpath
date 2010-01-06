@@ -6,5 +6,6 @@
 	<classpathentry kind="con" path="org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/hq-agent-pdk"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/hq-pdk-shared"/>
+	<classpathentry kind="lib" path="build-lib/jbossall-client.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

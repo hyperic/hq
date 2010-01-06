@@ -28,8 +28,6 @@ package org.hyperic.hq.ui.action.resource.common.monitor.alerts.config;
 import java.rmi.RemoteException;
 import java.util.Collections;
 
-import javax.ejb.FinderException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
@@ -63,7 +61,7 @@ public class ViewDefinitionNotificationsUsersAction
         return EmailActionConfig.TYPE_USERS;
     }
 
-    protected PageList getPageList(int sessionID, EmailActionConfig ea, PageControl pc) throws FinderException,
+    protected PageList getPageList(int sessionID, EmailActionConfig ea, PageControl pc) throws 
         SessionTimeoutException, SessionNotFoundException, PermissionException, RemoteException {
         log.debug("userIds: " + ea.getUsers());
         Integer[] userIds = new Integer[ea.getUsers().size()];

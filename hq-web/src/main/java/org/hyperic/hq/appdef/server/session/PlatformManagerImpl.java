@@ -38,9 +38,6 @@ import java.util.List;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
-import javax.ejb.CreateException;
-import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
 import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
@@ -88,12 +85,13 @@ import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.NotFoundException;
+import org.hyperic.hq.common.ProductProperties;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.ResourceAudit;
 import org.hyperic.hq.common.shared.AuditManager;
-import org.hyperic.hq.common.ProductProperties;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.server.session.AgentScheduleSyncZevent;
 import org.hyperic.hq.product.PlatformDetector;
@@ -273,7 +271,7 @@ public class PlatformManagerImpl implements PlatformManager {
         String typeName = AuthzConstants.platformPrototypeTypeName;
         try {
             rType = resourceManager.findResourceTypeByName(typeName);
-        } catch (FinderException e) {
+        } catch (NotFoundException e) {
             throw new SystemException(e);
         }
         return resourceManager.findResourceByInstanceId(rType, pt.getId());
@@ -299,7 +297,7 @@ public class PlatformManagerImpl implements PlatformManager {
      * 
      */
     public PageList<PlatformTypeValue> getViewablePlatformTypes(AuthzSubject subject, PageControl pc)
-        throws FinderException, PermissionException {
+        throws PermissionException, NotFoundException {
 
         // build the platform types from the visible list of platforms
         Collection platforms;
@@ -372,7 +370,7 @@ public class PlatformManagerImpl implements PlatformManager {
      * @param id - The id of the Platform
      * 
      */
-    public void removePlatform(AuthzSubject subject, Platform platform) throws RemoveException,
+    public void removePlatform(AuthzSubject subject, Platform platform) throws 
         PlatformNotFoundException, PermissionException, VetoException {
         final AppdefEntityID aeid = platform.getEntityId();
         final Resource r = platform.getResource();
@@ -399,10 +397,7 @@ public class PlatformManagerImpl implements PlatformManager {
             cpropManager.deleteValues(aeid.getType(), aeid.getID());
             resourceManager.removeAuthzResource(subject, aeid, r);
             platformDAO.getSession().flush();
-        } catch (RemoveException e) {
-            log.debug("Error while removing Platform");
-
-            throw e;
+      
         } catch (PermissionException e) {
             log.debug("Error while removing Platform");
 
@@ -479,7 +474,7 @@ public class PlatformManagerImpl implements PlatformManager {
      * 
      */
     public Platform createPlatform(AuthzSubject subject, Integer platformTypeId, PlatformValue pValue, Integer agentPK)
-        throws CreateException, ValidationException, PermissionException, AppdefDuplicateNameException,
+        throws  ValidationException, PermissionException, AppdefDuplicateNameException,
         AppdefDuplicateFQDNException, ApplicationException {
         // check if the object already exists
 
@@ -492,7 +487,7 @@ public class PlatformManagerImpl implements PlatformManager {
             throw new AppdefDuplicateFQDNException();
         }
 
-        try {
+       try {
 
             ConfigResponseDB config;
             Platform platform;
@@ -537,8 +532,8 @@ public class PlatformManagerImpl implements PlatformManager {
             zeventManager.enqueueEventAfterCommit(zevent);
 
             return platform;
-        } catch (FinderException e) {
-            throw new CreateException("Unable to find PlatformType: " + platformTypeId + " : " + e.getMessage());
+       } catch (NotFoundException e) {
+            throw new ApplicationException("Unable to find PlatformType: " + platformTypeId + " : " + e.getMessage());
         }
     }
 
@@ -552,8 +547,7 @@ public class PlatformManagerImpl implements PlatformManager {
      * @param aipValue the AIPlatform to create as a regular appdef platform.
      * 
      */
-    public Platform createPlatform(AuthzSubject subject, AIPlatformValue aipValue) throws ApplicationException,
-        CreateException {
+    public Platform createPlatform(AuthzSubject subject, AIPlatformValue aipValue) throws ApplicationException {
         getCounter().addCPUs(aipValue.getCpuCount().intValue());
 
         PlatformType platType = platformTypeDAO.findByName(aipValue.getPlatformTypeName());
@@ -601,8 +595,8 @@ public class PlatformManagerImpl implements PlatformManager {
      * @return A List of PlatformValue objects representing all of the platforms
      *         that the given subject is allowed to view.
      */
-    public PageList<PlatformValue> getAllPlatforms(AuthzSubject subject, PageControl pc) throws FinderException,
-        PermissionException {
+    public PageList<PlatformValue> getAllPlatforms(AuthzSubject subject, PageControl pc) throws 
+        PermissionException, NotFoundException {
 
         Collection<Platform> ejbs;
         try {
@@ -627,7 +621,7 @@ public class PlatformManagerImpl implements PlatformManager {
      *         within the given range.
      */
     public PageList<PlatformValue> getRecentPlatforms(AuthzSubject subject, long range, int size)
-        throws FinderException, PermissionException {
+        throws  PermissionException, NotFoundException {
         PageControl pc = new PageControl(0, size);
 
         Collection<Platform> platforms = platformDAO.findByCTime(System.currentTimeMillis() - range);
@@ -1010,7 +1004,7 @@ public class PlatformManagerImpl implements PlatformManager {
         Set<Integer> authzPks;
         try {
             authzPks = new HashSet<Integer>(getViewablePlatformPKs(subject));
-        } catch (FinderException exc) {
+        } catch (NotFoundException exc) {
             return new PageList<PlatformValue>();
         }
 
@@ -1122,7 +1116,7 @@ public class PlatformManagerImpl implements PlatformManager {
         return rtn;
     }
 
-    protected List<Integer> getViewablePlatformPKs(AuthzSubject who) throws FinderException, PermissionException {
+    protected List<Integer> getViewablePlatformPKs(AuthzSubject who) throws  PermissionException, NotFoundException {
         // now get a list of all the viewable items
 
         Operation op = getOperationByName(resourceManager.findResourceTypeByName(AuthzConstants.platformResType),
@@ -1172,7 +1166,7 @@ public class PlatformManagerImpl implements PlatformManager {
             }
 
             return (Integer[]) platIds.toArray(new Integer[0]);
-        } catch (FinderException e) {
+        } catch (NotFoundException e) {
             // There are no viewable platforms
             return new Integer[0];
         }
@@ -1214,9 +1208,9 @@ public class PlatformManagerImpl implements PlatformManager {
             }
 
             return platforms;
-        } catch (FinderException e) {
+       } catch (NotFoundException e) {
             // There are no viewable platforms
-            return new PageList<Platform>();
+           return new PageList<Platform>();
         }
     }
 
@@ -1232,8 +1226,8 @@ public class PlatformManagerImpl implements PlatformManager {
      *         the viewable resources then select those platform where id in
      *         (:pids) OR look them up from cache.
      */
-    protected Collection<Platform> getViewablePlatforms(AuthzSubject whoami, PageControl pc) throws FinderException,
-        PermissionException, NamingException {
+    protected Collection<Platform> getViewablePlatforms(AuthzSubject whoami, PageControl pc) throws 
+        PermissionException, NamingException, NotFoundException {
         // first find all, based on the sorting attribute passed in, or
         // with no sorting if the page control is null
         Collection<Platform> platforms;
@@ -1251,7 +1245,7 @@ public class PlatformManagerImpl implements PlatformManager {
                     platforms = platformDAO.findAll_orderCTime(pc.isAscending());
                     break;
                 default:
-                    throw new FinderException("Invalid sort attribute: " + attr);
+                    throw new NotFoundException("Invalid sort attribute: " + attr);
             }
         }
         // now get the list of PKs
@@ -1510,8 +1504,8 @@ public class PlatformManagerImpl implements PlatformManager {
      * 
      * @param subject - the user creating
      */
-    private void createAuthzPlatform(AuthzSubject subject, Platform platform) throws FinderException,
-        PermissionException {
+    private void createAuthzPlatform(AuthzSubject subject, Platform platform) throws 
+        PermissionException, NotFoundException {
         log.debug("Begin Authz CreatePlatform");
         // check to make sure the user has createPlatform permission
         // on the root resource type
@@ -1532,7 +1526,7 @@ public class PlatformManagerImpl implements PlatformManager {
      * 
      * 
      */
-    public void deletePlatformType(PlatformType pt) throws VetoException, RemoveException {
+    public void deletePlatformType(PlatformType pt) throws VetoException {
 
         Resource proto = resourceManager.findResourceByInstanceId(AuthzConstants.authzPlatformProto, pt.getId());
         AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
@@ -1573,8 +1567,8 @@ public class PlatformManagerImpl implements PlatformManager {
      * 
      * 
      */
-    public void updatePlatformTypes(String plugin, PlatformTypeInfo[] infos) throws CreateException, FinderException,
-        RemoveException, VetoException {
+    public void updatePlatformTypes(String plugin, PlatformTypeInfo[] infos) throws  
+         VetoException, NotFoundException {
         // First, put all of the infos into a Hash
         HashMap<String, PlatformTypeInfo> infoMap = new HashMap<String, PlatformTypeInfo>();
         for (int i = 0; i < infos.length; i++) {

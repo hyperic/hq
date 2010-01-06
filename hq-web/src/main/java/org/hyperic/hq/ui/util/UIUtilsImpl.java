@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.ejb.CreateException;
-import javax.ejb.FinderException;
 import javax.naming.NamingException;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -78,7 +76,7 @@ public class UIUtilsImpl implements UIUtils {
     }
 
     public List getResourceTypes(ServletContext ctx, Integer sessionId) throws 
-        NamingException, FinderException, CreateException, PermissionException, SessionTimeoutException,
+        NamingException,  PermissionException, SessionTimeoutException,
         SessionNotFoundException, RemoteException {
         return new ArrayList();
     }

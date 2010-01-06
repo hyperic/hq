@@ -29,9 +29,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.annotation.PostConstruct;
-import javax.ejb.CreateException;
-import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,6 +39,8 @@ import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
+import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.server.session.Crispo;
 import org.hyperic.hq.common.shared.CrispoManager;
 import org.hyperic.hq.context.Bootstrap;
@@ -112,14 +111,14 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
      */
     public AuthzSubject createSubject(AuthzSubject whoami, String name, boolean active, String dsn, String dept,
                                       String email, String first, String last, String phone, String sms, boolean html)
-        throws PermissionException, CreateException {
+        throws PermissionException, ApplicationException {
 
         permissionManager.check(whoami.getId(), resourceTypeDAO.findTypeResourceType(), AuthzConstants.rootResourceId,
             AuthzConstants.subjectOpCreateSubject);
 
         AuthzSubject existing = authzSubjectDAO.findByName(name);
         if (existing != null) {
-            throw new CreateException("A system user already exists with " + name);
+            throw new ApplicationException("A system user already exists with " + name);
         }
 
         AuthzSubject subjectPojo = authzSubjectDAO.create(whoami, name, active, dsn, dept, email, first, last, phone,
@@ -215,10 +214,10 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
      * @param subject The ID of the subject to delete.
      * 
      */
-    public void removeSubject(AuthzSubject whoami, Integer subject) throws RemoveException, PermissionException {
+    public void removeSubject(AuthzSubject whoami, Integer subject) throws PermissionException {
         // no removing of the root user!
         if (subject.equals(AuthzConstants.rootSubjectId)) {
-            throw new RemoveException("Root user can not be deleted");
+            throw new PermissionException("Root user can not be deleted");
         }
 
         AuthzSubject toDelete = authzSubjectDAO.findById(subject);
@@ -301,7 +300,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
      * @param excludes the IDs of subjects to exclude from result
      */
     public PageList<AuthzSubjectValue> getAllSubjects(AuthzSubject whoami, Collection<Integer> excludes, PageControl pc)
-        throws FinderException, PermissionException {
+        throws NotFoundException, PermissionException {
 
         pc = PageControl.initDefaults(pc, SortAttribute.SUBJECT_NAME);
 
@@ -352,7 +351,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
                 break;
 
             default:
-                throw new FinderException("Unrecognized sort attribute: " + pc.getSortattribute());
+                throw new NotFoundException("Unrecognized sort attribute: " + pc.getSortattribute());
         }
 
         return subjectPager.seek(subjects, pc.getPagenum(), pc.getPagesize());

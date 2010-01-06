@@ -27,7 +27,6 @@ package org.hyperic.hq.ui.action.resource.common.inventory;
 
 import java.util.HashMap;
 
-import javax.ejb.FinderException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -324,11 +323,6 @@ public class EditConfigPropertiesAction
             return returnFailure(request, mapping);
         } catch (EncodingException e) {
             log.error("Encoding error " + e);
-            RequestUtils.setErrorWithNullCheck(request, e, ERR_NOMSG, ERR_CONFIG);
-            cfgForm.validationErrors = true;
-            return returnFailure(request, mapping);
-        } catch (FinderException e) {
-            log.error("Error finding resource " + e);
             RequestUtils.setErrorWithNullCheck(request, e, ERR_NOMSG, ERR_CONFIG);
             cfgForm.validationErrors = true;
             return returnFailure(request, mapping);

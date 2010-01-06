@@ -37,9 +37,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
-import javax.ejb.CreateException;
-import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -72,6 +69,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
+import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.Audit;
@@ -271,8 +269,7 @@ public class ServerManagerImpl implements ServerManager {
      * 
      */
     public Server cloneServer(AuthzSubject subject, Platform targetPlatform, Server serverToClone)
-        throws ValidationException, PermissionException, RemoveException, VetoException, CreateException,
-        FinderException {
+        throws ValidationException, PermissionException,  VetoException, NotFoundException {
         Server s = null;
         // See if we already have this server type
         for (Server server : targetPlatform.getServers()) {
@@ -361,7 +358,7 @@ public class ServerManagerImpl implements ServerManager {
      * @return List of ServerPK's for which subject has
      *         AuthzConstants.serverOpViewServer
      */
-    protected List<Integer> getViewableServers(AuthzSubject whoami) throws FinderException, PermissionException {
+    protected List<Integer> getViewableServers(AuthzSubject whoami) throws  PermissionException, NotFoundException {
         if (log.isDebugEnabled()) {
             log.debug("Checking viewable servers for subject: " + whoami.getName());
         }
@@ -409,10 +406,9 @@ public class ServerManagerImpl implements ServerManager {
             permissionManager.checkPermission(subject, resourceManager
                 .findResourceTypeByName(AuthzConstants.serverResType), target.getId(),
                 AuthzConstants.serverOpRemoveServer);
-        } catch (FinderException e) {
-            // TODO: FinderException needs to be expelled from this class.
-            throw new VetoException("Caught FinderException checking permission: " + e.getMessage()); // notgonnahappen
-        }
+         } catch (NotFoundException e) {
+           throw new VetoException("Caught NotFoundException checking permission: " + e.getMessage()); // notgonnahappen
+         }
 
         // Ensure target can be moved to the destination
         if (!destination.getPlatformType().getServerTypes().contains(target.getServerType())) {
@@ -461,13 +457,13 @@ public class ServerManagerImpl implements ServerManager {
      * Create a Server on the given platform.
      * 
      * @return ServerValue - the saved value object
-     * @exception CreateException - if it fails to add the server
+     * 
      * 
      */
     public Server createServer(AuthzSubject subject, Integer platformId, Integer serverTypeId, ServerValue sValue)
-        throws CreateException, ValidationException, PermissionException, PlatformNotFoundException,
-        AppdefDuplicateNameException {
-        try {
+        throws  ValidationException, PermissionException, PlatformNotFoundException,
+        AppdefDuplicateNameException, NotFoundException {
+       try {
             trimStrings(sValue);
 
             Platform platform = platformDAO.findById(platformId);
@@ -493,23 +489,23 @@ public class ServerManagerImpl implements ServerManager {
             zeventManager.enqueueEventAfterCommit(zevent);
 
             return server;
-        } catch (CreateException e) {
-            throw e;
-        } catch (FinderException e) {
-            throw new CreateException("Unable to find platform=" + platformId + " or server type=" + serverTypeId +
+       // } catch (CreateException e) {
+        //    throw e;
+       } catch (NotFoundException e) {
+            throw new NotFoundException("Unable to find platform=" + platformId + " or server type=" + serverTypeId +
                                       ":" + e.getMessage());
-        }
+       }
     }
 
     /**
      * Create a virtual server
-     * @throws FinderException
-     * @throws CreateException
+     * @throws NotFoundException
+     * 
      * @throws PermissionException
      * 
      */
     public Server createVirtualServer(AuthzSubject subject, Platform platform, ServerType st)
-        throws PermissionException, CreateException, FinderException {
+        throws PermissionException, NotFoundException {
         // First of all, make sure this is a virtual type
         if (!st.isVirtual()) {
             throw new IllegalArgumentException("createVirtualServer() called for non-virtual server type: " +
@@ -544,7 +540,7 @@ public class ServerManagerImpl implements ServerManager {
      * PlatformManager.removePlatform when cascading removal to servers.
      * 
      */
-    public void removeServer(AuthzSubject subject, Server server) throws RemoveException, PermissionException,
+    public void removeServer(AuthzSubject subject, Server server) throws  PermissionException,
         VetoException {
         final AppdefEntityID aeid = server.getEntityId();
         final Resource r = server.getResource();
@@ -624,7 +620,7 @@ public class ServerManagerImpl implements ServerManager {
      * @return list of serverTypeValues
      * 
      */
-    public PageList<ServerTypeValue> getAllServerTypes(AuthzSubject subject, PageControl pc) throws FinderException {
+    public PageList<ServerTypeValue> getAllServerTypes(AuthzSubject subject, PageControl pc)  {
         // valuePager converts local/remote interfaces to value objects
         // as it pages through them.
         return valuePager.seek(serverTypeDAO.findAllOrderByName(), pc);
@@ -643,7 +639,7 @@ public class ServerManagerImpl implements ServerManager {
      * 
      */
     public PageList<ServerTypeValue> getViewableServerTypes(AuthzSubject subject, PageControl pc)
-        throws FinderException, PermissionException {
+        throws  PermissionException, NotFoundException {
         // build the server types from the visible list of servers
         final List<Integer> authzPks = getViewableServers(subject);
         final Collection<ServerType> serverTypes = serverDAO.getServerTypes(authzPks, true);
@@ -744,10 +740,10 @@ public class ServerManagerImpl implements ServerManager {
      * @return ServerTypeValue
      * 
      */
-    public ServerType findServerTypeByName(String name) throws FinderException {
+    public ServerType findServerTypeByName(String name) throws NotFoundException {
         ServerType type = serverTypeDAO.findByName(name);
         if (type == null) {
-            throw new FinderException("name not found: " + name);
+            throw new NotFoundException("name not found: " + name);
         }
         return type;
     }
@@ -808,7 +804,7 @@ public class ServerManagerImpl implements ServerManager {
             }
 
             return (Integer[]) serverIds.toArray(new Integer[0]);
-        } catch (FinderException e) {
+        } catch (NotFoundException e) {
             // There are no viewable servers
             return new Integer[0];
         }
@@ -852,8 +848,8 @@ public class ServerManagerImpl implements ServerManager {
      * @return A List of ServerValue objects representing all of the servers
      *         that the given subject is allowed to view.
      */
-    public PageList<ServerValue> getAllServers(AuthzSubject subject, PageControl pc) throws FinderException,
-        PermissionException {
+    public PageList<ServerValue> getAllServers(AuthzSubject subject, PageControl pc) throws 
+        PermissionException, NotFoundException {
         Collection<Server> servers = getViewableServers(subject, pc);
 
         // valuePager converts local/remote interfaces to value objects
@@ -867,8 +863,7 @@ public class ServerManagerImpl implements ServerManager {
      * @return List of ServerLocals for which subject has
      *         AuthzConstants.serverOpViewServer
      */
-    private Collection<Server> getViewableServers(AuthzSubject subject, PageControl pc) throws PermissionException,
-        FinderException {
+    private Collection<Server> getViewableServers(AuthzSubject subject, PageControl pc) throws PermissionException, NotFoundException {
         Collection<Server> servers;
         List<Integer> authzPks = getViewableServers(subject);
         int attr = -1;
@@ -922,7 +917,7 @@ public class ServerManagerImpl implements ServerManager {
         List<Integer> authzPks;
         try {
             authzPks = getViewableServers(subject);
-        } catch (FinderException exc) {
+        } catch (NotFoundException exc) {
             throw new ServerNotFoundException("No (viewable) servers associated with platform " + platId);
         }
 
@@ -1042,7 +1037,7 @@ public class ServerManagerImpl implements ServerManager {
      */
     public List<ServerValue> getServersByType(AuthzSubject subject, String name) throws PermissionException,
         InvalidAppdefTypeException {
-        try {
+       try {
             ServerType ejb = serverTypeDAO.findByName(name);
             if (ejb == null) {
                 return new PageList<ServerValue>();
@@ -1061,9 +1056,9 @@ public class ServerManagerImpl implements ServerManager {
             // valuePager converts local/remote interfaces to value objects
             // as it pages through them.
             return valuePager.seek(servers, PageControl.PAGE_ALL);
-        } catch (FinderException e) {
-            return new ArrayList<ServerValue>(0);
-        }
+       } catch (NotFoundException e) {
+           return new ArrayList<ServerValue>(0);
+       }
     }
 
     /**
@@ -1141,7 +1136,7 @@ public class ServerManagerImpl implements ServerManager {
 
         try {
             authzPks = getViewableServers(subject);
-        } catch (FinderException e) {
+        } catch (NotFoundException e) {
             throw new ServerNotFoundException("No (viewable) servers " + "associated with " + "application " + appId, e);
         }
 
@@ -1301,8 +1296,8 @@ public class ServerManagerImpl implements ServerManager {
      * Update server types
      * 
      */
-    public void updateServerTypes(String plugin, ServerTypeInfo[] infos) throws CreateException, FinderException,
-        RemoveException, VetoException {
+    public void updateServerTypes(String plugin, ServerTypeInfo[] infos) throws  
+         VetoException, NotFoundException {
         // First, put all of the infos into a Hash
         HashMap<String, ServerTypeInfo> infoMap = new HashMap<String, ServerTypeInfo>();
         for (int i = 0; i < infos.length; i++) {
@@ -1445,7 +1440,7 @@ public class ServerManagerImpl implements ServerManager {
      * 
      */
     public void deleteServerType(ServerType serverType, AuthzSubject overlord, ResourceGroupManager resGroupMan,
-                                 ResourceManager resMan) throws VetoException, RemoveException {
+                                 ResourceManager resMan) throws VetoException {
         // Need to remove all service types
 
         ServiceType[] types = (ServiceType[]) serverType.getServiceTypes().toArray(new ServiceType[0]);
@@ -1485,12 +1480,12 @@ public class ServerManagerImpl implements ServerManager {
      * Get a Set of PlatformTypeLocal objects which map to the names as given by
      * the argument.
      */
-    private void findAndSetPlatformType(String[] platNames, ServerType stype) throws FinderException {
+    private void findAndSetPlatformType(String[] platNames, ServerType stype) throws NotFoundException {
 
         for (int i = 0; i < platNames.length; i++) {
             PlatformType pType = platformTypeDAO.findByName(platNames[i]);
             if (pType == null) {
-                throw new FinderException("Could not find platform type '" + platNames[i] + "'");
+                throw new NotFoundException("Could not find platform type '" + platNames[i] + "'");
             }
             stype.addPlatformType(pType);
         }
@@ -1500,8 +1495,8 @@ public class ServerManagerImpl implements ServerManager {
      * Create the Authz resource and verify that the user has correct
      * permissions
      */
-    private void createAuthzServer(AuthzSubject subject, Server server) throws CreateException, FinderException,
-        PermissionException {
+    private void createAuthzServer(AuthzSubject subject, Server server) throws  
+        PermissionException, NotFoundException {
         log.debug("Being Authz CreateServer");
         if (log.isDebugEnabled()) {
             log.debug("Checking for: " + AuthzConstants.platformOpAddServer + " for subject: " + subject);

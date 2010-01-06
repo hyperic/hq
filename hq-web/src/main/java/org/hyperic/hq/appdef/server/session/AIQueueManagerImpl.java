@@ -33,8 +33,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
-import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -451,7 +449,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
     @Transactional
     public List<AppdefResource> processQueue(AuthzSubject subject, List<Integer> platformList,
                                              List<Integer> serverList, List<Integer> ipList, int action)
-        throws FinderException, PermissionException, ValidationException, RemoveException, AIQApprovalException {
+        throws  PermissionException, ValidationException,  AIQApprovalException {
         AuthzSubject s = authzSubjectManager.findSubjectById(subject.getId());
         boolean approved = false;
 
@@ -469,8 +467,8 @@ public class AIQueueManagerImpl implements AIQueueManager {
 
     private List<AppdefResource> _processQueue(AuthzSubject subject, List<Integer> platformList,
                                                List<Integer> serverList, List<Integer> ipList, int action,
-                                               boolean verifyLiveAgent) throws FinderException, PermissionException,
-        ValidationException, RemoveException, AIQApprovalException {
+                                               boolean verifyLiveAgent) throws  PermissionException,
+        ValidationException,  AIQApprovalException {
         boolean isApproveAction = (action == AIQueueConstants.Q_DECISION_APPROVE);
         boolean isPurgeAction = (action == AIQueueConstants.Q_DECISION_PURGE);
         int i;
@@ -659,7 +657,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
      * Find a platform given an AI platform id
      * 
      */
-    public PlatformValue getPlatformByAI(AuthzSubject subject, int aiPlatformID) throws FinderException,
+    public PlatformValue getPlatformByAI(AuthzSubject subject, int aiPlatformID) throws 
         PermissionException, PlatformNotFoundException {
         AIPlatform aiplatform;
 

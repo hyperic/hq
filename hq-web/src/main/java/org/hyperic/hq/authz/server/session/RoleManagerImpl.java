@@ -38,9 +38,6 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import javax.annotation.PostConstruct;
-import javax.ejb.CreateException;
-import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
 import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
@@ -55,6 +52,8 @@ import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.authz.shared.RoleManager;
 import org.hyperic.hq.authz.shared.RoleValue;
 import org.hyperic.hq.authz.values.OwnedRoleValue;
+import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.server.session.Calendar;
 import org.hyperic.hq.common.shared.CalendarManager;
 import org.hyperic.hq.context.Bootstrap;
@@ -166,10 +165,9 @@ public class RoleManagerImpl implements RoleManager {
      * Filter a collection of roleLocal objects to only include those viewable
      * by the specified user
      * 
-     * @throws FinderException SQL error looking up roles scope
+     *
      */
-    private Collection<Role> filterViewableRoles(AuthzSubject who, Collection<Role> roles) throws PermissionException,
-        FinderException {
+    private Collection<Role> filterViewableRoles(AuthzSubject who, Collection<Role> roles) throws PermissionException {
         return filterViewableRoles(who, roles, null);
     }
 
@@ -182,10 +180,10 @@ public class RoleManagerImpl implements RoleManager {
      * @param excludeIds - role ids which should be excluded from the return
      *        list
      * 
-     * @throws FinderException SQL error looking up roles scope
+     * 
      */
     private Collection<Role> filterViewableRoles(AuthzSubject who, Collection<Role> roles, Integer[] excludeIds)
-        throws PermissionException, FinderException {
+        throws PermissionException {
         try {
 
             permissionManager.check(who.getId(), resourceTypeDAO.findByName(AuthzConstants.roleResourceTypeName),
@@ -223,14 +221,14 @@ public class RoleManagerImpl implements RoleManager {
      * @param groupIds Ids of resource groups to add to the new role. Use null
      *        to add subjects later.
      * @return OwnedRoleValue for the role.
-     * @throws CreateException Unable to create the specified entity.
-     * @throws FinderException Unable to find a given or dependent entities.
+     * 
+     * 
      * @throws PermissionException whoami may not perform createResource on the
      *         covalentAuthzRole ResourceType.
      * 
      */
     public Integer createOwnedRole(AuthzSubject whoami, RoleValue role, Operation[] operations, Integer[] subjectIds,
-                                   Integer[] groupIds) throws FinderException, AuthzDuplicateNameException,
+                                   Integer[] groupIds) throws  AuthzDuplicateNameException,
         PermissionException {
 
         validateRole(role);
@@ -270,13 +268,13 @@ public class RoleManagerImpl implements RoleManager {
      * 
      * @param whoami The current running user.
      * @param role The role to delete.
-     * @throws RemoveException Unable to delete the specified entity.
+     * @throws ApplicationException Unable to delete the specified entity.
      * 
      */
-    public void removeRole(AuthzSubject whoami, Integer rolePk) throws RemoveException, PermissionException {
+    public void removeRole(AuthzSubject whoami, Integer rolePk) throws PermissionException, ApplicationException {
         // Don't delete the super user role
         if (rolePk.equals(AuthzConstants.rootRoleId)) {
-            throw new RemoveException("Superuser role cannot be removed");
+            throw new ApplicationException("Superuser role cannot be removed");
         }
 
         Role role = roleDAO.findById(rolePk);
@@ -337,7 +335,7 @@ public class RoleManagerImpl implements RoleManager {
      * @param whoami The current running user.
      * @param role The role.
      * @param operations The operations to associate with the role.
-     * @throws FinderException Unable to find a given or dependent entities.
+     * 
      * @throws PermissionException whoami may not perform addOperation on this
      *         role.
      * 
@@ -354,7 +352,7 @@ public class RoleManagerImpl implements RoleManager {
      * 
      * @param whoami The current running user.
      * @param role The role.
-     * @throws FinderException Unable to find a given or dependent entities.
+     *
      * @throws PermissionException whoami may not perform removeOperation on
      *         this role.
      * 
@@ -371,7 +369,7 @@ public class RoleManagerImpl implements RoleManager {
      * @param whoami The current running user.
      * @param id The ID of the role.
      * @param operations Operations to associate with this role.
-     * @throws FinderException Unable to find a given or dependent entities.
+     * 
      * @throws PermissionException whoami is not allowed to perform
      *         setOperations on this role.
      * 
@@ -394,7 +392,7 @@ public class RoleManagerImpl implements RoleManager {
      * @param whoami The current running user.
      * @param role This role.
      * @param gids The ids of the groups to associate with this role.
-     * @throws FinderException Unable to find a given or dependent entities.
+     * 
      * @throws PermissionException whoami is not allowed to perform
      *         addResourceGroup on this role.
      * 
@@ -415,11 +413,10 @@ public class RoleManagerImpl implements RoleManager {
      * @param ids The id of the group to associate with the roles.
      * @throws PermissionException whoami is not allowed to perform
      *         addResourceGroup on this role.
-     * @throws FinderException SQL error looking up roles scope
+     * 
      * 
      */
-    public void addResourceGroupRoles(AuthzSubject whoami, Integer gid, Integer[] ids) throws PermissionException,
-        FinderException {
+    public void addResourceGroupRoles(AuthzSubject whoami, Integer gid, Integer[] ids) throws PermissionException {
         ResourceGroup group = lookupGroup(gid);
         for (int i = 0; i < ids.length; i++) {
             Role roleLocal = lookupRole(ids[i]);
@@ -433,7 +430,7 @@ public class RoleManagerImpl implements RoleManager {
      * @param whoami The current running user.
      * @param id This role.
      * @param gids The ids of the groups to disassociate.
-     * @throws FinderException Unable to find a given or dependent entities.
+     * 
      * @throws PermissionException whoami is not allowed to perform modifyRole
      *         on this role.
      * 
@@ -455,7 +452,7 @@ public class RoleManagerImpl implements RoleManager {
      * @param whoami The current running user.
      * @param role This role.
      * @param ids The ids of the groups to disassociate.
-     * @throws FinderException Unable to find a given or dependent entities.
+     *
      * @throws PermissionException whoami is not allowed to perform modifyRole
      *         on this role.
      * 
@@ -478,7 +475,7 @@ public class RoleManagerImpl implements RoleManager {
      * 
      * @param whoami The current running user.
      * @param role This role.
-     * @throws FinderException Unable to find a given or dependent entities.
+     * 
      * @throws NamingException
      * @throws PermissionException whoami is not allowed to perform modifyRole
      *         on this role.
@@ -567,7 +564,7 @@ public class RoleManagerImpl implements RoleManager {
      * 
      * @param id The ID of the role you're looking for.
      * @return The owned value-object of the role of the given ID.
-     * @throws FinderException Unable to find a given or dependent entities.
+     * 
      * 
      */
     public OwnedRoleValue findOwnedRoleById(AuthzSubject whoami, Integer id) throws PermissionException {
@@ -645,7 +642,7 @@ public class RoleManagerImpl implements RoleManager {
      * @return List a list of RoleValues
      * 
      */
-    public List<RoleValue> getAllRoles(AuthzSubject subject, PageControl pc) throws FinderException {
+    public List<RoleValue> getAllRoles(AuthzSubject subject, PageControl pc)  {
         pc = PageControl.initDefaults(pc, SortAttribute.ROLE_NAME);
         Collection<Role> roles = getAllRoles(subject, pc.getSortattribute(), pc.isAscending());
 
@@ -670,11 +667,11 @@ public class RoleManagerImpl implements RoleManager {
      * List all Roles in the system, except system roles.
      * 
      * @return List a list of OwnedRoleValues that are not system roles
-     * @throws FinderException if sort attribute is unrecognized
+     * @throws NotFoundException if sort attribute is unrecognized
      * 
      */
     public PageList<OwnedRoleValue> getAllNonSystemOwnedRoles(AuthzSubject subject, Integer[] excludeIds, PageControl pc)
-        throws PermissionException, FinderException {
+        throws PermissionException, NotFoundException {
 
         pc = PageControl.initDefaults(pc, SortAttribute.ROLE_NAME);
         int attr = pc.getSortattribute();
@@ -686,7 +683,7 @@ public class RoleManagerImpl implements RoleManager {
                 break;
 
             default:
-                throw new FinderException("Unrecognized sort attribute: " + attr);
+                throw new NotFoundException("Unrecognized sort attribute: " + attr);
         }
 
         // 6729 - if caller is a member of the root role, show it
@@ -713,13 +710,13 @@ public class RoleManagerImpl implements RoleManager {
      * @param subject
      * @param ids the role ids
      * @param pc Paging information for the request
-     * @throws FinderException
+     * 
      * @throws PermissionException
      * 
      * 
      */
     public PageList<RoleValue> getRolesById(AuthzSubject whoami, Integer[] ids, PageControl pc)
-        throws PermissionException, FinderException {
+        throws PermissionException {
 
         List<Role> roles = getRolesByIds(whoami, ids, pc);
 
@@ -729,8 +726,7 @@ public class RoleManagerImpl implements RoleManager {
         return plist;
     }
 
-    private List<Role> getRolesByIds(AuthzSubject whoami, Integer[] ids, PageControl pc) throws PermissionException,
-        FinderException {
+    private List<Role> getRolesByIds(AuthzSubject whoami, Integer[] ids, PageControl pc) throws PermissionException {
 
         permissionManager.check(whoami.getId(), AuthzConstants.roleResourceTypeName, AuthzConstants.rootResourceId,
             AuthzConstants.roleOpViewRole);
@@ -783,8 +779,7 @@ public class RoleManagerImpl implements RoleManager {
      *         subject.
      * 
      */
-    public void removeRoles(AuthzSubject whoami, AuthzSubject subject, Integer[] roles) throws PermissionException,
-        FinderException {
+    public void removeRoles(AuthzSubject whoami, AuthzSubject subject, Integer[] roles) throws PermissionException {
         Collection<Role> roleLocals = getRolesByIds(whoami, roles, PageControl.PAGE_ALL);
 
         RoleRemoveFromSubjectCallback callback = AuthzStartupListener.getRoleRemoveFromSubjectCallback();
@@ -832,16 +827,14 @@ public class RoleManagerImpl implements RoleManager {
      * @param intendedSubjectValue is the subject of intended subject.
      * @param pc The PageControl object for paging results.
      * @return List a list of OwnedRoleValues that are not system roles
-     * 
-     * @throws CreateException indicating ejb creation / container failure.
-     * @throws FinderException Unable to find a given or dependent entities.
+     *  
      * @throws PermissionException caller is not allowed to perform listRoles on
      *         this role.
-     * @throws FinderException SQL error looking up roles scope
+  
      */
     public PageList<OwnedRoleValue> getNonSystemOwnedRoles(AuthzSubject callerSubjectValue,
                                                            AuthzSubject intendedSubjectValue, PageControl pc)
-        throws PermissionException, FinderException {
+        throws PermissionException {
         return getNonSystemOwnedRoles(callerSubjectValue, intendedSubjectValue, null, pc);
     }
 
@@ -853,15 +846,12 @@ public class RoleManagerImpl implements RoleManager {
      * @param pc The PageControl object for paging results.
      * @return List a list of OwnedRoleValues that are not system roles
      * 
-     * @throws CreateException indicating ejb creation / container failure.
-     * @throws FinderException Unable to find a given or dependent entities.
      * @throws PermissionException caller is not allowed to perform listRoles on
      *         this role.
-     * @throws FinderException SQL error looking up roles scope
      */
     public PageList<OwnedRoleValue> getNonSystemOwnedRoles(AuthzSubject callerSubjectValue,
                                                            AuthzSubject intendedSubjectValue, Integer[] excludeIds,
-                                                           PageControl pc) throws PermissionException, FinderException {
+                                                           PageControl pc) throws PermissionException {
 
         // Fetch all roles presently assigned to the assignee
         Collection<Role> roles;
@@ -928,15 +918,15 @@ public class RoleManagerImpl implements RoleManager {
      *        then only non-system roles are returned.
      * @param subjectId The id of the subject.
      * @return List of roles.
-     * @throws FinderException Unable to find a given or dependent entities.
+     * @throws NotFoundException Unable to find a given or dependent entities.
      * @throws PermissionException whoami is not allowed to perform listRoles on
      *         this role.
-     * @throws FinderException
+     *
      * 
      */
     public PageList<RoleValue> getAvailableRoles(AuthzSubject whoami, boolean system, Integer subjectId,
                                                  Integer[] roleIds, PageControl pc) throws PermissionException,
-        FinderException {
+        NotFoundException{
         Collection<Role> foundRoles;
         pc = PageControl.initDefaults(pc, SortAttribute.ROLE_NAME);
         int attr = pc.getSortattribute();
@@ -948,7 +938,7 @@ public class RoleManagerImpl implements RoleManager {
                 break;
 
             default:
-                throw new FinderException("Unrecognized sort attribute: " + attr);
+                throw new NotFoundException("Unrecognized sort attribute: " + attr);
         }
 
         HashSet<Integer> index = new HashSet<Integer>();
@@ -998,14 +988,14 @@ public class RoleManagerImpl implements RoleManager {
      *        then only non-system roles are returned.
      * @param groupId The id of the subject.
      * @return List of roles.
-     * @throws FinderException Unable to find a given or dependent entities.
+     * @throws NotFoundException Unable to find a given or dependent entities.
      * @throws PermissionException whoami is not allowed to perform listRoles on
      *         this role.
-     * @throws FinderException if the sort attribute was not recognized
+     * @throws NotFoundException if the sort attribute was not recognized
      * 
      */
     public PageList<RoleValue> getAvailableGroupRoles(AuthzSubject whoami, Integer groupId, Integer[] roleIds,
-                                                      PageControl pc) throws PermissionException, FinderException {
+                                                      PageControl pc) throws PermissionException, NotFoundException {
         Collection<Role> foundRoles;
         pc = PageControl.initDefaults(pc, SortAttribute.ROLE_NAME);
         int attr = pc.getSortattribute();
@@ -1015,7 +1005,7 @@ public class RoleManagerImpl implements RoleManager {
                 foundRoles = roleDAO.findAvailableForGroup(false, groupId);
                 break;
             default:
-                throw new FinderException("Unrecognized sort attribute: " + attr);
+                throw new NotFoundException("Unrecognized sort attribute: " + attr);
         }
 
         log.debug("Found " + foundRoles.size() + " available roles for group " + groupId +
@@ -1068,7 +1058,7 @@ public class RoleManagerImpl implements RoleManager {
      */
     public PageList<ResourceGroupValue> getResourceGroupsByRoleIdAndSystem(AuthzSubject subject, Integer roleId,
                                                                            boolean system, PageControl pc)
-        throws PermissionException, FinderException {
+        throws PermissionException, NotFoundException {
         // first find the role by its id
         roleDAO.findById(roleId);
 
@@ -1083,7 +1073,7 @@ public class RoleManagerImpl implements RoleManager {
                 break;
 
             default:
-                throw new FinderException("Unrecognized sort attribute: " + attr);
+                throw new NotFoundException("Unrecognized sort attribute: " + attr);
         }
 
         // now get viewable group pks
@@ -1138,7 +1128,7 @@ public class RoleManagerImpl implements RoleManager {
      * by the specified user
      */
     private Collection<ResourceGroup> filterViewableGroups(AuthzSubject who, Collection<ResourceGroup> groups)
-        throws PermissionException, FinderException {
+        throws PermissionException, NotFoundException {
         // finally scope down to only the ones the user can see
 
         List<Integer> viewable = permissionManager.findOperationScopeBySubject(who,
@@ -1162,12 +1152,12 @@ public class RoleManagerImpl implements RoleManager {
      * @return List of groups in this role.
      * @throws PermissionException whoami is not allowed to perform listGroups
      *         on this role.
-     * @throws FinderException
+     * @throws NotFoundException
      * 
      */
     public PageList<ResourceGroupValue> getAvailableResourceGroups(AuthzSubject whoami, Integer roleId,
                                                                    Integer[] groupIds, PageControl pc)
-        throws PermissionException, FinderException {
+        throws PermissionException, NotFoundException {
 
         Role role = roleDAO.findById(roleId);
         Collection<ResourceGroup> noRoles;
@@ -1182,7 +1172,7 @@ public class RoleManagerImpl implements RoleManager {
                 break;
 
             default:
-                throw new FinderException("Unrecognized sort attribute: " + attr);
+                throw new NotFoundException("Unrecognized sort attribute: " + attr);
         }
 
         // FIXME- merging these two sorted lists probably causes the
@@ -1235,12 +1225,12 @@ public class RoleManagerImpl implements RoleManager {
      * @return List of subjects in this role.
      * @throws PermissionException whoami is not allowed to perform listSubjects
      *         on this role.
-     * @throws FinderException if the sort attribute is not recognized
+     * @throws NotFoundException if the sort attribute is not recognized
      * 
      * 
      */
     public PageList<AuthzSubjectValue> getSubjects(AuthzSubject whoami, Integer roleId, PageControl pc)
-        throws PermissionException, FinderException {
+        throws PermissionException, NotFoundException {
         Role roleLocal = roleDAO.get(roleId);
 
         if (roleLocal == null) {
@@ -1277,7 +1267,7 @@ public class RoleManagerImpl implements RoleManager {
                 subjects = authzSubjectDAO.findByRoleId_orderName(roleLocal.getId(), pc.isAscending());
                 break;
             default:
-                throw new FinderException("Unrecognized sort attribute: " + pc.getSortattribute());
+                throw new NotFoundException("Unrecognized sort attribute: " + pc.getSortattribute());
         }
 
         PageList<AuthzSubjectValue> plist = new PageList<AuthzSubjectValue>();
@@ -1293,15 +1283,15 @@ public class RoleManagerImpl implements RoleManager {
      * @param whoami The current running user.
      * @param roleId The id of the role.
      * @return List of subjects in this role.
-     * @throws FinderException Unable to find a given or dependent entities.
+     * @throws NotFoundException Unable to find a given or dependent entities.
      * @throws PermissionException whoami is not allowed to perform listSubjects
      *         on this role.
-     * @throws FinderException if the sort attribute is not recognized
+     * @throws NotFoundException if the sort attribute is not recognized
      * 
      * 
      */
     public PageList<AuthzSubjectValue> getAvailableSubjects(AuthzSubject whoami, Integer roleId, Integer[] subjectIds,
-                                                            PageControl pc) throws PermissionException, FinderException {
+                                                            PageControl pc) throws PermissionException, NotFoundException {
         Role roleLocal = lookupRole(roleId);
 
         /** TODO PermissionCheck scope for viewSubject **/
@@ -1313,7 +1303,7 @@ public class RoleManagerImpl implements RoleManager {
                 otherRoles = authzSubjectDAO.findByNotRoleId_orderName(roleLocal.getId(), pc.isAscending());
                 break;
             default:
-                throw new FinderException("Unrecognized sort attribute: " + pc.getSortattribute());
+                throw new NotFoundException("Unrecognized sort attribute: " + pc.getSortattribute());
         }
 
         // build an index of subjectIds

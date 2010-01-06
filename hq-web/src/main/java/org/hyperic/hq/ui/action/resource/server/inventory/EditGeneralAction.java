@@ -28,7 +28,6 @@ package org.hyperic.hq.ui.action.resource.server.inventory;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.ejb.ObjectNotFoundException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -90,9 +89,6 @@ public class EditGeneralAction
                 updatedServer.getName());
 
             return returnSuccess(request, mapping, Constants.RESOURCE_PARAM, serverId, YES_RETURN_PATH);
-        } catch (ObjectNotFoundException oe) {
-            RequestUtils.setError(request, "resource.server.inventory.error.ServerNotFound", "resourceType");
-            return returnFailure(request, mapping);
         } catch (AppdefDuplicateNameException e1) {
             RequestUtils.setError(request, Constants.ERR_DUP_RESOURCE_FOUND);
             return returnFailure(request, mapping);

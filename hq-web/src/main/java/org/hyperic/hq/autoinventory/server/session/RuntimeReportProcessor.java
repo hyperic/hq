@@ -31,9 +31,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import javax.ejb.CreateException;
-import javax.ejb.FinderException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.Util;
@@ -72,6 +69,7 @@ import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.CompositeRuntimeResourceReport;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManager;
 import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.AuditManagerImpl;
 import org.hyperic.hq.product.RuntimeResourceReport;
@@ -112,7 +110,7 @@ public class RuntimeReportProcessor {
 
     public void processRuntimeReport(AuthzSubject subject, String agentToken,
                                      CompositeRuntimeResourceReport crrr)
-        throws AutoinventoryException, CreateException,  PermissionException,
+        throws AutoinventoryException,   PermissionException,
                ValidationException, ApplicationException 
     {
         _overlord   = _subjectMgr.getOverlordPojo();
@@ -135,7 +133,7 @@ public class RuntimeReportProcessor {
 
     private void _processRuntimeReport(AuthzSubject subject,
                                        CompositeRuntimeResourceReport crrr)
-        throws AutoinventoryException, CreateException, PermissionException,
+        throws AutoinventoryException,  PermissionException,
                ValidationException, ApplicationException 
     {
         long startTime = System.currentTimeMillis();
@@ -235,7 +233,7 @@ public class RuntimeReportProcessor {
     private void mergePlatformIntoInventory(AuthzSubject subject,
                                             AIPlatformValue aiplatform,
                                             Server reportingServer)
-        throws CreateException, PermissionException, ValidationException,
+        throws  PermissionException, ValidationException,
                ApplicationException {
 
         AIServerValue[] aiservers = aiplatform.getAIServerValues();
@@ -310,7 +308,7 @@ public class RuntimeReportProcessor {
                                           AIServerValue aiserver,
                                           List appdefServers,
                                           Server reportingServer)
-        throws CreateException, PermissionException, ValidationException
+        throws  PermissionException, ValidationException
     {
         Integer serverTypePK;
 
@@ -407,7 +405,7 @@ public class RuntimeReportProcessor {
             _log.error("Failed to merge server: " + aiserver, e);
             _log.info("Server: " + aiserver + " will be skipped.");
             return;
-        } catch (FinderException e) {
+        } catch (NotFoundException e) {
             _log.error("Failed to merge server: " + aiserver, e);
             _log.info("Server: " + aiserver + " will be skipped.");
             return;

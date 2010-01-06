@@ -8,9 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.ejb.CreateException;
-import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
+
 
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.Agent;
@@ -64,6 +62,7 @@ import org.hyperic.hq.authz.shared.GroupCreationException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.uibeans.SearchResult;
 import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
@@ -99,21 +98,21 @@ public interface AppdefBoss {
      * @return A list of PlatformTypeValue objects.
      */
     public PageList<PlatformTypeValue> findViewablePlatformTypes(int sessionID, PageControl pc)
-        throws SessionTimeoutException, SessionNotFoundException, PermissionException, FinderException;
+        throws SessionTimeoutException, SessionNotFoundException, PermissionException, NotFoundException;
 
     /**
      * Find all the server types defined in the system.
      * @return A list of ServerTypeValue objects.
      */
-    public PageList<ServerTypeValue> findAllServerTypes(int sessionID, PageControl pc) throws FinderException,
+    public PageList<ServerTypeValue> findAllServerTypes(int sessionID, PageControl pc) throws 
         SessionNotFoundException, SessionTimeoutException, PermissionException;
 
     /**
      * Find all viewable server types defined in the system.
      * @return A list of ServerTypeValue objects.
      */
-    public PageList<ServerTypeValue> findViewableServerTypes(int sessionID, PageControl pc) throws FinderException,
-        SessionNotFoundException, SessionTimeoutException, PermissionException;
+    public PageList<ServerTypeValue> findViewableServerTypes(int sessionID, PageControl pc) throws 
+        SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException;
 
     public List<AppdefResourceTypeValue> findAllApplicationTypes(int sessionID) throws ApplicationException;
 
@@ -122,8 +121,8 @@ public interface AppdefBoss {
     public PageList<ServiceTypeValue> findAllServiceTypes(int sessionID, PageControl pc)
         throws SessionTimeoutException, SessionNotFoundException, PermissionException;
 
-    public PageList<ServiceTypeValue> findViewableServiceTypes(int sessionID, PageControl pc) throws FinderException,
-        SessionTimeoutException, SessionNotFoundException, PermissionException;
+    public PageList<ServiceTypeValue> findViewableServiceTypes(int sessionID, PageControl pc) throws 
+        SessionTimeoutException, SessionNotFoundException, PermissionException, NotFoundException;
 
     public PageList<ServiceTypeValue> findViewablePlatformServiceTypes(int sessionID, Integer platId)
         throws SessionTimeoutException, SessionNotFoundException, PermissionException;
@@ -224,8 +223,8 @@ public interface AppdefBoss {
      * @return A List of PlatformValue objects representing all of the platforms
      *         that the given subject is allowed to view.
      */
-    public PageList<PlatformValue> findAllPlatforms(int sessionID, PageControl pc) throws FinderException,
-        SessionTimeoutException, SessionNotFoundException, PermissionException;
+    public PageList<PlatformValue> findAllPlatforms(int sessionID, PageControl pc) throws 
+        SessionTimeoutException, SessionNotFoundException, PermissionException, NotFoundException;
 
     /**
      * Get recently created platforms in the inventory.
@@ -234,8 +233,8 @@ public interface AppdefBoss {
      *         that the given subject is allowed to view that was created in the
      *         past time range specified.
      */
-    public PageList<PlatformValue> findRecentPlatforms(int sessionID, long range, int size) throws FinderException,
-        SessionTimeoutException, SessionNotFoundException, PermissionException;
+    public PageList<PlatformValue> findRecentPlatforms(int sessionID, long range, int size) throws 
+        SessionTimeoutException, SessionNotFoundException, PermissionException, NotFoundException;
 
     /**
      * Looks up and returns a list of value objects corresponding to the list of
@@ -275,7 +274,7 @@ public interface AppdefBoss {
         throws SessionTimeoutException, SessionNotFoundException, PermissionException;
 
     public Platform createPlatform(int sessionID, PlatformValue platformVal, Integer platTypePK, Integer agent)
-        throws CreateException, ValidationException, SessionTimeoutException, SessionNotFoundException,
+        throws ValidationException, SessionTimeoutException, SessionNotFoundException,
         PermissionException, AppdefDuplicateNameException, AppdefDuplicateFQDNException, ApplicationException;
 
     public AppdefResourceTypeValue findResourceTypeById(int sessionID, AppdefEntityTypeID id)
@@ -304,9 +303,9 @@ public interface AppdefBoss {
      * @return ServerValue - the saved server
      */
     public ServerValue createServer(int sessionID, ServerValue serverVal, Integer platformPK, Integer serverTypePK,
-                                    Map<String, String> cProps) throws CreateException, ValidationException,
+                                    Map<String, String> cProps) throws ValidationException,
         SessionTimeoutException, SessionNotFoundException, PermissionException, AppdefDuplicateNameException,
-        CPropKeyNotFoundException;
+        CPropKeyNotFoundException, NotFoundException;
 
     /**
      * Create an application
@@ -314,12 +313,12 @@ public interface AppdefBoss {
      */
     public ApplicationValue createApplication(int sessionID, ApplicationValue appVal,
                                               Collection<ServiceValue> services, ConfigResponse protoProps)
-        throws CreateException, ValidationException, SessionTimeoutException, SessionNotFoundException,
-        PermissionException, AppdefDuplicateNameException;
+        throws ValidationException, SessionTimeoutException, SessionNotFoundException,
+        PermissionException, AppdefDuplicateNameException, NotFoundException;
 
     public ServiceValue createService(int sessionID, ServiceValue serviceVal, Integer serviceTypePK, AppdefEntityID aeid)
         throws SessionNotFoundException, SessionTimeoutException, ServerNotFoundException, PlatformNotFoundException,
-        PermissionException, AppdefDuplicateNameException, ValidationException, CreateException;
+        PermissionException, AppdefDuplicateNameException, ValidationException;
 
     /**
      * Create a service with CProps
@@ -331,7 +330,7 @@ public interface AppdefBoss {
     public Service createService(AuthzSubject subject, ServiceValue serviceVal, Integer serviceTypePK,
                                  Integer serverPK, Map<String, String> cProps) throws SessionNotFoundException,
         SessionTimeoutException, AppdefDuplicateNameException, ValidationException, PermissionException,
-        CreateException, CPropKeyNotFoundException;
+        CPropKeyNotFoundException;
 
     /**
      * Removes an appdef entity by nulling out any reference from its children
@@ -348,7 +347,7 @@ public interface AppdefBoss {
      * resource deletes may take longer than the jboss transaction timeout. No
      * need for a transaction in this context.
      */
-    public void removeDeletedResources() throws ApplicationException, VetoException, RemoveException;
+    public void removeDeletedResources() throws ApplicationException, VetoException;
 
     public void _removePlatformInNewTran(AuthzSubject subject, Platform platform) throws ApplicationException,
         VetoException;
@@ -358,7 +357,7 @@ public interface AppdefBoss {
     public void _removeServerInNewTran(AuthzSubject subject, Server server) throws VetoException, PermissionException;
 
     public void _removeServiceInNewTran(AuthzSubject subject, Service service) throws VetoException,
-        PermissionException, RemoveException;
+        PermissionException;
 
     public void _removeGroupInNewTran(AuthzSubject subject, ResourceGroup group) throws SessionException,
         PermissionException, VetoException;
@@ -367,7 +366,7 @@ public interface AppdefBoss {
         PermissionException, SessionException, VetoException;
 
     public ServerValue updateServer(int sessionId, ServerValue aServer) throws PermissionException,
-        ValidationException, SessionTimeoutException, SessionNotFoundException, FinderException, UpdateException,
+        ValidationException, SessionTimeoutException, SessionNotFoundException, UpdateException,
         AppdefDuplicateNameException;
 
     /**
@@ -375,34 +374,34 @@ public interface AppdefBoss {
      * @param cProps - the map with Custom Properties for the server
      */
     public ServerValue updateServer(int sessionId, ServerValue aServer, Map<String, String> cProps)
-        throws FinderException, ValidationException, SessionTimeoutException, SessionNotFoundException,
+        throws ValidationException, SessionTimeoutException, SessionNotFoundException,
         PermissionException, UpdateException, AppdefDuplicateNameException, CPropKeyNotFoundException;
 
     public ServiceValue updateService(int sessionId, ServiceValue aService) throws PermissionException,
-        ValidationException, SessionTimeoutException, SessionNotFoundException, FinderException, UpdateException,
-        AppdefDuplicateNameException;
+        ValidationException, SessionTimeoutException, SessionNotFoundException, UpdateException,
+        AppdefDuplicateNameException, NotFoundException;
 
     /**
      * Update a service with cProps.
      * @param cProps - the map with Custom Properties for the service
      */
     public ServiceValue updateService(int sessionId, ServiceValue aService, Map<String, String> cProps)
-        throws FinderException, ValidationException, SessionTimeoutException, SessionNotFoundException,
-        PermissionException, UpdateException, AppdefDuplicateNameException, CPropKeyNotFoundException;
+        throws ValidationException, SessionTimeoutException, SessionNotFoundException,
+        PermissionException, UpdateException, AppdefDuplicateNameException, CPropKeyNotFoundException, NotFoundException;
 
     /**
      * Update a service with cProps.
      * @param cProps - the map with Custom Properties for the service
      */
     public ServiceValue updateService(AuthzSubject subject, ServiceValue aService, Map<String, String> cProps)
-        throws FinderException, ValidationException, SessionTimeoutException, SessionNotFoundException,
-        PermissionException, UpdateException, AppdefDuplicateNameException, CPropKeyNotFoundException;
+        throws ValidationException, SessionTimeoutException, SessionNotFoundException,
+        PermissionException, UpdateException, AppdefDuplicateNameException, CPropKeyNotFoundException, NotFoundException;
 
-    public PlatformValue updatePlatform(int sessionId, PlatformValue aPlatform) throws FinderException,
+    public PlatformValue updatePlatform(int sessionId, PlatformValue aPlatform) throws 
         ValidationException, PermissionException, SessionTimeoutException, SessionNotFoundException, UpdateException,
         ApplicationException, AppdefDuplicateNameException, AppdefDuplicateFQDNException;
 
-    public PlatformValue updatePlatform(AuthzSubject subject, PlatformValue aPlatform) throws FinderException,
+    public PlatformValue updatePlatform(AuthzSubject subject, PlatformValue aPlatform) throws 
         ValidationException, PermissionException, SessionTimeoutException, SessionNotFoundException, UpdateException,
         ApplicationException, AppdefDuplicateNameException, AppdefDuplicateFQDNException;
 
@@ -680,7 +679,7 @@ public interface AppdefBoss {
         throws PermissionException, SessionException, VetoException;
 
     public AppdefResourcePermissions getResourcePermissions(int sessionId, AppdefEntityID id)
-        throws SessionNotFoundException, SessionTimeoutException, FinderException;
+        throws SessionNotFoundException, SessionTimeoutException;
 
     public int getAgentCount(int sessionId) throws SessionNotFoundException, SessionTimeoutException;
 

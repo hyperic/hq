@@ -8,6 +8,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.control.server.session.ControlHistory;
 import org.hyperic.hq.control.server.session.ControlSchedule;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;

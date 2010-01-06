@@ -5,10 +5,9 @@ package org.hyperic.hq.appdef.shared;
 
 import java.util.List;
 
-import javax.ejb.FinderException;
-
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.common.NotFoundException;
 
 /**
  * Local interface for VirtualManager.
@@ -46,12 +45,12 @@ public interface VirtualManager {
      * Associate an array of entities to a VM
      */
     public void associateEntities(AuthzSubject subj, Integer processId,
-                                  org.hyperic.hq.appdef.shared.AppdefEntityID[] aeids) throws FinderException;
+                                  org.hyperic.hq.appdef.shared.AppdefEntityID[] aeids);
 
     /**
      * Associate an array of entities to a VM
-     * @throws FinderException
+     * @throws NotFoundException
      */
-    public void associateToPhysical(AuthzSubject subj, Integer physicalId, AppdefEntityID aeid) throws FinderException;
+    public void associateToPhysical(AuthzSubject subj, Integer physicalId, AppdefEntityID aeid) throws NotFoundException;
 
 }

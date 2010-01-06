@@ -28,7 +28,6 @@ package org.hyperic.hq.ui.action.resource.application.inventory;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import javax.ejb.ObjectNotFoundException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -107,11 +106,7 @@ public class NewApplicationAction
                 .getName());
             forwardParams.put(Constants.ENTITY_ID_PARAM, appId);
             return returnNew(request, mapping, forwardParams);
-        } catch (ObjectNotFoundException oe) {
-            RequestUtils.setError(request, "resource.application.inventory.error." + "ApplicationTypeNotFound",
-                "resourceType");
-            return returnFailure(request, mapping, forwardParams);
-        } catch (AppdefDuplicateNameException e1) {
+        }  catch (AppdefDuplicateNameException e1) {
             RequestUtils.setError(request, Constants.ERR_DUP_RESOURCE_FOUND);
             return returnFailure(request, mapping);
         }
