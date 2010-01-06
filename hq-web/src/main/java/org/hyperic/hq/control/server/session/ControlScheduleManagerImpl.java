@@ -37,8 +37,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.ejb.FinderException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
@@ -51,6 +49,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.control.shared.ControlConstants;
@@ -296,7 +295,6 @@ public class ControlScheduleManagerImpl
                     name = aVal.getName();
 
                 } catch (Exception e) {
-                    // One of NamingException, FinderException, CreateException.
                     // Should never happen
                     log.error("Error looking up appdef name for type=" + rs.getInt(1) + " id=" + rs.getInt(2));
                     continue;
@@ -342,9 +340,9 @@ public class ControlScheduleManagerImpl
                     schedule = controlScheduleDAO.findByEntityAction(id.getType(), id.getID(), pc.isAscending());
                     break;
                 default:
-                    throw new FinderException("Unknown sort attribute: " + sortAttr);
+                    throw new NotFoundException("Unknown sort attribute: " + sortAttr);
             }
-        } catch (FinderException e) {
+        } catch (NotFoundException e) {
             throw new ScheduledJobNotFoundException(e);
         }
 

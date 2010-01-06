@@ -30,9 +30,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.ejb.CreateException;
-import javax.naming.NamingException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -41,7 +38,6 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.util.MessagePublisher;
-import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.control.ControlEvent;
 import org.hyperic.hq.control.shared.ControlActionTimeoutException;

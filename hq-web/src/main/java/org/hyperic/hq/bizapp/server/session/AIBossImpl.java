@@ -28,8 +28,6 @@ package org.hyperic.hq.bizapp.server.session;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.FinderException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
@@ -64,6 +62,7 @@ import org.hyperic.hq.autoinventory.shared.AIScheduleManager;
 import org.hyperic.hq.autoinventory.shared.AIScheduleValue;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManager;
 import org.hyperic.hq.bizapp.shared.AIBoss;
+import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
@@ -112,7 +111,7 @@ public class AIBossImpl implements AIBoss {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         try {
             return aiScheduleManager.findScheduledJobs(subject, id, pc);
-        } catch (FinderException e) {
+        } catch (NotFoundException e) {
             throw new SystemException(e);
         }
     }

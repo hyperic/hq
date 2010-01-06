@@ -32,7 +32,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.catalina.Globals;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.auth.shared.SessionException;
@@ -42,6 +41,7 @@ import org.hyperic.hq.hqu.RenditServerImpl;
 import org.hyperic.hq.hqu.RequestInvocationBindings;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.StringUtil;
+import org.springframework.web.util.WebUtils;
 
 public class RenditServlet 
     extends HttpServlet
@@ -62,7 +62,7 @@ public class RenditServlet
     
     public static boolean requestIsValid(HttpServletRequest req) {
         String reqUri = (String)
-            req.getAttribute(Globals.INCLUDE_REQUEST_URI_ATTR);
+            req.getAttribute(WebUtils.INCLUDE_REQUEST_URI_ATTRIBUTE);
         boolean useInclude = false;
         
         if (reqUri != null)
@@ -111,35 +111,35 @@ public class RenditServlet
         // include(), we need to investigate the subrequest URIs, etc.
         // and use those, as Tomcat won't set them up in subrequest objects
         String reqUri = (String)
-            req.getAttribute(Globals.INCLUDE_REQUEST_URI_ATTR);
+            req.getAttribute(WebUtils.INCLUDE_REQUEST_URI_ATTRIBUTE);
         if (reqUri != null)
             useInclude = true;
         if (reqUri == null && !useInclude)
             reqUri = req.getRequestURI();
         
         String ctxPath = (String)
-            req.getAttribute(Globals.INCLUDE_CONTEXT_PATH_ATTR);
+            req.getAttribute(WebUtils.INCLUDE_CONTEXT_PATH_ATTRIBUTE);
         if (ctxPath != null)
             useInclude = true;
         if (ctxPath == null && !useInclude)
             ctxPath = req.getContextPath();
         
         String pathInfo = (String)
-            req.getAttribute(Globals.INCLUDE_PATH_INFO_ATTR);
+            req.getAttribute(WebUtils.INCLUDE_PATH_INFO_ATTRIBUTE);
         if (pathInfo != null)
             useInclude = true;
         if (pathInfo == null && !useInclude) 
             pathInfo = req.getPathInfo();
         
         String servletPath = (String)
-            req.getAttribute(Globals.INCLUDE_SERVLET_PATH_ATTR);
+            req.getAttribute(WebUtils.INCLUDE_SERVLET_PATH_ATTRIBUTE);
         if (servletPath != null)
             useInclude = true;
         if (servletPath == null && !useInclude)
             servletPath = req.getServletPath();
         
         String queryStr = (String)
-            req.getAttribute(Globals.INCLUDE_QUERY_STRING_ATTR);
+            req.getAttribute(WebUtils.INCLUDE_QUERY_STRING_ATTRIBUTE);
         if (queryStr != null)
             useInclude = true;
         if (queryStr == null && !useInclude)

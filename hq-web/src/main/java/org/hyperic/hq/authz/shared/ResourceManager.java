@@ -7,9 +7,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
-
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
@@ -21,6 +18,7 @@ import org.hyperic.hq.authz.server.session.ResourceRelation;
 import org.hyperic.hq.authz.server.session.ResourceSortField;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.bizapp.server.session.AppdefBossImpl;
+import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -33,9 +31,9 @@ public interface ResourceManager {
      * Find the type that has the given name.
      * @param name The name of the type you're looking for.
      * @return The value-object of the type of the given name.
-     * @throws FinderException Unable to find a given or dependent entities.
+     * @throws NotFoundException Unable to find a given or dependent entities.
      */
-    public ResourceType findResourceTypeByName(String name) throws FinderException;
+    public ResourceType findResourceTypeByName(String name) throws NotFoundException;
 
     /**
      * Find a resource, acting as a resource prototype.
@@ -143,8 +141,8 @@ public interface ResourceManager {
      * @param subject
      * @return Map of resource values
      */
-    public List<Integer> findViewableInstances(AuthzSubject subject, String typeName, String resName, String appdefTypeStr,
-                                      Integer typeId, PageControl pc);
+    public List<Integer> findViewableInstances(AuthzSubject subject, String typeName, String resName,
+                                               String appdefTypeStr, Integer typeId, PageControl pc);
 
     /**
      * Get viewable resources by "type" OR "resource name"
@@ -212,8 +210,8 @@ public interface ResourceManager {
 
     public boolean isResourceChildOf(Resource parent, Resource child);
 
-    public List<ResourceEdge> findResourceEdges(ResourceRelation relation, Integer resourceId, List<Integer> platformTypeIds,
-                                  String platformName);
+    public List<ResourceEdge> findResourceEdges(ResourceRelation relation, Integer resourceId,
+                                                List<Integer> platformTypeIds, String platformName);
 
     public void createResourceEdges(AuthzSubject subject, ResourceRelation relation, AppdefEntityID parent,
                                     AppdefEntityID[] children) throws PermissionException, ResourceEdgeCreateException;
@@ -229,11 +227,11 @@ public interface ResourceManager {
         throws PermissionException;
 
     public ResourceRelation getContainmentRelation();
-    
+
     ResourceRelation getNetworkRelation();
-    
-    void removeAuthzResource(AuthzSubject subject, AppdefEntityID aeid, Resource r) throws RemoveException,
-    PermissionException, VetoException;
+
+    void removeAuthzResource(AuthzSubject subject, AppdefEntityID aeid, Resource r) throws PermissionException,
+        VetoException;
 
     public String getAppdefEntityName(AppdefEntityID appEnt);
 }

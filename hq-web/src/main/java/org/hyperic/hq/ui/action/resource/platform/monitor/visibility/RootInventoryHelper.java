@@ -30,7 +30,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.FinderException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -47,6 +46,7 @@ import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.ui.action.resource.common.monitor.visibility.InventoryHelper;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
@@ -117,7 +117,7 @@ public class RootInventoryHelper
         try {
             Collection<PlatformValue> arvs = appdefBoss.findAllPlatforms(sessionId, PageControl.PAGE_ALL);
             return AppdefResourceValue.getPlatformTypeCountMap(arvs);
-        } catch (FinderException e) {
+        } catch (NotFoundException e) {
             throw new PlatformNotFoundException("couldn't find all platforms");
         }
     }

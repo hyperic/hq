@@ -28,8 +28,6 @@ package org.hyperic.hq.appdef.shared;
 import java.rmi.RemoteException;
 import java.util.List;
 
-import javax.ejb.CreateException;
-import javax.ejb.FinderException;
 import javax.naming.NamingException;
 
 import org.hyperic.hq.appdef.server.session.Platform;
@@ -38,6 +36,7 @@ import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.util.config.EncodingException;
@@ -70,9 +69,9 @@ public interface CloningBoss {
      * 
      */
     public void clonePlatform(AuthzSubject subj, Platform master, Platform clone) throws AppdefEntityNotFoundException,
-        ConfigFetchException, PermissionException, FinderException, CreateException, NamingException,
+        ConfigFetchException, PermissionException,  NamingException,
         SessionNotFoundException, SessionTimeoutException, SessionException, VetoException,
         AppdefDuplicateNameException, ValidationException, GroupNotCompatibleException, UpdateException,
-        EncodingException, RemoteException;
+        EncodingException, RemoteException, NotFoundException;
 
 }

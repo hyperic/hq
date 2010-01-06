@@ -28,9 +28,6 @@ package org.hyperic.hq.appdef.server.session;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.ejb.CreateException;
-import javax.ejb.FinderException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AIConversionUtil;
@@ -51,6 +48,7 @@ import org.hyperic.hq.autoinventory.AIIp;
 import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.hq.autoinventory.AIServer;
 import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
 
 /**
@@ -125,9 +123,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
                 throw new AIQApprovalException(e);
             }
 
-            catch (CreateException e) {
-                throw new AIQApprovalException(e);
-            }
+           
             
             try {
                 configMgr.configureResponse(subject,
@@ -443,7 +439,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
                                      Platform platform,
                                      AIServer aiserver,
                                      ServerManager smLocal)
-        throws PermissionException, FinderException {
+        throws PermissionException, NotFoundException  {
         Server server = smLocal.findServerByAIID(
             subject, platform, aiserver.getAutoinventoryIdentifier());
         if (server != null || aiserver.getAIPlatform().isPlatformDevice()) {

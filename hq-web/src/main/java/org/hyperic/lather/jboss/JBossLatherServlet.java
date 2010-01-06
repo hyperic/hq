@@ -30,25 +30,16 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
-import java.util.Map;
 import java.util.Random;
-
-import javax.ejb.EJBLocalHome;
-
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpUtils;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.bizapp.shared.LatherBoss;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.lather.LatherContext;
@@ -56,11 +47,7 @@ import org.hyperic.lather.LatherRemoteException;
 import org.hyperic.lather.LatherValue;
 import org.hyperic.lather.client.LatherHTTPClient;
 import org.hyperic.lather.xcode.LatherXCoder;
-
 import org.hyperic.util.encoding.Base64;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * The purpose of this class is to take servlet requests for

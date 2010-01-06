@@ -25,11 +25,6 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import java.util.Collection;
-import java.util.Iterator;
-
-import javax.ejb.RemoveException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;

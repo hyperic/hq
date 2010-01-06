@@ -28,7 +28,6 @@ package org.hyperic.hq.ui.action.resource.common.monitor.alerts.config;
 import java.rmi.RemoteException;
 import java.util.List;
 
-import javax.ejb.FinderException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -131,7 +130,7 @@ public abstract class ViewDefinitionNotificationsAction
     }
 
     protected abstract PageList getPageList(int sessionID, EmailActionConfig ea, PageControl pc)
-        throws FinderException, SessionTimeoutException, SessionNotFoundException, PermissionException, RemoteException;
+        throws SessionTimeoutException, SessionNotFoundException, PermissionException, RemoteException;
 
     // -----------------------------------------------------------------
     // -- private helpers

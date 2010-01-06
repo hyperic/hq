@@ -25,7 +25,7 @@
 
 package org.hyperic.hq.auth.server.session;
 
-import javax.ejb.CreateException;
+
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
@@ -83,8 +83,8 @@ public class AuthManagerImpl implements AuthManager {
      * @return session id that is associated with the user
      */
     @Transactional(propagation = Propagation.SUPPORTS)
-    public int getSessionId(String user, String password)
-        throws SecurityException, LoginException, ConfigPropertyException, ApplicationException {
+    public int getSessionId(String user, String password) throws SecurityException, LoginException,
+        ConfigPropertyException, ApplicationException {
         if (password == null) {
             throw new LoginException("No password was given");
         }
@@ -107,14 +107,8 @@ public class AuthManagerImpl implements AuthManager {
             }
         } catch (SubjectNotFoundException fe) {
             // User not found in the authz system. Create it.
-            try {
-                AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
-                subject = authzSubjectManager.createSubject(overlord, user, true, appName,
-                                                            "", "", "", "", "", "", false);
-            } catch (CreateException e) {
-                throw new ApplicationException("Unable to add user to " +
-                                               "authorization system", e);
-            }
+            AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
+            subject = authzSubjectManager.createSubject(overlord, user, true, appName, "", "", "", "", "", "", false);
         }
 
         return SessionManager.getInstance().put(subject);
@@ -143,13 +137,11 @@ public class AuthManagerImpl implements AuthManager {
             // Session Manager
             AuthzSubject subject = authzSubjectManager.findSubjectByAuth(user, appName);
             if (!subject.getActive()) {
-                throw new SessionNotFoundException(
-                                                   "User account has been disabled.");
+                throw new SessionNotFoundException("User account has been disabled.");
             }
             return mgr.put(subject, 30000); // 30 seconds only
         } catch (SubjectNotFoundException e) {
-            throw new SessionNotFoundException("Unable to find user " + user +
-                                               " to create session");
+            throw new SessionNotFoundException("Unable to find user " + user + " to create session");
         }
     }
 
@@ -158,13 +150,12 @@ public class AuthManagerImpl implements AuthManager {
      * 
      * @param subject The subject of the currently logged in user
      * @param username The username to add
-     * @param password The password for this user
-     *        XXX: Shouldn't this check permissions?
+     * @param password The password for this user XXX: Shouldn't this check
+     *        permissions?
      */
     public void addUser(AuthzSubject subject, String username, String password) {
         // All passwords are stored encrypted
-        String passwordHash = Util.createPasswordHash("MD5", "base64",
-                                                      null, null, password);
+        String passwordHash = Util.createPasswordHash("MD5", "base64", null, null, password);
         principalDao.create(username, passwordHash);
     }
 
@@ -175,8 +166,7 @@ public class AuthManagerImpl implements AuthManager {
      * @param username The username whose password will be changed.
      * @param password The new password for this user
      */
-    public void changePassword(AuthzSubject subject, String username, String password)
-        throws PermissionException {
+    public void changePassword(AuthzSubject subject, String username, String password) throws PermissionException {
         // AUTHZ check
         if (!subject.getName().equals(username)) {
             // users can change their own passwords... only
@@ -185,8 +175,7 @@ public class AuthManagerImpl implements AuthManager {
         }
         Principal local = principalDao.findByUsername(username);
         // hash the password as is done in ejbCreate. Fixes 4661
-        String hash = Util.createPasswordHash("MD5", "base64",
-                                              null, null, password);
+        String hash = Util.createPasswordHash("MD5", "base64", null, null, password);
         local.setPassword(hash);
     }
 
@@ -197,9 +186,7 @@ public class AuthManagerImpl implements AuthManager {
      * @param username The username whose password will be changed.
      * @param password The new password for this user
      */
-    public void changePasswordHash(AuthzSubject subject, String username,
-                                   String hash)
-        throws PermissionException {
+    public void changePasswordHash(AuthzSubject subject, String username, String hash) throws PermissionException {
         // AUTHZ check
         if (!subject.getName().equals(username)) {
             // users can change their own passwords... only
@@ -218,8 +205,7 @@ public class AuthManagerImpl implements AuthManager {
      * Delete a user from the internal database
      * 
      * @param subject The subject of the currently logged in user
-     * @param username The user to delete
-     *        XXX: Shouldn't this check permissions?
+     * @param username The user to delete XXX: Shouldn't this check permissions?
      */
     public void deleteUser(AuthzSubject subject, String username) {
         Principal local = principalDao.findByUsername(username);

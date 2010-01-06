@@ -3,12 +3,10 @@
  */
 package org.hyperic.hq.authz.shared;
 
-import javax.ejb.CreateException;
-import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
-
 import org.hyperic.hq.auth.shared.SubjectNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -24,7 +22,7 @@ public interface AuthzSubjectManager {
      */
     public AuthzSubject createSubject(AuthzSubject whoami, String name, boolean active, String dsn, String dept,
                                       String email, String first, String last, String phone, String sms, boolean html)
-        throws PermissionException, CreateException;
+        throws PermissionException, ApplicationException;
 
     /**
      * Update user settings for the target
@@ -47,7 +45,7 @@ public interface AuthzSubjectManager {
      * @param whoami The current running user.
      * @param subject The ID of the subject to delete.
      */
-    public void removeSubject(AuthzSubject whoami, Integer subject) throws RemoveException, PermissionException;
+    public void removeSubject(AuthzSubject whoami, Integer subject) throws PermissionException;
 
     public AuthzSubject findByAuth(String name, String authDsn);
 
@@ -68,7 +66,7 @@ public interface AuthzSubjectManager {
      * @param excludes the IDs of subjects to exclude from result
      */
     public PageList<AuthzSubjectValue> getAllSubjects(AuthzSubject whoami, java.util.Collection<Integer> excludes,
-                                                      PageControl pc) throws FinderException, PermissionException;
+                                                      PageControl pc) throws PermissionException, NotFoundException;
 
     /**
      * Get the subjects with the specified ids NOTE: This method returns an

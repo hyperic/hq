@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
-import javax.ejb.FinderException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -56,6 +55,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceValue;
+import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.MessagePublisher;
 import org.hyperic.hq.context.Bootstrap;
@@ -569,7 +569,7 @@ public class ControlManagerImpl implements ControlManager {
                 for (int x = 0; x < authz.length; x++) {
                     retVal.add(AppdefUtil.newAppdefEntityId(authz[x]));
                 }
-            } catch (FinderException e) {
+            } catch (ApplicationException e) {
                 // returns empty list as advertised
             }
         }

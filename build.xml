@@ -31,8 +31,6 @@
 
 	<property name="jboss.home" location="${ENV.JBOSS_HOME}" />
 
-	<property name="jbossweb.home" value="jboss-web.deployer" />
-	<property name="tomcat.home" location="${jboss.home}/server/default/deploy/${jbossweb.home}" />
 
 	<property name="build.dir" location="${basedir}/build" />
 
@@ -80,9 +78,6 @@
 
 	<property name="jboss.deploy.dir" value="${jboss.home}/server/default/deploy" />
 
-	<property name="jboss.deploy.ear.dir" value="${jboss.home}/server/default/deploy/hq.ear" />
-
-	<property name="jboss.deploy.war.dir" value="${jboss.home}/server/default/deploy/hq.ear/hq.war" />
 
 	<path id="pdknative">
 		<fileset dir="${sigar.lib}" includes="*.jar" />
@@ -104,10 +99,8 @@
 		<fileset dir="${thirdparty.lib}/tapestry" includes="*.jar" />
 		<fileset dir="${wrapper.lib}" includes="*.jar" />
 		<fileset dir="${hibernate.lib}" includes="*.jar" />
-		<fileset dir="${jboss.home}/server/default/lib" includes="*.jar" excludes="antlr-*.jar,txsnatch.jar,jbossjta.jar" />
-		<fileset dir="${jboss.home}/lib" includes="*.jar" />
-		<fileset dir="${jboss.home}/client" includes="*.jar" />
-		<fileset dir="${tomcat.home}" includes="*.jar" />
+		<fileset dir="${jboss.home}/server/default/lib" includes="jbosssx.jar,scheduler-plugin.jar" />
+		<fileset dir="${jboss.home}/lib" includes="jboss-system.jar" />
 		<fileset dir="${hq.plugins}" includes="**/build-lib/*.jar" />
 		<fileset dir="${hq.plugins}" includes="**/lib/*.jar" />
 	</path>
@@ -126,13 +119,7 @@
 		<pathelement location="${thirdparty.lib}/com.springsource.com.cenqua.clover-2.4.2.jar" />
 	</path>
 
-	<path id="remotejars">
-		<path refid="alljars" />
-		<fileset dir="${webapp.home}/WEB-INF/lib" includes="*.jar" />
-		<fileset dir="${jboss.home}/server/default/lib" includes="*.jar" />
-		<fileset dir="${jboss.home}/lib" includes="*.jar" />
-		<fileset dir="${jboss.home}/client" includes="*.jar" />
-	</path>
+
 
 	<path id="pdkjars">
 		<path location="${hq.pdk.shared}/target/classes"/>
@@ -514,7 +501,6 @@
 				<include name="log4j-1.2.14.jar" />
 				<include name="quartz-1.6.5.jar" />
 				<include name="quartz-oracle-1.6.5.jar" />
-				<include name="quartz-jboss-1.6.5.jar" />
 				<include name="snmp4j.jar" />
 				<include name="dnsjava-2.0.3.jar" />
 				<include name="ehcache-1.5.0.jar" />

@@ -34,10 +34,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 
-import javax.ejb.CreateException;
-import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.alerts.AlertDefinitionXmlParser;
@@ -51,6 +47,7 @@ import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.shared.AuditManager;
@@ -122,8 +119,8 @@ public class ProductManagerImpl implements ProductManager {
      * 
      * 
      */
-    private void updateAppdefEntities(String pluginName, TypeInfo[] entities) throws FinderException, RemoveException,
-        CreateException, VetoException {
+    private void updateAppdefEntities(String pluginName, TypeInfo[] entities) throws  
+         VetoException, NotFoundException {
         ArrayList<TypeInfo> platforms = new ArrayList<TypeInfo>();
         ArrayList<TypeInfo> servers = new ArrayList<TypeInfo>();
         ArrayList<TypeInfo> services = new ArrayList<TypeInfo>();
@@ -261,8 +258,8 @@ public class ProductManagerImpl implements ProductManager {
     /**
      */
     @Transactional
-    public void deploymentNotify(String pluginName) throws PluginNotFoundException, FinderException, CreateException,
-        RemoveException, VetoException {
+    public void deploymentNotify(String pluginName) throws PluginNotFoundException,  
+         VetoException, NotFoundException {
         ProductPlugin pplugin = (ProductPlugin) getProductPluginManager().getPlugin(pluginName);
         PluginValue ejbPlugin;
         PluginInfo pInfo;
@@ -322,13 +319,11 @@ public class ProductManagerImpl implements ProductManager {
      * @param serviceTypes The Set of {@link ServiceType}s to update
      * @throws PluginNotFoundException
      * @throws VetoException
-     * @throws CreateException
-     * @throws RemoveException
-     * @throws FinderException
+     * @throws NotFoundException
      */
     @Transactional
     public void updateDynamicServiceTypePlugin(String pluginName, Set<ServiceType> serviceTypes)
-        throws PluginNotFoundException, FinderException, RemoveException, CreateException, VetoException {
+        throws PluginNotFoundException, NotFoundException, VetoException {
         ProductPlugin productPlugin = (ProductPlugin) getProductPluginManager().getPlugin(pluginName);
         try {
             pluginUpdater.updateServiceTypes(productPlugin, serviceTypes);
@@ -338,8 +333,8 @@ public class ProductManagerImpl implements ProductManager {
         }
     }
 
-    private void updatePlugin(String pluginName) throws FinderException, RemoveException, CreateException,
-        VetoException, PluginNotFoundException {
+    private void updatePlugin(String pluginName) throws   
+        VetoException, PluginNotFoundException, NotFoundException {
         ProductPlugin pplugin = (ProductPlugin) getProductPluginManager().getPlugin(pluginName);
 
         PluginInfo pInfo = getProductPluginManager().getPluginInfo(pluginName);
@@ -395,8 +390,8 @@ public class ProductManagerImpl implements ProductManager {
         updateEJBPlugin(pluginDao, pInfo);
     }
 
-    private void createAlertDefinitions(final PluginInfo pInfo) throws FinderException, RemoveException,
-        CreateException, VetoException {
+    private void createAlertDefinitions(final PluginInfo pInfo) throws  
+         VetoException {
         final InputStream alertDefns = pInfo.resourceLoader.getResourceAsStream(ALERT_DEFINITIONS_XML_FILE);
         if (alertDefns == null) {
             return;

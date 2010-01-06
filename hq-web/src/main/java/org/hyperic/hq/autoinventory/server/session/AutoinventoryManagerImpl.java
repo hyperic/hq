@@ -34,8 +34,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
-import javax.ejb.CreateException;
-import javax.ejb.FinderException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -94,6 +92,7 @@ import org.hyperic.hq.autoinventory.server.session.RuntimeReportProcessor.Servic
 import org.hyperic.hq.autoinventory.shared.AIScheduleManager;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManager;
 import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.context.Bootstrap;
@@ -177,7 +176,7 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
     @Transactional
     public Map<String, ServerSignature> getServerSignatures(AuthzSubject subject,
                                                             List<ServerTypeValue> serverTypes)
-        throws FinderException, AutoinventoryException {
+        throws  AutoinventoryException {
         // Plug server type names into a map for quick retrieval
         HashMap<String, ServerTypeValue> stNames = null;
         if (serverTypes != null) {
@@ -694,7 +693,7 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
                 // Ensure the server reported has a valid appdef type
                 try {
                     serverManager.findServerTypeByName(aiServer.getServerTypeName());
-                } catch (FinderException e) {
+                } catch (NotFoundException e) {
                     log.error("Ignoring non-existent server type: " +
                                aiServer.getServerTypeName(), e);
                     continue;
@@ -812,13 +811,13 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
         AuthzSubject subject = getHQAdmin();
 
         RuntimeReportProcessor rrp = new RuntimeReportProcessor();
-        try {
+        //try {
             rrp.processRuntimeReport(subject, agentToken, crrr);
             mergeServiceTypes(rrp.getServiceTypeMerges());
             return rrp.getServiceMerges();
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        }
+        //} catch (CreateException e) {
+          //  throw new SystemException(e);
+        //}
     }
 
     private void mergeServiceTypes(final Set<org.hyperic.hq.product.ServiceType> serviceTypeMerges) {
@@ -1072,11 +1071,10 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
 
     /**
      * Create an autoinventory manager.
-     * @exception CreateException If an error occurs creating the pager
-     *            for the bean.
+     * 
      */
     @PostConstruct
-    public void createDependentManagers() throws CreateException {
+    public void createDependentManagers()  {
         // Get reference to the AI plugin manager
         try {
             aiPluginManager =

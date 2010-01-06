@@ -7,8 +7,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.CreateException;
-
 import org.hyperic.hq.appdef.ServiceCluster;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.Server;
@@ -20,6 +18,7 @@ import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
+import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -63,8 +62,8 @@ public interface ServiceManager {
      * @return The service id.
      */
     public Service createService(AuthzSubject subject, Integer serverId, Integer serviceTypeId, String name,
-                                 String desc, String location) throws CreateException, ValidationException,
-        PermissionException, ServerNotFoundException, AppdefDuplicateNameException;
+                                 String desc, String location) throws ValidationException, PermissionException,
+        ServerNotFoundException, AppdefDuplicateNameException;
 
     /**
      * Get service IDs by service type.
@@ -116,14 +115,13 @@ public interface ServiceManager {
     public PageList<ServiceTypeValue> getAllServiceTypes(AuthzSubject subject, PageControl pc);
 
     public PageList<ServiceTypeValue> getViewableServiceTypes(AuthzSubject subject, PageControl pc)
-        throws javax.ejb.FinderException, PermissionException;
+        throws PermissionException, NotFoundException;
 
     public PageList<ServiceTypeValue> getServiceTypesByServerType(AuthzSubject subject, int serverTypeId);
 
     public PageList<ServiceTypeValue> findVirtualServiceTypesByPlatform(AuthzSubject subject, Integer platformId);
 
-    public PageList<ServiceValue> getAllServices(AuthzSubject subject, PageControl pc)
-        throws javax.ejb.FinderException, PermissionException;
+    public PageList<ServiceValue> getAllServices(AuthzSubject subject, PageControl pc) throws PermissionException, NotFoundException;
 
     /**
      * Fetch all services that haven't been assigned to a cluster and that
@@ -132,7 +130,7 @@ public interface ServiceManager {
      *         services that the given subject is allowed to view.
      */
     public PageList<ServiceValue> getAllClusterAppUnassignedServices(AuthzSubject subject, PageControl pc)
-        throws javax.ejb.FinderException, PermissionException;
+        throws PermissionException, NotFoundException;
 
     /**
      * Get services by server and type.
@@ -262,18 +260,16 @@ public interface ServiceManager {
         org.hyperic.hq.appdef.shared.UpdateException, org.hyperic.hq.appdef.shared.AppdefDuplicateNameException,
         ServiceNotFoundException;
 
-    public void updateServiceTypes(String plugin, org.hyperic.hq.product.ServiceTypeInfo[] infos)
-        throws javax.ejb.CreateException, javax.ejb.FinderException, javax.ejb.RemoveException, VetoException;
+    public void updateServiceTypes(String plugin, org.hyperic.hq.product.ServiceTypeInfo[] infos) throws VetoException, NotFoundException;
 
     public void deleteServiceType(ServiceType serviceType, AuthzSubject overlord, ResourceGroupManager resGroupMan,
-                                  ResourceManager resMan) throws VetoException, javax.ejb.RemoveException;
+                                  ResourceManager resMan) throws VetoException;
 
     /**
      * A removeService method that takes a ServiceLocal. This is called by
      * ServerManager.removeServer when cascading a delete onto services.
      */
-    public void removeService(AuthzSubject subject, Service service) throws javax.ejb.RemoveException,
-        PermissionException, VetoException;
+    public void removeService(AuthzSubject subject, Service service) throws PermissionException, VetoException;
 
     public void handleResourceDelete(Resource resource);
 

@@ -38,9 +38,6 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
-import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
 import javax.security.auth.login.LoginException;
 
 import org.apache.commons.logging.Log;
@@ -352,7 +349,7 @@ public class EventsBossImpl implements EventsBoss {
      * 
      */
     public int[] getAlertCount(int sessionID, AppdefEntityID[] ids) throws SessionNotFoundException,
-        SessionTimeoutException, PermissionException, FinderException {
+        SessionTimeoutException, PermissionException{
         AuthzSubject subject = sessionManager.getSubject(sessionID);
 
         int[] counts = alertManager.getAlertCount(ids);
@@ -603,8 +600,8 @@ public class EventsBossImpl implements EventsBoss {
      * 
      */
     public Action createAction(int sessionID, Integer adid, String className, ConfigResponse config)
-        throws SessionNotFoundException, SessionTimeoutException, ActionCreateException, RemoveException,
-        FinderException, PermissionException {
+        throws SessionNotFoundException, SessionTimeoutException, ActionCreateException, 
+         PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
 
         ArrayList<AlertDefinition> alertdefs = new ArrayList<AlertDefinition>();
@@ -639,7 +636,7 @@ public class EventsBossImpl implements EventsBoss {
      * 
      */
     public void activateAlertDefinitions(int sessionID, Integer[] ids, boolean activate)
-        throws SessionNotFoundException, SessionTimeoutException, FinderException, PermissionException {
+        throws SessionNotFoundException, SessionTimeoutException,  PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         alertDefinitionManager.updateAlertDefinitionsActiveStatus(subject, ids, activate);
     }
@@ -706,7 +703,7 @@ public class EventsBossImpl implements EventsBoss {
      */
     public void updateAlertDefinitionBasic(int sessionID, Integer alertDefId, String name, String desc, int priority,
                                            boolean activate) throws SessionNotFoundException, SessionTimeoutException,
-        FinderException, RemoveException, PermissionException {
+          PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         alertDefinitionManager.updateAlertDefinitionBasic(subject, alertDefId, name, desc, priority, activate);
     }
@@ -716,7 +713,7 @@ public class EventsBossImpl implements EventsBoss {
      */
     public void updateAlertDefinition(int sessionID, AlertDefinitionValue adval) throws TriggerCreateException,
         InvalidOptionException, InvalidOptionValueException, AlertConditionCreateException, ActionCreateException,
-        FinderException, RemoveException, SessionNotFoundException, SessionTimeoutException {
+          SessionNotFoundException, SessionTimeoutException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
 
         // Verify that there are some conditions to evaluate
@@ -807,7 +804,7 @@ public class EventsBossImpl implements EventsBoss {
      * 
      */
     public void deleteAlertDefinitions(int sessionID, Integer[] ids) throws SessionNotFoundException,
-        SessionTimeoutException, RemoveException, PermissionException {
+        SessionTimeoutException,  PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         alertDefinitionManager.deleteAlertDefinitions(subject, ids);
     }
@@ -818,7 +815,7 @@ public class EventsBossImpl implements EventsBoss {
      * 
      */
     public void deleteAlerts(int sessionID, Integer[] ids) throws SessionNotFoundException, SessionTimeoutException,
-        RemoveException, PermissionException {
+         PermissionException {
         sessionManager.authenticate(sessionID);
         alertManager.deleteAlerts(ids);
     }
@@ -829,7 +826,7 @@ public class EventsBossImpl implements EventsBoss {
      * 
      */
     public int deleteAlerts(int sessionID, AppdefEntityID aeid) throws SessionNotFoundException,
-        SessionTimeoutException, RemoveException, PermissionException {
+        SessionTimeoutException,  PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         return alertManager.deleteAlerts(subject, aeid);
     }
@@ -840,7 +837,7 @@ public class EventsBossImpl implements EventsBoss {
      * 
      */
     public int deleteAlerts(int sessionID, long begin, long end) throws SessionNotFoundException,
-        SessionTimeoutException, RemoveException, PermissionException {
+        SessionTimeoutException,  PermissionException {
         sessionManager.authenticate(sessionID);
         // XXX - check security
         return alertManager.deleteAlerts(begin, end);
@@ -848,12 +845,12 @@ public class EventsBossImpl implements EventsBoss {
 
     /**
      * Delete all alerts for a list of alert definitions
-     * @throws FinderException if alert definition is not found
+     * 
      * 
      * 
      */
     public int deleteAlertsForDefinitions(int sessionID, Integer[] adids) throws SessionNotFoundException,
-        SessionTimeoutException, RemoveException, PermissionException, FinderException {
+        SessionTimeoutException,  PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
 
         // Delete alerts for definition and its children
@@ -878,7 +875,7 @@ public class EventsBossImpl implements EventsBoss {
      * 
      */
     public AlertDefinitionValue getAlertDefinition(int sessionID, Integer id) throws SessionNotFoundException,
-        SessionTimeoutException, FinderException, PermissionException {
+        SessionTimeoutException,  PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         return alertDefinitionManager.getById(subject, id);
     }
@@ -1155,7 +1152,7 @@ public class EventsBossImpl implements EventsBoss {
      * 
      */
     public Integer getEscalationIdByAlertDefId(int sessionID, Integer id, EscalationAlertType alertType)
-        throws SessionTimeoutException, SessionNotFoundException, PermissionException, FinderException {
+        throws SessionTimeoutException, SessionNotFoundException, PermissionException{
         sessionManager.authenticate(sessionID);
         Escalation esc = findEscalationByAlertDefId(id, alertType);
         return esc == null ? null : esc.getId();
@@ -1192,7 +1189,7 @@ public class EventsBossImpl implements EventsBoss {
      * 
      */
     public JSONObject jsonEscalationByAlertDefId(int sessionID, Integer id, EscalationAlertType alertType)
-        throws SessionException, PermissionException, JSONException, FinderException {
+        throws SessionException, PermissionException, JSONException {
         sessionManager.authenticate(sessionID);
         Escalation e = findEscalationByAlertDefId(id, alertType);
         return e == null ? null : new JSONObject().put(e.getJsonName(), e.toJSON());
@@ -1431,7 +1428,7 @@ public class EventsBossImpl implements EventsBoss {
      * 
      */
     public String getLastFix(int sessionID, Integer defId) throws SessionNotFoundException, SessionTimeoutException,
-        PermissionException, FinderException {
+        PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
 
         // Look for the last fixed alert

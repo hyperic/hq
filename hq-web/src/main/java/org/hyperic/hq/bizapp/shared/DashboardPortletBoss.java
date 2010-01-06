@@ -5,8 +5,6 @@ package org.hyperic.hq.bizapp.shared;
 
 import java.util.List;
 
-import javax.ejb.FinderException;
-
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -26,6 +24,6 @@ public interface DashboardPortletBoss {
     public JSONObject getAllGroups(AuthzSubject subj) throws PermissionException, JSONException;
 
     public JSONObject getAlertCounts(AuthzSubject subj, List<Integer> groupIds, PageInfo pageInfo)
-        throws PermissionException, JSONException, FinderException;
+        throws PermissionException, JSONException;
 
 }

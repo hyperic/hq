@@ -464,7 +464,7 @@
               scope="request"
               input="/admin/user/UserAdmin.do?mode=list">
               <exception key="exception.cant.remove"
-                         type="javax.ejb.RemoveException"
+                         type="org.hyperic.hq.common.ApplicationException"
                          path="/common/GenericError.jsp"/>             
               <forward name="success" path="/admin/user/UserAdmin.do?mode=list"/>
       </action>

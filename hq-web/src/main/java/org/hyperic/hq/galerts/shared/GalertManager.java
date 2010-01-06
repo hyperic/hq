@@ -6,8 +6,6 @@ package org.hyperic.hq.galerts.shared;
 import java.util.Collection;
 import java.util.List;
 
-import javax.ejb.FinderException;
-
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -117,8 +115,7 @@ public interface GalertManager {
     public List<GalertLog> findUnfixedAlertLogsByTimeWindow(ResourceGroup group, long begin, long end);
 
     public List<Escalatable> findEscalatables(AuthzSubject subj, int count, int priority, long timeRange, long endTime,
-                                              List<AppdefEntityID> includes)
-        throws PermissionException;
+                                              List<AppdefEntityID> includes) throws PermissionException;
 
     /**
      * Find group alerts based on a set of criteria
@@ -133,22 +130,19 @@ public interface GalertManager {
      * @return a list of {@link GalertLog}s
      */
     public List<GalertLog> findAlerts(AuthzSubject subj, int count, int priority, long timeRange, long endTime,
-                                      List<AppdefEntityID> includes)
-        throws PermissionException;
+                                      List<AppdefEntityID> includes) throws PermissionException;
 
     public List<GalertLog> findAlerts(AuthzSubject subj, AlertSeverity severity, long timeRange, long endTime,
-                                      boolean inEsc,
-                                      boolean notFixed, Integer groupId, PageInfo pInfo);
+                                      boolean inEsc, boolean notFixed, Integer groupId, PageInfo pInfo);
 
     public List<GalertLog> findAlerts(AuthzSubject subj, AlertSeverity severity, long timeRange, long endTime,
-                                      boolean inEsc,
-                                      boolean notFixed, Integer groupId, Integer galertDefId, PageInfo pInfo);
+                                      boolean inEsc, boolean notFixed, Integer groupId, Integer galertDefId,
+                                      PageInfo pInfo);
 
     /**
      * Get the number of alerts for the given array of AppdefEntityID's
      */
-    public int[] fillAlertCount(AuthzSubject subj, AppdefEntityID[] ids, int[] counts) throws PermissionException,
-        FinderException;
+    public int[] fillAlertCount(AuthzSubject subj, AppdefEntityID[] ids, int[] counts) throws PermissionException;
 
     public void deleteAlertLog(GalertLog log);
 

@@ -7,9 +7,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.CreateException;
-import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
 import javax.naming.NamingException;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -18,6 +15,8 @@ import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.authz.server.session.RoleCalendar;
 import org.hyperic.hq.authz.server.session.RoleCalendarType;
 import org.hyperic.hq.authz.values.OwnedRoleValue;
+import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
@@ -39,23 +38,21 @@ public interface RoleManager {
      * @param groupIds Ids of resource groups to add to the new role. Use null
      *        to add subjects later.
      * @return OwnedRoleValue for the role.
-     * @throws CreateException Unable to create the specified entity.
-     * @throws FinderException Unable to find a given or dependent entities.
      * @throws PermissionException whoami may not perform createResource on the
      *         covalentAuthzRole ResourceType.
      */
     public Integer createOwnedRole(AuthzSubject whoami, RoleValue role,
                                    org.hyperic.hq.authz.server.session.Operation[] operations,
                                    java.lang.Integer[] subjectIds, java.lang.Integer[] groupIds)
-        throws FinderException, AuthzDuplicateNameException, PermissionException;
+        throws AuthzDuplicateNameException, PermissionException;
 
     /**
      * Delete the specified role.
      * @param whoami The current running user.
      * @param role The role to delete.
-     * @throws RemoveException Unable to delete the specified entity.
+     * 
      */
-    public void removeRole(AuthzSubject whoami, Integer rolePk) throws javax.ejb.RemoveException, PermissionException;
+    public void removeRole(AuthzSubject whoami, Integer rolePk) throws PermissionException, ApplicationException;
 
     /**
      * Write the specified entity out to permanent storage.
@@ -82,7 +79,6 @@ public interface RoleManager {
      * @param whoami The current running user.
      * @param role The role.
      * @param operations The operations to associate with the role.
-     * @throws FinderException Unable to find a given or dependent entities.
      * @throws PermissionException whoami may not perform addOperation on this
      *         role.
      */
@@ -93,7 +89,6 @@ public interface RoleManager {
      * Disassociate all operations from this role.
      * @param whoami The current running user.
      * @param role The role.
-     * @throws FinderException Unable to find a given or dependent entities.
      * @throws PermissionException whoami may not perform removeOperation on
      *         this role.
      */
@@ -105,7 +100,7 @@ public interface RoleManager {
      * @param whoami The current running user.
      * @param id The ID of the role.
      * @param operations Operations to associate with this role.
-     * @throws FinderException Unable to find a given or dependent entities.
+     
      * @throws PermissionException whoami is not allowed to perform
      *         setOperations on this role.
      */
@@ -117,7 +112,7 @@ public interface RoleManager {
      * @param whoami The current running user.
      * @param role This role.
      * @param gids The ids of the groups to associate with this role.
-     * @throws FinderException Unable to find a given or dependent entities.
+     
      * @throws PermissionException whoami is not allowed to perform
      *         addResourceGroup on this role.
      */
@@ -131,17 +126,17 @@ public interface RoleManager {
      * @param ids The id of the group to associate with the roles.
      * @throws PermissionException whoami is not allowed to perform
      *         addResourceGroup on this role.
-     * @throws FinderException SQL error looking up roles scope
+     *
      */
     public void addResourceGroupRoles(AuthzSubject whoami, Integer gid, java.lang.Integer[] ids)
-        throws PermissionException, FinderException;
+        throws PermissionException;
 
     /**
      * Disassociate ResourceGroups from this role.
      * @param whoami The current running user.
      * @param id This role.
      * @param gids The ids of the groups to disassociate.
-     * @throws FinderException Unable to find a given or dependent entities.
+     * 
      * @throws PermissionException whoami is not allowed to perform modifyRole
      *         on this role.
      */
@@ -153,7 +148,7 @@ public interface RoleManager {
      * @param whoami The current running user.
      * @param role This role.
      * @param ids The ids of the groups to disassociate.
-     * @throws FinderException Unable to find a given or dependent entities.
+     *
      * @throws PermissionException whoami is not allowed to perform modifyRole
      *         on this role.
      */
@@ -164,7 +159,7 @@ public interface RoleManager {
      * Disassociate all ResourceGroups of this role from this role.
      * @param whoami The current running user.
      * @param role This role.
-     * @throws FinderException Unable to find a given or dependent entities.
+     * 
      * @throws NamingException
      * @throws PermissionException whoami is not allowed to perform modifyRole
      *         on this role.
@@ -205,7 +200,7 @@ public interface RoleManager {
      * Find the owned role that has the given ID.
      * @param id The ID of the role you're looking for.
      * @return The owned value-object of the role of the given ID.
-     * @throws FinderException Unable to find a given or dependent entities.
+     * 
      */
     public OwnedRoleValue findOwnedRoleById(AuthzSubject whoami, Integer id) throws PermissionException;
 
@@ -227,7 +222,7 @@ public interface RoleManager {
      * @param pc Paging information for the request
      * @return List a list of RoleValues
      */
-    public List<RoleValue> getAllRoles(AuthzSubject subject, PageControl pc) throws FinderException;
+    public List<RoleValue> getAllRoles(AuthzSubject subject, PageControl pc);
 
     /**
      * List all OwnedRoles in the system
@@ -240,22 +235,21 @@ public interface RoleManager {
     /**
      * List all Roles in the system, except system roles.
      * @return List a list of OwnedRoleValues that are not system roles
-     * @throws FinderException if sort attribute is unrecognized
+     * @throws NotFoundException if sort attribute is unrecognized
      */
     public PageList<OwnedRoleValue> getAllNonSystemOwnedRoles(AuthzSubject subject, java.lang.Integer[] excludeIds,
-                                                              PageControl pc) throws PermissionException,
-        FinderException;
+                                                              PageControl pc) throws PermissionException, NotFoundException;
 
     /**
      * Get the roles with the specified ids
      * @param subject
      * @param ids the role ids
      * @param pc Paging information for the request
-     * @throws FinderException
+     * 
      * @throws PermissionException
      */
     public PageList<RoleValue> getRolesById(AuthzSubject whoami, java.lang.Integer[] ids, PageControl pc)
-        throws PermissionException, FinderException;
+        throws PermissionException;
 
     /**
      * Associate roles with this subject.
@@ -277,7 +271,7 @@ public interface RoleManager {
      *         subject.
      */
     public void removeRoles(AuthzSubject whoami, AuthzSubject subject, java.lang.Integer[] roles)
-        throws PermissionException, FinderException;
+        throws PermissionException;
 
     /**
      * Get the roles for a subject
@@ -303,15 +297,15 @@ public interface RoleManager {
      * @param intendedSubjectValue is the subject of intended subject.
      * @param pc The PageControl object for paging results.
      * @return List a list of OwnedRoleValues that are not system roles
-     * @throws CreateException indicating ejb creation / container failure.
-     * @throws FinderException Unable to find a given or dependent entities.
+     * 
+     * 
      * @throws PermissionException caller is not allowed to perform listRoles on
      *         this role.
-     * @throws FinderException SQL error looking up roles scope
+     * 
      */
     public PageList<OwnedRoleValue> getNonSystemOwnedRoles(AuthzSubject callerSubjectValue,
                                                            AuthzSubject intendedSubjectValue, PageControl pc)
-        throws PermissionException, FinderException;
+        throws PermissionException;
 
     /**
      * Get the owned roles for a subject, except system roles.
@@ -319,16 +313,16 @@ public interface RoleManager {
      * @param intendedSubjectValue is the subject of intended subject.
      * @param pc The PageControl object for paging results.
      * @return List a list of OwnedRoleValues that are not system roles
-     * @throws CreateException indicating ejb creation / container failure.
-     * @throws FinderException Unable to find a given or dependent entities.
+     *
+     * 
      * @throws PermissionException caller is not allowed to perform listRoles on
      *         this role.
-     * @throws FinderException SQL error looking up roles scope
+     * 
      */
     public PageList<OwnedRoleValue> getNonSystemOwnedRoles(AuthzSubject callerSubjectValue,
                                                            AuthzSubject intendedSubjectValue,
                                                            java.lang.Integer[] excludeIds, PageControl pc)
-        throws PermissionException, FinderException;
+        throws PermissionException;
 
     /**
      * List the roles that this subject is not in and that are not one of the
@@ -338,14 +332,14 @@ public interface RoleManager {
      *        then only non-system roles are returned.
      * @param subjectId The id of the subject.
      * @return List of roles.
-     * @throws FinderException Unable to find a given or dependent entities.
+     * @throws NotFoundException Unable to find a given or dependent entities.
      * @throws PermissionException whoami is not allowed to perform listRoles on
      *         this role.
-     * @throws FinderException
+     * 
      */
     public PageList<RoleValue> getAvailableRoles(AuthzSubject whoami, boolean system, Integer subjectId,
                                                  java.lang.Integer[] roleIds, PageControl pc)
-        throws PermissionException, FinderException;
+        throws PermissionException, NotFoundException;
 
     /**
      * List the roles that this subject is not in and that are not one of the
@@ -355,21 +349,21 @@ public interface RoleManager {
      *        then only non-system roles are returned.
      * @param groupId The id of the subject.
      * @return List of roles.
-     * @throws FinderException Unable to find a given or dependent entities.
+     * @throws NotFoundException Unable to find a given or dependent entities.
      * @throws PermissionException whoami is not allowed to perform listRoles on
      *         this role.
-     * @throws FinderException if the sort attribute was not recognized
+     * @throws NotFoundException if the sort attribute was not recognized
      */
     public PageList<RoleValue> getAvailableGroupRoles(AuthzSubject whoami, Integer groupId,
                                                       java.lang.Integer[] roleIds, PageControl pc)
-        throws PermissionException, FinderException;
+        throws PermissionException, NotFoundException;
 
     /**
      * Get the resource groups applicable to a given role
      */
     public PageList<ResourceGroupValue> getResourceGroupsByRoleIdAndSystem(AuthzSubject subject, Integer roleId,
                                                                            boolean system, PageControl pc)
-        throws PermissionException, FinderException;
+        throws PermissionException, NotFoundException;
 
     /**
      * Return the roles of a group
@@ -385,11 +379,11 @@ public interface RoleManager {
      * @return List of groups in this role.
      * @throws PermissionException whoami is not allowed to perform listGroups
      *         on this role.
-     * @throws FinderException
+     * @throws NotFoundException
      */
     public PageList<ResourceGroupValue> getAvailableResourceGroups(AuthzSubject whoami, Integer roleId,
                                                                    java.lang.Integer[] groupIds, PageControl pc)
-        throws PermissionException, FinderException;
+        throws PermissionException, NotFoundException;
 
     /**
      * List the subjects in this role.
@@ -398,24 +392,24 @@ public interface RoleManager {
      * @return List of subjects in this role.
      * @throws PermissionException whoami is not allowed to perform listSubjects
      *         on this role.
-     * @throws FinderException if the sort attribute is not recognized
+     * @throws NotFoundException if the sort attribute is not recognized
      */
     public PageList<AuthzSubjectValue> getSubjects(AuthzSubject whoami, Integer roleId, PageControl pc)
-        throws PermissionException, FinderException;
+        throws PermissionException, NotFoundException;
 
     /**
      * List the subjects not in this role and not one of the specified subjects.
      * @param whoami The current running user.
      * @param roleId The id of the role.
      * @return List of subjects in this role.
-     * @throws FinderException Unable to find a given or dependent entities.
+     * @throws NotFoundException Unable to find a given or dependent entities.
      * @throws PermissionException whoami is not allowed to perform listSubjects
      *         on this role.
-     * @throws FinderException if the sort attribute is not recognized
+     * @throws NotFoundException if the sort attribute is not recognized
      */
     public PageList<AuthzSubjectValue> getAvailableSubjects(AuthzSubject whoami, Integer roleId,
                                                             java.lang.Integer[] subjectIds, PageControl pc)
-        throws PermissionException, FinderException;
+        throws PermissionException, NotFoundException;
 
     /**
      * Add subjects to this role.

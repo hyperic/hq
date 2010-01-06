@@ -6,10 +6,6 @@ package org.hyperic.hq.appdef.shared;
 import java.util.Collection;
 import java.util.List;
 
-import javax.ejb.CreateException;
-import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
-
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.ServerType;
@@ -18,6 +14,7 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
+import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -30,8 +27,7 @@ public interface ServerManager {
      * Clone a Server to a target Platform
      */
     public Server cloneServer(AuthzSubject subject, Platform targetPlatform, Server serverToClone)
-        throws ValidationException, PermissionException, RemoveException, VetoException, javax.ejb.CreateException,
-        javax.ejb.FinderException;
+        throws ValidationException, PermissionException,  VetoException, NotFoundException;
 
     /**
      * Move a Server to the given Platform
@@ -50,26 +46,26 @@ public interface ServerManager {
     /**
      * Create a Server on the given platform.
      * @return ServerValue - the saved value object
-     * @exception CreateException - if it fails to add the server
+     * 
      */
     public Server createServer(AuthzSubject subject, Integer platformId, Integer serverTypeId, ServerValue sValue)
-        throws javax.ejb.CreateException, ValidationException, PermissionException, PlatformNotFoundException,
-        org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
+        throws ValidationException, PermissionException, PlatformNotFoundException,
+        org.hyperic.hq.appdef.shared.AppdefDuplicateNameException, NotFoundException;
 
     /**
      * Create a virtual server
-     * @throws FinderException
-     * @throws CreateException
+     * @throws NotFoundException
+     *
      * @throws PermissionException
      */
     public Server createVirtualServer(AuthzSubject subject, Platform platform, ServerType st)
-        throws PermissionException, javax.ejb.CreateException, javax.ejb.FinderException;
+        throws PermissionException, NotFoundException;
 
     /**
      * A removeServer method that takes a ServerLocal. Used by
      * PlatformManager.removePlatform when cascading removal to servers.
      */
-    public void removeServer(AuthzSubject subject, Server server) throws RemoveException, PermissionException,
+    public void removeServer(AuthzSubject subject, Server server) throws  PermissionException,
         VetoException;
 
     public void handleResourceDelete(Resource resource);
@@ -78,8 +74,7 @@ public interface ServerManager {
      * Find all server types
      * @return list of serverTypeValues
      */
-    public PageList<ServerTypeValue> getAllServerTypes(AuthzSubject subject, PageControl pc)
-        throws javax.ejb.FinderException;
+    public PageList<ServerTypeValue> getAllServerTypes(AuthzSubject subject, PageControl pc);
 
     public Server getServerByName(Platform host, String name);
 
@@ -88,7 +83,7 @@ public interface ServerManager {
      * @return list of serverTypeValues
      */
     public PageList<ServerTypeValue> getViewableServerTypes(AuthzSubject subject, PageControl pc)
-        throws javax.ejb.FinderException, PermissionException;
+        throws  PermissionException, NotFoundException;
 
     /**
      * Find viewable server non-virtual types for a platform
@@ -136,7 +131,7 @@ public interface ServerManager {
      * @param name - the name of the server
      * @return ServerTypeValue
      */
-    public ServerType findServerTypeByName(String name) throws javax.ejb.FinderException;
+    public ServerType findServerTypeByName(String name) throws NotFoundException;
 
     public List<Server> findServersByType(Platform p, ServerType st);
 
@@ -174,8 +169,8 @@ public interface ServerManager {
      * @return A List of ServerValue objects representing all of the servers
      *         that the given subject is allowed to view.
      */
-    public PageList<ServerValue> getAllServers(AuthzSubject subject, PageControl pc) throws FinderException,
-        PermissionException;
+    public PageList<ServerValue> getAllServers(AuthzSubject subject, PageControl pc) throws 
+        PermissionException, NotFoundException;
 
     public Collection<Server> getViewableServers(AuthzSubject subject, Platform platform);
 
@@ -301,11 +296,11 @@ public interface ServerManager {
     /**
      * Update server types
      */
-    public void updateServerTypes(String plugin, org.hyperic.hq.product.ServerTypeInfo[] infos) throws CreateException,
-        FinderException, RemoveException, VetoException;
+    public void updateServerTypes(String plugin, org.hyperic.hq.product.ServerTypeInfo[] infos) throws 
+          VetoException, NotFoundException;
 
     public void deleteServerType(ServerType serverType, AuthzSubject overlord, ResourceGroupManager resGroupMan,
-                                 ResourceManager resMan) throws VetoException, RemoveException;
+                                 ResourceManager resMan) throws VetoException;
 
     public void setAutodiscoveryZombie(Server server, boolean zombie);
 

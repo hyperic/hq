@@ -34,7 +34,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.ejb.FinderException;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
@@ -134,32 +133,28 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
      */
     public Properties getConfig(String prefix) throws ConfigPropertyException {
 
-        try {
+        Collection<ConfigProperty> allProps = getProps(prefix);
+        Properties props = new Properties();
 
-            Collection<ConfigProperty> allProps = getProps(prefix);
-            Properties props = new Properties();
-
-            for (ConfigProperty configProp : allProps) {
-                String key = configProp.getKey();
-                // Check if the key has a value
-                if (configProp.getValue() != null && configProp.getValue().length() != 0) {
-                    props.setProperty(key, configProp.getValue());
+        for (ConfigProperty configProp : allProps) {
+            String key = configProp.getKey();
+            // Check if the key has a value
+            if (configProp.getValue() != null && configProp.getValue().length() != 0) {
+                props.setProperty(key, configProp.getValue());
+            } else {
+                // Use defaults
+                if (configProp.getDefaultValue() != null) {
+                    props.setProperty(key, configProp.getDefaultValue());
                 } else {
-                    // Use defaults
-                    if (configProp.getDefaultValue() != null) {
-                        props.setProperty(key, configProp.getDefaultValue());
-                    } else {
-                        // Otherwise return an empty key. We dont want to
-                        // prune any keys from the config.
-                        props.setProperty(key, "");
-                    }
+                    // Otherwise return an empty key. We dont want to
+                    // prune any keys from the config.
+                    props.setProperty(key, "");
                 }
             }
-
-            return props;
-        } catch (FinderException e) {
-            throw new ConfigPropertyException("Unable to find config property");
         }
+
+        return props;
+
     }
 
     private void createChangeAudit(AuthzSubject subject, String key, String oldVal, String newVal) {
@@ -262,48 +257,45 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
 
         Properties tempProps = new Properties();
         tempProps.putAll(newProps);
-        try {
 
-            // get all properties
-            Collection<ConfigProperty> allProps = getProps(prefix);
-            // iterate over ejbs
-            createChangeAudits(subject, allProps, newProps);
-            for (ConfigProperty ejb : allProps) {
+        // get all properties
+        Collection<ConfigProperty> allProps = getProps(prefix);
+        // iterate over ejbs
+        createChangeAudits(subject, allProps, newProps);
+        for (ConfigProperty ejb : allProps) {
 
-                // check if the props object has a key matching
-                String key = ejb.getKey();
-                if (newProps.containsKey(key)) {
-                    tempProps.remove(key);
-                    String propValue = (String) newProps.get(key);
-                    // delete null values from prefixed properties
-                    if (prefix != null && (propValue == null || propValue.equals("NULL"))) {
-                        configPropertyDAO.remove(ejb);
-                        cache.remove(key);
-                    } else {
-                        // non-prefixed properties never get deleted.
-                        ejb.setValue(propValue);
-                        cache.put(key, propValue);
-                    }
-                } else if (prefix == null) {
-                    // Bomb out if props are missing for non-prefixed properties
-                    throw new ConfigPropertyException("Updated configuration missing required key: " + key);
-                }
-            }
-
-            // create properties that are still left in tempProps
-            if (tempProps.size() > 0) {
-                Enumeration propsToAdd = tempProps.propertyNames();
-                while (propsToAdd.hasMoreElements()) {
-                    String key = (String) propsToAdd.nextElement();
-                    String propValue = tempProps.getProperty(key);
-                    // create the new property
-                    configPropertyDAO.create(prefix, key, propValue, propValue);
+            // check if the props object has a key matching
+            String key = ejb.getKey();
+            if (newProps.containsKey(key)) {
+                tempProps.remove(key);
+                String propValue = (String) newProps.get(key);
+                // delete null values from prefixed properties
+                if (prefix != null && (propValue == null || propValue.equals("NULL"))) {
+                    configPropertyDAO.remove(ejb);
+                    cache.remove(key);
+                } else {
+                    // non-prefixed properties never get deleted.
+                    ejb.setValue(propValue);
                     cache.put(key, propValue);
                 }
+            } else if (prefix == null) {
+                // Bomb out if props are missing for non-prefixed properties
+                throw new ConfigPropertyException("Updated configuration missing required key: " + key);
             }
-        } catch (FinderException e) {
-            throw new ApplicationException("Unable to find config property", e);
         }
+
+        // create properties that are still left in tempProps
+        if (tempProps.size() > 0) {
+            Enumeration propsToAdd = tempProps.propertyNames();
+            while (propsToAdd.hasMoreElements()) {
+                String key = (String) propsToAdd.nextElement();
+                String propValue = tempProps.getProperty(key);
+                // create the new property
+                configPropertyDAO.create(prefix, key, propValue, propValue);
+                cache.put(key, propValue);
+            }
+        }
+
     }
 
     /**
@@ -481,7 +473,7 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
         return configPropertyDAO.findAll();
     }
 
-    private Collection<ConfigProperty> getProps(String prefix) throws FinderException {
+    private Collection<ConfigProperty> getProps(String prefix) {
         if (prefix == null) {
             return configPropertyDAO.findAll();
         } else {

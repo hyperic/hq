@@ -38,10 +38,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.CreateException;
-import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Session;
@@ -114,7 +110,7 @@ public class TemplateManagerImpl implements TemplateManager {
     /**
      * Look up a measurement templates for an array of template IDs
      * 
-     * @throws FinderException if no measurement templates are found.
+     * @throws TemplateNotFoundException if no measurement templates are found.
      * @return a MeasurementTemplate value
      */
     public List<MeasurementTemplate> getTemplates(Integer[] ids, PageControl pc) throws TemplateNotFoundException {
@@ -411,17 +407,17 @@ public class TemplateManagerImpl implements TemplateManager {
 
         return t;
     }
-    
-    private int entityInfoTypeToAppdefType(int entityInfoType){
-        switch(entityInfoType){
-        case TypeInfo.TYPE_PLATFORM:
-            return AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
-        case TypeInfo.TYPE_SERVER:
-            return AppdefEntityConstants.APPDEF_TYPE_SERVER;
-        case TypeInfo.TYPE_SERVICE:
-            return AppdefEntityConstants.APPDEF_TYPE_SERVICE;
-        default:
-            throw new IllegalArgumentException("Unknown TypeInfo type");
+
+    private int entityInfoTypeToAppdefType(int entityInfoType) {
+        switch (entityInfoType) {
+            case TypeInfo.TYPE_PLATFORM:
+                return AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
+            case TypeInfo.TYPE_SERVER:
+                return AppdefEntityConstants.APPDEF_TYPE_SERVER;
+            case TypeInfo.TYPE_SERVICE:
+                return AppdefEntityConstants.APPDEF_TYPE_SERVICE;
+            default:
+                throw new IllegalArgumentException("Unknown TypeInfo type");
         }
     }
 
@@ -433,8 +429,7 @@ public class TemplateManagerImpl implements TemplateManager {
      *         created.
      */
     public Map<String, MeasurementInfo> updateTemplates(String pluginName, TypeInfo ownerEntity,
-                                                        MonitorableType monitorableType, MeasurementInfo[] tmpls)
-        throws CreateException, RemoveException {
+                                                        MonitorableType monitorableType, MeasurementInfo[] tmpls) {
         // Organize the templates first
         Map<String, MeasurementInfo> tmap = new HashMap<String, MeasurementInfo>();
         for (int i = 0; i < tmpls.length; i++) {
@@ -463,8 +458,7 @@ public class TemplateManagerImpl implements TemplateManager {
      * This does a batch style insert, and expects a map of maps indexed by the
      * monitorable type id.
      */
-    public void createTemplates(String pluginName, Map<MonitorableType, Map<?, MeasurementInfo>> toAdd)
-        throws CreateException {
+    public void createTemplates(String pluginName, Map<MonitorableType, Map<?, MeasurementInfo>> toAdd) {
         // Add the new templates
         PreparedStatement stmt;
 
@@ -527,7 +521,7 @@ public class TemplateManagerImpl implements TemplateManager {
         } catch (SQLException e) {
             this.log.error("Unable to add measurements for: " + pluginName, e);
         } finally {
-            //Util.endConnection();
+            // Util.endConnection();
         }
     }
 

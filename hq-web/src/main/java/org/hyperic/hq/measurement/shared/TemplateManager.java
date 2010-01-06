@@ -6,10 +6,6 @@ package org.hyperic.hq.measurement.shared;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.CreateException;
-import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
-
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -37,7 +33,7 @@ public interface TemplateManager {
 
     /**
      * Look up a measurement templates for an array of template IDs
-     * @throws FinderException if no measurement templates are found.
+     * @throws TemplateNotFoundException if no measurement templates are found.
      * @return a MeasurementTemplate value
      */
     public List<MeasurementTemplate> getTemplates(Integer[] ids, PageControl pc) throws TemplateNotFoundException;
@@ -109,15 +105,13 @@ public interface TemplateManager {
      *         created.
      */
     public Map<String, MeasurementInfo> updateTemplates(String pluginName, TypeInfo ownerEntity,
-                                                        MonitorableType monitorableType, MeasurementInfo[] tmpls)
-        throws CreateException, RemoveException;
+                                                        MonitorableType monitorableType, MeasurementInfo[] tmpls);
 
     /**
      * Add new measurement templates for a plugin. This does a batch style
      * insert, and expects a map of maps indexed by the monitorable type id.
      */
-    public void createTemplates(String pluginName, Map<MonitorableType, Map<?, MeasurementInfo>> toAdd)
-        throws CreateException;
+    public void createTemplates(String pluginName, Map<MonitorableType, Map<?, MeasurementInfo>> toAdd);
 
     public void setDesignated(MeasurementTemplate tmpl, boolean designated);
 

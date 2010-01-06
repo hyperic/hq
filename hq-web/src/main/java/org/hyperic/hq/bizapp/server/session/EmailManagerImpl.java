@@ -59,8 +59,8 @@ public class EmailManagerImpl implements EmailManager {
 
 
     @Autowired
-    public EmailManagerImpl(JavaMailSender mailSender, ServerConfigManager serverConfigManager) {
-        this.mailSender = mailSender;
+    public EmailManagerImpl( ServerConfigManager serverConfigManager) {
+        //this.mailSender = mailSender;
         this.serverConfigManager = serverConfigManager;
     }
 

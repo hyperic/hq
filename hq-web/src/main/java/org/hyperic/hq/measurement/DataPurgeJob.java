@@ -29,7 +29,6 @@ import java.beans.Introspector;
 import java.sql.SQLException;
 import java.util.Properties;
 
-import javax.ejb.CreateException;
 import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
@@ -43,8 +42,8 @@ import org.hyperic.hq.events.shared.EventLogManager;
 import org.hyperic.hq.measurement.server.session.DataCompressImpl;
 import org.hyperic.hq.measurement.server.session.MeasurementManagerImpl;
 import org.hyperic.hq.measurement.shared.DataCompress;
-import org.hyperic.util.TimeUtil;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
+import org.hyperic.util.TimeUtil;
 
 public class DataPurgeJob implements Runnable {
 
@@ -90,7 +89,7 @@ public class DataPurgeJob implements Runnable {
      * Entry point into compression routine
      */
     public static void compressData()
-        throws CreateException, NamingException
+        throws  NamingException
     {
         final ServerConfigManager serverConfig =
             ServerConfigManagerImpl.getOne();
@@ -222,7 +221,7 @@ public class DataPurgeJob implements Runnable {
     }
 
     protected void purge(Properties conf, long now)
-        throws CreateException, NamingException {
+        throws  NamingException {
         ConcurrentStatsCollector stats = ConcurrentStatsCollector.getInstance();
         long start = now();
         DataPurgeJob.purgeEventLogs(conf, now);
@@ -255,7 +254,7 @@ public class DataPurgeJob implements Runnable {
      * Purge Event Log data
      */
     private static void purgeEventLogs(Properties conf, long now)
-        throws CreateException, NamingException
+        throws NamingException
     {
         String purgeEventString = conf.getProperty(HQConstants.EventLogPurge);
         long purgeEventLog = Long.parseLong(purgeEventString);

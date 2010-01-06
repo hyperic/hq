@@ -27,9 +27,6 @@ package org.hyperic.hq.control.server.session;
 
 import java.util.Date;
 
-import javax.ejb.CreateException;
-import javax.naming.NamingException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConnectionException;

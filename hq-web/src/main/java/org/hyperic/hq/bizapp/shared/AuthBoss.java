@@ -3,7 +3,6 @@
  */
 package org.hyperic.hq.bizapp.shared;
 
-import javax.ejb.FinderException;
 import javax.security.auth.login.LoginException;
 
 import org.hyperic.hq.auth.shared.SessionException;
@@ -65,8 +64,8 @@ public interface AuthBoss {
      * @param username The user whose password should be updated
      * @param password The new password for the user
      */
-    public void changePassword(int sessionID, String username, String password) throws FinderException,
-        PermissionException, SessionException;
+    public void changePassword(int sessionID, String username, String password) throws PermissionException,
+        SessionException;
 
     /**
      * Check existence of a user

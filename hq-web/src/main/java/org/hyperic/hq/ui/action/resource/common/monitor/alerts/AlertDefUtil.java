@@ -29,8 +29,7 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.ejb.CreateException;
-import javax.ejb.FinderException;
+
 import javax.naming.NamingException;
 import javax.servlet.http.HttpServletRequest;
 
@@ -305,8 +304,8 @@ public class AlertDefUtil {
      * it.
      */
     public static AlertDefinitionValue getAlertDefinition(HttpServletRequest request, int sessionID, EventsBoss eb)
-        throws SessionNotFoundException, SessionTimeoutException, NamingException, CreateException, SystemException,
-        FinderException, RemoteException, PermissionException, ParameterNotFoundException {
+        throws SessionNotFoundException, SessionTimeoutException, NamingException,  SystemException,
+         RemoteException, PermissionException, ParameterNotFoundException {
         AlertDefinitionValue adv = (AlertDefinitionValue) request.getAttribute(Constants.ALERT_DEFINITION_ATTR);
         if (null == adv) {
             String adS = request.getParameter(Constants.ALERT_DEFINITION_PARAM);
@@ -381,4 +380,3 @@ public class AlertDefUtil {
     }
 }
 
-// EOF

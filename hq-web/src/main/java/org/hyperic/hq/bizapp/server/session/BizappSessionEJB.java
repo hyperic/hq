@@ -25,10 +25,6 @@
 
 package org.hyperic.hq.bizapp.server.session;
 
-import java.rmi.RemoteException;
-
-import javax.ejb.SessionContext;
-
 import org.hyperic.hq.appdef.server.session.AIQueueManagerImpl;
 import org.hyperic.hq.appdef.server.session.AgentManagerImpl;
 import org.hyperic.hq.appdef.server.session.AppdefStatManagerImpl;
@@ -92,7 +88,7 @@ import org.hyperic.hq.product.shared.ProductManager;
 
 public abstract class BizappSessionEJB {
 
-    protected SessionContext ctx;
+   
     
     public EventsBoss getEventsBoss() {
        return EventsBossImpl.getOne();
@@ -240,23 +236,7 @@ public abstract class BizappSessionEJB {
         return getAuthzSubjectManager().getOverlordPojo();
     }
 
-    public void setSessionContext(SessionContext aCtx) throws RemoteException {
-        ctx = aCtx;
-    }
-
-    protected SessionContext getSessionContext() {
-        return ctx;
-    }
-
-    /**
-     * Generic method to force rollback of current transaction.
-     * will not call rollback if the tx is already marked for rollback
-     */
-    protected void rollback() {
-        if(!getSessionContext().getRollbackOnly()) {
-            getSessionContext().setRollbackOnly();
-        }
-    }
+  
 
     protected AIQueueManager getAIManager() {
         return AIQueueManagerImpl.getOne();
