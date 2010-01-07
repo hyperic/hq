@@ -4,14 +4,12 @@ import java.util.Collection;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 
-public class Bootstrap implements ApplicationContextAware {
-    private static ApplicationContext appContext;
+
+public class Bootstrap  {
+    static ApplicationContext appContext;
     
-    public void setApplicationContext(ApplicationContext appContext) throws BeansException {
-        Bootstrap.appContext = appContext;
-    }
+   
     
     public static <T> T getBean(Class<T> beanClass)  {
         try {
