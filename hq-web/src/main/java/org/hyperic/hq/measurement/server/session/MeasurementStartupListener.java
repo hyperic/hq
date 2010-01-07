@@ -47,7 +47,6 @@ import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.galerts.MetricAuxLogProvider;
-import org.hyperic.hq.measurement.server.mbean.ScheduleVerificationService;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.MetricAuxLogManager;
 import org.hyperic.hq.measurement.shared.SRNManager;

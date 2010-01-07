@@ -115,6 +115,14 @@
 		<bean class="org.hyperic.hq.bizapp.server.trigger.conditional.ValueChangeTrigger"/>
 	</util:list>
 	
-	<task:annotation-driven/>
+	<task:scheduler id="scheduler" />
+	
+	<task:scheduled-tasks scheduler="scheduler">
+    	<task:scheduled ref="availabilityCheckService" method="backfill" fixed-rate="120000"/>
+    	<task:scheduled ref="agentAIScanService" method="notifyAgents" fixed-rate="300000"/>
+    	<!--  This is meant to be disabled by default -->
+    	<!--  <task:scheduled ref="scheduleVerificationService" method="verifySchedules" fixed-rate="300000"/> -->
+	</task:scheduled-tasks>
+	
 	
 </beans>
