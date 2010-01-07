@@ -40,6 +40,9 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.common.SessionMBeanBase;
+import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.hibernate.SessionManager;
+import org.hyperic.hq.hibernate.SessionManager.SessionRunner;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.server.session.AvailabilityCache;
@@ -52,6 +55,7 @@ import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.TimeUtil;
 import org.jboss.varia.scheduler.Scheduler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 /**
@@ -88,25 +92,41 @@ public class AvailabilityCheckService
     
    
     public void startSchedule() throws Exception {
-       Scheduler scheduler = new Scheduler();
-       scheduler.setSchedulableMBeanMethod("hit( DATE )");
-       scheduler.setSchedulableMBean("hyperic.jmx:type=Service,name=AvailabilityCheck");
-       scheduler.setInitialStartDate("NOW");
-       scheduler.setSchedulePeriod(120000);
-       scheduler.setInitialRepetitions(-1);
-       scheduler.setStartAtStartup(false);
-       ObjectName schedulerName = new ObjectName("hyperic.jmx:service=Scheduler,name=AvailabilityCheck");
-       mbeanServer.registerMBean(scheduler,schedulerName);
-       mbeanServer.invoke(schedulerName, "start", new Object[] {}, new String[] {});
-       mbeanServer.invoke(schedulerName, "startSchedule", new Object[] {}, new String[] {});
+//       Scheduler scheduler = new Scheduler();
+//       scheduler.setSchedulableMBeanMethod("hit( DATE )");
+//       scheduler.setSchedulableMBean("hyperic.jmx:type=Service,name=AvailabilityCheck");
+//       scheduler.setInitialStartDate("NOW");
+//       scheduler.setSchedulePeriod(120000);
+//       scheduler.setInitialRepetitions(-1);
+//       scheduler.setStartAtStartup(false);
+//       ObjectName schedulerName = new ObjectName("hyperic.jmx:service=Scheduler,name=AvailabilityCheck");
+//       mbeanServer.registerMBean(scheduler,schedulerName);
+//       mbeanServer.invoke(schedulerName, "start", new Object[] {}, new String[] {});
+//       mbeanServer.invoke(schedulerName, "startSchedule", new Object[] {}, new String[] {});
     }
 
     /**
      * 
      * 
      */
+   @Scheduled(fixedRate=120000)
+   public void hitIt() {
+       try {
+           SessionManager.runInSession(new SessionRunner() {
+               public String getName() {
+                   return "SessionMBeanBase";
+               }
+
+               public void run() throws Exception {
+                   hitInSession(new Date(System.currentTimeMillis()));
+               }
+           });
+       } catch(Exception e) {
+           throw new SystemException(e);
+       }
+   }
    
-    public void hitWithDate(Date lDate) {
+   public void hitWithDate(Date lDate) {
         super.hit(lDate);
     }
 
