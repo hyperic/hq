@@ -23,18 +23,14 @@
  * USA.
  */
 
-package org.hyperic.hq.measurement.server.mbean;
+package org.hyperic.hq.measurement.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -43,17 +39,15 @@ import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.common.SessionMBeanBase;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.measurement.MeasurementScheduleException;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
 import org.hyperic.hq.measurement.shared.MeasurementProcessor;
 import org.hyperic.hq.measurement.shared.SRNManager;
-import org.jboss.varia.scheduler.Scheduler;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jmx.export.annotation.ManagedOperation;
-import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * This job is responsible for verifying measurement jobs.
@@ -70,14 +64,12 @@ import org.springframework.stereotype.Service;
  * 
  * 
  */
-@ManagedResource("hyperic.jmx:type=Service,name=MeasurementSchedule")
-@Service
-public class ScheduleVerificationService
-    extends SessionMBeanBase
-    implements ScheduleVerificationServiceMBean
+
+@Service("scheduleVerificationService")
+public class ScheduleVerificationServiceImpl implements ScheduleVerificationService
 {
     private Log log =
-        LogFactory.getLog(ScheduleVerificationService.class.getName());
+        LogFactory.getLog(ScheduleVerificationServiceImpl.class.getName());
 
     private boolean firstTime = true;
 
@@ -88,26 +80,16 @@ public class ScheduleVerificationService
     
     
     @Autowired
-    public ScheduleVerificationService(MeasurementProcessor measurementProcessor, SRNManager srnManager,
+    public ScheduleVerificationServiceImpl(MeasurementProcessor measurementProcessor, SRNManager srnManager,
                                        AgentManager agentManager) {
         this.measurementProcessor = measurementProcessor;
         this.srnManager = srnManager;
         this.agentManager = agentManager;
     }
     
-    
-   
-
-    /**
-     * 
-     */
-    @ManagedOperation
-    public void hit(final Date lDate) {
-        super.hit(lDate);
-    }
-    
-    protected void hitInSession(final Date lDate) {
-      
+    @Transactional
+    public void verifySchedules() {
+      try {
         
         // Skip first schedule verification, let the server warm up a bit
         // XXX: We should add a wait attribute for this, similar to the
@@ -183,33 +165,9 @@ public class ScheduleVerificationService
                            "Could not connect to agent " + agentId);
             }
         }
+      } catch (Exception e) {
+          throw new SystemException(e);
+      }
     }
 
-    /**
-     * 
-     */
-    @ManagedOperation
-    public void init() {}
-
-    /**
-     * 
-     */
-    @ManagedOperation
-    public void start() {
-        log.info("Starting " + getClass().getName());
-    }
-
-    /**
-     * 
-     */
-    @ManagedOperation
-    public void stop() {
-        log.info("Stopping " + getClass().getName());
-    }
-
-    /**
-     * 
-     */
-    @ManagedOperation
-    public void destroy() {}
 }

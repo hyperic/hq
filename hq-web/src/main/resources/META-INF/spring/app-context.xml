@@ -6,9 +6,11 @@
 	xmlns:tx="http://www.springframework.org/schema/tx"
 	xmlns:jee="http://www.springframework.org/schema/jee"
 	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:task="http://www.springframework.org/schema/task"
 	xsi:schemaLocation="http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-2.0.xsd
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd
 		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
@@ -110,6 +112,15 @@
 		<bean class="org.hyperic.hq.bizapp.server.trigger.conditional.MeasurementThresholdTrigger"/>
 		<bean class="org.hyperic.hq.bizapp.server.trigger.conditional.ValueChangeTrigger"/>
 	</util:list>
-
-
+	
+	<task:scheduler id="scheduler" />
+	
+	<task:scheduled-tasks scheduler="scheduler">
+    	<task:scheduled ref="availabilityCheckService" method="backfill" fixed-rate="120000"/>
+    	<task:scheduled ref="agentAIScanService" method="notifyAgents" fixed-rate="300000"/>
+    	<!--  This is meant to be disabled by default -->
+    	<!--  <task:scheduled ref="scheduleVerificationService" method="verifySchedules" fixed-rate="300000"/> -->
+	</task:scheduled-tasks>
+	
+	
 </beans>

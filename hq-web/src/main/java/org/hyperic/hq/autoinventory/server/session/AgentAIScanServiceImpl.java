@@ -22,33 +22,36 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-package org.hyperic.hq.common;
 
-import java.util.Date;
+package org.hyperic.hq.autoinventory.server.session;
 
-import org.hyperic.hq.hibernate.SessionManager;
-import org.hyperic.hq.hibernate.SessionManager.SessionRunner;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.autoinventory.shared.AutoinventoryManager;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
- * Since mbeans don't seem to be easily interceptable in JBoss, we can give 
- * them sessions by having them subclass this.
+ * This job is responsible for notifying agents needing an auto inventory scan.
+ * 
+ * 
  */
-public abstract class SessionMBeanBase { 
-    public void hit(final Date d) {
-        try {
-            SessionManager.runInSession(new SessionRunner() {
-                public String getName() {
-                    return "SessionMBeanBase";
-                }
 
-                public void run() throws Exception {
-                    hitInSession(d);
-                }
-            });
-        } catch(Exception e) {
-            throw new SystemException(e);
-        }
+@Service("agentAIScanService")
+public class AgentAIScanServiceImpl implements AgentAIScanService {
+    private Log log = LogFactory.getLog(AgentAIScanServiceImpl.class);
+
+    private AutoinventoryManager autoinventoryManager;
+
+    @Autowired
+    public AgentAIScanServiceImpl(AutoinventoryManager autoinventoryManager) {
+        this.autoinventoryManager = autoinventoryManager;
     }
-    
-    protected abstract void hitInSession(Date d);
+
+    public void notifyAgents() {
+        log.debug("Agent AI Scan Service started executing");
+        autoinventoryManager.notifyAgentsNeedingRuntimeScan();
+        log.debug("Agent AI Scan Service finished executing");
+    }
+
 }
