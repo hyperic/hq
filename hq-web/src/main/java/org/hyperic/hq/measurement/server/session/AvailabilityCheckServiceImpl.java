@@ -37,8 +37,6 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.hibernate.SessionManager;
-import org.hyperic.hq.hibernate.SessionManager.SessionRunner;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
@@ -46,6 +44,7 @@ import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.TimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * This job is responsible for filling in missing availabilty metric values.
@@ -58,35 +57,17 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
     private static final double AVAIL_DOWN = MeasurementConstants.AVAIL_DOWN,
         AVAIL_PAUSED = MeasurementConstants.AVAIL_PAUSED, AVAIL_NULL = MeasurementConstants.AVAIL_NULL;
 
-   
     private long startTime = 0;
     private long wait = 5 * MeasurementConstants.MINUTE;
     private final Object IS_RUNNING_LOCK = new Object();
     private boolean isRunning = false;
     private AvailabilityManager availabilityManager;
     private PermissionManager permissionManager;
-   
 
     @Autowired
     public AvailabilityCheckServiceImpl(AvailabilityManager availabilityManager, PermissionManager permissionManager) {
         this.availabilityManager = availabilityManager;
         this.permissionManager = permissionManager;
-    }
-
-    public void backfill() {
-        try {
-            SessionManager.runInSession(new SessionRunner() {
-                public String getName() {
-                    return "SessionMBeanBase";
-                }
-
-                public void run() throws Exception {
-                    backfillInSession();
-                }
-            });
-        } catch (Exception e) {
-            throw new SystemException(e);
-        }
     }
 
     // End is at least more than 1 interval away
@@ -172,47 +153,52 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
         return rtn;
     }
 
-    private void backfillInSession() {
-        Date lDate = new Date(System.currentTimeMillis());
-        final boolean debug = log.isDebugEnabled();
-        if (debug) {
-            log.debug("Availability Check Service started executing: " + lDate);
-        }
-        long current = lDate.getTime();
-        // Don't start backfilling immediately
-        if (!canStart(current)) {
-            log.debug("not starting availability check");
-            return;
-        }
-        AvailabilityCache cache = AvailabilityCache.getInstance();
-        synchronized (IS_RUNNING_LOCK) {
-            if (isRunning) {
-                log.warn("Availability Check Service is already running, " + "bailing out");
-                return;
-            } else {
-                isRunning = true;
-            }
-        }
+    @Transactional
+    public void backfill() {
         try {
-            // PLEASE NOTE: This synchronized block directly affects the
-            // throughput of the availability metrics, while this lock is
-            // active no availability metric will be inserted. This is to
-            // ensure the backfilled points will not be inserted after the
-            // associated AVAIL_UP value from the agent.
-            // The code must be extremely efficient or else it will have
-            // a big impact on the performance of availability insertion.
-            Map<Integer, DataPoint> backfillPoints = null;
-            synchronized (cache) {
-                Map<Integer, ResourceDataPoint> downPlatforms = getDownPlatforms(lDate);
-                backfillPoints = getBackfillPts(downPlatforms, current);
-                backfillAvails(new ArrayList<DataPoint>(backfillPoints.values()));
+            Date lDate = new Date(System.currentTimeMillis());
+            final boolean debug = log.isDebugEnabled();
+            if (debug) {
+                log.debug("Availability Check Service started executing: " + lDate);
             }
-            // send data to event handlers outside of synchronized block
-            availabilityManager.sendDataToEventHandlers(backfillPoints);
-        } finally {
+            long current = lDate.getTime();
+            // Don't start backfilling immediately
+            if (!canStart(current)) {
+                log.debug("not starting availability check");
+                return;
+            }
+            AvailabilityCache cache = AvailabilityCache.getInstance();
             synchronized (IS_RUNNING_LOCK) {
-                isRunning = false;
+                if (isRunning) {
+                    log.warn("Availability Check Service is already running, " + "bailing out");
+                    return;
+                } else {
+                    isRunning = true;
+                }
             }
+            try {
+                // PLEASE NOTE: This synchronized block directly affects the
+                // throughput of the availability metrics, while this lock is
+                // active no availability metric will be inserted. This is to
+                // ensure the backfilled points will not be inserted after the
+                // associated AVAIL_UP value from the agent.
+                // The code must be extremely efficient or else it will have
+                // a big impact on the performance of availability insertion.
+                Map<Integer, DataPoint> backfillPoints = null;
+                synchronized (cache) {
+                    Map<Integer, ResourceDataPoint> downPlatforms = getDownPlatforms(lDate);
+                    backfillPoints = getBackfillPts(downPlatforms, current);
+                    backfillAvails(new ArrayList<DataPoint>(backfillPoints.values()));
+                }
+                // send data to event handlers outside of synchronized block
+                availabilityManager.sendDataToEventHandlers(backfillPoints);
+            } finally {
+                synchronized (IS_RUNNING_LOCK) {
+                    isRunning = false;
+                }
+            }
+        } catch (Exception e) {
+            throw new SystemException(e);
         }
     }
 
@@ -296,5 +282,5 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
             return false;
         }
         return true;
-    }  
+    }
 }

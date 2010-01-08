@@ -40,8 +40,6 @@ import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.hibernate.SessionManager;
-import org.hyperic.hq.hibernate.SessionManager.SessionRunner;
 import org.hyperic.hq.measurement.MeasurementScheduleException;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
@@ -49,6 +47,7 @@ import org.hyperic.hq.measurement.shared.MeasurementProcessor;
 import org.hyperic.hq.measurement.shared.SRNManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * This job is responsible for verifying measurement jobs.
@@ -88,25 +87,9 @@ public class ScheduleVerificationServiceImpl implements ScheduleVerificationServ
         this.agentManager = agentManager;
     }
     
-    
+    @Transactional
     public void verifySchedules() {
-        try {
-            SessionManager.runInSession(new SessionRunner() {
-                public String getName() {
-                    return "SessionMBeanBase";
-                }
-
-                public void run() throws Exception {
-                    verifySchedulesInSession();
-                }
-            });
-        } catch (Exception e) {
-            throw new SystemException(e);
-        }
-    }
-    
-    private void verifySchedulesInSession() {
-      
+      try {
         
         // Skip first schedule verification, let the server warm up a bit
         // XXX: We should add a wait attribute for this, similar to the
@@ -182,6 +165,9 @@ public class ScheduleVerificationServiceImpl implements ScheduleVerificationServ
                            "Could not connect to agent " + agentId);
             }
         }
+      } catch (Exception e) {
+          throw new SystemException(e);
+      }
     }
 
 }
