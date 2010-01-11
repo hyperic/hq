@@ -36,7 +36,6 @@ import org.apache.tapestry.annotations.InjectObject;
 import org.apache.tapestry.annotations.InjectScript;
 import org.apache.tapestry.annotations.Parameter;
 import org.apache.tapestry.engine.IEngineService;
-import org.hyperic.hq.ui.PageListing;
 import org.hyperic.hq.ui.util.URLUtils;
 import org.hyperic.ui.tapestry.components.BaseComponent;
 
@@ -74,8 +73,9 @@ public abstract class NavigationTabs extends BaseComponent {
     protected void renderComponent(IMarkupWriter writer, IRequestCycle cycle) {
         // render as if an Any component
         NavigationMenu m = this.getNavigationMenu();
-        if(cycle.getPage().getPageName() != PageListing.SIGN_IN)
-            super.renderComponent(writer, cycle);
+
+        super.renderComponent(writer, cycle);
+        
         // then add the script
         if (!cycle.isRewinding()) {
             PageRenderSupport pageRenderSupport = TapestryUtils

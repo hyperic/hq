@@ -348,7 +348,6 @@
 <!-- =================================== Global Forward Definitions -->
 
     <global-forwards>
-      <forward name="invalid.session" path="/SignIn.html" redirect="true"/>
       <forward name="rss.feed" path="/common/RSSFormat.jsp"/>
       <forward name="ajax" path="/common/AJAXResponse.jsp"/>
     </global-forwards>
@@ -359,22 +358,6 @@
       
 	  <action path="/NoRights" 
               forward="/common/NoRights.jsp">
-      </action>
-                          
-      <!--authentication -->
-      <action path="/j_security_check"                             
-              type="org.hyperic.hq.ui.action.authentication.AuthenticateUserAction"
-              name="LoginForm"
-              scope="request"
-              validate="true"
-              input="/Login.do">
-              <!-- do not redirect here or login error messages will not show up -->
-              <forward name="bad" path="/Login.do"/>
-      </action>    
-
-      <action path="/Logout" 
-              type="org.hyperic.hq.ui.action.authentication.LogoutAction">              
-              <forward name="success" path="/SignIn.html"/>
       </action>
       
       <action path="/Header"

@@ -58,9 +58,8 @@
 
     <contribution configuration-id="tapestry.InfrastructureOverrides">
         <!-- <property name="exceptionPageName" value="Error" /> -->
-        <property name="staleSessionPageName" value="SignIn" />
+       	<property name="staleSessionPageName" value="SignIn" />
         <property name="staleLinkPageName" value="SignIn" />
-
     </contribution>
         
 </module>
