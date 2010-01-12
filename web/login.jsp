@@ -48,17 +48,29 @@
 							</div>
 						</p>
 					</c:if>
-					<p>
-						<label for="j_username"><fmt:message key="login.field.username" /></label>
-						<input type="text" id="j_username" name="j_username" value="" />
-					</p>
-					<p>
-						<label for="j_password"><fmt:message key="login.field.password" /></label>
-						<input type="password" id="j_password" name="j_password" />
-					</p>
-					<p>
-						<input name="submit" type="submit" class="button42" value="<fmt:message key="login.signin" />" />
-					</p>
+					<table>
+						<tr>
+							<td>
+								<label for="j_username"><fmt:message key="login.field.username" /></label>	
+							</td>
+							<td>
+								<input type="text" id="j_username" name="j_username" value="" />	
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<label for="j_password"><fmt:message key="login.field.password" /></label>	
+							</td>
+							<td>
+								<input type="password" id="j_password" name="j_password" />	
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2" align="right">
+								<input name="submit" type="submit" class="button42" value="<fmt:message key="login.signin" />" />
+							</td>
+						</tr>
+					</table>
 				</fieldset>
     		</form>
     	</div>
