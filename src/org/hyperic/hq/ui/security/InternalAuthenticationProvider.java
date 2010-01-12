@@ -18,16 +18,30 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.GrantedAuthorityImpl;
-import org.springframework.stereotype.Component;
 
 /*
- * This class is responsible for authenticating a user using HQ's internal user store.
+ * This class is responsible for authenticating a user using HQ's internal user store. It can also be configured to enable guest user access as well as override the guest username.
  * 
  */
-@Component
 public class InternalAuthenticationProvider implements AuthenticationProvider {
     private static Log log = LogFactory.getLog(InternalAuthenticationProvider.class.getName());
     
+    private String guestUserName = "guest";
+    private boolean guestEnabled = false;
+
+    // TODO get this from the db instead
+    public String getGuestUserName() {
+        return guestUserName;
+    }
+
+    public boolean isGuestEnabled() {
+        return guestEnabled;
+    }
+
+    public void setGuestEnabled(boolean guestEnabled) {
+        this.guestEnabled = guestEnabled;
+    }
+
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         // TODO: Once this is evolution, remove the getOne in favor of DI
         AuthBossLocal authBoss = AuthBossEJBImpl.getOne();
@@ -38,8 +52,16 @@ public class InternalAuthenticationProvider implements AuthenticationProvider {
            
         // ...then we attempt to authenticate using authBoss...
         try {
-            int sid = authBoss.login(username, password);
-
+            // ...check to see if we the user is trying to log in as guest user...
+            int sid;
+            
+            if (this.isGuestEnabled() && this.getGuestUserName().equalsIgnoreCase(username)) {
+                sid = authBoss.loginGuest();
+            } else {
+                // ...this is a non guest user, authenticate...
+                sid = authBoss.login(username, password);
+            }
+            
             if (log.isTraceEnabled()) {
                 log.trace("Logged in as [" + username + "] with session id [" + sid + "]");
             }
