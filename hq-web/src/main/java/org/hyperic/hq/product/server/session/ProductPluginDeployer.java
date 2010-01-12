@@ -43,6 +43,7 @@ import java.util.jar.JarFile;
 
 import javax.annotation.PostConstruct;
 import javax.naming.NamingException;
+import javax.servlet.ServletContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -62,15 +63,13 @@ import org.hyperic.hq.product.shared.ProductManager;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.util.file.FileUtil;
 import org.hyperic.util.jdbc.DBUtil;
-
-import org.jboss.system.server.ServerConfig;
-import org.jboss.system.server.ServerConfigLocator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedMetric;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.ServletContextAware;
 
 /**
  * ProductPlugin deployer. We accept $PLUGIN_DIR/*.{jar,xml}
@@ -79,7 +78,7 @@ import org.springframework.stereotype.Service;
  */
 @ManagedResource("hyperic.jmx:type=Service,name=ProductPluginDeployer")
 @Service
-public class ProductPluginDeployer implements Comparator<String> {
+public class ProductPluginDeployer implements Comparator<String>, ServletContextAware {
 
     private final Log log = LogFactory.getLog(ProductPluginDeployer.class);
 
@@ -102,6 +101,8 @@ public class ProductPluginDeployer implements Comparator<String> {
     private String _pluginDir;
     private String _hquDir;
 
+    private ServletContext servletContext;
+
     @Autowired
     public ProductPluginDeployer(HQApp hqApp, DBUtil dbUtil, RenditServer renditServer,
                                  ProductManager productManager,
@@ -111,28 +112,9 @@ public class ProductPluginDeployer implements Comparator<String> {
         this.renditServer = renditServer;
         this.productManager = productManager;
         this.notReadyManager = notReadyManager;
-        // XXX un-hardcode these paths.
-        String war = System.getProperty("jboss.server.home.dir") + "/deploy/hq.war";
-
-        // native libraries are deployed into another directory
-        // which is not next to sigar.jar, so we drop this hint
-        // to find it.
-        System.setProperty("org.hyperic.sigar.path", war + "/sigar_bin/lib");
-
-        _hquDir = war + "/" + HQU;
-        
-        _pluginDir = war + "/" + PLUGIN_DIR;
-
         // Initialize database
         initDatabase();
 
-        File propFile = ProductPluginManager.PLUGIN_PROPERTIES_FILE;
-        _ppm = new ProductPluginManager(propFile);
-        _ppm.setRegisterTypes(true);
-
-        if (propFile.canRead()) {
-            _log.info("Loaded custom properties from: " + propFile);
-        }
     }
 
     private void initDatabase() {
@@ -226,7 +208,6 @@ public class ProductPluginDeployer implements Comparator<String> {
      * 
      */
     private void serverStarted() {
-        loadConfig();
         try {
             loadPlugins();
         } catch (Exception e) {
@@ -429,14 +410,6 @@ public class ProductPluginDeployer implements Comparator<String> {
         return isReady.booleanValue();
     }
 
-    private void loadConfig() {
-        ServerConfig sc = ServerConfigLocator.locate();
-        hqApp.setRestartStorageDir(sc.getHomeDir());
-        File deployDir = new File(sc.getServerHomeDir(), "deploy");
-        File warDir = new File(deployDir, "hq.war");
-        hqApp.setWebAccessibleDir(warDir);
-    }
-
     private String registerPluginJar(String pluginJar) {
         if (!_ppm.isLoadablePluginName(pluginJar)) {
             return null;
@@ -467,7 +440,23 @@ public class ProductPluginDeployer implements Comparator<String> {
      */
     @PostConstruct
     public void start() throws Exception {
-        _ppm.init();
+        String war = servletContext.getRealPath("/");
+        // native libraries are deployed into another directory
+        // which is not next to sigar.jar, so we drop this hint
+        // to find it.
+        System.setProperty("org.hyperic.sigar.path", war + "/sigar_bin/lib");
+
+        _hquDir = war + "/" + HQU;
+        
+        _pluginDir = war + "/" + PLUGIN_DIR;
+        
+        File propFile = ProductPluginManager.PLUGIN_PROPERTIES_FILE;
+        _ppm = new ProductPluginManager(propFile);
+        _ppm.setRegisterTypes(true);
+
+        if (propFile.canRead()) {
+            _log.info("Loaded custom properties from: " + propFile);
+        }
 
         try {
             // hq.war contains sigar_bin/lib with the
@@ -479,6 +468,14 @@ public class ProductPluginDeployer implements Comparator<String> {
         } catch (Exception e) {
             _log.error(e);
         }
+
+        _ppm.init();
+
+        File warDir = new File(war);
+        hqApp.setWebAccessibleDir(warDir);
+
+        String restartStorageDir = new File(warDir.getParent()).getParent();
+        hqApp.setRestartStorageDir(new File(restartStorageDir));
 
         // turn off ready filter asap at shutdown
         // this.stop() won't run until all files are undeploy()ed
@@ -562,5 +559,9 @@ public class ProductPluginDeployer implements Comparator<String> {
                 deployHqu(plugin, pluginFile.toURI().toURL());
             }
         }
+    }
+
+    public void setServletContext(ServletContext servletContext) {
+        this.servletContext = servletContext;
     }
 }
