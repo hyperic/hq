@@ -42,17 +42,12 @@ public class HQConstants {
 
     public static final String SchemaVersion = "CAM_SCHEMA_VERSION";
 
-    public static final String JAASProvider = "CAM_JAAS_PROVIDER";
+
 
     /** Application realm. Used to authenticate users **/
     public static final String ApplicationName = "CAM";
 
-    /** Valid JAAS Providers **/
-    public static final String JDBCJAASProvider = "JDBC";
-
-    /** JAAS Provider class names **/
-    public static final String JDBCJAASProviderClass =
-        "org.hyperic.hq.auth.server.JDBCLoginModule";
+   
 
     /** Base URL for the application **/
     public static final String BaseURL = "CAM_BASE_URL";

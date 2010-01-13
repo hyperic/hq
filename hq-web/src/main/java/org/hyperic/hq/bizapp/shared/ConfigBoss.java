@@ -37,11 +37,6 @@ public interface ConfigBoss {
         ConfigPropertyException;
 
     /**
-     * Restart the config Service
-     */
-    public void restartConfig();
-
-    /**
      * Perform routine database maintenance. Must have admin permissions.
      * @return The time it took to vaccum, in milliseconds, or -1 if the
      *         database is not PostgreSQL.

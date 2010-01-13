@@ -23,18 +23,16 @@ public class BossStartupListener implements StartupListener {
 
     private EventsBoss eventsBoss;
     private EventLogBoss eventLogBoss;
-    private AuthBoss authBoss;
     private ProductBoss productBoss;
     private UpdateBoss updateBoss;
     private HQApp hqApp;
 
     @Autowired
     public BossStartupListener(AppdefBoss appdefBoss, EventsBoss eventsBoss, EventLogBoss eventLogBoss,
-                               AuthBoss authBoss, ProductBoss productBoss, UpdateBoss updateBoss, HQApp hqApp, MeasurementStartupListener measurementStartupListener) {
+                                ProductBoss productBoss, UpdateBoss updateBoss, HQApp hqApp, MeasurementStartupListener measurementStartupListener) {
         this.appdefBoss = appdefBoss;
         this.eventsBoss = eventsBoss;
         this.eventLogBoss = eventLogBoss;
-        this.authBoss = authBoss;
         this.productBoss = productBoss;
         this.updateBoss = updateBoss;
         this.hqApp = hqApp;
@@ -45,7 +43,6 @@ public class BossStartupListener implements StartupListener {
     public void hqStarted() {
         eventsBoss.startup();
         eventLogBoss.startup();
-        authBoss.startup();
         appdefBoss.startup();
         productBoss.preload();
         updateCallback = (UpdateReportAppender) hqApp.registerCallbackCaller(UpdateReportAppender.class);

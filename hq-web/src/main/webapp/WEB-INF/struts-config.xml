@@ -24,8 +24,7 @@
         <form-bean name="NewUserForm"
                  type="org.hyperic.hq.ui.action.admin.user.NewForm"/>
 
-        <form-bean name="RegisterUserForm"
-                 type="org.hyperic.hq.ui.action.admin.user.EditForm"/>
+       
 
         <form-bean name="EditPasswordForm"
                  type="org.hyperic.hq.ui.action.admin.user.EditPasswordForm"/>
@@ -348,7 +347,6 @@
 <!-- =================================== Global Forward Definitions -->
 
     <global-forwards>
-      <forward name="invalid.session" path="/SignIn.html" redirect="true"/>
       <forward name="rss.feed" path="/common/RSSFormat.jsp"/>
       <forward name="ajax" path="/common/AJAXResponse.jsp"/>
     </global-forwards>
@@ -361,10 +359,6 @@
               forward="/common/NoRights.jsp">
       </action>
 
-      <action path="/Logout" 
-              type="org.springframework.web.struts.DelegatingActionProxy">              
-              <forward name="success" path="/SignIn.html"/>
-      </action>
       
       <action path="/Header"
             type="org.springframework.web.struts.DelegatingActionProxy">
@@ -483,35 +477,7 @@
                        redirect="true"/>
       </action>      
 
-      <action path="/admin/user/Register"
-              name="RegisterUserForm"
-              scope="request"
-              type="org.springframework.web.struts.DelegatingActionProxy"
-              input="/admin/user/UserAdmin.do?mode=register">
-        <set-property property="workflow" value="user/Register"/>
-        <exception key="exception.user.alreadyExists"
-                   type="javax.ejb.CreateException"
-                   path="/admin/user/UserAdmin.do?mode=register"/>
-        <forward name="success" path="/Dashboard.do"/>
-        <forward name="failure" path="/admin/user/UserAdmin.do?mode=register"/>
-        <forward name="reset" path="/admin/user/UserAdmin.do?mode=register" redirect="true"/>
-        <forward name="logout" path="/Logout.do"/>
-      </action>
-      
-      <action path="/admin/user/RegisterFormPrepare"
-              name="RegisterUserForm"
-              scope="request"
-              type="org.springframework.web.struts.DelegatingActionProxy"
-              input="/admin/user/UserAdmin.do?mode=register">
-        <set-property property="workflow" value="user/Register"/>
-        <exception key="exception.user.alreadyExists"
-                   type="javax.ejb.CreateException"
-                   path="/admin/user/UserAdmin.do?mode=register"/>
-        <forward name="success" path="/Dashboard.do"/>
-        <forward name="failure" path="/admin/user/UserAdmin.do?mode=register"/>
-        <forward name="reset" path="/admin/user/UserAdmin.do?mode=register" redirect="true"/>
-        <forward name="logout" path="/Logout.do"/>
-      </action>
+    
       <!-- end user admin actions / -->
 
       <!-- Admin plugins -->

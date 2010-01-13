@@ -33,8 +33,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import javax.security.auth.login.LoginException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
@@ -63,9 +61,6 @@ import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
 import org.hyperic.hq.appdef.shared.resourceTree.ServerNode;
 import org.hyperic.hq.appdef.shared.resourceTree.ServiceNode;
 import org.hyperic.hq.auth.shared.AuthManager;
-import org.hyperic.hq.auth.shared.SessionManager;
-import org.hyperic.hq.auth.shared.SessionNotFoundException;
-import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -93,6 +88,7 @@ import org.hyperic.hq.bizapp.shared.lather.UserIsValid_args;
 import org.hyperic.hq.bizapp.shared.lather.UserIsValid_result;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.util.MessagePublisher;
 import org.hyperic.hq.control.shared.ControlManager;
 import org.hyperic.hq.events.EventConstants;
@@ -116,7 +112,6 @@ import org.hyperic.lather.LatherContext;
 import org.hyperic.lather.LatherRemoteException;
 import org.hyperic.lather.LatherValue;
 import org.hyperic.lather.NullLatherValue;
-import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.security.SecurityUtil;
@@ -126,7 +121,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class LatherDispatcherImpl implements LatherDispatcher {
     protected final Log log = LogFactory.getLog(LatherDispatcherImpl.class.getName());
 
-    private SessionManager sessionManager;
+   
     protected HashSet<String> secureCommands = new HashSet<String>();
     private Set<String> noTxCommands = new HashSet<String>();
 
@@ -157,15 +152,13 @@ public class LatherDispatcherImpl implements LatherDispatcher {
     private MessagePublisher messagePublisher;
 
     @Autowired
-    public LatherDispatcherImpl(SessionManager sessionManager, AgentManager agentManager, AuthManager authManager,
+    public LatherDispatcherImpl(AgentManager agentManager, AuthManager authManager,
                                 AuthzSubjectManager authzSubjectManager, AutoinventoryManager autoinventoryManager,
                                 ConfigManager configManager, ControlManager controlManager,
                                 MeasurementManager measurementManager, PlatformManager platformManager,
                                 ReportProcessor reportProcessor, PermissionManager permissionManager,
                                 ZeventEnqueuer zeventManager,
                                 MessagePublisher messagePublisher) {
-
-        this.sessionManager = sessionManager;
         this.agentManager = agentManager;
         this.authManager = authManager;
         this.authzSubjectManager = authzSubjectManager;
@@ -211,37 +204,20 @@ public class LatherDispatcherImpl implements LatherDispatcher {
     private void checkUserCanManageAgent(LatherContext ctx, String user, String pword, String operation)
         throws PermissionException {
         try {
-
-            int sessionId = authManager.getSessionId(user, pword);
-            AuthzSubject subject = sessionManager.getSubject(sessionId);
+            authManager.authenticate(user, pword);
+            AuthzSubject subject = authzSubjectManager.findSubjectByAuth(user, HQConstants.ApplicationName);
             permissionManager.checkCreatePlatformPermission(subject);
         } catch (SecurityException exc) {
             log.warn("Security exception when '" + user + "' tried to " + operation + " an Agent @ " +
                      ctx.getCallerIP(), exc);
             throw new PermissionException();
-        } catch (LoginException exc) {
-            log.warn("Login exception when '" + user + "' tried to " + operation + " an Agent @ " + ctx.getCallerIP() +
-                     ":  " + exc.getMessage());
-            throw new PermissionException();
-        } catch (SessionTimeoutException exc) {
-            log.warn("Session timeout when '" + user + "' tried to " + operation + " an Agent @ " + ctx.getCallerIP() +
-                     ":  " + exc.getMessage());
-            throw new PermissionException();
-        } catch (SessionNotFoundException exc) {
-            log.warn("Session not found when '" + user + "' tried to " + operation + " an Agent @ " +
-                     ctx.getCallerIP() + ":  " + exc.getMessage());
-            throw new PermissionException();
-        } catch (PermissionException exc) {
+        }  catch (PermissionException exc) {
             log
                 .warn("Permission denied when '" + user + "' tried to " + operation + " an Agent @ " +
                       ctx.getCallerIP());
             throw new PermissionException();
         } catch (ApplicationException exc) {
             log.warn("Application exception when '" + user + "' tried to " + operation + " an Agent @ " +
-                     ctx.getCallerIP(), exc);
-            throw new PermissionException();
-        } catch (ConfigPropertyException exc) {
-            log.warn("Config property exception when '" + user + "' tried to " + operation + " an Agent @ " +
                      ctx.getCallerIP(), exc);
             throw new PermissionException();
         } catch (SystemException exc) {
@@ -466,7 +442,7 @@ public class LatherDispatcherImpl implements LatherDispatcher {
      */
     private UserIsValid_result cmdUserIsValid(LatherContext ctx, UserIsValid_args arg) {
         try {
-            authManager.getSessionId(arg.getUser(), arg.getPword());
+            authManager.authenticate(arg.getUser(), arg.getPword());
         } catch (Exception exc) {
             log.warn("An invalid user(" + arg.getUser() + ") connected from " + ctx.getCallerIP());
             return new UserIsValid_result(false);

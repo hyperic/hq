@@ -401,11 +401,6 @@ public interface AttrConstants {
      */
     public static final String SERVICE_LOCATOR_CTX_ATTR = "service-locator";
 
-    /**
-     * The context scope attribute under which the JAAS provider name
-     * is stored.
-     */
-    public static final String JAAS_PROVIDER_CTX_ATTR = "jaas-provider";
 
     /**
      * The context scope attribute under which the list of permissions

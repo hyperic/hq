@@ -33,7 +33,6 @@ public class PageListing {
     /*
      * Tapestry representations of tapestry pages
      */
-    public static final String SIGN_IN = "SignIn";
     public static final String REGISTRATION = "admin/Register";
     public static final String RESOURCE_HUB = "resource/Hub";
     public static final String PLUGIN = "Plugin";
@@ -41,7 +40,6 @@ public class PageListing {
     /*
      * Struts representations of tapestry pages
      */
-    public static final String SIGN_IN_URL = "/SignIn.html";
     public static final String REGISTRATION_URL =
         "/admin/user/UserAdmin.do?mode=register";
 

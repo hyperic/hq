@@ -1,0 +1,167 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:sec="http://www.springframework.org/schema/security"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+           http://www.springframework.org/schema/context 
+           http://www.springframework.org/schema/context/spring-context-2.5.xsd
+           http://www.springframework.org/schema/security 
+           http://www.springframework.org/schema/security/spring-security-3.0.xsd">
+
+	<bean id="filterChainProxy" class="org.springframework.security.web.FilterChainProxy">
+		<sec:filter-chain-map path-type="ant">
+			<sec:filter-chain pattern="/lather/**" filters="none" />
+			<sec:filter-chain pattern="/login.jsp" filters="none" />
+			<sec:filter-chain pattern="/*.ico" filters="none" />
+			<sec:filter-chain pattern="/css/**" filters="none" />
+			<sec:filter-chain pattern="/js/**" filters="none" />
+			<sec:filter-chain pattern="/images/**" filters="none" />
+			<sec:filter-chain pattern="/ui-docs/**" filters="none" />
+			<sec:filter-chain pattern="/hqu/hqapi*/**"
+				filters="securityContextPersistenceFilter,
+																basicAuthenticationFilter,
+																basicAuthenticationExceptionTranslationFilter,
+																sessionManagementFilter,
+			    	                                     		filterSecurityInterceptor" />
+			<sec:filter-chain pattern="/**"
+				filters="securityContextPersistenceFilter,
+			                                         logoutFilter,
+			                                         basicAuthenticationFilter,
+													 formBasedAuthenticationFilter,
+													 sessionManagementFilter,
+			                                         formAuthenticationExceptionTranslationFilter,
+			                                         filterSecurityInterceptor" />
+		</sec:filter-chain-map>
+	</bean>
+
+	<!-- Setup security context persistence filter -->
+	<bean id="securityContextRepository"
+		class="org.springframework.security.web.context.HttpSessionSecurityContextRepository" />
+
+	<bean id="securityContextPersistenceFilter"
+		class="org.springframework.security.web.context.SecurityContextPersistenceFilter">
+		<property name="securityContextRepository" ref="securityContextRepository" />
+	</bean>
+
+	<!-- For logout -->
+	<bean id="logoutFilter"
+		class="org.springframework.security.web.authentication.logout.LogoutFilter">
+		<constructor-arg value="/login.jsp" />
+		<constructor-arg>
+			<list>
+				<bean
+					class="org.hyperic.hq.ui.security.SessionManagingLogoutHandler"></bean>
+			</list>
+		</constructor-arg>
+	</bean>
+
+	<!-- For basic authentication -->
+	<bean id="basicAuthenticationFilter"
+		class="org.springframework.security.web.authentication.www.BasicAuthenticationFilter">
+		<property name="authenticationManager" ref="authenticationManager" />
+		<property name="authenticationEntryPoint" ref="basicAuthenticationEntryPoint" />
+	</bean>
+
+	<bean id="basicAuthenticationEntryPoint"
+		class="org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint">
+		<property name="realmName" value="HQ-Realm" />
+	</bean>
+
+	<bean id="basicAuthenticationExceptionTranslationFilter"
+		class="org.springframework.security.web.access.ExceptionTranslationFilter">
+		<property name="authenticationEntryPoint" ref="basicAuthenticationEntryPoint" />
+		<property name="accessDeniedHandler">
+			<bean
+				class="org.springframework.security.web.access.AccessDeniedHandlerImpl" />
+		</property>
+	</bean>
+
+	<!-- For form-based authentication -->
+	<bean id="formBasedAuthenticationFilter"
+		class="org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter">
+		<property name="authenticationManager" ref="authenticationManager" />
+		<property name="sessionAuthenticationStrategy" ref="sessionInitializationStrategy" />
+		<property name="authenticationSuccessHandler">
+			<bean
+				class="org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler">
+				<property name="defaultTargetUrl" value="/Dashboard.do" />
+			</bean>
+		</property>
+		<property name="authenticationFailureHandler">
+			<bean
+				class="org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler">
+				<property name="defaultFailureUrl" value="/login.jsp?authfailed=true" />
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="formAuthenticationEntryPoint"
+		class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
+		<property name="loginFormUrl" value="/login.jsp" />
+	</bean>
+
+	<bean id="formAuthenticationExceptionTranslationFilter"
+		class="org.springframework.security.web.access.ExceptionTranslationFilter">
+		<property name="authenticationEntryPoint" ref="formAuthenticationEntryPoint" />
+	</bean>
+
+	<!-- Setup session management filter -->
+	<bean id="sessionManagementFilter"
+		class="org.springframework.security.web.session.SessionManagementFilter">
+		<constructor-arg ref="securityContextRepository" />
+		<property name="sessionAuthenticationStrategy" ref="sessionInitializationStrategy" />
+	</bean>
+
+	<!-- Setup the filter security interceptor -->
+	<bean id="filterSecurityInterceptor"
+		class="org.springframework.security.web.access.intercept.FilterSecurityInterceptor">
+		<property name="authenticationManager" ref="authenticationManager" />
+		<property name="accessDecisionManager">
+			<bean class="org.springframework.security.access.vote.AffirmativeBased">
+				<property name="allowIfAllAbstainDecisions" value="false" />
+				<property name="decisionVoters">
+					<list>
+						<bean class="org.springframework.security.access.vote.RoleVoter" />
+					</list>
+				</property>
+			</bean>
+		</property>
+		<property name="securityMetadataSource">
+			<sec:filter-security-metadata-source>
+				<sec:intercept-url pattern="/login.jsp" />
+				<sec:intercept-url pattern="/favicon.ico" />
+				<sec:intercept-url pattern="/css/**" />
+				<sec:intercept-url pattern="/js/**" />
+				<sec:intercept-url pattern="/images/**" />
+				<sec:intercept-url pattern="/ui_docs/**" />
+				<sec:intercept-url pattern="/hqu/hqapi*/**"
+					access="ROLE_USER" />
+				<sec:intercept-url pattern="/**" access="ROLE_USER" />
+			</sec:filter-security-metadata-source>
+		</property>
+	</bean>
+	
+	<bean id="passwordEncoder"
+				class="org.springframework.security.authentication.encoding.Md5PasswordEncoder">
+				<property name="encodeHashAsBase64" value="true" />
+	</bean>
+
+	<bean id="userDetailsService" class="org.hyperic.hq.auth.UserDetailsServiceImpl" />
+
+	<bean id="authProvider"
+		class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
+		<property name="passwordEncoder" ref="passwordEncoder"/>
+		<property name="userDetailsService" ref="userDetailsService" />
+	</bean>
+
+	<bean id="authenticationManager"
+		class="org.springframework.security.authentication.ProviderManager">
+		<property name="providers">
+			<list>
+				<ref local="authProvider" />
+			</list>
+		</property>
+	</bean>
+
+</beans>

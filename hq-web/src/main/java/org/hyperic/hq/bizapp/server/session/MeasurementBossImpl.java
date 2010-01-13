@@ -84,6 +84,7 @@ import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
+import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.bizapp.shared.uibeans.AutogroupDisplaySummary;
 import org.hyperic.hq.bizapp.shared.uibeans.ClusterDisplaySummary;
@@ -145,7 +146,7 @@ public class MeasurementBossImpl implements MeasurementBoss
     private static final double AVAIL_DOWN = MeasurementConstants.AVAIL_DOWN;
     
     private SessionManager sessionManager;
-    private AuthManager authManager;
+    private AuthBoss authBoss;
     private MeasurementManager measurementManager;
     private TemplateManager templateManager;
     private AvailabilityManager availabilityManager;
@@ -161,7 +162,7 @@ public class MeasurementBossImpl implements MeasurementBoss
     
     
     @Autowired
-    public MeasurementBossImpl(SessionManager sessionManager, AuthManager authManager,
+    public MeasurementBossImpl(SessionManager sessionManager, AuthBoss authBoss,
                                MeasurementManager measurementManager, TemplateManager templateManager,
                                AvailabilityManager availabilityManager, DataManager dataManager,
                                ConfigManager configManager, PlatformManager platformManager,
@@ -169,7 +170,7 @@ public class MeasurementBossImpl implements MeasurementBoss
                                ServerManager serverManager, AgentManager agentManager, ServiceManager serviceManager,
                                VirtualManager virtualManager) {
         this.sessionManager = sessionManager;
-        this.authManager = authManager;
+        this.authBoss = authBoss;
         this.measurementManager = measurementManager;
         this.templateManager = templateManager;
         this.availabilityManager = availabilityManager;
@@ -302,7 +303,7 @@ public class MeasurementBossImpl implements MeasurementBoss
     public List<MeasurementTemplate> findMeasurementTemplates(String user, Integer[] ids,
                                          PageControl pc)
         throws LoginException, ApplicationException, ConfigPropertyException {
-        int sessionId = authManager.getUnauthSessionId(user);
+        int sessionId = authBoss.getUnauthSessionId(user);
         return findMeasurementTemplates(sessionId, ids, pc);
     }
 
@@ -1242,7 +1243,7 @@ public class MeasurementBossImpl implements MeasurementBoss
                                         long begin, long end, long interval,
                                         boolean returnNulls, PageControl pc)
         throws LoginException, ApplicationException, ConfigPropertyException {
-        int sessionId = authManager.getUnauthSessionId(user);
+        int sessionId = authBoss.getUnauthSessionId(user);
         return findMeasurementData(sessionId, aid, tmpl, begin, end, interval,
                                    returnNulls, pc); 
     }
@@ -1318,7 +1319,7 @@ public class MeasurementBossImpl implements MeasurementBoss
                                           long begin, long end, long interval,
                                           boolean returnNulls, PageControl pc)
         throws LoginException, ApplicationException, ConfigPropertyException {
-        int sessionId = authManager.getUnauthSessionId(user);
+        int sessionId = authBoss.getUnauthSessionId(user);
         return findAGMeasurementData(sessionId, aids, tmpl, ctype, begin, end,
                                      interval, returnNulls, pc);
     }
@@ -3578,7 +3579,7 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
         throws LoginException, ApplicationException, PermissionException,
                AppdefEntityNotFoundException, SessionNotFoundException,
                SessionTimeoutException {
-        int sessionId = authManager.getUnauthSessionId(user);
+        int sessionId = authBoss.getUnauthSessionId(user);
         return findResourcesCurrentHealth(sessionId, entIds);
     }
     

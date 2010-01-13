@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.ui.action.admin.user;
 
-import javax.security.auth.login.LoginException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -54,6 +53,7 @@ public class EditPasswordAction
     private final Log log = LogFactory.getLog(NewAction.class.getName());
     private AuthBoss authBoss;
     private AuthzBoss authzBoss;
+    
 
     @Autowired
     public EditPasswordAction(AuthBoss authBoss, AuthzBoss authzBoss) {
@@ -94,8 +94,8 @@ public class EditPasswordAction
 
         if (!admin) {
             try {
-                authBoss.login(user.getName(), pForm.getCurrentPassword());
-            } catch (LoginException e) {
+                authBoss.authenticate(user.getName(), pForm.getCurrentPassword());
+            } catch (Exception e) {
                 RequestUtils.setError(request, "admin.user.error.WrongPassword", "currentPassword");
                 return returnFailure(request, mapping, Constants.USER_PARAM, pForm.getId());
             }

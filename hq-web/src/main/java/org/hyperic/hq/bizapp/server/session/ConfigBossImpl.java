@@ -35,8 +35,6 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.bizapp.shared.ConfigBoss;
 import org.hyperic.hq.common.ApplicationException;
-import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.server.session.ProductConfigService;
 import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.util.ConfigPropertyException;
@@ -50,7 +48,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class ConfigBossImpl implements ConfigBoss {
-    private static final String PRODUCT_CONFIG_SVC_KEY = "hyperic.hq.config.service";
 
     private SessionManager sessionManager;
 
@@ -99,19 +96,6 @@ public class ConfigBossImpl implements ConfigBoss {
         ConfigPropertyException {
         AuthzSubject subject = sessionManager.getSubject(sessId);
         serverConfigManager.setConfig(subject, prefix, props);
-    }
-
-    /**
-     * Restart the config Service
-     * 
-     */
-    public void restartConfig() {
-        try {
-            ((ProductConfigService) org.hyperic.hq.common.ProductProperties
-                .getPropertyInstance(PRODUCT_CONFIG_SVC_KEY)).restart();
-        } catch (Exception e) {
-            throw new SystemException(e);
-        }
     }
 
     /**

@@ -12,16 +12,6 @@
     </state-object>
 </contribution>
 
-<!--
-<contribution configuration-id="tapestry.form.validator.Validators">
-  <validator name="firstAvailableDate" configurable="false"
-    class="org.hyperic.ui.tapestry.validators.FirstAvailableDateValidator" />
-</contribution>
-<contribution configuration-id="hivemind.FactoryDefaults">
-    <default symbol="org.apache.tapestry.home-page" value="SignIn" />
-</contribution>
--->
-
 <!-- Friendly URL configuration -->
 <contribution configuration-id="tapestry.url.ServiceEncoders">
   <page-service-encoder id="page" extension="html" service="page" />

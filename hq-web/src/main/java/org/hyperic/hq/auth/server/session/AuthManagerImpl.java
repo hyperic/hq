@@ -25,29 +25,18 @@
 
 package org.hyperic.hq.auth.server.session;
 
-
-import javax.security.auth.login.LoginContext;
-import javax.security.auth.login.LoginException;
-
 import org.hyperic.hq.auth.Principal;
 import org.hyperic.hq.auth.shared.AuthManager;
-import org.hyperic.hq.auth.shared.SessionManager;
-import org.hyperic.hq.auth.shared.SessionNotFoundException;
-import org.hyperic.hq.auth.shared.SubjectNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.common.ApplicationException;
-import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.dao.PrincipalDAO;
-import org.hyperic.hq.product.shared.ProductManager;
-import org.hyperic.util.ConfigPropertyException;
-import org.jboss.security.Util;
-import org.jboss.security.auth.callback.UsernamePasswordHandler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.encoding.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -57,92 +46,23 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class AuthManagerImpl implements AuthManager {
 
-    // Always authenticate against the HQ application realm
-    private final String appName = HQConstants.ApplicationName;
     private PrincipalDAO principalDao;
-
-    private ProductManager productManager;
+    private PasswordEncoder passwordEncoder;
+    private AuthenticationManager authenticationManager;
     private AuthzSubjectManager authzSubjectManager;
 
     @Autowired
-    public AuthManagerImpl(PrincipalDAO principalDao, ProductManager productManager,
-                           AuthzSubjectManager authzSubjectManager) {
+    public AuthManagerImpl(PrincipalDAO principalDao, AuthzSubjectManager authzSubjectManager,
+                           PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager) {
         this.principalDao = principalDao;
-        this.productManager = productManager;
         this.authzSubjectManager = authzSubjectManager;
+        this.passwordEncoder = passwordEncoder;
+        this.authenticationManager = authenticationManager;
     }
 
-    private boolean isReady() {
-        return productManager.isReady();
-    }
-
-    /**
-     * Authenticates the user using the given password
-     * @param user The user to authenticate
-     * @param password The password for the user
-     * @return session id that is associated with the user
-     */
-    @Transactional(propagation = Propagation.SUPPORTS)
-    public int getSessionId(String user, String password) throws SecurityException, LoginException,
-        ConfigPropertyException, ApplicationException {
-        if (password == null) {
-            throw new LoginException("No password was given");
-        }
-
-        if (!isReady()) {
-            throw new LoginException("Server still starting");
-        }
-
-        UsernamePasswordHandler handler = new UsernamePasswordHandler(user, password.toCharArray());
-
-        LoginContext loginContext = new LoginContext(appName, handler);
-        loginContext.login();
-        loginContext.logout();
-
-        AuthzSubject subject;
-        try {
-            subject = authzSubjectManager.findSubjectByAuth(user, appName);
-            if (!subject.getActive()) {
-                throw new LoginException("User account has been disabled.");
-            }
-        } catch (SubjectNotFoundException fe) {
-            // User not found in the authz system. Create it.
-            AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
-            subject = authzSubjectManager.createSubject(overlord, user, true, appName, "", "", "", "", "", "", false);
-        }
-
-        return SessionManager.getInstance().put(subject);
-    }
-
-    /**
-     * Get a session ID based on username only
-     * @param user The user to authenticate
-     * @return session id that is associated with the user
-     * @throws ApplicationException if user is not found
-     * @throws LoginException if user account has been disabled
-     */
-    @Transactional(propagation = Propagation.SUPPORTS)
-    public int getUnauthSessionId(String user) throws ApplicationException {
-        try {
-            SessionManager mgr = SessionManager.getInstance();
-            try {
-                int sessionId = mgr.getIdFromUsername(user);
-                if (sessionId > 0)
-                    return sessionId;
-            } catch (SessionNotFoundException e) {
-                // Continue
-            }
-
-            // Get the id from the authz system and return an id from the
-            // Session Manager
-            AuthzSubject subject = authzSubjectManager.findSubjectByAuth(user, appName);
-            if (!subject.getActive()) {
-                throw new SessionNotFoundException("User account has been disabled.");
-            }
-            return mgr.put(subject, 30000); // 30 seconds only
-        } catch (SubjectNotFoundException e) {
-            throw new SessionNotFoundException("Unable to find user " + user + " to create session");
-        }
+    public void authenticate(String username, String password) {
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(username, password);
+        authenticationManager.authenticate(authentication);
     }
 
     /**
@@ -155,7 +75,7 @@ public class AuthManagerImpl implements AuthManager {
      */
     public void addUser(AuthzSubject subject, String username, String password) {
         // All passwords are stored encrypted
-        String passwordHash = Util.createPasswordHash("MD5", "base64", null, null, password);
+        String passwordHash = passwordEncoder.encodePassword(password, null);
         principalDao.create(username, passwordHash);
     }
 
@@ -175,7 +95,7 @@ public class AuthManagerImpl implements AuthManager {
         }
         Principal local = principalDao.findByUsername(username);
         // hash the password as is done in ejbCreate. Fixes 4661
-        String hash = Util.createPasswordHash("MD5", "base64", null, null, password);
+        String hash = passwordEncoder.encodePassword(password, null);
         local.setPassword(hash);
     }
 
