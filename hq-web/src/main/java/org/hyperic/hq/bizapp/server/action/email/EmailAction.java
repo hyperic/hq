@@ -217,8 +217,6 @@ public class EmailAction extends EmailActionConfig
                             .getString("action.email.error.noEmailAddress");
             }
 
-            EmailFilter filter = new EmailFilter();
-
             AlertDefinitionInterface alertDef =
                 alert.getAlertDefinitionInterface();
             AppdefEntityID appEnt = getResource(alertDef);
@@ -246,7 +244,7 @@ public class EmailAction extends EmailActionConfig
             		}
 
             		final String subject = createSubject(alertDef, alert, resource, "");
-            		sendAlert(filter, appEnt, to, subject, body, htmlBody,
+            		sendAlert(appEnt, to, subject, body, htmlBody,
             				alertDef.getPriority(), alertDef.isNotifyFiltered());
 
             		StringBuffer result = getLog(to);
@@ -362,8 +360,6 @@ public class EmailAction extends EmailActionConfig
 
         Map addrs = lookupEmailAddr();
 
-        EmailFilter filter = new EmailFilter();
-
         for (Iterator it = addrs.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry entry = (Map.Entry) it.next();
             EmailRecipient rec = (EmailRecipient) entry.getKey();
@@ -391,11 +387,11 @@ public class EmailAction extends EmailActionConfig
 
         final String subject = createSubject(
             defInfo, alert.getAlertInfo(), resource, change.getDescription());
-        sendAlert(filter, getResource(defInfo), to, subject, messages, messages,
+        sendAlert(getResource(defInfo), to, subject, messages, messages,
             defInfo.getPriority(), false);
     }
 
-    private static void sendAlert(EmailFilter filter, AppdefEntityID appEnt,
+    private static void sendAlert(AppdefEntityID appEnt,
                            EmailRecipient[] to, String subject, String[] body,
                            String[] htmlBody, int priority,
                            boolean notifyFiltered) {
@@ -403,15 +399,15 @@ public class EmailAction extends EmailActionConfig
         if (_alertThreshold <= 0) {
             final boolean debug = _log.isDebugEnabled();
             if (debug) {
-                EmailObj obj = new EmailObj(filter, appEnt, to, subject, body,
+                EmailObj obj = new EmailObj(appEnt, to, subject, body,
                     htmlBody, priority, notifyFiltered);
                 debug(obj);
             }
-            getEmailMan().sendAlert(filter, appEnt, to, subject, body, htmlBody,
+            getEmailMan().sendAlert(appEnt, to, subject, body, htmlBody,
                 priority, notifyFiltered);
         } else {
             synchronized (_emails) {
-                EmailObj obj = new EmailObj(filter, appEnt, to, subject, body,
+                EmailObj obj = new EmailObj(appEnt, to, subject, body,
                     htmlBody, priority, notifyFiltered);
                 _emails.add(obj);
             }
@@ -488,8 +484,7 @@ public class EmailAction extends EmailActionConfig
                     // send all emails, alert storm is not in affect
                     for (final Iterator it=toEmail.iterator(); it.hasNext(); ) {
                         final EmailObj obj = (EmailObj)it.next();
-                        final EmailFilter filter = obj.getFilter();
-                        sendFilteredEmail(filter, obj);
+                        sendFilteredEmail(obj);
                     }
                     return;
                 }
@@ -499,9 +494,9 @@ public class EmailAction extends EmailActionConfig
             }
         }
 
-        private void sendFilteredEmail(EmailFilter filter, EmailObj obj) {
+        private void sendFilteredEmail(EmailObj obj) {
             debug(obj);
-            getEmailMan().sendAlert(filter, obj.getAppEnt(), obj.getTo(),
+            getEmailMan().sendAlert(obj.getAppEnt(), obj.getTo(),
                 obj.getSubject(), obj.getBody(), obj.getHtmlBody(),
                 obj.getPriority(), obj.isNotifyFiltered());
         }
@@ -608,7 +603,6 @@ public class EmailAction extends EmailActionConfig
     }
 
     private static class EmailObj {
-        private final EmailFilter _filter;
         private final AppdefEntityID _appEnt;
         private final EmailRecipient[] _to;
         private final String _subject;
@@ -616,11 +610,10 @@ public class EmailAction extends EmailActionConfig
         private final String[] _htmlBody;
         private final int _priority;
         private final boolean _notifyFiltered;
-        public EmailObj(EmailFilter filter, AppdefEntityID appEnt,
+        public EmailObj(AppdefEntityID appEnt,
                         EmailRecipient[] to, String subject, String[] body,
                         String[] htmlBody, int priority,
                         boolean notifyFiltered) {
-            _filter = filter;
             _appEnt = appEnt;
             _to = to;
             _subject = subject;
@@ -628,9 +621,6 @@ public class EmailAction extends EmailActionConfig
             _htmlBody = htmlBody;
             _priority = priority;
             _notifyFiltered = notifyFiltered;
-        }
-        public EmailFilter getFilter() {
-            return _filter;
         }
         public AppdefEntityID getAppEnt() {
             return _appEnt;

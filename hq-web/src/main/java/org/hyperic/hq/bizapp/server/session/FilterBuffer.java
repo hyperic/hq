@@ -23,7 +23,7 @@
  * USA.
  */
 
-package org.hyperic.hq.bizapp.server.action.email;
+package org.hyperic.hq.bizapp.server.session;
 
 class FilterBuffer {
     private int          _numEnts = 0;
