@@ -99,7 +99,6 @@
 		<fileset dir="${thirdparty.lib}/tapestry" includes="*.jar" />
 		<fileset dir="${wrapper.lib}" includes="*.jar" />
 		<fileset dir="${hibernate.lib}" includes="*.jar" />
-		<fileset dir="${jboss.home}/server/default/lib" includes="jbosssx.jar" />
 		<fileset dir="${jboss.home}/lib" includes="jboss-system.jar" />
 		<fileset dir="${hq.plugins}" includes="**/build-lib/*.jar" />
 		<fileset dir="${hq.plugins}" includes="**/lib/*.jar" />
