@@ -4136,16 +4136,7 @@ public class AppdefBossEJBImpl
 
         return ret;
     }
-    
-    /** 
-     * temporary method for determining whether or not we're running
-     *  a database that supports navmap 
-     * @ejb:interface-method
-     */
-    public boolean isNavMapSupported () {
-        return getAppdefStatManager().isNavMapSupported();    
-    }
-    
+
     /**
      * @ejb:interface-method
      */
