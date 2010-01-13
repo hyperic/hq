@@ -2983,7 +2983,15 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     public double getAvailability(AuthzSubject subj, AppdefEntityID id)
         throws AppdefEntityNotFoundException,
                PermissionException {
-        return getAvailability(subj, id, null, null);
+        final Map measCache =
+            getMetricManager().getAvailMeasurements(Collections.singleton(id));
+        Map availCache = null;
+        if (id.isApplication()) {
+            List members =
+                getApplicationManager().getApplicationResources(subj, id.getId());
+            availCache = getAvailManager().getLastAvail(members, measCache);
+        }
+        return getAvailability(subj, id, measCache, availCache);
     }
 
     /**
@@ -2997,9 +3005,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws AppdefEntityNotFoundException,
                PermissionException {
         StopWatch watch = new StopWatch();
-        if (_log.isDebugEnabled())
-            _log.debug("BEGIN getAvailability()");
-    
+        final boolean debug = _log.isDebugEnabled();
+        if (debug) _log.debug("BEGIN getAvailability()");
         try {
             if (id.isGroup()) {
                 return getGroupAvailability(
@@ -3007,18 +3014,22 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             }
             else if (id.isApplication()) {
                 AppdefEntityValue appVal = new AppdefEntityValue(id, subject);
+                if (debug) watch.markTimeBegin("getFlattenedServiceIds");
                 AppdefEntityID[] services = appVal.getFlattenedServiceIds();
+                if (debug) watch.markTimeEnd("getFlattenedServiceIds");
 
-                return getAggregateAvailability(
+                if (debug) watch.markTimeBegin("getAggregateAvailability");
+                double rtn = getAggregateAvailability(
                     subject, services, measCache, availCache);
+                if (debug) watch.markTimeEnd("getAggregateAvailability");
+                return rtn;
             }
             
             AppdefEntityID[] ids = new AppdefEntityID[] { id };
             return getAvailability(
                 subject, ids, getMidMap(ids, measCache), availCache)[0];
         } finally {
-            if (_log.isDebugEnabled())
-                _log.debug("END getAvailability() -- " + watch);
+            if (debug) _log.debug("END getAvailability() -- " + watch);
         }
     }
 
