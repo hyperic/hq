@@ -19,7 +19,6 @@
 	<body>
 		<div id="header">
     		<div id="headerLogo" title="Home" onclick="location.href='<html:rewrite action="/Dashboard" />'">&nbsp;</div>
-    		<!-- 
     		<div id="headerLinks">
         		<ul>
         			<li>
@@ -30,7 +29,6 @@
         			</li>
         		</ul>
     		</div>
-    		-->
     	</div>
     	<div class="loginPanel">
     		<form name='f' action='/j_spring_security_check' method='POST'>

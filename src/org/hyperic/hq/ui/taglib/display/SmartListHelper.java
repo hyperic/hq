@@ -65,11 +65,8 @@ class SmartListHelper extends Object{
         this.pageSize = pageSize;
         this.masterList = list;        
         
-        try{
+        if (extSize != null) {
             this.extSize = extSize.intValue();
-        }
-        catch(NullPointerException e){
-            //do nothing means value  not set.
         }
         
         this.pageCount = this.computedPageCount();        
