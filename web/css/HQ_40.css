@@ -1377,7 +1377,7 @@ select {
 }
 
 .loginPanel input[type="password"], .loginPanel input[type="text"] {
-    width: 248px
+    width: 200px
 }
 
 .ToolbarContent td {
