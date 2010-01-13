@@ -665,6 +665,7 @@ a.guidelink:hover {
     position: absolute;
     top: 0;
     width: 360px;
+    padding-left: 72px;
     z-index: 1
 }
 

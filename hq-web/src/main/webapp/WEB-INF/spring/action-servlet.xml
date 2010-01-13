@@ -10,7 +10,6 @@
 	<context:annotation-config />
 
 	<!-- From struts-config.xml  -->
-	<bean name="/Logout" class="org.hyperic.hq.ui.action.authentication.LogoutAction" />
 	<bean name="/Header" class="org.hyperic.hq.ui.action.common.HeaderAction" />
 	<bean name="/admin/tiles/reload"
 		class="org.apache.struts.tiles.actions.ReloadDefinitionsAction" />
@@ -32,9 +31,7 @@
 	<bean name="/admin/user/Remove" class="org.hyperic.hq.ui.action.admin.user.RemoveAction" />
 	<bean name="/admin/user/EditPassword"
 		class="org.hyperic.hq.ui.action.admin.user.EditPasswordAction" />
-	<bean name="/admin/user/Register" class="org.hyperic.hq.ui.action.admin.user.RegisterAction" />
-	<bean name="/admin/user/RegisterFormPrepare"
-		class="org.hyperic.hq.ui.action.admin.user.RegisterFormPrepareAction" />
+	
 	<bean name="/admin/user/Plugins" class="org.hyperic.hq.ui.action.admin.plugins.PluginsAction" />
 	<bean name="/admin/config/EditConfigPrep"
 		class="org.hyperic.hq.ui.action.admin.config.EditConfigPrepAction" />

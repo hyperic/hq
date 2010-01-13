@@ -75,6 +75,7 @@ import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.DuplicateObjectException;
@@ -164,7 +165,7 @@ public class EventsBossImpl implements EventsBoss {
 
     private AppdefBoss appdefBoss;
 
-    private AuthManager authManager;
+    private AuthBoss authBoss;
 
     private EscalationManager escalationManager;
 
@@ -195,7 +196,7 @@ public class EventsBossImpl implements EventsBoss {
     @Autowired
     public EventsBossImpl(SessionManager sessionManager, ActionManager actionManager,
                           AlertDefinitionManager alertDefinitionManager, AlertManager alertManager,
-                          AppdefBoss appdefBoss, AuthManager authManager,
+                          AppdefBoss appdefBoss, AuthBoss authBoss,
                           EscalationManager escalationManager, MeasurementManager measurementManager,
                           PlatformManager platformManager, RegisteredTriggerManager registeredTriggerManager,
                           ResourceManager resourceManager, ServerManager serverManager,
@@ -207,7 +208,7 @@ public class EventsBossImpl implements EventsBoss {
         this.alertDefinitionManager = alertDefinitionManager;
         this.alertManager = alertManager;
         this.appdefBoss = appdefBoss;
-        this.authManager = authManager;
+        this.authBoss = authBoss;
         this.escalationManager = escalationManager;
         this.measurementManager = measurementManager;
         this.platformManager = platformManager;
@@ -975,7 +976,7 @@ public class EventsBossImpl implements EventsBoss {
     public List<Escalatable> findRecentAlerts(String username, int count, int priority, long timeRange,
                                               AppdefEntityID[] ids) throws LoginException, ApplicationException,
         ConfigPropertyException {
-        int sessionId = authManager.getUnauthSessionId(username);
+        int sessionId = authBoss.getUnauthSessionId(username);
         return findRecentAlerts(sessionId, count, priority, timeRange, ids);
     }
 

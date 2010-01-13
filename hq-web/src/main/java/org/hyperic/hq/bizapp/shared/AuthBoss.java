@@ -10,45 +10,26 @@ import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
-import org.hyperic.util.ConfigPropertyException;
 
 /**
  * Local interface for AuthBoss.
  */
 public interface AuthBoss {
     /**
-     * Add buffered listener to register login audits post commit. This allows
-     * for read-only operations to succeed properly when accessed via HQU
+     * Get a session ID based on username only
+     * @param user The user to authenticate
+     * @return session id that is associated with the user
+     * @throws ApplicationException if user is not found
+     * @throws LoginException if user account has been disabled
      */
-    public void startup();
+    public int getUnauthSessionId(String user) throws ApplicationException;
 
     /**
-     * Login a user.
-     * @param username The name of the user.
-     * @param password The password.
-     * @return An integer representing the session ID of the logged-in user.
+     * Authenticate a user
+     * @param username The username
+     * @param password The password
      */
-    public int login(String username, String password) throws SecurityException, LoginException, ApplicationException,
-        ConfigPropertyException;
-
-    /**
-     * Login a guest.
-     * @return An integer representing the session ID of the logged-in user.
-     */
-    public int loginGuest() throws SecurityException, LoginException, ApplicationException, ConfigPropertyException;
-
-    /**
-     * Logout a user.
-     * @param sessionID The session id for the current user
-     */
-    public void logout(int sessionID);
-
-    /**
-     * Check if a user is logged in.
-     * @param username The name of the user.
-     * @return a boolean| true if logged in and false if not.
-     */
-    public boolean isLoggedIn(String username);
+    void authenticate(String username, String password);
 
     /**
      * Add a user to the internal database

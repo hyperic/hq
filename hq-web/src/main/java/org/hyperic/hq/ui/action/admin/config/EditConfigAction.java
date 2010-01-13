@@ -81,7 +81,8 @@ public class EditConfigAction
 
             if (log.isTraceEnabled())
                 log.trace("Restarting config service");
-            configBoss.restartConfig();
+            //TODO this previously delegated to removed ProductConfigServiceImpl.restartConfig which registered/unregistered JDBC, LDAP, and/or Kerberos LoginModules
+            //configBoss.restartConfig();
 
             // Set the update mode
 

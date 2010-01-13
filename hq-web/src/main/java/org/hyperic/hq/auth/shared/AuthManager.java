@@ -3,36 +3,24 @@
  */
 package org.hyperic.hq.auth.shared;
 
-import javax.security.auth.login.LoginException;
-
 import org.hyperic.hq.auth.Principal;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.common.ApplicationException;
-import org.hyperic.util.ConfigPropertyException;
 
 /**
  * Local interface for AuthManager.
  */
 public interface AuthManager {
-    /**
-     * Authenticates the user using the given password
-     * @param user The user to authenticate
-     * @param password The password for the user
-     * @return session id that is associated with the user
-     */
-    public int getSessionId(String user, String password) throws SecurityException, LoginException,
-        ConfigPropertyException, ApplicationException;
 
+    
     /**
-     * Get a session ID based on username only
-     * @param user The user to authenticate
-     * @return session id that is associated with the user
-     * @throws ApplicationException if user is not found
-     * @throws LoginException if user account has been disabled
+     * Authenticate a user.
+     * @param username The name of the user.
+     * @param password The password.
      */
-    public int getUnauthSessionId(String user) throws ApplicationException;
-
+    public void authenticate(String username, String password);
+    
+    
     /**
      * Add a user to the internal database
      * @param subject The subject of the currently logged in user

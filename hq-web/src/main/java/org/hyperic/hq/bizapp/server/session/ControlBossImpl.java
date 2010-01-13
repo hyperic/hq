@@ -38,7 +38,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefManager;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.auth.shared.AuthManager;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
@@ -46,6 +45,7 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.context.Bootstrap;
@@ -75,17 +75,17 @@ public class ControlBossImpl implements ControlBoss {
 	
 	private SessionManager sessionManager;
 	private AppdefManager appdefManager;
-	private AuthManager authManager;
+	private AuthBoss authBoss;
 	private ControlManager controlManager;
 	private ControlScheduleManager controlScheduleManager;
 
 	@Autowired
 	public ControlBossImpl(SessionManager sessionManager,
-			AppdefManager appdefManager, AuthManager authManager,
+			AppdefManager appdefManager, AuthBoss authBoss,
 			ControlManager controlManager,
 			ControlScheduleManager controlScheduleManager) {
 		this.appdefManager = appdefManager;
-		this.authManager = authManager;
+		this.authBoss = authBoss;
 		this.controlManager = controlManager;
 		this.controlScheduleManager = controlScheduleManager;
 		this.sessionManager = sessionManager;
@@ -433,7 +433,7 @@ public class ControlBossImpl implements ControlBoss {
 	 */
 	public PageList<ControlHistory> getRecentControlActions(String user,
 			int rows, long window) throws LoginException, ApplicationException {
-		int sessionId = authManager.getUnauthSessionId(user);
+		int sessionId = authBoss.getUnauthSessionId(user);
 
 		return getRecentControlActions(sessionId, rows, window);
 	}

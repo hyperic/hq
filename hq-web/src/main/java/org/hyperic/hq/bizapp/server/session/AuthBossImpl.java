@@ -25,36 +25,30 @@
 
 package org.hyperic.hq.bizapp.server.session;
 
-import java.util.HashSet;
-import java.util.List;
-
 import javax.security.auth.login.LoginException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.auth.server.session.UserAudit;
-import org.hyperic.hq.auth.server.session.UserLoginZevent;
 import org.hyperic.hq.auth.shared.AuthManager;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.auth.shared.SubjectNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.context.Bootstrap;
-import org.hyperic.hq.zevents.ZeventEnqueuer;
-import org.hyperic.hq.zevents.ZeventListener;
-import org.hyperic.util.ConfigPropertyException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The BizApp's interface to the Auth Subsystem
+ * TODO this layer just exists to deal directly with the session ID (since service layer should not be aware of HTTP sessions).
+ * We may be able to remove this once we properly integrate Spring Security context holder and possibly get rid of SessionManager
  * 
  */
 @Service
@@ -62,134 +56,56 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthBossImpl implements AuthBoss {
     private SessionManager sessionManager;
 
-    private Log log = LogFactory.getLog(AuthBossImpl.class);
-
     private AuthManager authManager;
 
     private AuthzSubjectManager authzSubjectManager;
 
-    private ZeventEnqueuer zEventManager;
-
     @Autowired
-    public AuthBossImpl(SessionManager sessionManager, AuthManager authManager,
-                        AuthzSubjectManager authzSubjectManager, ZeventEnqueuer zEventManager) {
+    public AuthBossImpl(SessionManager sessionManager, AuthManager authManager, AuthzSubjectManager authzSubjectManager) {
         this.sessionManager = sessionManager;
         this.authManager = authManager;
         this.authzSubjectManager = authzSubjectManager;
-        this.zEventManager = zEventManager;
-    }
-
-    public class UserZeventListener implements ZeventListener<UserLoginZevent> {
-
-        public void processEvents(final List<UserLoginZevent> events) {
-            // Process events needs to occur within a session due to
-            // UserAudit accessing pojo's outside of a Transactional Impl.
-            try {
-                org.hyperic.hq.hibernate.SessionManager
-                    .runInSession(new org.hyperic.hq.hibernate.SessionManager.SessionRunner() {
-
-                        public String getName() {
-                            return "UserLoginListener";
-                        }
-
-                        public void run() throws Exception {
-                            for (UserLoginZevent z : events) {
-                                UserLoginZevent.UserLoginZeventPayload p = (UserLoginZevent.UserLoginZeventPayload) z
-                                    .getPayload();
-                                Integer subjectId = p.getSubjectId();
-                                // Re-look up subject
-                                AuthzSubject sub = authzSubjectManager.getSubjectById(subjectId);
-                                UserAudit.loginAudit(sub);
-                            }
-                        }
-                    });
-            } catch (Exception e) {
-                log.error("Exception running login audit", e);
-            }
-        }
-
-        public String toString() {
-            return "UserLoginListener";
-        }
     }
 
     /**
-     * Add buffered listener to register login audits post commit. This allows
-     * for read-only operations to succeed properly when accessed via HQU
-     * 
-     * 
+     * Get a session ID based on username only
+     * @param user The user to authenticate
+     * @return session id that is associated with the user
+     * @throws ApplicationException if user is not found
+     * @throws LoginException if user account has been disabled
      */
-    public void startup() {
-        HashSet<Class<UserLoginZevent>> events = new HashSet<Class<UserLoginZevent>>();
-        events.add(UserLoginZevent.class);
-        zEventManager.addBufferedListener(events, new UserZeventListener());
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public int getUnauthSessionId(String user) throws ApplicationException {
+        try {
+            SessionManager mgr = SessionManager.getInstance();
+            try {
+                int sessionId = mgr.getIdFromUsername(user);
+                if (sessionId > 0)
+                    return sessionId;
+            } catch (SessionNotFoundException e) {
+                // Continue
+            }
+
+            // Get the id from the authz system and return an id from the
+            // Session Manager
+            AuthzSubject subject = authzSubjectManager.findSubjectByAuth(user, HQConstants.ApplicationName);
+            if (!subject.getActive()) {
+                throw new SessionNotFoundException("User account has been disabled.");
+            }
+            return mgr.put(subject, 30000); // 30 seconds only
+        } catch (SubjectNotFoundException e) {
+            throw new SessionNotFoundException("Unable to find user " + user + " to create session");
+        }
     }
 
     /**
-     * Login a user.
+     * Authenticate a user.
      * @param username The name of the user.
      * @param password The password.
-     * @return An integer representing the session ID of the logged-in user.
      * 
      */
-    public int login(String username, String password) throws SecurityException, LoginException, ApplicationException,
-        ConfigPropertyException {
-
-        int res = authManager.getSessionId(username, password);
-        AuthzSubject s = sessionManager.getSubject(res);
-        UserLoginZevent evt = new UserLoginZevent(s.getId());
-        zEventManager.enqueueEventAfterCommit(evt);
-        return res;
-
-    }
-
-    /**
-     * Login a guest.
-     * 
-     * @return An integer representing the session ID of the logged-in user.
-     * 
-     */
-    public int loginGuest() throws SecurityException, LoginException, ApplicationException, ConfigPropertyException {
-
-        AuthzSubject guest = authzSubjectManager.getSubjectById(AuthzConstants.guestId);
-
-        if (guest != null && guest.getActive()) {
-            return sessionManager.put(guest);
-        }
-        throw new LoginException("Guest account not enabled");
-
-    }
-
-    /**
-     * Logout a user.
-     * @param sessionID The session id for the current user
-     * 
-     */
-    public void logout(int sessionID) {
-        try {
-            UserAudit.logoutAudit(sessionManager.getSubject(sessionID));
-        } catch (SessionException e) {
-        }
-        sessionManager.invalidate(sessionID);
-    }
-
-    /**
-     * Check if a user is logged in.
-     * @param username The name of the user.
-     * @return a boolean| true if logged in and false if not.
-     * 
-     */
-    public boolean isLoggedIn(String username) {
-        boolean loggedIn = false;
-        try {
-            if (sessionManager.getIdFromUsername(username) > 0)
-                loggedIn = true;
-        } catch (SessionNotFoundException e) {
-            // safely ignore
-        } catch (SessionTimeoutException e) {
-            // safely ignore
-        }
-        return loggedIn;
+    public void authenticate(String username, String password) {
+        authManager.authenticate(username, password);
     }
 
     /**

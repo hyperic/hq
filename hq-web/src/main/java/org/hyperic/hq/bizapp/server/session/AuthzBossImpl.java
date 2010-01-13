@@ -56,6 +56,7 @@ import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
@@ -86,6 +87,8 @@ public class AuthzBossImpl implements AuthzBoss {
     private AppdefBoss appdefBoss;
 
     private AuthManager authManager;
+    
+    private AuthBoss authBoss;
 
     private AuthzSubjectManager authzSubjectManager;
 
@@ -98,13 +101,14 @@ public class AuthzBossImpl implements AuthzBoss {
     private PermissionManager permissionManager;
 
     @Autowired
-    public AuthzBossImpl(SessionManager sessionManager, AppdefBoss appdefBoss, AuthManager authManager,
+    public AuthzBossImpl(SessionManager sessionManager, AppdefBoss appdefBoss, AuthBoss authBoss, AuthManager authManager,
                          AuthzSubjectManager authzSubjectManager, ResourceGroupManager resourceGroupManager,
                          ResourceManager resourceManager, DashboardManager dashboardManager,
                          PermissionManager permissionManager) {
         this.sessionManager = sessionManager;
         this.appdefBoss = appdefBoss;
         this.authManager = authManager;
+        this.authBoss = authBoss;
         this.authzSubjectManager = authzSubjectManager;
         this.resourceGroupManager = resourceGroupManager;
         this.resourceManager = resourceManager;
@@ -364,7 +368,7 @@ public class AuthzBossImpl implements AuthzBoss {
      * 
      */
     public AuthzSubject getCurrentSubject(String name) throws SessionException, ApplicationException {
-        int sessionId = authManager.getUnauthSessionId(name);
+        int sessionId = authBoss.getUnauthSessionId(name);
         return getCurrentSubject(sessionId);
     }
 
@@ -422,7 +426,7 @@ public class AuthzBossImpl implements AuthzBoss {
      */
     public ConfigResponse getUserPrefs(String username) throws SessionNotFoundException, ApplicationException,
         ConfigPropertyException {
-        int sessionId = authManager.getUnauthSessionId(username);
+        int sessionId = authBoss.getUnauthSessionId(username);
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         return getUserPrefs(new Integer(sessionId), subject.getId());
     }
