@@ -426,8 +426,9 @@ public class MetricSessionEJB extends BizappSessionEJB {
                 if (r == null || r.isInAsyncDeleteState()) {
                     continue;
                 }
-                Measurement meas = (Measurement)midMap.get(r.getId());
-                if (null == midMap || null == meas) {
+                Measurement meas;
+                if (null == midMap
+                        || null == (meas = (Measurement)midMap.get(r.getId()))) {
                     if (debug) watch.markTimeBegin("getAvailabilityMeasurement");
                     meas = mMan.getAvailabilityMeasurement(r);
                     if (debug) watch.markTimeEnd("getAvailabilityMeasurement");
@@ -615,23 +616,20 @@ public class MetricSessionEJB extends BizappSessionEJB {
             if (debug) watch.markTimeBegin("findResource size=" + size);
             final Resource res = rMan.findResource(id);
             if (debug) watch.markTimeEnd("findResource size=" + size);
-            
-            if (null != measCache) {
-                List list = (List) measCache.get(res.getId());
-                
-                if  (null != list) {
-                    if (list.size() > 1) {
-                        log.warn("resourceId " + res.getId() +
-                                 " has more than one availability measurement " +
-                                 " assigned to it");
-                    } else if (list.size() <= 0) {
-                        continue;
-                    }
-                    final Measurement m = (Measurement)list.get(0);
-                    rtn.put(res.getId(), m);
-                } else {
-                    toGet.add(res);
+            List list;
+            if (null != measCache
+                   && null != (list = (List)measCache.get(res.getId()))) {
+                if (list.size() > 1) {
+                    log.warn("resourceId " + res.getId() +
+                             " has more than one availability measurement " +
+                             " assigned to it");
+                } else if (list.size() <= 0) {
+                    continue;
                 }
+                final Measurement m = (Measurement)list.get(0);
+                rtn.put(res.getId(), m);
+            } else {
+                toGet.add(res);
             }
         }
         if (debug) watch.markTimeBegin("getAvailMeasurements");
