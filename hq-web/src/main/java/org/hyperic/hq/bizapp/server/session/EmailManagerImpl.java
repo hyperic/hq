@@ -52,7 +52,6 @@ import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
 import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.server.action.email.EmailAction;
-import org.hyperic.hq.bizapp.server.action.email.EmailFilter;
 import org.hyperic.hq.bizapp.server.action.email.EmailFilterJob;
 import org.hyperic.hq.bizapp.server.action.email.EmailRecipient;
 import org.hyperic.hq.bizapp.shared.EmailManager;

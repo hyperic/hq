@@ -4,7 +4,6 @@
 package org.hyperic.hq.bizapp.shared;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.bizapp.server.action.email.EmailFilter;
 import org.hyperic.hq.bizapp.server.action.email.EmailRecipient;
 
 /**
