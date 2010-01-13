@@ -426,8 +426,9 @@ public class MetricSessionEJB extends BizappSessionEJB {
                 if (r == null || r.isInAsyncDeleteState()) {
                     continue;
                 }
-                Measurement meas = (Measurement)midMap.get(r.getId());
-                if (null == midMap || null == meas) {
+                Measurement meas;
+                if (null == midMap
+                        || null == (meas = (Measurement)midMap.get(r.getId()))) {
                     if (debug) watch.markTimeBegin("getAvailabilityMeasurement");
                     meas = mMan.getAvailabilityMeasurement(r);
                     if (debug) watch.markTimeEnd("getAvailabilityMeasurement");
@@ -615,8 +616,9 @@ public class MetricSessionEJB extends BizappSessionEJB {
             if (debug) watch.markTimeBegin("findResource size=" + size);
             final Resource res = rMan.findResource(id);
             if (debug) watch.markTimeEnd("findResource size=" + size);
-            List list = (List) measCache.get(res.getId());
-            if (null != measCache && null != list) {
+            List list;
+            if (null != measCache
+                   && null != (list = (List)measCache.get(res.getId()))) {
                 if (list.size() > 1) {
                     log.warn("resourceId " + res.getId() +
                              " has more than one availability measurement " +
