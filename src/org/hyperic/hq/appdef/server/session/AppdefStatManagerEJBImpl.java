@@ -1587,29 +1587,21 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                                            .getName()),
                                    groupVo.getEntityId(),
                                    ResourceTreeNode.CLUSTER);
-        final Collection agEntries = groupVo.getAppdefGroupEntries();
+        final List agEntries = groupVo.getAppdefGroupEntries();
         if (agEntries.size() == 0) {
             return new ResourceTreeNode[] {grpNode};
         }
-        ResourceTreeNode[] retVal;
-        Statement            stmt;
-        ResultSet            rs;
-        final StringBuilder  grpSqlStmt = new StringBuilder();
-        int                  entityType;
-        Set                  entitySet;
+        ResourceTreeNode[] retVal = null;
+        final StringBuilder grpSqlStmt = new StringBuilder();
         final boolean debug = log.isDebugEnabled();
-        
-        stmt = null;
-        rs = null;
-        retVal = null;
-        entityType = groupVo.getGroupEntType();
-
+        int entityType = groupVo.getGroupEntType();
         try {
             final Connection conn = getDBConn();
-
-            final String resJoin =
-                " JOIN " + TBL_RES + " res on resource_id = res.id ";
-            
+            final String resJoin = new StringBuilder()
+                .append(" JOIN ")
+                .append(TBL_RES)
+                .append(" res on resource_id = res.id ")
+                .toString();
             switch (entityType) {
             case APPDEF_TYPE_PLATFORM :
                 grpSqlStmt.append("SELECT p.id as platform_id, res.name as platform_name ")
@@ -1635,46 +1627,20 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
             }
 
             if (debug) log.debug(grpSqlStmt);
-            entitySet = new HashSet();
+            Set entitySet = new HashSet(agEntries.size());
 
-            int x;
-            Iterator i;
             Map entNameMap = new HashMap();
             if (groupVo.getTotalSize() > 0) {
-                try {
-                    stmt = conn.createStatement();
-
-                    for (x=1,i=agEntries.iterator(); i.hasNext(); x++) {
-                        final AppdefEntityID mem = (AppdefEntityID) i.next();
-                        grpSqlStmt.append(((x==1) ? "" : ","))
-                                  .append(mem.getID());
-
-                        if (debug) log.debug("Arg " + x + ": " + mem.getID());
-                    }
-
-                    grpSqlStmt.append(")");
-                    StopWatch timer = new StopWatch();
-                    
-                    if (debug) log.debug("SQL: " + grpSqlStmt);
-                    
-                    rs = stmt.executeQuery(grpSqlStmt.toString());
-                    
-                    if (debug) {
-                        log.debug("getNavMapDataForGroup() executed in: " + timer);
-                    }
-
-                    while (rs.next()) {
-                        int     thisEntityId       = rs.getInt(1);
-                        String  thisEntityName     = rs.getString(2);
-                        entNameMap.put(new Integer(thisEntityId),
-                                       thisEntityName);
-                    }
-                } finally {
-                    DBUtil.closeJDBCObjects(logCtx, null, stmt, rs);
+                final int max = Util.getHQDialect().getMaxExpressions();
+                final int batchSize = (max < 0) ? Integer.MAX_VALUE : max;
+                for (int ii=0; ii<agEntries.size(); ii+=batchSize) {
+                    int end = Math.min(ii+batchSize, agEntries.size());
+                    List list = agEntries.subList(ii, end);
+                    setEntNameMap(entNameMap, list, conn, grpSqlStmt);
                 }
 
                 // Let group member order drive node creation (not db order).
-                for (i=groupVo.getAppdefGroupEntries().iterator();i.hasNext();) {
+                for (Iterator i=groupVo.getAppdefGroupEntries().iterator();i.hasNext();) {
                     AppdefEntityID id = (AppdefEntityID)i.next();
                     entitySet.add (
                         new ResourceTreeNode (
@@ -1695,12 +1661,46 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
 
             retVal = new ResourceTreeNode[] { grpNode }; 
 
-        } catch (SQLException e) {
-            throw e;
         } finally {
             disconnect();
         }
         return retVal;
+    }
+
+    private void setEntNameMap(Map entNameMap, List list, Connection conn,
+                               StringBuilder grpSqlStmt) throws SQLException {
+        if (list.size() == 0) {
+            return;
+        }
+        final boolean debug = log.isDebugEnabled();
+        // don't overwrite the caller's object
+        grpSqlStmt = new StringBuilder(grpSqlStmt);
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = conn.createStatement();
+            int x=1;
+            for (Iterator i=list.iterator(); i.hasNext(); ) {
+                final AppdefEntityID mem = (AppdefEntityID) i.next();
+                if (debug) log.debug("Arg " + x + ": " + mem.getID());
+                grpSqlStmt.append((x++==1 ? "" : ","))
+                          .append(mem.getID());
+            }
+            grpSqlStmt.append(")");
+            StopWatch timer = new StopWatch();
+            if (debug) log.debug("SQL: " + grpSqlStmt);
+            rs = stmt.executeQuery(grpSqlStmt.toString());
+            if (debug) {
+                log.debug("getNavMapDataForGroup() executed in: " + timer);
+            }
+            while (rs.next()) {
+                int    thisEntityId   = rs.getInt(1);
+                String thisEntityName = rs.getString(2);
+                entNameMap.put(new Integer(thisEntityId), thisEntityName);
+            }
+        } finally {
+            DBUtil.closeJDBCObjects(logCtx, null, stmt, rs);
+        }
     }
 
     // The methods in this class should call getDBConn() to obtain a connection,
