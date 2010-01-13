@@ -27,6 +27,7 @@ package org.hyperic.hq.bizapp.server.action.email;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.bizapp.server.session.EmailManagerImpl;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -41,16 +42,12 @@ public class EmailFilterJob implements Job {
 
     public static final String APP_ID = "appId";
 
-    public EmailFilterJob() {
-    }
-
     public void execute(JobExecutionContext context) throws
         JobExecutionException
     {
         JobDataMap dataMap = context.getJobDetail().getJobDataMap();
         Integer appId = new Integer(dataMap.getString(APP_ID));
 
-        EmailFilter ef = new EmailFilter();
-        ef.sendFiltered(appId);
+        EmailManagerImpl.getOne().sendFiltered(appId);
     }
 }
