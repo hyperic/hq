@@ -38,6 +38,7 @@ import javax.ejb.SessionBean;
 
 import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.ApplicationType;
+import org.hyperic.hq.appdef.shared.AppServiceValue;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -329,8 +330,9 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      * Find application by name
      * @param subject - who
      * @param name - name of app
+     * @ejb:interface-method
      */
-    private Application findApplicationByName(AuthzSubject subject, String name)
+    public Application findApplicationByName(AuthzSubject subject, String name)
         throws ApplicationNotFoundException, PermissionException {
         Application app = getApplicationDAO().findByName(name);
         if (app == null) {
@@ -397,6 +399,21 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
             }
         }
         return valuePager.seek(apps, pc);
+    }
+
+    /**
+     * @return {@link List} of {@link Resource}
+     * @ejb:interface-method
+     */
+    public List getApplicationResources(AuthzSubject subject, Integer appId) 
+        throws ApplicationNotFoundException, PermissionException {
+        List services = getApplicationServices(subject, appId);
+        List rtn = new ArrayList(services.size());
+        for (Iterator it=services.iterator(); it.hasNext(); ) {
+            AppServiceValue val = (AppServiceValue) it.next();
+            rtn.add(val.getService().getResource());
+        }
+        return rtn;
     }
 
     /**

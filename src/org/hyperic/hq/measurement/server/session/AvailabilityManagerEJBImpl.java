@@ -554,7 +554,9 @@ public class AvailabilityManagerEJBImpl
      *  {@link AppdefEntityId}, {@link AppdefEntityValue},
      *  {@link AppdefResourceValue} or {@link Integer}
      * @param measCache Map<Integer, List> optional arg (may be null) to supply
-     * measurement id(s) of ResourceIds. Integer => Resource.getId()
+     * measurement id(s) of ResourceIds. Integer => Resource.getId().  If a 
+     * measurement is not specified in the measCache parameter it will be added
+     * to the map
      * @return Map<Integer, MetricValue> Integer => Measurement.getId()
      * @ejb:interface-method
      */
@@ -601,6 +603,15 @@ public class AvailabilityManagerEJBImpl
                 final List mids = (List)it.next();
                 for (final Iterator iter=mids.iterator(); iter.hasNext(); ) {
                     final Measurement m = (Measurement)iter.next();
+                    // populate the Map if value doesn't exist
+                    if (measCache != null && measCache != Collections.EMPTY_MAP) {
+                        List measids = (List) measCache.get(m.getResource().getId());
+                        if (measids == null) {
+                            measids = new ArrayList();
+                        }
+                        measids.add(m);
+                        measCache.put(m.getResource(), m);
+                    }
                     midsToGet.add(m.getId());
                 }
             }

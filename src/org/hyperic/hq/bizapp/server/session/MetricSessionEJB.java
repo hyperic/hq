@@ -39,12 +39,8 @@ import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.appdef.Agent;
-import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.PlatformType;
-import org.hyperic.hq.appdef.shared.AgentManagerLocal;
-import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefCompatException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -83,6 +79,7 @@ import org.hyperic.hq.measurement.shared.DataManagerLocal;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.pager.PageControl;
+import org.hyperic.util.timer.StopWatch;
 
 public class MetricSessionEJB extends BizappSessionEJB {
     private Log log = LogFactory.getLog(MetricSessionEJB.class.getName());
@@ -407,47 +404,58 @@ public class MetricSessionEJB extends BizappSessionEJB {
         throws ApplicationNotFoundException,
                AppdefEntityNotFoundException,
                PermissionException {
-        final AgentManagerLocal agentMan = AgentManagerEJBImpl.getOne();
         final double[] result = new double[ids.length];
         Arrays.fill(result, MeasurementConstants.AVAIL_UNKNOWN);
         final Map data = new HashMap();
         final MeasurementManagerLocal mMan = getMetricManager();
         final ResourceManagerLocal rMan = getResourceManager();
         final AvailabilityManagerLocal aMan = getAvailManager();
+        final StopWatch watch = new StopWatch();
+        final boolean debug = log.isDebugEnabled();
+        final Map prefetched = new HashMap();
         if (midMap.size() > 0) {
             final List mids = new ArrayList();
             final List aeids = Arrays.asList(ids);
+            final int size = aeids.size();
             for (final Iterator it=aeids.iterator(); it.hasNext(); ) {
                 final AppdefEntityID aeid = (AppdefEntityID)it.next();
+                if (debug) watch.markTimeBegin("findResource size=" + size);
                 final Resource r = rMan.findResource(aeid);
+                if (debug) watch.markTimeEnd("findResource size=" + size);
+                prefetched.put(aeid, r);
                 if (r == null || r.isInAsyncDeleteState()) {
                     continue;
                 }
-                Measurement meas;
-                if (null == midMap ||
-                    null == (meas = (Measurement)midMap.get(r.getId()))) {
+                Measurement meas = (Measurement)midMap.get(r.getId());
+                if (null == midMap || null == meas) {
+                    if (debug) watch.markTimeBegin("getAvailabilityMeasurement");
                     meas = mMan.getAvailabilityMeasurement(r);
+                    if (debug) watch.markTimeEnd("getAvailabilityMeasurement");
                 }
                 if (meas == null) {
                     continue;
                 }
-                MetricValue mv;
-                if (null != availCache &&
-                    null != (mv = (MetricValue)availCache.get(meas.getId()))) {
-                    data.put(meas.getId(), mv);
+                if (availCache != null) {
+                    MetricValue mv = (MetricValue)availCache.get(meas.getId());
+                    if (mv != null) {
+                        data.put(meas.getId(), mv);
+                    } else {
+                        mids.add(meas.getId());
+                    }
                 } else {
                     mids.add(meas.getId());
                 }
             }
+            if (debug) watch.markTimeBegin("getLastAvail");
             data.putAll(
                 aMan.getLastAvail((Integer[])mids.toArray(new Integer[0])));
+            if (debug) watch.markTimeEnd("getLastAvail");
         }
-    
-        // Organize by agent
-        HashMap toGetLive = new HashMap();
-        
         for (int i = 0; i < ids.length; i++) {
-            final Resource r = rMan.findResource(ids[i]);
+            Resource r = (Resource) prefetched.get(ids[i]);
+            if (r == null) {
+                r = rMan.findResource(ids[i]);
+            }
             if (r == null || r.isInAsyncDeleteState()) {
                 continue;
             }
@@ -456,21 +464,6 @@ public class MetricSessionEJB extends BizappSessionEJB {
                 MetricValue mval = null;
                 if (null != (mval = (MetricValue)data.get(mid))) {
                     result[i] = mval.getValue();
-                } else {
-                    // First figure out if the agent of this appdef entity
-                    // already has a list
-                    try {
-                        Agent agent = agentMan.getAgent(ids[i]);
-                        List toGetLiveList;
-                        if (null == (toGetLiveList = (List)toGetLive.get(agent))) {
-                            toGetLiveList = new ArrayList();
-                            toGetLive.put(agent, toGetLiveList);
-                        }
-                        // Now add to list
-                        toGetLiveList.add(new Integer(i));
-                    } catch (AgentNotFoundException e) {
-                        result[i] = AVAIL_DOWN;
-                    }
                 }
             } else {
                 // cases for abstract resources whose availability are xor'd
@@ -478,21 +471,28 @@ public class MetricSessionEJB extends BizappSessionEJB {
                     case AppdefEntityConstants.APPDEF_TYPE_APPLICATION :
                         AppdefEntityValue appVal =
                             new AppdefEntityValue(ids[i], subject);
+                        if (debug) watch.markTimeBegin("getFlattenedServiceIds");
                         AppdefEntityID[] services =
                             appVal.getFlattenedServiceIds();
+                        if (debug) watch.markTimeEnd("getFlattenedServiceIds");
     
+                        if (debug) watch.markTimeBegin("getAggregateAvailability");
                         result[i] = getAggregateAvailability(
                             subject, services, null, availCache);
+                        if (debug) watch.markTimeEnd("getAggregateAvailability");
                         break;
                     case AppdefEntityConstants.APPDEF_TYPE_GROUP :
+                        if (debug) watch.markTimeBegin("getGroupAvailability");
                         result[i] = getGroupAvailability(
                             subject, ids[i].getId(), null, null);
+                        if (debug) watch.markTimeEnd("getGroupAvailability");
                         break;
                     default :
                         break;
                 }
             }
         }
+        if (debug) log.debug(watch);
         return result;
     }
 
@@ -533,39 +533,31 @@ public class MetricSessionEJB extends BizappSessionEJB {
                                               Map measCache,
                                               Map availCache)
         throws AppdefEntityNotFoundException, PermissionException {
-        if (ids.length == 0)
+        if (ids.length == 0) {
             return MeasurementConstants.AVAIL_UNKNOWN;
-        
-        // Break them up and do 5 at a time
-        int length = 5;
+        } 
+        final StopWatch watch = new StopWatch();
+        final boolean debug = log.isDebugEnabled();
         double sum = 0;
         int count = 0;
         int unknownCount = 0;
         final Map midMap = getMidMap(ids, measCache);
-        for (int ind = 0; ind < ids.length; ind += length) {
-            if (ids.length - ind < length) {
-                length = ids.length - ind;
-            }
-            AppdefEntityID[] subids = new AppdefEntityID[length];
-            for (int i = ind; i < ind + length; i++) {
-                subids[i - ind] = ids[i];
-            }
-            double[] avails =
-                getAvailability(subject, subids, midMap, availCache);
-            for (int i = 0; i < avails.length; i++) {
-                 if (avails[i] == MeasurementConstants.AVAIL_UNKNOWN) {
-                     unknownCount++;
-                 } else {
-                     sum += avails[i];
-                     count++;
-                 }
+        if (debug) watch.markTimeBegin("getAvailability");
+        double[] avails = getAvailability(subject, ids, midMap, availCache);
+        if (debug) watch.markTimeEnd("getAvailability");
+        for (int i = 0; i < avails.length; i++) {
+             if (avails[i] == MeasurementConstants.AVAIL_UNKNOWN) {
+                 unknownCount++;
+             } else {
+                 sum += avails[i];
+                 count++;
              }
-        }
-        
-        if (unknownCount == ids.length)
+         }
+        if (unknownCount == ids.length) {
             // All resources are unknown
             return MeasurementConstants.AVAIL_UNKNOWN;
-        
+        }
+        if (debug) log.debug(watch);
         return sum / count;
     }
 
@@ -601,6 +593,8 @@ public class MetricSessionEJB extends BizappSessionEJB {
     }
     
     /**
+     * @param measCache {@link Map} of {@link Integer} of Resource.getId() to
+     * {@link List} of {@link Measurement}
      * @return {@link Map} of {@link Integer} to {@link Measurement}
      * Integer = Resource.getId()
      */
@@ -609,15 +603,20 @@ public class MetricSessionEJB extends BizappSessionEJB {
         final ResourceManagerLocal rMan = getResourceManager();
         final MeasurementManagerLocal mMan = getMetricManager();
         final List toGet = new ArrayList();
-        for (final Iterator it=Arrays.asList(ids).iterator(); it.hasNext(); ) {
+        final boolean debug = log.isDebugEnabled();
+        final StopWatch watch = new StopWatch();
+        final List aeids = Arrays.asList(ids);
+        final int size = aeids.size();
+        for (final Iterator it=aeids.iterator(); it.hasNext(); ) {
             final AppdefEntityID id = (AppdefEntityID)it.next();
             if (id == null) {
                 continue;
             }
+            if (debug) watch.markTimeBegin("findResource size=" + size);
             final Resource res = rMan.findResource(id);
-            List list;
-            if (null != measCache &&
-                null != (list = (List)measCache.get(res.getId()))) {
+            if (debug) watch.markTimeEnd("findResource size=" + size);
+            List list = (List) measCache.get(res.getId());
+            if (null != measCache && null != list) {
                 if (list.size() > 1) {
                     log.warn("resourceId " + res.getId() +
                              " has more than one availability measurement " +
@@ -631,7 +630,9 @@ public class MetricSessionEJB extends BizappSessionEJB {
                 toGet.add(res);
             }
         }
+        if (debug) watch.markTimeBegin("getAvailMeasurements");
         final Map measMap = mMan.getAvailMeasurements(toGet);
+        if (debug) watch.markTimeEnd("getAvailMeasurements");
         for (final Iterator it=measMap.entrySet().iterator(); it.hasNext(); ) {
             final Map.Entry entry = (Map.Entry)it.next();
             final Integer id = (Integer)entry.getKey();
@@ -648,6 +649,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
             }
             rtn.put(r.getId(), m);
         }
+        if (debug) log.debug(watch);
         return rtn;
     }
 
