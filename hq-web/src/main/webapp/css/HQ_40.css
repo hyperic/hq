@@ -53,23 +53,23 @@ a:visited,a:hover,a {
 #headerLinks ul {
 	margin: 0;
 }
+
 #headerLinks li {
-  	margin: 0 5px;
-  	list-style: none;
-    float: left;
+	margin: 0 5px;
+	list-style: none;
+    float: left;
 }
- 
+
 #headerLinks ul li a {
-	color: #88C7FC;
-	text-decoration: none;
+    color: #88C7FC;
+    text-decoration: none;
 }
 
 #headerLinks span {
-	margin-left: 8px;
-	font-weight: 500;
-	color: #fff;
+    margin-left: 8px;
+    font-weight: 500;
+    color: #fff
 }
-
 
 /* HEADER SEARCH */
 
@@ -467,10 +467,27 @@ fieldset {
     background: #fff;
     margin: 150px auto 0;
     padding: 16px 16px 10px;
-    -moz-border-radius:8px;
+    -moz-border-radius: 8px;
     -webkit-border-radius: 8px;
-  	-moz-box-shadow: 0 3px 3px #999;
-	-webkit-box-shadow: 0 3px 3px #999;   
+    -moz-box-shadow: 0 3px 3px #999;
+	-webkit-box-shadow: 0 3px 3px #999;
+}
+
+.loginPanel form fieldset {
+	padding: 0 5px;
+}
+
+.loginPanel form fieldset p {
+	margin: 1em 0;
+}
+
+.loginPanel form fieldset p label {
+	font-weight: bold;
+	padding-left: 5px;
+}
+
+.loginPanel form fieldset p input[type="submit"] {
+	float: right;	
 }
 
 .fieldsetTitle {
@@ -653,8 +670,8 @@ a.buttonInactive:active span {
     /* setting z-index here to make sure that header stacks higher than the main body content
     so that header menus drop down on TOP of the main content */
     z-index: 2;  
-    height: 65px;
-    background: transparent url(/images/4.0/backgrounds/hdbg.png) repeat-x scroll
+    height: 64px;
+    background: transparent url(/images/4.0/backgrounds/header_background.jpg) repeat-x scroll
 }
 
 .right {
@@ -2327,7 +2344,7 @@ button span{
     -moz-border-radius: 3px;
     -webkit-border-radius: 3px;
     border-radius: 3px;
-    padding: 0px 5px 0px 5px;
+    padding: 3px 5px;
     cursor:pointer;
 }
 
@@ -2404,6 +2421,14 @@ span.returnToLink {
 	font-size: 0.8em;
 	clear: left;
 	display: block;
+}
+
+.emphasizedCell {
+	padding: 3px;
+	background-color: #ddd;
+	color: #333;
+	border-bottom: 1px solid #eee;
+	font-style: italic;
 }
 
 .emphasizedCell {
