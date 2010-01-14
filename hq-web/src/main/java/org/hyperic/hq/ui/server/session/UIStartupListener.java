@@ -33,12 +33,13 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
+import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.StartupListener;
 import org.hyperic.hq.hqu.RenditServer;
+import org.hyperic.hq.product.server.session.ProductPluginDeployer;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.file.DirWatcher;
 import org.hyperic.util.file.DirWatcher.DirWatcherCallback;
-import org.jboss.system.server.ServerConfigLocator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -49,13 +50,18 @@ public class UIStartupListener implements StartupListener {
     private ZeventEnqueuer zeventManager;
     private RenditServer renditServer;
     private ResourceDeleteWatcher resourceDeleteWatcher;
+    private HQApp hqApp;
+    //TODO this is only injected to ensure that PPD.start() is called first to set the web accessible dir and unpack ui plugins from product plugins.  Make this cleaner
+    private ProductPluginDeployer productPluginDeployer;
 
     @Autowired
     public UIStartupListener(ZeventEnqueuer zeventManager, RenditServer renditServer,
-                             ResourceDeleteWatcher resourceDeleteWatcher) {
+                             ResourceDeleteWatcher resourceDeleteWatcher, HQApp hqApp, ProductPluginDeployer productPluginDeployer) {
         this.zeventManager = zeventManager;
         this.renditServer = renditServer;
         this.resourceDeleteWatcher = resourceDeleteWatcher;
+        this.hqApp = hqApp;
+        this.productPluginDeployer = productPluginDeployer;
     }
 
     @PostConstruct
@@ -67,9 +73,8 @@ public class UIStartupListener implements StartupListener {
     }
 
     private void initPlugins() {
-        File homeDir = ServerConfigLocator.locate().getServerHomeDir();
-        File deployDir = new File(homeDir, "deploy");
-        File warDir = new File(deployDir, "hq.war");
+       
+        File warDir = hqApp.getWebAccessibleDir();
         File pluginDir = new File(warDir, "hqu");
         File sysDir = new File(warDir, "rendit_sys");
         renditServer.setSysDir(sysDir);
