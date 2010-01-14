@@ -608,9 +608,9 @@ public class AvailabilityManagerEJBImpl
                         List measids = (List) measCache.get(m.getResource().getId());
                         if (measids == null) {
                             measids = new ArrayList();
+                            measids.add(m);
+                            measCache.put(m.getResource(), measids);
                         }
-                        measids.add(m);
-                        measCache.put(m.getResource(), m);
                     }
                     midsToGet.add(m.getId());
                 }
