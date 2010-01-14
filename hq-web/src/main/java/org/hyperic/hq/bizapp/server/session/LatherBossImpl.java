@@ -71,7 +71,7 @@ public class LatherBossImpl implements LatherBoss {
     }
 
     /**
-     * The main dispatch command which is called via the JBoss-lather servlet.
+     * The main dispatch command which is called via the lather servlet.
      * It is the responsibility of this routine to take the method/args, and
      * route it to the correct method.
      * 

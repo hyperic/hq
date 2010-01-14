@@ -131,7 +131,7 @@ public abstract class BaseScheduleManager {
     protected void setDbType() {
         Connection conn = null;
         try {
-            conn = dbUtil.getConnByContext(new InitialContext(), HQConstants.DATASOURCE);
+            conn = dbUtil.getConnection();
             this.dbType = DBUtil.getDBType(conn);
         } catch (NamingException e) {
             throw new SystemException(e);

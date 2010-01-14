@@ -25,7 +25,7 @@
 
 package org.hyperic.hq.authz.shared;
 
-import org.hyperic.hq.common.shared.HQConstants;
+
 
 public final class AuthzConstants {
 
@@ -125,7 +125,6 @@ public final class AuthzConstants {
     public static final Integer perm_removeApplication   = new Integer(318);
 
     // Authz Stuff...
-    public static final String authzDS = HQConstants.DATASOURCE;
     public static final String rootRoleName = "Super User Role";
     public static final Integer rootRoleId = new Integer(0);
     public static final String creatorRoleName = "RESOURCE_CREATOR_ROLE";

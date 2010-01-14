@@ -1241,7 +1241,7 @@ public class AppdefBossImpl implements AppdefBoss {
     // TODO modify javadoc comment below regarding NotSupported
     /**
      * Remove all delete resources Method was "NotSupported" since all the
-     * resource deletes may take longer than the jboss transaction timeout. No
+     * resource deletes may take longer than the transaction timeout. No
      * need for a transaction in this context.
      * 
      */

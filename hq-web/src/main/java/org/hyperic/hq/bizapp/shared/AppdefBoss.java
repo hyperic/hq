@@ -344,7 +344,7 @@ public interface AppdefBoss {
 
     /**
      * Remove all delete resources Method is "NotSupported" since all the
-     * resource deletes may take longer than the jboss transaction timeout. No
+     * resource deletes may take longer than the transaction timeout. No
      * need for a transaction in this context.
      */
     public void removeDeletedResources() throws ApplicationException, VetoException;

@@ -150,7 +150,7 @@ public class HQDBHealthStartupListener implements StartupListener {
                     // wait 1 second before trying
                     Thread.sleep(FAILURE_CHECK_PERIOD_MILLIS);
 
-                    conn = dbUtil.getConnByContext(new InitialContext(), HQConstants.DATASOURCE);
+                    conn = dbUtil.getConnection();
                     stmt = conn.createStatement();
 
                     healthOkStartTime = pingDatabase(conn, stmt, rs);

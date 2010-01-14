@@ -12,7 +12,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * Watches a directory for changes, issuing callbacks when things change  
  * 
- * XXX:  JBoss has similar functionality that we should re-use
+ * 
  */
 public class DirWatcher 
     implements Runnable

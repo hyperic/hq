@@ -322,7 +322,7 @@ public interface EventsBoss {
 
     /**
      * Fix a single alert. Method is "NotSupported" since all the alert fixes
-     * may take longer than the jboss transaction timeout. No need for a
+     * may take longer than the transaction timeout. No need for a
      * transaction in this context.
      */
     public void fixAlert(int sessionID, EscalationAlertType alertType, Integer alertID, String moreInfo)
@@ -330,7 +330,7 @@ public interface EventsBoss {
 
     /**
      * Fix a batch of alerts. Method is "NotSupported" since all the alert fixes
-     * may take longer than the jboss transaction timeout. No need for a
+     * may take longer than the transaction timeout. No need for a
      * transaction in this context.
      */
     public void fixAlert(int sessionID, EscalationAlertType alertType, Integer alertID, String moreInfo,

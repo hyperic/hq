@@ -636,9 +636,9 @@ public class AgentClient {
                                                    7443, QPROP_SSLPORT);
                     
                     // The unidirectional transport is not hosted via the 
-                    // JBossLather servlet, but this is ok, since the 
+                    // Lather servlet, but this is ok, since the 
                     // undirectional servlet is in the same container as 
-                    // the JBossLather servlet. We are just testing connectivity 
+                    // the Lather servlet. We are just testing connectivity 
                     // to the servlet container here.
                     String unidirectionalProvider = 
                         AgentCallbackClient.getDefaultProviderURL(host,

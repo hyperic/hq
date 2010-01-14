@@ -55,17 +55,17 @@ public class IDGeneratorFactory {
      */
     public static long getNextId(String ctx, 
                                  String sequenceName, 
-                                 String dsName, DBUtil dbUtil)
+                                 DBUtil dbUtil)
         throws ConfigPropertyException, 
                NamingException, 
                SequenceRetrievalException, 
                SQLException {
-        IDGenerator theGenerator = getGenerator(ctx, sequenceName, dsName, dbUtil);                   
+        IDGenerator theGenerator = getGenerator(ctx, sequenceName, dbUtil);                   
         return theGenerator.getNewID();
     }
     
     private static IDGenerator getGenerator(String ctx, String sequenceName, 
-                                            String dsName, DBUtil dbUtil) 
+                                             DBUtil dbUtil) 
         throws ConfigPropertyException,
                NamingException,
                SequenceRetrievalException,
@@ -77,7 +77,7 @@ public class IDGeneratorFactory {
     	
     		if (result == null) {
                 result = new IDGenerator(ctx, sequenceName,
-                						DEFAULT_INTERVAL, dsName, dbUtil);
+                						DEFAULT_INTERVAL,  dbUtil);
                 generatorMap.put(sequenceName, result); 
             }
         }

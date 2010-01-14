@@ -313,7 +313,7 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
 
         Connection conn = null;
         try {
-            conn = dbUtil.getConnByContext(getInitialContext(), HQConstants.DATASOURCE);
+            conn = dbUtil.getConnection();
 
             for (Iterator i = Util.getTableMappings(); i.hasNext();) {
                 Table t = (Table) i.next();
@@ -358,7 +358,7 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
         Connection conn = null;
         try {
             String sql;
-            conn = dbUtil.getConnByContext(getInitialContext(), HQConstants.DATASOURCE);
+            conn = dbUtil.getConnection();
             sql = dialect.getOptimizeStmt(currMetricDataTable, DEFAULT_COST);
             duration += doCommand(conn, sql, null);
             if (analyzePrevMetricDataTable) {
@@ -390,7 +390,7 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
         Connection conn = null;
         long duration = 0;
         try {
-            conn = dbUtil.getConnByContext(getInitialContext(), HQConstants.DATASOURCE);
+            conn = dbUtil.getConnection();
             if (!DBUtil.isPostgreSQL(conn)) {
                 return -1;
             }
@@ -422,7 +422,7 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
         Connection conn = null;
         long duration = 0;
         try {
-            conn = dbUtil.getConnByContext(getInitialContext(), HQConstants.DATASOURCE);
+            conn = dbUtil.getConnection();
             if (!DBUtil.isPostgreSQL(conn)) {
                 return -1;
             }
