@@ -25,7 +25,7 @@
 
 package org.hyperic.hq.transport;
 
-import org.jboss.remoting.InvokerLocator;
+
 
 /**
  * The poller client for the unidirectional transport.
@@ -56,6 +56,7 @@ public interface PollerClient {
      * @return The invoker locator for the remote end point to which this poller 
      *         client is connected (the Poller Service end point).
      */
-    InvokerLocator getRemoteEndpointLocator();
+    //TODO : remoting uncomment
+    //InvokerLocator getRemoteEndpointLocator();
 
 }

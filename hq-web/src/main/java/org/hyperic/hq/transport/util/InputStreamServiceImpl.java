@@ -26,6 +26,7 @@
 package org.hyperic.hq.transport.util;
 
 import java.io.IOException;
+import java.rmi.server.UID;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -35,7 +36,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.hyperic.util.timer.Clock;
 import org.hyperic.util.timer.ClockFactory;
-import org.jboss.util.id.UID;
+
 
 
 
@@ -122,7 +123,7 @@ public class InputStreamServiceImpl implements InputStreamService {
         // remove any registered buffers that haven't been touched in 30 minutes
         ageOutOldBuffersFromRegistry(30*60000);
               
-        String streamId = UID.asString();
+        String streamId = new UID().toString();
         _streamBufferRegistry.put(streamId, new RegisteredStreamBuffer(_clock, _timeout));
         return new RemoteInputStream(streamId);
     }

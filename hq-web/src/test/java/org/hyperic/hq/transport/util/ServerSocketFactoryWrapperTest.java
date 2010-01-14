@@ -34,7 +34,7 @@ import javax.net.ServerSocketFactory;
 
 import junit.framework.TestCase;
 
-import org.jboss.remoting.transport.PortUtil;
+
 
 /**
  * Tests the ServerSocketFactoryWrapper class.
@@ -99,129 +99,130 @@ public class ServerSocketFactoryWrapperTest extends TestCase {
             close(serverSocket);
         }        
     }
+  //TODO : remoting uncomment
     
-    public void testCreateServerSocketBoundToPortWildCardAddress() throws Exception {
-        ServerSocketFactory wrapped = ServerSocketFactory.getDefault();
-        
-        ServerSocket serverSocket = null;
-        
-        try {
-            ServerSocketFactoryWrapper wrapper = new ServerSocketFactoryWrapper(wrapped);
-            wrapper.setReuseAddress(false);
-            
-            int port = PortUtil.findFreePort(LOCALHOST);
-            
-            serverSocket = wrapper.createServerSocket(port);
-            
-            assertTrue(serverSocket.isBound());
-            assertEquals(port, serverSocket.getLocalPort());
-            assertEquals(InetAddress.getByName(WILDCARD_ADDR), serverSocket.getInetAddress());
-            
-            assertReuseAddr(serverSocket, false);
-        } finally {
-            close(serverSocket);
-        }
-        
-        try {
-            ServerSocketFactoryWrapper wrapper = new ServerSocketFactoryWrapper(wrapped);
-            wrapper.setReuseAddress(true);
-
-            int port = PortUtil.findFreePort(LOCALHOST);
-            
-            serverSocket = wrapper.createServerSocket(port);
-            
-            assertTrue(serverSocket.isBound());
-            assertEquals(port, serverSocket.getLocalPort());
-            assertEquals(InetAddress.getByName(WILDCARD_ADDR), serverSocket.getInetAddress());
-            
-            assertReuseAddr(serverSocket, true);
-        } finally {
-            close(serverSocket);
-        }        
-    }
-    
-    public void testCreateServerSocketBoundToPortWildCardAddressWithBackLog() throws Exception {
-        ServerSocketFactory wrapped = ServerSocketFactory.getDefault();
-        
-        ServerSocket serverSocket = null;
-        int backlog = 10;
-        
-        try {
-            ServerSocketFactoryWrapper wrapper = new ServerSocketFactoryWrapper(wrapped);
-            wrapper.setReuseAddress(false);
-            
-            int port = PortUtil.findFreePort(LOCALHOST);
-            
-            serverSocket = wrapper.createServerSocket(port, backlog);
-            
-            assertTrue(serverSocket.isBound());
-            assertEquals(port, serverSocket.getLocalPort());
-            assertEquals(InetAddress.getByName(WILDCARD_ADDR), serverSocket.getInetAddress());
-            
-            assertReuseAddr(serverSocket, false);
-        } finally {
-            close(serverSocket);
-        }
-        
-        try {
-            ServerSocketFactoryWrapper wrapper = new ServerSocketFactoryWrapper(wrapped);
-            wrapper.setReuseAddress(true);
-
-            int port = PortUtil.findFreePort(LOCALHOST);
-            
-            serverSocket = wrapper.createServerSocket(port, backlog);
-            
-            assertTrue(serverSocket.isBound());
-            assertEquals(port, serverSocket.getLocalPort());
-            assertEquals(InetAddress.getByName(WILDCARD_ADDR), serverSocket.getInetAddress());
-            
-            assertReuseAddr(serverSocket, true);
-        } finally {
-            close(serverSocket);
-        }        
-    }
-    
-    public void testCreateServerSocketBoundToPortSpecificInterface() throws Exception {
-        ServerSocketFactory wrapped = ServerSocketFactory.getDefault();
-        
-        ServerSocket serverSocket = null;
-        int backlog = 10;
-        InetAddress localhost = InetAddress.getLocalHost();
-        
-        try {
-            ServerSocketFactoryWrapper wrapper = new ServerSocketFactoryWrapper(wrapped);
-            wrapper.setReuseAddress(false);
-            
-            int port = PortUtil.findFreePort(LOCALHOST);
-            
-            serverSocket = wrapper.createServerSocket(port, backlog, localhost);
-            
-            assertTrue(serverSocket.isBound());
-            assertEquals(port, serverSocket.getLocalPort());
-            assertEquals(localhost, serverSocket.getInetAddress());
-            
-            assertReuseAddr(serverSocket, false);
-        } finally {
-            close(serverSocket);
-        }
-        
-        try {
-            ServerSocketFactoryWrapper wrapper = new ServerSocketFactoryWrapper(wrapped);
-            wrapper.setReuseAddress(true);
-
-            int port = PortUtil.findFreePort(LOCALHOST);
-            
-            serverSocket = wrapper.createServerSocket(port, backlog, localhost);
-            
-            assertTrue(serverSocket.isBound());
-            assertEquals(port, serverSocket.getLocalPort());
-            assertEquals(localhost, serverSocket.getInetAddress());
-            
-            assertReuseAddr(serverSocket, true);
-        } finally {
-            close(serverSocket);
-        }        
-    }
+//    public void testCreateServerSocketBoundToPortWildCardAddress() throws Exception {
+//        ServerSocketFactory wrapped = ServerSocketFactory.getDefault();
+//        
+//        ServerSocket serverSocket = null;
+//        
+//        try {
+//            ServerSocketFactoryWrapper wrapper = new ServerSocketFactoryWrapper(wrapped);
+//            wrapper.setReuseAddress(false);
+//            
+//            int port = PortUtil.findFreePort(LOCALHOST);
+//            
+//            serverSocket = wrapper.createServerSocket(port);
+//            
+//            assertTrue(serverSocket.isBound());
+//            assertEquals(port, serverSocket.getLocalPort());
+//            assertEquals(InetAddress.getByName(WILDCARD_ADDR), serverSocket.getInetAddress());
+//            
+//            assertReuseAddr(serverSocket, false);
+//        } finally {
+//            close(serverSocket);
+//        }
+//        
+//        try {
+//            ServerSocketFactoryWrapper wrapper = new ServerSocketFactoryWrapper(wrapped);
+//            wrapper.setReuseAddress(true);
+//
+//            int port = PortUtil.findFreePort(LOCALHOST);
+//            
+//            serverSocket = wrapper.createServerSocket(port);
+//            
+//            assertTrue(serverSocket.isBound());
+//            assertEquals(port, serverSocket.getLocalPort());
+//            assertEquals(InetAddress.getByName(WILDCARD_ADDR), serverSocket.getInetAddress());
+//            
+//            assertReuseAddr(serverSocket, true);
+//        } finally {
+//            close(serverSocket);
+//        }        
+//    }
+//    
+//    public void testCreateServerSocketBoundToPortWildCardAddressWithBackLog() throws Exception {
+//        ServerSocketFactory wrapped = ServerSocketFactory.getDefault();
+//        
+//        ServerSocket serverSocket = null;
+//        int backlog = 10;
+//        
+//        try {
+//            ServerSocketFactoryWrapper wrapper = new ServerSocketFactoryWrapper(wrapped);
+//            wrapper.setReuseAddress(false);
+//            
+//            int port = PortUtil.findFreePort(LOCALHOST);
+//            
+//            serverSocket = wrapper.createServerSocket(port, backlog);
+//            
+//            assertTrue(serverSocket.isBound());
+//            assertEquals(port, serverSocket.getLocalPort());
+//            assertEquals(InetAddress.getByName(WILDCARD_ADDR), serverSocket.getInetAddress());
+//            
+//            assertReuseAddr(serverSocket, false);
+//        } finally {
+//            close(serverSocket);
+//        }
+//        
+//        try {
+//            ServerSocketFactoryWrapper wrapper = new ServerSocketFactoryWrapper(wrapped);
+//            wrapper.setReuseAddress(true);
+//
+//            int port = PortUtil.findFreePort(LOCALHOST);
+//            
+//            serverSocket = wrapper.createServerSocket(port, backlog);
+//            
+//            assertTrue(serverSocket.isBound());
+//            assertEquals(port, serverSocket.getLocalPort());
+//            assertEquals(InetAddress.getByName(WILDCARD_ADDR), serverSocket.getInetAddress());
+//            
+//            assertReuseAddr(serverSocket, true);
+//        } finally {
+//            close(serverSocket);
+//        }        
+//    }
+//    
+//    public void testCreateServerSocketBoundToPortSpecificInterface() throws Exception {
+//        ServerSocketFactory wrapped = ServerSocketFactory.getDefault();
+//        
+//        ServerSocket serverSocket = null;
+//        int backlog = 10;
+//        InetAddress localhost = InetAddress.getLocalHost();
+//        
+//        try {
+//            ServerSocketFactoryWrapper wrapper = new ServerSocketFactoryWrapper(wrapped);
+//            wrapper.setReuseAddress(false);
+//            
+//            int port = PortUtil.findFreePort(LOCALHOST);
+//            
+//            serverSocket = wrapper.createServerSocket(port, backlog, localhost);
+//            
+//            assertTrue(serverSocket.isBound());
+//            assertEquals(port, serverSocket.getLocalPort());
+//            assertEquals(localhost, serverSocket.getInetAddress());
+//            
+//            assertReuseAddr(serverSocket, false);
+//        } finally {
+//            close(serverSocket);
+//        }
+//        
+//        try {
+//            ServerSocketFactoryWrapper wrapper = new ServerSocketFactoryWrapper(wrapped);
+//            wrapper.setReuseAddress(true);
+//
+//            int port = PortUtil.findFreePort(LOCALHOST);
+//            
+//            serverSocket = wrapper.createServerSocket(port, backlog, localhost);
+//            
+//            assertTrue(serverSocket.isBound());
+//            assertEquals(port, serverSocket.getLocalPort());
+//            assertEquals(localhost, serverSocket.getInetAddress());
+//            
+//            assertReuseAddr(serverSocket, true);
+//        } finally {
+//            close(serverSocket);
+//        }        
+//    }
 
     private void assertReuseAddr(ServerSocket serverSocket, boolean assertTrue) 
         throws SocketException {

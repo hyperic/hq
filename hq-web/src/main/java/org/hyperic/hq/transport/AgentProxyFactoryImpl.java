@@ -27,7 +27,7 @@ package org.hyperic.hq.transport;
 
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.transport.util.AsynchronousInvoker;
-import org.jboss.remoting.transporter.TransporterClient;
+
 
 /**
  * The factory class for creating proxies to agent services. Note that proxy 
@@ -96,9 +96,10 @@ public class AgentProxyFactoryImpl implements AgentProxyFactory {
      * @see org.hyperic.hq.transport.AgentProxyFactory#destroyService(java.lang.Object)
      */
     public void destroyService(Object proxy) {
-        if (proxy != null) {
-            TransporterClient.destroyTransporterClient(proxy);            
-        }
+      //TODO : remoting uncomment
+//        if (proxy != null) {
+//            TransporterClient.destroyTransporterClient(proxy);            
+//        }
     }
 
 }
