@@ -23,7 +23,7 @@
  * USA.
  */
 
-package org.hyperic.lather.jboss;
+package org.hyperic.lather.server;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -65,7 +65,7 @@ import org.hyperic.util.encoding.Base64;
  * XXX -- We could do more with caching the method/object which we are
  *        invoking, but right now, it seems to be quite fast.
  */
-public class JBossLatherServlet 
+public class LatherServlet 
     extends HttpServlet
 {
     private static final String PROP_PREFIX =
@@ -84,7 +84,7 @@ public class JBossLatherServlet
         PROP_PREFIX + "connID";
 
     private final Log log = 
-        LogFactory.getLog(JBossLatherServlet.class.getName());
+        LogFactory.getLog(LatherServlet.class.getName());
     private String       dispatchBean;
     private String       dispatchMethod;
     private String       dispatchClass;
@@ -253,7 +253,7 @@ public class JBossLatherServlet
         try {
             val = xCoder.decode(dIs, valClass);
         } catch(LatherRemoteException exc){
-            JBossLatherServlet.issueErrorResponse(resp, exc.toString());
+            LatherServlet.issueErrorResponse(resp, exc.toString());
             return;
         }
 
@@ -269,14 +269,14 @@ public class JBossLatherServlet
         private LatherValue arg;
         private LatherContext ctx;
         private String method;
-        private JBossLatherServlet  servlet;
+        private LatherServlet  servlet;
         private Log                 log;
         private LatherBoss latherBoss;
         
 
         private EJBCaller(HttpServletResponse resp, 
                           LatherXCoder xcoder, LatherContext ctx, String method, LatherValue arg, 
-                          JBossLatherServlet servlet, Log log, LatherBoss latherBoss)
+                          LatherServlet servlet, Log log, LatherBoss latherBoss)
         {
             this.resp    = resp;
            
