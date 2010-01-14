@@ -59,6 +59,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
+import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
@@ -85,8 +86,7 @@ public class AgentManagerImpl implements AgentManager {
     // XXX: These should go elsewhere.
     private static final String CAM_AGENT_TYPE = "covalent-eam";
     private static final String HQ_AGENT_REMOTING_TYPE = "hyperic-hq-remoting";
-    private static final String JBOSS_SERVER_HOME_DIR_PROP = "jboss.server.home.dir";
-    private static final String HQ_PLUGINS_DIR = "/deploy/hq.ear/hq-plugins";
+    private static final String HQ_PLUGINS_DIR = "/hq-plugins";
     private static final String PLUGINS_EXTENSION = "-plugin";
 
     private final Log log = LogFactory.getLog(AgentManagerImpl.class.getName());
@@ -98,11 +98,12 @@ public class AgentManagerImpl implements AgentManager {
     private PermissionManager permissionManager;
     private PlatformDAO platformDao;
     private ServerConfigManager serverConfigManager;
+    private HQApp hqApp;
 
     @Autowired
     public AgentManagerImpl(AgentReportStatusDAO agentReportStatusDao, AgentTypeDAO agentTypeDao, AgentDAO agentDao,
                             ServiceDAO serviceDao, ServerDAO serverDao, PermissionManager permissionManager,
-                            PlatformDAO platformDao, ServerConfigManager serverConfigManager) {
+                            PlatformDAO platformDao, ServerConfigManager serverConfigManager, HQApp hqApp) {
         this.agentReportStatusDao = agentReportStatusDao;
         this.agentTypeDao = agentTypeDao;
         this.agentDao = agentDao;
@@ -111,6 +112,7 @@ public class AgentManagerImpl implements AgentManager {
         this.permissionManager = permissionManager;
         this.platformDao = platformDao;
         this.serverConfigManager = serverConfigManager;
+        this.hqApp = hqApp;
     }
 
     /**
@@ -756,12 +758,8 @@ public class AgentManagerImpl implements AgentManager {
 
         String[][] files = new String[1][2];
 
-        String jbossHome = System.getProperty(JBOSS_SERVER_HOME_DIR_PROP);
-        // this should never happen, but catch it just in case
-        if (jbossHome == null) {
-            log.error("Could not resolve System property " + JBOSS_SERVER_HOME_DIR_PROP);
-        }
-        File src = new File(jbossHome + HQ_PLUGINS_DIR, plugin);
+       
+        File src = new File(hqApp.getWebAccessibleDir() + HQ_PLUGINS_DIR, plugin);
         if (!src.exists()) {
             throw new FileNotFoundException("Plugin " + plugin + " could not be found");
         }
@@ -812,13 +810,7 @@ public class AgentManagerImpl implements AgentManager {
         getAgent(aid);
 
         // perform some basic error checking before enqueueing.
-        String jbossHome = System.getProperty(JBOSS_SERVER_HOME_DIR_PROP);
-        // this should never happen, but catch it just in case
-        if (jbossHome == null) {
-            log.error("Could not resolve System property " + JBOSS_SERVER_HOME_DIR_PROP);
-        }
-
-        File src = new File(jbossHome + HQ_PLUGINS_DIR, plugin);
+        File src = new File(hqApp.getWebAccessibleDir() + HQ_PLUGINS_DIR, plugin);
         if (!src.exists()) {
             throw new FileNotFoundException("Plugin " + plugin + " could not be found");
         }
@@ -992,14 +984,11 @@ public class AgentManagerImpl implements AgentManager {
 
         File repository = new File(repositoryDir);
 
-        // A relative repository dir should be resolved against
-        // jboss.server.home.dir.
+        // A relative repository dir should be resolved against web app root
         // An absolute repository dir is allowed in case the bundle repository
         // resides outside of the HQ server install.
         if (!repository.isAbsolute()) {
-            String hqEarDir = System.getProperty("jboss.server.home.dir") + File.separator + "deploy" + File.separator +
-                              "hq.ear";
-            repository = new File(hqEarDir, repository.getPath());
+            repository = new File(hqApp.getWebAccessibleDir(), repository.getPath());
         }
 
         return new File(repository, bundleFileName);

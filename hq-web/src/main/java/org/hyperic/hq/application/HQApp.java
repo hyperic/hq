@@ -33,6 +33,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
+import javax.annotation.PostConstruct;
+import javax.servlet.ServletContext;
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
 
@@ -42,19 +44,23 @@ import org.hibernate.Transaction;
 import org.hyperic.hibernate.HibernateInterceptorChain;
 import org.hyperic.hibernate.HypericInterceptor;
 import org.hyperic.hibernate.Util;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.transport.AgentProxyFactory;
 import org.hyperic.hq.transport.ServerTransport;
 import org.hyperic.util.callback.CallbackDispatcher;
 import org.hyperic.util.thread.ThreadWatchdog;
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.ServletContextAware;
 
 
 /**
  * This class represents the central concept of the Hyperic HQ application.
  * (not the Application resource)
  */
-public class HQApp  {
+@Component
+public class HQApp  implements ServletContextAware {
     private static final Log _log = LogFactory.getLog(HQApp.class);
-    private static final HQApp INSTANCE = new HQApp();
+   
 
     
     private ThreadLocal        _txListeners    = new ThreadLocal();
@@ -71,7 +77,7 @@ public class HQApp  {
    
     private final Object initLock = new Object();
    
-
+    private ServletContext servletContext;
     
 
     
@@ -79,11 +85,7 @@ public class HQApp  {
     private final HQHibernateLogger         _hiberLogger;
 
     
-
-
-   
-
-    private HQApp() {
+    public HQApp() {
         _callbacks = new CallbackDispatcher();
         _shutdown = (ShutdownCallback)
             _callbacks.generateCaller(ShutdownCallback.class);
@@ -110,10 +112,17 @@ public class HQApp  {
                 _log.info("Done running shutdown hooks");
             }
         });
-
-       
-
         _hiberLogger = new HQHibernateLogger();
+    }
+
+   
+    @PostConstruct
+    public void init() {
+        String war = servletContext.getRealPath("/");
+        File warDir = new File(war);
+        setWebAccessibleDir(warDir);
+        String restartStorageDir = new File(warDir.getParent()).getParent();
+        setRestartStorageDir(new File(restartStorageDir));
     }
 
    
@@ -289,6 +298,10 @@ public class HQApp  {
             _txListeners.set(null);
         }
     }
+    
+    public void setServletContext(ServletContext servletContext) {
+        this.servletContext = servletContext;
+    }
 
     /**
      * Get an interceptor to process hibernate lifecycle methods.
@@ -308,6 +321,6 @@ public class HQApp  {
     }
 
     public static HQApp getInstance() {
-        return INSTANCE;
+        return Bootstrap.getBean(HQApp.class);
     }
 }
