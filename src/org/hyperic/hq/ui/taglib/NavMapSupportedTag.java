@@ -57,11 +57,11 @@ public class NavMapSupportedTag extends VarSetterBaseTag {
             HttpServletRequest request = (HttpServletRequest)pageContext.getRequest();
             ServletContext ctx = pageContext.getServletContext();
             AppdefBoss ab = ContextUtils.getAppdefBoss(ctx);
-
             boolean navMapSupported = true;
 
             // first try to get the resource ids as eids, then as rid / type
             AppdefEntityID[] eids = null;
+            
             try {
                 eids = RequestUtils.getEntityIds(request);
             } catch (ParameterNotFoundException e) {
@@ -89,7 +89,7 @@ public class NavMapSupportedTag extends VarSetterBaseTag {
                             int sessionId = RequestUtils.getSessionId(request).intValue();
                             AppdefGroupValue group =
                                 ab.findGroup(sessionId, eids[0].getId());
-
+                            
                             if ( group.isGroupAdhoc() ) {
                                 // mixed-group, not supported
                                 navMapSupported = false;
@@ -120,9 +120,7 @@ public class NavMapSupportedTag extends VarSetterBaseTag {
                     navMapSupported = true;
                 }
             }
-
-            // now check to see if the server supports the navigation map
-            navMapSupported = navMapSupported && ab.isNavMapSupported();
+            
             setScopedVariable( new Boolean(navMapSupported) );
         } catch (RemoteException e) {
             log.error("Couldn't interact with bizapp layer.  Assuming NavMap not supported.", e);

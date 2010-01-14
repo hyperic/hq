@@ -485,33 +485,6 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
         return grpMap;
     }
 
-    /**
-     * Method for determining whether or not to show a nav map
-     * (this is a temporary method)
-     * @ejb:interface-method
-     */
-    public boolean isNavMapSupported () { 
-        try {
-            Connection conn = getDBConn();
-            switch (DBUtil.getDBType(conn)) {
-            case DBUtil.DATABASE_ORACLE_8:
-            case DBUtil.DATABASE_ORACLE_9:
-            case DBUtil.DATABASE_ORACLE_10:
-            case DBUtil.DATABASE_POSTGRESQL_7:
-            case DBUtil.DATABASE_POSTGRESQL_8:
-            case DBUtil.DATABASE_MYSQL5:
-                return true;
-            default:
-                return false;
-            }
-        } catch (SQLException e) {
-            log.error("Unable to determine navmap capability");
-            return false;
-        } finally {
-            disconnect();
-        }
-    }
-
     /**<p>Return directly connected resource tree for node level platform</p>
      * @ejb:interface-method
      * @ejb:transaction type="Supports"
