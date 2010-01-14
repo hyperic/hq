@@ -6,7 +6,6 @@
 	<classpathentry kind="src" path="etc"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry exported="true" kind="con" path="GROOVY_SUPPORT"/>
-	<classpathentry kind="var" path="JBOSS_HOME/server/default/lib/jboss-j2ee.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/hq-web"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/hq-pdk-shared"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/hq-rendit"/>
