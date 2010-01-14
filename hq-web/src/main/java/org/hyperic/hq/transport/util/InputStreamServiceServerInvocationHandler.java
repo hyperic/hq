@@ -25,18 +25,20 @@
 
 package org.hyperic.hq.transport.util;
 
-import org.jboss.remoting.transporter.TransporterHandler;
+
 
 /**
  * The server invocation handler that dispatches calls to the {@link InputStreamServiceImpl}.
  */
-public class InputStreamServiceServerInvocationHandler extends TransporterHandler {
+public class InputStreamServiceServerInvocationHandler {
+  //TODO : remoting uncomment
+    //extends TransporterHandler {
 
     /**
      * Default constructor required for configuration through the connector mbean.
      */
     public InputStreamServiceServerInvocationHandler() {
-        super(InputStreamServiceImpl.getInstance());        
+        //super(InputStreamServiceImpl.getInstance());        
     }
 
 }

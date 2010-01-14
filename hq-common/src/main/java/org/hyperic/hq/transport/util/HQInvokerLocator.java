@@ -28,13 +28,15 @@ package org.hyperic.hq.transport.util;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jboss.remoting.InvokerLocator;
+
 
 
 /**
  * The invoker locator containing configuration specific to the HQ transport.
  */
-public class HQInvokerLocator extends InvokerLocator {
+public class HQInvokerLocator {
+  //TODO : remoting uncomment
+    //extends InvokerLocator {
     
     /**
      * The default value for the agent token when the agent token is not yet known.
@@ -68,7 +70,7 @@ public class HQInvokerLocator extends InvokerLocator {
                             String path, 
                             Map parameters, 
                             String agentToken) {
-        super(protocol, host, port, path, parameters);
+        //super(protocol, host, port, path, parameters);
         
         if (agentToken == null) {
             throw new NullPointerException("agent token is null");
@@ -95,7 +97,7 @@ public class HQInvokerLocator extends InvokerLocator {
                             int port, 
                             String path, 
                             Map parameters) {
-        super(protocol, host, port, path, parameters);
+        //super(protocol, host, port, path, parameters);
         
         _agentToken = UNKNOWN_AGENT_TOKEN;
     }
@@ -104,14 +106,14 @@ public class HQInvokerLocator extends InvokerLocator {
      * @return An invoker locator instance with the same connection info as this 
      *         HQ invoker locator.
      */
-    public InvokerLocator toInvokerLocator() {
-        return new InvokerLocator(this.getProtocol(), 
-                                  this.getHost(), 
-                                  this.getPort(), 
-                                  this.getPath(), 
-                                  this.getParameters());
-    }
-    
+//    public InvokerLocator toInvokerLocator() {
+//        return new InvokerLocator(this.getProtocol(), 
+//                                  this.getHost(), 
+//                                  this.getPort(), 
+//                                  this.getPath(), 
+//                                  this.getParameters());
+//    }
+//    
     /**
      * Clone this instance of HQ invoker locator, setting the agent token 
      * to a new value. Note that the {@link MessageDeliveryOptions} are not 
@@ -123,20 +125,20 @@ public class HQInvokerLocator extends InvokerLocator {
      * @throws IllegalArgumentException if the agent token is assigned the value 
      *                                  {@link #UNKNOWN_AGENT_TOKEN}.
      */
-    public HQInvokerLocator cloneWithNewAgentToken(String agentToken) {
-        Map parameters = null;
-        
-        if (this.getParameters() != null) {
-            parameters = new HashMap(this.getParameters());
-        }
-        
-        return new HQInvokerLocator(this.getProtocol(), 
-                                    this.getHost(), 
-                                    this.getPort(), 
-                                    this.getPath(), 
-                                    parameters, 
-                                    agentToken);
-    }
+//    public HQInvokerLocator cloneWithNewAgentToken(String agentToken) {
+//        Map parameters = null;
+//        
+//        if (this.getParameters() != null) {
+//            parameters = new HashMap(this.getParameters());
+//        }
+//        
+//        return new HQInvokerLocator(this.getProtocol(), 
+//                                    this.getHost(), 
+//                                    this.getPort(), 
+//                                    this.getPath(), 
+//                                    parameters, 
+//                                    agentToken);
+//    }
         
     /**
      * @return The agent token or {@link #UNKNOWN_AGENT_TOKEN} if the 

@@ -99,7 +99,6 @@
 		<fileset dir="${thirdparty.lib}/tapestry" includes="*.jar" />
 		<fileset dir="${wrapper.lib}" includes="*.jar" />
 		<fileset dir="${hibernate.lib}" includes="*.jar" />
-		<fileset dir="${jboss.home}/lib" includes="jboss-system.jar" />
 		<fileset dir="${hq.plugins}" includes="**/build-lib/*.jar" />
 		<fileset dir="${hq.plugins}" includes="**/lib/*.jar" />
 	</path>
@@ -980,11 +979,6 @@
 </copy>
 
 <copy todir="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/lib">
-	<fileset dir="${thirdparty.lib}">
-		<include name="jboss-remoting.jar" />
-		<include name="jboss-common.jar" />
-		<include name="jboss-jmx.jar" />
-	</fileset>
 	<fileset dir="${thirdparty.lib}/hibernate" includes="concurrent*.jar" />
 </copy>
 

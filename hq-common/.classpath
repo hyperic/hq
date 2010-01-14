@@ -111,14 +111,11 @@
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.web.struts-3.0.0.CI-503.jar" sourcepath="thirdparty/lib-src/org.springframework.web.struts-sources-3.0.0.CI-503.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/com.springsource.javax.activation-1.1.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/com.springsource.javax.mail-1.4.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="thirdparty/lib/jboss-remoting.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/com.springsource.javax.transaction-1.1.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/com.springsource.javax.servlet.jsp-2.1.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/spring-security-config-3.0.0.RELEASE.jar" sourcepath="thirdparty/lib-src/spring-security-config-3.0.0.RELEASE-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/spring-security-core-3.0.0.RELEASE.jar" sourcepath="thirdparty/lib-src/spring-security-core-3.0.0.RELEASE-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/spring-security-taglibs-3.0.0.RELEASE.jar" sourcepath="thirdparty/lib-src/spring-security-taglibs-3.0.0.RELEASE-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/spring-security-web-3.0.0.RELEASE.jar" sourcepath="thirdparty/lib-src/spring-security-web-3.0.0.RELEASE-sources.jar"/>
-	<classpathentry exported="true" kind="var" path="JBOSS_HOME/lib/jboss-system.jar"/>
-	<classpathentry exported="true" kind="lib" path="thirdparty/lib/jboss-common.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
