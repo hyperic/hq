@@ -1,3 +1,4 @@
+import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.hqu.rendit.BaseController
 import org.hyperic.hq.hqu.rendit.html.HtmlUtil
 
@@ -99,9 +100,8 @@ class JmxController extends BaseController
     }
     
     private getServerFilters() {
-        def jbossHome = System.properties["jboss.server.home.dir"]
         def filters = []
-        File dir = new File("${jbossHome}/deploy/hq.ear/hq.war/hqu/jmx/conf");
+        File dir = new File(HQApp.getInstance().getWebAccessibleDir(),"hqu/jmx/conf");
         XmlParser parser = new XmlParser()
         def children = dir.listFiles();
         for (child in children) {

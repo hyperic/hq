@@ -9,12 +9,14 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * Default implementation of {@link AlertConditionEvaluatorFactory}
  * @author jhickey
  * 
  */
+@Component
 public class AlertConditionEvaluatorFactoryImpl implements AlertConditionEvaluatorFactory {
 
     private final ZeventEnqueuer zeventEnqueuer;

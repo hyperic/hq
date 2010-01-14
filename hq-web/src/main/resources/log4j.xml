@@ -39,7 +39,7 @@
 
 	<!--
 		<appender name="SYSLOG" class="org.apache.log4j.net.SyslogAppender">
-		<errorHandler class="org.jboss.logging.util.OnlyOnceErrorHandler" />
+		<errorHandler class="org.apache.log4j.helpers.OnlyOnceErrorHandler" />
 		<param name="Facility" value="SYSLOG" /> <param
 		name="FacilityPrinting" value="true" /> <param name="SyslogHost"
 		value="localhost" /> <layout class="org.apache.log4j.PatternLayout">

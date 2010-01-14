@@ -176,12 +176,7 @@ public class ProductManagerImpl implements ProductManager {
     /**
      */
     public boolean isReady() {
-        try {
-            return Bootstrap.getBean(ProductPluginDeployer.class).isReady();
-        } catch (Exception e) {
-            log.error("Unable to determine deployer state", e);
-            return false;
-        }
+       return true;
     }
 
     /**

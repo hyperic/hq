@@ -43,18 +43,15 @@ import java.util.jar.JarFile;
 
 import javax.annotation.PostConstruct;
 import javax.naming.NamingException;
-import javax.servlet.ServletContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.application.HQApp;
-import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.hqu.RenditServer;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
-import org.hyperic.hq.notready.NotReadyManager;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginInfo;
 import org.hyperic.hq.product.ProductPlugin;
@@ -69,7 +66,7 @@ import org.springframework.jmx.export.annotation.ManagedMetric;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Service;
-import org.springframework.web.context.ServletContextAware;
+
 
 /**
  * ProductPlugin deployer. We accept $PLUGIN_DIR/*.{jar,xml}
@@ -78,7 +75,7 @@ import org.springframework.web.context.ServletContextAware;
  */
 @ManagedResource("hyperic.jmx:type=Service,name=ProductPluginDeployer")
 @Service
-public class ProductPluginDeployer implements Comparator<String>, ServletContextAware {
+public class ProductPluginDeployer implements Comparator<String> {
 
     private final Log log = LogFactory.getLog(ProductPluginDeployer.class);
 
@@ -91,7 +88,6 @@ public class ProductPluginDeployer implements Comparator<String>, ServletContext
     private DBUtil dbUtil;
     private RenditServer renditServer;
     private ProductManager productManager;
-    private NotReadyManager notReadyManager;
 
     private Log _log = LogFactory.getLog(ProductPluginDeployer.class);
 
@@ -101,17 +97,12 @@ public class ProductPluginDeployer implements Comparator<String>, ServletContext
     private String _pluginDir;
     private String _hquDir;
 
-    private ServletContext servletContext;
-
     @Autowired
-    public ProductPluginDeployer(HQApp hqApp, DBUtil dbUtil, RenditServer renditServer,
-                                 ProductManager productManager,
-                                 NotReadyManager notReadyManager) {
+    public ProductPluginDeployer(HQApp hqApp, DBUtil dbUtil, RenditServer renditServer, ProductManager productManager) {
         this.hqApp = hqApp;
         this.dbUtil = dbUtil;
         this.renditServer = renditServer;
         this.productManager = productManager;
-        this.notReadyManager = notReadyManager;
         // Initialize database
         initDatabase();
 
@@ -130,9 +121,9 @@ public class ProductPluginDeployer implements Comparator<String>, ServletContext
                 dbrs[i].runRoutines(conn);
             }
         } catch (SQLException e) {
-            log.error("SQLException creating connection to " + HQConstants.DATASOURCE, e);
+            log.error("SQLException creating connection: ", e);
         } catch (NamingException e) {
-            log.error("NamingException creating connection to " + HQConstants.DATASOURCE, e);
+            log.error("NamingException creating connection: ", e);
         } finally {
             DBUtil.closeConnection(ProductPluginDeployer.class, conn);
         }
@@ -211,7 +202,7 @@ public class ProductPluginDeployer implements Comparator<String>, ServletContext
         try {
             loadPlugins();
         } catch (Exception e) {
-            log.error("Error loading product plugins",e);
+            log.error("Error loading product plugins", e);
         }
 
         Collections.sort(_plugins, this);
@@ -219,11 +210,9 @@ public class ProductPluginDeployer implements Comparator<String>, ServletContext
         for (String pluginName : _plugins) {
             deployPlugin(pluginName);
         }
-        
+
         _plugins.clear();
         startConcurrentStatsCollector();
-
-        setReady(true);
 
     }
 
@@ -377,37 +366,11 @@ public class ProductPluginDeployer implements Comparator<String>, ServletContext
         return info;
     }
 
-   
-
     public int compare(String s1, String s2) {
         int order1 = _ppm.getPluginInfo(s1).deploymentOrder;
         int order2 = _ppm.getPluginInfo(s2).deploymentOrder;
 
         return order1 - order2;
-    }
-
-    private void setReady(boolean ready) {
-        try {
-            notReadyManager.setReady(ready);
-        } catch (Exception e) {
-            _log.error("Unable to declare application ready", e);
-        }
-    }
-
-    /**
-     *
-     */
-    @ManagedAttribute
-    public boolean isReady() {
-        Boolean isReady;
-        try {
-            isReady = notReadyManager.isReady();
-        } catch (Exception e) {
-            _log.error("Unable to get Application's ready state", e);
-            return false;
-        }
-
-        return isReady.booleanValue();
     }
 
     private String registerPluginJar(String pluginJar) {
@@ -423,7 +386,7 @@ public class ProductPluginDeployer implements Comparator<String>, ServletContext
         }
     }
 
-    private void deployPlugin(String plugin)  {
+    private void deployPlugin(String plugin) {
         try {
             productManager.deploymentNotify(plugin);
         } catch (Exception e) {
@@ -431,25 +394,18 @@ public class ProductPluginDeployer implements Comparator<String>, ServletContext
         }
     }
 
-    /**
-     * MBean Service start method. This method is called when JBoss is deploying
-     * the MBean, unfortunately, the dependencies that this has with
-     * HighAvailService and with other components is such that the only thing
-     * this method does is queue up the plugins that are ready for deployment.
-     * The actual deployment occurs when the startDeployer() method is called.
-     */
     @PostConstruct
     public void start() throws Exception {
-        String war = servletContext.getRealPath("/");
+        String war = hqApp.getWebAccessibleDir().toString();
         // native libraries are deployed into another directory
         // which is not next to sigar.jar, so we drop this hint
         // to find it.
         System.setProperty("org.hyperic.sigar.path", war + "/sigar_bin/lib");
 
         _hquDir = war + "/" + HQU;
-        
+
         _pluginDir = war + "/" + PLUGIN_DIR;
-        
+
         File propFile = ProductPluginManager.PLUGIN_PROPERTIES_FILE;
         _ppm = new ProductPluginManager(propFile);
         _ppm.setRegisterTypes(true);
@@ -469,34 +425,16 @@ public class ProductPluginDeployer implements Comparator<String>, ServletContext
             _log.error(e);
         }
 
+        ProductPluginManager.setPdkPluginsDir(war + "/hq-plugins");
         _ppm.init();
-
-        File warDir = new File(war);
-        hqApp.setWebAccessibleDir(warDir);
-
-        String restartStorageDir = new File(warDir.getParent()).getParent();
-        hqApp.setRestartStorageDir(new File(restartStorageDir));
-
-        // turn off ready filter asap at shutdown
-        // this.stop() won't run until all files are undeploy()ed
-        // which may take several minutes.
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            public void run() {
-                setReady(false);
-            }
-        });
-
         serverStarted();
     }
 
     /**
      * 
      */
-    // TODO this is never called (used to be an MBean and called by JBoss on
-    // going down)
     @ManagedOperation
     public void stop() {
-        setReady(false);
         _plugins.clear();
     }
 
@@ -526,9 +464,8 @@ public class ProductPluginDeployer implements Comparator<String>, ServletContext
         }
     }
 
-  
     private void deployHqu(String plugin, URL pluginFile) throws Exception {
-        URLClassLoader pluginClassloader = new URLClassLoader(new URL[] {pluginFile});
+        URLClassLoader pluginClassloader = new URLClassLoader(new URL[] { pluginFile });
         final String prefix = HQU + "/";
         URL hqu = pluginClassloader.getResource(prefix);
         if (hqu == null) {
@@ -552,7 +489,7 @@ public class ProductPluginDeployer implements Comparator<String>, ServletContext
     private void loadPlugins() throws Exception {
         File pluginDir = new File(getPluginDir());
         File[] plugins = pluginDir.listFiles();
-        for(File pluginFile : plugins) {
+        for (File pluginFile : plugins) {
             String plugin = registerPluginJar(pluginFile.toString());
             if (plugin != null) {
                 _plugins.add(plugin);
@@ -561,7 +498,4 @@ public class ProductPluginDeployer implements Comparator<String>, ServletContext
         }
     }
 
-    public void setServletContext(ServletContext servletContext) {
-        this.servletContext = servletContext;
-    }
 }

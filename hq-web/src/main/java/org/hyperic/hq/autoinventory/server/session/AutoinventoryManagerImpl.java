@@ -94,7 +94,6 @@ import org.hyperic.hq.autoinventory.shared.AutoinventoryManager;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.dao.AIHistoryDAO;
 import org.hyperic.hq.dao.AIPlatformDAO;
@@ -120,7 +119,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AutoinventoryManagerImpl implements AutoinventoryManager {
     private Log log = LogFactory.getLog(AutoinventoryManagerImpl.class.getName());
 
-    protected final String DATASOURCE_NAME = HQConstants.DATASOURCE;
+   
 
     private AutoinventoryPluginManager aiPluginManager;
     private AIScheduleManager aiScheduleManager;

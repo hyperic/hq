@@ -75,29 +75,6 @@
 		<constructor-arg ref="latherDispatcher" />
 	</bean>
 
-	<!--
-		These components have to be initialized here instead of through
-		@Component because HQApp restart storage dir is set through
-		ProductPluginDeployer loadConfig() after server is started.
-	-->
-	<!--
-		TODO configure storage dir separately once we're off JBoss and then
-		these can be instantiated through component scanning
-	-->
-	<bean id="hqApp" class="org.hyperic.hq.application.HQApp"
-		factory-method="getInstance" />
-
-	<bean
-		class="org.hyperic.hq.events.server.session.FileAlertConditionEvaluatorStateRepository">
-		<constructor-arg value="#{ hqApp.restartStorageDir}" />
-	</bean>
-
-	<bean
-		class="org.hyperic.hq.events.server.session.AlertConditionEvaluatorFactoryImpl" />
-
-	<bean
-		class="org.hyperic.hq.events.server.session.AlertConditionEvaluatorRepositoryImpl" />
-
 	<bean class="org.hyperic.hq.events.server.session.TriggersCreatedListener" />
 
 	<!-- This bean refers to various classes that should be loaded at startup. Its only interest is loading the classes listed 

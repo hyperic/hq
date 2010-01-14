@@ -562,18 +562,6 @@ public final class ConcurrentStatsCollector {
         register(new MBeanCollector("PLATFORM_COUNT",
             "hyperic.jmx:name=HQInternal", "PlatformCount", false));
 
-        register(new MBeanCollector("JDBC_HQ_DS_AVAIL_CONNS",
-            "jboss.jca:service=ManagedConnectionPool,name=HypericDS",
-            "AvailableConnectionCount", false));
-
-        register(new MBeanCollector("JDBC_HQ_DS_IN_USE",
-            "jboss.jca:service=ManagedConnectionPool,name=HypericDS",
-            "ConnectionCount", false));
-
-        register(new MBeanCollector("JMS_EVENT_TOPIC",
-            "jboss.mq.destination:service=Topic,name=eventsTopic",
-            "AllMessageCount", false));
-
         register(new MBeanCollector(
             "EDEN_MEMORY_USED", "java.lang:type=MemoryPool,name=",
             new String[] {"Par Eden Space", "PS Eden Space", "Eden Space"},

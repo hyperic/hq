@@ -51,7 +51,7 @@ public class UIStartupListener implements StartupListener {
     private RenditServer renditServer;
     private ResourceDeleteWatcher resourceDeleteWatcher;
     private HQApp hqApp;
-    //TODO this is only injected to ensure that PPD.start() is called first to set the web accessible dir and unpack ui plugins from product plugins.  Make this cleaner
+    //TODO this is only injected to ensure that PPD.start() is called first to unpack ui plugins from product plugins.  Make this cleaner
     private ProductPluginDeployer productPluginDeployer;
 
     @Autowired

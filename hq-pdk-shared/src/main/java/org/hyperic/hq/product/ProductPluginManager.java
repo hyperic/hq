@@ -338,14 +338,7 @@ public class ProductPluginManager
             setPdkPluginsDir(pluginsDir);
             log.info(PROP_PDK_DIR + "=" + getPdkDir());
         } else {
-            String serverHome = System.getProperty("jboss.server.home.dir");
-            if (serverHome != null) {
-                setPdkPluginsDir(serverHome + "/deploy/hq.war/hq-plugins");
-            }
-            String tmp = System.getProperty("jboss.server.temp.dir");
-            if (tmp == null) {
-                tmp = System.getProperty("java.io.tmpdir");
-            }
+            String tmp = System.getProperty("java.io.tmpdir");
             File work = new File(tmp + "/pdk" + workDir);
             setPdkWorkDir(work.getPath());
             if (!work.exists()) {
@@ -937,7 +930,7 @@ public class ProductPluginManager
 
             PluginInfo info = new PluginInfo(plugin, jarName);
             // e.g. for finding hq-plugin.xml
-            // when deployed under jboss
+            // when deployed on server
             // resourceLoader != plugin.getClass().getClassLoader()
             if (resourceLoader == null) {
                 resourceLoader = plugin.getClass().getClassLoader();

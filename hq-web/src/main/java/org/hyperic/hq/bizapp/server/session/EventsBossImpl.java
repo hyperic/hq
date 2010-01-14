@@ -1327,7 +1327,7 @@ public class EventsBossImpl implements EventsBoss {
 
     /**
      * Fix a single alert. TODO: remove comment below Method WAS "NotSupported"
-     * since all the alert fixes may take longer than the jboss transaction
+     * since all the alert fixes may take longer than the transaction
      * timeout. No need for a transaction in this context.
      * 
      */
@@ -1338,7 +1338,7 @@ public class EventsBossImpl implements EventsBoss {
 
     /**
      * Fix a batch of alerts. TODO: remove comment below Method is
-     * "NotSupported" since all the alert fixes may take longer than the jboss
+     * "NotSupported" since all the alert fixes may take longer than the
      * transaction timeout. No need for a transaction in this context.
      * 
      */
@@ -1366,7 +1366,7 @@ public class EventsBossImpl implements EventsBoss {
 
     /**
      * Fix all previous alerts. Method is "NotSupported" since all the alert
-     * fixes may take longer than the jboss transaction timeout. No need for a
+     * fixes may take longer than the transaction timeout. No need for a
      * transaction in this context.
      */
     @SuppressWarnings("unchecked")

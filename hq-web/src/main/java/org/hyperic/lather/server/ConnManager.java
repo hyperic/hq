@@ -23,49 +23,51 @@
  * USA.
  */
 
-package org.hyperic.hq.product.servlet.filter;
+package org.hyperic.lather.server;
 
-import javax.servlet.http.HttpSessionListener;
-import javax.servlet.http.HttpSessionEvent;
-import javax.servlet.http.HttpSession;
+class ConnManager {
+    static ConnManager mgr = new ConnManager(Integer.MAX_VALUE);
 
-public final class JMXSessionListener 
-    implements HttpSessionListener
-{
-    private int created = 0;
-    private int destroyed = 0;
-    private boolean fresh = true;
-    
-    public JMXSessionListener() {
+    private Object connLock = new Object();
+    private int    maxConns;
+    private int    numConns;
+
+    private ConnManager(int maxConns){
+        this.maxConns = maxConns;
+        this.numConns = 0;
     }
     
-    private void init(HttpSession session) {
-        JMXFilterInitServlet.registerSessionListener(this);
+    static ConnManager getInstance(int maxConns){
+        synchronized(mgr.connLock){
+            mgr.maxConns = maxConns;
+        }
+        return mgr;
     }
 
-    public int getCreated() {
-        return created;
+    int getNumConns(){
+        synchronized(this.connLock){
+            return this.numConns;
+        }
     }
 
-    public void setCreated(int created) {
-        this.created = created;
+    boolean getConn(){
+        synchronized(this.connLock){
+            if(this.numConns >= this.maxConns){
+                return false;
+            }
+
+            this.numConns++;
+        }
+        return true;
     }
 
-    public int getDestroyed() {
-        return destroyed;
-    }
-
-    public void setDestroyed(int destroyed) {
-        this.destroyed = destroyed;
-    }
-
-
-    public void sessionCreated(HttpSessionEvent event) {
-        if(fresh) init(event.getSession());
-        created++;
-    }
-
-    public void sessionDestroyed(HttpSessionEvent event) {
-        destroyed++;
+    void releaseConn(){
+        synchronized(this.connLock){
+            this.numConns--;
+            if(this.numConns < 0){
+                throw new IllegalStateException("Released more connections " +
+                                                "than acquired");
+            }
+        }
     }
 }

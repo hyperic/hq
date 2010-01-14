@@ -355,7 +355,7 @@
     <servlet-name>lather</servlet-name>
     <display-name>Lather Servlet</display-name>
     <servlet-class>
-        org.hyperic.lather.jboss.JBossLatherServlet
+        org.hyperic.lather.server.LatherServlet
     </servlet-class>
     <init-param>
         <param-name>org.hyperic.lather.dispatchBean</param-name>

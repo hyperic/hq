@@ -29,22 +29,16 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Hashtable;
 
-import javax.naming.InitialContext;
 import javax.naming.NamingException;
-
 
 import org.hyperic.util.ConfigPropertyException;
 
 public class IDGenerator {
 
-    private InitialContext itsIC = null;
-
     private int       itsDBType = DBUtil.DATABASE_UNKNOWN;
     private String    itsSequenceName;
     private int       itsSequenceInterval;
-    private String    itsDSName = null;
     private String    itsTableName = null;
 
     private String    itsAlterSQL  = null;
@@ -70,11 +64,10 @@ public class IDGenerator {
     public IDGenerator ( String ctx,
                          String theSequenceName,
                          int    theSequenceInterval,
-                         String theDSName, DBUtil dbUtil ) {
+                         DBUtil dbUtil ) {
         this.ctx            = ctx;
         itsSequenceName     = theSequenceName;
         itsSequenceInterval = theSequenceInterval;
-        itsDSName           = theDSName;
         itsTableName        = getTableName(itsSequenceName);
         isInitialized       = false;
         this.dbUtil = dbUtil;
@@ -142,29 +135,17 @@ public class IDGenerator {
         }
     }
 
-    private static Hashtable getJBossNaming() {
-        String port = System.getProperty("jboss.jnp.port", "2099");
-
-        Hashtable props = new Hashtable();
-
-        props.put("java.naming.factory.initial",
-                  "org.jnp.interfaces.NamingContextFactory");
-        props.put("java.naming.factory.url.pkgs",
-                  "org.jboss.naming:org.jnp.interfaces");
-        props.put("java.naming.provider.url",
-                  "jnp://localhost:" + port);
-
-        return props;
-    }
+  
 
     private synchronized void init ()
         throws ConfigPropertyException, NamingException, SQLException {
 
-        if ( isInitialized ) return;
+        if ( isInitialized ) {
+            return;
+        }
         isInitialized = true;
 
-        itsIC = new InitialContext(getJBossNaming());
-
+       
         Connection conn = null;
         try {
             conn = getConnection();
@@ -221,6 +202,6 @@ public class IDGenerator {
     }
 
     private Connection getConnection() throws NamingException, SQLException {
-        return dbUtil.getConnByContext(itsIC, itsDSName);
+        return dbUtil.getConnection();
     }
 }

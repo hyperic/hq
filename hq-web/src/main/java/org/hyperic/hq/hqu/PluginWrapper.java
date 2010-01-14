@@ -70,11 +70,8 @@ public class PluginWrapper {
      * @return A unique temporary directory for embedded jar deployments.
      */
     private File getTempDir() {
-        String tmp = System.getProperty("jboss.server.temp.dir");
-        if (tmp == null) {
-            tmp = System.getProperty("java.io.tmpdir");
-        }
-
+        String tmp = System.getProperty("java.io.tmpdir");
+      
         File tmpHquDir = new File(tmp, "hqu");
 
         if (!tmpHquDir.exists()) {

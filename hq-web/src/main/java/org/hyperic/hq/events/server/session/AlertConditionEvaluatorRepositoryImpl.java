@@ -12,6 +12,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.ShutdownCallback;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 /**
  * Default implementation of{@link AlertConditionEvaluatorRepository} This
@@ -24,7 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author jhickey
  * 
  */
-
+@Repository
 public class AlertConditionEvaluatorRepositoryImpl implements AlertConditionEvaluatorRepository, ShutdownCallback {
     private static final Log log = LogFactory.getLog(AlertConditionEvaluatorRepositoryImpl.class);
     private AlertConditionEvaluatorStateRepository alertConditionEvaluatorStateRepository;

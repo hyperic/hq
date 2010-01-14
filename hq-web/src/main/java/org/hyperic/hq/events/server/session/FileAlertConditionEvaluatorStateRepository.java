@@ -15,6 +15,9 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.application.HQApp;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 /**
  * Implementation of {@link AlertConditionEvaluatorRepository} that stores and
@@ -22,12 +25,19 @@ import org.apache.commons.logging.LogFactory;
  * @author jhickey
  * 
  */
+@Repository
 public class FileAlertConditionEvaluatorStateRepository implements AlertConditionEvaluatorStateRepository {
     private final File storageDirectory;
     public static final String EVALUATOR_STATE_FILE_NAME = "AlertConditionEvaluatorStates.dat";
     public static final String EXECUTION_STRATEGY_FILE_NAME = "ExecutionStrategyStates.dat";
     private final Log log = LogFactory.getLog(FileAlertConditionEvaluatorStateRepository.class);
 
+    
+    @Autowired
+    public FileAlertConditionEvaluatorStateRepository(HQApp hqApp) {
+        this.storageDirectory = hqApp.getRestartStorageDir();
+    }
+    
     /**
      * 
      * @param storageDirectory The directory in which to write and read
