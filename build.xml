@@ -29,7 +29,7 @@
 	<property name="hq.agent.handlers" location="${hq.home}/hq-agent/hq-agent-handlers" />
 	<property name="hq.plugins" location="${hq.home}/hq-plugins" />
 
-	<property name="jboss.home" location="${ENV.JBOSS_HOME}" />
+	<property name="tomcat.home" location="${ENV.TOMCAT_HOME}" />
 
 
 	<property name="build.dir" location="${basedir}/build" />
@@ -76,7 +76,7 @@
 
 	<property name="installer.dir" value="${build.dir}/installer" />
 
-	<property name="jboss.deploy.dir" value="${jboss.home}/server/default/deploy" />
+	<property name="tomcat.deploy.dir" value="${tomcat.home}/webapps" />
 
 
 	<path id="pdknative">
@@ -1095,20 +1095,19 @@
 	</delete>
 </target>
 
-<target name="deploy" description="Copy the war to jboss deploy dir ( slow )">
-	<property name="jboss.deploy.dir" value="${jboss.home}/server/default/deploy" />
-	
-	<!-- create the deploy directory -->
-	<mkdir dir="${jboss.deploy.dir}/hq.war" />
-	<copy todir="${jboss.deploy.dir}/hq.war">
+<target name="deploy" description="Copy the war to tomcat deploy dir ( slow )">
+	<!-- Deploy app as ROOT -->
+	<delete dir="${tomcat.deploy.dir}/ROOT" />
+	<mkdir dir="${tomcat.deploy.dir}/ROOT" />
+	<copy todir="${tomcat.deploy.dir}/ROOT">
 		<fileset dir="${war.dir}" includes="**" />
 	</copy>
 </target>
 
 <target name="redeploy" depends="undeploy,deploy" />
 
-<target name="undeploy" description="Remove the war from jboss deploy dir">
-	<delete dir="${jboss.home}/server/default/deploy/hq.war" />
+<target name="undeploy" description="Remove the war from tomcat deploy dir">
+	<delete dir="${tomcat.deploy.dir}/ROOT" />
 </target>
 
 <target name="hq-javadoc" depends="hibernate-prep">
