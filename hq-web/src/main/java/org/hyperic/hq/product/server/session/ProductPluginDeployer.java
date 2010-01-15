@@ -419,7 +419,7 @@ public class ProductPluginDeployer implements Comparator<String> {
             // native sigar libraries. we set sigar.install.home
             // here so plugins which use sigar can find it during Sigar.load()
 
-            String path = getClass().getClassLoader().getResource("sigar_bin").getFile();
+            String path = war + "/sigar_bin";
             _ppm.setProperty("sigar.install.home", path);
         } catch (Exception e) {
             _log.error(e);
