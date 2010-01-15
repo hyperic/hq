@@ -341,16 +341,6 @@
 	</error-page>
 	
 	<!-- Lather servlet -->
-	<filter>
-    	<filter-name>NotReadyFilter</filter-name>
-    	<filter-class>org.hyperic.hq.notready.NotReadyFilter</filter-class>
-  	</filter>
-
-  <filter-mapping>
-    <filter-name>NotReadyFilter</filter-name>
-    <servlet-name>lather</servlet-name>
-  </filter-mapping>
-
   <servlet>
     <servlet-name>lather</servlet-name>
     <display-name>Lather Servlet</display-name>
