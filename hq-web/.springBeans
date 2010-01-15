@@ -10,7 +10,6 @@
 		<config>src/main/resources/META-INF/spring/jms-context.xml</config>
 		<config>src/main/resources/META-INF/spring/app-context.xml</config>
 		<config>src/main/resources/META-INF/spring/mail-context.xml</config>
-		<config>src/main/resources/META-INF/spring/security-context.xml</config>
 	</configs>
 	<configSets>
 		<configSet>
@@ -21,7 +20,6 @@
 				<config>src/main/resources/META-INF/spring/app-context.xml</config>
 				<config>src/main/resources/META-INF/spring/jms-context.xml</config>
 				<config>src/main/resources/META-INF/spring/mail-context.xml</config>
-				<config>src/main/resources/META-INF/spring/security-context.xml</config>
 			</configs>
 		</configSet>
 	</configSets>
