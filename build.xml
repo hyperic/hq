@@ -495,7 +495,6 @@
 				<include name="commons-lang-2.3.jar" />
 				<include name="commons-logging-1.0.4.jar" />
 				<include name="com.springsource.org.apache.commons.pool-1.5.3.jar" />
-				<include name="com.springsource.javax*.jar" />
 				<include name="log4j-1.2.14.jar" />
 				<include name="quartz-1.6.5.jar" />
 				<include name="quartz-oracle-1.6.5.jar" />
@@ -529,10 +528,11 @@
 
 				<include name="ant.jar" />
 				<include name="ant-lancher.jar" />
-
+				<include name="com.springsource.javax.activation*.jar" />
+				<include name="com.springsource.javax.mail*.jar" />
+				<include name="com.springsource.javax.transaction*.jar" />
 				<include name="com.springsource.com.sun.xml.bind-*.jar" />
-				<include name="com.springsource.javax.xml.bind-*.jar" />
-				<include name="com.springsource.javax.xml.stream-*.jar" />
+				<include name="com.springsource.javax.xml.*.jar" />
 
 				<include name="*aopalliance*.jar" />
 				<include name="*dbcp*.jar" />
