@@ -62,7 +62,7 @@ public class AgentConnections {
         }
     }
 
-    int getNumConnected() {
+    public int getNumConnected() {
         int res = 0;
         synchronized (_activeConns) {
             for (Iterator i=_activeConns.entrySet().iterator(); i.hasNext(); ) {
@@ -123,13 +123,13 @@ public class AgentConnections {
         }
     }
     
-    long getTotalConnections() {
+    public long getTotalConnections() {
         synchronized (_activeConns) {
             return _totalConns;
         }
     }
     
-    static AgentConnections getInstance() {
+    public static AgentConnections getInstance() {
         return INSTANCE;
     }
 }

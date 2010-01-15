@@ -161,10 +161,7 @@ public class ProductManagerImpl implements ProductManager {
         }
     }
 
-    /*
-     * There is once instance of the ProductPluginDeployer service MBean, it
-     * will be deployed before we are created.
-     */
+   
     private ProductPluginManager getProductPluginManager() {
         return Bootstrap.getBean(ProductPluginDeployer.class).getProductPluginManager();
     }

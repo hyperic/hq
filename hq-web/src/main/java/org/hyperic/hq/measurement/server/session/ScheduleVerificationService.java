@@ -4,7 +4,7 @@
 package org.hyperic.hq.measurement.server.session;
 
 /**
- * MBean interface.
+ * 
  */
 public interface ScheduleVerificationService {
 

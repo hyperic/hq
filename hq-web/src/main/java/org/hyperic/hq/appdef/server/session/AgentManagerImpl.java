@@ -449,18 +449,6 @@ public class AgentManagerImpl implements AgentManager {
     }
 
     /**
-     */
-    public int getNumConnectedAgents() {
-        return AgentConnections.getInstance().getNumConnected();
-    }
-
-    /**
-     */
-    public long getTotalConnectedAgents() {
-        return AgentConnections.getInstance().getTotalConnections();
-    }
-
-    /**
      * Find an agent listening on a specific IP & port
      */
     public Agent getAgent(String ip, int port) throws AgentNotFoundException {

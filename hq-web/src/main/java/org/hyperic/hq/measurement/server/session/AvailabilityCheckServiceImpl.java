@@ -83,7 +83,7 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
         // We have to get at least the measurement interval
         long maxInterval = Math.max(Math.max(interval, wait), measInterval);
 
-        // Begin is maximum of mbean interval or measurement create time
+        // Begin is maximum of interval or measurement create time
         long begin = Math.max(end - maxInterval, meas.getMtime() + measInterval);
         return TimingVoodoo.roundDownTime(begin, measInterval);
     }

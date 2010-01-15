@@ -27,6 +27,7 @@ package org.hyperic.hq.bizapp.server.session;
 
 import java.util.List;
 
+import org.hyperic.hq.appdef.server.session.AgentConnections;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.measurement.server.session.CollectionSummary;
@@ -83,14 +84,12 @@ public class HQInternalService implements HQInternalServiceMBean {
         return platformManager.getPlatformCount().intValue();
     }
 
-  
-
     public long getAgentRequests() {
-        return agentManager.getTotalConnectedAgents();
+        return AgentConnections.getInstance().getTotalConnections();
     }
     
     public int getAgentConnections() {
-        return agentManager.getNumConnectedAgents();
+        return AgentConnections.getInstance().getNumConnected();
     }
 
     public long getZeventMaxWait() {

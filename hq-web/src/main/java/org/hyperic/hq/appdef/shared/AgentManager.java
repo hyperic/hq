@@ -145,10 +145,6 @@ public interface AgentManager {
 
     public Collection<Agent> getConnectedAgents();
 
-    public int getNumConnectedAgents();
-
-    public long getTotalConnectedAgents();
-
     /**
      * Find an agent listening on a specific IP & port
      */
