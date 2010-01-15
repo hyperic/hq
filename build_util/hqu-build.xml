@@ -3,8 +3,8 @@
 <project name="hqu-build" basedir="..">
 
 	<property name="rendit_sys.dir" value="${hq.home}/hq-rendit" />
-	<property name="hqu.deployed.dir" value="${jboss.home}/server/default/deploy/hq.war/hqu" />
-	<property name="hqu.deployed.rendit_sys.dir" value="${jboss.home}/server/default/deploy/hq.war/rendit_sys" />
+	<property name="hqu.deployed.dir" value="${tomcat.deploy.dir}/ROOT/hqu" />
+	<property name="hqu.deployed.rendit_sys.dir" value="${tomcat.deploy.dir}/ROOT/rendit_sys" />
 
 
 	<target name="hqu-init" unless="hqu-init.notrequired">
@@ -63,7 +63,7 @@
 
 	<!-- HQU == UI Plugins -->
 	<target name="hqu-deploy" depends="hqu-init">
-		<property name="wardir" value="${jboss.home}/server/default/deploy/hq.war" />
+		<property name="wardir" value="${tomcat.deploy.dir}/ROOT" />
 		<property name="plugindir" value="${basedir}/hq-ui-plugins" />
 		<hqu-copy wardir="${wardir}" plugindir="{plugindir}"/>
 	</target>
@@ -91,7 +91,7 @@
 	</target>
 
 	<target name="hqu-redeploy-plugin" depends="hqu-init">
-		<hqu-redeploy-plugin wardir="${jboss.home}/server/default/deploy/hq.war" plugin="${plugin}" />
+		<hqu-redeploy-plugin wardir="${tomcat.deploy.dir}/ROOT" plugin="${plugin}" />
 	</target>
 
 	<target name="hqu-gen-scaffold" depends="hqu-init">
