@@ -9748,22 +9748,22 @@ has already been defined.
 
   <schemaSpec version="3.142.1">
     <schema-directSQL>
-        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ALERT" targetDB="postgresql">
+        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ALERT" targetDB="postgresql" fail="false">
            alter table EAM_ALERT_ACTION_LOG drop constraint FK423FA3CC1AA4E259
         </statement>
-        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ACTION" targetDB="postgresql">
+        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ACTION" targetDB="postgresql" fail="false">
            alter table EAM_ALERT_ACTION_LOG drop constraint FK423FA3CC9C76C3BB
         </statement>
-        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ALERT" targetDB="oracle">
+        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ALERT" targetDB="oracle" fail="false">
            alter table EAM_ALERT_ACTION_LOG drop constraint FK423FA3CC1AA4E259
         </statement>
-        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ACTION" targetDB="oracle">
+        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ACTION" targetDB="oracle" fail="false">
            alter table EAM_ALERT_ACTION_LOG drop constraint FK423FA3CC9C76C3BB
         </statement>
-        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ALERT" targetDB="mysql">
+        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ALERT" targetDB="mysql" fail="false">
            alter table EAM_ALERT_ACTION_LOG drop foreign key FK423FA3CC1AA4E259
         </statement>
-        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ACTION" targetDB="mysql">
+        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ACTION" targetDB="mysql" fail="false">
            alter table EAM_ALERT_ACTION_LOG drop foreign key FK423FA3CC9C76C3BB
         </statement>
     </schema-directSQL>
