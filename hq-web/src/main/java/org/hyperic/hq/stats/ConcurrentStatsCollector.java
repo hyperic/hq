@@ -122,14 +122,19 @@ public final class ConcurrentStatsCollector {
     	
         	final String d =
         		HQApp.getInstance().getRestartStorageDir().getAbsolutePath();
-        	final String logSuffix =
-        		"log" + fs + "hqstats" + fs;
-        	_baseDir = d + fs + logSuffix;
-        	_log.info("using hqstats baseDir " + _baseDir);
-        	final File dir = new File(_baseDir);
-        	if (!dir.exists()) {
-        		dir.mkdir();
+        	final String logDir = "logs";
+        	final File logDirectory = new File(d+ fs + logDir);
+        	if(!(logDirectory.exists())) {
+        	   logDirectory.mkdir();
         	}
+            final String logSuffix =
+            		logDir + fs + "hqstats" + fs;
+            _baseDir = d + fs + logSuffix;
+            _log.info("using hqstats baseDir " + _baseDir);
+            final File dir = new File(_baseDir);
+            if (!dir.exists()) {
+            	dir.mkdir();
+            }
     		_mbeanServer = Bootstrap.getBean(MBeanServer.class);
     		registerInternalStats();
     	
