@@ -29,10 +29,14 @@ import java.awt.image.BufferedImage;
 import java.awt.image.IndexColorModel;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
 import javax.imageio.ImageIO;
+
+import org.hyperic.hq.application.HQApp;
 
 public class ImageUtil
 {
@@ -114,9 +118,7 @@ public class ImageUtil
      * @throws IOException
      */
     public static BufferedImage loadImage(String path) throws IOException {
-        ClassLoader ldr = ImageUtil.class.getClassLoader();
-            
-        InputStream i = ldr.getResourceAsStream(path);
+        InputStream i = new FileInputStream(new File(HQApp.getInstance().getWebAccessibleDir() + "/" + path));
         BufferedImage result = ImageIO.read(i);
         i.close();
         

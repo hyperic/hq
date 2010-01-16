@@ -31,12 +31,15 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.NumberFormat;
 
 import javax.imageio.ImageIO;
 
+import org.hyperic.hq.application.HQApp;
 import org.hyperic.util.data.IDataPoint;
 
 public class AvailabilityReportChart extends Chart{
@@ -72,17 +75,18 @@ public class AvailabilityReportChart extends Chart{
         InputStream i;
         
         try {
-            ClassLoader ldr = AvailabilityReportChart.class.getClassLoader();
-            
-            i = ldr.getResourceAsStream("images/icon_available_green.gif");
+            i = new FileInputStream(new File(HQApp.getInstance().getWebAccessibleDir() + "/images/icon_available_green.gif"));
+           
             GOOD_CIRCLE = ImageIO.read(i);
             i.close();
-                    
-            i = ldr.getResourceAsStream("images/icon_available_red.gif");
+            
+            i = new FileInputStream(new File(HQApp.getInstance().getWebAccessibleDir() + "/images/icon_available_red.gif"));
+          
             DANGER_CIRCLE = ImageIO.read(i);
             i.close();
             
-            i = ldr.getResourceAsStream("images/icon_available_error.gif");
+            i = new FileInputStream(new File(HQApp.getInstance().getWebAccessibleDir() + "/images/icon_available_error.gif"));
+           
             UNKNOWN_CIRCLE = ImageIO.read(i);
             i.close();       
         } catch(IOException e) {
