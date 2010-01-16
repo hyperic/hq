@@ -329,14 +329,14 @@ public class ServiceManagerImpl implements ServiceManager {
 
             // now get the list of PKs
             Set<Integer> viewable = new HashSet<Integer>(getViewableServices(subject));
-            // and iterate over the ejbList to remove any item not in the
+            // and iterate over the List to remove any item not in the
             // viewable list
             int i = 0;
             for (Iterator<Service> it = services.iterator(); it.hasNext(); i++) {
-                Service aEJB = it.next();
-                if (viewable.contains(aEJB.getId())) {
+                Service service = it.next();
+                if (viewable.contains(service.getId())) {
                     // add the item, user can see it
-                    serviceIds.add(aEJB.getId());
+                    serviceIds.add(service.getId());
                 }
             }
 
@@ -1340,14 +1340,14 @@ public class ServiceManagerImpl implements ServiceManager {
                     .getInternal());
 
                 // Lookup the server type
-                ServerType servTypeEJB;
+                ServerType servType;
                 if (serverTypes.containsKey(sinfo.getServerName())) {
-                    servTypeEJB = (ServerType) serverTypes.get(sinfo.getServerName());
+                    servType = (ServerType) serverTypes.get(sinfo.getServerName());
                 } else {
-                    servTypeEJB = serverTypeDAO.findByName(sinfo.getServerName());
-                    serverTypes.put(servTypeEJB.getName(), servTypeEJB);
+                    servType = serverTypeDAO.findByName(sinfo.getServerName());
+                    serverTypes.put(servType.getName(), servType);
                 }
-                stype.setServerType(servTypeEJB);
+                stype.setServerType(servType);
                 resourceManager.createResource(overlord, resourceManager
                     .findResourceTypeByName(AuthzConstants.servicePrototypeTypeName), prototype, stype.getId(), stype
                     .getName(), false, null);

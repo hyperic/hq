@@ -72,7 +72,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * AppdefStatManagerEJB provides summary and aggregate statistical information
+ * AppdefStatManagerImpl provides summary and aggregate statistical information
  * for appdef related entities.
  * <p>
  * 

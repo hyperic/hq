@@ -131,12 +131,12 @@ public class ApplicationDAO extends HibernateDAO<Application>
                     (AppService) aNode.getRemovedChildren().get(j);
                 // this dep has been removed
                 // look it up and delete it
-                AppSvcDependency depEJB =
+                AppSvcDependency dep =
                     adao.findByDependentAndDependor(
                         aNode.getAppService().getId(),
                         removedAsv.getId());
-                if (depEJB != null) {
-                    adao.remove(depEJB);
+                if (dep != null) {
+                    adao.remove(dep);
                 }
             }
             // now iterate over the new and existing deps

@@ -226,7 +226,7 @@ public class EventsBossImpl implements EventsBoss {
 
     /**
      * TODO possibly find another way to return the correct impl of interface if
-     * in HQ or HQ EE. For now, this has to be lazy b/c using SPEL
+     * in HQ or HQ EE. Previously, this had to be lazy b/c using SPEL
      * permissionManager.maintenanceEventManager causes the
      * Bootstrap.getBean(MaintenanceEventManager) to be invoked during creation
      * of ejb-context.xml (which doesn't work b/c Boostrap.context is still set

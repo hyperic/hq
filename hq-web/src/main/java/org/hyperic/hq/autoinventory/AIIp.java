@@ -83,7 +83,7 @@ public class AIIp extends IpBase
 
     private AIIpValue aIIpValue = null;
     /**
-     * legacy EJB DTO pattern
+     * legacy DTO pattern
      * @deprecated use (this) AIIp object instead
      */
     public AIIpValue getAIIpValue()

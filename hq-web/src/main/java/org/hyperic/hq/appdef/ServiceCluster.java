@@ -134,7 +134,7 @@ public class ServiceCluster extends AppdefBean
     private ServiceClusterValue _svcClusterVal = new ServiceClusterValue();
     
     /**
-     * legacy EJB DTO pattern
+     * legacy DTO pattern
      * @deprecated use (this) ServiceCluster object instead
      */
     public ServiceClusterValue getServiceClusterValue() {

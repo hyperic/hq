@@ -33,8 +33,7 @@ import java.util.Map;
 
 /**
  * Implements a generic pager. What is a pager? Let's say you
- * have a large collection of objects, perhaps a long list of
- * EJB Local Interfaces. You're interested in breaking the
+ * have a large collection of objects. You're interested in breaking the
  * mammoth list out into a number pages, each with 25 items on it.
  * You're interested in returning page #17 of such a collection.
  * Why bother implementing the "skip past a bunch of things, then

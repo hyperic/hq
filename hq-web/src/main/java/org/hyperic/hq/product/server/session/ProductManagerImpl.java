@@ -212,13 +212,13 @@ public class ProductManagerImpl implements ProductManager {
         return manager.getConfigSchema(name, info, baseResponse);
     }
 
-    private void updateEJBPlugin(PluginDAO plHome, PluginInfo pInfo) {
-        Plugin ejbPlugin = plHome.findByName(pInfo.name);
-        if (ejbPlugin == null) {
+    private void updatePlugin(PluginDAO plHome, PluginInfo pInfo) {
+        Plugin plugin = plHome.findByName(pInfo.name);
+        if (plugin == null) {
             plHome.create(pInfo.name, pInfo.jar, pInfo.md5);
         } else {
-            ejbPlugin.setPath(pInfo.jar);
-            ejbPlugin.setMD5(pInfo.md5);
+            plugin.setPath(pInfo.jar);
+            plugin.setMD5(pInfo.md5);
         }
     }
 
@@ -253,16 +253,16 @@ public class ProductManagerImpl implements ProductManager {
     public void deploymentNotify(String pluginName) throws PluginNotFoundException,  
          VetoException, NotFoundException {
         ProductPlugin pplugin = (ProductPlugin) getProductPluginManager().getPlugin(pluginName);
-        PluginValue ejbPlugin;
+        PluginValue pluginVal;
         PluginInfo pInfo;
         boolean created = false;
         long start = System.currentTimeMillis();
 
         pInfo = getProductPluginManager().getPluginInfo(pluginName);
         Plugin plugin = pluginDao.findByName(pluginName);
-        ejbPlugin = plugin != null ? plugin.getPluginValue() : null;
+        pluginVal = plugin != null ? plugin.getPluginValue() : null;
 
-        if (ejbPlugin != null && pInfo.name.equals(ejbPlugin.getName()) && pInfo.md5.equals(ejbPlugin.getMD5())) {
+        if (pluginVal != null && pInfo.name.equals(pluginVal.getName()) && pInfo.md5.equals(pluginVal.getMD5())) {
             log.info(pluginName + " plugin up to date");
             if (forceUpdate(pluginName)) {
                 log.info(pluginName + " configured to force update");
@@ -272,14 +272,14 @@ public class ProductManagerImpl implements ProductManager {
             }
         } else {
             log.info(pluginName + " unknown -- registering");
-            created = (ejbPlugin == null);
+            created = (pluginVal == null);
         }
 
         // Get the Appdef entities
         TypeInfo[] entities = pplugin.getTypes();
         if (entities == null) {
             log.info(pluginName + " does not define any resource types");
-            updateEJBPlugin(pluginDao, pInfo);
+            updatePlugin(pluginDao, pInfo);
             if (created)
                 PluginAudit.deployAudit(pluginName, start, System.currentTimeMillis());
             else
@@ -379,7 +379,7 @@ public class ProductManagerImpl implements ProductManager {
         }
         createAlertDefinitions(pInfo);
         pluginDeployed(pInfo);
-        updateEJBPlugin(pluginDao, pInfo);
+        updatePlugin(pluginDao, pInfo);
     }
 
     private void createAlertDefinitions(final PluginInfo pInfo) throws  

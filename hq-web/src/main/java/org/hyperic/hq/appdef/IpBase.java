@@ -60,7 +60,7 @@ public abstract class IpBase extends AppdefBean
 
     /**
      * convenience method for copying simple values
-     * from the legacy EJB Value Object
+     * from the legacy Value Object
      *
      * @deprecated
      */
@@ -71,7 +71,7 @@ public abstract class IpBase extends AppdefBean
     }
 
     /**
-     * legacy EJB DTO pattern
+     * legacy DTO pattern
      * @deprecated use (this) Ip Object instead
      */
     public IpValue getIpValue()

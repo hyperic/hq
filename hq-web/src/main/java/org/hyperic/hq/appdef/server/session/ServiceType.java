@@ -114,7 +114,7 @@ public class ServiceType extends AppdefResourceType
 
     private ServiceTypeValue _serviceTypeValue = null;
     /**
-     * legacy EJB DTO pattern
+     * legacy DTO pattern
      * @deprecated use (this) ServiceType object instead
      * @return
      */

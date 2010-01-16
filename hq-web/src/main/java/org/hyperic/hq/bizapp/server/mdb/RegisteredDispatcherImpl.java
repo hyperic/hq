@@ -85,7 +85,7 @@ public class RegisteredDispatcherImpl implements MessageListener {
 
     /**
      * The onMessage method
-     * @ejb:interface-method
+     * 
      */
     @SuppressWarnings("unchecked")
     public void onMessage(Message inMessage) {

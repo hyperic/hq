@@ -36,7 +36,7 @@
               input="/admin/user/UserAdmin.do?mode=new">
               <set-property property="workflow" value="user/New"/>
               <exception key="exception.user.alreadyExists"
-                         type="javax.ejb.CreateException"
+                         type="org.hyperic.hq.common.ApplicationException"
                          path="/admin/user/UserAdmin.do?mode=new"/>
               <forward name="failure" path="/admin/user/UserAdmin.do?mode=new" />
               <forward name="okassign" path="/admin/user/UserAdmin.do?mode=view"/>              

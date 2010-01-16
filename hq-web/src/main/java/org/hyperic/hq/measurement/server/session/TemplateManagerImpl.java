@@ -66,8 +66,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * The TemplateManagerEJB class is a stateless session bean that can be used to
- * interact with Template EJB's
+ * The TemplateManager can be used to
+ * interact with Templates
  */
 @Service
 @Transactional

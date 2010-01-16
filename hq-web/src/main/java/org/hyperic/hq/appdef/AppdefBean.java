@@ -34,7 +34,7 @@ import org.hyperic.hibernate.PersistedObject;
 
 /**
  * This is the base abstract class for all appdef pojos.
- * This is modeled after the AppdefEntityBean less the EJB code.
+ * This is modeled after the AppdefEntityBean
  */
 public abstract class AppdefBean 
     extends PersistedObject
@@ -93,7 +93,7 @@ public abstract class AppdefBean
         this.modifiedTime = modifiedTime;
     }
 
-    // for legacy EJB assessor
+    // for legacy assessor
     /**
      * @deprecated
      * @return
@@ -110,7 +110,7 @@ public abstract class AppdefBean
     {
         return modifiedTime;
     }
-    // end legacy EJB assessors
+    // end legacy assessors
     public Integer getCid()
     {
         return cid;
@@ -122,7 +122,7 @@ public abstract class AppdefBean
     }
 
     /**
-     * legacy EJB entity bean code
+     * legacy entity bean code
      * @param obj
      * @return
      */

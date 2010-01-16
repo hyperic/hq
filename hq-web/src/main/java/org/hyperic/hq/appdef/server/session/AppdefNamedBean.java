@@ -106,7 +106,7 @@ public abstract class AppdefNamedBean extends AppdefBean
 
     /**
      * Get the appdefEntityId for this platform
-     * legacy code from EJB entity bean
+     * legacy code from entity bean
      */
     public abstract AppdefEntityID getEntityId();
     

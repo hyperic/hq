@@ -187,7 +187,7 @@ public class PlatformType extends AppdefResourceType {
     }
     
     /**
-     * legacy EJB DTO pattern
+     * legacy DTO pattern
      * @deprecated use (this) PlatformType object instead
      */
     public PlatformTypeValue getPlatformTypeValue() {

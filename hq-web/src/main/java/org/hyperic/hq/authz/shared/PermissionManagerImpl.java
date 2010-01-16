@@ -158,11 +158,11 @@ public class PermissionManagerImpl
         ResourceType resTypeBean = getResourceTypeDAO().findByName(resType);
         
         if (resTypeBean != null) {
-            Operation opEJB =
+            Operation op =
                 getOperationDAO().findByTypeAndName(resTypeBean, opName);
             
-            if (opEJB != null) {
-                return findOperationScopeBySubject(subj, opEJB.getId());
+            if (op != null) {
+                return findOperationScopeBySubject(subj, op.getId());
             }
         }
         

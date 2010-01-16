@@ -1179,9 +1179,9 @@ public class RoleManagerImpl implements RoleManager {
         // final list to not be sorted correctly. fix this by
         // combining the two finders into one!
         // FIX for 6924 - dont include duplicate groups
-        for (ResourceGroup groupEJB : otherRoles) {
-            if (!noRoles.contains(groupEJB)) {
-                noRoles.add(groupEJB);
+        for (ResourceGroup group : otherRoles) {
+            if (!noRoles.contains(group)) {
+                noRoles.add(group);
             }
         }
 

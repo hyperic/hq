@@ -174,7 +174,7 @@ public class AISchedule extends PersistedObject
 
     private AIScheduleValue aIScheduleValue = new AIScheduleValue();
     /**
-     * legacy EJB DTO pattern
+     * legacy DTO pattern
      * @deprecated use (this) AISchedule object
      * @return
      */

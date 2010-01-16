@@ -46,8 +46,6 @@ import org.hyperic.hq.authz.server.session.ResourceGroup;
 
 /**
  * An abstract class which all appdef value objects inherit from
- * inheritance is achieved by using:
- * <code>@ejb:value-object name="SomeEntity" match="*" extends="org.hyperic.hq.appdef.shared.AppdefResourceValue"</code>
  * 
  * The accessors provided in this class represent what the UI model labels
  * "General Properties". Any other attribute is assumed to be specific

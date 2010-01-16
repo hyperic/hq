@@ -328,7 +328,7 @@ public class PlatformManagerImpl implements PlatformManager {
         String typeName;
 
         if (id.isService()) {
-            // look up the service ejb
+            // look up the service
             Service service = serviceDAO.get(id.getId());
 
             if (service == null) {
@@ -598,15 +598,15 @@ public class PlatformManagerImpl implements PlatformManager {
     public PageList<PlatformValue> getAllPlatforms(AuthzSubject subject, PageControl pc) throws 
         PermissionException, NotFoundException {
 
-        Collection<Platform> ejbs;
+        Collection<Platform> platforms;
         try {
-            ejbs = getViewablePlatforms(subject, pc);
+            platforms = getViewablePlatforms(subject, pc);
         } catch (NamingException e) {
             throw new SystemException(e);
         }
         // valuePager converts local/remote interfaces to value objects
         // as it pages through them.
-        return valuePager.seek(ejbs, pc);
+        return valuePager.seek(platforms, pc);
     }
 
     /**
@@ -1155,13 +1155,13 @@ public class PlatformManagerImpl implements PlatformManager {
 
             // now get the list of PKs
             Collection<Integer> viewable = getViewablePlatformPKs(subject);
-            // and iterate over the ejbList to remove any item not in the
+            // and iterate over the list to remove any item not in the
             // viewable list
-            for (Platform aEJB : platforms) {
+            for (Platform platform : platforms) {
 
-                if (viewable.contains(aEJB.getId())) {
+                if (viewable.contains(platform.getId())) {
                     // remove the item, user cant see it
-                    platIds.add(aEJB.getId());
+                    platIds.add(platform.getId());
                 }
             }
 
@@ -1197,11 +1197,11 @@ public class PlatformManagerImpl implements PlatformManager {
             }
             // now get the list of PKs
             Collection<Integer> viewable = getViewablePlatformPKs(subject);
-            // and iterate over the ejbList to remove any item not in the
+            // and iterate over the List to remove any item not in the
             // viewable list
             for (Iterator<Platform> it = platforms.iterator(); it.hasNext();) {
-                Platform aEJB = it.next();
-                if (!viewable.contains(aEJB.getId())) {
+                Platform platform = it.next();
+                if (!viewable.contains(platform.getId())) {
                     // remove the item, user can't see it
                     it.remove();
                 }
@@ -1250,7 +1250,7 @@ public class PlatformManagerImpl implements PlatformManager {
         }
         // now get the list of PKs
         Set<Integer> viewable = new HashSet<Integer>(getViewablePlatformPKs(whoami));
-        // and iterate over the ejbList to remove any item not in the
+        // and iterate over the List to remove any item not in the
         // viewable list
         for (Iterator<Platform> i = platforms.iterator(); i.hasNext();) {
             Platform platform = i.next();

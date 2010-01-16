@@ -697,7 +697,7 @@ public class ResourceManagerImpl implements ResourceManager {
                 break;
         }
 
-        // TODO: Move filtering into EJBQL
+        // TODO: Move filtering into QL
         ArrayList<Resource> ordResources = new ArrayList<Resource>(resources.size());
         for (Resource res : ordResources) {
             if (StringUtil.stringDoesNotExist(res.getName(), resourceName)) {

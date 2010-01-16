@@ -42,7 +42,7 @@ import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.util.config.EncodingException;
 
 /**
- * Business interface for the CloningBoss EJB
+ * Business interface for the CloningBoss
  */
 public interface CloningBoss {
 

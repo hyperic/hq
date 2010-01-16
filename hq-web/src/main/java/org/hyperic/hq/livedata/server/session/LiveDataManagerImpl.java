@@ -185,7 +185,7 @@ public class LiveDataManagerImpl implements LiveDataManager {
     /**
      * Run the given live data command.
      * 
-     * @ejb:interface-method
+     * 
      */
     public LiveDataResult getData(AuthzSubject subject,
                                   LiveDataCommand cmd)
@@ -199,7 +199,7 @@ public class LiveDataManagerImpl implements LiveDataManager {
      * older than the cachedTimeout the cached data will be returned.
      * 
      * @param cacheTimeout
-     * @ejb:interface-method
+     * 
      */
     public LiveDataResult getData(AuthzSubject subject,
                                   LiveDataCommand cmd, long cacheTimeout)
@@ -239,7 +239,7 @@ public class LiveDataManagerImpl implements LiveDataManager {
     /**
      * Run a list of live data commands in batch.
      * 
-     * @ejb:interface-method
+     * 
      */
     public LiveDataResult[] getData(AuthzSubject subject,
                                     LiveDataCommand[] commands)
@@ -253,7 +253,7 @@ public class LiveDataManagerImpl implements LiveDataManager {
      * that is not older than the cacheTimeout the cached data will be returned.
      * 
      * @param cacheTimeout The cache timeout given in milliseconds.
-     * @ejb:interface-method
+     * 
      */
     public LiveDataResult[] getData(AuthzSubject subject,
                                     LiveDataCommand[] commands,
@@ -314,7 +314,7 @@ public class LiveDataManagerImpl implements LiveDataManager {
     /**
      * Get the available commands for a given resources.
      * 
-     * @ejb:interface-method
+     * 
      */
     public String[] getCommands(AuthzSubject subject, AppdefEntityID id)
         throws PluginException, PermissionException {
@@ -329,7 +329,7 @@ public class LiveDataManagerImpl implements LiveDataManager {
     }
 
     /**
-     * @ejb:interface-method
+     * 
      */
     public void registerFormatter(LiveDataFormatter f) {
         log.info("Registering formatter [" + f.getName() + "]: " +
@@ -338,7 +338,7 @@ public class LiveDataManagerImpl implements LiveDataManager {
     }
 
     /**
-     * @ejb:interface-method
+     * 
      */
     public void unregisterFormatter(LiveDataFormatter f) {
         log.info("Unregistering formatter [" + f.getName() + "]");
@@ -349,7 +349,7 @@ public class LiveDataManagerImpl implements LiveDataManager {
      * Gets a set of {@link LiveDataFormatter}s which are able to format
      * the passed command.
      * 
-     * @ejb:interface-method
+     * 
      */
     public Set<LiveDataFormatter> findFormatters(LiveDataCommand cmd, FormatType type) {
         return FormatterRegistry.getInstance().findFormatters(cmd, type);
@@ -357,7 +357,7 @@ public class LiveDataManagerImpl implements LiveDataManager {
 
     /**
      * Find a formatter based on its 'id' property.
-     * @ejb:interface-method
+     * 
      */
     public LiveDataFormatter findFormatter(String id) {
         return FormatterRegistry.getInstance().findFormatter(id);
@@ -366,7 +366,7 @@ public class LiveDataManagerImpl implements LiveDataManager {
     /**
      * Get the ConfigSchema for a given resource.
      * 
-     * @ejb:interface-method
+     * 
      */
     public ConfigSchema getConfigSchema(AuthzSubject subject,
                                         AppdefEntityID id, String command)

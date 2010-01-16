@@ -36,34 +36,22 @@ import org.hyperic.hq.autoinventory.ScanConfigurationCore;
  */
 public abstract class AIScheduleBaseValue implements java.io.Serializable {
     private byte[] config;
-    /**
-     * @ejb:interface-method
-     * @ejb:value-object match="*"
-     */
+   
     public byte[] getConfig() {
         return this.config;
     }
 
-    /**
-     * @ejb:interface-method
-     * @ejb:value-object match="*"
-     */
+    
     public void setConfig(byte[] core) {
         this.config=core;
     }
 
-    /**
-     * @ejb:interface-method
-     * @ejb:value-object match="*"
-     */
+   
     public ScanConfigurationCore getConfigObj() throws AutoinventoryException {
         return ScanConfigurationCore.deserialize(getConfig());
     }
 
-    /**
-     * @ejb:interface-method
-     * @ejb:value-object match="*"
-     */
+   
     public void setConfigObj(ScanConfigurationCore core)
         throws AutoinventoryException {
         setConfig(core.serialize());

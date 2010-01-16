@@ -64,7 +64,7 @@ public class ServerType extends AppdefResourceType
     }
 
     /**
-     * legacy EJB getter
+     * legacy getter
      * @deprecated use isVirtual() instead
      * @return
      */
@@ -111,7 +111,7 @@ public class ServerType extends AppdefResourceType
 
     private ServerTypeValue _serverTypeValue = new ServerTypeValue();
     /**
-     * legacy EJB DTO (value object) pattern
+     * legacy DTO (value object) pattern
      * @deprecated use (this) ServerType object instead
      */
     public ServerTypeValue getServerTypeValue()

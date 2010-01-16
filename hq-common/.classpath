@@ -50,8 +50,6 @@
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/jug-asl-2.0.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/junit-3.8.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/log4j-1.2.14.jar"/>
-	<classpathentry exported="true" kind="lib" path="thirdparty/lib/mockejb.jar"/>
-	<classpathentry exported="true" kind="lib" path="thirdparty/lib/mockrunner-ejb.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/mx4j-jmx.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/oro-2.0.8.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/quartz-1.6.5.jar"/>

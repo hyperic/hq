@@ -107,7 +107,6 @@ public class HQConstants {
     
     public static final String CAS_URL = "CAS_URL";
 
-    public static final String EJB_MODULE_PATTERN = "hq-";
 
     public static final String EventLogPurge = "EVENT_LOG_PURGE";
 

@@ -267,11 +267,11 @@ public class AppServiceDAO extends HibernateDAO<AppService>
             DAOFactory.getDAOFactory().getAppSvcDepencyDAO();
 
         // Make sure there isn't already a dependency
-        AppSvcDependency depEJB =
+        AppSvcDependency dep =
             depdao.findByDependentAndDependor(appSvcPK, depPK);
 
-        if (depEJB != null) {
-            return depEJB;
+        if (dep != null) {
+            return dep;
         }
 
         // look for the app service for **this** Service

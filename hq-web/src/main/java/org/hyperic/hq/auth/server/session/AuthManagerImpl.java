@@ -94,7 +94,6 @@ public class AuthManagerImpl implements AuthManager {
             authzSubjectManager.checkModifyUsers(subject);
         }
         Principal local = principalDao.findByUsername(username);
-        // hash the password as is done in ejbCreate. Fixes 4661
         String hash = passwordEncoder.encodePassword(password, null);
         local.setPassword(hash);
     }

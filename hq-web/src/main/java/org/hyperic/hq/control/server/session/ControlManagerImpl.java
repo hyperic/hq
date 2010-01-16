@@ -432,7 +432,7 @@ public class ControlManagerImpl implements ControlManager {
         return configResponse;
     }
 
-    // Remote EJB methods for use by agents.
+   
 
     /**
      * Send an agent a plugin configuration. This is needed when agents

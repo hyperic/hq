@@ -469,11 +469,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
             throw new ApplicationNotFoundException(appId);
         }
         permissionManager.checkViewPermission(subject, app.getEntityId());
-        Collection<AppService> ejbs = app.getAppServices();
-        List<AppServiceValue> appSvc = new ArrayList<AppServiceValue>(ejbs.size());
-        for (AppService aEJB : ejbs) {
+        Collection<AppService> appSvcs = app.getAppServices();
+        List<AppServiceValue> appSvc = new ArrayList<AppServiceValue>(appSvcs.size());
+        for (AppService svc : appSvcs) {
 
-            appSvc.add(aEJB.getAppServiceValue());
+            appSvc.add(svc.getAppServiceValue());
         }
         return appSvc;
     }

@@ -140,7 +140,7 @@ public class Server extends ServerBase
     private ServerLightValue _serverLightValue = new ServerLightValue();
 
     /**
-     * for legacy EJB DTO pattern
+     * for legacy DTO pattern
      * @deprecated use (this) Server object instead
      * @return
      */
@@ -173,7 +173,7 @@ public class Server extends ServerBase
 
     private ServerValue _serverValue = new ServerValue();
     /**
-     * for legacy EJB DTO pattern
+     * for legacy DTO pattern
      * @deprecated use (this) Server object instead
      * @return
      */
@@ -292,7 +292,7 @@ public class Server extends ServerBase
     }
 
     /**
-     * legacy EJB method
+     * legacy method
      * @param valueHolder
      */
     void updateServer(ServerValue valueHolder) {

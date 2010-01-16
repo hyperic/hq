@@ -263,12 +263,7 @@
             key="exception.DuplicateObjectException"
             type="org.hyperic.hq.common.DuplicateObjectException"                  
             path="/common/GenericError.jsp"/>
-
-        <exception
-            key="exception.javax.ejb.CreateException"
-            type="javax.ejb.CreateException"                  
-            path="/common/GenericError.jsp"/>            
-        
+ 
         <exception
             key="exception.CreateFailedException"
             type="org.hyperic.hq.common.CreateFailedException"                  

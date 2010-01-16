@@ -260,22 +260,22 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
 
         // get all properties
         Collection<ConfigProperty> allProps = getProps(prefix);
-        // iterate over ejbs
+      
         createChangeAudits(subject, allProps, newProps);
-        for (ConfigProperty ejb : allProps) {
+        for (ConfigProperty configProp : allProps) {
 
             // check if the props object has a key matching
-            String key = ejb.getKey();
+            String key = configProp.getKey();
             if (newProps.containsKey(key)) {
                 tempProps.remove(key);
                 String propValue = (String) newProps.get(key);
                 // delete null values from prefixed properties
                 if (prefix != null && (propValue == null || propValue.equals("NULL"))) {
-                    configPropertyDAO.remove(ejb);
+                    configPropertyDAO.remove(configProp);
                     cache.remove(key);
                 } else {
                     // non-prefixed properties never get deleted.
-                    ejb.setValue(propValue);
+                    configProp.setValue(propValue);
                     cache.put(key, propValue);
                 }
             } else if (prefix == null) {

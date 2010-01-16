@@ -103,7 +103,7 @@ public class Service extends AppdefResource
     }
 
     /**
-     * legacy EJB getter for configresponse id
+     * legacy getter for configresponse id
      * @deprecated use setParentService() instead
      */
     void setParentId(Integer parentId) {
@@ -158,7 +158,7 @@ public class Service extends AppdefResource
 
     private ServiceValue _serviceValue = new ServiceValue();
     /**
-     * legacy EJB DTO pattern
+     * legacy DTO pattern
      * @deprecated use (this) Service object instead
      */
     public ServiceValue getServiceValue()
@@ -205,7 +205,7 @@ public class Service extends AppdefResource
     }
 
     /**
-     * legacy EJB DTO pattern.
+     * legacy DTO pattern.
      * Compare this entity bean to a value object
      * @deprecated should use (this) Service object and hibernate dirty() check
      * @return true if the service value matches this entity
@@ -231,7 +231,7 @@ public class Service extends AppdefResource
     }
 
     /**
-     * legacy EJB DTO pattern for copying attribute values from value
+     * legacy DTO pattern for copying attribute values from value
      * object.
      *
      * Set the value object. This method does *NOT* update any of the CMR's

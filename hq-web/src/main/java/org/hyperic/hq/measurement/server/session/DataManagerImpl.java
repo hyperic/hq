@@ -80,7 +80,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * The DataManagerEJB class is a stateless session bean that can be used to
+ * The DataManagerImpl can be used to
  * retrieve measurement data points
  * 
  */

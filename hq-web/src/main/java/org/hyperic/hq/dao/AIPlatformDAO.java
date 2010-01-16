@@ -174,7 +174,7 @@ public class AIPlatformDAO extends HibernateDAO<AIPlatform>
     }
 
     /**
-     * legacy EJB method
+     * legacy method
      *
      * @param aiplatform The new AI data to update this platform with.
      * @param updateServers If true, servers will be updated too.

@@ -742,8 +742,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
 
     /**
      * Check to see if the subject can perform an autoinventory scan on the
-     * specified resource. This is another hack to publicly expose this method
-     * in AppdefSessionEJB as an EJB interface method.
+     * specified resource. 
      * 
      */
     public void checkAIScanPermission(AuthzSubject subject, AppdefEntityID id) throws PermissionException,

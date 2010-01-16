@@ -188,7 +188,7 @@ public class AIServer extends ServerBase
 
     private AIServerValue aIServerValue = new AIServerValue();
     /**
-     * legacy EJB DTO pattern
+     * legacy DTO pattern
      * @deprecated use (this) AIServer object instead
      * @return
      */

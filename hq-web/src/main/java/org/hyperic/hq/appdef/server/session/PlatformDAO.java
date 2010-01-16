@@ -88,7 +88,7 @@ public class PlatformDAO extends HibernateDAO<Platform> {
      * collection. This means you should removeAllIpValues(), then add them
      * individually. This is a workaround until the xdoclet stuff is made to work.
      *
-     * Legacy code from EJB entity bean.  All this logic should move close
+     * Legacy code from entity bean.  All this logic should move close
      * to the modification source.  Should pass the pojo directly instead
      * of using Platform Value object.
      *
@@ -121,7 +121,7 @@ public class PlatformDAO extends HibernateDAO<Platform> {
         for(Iterator i = ips.iterator(); i.hasNext();) {
             IpValue aIp = (IpValue)i.next();
             if(aIp.idHasBeenSet()) {
-                // update the ejb
+                
                 updateAIp(curips, aIp);
             } else {
                 // looks like its a new one
@@ -131,7 +131,7 @@ public class PlatformDAO extends HibernateDAO<Platform> {
                 curips.add(nip);
             }
         }
-        // finally update the platform ejb
+        // finally update the platform 
         platform.setPlatformValue(existing);
 
         // if there is a agent

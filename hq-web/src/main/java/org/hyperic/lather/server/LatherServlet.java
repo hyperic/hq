@@ -51,7 +51,7 @@ import org.hyperic.util.encoding.Base64;
 
 /**
  * The purpose of this class is to take servlet requests for
- * remote execution, and translate them into EJB calls.
+ * remote execution, and translate them into service calls.
  *
  * The servlet understands POST requests which must have the
  * following data:
@@ -257,10 +257,10 @@ public class LatherServlet
             return;
         }
 
-        this.doEJBCall(req, resp, method[0], val, xCoder, ctx);
+        this.doServiceCall(req, resp, method[0], val, xCoder, ctx);
     }
 
-    private class EJBCaller 
+    private class ServiceCaller 
         extends Thread
     {
         private HttpServletResponse resp;
@@ -274,7 +274,7 @@ public class LatherServlet
         private LatherBoss latherBoss;
         
 
-        private EJBCaller(HttpServletResponse resp, 
+        private ServiceCaller(HttpServletResponse resp, 
                           LatherXCoder xcoder, LatherContext ctx, String method, LatherValue arg, 
                           LatherServlet servlet, Log log, LatherBoss latherBoss)
         {
@@ -326,13 +326,13 @@ public class LatherServlet
         }
     }
 
-    private void doEJBCall(HttpServletRequest req, HttpServletResponse resp, 
+    private void doServiceCall(HttpServletRequest req, HttpServletResponse resp, 
                            String methName, LatherValue args,
                            LatherXCoder xCoder, LatherContext ctx)
         throws IOException
     {
        
-        EJBCaller caller;
+        ServiceCaller caller;
         Class realClass;
         try {
             realClass = Class.forName(this.dispatchClass);
@@ -344,7 +344,7 @@ public class LatherServlet
 
         LatherBoss latherBoss = (LatherBoss) Bootstrap.getBean(realClass);
 
-        caller = new EJBCaller(resp, xCoder, 
+        caller = new ServiceCaller(resp, xCoder, 
                                ctx, methName, args,
                                this, this.log, latherBoss);
         caller.start();

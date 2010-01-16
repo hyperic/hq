@@ -166,7 +166,7 @@ public class AIService extends AppdefNamedBean
 
     private AIServiceValue aIServiceValue = new AIServiceValue();
     /**
-     * legacy EJB DTO pattern
+     * legacy DTO pattern
      * @deprecated use (this) AIService object instead
      * @return
      */

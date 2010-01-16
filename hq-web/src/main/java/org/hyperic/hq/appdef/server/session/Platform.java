@@ -237,7 +237,7 @@ public class Platform extends PlatformBase
     private PlatformValue _platformValue = new PlatformValue();
 
     /**
-     * legacy EJB DTO pattern
+     * legacy DTO pattern
      * @deprecated use (this) Platform object instead
      */
     public PlatformValue getPlatformValue()

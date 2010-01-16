@@ -792,14 +792,14 @@ public class ServerManagerImpl implements ServerManager {
 
             // now get the list of PKs
             Collection<Integer> viewable = getViewableServers(subject);
-            // and iterate over the ejbList to remove any item not in the
+            // and iterate over the List to remove any item not in the
             // viewable list
             int i = 0;
             for (Iterator<Server> it = servers.iterator(); it.hasNext(); i++) {
-                Server aEJB = it.next();
-                if (viewable.contains(aEJB.getId())) {
+                Server server = it.next();
+                if (viewable.contains(server.getId())) {
                     // add the item, user can see it
-                    serverIds.add(aEJB.getId());
+                    serverIds.add(server.getId());
                 }
             }
 
@@ -1038,12 +1038,12 @@ public class ServerManagerImpl implements ServerManager {
     public List<ServerValue> getServersByType(AuthzSubject subject, String name) throws PermissionException,
         InvalidAppdefTypeException {
        try {
-            ServerType ejb = serverTypeDAO.findByName(name);
-            if (ejb == null) {
+            ServerType serverType = serverTypeDAO.findByName(name);
+            if (serverType == null) {
                 return new PageList<ServerValue>();
             }
 
-            Collection<Server> servers = serverDAO.findByType(ejb.getId());
+            Collection<Server> servers = serverDAO.findByType(serverType.getId());
 
             List<Integer> authzPks = getViewableServers(subject);
             for (Iterator<Server> i = servers.iterator(); i.hasNext();) {
@@ -1143,7 +1143,7 @@ public class ServerManagerImpl implements ServerManager {
         HashMap<Integer, Server> serverCollection = new HashMap<Integer, Server>();
 
         // XXX - a better solution is to control the viewable set returned by
-        // ejbql finders. This will be forthcoming.
+        // ql finders. This will be forthcoming.
 
         Collection<AppService> appServiceCollection = appLocal.getAppServices();
         Iterator<AppService> it = appServiceCollection.iterator();

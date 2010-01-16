@@ -56,7 +56,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * The DataCompress EJB handles all compression and purging of
+ * The DataCompressImpl handles all compression and purging of
  * measurement data in the HQ system.
  */
 @Service
