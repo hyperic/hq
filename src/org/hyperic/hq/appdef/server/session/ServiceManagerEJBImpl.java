@@ -58,6 +58,7 @@ import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceManagerUtil;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.ConfigResponseDB;
+import org.hyperic.hq.appdef.ServiceCluster;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
@@ -79,6 +80,7 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
+import org.hyperic.util.timer.StopWatch;
 import org.hyperic.dao.DAOFactory;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.appdef.server.session.Platform;
@@ -1145,20 +1147,30 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             throw new ApplicationNotFoundException(appId, e);
         }
 
+        final StopWatch watch = new StopWatch();
+        final boolean debug = log.isDebugEnabled();
         Collection svcCollection = new ArrayList();
+        if (debug) watch.markTimeBegin("getAppServices");
         Collection appSvcCollection = appLocal.getAppServices();
+        if (debug) watch.markTimeEnd("getAppServices");
         Iterator it = appSvcCollection.iterator();
         while (it != null && it.hasNext()) {
             AppService appService = (AppService) it.next();
 
             if (appService.isIsGroup()) {
-                svcCollection.addAll(getServiceCluster(
-                    appService.getResourceGroup()).getServices());
+                if (debug) watch.markTimeBegin("getServiceCluster");
+                ServiceCluster cluster =
+                    getServiceCluster(appService.getResourceGroup());
+                if (debug) watch.markTimeEnd("getServiceCluster");
+                if (debug) watch.markTimeBegin("getServices");
+                svcCollection.addAll(cluster.getServices());
+                if (debug) watch.markTimeEnd("getServices");
             } else {
                 svcCollection.add(appService.getService());
             } 
         }
 
+        if (debug) log.debug(watch);
         return filterAndPage(svcCollection, subject, typeId, pc);
     }
 
@@ -1200,9 +1212,13 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         throws ServiceNotFoundException, PermissionException,
                ApplicationNotFoundException {
 
-        List serviceInventory = 
-            getUnflattenedServiceInventoryByApplication(
-                subject, appId, PageControl.PAGE_ALL);
+        final boolean debug = log.isDebugEnabled();
+        final StopWatch watch = new StopWatch();
+        
+        if (debug) watch.markTimeBegin("getUnflattenedServiceInventoryByApplication");
+        List serviceInventory = getUnflattenedServiceInventoryByApplication(
+            subject, appId, PageControl.PAGE_ALL);
+        if (debug) watch.markTimeEnd("getUnflattenedServiceInventoryByApplication");
         
         List servicePKs = new ArrayList();
         // flattening: open up all of the groups (if any) and get their services as well
@@ -1223,12 +1239,13 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                     // any authz resource filtering on the group members happens
                     // inside the group subsystem
                     try {
+                        if (debug) watch.markTimeBegin("getCompatGroupMembers");
                         List memberIds = GroupUtil.getCompatGroupMembers(
                             subject, groupId, null, PageControl.PAGE_ALL);
-                        for (Iterator memberIter = memberIds.iterator();
-                             memberIter.hasNext(); ) {
+                        if (debug) watch.markTimeEnd("getCompatGroupMembers");
+                        for (Iterator it=memberIds.iterator(); it.hasNext(); ) {
                             AppdefEntityID memberEntId =
-                                (AppdefEntityID) memberIter.next();
+                                (AppdefEntityID) it.next();
                             servicePKs.add(memberEntId.getId());
                         }
                     } catch (PermissionException e) {
@@ -1245,18 +1262,16 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             throw new ServiceNotFoundException("could not return all services",
                                                e);
         }
-
-        return (Integer[]) servicePKs.toArray(
-            new Integer[servicePKs.size()]);
+        if (debug) log.debug(watch);
+        return (Integer[]) servicePKs.toArray(new Integer[servicePKs.size()]);
     }
 
     private List getUnflattenedServiceInventoryByApplication(
         AuthzSubject subject, Integer appId, PageControl pc)
-        throws ApplicationNotFoundException, ServiceNotFoundException {
-        
-        AppServiceDAO appServLocHome;
-        List appServiceCollection;
-        
+    throws ApplicationNotFoundException, ServiceNotFoundException {
+        final boolean debug = log.isDebugEnabled();
+        final StopWatch watch = new StopWatch();
+
         try {
             getApplicationDAO().findById(appId);
         } catch (ObjectNotFoundException e) {
@@ -1266,19 +1281,22 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
 
         pc = PageControl.initDefaults(pc, SortAttribute.SERVICE_NAME);
 
-        appServLocHome = new AppServiceDAO(DAOFactory.getDAOFactory());
+        AppServiceDAO appServDAO = new AppServiceDAO(DAOFactory.getDAOFactory());
+        Collection appServices = null;
         switch (pc.getSortattribute()) {
         case SortAttribute.SERVICE_NAME :
         case SortAttribute.RESOURCE_NAME :
         case SortAttribute.NAME :
             // TODO: Not actually sorting
-            appServiceCollection =
-                appServLocHome.findByApplication_orderName(appId);
+            if (debug) watch.markTimeBegin("findByApplication_orderName");
+            appServices = appServDAO.findByApplication_orderName(appId);
+            if (debug) watch.markTimeEnd("findByApplication_orderName");
             break;
         case SortAttribute.SERVICE_TYPE :
-            appServiceCollection =
-                appServLocHome.findByApplication_orderType(appId,
-                                                           pc.isAscending());
+            if (debug) watch.markTimeBegin("findByApplication_orderType");
+            appServices = appServDAO.findByApplication_orderType(
+                appId, pc.isAscending());
+            if (debug) watch.markTimeEnd("findByApplication_orderType");
             break;
         default :
             throw new IllegalArgumentException(
@@ -1292,17 +1310,20 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         // to authz in batches to find out which ones we are
         // allowed to return.
 
-        AppService appService;
-        Iterator i = appServiceCollection.iterator();
-        List services = new ArrayList();
-        while (i.hasNext()) {
-            appService = (AppService) i.next();
+        List services = new ArrayList(appServices.size());
+        for (Iterator it=appServices.iterator(); it.hasNext(); ) {
+            AppService appService = (AppService) it.next();
             if (appService.isIsGroup()) {
+                if (debug) watch.markTimeBegin("appService.getResourceGroup");
                 services.add(appService.getResourceGroup());
+                if (debug) watch.markTimeEnd("appService.getResourceGroup");
             } else {
+                if (debug) watch.markTimeBegin("appService.getService");
                 services.add(appService.getService());
+                if (debug) watch.markTimeEnd("appService.getService");
             }
         }
+        if (debug) log.debug(watch);
         return services;
     }
 

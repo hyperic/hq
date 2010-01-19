@@ -1,6 +1,7 @@
 package org.hyperic.hq.appdef.server.session;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -11,10 +12,13 @@ import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.AppSvcDependency;
 import org.hyperic.hq.appdef.ServiceCluster;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupDAO;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.dao.HibernateDAO;
+
+import edu.emory.mathcs.backport.java.util.Collections;
 
 /*
  * NOTE: This copyright does *not* cover user programs that use HQ
@@ -152,42 +156,57 @@ public class AppServiceDAO extends HibernateDAO
         return create(aClusterPK, a);
     }
 
-    public List findByApplication_orderName(Integer id)
-    {
-        // TODO: fix this query after authz conversion
-        String sql=
-            "select distinct a from " +
-            "AppService a, Resource r, ResourceType t " +
-            "where a.application.id=:appid and (" +
-            "r.resourceType.id=t.id AND t.name=:groupType "+
-            "AND a.resourceGroup.id IN (" +
-            "SELECT id FROM ResourceGroup g where g.id = r.instanceId)"+
-            " OR " +
-            "(r.instanceId=a.service.id and " +
-            "r.resourceType.id=t.id AND t.name=:serviceType))) " +
-            "order by r.name";
-        return getSession().createQuery(sql)
-            .setInteger("appid", id.intValue())
-            .setString("groupType", groupResType)
-            .setString("serviceType", serviceResType)
-            .list();
+    public List findByApplication_orderName(Integer id) {
+        List list = findByApplication(id);
+        Comparator c = new Comparator() {
+            private String name = null;
+            public int compare(Object arg0, Object arg1) {
+                AppService app0 = (AppService) arg0;
+                AppService app1 = (AppService) arg1;
+                return getName(app0).compareTo(getName(app1));
+            }
+            private String getName(AppService app) {
+                if (name != null) {
+                    return name;
+                }
+                Resource res = (app.isIsGroup()) ?
+                    app.getResourceGroup().getResource() :
+                    app.getService().getResource();
+                name = (res == null || res.isInAsyncDeleteState()) ?
+                    "" : res.getName();
+                return name;
+            }
+        };
+        Collections.sort(list, c);
+        return list;
     }
 
-    public List findByApplication_orderType(Integer id, boolean asc)
+    public List findByApplication_orderType(Integer id, final boolean asc)
     {
-        String sql="select distinct a from AppService a " +
-                   " join fetch a.serviceType st " +
-                   "where a.application.id=? " +
-                   "order by st.name " + (asc ? "asc" : "desc");
-        return getSession().createQuery(sql)
-            .setInteger(0, id.intValue())
-            .list();
+        List list = findByApplication(id);
+        Comparator c = new Comparator() {
+            private String type = null;
+            public int compare(Object arg0, Object arg1) {
+                AppService app0 = (AppService) arg0;
+                AppService app1 = (AppService) arg1;
+                return (asc) ? getType(app0).compareTo(getType(app1)) :
+                    getType(app1).compareTo(getType(app0));
+            }
+            private String getType(AppService app) {
+                if (type != null) {
+                    return type;
+                }
+                type = app.getServiceType().getName();
+                return type;
+            }
+        };
+        Collections.sort(list, c);
+        return list;
     }
 
-    public Collection findByApplication(Integer id)
+    public List findByApplication(Integer id)
     {
-        String sql="select distinct a from AppService a " +
-                   "where a.application.id=?";
+        String sql="select a from AppService a where a.application.id=?";
         return getSession().createQuery(sql)
             .setInteger(0, id.intValue())
             .list();
