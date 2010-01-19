@@ -746,32 +746,21 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     public Map findDesignatedMeasurements(AuthzSubject subject,
                                           AppdefEntityID[] ids, String cat)
         throws MeasurementNotFoundException {
-
-        Map midMap = new HashMap();
-        if (ids.length == 0)
-            return midMap;
-
-        for (int i = 0; i < ids.length; i++) {
+        if (ids.length == 0) {
+            return Collections.EMPTY_MAP;
+        }
+        Map midMap = new HashMap(ids.length);
+        ResourceManagerLocal rMan = ResourceManagerEJBImpl.getOne();
+        ArrayList resources = new ArrayList(ids.length);
+        for (int i=0; i<ids.length; i++) {
             AppdefEntityID id = ids[i];
-            try {
-                List metrics = getMeasurementDAO().
-                    findDesignatedByResourceForCategory(getResource(id),
-                                                        cat);
-
-                if (metrics.size() == 0) {
-                    throw new FinderException("No metrics found");
-                }
-
-                Measurement m = (Measurement) metrics.get(0);
-                midMap.put(id, m);
-            } catch (FinderException e) {
-                // Throw an exception if we're only looking for one
-                // measurement
-                if (ids.length == 1) {
-                    throw new MeasurementNotFoundException(cat + " metric for " +
-                                                           id + " not found");
-                }
-            }
+            resources.add(rMan.findResource(id));
+        }
+        MeasurementDAO dao = getMeasurementDAO();
+        List list = dao.findDesignatedByResourcesForCategory(resources, cat);
+        for (Iterator it=list.iterator(); it.hasNext(); ) {
+            Measurement m = (Measurement) it.next();
+            midMap.put(new AppdefEntityID(m.getResource()), m);
         }
         return midMap;
     }
