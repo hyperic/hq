@@ -1204,29 +1204,28 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                         MeasurementTemplate tmpl,
                                         long begin, long end, long interval,
                                         boolean returnNulls, PageControl pc)
-        throws SessionNotFoundException, SessionTimeoutException,
-               AppdefEntityNotFoundException,
-               PermissionException, MeasurementNotFoundException {
-            
+    throws SessionNotFoundException, SessionTimeoutException,
+           AppdefEntityNotFoundException, PermissionException,
+           MeasurementNotFoundException {
         final AuthzSubject subject = manager.getSubject(sessionId);
-
+        final boolean debug = _log.isDebugEnabled();
+        final StopWatch watch = new StopWatch();
         List measurements;
-
         if (aid.isApplication() && tmpl.isAvailability()) {
             // Special case for application availability
             _log.debug("BEGIN findMeasurementData()");
-            
             AppdefEntityValue aeval = new AppdefEntityValue(aid, subject);
-            
             // Get the flattened list of services
+            if (debug) watch.markTimeBegin("getFlattenedServiceIds");
             AppdefEntityID[] serviceIds = aeval.getFlattenedServiceIds();
-            
+            if (debug) watch.markTimeEnd("getFlattenedServiceIds");
+            if (debug) watch.markTimeBegin("findDesignatedMeasurements");
             Map midMap = getMetricManager()
                 .findDesignatedMeasurements(subject, serviceIds,
                                             MeasurementConstants.CAT_AVAILABILITY);
+            if (debug) watch.markTimeEnd("findDesignatedMeasurements");
             measurements = new ArrayList(midMap.values());
-        }
-        else {
+        } else {
             measurements = getMeasurementsForResource(subject, aid, tmpl);
             if (measurements == null || measurements.size() == 0) {
                 throw new MeasurementNotFoundException(
@@ -1234,10 +1233,13 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                     tmpl.getId());
             }
         }
-
-	    return getDataMan().getHistoricalData(measurements, begin, end,
-                                              interval, tmpl.getCollectionType(),
-                                              returnNulls, pc);
+        if (debug) watch.markTimeBegin("getHistoricalData");
+	    PageList rtn = getDataMan().getHistoricalData(
+	        measurements, begin, end, interval, tmpl.getCollectionType(),
+	        returnNulls, pc);
+        if (debug) watch.markTimeEnd("getHistoricalData");
+        if (debug) _log.debug(watch);
+        return rtn;
     }
 
     /**
@@ -3006,30 +3008,27 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                PermissionException {
         StopWatch watch = new StopWatch();
         final boolean debug = _log.isDebugEnabled();
-        if (debug) _log.debug("BEGIN getAvailability()");
+        if (debug) _log.debug("BEGIN getAvailability() id=" + id);
         try {
             if (id.isGroup()) {
                 return getGroupAvailability(
                     subject, id.getId(), measCache, availCache);
-            }
-            else if (id.isApplication()) {
+            } else if (id.isApplication()) {
                 AppdefEntityValue appVal = new AppdefEntityValue(id, subject);
                 if (debug) watch.markTimeBegin("getFlattenedServiceIds");
                 AppdefEntityID[] services = appVal.getFlattenedServiceIds();
                 if (debug) watch.markTimeEnd("getFlattenedServiceIds");
-
                 if (debug) watch.markTimeBegin("getAggregateAvailability");
                 double rtn = getAggregateAvailability(
                     subject, services, measCache, availCache);
                 if (debug) watch.markTimeEnd("getAggregateAvailability");
                 return rtn;
             }
-            
             AppdefEntityID[] ids = new AppdefEntityID[] { id };
             return getAvailability(
                 subject, ids, getMidMap(ids, measCache), availCache)[0];
         } finally {
-            if (debug) _log.debug("END getAvailability() -- " + watch);
+            if (debug) _log.debug("END getAvailability() id=" + id + " -- " + watch);
         }
     }
 
