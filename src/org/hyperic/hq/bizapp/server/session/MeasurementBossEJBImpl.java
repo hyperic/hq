@@ -2446,15 +2446,16 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     private PageList getResourcesCurrentHealth(AuthzSubject subject,
                                                PageList resources)
         throws AppdefEntityNotFoundException, PermissionException {
-        StopWatch watch = new StopWatch();
+        final ServerManagerLocal sMan = getServerManager();
+        final boolean debug = _log.isDebugEnabled();
+        final StopWatch watch = new StopWatch();
         PageList summaries = new PageList();
-        watch.markTimeBegin("getAvailMeasurements");
+        if (debug) watch.markTimeBegin("getAvailMeasurements");
         final Map measCache = getMetricManager().getAvailMeasurements(resources);
-        watch.markTimeEnd("getAvailMeasurements");
-        watch.markTimeBegin("getLastAvail");
-        final Map availCache = getAvailManager().getLastAvail(
-            resources, measCache);
-        watch.markTimeEnd("getLastAvail");
+        if (debug) watch.markTimeEnd("getAvailMeasurements");
+        if (debug) watch.markTimeBegin("getLastAvail");
+        final Map availCache = getAvailManager().getLastAvail(resources, measCache);
+        if (debug) watch.markTimeEnd("getLastAvail");
         for (Iterator it = resources.iterator(); it.hasNext(); ) {
             try {
                 Object o = it.next();
@@ -2479,34 +2480,26 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 HashSet categories = new HashSet(4);
                 switch (aeid.getType()) {
                     case AppdefEntityConstants.APPDEF_TYPE_SERVER :
-                        try {
-                            List platforms =
-                                rv.getAssociatedPlatforms(PageControl.PAGE_ALL);
-                            if (platforms != null && platforms.size() > 0) {
-                                parent = (AppdefResourceValue) platforms.get(0);
-                            }
-                        } catch (PermissionException e) {
-                            // Can't get the parent, leave parent = null
-                        }
-                        // Fall through to set the monitorable and metrics
+                        if (debug) watch.markTimeBegin("getPlatform");
+                        Server server = sMan.findServerById(rv.getID().getId());
+                        parent = server.getPlatform().getAppdefResourceValue();
+                        if (debug) watch.markTimeEnd("getPlatform");
                     case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
                     case AppdefEntityConstants.APPDEF_TYPE_SERVICE :
                         categories.add(MeasurementConstants.CAT_AVAILABILITY);
                         // XXX scottmf need to review this, perf is bad and metric
                         // is not very useful
                         //categories.add(MeasurementConstants.CAT_THROUGHPUT);
-                        watch.markTimeBegin(
-                            "setResourceDisplaySummaryValueForCategory");
+                        if (debug) watch.markTimeBegin("setResourceDisplaySummaryValueForCategory");
                         setResourceDisplaySummaryValueForCategory(
                             subject, aeid, summary, categories, measCache,
                             availCache);
-                        watch.markTimeEnd("setResourceDisplaySummaryValueForCategory");
-                        
+                        if (debug) watch.markTimeEnd("setResourceDisplaySummaryValueForCategory");
                         summary.setMonitorable(Boolean.TRUE);
                         break;
                     case AppdefEntityConstants.APPDEF_TYPE_GROUP:
                     case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-                        watch.markTimeBegin("Group Type");
+                        if (debug) watch.markTimeBegin("Group Type");
                         summary.setMonitorable(Boolean.TRUE);
                         // Set the availability now
                         double avail = getAvailability(
@@ -2520,22 +2513,22 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                         } catch (MeasurementNotFoundException e) {
                             // No availability metric, don't set it
                         }
-                        watch.markTimeEnd("Group Type");
+                        if (debug) watch.markTimeEnd("Group Type");
                         break;
                     default:
                         throw new InvalidAppdefTypeException(
                             "entity type is not monitorable, id type: " +
                             aeid.getType());
                 }            
+                if (debug) watch.markTimeBegin("setResourceDisplaySummary");
                 setResourceDisplaySummary(summary, rv, parent);
+                if (debug) watch.markTimeEnd("setResourceDisplaySummary");
                 summaries.add(summary);
             } catch (AppdefEntityNotFoundException e) {
                 _log.debug(e.getMessage(), e);
             }
         }
-        if (_log.isDebugEnabled()) {
-            _log.debug("getResourcesCurrentHealth: " + watch);
-        }
+        if (debug) _log.debug("getResourcesCurrentHealth: " + watch);
         summaries.setTotalSize(resources.getTotalSize());
         return summaries;
     }
@@ -2911,7 +2904,13 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         PageList servers = rv.getAssociatedServers(pc);
         
         // Return a paged list of current health        
-        return getResourcesCurrentHealth(subject, servers);
+        final StopWatch watch = new StopWatch();
+        final boolean debug = _log.isDebugEnabled();
+        if (debug) watch.markTimeBegin("getResourcesCurrentHealth");
+        PageList rtn = getResourcesCurrentHealth(subject, servers);
+        if (debug) watch.markTimeEnd("getResourcesCurrentHealth");
+        if (debug) _log.debug(watch);
+        return rtn;
     }
 
     /**
