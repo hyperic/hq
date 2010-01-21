@@ -170,11 +170,7 @@ public class ProductManagerImpl implements ProductManager {
         return Bootstrap.getBean(ProductManager.class);
     }
 
-    /**
-     */
-    public boolean isReady() {
-       return true;
-    }
+  
 
     /**
      */

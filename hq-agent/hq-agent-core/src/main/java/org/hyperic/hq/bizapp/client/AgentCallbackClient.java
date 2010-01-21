@@ -168,11 +168,7 @@ public abstract class AgentCallbackClient {
 
             if(msg != null){
                 String eMsg;
-
-                if(msg.indexOf("is still starting") != -1){
-                    eMsg = "Unable to contact server -- it is still starting";
-                    this.log.debug(eMsg);
-                } else if(msg.indexOf("Service Unavailable") != -1){
+                if(msg.indexOf("Service Unavailable") != -1){
                     eMsg = "Unable to contact server -- it has no more " +
                         "free connections";
                     this.log.debug(eMsg);
