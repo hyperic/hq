@@ -183,7 +183,7 @@ public class MetricsControlAction extends BaseAction {
                     }
                 }
             }
-            boss.setUserPrefs(sessionId, user.getId(), user.getPreferences());
+            boss.setUserPrefsAfterCommit(sessionId, user.getId(), user.getPreferences());
         }
 
 
