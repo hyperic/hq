@@ -411,6 +411,11 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
         List rtn = new ArrayList(services.size());
         for (Iterator it=services.iterator(); it.hasNext(); ) {
             AppServiceValue val = (AppServiceValue) it.next();
+            if (val == null || val.getService() == null ||
+                val.getService().getResource() == null ||
+                val.getService().getResource().isInAsyncDeleteState()) {
+                continue;
+            }
             rtn.add(val.getService().getResource());
         }
         return rtn;
