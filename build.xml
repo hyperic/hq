@@ -83,13 +83,15 @@
 		<fileset dir="${sigar.lib}" includes="*.jar" />
 		<fileset dir="${db2monitor.dir}" includes="lib/db2monitor.jar" />
 	</path>
-
-
-
+	
+	<path id="antjars">
+		<fileset dir="${thirdparty.lib}" includes="ant*.jar" />
+	</path>
+		
 	<path id="alljars">
 		<path refid="pdknative" />
 		<fileset dir="${lather.lib}" includes="lather.jar" />
-		<fileset dir="${thirdparty.lib}" includes="*.jar" excludes="strutstest-*.jar,cactus*.jar,mockejb.jar,mockrunner-ejb.jar,dbunit*.jar,jaas.jar" />
+		<fileset dir="${thirdparty.lib}" includes="*.jar" excludes="ant*.jar, strutstest-*.jar,cactus*.jar,mockejb.jar,mockrunner-ejb.jar,dbunit*.jar,jaas.jar" />
 		<fileset dir="${thirdparty.lib}" includes="*.zip" />
 		<fileset dir="${thirdparty.lib}/oracle_jdbc" includes="*.jar" />
 		<fileset dir="${thirdparty.lib}/postgresql" includes="postgresql-8.2-*.jdbc3.jar" />
@@ -107,8 +109,7 @@
 		<path refid="alljars" />
 		<path location="${thirdparty.lib}/cactus-1.7.2.jar" />
 		<path location="${thirdparty.lib}/strutstest-2.1.3.jar" />
-		<path location="${thirdparty.lib}/mockejb.jar" />
-		<path location="${thirdparty.lib}/mockrunner-ejb.jar" />
+		<fileset dir="${thirdparty.lib}" includes="*.jar" excludes="ant*.jar strutstest-*.jar,cactus*.jar,mockejb.jar,mockrunner-ejb.jar,dbunit*.jar,jaas.jar" />
 		<path location="${thirdparty.lib}/dbunit-2.2.jar" />
 	</path>
 
@@ -132,6 +133,48 @@
 		<path location="${hq.web}/target/classes" />
 		<path location="${hq.util}/target/classes" />
 	</path>
+	
+	<path id="agent.compile.classpath">
+			<path refid="alljars" />
+			<path refid="testjars" />
+			<path location="${hq.util}/target/classes" />
+			<path location="${hq.common}/target/classes" />
+			<path location="${hq.pdk.shared}/target/classes" />
+			<path location="${hq.pdk.agent}/target/classes" />
+	</path>
+	
+	<path id="agent.handler.compile.classpath">
+		<path refid="alljars" />
+		<path refid="testjars" />
+		<path location="${hq.util}/target/classes" />
+		<path location="${hq.common}/target/classes" />
+		<path location="${hq.pdk.shared}/target/classes" />
+		<path location="${hq.pdk.agent}/target/classes" />
+		<path location="${hq.agent}/target/classes" />
+	</path>
+	
+	<path id="agent.pdk.compile.classpath">
+		<path refid="alljars" />
+		<path refid="testjars" />
+		<path location="${hq.util}/target/classes" />
+		<path location="${hq.common}/target/classes" />
+		<path location="${hq.pdk.shared}/target/classes" />
+	</path>
+	
+	<path id="web.compile.classpath">
+		<path refid="alljars" />
+		<path refid="testjars" />
+		<path location="${hq.util}/target/classes" />
+		<path location="${hq.common}/target/classes" />
+		<path location="${hq.pdk.shared}/target/classes" />
+	</path>
+	
+	<path id="shared.compile.classpath">
+		<path refid="alljars" />
+		<path refid="testjars" />
+		<path location="${hq.util}/target/classes" />
+		<path location="${hq.common}/target/classes" />
+	</path>
 
 	<!-- Source common targets -->
 	<import file="${hq.home}/build_util/util-build.xml" />
@@ -150,9 +193,9 @@
 	</target>
 
 	<target name="init-taskdefs" unless="init-taskdefs.notrequired">
-		<taskdef resource="net/sf/antcontrib/antcontrib.properties" classpathref="alljars" />
-		<taskdef name="for" classname="net.sf.antcontrib.logic.For" classpathref="alljars" />
-		<taskdef name="post" classname="net.sf.antcontrib.net.PostTask" classpathref="alljars" />
+		<taskdef resource="net/sf/antcontrib/antcontrib.properties" classpathref="antjars" />
+		<taskdef name="for" classname="net.sf.antcontrib.logic.For" classpathref="antjars" />
+		<taskdef name="post" classname="net.sf.antcontrib.net.PostTask" classpathref="antjars" />
 		<!-- validate pure-xml plugins -->
 		<taskdef name="plugincopy" classname="org.hyperic.hq.product.ant.PluginCopy" classpathref="pdkjars" />
 		<taskdef name="hqplugin" classname="org.hyperic.hq.product.ant.PluginJar" classpathref="pdkjars" />
@@ -171,26 +214,13 @@
 	<target name="compile" depends="compile-shared,compile-web, compile-installer" />
 
 	<target name="compile-shared" depends="init">
-		<path id="compile.classpath">
-			<path refid="alljars" />
-			<path refid="testjars" />
-			<path location="${hq.util}/target/classes" />
-			<path location="${hq.common}/target/classes" />
-		</path>
-		<compile-sources classpath.id="compile.classpath" src.dir="${hq.util}" output.dir="${hq.util}/target/classes" />
-		<compile-sources classpath.id="compile.classpath" src.dir="${hq.common}" output.dir="${hq.common}/target/classes" />
-		<compile-sources classpath.id="compile.classpath" src.dir="${hq.pdk.shared}" output.dir="${hq.pdk.shared}/target/classes" />
+		<compile-sources classpath.id="shared.compile.classpath" src.dir="${hq.util}" output.dir="${hq.util}/target/classes" />
+		<compile-sources classpath.id="shared.compile.classpath" src.dir="${hq.common}" output.dir="${hq.common}/target/classes" />
+		<compile-sources classpath.id="shared.compile.classpath" src.dir="${hq.pdk.shared}" output.dir="${hq.pdk.shared}/target/classes" />
 	</target>
 
 	<target name="compile-web" depends="compile-shared">
-		<path id="compile.classpath">
-			<path refid="alljars" />
-			<path refid="testjars" />
-			<path location="${hq.util}/target/classes" />
-			<path location="${hq.common}/target/classes" />
-			<path location="${hq.pdk.shared}/target/classes" />
-		</path>
-		<compile-sources classpath.id="compile.classpath" src.dir="${hq.web}" output.dir="${hq.web}/target/classes" />
+		<compile-sources classpath.id="web.compile.classpath" src.dir="${hq.web}" output.dir="${hq.web}/target/classes" />
 		<copy toDir="${hq.web}/target/classes">
 			<fileset dir="${hq.web}/src/main/java" excludes="**/*.java" />
 		</copy>
@@ -209,42 +239,18 @@
 		<compile-sources classpath.id="compile.classpath" src.dir="${hq.installer}" output.dir="${hq.installer}/target/classes" />
 	</target>
 
-	<target name="compile-agent" depends="compile-agent-pdk">
-		<path id="compile.classpath">
-			<path refid="alljars" />
-			<path refid="testjars" />
-			<path location="${hq.util}/target/classes" />
-			<path location="${hq.common}/target/classes" />
-			<path location="${hq.pdk.shared}/target/classes" />
-			<path location="${hq.pdk.agent}/target/classes" />
-		</path>
-		<path id="handler.classpath">
-			<path refid="alljars" />
-			<path refid="testjars" />
-			<path location="${hq.util}/target/classes" />
-			<path location="${hq.common}/target/classes" />
-			<path location="${hq.pdk.shared}/target/classes" />
-			<path location="${hq.pdk.agent}/target/classes" />
-			<path location="${hq.agent}/target/classes" />
-		</path>
-		<compile-sources classpath.id="compile.classpath" src.dir="${hq.agent}" output.dir="${hq.agent}/target/classes" />
-		<compile-agent-handlers classpath.id="handler.classpath" handler.name="autoinventory" />
-		<compile-agent-handlers classpath.id="handler.classpath" handler.name="bizapp" />
-		<compile-agent-handlers classpath.id="handler.classpath" handler.name="commands" />
-		<compile-agent-handlers classpath.id="handler.classpath" handler.name="control" />
-		<compile-agent-handlers classpath.id="handler.classpath" handler.name="livedata" />
-		<compile-agent-handlers classpath.id="handler.classpath" handler.name="measurement" />
+	<target name="compile-agent" depends="compile-agent-pdk">	
+		<compile-sources classpath.id="agent.compile.classpath" src.dir="${hq.agent}" output.dir="${hq.agent}/target/classes" />
+		<compile-agent-handlers classpath.id="agent.handler.compile.classpath" handler.name="autoinventory" />
+		<compile-agent-handlers classpath.id="agent.handler.compile.classpath" handler.name="bizapp" />
+		<compile-agent-handlers classpath.id="agent.handler.compile.classpath" handler.name="commands" />
+		<compile-agent-handlers classpath.id="agent.handler.compile.classpath" handler.name="control" />
+		<compile-agent-handlers classpath.id="agent.handler.compile.classpath" handler.name="livedata" />
+		<compile-agent-handlers classpath.id="agent.handler.compile.classpath" handler.name="measurement" />
 	</target>
 	
 	<target name="compile-agent-pdk" depends="compile-shared">
-			<path id="compile.classpath">
-				<path refid="alljars" />
-				<path refid="testjars" />
-				<path location="${hq.util}/target/classes" />
-				<path location="${hq.common}/target/classes" />
-				<path location="${hq.pdk.shared}/target/classes" />
-			</path>
-			<compile-sources classpath.id="compile.classpath" src.dir="${hq.pdk.agent}" output.dir="${hq.pdk.agent}/target/classes" />
+			<compile-sources classpath.id="agent.pdk.compile.classpath" src.dir="${hq.pdk.agent}" output.dir="${hq.pdk.agent}/target/classes" />
 	</target>
 
 	<macrodef name="compile-sources">
@@ -262,7 +268,7 @@
 				</src>
 			</hq-javac>
 			<copy toDir="@{output.dir}">
-				<fileset dir="@{src.dir}/src/main/resources" includes="**/*" />
+				<fileset dir="@{src.dir}/src/main/resources" includes="**/*" erroronmissingdir="false"/>
 			</copy>
 		</sequential>
 	</macrodef>
@@ -281,7 +287,7 @@
 				</src>
 			</hq-javac>
 			<copy toDir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/target/classes">
-				<fileset dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/src/main/resources" includes="*" />
+				<fileset dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/src/main/resources" includes="*" erroronmissingdir="false"/>
 			</copy>
 		</sequential>
 	</macrodef>

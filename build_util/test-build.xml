@@ -17,31 +17,71 @@
     </antcall>
 </target>
 
+<macrodef name="compile-tests">
+	<attribute name="classpath.id" />
+	<attribute name="src.dir" />
+	<attribute name="output.dir" />
+	<sequential>
+		<mkdir dir="@{output.dir}" />
+		<hq-javac destdir="@{output.dir}">
+			<classpath refid="@{classpath.id}" />
+			<src>
+				<dirset dir="@{src.dir}">
+					<include name="src/test/java" />
+				</dirset>
+			</src>
+		</hq-javac>
+		<copy toDir="@{output.dir}">
+			<fileset dir="@{src.dir}/src/test/resources" includes="**/*" erroronmissingdir="false"/>
+		</copy>
+	</sequential>
+</macrodef>
+
 
 <target name="test" depends="init,init-taskdefs,init-tests">
-  <path id="test.compile.classpath">
-    <path refid="alljars"/>
-     <path refid="testjars"/>
-      <path location="${build.dir}/classes" />
-  </path>
-  <test-run classpath.id="test.compile.classpath" input.dir="${basedir}/unittest/src"/>
+   <condition property="test.halt" value="false" else="true">
+	    <istrue value="${ci.build}"/>
+   </condition>
+   <echo message="Halt on error or failure: ${test.halt}"/>
+   <test.do module.dir="${hq.agent}" compile.classpath.id="agent.compile.classpath"/>
+   <test.do module.dir="${hq.agent.handlers}/hq-agent-handler-autoinventory" compile.classpath.id="agent.handler.compile.classpath"/>
+   <test.do module.dir="${hq.agent.handlers}/hq-agent-handler-bizapp" compile.classpath.id="agent.handler.compile.classpath"/>
+   <test.do module.dir="${hq.agent.handlers}/hq-agent-handler-commands" compile.classpath.id="agent.handler.compile.classpath"/>
+   <test.do module.dir="${hq.agent.handlers}/hq-agent-handler-control" compile.classpath.id="agent.handler.compile.classpath"/>
+   <test.do module.dir="${hq.agent.handlers}/hq-agent-handler-livedata" compile.classpath.id="agent.handler.compile.classpath"/>
+   <test.do module.dir="${hq.agent.handlers}/hq-agent-handler-measurement" compile.classpath.id="agent.handler.compile.classpath"/>
+   <test.do module.dir="${hq.pdk.agent}" compile.classpath.id="agent.pdk.compile.classpath"/>
+   <test.do module.dir="${hq.common}" compile.classpath.id="shared.compile.classpath"/>
+   <test.do module.dir="${hq.util}" compile.classpath.id="shared.compile.classpath"/>
+	<test.do module.dir="${hq.pdk.shared}" compile.classpath.id="shared.compile.classpath"/>
+	<test.do module.dir="${hq.web}" compile.classpath.id="web.compile.classpath"/>
 </target>
+
+<macrodef name="test.do">
+	<attribute name="module.dir"/>
+	<attribute name="compile.classpath.id"/>
+	<sequential>
+	<path id="test.compile.classpath">
+		<path refid="@{compile.classpath.id}" />
+		<path location="@{module.dir}/target/classes" />
+	</path>
+  	<compile-tests classpath.id="test.compile.classpath" src.dir="@{module.dir}" output.dir="@{module.dir}/target/test-classes" />
+	<path id="test.run.classpath">
+	    <path refid="test.compile.classpath" />
+	 	<path location="@{module.dir}/target/test-classes" />
+	</path>
+    <test-run classpath.id="test.run.classpath" test.output.dir="@{module.dir}/target/test-classes"/>
+</sequential>
+</macrodef>
 
 <macrodef name="test-run">
     <attribute name="classpath.id"/>
-    <attribute name="input.dir"/>
+    <attribute name="test.output.dir"/>
     <sequential>
-
-
-  <condition property="test.halt" value="false" else="true">
-    <istrue value="${ci.build}"/>
-  </condition>
-
-  <echo message="Halt on error or failure: ${test.halt}"/>
 
     <junit reloading="no" fork="true" forkmode="once" printsummary="yes" haltOnError="${test.halt}" haltOnFailure="${test.halt}">
        
-     <jvmarg value="-Dtest.halt=${test.halt}"/>
+    <jvmarg value="-Dtest.halt=${test.halt}"/>
     <classpath refid="@{classpath.id}"/>
 
        <formatter type="xml"/>
@@ -49,8 +89,8 @@
        <test name="${testcase}" todir="${junitResults.dir}" if="single.test" />
 
        <batchtest todir="${junitResults.dir}" unless="single.test">
-           <fileset dir="@{input.dir}">
-				<include name="**/*Test.java"/>
+           <fileset dir="@{test.output.dir}">
+				<include name="**/*Test.class"/>
            </fileset>
       </batchtest>
     </junit>
