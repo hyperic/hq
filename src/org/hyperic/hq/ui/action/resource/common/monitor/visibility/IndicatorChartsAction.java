@@ -214,10 +214,32 @@ public class IndicatorChartsAction extends DispatchAction
             }
         }
         
+        // This should only happen if every value in the array is NaN/Infinity...
+        // ...if so, set low to zero
+        if (low == Double.MAX_VALUE) {
+            low = 0;
+            
+            // ..high should not have change either
+            assert(high == Double.MIN_VALUE);
+        }
+
+        // ...low should never be greater than high...
+        assert(low <= high);
+        
+        double avg = (double)total/count;
+        
+        /* TODO Ensure this is true, have seen some odd cases where the data makes these assertion false
+        // ...low should never be greater than avg...
+        assert(low <= avg);
+        
+        // ...avg should never be greater than high...
+        assert(avg <= high);
+        */
+        
         final double[] data = new double[MeasurementConstants.IND_LAST_TIME + 1];
         
         data[MeasurementConstants.IND_MIN] = low;
-        data[MeasurementConstants.IND_AVG] = (double)total/count;
+        data[MeasurementConstants.IND_AVG] = avg;
         data[MeasurementConstants.IND_MAX] = high;
         data[MeasurementConstants.IND_CFG_COUNT] = count;
         
