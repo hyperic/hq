@@ -113,13 +113,6 @@
 		<path location="${thirdparty.lib}/dbunit-2.2.jar" />
 	</path>
 
-
-	<path id="clover.classpath">
-		<pathelement location="${thirdparty.lib}/com.springsource.com.cenqua.clover-2.4.2.jar" />
-	</path>
-
-
-
 	<path id="pdkjars">
 		<path location="${hq.pdk.shared}/target/classes"/>
 		<path location="${hq.common}/target/classes" />
@@ -214,13 +207,13 @@
 	<target name="compile" depends="compile-shared,compile-web, compile-installer" />
 
 	<target name="compile-shared" depends="init">
-		<compile-sources classpath.id="shared.compile.classpath" src.dir="${hq.util}" output.dir="${hq.util}/target/classes" />
-		<compile-sources classpath.id="shared.compile.classpath" src.dir="${hq.common}" output.dir="${hq.common}/target/classes" />
-		<compile-sources classpath.id="shared.compile.classpath" src.dir="${hq.pdk.shared}" output.dir="${hq.pdk.shared}/target/classes" />
+		<compile-sources classpath.id="shared.compile.classpath" src.dir="${hq.util}/src/main/java" resource.dir="${hq.util}/src/main/resources" output.dir="${hq.util}/target/classes" />
+		<compile-sources classpath.id="shared.compile.classpath" src.dir="${hq.common}/src/main/java" resource.dir="${hq.common}/src/main/resources" output.dir="${hq.common}/target/classes" />
+		<compile-sources classpath.id="shared.compile.classpath" src.dir="${hq.pdk.shared}/src/main/java" resource.dir="${hq.pdk.shared}/src/main/resources" output.dir="${hq.pdk.shared}/target/classes" />
 	</target>
 
 	<target name="compile-web" depends="compile-shared">
-		<compile-sources classpath.id="web.compile.classpath" src.dir="${hq.web}" output.dir="${hq.web}/target/classes" />
+		<compile-sources classpath.id="web.compile.classpath" src.dir="${hq.web}/src/main/java" resource.dir="${hq.web}/src/main/resources" output.dir="${hq.web}/target/classes" />
 		<copy toDir="${hq.web}/target/classes">
 			<fileset dir="${hq.web}/src/main/java" excludes="**/*.java" />
 		</copy>
@@ -236,11 +229,11 @@
 			<path location="${hq.pdk.shared}/target/classes" />
 			<path location="${hq.web}/target/classes" />
 		</path>
-		<compile-sources classpath.id="compile.classpath" src.dir="${hq.installer}" output.dir="${hq.installer}/target/classes" />
+		<compile-sources classpath.id="compile.classpath" src.dir="${hq.installer}/src/main/java" resource.dir="${hq.installer}/src/main/resources" output.dir="${hq.installer}/target/classes" />
 	</target>
 
 	<target name="compile-agent" depends="compile-agent-pdk">	
-		<compile-sources classpath.id="agent.compile.classpath" src.dir="${hq.agent}" output.dir="${hq.agent}/target/classes" />
+		<compile-sources classpath.id="agent.compile.classpath" src.dir="${hq.agent}/src/main/java" resource.dir="${hq.agent}/src/main/resources" output.dir="${hq.agent}/target/classes" />
 		<compile-agent-handlers classpath.id="agent.handler.compile.classpath" handler.name="autoinventory" />
 		<compile-agent-handlers classpath.id="agent.handler.compile.classpath" handler.name="bizapp" />
 		<compile-agent-handlers classpath.id="agent.handler.compile.classpath" handler.name="commands" />
@@ -250,28 +243,8 @@
 	</target>
 	
 	<target name="compile-agent-pdk" depends="compile-shared">
-			<compile-sources classpath.id="agent.pdk.compile.classpath" src.dir="${hq.pdk.agent}" output.dir="${hq.pdk.agent}/target/classes" />
+			<compile-sources classpath.id="agent.pdk.compile.classpath" src.dir="${hq.pdk.agent}/src/main/java" resource.dir="${hq.pdk.agent}/src/main/resources" output.dir="${hq.pdk.agent}/target/classes" />
 	</target>
-
-	<macrodef name="compile-sources">
-		<attribute name="classpath.id" />
-		<attribute name="src.dir" />
-		<attribute name="output.dir" />
-		<sequential>
-			<mkdir dir="@{output.dir}" />
-			<hq-javac destdir="@{output.dir}">
-				<classpath refid="@{classpath.id}" />
-				<src>
-					<dirset dir="@{src.dir}">
-						<include name="src/main/java" />
-					</dirset>
-				</src>
-			</hq-javac>
-			<copy toDir="@{output.dir}">
-				<fileset dir="@{src.dir}/src/main/resources" includes="**/*" erroronmissingdir="false"/>
-			</copy>
-		</sequential>
-	</macrodef>
 
 	<macrodef name="compile-agent-handlers">
 		<attribute name="handler.name" />
@@ -439,33 +412,6 @@
 	<target name="build-war" description="Build and create the war" depends="compile,compile-plugins,pack-plugins,pack-war" />
 
 	<!-- ==================== UI packaging ==================== -->
-
-
-
-
-	<target name="compile-tests">
-		<path id="src.path">
-			<path location="${basedir}/unittest/src" />
-		</path>
-		<path id="compile.classpath">
-			<path refid="testjars" />
-		</path>
-		<compile-test-sources srcpath.id="src.path" output.dir="${build.dir}/classes" classpath.id="compile.classpath" />
-	</target>
-
-	<macrodef name="compile-test-sources">
-		<attribute name="output.dir" />
-		<attribute name="srcpath.id" />
-		<attribute name="classpath.id" />
-		<sequential>
-			<hq-javac destdir="@{output.dir}">
-				<classpath refid="@{classpath.id}" />
-				<src refid="@{srcpath.id}" />
-			</hq-javac>
-		</sequential>
-	</macrodef>
-
-
 
 	<target name="pack-war" description="Create the war directory structure ( use if you modify .jsp or other web files, but no sources )">
 		<mkdir dir="${war.dir}" />
@@ -1143,5 +1089,37 @@
       </bottom>
 </javadoc>
 </target>
+
+<!-- Quality Targets -->
+<target name="test" depends="init,init-taskdefs,init-tests">
+   <test.do module.dir="${hq.agent}" compile.classpath.id="agent.compile.classpath"/>
+   <test.do module.dir="${hq.agent.handlers}/hq-agent-handler-autoinventory" compile.classpath.id="agent.handler.compile.classpath"/>
+   <test.do module.dir="${hq.agent.handlers}/hq-agent-handler-bizapp" compile.classpath.id="agent.handler.compile.classpath"/>
+   <test.do module.dir="${hq.agent.handlers}/hq-agent-handler-commands" compile.classpath.id="agent.handler.compile.classpath"/>
+   <test.do module.dir="${hq.agent.handlers}/hq-agent-handler-control" compile.classpath.id="agent.handler.compile.classpath"/>
+   <test.do module.dir="${hq.agent.handlers}/hq-agent-handler-livedata" compile.classpath.id="agent.handler.compile.classpath"/>
+   <test.do module.dir="${hq.agent.handlers}/hq-agent-handler-measurement" compile.classpath.id="agent.handler.compile.classpath"/>
+   <test.do module.dir="${hq.pdk.agent}" compile.classpath.id="agent.pdk.compile.classpath"/>
+   <test.do module.dir="${hq.common}" compile.classpath.id="shared.compile.classpath"/>
+   <test.do module.dir="${hq.util}" compile.classpath.id="shared.compile.classpath"/>
+	<test.do module.dir="${hq.pdk.shared}" compile.classpath.id="shared.compile.classpath"/>
+	<test.do module.dir="${hq.web}" compile.classpath.id="web.compile.classpath"/>
+</target>
+
+<target name="clover.instrument" depends="clover.init">
+    <instrument-module module.dir="${hq.util}"/>
+	<instrument-module module.dir="${hq.common}"/>
+	<instrument-module module.dir="${hq.pdk.shared}"/>
+	<instrument-module module.dir="${hq.web}"/>
+	<instrument-module module.dir="${hq.pdk.agent}"/>
+	<instrument-module module.dir="${hq.agent}"/>
+    <instrument-module module.dir="${hq.agent.handlers}/hq-agent-handler-autoinventory"/>
+    <instrument-module module.dir="${hq.agent.handlers}/hq-agent-handler-bizapp"/>
+    <instrument-module module.dir="${hq.agent.handlers}/hq-agent-handler-commands"/>
+    <instrument-module module.dir="${hq.agent.handlers}/hq-agent-handler-control"/>
+    <instrument-module module.dir="${hq.agent.handlers}/hq-agent-handler-livedata"/>
+    <instrument-module module.dir="${hq.agent.handlers}/hq-agent-handler-measurement"/>
+  </target>
+
 
 </project>
