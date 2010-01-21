@@ -183,7 +183,7 @@ public abstract class ResourceController extends BaseDispatchAction {
                         Constants.USERPREF_KEY_RECENT_RESOURCES, userPrefs,
                         entityId, 10)) {
                 	AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
-                	boss.setUserPrefs(user.getSessionId(),
+                	boss.setUserPrefsAfterCommit(user.getSessionId(),
                                       user.getSubject().getId(), userPrefs);
                 }
             } catch (AppdefEntityNotFoundException aenf) {

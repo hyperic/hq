@@ -42,6 +42,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.UpdateException;
+import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
@@ -471,6 +472,18 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
      * Set the UserPreferences 
      * @ejb:interface-method
      */
+    public void setUserPrefsAfterCommit(Integer sessionId, Integer subjectId,
+                                        ConfigResponse prefs)
+        throws ApplicationException, SessionTimeoutException,
+               SessionNotFoundException 
+    {
+        HQApp.getInstance().setUserPrefsCallback(sessionId, subjectId, prefs);
+    }
+
+    /**
+     * Set the UserPreferences 
+     * @ejb:interface-method
+     */
     public void setUserPrefs(Integer sessionId, Integer subjectId,
                              ConfigResponse prefs)
         throws ApplicationException, SessionTimeoutException,
@@ -478,7 +491,6 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
     {
         AuthzSubject who = manager.getSubject(sessionId);
         getAuthzSubjectManager().setUserPrefs(who, subjectId, prefs);
-        getUserPrefs(sessionId, subjectId);
     }
     
     /**

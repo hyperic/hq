@@ -54,6 +54,9 @@ import org.hibernate.Transaction;
 import org.hyperic.hibernate.HibernateInterceptorChain;
 import org.hyperic.hibernate.HypericInterceptor;
 import org.hyperic.hibernate.Util;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.hibernate.SessionManager;
@@ -62,6 +65,7 @@ import org.hyperic.hq.transport.ServerTransport;
 import org.hyperic.tools.ant.dbupgrade.DBUpgrader;
 import org.hyperic.txsnatch.TxSnatch;
 import org.hyperic.util.callback.CallbackDispatcher;
+import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.thread.ThreadWatchdog;
 import org.hyperic.util.timer.StopWatch;
@@ -80,6 +84,7 @@ public class HQApp {
     private ThreadLocal        _txListeners    = new ThreadLocal();
     private List               _startupClasses = new ArrayList();
     private CallbackDispatcher _callbacks;
+    private ThreadLocal        _userPrefsCallbacks = new ThreadLocal();
     private ShutdownCallback   _shutdown;
     private File               _restartStorage;
     private File               _resourceDir;
@@ -440,6 +445,45 @@ public class HQApp {
         }
     }
     
+    public void setUserPrefsCallback(Integer sessionId, Integer subjId, ConfigResponse prefs) {
+        List list = (List) _userPrefsCallbacks.get();
+        if (list == null) {
+            list = new ArrayList();
+            _userPrefsCallbacks.set(list);
+        }
+        Object[] objs = new Object[3];
+        objs[0] = sessionId;
+        objs[1] = subjId;
+        objs[2] = prefs;
+        list.add(objs);
+    }
+
+    private void runSetUserPrefsCallback() {
+        List list = (List) _userPrefsCallbacks.get();
+        if (list == null) {
+            return;
+        }
+        _userPrefsCallbacks.set(null);
+        final boolean debug = _log.isDebugEnabled();
+        for (Iterator it=list.iterator(); it.hasNext(); ) {
+            Object[] objs = (Object[]) it.next();
+            Integer sessionId = (Integer) objs[0];
+            Integer subjId = (Integer) objs[1];
+            ConfigResponse prefs = (ConfigResponse) objs[2];
+            try {
+                if (debug) {
+                    _log.debug("setting preferences for sessionid=" + sessionId +
+                               ", subjId=" + subjId);
+                }
+                AuthzSubject who =
+                    org.hyperic.hq.auth.shared.SessionManager.getInstance().getSubject(sessionId);
+                AuthzSubjectManagerEJBImpl.getOne().setUserPrefs(who, subjId, prefs);
+            } catch (Exception e) {
+                _log.error(e,e);
+            }
+        }
+    }
+    
     private static class Snatcher implements TxSnatch.Snatcher  {
         private final Object SNATCH_LOCK = new Object();
         private HQApp _app;
@@ -485,7 +529,7 @@ public class HQApp {
             Method meth           = v.getMethod();
             String methName       = meth.getName();
             Class c               = meth.getDeclaringClass();
-            String className      = meth.getClass().getName();
+            String className      = c.getName();
             boolean readWrite     = false;
             boolean flush         = true;
             boolean sessCreated   = SessionManager.setupSession(methName);
@@ -555,12 +599,14 @@ public class HQApp {
                                    className + "]");
                     }
                     SessionManager.cleanupSession(flush);
+                    HQApp.getInstance().runSetUserPrefsCallback();
                 }
             }
         }
-        
+
         private boolean methIsReadOnly(String methName) {
             return // 'create' is part of EJB session bean creation
+                   methName.equals("setUserPrefsAfterCommit") ||
                    methName.equals("create") ||
                    methName.equals("disconnectAgent") ||
                    // recent alerts & indicators
