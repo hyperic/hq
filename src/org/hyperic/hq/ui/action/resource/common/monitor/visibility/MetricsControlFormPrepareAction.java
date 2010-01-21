@@ -38,6 +38,7 @@ import org.hyperic.hq.ui.util.MonitorUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.InvalidOptionException;
+import org.hyperic.util.timer.StopWatch;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -62,20 +63,25 @@ public class MetricsControlFormPrepareAction extends TilesAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
        throws Exception {
-
+        final boolean debug = log.isDebugEnabled();
+        
+        StopWatch watch = new StopWatch();
         MetricsControlForm controlForm = (MetricsControlForm) form;
-
         AppdefResourceValue resource = RequestUtils.getResource(request);
+
         if (resource == null) {
             return null;
         }
+        
         AppdefEntityID entityId = resource.getEntityId();
 
         controlForm.setRid(resource.getId());
         controlForm.setType(new Integer(entityId.getType()));
+        
         prepareForm(request, controlForm);
-
-
+        
+        if (debug) log.debug("IndicatorChartsAction.fresh: " + watch);
+        
         return null;
     }
 

@@ -49,11 +49,10 @@
 <META Http-Equiv="Pragma" Content="no-cache">
 <META Http-Equiv="Expires" Content="0">
 
-<script src="<html:rewrite page='/js/dojo/1.1/dojo/dojo.js.uncompressed.js'/>" type="text/javascript"></script>
+<script src="<html:rewrite page='/js/dojo/1.1/dojo/dojo.js'/>" type="text/javascript"></script>
 <script src="<html:rewrite page="/js/functions.js"/>" type="text/javascript"></script>
 <script src="<html:rewrite page="/js/prototype.js"/>" type="text/javascript"></script>
 <script src="<html:rewrite page="/js/effects.js"/>" type="text/javascript"></script>
-
 <script type="text/javascript">
   var baseUrl = "<html:rewrite page="/resource/common/monitor/visibility/IndicatorCharts.do"/>";
 
@@ -168,6 +167,7 @@
     <c:param name="now" value="${IndicatorViewsForm.timeToken}"/>
     <c:param name="unitUnits" value="${metric.unitUnits}"/>
     <c:param name="unitScale" value="${metric.unitScale}"/>
+    <c:param name="index" value="${status.index}"/>
   </c:url>
 
   <li id="<c:out value="${metric.templateId}"/>">
@@ -202,7 +202,7 @@
 </table>
    <c:choose>
      <c:when test="${xlib}">
-<html:img src="${chartImg}" border="0"/>
+<img src="<c:out value="${chartImg}" />" border="0" width="647" height="100" />
      </c:when>
      <c:otherwise>
     <table><tr>

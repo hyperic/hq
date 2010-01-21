@@ -37,6 +37,7 @@ import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.util.timer.StopWatch;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -51,7 +52,6 @@ import org.apache.struts.tiles.actions.TilesAction;
  * Fetch the children resources for the application
  */
 public class ListChildrenAction extends TilesAction {
-    
     protected static Log log =
         LogFactory.getLog(ListChildrenAction.class.getName());
 
@@ -60,25 +60,27 @@ public class ListChildrenAction extends TilesAction {
                                  ActionForm form,
                                  HttpServletRequest request,
                                  HttpServletResponse response)
-        throws Exception {
+    throws Exception {
+        final boolean debug = log.isDebugEnabled();
+        StopWatch watch = new StopWatch();
         AppdefResourceValue resource = RequestUtils.getResource(request);
         
         if (resource == null) {
             RequestUtils.setError(request, Constants.ERR_RESOURCE_NOT_FOUND);
+
             return null;
         }
         
         AppdefEntityID entityId = resource.getEntityId();
-
         int sessionId = RequestUtils.getSessionId(request).intValue();
         ServletContext ctx = getServlet().getServletContext();
         MeasurementBoss boss = ContextUtils.getMeasurementBoss(ctx);
-
-        List internalHealths =
-            boss.findSummarizedServiceCurrentHealth(sessionId, entityId);
+        List internalHealths = boss.findSummarizedServiceCurrentHealth(sessionId, entityId);
 
         context.putAttribute(Constants.CTX_SUMMARIES, internalHealths);
-
+        
+        if (debug) log.debug("ListChildrenAction.execute: " + watch);
+        
         return null;
     }
 }

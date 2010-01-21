@@ -38,6 +38,7 @@ import org.hyperic.image.chart.AvailabilityReportChart;
 import org.hyperic.image.chart.Chart;
 import org.hyperic.image.chart.DataPointCollection;
 import org.hyperic.util.config.InvalidOptionException;
+import org.hyperic.util.timer.StopWatch;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -53,9 +54,7 @@ import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 
 public class AvailabilityStoplightChartServlet extends ChartServlet {
-    
-
-    Log log = LogFactory.getLog(AvailabilityStoplightChartServlet.class.getName());
+    private static final Log log = LogFactory.getLog(AvailabilityStoplightChartServlet.class.getName());
 
     /**
      * 
@@ -77,7 +76,10 @@ public class AvailabilityStoplightChartServlet extends ChartServlet {
      */
     protected void plotData(HttpServletRequest request, Chart chart, ChartDataBean dataBean)
             throws ServletException {
-
+        final boolean debug = log.isDebugEnabled();
+        
+        StopWatch watch = new StopWatch();
+        
         // the user
         int sessionId = RequestUtils.getSessionId(request).intValue();
 
@@ -86,19 +88,21 @@ public class AvailabilityStoplightChartServlet extends ChartServlet {
 
         // the child resource type
         AppdefEntityTypeID ctype = RequestUtils.getChildResourceTypeId(request);
-
         MeasurementBoss boss = ContextUtils.getMeasurementBoss( getServletContext() );
+        
         try {
             MeasurementSummary summary = boss.getSummarizedResourceAvailability(sessionId, 
                 entId, ctype.getType(), ctype.getId());
             AvailabilityReportChart availChart = (AvailabilityReportChart) chart;
             DataPointCollection data = availChart.getDataPoints();
+            
             data.clear();
+            
             for (Iterator iter = summary.asList().iterator(); iter.hasNext();) {
                 Integer avail = (Integer) iter.next();
+            
                 data.add(new AvailabilityDataPoint(avail));
             }
-            
         } catch (AppdefEntityNotFoundException e) {
             log.error("failed: ", e);
         } catch (SessionTimeoutException e) {
@@ -111,7 +115,8 @@ public class AvailabilityStoplightChartServlet extends ChartServlet {
             log.error("failed: ", e);
         } catch (RemoteException e) {
             log.error("failed: ", e);
-        }                   
+        }  
+        
+        if (debug) log.debug("AvailabilityStoplightChartServlet.plotData: " + watch);
     }
-
 }

@@ -53,6 +53,7 @@ import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.image.widget.ResourceTree;
 import org.hyperic.util.data.IResourceTreeNode;
+import org.hyperic.util.timer.StopWatch;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -123,6 +124,9 @@ public class NavMapTag extends TagSupport {
      * @exception JspException if any errors occur
      */
     public final int doStartTag() throws JspException {
+        final boolean debug = log.isDebugEnabled();
+        
+        StopWatch watch = new StopWatch();
         HttpServletRequest request = (HttpServletRequest)pageContext.getRequest();
         ServletContext ctx = pageContext.getServletContext();
 
@@ -189,10 +193,13 @@ public class NavMapTag extends TagSupport {
             request.setAttribute(areasVar, areas);
             request.setAttribute(areasSizeVar, new Integer( areas.size() ) );
         } catch (Exception e) {
-            log.debug("Error while getting tree.", e);
+            if (debug) log.debug("Error while getting tree.", e);
+            
             throw new JspException(e);
         }
 
+        if (debug) log.debug("NavMapTag.doStartTag: " + watch);
+        
         return SKIP_BODY;
     }
 

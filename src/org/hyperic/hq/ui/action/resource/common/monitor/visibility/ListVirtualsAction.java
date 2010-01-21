@@ -37,6 +37,7 @@ import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.util.timer.StopWatch;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -61,6 +62,9 @@ public class ListVirtualsAction extends TilesAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
+        final boolean debug = log.isDebugEnabled();
+        
+        StopWatch watch = new StopWatch();
         AppdefResourceValue resource = RequestUtils.getResource(request);
         
         if (resource == null) {
@@ -78,7 +82,9 @@ public class ListVirtualsAction extends TilesAction {
             boss.findVirtualsCurrentHealth(sessionId, entityId);
 
         context.putAttribute(Constants.CTX_SUMMARIES, virtualHealths);
-
+       
+        if (debug) log.debug("ListVirtualsAction.execute: " + watch);
+        
         return null;
     }
 }
