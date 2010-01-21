@@ -60,6 +60,9 @@ public class SNMPClient {
     public static final String PROP_USER = "snmpUser";
     public static final String PROP_PASSWORD = "snmpPassword";
     public static final String PROP_AUTHTYPE = "snmpAuthType";
+    public static final String PROP_PRIV_TYPE = "snmpPrivacyType";
+    public static final String PROP_PRIV_PASSPHRASE = "snmpPrivacyPassPhrase";
+    public static final String PROP_SECURITY_CONTEXT = "snmpSecurityContext";
 
     private static Log log = LogFactory.getLog(SNMPClient.class);
 
@@ -85,20 +88,6 @@ public class SNMPClient {
         }
 
         throw new IllegalArgumentException("unknown version: " + version);
-    }
-
-    private static int parseAuthMethod(String authMethod) {
-        if (authMethod == null) {
-            throw new IllegalArgumentException("authMethod is null");
-        }
-
-        if (authMethod.equalsIgnoreCase("md5")) {
-            return AUTH_MD5;
-        } else if (authMethod.equalsIgnoreCase("sha")) {
-            return AUTH_SHA;
-        }
-
-        throw new IllegalArgumentException("unknown authMethod: " + authMethod);
     }
 
     public SNMPClient() {
@@ -241,12 +230,13 @@ public class SNMPClient {
             case SNMPClient.VERSION_3:
 
                 String user = props.getProperty(PROP_USER, DEFAULT_USERNAME);
+                String pass = props.getProperty(PROP_PASSWORD);
+                String authtype = props.getProperty(PROP_AUTHTYPE);
+                String privtype = props.getProperty(PROP_PRIV_TYPE);
+                String privpass = props.getProperty(PROP_PRIV_PASSPHRASE);
 
-                String pass = props.getProperty(PROP_PASSWORD, DEFAULT_PASSWORD);
-
-                int authtype = parseAuthMethod(props.getProperty(PROP_AUTHTYPE, VALID_AUTHTYPES[0]));
-
-                ((SNMPSession_v3) session).init(address, port, transport, user, pass, authtype);
+                ((SNMPSession_v3) session).init(address, port, transport, user, 
+                                                authtype, pass, privtype, privpass);
 
                 break;
 

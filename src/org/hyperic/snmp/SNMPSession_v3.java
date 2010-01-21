@@ -42,7 +42,7 @@ import org.snmp4j.security.UsmUser;
 import org.snmp4j.smi.OID;
 import org.snmp4j.smi.OctetString;
 
-/*
+/**
  * Implements the SNMPSession interface for SNMPv3 sessions by extending the
  * SNMPSession_v2c implementation. SNMPv3 is only different from v1 or v2c in
  * the way that a session is initialized.
@@ -70,10 +70,18 @@ class SNMPSession_v3
         return pdu;
     }
 
-    private OctetString getPrivPassphrase(String defVal) throws SNMPException {
+    private OctetString getAuthPassphrase(String val) {
+        if (val == null || val.length() == 0) {
+            return null;
+        }
+
+        return new OctetString(val);        
+    }
+    
+    private OctetString getPrivPassphrase(String defVal) {
         String val = System.getProperty("snmpPrivacyPassPhrase", defVal);
 
-        if (val == null) {
+        if (val == null || val.length() == 0) {
             return null;
         }
 
@@ -83,7 +91,9 @@ class SNMPSession_v3
     private OID getPrivProtocol(String defVal) throws SNMPException {
         String val = System.getProperty("snmpPrivacyType", defVal);
 
-        if (val == null) {
+        if (val == null
+                || val.equalsIgnoreCase("none")
+                || val.length() == 0) {
             return null;
         }
 
@@ -104,16 +114,31 @@ class SNMPSession_v3
         }
     }
 
-    void init(String host, String port, String transport, String user, String password, int authmethod) throws SNMPException
-    {
-        OID authProtocol = authmethod == SNMPClient.AUTH_SHA ? AuthSHA.ID : AuthMD5.ID;
-
-        OID privProtocol = getPrivProtocol(null); // Template option...
+    private OID getAuthProtocol(String authMethod) {        
+        if (authMethod == null 
+                || authMethod.equalsIgnoreCase("none")
+                || authMethod.length() == 0) {
+            return null;
+        } else if (authMethod.equalsIgnoreCase("md5")) {
+            return AuthMD5.ID;
+        } else if (authMethod.equalsIgnoreCase("sha")) {
+            return AuthSHA.ID;
+        } else {
+            throw new IllegalArgumentException("unknown authentication protocol: " + authMethod);
+        }
+    }
+    
+    void init(String host, String port, String transport, String user, 
+              String authType, String authPassword, 
+              String privType, String privPassword) 
+        throws SNMPException
+    {                        
+        OID authProtocol = getAuthProtocol(authType);
+        OID privProtocol = getPrivProtocol(privType);
 
         OctetString securityName = new OctetString(user);
-        OctetString authPassphrase = password == null ? null : new OctetString(password);
-        OctetString privPassphrase = getPrivPassphrase(null); // Template
-                                                              // option...
+        OctetString authPassphrase = getAuthPassphrase(authPassword);
+        OctetString privPassphrase = getPrivPassphrase(privPassword);
 
         UserTarget target = new UserTarget();
 

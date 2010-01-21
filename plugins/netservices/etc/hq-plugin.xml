@@ -254,29 +254,30 @@
             optional="true"/>
 
     <option name="snmpUser"
-            description="SNMP username (v3 only)"
+            description="SNMP Security Name (v3 only)"
             default="username"
             optional="true"/>
 
-    <option name="snmpPassword"
-            description="SNMP password (v3 only)"
-            type="secret"
-            default="password"
-            optional="true"/>
+    <option name="snmpSecurityContext"
+    		description="SNMP Security Context Name (v3 only)" 
+    		optional="true"/>
 
     <option name="snmpAuthType"
-            description="SNMP auth type (v3 only)"
+            description="SNMP Authentication Protocol (v3 only)"
             type="enum"
             optional="true">
 		<include name="none" />		
    		<include name="MD5"/>
     	<include name="SHA"/>
     </option>
-    <option name="snmpAuthPassPhrase"
-    		description="SNMP auth passphrase (v3 only)"
-    		optional="true"/>
+    
+    <option name="snmpPassword"
+            description="SNMP Authentication Passphrase (v3 only)"
+            type="secret"
+            optional="true"/>
+
     <option name="snmpPrivacyType"
-    		description="SNMP privacy type (v3 only)"
+    		description="SNMP Privacy Protocol (v3 only)"
     		type="enum"
     		optional="true">
     	<include name="none" />		
@@ -286,12 +287,11 @@
     	<include name="AES-192" />		
     	<include name="AES-256" />		
     </option>
+    
     <option name="snmpPrivacyPassPhrase"
-    		description="SNMP privacy passphrase (v3 only)"
-    		optional="true"/>
-    <option name="snmpSecurityContext"
-    		description="SNMP security context (v3 only)" 
-    		optional="true"/>
+    		description="SNMP Privacy Passphrase (v3 only)"
+    		type="secret"
+    		optional="true"/>    		
   </config>
 
   <!-- disabled by default, change to true for testing -->
