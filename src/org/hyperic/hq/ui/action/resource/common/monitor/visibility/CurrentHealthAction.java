@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -59,6 +58,7 @@ import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.TimeUtil;
 import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.pager.PageControl;
+import org.hyperic.util.timer.StopWatch;
 import org.hyperic.util.units.UnitNumber;
 import org.hyperic.util.units.UnitsConstants;
 import org.hyperic.util.units.UnitsFormat;
@@ -83,6 +83,9 @@ public class CurrentHealthAction extends TilesAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
+        final boolean debug = log.isDebugEnabled();
+        
+        StopWatch watch = new StopWatch();
         AppdefResourceValue resource = RequestUtils.getResource(request);
 
         if (resource == null) {
@@ -135,10 +138,12 @@ public class CurrentHealthAction extends TilesAction {
                                  getFormattedAvailability(data));
         } catch (MeasurementNotFoundException e) {
             // No utilization metric
-            log.debug(MeasurementConstants.CAT_AVAILABILITY +
+            if (debug) log.debug(MeasurementConstants.CAT_AVAILABILITY +
                       " not found for " + aeid);
         }
-
+        
+        if (debug) log.debug("CurrentHealthAction.execute: " + watch);
+        
         return null;
     }
     

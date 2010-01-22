@@ -38,6 +38,7 @@ import org.hyperic.image.chart.AvailabilityReportChart;
 import org.hyperic.image.chart.Chart;
 import org.hyperic.image.chart.DataPointCollection;
 import org.hyperic.util.config.InvalidOptionException;
+import org.hyperic.util.timer.StopWatch;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -77,7 +78,10 @@ public class AvailabilityStoplightChartServlet extends ChartServlet {
      */
     protected void plotData(HttpServletRequest request, Chart chart, ChartDataBean dataBean)
             throws ServletException {
-
+        final boolean debug = log.isDebugEnabled();
+        
+        StopWatch watch = new StopWatch();
+        
         // the user
         int sessionId = RequestUtils.getSessionId(request).intValue();
 
@@ -111,7 +115,8 @@ public class AvailabilityStoplightChartServlet extends ChartServlet {
             log.error("failed: ", e);
         } catch (RemoteException e) {
             log.error("failed: ", e);
-        }                   
+        }  
+        
+        if (debug) log.debug("AvailabilityStoplightChartServlet.plotData: " + watch);
     }
-
 }

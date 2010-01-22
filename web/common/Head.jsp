@@ -49,7 +49,7 @@
 <script type="text/javascript">
 djConfig = { isDebug: false, locale: 'en-us' }
 </script>
-<script type="text/javascript" src="<html:rewrite page='/js/dojo/0.4.3/dojo.js.uncompressed.js'/>"></script> 
+<script type="text/javascript" src="<html:rewrite page='/js/dojo/0.4.3/dojo.js'/>"></script> 
 <script type="text/javascript">
 djConfig.parseOnLoad = true;
 djConfig.baseUrl = '/js/dojo/1.1/dojo/';
@@ -59,7 +59,7 @@ djConfig.scopeMap = [
         ["dojox", "dojox11"]
     ];
 </script>
-<script src="<html:rewrite page='/js/dojo/1.1/dojo/dojo.js.uncompressed.js'/>" type="text/javascript"></script>
+<script src="<html:rewrite page='/js/dojo/1.1/dojo/dojo.js'/>" type="text/javascript"></script>
 <script type="text/javascript">
     var imagePath = "<html:rewrite page="/images/"/>";
     dojo11.require('dojo.date');

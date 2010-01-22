@@ -2438,3 +2438,104 @@ span.returnToLink {
 	border-bottom: 1px solid #eee;
 	font-style: italic;
 }
+
+.autoGroupIcon {
+	background: url(../images/icon_auto-group.gif) no-repeat;
+	height: 10px;
+	width: 11px;
+}
+
+.clusterIcon {
+	background: url(../images/icon_auto-group.gif) no-repeat;
+	height: 10px;
+	width: 11px;
+}
+
+.timelineOn {
+	background: url(../images/timeline_on.gif) repeat-x;
+	height: 10px;
+	width: 9px;
+}
+
+.timelineOff {
+	background: url(../images/timeline_off.gif) repeat-x;
+	height: 10px;
+	width: 9px;
+}
+
+.timelineDown {
+	background: url(../images/timeline_down.gif) repeat-x;
+	height: 10px;
+	width: 9px;
+}
+
+.timelineUnknown {
+	background: url(../images/timeline_unknown.gif) repeat-x;
+	height: 10px;
+	width: 9px;
+}
+
+.timelineGreen {
+	background: url(../images/timeline_green.gif) repeat-x;
+	height: 10px;
+	width: 9px;
+}
+
+.timelineOrange {
+	background: url(../images/timeline_orange.gif) repeat-x;
+	height: 10px;
+	width: 9px;
+}
+
+.timelineYellow {
+	background: url(../images/timeline_yellow.gif) repeat-x;
+	height: 10px;
+	width: 9px;
+}
+
+.timelineRed {
+	background: url(../images/timeline_red.gif) repeat-x;
+	height: 10px;
+	width: 9px;
+}
+
+.resourceCommentIcon {
+	background: url(../images/comment.gif) no-repeat 0 3px;
+	height: 14px;
+	width: 14px;
+}
+
+.availabilityRed {
+	display:inline-block;
+	background: url(../images/icon_available_red.gif) no-repeat;
+	height: 12px;
+	width: 12px;
+}
+
+.availabilityOrange {
+	display:inline-block;
+	background: url(../images/icon_available_orange.gif) no-repeat;
+	height: 12px;
+	width: 12px;
+}
+
+.availabilityYellow {
+	display:inline-block;
+	background: url(../images/icon_available_yellow.gif) no-repeat;
+	height: 12px;
+	width: 12px;
+}
+
+.availabilityGreen {
+	display:inline-block;
+	background: url(../images/icon_available_green.gif) no-repeat;
+	height: 12px;
+	width: 12px;
+}
+
+.availabilityError {
+	display:inline-block;
+	background: url(../images/icon_available_error.gif) no-repeat;
+	height: 12px;
+	width: 12px;
+}

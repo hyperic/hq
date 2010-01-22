@@ -31,6 +31,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
@@ -44,13 +46,15 @@ import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.MonitorUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.TimeUtil;
+import org.hyperic.util.timer.StopWatch;
 
 /**
  * 
  * Set an array for the timeline display
  */
 public class TimelineAction extends TilesAction {
-
+    private static Log log = LogFactory.getLog(TimelineAction.class.getName());
+   
     /*
      * (non-Javadoc)
      * 
@@ -63,6 +67,9 @@ public class TimelineAction extends TilesAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
+        final boolean debug = log.isDebugEnabled();
+        
+        StopWatch watch = new StopWatch();
         WebUser user = RequestUtils.getWebUser(request);
         Map range = user.getMetricRangePreference();
         long begin = ((Long) range.get(MonitorUtils.BEGIN)).longValue();
@@ -73,7 +80,6 @@ public class TimelineAction extends TilesAction {
         ServletContext ctx = getServlet().getServletContext();
         EventLogBoss boss = ContextUtils.getEventLogBoss(ctx);
         AppdefEntityID aeid = RequestUtils.getEntityId(request);
-
         boolean[] logsExist = boss.logsExistPerInterval(user.getSessionId().intValue(),
                                                        aeid, begin, end,
                                                        intervals.length);
@@ -82,12 +88,15 @@ public class TimelineAction extends TilesAction {
         TimelineBean[] beans = new TimelineBean[intervals.length];
         long interval = TimeUtil.getInterval(begin, end,
                                              Constants.DEFAULT_CHART_POINTS);
+        
         for (int i = 0; i < intervals.length; i++) {
             beans[i] = new TimelineBean(begin + (interval * i),logsExist[i]);
         }
 
         request.setAttribute(Constants.TIME_INTERVALS_ATTR, beans);
-
+        
+        if (debug) log.debug("TimelineAction.execute: " + watch);
+        
         return null;
     }
 }

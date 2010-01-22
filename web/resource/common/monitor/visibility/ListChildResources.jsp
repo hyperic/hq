@@ -31,7 +31,6 @@
   USA.
  --%>
 
-
 <tiles:importAttribute name="mode" ignore="true"/>
 <tiles:importAttribute name="summaries" ignore="true"/>
 <tiles:importAttribute name="appdefResourceType" ignore="true"/>
@@ -105,8 +104,9 @@
       </c:otherwise>
     </c:choose>
     </li>
-    <li><div class="BoldText"><fmt:message key="resource.common.monitor.visibility.AVAILTH"/></div>
-    <img src="<c:out value="${stoplightUrl}" escapeXml="false" />" <c:out value="${availStoplightDimensions}" escapeXml="false" /> border="0" height="12">
+    <li>
+    <div class="BoldText"><fmt:message key="resource.common.monitor.visibility.AVAILTH"/></div>
+    <img id="<c:out value="${summary.resourceType.name}"/>_menu_availabilityIcon" src="/images/progress-running.gif" original="<c:out value="${stoplightUrl}" escapeXml="false" />" <c:out value="${availStoplightDimensions}" escapeXml="false" /> border="0" height="12">
     </li>
     <c:if test="${not empty url}">
     <hr>
@@ -128,12 +128,12 @@
     <td class="ListHeaderCheckbox" width="3%"><input type="checkbox" onclick="ToggleAllGroup(this, widgetProperties, '<c:out value="${listMembersName}"/>')" name="<c:out value="${listMembersName}"/>All"></td>
     </c:if>
 
-    <td class="ListHeader" width="100%" colspan="2" align="left"><fmt:message key="${childResourcesHealthKey}"/></td>
+    <td class="ListHeader" colspan="2" align="left"><fmt:message key="${childResourcesHealthKey}"/></td>
 
     <c:if test="${not empty summaries}">
     <!--<td class="ListHeaderInactive" width="20%" align="center" nowrap><fmt:message key="resource.common.monitor.visibility.TotalNumTH"/></td>-->
-    <td class="ListHeaderInactive" width="20%" align="center" nowrap><fmt:message key="resource.common.monitor.visibility.AVAILTH"/></td>
-    <td class="ListHeaderInactive" width="6%"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
+    <td class="ListHeaderInactive" align="center" nowrap><fmt:message key="resource.common.monitor.visibility.AVAILTH"/></td>
+    <td class="ListHeaderInactive">&nbsp;</td>
     </c:if>
   </tr>
 
@@ -177,13 +177,13 @@
     <td width="1%" class="ListCellCheckbox">
     <c:choose>
       <c:when test="${summary.summaryType == AUTOGROUP}">
-      <html:img page="/images/icon_auto-group.gif" height="10" width="11" border="0" alt=""/>
+      <div class="autoGroupIcon">&nbsp;</div>
       </c:when>
       <c:when test="${summary.summaryType == CLUSTER}">
-      <html:img page="/images/icon_cluster.gif" height="10" width="11" border="0" alt=""/>
+      <div class="clusterIcon">&nbsp;</div>
       </c:when>
       <c:otherwise>
-      <html:img page="/images/spacer.gif" height="10" width="11" border="0" alt=""/>
+      &nbsp;
       </c:otherwise>
     </c:choose>
     </td>
@@ -209,10 +209,10 @@
     </tiles:insert>
     </td>
 
-    <td class="ListCellCheckbox" style="padding-right:2px;padding-top:2px;">
-    <!--<a href="<c:out value="${url}"/>">-->
-      <html:img page="/images/comment.gif" onmouseover="menuLayers.show('${summary.resourceType.name}_menu', event)" onmouseout="menuLayers.hide()" border="0"/>
-    <!--</a>-->
+    <td class="ListCellCheckbox resourceCommentIcon" 
+    	onmouseover="var img = document.getElementById('<c:out value="${summary.resourceType.name}" />_menu_availabilityIcon'); if (img.src.indexOf('/images/progress-running.gif')) { img.setAttribute('src', img.getAttribute('original')); }; menuLayers.show('<c:out value="${summary.resourceType.name}" />_menu', event)" 
+        onmouseout="menuLayers.hide()">
+	&nbsp;
     </td>
   </tr>
     
@@ -227,4 +227,3 @@
 <c:if test="${empty summaries}">
   <tiles:insert definition=".resource.common.monitor.visibility.noHealths"/>
 </c:if>
-

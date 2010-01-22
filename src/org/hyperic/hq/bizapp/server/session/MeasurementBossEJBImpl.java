@@ -1428,28 +1428,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         
         List resources = getResourceIds(subject, aeid, ctype);
     
-        // Just one metric
-        final List mtids = Collections.singletonList(tid);
-        
-        // Look up the metric summaries of all associated resources
-        Map results = getResourceMetrics(subject, resources, mtids, begin, end,
-                                         null);
-
-        // Should only be one
-        if (_log.isDebugEnabled()) {
-            _log.debug("getResourceMetrics() returned " + results.size());
-        }
-
-        if (results.size() > 0) {
-            Iterator it = results.values().iterator();
-            Collection coll = (Collection) it.next();
-            it = coll.iterator();
-            MetricDisplaySummary summary = (MetricDisplaySummary) it.next();
-            
-            return summary;
-        }
-        
-        return null;
+        return findMetric(sessionId, resources, tid, begin, end);
     }
 
     /**

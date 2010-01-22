@@ -28,6 +28,7 @@ package org.hyperic.hq.ui.servlet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
@@ -39,8 +40,10 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
+import org.hyperic.hq.bizapp.shared.uibeans.MetricDisplaySummary;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
+import org.hyperic.hq.ui.action.resource.common.monitor.visibility.IndicatorChartsAction.IndicatorDisplaySummary;
 import org.hyperic.hq.ui.beans.ChartDataBean;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.ContextUtils;
@@ -51,6 +54,7 @@ import org.hyperic.image.chart.DataPointCollection;
 import org.hyperic.image.chart.HighLowChart;
 import org.hyperic.util.TimeUtil;
 import org.hyperic.util.pager.PageControl;
+import org.hyperic.util.timer.StopWatch;
 
 /**
  *
@@ -58,13 +62,16 @@ import org.hyperic.util.pager.PageControl;
  */
 public class HighLowChartServlet extends ChartServlet {
 
-    private Log log = LogFactory.getLog(HighLowChartServlet.class.getName());
+    private static final Log log = LogFactory.getLog(HighLowChartServlet.class.getName());
     
     /* (non-Javadoc)
      * @see org.hyperic.hq.ui.servlet.ChartServlet#createChart()
      */
     protected Chart createChart(HttpServletRequest request, ChartDataBean dataBean) {
-        log.trace("plotting a high low chart");
+        final boolean debug = log.isDebugEnabled();
+        
+        if (debug) log.debug("plotting a high low chart");
+        
         return new HighLowChart( getImageWidth(request), getImageHeight(request) );
     }
 
@@ -83,13 +90,16 @@ public class HighLowChartServlet extends ChartServlet {
         hiloChart.rightLabelWidth = (int) (this.getImageWidth(request) * 0.1);
         hiloChart.columnWidth = 7;
     }
-
-
+    
     /* (non-Javadoc)
      * @see org.hyperic.hq.ui.servlet.ChartServlet#plotData(javax.servlet.http.HttpServletRequest)
      */
     protected void plotData(HttpServletRequest request, Chart chart, ChartDataBean dataBean)
         throws ServletException {
+        final boolean debug = log.isDebugEnabled();
+        
+        StopWatch watch = new StopWatch();
+        
         // Make sure the entity and measurement IDs were passed in
         Integer tid = RequestUtils.getIntParameter(request, "tid");
         AppdefEntityID aeid = RequestUtils.getEntityId(request);
@@ -99,59 +109,80 @@ public class HighLowChartServlet extends ChartServlet {
         WebUser user = RequestUtils.getWebUser(request);
         int sessionId = user.getSessionId().intValue();
 
-        // set metric range defaults
-        Map pref = user.getMetricRangePreference(true);
-        Long begin = (Long) pref.get(MonitorUtils.BEGIN);
-        Long end = (Long) pref.get(MonitorUtils.END);
-
-        long interval = TimeUtil.getInterval(begin.longValue(),
-                                             end.longValue(),
-                                             Constants.DEFAULT_CHART_POINTS);
-
-        PageControl pc = new PageControl(0, Constants.DEFAULT_CHART_POINTS);
+        // retrieve the metric collection and the index
+        List<IndicatorDisplaySummary> metrics = (List<IndicatorDisplaySummary>) request.getSession().getAttribute(RequestUtils.generateSessionKey(request));
+        int index = Integer.parseInt(request.getParameter("index"));
         Collection data;
-        try {
+        
+        if (metrics != null && index > -1 && metrics.get(index).getHighLowMetrics() != null) {
+            data = metrics.get(index).getHighLowMetrics();
+        } else {
+            // set metric range defaults
+            Map pref = user.getMetricRangePreference(true);
+            Long begin = (Long) pref.get(MonitorUtils.BEGIN);
+            Long end = (Long) pref.get(MonitorUtils.END);
+            long interval = TimeUtil.getInterval(begin.longValue(), end.longValue(), Constants.DEFAULT_CHART_POINTS);
+            PageControl pc = new PageControl(0, Constants.DEFAULT_CHART_POINTS);
+            
             try {
-                // See if there are entities passed in
-                AppdefEntityID[] eids = (AppdefEntityID[]) request.getSession()
-                    .getAttribute(aeid.getAppdefKey() + ".entities");
-                
-                ArrayList entList = null;
-                if (eids != null) {
-                    entList = new ArrayList(Arrays.asList(eids));
-                }
-
-                if (entList != null) {
-                    if (!RequestUtils.parameterExists(
-                            request, Constants.CHILD_RESOURCE_TYPE_ID_PARAM) &&
-                        !aeid.isGroup()) {
-                        // Not group or autogroup
-                        entList.add(aeid);
+                try {
+                    // See if there are entities passed in
+                    AppdefEntityID[] eids = (AppdefEntityID[]) request.getSession().getAttribute(aeid.getAppdefKey() +
+                                                                                                 ".entities");
+                    ArrayList entList = null;
+                    
+                    if (eids != null) {
+                        entList = new ArrayList(Arrays.asList(eids));
                     }
-                    
-                    data = boss.findMeasurementData(
-                        sessionId, tid, entList, begin.longValue(),
-                        end.longValue(), interval, true, pc);
+
+                    if (entList != null) {
+                        if (!RequestUtils.parameterExists(request, Constants.CHILD_RESOURCE_TYPE_ID_PARAM) &&
+                            !aeid.isGroup())
+                        {
+                            // Not group or autogroup
+                            entList.add(aeid);
+                        }
+
+                        data = boss.findMeasurementData(sessionId,
+                                                        tid,
+                                                        entList,
+                                                        begin.longValue(),
+                                                        end.longValue(),
+                                                        interval,
+                                                        true,
+                                                        pc);
+                    } else {
+                        AppdefEntityTypeID childTypeId = RequestUtils.getChildResourceTypeId(request);
+
+                        data = boss.findMeasurementData(sessionId,
+                                                        tid,
+                                                        aeid,
+                                                        childTypeId,
+                                                        begin.longValue(),
+                                                        end.longValue(),
+                                                        interval,
+                                                        true,
+                                                        pc);
+                    }
+                } catch (ParameterNotFoundException e) {
+                    data = boss.findMeasurementData(sessionId,
+                                                    tid,
+                                                    aeid,
+                                                    begin.longValue(),
+                                                    end.longValue(),
+                                                    interval,
+                                                    true,
+                                                    pc);
                 }
-                else {
-                    AppdefEntityTypeID childTypeId =
-                        RequestUtils.getChildResourceTypeId(request);
-                    
-                    data = boss.findMeasurementData(
-                        sessionId, tid, aeid, childTypeId,
-                        begin.longValue(), end.longValue(), interval, true, pc);
-                }
-            } catch (ParameterNotFoundException e) {
-                data = boss.findMeasurementData(sessionId, tid, aeid,
-                    begin.longValue(), end.longValue(), interval, true, pc);
+            } catch (Exception e) {
+                throw new ServletException("Cannot fetch metric data: " + e, e);
             }
-        } catch (Exception e) {
-            throw new ServletException("Cannot fetch metric data: " + e, e);
         }
         
         HighLowChart hiloChart = (HighLowChart) chart;
         DataPointCollection bars = hiloChart.getDataPoints(0);
         bars.addAll(data);
+        
+        if (debug) log.debug("HighLowChartServlet.plotData: " + watch);
     }
-
 }
