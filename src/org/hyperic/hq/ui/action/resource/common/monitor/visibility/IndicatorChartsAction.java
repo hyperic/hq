@@ -218,17 +218,23 @@ public class IndicatorChartsAction extends DispatchAction
         // ...if so, set low to zero
         if (low == Double.MAX_VALUE) {
             low = 0;
-            
-            // ..high should not have change either
-            assert(high == Double.MIN_VALUE);
+        }
+
+        if (high == Double.MIN_VALUE) {
+            high = 0;
         }
 
         // ...low should never be greater than high...
         assert(low <= high);
         
-        double avg = (double)total/count;
+        double avg = 0.0d;
         
-        /* TODO Ensure this is true, have seen some odd cases where the data makes these assertion false
+        // calculate average if count is more than 0...
+        if (count > 0 && !(low == 0 && high == 0)) {
+            avg = (double)total/count;
+        }
+
+        /* TODO Ensure this is true, have seen some odd cases where the data makes these assertion fail
         // ...low should never be greater than avg...
         assert(low <= avg);
         
