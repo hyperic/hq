@@ -349,12 +349,23 @@ public class AvailabilityDataDAO extends HibernateDAO {
                     .append(" m.interval, m.dsn,m.resource,")
                     .append(" rle.endtime")
                     .append(" ORDER BY rle.endtime").toString();
-        return getSession()
-            .createQuery(sql)
-            .setLong("startime", start)
-            .setLong("endtime", end)
-            .setParameterList("mids", mids, new IntegerType())
-            .list();
+        final List measIds = Arrays.asList(mids);
+        final int size = measIds.size();
+        final HQDialect dialect = Util.getHQDialect();
+        final int batchSize = dialect.getMaxExpressions() < 0 ?
+            Integer.MAX_VALUE : dialect.getMaxExpressions();
+        final List rtn = new ArrayList(size);
+        for (int i=0; i<size; i+=batchSize) {
+            final int last = Math.min(i+batchSize, size);
+            final List sublist = measIds.subList(i, last);
+            rtn.addAll(getSession()
+                .createQuery(sql)
+                .setLong("startime", start)
+                .setLong("endtime", end)
+                .setParameterList("mids", sublist, new IntegerType())
+                .list());
+        }
+        return rtn;
     }
 
     /**
