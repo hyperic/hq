@@ -107,7 +107,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
     </display:column>
     <display:column width="18%" property="name" sort="true" sortAttr="5"
                     defaultSort="true" title="common.header.Name" 
-                    href="/resource/${resourceItem.entityId.typeName}/monitor/Visibility.do?mode=currentHealth&eid=${resourceItem.entityId.type}:${resourceItem.id}"/>
+                    href="/Resource.do?mode=currentHealth&eid=${resourceItem.entityId.type}:${resourceItem.id}"/>
     <display:column width="18%" property="appdefResourceTypeValue.name" title="resource.group.inventory.TypeTH" />
     <display:column width="44%" property="description" title="common.header.Description" />
     <display:column property="id" title="resource.common.monitor.visibility.AvailabilityTH" width="10%" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderCheckbox" valign="middle">
