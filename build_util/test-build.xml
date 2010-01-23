@@ -98,13 +98,14 @@
 
   <macrodef name="instrument-module">
 	 <attribute name="module.dir"/>
+	  <attribute name="staging.dir"/>
 	 <sequential>
-	  	<instrument input.dir="@{module.dir}/src/main/java" output.dir="${main.clover.dir}"/>
-	    <instrument input.dir="@{module.dir}/src/test/java" output.dir="${test.clover.dir}"/>
-	 	<copy toDir="${main.clover.resource.dir}">
+	  	<instrument input.dir="@{module.dir}/src/main/java" output.dir="@{staging.dir}/src/main/java"/>
+	    <instrument input.dir="@{module.dir}/src/test/java" output.dir="@{staging.dir}/src/test/java"/>
+	 	<copy toDir="@{staging.dir}/src/main/resources">
 			<fileset dir="@{module.dir}/src/main/resources" includes="**/*" erroronmissingdir="false"/>
 		</copy>
-		<copy toDir="${test.clover.resource.dir}">
+		<copy toDir="@{staging.dir}/src/test/resources">
 			<fileset dir="@{module.dir}/src/test/resources" includes="**/*" erroronmissingdir="false"/>
 		</copy>
 	  </sequential>
@@ -115,6 +116,7 @@
         <path refid="clover.classpath"/>
         <path refid="testjars"/>
 		<path location="${main.clover.classes.dir}"/>
+		<path location="${test.clover.classes.dir}"/>
     </path>
     <compile-sources classpath.id="clover.compile.classpath" src.dir="${main.clover.dir}" resource.dir="${main.clover.resource.dir}" output.dir="${main.clover.classes.dir}"/>
 	<compile-tests classpath.id="clover.compile.classpath" src.dir="${test.clover.dir}" resource.dir="${test.clover.resource.dir}" output.dir="${test.clover.classes.dir}"/>

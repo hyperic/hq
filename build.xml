@@ -1107,19 +1107,56 @@
 </target>
 
 <target name="clover.instrument" depends="clover.init">
-    <instrument-module module.dir="${hq.util}"/>
-	<instrument-module module.dir="${hq.common}"/>
-	<instrument-module module.dir="${hq.pdk.shared}"/>
-	<instrument-module module.dir="${hq.web}"/>
-	<instrument-module module.dir="${hq.pdk.agent}"/>
-	<instrument-module module.dir="${hq.agent}"/>
-    <instrument-module module.dir="${hq.agent.handlers}/hq-agent-handler-autoinventory"/>
-    <instrument-module module.dir="${hq.agent.handlers}/hq-agent-handler-bizapp"/>
-    <instrument-module module.dir="${hq.agent.handlers}/hq-agent-handler-commands"/>
-    <instrument-module module.dir="${hq.agent.handlers}/hq-agent-handler-control"/>
-    <instrument-module module.dir="${hq.agent.handlers}/hq-agent-handler-livedata"/>
-    <instrument-module module.dir="${hq.agent.handlers}/hq-agent-handler-measurement"/>
+    <instrument-module module.dir="${hq.util}" staging.dir="${clover.staging.dir}"/>
+	<instrument-module module.dir="${hq.common}" staging.dir="${clover.staging.dir}"/>
+	<instrument-module module.dir="${hq.pdk.shared}" staging.dir="${clover.staging.dir}"/>
+	<instrument-module module.dir="${hq.web}" staging.dir="${clover.staging.dir}"/>
+	<instrument-module module.dir="${hq.pdk.agent}" staging.dir="${clover.staging.dir}"/>
+	<instrument-module module.dir="${hq.agent}" staging.dir="${clover.staging.dir}"/>
+    <instrument-module module.dir="${hq.agent.handlers}/hq-agent-handler-autoinventory" staging.dir="${clover.staging.dir}"/>
+    <instrument-module module.dir="${hq.agent.handlers}/hq-agent-handler-bizapp" staging.dir="${clover.staging.dir}"/>
+    <instrument-module module.dir="${hq.agent.handlers}/hq-agent-handler-commands" staging.dir="${clover.staging.dir}"/>
+    <instrument-module module.dir="${hq.agent.handlers}/hq-agent-handler-control" staging.dir="${clover.staging.dir}"/>
+    <instrument-module module.dir="${hq.agent.handlers}/hq-agent-handler-livedata" staging.dir="${clover.staging.dir}"/>
+    <instrument-module module.dir="${hq.agent.handlers}/hq-agent-handler-measurement" staging.dir="${clover.staging.dir}"/>
   </target>
 
+<path id="web.clover.compile.classpath">
+	<path refid="testjars" />
+	<path location="${hq.util}/target/classes" />
+	<path location="${hq.common}/target/classes" />
+	<path location="${hq.pdk.shared}/target/classes" />
+	<path refid="clover.classpath"/>
+</path>
+
+<path id="shared.clover.compile.classpath">
+	<path refid="testjars" />
+	<path location="${hq.util}/target/classes" />
+	<path location="${hq.common}/target/classes" />
+	<path refid="clover.classpath"/>
+</path>
+
+<target name="build-instrumented-war" depends="instrument-war,compile-instrumented-war,compile-plugins,pack-plugins,pack-war">
+	<copy todir="${war.dir}/WEB-INF/lib/">
+		<fileset dir="${thirdparty.lib}">
+			<include name="com.springsource.com.cenqua.clover-2.4.2.jar" />
+		</fileset>
+	</copy>
+</target>
+
+<target name="instrument-war" depends="clover.init">
+	<instrument-module module.dir="${hq.util}" staging.dir="${hq.util}/target/clover/staging"/>
+	<instrument-module module.dir="${hq.common}" staging.dir="${hq.common}/target/clover/staging"/>
+	<instrument-module module.dir="${hq.pdk.shared}" staging.dir="${hq.pdk.shared}/target/clover/staging"/>
+	<instrument-module module.dir="${hq.web}" staging.dir="${hq.web}/target/clover/staging"/>
+</target>
+
+<target name="compile-instrumented-war">
+	<compile-sources classpath.id="shared.clover.compile.classpath" src.dir="${hq.util}/target/clover/staging/src/main/java" resource.dir="${hq.util}/target/clover/staging/src/main/resources" output.dir="${hq.util}/target/classes"/>
+	<compile-sources classpath.id="shared.clover.compile.classpath" src.dir="${hq.common}/target/clover/staging/src/main/java" resource.dir="${hq.common}/target/clover/staging/src/main/resources" output.dir="${hq.common}/target/classes"/>
+	<compile-sources classpath.id="shared.clover.compile.classpath" src.dir="${hq.pdk.shared}/target/clover/staging/src/main/java" resource.dir="${hq.pdk.shared}/target/clover/staging/src/main/resources" output.dir="${hq.pdk.shared}/target/classes"/>
+	<compile-sources classpath.id="web.clover.compile.classpath" src.dir="${hq.web}/target/clover/staging/src/main/java" resource.dir="${hq.web}/target/clover/staging/src/main/resources" output.dir="${hq.web}/target/classes"/>
+	<antcall target="compile-installer"/>
+</target>
 
 </project>
