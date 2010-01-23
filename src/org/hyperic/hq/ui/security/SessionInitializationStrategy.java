@@ -50,9 +50,9 @@ public class SessionInitializationStrategy implements SessionAuthenticationStrat
     private static Log log = LogFactory.getLog(SessionInitializationStrategy.class.getName());
     
     public void onAuthentication(Authentication authentication, HttpServletRequest request, HttpServletResponse response) throws SessionAuthenticationException {
-        if (log.isDebugEnabled()) {
-            log.debug("Initializing User Preferences...");
-        }
+        final boolean debug = log.isDebugEnabled();
+        
+        if (debug) log.debug("Initializing User Preferences...");
         
         // The following is logic taken from the old HQ Authentication Filter
         try {
@@ -78,10 +78,6 @@ public class SessionInitializationStrategy implements SessionAuthenticationStrat
                 needsRegistration = subjPojo.getEmailAddress() == null || subjPojo.getEmailAddress().length() == 0;
             }
             
-            if (needsRegistration && log.isDebugEnabled()) {
-                log.debug("Authentic user but no HQ entity...must have authenticated against LDAP/Kerberos/Other authentication handler...needs registration");
-            }
-            
             // figure out if the user has a principal
             boolean hasPrincipal = authBoss.isUser(sessionId, subject.getName());
             ConfigResponse preferences = needsRegistration ? new ConfigResponse() : getUserPreferences(ctx, sessionId, subject.getId(), authzBoss);
@@ -90,9 +86,7 @@ public class SessionInitializationStrategy implements SessionAuthenticationStrat
             // Add WebUser to Session
             session.setAttribute(Constants.WEBUSER_SES_ATTR, webUser);
             
-            if (log.isDebugEnabled()) {
-                log.debug("WebUser object created and stashed in the session");
-            }
+            if (debug) log.debug("WebUser object created and stashed in the session");
             
             // TODO - We should use Spring Security for handling user permissions...
             Map<String, Boolean> userOperationsMap = new HashMap<String, Boolean>();
@@ -102,9 +96,7 @@ public class SessionInitializationStrategy implements SessionAuthenticationStrat
                 session.setAttribute(Constants.PASSWORD_SES_ATTR, authentication.getCredentials().toString());
                 session.setAttribute(Constants.NEEDS_REGISTRATION, Boolean.TRUE);
                 
-                if (log.isDebugEnabled()) {
-                    log.debug("Stashing registration parameters in the session for later use");
-                }
+                if (debug) log.debug("Stashing registration parameters in the session for later use");
             } else {
                 userOperationsMap = loadUserPermissions(webUser.getSessionId(), authzBoss);
             }
@@ -115,9 +107,9 @@ public class SessionInitializationStrategy implements SessionAuthenticationStrat
             loadDashboard(ctx, webUser, authzBoss);
             setXlibFlag(session);
             
-            if (log.isDebugEnabled()) {
-                log.debug("Stashing user operations in the session");
-            }
+            if (debug) log.debug("Stashing user operations in the session");
+            
+            if (debug && needsRegistration) log.debug("Authentic user but no HQ entity, must have authenticated outside of HQ...needs registration");
         } catch (SessionException e) {
             log.error(e);
             

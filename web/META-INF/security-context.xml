@@ -10,7 +10,7 @@
            http://www.springframework.org/schema/security/spring-security-3.0.xsd"> 
 	<!-- Auto wire our custom security beans -->
 	<context:component-scan base-package="org.hyperic.hq.ui.security" />
-		
+	
 	<bean id="filterChainProxy" class="org.springframework.security.web.FilterChainProxy">
 		<sec:filter-chain-map path-type="ant">
 			<sec:filter-chain pattern="/login.jsp" filters="none" />
@@ -67,7 +67,7 @@
 			<bean class="org.springframework.security.web.access.AccessDeniedHandlerImpl" />
 		</property>
 	</bean>
-	
+
 	<!-- For form-based authentication -->
 	<bean id="formBasedAuthenticationFilter" class="org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter">
 		<property name="authenticationManager" ref="authenticationManager" />
@@ -75,6 +75,11 @@
 		<property name="authenticationSuccessHandler">
 			<bean class="org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler">
 				<property name="defaultTargetUrl" value="/Dashboard.do" />
+				<property name="redirectStrategy">
+					<bean class="org.hyperic.hq.ui.security.RegistrationRedirectStrategy">
+						<constructor-arg value="/admin/user/UserAdmin.do?mode=register" />
+					</bean>
+				</property>
 			</bean>
 		</property>
 		<property name="authenticationFailureHandler">
@@ -113,7 +118,7 @@
 		</property>
 		<property name="securityMetadataSource">
 			<sec:filter-security-metadata-source>
-				<sec:intercept-url pattern="/login.jsp" />
+				<sec:intercept-url pattern="/login.jsp" access="ROLE_ANONYMOUS" />
 		    	<sec:intercept-url pattern="/favicon.ico" />  
 		    	<sec:intercept-url pattern="/css/**" />  
 		    	<sec:intercept-url pattern="/js/**" />  
