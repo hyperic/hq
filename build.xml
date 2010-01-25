@@ -535,7 +535,13 @@
 				<exclude name="sigar.jar" />
 			</fileset>
 		</copy>
-
+		
+		<mkdir dir="${war.dir}/gconsoleTemplates"/>
+	  
+	    <copy todir="${war.dir}/gconsoleTemplates" failonerror="false">
+	       <fileset dir="${user.home}/.hq/gconsoleTemplates"/>
+	    </copy>
+	 
 		<antcall target="pack-common" />
 
 		<copy todir="${war.dir}/WEB-INF/lib/">
