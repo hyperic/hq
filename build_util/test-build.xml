@@ -13,25 +13,6 @@
    <echo message="Halt on error or failure: ${test.halt}"/>
 </target>
 
-<macrodef name="compile-tests">
-	<attribute name="classpath.id" />
-	<attribute name="src.dir" />
-	<attribute name="output.dir" />
-	<attribute name="resource.dir"/>
-	<sequential>
-		<mkdir dir="@{output.dir}" />
-		<hq-javac destdir="@{output.dir}">
-			<classpath refid="@{classpath.id}" />
-			<src>
-				<dirset dir="@{src.dir}"/>
-			</src>
-		</hq-javac>
-		<copy toDir="@{output.dir}">
-			<fileset dir="@{resource.dir}" includes="**/*" erroronmissingdir="false"/>
-		</copy>
-	</sequential>
-</macrodef>
-
 <macrodef name="test.do">
 	<attribute name="module.dir"/>
 	<attribute name="compile.classpath.id"/>
@@ -40,7 +21,7 @@
 		<path refid="@{compile.classpath.id}" />
 		<path location="@{module.dir}/target/classes" />
 	</path>
-  	<compile-tests classpath.id="test.compile.classpath" src.dir="@{module.dir}/src/test/java" resource.dir="@{module.dir}/src/test/resources" output.dir="@{module.dir}/target/test-classes" />
+  	<compile-sources classpath.id="test.compile.classpath" src.dir="@{module.dir}/src/test/java" resource.dir="@{module.dir}/src/test/resources" output.dir="@{module.dir}/target/test-classes" />
 	<path id="test.run.classpath">
 	    <path refid="test.compile.classpath" />
 	 	<path location="@{module.dir}/target/test-classes" />
@@ -48,8 +29,6 @@
     <test-run classpath.id="test.run.classpath" input.dir="@{module.dir}/target/test-classes"/>
 </sequential>
 </macrodef>
-
-
 
   <macrodef name="test-run">
     <attribute name="classpath.id"/>
@@ -75,7 +54,7 @@
 	 <pathelement location="${thirdparty.lib}/com.springsource.com.cenqua.clover-2.4.2.jar" />
   </path>
 
-  <target name="clover" depends="clover.pre, clover.instrument, clover.compile, clover.do, clover.post" description="Executes all tests resulting from a compilation of the test tree returning test coverage metrics."/>
+  <target name="clover" depends="clover.pre, clover.instrument, clover.do, clover.post" description="Executes all tests resulting from a compilation of the test tree returning test coverage metrics."/>
 
   <target name="clover.pre">
     <delete dir="${clover.output.dir}" quiet="true"/>
@@ -97,31 +76,33 @@
   </target>
 
   <macrodef name="instrument-module">
-	 <attribute name="module.dir"/>
-	  <attribute name="staging.dir"/>
+	<attribute name="input.dir"/>
+	<attribute name="output.dir"/>
+	<attribute name="resource.dir"/>
+	<attribute name="staging.dir"/>
+	<attribute name="classpath.id"/>
 	 <sequential>
-	  	<instrument input.dir="@{module.dir}/src/main/java" output.dir="@{staging.dir}/src/main/java"/>
-	    <instrument input.dir="@{module.dir}/src/test/java" output.dir="@{staging.dir}/src/test/java"/>
-	 	<copy toDir="@{staging.dir}/src/main/resources">
-			<fileset dir="@{module.dir}/src/main/resources" includes="**/*" erroronmissingdir="false"/>
-		</copy>
-		<copy toDir="@{staging.dir}/src/test/resources">
-			<fileset dir="@{module.dir}/src/test/resources" includes="**/*" erroronmissingdir="false"/>
-		</copy>
+		<mkdir dir="@{staging.dir}"/>
+	  	<instrument input.dir="@{input.dir}" output.dir="@{staging.dir}"/>
+	   	<compile-sources classpath.id="@{classpath.id}" src.dir="@{staging.dir}" resource.dir="@{resource.dir}" output.dir="@{output.dir}"/>
 	  </sequential>
   </macrodef>
-  
-  <target name="clover.compile" depends="clover.pre,clover.instrument">
-    <path id="clover.compile.classpath">
+
+  <path id="clover.compile.classpath">
         <path refid="clover.classpath"/>
         <path refid="testjars"/>
 		<path location="${main.clover.classes.dir}"/>
 		<path location="${test.clover.classes.dir}"/>
     </path>
-    <compile-sources classpath.id="clover.compile.classpath" src.dir="${main.clover.dir}" resource.dir="${main.clover.resource.dir}" output.dir="${main.clover.classes.dir}"/>
-	<compile-tests classpath.id="clover.compile.classpath" src.dir="${test.clover.dir}" resource.dir="${test.clover.resource.dir}" output.dir="${test.clover.classes.dir}"/>
-  </target>
 
+  <macrodef name="instrument-module-with-tests">
+	<attribute name="module.dir"/>
+	 <sequential>
+		<instrument-module input.dir="@{module.dir}/src/main/java" staging.dir="${main.clover.staging.dir}" resource.dir="@{module.dir}/src/main/resources" classpath.id="clover.compile.classpath" output.dir="${main.clover.classes.dir}"/>
+		<instrument-module input.dir="@{module.dir}/src/test/java" staging.dir="${test.clover.staging.dir}" resource.dir="@{module.dir}/src/test/resources" classpath.id="clover.compile.classpath" output.dir="${test.clover.classes.dir}"/>
+   </sequential>
+</macrodef>
+  
   <target name="clover.init" depends="init">
     <taskdef resource="cloverlib.xml" classpathref="clover.classpath"/>
   </target>
@@ -149,6 +130,7 @@
     <attribute name="input.dir"/>
     <attribute name="output.dir"/>
     <sequential>
+	  <echo message="Output dir @{output.dir} Input dir @{input.dir} ${clover.db.file}"/>
       <clover-instr initstring="${clover.db.file}" destdir="@{output.dir}" source="1.5">
         <fileset dir="@{input.dir}">
           <include name="**/*.java"/>
