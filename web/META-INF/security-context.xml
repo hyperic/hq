@@ -25,10 +25,12 @@
 																sessionManagementFilter,
 			    	                                     		filterSecurityInterceptor" />
 			<sec:filter-chain pattern="/**" filters="securityContextPersistenceFilter,
-			                                         logoutFilter,
+													 logoutFilter,
 			                                         basicAuthenticationFilter,
 													 formBasedAuthenticationFilter,
-													 sessionManagementFilter,
+													 requestCacheAwareFilter,
+													 securityContextHolderAwareRequestFilter,
+			                                         sessionManagementFilter,
 			                                         formAuthenticationExceptionTranslationFilter,
 			                                         filterSecurityInterceptor" />
 		</sec:filter-chain-map>
@@ -69,12 +71,15 @@
 	</bean>
 
 	<!-- For form-based authentication -->
+	<bean id="httpSessionRequestCache" class="org.springframework.security.web.savedrequest.HttpSessionRequestCache" />
+	
 	<bean id="formBasedAuthenticationFilter" class="org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter">
 		<property name="authenticationManager" ref="authenticationManager" />
 		<property name="sessionAuthenticationStrategy" ref="sessionInitializationStrategy" />
 		<property name="authenticationSuccessHandler">
-			<bean class="org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler">
+			<bean class="org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler">
 				<property name="defaultTargetUrl" value="/Dashboard.do" />
+				<property name="requestCache" ref="httpSessionRequestCache" />
 				<property name="redirectStrategy">
 					<bean class="org.hyperic.hq.ui.security.RegistrationRedirectStrategy">
 						<constructor-arg value="/admin/user/UserAdmin.do?mode=register" />
@@ -95,7 +100,14 @@
 	
 	<bean id="formAuthenticationExceptionTranslationFilter" class="org.springframework.security.web.access.ExceptionTranslationFilter">
 		<property name="authenticationEntryPoint" ref="formAuthenticationEntryPoint" />
+		<property name="requestCache" ref="httpSessionRequestCache" />
 	</bean>
+	
+	<!-- Request cache aware filter, this makes sure the original request is used after authenticating -->
+	<bean id="requestCacheAwareFilter" class="org.springframework.security.web.savedrequest.RequestCacheAwareFilter" />
+	
+	<!-- Security context holder aware request filter --> 
+	<bean id="securityContextHolderAwareRequestFilter" class="org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter" />
 	
 	<!-- Setup session management filter -->
 	<bean id="sessionManagementFilter" class="org.springframework.security.web.session.SessionManagementFilter">
