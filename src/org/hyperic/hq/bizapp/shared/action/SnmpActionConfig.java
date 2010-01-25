@@ -13,10 +13,12 @@ public class SnmpActionConfig implements ActionConfigInterface {
     protected static final String CFG_OID = "oid";
     protected static final String CFG_ADDRESS = "address";
     protected static final String CFG_NOTIFICATION_MECHANISM = "snmpNotificationMechanism";
+    protected static final String CFG_VARIABLE_BINDINGS = "variableBindings";
     
     protected String oid;
     protected String address;
     protected String snmpNotificationMechanism;
+    protected String variableBindings;  // in JSON format
     
     private String implementor =
         "com.hyperic.hq.bizapp.server.action.alert.SnmpAction";
@@ -24,10 +26,13 @@ public class SnmpActionConfig implements ActionConfigInterface {
     public SnmpActionConfig() {
     }
     
-    public SnmpActionConfig(String address, String oid, String snmpNotificationMechanism) {
+    public SnmpActionConfig(String snmpNotificationMechanism,
+                            String address, String oid,
+                            String variableBindings) {
+        this.snmpNotificationMechanism = snmpNotificationMechanism;
         this.address = address;
         this.oid = oid;
-        this.snmpNotificationMechanism = snmpNotificationMechanism;
+        this.variableBindings = variableBindings;
     }
 
     public void setOid(String oid) {
@@ -46,25 +51,51 @@ public class SnmpActionConfig implements ActionConfigInterface {
         return address;
     }
 
+    public String getSnmpNotificationMechanism() {
+        return snmpNotificationMechanism;
+    }
+
+    public void setSnmpNotificationMechanism(String snmpNotificationMechanism) {
+        this.snmpNotificationMechanism = snmpNotificationMechanism;
+    }
+    
+    /**
+     * Gets the variable bindings configuration in JSON format
+     */
+    public String getVariableBindings() {
+        return variableBindings;
+    }
+    
+    /**
+     * Sets the variable bindings configuration in JSON format
+     */
+    public void setVariableBindings(String variableBindings) {
+        this.variableBindings = variableBindings;
+    }
+    
     /* (non-Javadoc)
      * @see org.hyperic.hq.events.ActionConfigInterface#getConfigSchema()
      */
     public ConfigSchema getConfigSchema() {
-        StringConfigOption address, oid, snmpNotificationMechanism;
         ConfigSchema res = new ConfigSchema();
     
-        address = new StringConfigOption(CFG_ADDRESS,
+        StringConfigOption address = new StringConfigOption(CFG_ADDRESS,
                 "Transport Address ([transport:]address)", "");
         address.setMinLength(1);
         res.addOption(address);
     
-        oid = new StringConfigOption(CFG_OID, "OID", "1.3.6");
+        StringConfigOption oid = new StringConfigOption(CFG_OID, "OID", "1.3.6");
         oid.setMinLength(1);
         res.addOption(oid);
         
-        snmpNotificationMechanism = new StringConfigOption(CFG_NOTIFICATION_MECHANISM, "SNMP Notification Mechanism", "v1 Trap");
+        StringConfigOption snmpNotificationMechanism = 
+            new StringConfigOption(CFG_NOTIFICATION_MECHANISM, "SNMP Notification Mechanism", "v2c Trap");
         snmpNotificationMechanism.setMinLength(1);
         res.addOption(snmpNotificationMechanism);
+        
+        StringConfigOption variableBindings = 
+            new StringConfigOption(CFG_VARIABLE_BINDINGS, "User Variable Bindings", "[]");
+        res.addOption(variableBindings);
         
         return res;
     }
@@ -76,6 +107,7 @@ public class SnmpActionConfig implements ActionConfigInterface {
         response.setValue(CFG_ADDRESS, this.getAddress());
         response.setValue(CFG_OID, this.getOid());
         response.setValue(CFG_NOTIFICATION_MECHANISM, this.getSnmpNotificationMechanism());
+        response.setValue(CFG_VARIABLE_BINDINGS, this.getVariableBindings());
         
         return response;
     }
@@ -85,6 +117,7 @@ public class SnmpActionConfig implements ActionConfigInterface {
             setAddress(config.getValue(CFG_ADDRESS));
             setOid(config.getValue(CFG_OID));
             setSnmpNotificationMechanism(config.getValue(CFG_NOTIFICATION_MECHANISM));
+            setVariableBindings(config.getValue(CFG_VARIABLE_BINDINGS));
         } catch (IllegalArgumentException ex) {
             throw new InvalidActionDataException(ex);
         }
@@ -96,13 +129,5 @@ public class SnmpActionConfig implements ActionConfigInterface {
 
     public void setImplementor(String implementor) {
         this.implementor = implementor;
-    }
-
-    public String getSnmpNotificationMechanism() {
-        return snmpNotificationMechanism;
-    }
-
-    public void setSnmpNotificationMechanism(String snmpNotificationMechanism) {
-        this.snmpNotificationMechanism = snmpNotificationMechanism;
     }
 }

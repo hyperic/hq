@@ -75,8 +75,10 @@ public abstract class BaseAction extends Action
     protected void streamResult(JsonActionContext context)
             throws JSONException, IOException
     {
-        context.getJSONResult().write(
+        if (context.getJSONResult() != null) {
+            context.getJSONResult().write(
                 context.getWriter(),
                 context.isPrettyPrint());
+        }
     }
 }

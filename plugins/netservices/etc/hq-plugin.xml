@@ -259,7 +259,7 @@
             optional="true"/>
 
     <option name="snmpSecurityContext"
-    		description="SNMP Security Context Name (v3 only)" 
+    		description="SNMP Context Name (v3 only)" 
     		optional="true"/>
 
     <option name="snmpAuthType"
