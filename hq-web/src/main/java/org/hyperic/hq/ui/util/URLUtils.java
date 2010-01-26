@@ -24,13 +24,8 @@
  */
 package org.hyperic.hq.ui.util;
 
-import javax.servlet.ServletContext;
-
 import org.apache.tapestry.engine.IEngineService;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.bizapp.shared.ConfigBoss;
-import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.ui.RequestKeyConstants;
 import org.hyperic.ui.tapestry.page.PageListing;
@@ -39,7 +34,7 @@ import org.hyperic.ui.tapestry.page.PageListing;
  * Util class for url building and formatting
  *
  */
-public class URLUtils {
+public abstract class URLUtils {
     
     public static String buildResourceURL(AppdefResourceValue r) {
         return "/Resource.do?eid="
@@ -55,28 +50,5 @@ public class URLUtils {
     
     public static String getLocation(String pageDescriptor, IEngineService svc){
         return svc.getLink(false, pageDescriptor).getAbsoluteURL();
-    }
-    
-    /**
-     * Get the url for the HQU plugin
-     * @param sessionId TODO
-     * 
-     * @return a <code>java.lang.String</code> url in the form of
-     *         http(s)://fqdn[:port]/hqu/pluginName/pluginPath?typeId=pluginViewId
-     */
-    public static String buildPluginAbsoluteURL(String pluginName, String pluginPath, String pluginId, String baseURL, String sessionId) {
-        String url = new StringBuilder().append(baseURL).append(
-                PageListing.HQU_CONTEXT_URL).append(pluginName).append("/")
-                .append(pluginPath).append(";jsessionid=").append(sessionId)
-                .append("?").append(RequestKeyConstants.HQU_PLUGIN_ID_PARAM)
-                .append("=").append(pluginId).toString();
-        return url;
-    }
-    
-    public static String getHQBaseURL(ServletContext ctx)
-            throws org.hyperic.util.ConfigPropertyException,
-            java.rmi.RemoteException {
-        ConfigBoss cboss = Bootstrap.getBean(ConfigBoss.class);
-        return (String) cboss.getConfig().getProperty(HQConstants.BaseURL);
     }
 }

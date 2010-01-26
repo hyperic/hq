@@ -24,19 +24,25 @@
  */
 package org.hyperic.hq.ui.pages;
 
+import javax.servlet.ServletContext;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.tapestry.annotations.Persist;
 import org.apache.tapestry.event.PageBeginRenderListener;
 import org.apache.tapestry.event.PageEvent;
 import org.hyperic.hq.bizapp.server.session.ProductBossImpl;
+import org.hyperic.hq.bizapp.shared.ConfigBoss;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
+import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.server.session.Attachment;
 import org.hyperic.hq.hqu.server.session.View;
 import org.hyperic.hq.ui.RequestKeyConstants;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.URLUtils;
+import org.hyperic.ui.tapestry.page.PageListing;
 
 public abstract class Plugin extends MenuPage implements PageBeginRenderListener {
     
@@ -66,7 +72,7 @@ public abstract class Plugin extends MenuPage implements PageBeginRenderListener
         int sessionId;
         AttachmentDescriptor attachDesc = null;
         try {
-            baseUrl = URLUtils.getHQBaseURL(getServletContext());
+            baseUrl = getHQBaseURL(getServletContext());
             sessionId = RequestUtils.getSessionIdInt(getRequest());
             attachDesc = pBoss.findAttachment(sessionId, Integer
                     .valueOf(pluginId));
@@ -82,12 +88,37 @@ public abstract class Plugin extends MenuPage implements PageBeginRenderListener
             setTitle(attachDesc.getHTML());
             String path = view.getPath();
             String name = view.getPlugin().getName();
-            setPluginURL(URLUtils.buildPluginAbsoluteURL(name, path, pluginId, baseUrl, getRequest().getSession().getId()));
+            setPluginURL(buildPluginAbsoluteURL(name, path, pluginId, baseUrl, getRequest().getSession().getId()));
         } else {
             log.error("Cannot find attachment descriptor for attachment "
                     + pluginId);
             return;
         }
     }
+    
+    
+    private String getHQBaseURL(ServletContext ctx)
+            throws org.hyperic.util.ConfigPropertyException,
+            java.rmi.RemoteException {
+        ConfigBoss cboss = Bootstrap.getBean(ConfigBoss.class);
+        return (String) cboss.getConfig().getProperty(HQConstants.BaseURL);
+    }
+
+    /**
+     * Get the url for the HQU plugin
+     * @param sessionId TODO
+     * 
+     * @return a <code>java.lang.String</code> url in the form of
+     *         http(s)://fqdn[:port]/hqu/pluginName/pluginPath?typeId=pluginViewId
+     */
+    private static String buildPluginAbsoluteURL(String pluginName, String pluginPath, String pluginId, String baseURL, String sessionId) {
+        String url = new StringBuilder().append(baseURL).append(
+                PageListing.HQU_CONTEXT_URL).append(pluginName).append("/")
+                .append(pluginPath).append(";jsessionid=").append(sessionId)
+                .append("?").append(RequestKeyConstants.HQU_PLUGIN_ID_PARAM)
+                .append("=").append(pluginId).toString();
+        return url;
+    }
+
 
 }
