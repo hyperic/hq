@@ -10874,6 +10874,11 @@ has already been defined.
 	    </schema-directSQL>  
    </schemaSpec>
 
+  <schemaSpec version="3.193">
+    <schema-alterColumn table="EAM_MEASUREMENT_TEMPL" column="template"
+                        precision="2048" columnType="VARCHAR2" nullable="NOT NULL" />
+  </schemaSpec>
+
 </dbupgrade>
 </target>
 </project>
