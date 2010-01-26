@@ -20,7 +20,7 @@ class ConsoleController extends BaseController {
 	}
 	
     private def getTemplateDir() {
-		new File(HQApp.instance.webAccessibleDir, "gconsoleTemplates")    
+		new File(HQApp.instance.webAccessibleDir, "/WEB-INF/gconsoleTemplates")    
 	}
 	
 	private def getTemplates() {

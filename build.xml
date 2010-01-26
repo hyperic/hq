@@ -529,16 +529,16 @@
 			</fileset>
 		</copy>
 
-		<mkdir dir="${war.dir}/sigar_bin/lib" />
-		<copy todir="${war.dir}/sigar_bin/lib">
+		<mkdir dir="${war.dir}/WEB-INF/sigar_bin/lib" />
+		<copy todir="${war.dir}/WEB-INF/sigar_bin/lib">
 			<fileset dir="${sigar.lib}">
 				<exclude name="sigar.jar" />
 			</fileset>
 		</copy>
 		
-		<mkdir dir="${war.dir}/gconsoleTemplates"/>
+		<mkdir dir="${war.dir}/WEB-INF/gconsoleTemplates"/>
 	  
-	    <copy todir="${war.dir}/gconsoleTemplates" failonerror="false">
+	    <copy todir="${war.dir}/WEB-INF/gconsoleTemplates" failonerror="false">
 	       <fileset dir="${user.home}/.hq/gconsoleTemplates"/>
 	    </copy>
 	 
@@ -867,10 +867,10 @@
 </target>
 
  <target name="copy-plugins-to-server" depends="init-taskdefs">
-	<mkdir dir="${war.dir}/hq-plugins"/>
-	<mkdir dir="${war.dir}/hq-plugins/scripting"/>
+	<mkdir dir="${war.dir}/WEB-INF/hq-plugins"/>
+	<mkdir dir="${war.dir}/WEB-INF/hq-plugins/scripting"/>
 	
-	<copy todir="${war.dir}/hq-plugins">
+	<copy todir="${war.dir}/WEB-INF/hq-plugins">
       <fileset dir="${plugin.dir}"
                excludes="${plugins.exclude}">
         <exclude name="*-scripting-plugin.jar"/>
@@ -878,7 +878,7 @@
       </fileset>
     </copy>
 
-    <copy todir="${war.dir}/hq-plugins">
+    <copy todir="${war.dir}/WEB-INF/hq-plugins">
 	<!-- copy shared xml pieces-->
 	   <fileset dir="${hq.plugins}/process/src/main/resources">
 		   <include name="*.xml"/>
@@ -886,7 +886,7 @@
 	   <fileset dir="${hq.plugins}/jvm/src/main/resources" includes="*.xml"/>
     </copy>
 
-    <copy todir="${war.dir}/hq-plugins/scripting">
+    <copy todir="${war.dir}/WEB-INF/hq-plugins/scripting">
       <fileset dir="${plugin.dir}"
                excludes="${plugins.exclude}">
         <include name="*-scripting-plugin.jar"/>
@@ -896,14 +896,14 @@
       </fileset>
     </copy>
 
-    <plugincopy todir="${war.dir}/hq-plugins" file="hq-plugins/activemq/src/main/resources/activemq-plugin.xml"/>
-    <plugincopy todir="${war.dir}/hq-plugins" file="hq-plugins/geronimo/src/main/resources/geronimo-plugin.xml"/>
-    <plugincopy todir="${war.dir}/hq-plugins" file="hq-plugins/glassfish/src/main/resources/glassfish-plugin.xml"/>
-    <plugincopy todir="${war.dir}/hq-plugins" file="hq-plugins/hq-internal/src/main/resources/hq-internal-plugin.xml"/>
-    <plugincopy todir="${war.dir}/hq-plugins" file="hq-plugins/jetty/src/main/resources/jetty-plugin.xml"/>
-    <plugincopy todir="${war.dir}/hq-plugins" file="hq-plugins/jmx/src/main/resources/jmx-plugin.xml"/>
-    <plugincopy todir="${war.dir}/hq-plugins" file="hq-plugins/resin/src/main/resources/resin-plugin.xml"/>
-	<plugincopy todir="${war.dir}/hq-plugins" file="hq-plugins/sendmail/src/main/resources/sendmail-plugin.xml"/>
+    <plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/activemq/src/main/resources/activemq-plugin.xml"/>
+    <plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/geronimo/src/main/resources/geronimo-plugin.xml"/>
+    <plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/glassfish/src/main/resources/glassfish-plugin.xml"/>
+    <plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/hq-internal/src/main/resources/hq-internal-plugin.xml"/>
+    <plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/jetty/src/main/resources/jetty-plugin.xml"/>
+    <plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/jmx/src/main/resources/jmx-plugin.xml"/>
+    <plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/resin/src/main/resources/resin-plugin.xml"/>
+	<plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/sendmail/src/main/resources/sendmail-plugin.xml"/>
 
 </target>
 
