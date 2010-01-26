@@ -152,7 +152,7 @@ public class EmailAction extends EmailActionConfig
 
     private String renderTemplate(String filename, Map params) {
         File templateDir = new File(HQApp.getInstance().getWebAccessibleDir() + 
-                                    "/WEB-INF/classes/alertTemplates");
+                                    "/WEB-INF/alertTemplates");
         File templateFile = new File(templateDir, filename);
         StringWriter output = new StringWriter();
         try {

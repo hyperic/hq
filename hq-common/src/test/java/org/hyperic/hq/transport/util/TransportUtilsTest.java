@@ -46,7 +46,7 @@ public class TransportUtilsTest extends TestCase {
 //     * Test setting a one-way invocation where there is a preexisting 
 //     * request payload.
 //     */
-//    public void testSetOneWayInvocationWithPreexistingRequestPayload() {
+    public void testSetOneWayInvocationWithPreexistingRequestPayload() {
 //        Map requestPayload = new HashMap();
 //        
 //        InvocationRequest invocation = new InvocationRequest("sessionId", 
@@ -64,7 +64,7 @@ public class TransportUtilsTest extends TestCase {
 //        
 //        // check if it is now a one-way invocation
 //        assertTrue(TransportUtils.isOneWayInvocation(invocation));
-//    }
+    }
 //    
 //    /**
 //     * Test setting a one-way invocation where there is not a preexisting 

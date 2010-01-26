@@ -22,8 +22,8 @@
 	<classpathentry kind="lib" path="/hq-common/thirdparty/lib/commons-collections-3.2.jar"/>
 	<classpathentry kind="lib" path="/hq-common/thirdparty/lib/commons-beanutils-1.8.0.jar"/>
 	<classpathentry kind="lib" path="/hq-common/thirdparty/lib/jsch-0.1.34.jar"/>
-	<classpathentry kind="lib" path="/hq-common/thirdparty/lib/spring/org.springframework.beans-3.0.0.CI-503.jar"/>
-	<classpathentry kind="lib" path="/hq-common/thirdparty/lib/spring/org.springframework.context-3.0.0.CI-503.jar"/>
 	<classpathentry kind="lib" path="/hq-common/thirdparty/lib/com.springsource.javax.transaction-1.1.0.jar"/>
+	<classpathentry kind="lib" path="/hq-common/thirdparty/lib/spring/org.springframework.beans-3.0.0.RELEASE.jar"/>
+	<classpathentry kind="lib" path="/hq-common/thirdparty/lib/spring/org.springframework.context-3.0.0.RELEASE.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

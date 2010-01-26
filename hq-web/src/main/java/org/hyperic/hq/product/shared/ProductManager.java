@@ -24,8 +24,6 @@ import org.hyperic.util.config.ConfigSchema;
  */
 public interface ProductManager {
 
-    public boolean isReady();
-
     public TypeInfo getTypeInfo(AppdefEntityValue value) throws PermissionException, AppdefEntityNotFoundException;
 
     public PluginManager getPluginManager(String type) throws PluginException;

@@ -104,4 +104,23 @@
     </sequential>
   </macrodef>
 
+	<macrodef name="compile-sources">
+		<attribute name="classpath.id" />
+		<attribute name="src.dir" />
+		<attribute name="output.dir" />
+		<attribute name="resource.dir"/>
+		<sequential>
+			<mkdir dir="@{output.dir}" />
+			<hq-javac destdir="@{output.dir}">
+				<classpath refid="@{classpath.id}" />
+				<src>
+					<dirset dir="@{src.dir}"/>
+				</src>
+			</hq-javac>
+			<copy toDir="@{output.dir}">
+				<fileset dir="@{resource.dir}" includes="**/*" erroronmissingdir="false"/>
+			</copy>
+		</sequential>
+	</macrodef>
+
 </project>

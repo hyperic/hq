@@ -57,7 +57,7 @@ public class HQInvokerLocatorTest extends TestCase {
 //    /**
 //     * Expect a NullPointerException here.
 //     */
-//    public void testNullAgentToken() throws Exception {
+    public void testNullAgentToken() throws Exception {
 //        try {
 //            new HQInvokerLocator("protocol", "localhost", 8080, null, null, null);
 //            fail("Expected NPE");
@@ -71,7 +71,7 @@ public class HQInvokerLocatorTest extends TestCase {
 //        } catch (NullPointerException e) {
 //            // expected outcome
 //        }
-//    }
+    }
 //    
 //    /**
 //     * Expect an IllegalArgumentException here.
