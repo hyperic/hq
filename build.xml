@@ -1128,20 +1128,6 @@
 	<delete dir="${clover.staging.dir}" quiet="true"/>
   </target>
 
-<path id="web.clover.compile.classpath">
-	<path refid="testjars" />
-	<path location="${hq.util}/target/classes" />
-	<path location="${hq.common}/target/classes" />
-	<path location="${hq.pdk.shared}/target/classes" />
-	<path refid="clover.classpath"/>
-</path>
-
-<path id="shared.clover.compile.classpath">
-	<path refid="testjars" />
-	<path location="${hq.util}/target/classes" />
-	<path location="${hq.common}/target/classes" />
-	<path refid="clover.classpath"/>
-</path>
 
 <target name="build-instrumented-war" depends="instrument-war,compile-plugins,pack-plugins,pack-war">
 	<copy todir="${war.dir}/WEB-INF/lib/">
@@ -1151,17 +1137,47 @@
 	</copy>
 </target>
 
-<target name="instrument-war" depends="clover.init">
-	<instrument-module input.dir="${hq.util}/src/main/java" staging.dir="${hq.util}/target/clover/staging/src/main/java" resource.dir="${hq.util}/src/main/resources" output.dir="${hq.util}/target/classes" classpath.id="shared.clover.compile.classpath"/>
+<target name="instrument-common" depends="clover.init">
+	<instrument-module input.dir="${hq.util}/src/main/java" staging.dir="${hq.util}/target/clover/staging/src/main/java" resource.dir="${hq.util}/src/main/resources" output.dir="${hq.util}/target/classes" classpath.id="shared.compile.classpath"/>
 	<delete dir="${hq.util}/target/clover" quiet="true"/>
-	<instrument-module input.dir="${hq.common}/src/main/java" staging.dir="${hq.common}/target/clover/staging/src/main/java" resource.dir="${hq.common}/src/main/resources" output.dir="${hq.common}/target/classes" classpath.id="shared.clover.compile.classpath"/>
+	<instrument-module input.dir="${hq.common}/src/main/java" staging.dir="${hq.common}/target/clover/staging/src/main/java" resource.dir="${hq.common}/src/main/resources" output.dir="${hq.common}/target/classes" classpath.id="shared.compile.classpath"/>
 	<delete dir="${hq.common}/target/clover" quiet="true"/>
-	<instrument-module input.dir="${hq.pdk.shared}/src/main/java" staging.dir="${hq.pdk.shared}/target/clover/staging/src/main/java" resource.dir="${hq.pdk.shared}/src/main/resources" output.dir="${hq.pdk.shared}/target/classes" classpath.id="shared.clover.compile.classpath"/>
+	<instrument-module input.dir="${hq.pdk.shared}/src/main/java" staging.dir="${hq.pdk.shared}/target/clover/staging/src/main/java" resource.dir="${hq.pdk.shared}/src/main/resources" output.dir="${hq.pdk.shared}/target/classes" classpath.id="shared.compile.classpath"/>
 	<delete dir="${hq.pdk.shared}/target/clover" quiet="true"/>
-	<instrument-module input.dir="${hq.web}/src/main/java" staging.dir="${hq.web}/target/clover/staging/src/main/java" resource.dir="${hq.web}/src/main/resources" output.dir="${hq.web}/target/classes" classpath.id="web.clover.compile.classpath"/>
+</target>
+
+<target name="instrument-war" depends="instrument-common">
+	<instrument-module input.dir="${hq.web}/src/main/java" staging.dir="${hq.web}/target/clover/staging/src/main/java" resource.dir="${hq.web}/src/main/resources" output.dir="${hq.web}/target/classes" classpath.id="web.compile.classpath"/>
 	<delete dir="${hq.web}/target/clover" quiet="true"/>
 	<antcall target="compile-installer"/>
 </target>
 
+<target name="build-instrumented-agent" depends="instrument-agent,compile-plugins,pack-pdk,pack-agent">
+	<copy todir="${agent.dir}/bundles/${agent.bundle.dir}/lib">
+			<fileset dir="${thirdparty.lib}">
+				<include name="com.springsource.com.cenqua.clover-2.4.2.jar" />
+			</fileset>
+	</copy>
+</target>
 
+<target name="instrument-agent" depends="instrument-common">
+ 	<instrument-module classpath.id="agent.pdk.compile.classpath" input.dir="${hq.pdk.agent}/src/main/java" resource.dir="${hq.pdk.agent}/src/main/resources" output.dir="${hq.pdk.agent}/target/classes" staging.dir="${hq.pdk.agent}/target/clover/staging/src/main/java"/>
+	<delete dir="${hq.pdk.agent}/target/clover" quiet="true"/>
+	<instrument-module classpath.id="agent.compile.classpath" input.dir="${hq.agent}/src/main/java" resource.dir="${hq.agent}/src/main/resources" output.dir="${hq.agent}/target/classes" staging.dir="${hq.agent}/target/clover/staging/src/main/java"/>
+	<delete dir="${hq.agent}/target/clover" quiet="true"/>
+	<instrument-agent-handler handler.name="autoinventory"/>
+	<instrument-agent-handler handler.name="bizapp"/>
+	<instrument-agent-handler handler.name="commands"/>
+	<instrument-agent-handler handler.name="control"/>
+	<instrument-agent-handler handler.name="livedata"/>
+	<instrument-agent-handler handler.name="measurement"/>
+</target>
+
+<macrodef name="instrument-agent-handler">
+	<attribute name="handler.name"/>
+	<sequential>
+		<instrument-module classpath.id="agent.handler.compile.classpath" input.dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/src/main/java" resource.dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/src/main/resources" output.dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/target/classes" staging.dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/target/clover/staging/src/main/java"/>
+		<delete dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/target/clover" quiet="true"/>
+	</sequential>
+</macrodef>	
 </project>
