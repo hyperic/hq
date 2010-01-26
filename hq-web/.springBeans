@@ -7,9 +7,10 @@
 	</configSuffixes>
 	<enableImports><![CDATA[true]]></enableImports>
 	<configs>
-		<config>src/main/resources/META-INF/spring/jms-context.xml</config>
-		<config>src/main/resources/META-INF/spring/app-context.xml</config>
-		<config>src/main/resources/META-INF/spring/mail-context.xml</config>
+		<config>src/main/webapp/WEB-INF/spring/action-servlet.xml</config>
+		<config>src/main/webapp/WEB-INF/spring/app-context.xml</config>
+		<config>src/main/webapp/WEB-INF/spring/jms-context.xml</config>
+		<config>src/main/webapp/WEB-INF/spring/mail-context.xml</config>
 	</configs>
 	<configSets>
 		<configSet>
@@ -17,9 +18,10 @@
 			<allowBeanDefinitionOverriding>true</allowBeanDefinitionOverriding>
 			<incomplete>false</incomplete>
 			<configs>
-				<config>src/main/resources/META-INF/spring/app-context.xml</config>
-				<config>src/main/resources/META-INF/spring/jms-context.xml</config>
-				<config>src/main/resources/META-INF/spring/mail-context.xml</config>
+				<config>src/main/webapp/WEB-INF/spring/action-servlet.xml</config>
+				<config>src/main/webapp/WEB-INF/spring/app-context.xml</config>
+				<config>src/main/webapp/WEB-INF/spring/jms-context.xml</config>
+				<config>src/main/webapp/WEB-INF/spring/mail-context.xml</config>
 			</configs>
 		</configSet>
 	</configSets>
