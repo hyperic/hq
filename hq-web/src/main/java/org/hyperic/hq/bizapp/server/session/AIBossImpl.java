@@ -462,8 +462,4 @@ public class AIBossImpl implements AIBoss {
 
         throw new PlatformNotFoundException(platformID);
     }
-
-    public static AIBoss getOne() {
-        return Bootstrap.getBean(AIBoss.class);
-    }
 }

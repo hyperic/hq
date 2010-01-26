@@ -750,10 +750,6 @@ public class AIQueueManagerImpl implements AIQueueManager {
         permissionManager.checkAIScanPermission(subject, id);
     }
 
-    public static AIQueueManager getOne() {
-        return Bootstrap.getBean(AIQueueManager.class);
-    }
-
     /**
      * 
      */

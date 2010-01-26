@@ -34,9 +34,6 @@ import org.hyperic.util.pager.PagerEventHandler;
 import org.hyperic.util.pager.PagerProcessorExt;
 
 public class PagerProcessor_aiplatform implements PagerProcessorExt {
-
-    protected AIQueueManager aiqManagerLocal;
-
     private AIPlatformDAO aPlatformDAO = Bootstrap.getBean(AIPlatformDAO.class);
 
     public PagerProcessor_aiplatform () {}
@@ -70,19 +67,8 @@ public class PagerProcessor_aiplatform implements PagerProcessorExt {
     }
 
     public class AIPlatformPagerEventHandler implements PagerEventHandler {
-
-        public AIPlatformPagerEventHandler () {}
-
         public void init () {
-            try {
-                aiqManagerLocal = AIQueueManagerImpl.getOne();
-            } catch (Exception e) {
-                IllegalStateException ise
-                    = new IllegalStateException("Could not create " +
-                                                "AIQManagerLocal:" + e);
-                ise.initCause(e);
-                throw ise;
-            }
+            // do nothing
         }
 
         public void cleanup () {
