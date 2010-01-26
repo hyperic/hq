@@ -747,7 +747,7 @@ public class AgentManagerImpl implements AgentManager {
         String[][] files = new String[1][2];
 
        
-        File src = new File(hqApp.getWebAccessibleDir() + HQ_PLUGINS_DIR, plugin);
+        File src = new File(hqApp.getWebAccessibleDir() + "/WEB-INF" + HQ_PLUGINS_DIR, plugin);
         if (!src.exists()) {
             throw new FileNotFoundException("Plugin " + plugin + " could not be found");
         }
@@ -798,7 +798,7 @@ public class AgentManagerImpl implements AgentManager {
         getAgent(aid);
 
         // perform some basic error checking before enqueueing.
-        File src = new File(hqApp.getWebAccessibleDir() + HQ_PLUGINS_DIR, plugin);
+        File src = new File(hqApp.getWebAccessibleDir() + "/WEB-INF" + HQ_PLUGINS_DIR, plugin);
         if (!src.exists()) {
             throw new FileNotFoundException("Plugin " + plugin + " could not be found");
         }
@@ -976,7 +976,7 @@ public class AgentManagerImpl implements AgentManager {
         // An absolute repository dir is allowed in case the bundle repository
         // resides outside of the HQ server install.
         if (!repository.isAbsolute()) {
-            repository = new File(hqApp.getWebAccessibleDir(), repository.getPath());
+            repository = new File(hqApp.getWebAccessibleDir() + "/WEB-INF", repository.getPath());
         }
 
         return new File(repository, bundleFileName);
