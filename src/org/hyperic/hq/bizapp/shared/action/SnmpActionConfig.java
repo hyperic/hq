@@ -116,8 +116,8 @@ public class SnmpActionConfig implements ActionConfigInterface {
         try {
             setAddress(config.getValue(CFG_ADDRESS));
             setOid(config.getValue(CFG_OID));
-            setSnmpNotificationMechanism(config.getValue(CFG_NOTIFICATION_MECHANISM));
-            setVariableBindings(config.getValue(CFG_VARIABLE_BINDINGS));
+            setSnmpNotificationMechanism(config.getValue(CFG_NOTIFICATION_MECHANISM, "v2c Trap"));
+            setVariableBindings(config.getValue(CFG_VARIABLE_BINDINGS, "[]"));
         } catch (IllegalArgumentException ex) {
             throw new InvalidActionDataException(ex);
         }
