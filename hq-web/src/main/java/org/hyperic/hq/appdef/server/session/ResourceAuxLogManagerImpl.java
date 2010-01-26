@@ -45,10 +45,6 @@ public class ResourceAuxLogManagerImpl implements ResourceAuxLogManager {
         this.resourceAuxLogDao = resourceAuxLogDao;
     }
 
-    public static ResourceAuxLogManager getOne() {
-        return Bootstrap.getBean(ResourceAuxLogManager.class);
-    }
-
     /**
      */
     public ResourceAuxLogPojo create(GalertAuxLog log, ResourceAuxLog logInfo) {

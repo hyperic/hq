@@ -63,10 +63,6 @@ public class ResourceAuxLogPojo
         _def = def;
     }
     
-    public AlertAuxLogProvider getProvider() {
-        return ResourceAuxLogProvider.INSTANCE;
-    }
-
     public int hashCode() {
         int hash = 1;
 

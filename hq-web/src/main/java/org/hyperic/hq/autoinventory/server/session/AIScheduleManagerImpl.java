@@ -362,8 +362,4 @@ public class AIScheduleManagerImpl
         }
         return;
     }
-
-    public static AIScheduleManager getOne() {
-        return Bootstrap.getBean(AIScheduleManager.class);
-    }
 }

@@ -215,8 +215,4 @@ public class VirtualManagerImpl implements VirtualManager {
             throw new NotFoundException(aeid.toString() + " is not registered as a virtual resource");
         }
     }
-
-    public static VirtualManager getOne() {
-        return Bootstrap.getBean(VirtualManager.class);
-    }
 }

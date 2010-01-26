@@ -316,9 +316,4 @@ public class AppdefManagerImpl implements AppdefManager {
         // update the modified field in the appdef table -- YUCK
         res.setModifiedBy(who.getName());
     }
-
-    public static AppdefManager getOne() {
-        return Bootstrap.getBean(AppdefManager.class);
-    }
-
 }
