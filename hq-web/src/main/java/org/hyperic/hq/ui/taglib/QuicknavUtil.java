@@ -27,18 +27,14 @@ package org.hyperic.hq.ui.taglib;
 
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.PageContext;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.common.ProductProperties;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.util.RequestUtils;
 
 public class QuicknavUtil {
 
@@ -87,18 +83,6 @@ public class QuicknavUtil {
             default:
                 return false;
         }
-    }
-
-    public static boolean isControllable(AppdefResourceValue rv,
-                                         PageContext context)
-        throws Exception {
-        HttpServletRequest request =
-            (HttpServletRequest)context.getRequest();
-        ServletContext ctx = context.getServletContext();
-        ControlBoss boss = Bootstrap.getBean(ControlBoss.class);
-        int sessionId = RequestUtils.getSessionId(request).intValue();
-        
-        return boss.isControlSupported(sessionId, rv);
     }
 
     public static boolean canControl(AppdefResourceValue rv,
