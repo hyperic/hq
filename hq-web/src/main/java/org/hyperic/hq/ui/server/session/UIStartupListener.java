@@ -76,7 +76,7 @@ public class UIStartupListener implements StartupListener {
        
         File warDir = hqApp.getWebAccessibleDir();
         File pluginDir = new File(warDir, "hqu");
-        File sysDir = new File(warDir, "rendit_sys");
+        File sysDir = new File(warDir + "/WEB-INF", "rendit_sys");
         renditServer.setSysDir(sysDir);
 
         log.info("HQU SysDir = [" + sysDir.getAbsolutePath() + "]");

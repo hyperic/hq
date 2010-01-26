@@ -4,7 +4,7 @@
 
 	<property name="rendit_sys.dir" value="${hq.home}/hq-rendit" />
 	<property name="hqu.deployed.dir" value="${tomcat.deploy.dir}/ROOT/hqu" />
-	<property name="hqu.deployed.rendit_sys.dir" value="${tomcat.deploy.dir}/ROOT/rendit_sys" />
+	<property name="hqu.deployed.rendit_sys.dir" value="${tomcat.deploy.dir}/ROOT/WEB-INF/rendit_sys" />
 
 
 	<target name="hqu-init" unless="hqu-init.notrequired">
@@ -12,8 +12,8 @@
 			<attribute name="wardir" />
 			<attribute name="plugindir"/>
 			<sequential>
-				<mkdir dir="@{wardir}/rendit_sys" />
-				<copy todir="@{wardir}/rendit_sys">
+				<mkdir dir="@{wardir}/WEB-INF/rendit_sys" />
+				<copy todir="@{wardir}/WEB-INF/rendit_sys">
 					<fileset dir="${rendit_sys.dir}/src/main/java">
 						<include name="**/*.groovy" />
 					</fileset>
@@ -141,7 +141,7 @@
 
 		<taskdef name="groovydoc" classname="org.codehaus.groovy.ant.Groovydoc" classpathref="alljars" />
 
-		<groovydoc destdir="${build.dir}/hqudoc" sourcepath="${build.dir}/hq.war/rendit_sys" use="true" windowtitle="groovydoc" private="false" />
+		<groovydoc destdir="${build.dir}/hqudoc" sourcepath="${build.dir}/hq.war/WEB-INF/rendit_sys" use="true" windowtitle="groovydoc" private="false" />
 	</target>
 
 </project>

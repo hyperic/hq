@@ -400,11 +400,11 @@ public class ProductPluginDeployer implements Comparator<String> {
         // native libraries are deployed into another directory
         // which is not next to sigar.jar, so we drop this hint
         // to find it.
-        System.setProperty("org.hyperic.sigar.path", war + "/sigar_bin/lib");
+        System.setProperty("org.hyperic.sigar.path", war + "/WEB-INF/sigar_bin/lib");
 
         _hquDir = war + "/" + HQU;
 
-        _pluginDir = war + "/" + PLUGIN_DIR;
+        _pluginDir = war + "/WEB-INF/" + PLUGIN_DIR;
 
         File propFile = ProductPluginManager.PLUGIN_PROPERTIES_FILE;
         _ppm = new ProductPluginManager(propFile);
@@ -419,13 +419,13 @@ public class ProductPluginDeployer implements Comparator<String> {
             // native sigar libraries. we set sigar.install.home
             // here so plugins which use sigar can find it during Sigar.load()
 
-            String path = war + "/sigar_bin";
+            String path = war + "/WEB-INF/sigar_bin";
             _ppm.setProperty("sigar.install.home", path);
         } catch (Exception e) {
             _log.error(e);
         }
 
-        ProductPluginManager.setPdkPluginsDir(war + "/hq-plugins");
+        ProductPluginManager.setPdkPluginsDir(war + "/WEB-INF/hq-plugins");
         _ppm.init();
         serverStarted();
     }
