@@ -44,19 +44,19 @@ public interface StringConstants {
      * Filesystem location for the application configuration
      * properties file.
      */
-    public static final String PROPS_FILE_NAME = "/WEB-INF/hq.properties";
+    public static final String PROPS_FILE_NAME = "/WEB-INF/classes/hq.properties";
     
     /**
      * Filesystem location for the application configuration
      * properties file.
      */
-    public static final String PROPS_TAGLIB = "/WEB-INF/taglib.properties";
+    public static final String PROPS_TAGLIB = "/WEB-INF/classes/taglib.properties";
     
     /** Filesystem location for the application configuration
      * properties file.
      */
     public static final String PROPS_USER_PREFS =
-        "/WEB-INF/DefaultUserPreferences.properties";
+        "/WEB-INF/classes/DefaultUserPreferences.properties";
     
     /**
      * file list delimitor
