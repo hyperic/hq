@@ -434,7 +434,7 @@ a:visited,a:hover,a {
 }
 
 .fieldRow input {
-    float: left
+    float: left;
 }
 
 .fieldRow input[readonly='readonly'] {
@@ -461,16 +461,53 @@ fieldset {
     margin: 6px 0 0
 }
 
+#content .loginPanel {
+	margin:10% auto 0;
+}
+
 .loginPanel {
-    width: 330px;
+    width: 350px;
     border: 3px solid #B0F6FF;
     background: #fff;
-    margin: 150px auto 0;
-    padding: 16px 16px 10px;
+	padding: 16px 16px 10px;
+	text-align: left;
     -moz-border-radius: 8px;
     -webkit-border-radius: 8px;
     -moz-box-shadow: 0 3px 3px #999;
 	-webkit-box-shadow: 0 3px 3px #999;
+}
+
+.loginPanel .fieldRow {
+    height:33px;
+    position:relative;
+    clear:none;
+}
+
+.loginPanel .fieldRow input {
+    position:absolute;
+    right:5px;
+    top:5px;
+    float:none;
+}
+
+.loginPanel .fieldRow label {
+    top: 5px;
+    position: absolute;
+    text-align:left;
+    float:none;
+}
+
+.loginPanel input[type="password"], .loginPanel input[type="text"] {
+    margin-right:5px;
+}
+
+.loginPanel .guestuser {
+	background-color:#38ADEA;
+	border-color:#60BCEA;
+}
+
+.loginButtons {
+	text-align: right;	
 }
 
 .loginPanel form fieldset {
@@ -484,10 +521,6 @@ fieldset {
 .loginPanel form fieldset p label {
 	font-weight: bold;
 	padding-left: 5px;
-}
-
-.loginPanel form fieldset p input[type="submit"] {
-	float: right;	
 }
 
 .fieldsetTitle {
@@ -1374,10 +1407,6 @@ textarea {
 
 select {
     padding: 2px;
-}
-
-.loginPanel input[type="password"], .loginPanel input[type="text"] {
-    width: 200px
 }
 
 .ToolbarContent td {

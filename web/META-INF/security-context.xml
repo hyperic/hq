@@ -13,7 +13,6 @@
 	
 	<bean id="filterChainProxy" class="org.springframework.security.web.FilterChainProxy">
 		<sec:filter-chain-map path-type="ant">
-			<sec:filter-chain pattern="/login.jsp" filters="none" />
 			<sec:filter-chain pattern="/*.ico" filters="none" />
 			<sec:filter-chain pattern="/css/**" filters="none" />
 			<sec:filter-chain pattern="/js/**" filters="none" />
@@ -22,15 +21,16 @@
 			<sec:filter-chain pattern="/hqu/hqapi*/**" filters="securityContextPersistenceFilter,
 																basicAuthenticationFilter,
 																basicAuthenticationExceptionTranslationFilter,
-																sessionManagementFilter,
+																basicSessionManagementFilter,
 			    	                                     		filterSecurityInterceptor" />
 			<sec:filter-chain pattern="/**" filters="securityContextPersistenceFilter,
 													 logoutFilter,
 			                                         basicAuthenticationFilter,
 													 formBasedAuthenticationFilter,
+													 formAnonymousAuthFilter,
 													 requestCacheAwareFilter,
 													 securityContextHolderAwareRequestFilter,
-			                                         sessionManagementFilter,
+			                                         formSessionManagementFilter,
 			                                         formAuthenticationExceptionTranslationFilter,
 			                                         filterSecurityInterceptor" />
 		</sec:filter-chain-map>
@@ -45,7 +45,7 @@
 	
 	<!-- For logout -->
 	<bean id="logoutFilter" class="org.springframework.security.web.authentication.logout.LogoutFilter">
-		<constructor-arg value="/login.jsp" />
+		<constructor-arg value="/app/login" />
 		<constructor-arg>
 			<list>
 				<bean class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler"></bean>
@@ -69,13 +69,18 @@
 			<bean class="org.springframework.security.web.access.AccessDeniedHandlerImpl" />
 		</property>
 	</bean>
+	
+	<bean id="basicSessionManagementFilter" class="org.springframework.security.web.session.SessionManagementFilter">
+		<constructor-arg ref="securityContextRepository" />
+		<property name="sessionAuthenticationStrategy" ref="baseSessionInitializationStrategy" />
+	</bean>
 
 	<!-- For form-based authentication -->
 	<bean id="httpSessionRequestCache" class="org.springframework.security.web.savedrequest.HttpSessionRequestCache" />
 	
 	<bean id="formBasedAuthenticationFilter" class="org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter">
 		<property name="authenticationManager" ref="authenticationManager" />
-		<property name="sessionAuthenticationStrategy" ref="sessionInitializationStrategy" />
+		<property name="sessionAuthenticationStrategy" ref="UISessionInitializationStrategy" />
 		<property name="authenticationSuccessHandler">
 			<bean class="org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler">
 				<property name="defaultTargetUrl" value="/Dashboard.do" />
@@ -89,13 +94,13 @@
 		</property>
 		<property name="authenticationFailureHandler">
 			<bean class="org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler">
-				<property name="defaultFailureUrl" value="/login.jsp?authfailed=true" />
+				<property name="defaultFailureUrl" value="/app/login?authfailed=true" />
 			</bean>
 		</property>
 	</bean>
 	
 	<bean id="formAuthenticationEntryPoint" class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
-		<property name="loginFormUrl" value="/login.jsp" />
+		<property name="loginFormUrl" value="/app/login" />
 	</bean>
 	
 	<bean id="formAuthenticationExceptionTranslationFilter" class="org.springframework.security.web.access.ExceptionTranslationFilter">
@@ -103,17 +108,26 @@
 		<property name="requestCache" ref="httpSessionRequestCache" />
 	</bean>
 	
+	<bean id="formSessionManagementFilter" class="org.springframework.security.web.session.SessionManagementFilter">
+		<constructor-arg ref="securityContextRepository" />
+		<property name="sessionAuthenticationStrategy" ref="UISessionInitializationStrategy" />
+	</bean>
+	
+	<bean id="formAnonymousAuthFilter" class="org.springframework.security.web.authentication.AnonymousAuthenticationFilter">
+  		<property name="key" value="allyourbasebelongtous!"/>
+  		<property name="userAttribute" value="anonymousUser,ROLE_ANONYMOUS"/>
+	</bean>
+
+	<bean id="anonymousAuthenticationProvider" class="org.springframework.security.authentication.AnonymousAuthenticationProvider">
+  		<property name="key" value="allyourbasebelongtous!"/>
+	</bean>
+	
+	
 	<!-- Request cache aware filter, this makes sure the original request is used after authenticating -->
 	<bean id="requestCacheAwareFilter" class="org.springframework.security.web.savedrequest.RequestCacheAwareFilter" />
 	
 	<!-- Security context holder aware request filter --> 
 	<bean id="securityContextHolderAwareRequestFilter" class="org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter" />
-	
-	<!-- Setup session management filter -->
-	<bean id="sessionManagementFilter" class="org.springframework.security.web.session.SessionManagementFilter">
-		<constructor-arg ref="securityContextRepository" />
-		<property name="sessionAuthenticationStrategy" ref="sessionInitializationStrategy" />
-	</bean>
 	
 	<!-- Setup the filter security interceptor -->
 	<bean id="filterSecurityInterceptor" class="org.springframework.security.web.access.intercept.FilterSecurityInterceptor">
@@ -130,25 +144,24 @@
 		</property>
 		<property name="securityMetadataSource">
 			<sec:filter-security-metadata-source>
-				<sec:intercept-url pattern="/login.jsp" access="ROLE_ANONYMOUS" />
-		    	<sec:intercept-url pattern="/favicon.ico" />  
+				<sec:intercept-url pattern="/favicon.ico" />  
 		    	<sec:intercept-url pattern="/css/**" />  
 		    	<sec:intercept-url pattern="/js/**" />  
 		    	<sec:intercept-url pattern="/images/**" />  
 		    	<sec:intercept-url pattern="/ui_docs/**" /> 
 		    	<sec:intercept-url pattern="/hqu/hqapi*/**" access="ROLE_USER" /> 
+		    	<sec:intercept-url pattern="/app/login" access="ROLE_ANONYMOUS,ROLE_USER" />
 		    	<sec:intercept-url pattern="/**" access="ROLE_USER" />
 			</sec:filter-security-metadata-source>
 		</property>
 	</bean>
 	
-	<bean id="internalAuthenticationProvider" class="org.hyperic.hq.ui.security.InternalAuthenticationProvider">
-       	<property name="guestEnabled" value="true" />	
-    </bean> 
+	<bean id="internalAuthenticationProvider" class="org.hyperic.hq.ui.security.InternalAuthenticationProvider" />
 	
 	<bean id="authenticationManager" class="org.springframework.security.authentication.ProviderManager">
      		<property name="providers">
        		<list> 
+       				<ref local="anonymousAuthenticationProvider" />
         			<ref local="internalAuthenticationProvider" />
        		</list> 
      		</property>
