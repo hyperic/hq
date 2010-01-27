@@ -172,7 +172,7 @@ public class AddResourcesPrepareAction
         log.debug("get page of pending resources selected by user");
         Pager pendingPager = Pager.getDefaultPager();
         List pendingResources = DashboardUtils.listAsResources(pendingResourcesIds, getServlet().getServletContext(),
-            user);
+            user, appdefBoss);
 
         PageList pageOfPendingResources = pendingPager.seek(pendingResources, pcPending.getPagenum(), pcPending
             .getPagesize());

@@ -120,7 +120,7 @@ public class PrepareAction
 
         selectedOrAll = dashPrefs.getValue(selOrAllKey, dashPrefs.getValue(PropertiesForm.SELECTED_OR_ALL));
 
-        DashboardUtils.verifyResources(resKey, getServlet().getServletContext(), dashPrefs, user);
+        DashboardUtils.verifyResources(resKey, getServlet().getServletContext(), dashPrefs, user, appdefBoss, authzBoss);
 
         pForm.setNumberOfAlerts(numberOfAlerts);
         pForm.setPast(past);

@@ -15,6 +15,7 @@ import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.util.config.ConfigResponse;
@@ -26,12 +27,13 @@ import org.springframework.stereotype.Component;
 public class UIUtilsImpl implements UIUtils {
     
     protected AppdefBoss appdefBoss;
-    
+    private AuthzBoss authzBoss;
     
     @Autowired
-    public UIUtilsImpl(AppdefBoss appdefBoss) {
+    public UIUtilsImpl(AppdefBoss appdefBoss, AuthzBoss authzBoss) {
         super();
         this.appdefBoss = appdefBoss;
+        this.authzBoss = authzBoss;
     }
 
     public List<AppdefResourceValue> getFavoriteResources(ServletContext ctx, WebUser user) {
@@ -46,7 +48,7 @@ public class UIUtilsImpl implements UIUtils {
                 list = getResourcesFromKeys(key,  user, userPrefs);
             } catch (Exception e) {
                 try {
-                    DashboardUtils.verifyResources(key, ctx, userPrefs, user);
+                    DashboardUtils.verifyResources(key, ctx, userPrefs, user, appdefBoss, authzBoss);
                     list = getResourcesFromKeys(key,  user, userPrefs);
                 } catch (Exception ex) {
                     return new ArrayList<AppdefResourceValue>();

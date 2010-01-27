@@ -43,6 +43,7 @@ import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
@@ -63,11 +64,13 @@ public class ViewAction
 
     private final Log log = LogFactory.getLog("DASHBOARD-TIMING");
     private AuthzBoss authzBoss;
+    private AppdefBoss appdefBoss;
 
     @Autowired
-    public ViewAction(AuthzBoss authzBoss) {
+    public ViewAction(AuthzBoss authzBoss, AppdefBoss appdefBoss) {
         super();
         this.authzBoss = authzBoss;
+        this.appdefBoss = appdefBoss;
     }
 
     public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
@@ -84,7 +87,7 @@ public class ViewAction
             try {
                 list = getStuff(key, user, userPrefs);
             } catch (Exception e) {
-                DashboardUtils.verifyResources(key, getServlet().getServletContext(), userPrefs, user);
+                DashboardUtils.verifyResources(key, getServlet().getServletContext(), userPrefs, user, appdefBoss, authzBoss);
                 list = getStuff(key, user, userPrefs);
             }
 

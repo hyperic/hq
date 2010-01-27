@@ -38,6 +38,7 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
@@ -56,12 +57,14 @@ public class PrepareAction
     extends TilesAction {
     private AuthzBoss authzBoss;
     private DashboardManager dashboardManager;
+    private AppdefBoss appdefBoss;
 
     @Autowired
-    public PrepareAction(AuthzBoss authzBoss, DashboardManager dashboardManager) {
+    public PrepareAction(AuthzBoss authzBoss, DashboardManager dashboardManager, AppdefBoss appdefBoss) {
         super();
         this.authzBoss = authzBoss;
         this.dashboardManager = dashboardManager;
+        this.appdefBoss = appdefBoss;
     }
 
     public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
@@ -70,16 +73,19 @@ public class PrepareAction
         HttpSession session = request.getSession();
         WebUser user = RequestUtils.getWebUser(session);
 
-        DashboardConfig dashConfig = dashboardManager.findDashboard((Integer) session
-            .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
+        DashboardConfig dashConfig = dashboardManager
+                                                     .findDashboard(
+                                                                    (Integer) session
+                                                                                     .getAttribute(Constants.SELECTED_DASHBOARD_ID),
+                                                                    user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
 
-        DashboardUtils.verifyResources(Constants.USERPREF_KEY_FAVORITE_RESOURCES, ctx, dashPrefs, user);
+        DashboardUtils.verifyResources(Constants.USERPREF_KEY_FAVORITE_RESOURCES, ctx, dashPrefs, user, appdefBoss, authzBoss);
         // this quarantees that the session dosen't contain any resources it
         // shouldnt
         SessionUtils.removeList(session, Constants.PENDING_RESOURCES_SES_ATTR);
-        List<AppdefResourceValue> resources = DashboardUtils.preferencesAsResources(
-            Constants.USERPREF_KEY_FAVORITE_RESOURCES, ctx, user, dashPrefs);
+        List<AppdefResourceValue> resources = preferencesAsResources(Constants.USERPREF_KEY_FAVORITE_RESOURCES,
+                                                                     ctx, user, dashPrefs);
 
         Pager pendingPager = Pager.getDefaultPager();
         PageList viewableResourses = pendingPager.seek(resources, PageControl.PAGE_ALL);
@@ -89,5 +95,11 @@ public class PrepareAction
         request.setAttribute(Constants.RESOURCE_HEALTH_LIST, viewableResourses);
 
         return null;
+    }
+
+    private List<AppdefResourceValue> preferencesAsResources(String key, ServletContext ctx,
+                                                             WebUser user, ConfigResponse config) throws Exception {
+        List resourceList = config.getPreferenceAsList(key, Constants.DASHBOARD_DELIMITER);
+        return DashboardUtils.listAsResources(resourceList, ctx, user, appdefBoss);
     }
 }

@@ -40,7 +40,6 @@ import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
@@ -48,8 +47,6 @@ import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
-import org.hyperic.hq.ui.server.session.DashboardManagerImpl;
-import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.InvalidOptionException;
@@ -63,9 +60,8 @@ public class DashboardUtils {
     public static final Log log = LogFactory.getLog(DashboardUtils.class.getName());
     
     public static List<AppdefResourceValue> listAsResources(List list, ServletContext ctx,
-                                       WebUser user)
+                                       WebUser user, AppdefBoss appdefBoss)
         throws Exception {
-        AppdefBoss appdefBoss = Bootstrap.getBean(AppdefBoss.class);
         List entityIds = listAsEntityIds(list);
         ArrayList<AppdefResourceValue> resources = new ArrayList<AppdefResourceValue>();
         for (Iterator i = entityIds.iterator(); i.hasNext();) {
@@ -106,20 +102,6 @@ public class DashboardUtils {
         return resources;
     }
 
-    public static List preferencesAsResources(String key, ServletContext ctx,
-                                              WebUser user)
-        throws Exception {
-        List resourceList = user
-            .getPreferenceAsList(key, Constants.DASHBOARD_DELIMITER);
-        return listAsResources(resourceList, ctx, user);
-    }
-    
-    public static List<AppdefResourceValue> preferencesAsResources(String key, ServletContext ctx,
-			WebUser user, ConfigResponse config) throws Exception {
-		List resourceList = config.getPreferenceAsList(key,
-				Constants.DASHBOARD_DELIMITER);
-		return listAsResources(resourceList, ctx, user);
-	}
 
     public static List preferencesAsEntityIds(String key, WebUser user) {
         try {
@@ -284,34 +266,8 @@ public class DashboardUtils {
     }
 
     public static void verifyResources(String key, ServletContext ctx,
-                                       WebUser user)
-        throws Exception {
-        List resourcelist = preferencesAsEntityIds(key, user);
-        AppdefBoss appdefBoss = Bootstrap.getBean(AppdefBoss.class);
-        AuthzBoss authzboss = Bootstrap.getBean(AuthzBoss.class);
-        ArrayList toRemove = new ArrayList();
-        for (Iterator i = resourcelist.iterator(); i.hasNext();) {
-            AppdefEntityID entityID = (AppdefEntityID) i.next();
-            try {
-                appdefBoss.findById(user.getSessionId().intValue(), entityID);
-            } catch (Exception e) {
-                String entityid = entityID.getAppdefKey();
-                toRemove.add(entityid);
-            }
-        }
-
-        if (toRemove.size() > 0) {
-            String[] ids = (String[])toRemove.toArray(new String[0]);
-            removeResources(ids, key, user);
-            authzboss.setUserPrefs(user.getSessionId(), user.getId(),
-                                   user.getPreferences());
-        }
-    }
-    public static void verifyResources(String key, ServletContext ctx,
-			ConfigResponse config, WebUser user) throws Exception {
+			ConfigResponse config, WebUser user, AppdefBoss appdefBoss, AuthzBoss authzBoss) throws Exception {
 		List resourcelist = preferencesAsEntityIds(key, config);
-		AppdefBoss appdefBoss = Bootstrap.getBean(AppdefBoss.class);
-		AuthzBoss authzboss = Bootstrap.getBean(AuthzBoss.class);
 		ArrayList toRemove = new ArrayList();
 		for (Iterator i = resourcelist.iterator(); i.hasNext();) {
 			AppdefEntityID entityID = (AppdefEntityID) i.next();
@@ -326,7 +282,7 @@ public class DashboardUtils {
 		if (toRemove.size() > 0) {
 			String[] ids = (String[]) toRemove.toArray(new String[0]);
 			removeResources(ids, key, config);
-			authzboss.setUserPrefs(user.getSessionId(), user.getId(), user
+			authzBoss.setUserPrefs(user.getSessionId(), user.getId(), user
 					.getPreferences());
 		}
 	}

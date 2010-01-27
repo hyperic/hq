@@ -38,15 +38,25 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageList;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class RemoveResourcesAction
     extends TilesAction {
 
+    private AppdefBoss appdefBoss;
+    
+    @Autowired
+    public RemoveResourcesAction(AppdefBoss appdefBoss) {
+        this.appdefBoss = appdefBoss;
+    }
+    
+    
     public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
                                  HttpServletRequest request, HttpServletResponse response) throws Exception {
         ServletContext ctx = getServlet().getServletContext();
@@ -56,8 +66,8 @@ public class RemoveResourcesAction
         List<String> resourceList = user.getPreferenceAsList(Constants.USERPREF_KEY_FAVORITE_RESOURCES,
             Constants.DASHBOARD_DELIMITER);
 
-        PageList<AppdefResourceValue> resources = new PageList<AppdefResourceValue>(DashboardUtils.listAsResources(
-            resourceList, ctx, user), resourceList.size());
+        PageList<AppdefResourceValue> resources 
+            = new PageList<AppdefResourceValue>(DashboardUtils.listAsResources(resourceList, ctx, user, appdefBoss), resourceList.size());
 
         request.setAttribute(Constants.RESOURCE_HEALTH_LIST, resources);
 

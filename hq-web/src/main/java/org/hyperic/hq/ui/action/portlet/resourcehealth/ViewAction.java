@@ -106,7 +106,7 @@ public class ViewAction
         try {
             list = measurementBoss.findResourcesCurrentHealth(sessionID, arrayIds);
         } catch (Exception e) {
-            DashboardUtils.verifyResources(key, getServlet().getServletContext(), dashPrefs, user);
+            DashboardUtils.verifyResources(key, getServlet().getServletContext(), dashPrefs, user, appdefBoss, authzBoss);
             list = measurementBoss.findResourcesCurrentHealth(sessionID, arrayIds);
         }
 
