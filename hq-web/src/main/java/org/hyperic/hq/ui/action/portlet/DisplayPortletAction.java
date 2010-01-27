@@ -23,11 +23,13 @@ public class DisplayPortletAction
     extends TilesAction {
 
     private AuthzBoss authzBoss;
+    private DashboardManager dashboardManager;
 
     @Autowired
-    public DisplayPortletAction(AuthzBoss authzBoss) {
+    public DisplayPortletAction(AuthzBoss authzBoss, DashboardManager dashboardManager) {
         super();
         this.authzBoss = authzBoss;
+        this.dashboardManager = dashboardManager;
     }
 
     @Override
@@ -37,9 +39,8 @@ public class DisplayPortletAction
         HttpSession session = request.getSession();
 
         WebUser user = SessionUtils.getWebUser(session);
-        DashboardManager dashManager = DashboardManagerImpl.getOne();
         AuthzSubject guestUser = authzBoss.findSubjectByName(user.getSessionId(), "guest");
-        DashboardConfig dashboardConfig = dashManager.getUserDashboard(guestUser, guestUser);
+        DashboardConfig dashboardConfig = dashboardManager.getUserDashboard(guestUser, guestUser);
 
         String portletId = request.getParameter("pid");
         Portlet portlet = new Portlet(portletId);

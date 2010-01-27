@@ -40,6 +40,7 @@ import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SaveChartToDashboardUtil;
 import org.hyperic.hq.ui.util.SaveChartToDashboardUtil.ResultCode;
@@ -52,9 +53,12 @@ public class ViewChartAction
     extends MetricDisplayRangeAction {
     protected final Log log = LogFactory.getLog(ViewChartAction.class.getName());
 
+    private DashboardManager dashboardManager;
+    
     @Autowired
-    public ViewChartAction(AuthzBoss authzBoss) {
+    public ViewChartAction(AuthzBoss authzBoss, DashboardManager dashboardManager) {
         super(authzBoss);
+        this.dashboardManager = dashboardManager;
     }
 
     /**
@@ -138,7 +142,7 @@ public class ViewChartAction
         ActionForward success = returnRedraw(request, mapping, forwardParams);
 
         ResultCode result = SaveChartToDashboardUtil.saveChartToDashboard(getServlet().getServletContext(), request,
-            success, chartForm, adeId, chartForm.getChartName(), isEE);
+            success, chartForm, adeId, chartForm.getChartName(), isEE, dashboardManager);
 
         switch (result) {
             case DUPLICATE:

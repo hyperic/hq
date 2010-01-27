@@ -46,7 +46,6 @@ import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.Dashboard;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.server.session.DashboardManagerImpl;
@@ -398,102 +397,11 @@ public class DashboardUtils {
 	}
     
     /**
-     * Find a given dashboard by its id
-     * @param id the id of the dashboard
-     * @param user current user
-     * @param boss the authzboss
-     * @return the DashboardConfig of the corresponding DashboardId or null if none
-     */
-    public static DashboardConfig findDashboard(Integer id, WebUser user, AuthzBoss boss) {
-		AuthzSubject me;
-		ArrayList dashboardCollection;
-		
-		try {
-			me = boss.findSubjectById(user.getSessionId(), user.getSubject().getId());
-			DashboardManager dashManager = DashboardManagerImpl.getOne();
-			dashboardCollection = (ArrayList) dashManager.getDashboards(me);
-		} catch (Exception e) {
-			return null;
-		}
-		
-		Iterator i = dashboardCollection.iterator();
-		
-		while (i.hasNext()) {
-			DashboardConfig config = (DashboardConfig) i.next();
-		
-			if (config.getId().equals(id)) {
-				return config;
-			}
-		}
-		
-		return null;
-	}
-    
-    /**
      * Find the user's dashboard
      */
     public static ConfigResponse findUserDashboardConfig(WebUser user, AuthzBoss boss)
     throws SessionNotFoundException, SessionTimeoutException, PermissionException, RemoteException 
     {
         return boss.getUserDashboardConfig(user.getSessionId());
-    }
-    
-    /**
-     * Find the user's default dashboard
-     */
-    public static DashboardConfig findDefaultDashboardConfig(WebUser user, AuthzBoss boss) {
-    	String defaultDashboard = user.getPreference(Constants.DEFAULT_DASHBOARD_ID, null);
-		
-    	if (defaultDashboard != null) {
-    		return findDashboard(Integer.getInteger(defaultDashboard), user, boss);
-    	}
-    	
-    	return null;
-    }
-    
-    /**
-     * Find the user's default dashboard
-     */
-    public static List findEditableDashboardConfigs(WebUser user, AuthzBoss boss) 
-    throws SessionNotFoundException, SessionTimeoutException, PermissionException, RemoteException
-    {
-		AuthzSubject me;
-		ArrayList dashboardCollection;
-		ArrayList editableDashboardConfigs = new ArrayList();
-		
-		me = boss.findSubjectById(user.getSessionId(), user.getSubject().getId());
-			
-		DashboardManager dashManager = DashboardManagerImpl.getOne();
-			
-		dashboardCollection = (ArrayList) dashManager.getDashboards(me);
-			
-		for (Iterator i = dashboardCollection.iterator(); i.hasNext();) {
-			DashboardConfig config = (DashboardConfig) i.next();
-			
-			if (dashManager.isEditable(me, config)) {
-				editableDashboardConfigs.add(config);
-			}
-		}
-		
-		return editableDashboardConfigs; 
-    }
-    
-    public static List<Dashboard> findEditableDashboards(WebUser user, AuthzBoss boss)
-    throws SessionNotFoundException, SessionTimeoutException, PermissionException, RemoteException
-    {
-		List dashboardConfigs = findEditableDashboardConfigs(user, boss);
-		List<Dashboard> editableDashboards = new ArrayList<Dashboard>();
-		
-		for (Iterator i = dashboardConfigs.iterator(); i.hasNext();) {
-			DashboardConfig config = (DashboardConfig) i.next();
-			Dashboard dashboard = new Dashboard();
-			
-			dashboard.set_name(config.getName());
-			dashboard.setId(config.getId());
-			
-			editableDashboards.add(dashboard);
-		}   	
-		
-		return editableDashboards;
     }
 }

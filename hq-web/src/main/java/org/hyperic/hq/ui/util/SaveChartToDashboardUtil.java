@@ -14,16 +14,15 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForward;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.resource.common.monitor.visibility.ViewChartForm;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
-import org.hyperic.hq.ui.server.session.DashboardManagerImpl;
 import org.hyperic.hq.ui.server.session.RoleDashboardConfig;
 import org.hyperic.hq.ui.server.session.UserDashboardConfig;
+import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.util.config.ConfigResponse;
 
 abstract public class SaveChartToDashboardUtil {
@@ -45,7 +44,10 @@ abstract public class SaveChartToDashboardUtil {
 	}
 	
 	// Moving this logic into a util method as it's being used by more than one class
-	public static ResultCode saveChartToDashboard(ServletContext ctx, HttpServletRequest request, ActionForward success, ViewChartForm chartForm, AppdefEntityID adeId, String chartName, boolean isEE)
+	public static ResultCode saveChartToDashboard(ServletContext ctx, HttpServletRequest request, 
+	                                              ActionForward success, ViewChartForm chartForm, 
+	                                              AppdefEntityID adeId, String chartName, boolean isEE,
+	                                              DashboardManager dashboardManager)
 	throws Exception 
 	{
         AuthzBoss boss = Bootstrap.getBean(AuthzBoss.class);
@@ -57,7 +59,7 @@ abstract public class SaveChartToDashboardUtil {
         if (dashboardIds != null) {
     		for (int x = 0; x < dashboardIds.length; x++) {
     			Integer dashId = Integer.valueOf(dashboardIds[x]);
-    			DashboardConfig dashboardConfig = DashboardUtils.findDashboard(dashId, user, boss);
+    			DashboardConfig dashboardConfig = dashboardManager.findDashboard(dashId, user, boss);
     			
     			result = addChartToDashboard(forHTMLTag(chartName), url, dashboardConfig, boss, user, request);
     			
@@ -66,7 +68,7 @@ abstract public class SaveChartToDashboardUtil {
     		}
     	} else {
             AuthzSubject me = boss.findSubjectById(user.getSessionId(), user.getSubject().getId());
-            DashboardConfig dashboardConfig = DashboardManagerImpl.getOne().getUserDashboard(me, me);
+            DashboardConfig dashboardConfig = dashboardManager.getUserDashboard(me, me);
     		
     		result = addChartToDashboard(forHTMLTag(chartName), url, dashboardConfig, boss, user, request);
     	}

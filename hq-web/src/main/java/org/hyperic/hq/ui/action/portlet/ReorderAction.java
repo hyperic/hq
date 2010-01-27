@@ -37,8 +37,8 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
+import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.hq.ui.util.ConfigurationProxy;
-import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,12 +48,14 @@ public class ReorderAction
 
     private ConfigurationProxy configurationProxy;
     private AuthzBoss authzBoss;
+    private DashboardManager dashboardManager;
 
     @Autowired
-    public ReorderAction(ConfigurationProxy configurationProxy, AuthzBoss authzBoss) {
+    public ReorderAction(ConfigurationProxy configurationProxy, AuthzBoss authzBoss, DashboardManager dashboardManager) {
         super();
         this.configurationProxy = configurationProxy;
         this.authzBoss = authzBoss;
+        this.dashboardManager = dashboardManager;
     }
 
     public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
@@ -84,7 +86,7 @@ public class ReorderAction
             ordPortlets.append(Constants.DASHBOARD_DELIMITER);
             ordPortlets.append(portlet);
         }
-        DashboardConfig dashConfig = DashboardUtils.findDashboard((Integer) session
+        DashboardConfig dashConfig = dashboardManager.findDashboard((Integer) session
             .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         // tokenize and reshuffle

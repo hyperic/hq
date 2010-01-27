@@ -772,7 +772,7 @@ public class RESTService extends BaseService {
 
     private ConfigResponse loadDashboardConfig(AuthzSubject me) {
         // Load the current dashboard
-        DashboardManager dashManager = DashboardManagerImpl.getOne();
+        DashboardManager dashManager = Bootstrap.getBean(DashboardManager.class);
         Integer selectedDashboard =
             SessionUtils.getIntegerAttribute(_request.getSession(),
                                              Constants.SELECTED_DASHBOARD_ID,
