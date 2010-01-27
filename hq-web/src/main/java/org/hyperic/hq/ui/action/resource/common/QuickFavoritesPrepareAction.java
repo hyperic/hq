@@ -40,6 +40,7 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Dashboard;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.WorkflowPrepareAction;
+import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
@@ -49,11 +50,12 @@ public class QuickFavoritesPrepareAction
     extends WorkflowPrepareAction {
 
     private AuthzBoss authzBoss;
+    private DashboardManager dashboardManager;
 
     @Autowired
-    public QuickFavoritesPrepareAction(AuthzBoss authzBoss) {
-        super();
+    public QuickFavoritesPrepareAction(AuthzBoss authzBoss, DashboardManager dashboardManager) {
         this.authzBoss = authzBoss;
+        this.dashboardManager = dashboardManager;
     }
 
     public ActionForward workflow(ComponentContext context, ActionMapping mapping, ActionForm form,
@@ -70,7 +72,7 @@ public class QuickFavoritesPrepareAction
         request.setAttribute(Constants.ENTITY_ID_PARAM, arv.getEntityId().getAppdefKey());
         request.setAttribute(Constants.IS_FAVORITE_PARAM, isFavorite);
 
-        List<Dashboard> editableDashboards = DashboardUtils.findEditableDashboards(user, authzBoss);
+        List<Dashboard> editableDashboards = dashboardManager.findEditableDashboards(user, authzBoss);
 
         request.setAttribute(Constants.EDITABLE_DASHBOARDS_PARAM, editableDashboards);
         request.setAttribute(Constants.HAS_MULTIPLE_DASHBOARDS_PARAM, editableDashboards.size() > 1);

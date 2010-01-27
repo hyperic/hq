@@ -25,11 +25,12 @@
 
 package org.hyperic.hq.ui.server.session;
 
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
 import javax.security.auth.login.LoginException;
 
 import org.apache.commons.logging.Log;
@@ -37,8 +38,9 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.auth.shared.SessionManager;
+import org.hyperic.hq.auth.shared.SessionNotFoundException;
+import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
 import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.authz.server.session.RoleCreateCallback;
 import org.hyperic.hq.authz.server.session.RoleRemoveCallback;
@@ -49,12 +51,14 @@ import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.common.server.session.Crispo;
-import org.hyperic.hq.common.server.session.CrispoManagerImpl;
 import org.hyperic.hq.common.server.session.CrispoOption;
 import org.hyperic.hq.common.shared.CrispoManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.Dashboard;
+import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
@@ -340,8 +344,65 @@ public class DashboardManagerImpl implements DashboardManager {
         }
              );
     }
+    
+    public List<DashboardConfig> findEditableDashboardConfigs(WebUser user, AuthzBoss boss) 
+    throws SessionNotFoundException, SessionTimeoutException, PermissionException, RemoteException
+    {
+        AuthzSubject me = boss.findSubjectById(user.getSessionId(), user.getSubject().getId());
+            
+        Collection<DashboardConfig> dashboardCollection = getDashboards(me);
+        List<DashboardConfig> editableDashboardConfigs = new ArrayList<DashboardConfig>();
+        
+        for (DashboardConfig config : dashboardCollection) {
+            if (isEditable(me, config)) {
+                editableDashboardConfigs.add(config);
+            }
+        }
+        
+        return editableDashboardConfigs; 
+    }
+    
+    public List<Dashboard> findEditableDashboards(WebUser user, AuthzBoss boss)
+    throws SessionNotFoundException, SessionTimeoutException, PermissionException, RemoteException
+    {
+        List<DashboardConfig> dashboardConfigs = findEditableDashboardConfigs(user, boss);
+        List<Dashboard> editableDashboards = new ArrayList<Dashboard>();
+        
+        for (DashboardConfig config : dashboardConfigs) {
+            Dashboard dashboard = new Dashboard();
+            
+            dashboard.set_name(config.getName());
+            dashboard.setId(config.getId());
+            
+            editableDashboards.add(dashboard);
+        }       
+        
+        return editableDashboards;
+    }
 
-    public static DashboardManager getOne() {
-        return Bootstrap.getBean(DashboardManager.class);
+    /**
+     * Find a given dashboard by its id
+     * @param id the id of the dashboard
+     * @param user current user
+     * @param boss the authzboss
+     * @return the DashboardConfig of the corresponding DashboardId or null if none
+     */
+    public DashboardConfig findDashboard(Integer id, WebUser user, AuthzBoss boss) {
+        Collection<DashboardConfig> dashboardCollection;
+        
+        try {
+            AuthzSubject me = boss.findSubjectById(user.getSessionId(), user.getSubject().getId());
+            dashboardCollection = getDashboards(me);
+        } catch (Exception e) {
+            return null;
+        }
+        
+        for (DashboardConfig config : dashboardCollection) {
+            if (config.getId().equals(id)) {
+                return config;
+            }
+        }
+        
+        return null;
     }
 }

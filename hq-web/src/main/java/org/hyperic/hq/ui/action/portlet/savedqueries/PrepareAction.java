@@ -45,7 +45,7 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.StringConstants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
-import org.hyperic.hq.ui.util.DashboardUtils;
+import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
@@ -60,11 +60,13 @@ public class PrepareAction
 
     private final Log log = LogFactory.getLog(PrepareAction.class.getName());
     private AuthzBoss authzBoss;
+    private DashboardManager dashboardManager;
 
     @Autowired
-    public PrepareAction(AuthzBoss authzBoss) {
+    public PrepareAction(AuthzBoss authzBoss, DashboardManager dashboardManager) {
         super();
         this.authzBoss = authzBoss;
+        this.dashboardManager = dashboardManager;
     }
 
     public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
@@ -74,7 +76,7 @@ public class PrepareAction
 
         WebUser user = RequestUtils.getWebUser(request);
 
-        DashboardConfig dashConfig = DashboardUtils.findDashboard((Integer) request.getSession().getAttribute(
+        DashboardConfig dashConfig = dashboardManager.findDashboard((Integer) request.getSession().getAttribute(
             Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         List<String> chartList = StringUtil.explode(dashPrefs.getValue(Constants.USER_DASHBOARD_CHARTS),

@@ -50,6 +50,7 @@ import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
+import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
@@ -64,13 +65,15 @@ public class PrepareAction
     private AuthzBoss authzBoss;
     private AppdefBoss appdefBoss;
     private MeasurementBoss measurementBoss;
+    private DashboardManager dashboardManager;
 
     @Autowired
-    public PrepareAction(AuthzBoss authzBoss, AppdefBoss appdefBoss, MeasurementBoss measurementBoss) {
+    public PrepareAction(AuthzBoss authzBoss, AppdefBoss appdefBoss, MeasurementBoss measurementBoss, DashboardManager dashboardManager) {
         super();
         this.authzBoss = authzBoss;
         this.appdefBoss = appdefBoss;
         this.measurementBoss = measurementBoss;
+        this.dashboardManager = dashboardManager;
     }
 
     public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
@@ -80,7 +83,7 @@ public class PrepareAction
         WebUser user = RequestUtils.getWebUser(session);
         int sessionId = user.getSessionId().intValue();
 
-        DashboardConfig dashConfig = DashboardUtils.findDashboard((Integer) session
+        DashboardConfig dashConfig = dashboardManager.findDashboard((Integer) session
             .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         PropertiesForm pForm = (PropertiesForm) form;

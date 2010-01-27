@@ -42,6 +42,7 @@ import org.hyperic.hq.ui.StringConstants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
+import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.hq.ui.util.ConfigurationProxy;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
@@ -60,12 +61,14 @@ public class ModifyAction
 
     private ConfigurationProxy configurationProxy;
     private AuthzBoss authzBoss;
+    private DashboardManager dashboardManager;
 
     @Autowired
-    public ModifyAction(ConfigurationProxy configurationProxy, AuthzBoss authzBoss) {
+    public ModifyAction(ConfigurationProxy configurationProxy, AuthzBoss authzBoss, DashboardManager dashboardManager) {
         super();
         this.configurationProxy = configurationProxy;
         this.authzBoss = authzBoss;
+        this.dashboardManager = dashboardManager;
     }
 
     /**
@@ -85,7 +88,7 @@ public class ModifyAction
         HttpSession session = request.getSession();
         WebUser user = RequestUtils.getWebUser(request);
 
-        DashboardConfig dashConfig = DashboardUtils.findDashboard((Integer) session
+        DashboardConfig dashConfig = dashboardManager.findDashboard((Integer) session
             .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         String forwardStr = "success";

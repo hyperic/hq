@@ -41,6 +41,7 @@ import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.server.session.RoleDashboardConfig;
 import org.hyperic.hq.ui.server.session.UserDashboardConfig;
+import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.hq.ui.util.ConfigurationProxy;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
@@ -52,12 +53,14 @@ public class QuickFavoritesAction
 
     private ConfigurationProxy configurationProxy;
     private AuthzBoss authzBoss;
+    private DashboardManager dashboardManager;
 
     @Autowired
-    public QuickFavoritesAction(ConfigurationProxy configurationProxy, AuthzBoss authzBoss) {
+    public QuickFavoritesAction(ConfigurationProxy configurationProxy, AuthzBoss authzBoss, DashboardManager dashboardManager) {
         super();
         this.configurationProxy = configurationProxy;
         this.authzBoss = authzBoss;
+        this.dashboardManager = dashboardManager;
     }
 
     public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
@@ -80,7 +83,7 @@ public class QuickFavoritesAction
             if (dashboardIds != null) {
                 for (int x = 0; x < dashboardIds.length; x++) {
                     Integer dashId = Integer.valueOf(dashboardIds[x]);
-                    DashboardConfig dashboardConfig = DashboardUtils.findDashboard(dashId, user, authzBoss);
+                    DashboardConfig dashboardConfig = dashboardManager.findDashboard(dashId, user, authzBoss);
                     ConfigResponse configResponse = dashboardConfig.getConfig();
                     Boolean isFavorite = QuickFavoritesUtil.isFavorite(configResponse, aeid);
 

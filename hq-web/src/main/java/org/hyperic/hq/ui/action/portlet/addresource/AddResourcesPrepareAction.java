@@ -55,6 +55,7 @@ import org.hyperic.hq.ui.StringConstants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseActionMapping;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
+import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
@@ -93,12 +94,14 @@ public class AddResourcesPrepareAction
     private final Log log = LogFactory.getLog(AddResourcesPrepareAction.class.getName());
     private AuthzBoss authzBoss;
     private AppdefBoss appdefBoss;
+    private DashboardManager dashboardManager;
 
     @Autowired
-    public AddResourcesPrepareAction(AuthzBoss authzBoss, AppdefBoss appdefBoss) {
+    public AddResourcesPrepareAction(AuthzBoss authzBoss, AppdefBoss appdefBoss, DashboardManager dashboardManager) {
         super();
         this.authzBoss = authzBoss;
         this.appdefBoss = appdefBoss;
+        this.dashboardManager = dashboardManager;
     }
 
     /**
@@ -137,7 +140,7 @@ public class AddResourcesPrepareAction
         WebUser user = RequestUtils.getWebUser(session);
         Integer sessionId = user.getSessionId();
 
-        DashboardConfig dashConfig = DashboardUtils.findDashboard((Integer) session
+        DashboardConfig dashConfig = dashboardManager.findDashboard((Integer) session
             .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
 

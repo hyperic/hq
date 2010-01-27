@@ -45,8 +45,8 @@ import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
+import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.hq.ui.util.CheckPermissionsUtil;
-import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.StringUtil;
@@ -66,13 +66,15 @@ public class ViewAction
     private final Log log = LogFactory.getLog(ViewAction.class.getName());
     private AuthzBoss authzBoss;
     private AppdefBoss appdefBoss;
+    private DashboardManager dashboardManager;
     private final Log timingLog = LogFactory.getLog("DASHBOARD-TIMING");
 
     @Autowired
-    public ViewAction(AuthzBoss authzBoss, AppdefBoss appdefBoss) {
+    public ViewAction(AuthzBoss authzBoss, AppdefBoss appdefBoss, DashboardManager dashboardManager) {
         super();
         this.authzBoss = authzBoss;
         this.appdefBoss = appdefBoss;
+        this.dashboardManager = dashboardManager;
     }
 
     public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
@@ -82,7 +84,7 @@ public class ViewAction
         HttpSession session = request.getSession();
 
         WebUser user = SessionUtils.getWebUser(session);
-        DashboardConfig dashConfig = DashboardUtils.findDashboard((Integer) session
+        DashboardConfig dashConfig = dashboardManager.findDashboard((Integer) session
             .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
 

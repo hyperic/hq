@@ -3,15 +3,25 @@
  */
 package org.hyperic.hq.ui.shared;
 
+import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.security.auth.login.LoginException;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.auth.shared.SessionNotFoundException;
+import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.ui.Dashboard;
+import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
+import org.hyperic.hq.ui.server.session.DashboardManagerImpl;
 import org.hyperic.hq.ui.server.session.RoleDashboardConfig;
 import org.hyperic.hq.ui.server.session.UserDashboardConfig;
 import org.hyperic.util.config.ConfigResponse;
@@ -54,5 +64,13 @@ public interface DashboardManager {
     public ConfigResponse getRssUserPreferences(String user, String token) throws LoginException;
 
     public void startup();
+
+    public List<DashboardConfig> findEditableDashboardConfigs(WebUser user, AuthzBoss boss) 
+        throws SessionNotFoundException, SessionTimeoutException, PermissionException, RemoteException;
+    
+    public List<Dashboard> findEditableDashboards(WebUser user, AuthzBoss boss)
+        throws SessionNotFoundException, SessionTimeoutException, PermissionException, RemoteException;
+
+    public DashboardConfig findDashboard(Integer id, WebUser user, AuthzBoss boss);
 
 }
