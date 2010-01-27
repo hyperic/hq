@@ -40,7 +40,7 @@ import org.hyperic.util.config.ConfigResponse;
 
 /**
  * A class that loads the application properties file (found at
- * <code>/WEB-INF/hq.properties</code>) and configures the
+ * <code>/WEB-INF/classes/hq.properties</code>) and configures the
  * web application. All properties in the file are exposed as servlet
  * context attributes.
  *
@@ -62,7 +62,7 @@ public class Configurator implements ServletContextListener {
     }
     
     protected String getUserDashboardPreferenceFile(){
-    	return "/WEB-INF/DefaultUserDashboardPreferences.properties";
+    	return "/WEB-INF/classes/DefaultUserDashboardPreferences.properties";
     }
     
     /**
@@ -89,7 +89,7 @@ public class Configurator implements ServletContextListener {
 
     /**
      * Load the application properties file (found at
-     * <code>/WEB-INF/hq.properties</code>) and configure
+     * <code>/WEB-INF/classes/hq.properties</code>) and configure
      * the web application. All properties in the file are exposed as
      * servlet context attributes.
      *
