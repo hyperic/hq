@@ -31,22 +31,30 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
 import org.hyperic.hq.zevents.ZeventListener;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * The Zevent Listener that upgrades agents.
  */
+@Component
 public class UpgradeAgentZeventListener implements ZeventListener {
 
-    private final Log _log = LogFactory
-            .getLog(UpgradeAgentZeventListener.class);
+    private final Log _log = LogFactory.getLog(UpgradeAgentZeventListener.class);
+
+    private AgentManager agentManager;
+
+    @Autowired
+    public UpgradeAgentZeventListener(AgentManager agentManager) {
+        this.agentManager = agentManager;
+    }
 
     /**
      * @see org.hyperic.hq.zevents.ZeventListener#processEvents(java.util.List)
      */
     public void processEvents(List events) {
-        AgentManager agentMan = AgentManagerImpl.getOne();
-        AuthzSubject overlord = AuthzSubjectManagerImpl.getOne()
-                .getOverlordPojo();
+
+        AuthzSubject overlord = AuthzSubjectManagerImpl.getOne().getOverlordPojo();
 
         for (Iterator iter = events.iterator(); iter.hasNext();) {
             UpgradeAgentZevent zevent = (UpgradeAgentZevent) iter.next();
@@ -54,11 +62,9 @@ public class UpgradeAgentZeventListener implements ZeventListener {
             final AppdefEntityID aid = zevent.getAgent();
 
             try {
-                agentMan.upgradeAgent(overlord, aid, bundleFileName);
-            }
-            catch (Exception e) {
-                _log.warn("Failed to upgrade agent " + aid.getID()
-                        + " to bundle " + bundleFileName, e);
+                agentManager.upgradeAgent(overlord, aid, bundleFileName);
+            } catch (Exception e) {
+                _log.warn("Failed to upgrade agent " + aid.getID() + " to bundle " + bundleFileName, e);
             }
         }
 

@@ -1,13 +1,15 @@
 package org.hyperic.hq.hqu.rendit.helpers
 
-import org.hyperic.hq.appdef.server.session.AgentManagerImpl as AgentMan
+
 import org.hyperic.hq.authz.server.session.AuthzSubject
+import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException
+import org.hyperic.hq.context.Bootstrap;
 
 
 class AgentHelper extends BaseHelper {
 
-    private aMan = AgentMan.one
+    private aMan = Bootstrap.getBean(AgentManager.class);
 
     
 
@@ -30,10 +32,10 @@ class AgentHelper extends BaseHelper {
         ['count', 'withPaging'].each {args.get(it, null)}
 
         if (args['count'] == 'agents') {
-            return AgentMan.one.agentCount
+            return aMan.agentCount
         }
         else if (args['count'] == 'activeAgents') {
-            return AgentMan.one.agentCountUsed
+            return aMan.agentCountUsed
         }
             
         if (args['withPaging']) 

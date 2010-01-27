@@ -121,7 +121,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class LatherDispatcherImpl implements LatherDispatcher {
     protected final Log log = LogFactory.getLog(LatherDispatcherImpl.class.getName());
 
-   
     protected HashSet<String> secureCommands = new HashSet<String>();
     private Set<String> noTxCommands = new HashSet<String>();
 
@@ -150,6 +149,7 @@ public class LatherDispatcherImpl implements LatherDispatcher {
 
     private ZeventEnqueuer zeventManager;
     private MessagePublisher messagePublisher;
+    private AgentCommandsClientFactory agentCommandsClientFactory;
 
     @Autowired
     public LatherDispatcherImpl(AgentManager agentManager, AuthManager authManager,
@@ -157,8 +157,8 @@ public class LatherDispatcherImpl implements LatherDispatcher {
                                 ConfigManager configManager, ControlManager controlManager,
                                 MeasurementManager measurementManager, PlatformManager platformManager,
                                 ReportProcessor reportProcessor, PermissionManager permissionManager,
-                                ZeventEnqueuer zeventManager,
-                                MessagePublisher messagePublisher) {
+                                ZeventEnqueuer zeventManager, MessagePublisher messagePublisher,
+                                AgentCommandsClientFactory agentCommandsClientFactory) {
         this.agentManager = agentManager;
         this.authManager = authManager;
         this.authzSubjectManager = authzSubjectManager;
@@ -170,6 +170,7 @@ public class LatherDispatcherImpl implements LatherDispatcher {
         this.reportProcessor = reportProcessor;
         this.permissionManager = permissionManager;
         this.zeventManager = zeventManager;
+        this.agentCommandsClientFactory = agentCommandsClientFactory;
         for (int i = 0; i < CommandInfo.SECURE_COMMANDS.length; i++) {
             secureCommands.add(CommandInfo.SECURE_COMMANDS[i]);
         }
@@ -211,7 +212,7 @@ public class LatherDispatcherImpl implements LatherDispatcher {
             log.warn("Security exception when '" + user + "' tried to " + operation + " an Agent @ " +
                      ctx.getCallerIP(), exc);
             throw new PermissionException();
-        }  catch (PermissionException exc) {
+        } catch (PermissionException exc) {
             log
                 .warn("Permission denied when '" + user + "' tried to " + operation + " an Agent @ " +
                       ctx.getCallerIP());
@@ -229,7 +230,7 @@ public class LatherDispatcherImpl implements LatherDispatcher {
 
     private String testAgentConn(String agentIP, int agentPort, String authToken, boolean isNewTransportAgent,
                                  boolean unidirectional) {
-        AgentCommandsClient client = AgentCommandsClientFactory.getInstance().getClient(agentIP, agentPort, authToken,
+        AgentCommandsClient client = agentCommandsClientFactory.getClient(agentIP, agentPort, authToken,
             isNewTransportAgent, unidirectional);
         try {
             client.ping();
@@ -507,7 +508,7 @@ public class LatherDispatcherImpl implements LatherDispatcher {
     private MeasurementGetConfigs_result cmdMeasurementGetConfigs(MeasurementGetConfigs_args args)
         throws LatherRemoteException {
 
-        ResourceTree tree;
+        ResourceTree tree; 
 
         AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
         try {

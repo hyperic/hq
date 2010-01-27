@@ -42,35 +42,41 @@ import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-
 @Service
-public class AppdefStartupListener
-    implements StartupListener
-{
+public class AppdefStartupListener implements StartupListener {
     private static final Object LOCK = new Object();
-    
-    private static AgentCreateCallback   _agentCreateCallback;
-    
+
+    private static AgentCreateCallback _agentCreateCallback;
+
     private HQApp app;
     private PlatformManager platformManager;
     private ServerManager serverManager;
     private ServiceManager serviceManager;
     private ApplicationManager applicationManager;
     private ZeventEnqueuer zEventManager;
-    
-    
-    
+    private TransferAgentBundleZeventListener transferAgentBundleZeventListener;
+    private TransferAgentPluginZeventListener transferAgentPluginZeventListener;
+    private UpgradeAgentZeventListener upgradeAgentZeventListener;
+
     @Autowired
     public AppdefStartupListener(HQApp app, PlatformManager platformManager, ServerManager serverManager,
                                  ServiceManager serviceManager, ApplicationManager applicationManager,
-                                 ZeventEnqueuer zEventManager, AuthzStartupListener authzStartupListener) {
+                                 ZeventEnqueuer zEventManager, AuthzStartupListener authzStartupListener,
+                                 TransferAgentBundleZeventListener transferAgentBundleZeventListener,
+                                 TransferAgentPluginZeventListener transferAgentPluginZeventListener,
+                                 UpgradeAgentZeventListener upgradeAgentZeventListener) {
         this.app = app;
         this.platformManager = platformManager;
         this.serverManager = serverManager;
         this.serviceManager = serviceManager;
         this.applicationManager = applicationManager;
         this.zEventManager = zEventManager;
-        //TODO AuthzStartupListener has to be initialized first to register the ResourceDeleteCallback handler.  Injecting the listener here purely to wait for that
+        this.transferAgentBundleZeventListener = transferAgentBundleZeventListener;
+        this.transferAgentPluginZeventListener = transferAgentPluginZeventListener;
+        this.upgradeAgentZeventListener = upgradeAgentZeventListener;
+        // TODO AuthzStartupListener has to be initialized first to register the
+        // ResourceDeleteCallback handler. Injecting the listener here purely to
+        // wait for that
     }
 
     @PostConstruct
@@ -78,16 +84,11 @@ public class AppdefStartupListener
         // Make sure we have the aux-log provider loaded
         ResourceAuxLogProvider.class.toString();
 
-       
-
         synchronized (LOCK) {
-            _agentCreateCallback = (AgentCreateCallback)
-                app.registerCallbackCaller(AgentCreateCallback.class);
-            app.registerCallbackListener(ResourceDeleteCallback.class,
-                                         new ResourceDeleteCallback() {
+            _agentCreateCallback = (AgentCreateCallback) app.registerCallbackCaller(AgentCreateCallback.class);
+            app.registerCallbackListener(ResourceDeleteCallback.class, new ResourceDeleteCallback() {
 
-                public void preResourceDelete(Resource r)
-                    throws VetoException {
+                public void preResourceDelete(Resource r) throws VetoException {
                     // Go ahead and let every appdef type handle a resource
                     // delete
                     platformManager.handleResourceDelete(r);
@@ -97,35 +98,28 @@ public class AppdefStartupListener
                 }
             });
         }
-      
-        
+
         registerTransferAgentBundleZeventListener();
         registerTransferAgentPluginZeventListener();
         registerUpgradeAgentZeventListener();
     }
-    
+
     static AgentCreateCallback getAgentCreateCallback() {
         synchronized (LOCK) {
             return _agentCreateCallback;
         }
     }
-    
+
     private void registerTransferAgentBundleZeventListener() {
-        zEventManager
-        .addBufferedListener(TransferAgentBundleZevent.class,
-                             new TransferAgentBundleZeventListener());
+        zEventManager.addBufferedListener(TransferAgentBundleZevent.class, transferAgentBundleZeventListener);
     }
-    
+
     private void registerTransferAgentPluginZeventListener() {
-        zEventManager
-        .addBufferedListener(TransferAgentPluginZevent.class,
-                             new TransferAgentPluginZeventListener());
+        zEventManager.addBufferedListener(TransferAgentPluginZevent.class, transferAgentPluginZeventListener);
     }
-    
+
     private void registerUpgradeAgentZeventListener() {
-        zEventManager
-        .addBufferedListener(UpgradeAgentZevent.class,
-                             new UpgradeAgentZeventListener());
+        zEventManager.addBufferedListener(UpgradeAgentZevent.class, upgradeAgentZeventListener);
     }
-    
+
 }

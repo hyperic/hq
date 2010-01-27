@@ -48,6 +48,7 @@ import org.hyperic.hq.appdef.shared.AIQApprovalException;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AIQueueManager;
 import org.hyperic.hq.appdef.shared.AIServerValue;
+import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.CPropManager;
@@ -67,7 +68,6 @@ import org.hyperic.hq.autoinventory.AIServer;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.shared.AuditManager;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.dao.AIIpDAO;
 import org.hyperic.hq.dao.AIPlatformDAO;
 import org.hyperic.hq.dao.AIServerDAO;
@@ -107,6 +107,8 @@ public class AIQueueManagerImpl implements AIQueueManager {
     private PermissionManager permissionManager;
     private AuditManager auditManager;
     private AuthzSubjectManager authzSubjectManager;
+    private AgentCommandsClientFactory agentCommandsClientFactory;
+    private AgentManager agentManager;
     protected final Log log = LogFactory.getLog(AIQueueManagerImpl.class.getName());
 
     @Autowired
@@ -114,7 +116,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
                               ConfigManager configManager, CPropManager cPropManager, PlatformDAO platformDAO,
                               PlatformManager platformManager, ServerManager serverManager,
                               PermissionManager permissionManager, AuditManager auditManager,
-                              AuthzSubjectManager authzSubjectManager) {
+                              AuthzSubjectManager authzSubjectManager, AgentCommandsClientFactory agentCommandsClientFactory, AgentManager agentManager) {
 
         this.aIServerDAO = aIServerDAO;
         this.aiIpDAO = aiIpDAO;
@@ -127,6 +129,8 @@ public class AIQueueManagerImpl implements AIQueueManager {
         this.permissionManager = permissionManager;
         this.auditManager = auditManager;
         this.authzSubjectManager = authzSubjectManager;
+        this.agentCommandsClientFactory = agentCommandsClientFactory;
+        this.agentManager = agentManager;
     }
 
     /**
@@ -507,8 +511,8 @@ public class AIQueueManagerImpl implements AIQueueManager {
                 // runtime discovery and enable metrics.
                 if (isApproveAction && verifyLiveAgent) {
                     try {
-                        AgentCommandsClient client = AgentCommandsClientFactory.getInstance().getClient(
-                            aiplatform.getAgentToken());
+                        AgentCommandsClient client = agentCommandsClientFactory.getClient(
+                            agentManager.getAgent(aiplatform.getAgentToken()));
                         client.ping();
                     } catch (AgentNotFoundException e) {
                         // In this case we just want to

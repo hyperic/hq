@@ -56,15 +56,17 @@ import org.springframework.stereotype.Service;
 public class TrackerManagerImpl implements TrackerManager {
     private final Log log = LogFactory.getLog(TrackerManagerImpl.class);
     private PlatformManager platformManager;
+    private MeasurementCommandsClientFactory measurementCommandsClientFactory;
 
     @Autowired
-    public TrackerManagerImpl(PlatformManager platformManager) {
+    public TrackerManagerImpl(PlatformManager platformManager, MeasurementCommandsClientFactory measurementCommandsClientFactory) {
         this.platformManager = platformManager;
+        this.measurementCommandsClientFactory = measurementCommandsClientFactory;
     }
 
     private MeasurementCommandsClient getClient(AppdefEntityID aid)
         throws PermissionException, AgentNotFoundException {
-        return MeasurementCommandsClientFactory.getInstance().getClient(aid);
+        return measurementCommandsClientFactory.getClient(aid); 
     }
 
     /**

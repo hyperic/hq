@@ -26,36 +26,38 @@
 package org.hyperic.hq.livedata.agent.client;
 
 import org.hyperic.hq.appdef.Agent;
-import org.hyperic.hq.appdef.server.session.AgentManagerImpl;
+import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.bizapp.agent.client.SecureAgentConnection;
 import org.hyperic.hq.transport.AgentProxyFactory;
 import org.hyperic.util.i18n.MessageBundle;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * A factory for returning Live Data Commands clients depending on if the agent 
  * uses the legacy or new transport.
  */
+@Component
 public class LiveDataCommandsClientFactory {
     
     public static final MessageBundle BUNDLE =
         MessageBundle.getBundle("org.hyperic.hq.livedata.Resources");
 
-    private static final LiveDataCommandsClientFactory INSTANCE = new LiveDataCommandsClientFactory();
-
-    private LiveDataCommandsClientFactory() {
-    }
-
-    public static LiveDataCommandsClientFactory getInstance() {
-        return INSTANCE;
+    private AgentManager agentManager;
+    
+    
+    @Autowired
+    public LiveDataCommandsClientFactory(AgentManager agentManager) {
+        this.agentManager = agentManager;
     }
 
     public LiveDataCommandsClient getClient(AppdefEntityID aid) 
         throws AgentNotFoundException {
         
-        Agent agent = AgentManagerImpl.getOne().getAgent(aid);
+        Agent agent = agentManager.getAgent(aid);
 
         return getClient(agent);
     }
@@ -63,7 +65,7 @@ public class LiveDataCommandsClientFactory {
     public LiveDataCommandsClient getClient(String agentToken) 
         throws AgentNotFoundException {
         
-        Agent agent = AgentManagerImpl.getOne().getAgent(agentToken);
+        Agent agent = agentManager.getAgent(agentToken);
 
         return getClient(agent);
     }

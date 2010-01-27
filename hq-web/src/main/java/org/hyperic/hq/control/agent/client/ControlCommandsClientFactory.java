@@ -26,53 +26,52 @@
 package org.hyperic.hq.control.agent.client;
 
 import org.hyperic.hq.appdef.Agent;
-import org.hyperic.hq.appdef.server.session.AgentManagerImpl;
+import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.bizapp.agent.client.SecureAgentConnection;
 import org.hyperic.hq.transport.AgentProxyFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
- * A factory for returning Control Commands clients depending on if the agent 
+ * A factory for returning Control Commands clients depending on if the agent
  * uses the legacy or new transport.
  */
+@Component
 public class ControlCommandsClientFactory {
 
-    private static final ControlCommandsClientFactory INSTANCE = 
-            new ControlCommandsClientFactory();
+    private AgentManager agentManager;
 
-    private ControlCommandsClientFactory() {
+    @Autowired
+    public ControlCommandsClientFactory(AgentManager agentManager) { 
+        this.agentManager = agentManager;
     }
 
-    public static ControlCommandsClientFactory getInstance() {
-        return INSTANCE;
-    }
+    public ControlCommandsClient getClient(AppdefEntityID aid) throws AgentNotFoundException {
 
-    public ControlCommandsClient getClient(AppdefEntityID aid) 
-        throws AgentNotFoundException {
-        
-        Agent agent = AgentManagerImpl.getOne().getAgent(aid);
+        Agent agent = agentManager.getAgent(aid);
 
         return getClient(agent);
     }
 
-    public ControlCommandsClient getClient(String agentToken) 
-        throws AgentNotFoundException {
-        
-        Agent agent = AgentManagerImpl.getOne().getAgent(agentToken);
+    public ControlCommandsClient getClient(String agentToken) throws AgentNotFoundException {
+
+        Agent agent = agentManager.getAgent(agentToken);
 
         return getClient(agent);
     }
-    
+
     private ControlCommandsClient getClient(Agent agent) {
         if (agent.isNewTransportAgent()) {
             AgentProxyFactory factory = HQApp.getInstance().getAgentProxyFactory();
-            
+
             return new ControlCommandsClientImpl(agent, factory);
         } else {
-            return new LegacyControlCommandsClientImpl(new SecureAgentConnection(agent.getAddress(),agent.getPort(),agent.getAuthToken()));            
-        }         
+            return new LegacyControlCommandsClientImpl(new SecureAgentConnection(agent.getAddress(), agent.getPort(),
+                agent.getAuthToken()));
+        }
     }
 
 }

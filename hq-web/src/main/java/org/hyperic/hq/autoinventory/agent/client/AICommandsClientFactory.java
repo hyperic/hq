@@ -26,52 +26,52 @@
 package org.hyperic.hq.autoinventory.agent.client;
 
 import org.hyperic.hq.appdef.Agent;
-import org.hyperic.hq.appdef.server.session.AgentManagerImpl;
+import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.bizapp.agent.client.SecureAgentConnection;
 import org.hyperic.hq.transport.AgentProxyFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
- * A factory for returning AI Commands clients depending on if the agent 
- * uses the legacy or new transport.
+ * A factory for returning AI Commands clients depending on if the agent uses
+ * the legacy or new transport.
  */
+@Component
 public class AICommandsClientFactory {
 
-    private static final AICommandsClientFactory INSTANCE = new AICommandsClientFactory();
+    private AgentManager agentManager;
 
-    private AICommandsClientFactory() {
+    @Autowired 
+    public AICommandsClientFactory(AgentManager agentManager) {
+        this.agentManager = agentManager;
     }
 
-    public static AICommandsClientFactory getInstance() {
-        return INSTANCE;
-    }
+    public AICommandsClient getClient(AppdefEntityID aid) throws AgentNotFoundException {
 
-    public AICommandsClient getClient(AppdefEntityID aid) 
-        throws AgentNotFoundException {
-        
-        Agent agent = AgentManagerImpl.getOne().getAgent(aid);
+        Agent agent = agentManager.getAgent(aid);
 
         return getClient(agent);
     }
 
-    public AICommandsClient getClient(String agentToken) 
-        throws AgentNotFoundException {
-        
-        Agent agent = AgentManagerImpl.getOne().getAgent(agentToken);
+    public AICommandsClient getClient(String agentToken) throws AgentNotFoundException {
+
+        Agent agent = agentManager.getAgent(agentToken);
 
         return getClient(agent);
     }
-    
+
     private AICommandsClient getClient(Agent agent) {
         if (agent.isNewTransportAgent()) {
             AgentProxyFactory factory = HQApp.getInstance().getAgentProxyFactory();
-            
+
             return new AICommandsClientImpl(agent, factory);
         } else {
-            return new LegacyAICommandsClientImpl(new SecureAgentConnection(agent.getAddress(),agent.getPort(),agent.getAuthToken()));            
-        }         
+            return new LegacyAICommandsClientImpl(new SecureAgentConnection(agent.getAddress(), agent.getPort(), agent
+                .getAuthToken()));
+        }
     }
 
 }
