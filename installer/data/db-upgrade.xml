@@ -10879,6 +10879,12 @@ has already been defined.
                         precision="2048" columnType="VARCHAR2" nullable="NOT NULL" />
   </schemaSpec>
 
+  <!-- Increase autoinventoryidentifier to limit of 500 (per name in EAM_RESOURCE) -->
+  <schemaSpec version="3.194"> 
+    <schema-alterColumn table="EAM_SERVICE" column="autoinventoryidentifier"
+                        precision="500" columnType="VARCHAR2" />
+  </schemaSpec>
+
 </dbupgrade>
 </target>
 </project>
