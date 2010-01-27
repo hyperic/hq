@@ -943,4 +943,9 @@ public interface AttrConstants {
      */
     public static final String XLIB_INSTALLED = "xlib";
     
+    /**
+     * Attribute name for the SNMP local engine ID
+     */
+    public static final String SNMP_LOCAL_ENGINE_ID = "snmpLocalEngineID";
+    
 }

@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2009], Hyperic, Inc.
+ * Copyright (C) [2004-2010], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -41,8 +41,11 @@ import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.bizapp.server.session.UpdateStatusMode;
 import org.hyperic.hq.bizapp.shared.ConfigBoss;
 import org.hyperic.hq.bizapp.shared.UpdateBoss;
+import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.snmp4j.mp.MPv3;
+import org.snmp4j.smi.OctetString;
 
 public class EditConfigPrepAction extends TilesAction {
 
@@ -69,6 +72,10 @@ public class EditConfigPrepAction extends TilesAction {
         UpdateBoss uboss = ContextUtils.getUpdateBoss(ctx);
         UpdateStatusMode upMode = uboss.getUpdateMode();
         cForm.setUpdateMode(upMode.getCode());
+        
+        // Set the HQ SNMP local engine id
+        String localEngineID = "0x" + new OctetString(MPv3.createLocalEngineID());
+        request.setAttribute(Constants.SNMP_LOCAL_ENGINE_ID, localEngineID);
         
         return null;
     }
