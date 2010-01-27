@@ -43,6 +43,7 @@ import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
+import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
@@ -56,12 +57,14 @@ public class PrepareAction
 
     private AppdefBoss appdefBoss;
     private AuthzBoss authzBoss;
+    private DashboardManager dashboardManager;
 
     @Autowired
-    public PrepareAction(AppdefBoss appdefBoss, AuthzBoss authzBoss) {
+    public PrepareAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, DashboardManager dashboardManager) {
         super();
         this.appdefBoss = appdefBoss;
         this.authzBoss = authzBoss;
+        this.dashboardManager = dashboardManager;
     }
 
     public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
@@ -73,7 +76,7 @@ public class PrepareAction
         WebUser user = RequestUtils.getWebUser(session);
         Integer sessionId = user.getSessionId();
 
-        DashboardConfig dashConfig = DashboardUtils.findDashboard((Integer) session
+        DashboardConfig dashConfig = dashboardManager.findDashboard((Integer) session
             .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
 

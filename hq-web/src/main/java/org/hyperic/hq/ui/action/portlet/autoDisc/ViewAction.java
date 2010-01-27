@@ -50,8 +50,8 @@ import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
+import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.hq.ui.util.BizappUtils;
-import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.ConfigResponse;
@@ -66,13 +66,15 @@ public class ViewAction
     private AuthzBoss authzBoss;
     private AIBoss aiBoss;
     private AppdefBoss appdefBoss;
+    private DashboardManager dashboardManager;
 
     @Autowired
-    public ViewAction(AuthzBoss authzBoss, AIBoss aiBoss, AppdefBoss appdefBoss) {
+    public ViewAction(AuthzBoss authzBoss, AIBoss aiBoss, AppdefBoss appdefBoss, DashboardManager dashboardManager) {
         super();
         this.authzBoss = authzBoss;
         this.aiBoss = aiBoss;
         this.appdefBoss = appdefBoss;
+        this.dashboardManager = dashboardManager;
     }
 
     public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
@@ -86,7 +88,7 @@ public class ViewAction
 
         PageControl page = new PageControl();
 
-        DashboardConfig dashConfig = DashboardUtils.findDashboard((Integer) session
+        DashboardConfig dashConfig = dashboardManager.findDashboard((Integer) session
             .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         page.setPagesize(Integer.parseInt(dashPrefs.getValue(".dashContent.autoDiscovery.range")));

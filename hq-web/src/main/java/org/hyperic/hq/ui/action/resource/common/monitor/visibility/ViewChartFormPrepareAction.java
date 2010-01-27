@@ -75,8 +75,8 @@ import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.beans.ChartedMetricBean;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
+import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.hq.ui.util.ConfigurationProxy;
-import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.MonitorUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
@@ -102,16 +102,19 @@ public class ViewChartFormPrepareAction
     private AppdefBoss appdefBoss;
     protected MeasurementBoss measurementBoss;
     private EventLogBoss eventLogBoss;
-
+    private DashboardManager dashboardManager;
+    
     @Autowired
     public ViewChartFormPrepareAction(ConfigurationProxy configurationProxy, AuthzBoss authzBoss,
-                                      AppdefBoss appdefBoss, MeasurementBoss measurementBoss, EventLogBoss eventLogBoss) {
+                                      AppdefBoss appdefBoss, MeasurementBoss measurementBoss, 
+                                      EventLogBoss eventLogBoss, DashboardManager dashboardManager) {
         super();
         this.configurationProxy = configurationProxy;
         this.authzBoss = authzBoss;
         this.appdefBoss = appdefBoss;
         this.measurementBoss = measurementBoss;
         this.eventLogBoss = eventLogBoss;
+        this.dashboardManager = dashboardManager;
     }
 
     /**
@@ -172,7 +175,7 @@ public class ViewChartFormPrepareAction
         HttpSession session = request.getSession();
         WebUser user = SessionUtils.getWebUser(session);
 
-        DashboardConfig dashConfig = DashboardUtils.findDashboard((Integer) session
+        DashboardConfig dashConfig = dashboardManager.findDashboard((Integer) session
             .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         String userCharts = dashPrefs.getValue(Constants.USER_DASHBOARD_CHARTS);

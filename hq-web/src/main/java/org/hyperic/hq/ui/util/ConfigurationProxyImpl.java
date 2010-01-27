@@ -63,7 +63,7 @@ public class ConfigurationProxyImpl implements ConfigurationProxy {
             // Dashboard preference
 
             AuthzSubject me = authzBoss.findSubjectById(user.getSessionId(), user.getSubject().getId());
-            DashboardConfig dashConfig = DashboardUtils.findDashboard((Integer) session
+            DashboardConfig dashConfig = dashboardManager.findDashboard((Integer) session
                 .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
             ConfigResponse dashboardConfigResp = dashConfig.getConfig();
             dashboardConfigResp.setValue(key, value);
@@ -79,7 +79,7 @@ public class ConfigurationProxyImpl implements ConfigurationProxy {
         throws SessionNotFoundException, SessionTimeoutException, PermissionException, RemoteException {
 
         AuthzSubject me = authzBoss.findSubjectById(user.getSessionId(), user.getSubject().getId());
-        DashboardConfig dashConfig = DashboardUtils.findDashboard((Integer) session
+        DashboardConfig dashConfig = dashboardManager.findDashboard((Integer) session
             .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
         dashboardManager.configureDashboard(me, dashConfig, dashConfigResp);
     }

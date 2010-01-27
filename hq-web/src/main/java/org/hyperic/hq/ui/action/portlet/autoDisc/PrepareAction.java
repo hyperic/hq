@@ -37,7 +37,7 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
-import org.hyperic.hq.ui.util.DashboardUtils;
+import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,11 +46,13 @@ public class PrepareAction
     extends BaseAction {
 
     private AuthzBoss authzBoss;
+    private DashboardManager dashboardManager;
 
     @Autowired
-    public PrepareAction(AuthzBoss authzBoss) {
+    public PrepareAction(AuthzBoss authzBoss, DashboardManager dashboardManager) {
         super();
         this.authzBoss = authzBoss;
+        this.dashboardManager = dashboardManager;
     }
 
     /**
@@ -70,7 +72,7 @@ public class PrepareAction
 
         WebUser user = RequestUtils.getWebUser(session);
 
-        DashboardConfig dashConfig = DashboardUtils.findDashboard((Integer) session
+        DashboardConfig dashConfig = dashboardManager.findDashboard((Integer) session
             .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         Integer range = new Integer(dashPrefs.getValue(".dashContent.autoDiscovery.range"));
