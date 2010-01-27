@@ -436,10 +436,6 @@
 			<param name="version-file" value="${war.dir}/WEB-INF/classes/version.properties" />
 		</antcall>
 
-		<replace file="${war.dir}/META-INF/context.xml">
-			<replacefilter token="@@@HYPERIC_UI_HOTDEPLOY@@@" value="${hq.ui.hot-deploy}" />
-		</replace>
-
 		<copy todir="${war.dir}/WEB-INF/lib/">
 			<fileset dir="${thirdparty.lib}">
 				<include name="commons-beanutils-1.8.0.jar" />
