@@ -1,8 +1,10 @@
 package org.hyperic.hq.hqu.rendit.helpers
 
-import org.hyperic.hq.appdef.server.session.AIQueueManagerImpl as AIQMan
+
 import org.hyperic.hq.appdef.shared.AIPlatformValue
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.appdef.shared.AIQueueConstants
+import org.hyperic.hq.appdef.shared.AIQueueManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.util.pager.PageControl
 
@@ -12,7 +14,7 @@ import org.hyperic.util.pager.PageControl
  */
 class AutodiscoveryHelper extends BaseHelper {
 
-    private aiqMan = AIQMan.one
+    private aiqMan = Bootstrap.getBean(AIQueueManager.class);
     AutodiscoveryHelper(AuthzSubject user) {
         super(user)
     }
