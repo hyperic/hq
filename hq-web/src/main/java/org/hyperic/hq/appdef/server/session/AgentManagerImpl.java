@@ -69,7 +69,6 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManager;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.StringUtil;
@@ -87,7 +86,7 @@ public class AgentManagerImpl implements AgentManager {
     private static final String CAM_AGENT_TYPE = "covalent-eam";
     private static final String HQ_AGENT_REMOTING_TYPE = "hyperic-hq-remoting";
     private static final String HQ_PLUGINS_DIR = "/hq-plugins";
-    private static final String PLUGINS_EXTENSION = "-plugin";
+    private static final String PLUGINS_EXTENSION = "-plugin"; 
 
     private final Log log = LogFactory.getLog(AgentManagerImpl.class.getName());
     private AgentReportStatusDAO agentReportStatusDao;
@@ -99,11 +98,13 @@ public class AgentManagerImpl implements AgentManager {
     private PlatformDAO platformDao;
     private ServerConfigManager serverConfigManager;
     private HQApp hqApp;
+    private AgentCommandsClientFactory agentCommandsClientFactory;
 
     @Autowired
     public AgentManagerImpl(AgentReportStatusDAO agentReportStatusDao, AgentTypeDAO agentTypeDao, AgentDAO agentDao,
                             ServiceDAO serviceDao, ServerDAO serverDao, PermissionManager permissionManager,
-                            PlatformDAO platformDao, ServerConfigManager serverConfigManager, HQApp hqApp) {
+                            PlatformDAO platformDao, ServerConfigManager serverConfigManager, HQApp hqApp,
+                            AgentCommandsClientFactory agentCommandsClientFactory) {
         this.agentReportStatusDao = agentReportStatusDao;
         this.agentTypeDao = agentTypeDao;
         this.agentDao = agentDao;
@@ -113,6 +114,7 @@ public class AgentManagerImpl implements AgentManager {
         this.platformDao = platformDao;
         this.serverConfigManager = serverConfigManager;
         this.hqApp = hqApp;
+        this.agentCommandsClientFactory = agentCommandsClientFactory;
     }
 
     /**
@@ -547,7 +549,7 @@ public class AgentManagerImpl implements AgentManager {
         // check permissions
         permissionManager.checkCreatePlatformPermission(subject);
 
-        AgentCommandsClient client = AgentCommandsClientFactory.getInstance().getClient(aid);
+        AgentCommandsClient client = agentCommandsClientFactory.getClient(getAgent(aid));
 
         return client.getCurrentAgentBundle();
     }
@@ -746,7 +748,6 @@ public class AgentManagerImpl implements AgentManager {
 
         String[][] files = new String[1][2];
 
-       
         File src = new File(hqApp.getWebAccessibleDir() + "/WEB-INF" + HQ_PLUGINS_DIR, plugin);
         if (!src.exists()) {
             throw new FileNotFoundException("Plugin " + plugin + " could not be found");
@@ -836,7 +837,7 @@ public class AgentManagerImpl implements AgentManager {
 
         permissionManager.checkCreatePlatformPermission(subject);
 
-        AgentCommandsClient client = AgentCommandsClientFactory.getInstance().getClient(aid);
+        AgentCommandsClient client = agentCommandsClientFactory.getClient(getAgent(aid));
         String bundleFilePath = HQConstants.AgentBundleDropDir + "/" + bundleFileName;
         // TODO: G
         Map updatedAgentInfo = client.upgrade(bundleFilePath, HQConstants.AgentBundleDropDir);
@@ -882,7 +883,7 @@ public class AgentManagerImpl implements AgentManager {
 
         permissionManager.checkCreatePlatformPermission(subject);
 
-        AgentCommandsClient client = AgentCommandsClientFactory.getInstance().getClient(aid);
+        AgentCommandsClient client = agentCommandsClientFactory.getClient(getAgent(aid));
         client.restart();
     }
 
@@ -924,7 +925,7 @@ public class AgentManagerImpl implements AgentManager {
 
         permissionManager.checkCreatePlatformPermission(subject);
 
-        AgentCommandsClient client = AgentCommandsClientFactory.getInstance().getClient(agent);
+        AgentCommandsClient client = agentCommandsClientFactory.getClient(agent);
         return client.ping();
     }
 
@@ -990,7 +991,7 @@ public class AgentManagerImpl implements AgentManager {
         FileNotFoundException, IOException {
         permissionManager.checkCreatePlatformPermission(subject);
 
-        AgentCommandsClient client = AgentCommandsClientFactory.getInstance().getClient(id);
+        AgentCommandsClient client = agentCommandsClientFactory.getClient(getAgent(id));
 
         FileData[] data = new FileData[files.length];
         InputStream[] streams = new InputStream[files.length];
@@ -1029,9 +1030,5 @@ public class AgentManagerImpl implements AgentManager {
                 }
             }
         }
-    }
-
-    public static AgentManager getOne() {
-        return Bootstrap.getBean(AgentManager.class);
     }
 }

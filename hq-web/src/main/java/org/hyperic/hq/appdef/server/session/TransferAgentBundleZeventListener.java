@@ -34,26 +34,35 @@ import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
 import org.hyperic.hq.zevents.ZeventListener;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * The Zevent Listener that transfers agent bundles.
  */
+@Component
 public class TransferAgentBundleZeventListener implements ZeventListener {
     
     private final Log _log = LogFactory.getLog(TransferAgentBundleZeventListener.class);
+    private AgentManager agentManager;
+    
+    
+    @Autowired
+    public TransferAgentBundleZeventListener(AgentManager agentManager) {
+        this.agentManager = agentManager;
+    }
 
     /**
      * @see org.hyperic.hq.zevents.ZeventListener#processEvents(java.util.List)
      */
     public void processEvents(List events) {
-        AgentManager agentMan = AgentManagerImpl.getOne();
         AuthzSubject overlord = AuthzSubjectManagerImpl.getOne().getOverlordPojo();
         
         for (Iterator iter = events.iterator(); iter.hasNext();) {
             TransferAgentBundleZevent zevent = (TransferAgentBundleZevent) iter.next();
             
             try {
-                agentMan.transferAgentBundle(overlord, 
+                agentManager.transferAgentBundle(overlord, 
                                              zevent.getAgent(), 
                                              zevent.getAgentBundleFile());
             } catch (Exception e) {

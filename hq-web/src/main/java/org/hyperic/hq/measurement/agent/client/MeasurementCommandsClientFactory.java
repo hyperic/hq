@@ -26,32 +26,34 @@
 package org.hyperic.hq.measurement.agent.client;
 
 import org.hyperic.hq.appdef.Agent;
-import org.hyperic.hq.appdef.server.session.AgentManagerImpl;
+import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.bizapp.agent.client.SecureAgentConnection;
 import org.hyperic.hq.transport.AgentProxyFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * A factory for returning Measurement Commands clients depending on if the agent 
  * uses the legacy or new transport.
  */
+@Component
 public class MeasurementCommandsClientFactory {
 
-    private static final MeasurementCommandsClientFactory INSTANCE = new MeasurementCommandsClientFactory();
-
-    private MeasurementCommandsClientFactory() {
-    }
-
-    public static MeasurementCommandsClientFactory getInstance() {
-        return INSTANCE;
+    private AgentManager agentManager;
+    
+    
+    @Autowired
+    public MeasurementCommandsClientFactory(AgentManager agentManager) { 
+        this.agentManager = agentManager;
     }
 
     public MeasurementCommandsClient getClient(AppdefEntityID aid) 
         throws AgentNotFoundException {
         
-        Agent agent = AgentManagerImpl.getOne().getAgent(aid);
+        Agent agent = agentManager.getAgent(aid);
 
         return getClient(agent);
     }
@@ -59,7 +61,7 @@ public class MeasurementCommandsClientFactory {
     public MeasurementCommandsClient getClient(String agentToken) 
         throws AgentNotFoundException {
         
-        Agent agent = AgentManagerImpl.getOne().getAgent(agentToken);
+        Agent agent = agentManager.getAgent(agentToken);
 
         return getClient(agent);
     }

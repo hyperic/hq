@@ -84,11 +84,14 @@ public class LiveDataManagerImpl implements LiveDataManager {
     private ProductManager productManager;
 
     private ConfigManager configManager;
+    
+    private LiveDataCommandsClientFactory liveDataCommandsClientFactory;
 
     @Autowired
-    public LiveDataManagerImpl(ProductManager productManager, ConfigManager configManager) {
+    public LiveDataManagerImpl(ProductManager productManager, ConfigManager configManager, LiveDataCommandsClientFactory liveDataCommandsClientFactory) {
         this.productManager = productManager;
         this.configManager = configManager;
+        this.liveDataCommandsClientFactory =  liveDataCommandsClientFactory;
     }
 
     @PostConstruct
@@ -218,7 +221,7 @@ public class LiveDataManagerImpl implements LiveDataManager {
         AppdefEntityID id = cmd.getAppdefEntityID();
 
         LiveDataCommandsClient client =
-                                        LiveDataCommandsClientFactory.getInstance().getClient(id);
+                                        liveDataCommandsClientFactory.getClient(id);
 
         ConfigResponse config = getConfig(subject, cmd);
         String type = getType(subject, cmd);
@@ -295,7 +298,7 @@ public class LiveDataManagerImpl implements LiveDataManager {
             List<LiveDataExecutorCommand> cmds = buckets.get(id);
 
             LiveDataCommandsClient client =
-                                            LiveDataCommandsClientFactory.getInstance().getClient(id);
+                                            liveDataCommandsClientFactory.getClient(id);
 
             executor.getData(client, cmds);
         }

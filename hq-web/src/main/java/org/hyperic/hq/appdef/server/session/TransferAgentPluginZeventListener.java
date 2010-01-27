@@ -31,22 +31,29 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
 import org.hyperic.hq.zevents.ZeventListener;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * The Zevent Listener that upgrades agents.
  */
+@Component
 public class TransferAgentPluginZeventListener implements ZeventListener {
 
-    private final Log _log = LogFactory
-            .getLog(TransferAgentPluginZeventListener.class);
+    private final Log _log = LogFactory.getLog(TransferAgentPluginZeventListener.class);
+
+    private AgentManager agentManager;
+
+    @Autowired
+    public TransferAgentPluginZeventListener(AgentManager agentManager) {
+        this.agentManager = agentManager;
+    }
 
     /**
      * @see org.hyperic.hq.zevents.ZeventListener#processEvents(java.util.List)
      */
     public void processEvents(List events) {
-        AgentManager agentMan = AgentManagerImpl.getOne();
-        AuthzSubject overlord = AuthzSubjectManagerImpl.getOne()
-                .getOverlordPojo();
+        AuthzSubject overlord = AuthzSubjectManagerImpl.getOne().getOverlordPojo();
 
         for (Iterator iter = events.iterator(); iter.hasNext();) {
             TransferAgentPluginZevent zevent = (TransferAgentPluginZevent) iter.next();
@@ -54,12 +61,11 @@ public class TransferAgentPluginZeventListener implements ZeventListener {
             final AppdefEntityID aid = zevent.getAgent();
 
             try {
-                agentMan.transferAgentPlugin(overlord, zevent.getAgent(), zevent.getPlugin());
-                agentMan.restartAgent(overlord, aid);
-            }
-            catch (Exception e) {
-                _log.warn("Failed to transfer plugin " + zevent.getPlugin()
-                        + " to agent " + zevent.getAgent().getID(), e);
+                agentManager.transferAgentPlugin(overlord, zevent.getAgent(), zevent.getPlugin());
+                agentManager.restartAgent(overlord, aid);
+            } catch (Exception e) {
+                _log.warn("Failed to transfer plugin " + zevent.getPlugin() + " to agent " + zevent.getAgent().getID(),
+                    e);
             }
         }
 

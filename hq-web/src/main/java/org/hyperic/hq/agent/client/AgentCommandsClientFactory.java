@@ -26,68 +26,38 @@
 package org.hyperic.hq.agent.client;
 
 import org.hyperic.hq.appdef.Agent;
-import org.hyperic.hq.appdef.server.session.AgentManagerImpl;
-import org.hyperic.hq.appdef.shared.AgentNotFoundException;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.bizapp.agent.client.SecureAgentConnection;
 import org.hyperic.hq.transport.AgentProxyFactory;
+import org.springframework.stereotype.Component;
 
 /**
- * A factory for returning Agent Commands clients depending on if the agent 
- * uses the legacy or new transport.
+ * A factory for returning Agent Commands clients depending on if the agent uses
+ * the legacy or new transport.
  */
+@Component
 public class AgentCommandsClientFactory {
 
-    private static final AgentCommandsClientFactory INSTANCE = new AgentCommandsClientFactory();
-
-    private AgentCommandsClientFactory() {
-    }
-
-    public static AgentCommandsClientFactory getInstance() {
-        return INSTANCE;
-    }
-
-    public AgentCommandsClient getClient(AppdefEntityID aid) 
-        throws AgentNotFoundException {
-        
-        Agent agent = AgentManagerImpl.getOne().getAgent(aid);
-
-        return getClient(agent);
-    }
-
-    public AgentCommandsClient getClient(String agentToken) 
-        throws AgentNotFoundException {
-        
-        Agent agent = AgentManagerImpl.getOne().getAgent(agentToken);
-
-        return getClient(agent);
-    }
-    
     public AgentCommandsClient getClient(Agent agent) {
         if (agent.isNewTransportAgent()) {
             AgentProxyFactory factory = HQApp.getInstance().getAgentProxyFactory();
-            
+
             return new AgentCommandsClientImpl(agent, factory);
         } else {
-            return new LegacyAgentCommandsClientImpl(new SecureAgentConnection(agent.getAddress(),agent.getPort(),agent.getAuthToken()));            
-        }         
-    }    
-    
-    public AgentCommandsClient getClient(String agentAddress, 
-                                         int agentPort, 
-                                         String authToken, 
-                                         boolean isNewTransportAgent,
-                                         boolean unidirectional) {
+            return new LegacyAgentCommandsClientImpl(new SecureAgentConnection(agent.getAddress(), agent.getPort(),
+                agent.getAuthToken()));
+        }
+    }
+
+    public AgentCommandsClient getClient(String agentAddress, int agentPort, String authToken,
+                                         boolean isNewTransportAgent, boolean unidirectional) {
         if (isNewTransportAgent) {
-            AgentProxyFactory factory = 
-                HQApp.getInstance().getAgentProxyFactory();
-            
+            AgentProxyFactory factory = HQApp.getInstance().getAgentProxyFactory();
+
             return new AgentCommandsClientImpl(factory, agentAddress, agentPort, unidirectional);
         } else {
-            return new LegacyAgentCommandsClientImpl(
-                    new SecureAgentConnection(agentAddress, agentPort, authToken));
-        }    
-    }    
-    
+            return new LegacyAgentCommandsClientImpl(new SecureAgentConnection(agentAddress, agentPort, authToken));
+        }
+    }
+
 }

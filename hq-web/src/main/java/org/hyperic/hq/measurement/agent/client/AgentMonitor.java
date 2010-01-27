@@ -41,6 +41,8 @@ import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.collection.ExpireMap;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -49,6 +51,7 @@ import org.apache.commons.logging.LogFactory;
  * The AgentMonitor is a wrapper around the MeasurementClient, providing
  * commonly used routines.
  */
+@Component
 public class AgentMonitor
 {
     private final Log log = 
@@ -56,10 +59,16 @@ public class AgentMonitor
 
     private static final String ERR_REMOTE = "Error reported by Agent @ ";
 
-    private static ExpireMap badAgents = new ExpireMap();
+    private ExpireMap badAgents = new ExpireMap();
     private static final long BAD_AGENT_EXPIRE = 60000;
-
-    public AgentMonitor() {}
+    private MeasurementCommandsClientFactory measurementCommandsClientFactory;
+    private AgentCommandsClientFactory agentCommandsClientFactory;
+    
+    @Autowired
+    public AgentMonitor(MeasurementCommandsClientFactory measurementCommandsClientFactory, AgentCommandsClientFactory agentCommandsClientFactory) {
+        this.measurementCommandsClientFactory = measurementCommandsClientFactory;
+        this.agentCommandsClientFactory = agentCommandsClientFactory;
+    } 
 
     /**
      * Ping the agent to see if it is alive
@@ -69,8 +78,7 @@ public class AgentMonitor
     public boolean ping(Agent agent) {
         try {
             AgentCommandsClient client = 
-                AgentCommandsClientFactory.
-                    getInstance().getClient(agent);
+                agentCommandsClientFactory.getClient(agent);
             client.ping(); 
         } catch (AgentRemoteException e) {
             log.error("Agent exception: " + e.getMessage());
@@ -124,7 +132,7 @@ public class AgentMonitor
 
         try {
             MeasurementCommandsClient client = 
-                MeasurementCommandsClientFactory.getInstance().getClient(agent);
+                measurementCommandsClientFactory.getClient(agent);
 
             UnscheduleMeasurements_args args = 
                 new UnscheduleMeasurements_args();
@@ -172,7 +180,7 @@ public class AgentMonitor
             }
             
             MeasurementCommandsClient client = 
-                MeasurementCommandsClientFactory.getInstance().getClient(agent);
+                measurementCommandsClientFactory.getClient(agent);
 
             result = client.getMeasurements(args);
             res    = new MetricValue[dsns.length];

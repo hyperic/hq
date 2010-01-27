@@ -43,8 +43,7 @@ import org.hibernate.type.IntegerType;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.appdef.Agent;
-import org.hyperic.hq.appdef.server.session.AgentManagerImpl;
-import org.hyperic.hq.appdef.shared.AgentManager;
+import org.hyperic.hq.appdef.server.session.AgentDAO;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
@@ -58,10 +57,12 @@ public class MeasurementDAO
     extends HibernateDAO<Measurement> {
     private static final String ALIAS_CLAUSE = " upper(t.alias) = '" +
                                                MeasurementConstants.CAT_AVAILABILITY.toUpperCase() + "' ";
+    private AgentDAO agentDao;
 
     @Autowired
-    public MeasurementDAO(SessionFactory f) {
+    public MeasurementDAO(SessionFactory f, AgentDAO agentDao) {
         super(Measurement.class, f);
+        this.agentDao = agentDao;
     }
 
     public Measurement findById(Integer id) {
@@ -789,12 +790,12 @@ public class MeasurementDAO
         }
 
         Map<Agent, Long> res = new HashMap<Agent, Long>(idToCount.size());
-        AgentManager agentMan = AgentManagerImpl.getOne();
+     
         for (Map.Entry<Integer, Long> ent : idToCount.entrySet()) {
             Integer id = ent.getKey();
             Long count = ent.getValue();
 
-            res.put(agentMan.findAgent(id), count);
+            res.put(agentDao.findById(id), count);
         }
         return res;
     }
@@ -820,7 +821,7 @@ public class MeasurementDAO
      * 
      * @return A List of Measurement ID's.
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked") 
     List<Integer> findOrphanedMeasurements() {
         String sql = "SELECT id FROM Measurement WHERE resource IS NULL";
         return getSession().createQuery(sql).list();

@@ -13,6 +13,7 @@ import org.hyperic.hq.product.ServiceTypeInfo;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.EncodingException;
+import org.springframework.stereotype.Component;
 
 /**
  * Constructs a {@link ServiceType} from an {@link AIServiceTypeValue}
@@ -20,6 +21,7 @@ import org.hyperic.util.config.EncodingException;
  * @author jhickey
  * 
  */
+@Component
 public class ServiceTypeFactory {
 
 	private Log log = LogFactory.getLog(ServiceTypeFactory.class);

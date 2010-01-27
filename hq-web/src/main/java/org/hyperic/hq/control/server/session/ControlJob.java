@@ -37,6 +37,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.control.agent.client.ControlCommandsClient;
 import org.hyperic.hq.control.agent.client.ControlCommandsClientFactory;
 import org.hyperic.hq.control.shared.ControlConstants;
@@ -80,7 +81,7 @@ public abstract class ControlJob extends BaseJob {
         
         try {
             ControlCommandsClient client =
-                ControlCommandsClientFactory.getInstance().getClient(id);
+               Bootstrap.getBean(ControlCommandsClientFactory.class).getClient(id);
             String pluginName  = id.toString();
             String productName = PlatformManagerImpl.getOne()
                 .getPlatformPluginName(id);

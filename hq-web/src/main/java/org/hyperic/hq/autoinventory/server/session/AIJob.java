@@ -44,6 +44,7 @@ import org.hyperic.hq.autoinventory.agent.client.AICommandsClient;
 import org.hyperic.hq.autoinventory.agent.client.AICommandsClientFactory;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManager;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.scheduler.server.session.BaseJob;
 import org.quartz.JobDataMap;
 
@@ -90,7 +91,7 @@ public abstract class AIJob extends BaseJob {
 
         try {
             AICommandsClient client = 
-                AICommandsClientFactory.getInstance().getClient(id);
+                Bootstrap.getBean(AICommandsClientFactory.class).getClient(id);
             commandHistory =
                 createHistory(id, groupId, batchId,
                               subject.getName(),

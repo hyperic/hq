@@ -118,6 +118,7 @@ public class MeasurementManagerImpl implements MeasurementManager {
     private MeasurementDAO measurementDAO;
     private MeasurementTemplateDAO measurementTemplateDAO;
     private AgentManager agentManager;
+    private AgentMonitor agentMonitor; 
    
 
     @Autowired
@@ -125,7 +126,7 @@ public class MeasurementManagerImpl implements MeasurementManager {
                                   ApplicationDAO applicationDAO, PermissionManager permissionManager,
                                   AuthzSubjectManager authzSubjectManager, ConfigManager configManager,
                                   MetricDataCache metricDataCache, MeasurementDAO measurementDAO,
-                                  MeasurementTemplateDAO measurementTemplateDAO, AgentManager agentManager) {
+                                  MeasurementTemplateDAO measurementTemplateDAO, AgentManager agentManager, AgentMonitor agentMonitor) {
         this.resourceManager = resourceManager;
         this.resourceGroupManager = resourceGroupManager;
         this.applicationDAO = applicationDAO;
@@ -136,6 +137,7 @@ public class MeasurementManagerImpl implements MeasurementManager {
         this.measurementDAO = measurementDAO;
         this.measurementTemplateDAO = measurementTemplateDAO;
         this.agentManager = agentManager;
+        this.agentMonitor = agentMonitor;
     }
 
     // TODO: Resolve circular dependency
@@ -1432,11 +1434,8 @@ public class MeasurementManagerImpl implements MeasurementManager {
     private MetricValue[] getLiveMeasurementValues(AppdefEntityID entity, String[] dsns)
         throws LiveMeasurementException, PermissionException {
         try {
-            AgentMonitor monitor = new AgentMonitor();
-
             Agent a = agentManager.getAgent(entity);
-
-            return monitor.getLiveValues(a, dsns);
+            return agentMonitor.getLiveValues(a, dsns);
         } catch (AgentNotFoundException e) {
             throw new LiveMeasurementException(e.getMessage(), e);
         } catch (MonitorAgentException e) {

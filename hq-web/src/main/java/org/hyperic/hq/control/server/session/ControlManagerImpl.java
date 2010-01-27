@@ -103,6 +103,7 @@ public class ControlManagerImpl implements ControlManager {
     private ControlPluginManager controlPluginManager;
 
     private MessagePublisher messagePublisher;
+    private ControlCommandsClientFactory controlCommandsClientFactory; 
 
     @Autowired
     public ControlManagerImpl(ProductManager productManager, ControlScheduleManager controlScheduleManager,
@@ -111,7 +112,7 @@ public class ControlManagerImpl implements ControlManager {
                               PlatformManager platformManager,
                               AuthzSubjectManager authzSubjectManager, 
                               PermissionManager permissionManager,
-                              MessagePublisher messagePublisher) {
+                              MessagePublisher messagePublisher, ControlCommandsClientFactory controlCommandsClientFactory) {
         this.productManager = productManager;
         this.controlScheduleManager = controlScheduleManager;
         this.controlHistoryDao = controlHistoryDao;
@@ -120,8 +121,8 @@ public class ControlManagerImpl implements ControlManager {
         this.platformManager = platformManager;
         this.authzSubjectManager = authzSubjectManager;
         this.permissionManager = permissionManager;
-        
         this.messagePublisher = messagePublisher;
+        this.controlCommandsClientFactory = controlCommandsClientFactory;
     }
 
     @PostConstruct
@@ -154,7 +155,7 @@ public class ControlManagerImpl implements ControlManager {
                                                                    ProductPlugin.TYPE_CONTROL,
                                                                    id, true);
 
-            ControlCommandsClient client = ControlCommandsClientFactory.getInstance().getClient(id);
+            ControlCommandsClient client = controlCommandsClientFactory.getClient(id);
             client.controlPluginAdd(pluginName, pluginType, mergedResponse);
         } catch (EncodingException e) {
             throw new PluginException("Unable to decode config", e);

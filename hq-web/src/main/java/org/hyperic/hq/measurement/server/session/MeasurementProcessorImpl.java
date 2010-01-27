@@ -69,24 +69,28 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
     private MeasurementManager measurementManager;
     private AuthzSubjectManager authzSubjectManager;
     private SRNManager srnManager;
+    private AgentMonitor agentMonitor;
+    private MeasurementCommandsClientFactory measurementCommandsClientFactory;
 
     @Autowired
     public MeasurementProcessorImpl(AgentManager agentManager, MeasurementManager measurementManager,
-                                    AuthzSubjectManager authzSubjectManager, SRNManager srnManager) {
+                                    AuthzSubjectManager authzSubjectManager, SRNManager srnManager,
+                                    AgentMonitor agentMonitor,
+                                    MeasurementCommandsClientFactory measurementCommandsClientFactory) {
 
         this.agentManager = agentManager;
         this.measurementManager = measurementManager;
         this.authzSubjectManager = authzSubjectManager;
         this.srnManager = srnManager;
+        this.agentMonitor = agentMonitor;
+        this.measurementCommandsClientFactory = measurementCommandsClientFactory;
     }
 
     /**
      * Ping the agent to make sure it's up
      */
     public boolean ping(Agent a) throws PermissionException {
-
-        AgentMonitor monitor = new AgentMonitor();
-        return monitor.ping(a);
+        return agentMonitor.ping(a);
     }
 
     /**
@@ -143,11 +147,11 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
      */
     public void scheduleEnabled(Agent agent, List<AppdefEntityID> eids) throws MonitorAgentException {
         final Map<SRN, List<Measurement>> schedMap = new HashMap<SRN, List<Measurement>>();
-        AgentMonitor monitor = new AgentMonitor();
+
         MeasurementCommandsClient client = null;
         try {
             final ConcurrentStatsCollector stats = ConcurrentStatsCollector.getInstance();
-            client = MeasurementCommandsClientFactory.getInstance().getClient(agent);
+            client = measurementCommandsClientFactory.getClient(agent); 
 
             final AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
             for (AppdefEntityID eid : eids) {
@@ -158,7 +162,7 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
                 schedMap.put(srn, measurements);
                 try {
                     Measurement[] meas = (Measurement[]) measurements.toArray(new Measurement[0]);
-                    monitor.schedule(client, srn, meas);
+                    agentMonitor.schedule(client, srn, meas);
                     stats.addStat((now() - begin), ConcurrentStatsCollector.MEASUREMENT_SCHEDULE_TIME);
                 } catch (AgentConnectionException e) {
                     final String emsg = "Error reported by agent @ " + agent.connectionString() + ": " + e.getMessage();
@@ -196,9 +200,7 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
                 // for this resource.
             }
         }
-
-        AgentMonitor monitor = new AgentMonitor();
-        monitor.unschedule(a, entIds);
+        agentMonitor.unschedule(a, entIds);
     }
 
     /**
