@@ -6,9 +6,9 @@ import org.hyperic.hq.authz.shared.PermissionException
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl as AuthzMan
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.Resource
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.MeasurementConstants
 import org.hyperic.hq.measurement.server.session.AvailabilityDataRLE
-import org.hyperic.hq.measurement.server.session.AvailabilityManagerImpl as AvailMan
 import org.hyperic.hq.measurement.server.session.DataManagerImpl as DataMan
 import org.hyperic.hq.measurement.server.session.Measurement
 import org.hyperic.hq.measurement.shared.HighLowMetricValue
@@ -18,6 +18,7 @@ import org.hyperic.hq.events.server.session.EventLog
 import org.hyperic.hq.events.EventLogStatus
 import org.hyperic.hq.hqu.rendit.BaseController
 import org.hyperic.util.pager.PageControl
+import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.measurement.shared.ResourceLogEvent
 import org.hyperic.hq.measurement.UnitsConvert
 import org.hyperic.hq.product.TrackEvent
@@ -52,6 +53,7 @@ class HealthStripGenerator {
          DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
          
     private authzMan = AuthzMan.one
+    private availMan = Bootstrap.getBean(AvailabilityManager.class)
      
     Log log = LogFactory.getLog(this.getClass())
      
@@ -420,13 +422,13 @@ class HealthStripGenerator {
      }
      
      List getRLE(resource, long begin, long end) {
-         AvailMan.one.getHistoricalAvailData(resource, begin, end).collect { rle ->
+         availMan.getHistoricalAvailData(resource, begin, end).collect { rle ->
              [ start: rle.startime, end: rle.endtime, value: rle.availVal ]
          }
      }
 
      def getAvail(resource, ago, now) {
-         def availMan = AvailMan.one
+        
          def metric = availMan.getAvailMeasurement(resource)
 
          availMan.getHistoricalAvailData([metric.id] as Integer[], ago, now, (long)((now - ago) / 100),

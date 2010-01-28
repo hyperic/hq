@@ -28,25 +28,25 @@ package org.hyperic.hq.measurement.server.session;
 import java.util.List;
 
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+@Component
 public class SynchronousAvailDataInserter implements DataInserter {
     
-    private final AvailabilityManager _aMan =
-        AvailabilityManagerImpl.getOne();
-    
-    private final Object _lock;
+    private final AvailabilityManager availabilityManager;
 
-    public SynchronousAvailDataInserter(Object lock) {
-        _lock = lock;
+    @Autowired
+    public SynchronousAvailDataInserter(AvailabilityManager availabilityManager) {
+        this.availabilityManager = availabilityManager;
     }
 
     public void insertMetrics(List availData)
         throws InterruptedException, DataInserterException {
-        _aMan.addData(availData);
+        availabilityManager.addData(availData);
     }
 
     public Object getLock() {
-        return _lock;
+        return AvailabilityCache.getInstance();
     }
 
     public void insertMetrics(List metricData, boolean isPriority)
