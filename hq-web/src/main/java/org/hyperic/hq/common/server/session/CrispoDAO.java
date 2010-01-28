@@ -25,7 +25,6 @@
 package org.hyperic.hq.common.server.session;
 
 import org.hibernate.SessionFactory;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -38,15 +37,15 @@ public class CrispoDAO
         super(Crispo.class, f);
     }
 
-    Crispo findById(Integer id) {
+    public Crispo findById(Integer id) {
         return (Crispo) super.findById(id);
     }
 
-    void remove(Crispo c) {
+    public void remove(Crispo c) {
         super.remove(c);
     }
 
-    void save(Crispo c) {
+    public void save(Crispo c) {
         super.save(c);
     }
 }
