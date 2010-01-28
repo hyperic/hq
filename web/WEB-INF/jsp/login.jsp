@@ -49,7 +49,7 @@
 					</div>
 					<div class="button">
 						<c:if test="${guestEnabled}">
-							<input type="button" id="guestLoginBtn" class="button42 guestuser" value="<fmt:message key="login.signInAsGuest" />" />
+							<a href="#" id="guestLoginLink" class="guestuser"><fmt:message key="login.signInAsGuest" /></a>
 						</c:if>
 						<input type="submit" name="submit" class="button42" value="<fmt:message key="login.signin" />" />
 					</div>
@@ -88,7 +88,7 @@
 				});
 
 				<c:if test="${guestEnabled}">
-					dojo.connect(dojo.byId("guestLoginBtn"), "onclick", function() {
+					dojo.connect(dojo.byId("guestLoginLink"), "onclick", function() {
 						var username = dojo.byId("usernameInput");
 	
 						username.value = "<c:out value="${guestUsername}" />";

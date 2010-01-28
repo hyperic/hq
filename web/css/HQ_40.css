@@ -479,6 +479,7 @@ fieldset {
 
 .loginPanel .fieldRow {
     height:33px;
+    max-height:21px;
     position:relative;
     clear:none;
 }
@@ -502,8 +503,8 @@ fieldset {
 }
 
 .loginPanel .guestuser {
-	background-color:#38ADEA;
-	border-color:#60BCEA;
+	color:#45A8DF;
+	margin-right:10px;
 }
 
 .loginButtons {
