@@ -3,6 +3,8 @@ package org.hyperic.hq.hqu.rendit.metaclass
 import org.hyperic.hq.authz.shared.AuthzConstants
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl as AuthzMan
+import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.control.shared.ControlScheduleManager;
 import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.authz.server.session.ResourceGroup
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo
@@ -28,7 +30,6 @@ import org.hyperic.hq.events.server.session.AlertManagerImpl as AlertMan
 import org.hyperic.hq.events.server.session.EventLogManagerImpl as EventMan
 import org.hyperic.hq.livedata.server.session.LiveDataManagerImpl as liveDataMan
 import org.hyperic.hq.control.server.session.ControlManagerImpl as CMan
-import org.hyperic.hq.control.server.session.ControlScheduleManagerImpl as CSMan
 import org.hyperic.hq.product.PluginNotFoundException
 import org.hyperic.hq.measurement.server.session.MeasurementManagerImpl as DMan
 
@@ -63,7 +64,7 @@ class ResourceCategory {
     private static alertMan = AlertMan.one
     private static eventMan = EventMan.one
     private static cMan     = CMan.one
-    private static csMan	= CSMan.one
+    private static csMan	= Bootstrap.getBean(ControlScheduleManager.class);
 
     /**
      * Creates a URL for the resource.  This should typically only be called
