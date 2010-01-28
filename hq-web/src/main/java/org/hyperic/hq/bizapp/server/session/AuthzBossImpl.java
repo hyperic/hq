@@ -61,7 +61,6 @@ import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.config.ConfigResponse;
@@ -483,9 +482,5 @@ public class AuthzBossImpl implements AuthzBoss {
         SessionNotFoundException {
         sessionManager.authenticate(sessionId.intValue());
         return authzSubjectManager.getEmailById(userId);
-    }
-
-    public static AuthzBoss getOne() {
-        return Bootstrap.getBean(AuthzBoss.class);
     }
 }

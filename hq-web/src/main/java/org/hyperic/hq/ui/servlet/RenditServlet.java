@@ -37,10 +37,13 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.server.session.AuthzBossImpl;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.hqu.RenditServerImpl;
 import org.hyperic.hq.hqu.RequestInvocationBindings;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.StringUtil;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.util.WebUtils;
 
 public class RenditServlet 
@@ -172,10 +175,14 @@ public class RenditServlet
         }
 
         int sessId = RequestUtils.getSessionIdInt(req);
+        WebApplicationContext springContext =
+            WebApplicationContextUtils.getWebApplicationContext(getServletContext());
+        AuthzBoss authzBoss = springContext.getBean(AuthzBoss.class);
+
         AuthzSubject user;
         
         try {
-            user = AuthzBossImpl.getOne().getCurrentSubject(sessId);
+            user = authzBoss.getCurrentSubject(sessId);
         } catch(SessionException e) {
             // Could not get the current user.  We should default to a 'nobody'
             // user here.
