@@ -52,7 +52,6 @@ import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.Messenger;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.util.config.ConfigResponse;
@@ -546,10 +545,6 @@ public class CPropManagerImpl implements CPropManager {
         }
 
         return res;
-    }
-
-    public static CPropManager getOne() {
-        return Bootstrap.getBean(CPropManager.class);
     }
 
     /**

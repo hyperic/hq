@@ -28,12 +28,12 @@ import org.hyperic.hq.common.VetoException
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerImpl as DefMan
 import org.hyperic.hq.events.server.session.AlertManagerImpl as AlertMan
 import org.hyperic.hq.events.server.session.EventLogManagerImpl as EventMan
-import org.hyperic.hq.livedata.server.session.LiveDataManagerImpl as liveDataMan
 import org.hyperic.hq.control.server.session.ControlManagerImpl as CMan
 import org.hyperic.hq.product.PluginNotFoundException
 import org.hyperic.hq.measurement.server.session.MeasurementManagerImpl as DMan
 
 import org.hyperic.hq.livedata.shared.LiveDataCommand
+import org.hyperic.hq.livedata.shared.LiveDataManager;
 import org.hyperic.hq.livedata.shared.LiveDataResult
 import org.hyperic.util.config.ConfigResponse
 import org.hyperic.util.pager.PageControl
@@ -54,6 +54,7 @@ import org.hyperic.hq.authz.shared.PermissionException
  */
 
 class ResourceCategory {
+    private static liveDataMan = Bootstrap.getBean(LiveDataManager.class)
     private static platMan  = PlatMan.one
     private static svcMan   = ServiceMan.one
     private static svrMan   = ServerMan.one 
@@ -236,7 +237,7 @@ class ResourceCategory {
      */
     static Collection getLiveDataCommands(Resource r, AuthzSubject user) {
         try {
-            return liveDataMan.one.getCommands(user, r.entityId) as List
+            return liveDataMan.getCommands(user, r.entityId) as List
         } catch (PluginNotFoundException e) {
             return []
         }
@@ -246,7 +247,7 @@ class ResourceCategory {
                                       String cmd, ConfigResponse cfg)  
     {
         def lcmd = new LiveDataCommand(r.entityId, cmd, cfg)
-        liveDataMan.one.getData(user, lcmd)
+        liveDataMan.getData(user, lcmd)
     }
     
     static List getLiveData(Collection resources, AuthzSubject user,
@@ -256,7 +257,7 @@ class ResourceCategory {
         for (r in resources) {
             cmds << new LiveDataCommand(r.entityId, cmd, cfg)
         }
-        liveDataMan.one.getData(user, cmds as LiveDataCommand[]) as List
+        liveDataMan.getData(user, cmds as LiveDataCommand[]) as List
     }
     
     static boolean isPlatform(Resource r) {

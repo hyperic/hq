@@ -1,11 +1,11 @@
 package org.hyperic.hq.hqu.rendit.util
 
 import org.hyperic.hq.appdef.Agent
-import org.hyperic.hq.appdef.server.session.CPropManagerImpl as CPropMan
 import org.hyperic.hq.appdef.server.session.ConfigManagerImpl as ConfigMan
 import org.hyperic.hq.appdef.server.session.PlatformManagerImpl as PlatMan
 import org.hyperic.hq.appdef.server.session.ServerManagerImpl as ServerMan
 import org.hyperic.hq.appdef.server.session.ServiceManagerImpl as ServiceMan
+import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException
 import org.hyperic.hq.auth.shared.SessionManager
 import org.hyperic.hq.authz.server.session.AuthzSubject
@@ -13,6 +13,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl as AuthzMan
 import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.bizapp.server.session.AppdefBossImpl as AppdefBoss
 import org.hyperic.hq.bizapp.server.session.ProductBossImpl as ProductBoss
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.bizapp.shared.AllConfigResponses
 import org.hyperic.hq.product.ProductPlugin
 import org.hyperic.hq.product.PluginNotFoundException
@@ -30,7 +31,7 @@ import org.hyperic.util.config.ConfigResponse
  */
 class ResourceConfig {
     private static authzMan  = AuthzMan.one
-    private static cpropMan  = CPropMan.one
+    private static cpropMan  = Bootstrap.getBean(CPropManager.class)
     private static appBoss   = AppdefBoss.one
     private static prodBoss  = ProductBoss.one
     private static configMan = ConfigMan.one

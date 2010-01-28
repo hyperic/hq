@@ -1,10 +1,11 @@
 import org.hyperic.hq.measurement.server.session.MeasurementManagerImpl as MM
 import org.hyperic.hq.bizapp.server.session.ProductBossImpl as PB
 import org.hyperic.hq.common.server.session.ServerConfigManagerImpl as SCM
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl as subMan
-import org.hyperic.hq.appdef.server.session.CPropManagerImpl as cpropMan
 import org.hyperic.hq.appdef.server.session.Server
 import org.hyperic.hq.appdef.shared.AppdefEntityID
+import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue
 import org.hyperic.hq.appdef.server.session.AgentSortField
 import org.hyperic.hq.appdef.Agent
@@ -35,6 +36,7 @@ class HealthController
         DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
     private final PrintfFormat agentFmt =
         new PrintfFormat("%-25s %-15s %-5s %-9s %-17s %-13s %-16s %-10s %s")
+    private cpropMan = Bootstrap.getBean(CPropManager.class)
 
     HealthController() {
         onlyAllowSuperUsers()
@@ -110,7 +112,7 @@ class HealthController
         def aev = new AppdefEntityValue(AppdefEntityID.newServerID(s.id), overlord)
         def cprop = "N/A"
         try {
-            cprop = cpropMan.one.getValue(aev, prop)
+            cprop = cpropMan.getValue(aev, prop)
         } catch (Exception e) {
             // cannot recover
         }

@@ -30,7 +30,6 @@ import org.hyperic.hq.auth.shared.AuthManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.dao.PrincipalDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -153,9 +152,5 @@ public class AuthManagerImpl implements AuthManager {
      */
     public Principal getPrincipal(AuthzSubject subject) {
         return principalDao.findByUsername(subject.getName());
-    }
-
-    public static AuthManager getOne() {
-        return Bootstrap.getBean(AuthManager.class);
     }
 }

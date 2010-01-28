@@ -40,7 +40,6 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceDeleteCallback;
 import org.hyperic.hq.bizapp.shared.EventLogBoss;
 import org.hyperic.hq.common.VetoException;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.server.session.EventLog;
 import org.hyperic.hq.events.shared.EventLogManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -166,9 +165,5 @@ public class EventLogBossImpl implements EventLogBoss {
                 eventLogManager.deleteLogs(r);
             }
         });
-    }
-
-    public static EventLogBoss getOne() {
-        return Bootstrap.getBean(EventLogBoss.class);
     }
 }

@@ -31,7 +31,6 @@ import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.bizapp.shared.SchedulerBoss;
-import org.hyperic.hq.context.Bootstrap;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.Scheduler;
@@ -201,10 +200,6 @@ public class SchedulerBossImpl implements SchedulerBoss {
         }
 
         return numDeleted;
-    }
-
-    public static SchedulerBoss getOne() {
-        return Bootstrap.getBean(SchedulerBoss.class);
     }
 
 }

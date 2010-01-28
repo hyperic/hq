@@ -74,8 +74,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * The AvailabityManagerImpl class is a stateless session bean that can be
- * used to retrieve Availability Data RLE points
+ * The AvailabityManagerImpl class is a stateless session bean that can be used
+ * to retrieve Availability Data RLE points
  * 
  */
 @Service
@@ -133,13 +133,13 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
 
     @Autowired
     public AvailabilityManagerImpl(ResourceManager resourceManager, MessagePublisher messenger,
-                                   AvailabilityDataDAO availabilityDataDAO, 
-                                   MeasurementDAO measurementDAO, MessagePublisher messagePublisher) {
+                                   AvailabilityDataDAO availabilityDataDAO, MeasurementDAO measurementDAO,
+                                   MessagePublisher messagePublisher) {
         this.resourceManager = resourceManager;
         this.messenger = messenger;
         this.availabilityDataDAO = availabilityDataDAO;
         this.measurementDAO = measurementDAO;
-        
+
         this.messagePublisher = messagePublisher;
     }
 
@@ -1271,7 +1271,8 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             PermissionManagerFactory.getInstance().getHierarchicalAlertingManager().suppressMeasurementEvents(events,
                 false);
 
-            messagePublisher.publishMessage(EventConstants.EVENTS_TOPIC, new ArrayList<MeasurementEvent>(events.values()));
+            messagePublisher.publishMessage(EventConstants.EVENTS_TOPIC, new ArrayList<MeasurementEvent>(events
+                .values()));
         }
 
         if (!zevents.isEmpty()) {
@@ -1281,10 +1282,6 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
 
     private Measurement getMeasurement(Integer mId) {
         return measurementManager.getMeasurement(mId);
-    }
-
-    public static AvailabilityManager getOne() {
-        return Bootstrap.getBean(AvailabilityManager.class);
     }
 
     private Map<Integer, StringBuilder> captureCurrAvailState() {

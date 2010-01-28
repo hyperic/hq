@@ -48,7 +48,6 @@ import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.livedata.FormatType;
 import org.hyperic.hq.livedata.LiveDataFormatter;
 import org.hyperic.hq.livedata.agent.client.LiveDataCommandsClient;
@@ -103,10 +102,6 @@ public class LiveDataManagerImpl implements LiveDataManager {
         } catch (Exception e) {
             log.error("Unable to initialize LiveData manager", e);
         }
-    }
-
-    public static LiveDataManager getOne() {
-        return Bootstrap.getBean(LiveDataManager.class);
     }
 
     /**

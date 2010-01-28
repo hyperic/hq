@@ -55,14 +55,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class MeasurementStartupListener
-    implements StartupListener
-{
+public class MeasurementStartupListener implements StartupListener {
     private static final String PROP_REPSTATS_SIZE = "REPORT_STATS_SIZE";
-    
-    private static final Log _log = 
-        LogFactory.getLog(MeasurementStartupListener.class);
-    
+
+    private static final Log _log = LogFactory.getLog(MeasurementStartupListener.class);
+
     private static final Object LOCK = new Object();
     private static DataInserter _dataInserter;
     private static DataInserter _availDataInserter;
@@ -75,73 +72,66 @@ public class MeasurementStartupListener
     private MeasurementManager measurementManager;
     private ServerConfigManager serverConfigManager;
     private SRNManager srnManager;
-   
-   
-    
+    private SynchronousAvailDataInserter synchronousAvailDataInserter;
+
     @Autowired
     public MeasurementStartupListener(ZeventEnqueuer zEventManager, MetricAuxLogManager metricAuxLogManager,
-                                      MeasurementManager measurementManager, ServerConfigManager serverConfigManager, SRNManager srnManager, HQApp app
-                                      ) {
+                                      MeasurementManager measurementManager, ServerConfigManager serverConfigManager,
+                                      SRNManager srnManager, HQApp app,
+                                      SynchronousAvailDataInserter synchronousAvailDataInserter) {
         this.zEventManager = zEventManager;
         this.metricAuxLogManager = metricAuxLogManager;
         this.measurementManager = measurementManager;
         this.serverConfigManager = serverConfigManager;
         this.srnManager = srnManager;
+        this.synchronousAvailDataInserter = synchronousAvailDataInserter;
         MeasurementStartupListener.app = app;
     }
 
     @PostConstruct
-    public void hqStarted()  {
+    public void hqStarted() {
         // Make sure we have the aux-log provider loaded
         MetricAuxLogProvider.class.toString();
-       
+
         srnManager.initializeCache();
-    
+
         /**
-         * Add measurement enabler listener to enable metrics for newly
-         * created resources or to reschedule when resources are updated.
+         * Add measurement enabler listener to enable metrics for newly created
+         * resources or to reschedule when resources are updated.
          */
         Set<Class<?>> listenEvents = new HashSet<Class<?>>();
         listenEvents.add(ResourceCreatedZevent.class);
         listenEvents.add(ResourceUpdatedZevent.class);
         listenEvents.add(ResourceRefreshZevent.class);
-        zEventManager.addBufferedListener(
-            listenEvents, new MeasurementEnabler());
+        zEventManager.addBufferedListener(listenEvents, new MeasurementEnabler());
 
-       
         synchronized (LOCK) {
-            _defEnableCallback = (DefaultMetricEnableCallback)
-                app.registerCallbackCaller(DefaultMetricEnableCallback.class);
-            _delCallback = (MetricDeleteCallback)
-                app.registerCallbackCaller(MetricDeleteCallback.class);
+            _defEnableCallback = (DefaultMetricEnableCallback) app
+                .registerCallbackCaller(DefaultMetricEnableCallback.class);
+            _delCallback = (MetricDeleteCallback) app.registerCallbackCaller(MetricDeleteCallback.class);
             _dataInserter = new SynchronousDataInserter();
-            Object _availLock = AvailabilityCache.getInstance();
-            _availDataInserter = new SynchronousAvailDataInserter(_availLock);
+            _availDataInserter = synchronousAvailDataInserter;
         }
-        
-        app.registerCallbackListener(MetricDeleteCallback.class, 
-                                     new MetricDeleteCallback() {
+
+        app.registerCallbackListener(MetricDeleteCallback.class, new MetricDeleteCallback() {
             public void beforeMetricsDelete(Collection<Integer> mids) {
                 metricAuxLogManager.metricsDeleted(mids);
             }
         });
-        
-        app.registerCallbackListener(ResourceDeleteCallback.class,
-                                     new ResourceDeleteCallback() {
 
-            public void preResourceDelete(Resource r)
-                throws VetoException {
-                measurementManager
-                    .handleResourceDelete(r);
+        app.registerCallbackListener(ResourceDeleteCallback.class, new ResourceDeleteCallback() {
+
+            public void preResourceDelete(Resource r) throws VetoException {
+                measurementManager.handleResourceDelete(r);
             }
-            
+
         });
 
         prefetchEnabledMeasurementsAndTemplates();
         initReportsStats();
         startDataPurgeWorker();
     }
-    
+
     public static void stopDataPurgeWorker() {
         if (_dataPurgeFuture != null) {
             _log.info("Stopping Data Purge Worker");
@@ -153,9 +143,9 @@ public class MeasurementStartupListener
 
     /**
      * Starts either the com.hyperic.hq.measurement.DataPurgeJob or
-     *  org.hyperic.hq.measurement.DataPurgeJob after stopping an existing
-     *  worker if one is already scheduled.  The worker is scheduled to run
-     *  at 10 past every hour.
+     * org.hyperic.hq.measurement.DataPurgeJob after stopping an existing worker
+     * if one is already scheduled. The worker is scheduled to run at 10 past
+     * every hour.
      */
     public static void startDataPurgeWorker() {
         stopDataPurgeWorker();
@@ -174,21 +164,21 @@ public class MeasurementStartupListener
         Runnable dataPurgeJob;
         try {
             final String klazz = "com.hyperic.hq.measurement.DataPurgeJob";
-            dataPurgeJob = (Runnable)Class.forName(klazz).newInstance();
+            dataPurgeJob = (Runnable) Class.forName(klazz).newInstance();
             _log.info("Started DataPurgeWorker as " + klazz);
         } catch (Exception e) {
             try {
                 final String klazz = "org.hyperic.hq.measurement.DataPurgeJob";
-                dataPurgeJob = (Runnable)Class.forName(klazz).newInstance();
+                dataPurgeJob = (Runnable) Class.forName(klazz).newInstance();
                 _log.info("Started DataPurgeWorker as " + klazz);
             } catch (Exception e1) {
                 _log.fatal("Could not start DataPurgeWorker", e1);
                 return;
             }
         }
-      
-        _dataPurgeFuture = app.getScheduler().scheduleAtFixedRate(
-            dataPurgeJob, initialDelay, MeasurementConstants.HOUR);
+
+        _dataPurgeFuture = app.getScheduler()
+            .scheduleAtFixedRate(dataPurgeJob, initialDelay, MeasurementConstants.HOUR);
     }
 
     private static final long now() {
@@ -204,45 +194,44 @@ public class MeasurementStartupListener
 
         try {
             cfg = serverConfigManager.getConfig();
-        } catch(Exception e) {
+        } catch (Exception e) {
             _log.warn("Error getting server config", e);
         }
-        
-        int repSize = Integer.parseInt(cfg.getProperty(PROP_REPSTATS_SIZE, 
-                                                       "1000"));
+
+        int repSize = Integer.parseInt(cfg.getProperty(PROP_REPSTATS_SIZE, "1000"));
         ReportStatsCollector.getInstance().initialize(repSize);
     }
-    
+
     public static void setAvailDataInserter(DataInserter d) {
         synchronized (LOCK) {
             _availDataInserter = d;
         }
     }
-    
+
     public static void setDataInserter(DataInserter d) {
         synchronized (LOCK) {
             _dataInserter = d;
         }
     }
-    
+
     public static DataInserter getAvailDataInserter() {
         synchronized (LOCK) {
             return _availDataInserter;
         }
     }
-    
+
     static DataInserter getDataInserter() {
         synchronized (LOCK) {
             return _dataInserter;
         }
     }
-    
+
     static DefaultMetricEnableCallback getDefaultEnableObj() {
         synchronized (LOCK) {
             return _defEnableCallback;
         }
     }
-    
+
     static MetricDeleteCallback getMetricDeleteCallbackObj() {
         synchronized (LOCK) {
             return _delCallback;

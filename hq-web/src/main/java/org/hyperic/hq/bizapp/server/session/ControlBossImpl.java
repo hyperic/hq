@@ -48,7 +48,6 @@ import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.common.ApplicationException;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.control.server.session.ControlHistory;
 import org.hyperic.hq.control.server.session.ControlSchedule;
 import org.hyperic.hq.control.shared.ControlFrequencyValue;
@@ -580,9 +579,5 @@ public class ControlBossImpl implements ControlBoss {
 		}
 
 		return result;
-	}
-
-	public static ControlBoss getOne() {
-		return Bootstrap.getBean(ControlBoss.class);
 	}
 }
