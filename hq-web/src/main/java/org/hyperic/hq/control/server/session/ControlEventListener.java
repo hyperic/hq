@@ -33,34 +33,40 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.server.session.ResourceZevent;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.control.shared.ControlScheduleManager;
 import org.hyperic.hq.zevents.ZeventListener;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-public class ControlEventListener
-    implements ZeventListener {
+@Component
+public class ControlEventListener implements ZeventListener {
 
-    private static Log _log = LogFactory.getLog(ControlEventListener.class);
+    private final Log _log = LogFactory.getLog(ControlEventListener.class);
+    private ControlScheduleManager controlScheduleManager;
+    private AuthzSubjectManager authzSubjectManager;
+
+    @Autowired
+    public ControlEventListener(ControlScheduleManager controlScheduleManager, AuthzSubjectManager authzSubjectManager) {
+        this.controlScheduleManager = controlScheduleManager;
+        this.authzSubjectManager = authzSubjectManager;
+    }
 
     public void processEvents(List events) {
-        ControlScheduleManager cM = ControlScheduleManagerImpl.getOne();
-        AuthzSubjectManager azMan = AuthzSubjectManagerImpl.getOne();
-
         for (Iterator i = events.iterator(); i.hasNext();) {
             ResourceZevent z = (ResourceZevent) i.next();
-            AuthzSubject subject = azMan.findSubjectById(z.getAuthzSubjectId());
+            AuthzSubject subject = authzSubjectManager.findSubjectById(z.getAuthzSubjectId());
             AppdefEntityID id = z.getAppdefEntityID();
 
             _log.info("Removing scheduled jobs for " + id);
             try {
-                cM.removeScheduledJobs(subject, id);
+                controlScheduleManager.removeScheduledJobs(subject, id);
             } catch (Exception e) {
-                _log.error("Unable to remove scheduled jobs for " + id , e);
+                _log.error("Unable to remove scheduled jobs for " + id, e);
             }
         }
     }
-    
+
     public String toString() {
         return "ControlEventListener";
     }

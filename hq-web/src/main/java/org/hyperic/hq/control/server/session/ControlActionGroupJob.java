@@ -104,7 +104,7 @@ public class ControlActionGroupJob extends ControlJob {
 
             // create group entry in the history
             ControlScheduleManager cLocal =
-                ControlScheduleManagerImpl.getOne();
+                Bootstrap.getBean(ControlScheduleManager.class);
             ControlHistory historyValue =
                 cLocal.createHistory(id, null, null, subject.getName(),
                                      action, args, scheduled, startTime,
@@ -181,7 +181,7 @@ public class ControlActionGroupJob extends ControlJob {
                 try {
                     // Update group history entry
                     ControlScheduleManager cLocal =
-                       ControlScheduleManagerImpl.getOne();
+                       Bootstrap.getBean(ControlScheduleManager.class);
                     cLocal.updateHistory(groupId, System.currentTimeMillis(),
                                          status, errMsg);
 
@@ -213,7 +213,7 @@ public class ControlActionGroupJob extends ControlJob {
         throws ControlActionTimeoutException,
                ApplicationException
     {
-        ControlScheduleManager cMan = ControlScheduleManagerImpl.getOne();
+        ControlScheduleManager cMan = Bootstrap.getBean(ControlScheduleManager.class);
 
         long start = System.currentTimeMillis();
 
@@ -244,7 +244,7 @@ public class ControlActionGroupJob extends ControlJob {
         throws ControlActionTimeoutException,
                ApplicationException
     {
-        ControlScheduleManager cMan = ControlScheduleManagerImpl.getOne();
+        ControlScheduleManager cMan = Bootstrap.getBean(ControlScheduleManager.class);
 
         long start = System.currentTimeMillis();
 
