@@ -197,8 +197,4 @@ public class ActionManagerImpl implements ActionManager {
         }
     }
 
-    public static ActionManager getOne() {
-        return Bootstrap.getBean(ActionManager.class);
-    }
-
 }

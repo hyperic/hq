@@ -1536,9 +1536,4 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
         }
         return desc;
     }
-
-    public static AppdefStatManager getOne() {
-        return Bootstrap.getBean(AppdefStatManager.class);
-    }
-
 }

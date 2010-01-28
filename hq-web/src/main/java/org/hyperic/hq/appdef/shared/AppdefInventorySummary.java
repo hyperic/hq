@@ -60,13 +60,12 @@ public class AppdefInventorySummary implements java.io.Serializable {
     private List platformTypes     = null;
     private List serverTypes       = null;
     private List serviceTypes      = null;
-    
-    public AppdefInventorySummary(AuthzSubject user) {
-        this(user, true);
-    }
+    private AppdefStatManager appdefStatManager;
+  
 
-    public AppdefInventorySummary(AuthzSubject user, boolean countTypes) {
+    public AppdefInventorySummary(AuthzSubject user, boolean countTypes, AppdefStatManager appdefStatManager) {
         _user = user;
+        this.appdefStatManager = appdefStatManager;
         init(countTypes);
     }
 
@@ -191,55 +190,53 @@ public class AppdefInventorySummary implements java.io.Serializable {
     
     private void getPlatformSummary(boolean countTypes) {
         if (countTypes) {
-            platformTypeMap = getAppdefStatManager()
+            platformTypeMap = appdefStatManager
                 .getPlatformCountsByTypeMap(_user);
             if (platformTypeMap != null) {
                 platformCount = countMapTotals(platformTypeMap);
             }
         } else {
-            platformCount = getAppdefStatManager().getPlatformsCount(_user);
+            platformCount = appdefStatManager.getPlatformsCount(_user);
         }
     }
 
     private void getServerSummary(boolean countTypes) {
         if (countTypes) {
-            serverTypeMap = getAppdefStatManager()
+            serverTypeMap = appdefStatManager
                 .getServerCountsByTypeMap(this._user);
             if (serverTypeMap != null) {
                 serverCount = countMapTotals(serverTypeMap);
             }
         } else {
-            serverCount = getAppdefStatManager().getServersCount(_user);
+            serverCount = appdefStatManager.getServersCount(_user);
         }
     }
 
     private void getServiceSummary(boolean countTypes) {
         if (countTypes) {
-            serviceTypeMap = getAppdefStatManager()
+            serviceTypeMap = appdefStatManager
                 .getServiceCountsByTypeMap(this._user);
             if (serviceTypeMap != null) {
                 serviceCount = countMapTotals(serviceTypeMap);
             }
         } else {
-            serviceCount = getAppdefStatManager().getServicesCount(_user);
+            serviceCount = appdefStatManager.getServicesCount(_user);
         }
     }
 
     private void getAppSummary(boolean countTypes) {
         if (countTypes) {
-            appTypeMap = getAppdefStatManager()
+            appTypeMap = appdefStatManager
                 .getApplicationCountsByTypeMap(this._user);
             if (appTypeMap != null) {
                 appCount = countMapTotals(appTypeMap);
             }
         } else {
-            appCount = getAppdefStatManager().getApplicationsCount(_user);
+            appCount = appdefStatManager.getApplicationsCount(_user);
         }
     }
 
-    private AppdefStatManager getAppdefStatManager() {
-        return AppdefStatManagerImpl.getOne();
-    }
+  
 
     /* With groups, we have multiple types and each type may or may not
        break down to further group types. So we're not returning a "map" per
@@ -247,7 +244,7 @@ public class AppdefInventorySummary implements java.io.Serializable {
        accessors to the group summary count information. This also has the
        added benefit of keeping our types ordered where maps lose this attr. */
     private void getGroupSummary() {
-        Map grpTypeMap = getAppdefStatManager().getGroupCountsMap(this._user);
+        Map grpTypeMap = appdefStatManager.getGroupCountsMap(this._user);
 
         groupCntAdhocApp = ((Integer)grpTypeMap.get(new Integer(
             AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP))).intValue();
