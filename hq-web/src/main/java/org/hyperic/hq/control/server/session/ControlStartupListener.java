@@ -34,16 +34,18 @@ import org.hyperic.hq.application.StartupListener;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 @Service
 public class ControlStartupListener implements StartupListener {
 
     private ZeventEnqueuer zEventManager;
-    
-    @Autowired
-    public ControlStartupListener(ZeventEnqueuer zEventManager) {
-        this.zEventManager = zEventManager;
-    }
+    private ControlEventListener controlEventListener;
 
+    @Autowired
+    public ControlStartupListener(ZeventEnqueuer zEventManager, ControlEventListener controlEventListener) {
+        this.zEventManager = zEventManager;
+        this.controlEventListener = controlEventListener;
+    }
 
     @PostConstruct
     public void hqStarted() {
@@ -52,9 +54,7 @@ public class ControlStartupListener implements StartupListener {
         // are deleted.
         HashSet<Class<ResourceDeletedZevent>> events = new HashSet<Class<ResourceDeletedZevent>>();
         events.add(ResourceDeletedZevent.class);
-        zEventManager.
-            addBufferedListener(events,
-                                new ControlEventListener());
+        zEventManager.addBufferedListener(events, controlEventListener);
 
     }
 }

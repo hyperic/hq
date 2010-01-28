@@ -87,7 +87,7 @@ public abstract class ControlJob extends BaseJob {
                 .getPlatformPluginName(id);
 
             ControlScheduleManager cLocal =
-                ControlScheduleManagerImpl.getOne();
+                Bootstrap.getBean(ControlScheduleManager.class);
 
             // Regular command
 
@@ -124,7 +124,7 @@ public abstract class ControlJob extends BaseJob {
                     AppdefEntityID aid = (gid != null) ? gid : id;
 
                     ControlScheduleManager cLocal =
-                        ControlScheduleManagerImpl.getOne();
+                        Bootstrap.getBean(ControlScheduleManager.class);
 
                     // Remove the old history
                     if (commandHistory != null)

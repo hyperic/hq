@@ -133,10 +133,6 @@ public class ControlScheduleManagerImpl
         return SCHEDULE_PREFIX;
     }
 
-    public static ControlScheduleManager getOne() {
-        return Bootstrap.getBean(ControlScheduleManager.class);
-    }
-
     protected void setupJobData(JobDetail jobDetail, AuthzSubject subject, AppdefEntityID id, String action,
                                 String args, String scheduleString, Boolean scheduled, String description, int[] order) {
         super.setupJobData(jobDetail, subject, id, scheduleString, scheduled, order);
@@ -308,7 +304,7 @@ public class ControlScheduleManagerImpl
             throw new ApplicationException(e);
         } finally {
             DBUtil.closeJDBCObjects(log, null, stmt, rs);
-           
+
         }
 
         return list;
