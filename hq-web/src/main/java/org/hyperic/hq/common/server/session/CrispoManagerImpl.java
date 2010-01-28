@@ -142,8 +142,4 @@ public class CrispoManagerImpl implements CrispoManager {
             crispoOptionDao.save(o);
         }
     }
-
-    public static CrispoManager getOne() {
-        return Bootstrap.getBean(CrispoManager.class);
-    }
 }

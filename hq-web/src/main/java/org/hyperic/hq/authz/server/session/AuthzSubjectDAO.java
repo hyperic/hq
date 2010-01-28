@@ -36,7 +36,7 @@ import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.common.server.session.Crispo;
-import org.hyperic.hq.common.server.session.CrispoManagerImpl;
+import org.hyperic.hq.common.server.session.CrispoDAO;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
@@ -47,9 +47,12 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class AuthzSubjectDAO
     extends HibernateDAO<AuthzSubject> {
+    private CrispoDAO crispoDao;
+
     @Autowired
-    public AuthzSubjectDAO(SessionFactory f) {
+    public AuthzSubjectDAO(SessionFactory f, CrispoDAO crispoDAO) {
         super(AuthzSubject.class, f);
+        this.crispoDao = crispoDAO;
     }
 
     AuthzSubject create(AuthzSubject creator, String name, boolean active, String dsn, String dept, String email,
@@ -77,7 +80,9 @@ public class AuthzSubjectDAO
         subject.addRole(role);
 
         // Insert an empty config response
-        Crispo c = CrispoManagerImpl.getOne().create(new ConfigResponse());
+        Crispo c = Crispo.create(new ConfigResponse());
+        crispoDao.save(c);
+
         subject.setPrefs(c);
         save(subject);
         return subject;
@@ -94,7 +99,7 @@ public class AuthzSubjectDAO
     void remove(AuthzSubject entity) {
         Crispo c = entity.getPrefs();
         entity.setPrefs(null);
-        CrispoManagerImpl.getOne().deleteCrispo(c);
+        crispoDao.remove(c);
         super.remove(entity);
     }
 

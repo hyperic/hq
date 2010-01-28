@@ -145,7 +145,7 @@ public class Crispo
         return res;
     }
 
-    static Crispo create(ConfigResponse cfg) {
+    public static Crispo create(ConfigResponse cfg) {
         Crispo res = new Crispo();
 
         for (String key : cfg.getKeys()) {
