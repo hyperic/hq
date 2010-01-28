@@ -2823,7 +2823,7 @@ public class AppdefBossImpl implements AppdefBoss {
     public AppdefInventorySummary getInventorySummary(int sessionId, boolean countTypes)
         throws SessionNotFoundException, SessionTimeoutException {
         AuthzSubject who = sessionManager.getSubject(sessionId);
-        return new AppdefInventorySummary(who, countTypes);
+        return new AppdefInventorySummary(who, countTypes, appdefStatManager);
     }
 
     /**
