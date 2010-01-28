@@ -28,7 +28,6 @@ package org.hyperic.hq.bizapp.server.session;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.bizapp.shared.LatherBoss;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.lather.LatherContext;
 import org.hyperic.lather.LatherRemoteException;
 import org.hyperic.lather.LatherValue;
@@ -71,9 +70,9 @@ public class LatherBossImpl implements LatherBoss {
     }
 
     /**
-     * The main dispatch command which is called via the lather servlet.
-     * It is the responsibility of this routine to take the method/args, and
-     * route it to the correct method.
+     * The main dispatch command which is called via the lather servlet. It is
+     * the responsibility of this routine to take the method/args, and route it
+     * to the correct method.
      * 
      * @param ctx Information about the remote caller
      * @param method Name of the method to invoke
@@ -91,10 +90,6 @@ public class LatherBossImpl implements LatherBoss {
         } else {
             return dispatchWithoutTx(ctx, method, arg);
         }
-    }
-
-    public static LatherBoss getOne() {
-        return Bootstrap.getBean(LatherBoss.class);
     }
 
 }

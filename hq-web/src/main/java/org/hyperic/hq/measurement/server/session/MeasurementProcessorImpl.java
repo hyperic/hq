@@ -42,7 +42,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.agent.client.AgentMonitor;
 import org.hyperic.hq.measurement.agent.client.MeasurementCommandsClient;
@@ -151,7 +150,7 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
         MeasurementCommandsClient client = null;
         try {
             final ConcurrentStatsCollector stats = ConcurrentStatsCollector.getInstance();
-            client = measurementCommandsClientFactory.getClient(agent); 
+            client = measurementCommandsClientFactory.getClient(agent);
 
             final AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
             for (AppdefEntityID eid : eids) {
@@ -255,7 +254,4 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
         }
     }
 
-    public static MeasurementProcessor getOne() {
-        return Bootstrap.getBean(MeasurementProcessor.class);
-    }
 }

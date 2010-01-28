@@ -73,7 +73,6 @@ import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceClusterValue;
 import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.appdef.shared.VirtualManager;
-import org.hyperic.hq.auth.shared.AuthManager;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
@@ -101,7 +100,6 @@ import org.hyperic.hq.bizapp.shared.uibeans.ResourceMetricDisplaySummary;
 import org.hyperic.hq.bizapp.shared.uibeans.ResourceTypeDisplaySummary;
 import org.hyperic.hq.bizapp.shared.uibeans.SingletonDisplaySummary;
 import org.hyperic.hq.common.ApplicationException;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.grouping.CritterList;
 import org.hyperic.hq.grouping.CritterTranslationContext;
 import org.hyperic.hq.grouping.CritterTranslator;
@@ -4156,10 +4154,6 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
     {
         final AuthzSubject subject = sessionManager.getSubject(sessionId);
         return measurementManager.getAvailabilityMeasurement(subject, id);
-    }
-    
-    public static MeasurementBoss getOne() {
-     return Bootstrap.getBean(MeasurementBoss.class);
     }
 
 }

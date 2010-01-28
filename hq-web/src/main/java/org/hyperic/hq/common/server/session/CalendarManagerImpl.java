@@ -27,11 +27,7 @@ package org.hyperic.hq.common.server.session;
 
 import java.util.Collection;
 
-import org.hyperic.hq.common.server.session.Calendar;
-import org.hyperic.hq.common.server.session.CalendarEntry;
-import org.hyperic.hq.common.server.session.WeekEntry;
 import org.hyperic.hq.common.shared.CalendarManager;
-import org.hyperic.hq.context.Bootstrap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -125,9 +121,5 @@ public class CalendarManagerImpl implements CalendarManager {
 
 	public CalendarEntry findEntryById(int id) {
 		return calendarEntryDAO.findById(new Integer(id));
-	}
-
-	public static CalendarManager getOne() {
-		return Bootstrap.getBean(CalendarManager.class);
 	}
 }

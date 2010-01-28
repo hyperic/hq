@@ -30,7 +30,6 @@ import java.util.Date;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.common.util.MessagePublisher;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.HeartBeatEvent;
 import org.hyperic.hq.events.shared.HeartBeatService;
@@ -49,23 +48,19 @@ public class HeartBeatServiceImpl implements HeartBeatService {
     private String topicName = EventConstants.EVENTS_TOPIC;
     private MessagePublisher messagePublisher;
 
-    public static HeartBeatService getOne() {
-        return Bootstrap.getBean(HeartBeatService.class);
-    }
-
     @Autowired
     public HeartBeatServiceImpl(MessagePublisher messagePublisher) {
         this.messagePublisher = messagePublisher;
     }
-    
+
     /**
      * Dispatch a heart beat.
      * 
      * @param beatTime The heart beat time.
      */
     public void dispatchHeartBeat(Date beatTime) {
-        log.debug("Heart Beat Service started dispatching a heart beat: " +
-                  beatTime + ", timestamp=" + beatTime.getTime());
+        log.debug("Heart Beat Service started dispatching a heart beat: " + beatTime + ", timestamp=" +
+                  beatTime.getTime());
 
         HeartBeatEvent event = new HeartBeatEvent(beatTime);
 

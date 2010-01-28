@@ -1,9 +1,11 @@
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.hqu.rendit.BaseController
 
-import org.hyperic.hq.livedata.server.session.LiveDataManagerImpl as ldmi
+
 import org.hyperic.util.config.ConfigResponse
 import org.hyperic.hq.livedata.FormatType
 import org.hyperic.hq.livedata.shared.LiveDataCommand
+import org.hyperic.hq.livedata.shared.LiveDataManager;
 import org.json.JSONObject
 import org.json.JSONArray
 
@@ -13,6 +15,8 @@ class LiveController
 	extends BaseController
 {
     private FORBIDDEN = ['cpu', 'kill', 'process', 'read', 'time']
+
+    private def liveMan = Bootstrap.getBean(LiveDataManager.class)
                          
     def LiveController() {
         setTemplate('standard')
@@ -31,7 +35,7 @@ class LiveController
     }
     
     private getCommands() {
-        def liveMan = ldmi.one
+        
         def r = viewedResource
         def cmds = []
                     
@@ -53,7 +57,7 @@ class LiveController
     def index(params) {
         def cmds       = commands
         def viewedId   = viewedResource.entityId
-        def liveMan    = ldmi.one
+    
         def cmdFmt     = [:]
         def formatters = [:]
 
@@ -91,7 +95,7 @@ class LiveController
         def lres = resources.getLiveData(user, cmd, new ConfigResponse()) 
         JSONArray res = new JSONArray()
 
-        def formatter = ldmi.one.findFormatter(fmtId)
+        def formatter = liveMan.findFormatter(fmtId)
         def fmtCmd    = new LiveDataCommand(viewedResource.entityId, cmd,
                                             new ConfigResponse())
 

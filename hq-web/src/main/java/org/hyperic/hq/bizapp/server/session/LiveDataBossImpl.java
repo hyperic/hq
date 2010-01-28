@@ -34,7 +34,6 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.LiveDataBoss;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.livedata.shared.LiveDataCommand;
 import org.hyperic.hq.livedata.shared.LiveDataException;
 import org.hyperic.hq.livedata.shared.LiveDataManager;
@@ -105,7 +104,4 @@ public class LiveDataBossImpl implements LiveDataBoss {
         return liveDataManager.getConfigSchema(subject, id, command);
     }
 
-    public static LiveDataBoss getOne() {
-        return Bootstrap.getBean(LiveDataBoss.class);
-    }
 }

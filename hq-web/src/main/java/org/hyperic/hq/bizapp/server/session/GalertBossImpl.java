@@ -29,7 +29,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
@@ -40,7 +39,6 @@ import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.bizapp.shared.GalertBoss;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.shared.EscalationManager;
@@ -354,9 +352,5 @@ public class GalertBossImpl implements GalertBoss {
     public String getLastFix(int sessionID, GalertDef def)
         throws SessionNotFoundException, SessionTimeoutException {
         return escalationManager.getLastFix(def);
-    }
-
-    public static GalertBoss getOne() {
-        return Bootstrap.getBean(GalertBoss.class);
     }
 }

@@ -42,7 +42,6 @@ import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.TimingVoodoo;
@@ -261,9 +260,5 @@ public class ReportProcessorImpl implements ReportProcessor {
         } catch (InterruptedException e) {
             throw new SystemException("Interrupted while attempting to " + "insert data");
         }
-    }
-
-    public static ReportProcessor getOne() {
-        return Bootstrap.getBean(ReportProcessor.class);
     }
 }

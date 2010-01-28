@@ -90,8 +90,4 @@ public class GtriggerManagerImpl implements GtriggerManager {
 
         gtriggerTypeInfoDao.remove(info);
     }
-
-    public static GtriggerManager getOne() {
-        return Bootstrap.getBean(GtriggerManager.class);
-    }
 }

@@ -36,7 +36,6 @@ import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.bizapp.shared.ConfigBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.shared.ServerConfigManager;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.util.ConfigPropertyException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -111,9 +110,5 @@ public class ConfigBossImpl implements ConfigBoss {
             throw new PermissionException("Only admins can vacuum the DB");
         }
         return serverConfigManager.vacuum();
-    }
-
-    public static ConfigBoss getOne() {
-        return Bootstrap.getBean(ConfigBoss.class);
     }
 }
