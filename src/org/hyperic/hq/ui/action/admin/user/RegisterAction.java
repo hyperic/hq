@@ -28,7 +28,9 @@ package org.hyperic.hq.ui.action.admin.user;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
+import javax.security.auth.login.FailedLoginException;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -39,9 +41,11 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Operation;
+import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.common.shared.HQConstants;
@@ -70,8 +74,9 @@ public class RegisterAction extends BaseAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
     throws Exception {
-        Log log = LogFactory.getLog(RegisterAction.class.getName());
-
+        final Log log = LogFactory.getLog(RegisterAction.class.getName());
+        final boolean debug = log.isDebugEnabled();
+        
         Integer sessionId =  RequestUtils.getSessionId(request);
         EditForm userForm = (EditForm)form;
         HttpSession session = request.getSession(false);
@@ -85,7 +90,6 @@ public class RegisterAction extends BaseAction {
         ServletContext ctx = getServlet().getServletContext();            
         AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);             
         AuthBoss authBoss = ContextUtils.getAuthBoss(ctx); 
-
         WebUser webUser = RequestUtils.getWebUser(session);
 
         // password was saved off when the user logged in
@@ -95,10 +99,12 @@ public class RegisterAction extends BaseAction {
 
         // use the overlord to register the subject, and don't add
         // a principal
-        log.trace("registering subject [" + webUser.getUsername() + "]");
+        if (debug) log.debug("registering subject [" + webUser.getUsername() + "]");
         
-        AuthzSubject target = 
-            AuthzSubjectManagerEJBImpl.getOne().findSubjectById(userForm.getId()); 
+        Integer authzSubjectId = userForm.getId();
+        AuthzSubjectManagerLocal authzSubjectManager = AuthzSubjectManagerEJBImpl.getOne();
+        AuthzSubject target = authzSubjectManager.findSubjectById(authzSubjectId); 
+        
         authzBoss.updateSubject(sessionId, target, Boolean.TRUE,
                                 HQConstants.ApplicationName,
                                 userForm.getDepartment(),
@@ -113,10 +119,19 @@ public class RegisterAction extends BaseAction {
         // one for this subject.. must be done before pulling the
         // new subject in order to do it with his own credentials
         authBoss.logout(sessionId.intValue());
-        sessionId = new Integer(authBoss.login(webUser.getUsername(),
+        
+        try {
+            sessionId = new Integer(authBoss.login(webUser.getUsername(),
                                                password));
-
-        log.trace("finding subject [" + webUser.getUsername() + "]");
+        } catch(FailedLoginException e) {
+            // This should only fail in the instance we are using a custom auth provider
+            // TODO this needs to be reworked in evolution...
+            if (debug) log.debug("AuthzSubject refreshed failed via legacy method, retrieving directly.");
+            
+            sessionId = SessionManager.getInstance().put(authzSubjectManager.findSubjectById(authzSubjectId));
+        }
+        
+        if (debug) log.debug("finding subject [" + webUser.getUsername() + "]");
 
         // the new user has no prefs, but we still want to pick up
         // the defaults
@@ -124,9 +139,11 @@ public class RegisterAction extends BaseAction {
             (ConfigResponse)ctx.getAttribute(Constants.DEF_USER_PREFS);
 
         // look up the user's permissions
-        log.trace("getting all operations");
-        HashMap userOpsMap = new HashMap();
+        if (debug) log.debug("getting all operations");
+        
+        Map userOpsMap = new HashMap();
         List userOps = authzBoss.getAllOperations(sessionId);
+        
         for (Iterator it=userOps.iterator(); it.hasNext();) {
             Operation op = (Operation)it.next();
             userOpsMap.put(op.getName(), Boolean.TRUE);
@@ -134,10 +151,12 @@ public class RegisterAction extends BaseAction {
 
         // we also need to create up a new web user
         webUser = new WebUser(target, sessionId, preferences, false);
+        
         session.setAttribute(Constants.WEBUSER_SES_ATTR, webUser);
         session.setAttribute(Constants.USER_OPERATIONS_ATTR, userOpsMap);
 
-        HashMap parms = new HashMap(1);
+        Map parms = new HashMap(1);
+        
         parms.put(Constants.USER_PARAM, target.getId());
 
         return returnSuccess(request, mapping, parms, false);

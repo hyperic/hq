@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -26,6 +27,8 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.util.ContextUtils;
@@ -56,22 +59,25 @@ public class BaseSessionInitializationStrategy implements SessionAuthenticationS
             AuthBoss authBoss = ContextUtils.getAuthBoss(ctx);
 
             // look up the subject record
-            AuthzSubject subjPojo = authzBoss.getCurrentSubject(sessionId);
-            AuthzSubjectValue subject = null;
+            AuthzSubject currentSubject = authzBoss.getCurrentSubject(sessionId);
             boolean needsRegistration = false;
             
-            if (subjPojo == null) {
-                subject = new AuthzSubjectValue();
-                
-                subject.setName(username);
+            if (currentSubject == null) {
+                try {
+                    AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
+                    currentSubject = authzSubjectManager.createSubject(overlord, username, true, HQConstants.ApplicationName, "", "", "", "", "", "", false);
+                } catch (CreateException e) {
+                    throw new SessionAuthenticationException("Unable to add user to authorization system");
+                }
                 
                 needsRegistration = true;
+                sessionId = SessionManager.getInstance().put(currentSubject);
             } else {
-                subject = subjPojo.getAuthzSubjectValue();
-                
-                needsRegistration = subjPojo.getEmailAddress() == null || subjPojo.getEmailAddress().length() == 0;
+                needsRegistration = currentSubject.getEmailAddress() == null || currentSubject.getEmailAddress().length() == 0;
             }
 
+            AuthzSubjectValue subject = currentSubject.getAuthzSubjectValue();
+            
             // figure out if the user has a principal
             boolean hasPrincipal = authBoss.isUser(sessionId, subject.getName());
             ConfigResponse preferences = needsRegistration ? new ConfigResponse() : 
