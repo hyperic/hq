@@ -20,7 +20,7 @@ public class SnmpActionConfig implements ActionConfigInterface {
     protected String snmpNotificationMechanism;
     protected String variableBindings;  // in JSON format
     
-    private String implementor =
+    private static String implementor =
         "com.hyperic.hq.bizapp.server.action.alert.SnmpAction";
 
     public SnmpActionConfig() {
@@ -95,6 +95,7 @@ public class SnmpActionConfig implements ActionConfigInterface {
         
         StringConfigOption variableBindings = 
             new StringConfigOption(CFG_VARIABLE_BINDINGS, "User Variable Bindings", "[]");
+        variableBindings.setOptional(true);
         res.addOption(variableBindings);
         
         return res;
