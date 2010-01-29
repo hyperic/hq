@@ -46,7 +46,6 @@ import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
-import org.hyperic.hq.ui.server.session.DashboardManagerImpl;
 import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.hq.ui.util.CheckPermissionsUtil;
 import org.hyperic.hq.ui.util.ConfigurationProxy;
@@ -690,9 +689,7 @@ public class RESTService extends BaseService {
             return ERROR_GENERIC;
 
         try {
-        	CloningBoss cloningBoss = PermissionManagerFactory
-        											.getInstance()
-        											.getCloningBoss();
+        	CloningBoss cloningBoss = Bootstrap.getBean(CloningBoss.class);
 
         	if ((performClone != null) 
         			&& (Boolean.valueOf(performClone).booleanValue()))

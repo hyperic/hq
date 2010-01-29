@@ -91,9 +91,4 @@ public class CloningBossImpl implements CloningBoss {
         EncodingException {
         throw new UnsupportedOperationException();
     }
-
-    public static CloningBoss getOne() {
-        return (CloningBoss) Bootstrap.getBean("CloningBoss");
-    }
-
 }
