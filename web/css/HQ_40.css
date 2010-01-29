@@ -502,9 +502,23 @@ fieldset {
     margin-right:5px;
 }
 
-.loginPanel .guestuser {
+.loginPanel input[type="submit"] {
+	font-size: 1.1em ! important;
+}
+
+.loginPanel .submitButtonContainer {
+	text-align: right; 
+	margin-right: 10px;
+}
+
+.loginPanel .guestUserLinkContainer {
+	margin-top: 5px; 
+	text-align: right;
+}
+
+.loginPanel .guestUser {
 	color:#45A8DF;
-	margin-right:10px;
+	margin-right:0;
 }
 
 .loginButtons {
@@ -2370,9 +2384,9 @@ button span{
 	width:auto;
 	overflow:visible;
     border: 1px solid #84B96D;
-    background-color: #2DBF3D;
-    -moz-border-radius: 3px;
-    -webkit-border-radius: 3px;
+    background: #2DBF3D url(../images/4.0/backgrounds/button-green-background.jpg) repeat-x bottom;
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
     border-radius: 3px;
     padding: 3px 5px;
     cursor:pointer;
@@ -2380,7 +2394,7 @@ button span{
 
 .button42disabled {
 	color: #888;
-	background-color: #ccc;
+	background: #bbb url(../images/4.0/backgrounds/button-grey-background.jpg) repeat-x bottom;
 	border-color: #aaa;	
 	cursor: default
 }
@@ -2568,4 +2582,26 @@ span.returnToLink {
 	background: url(../images/icon_available_error.gif) no-repeat;
 	height: 12px;
 	width: 12px;
+}
+
+.formButtonContainer {
+	margin-top:25px; 
+	text-align:center; 
+	width:100%;
+}
+
+.formButtonContainer input[type=button] {
+	margin-right:8px;
+}
+
+.formButtonContainer .reset,
+.formButtonContainer .cancel {
+	background: #bbb url(../images/4.0/backgrounds/button-grey-background.jpg) repeat-x bottom;
+	border-color:#ddd;
+}
+
+.footerMessageContainer {
+	margin-top:15px; 
+	text-align:center; 
+	width:100%;
 }

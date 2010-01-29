@@ -56,11 +56,13 @@
 						<label for="j_password"><fmt:message key="login.field.password" /></label> 
 						<input style="width: 75%;" id="passwordInput" type="password" id="j_password" name="j_password" />
 					</div>
-					<div class="button">
-						<c:if test="${guestEnabled}">
-							<a href="#" id="guestLoginLink" class="guestuser"><fmt:message key="login.signInAsGuest" /></a>
-						</c:if>
+					<div class="submitButtonContainer">
 						<input type="submit" name="submit" class="button42" value="<fmt:message key="login.signin" />" />
+						<c:if test="${guestEnabled}">
+							<div class="guestUserLinkContainer">
+								<fmt:message key="login.or" />&nbsp;<a href="#" id="guestLoginLink" class="guestUser"><fmt:message key="login.signInAsGuest" /></a>
+							</div>
+						</c:if>
 					</div>
 				</fieldset>
 			</form>
