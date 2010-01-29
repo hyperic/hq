@@ -78,7 +78,6 @@ import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.common.ObjectNotFoundException;
 import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.measurement.server.session.Baseline;
@@ -299,10 +298,8 @@ public class BizappUtils {
     public static AppdefResourceTypeValue[] buildSupportedAIServerTypes
         (ServletContext ctx,
          HttpServletRequest request,
-         String platType) throws Exception {
+         String platType, AppdefBoss appdefBoss, AIBoss aiBoss) throws Exception {
 
-        AppdefBoss appdefBoss = Bootstrap.getBean(AppdefBoss.class);
-        AIBoss aiBoss = Bootstrap.getBean(AIBoss.class);
         int sessionId = RequestUtils.getSessionIdInt(request);
 
         // Build support ai server types
@@ -1183,11 +1180,10 @@ public class BizappUtils {
 
     public static void startAutoScan(ServletContext ctx,
                                      int sessionId,
-                                     AppdefEntityID entityId) {
+                                     AppdefEntityID entityId,
+                                     AIBoss aiBoss) {
         try {
-            AIBoss aiboss = Bootstrap.getBean(AIBoss.class);
-
-            aiboss.startScan(sessionId, entityId.getID(),
+            aiBoss.startScan(sessionId, entityId.getID(),
                              new ScanConfigurationCore(),
                              null, null, null);
         } catch (Exception e) {

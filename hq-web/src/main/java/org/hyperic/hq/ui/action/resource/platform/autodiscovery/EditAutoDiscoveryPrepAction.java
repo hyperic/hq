@@ -45,6 +45,7 @@ import org.hyperic.hq.autoinventory.ScanMethod;
 import org.hyperic.hq.autoinventory.ScanMethodConfig;
 import org.hyperic.hq.autoinventory.ServerSignature;
 import org.hyperic.hq.autoinventory.shared.AIScheduleValue;
+import org.hyperic.hq.bizapp.shared.AIBoss;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.util.BizappUtils;
@@ -57,13 +58,10 @@ public class EditAutoDiscoveryPrepAction
     extends NewAutoDiscoveryPrepAction {
 
     private static ThreadLocal<AIScheduleValue> schedule = new ThreadLocal<AIScheduleValue>();
-    private AppdefBoss appdefBoss;
-    
     
     @Autowired
-    public EditAutoDiscoveryPrepAction(AppdefBoss appdefBoss) {
-        super();
-        this.appdefBoss = appdefBoss;
+    public EditAutoDiscoveryPrepAction(AppdefBoss appdefBoss, AIBoss aiBoss) {
+        super(appdefBoss, aiBoss);
     }
 
     /**

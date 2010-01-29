@@ -43,6 +43,7 @@ import org.hyperic.hq.appdef.shared.AppdefDuplicateFQDNException;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.PlatformValue;
+import org.hyperic.hq.bizapp.shared.AIBoss;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.ui.Constants;
@@ -60,11 +61,13 @@ public class NewPlatformAction
 
     private final Log log = LogFactory.getLog(NewPlatformAction.class.getName());
     private AppdefBoss appdefBoss;
+    private AIBoss aiBoss;
 
     @Autowired
-    public NewPlatformAction(AppdefBoss appdefBoss) {
+    public NewPlatformAction(AppdefBoss appdefBoss, AIBoss aiBoss) {
         super();
         this.appdefBoss = appdefBoss;
+        this.aiBoss = aiBoss;
     }
 
     /**
@@ -108,7 +111,7 @@ public class NewPlatformAction
             AppdefEntityID entityId = newPlatform.getEntityId();
 
             ServletContext ctx = getServlet().getServletContext();
-            BizappUtils.startAutoScan(ctx, sessionId.intValue(), entityId);
+            BizappUtils.startAutoScan(ctx, sessionId.intValue(), entityId, aiBoss);
 
             Integer entityType = new Integer(newPlatform.getEntityId().getType());
             newForm.setType(entityType);

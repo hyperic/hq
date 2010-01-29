@@ -48,6 +48,7 @@ import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
+import org.hyperic.hq.bizapp.shared.AIBoss;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.WorkflowPrepareAction;
@@ -60,11 +61,13 @@ public class ViewResultsPrepAction
     extends WorkflowPrepareAction {
 
     private AppdefBoss appdefBoss;
+    private AIBoss aiBoss;
 
     @Autowired
-    public ViewResultsPrepAction(AppdefBoss appdefBoss) {
+    public ViewResultsPrepAction(AppdefBoss appdefBoss, AIBoss aiBoss) {
         super();
         this.appdefBoss = appdefBoss;
+        this.aiBoss = aiBoss;
     }
 
     public ActionForward workflow(ComponentContext context, ActionMapping mapping, ActionForm form,
@@ -78,7 +81,7 @@ public class ViewResultsPrepAction
         Integer sessionId = RequestUtils.getSessionId(request);
 
         AppdefResourceTypeValue[] supportedSTypeFilter;
-        supportedSTypeFilter = BizappUtils.buildSupportedAIServerTypes(ctx, request, aiVal.getPlatformTypeName());
+        supportedSTypeFilter = BizappUtils.buildSupportedAIServerTypes(ctx, request, aiVal.getPlatformTypeName(), appdefBoss, aiBoss);
 
         AppdefResourceTypeValue[] serverTypeFilter = BizappUtils.buildfilteredAIServerTypes(supportedSTypeFilter, aiVal
             .getAIServerValues());
