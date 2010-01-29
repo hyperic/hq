@@ -583,10 +583,6 @@ public class PermissionManagerImpl
         return MaintenanceEventManagerImpl.getOne();
     }
 
-    public CloningBoss getCloningBoss() {
-    	return CloningBossImpl.getOne();
-    }
-
     public HierarchicalAlertingManager getHierarchicalAlertingManager() {
         return HierarchicalAlertingManagerImpl.getOne();
     }
