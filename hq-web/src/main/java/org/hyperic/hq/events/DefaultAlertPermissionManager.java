@@ -18,6 +18,7 @@ import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
+import org.hyperic.hq.authz.shared.RoleManager;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -38,12 +39,14 @@ public class DefaultAlertPermissionManager implements AlertPermissionManager {
     private  Map operations = new HashMap();
     private OperationDAO operationDAO;
     private ResourceTypeDAO resourceTypeDAO;
+    private RoleManager roleManager;
     
     
     @Autowired
-    public DefaultAlertPermissionManager(OperationDAO operationDAO, ResourceTypeDAO resourceTypeDAO) {
+    public DefaultAlertPermissionManager(OperationDAO operationDAO, ResourceTypeDAO resourceTypeDAO, RoleManager roleManager) {
         this.operationDAO = operationDAO;
         this.resourceTypeDAO = resourceTypeDAO;
+        this.roleManager = roleManager;
     }
 
     private  void checkPermission(Integer subjectId, String rtName, Integer instId, String opName) throws PermissionException
@@ -84,7 +87,7 @@ public class DefaultAlertPermissionManager implements AlertPermissionManager {
     public  void canManageAlerts(AuthzSubject who, AppdefEntityID id)  throws PermissionException {
         if (id instanceof AppdefEntityTypeID) {
             // Make sure the user is a super user
-            if (RoleManagerImpl.getOne().isRootRoleMember(who))
+            if (roleManager.isRootRoleMember(who))
                 return;
             throw new PermissionException("User must be in Super User role " + "to manage resource type alert "
                                           + "definitions");
