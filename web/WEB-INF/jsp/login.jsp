@@ -36,7 +36,16 @@
 				<fieldset>
 					<c:if test="${not empty param.authfailed}">
 						<p>
-							<div class="msgPanel msgError"><fmt:message key="login.info.bad" /></div>
+							<div class="msgPanel msgError">
+								<c:choose>
+									<c:when test="${not empty errorMessage}">
+										<c:out value="${errorMessage}" />
+									</c:when>
+									<c:otherwise>
+										<fmt:message key="login.error.login" />								
+									</c:otherwise>
+								</c:choose>
+							</div>
 						</p>
 					</c:if>
 					<div class="fieldRow">

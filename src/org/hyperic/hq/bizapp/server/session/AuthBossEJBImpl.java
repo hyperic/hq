@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.bizapp.server.session;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Iterator;
@@ -45,7 +44,10 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.common.AccountDisabledException;
 import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.PasswordIsNullException;
+import org.hyperic.hq.common.ServerStillStartingException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.hq.zevents.ZeventListener;
@@ -128,11 +130,17 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @param username The name of the user.
      * @param password The password.
      * @return An integer representing the session ID of the logged-in user.
+     * @throws AccountDisabledException 
+     * @throws ServerStillStartingException 
+     * @throws PasswordIsNullException 
      * @ejb:interface-method
      */
     public int login ( String username, String password ) 
-        throws SecurityException, LoginException, ApplicationException,
-               ConfigPropertyException 
+        throws LoginException, 
+               ApplicationException, 
+               PasswordIsNullException, 
+               ServerStillStartingException, 
+               AccountDisabledException
     {
         try {
             int res = getAuthManager().getSessionId(username, password);
@@ -153,8 +161,7 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @ejb:interface-method
      */
     public int loginGuest () 
-        throws SecurityException, LoginException, ApplicationException,
-               ConfigPropertyException 
+        throws LoginException, AccountDisabledException
     {
         try {
             AuthzSubject guest =
@@ -163,7 +170,7 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
             if (guest != null && guest.getActive()) {
                 return manager.put(guest);
             }
-            throw new LoginException("Guest account not enabled");
+            throw new AccountDisabledException("Guest account not enabled");
         } catch (AccessLocalException e) {
             throw new LoginException(e.getMessage());
         }

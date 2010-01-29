@@ -93,7 +93,10 @@ import org.hyperic.hq.bizapp.shared.lather.UpdateAgent_args;
 import org.hyperic.hq.bizapp.shared.lather.UpdateAgent_result;
 import org.hyperic.hq.bizapp.shared.lather.UserIsValid_args;
 import org.hyperic.hq.bizapp.shared.lather.UserIsValid_result;
+import org.hyperic.hq.common.AccountDisabledException;
 import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.PasswordIsNullException;
+import org.hyperic.hq.common.ServerStillStartingException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.control.shared.ControlManagerLocal;
@@ -258,15 +261,25 @@ public class LatherDispatcher
                           "' tried to " + operation + " an Agent @ " +
                           ctx.getCallerIP(), exc);
             throw new PermissionException();
-        } catch(ConfigPropertyException exc){
-            log.warn("Config property exception when '" + user + 
-                          "' tried to " + operation + " an Agent @ " +
-                          ctx.getCallerIP(), exc);
-            throw new PermissionException();
         } catch(SystemException exc){
             log.warn("System exception when '" + user + 
                           "' tried to " + operation + " an Agent @ " +
                           ctx.getCallerIP(), exc);
+            throw new PermissionException();
+        } catch (PasswordIsNullException exc) {
+            log.warn("Password is null exception when '" + user + 
+                     "' tried to " + operation + " an Agent @ " +
+                     ctx.getCallerIP(), exc);
+            throw new PermissionException();
+        } catch (ServerStillStartingException exc) {
+            log.warn("Server still starting exception when '" + user + 
+                     "' tried to " + operation + " an Agent @ " +
+                     ctx.getCallerIP(), exc);
+            throw new PermissionException();
+        } catch (AccountDisabledException exc) {
+            log.warn("Account disabled exception when '" + user + 
+                     "' tried to " + operation + " an Agent @ " +
+                     ctx.getCallerIP(), exc);
             throw new PermissionException();
         }
     }

@@ -27,7 +27,6 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
-import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
@@ -41,17 +40,18 @@ import org.springframework.stereotype.Component;
 @Component
 public class BaseSessionInitializationStrategy implements SessionAuthenticationStrategy {
     private static Log log = LogFactory.getLog(BaseSessionInitializationStrategy.class.getName());
-
+    
     public void onAuthentication(Authentication authentication, HttpServletRequest request, HttpServletResponse response) throws SessionAuthenticationException
     {
         final boolean debug = log.isDebugEnabled();
 
         if (debug) log.debug("Initializing UI session parameters...");
 
+        String username = authentication.getName();
+        
         // The following is logic taken from the old HQ Authentication Filter
         try {
             AuthzSubjectManagerLocal authzSubjectManager = AuthzSubjectManagerEJBImpl.getOne();
-            String username = authentication.getName();
             int sessionId = SessionManager.getInstance().put(authzSubjectManager.findSubjectByName(username));
             HttpSession session = request.getSession();
             ServletContext ctx = session.getServletContext();
@@ -103,21 +103,21 @@ public class BaseSessionInitializationStrategy implements SessionAuthenticationS
 
             if (debug && needsRegistration) log.debug("Authentic user but no HQ entity, must have authenticated outside of HQ...needs registration");
         } catch (SessionException e) {
-            log.error(e);
-
-            throw new SessionAuthenticationException("Session exception occurred");
+            if (debug) log.debug("Authentication of user {" + username + "} failed due to an session error.");
+            
+            throw new SessionAuthenticationException("login.error.application");
         } catch (RemoteException e) {
-            log.error(e);
-
-            throw new SessionAuthenticationException("Remote exception occurred");
+            if (debug) log.debug("Authentication of user {" + username + "} failed due to an remote error.");
+            
+            throw new SessionAuthenticationException("login.error.application");
         } catch (PermissionException e) {
-            log.error(e);
-
-            throw new SessionAuthenticationException("Permission exception occurred");
+            if (debug) log.debug("Authentication of user {" + username + "} failed due to an permissions error.");
+            
+            throw new SessionAuthenticationException("login.error.application");
         } catch (FinderException e) {
-            log.error(e);
-
-            throw new SessionAuthenticationException("Finder exception occurred");
+            if (debug) log.debug("Authentication of user {" + username + "} failed due to an finder error.");
+            
+            throw new SessionAuthenticationException("login.error.application");
         }
     }
     

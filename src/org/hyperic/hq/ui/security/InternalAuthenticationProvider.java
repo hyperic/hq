@@ -13,9 +13,12 @@ import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.bizapp.server.session.AuthBossEJBImpl;
 import org.hyperic.hq.bizapp.shared.AuthBossLocal;
+import org.hyperic.hq.common.AccountDisabledException;
 import org.hyperic.hq.common.ApplicationException;
-import org.hyperic.util.ConfigPropertyException;
+import org.hyperic.hq.common.PasswordIsNullException;
+import org.hyperic.hq.common.ServerStillStartingException;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -28,9 +31,11 @@ import org.springframework.security.core.authority.GrantedAuthorityImpl;
  * 
  */
 public class InternalAuthenticationProvider implements AuthenticationProvider {
-    private static Log log = LogFactory.getLog(InternalAuthenticationProvider.class.getName());
-    
+    private static final Log log = LogFactory.getLog(InternalAuthenticationProvider.class.getName());
+                                                                     
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+        final boolean debug = log.isDebugEnabled();
+        
         // TODO: Once this is evolution, remove the getOne in favor of DI
         AuthBossLocal authBoss = AuthBossEJBImpl.getOne();
         AuthzSubjectManagerLocal authzManager = AuthzSubjectManagerEJBImpl.getOne();
@@ -52,33 +57,27 @@ public class InternalAuthenticationProvider implements AuthenticationProvider {
                 sid = authBoss.login(username, password);
             }
             
-            if (log.isTraceEnabled()) {
-                log.trace("Logged in as [" + username + "] with session id [" + sid + "]");
-            }
-        } catch (SecurityException e) {
-            if (log.isDebugEnabled()) {
-                log.debug("Authentication of user {" + username + "} failed.", e);
-            }
-            
-            throw new BadCredentialsException("Login failed", e);
+            if (debug) log.debug("Logged in as [" + username + "] with session id [" + sid + "]");
         } catch (LoginException e) {
-            if (log.isDebugEnabled()) {
-                log.debug("Authentication of user {" + username + "} failed.", e);
-            }
+            if (debug) log.debug("Authentication of user {" + username + "} failed due to a login error.");
             
-            throw new BadCredentialsException("Login failed", e);
+            throw new BadCredentialsException("login.error.login", e);
         } catch (ApplicationException e) {
-            if (log.isDebugEnabled()) {
-                log.debug("Authentication of user {" + username + "} failed.", e);
-            }
+            if (debug) log.debug("Authentication of user {" + username + "} failed due to an application error.");
             
-            throw new BadCredentialsException("Login failed", e);
-        } catch (ConfigPropertyException e) {
-            if (log.isDebugEnabled()) {
-                log.debug("Authentication of user {" + username + "} failed.", e);
-            }
+            throw new AuthenticationServiceException("login.error.application", e);
+        } catch (AccountDisabledException e) {
+            if (debug) log.debug("Authentication of user {" + username + "} failed because account is disabled.");
             
-            throw new BadCredentialsException("Login failed", e);
+            throw new BadCredentialsException("login.error.accountDisabled", e);
+        } catch (PasswordIsNullException e) {
+            if (debug) log.debug("Authentication of user {" + username + "} failed because password being null.");
+            
+            throw new BadCredentialsException("login.error.login", e);
+        } catch (ServerStillStartingException e) {
+            if (debug) log.debug("Authentication of user {" + username + "} failed because server is still starting up.");
+            
+            throw new AuthenticationServiceException("login.error.serverStillStarting", e);
         }
         
         // ...finally, we need to create a list grant authorities for Spring Security...

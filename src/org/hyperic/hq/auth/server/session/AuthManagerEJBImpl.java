@@ -42,12 +42,14 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.common.AccountDisabledException;
 import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.PasswordIsNullException;
+import org.hyperic.hq.common.ServerStillStartingException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.dao.PrincipalDAO;
 import org.hyperic.hq.product.server.session.ProductManagerEJBImpl;
-import org.hyperic.util.ConfigPropertyException;
 import org.jboss.security.Util;
 import org.jboss.security.auth.callback.UsernamePasswordHandler;
 
@@ -86,14 +88,18 @@ public class AuthManagerEJBImpl implements SessionBean {
      * @ejb:transaction type="Supports"
      */
     public int getSessionId(String user, String password)
-        throws SecurityException, LoginException, ConfigPropertyException,
-               ApplicationException 
+        throws LoginException,
+               ApplicationException,
+               PasswordIsNullException,
+               ServerStillStartingException,
+               AccountDisabledException
     {
-        if(password == null)
-            throw new LoginException("No password was given");
-
+        if(password == null) {
+            throw new PasswordIsNullException("No password was given");
+        }
+        
         if (!isReady()) {
-            throw new LoginException("Server still starting");
+            throw new ServerStillStartingException("Server still starting");
         }
 
         UsernamePasswordHandler handler =
@@ -112,7 +118,7 @@ public class AuthManagerEJBImpl implements SessionBean {
         try {
             subject = subjMan.findSubjectByAuth(user, appName);
             if (!subject.getActive()) {
-                throw new LoginException("User account has been disabled.");
+                throw new AccountDisabledException("User account has been disabled.");
             }
         } catch (SubjectNotFoundException fe) {
             // User not found in the authz system.  Create it.
@@ -121,8 +127,7 @@ public class AuthManagerEJBImpl implements SessionBean {
                 subject = subjMan.createSubject(overlord, user, true, appName,
                                                 "", "", "", "", "", "", false);
             } catch (CreateException e) {
-                throw new ApplicationException("Unable to add user to " +
-                                               "authorization system", e);
+                throw new ApplicationException("Unable to add user to authorization system", e);
             }
         }
 
