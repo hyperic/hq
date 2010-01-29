@@ -15,6 +15,8 @@ import org.hyperic.hq.autoinventory.shared.AutoinventoryManager;
 import org.hyperic.hq.measurement.shared.TrackerManager;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.config.ConfigResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * Handles a server restarted event by re-enabling Config/Log tracking of the
@@ -27,6 +29,7 @@ import org.hyperic.util.config.ConfigResponse;
  * @author Jennifer Hickey
  * 
  */
+@Component("restartHandler")
 public class ServerRestartHandler {
 
     private final Log log = LogFactory.getLog(ServerRestartHandler.class.getName());
@@ -41,6 +44,7 @@ public class ServerRestartHandler {
 
     private long startDelay = 15l;
 
+    @Autowired
     public ServerRestartHandler(ServerManager serverManager,
                                 ConfigManager configManager,
                                 AutoinventoryManager autoInvManager,

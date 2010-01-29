@@ -28,24 +28,33 @@ package org.hyperic.hq.measurement.server.session;
 import java.util.List;
 
 import org.hyperic.hq.measurement.shared.DataManager;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * A {@link DataInserter} which immediately calls addData in the data manager
  * and will not return until the data has been written to the DB. 
  */
+@Component
 public class SynchronousDataInserter 
     implements DataInserter
 {
-    private final Object _lock = new Object();
+    private final Object lock = new Object();
 
-    private final DataManager _dMan = DataManagerImpl.getOne();
+    private final DataManager dataManager;
     
+    
+    @Autowired
+    public SynchronousDataInserter(DataManager dMan) {
+        dataManager = dMan;
+    }
+
     public void insertMetrics(List metricData) throws InterruptedException {
-        _dMan.addData(metricData);
+        dataManager.addData(metricData);
     }
 
     public Object getLock() {
-        return _lock;
+        return lock;
     }
 
     public void insertMetrics(List metricData, boolean isPriority)

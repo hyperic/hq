@@ -41,7 +41,6 @@ import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.ResourceManager;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.EventLogStatus;
 import org.hyperic.hq.events.ResourceEventInterface;
@@ -283,9 +282,5 @@ public class EventLogManagerImpl implements EventLogManager {
         long interval = Math.max(MeasurementConstants.DAY, (to - from) / 60);
 
         return eventLogDAO.deleteLogs(from, to, interval);
-    }
-
-    public static EventLogManager getOne() {
-        return Bootstrap.getBean(EventLogManager.class);
     }
 }

@@ -28,7 +28,6 @@ import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.TransactionListener;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.server.trigger.conditional.ConditionalTriggerInterface;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.InvalidTriggerDataException;
 import org.hyperic.hq.events.TriggerCreateException;
 import org.hyperic.hq.events.ext.RegisterableTriggerInterface;
@@ -467,9 +466,4 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
     void setZeventEnqueuer(ZeventEnqueuer zeventEnqueuer) {
         this.zeventEnqueuer = zeventEnqueuer;
     }
-
-    public static RegisteredTriggerManager getOne() {
-        return Bootstrap.getBean(RegisteredTriggerManager.class);
-    }
-
 }

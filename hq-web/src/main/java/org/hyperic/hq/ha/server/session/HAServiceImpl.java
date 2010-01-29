@@ -54,7 +54,8 @@ public class HAServiceImpl implements HAService
 
     public void start() {
         startHAService();
-        MeasurementStartupListener.startDataPurgeWorker();
+        //TODO re-enable start/stop of data purge when HA solution is finished
+        //MeasurementStartupListener.startDataPurgeWorker();
         HAUtil.setHAService(this);
     }
     

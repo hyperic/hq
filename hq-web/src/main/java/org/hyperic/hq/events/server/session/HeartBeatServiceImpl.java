@@ -47,6 +47,7 @@ public class HeartBeatServiceImpl implements HeartBeatService {
     private final Log log = LogFactory.getLog(HeartBeatServiceImpl.class);
     private String topicName = EventConstants.EVENTS_TOPIC;
     private MessagePublisher messagePublisher;
+    
 
     @Autowired
     public HeartBeatServiceImpl(MessagePublisher messagePublisher) {
@@ -65,10 +66,7 @@ public class HeartBeatServiceImpl implements HeartBeatService {
         HeartBeatEvent event = new HeartBeatEvent(beatTime);
 
         try {
-            // Try to see if RegisteredTriggerManager is available
-            // TODO: Figure out a way to avoid getOne() here
-            RegisteredTriggerManagerImpl.getOne();
-
+         
             // Send the heart beat event
             messagePublisher.publishMessage(topicName, event);
         } catch (Exception e) {

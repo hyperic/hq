@@ -112,9 +112,9 @@ public class RegisteredTriggersTest
         replay();
         registeredTriggers.addTrigger(trigger1);
         assertTrue(registeredTriggers.getInterestedTriggers(MockEvent.class, 123).isEmpty());
-        RegisteredTriggers.setInstance(registeredTriggers);
-        assertFalse(RegisteredTriggers.isTriggerInterested(new MockEvent(7l, 123)));
-        RegisteredTriggers.getInterestedTriggers(new MockEvent(3l, 123)).isEmpty();
+        
+        assertFalse(registeredTriggers.isTriggerInterested(new MockEvent(7l, 123)));
+        registeredTriggers.getInterestedTriggers(new MockEvent(3l, 123)).isEmpty();
         verify();
         EasyMock.verify(trigger1);
     }
@@ -172,15 +172,15 @@ public class RegisteredTriggersTest
         assertNotNull(instance2.get(987));
         assertNotNull(instance2.get(trigger2Id));
 
-        RegisteredTriggers.setInstance(registeredTriggers);
-        Collection<RegisterableTriggerInterface> interestedTriggers = RegisteredTriggers.getInterestedTriggers(new MockEvent(7l, 123));
+      
+        Collection<RegisterableTriggerInterface> interestedTriggers = registeredTriggers.getInterestedTriggers(new MockEvent(7l, 123));
         assertEquals(2, interestedTriggers.size());
 
-        Collection<RegisterableTriggerInterface> interestedTriggers2 = RegisteredTriggers.getInterestedTriggers(new MockEvent(7l, 999));
+        Collection<RegisterableTriggerInterface> interestedTriggers2 = registeredTriggers.getInterestedTriggers(new MockEvent(7l, 999));
         assertTrue(interestedTriggers2.isEmpty());
 
-        assertTrue(RegisteredTriggers.isTriggerInterested(new MockEvent(7l, 123)));
-        assertFalse(RegisteredTriggers.isTriggerInterested(new MockEvent(7l, 999)));
+        assertTrue(registeredTriggers.isTriggerInterested(new MockEvent(7l, 123)));
+        assertFalse(registeredTriggers.isTriggerInterested(new MockEvent(7l, 999)));
 
         EasyMock.verify(trigger1, trigger2);
         verify();
@@ -228,15 +228,15 @@ public class RegisteredTriggersTest
         assertNotNull(instance2.get(987));
         assertNotNull(instance2.get(trigger2Id));
 
-        RegisteredTriggers.setInstance(registeredTriggers);
-        Collection<RegisterableTriggerInterface> interestedTriggers = RegisteredTriggers.getInterestedTriggers(new MockEvent(7l, 123));
+       
+        Collection<RegisterableTriggerInterface> interestedTriggers = registeredTriggers.getInterestedTriggers(new MockEvent(7l, 123));
         assertEquals(1, interestedTriggers.size());
 
-        Collection<RegisterableTriggerInterface> interestedTriggers2 = RegisteredTriggers.getInterestedTriggers(new MockEvent(7l, 999));
+        Collection<RegisterableTriggerInterface> interestedTriggers2 = registeredTriggers.getInterestedTriggers(new MockEvent(7l, 999));
         assertTrue(interestedTriggers2.isEmpty());
 
-        assertTrue(RegisteredTriggers.isTriggerInterested(new MockEvent(7l, 123)));
-        assertFalse(RegisteredTriggers.isTriggerInterested(new MockEvent(7l, 999)));
+        assertTrue(registeredTriggers.isTriggerInterested(new MockEvent(7l, 123)));
+        assertFalse(registeredTriggers.isTriggerInterested(new MockEvent(7l, 999)));
 
         EasyMock.verify(trigger1, trigger2);
         verify();

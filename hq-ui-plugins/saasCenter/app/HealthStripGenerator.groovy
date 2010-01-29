@@ -9,11 +9,9 @@ import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.MeasurementConstants
 import org.hyperic.hq.measurement.server.session.AvailabilityDataRLE
-import org.hyperic.hq.measurement.server.session.DataManagerImpl as DataMan
 import org.hyperic.hq.measurement.server.session.Measurement
 import org.hyperic.hq.measurement.shared.HighLowMetricValue
 import org.hyperic.hq.appdef.shared.AppdefEntityID
-import org.hyperic.hq.events.server.session.EventLogManagerImpl as EventMan
 import org.hyperic.hq.events.server.session.EventLog
 import org.hyperic.hq.events.EventLogStatus
 import org.hyperic.hq.hqu.rendit.BaseController

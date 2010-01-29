@@ -27,6 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.ConditionalTriggerSchema;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.EventConstants;
@@ -78,7 +79,7 @@ public class ValueChangeTrigger
 
     public ValueChangeTrigger() {
         this.measurementManager = MeasurementManagerImpl.getOne();
-        this.dataManager = DataManagerImpl.getOne();
+        this.dataManager = Bootstrap.getBean(DataManager.class);
     }
 
     public ValueChangeTrigger(MeasurementManager measurementManager, DataManager dataManager) {

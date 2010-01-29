@@ -34,44 +34,52 @@ import javax.naming.NamingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.server.session.ServerConfigManagerImpl;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManager;
-import org.hyperic.hq.events.server.session.EventLogManagerImpl;
 import org.hyperic.hq.events.shared.EventLogManager;
-import org.hyperic.hq.measurement.server.session.DataCompressImpl;
-import org.hyperic.hq.measurement.server.session.MeasurementManagerImpl;
 import org.hyperic.hq.measurement.shared.DataCompress;
+import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.util.TimeUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component("dataPurgeJob")
 public class DataPurgeJob implements Runnable {
 
-    private static final Log _log = LogFactory.getLog(DataPurgeJob.class);
+    private final Log _log = LogFactory.getLog(DataPurgeJob.class);
 
-    static long HOUR = MeasurementConstants.HOUR;
-    static long MINUTE = MeasurementConstants.MINUTE;
-    private static long _lastAnalyze = 0l;
-    private static long ANALYZE_INTERVAL = 6*HOUR;
+    static final long HOUR = MeasurementConstants.HOUR;
+    static final long MINUTE = MeasurementConstants.MINUTE;
+    private ServerConfigManager serverConfigManager;
+    private MeasurementManager measurementManager;
+    private EventLogManager eventLogManager;
+    private DataCompress dataCompress;
 
-    // We create a private static class, in case the DataPurgeJob is 
-    // dynamically proxied (which would result in multiple instances of
-    // static variables
-    private static class DataPurgeLockHolder {
-        private static final Object ANALYZE_RUNNING_LOCK = new Object();
-        private static boolean analyzeRunning = false;
-        private static final Object COMPRESS_RUNNING_LOCK = new Object();
-        private static boolean compressRunning = false;
+    private long _lastAnalyze = 0l;
+    private static final long ANALYZE_INTERVAL = 6 * HOUR;
+    private final Object analyzeRunningLock = new Object();
+    private boolean analyzeRunning = false;
+    private final Object compressRunningLock = new Object();
+    private boolean compressRunning = false;
+
+    @Autowired
+    public DataPurgeJob(ServerConfigManager serverConfigManager, MeasurementManager measurementManager,
+                        EventLogManager eventLogManager, DataCompress dataCompress) {
+        this.serverConfigManager = serverConfigManager;
+        this.measurementManager = measurementManager;
+        this.eventLogManager = eventLogManager;
+        this.dataCompress = dataCompress;
     }
-    
+
     public synchronized void run() {
         try {
             compressData();
-            Properties conf = null; 
-            try { 
-                conf = ServerConfigManagerImpl.getOne().getConfig(); 
-            } catch (Exception e) { 
-                throw new SystemException(e); 
+            Properties conf = null;
+            try {
+                conf = serverConfigManager.getConfig();
+            } catch (Exception e) {
+                throw new SystemException(e);
             }
             final long now = System.currentTimeMillis();
             // need to do this because of the Sun JVM bug
@@ -84,111 +92,96 @@ public class DataPurgeJob implements Runnable {
             _log.error(e.getMessage(), e);
         }
     }
-    
+
     /**
      * Entry point into compression routine
      */
-    public static void compressData()
-        throws  NamingException
-    {
-        final ServerConfigManager serverConfig =
-            ServerConfigManagerImpl.getOne();
-
-        final DataCompress dataCompress = DataCompressImpl.getOne();
+    public void compressData() throws NamingException {
 
         // First check if we are already running
-        synchronized (DataPurgeLockHolder.COMPRESS_RUNNING_LOCK) {
-            if (DataPurgeLockHolder.compressRunning) {
+        synchronized (compressRunningLock) {
+            if (compressRunning) {
                 _log.info("Not starting data compression. (Already running)");
                 return;
             } else {
-                DataPurgeLockHolder.compressRunning = true;
+                compressRunning = true;
             }
         }
 
         final long time_start = now();
-        
+
         try {
             // Announce
-            _log.info("Data compression starting at " +
-                      TimeUtil.toString(time_start));
+            _log.info("Data compression starting at " + TimeUtil.toString(time_start));
 
-            ConcurrentStatsCollector stats =
-                ConcurrentStatsCollector.getInstance();
-            runDBAnalyze(serverConfig);
-            stats.addStat((now() - time_start),
-                ConcurrentStatsCollector.DB_ANALYZE_TIME);
+            ConcurrentStatsCollector stats = ConcurrentStatsCollector.getInstance();
+            runDBAnalyze();
+            stats.addStat((now() - time_start), ConcurrentStatsCollector.DB_ANALYZE_TIME);
 
             final long start = now();
             dataCompress.compressData();
-            stats.addStat((now() - start),
-                ConcurrentStatsCollector.METRIC_DATA_COMPRESS_TIME);
-            
+            stats.addStat((now() - start), ConcurrentStatsCollector.METRIC_DATA_COMPRESS_TIME);
+
         } catch (SQLException e) {
             _log.error("Unable to compress data: " + e, e);
         } finally {
-            synchronized (DataPurgeLockHolder.COMPRESS_RUNNING_LOCK) {
-                DataPurgeLockHolder.compressRunning = false;
+            synchronized (compressRunningLock) {
+                compressRunning = false;
             }
         }
 
         long time_end = System.currentTimeMillis();
-        _log.info("Data compression completed in " +
-                  ((time_end - time_start)/1000) +
-                  " seconds.");
-        runDBMaintenance(serverConfig);
+        _log.info("Data compression completed in " + ((time_end - time_start) / 1000) + " seconds.");
+        runDBMaintenance();
     }
-    
-    private static final long now() {
+
+    private final long now() {
         return System.currentTimeMillis();
     }
 
-    private static void runDBAnalyze(ServerConfigManager serverConfig)
-    {
+    private void runDBAnalyze() {
         // First check if we are already running
         long analyzeStart = System.currentTimeMillis();
-        synchronized (DataPurgeLockHolder.ANALYZE_RUNNING_LOCK) {
-            if (DataPurgeLockHolder.analyzeRunning) {
+        synchronized (analyzeRunningLock) {
+            if (analyzeRunning) {
                 _log.info("Not starting db analyze. (Already running)");
                 return;
             } else if ((_lastAnalyze + ANALYZE_INTERVAL) > analyzeStart) {
-                serverConfig.analyzeHqMetricTables(false);
-                _log.info("Only running analyze on current metric data table " +
-                    "since last full run was at " +
-                    TimeUtil.toString(_lastAnalyze));
+                serverConfigManager.analyzeHqMetricTables(false);
+                _log.info("Only running analyze on current metric data table " + "since last full run was at " +
+                          TimeUtil.toString(_lastAnalyze));
                 return;
             } else {
-                DataPurgeLockHolder.analyzeRunning = true;
+                analyzeRunning = true;
             }
         }
         try {
             _log.info("Performing database analyze");
             // Analyze the current and previous hq_metric_data table
-            serverConfig.analyzeHqMetricTables(true);
+            serverConfigManager.analyzeHqMetricTables(true);
             // Analyze all non-metric tables
-            serverConfig.analyzeNonMetricTables();
-            long secs = (System.currentTimeMillis()-analyzeStart)/1000;
+            serverConfigManager.analyzeNonMetricTables();
+            long secs = (System.currentTimeMillis() - analyzeStart) / 1000;
             _log.info("Completed database analyze " + secs + " secs");
         } finally {
-            synchronized (DataPurgeLockHolder.ANALYZE_RUNNING_LOCK) {
-                DataPurgeLockHolder.analyzeRunning = false;
+            synchronized (analyzeRunningLock) {
+                analyzeRunning = false;
                 _lastAnalyze = analyzeStart;
             }
         }
     }
 
-    private static void runDBMaintenance(ServerConfigManager serverConfig)
-    {
+    private void runDBMaintenance() {
         // Once compression finishes, we check to see if databae maintaince
-        // should be performed.  This is defaulted to 1 hour, so it should
+        // should be performed. This is defaulted to 1 hour, so it should
         // always run unless changed by the user.
 
         long time_start = System.currentTimeMillis();
         Properties conf;
-        
+
         try {
-            conf = ServerConfigManagerImpl.getOne().getConfig();
-        } catch(Exception e) {
+            conf = serverConfigManager.getConfig();
+        } catch (Exception e) {
             throw new SystemException(e);
         }
 
@@ -201,48 +194,41 @@ public class DataPurgeJob implements Runnable {
 
         long maintInterval = Long.parseLong(dataMaintenance);
         if (maintInterval <= 0) {
-            _log.error("Maintenance interval was specified as [" + 
-                       dataMaintenance + "] -- which is invalid");
+            _log.error("Maintenance interval was specified as [" + dataMaintenance + "] -- which is invalid");
             return;
         }
 
         long vacuumStart = System.currentTimeMillis();
-        if (TimingVoodoo.roundDownTime(time_start, HOUR) ==
-            TimingVoodoo.roundDownTime(time_start, maintInterval)) {
+        if (TimingVoodoo.roundDownTime(time_start, HOUR) == TimingVoodoo.roundDownTime(time_start, maintInterval)) {
             _log.info("Performing database maintenance (VACUUM ANALYZE)");
-            serverConfig.vacuum();
+            serverConfigManager.vacuum();
 
-            _log.info("Database maintenance completed in " +
-                      ((System.currentTimeMillis() - vacuumStart)/1000) +
+            _log.info("Database maintenance completed in " + ((System.currentTimeMillis() - vacuumStart) / 1000) +
                       " seconds.");
         } else {
             _log.info("Not performing database maintenance");
         }
     }
 
-    protected void purge(Properties conf, long now)
-        throws  NamingException {
+    protected void purge(Properties conf, long now) throws NamingException {
         ConcurrentStatsCollector stats = ConcurrentStatsCollector.getInstance();
         long start = now();
-        DataPurgeJob.purgeEventLogs(conf, now);
-        stats.addStat((now() - start),
-            ConcurrentStatsCollector.PURGE_EVENT_LOGS_TIME);
+        purgeEventLogs(conf, now);
+        stats.addStat((now() - start), ConcurrentStatsCollector.PURGE_EVENT_LOGS_TIME);
         start = now();
-        DataPurgeJob.purgeMeasurements();
-        stats.addStat((now() - start),
-            ConcurrentStatsCollector.PURGE_MEASUREMENTS_TIME);
+        purgeMeasurements();
+        stats.addStat((now() - start), ConcurrentStatsCollector.PURGE_MEASUREMENTS_TIME);
     }
 
     /**
      * Remove measurements no longer associated with a resource.
      */
-    private static void purgeMeasurements() {
+    private void purgeMeasurements() {
         long start = System.currentTimeMillis();
         try {
-            int dcount =
-                MeasurementManagerImpl.getOne().removeOrphanedMeasurements();
-            _log.info("Removed " + dcount + " measurements in " +
-                      ((System.currentTimeMillis() - start)/1000) + " seconds.");
+            int dcount = measurementManager.removeOrphanedMeasurements();
+            _log.info("Removed " + dcount + " measurements in " + ((System.currentTimeMillis() - start) / 1000) +
+                      " seconds.");
         } catch (Throwable t) {
             // Do not allow errors to cause other maintenance functions to
             // not run.
@@ -253,21 +239,15 @@ public class DataPurgeJob implements Runnable {
     /**
      * Purge Event Log data
      */
-    private static void purgeEventLogs(Properties conf, long now)
-        throws NamingException
-    {
+    private void purgeEventLogs(Properties conf, long now) throws NamingException {
         String purgeEventString = conf.getProperty(HQConstants.EventLogPurge);
         long purgeEventLog = Long.parseLong(purgeEventString);
 
         // Purge event logs
-        EventLogManager eventLogManager =
-            EventLogManagerImpl.getOne();
 
-        _log.info("Purging event logs older than " +
-            TimeUtil.toString(now - purgeEventLog));
+        _log.info("Purging event logs older than " + TimeUtil.toString(now - purgeEventLog));
         try {
-            int rowsDeleted = 
-                eventLogManager.deleteLogs(-1, now - purgeEventLog);
+            int rowsDeleted = eventLogManager.deleteLogs(-1, now - purgeEventLog);
             _log.info("Done (Deleted " + rowsDeleted + " event logs)");
         } catch (Exception e) {
             _log.error("Unable to delete event logs: " + e.getMessage(), e);

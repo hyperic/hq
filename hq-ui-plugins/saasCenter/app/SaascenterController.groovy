@@ -2,14 +2,14 @@ import java.text.DateFormat
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 
+import org.hyperic.hq.measurement.shared.DataManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.authz.server.session.ResourceManagerImpl as rme
-
-import org.hyperic.hq.measurement.server.session.DataManagerImpl as DataMan
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.server.session.Measurement
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate
 import org.hyperic.hq.measurement.UnitsConvert
@@ -124,7 +124,7 @@ class SaascenterController extends BaseController
             
             if (!chart.metric.units.equals("none")) {
                 long window = ((end-begin)/60).longValue()
-                def dMan = DataMan.one
+                def dMan = Bootstrap.getBean(DataManager.class)
                 List data = dMan.getHistoricalData(chart.measurements, begin, end, 
                                                    window, 0, true,
                                                    new PageControl(0, PageControl.SIZE_UNLIMITED, false))

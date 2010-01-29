@@ -1,11 +1,12 @@
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.AlertFiredEvent
 import org.hyperic.hq.measurement.shared.ResourceLogEvent
 import org.hyperic.hq.measurement.shared.ConfigChangedEvent
 import org.hyperic.hq.hqu.rendit.BaseController
 import org.hyperic.hq.hqu.rendit.html.DojoUtil
-import org.hyperic.hq.events.server.session.EventLogManagerImpl
 import org.hyperic.hq.events.server.session.EventLogSortField
 import org.hyperic.hq.events.server.session.EventLog
+import org.hyperic.hq.events.shared.EventLogManager;
 import org.hyperic.hibernate.PageInfo
 import org.hyperic.hq.events.EventLogStatus
 import java.text.DateFormat
@@ -15,13 +16,14 @@ class EventController
 {
     private final DateFormat df = 
         DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
+	private EventLogManager eventLogManager = Bootstrap.getBean(EventLogManager.class)
         
     private LOG_SCHEMA =  [
         getData: {pageInfo, params ->
             def typeCode = params.getOne('type', '0').toInteger()
             def timeCode = params.getOne('timeRange', '0').toInteger()
             def delta    = findTimeDeltaByCode(timeCode)
-            EventLogManagerImpl.one.findLogs(user, now() - delta, now(), 
+            eventLogManager.findLogs(user, now() - delta, now(), 
                                                 pageInfo, getStatus(params),
                                                 findTypeByCode(typeCode),
                                                 getInGroups(params))

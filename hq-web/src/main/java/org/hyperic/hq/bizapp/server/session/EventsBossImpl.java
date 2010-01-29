@@ -58,7 +58,6 @@ import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.application.HQApp;
-import org.hyperic.hq.auth.shared.AuthManager;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
@@ -81,7 +80,6 @@ import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationAlertType;
@@ -1487,7 +1485,7 @@ public class EventsBossImpl implements EventsBoss {
                 try {
                     log.info("Inheriting type-based alert defs for " + ent);
                     AuthzSubject hqadmin = authzSubjectManager.getSubjectById(AuthzConstants.rootSubjectId);
-                    getOne().inheritResourceTypeAlertDefinition(hqadmin, ent);
+                    inheritResourceTypeAlertDefinition(hqadmin, ent);
                 } catch (Exception e) {
                     throw new SystemException(e);
                 }
@@ -1525,9 +1523,5 @@ public class EventsBossImpl implements EventsBoss {
                 return "AlertDefCleanupListener";
             }
         });
-    }
-
-    public static EventsBoss getOne() {
-        return Bootstrap.getBean(EventsBoss.class);
     }
 }

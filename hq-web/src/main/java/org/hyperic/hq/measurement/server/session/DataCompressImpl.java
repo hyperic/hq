@@ -41,7 +41,6 @@ import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManager;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.shared.AlertManager;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
@@ -447,9 +446,5 @@ public class DataCompressImpl implements DataCompress {
         }
 
         log.info("Done (" + ((watch.getElapsed()) / 1000) + " seconds)");
-    }
-
-    public static DataCompress getOne() {
-        return Bootstrap.getBean(DataCompress.class);
     }
 }

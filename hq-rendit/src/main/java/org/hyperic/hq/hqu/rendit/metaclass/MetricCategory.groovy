@@ -2,10 +2,11 @@ package org.hyperic.hq.hqu.rendit.metaclass
 
 import org.hyperic.hq.product.MetricValue
 import org.hyperic.hq.measurement.UnitsConvert
-import org.hyperic.hq.measurement.server.session.DataManagerImpl
 import org.hyperic.hq.measurement.server.session.TemplateManagerImpl
-import org.hyperic.hq.measurement.server.session.MeasurementManagerImpl
+import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.server.session.Measurement
+import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.measurement.shared.DataManager;
 import org.hyperic.util.pager.PageControl
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate
 import org.hyperic.util.units.UnitNumber
@@ -13,9 +14,9 @@ import org.hyperic.util.units.UnitsFormat
 import org.hyperic.hq.authz.server.session.AuthzSubject
 
 class MetricCategory {
-    private static dataMan = DataManagerImpl.one
+    private static dataMan = Bootstrap.getBean(DataManager.class)
     private static tmplMan = TemplateManagerImpl.one
-    private static measMan = MeasurementManagerImpl.one
+    private static measMan = Bootstrap.getBean(MeasurementManager.class)
 
     static String urlFor(Measurement d, Map context) {
         def template = d.template

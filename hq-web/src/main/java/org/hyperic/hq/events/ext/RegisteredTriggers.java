@@ -28,10 +28,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.annotation.PostConstruct;
+
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.server.session.AlertRegulator;
-import org.hyperic.hq.events.server.session.RegisteredTriggerManagerImpl;
 import org.hyperic.hq.events.shared.RegisteredTriggerManager;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 
 
@@ -40,13 +43,10 @@ import org.hyperic.hq.events.shared.RegisteredTriggerManager;
  * @author jhickey
  *
  */
+@Repository
 public class RegisteredTriggers implements RegisterableTriggerRepository {
 
     public static final Integer KEY_ALL = new Integer(0);
-
-    private static final Object INIT_LOCK = new Object();
-
-    private static RegisteredTriggers INSTANCE;
 
     private Object triggerUpdateLock = new Object();
 
@@ -54,8 +54,8 @@ public class RegisteredTriggers implements RegisterableTriggerRepository {
 
     private RegisteredTriggerManager registeredTriggerManager;
 
-    /** Creates a new instance of RegisteredTriggers */
-    RegisteredTriggers(RegisteredTriggerManager registeredTriggerManager) {
+    @Autowired
+    public RegisteredTriggers(RegisteredTriggerManager registeredTriggerManager) {
         this.registeredTriggerManager = registeredTriggerManager;
 
     }
@@ -64,7 +64,8 @@ public class RegisteredTriggers implements RegisterableTriggerRepository {
         return this.triggers;
     }
 
-    void init() {
+    @PostConstruct
+    public void init() {
         registeredTriggerManager.initializeTriggers(this);
     }
 
@@ -160,37 +161,20 @@ public class RegisteredTriggers implements RegisterableTriggerRepository {
         }
     }
 
-    private static RegisteredTriggers getInstance() {
-        synchronized (INIT_LOCK) {
-            if (INSTANCE == null) {
-                INSTANCE = new RegisteredTriggers(RegisteredTriggerManagerImpl.getOne());
-                INSTANCE.init();
-            }
-        }
-        return INSTANCE;
-    }
-    
-    public static void reset() {
-        synchronized (INIT_LOCK) {
-            INSTANCE = null;
-        }
-    }
-
-    public static Collection<RegisterableTriggerInterface> getInterestedTriggers(AbstractEvent event) {
+    public Collection<RegisterableTriggerInterface> getInterestedTriggers(AbstractEvent event) {
         HashSet<RegisterableTriggerInterface> trigs = new HashSet<RegisterableTriggerInterface>();
 
         // Can't very well look up a null object
         if (event.getInstanceId() != null) {
             // Get the triggers that are interested in this instance
-            trigs.addAll(RegisteredTriggers.getInstance()
-                                           .getInterestedTriggers(event.getClass(), event.getInstanceId()));
+            trigs.addAll(getInterestedTriggers(event.getClass(), event.getInstanceId()));
         }
         // Get the triggers that are interested in all instances
-        trigs.addAll(RegisteredTriggers.getInstance().getInterestedTriggers(event.getClass(), KEY_ALL));
+        trigs.addAll(getInterestedTriggers(event.getClass(), KEY_ALL));
         return trigs;
     }
 
-    public static boolean isTriggerInterested(AbstractEvent event) {
+    public boolean isTriggerInterested(AbstractEvent event) {
         // If the event happened more than a day ago, does anyone care?
         final long ONE_DAY = 86400000;
         long current = System.currentTimeMillis();
@@ -200,23 +184,16 @@ public class RegisteredTriggers implements RegisterableTriggerRepository {
         // Can't very well look up a null object
         if (event.getInstanceId() != null) {
             // Get the triggers that are interested in this instance
-            Collection<RegisterableTriggerInterface> trigs = RegisteredTriggers.getInstance().getInterestedTriggers(event.getClass(),
+            Collection<RegisterableTriggerInterface> trigs = getInterestedTriggers(event.getClass(),
                                                                                       event.getInstanceId());
             if (trigs.size() > 0)
                 return true;
         }
 
         // Check the triggers that are interested in all instances
-        Collection<RegisterableTriggerInterface> trigs = RegisteredTriggers.getInstance().getInterestedTriggers(event.getClass(), KEY_ALL);
+        Collection<RegisterableTriggerInterface> trigs = getInterestedTriggers(event.getClass(), KEY_ALL);
         return (trigs.size() > 0);
     }
 
-    /**
-     * Set the static instance. This is expected to be used for testing only and
-     * is therefore not synchronized
-     * @param instance The static instance to use
-     */
-    static void setInstance(RegisteredTriggers instance) {
-        INSTANCE = instance;
-    }
+   
 }

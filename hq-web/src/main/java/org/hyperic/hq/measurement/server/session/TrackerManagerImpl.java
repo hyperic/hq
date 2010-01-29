@@ -35,7 +35,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.agent.client.MeasurementCommandsClient;
 import org.hyperic.hq.measurement.agent.client.MeasurementCommandsClientFactory;
 import org.hyperic.hq.measurement.shared.TrackerManager;
@@ -160,9 +159,5 @@ public class TrackerManagerImpl implements TrackerManager {
         } else {
             trackPluginRemove(subject, id, ProductPlugin.TYPE_CONFIG_TRACK);
         }
-    }
-
-    public static TrackerManager getOne() {
-        return Bootstrap.getBean(TrackerManager.class);
     }
 }

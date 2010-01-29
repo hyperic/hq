@@ -52,7 +52,6 @@ import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.MessagePublisher;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.ext.RegisteredTriggers;
 import org.hyperic.hq.measurement.MeasurementConstants;
@@ -130,17 +129,18 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
 
     private MeasurementDAO measurementDAO;
     private MessagePublisher messagePublisher;
+    private RegisteredTriggers registeredTriggers;
 
     @Autowired
     public AvailabilityManagerImpl(ResourceManager resourceManager, MessagePublisher messenger,
                                    AvailabilityDataDAO availabilityDataDAO, MeasurementDAO measurementDAO,
-                                   MessagePublisher messagePublisher) {
+                                   MessagePublisher messagePublisher, RegisteredTriggers registeredTriggers) {
         this.resourceManager = resourceManager;
         this.messenger = messenger;
         this.availabilityDataDAO = availabilityDataDAO;
         this.measurementDAO = measurementDAO;
-
         this.messagePublisher = messagePublisher;
+        this.registeredTriggers = registeredTriggers;
     }
 
     // To break AvailabilityManager - MeasurementManager circular dependency
@@ -1201,7 +1201,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
 
             MeasurementEvent event = new MeasurementEvent(metricId, val);
 
-            if (RegisteredTriggers.isTriggerInterested(event) || allEventsInteresting) {
+            if (registeredTriggers.isTriggerInterested(event) || allEventsInteresting) {
                 measurementManager.buildMeasurementEvent(event);
                 if (event.getValue().getValue() == AVAIL_DOWN) {
                     Resource r = resourceManager.findResource(event.getResource());
@@ -1257,7 +1257,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             MetricValue val = dp.getMetricValue();
             MeasurementEvent event = new MeasurementEvent(metricId, val);
 
-            if (RegisteredTriggers.isTriggerInterested(event) || allEventsInteresting) {
+            if (registeredTriggers.isTriggerInterested(event) || allEventsInteresting) {
                 measurementManager.buildMeasurementEvent(event);
                 events.put(resourceIdKey, event);
             }

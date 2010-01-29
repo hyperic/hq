@@ -32,6 +32,7 @@ import org.hyperic.hq.events.TriggerInterface;
 import org.hyperic.hq.events.ext.RegisterableTriggerInterface;
 import org.hyperic.hq.events.ext.RegisteredTriggers;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * The RegisteredDispatcher Message-Drive Bean registers Triggers and dispatches
@@ -47,6 +48,14 @@ import org.hyperic.hq.stats.ConcurrentStatsCollector;
  */
 public class RegisteredDispatcherImpl implements MessageListener {
     private final Log log = LogFactory.getLog(RegisteredDispatcherImpl.class);
+    
+    private RegisteredTriggers registeredTriggers;
+    
+    
+    @Autowired
+    public RegisteredDispatcherImpl(RegisteredTriggers registeredTriggers) {
+        this.registeredTriggers = registeredTriggers;
+    }
 
     /**
      * Dispatch the event to interested triggers.
@@ -80,7 +89,7 @@ public class RegisteredDispatcherImpl implements MessageListener {
     }
 
     protected Collection<RegisterableTriggerInterface> getInterestedTriggers(AbstractEvent evt) {
-        return RegisteredTriggers.getInterestedTriggers(evt);
+        return registeredTriggers.getInterestedTriggers(evt);
     }
 
     /**

@@ -43,6 +43,7 @@ import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.StartupListener;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceDeleteCallback;
+import org.hyperic.hq.common.ProductProperties;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.measurement.MeasurementConstants;
@@ -73,18 +74,20 @@ public class MeasurementStartupListener implements StartupListener {
     private ServerConfigManager serverConfigManager;
     private SRNManager srnManager;
     private SynchronousAvailDataInserter synchronousAvailDataInserter;
+    private SynchronousDataInserter synchronousDataInserter;
 
     @Autowired
     public MeasurementStartupListener(ZeventEnqueuer zEventManager, MetricAuxLogManager metricAuxLogManager,
                                       MeasurementManager measurementManager, ServerConfigManager serverConfigManager,
                                       SRNManager srnManager, HQApp app,
-                                      SynchronousAvailDataInserter synchronousAvailDataInserter) {
+                                      SynchronousAvailDataInserter synchronousAvailDataInserter, SynchronousDataInserter synchronousDataInserter) {
         this.zEventManager = zEventManager;
         this.metricAuxLogManager = metricAuxLogManager;
         this.measurementManager = measurementManager;
         this.serverConfigManager = serverConfigManager;
         this.srnManager = srnManager;
         this.synchronousAvailDataInserter = synchronousAvailDataInserter;
+        this.synchronousDataInserter = synchronousDataInserter;
         MeasurementStartupListener.app = app;
     }
 
@@ -109,7 +112,7 @@ public class MeasurementStartupListener implements StartupListener {
             _defEnableCallback = (DefaultMetricEnableCallback) app
                 .registerCallbackCaller(DefaultMetricEnableCallback.class);
             _delCallback = (MetricDeleteCallback) app.registerCallbackCaller(MetricDeleteCallback.class);
-            _dataInserter = new SynchronousDataInserter();
+            _dataInserter = synchronousDataInserter;
             _availDataInserter = synchronousAvailDataInserter;
         }
 
@@ -161,22 +164,11 @@ public class MeasurementStartupListener implements StartupListener {
         cal.set(Calendar.MILLISECOND, 0);
         final long initialDelay = cal.getTimeInMillis() - now();
         _log.info("Starting Data Purge Worker");
-        Runnable dataPurgeJob;
-        try {
-            final String klazz = "com.hyperic.hq.measurement.DataPurgeJob";
-            dataPurgeJob = (Runnable) Class.forName(klazz).newInstance();
-            _log.info("Started DataPurgeWorker as " + klazz);
-        } catch (Exception e) {
-            try {
-                final String klazz = "org.hyperic.hq.measurement.DataPurgeJob";
-                dataPurgeJob = (Runnable) Class.forName(klazz).newInstance();
-                _log.info("Started DataPurgeWorker as " + klazz);
-            } catch (Exception e1) {
-                _log.fatal("Could not start DataPurgeWorker", e1);
-                return;
-            }
-        }
-
+        Runnable dataPurgeJob = (Runnable)ProductProperties.getPropertyInstance("hyperic.hq.dataPurge");
+        if(dataPurgeJob == null) {
+            _log.fatal("Could not start DataPurgeWorker");
+            return;
+        } 
         _dataPurgeFuture = app.getScheduler()
             .scheduleAtFixedRate(dataPurgeJob, initialDelay, MeasurementConstants.HOUR);
     }

@@ -1,4 +1,3 @@
-import org.hyperic.hq.measurement.server.session.MeasurementManagerImpl as MM
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.hqu.server.session.Attachment

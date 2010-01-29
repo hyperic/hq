@@ -44,7 +44,8 @@ public class HA implements HAMBean {
     public void startSingleton() {
 
         // Reset in-memory triggers
-        RegisteredTriggers.reset();
+        //TODO add this capability back when we tackle HA?
+        //RegisteredTriggers.reset();
     }
 
     /**

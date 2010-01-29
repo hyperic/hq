@@ -55,7 +55,6 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.common.util.MessagePublisher;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.ext.RegisteredTriggers;
 import org.hyperic.hq.measurement.MeasurementConstants;
@@ -143,21 +142,22 @@ public class DataManagerImpl implements DataManager {
 
     private ZeventEnqueuer zeventManager;
     private MessagePublisher messagePublisher;
+    private RegisteredTriggers registeredTriggers;
 
     @Autowired
     public DataManagerImpl(DBUtil dbUtil, MeasurementDAO measurementDAO, MeasurementManager measurementManager,
                            ServerConfigManager serverConfigManager, AvailabilityManager availabilityManager,
                            MetricDataCache metricDataCache, ZeventEnqueuer zeventManager,
-                           MessagePublisher messagePublisher) {
+                           MessagePublisher messagePublisher, RegisteredTriggers registeredTriggers) {
         this.dbUtil = dbUtil;
         this.measurementDAO = measurementDAO;
         this.measurementManager = measurementManager;
         this.serverConfigManager = serverConfigManager;
         this.availabilityManager = availabilityManager;
         this.metricDataCache = metricDataCache;
-        this.zeventManager = zeventManager;
-        
+        this.zeventManager = zeventManager;        
         this.messagePublisher = messagePublisher;
+        this.registeredTriggers = registeredTriggers;
     }
 
     private double getValue(ResultSet rs) throws SQLException {
@@ -516,7 +516,7 @@ public class DataManagerImpl implements DataManager {
             MetricValue val = dp.getMetricValue();
             MeasurementEvent event = new MeasurementEvent(metricId, val);
 
-            if (RegisteredTriggers.isTriggerInterested(event) || allEventsInteresting) {
+            if (registeredTriggers.isTriggerInterested(event) || allEventsInteresting) {
                 measurementManager.buildMeasurementEvent(event);
                 events.add(event);
             }
@@ -1917,10 +1917,6 @@ public class DataManagerImpl implements DataManager {
         } finally {
             DBUtil.closeJDBCObjects(LOG_CTX, conn, stmt, null);
         }
-    }
-
-    public static DataManager getOne() {
-        return Bootstrap.getBean(DataManager.class);
     }
 
     // TODO remove after HE-54 allows injection

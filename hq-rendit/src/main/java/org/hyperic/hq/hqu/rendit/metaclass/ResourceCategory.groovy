@@ -26,13 +26,14 @@ import org.hyperic.hq.appdef.server.session.ServiceManagerImpl as ServiceMan
 import org.hyperic.hq.bizapp.server.session.AppdefBossImpl as AppdefBoss
 import org.hyperic.hq.common.VetoException
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerImpl as DefMan
+import org.hyperic.hq.events.shared.EventLogManager;
 import org.hyperic.hq.events.server.session.AlertManagerImpl as AlertMan
-import org.hyperic.hq.events.server.session.EventLogManagerImpl as EventMan
 import org.hyperic.hq.control.server.session.ControlManagerImpl as CMan
 import org.hyperic.hq.product.PluginNotFoundException
-import org.hyperic.hq.measurement.server.session.MeasurementManagerImpl as DMan
+
 
 import org.hyperic.hq.livedata.shared.LiveDataCommand
+import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.livedata.shared.LiveDataManager;
 import org.hyperic.hq.livedata.shared.LiveDataResult
 import org.hyperic.util.config.ConfigResponse
@@ -58,12 +59,12 @@ class ResourceCategory {
     private static platMan  = PlatMan.one
     private static svcMan   = ServiceMan.one
     private static svrMan   = ServerMan.one 
-    private static dman     = DMan.one
+    private static dman     = Bootstrap.getBean(MeasurementManager.class)
     private static authzMan = AuthzMan.one
     private static groupMan = GroupMan.one
     private static defMan   = DefMan.one
     private static alertMan = AlertMan.one
-    private static eventMan = EventMan.one
+    private static eventMan = Bootstrap.getBean(EventLogManager.class)
     private static cMan     = CMan.one
     private static csMan	= Bootstrap.getBean(ControlScheduleManager.class);
 

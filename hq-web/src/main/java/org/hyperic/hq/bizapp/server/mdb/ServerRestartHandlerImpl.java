@@ -17,22 +17,21 @@ import org.hyperic.hq.control.ControlEvent;
 import org.hyperic.hq.control.server.session.ServerRestartHandler;
 import org.hyperic.hq.control.shared.ControlConstants;
 import org.hyperic.hq.measurement.server.session.TrackerManagerImpl;
+import org.hyperic.hq.measurement.shared.TrackerManager;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * Uses transaction manager ("Required") and is bound to topic/eventsTopic 
+ * Uses transaction manager ("Required") and is bound to topic/eventsTopic
  */
 public class ServerRestartHandlerImpl implements MessageListener {
 
     private ServerRestartHandler serverRestartHandler;
 
-    private Log log = LogFactory.getLog(ServerRestartHandlerImpl.class);
+    private final Log log = LogFactory.getLog(ServerRestartHandlerImpl.class);
 
-    @PostConstruct
-    public void init() {
-        serverRestartHandler = new ServerRestartHandler(ServerManagerImpl.getOne(),
-                                                        ConfigManagerImpl.getOne(),
-                                                        AutoinventoryManagerImpl.getOne(),
-                                                        TrackerManagerImpl.getOne());
+    @Autowired
+    public ServerRestartHandlerImpl(ServerRestartHandler serverRestartHandler) {
+        this.serverRestartHandler = serverRestartHandler;
     }
 
     public void onMessage(Message message) {
@@ -42,8 +41,7 @@ public class ServerRestartHandlerImpl implements MessageListener {
                 if (messageObject instanceof ControlEvent) {
                     ControlEvent event = (ControlEvent) messageObject;
                     if ((event.getAction().equals("restart") || event.getAction().equals("start")) &&
-                        event.getStatus().equals(ControlConstants.STATUS_COMPLETED) && event.getResource().isServer())
-                    {
+                        event.getStatus().equals(ControlConstants.STATUS_COMPLETED) && event.getResource().isServer()) {
                         try {
                             serverRestartHandler.serverRestarted(event.getResource());
                         } catch (Exception e) {
@@ -56,6 +54,5 @@ public class ServerRestartHandlerImpl implements MessageListener {
             }
         }
     }
-
 
 }

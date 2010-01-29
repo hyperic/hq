@@ -1,4 +1,3 @@
-import org.hyperic.hq.measurement.server.session.MeasurementManagerImpl as MM
 import org.hyperic.hq.bizapp.server.session.ProductBossImpl as PB
 import org.hyperic.hq.common.server.session.ServerConfigManagerImpl as SCM
 import org.hyperic.hq.context.Bootstrap;
@@ -37,6 +36,7 @@ class HealthController
     private final PrintfFormat agentFmt =
         new PrintfFormat("%-25s %-15s %-5s %-9s %-17s %-13s %-16s %-10s %s")
     private cpropMan = Bootstrap.getBean(CPropManager.class)
+	private measurementMan = Bootstrap.getBean(MeasurementManager.class)
 
     HealthController() {
         onlyAllowSuperUsers()
@@ -130,8 +130,8 @@ class HealthController
     private getAgentData(pageInfo) {
         def res = []
         def agents     = agentHelper.find(withPaging: pageInfo)
-        def offsetData = MM.one.findAgentOffsetTuples()
-        def metricData = MM.one.findNumMetricsPerAgent()
+        def offsetData = measurementMan.findAgentOffsetTuples()
+        def metricData = measurementMan.findNumMetricsPerAgent()
         for (a in agents) {
             def found = false
             def numMetrics = 0
@@ -262,7 +262,7 @@ class HealthController
     }
     
     private getMetricsPerMinute() {
-		def vals  = MM.one.findMetricCountSummaries()
+		def vals  = measurementMan.findMetricCountSummaries()
         def total = 0.0
         
         for (v in vals) {

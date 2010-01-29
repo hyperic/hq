@@ -118,7 +118,8 @@ public class MeasurementManagerImpl implements MeasurementManager {
     private MeasurementDAO measurementDAO;
     private MeasurementTemplateDAO measurementTemplateDAO;
     private AgentManager agentManager;
-    private AgentMonitor agentMonitor; 
+    private AgentMonitor agentMonitor;
+    
    
 
     @Autowired
@@ -126,7 +127,8 @@ public class MeasurementManagerImpl implements MeasurementManager {
                                   ApplicationDAO applicationDAO, PermissionManager permissionManager,
                                   AuthzSubjectManager authzSubjectManager, ConfigManager configManager,
                                   MetricDataCache metricDataCache, MeasurementDAO measurementDAO,
-                                  MeasurementTemplateDAO measurementTemplateDAO, AgentManager agentManager, AgentMonitor agentMonitor) {
+                                  MeasurementTemplateDAO measurementTemplateDAO, AgentManager agentManager, AgentMonitor agentMonitor
+                                  ) {
         this.resourceManager = resourceManager;
         this.resourceGroupManager = resourceGroupManager;
         this.applicationDAO = applicationDAO;
@@ -1304,7 +1306,7 @@ public class MeasurementManagerImpl implements MeasurementManager {
      * 
      */
     public void handleCreateRefreshEvents(List<ResourceZevent> events) {
-        TrackerManager tm = TrackerManagerImpl.getOne();
+       
         List<AppdefEntityID> eids = new ArrayList<AppdefEntityID>();
 
         for (ResourceZevent z : events) {
@@ -1344,7 +1346,8 @@ public class MeasurementManagerImpl implements MeasurementManager {
                     // tracking is enabled. If so, enable it. We don't auto
                     // enable log or config tracking for update events since
                     // in the callback we don't know if that flag has changed.
-                    tm.enableTrackers(subject, id, c);
+                    //TODO break circular dep preventing DI of TrackerManager
+                    Bootstrap.getBean(TrackerManager.class).enableTrackers(subject, id, c);
                 }
 
             } catch (ConfigFetchException e) {
