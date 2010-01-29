@@ -259,7 +259,7 @@ public class SNMPTrapReceiver implements CommandResponder {
 
             if (plugin != null) {
                 if (log.isDebugEnabled()) {
-                    log.debug("No plugin for " + address + ", routing to default platform: " + plugin.getName());
+                    log.debug("No plugin for '" + address + "', '" + community + "', routing to default platform: " + plugin.getName());
                 }
             }
         }
