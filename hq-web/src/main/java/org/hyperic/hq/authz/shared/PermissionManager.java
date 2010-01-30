@@ -855,10 +855,6 @@ public abstract class PermissionManager {
      */
     public abstract MaintenanceEventManager getMaintenanceEventManager();
 
-    /**
-     * Return the CloningBoss implementation
-     */
-    public abstract CloningBoss getCloningBoss();
 
     /**
      * Return the HierarchicalAlertingManager implementation

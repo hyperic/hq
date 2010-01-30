@@ -40,6 +40,8 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.autoinventory.ScanMethod;
 import org.hyperic.hq.autoinventory.scanimpl.FileScan;
+import org.hyperic.hq.bizapp.shared.AIBoss;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.WorkflowPrepareAction;
 import org.hyperic.hq.ui.util.BizappUtils;
@@ -47,9 +49,19 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.sigar.OperatingSystem;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class NewAutoDiscoveryPrepAction
     extends WorkflowPrepareAction {
+    
+    protected AppdefBoss appdefBoss;
+    private AIBoss aiBoss;
+    
+    @Autowired
+    public NewAutoDiscoveryPrepAction(AppdefBoss appdefBoss, AIBoss aiBoss) {
+        this.appdefBoss = appdefBoss;
+        this.aiBoss = aiBoss;
+    }
 
     /**
      * Create the platform with the attributes specified in the given
@@ -69,7 +81,7 @@ public class NewAutoDiscoveryPrepAction
 
             PlatformValue pValue = (PlatformValue) RequestUtils.getResource(request);
             String platType = pValue.getPlatformType().getName();
-            newForm.setServerTypes(BizappUtils.buildSupportedAIServerTypes(ctx, request, platType));
+            newForm.setServerTypes(BizappUtils.buildSupportedAIServerTypes(ctx, request, platType, appdefBoss, aiBoss));
 
             loadScanConfig(newForm, request, platType);
             request.setAttribute("platformSpecificScanMsg", getPSScanMessage(false, platType));
