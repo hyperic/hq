@@ -21,6 +21,7 @@ import org.hyperic.hq.common.Humidor
 import org.hyperic.util.jdbc.DBUtil
 import org.hyperic.hibernate.PageInfo
 import org.hyperic.hibernate.Util
+import org.hyperic.hq.measurement.shared.MeasurementManager
 
 import java.text.DateFormat;
 import java.sql.Types
@@ -429,11 +430,10 @@ class HealthController
     
     private withConnection(Closure c) {
         def ctx  = new InitialContext()
-        def ds   = ctx.lookup("java:/HypericDS")
         def conn
         
         try {
-            conn = ds.connection
+            conn = Bootstrap.getBean("DBUtil").connection;
             return c.call(conn)
         } finally {
             if (conn != null) conn.close()
