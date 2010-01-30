@@ -11,8 +11,6 @@ import org.hyperic.hq.bizapp.server.session.UpdateStatusMode;
  */
 public interface UpdateBoss {
 
-    public void startup();
-
     /**
      * Meant to be called internally by the fetching thread
      */
