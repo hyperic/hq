@@ -28,7 +28,6 @@ package org.hyperic.hq.autoinventory.server.session;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -45,28 +44,22 @@ import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceZevent;
 import org.hyperic.hq.appdef.server.session.Server;
-import org.hyperic.hq.appdef.server.session.Service;
-import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.AIAppdefResourceValue;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AIQueueManager;
 import org.hyperic.hq.appdef.shared.AIServerValue;
-import org.hyperic.hq.appdef.shared.AIServiceValue;
-import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
-import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
-import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -88,13 +81,11 @@ import org.hyperic.hq.autoinventory.ScanStateCore;
 import org.hyperic.hq.autoinventory.ServerSignature;
 import org.hyperic.hq.autoinventory.agent.client.AICommandsClient;
 import org.hyperic.hq.autoinventory.agent.client.AICommandsClientFactory;
-import org.hyperic.hq.autoinventory.server.session.RuntimeReportProcessor.ServiceMergeInfo;
 import org.hyperic.hq.autoinventory.shared.AIScheduleManager;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManager;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.dao.AIHistoryDAO;
 import org.hyperic.hq.dao.AIPlatformDAO;
 import org.hyperic.hq.product.AutoinventoryPluginManager;
@@ -116,7 +107,7 @@ import org.springframework.transaction.annotation.Transactional;
  * and their relationships
  */
 @org.springframework.stereotype.Service
-abstract public class AutoinventoryManagerImpl implements AutoinventoryManager {
+public class AutoinventoryManagerImpl implements AutoinventoryManager {
     private Log log = LogFactory.getLog(AutoinventoryManagerImpl.class.getName());
 
     private AutoinventoryPluginManager aiPluginManager;
@@ -130,24 +121,24 @@ abstract public class AutoinventoryManagerImpl implements AutoinventoryManager {
     private ServerManager serverManager;
     private ResourceManager resourceManager;
     private ConfigManager configManager;
-    private AgentManager agentManager;
-    private CPropManager cPropManager;
-    private ServiceManager serviceManager;
+
     private AuthzSubjectManager authzSubjectManager;
     private AIQueueManager aiQueueManager;
     private PermissionManager permissionManager;
     private HQApp hqApp;
     private AICommandsClientFactory aiCommandsClientFactory;
+    private ServiceMerger serviceMerger;
+    private RuntimePlatformAndServerMerger runtimePlatformAndServerMerger;
 
     @Autowired
     public AutoinventoryManagerImpl(AgentReportStatusDAO agentReportStatusDao, AIHistoryDAO aiHistoryDao,
                                     AIPlatformDAO aiPlatformDao, ProductManager productManager,
                                     ServerManager serverManager, AIScheduleManager aiScheduleManager,
                                     ResourceManager resourceManager, ConfigManager configManager,
-                                    AgentManager agentManager, CPropManager cPropManager,
-                                    ServiceManager serviceManager, AuthzSubjectManager authzSubjectManager,
-                                    AIQueueManager aiQueueManager, PermissionManager permissionManager, HQApp hqApp,
-                                    AICommandsClientFactory aiCommandsClientFactory) {
+                                    AuthzSubjectManager authzSubjectManager, AIQueueManager aiQueueManager,
+                                    PermissionManager permissionManager, HQApp hqApp,
+                                    AICommandsClientFactory aiCommandsClientFactory, ServiceMerger serviceMerger,
+                                    RuntimePlatformAndServerMerger runtimePlatformAndServerMerger) {
         this.agentReportStatusDao = agentReportStatusDao;
         this.aiHistoryDao = aiHistoryDao;
         this.aiPlatformDao = aiPlatformDao;
@@ -155,15 +146,14 @@ abstract public class AutoinventoryManagerImpl implements AutoinventoryManager {
         this.serverManager = serverManager;
         this.aiScheduleManager = aiScheduleManager;
         this.resourceManager = resourceManager;
-        this.configManager = configManager; 
-        this.agentManager = agentManager;
-        this.cPropManager = cPropManager;
-        this.serviceManager = serviceManager;
+        this.configManager = configManager;
         this.authzSubjectManager = authzSubjectManager;
         this.aiQueueManager = aiQueueManager;
         this.permissionManager = permissionManager;
         this.hqApp = hqApp;
         this.aiCommandsClientFactory = aiCommandsClientFactory;
+        this.serviceMerger = serviceMerger;
+        this.runtimePlatformAndServerMerger = runtimePlatformAndServerMerger;
     }
 
     /**
@@ -696,140 +686,7 @@ abstract public class AutoinventoryManagerImpl implements AutoinventoryManager {
     @Transactional
     public void reportAIRuntimeReport(String agentToken, CompositeRuntimeResourceReport crrr)
         throws AutoinventoryException, PermissionException, ValidationException, ApplicationException {
-        RuntimePlatformAndServerMerger.schedulePlatformAndServerMerges(agentToken, crrr);
-    }
-
-    /**
-     * Should only be called from RuntimePlatformAndServerMerger
-     */
-    @Transactional
-    public void _reportAIRuntimeReport(String agentToken, CompositeRuntimeResourceReport crrr)
-        throws AutoinventoryException, PermissionException, ValidationException, ApplicationException {
-        List<ServiceMergeInfo> serviceMerges = mergePlatformsAndServers(agentToken, crrr);
-
-        Agent a = agentManager.getAgent(agentToken);
-
-        AgentReportStatus status = agentReportStatusDao.getOrCreate(a);
-
-        if (serviceMerges.isEmpty()) {
-            log.debug("Agent [" + agentToken + "] reported no services.  " + "Marking clean");
-            status.markClean();
-        } else {
-            log.debug("Agent [" + agentToken + "] reported " + serviceMerges.size() + " services.  Marking dirty");
-            status.markDirty();
-        }
-
-        ServiceMerger.scheduleServiceMerges(agentToken, serviceMerges);
-    }
-
-    /**
-     * Merge platforms and servers from the runtime report.
-     * 
-     * @return a List of {@link ServiceMergeInfo} -- information from the report
-     *         about services still needing to be processed
-     */
-    @Transactional
-    public List<ServiceMergeInfo> mergePlatformsAndServers(String agentToken, CompositeRuntimeResourceReport crrr)
-        throws ApplicationException, AutoinventoryException {
-        AuthzSubject subject = getHQAdmin();
-
-        RuntimeReportProcessor rrp = createRuntimeReportProcessor();
-        // try {
-        rrp.processRuntimeReport(subject, agentToken, crrr);
-        mergeServiceTypes(rrp.getServiceTypeMerges());
-        return rrp.getServiceMerges();
-        // } catch (CreateException e) {
-        // throw new SystemException(e);
-        // }
-    }
-
-    private void mergeServiceTypes(final Set<org.hyperic.hq.product.ServiceType> serviceTypeMerges) {
-        if (!serviceTypeMerges.isEmpty()) {
-            Map<String, Set<org.hyperic.hq.product.ServiceType>> productTypes = new HashMap<String, Set<org.hyperic.hq.product.ServiceType>>();
-            for (org.hyperic.hq.product.ServiceType serviceType : serviceTypeMerges) {
-                Set<org.hyperic.hq.product.ServiceType> serviceTypes = productTypes.get(serviceType.getProductName());
-                if (serviceTypes == null) {
-                    serviceTypes = new HashSet<org.hyperic.hq.product.ServiceType>();
-                }
-                serviceTypes.add(serviceType);
-                log.info("Adding serviceType " + serviceType + " to product type: " + serviceType.getProductName());
-                productTypes.put(serviceType.getProductName(), serviceTypes);
-            }
-            log.info("The size of productTypes: " + productTypes.size());
-            for (Map.Entry<String, Set<org.hyperic.hq.product.ServiceType>> serviceTypeEntry : productTypes.entrySet()) {
-                try {
-                    log.info("Updating dynamic service type plugin");
-                    productManager.updateDynamicServiceTypePlugin((String) serviceTypeEntry.getKey(), serviceTypeEntry
-                        .getValue());
-                } catch (Exception e) {
-                    log.error("Error merging dynamic service types for product.  Cause: " + e.getMessage());
-                }
-            }
-        }
-    }
-
-    /**
-     * Merge a list of {@link ServiceMergeInfo}s in HQ's appdef model
-     */
-    @Transactional
-    public void mergeServices(List<ServiceMergeInfo> mergeInfos) throws PermissionException, ApplicationException {
-        for (ServiceMergeInfo sInfo : mergeInfos) {
-            AIServiceValue aiservice = sInfo.aiservice;
-            Server server = serverManager.getServerById(sInfo.serverId);
-
-            log.info("Checking for existing service: " + aiservice.getName());
-
-            // this is a propagation of a bug that nobody really runs into.
-            // Occurs when a set of services under a server have the same name
-            // and therefore the AIID is also the same. In a perfect world the
-            // AIIDs will be unique, but there is nothing else that comes from
-            // the agent that can uniquely identify a service under a server.
-            // The get(0), instead of operating on the whole list, enables
-            // us to make the least amount of code changes in a messy code path
-            // thus reducing the amount of potential problems.
-            final List<Service> tmp = serviceManager.getServicesByAIID(server, aiservice.getName());
-            Service service = (tmp.size() > 0) ? (Service) tmp.get(0) : null;
-            boolean update = false;
-
-            if (service == null) {
-                // CREATE SERVICE
-                log.info("Creating new service: " + aiservice.getName());
-
-                String typeName = aiservice.getServiceTypeName();
-                ServiceType serviceType = serviceManager.findServiceTypeByName(typeName);
-                service = serviceManager.createService(sInfo.subject, server, serviceType, aiservice.getName(),
-                    aiservice.getDescription(), "", null);
-
-                log.debug("New service created: " + service);
-            } else {
-                update = true;
-                // UPDATE SERVICE
-                log.info("Updating service: " + service.getName());
-                final String aiSvcName = aiservice.getName();
-                final String svcName = service.getName();
-                final String aiid = service.getAutoinventoryIdentifier();
-                // if aiid.equals(svcName) this means that the name has
-                // not been manually changed. Therefore it is ok to change
-                // the current resource name
-                if (aiSvcName != null && !aiSvcName.equals(svcName) && aiid.equals(svcName)) {
-                    service.setName(aiservice.getName().trim());
-                    service.getResource().setName(service.getName());
-                }
-                if (aiservice.getDescription() != null)
-                    service.setDescription(aiservice.getDescription().trim());
-            }
-
-            // CONFIGURE SERVICE
-            configManager.configureResponse(sInfo.subject, service.getConfigResponse(), service.getEntityId(),
-                aiservice.getProductConfig(), aiservice.getMeasurementConfig(), aiservice.getControlConfig(), aiservice
-                    .getResponseTimeConfig(), null, update, false);
-
-            // SET CUSTOM PROPERTIES FOR SERVICE
-            if (aiservice.getCustomProperties() != null) {
-                int typeId = service.getServiceType().getId().intValue();
-                cPropManager.setConfigResponse(service.getEntityId(), typeId, aiservice.getCustomProperties());
-            }
-        }
+        runtimePlatformAndServerMerger.schedulePlatformAndServerMerges(agentToken, crrr);
     }
 
     /**
@@ -844,7 +701,7 @@ abstract public class AutoinventoryManagerImpl implements AutoinventoryManager {
         log.debug("Found " + dirties.size() + " agents with " + "serviceDirty = true");
 
         for (AgentReportStatus s : dirties) {
-            if (!ServiceMerger.currentlyWorkingOn(s.getAgent())) {
+            if (!serviceMerger.currentlyWorkingOn(s.getAgent())) {
                 log.debug("Agent [" + s.getAgent().getAgentToken() + "] is serviceDirty");
                 res.add(s.getAgent());
             } else {
@@ -885,38 +742,10 @@ abstract public class AutoinventoryManagerImpl implements AutoinventoryManager {
     /**
      */
     @Transactional
-    public void markServiceClean(String agentToken) {
-        Agent a;
-
-        try {
-            a = agentManager.getAgent(agentToken);
-        } catch (AgentNotFoundException e) {
-            log.error("Agent [" + agentToken + "] not found");
-            return;
-        }
-
-        markServiceClean(a, true);
-    }
-
-    /**
-     */
-    @Transactional
-    public void markServiceClean(Agent agent, boolean serviceClean) {
-
-        AgentReportStatus status = agentReportStatusDao.getOrCreate(agent);
-        if (serviceClean)
-            status.markClean();
-        else
-            status.markDirty();
-    }
-
-    /**
-     */
-    @Transactional
     public void startup() {
         AgentCreateCallback listener = new AgentCreateCallback() {
             public void agentCreated(Agent agent) {
-                markServiceClean(agent, false);
+                serviceMerger.markServiceClean(agent, false);
             }
         };
         hqApp.registerCallbackListener(AgentCreateCallback.class, listener);
@@ -961,13 +790,6 @@ abstract public class AutoinventoryManagerImpl implements AutoinventoryManager {
                 }
             }
         }
-    }
-    
-    
-    abstract protected RuntimeReportProcessor createRuntimeReportProcessor();
-
-    public static AutoinventoryManager getOne() {
-        return Bootstrap.getBean(AutoinventoryManager.class);
     }
 
     /**

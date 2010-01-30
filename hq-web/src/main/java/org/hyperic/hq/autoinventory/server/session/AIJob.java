@@ -184,13 +184,9 @@ public abstract class AIJob extends BaseJob {
         alocal.updateAIHistory(jobId, endTime, status, message);
     }
 
-    private AutoinventoryManager aimanager = null;
+    private AutoinventoryManager aimanager = Bootstrap.getBean(AutoinventoryManager.class);
 
-    protected AutoinventoryManager getAutoInventoryManager()
-        throws NamingException {
-        if (aimanager == null) {
-            aimanager = AutoinventoryManagerImpl.getOne();
-        }
+    protected AutoinventoryManager getAutoInventoryManager() {
         return aimanager;
     }
 

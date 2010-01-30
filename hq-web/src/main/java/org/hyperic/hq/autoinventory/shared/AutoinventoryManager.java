@@ -172,24 +172,6 @@ public interface AutoinventoryManager {
     public void reportAIRuntimeReport(String agentToken, CompositeRuntimeResourceReport crrr)
         throws AutoinventoryException, PermissionException, ValidationException, ApplicationException;
 
-    /**
-     * Should only be called from RuntimePlatformAndServerMerger
-     */
-    public void _reportAIRuntimeReport(String agentToken, CompositeRuntimeResourceReport crrr)
-        throws AutoinventoryException, PermissionException, ValidationException, ApplicationException;
-
-    /**
-     * Merge platforms and servers from the runtime report.
-     * @return a List of {@link ServiceMergeInfo} -- information from the report
-     *         about services still needing to be processed
-     */
-    public List<ServiceMergeInfo> mergePlatformsAndServers(String agentToken, CompositeRuntimeResourceReport crrr)
-        throws ApplicationException, AutoinventoryException;
-
-    /**
-     * Merge a list of {@link ServiceMergeInfo}s in HQ's appdef model
-     */
-    public void mergeServices(List<ServiceMergeInfo> mergeInfos) throws PermissionException, ApplicationException;
 
     /**
      * Returns a list of {@link Agent}s which still need to send in a runtime
@@ -198,10 +180,6 @@ public interface AutoinventoryManager {
     public List<Agent> findAgentsRequiringRuntimeScan();
 
     public void notifyAgentsNeedingRuntimeScan();
-
-    public void markServiceClean(String agentToken);
-
-    public void markServiceClean(Agent agent, boolean serviceClean);
 
     public void startup();
 

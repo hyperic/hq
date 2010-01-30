@@ -65,10 +65,6 @@
 	</bean>
 	
 	<bean id="runtimeReportProcessor" class="org.hyperic.hq.autoinventory.server.session.RuntimeReportProcessor" scope="prototype"/>
-	
-	<bean id="autoinventoryManager" class="org.hyperic.hq.autoinventory.server.session.AutoinventoryManagerImpl">
-  		<lookup-method name="createRuntimeReportProcessor" bean="runtimeReportProcessor"/>
-	</bean>
 
 	<context:mbean-export />
 	<context:mbean-server />

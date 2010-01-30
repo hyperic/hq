@@ -2,7 +2,6 @@
 
 package org.hyperic.hq.bizapp.server.mdb;
 
-import javax.annotation.PostConstruct;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
@@ -10,14 +9,9 @@ import javax.jms.ObjectMessage;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.appdef.server.session.ConfigManagerImpl;
-import org.hyperic.hq.appdef.server.session.ServerManagerImpl;
-import org.hyperic.hq.autoinventory.server.session.AutoinventoryManagerImpl;
 import org.hyperic.hq.control.ControlEvent;
 import org.hyperic.hq.control.server.session.ServerRestartHandler;
 import org.hyperic.hq.control.shared.ControlConstants;
-import org.hyperic.hq.measurement.server.session.TrackerManagerImpl;
-import org.hyperic.hq.measurement.shared.TrackerManager;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -33,6 +27,8 @@ public class ServerRestartHandlerImpl implements MessageListener {
     public ServerRestartHandlerImpl(ServerRestartHandler serverRestartHandler) {
         this.serverRestartHandler = serverRestartHandler;
     }
+
+
 
     public void onMessage(Message message) {
         if (message instanceof ObjectMessage) {

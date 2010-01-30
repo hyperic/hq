@@ -41,14 +41,12 @@ import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 @Service
-public class AIStartupListener
-    implements StartupListener
-{
+public class AIStartupListener implements StartupListener {
     private AutoinventoryManager autoinventoryManager;
     private ZeventEnqueuer zEventManager;
-    
-    
+   
     @Autowired
     public AIStartupListener(AutoinventoryManager autoinventoryManager, ZeventEnqueuer zEventManager) {
         this.autoinventoryManager = autoinventoryManager;
@@ -62,20 +60,12 @@ public class AIStartupListener
          * Add the runtime-AI listener to enable resources for runtime
          * autodiscovery as they are created.
          */
-        
+
         Set<Class<?>> events = new HashSet<Class<?>>();
         events.add(ResourceCreatedZevent.class);
         events.add(ResourceUpdatedZevent.class);
         events.add(ResourceRefreshZevent.class);
         zEventManager.addBufferedListener(events, new RuntimeAIEnabler());
-        
-        events = new HashSet<Class<?>>();
-        events.add(MergeServiceReportZevent.class);
-        zEventManager.addBufferedListener(events, new ServiceMerger());
-
-        events = new HashSet<Class<?>>();
-        events.add(MergePlatformAndServersZevent.class);
-        zEventManager.addBufferedListener(events, new RuntimePlatformAndServerMerger());
         autoinventoryManager.startup();
     }
 
@@ -87,7 +77,7 @@ public class AIStartupListener
         public void processEvents(List<ResourceZevent> events) {
             autoinventoryManager.handleResourceEvents(events);
         }
-        
+
         public String toString() {
             return "RuntimeAIEnabler";
         }
