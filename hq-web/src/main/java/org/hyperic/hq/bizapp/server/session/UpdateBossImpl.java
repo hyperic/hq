@@ -48,10 +48,8 @@ import org.hyperic.hq.bizapp.shared.UpdateBoss;
 import org.hyperic.hq.common.server.session.ServerConfigAudit;
 import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.common.shared.ServerConfigManager;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.hqu.server.session.UIPlugin;
 import org.hyperic.hq.hqu.shared.UIPluginManager;
-import org.hyperic.util.thread.LoggingThreadGroup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,286 +59,232 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class UpdateBossImpl implements UpdateBoss {
-	private static final Log log = LogFactory.getLog(UpdateBossImpl.class.getName());
-	private static final String CHECK_URL = "http://updates.hyperic.com/hq-updates";
-	
-	private ServerConfigManager serverConfigManager;
-	private PlatformManager platformManager;
-	private ServerManager serverManager;
-	private ServiceManager serviceManager;
-	private UIPluginManager uiPluginManager;
-	private UpdateStatusDAO updateDAO;
-	
-	
-	@Autowired
-	public UpdateBossImpl(UpdateStatusDAO updateDAO,
-			ServerConfigManager serverConfigManager,
-			PlatformManager platformManager, ServerManager serverManager,
-			ServiceManager serviceManager, UIPluginManager uiPluginManager) {
-		this.updateDAO = updateDAO;
-		this.serverConfigManager = serverConfigManager;
-		this.platformManager = platformManager;
-		this.serverManager = serverManager;
-		this.serviceManager = serviceManager;
-		this.uiPluginManager = uiPluginManager;
-	}
+    private static final Log log = LogFactory.getLog(UpdateBossImpl.class.getName());
+    private static final String CHECK_URL = "http://updates.hyperic.com/hq-updates";
 
-	private String getCheckURL() {
-		try {
-			Properties p = HQApp.getInstance().getTweakProperties();
-			String res = p.getProperty("hq.updateNotify.url");
-			if (res != null)
-				return res;
-		} catch (Exception e) {
-			log.warn("Unable to get notification url", e);
-		}
-		return CHECK_URL;
-	}
+    private ServerConfigManager serverConfigManager;
+    private PlatformManager platformManager;
+    private ServerManager serverManager;
+    private ServiceManager serviceManager;
+    private UIPluginManager uiPluginManager;
+    private UpdateStatusDAO updateDAO;
 
-	/**
+    @Autowired
+    public UpdateBossImpl(UpdateStatusDAO updateDAO, ServerConfigManager serverConfigManager,
+                          PlatformManager platformManager, ServerManager serverManager, ServiceManager serviceManager,
+                          UIPluginManager uiPluginManager) {
+        this.updateDAO = updateDAO;
+        this.serverConfigManager = serverConfigManager;
+        this.platformManager = platformManager;
+        this.serverManager = serverManager;
+        this.serviceManager = serviceManager;
+        this.uiPluginManager = uiPluginManager;
+    }
+
+    private String getCheckURL() {
+        try {
+            Properties p = HQApp.getInstance().getTweakProperties();
+            String res = p.getProperty("hq.updateNotify.url");
+            if (res != null)
+                return res;
+        } catch (Exception e) {
+            log.warn("Unable to get notification url", e);
+        }
+        return CHECK_URL;
+    }
+
+    private Properties getRequestInfo(UpdateStatus status) {
+        Properties req = new Properties();
+        String guid = serverConfigManager.getGUID();
+
+        req.setProperty("hq.updateStatusMode", "" + status.getMode().getCode());
+        req.setProperty("hq.version", ProductProperties.getVersion());
+        req.setProperty("hq.build", ProductProperties.getBuild());
+        req.setProperty("hq.guid", guid);
+        req.setProperty("hq.flavour", ProductProperties.getFlavour());
+        req.setProperty("platform.time", "" + System.currentTimeMillis());
+        req.setProperty("os.name", System.getProperty("os.name"));
+        req.setProperty("os.arch", System.getProperty("os.arch"));
+        req.setProperty("os.version", System.getProperty("os.version"));
+        req.setProperty("java.version", System.getProperty("java.version"));
+        req.setProperty("java.vendor", System.getProperty("java.vendor"));
+
+        List<Object[]> plats = platformManager.getPlatformTypeCounts();
+        List<Object[]> svrs = serverManager.getServerTypeCounts();
+        List<Object[]> svcs = serviceManager.getServiceTypeCounts();
+
+        addResourceProperties(req, plats, "hq.rsrc.plat.");
+        addResourceProperties(req, svrs, "hq.rsrc.svr.");
+        addResourceProperties(req, svcs, "hq.rsrc.svc.");
+
+        req.putAll(SysStats.getCpuMemStats());
+        req.putAll(SysStats.getDBStats());
+        req.putAll(getHQUPlugins());
+        BossStartupListener.getUpdateReportAppender().addProps(req);
+        return req;
+    }
+
+    private Properties getHQUPlugins() {
+        Collection<UIPlugin> plugins = uiPluginManager.findAll();
+        Properties res = new Properties();
+
+        for (UIPlugin p : plugins) {
+            res.setProperty("hqu.plugin." + p.getName(), p.getPluginVersion());
+        }
+        return res;
+    }
+
+    private void addResourceProperties(Properties p, List<Object[]> resCounts, String prefix) {
+        for (Object[] val : resCounts) {
+            p.setProperty(prefix + val[0], "" + val[1]);
+        }
+    }
+
+    /**
+     * Meant to be called internally by the fetching thread
+     * 
      * 
      */
-	
-	public void startup() {
-		LoggingThreadGroup grp = new LoggingThreadGroup("Update Notifier");
-		Thread t = new Thread(grp, new UpdateFetcher(), "Update Notifier");
-		t.start();
-	}
+    public void fetchReport() {
+        UpdateStatus status = getOrCreateStatus();
+        Properties req;
+        byte[] reqBytes;
 
-	@SuppressWarnings("unchecked")
-	private Properties getRequestInfo(UpdateStatus status) {
-		Properties req = new Properties();
-		String guid = serverConfigManager.getGUID();
+        if (status.getMode().equals(UpdateStatusMode.NONE))
+            return;
 
-		req.setProperty("hq.updateStatusMode", "" + status.getMode().getCode());
-		req.setProperty("hq.version", ProductProperties.getVersion());
-		req.setProperty("hq.build", ProductProperties.getBuild());
-		req.setProperty("hq.guid", guid);
-		req.setProperty("hq.flavour", ProductProperties.getFlavour());
-		req.setProperty("platform.time", "" + System.currentTimeMillis());
-		req.setProperty("os.name", System.getProperty("os.name"));
-		req.setProperty("os.arch", System.getProperty("os.arch"));
-		req.setProperty("os.version", System.getProperty("os.version"));
-		req.setProperty("java.version", System.getProperty("java.version"));
-		req.setProperty("java.vendor", System.getProperty("java.vendor"));
+        req = getRequestInfo(status);
 
-		List<Object[]> plats = platformManager.getPlatformTypeCounts();
-		List<Object[]> svrs = serverManager.getServerTypeCounts();
-		List<Object[]> svcs = serviceManager.getServiceTypeCounts();
+        try {
+            ByteArrayOutputStream bOs = new ByteArrayOutputStream();
+            GZIPOutputStream gOs = new GZIPOutputStream(bOs);
 
-		addResourceProperties(req, plats, "hq.rsrc.plat.");
-		addResourceProperties(req, svrs, "hq.rsrc.svr.");
-		addResourceProperties(req, svcs, "hq.rsrc.svc.");
+            req.store(gOs, "");
+            gOs.flush();
+            gOs.close();
+            bOs.flush();
+            bOs.close();
+            reqBytes = bOs.toByteArray();
+        } catch (IOException e) {
+            log.warn("Error creating report request", e);
+            return;
+        }
 
-		req.putAll(SysStats.getCpuMemStats());
-		req.putAll(SysStats.getDBStats());
-		req.putAll(getHQUPlugins());
-		BossStartupListener.getUpdateReportAppender().addProps(req);
-		return req;
-	}
+        log.debug("Generated report.  Size=" + reqBytes.length + " report:\n" + req);
 
-	@SuppressWarnings("unchecked")
-	private Properties getHQUPlugins() {
-		Collection<UIPlugin> plugins = uiPluginManager.findAll();
-		Properties res = new Properties();
+        PostMethod post = new PostMethod(getCheckURL());
+        post.addRequestHeader("x-hq-guid", req.getProperty("hq.guid"));
+        HttpClient c = new HttpClient();
+        c.setTimeout(5 * 60 * 1000);
 
-		for (UIPlugin p : plugins) {
-			res.setProperty("hqu.plugin." + p.getName(), p.getPluginVersion());
-		}
-		return res;
-	}
+        ByteArrayInputStream bIs = new ByteArrayInputStream(reqBytes);
 
-	private void addResourceProperties(Properties p, List<Object[]> resCounts,
-			String prefix) {
-		for (Object[] val : resCounts) {
-			p.setProperty(prefix + val[0], "" + val[1]);
-		}
-	}
+        post.setRequestBody(bIs);
 
-	/**
-	 * Meant to be called internally by the fetching thread
-	 * 
-	 * 
-	 */
-	public void fetchReport() {
-		UpdateStatus status = getOrCreateStatus();
-		Properties req;
-		byte[] reqBytes;
+        String response;
+        int statusCode;
+        try {
+            statusCode = c.executeMethod(post);
 
-		if (status.getMode().equals(UpdateStatusMode.NONE))
-			return;
+            response = post.getResponseBodyAsString();
+        } catch (Exception e) {
+            log.debug("Unable to get updates", e);
+            return;
+        } finally {
+            post.releaseConnection();
+        }
 
-		req = getRequestInfo(status);
+        processReport(statusCode, response);
+    }
 
-		try {
-			ByteArrayOutputStream bOs = new ByteArrayOutputStream();
-			GZIPOutputStream gOs = new GZIPOutputStream(bOs);
+    private void processReport(int statusCode, String response) {
+        UpdateStatus curStatus = getOrCreateStatus();
+        String curReport;
 
-			req.store(gOs, "");
-			gOs.flush();
-			gOs.close();
-			bOs.flush();
-			bOs.close();
-			reqBytes = bOs.toByteArray();
-		} catch (IOException e) {
-			log.warn("Error creating report request", e);
-			return;
-		}
+        if (response.length() >= 4000) {
+            log.warn("Update report exceeded 4k");
+            return;
+        }
 
-		log.debug("Generated report.  Size=" + reqBytes.length + " report:\n"
-				+ req);
+        if (statusCode != 200) {
+            log.debug("Bad status code returned: " + statusCode);
+            return;
+        }
 
-		PostMethod post = new PostMethod(getCheckURL());
-		post.addRequestHeader("x-hq-guid", req.getProperty("hq.guid"));
-		HttpClient c = new HttpClient();
-		c.setTimeout(5 * 60 * 1000);
+        if (curStatus.getMode().equals(UpdateStatusMode.NONE))
+            return;
 
-		ByteArrayInputStream bIs = new ByteArrayInputStream(reqBytes);
+        response = response.trim();
 
-		post.setRequestBody(bIs);
+        curReport = curStatus.getReport() == null ? "" : curStatus.getReport();
+        if (curReport.equals(response))
+            return;
 
-		String response;
-		int statusCode;
-		try {
-			statusCode = c.executeMethod(post);
+        curStatus.setReport(response);
+        curStatus.setIgnored(response.trim().length() == 0);
+    }
 
-			response = post.getResponseBodyAsString();
-		} catch (Exception e) {
-			log.debug("Unable to get updates", e);
-			return;
-		} finally {
-			post.releaseConnection();
-		}
-
-		processReport(statusCode, response);
-	}
-
-	private void processReport(int statusCode, String response) {
-		UpdateStatus curStatus = getOrCreateStatus();
-		String curReport;
-
-		if (response.length() >= 4000) {
-			log.warn("Update report exceeded 4k");
-			return;
-		}
-
-		if (statusCode != 200) {
-			log.debug("Bad status code returned: " + statusCode);
-			return;
-		}
-
-		if (curStatus.getMode().equals(UpdateStatusMode.NONE))
-			return;
-
-		response = response.trim();
-
-		curReport = curStatus.getReport() == null ? "" : curStatus.getReport();
-		if (curReport.equals(response))
-			return;
-
-		curStatus.setReport(response);
-		curStatus.setIgnored(response.trim().length() == 0);
-	}
-
-	/**
-	 * Returns null if there is no status report (or it's been ignored), else
-	 * the string status report
-	 * 
-	 * 
-	 */
-	public String getUpdateReport() {
-		UpdateStatus status = getOrCreateStatus();
-
-		if (status.isIgnored())
-			return null;
-
-		if (status.getReport() == null || status.getReport().equals("")) {
-			return null;
-		}
-
-		return status.getReport();
-	}
-
-	/**
+    /**
+     * Returns null if there is no status report (or it's been ignored), else
+     * the string status report
+     * 
      * 
      */
-	public void setUpdateMode(int sess, UpdateStatusMode mode)
-			throws SessionException {
-		AuthzSubject subject = SessionManager.getInstance().getSubject(sess);
-		UpdateStatus status = getOrCreateStatus();
+    public String getUpdateReport() {
+        UpdateStatus status = getOrCreateStatus();
 
-		if (!status.getMode().equals(mode))
-			ServerConfigAudit.updateAnnounce(subject, mode, status.getMode());
+        if (status.isIgnored())
+            return null;
 
-		status.setMode(mode);
+        if (status.getReport() == null || status.getReport().equals("")) {
+            return null;
+        }
 
-		if (mode.equals(UpdateStatusMode.NONE)) {
-			status.setIgnored(true);
-			status.setReport("");
-		}
-	}
+        return status.getReport();
+    }
 
-	/**
+    /**
      * 
      */
-	public UpdateStatusMode getUpdateMode() {
-		return getOrCreateStatus().getMode();
-	}
+    public void setUpdateMode(int sess, UpdateStatusMode mode) throws SessionException {
+        AuthzSubject subject = SessionManager.getInstance().getSubject(sess);
+        UpdateStatus status = getOrCreateStatus();
 
-	/**
+        if (!status.getMode().equals(mode))
+            ServerConfigAudit.updateAnnounce(subject, mode, status.getMode());
+
+        status.setMode(mode);
+
+        if (mode.equals(UpdateStatusMode.NONE)) {
+            status.setIgnored(true);
+            status.setReport("");
+        }
+    }
+
+    /**
      * 
      */
-	public void ignoreUpdate() {
-		UpdateStatus status = getOrCreateStatus();
+    public UpdateStatusMode getUpdateMode() {
+        return getOrCreateStatus().getMode();
+    }
 
-		status.setIgnored(true);
-	}
+    /**
+     * 
+     */
+    public void ignoreUpdate() {
+        UpdateStatus status = getOrCreateStatus();
 
-	private UpdateStatus getOrCreateStatus() {
-		UpdateStatus res = updateDAO.get();
+        status.setIgnored(true);
+    }
 
-		if (res == null) {
-			res = new UpdateStatus("", UpdateStatusMode.MAJOR);
-			updateDAO.save(res);
-		}
-		return res;
-	}
+    private UpdateStatus getOrCreateStatus() {
+        UpdateStatus res = updateDAO.get();
 
-	private static class UpdateFetcher implements Runnable {
-		private static final int CHECK_INTERVAL = 1000 * 60 * 60 * 24;
-		private static final Log _log = LogFactory.getLog(UpdateFetcher.class);
-
-		public void run() {
-			long interval = getCheckInterval();
-			while (true) {
-				try {
-					UpdateBossImpl.getOne().fetchReport();
-				} catch (Exception e) {
-					_log.warn("Error getting update notification", e);
-				}
-				try {
-					Thread.sleep(interval);
-				} catch (InterruptedException e) {
-					return;
-				}
-			}
-		}
-
-		private static long getCheckInterval() {
-			try {
-				Properties p = HQApp.getInstance().getTweakProperties();
-				String res = p.getProperty("hq.updateNotify.interval");
-				if (res != null)
-					return Long.parseLong(res);
-			} catch (Exception e) {
-				_log.warn("Unable to get notification interval", e);
-			}
-			return CHECK_INTERVAL;
-		}
-	}
-
-	public static UpdateBoss getOne() {
-		return Bootstrap.getBean(UpdateBoss.class);
-	}
+        if (res == null) {
+            res = new UpdateStatus("", UpdateStatusMode.MAJOR);
+            updateDAO.save(res);
+        }
+        return res;
+    }
 
 }
