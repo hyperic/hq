@@ -50,267 +50,246 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class UIPluginManagerImpl implements UIPluginManager {
-	private final static Log log = LogFactory.getLog(UIPluginManagerImpl.class
-			.getName());
+    private final static Log log = LogFactory.getLog(UIPluginManagerImpl.class.getName());
 
-	private UIPluginDAO uiPluginDAO;
-	private ViewDAO viewDAO;
-	private AttachmentDAO attachmentDAO;
-	private AttachmentResourceDAO attachmentResourceDAO;
-	private RenditServer renditServer;
-	private ResourceManager resourceManager;
-	private ResourceGroupManager resourceGroupManager;
+    private UIPluginDAO uiPluginDAO;
+    private ViewDAO viewDAO;
+    private AttachmentDAO attachmentDAO;
+    private AttachmentResourceDAO attachmentResourceDAO;
+    private RenditServer renditServer;
+    private ResourceManager resourceManager;
+    private ResourceGroupManager resourceGroupManager;
 
-	@Autowired
-	public UIPluginManagerImpl(AttachmentDAO attachmentDAO,
-			AttachmentResourceDAO attachmentResourceDAO, ViewDAO viewDAO,
-			UIPluginDAO uiPluginDAO, RenditServer renditServer,
-			ResourceManager resourceManager,
-			ResourceGroupManager resourceGroupManager) {
-		this.attachmentDAO = attachmentDAO;
-		this.attachmentResourceDAO = attachmentResourceDAO;
-		this.viewDAO = viewDAO;
-		this.uiPluginDAO = uiPluginDAO;
-		this.renditServer = renditServer;
-		this.resourceManager = resourceManager;
-		this.resourceGroupManager = resourceGroupManager;
-	}
+    @Autowired
+    public UIPluginManagerImpl(AttachmentDAO attachmentDAO, AttachmentResourceDAO attachmentResourceDAO,
+                               ViewDAO viewDAO, UIPluginDAO uiPluginDAO, RenditServer renditServer,
+                               ResourceManager resourceManager, ResourceGroupManager resourceGroupManager) {
+        this.attachmentDAO = attachmentDAO;
+        this.attachmentResourceDAO = attachmentResourceDAO;
+        this.viewDAO = viewDAO;
+        this.uiPluginDAO = uiPluginDAO;
+        this.renditServer = renditServer;
+        this.resourceManager = resourceManager;
+        this.resourceGroupManager = resourceGroupManager;
+    }
 
-	public UIPlugin createPlugin(String name, String ver) {
-		return uiPluginDAO.create(name, ver);
-	}
+    public UIPlugin createPlugin(String name, String ver) {
+        return uiPluginDAO.create(name, ver);
+    }
 
-	public UIPlugin createOrUpdate(String name, String version) {
-		UIPlugin p = findPluginByName(name);
+    public UIPlugin createOrUpdate(String name, String version) {
+        UIPlugin p = findPluginByName(name);
 
-		if (p == null) {
-			log.info("Creating plugin [" + name + "]");
-			p = uiPluginDAO.create(name, version);
-		} else {
-			log.info("Updating plugin [" + name + "]");
-			updatePlugin(p, version);
-		}
-		
-		return p;
-	}
+        if (p == null) {
+            log.info("Creating plugin [" + name + "]");
+            p = uiPluginDAO.create(name, version);
+        } else {
+            log.info("Updating plugin [" + name + "]");
+            updatePlugin(p, version);
+        }
 
-	public View createAdminView(UIPlugin p, ViewDescriptor d) {
-		View res = new ViewAdmin(p, d);
-		
-		p.addView(res);
-		
-		return res;
-	}
+        return p;
+    }
 
-	public View createMastheadView(UIPlugin p, ViewDescriptor d) {
-		View res = new ViewMasthead(p, d);
-		
-		p.addView(res);
-		
-		return res;
-	}
+    public View createAdminView(UIPlugin p, ViewDescriptor d) {
+        View res = new ViewAdmin(p, d);
 
-	public View createResourceView(UIPlugin p, ViewDescriptor d) {
-		View res = new ViewResource(p, d);
-		
-		p.addView(res);
-		
-		return res;
-	}
+        p.addView(res);
 
-	public UIPlugin findPluginByName(String name) {
-		return uiPluginDAO.findByName(name);
-	}
+        return res;
+    }
 
-	public UIPlugin findPluginById(Integer id) {
-		return uiPluginDAO.findById(id);
-	}
+    public View createMastheadView(UIPlugin p, ViewDescriptor d) {
+        View res = new ViewMasthead(p, d);
 
-	public View findViewById(Integer id) {
-		return viewDAO.findById(id);
-	}
+        p.addView(res);
 
-	public Attachment findAttachmentById(Integer id) {
-		return attachmentDAO.findById(id);
-	}
+        return res;
+    }
 
-	/**
-	 * Remove a plugin, all its views, and attach points from the system.
-	 */
-	public void deletePlugin(UIPlugin p) {
-		log.info("Deleting plugin " + p);
-		
-		uiPluginDAO.remove(p);
-	}
+    public View createResourceView(UIPlugin p, ViewDescriptor d) {
+        View res = new ViewResource(p, d);
 
-	public void detach(Attachment a) {
-		log.info("Detaching " + a);
-		
-		a.getView().removeAttachment(a);
-	}
+        p.addView(res);
 
-	public void attachView(ViewMasthead view, ViewMastheadCategory cat) {
-		if (!view.getAttachments().isEmpty()) {
-			throw new IllegalArgumentException("View [" + view + "] already "
-					+ "attached");
-		}
-		
-		view.addAttachment(new AttachmentMasthead(view, cat));
-		
-		log.info("Attaching [" + view + "] via [" + cat + "]");
-	}
+        return res;
+    }
 
-	public void attachView(ViewAdmin view, ViewAdminCategory cat) {
-		if (!view.getAttachments().isEmpty()) {
-			throw new IllegalArgumentException("View [" + view + "] already "
-					+ "attached");
-		}
-		
-		view.addAttachment(new AttachmentAdmin(view, cat));
-		
-		log.info("Attaching [" + view + "] via [" + cat + "]");
-	}
+    public UIPlugin findPluginByName(String name) {
+        return uiPluginDAO.findByName(name);
+    }
 
-	public void attachView(ViewResource view, ViewResourceCategory cat,
-			Resource r) {
-		for (Iterator<AttachmentResource> i = view.getAttachments().iterator(); i
-				.hasNext();) {
-			AttachmentResource a = i.next();
+    public UIPlugin findPluginById(Integer id) {
+        return uiPluginDAO.findById(id);
+    }
 
-			if (a.getCategory().equals(cat) && a.getResource().equals(r)) {
-				throw new IllegalArgumentException("View [" + view + "] is "
-						+ "already attached to [" + r + "] in [" + cat + "]");
-			}
-		}
-		
-		view.addAttachment(new AttachmentResource(view, cat, r));
-		
-		log.info("Attaching [" + view + "] to [" + r + "] via [" + cat + "]");
-	}
+    public View findViewById(Integer id) {
+        return viewDAO.findById(id);
+    }
 
-	public void updatePlugin(UIPlugin p, String version) {
-		if (!p.getPluginVersion().equals(version)) {
-			p.setPluginVersion(version);
-		}
-		
-		// TODO: What do we do here if the views for a particular plugin
-		// have changed? Work it out.
-	}
+    public Attachment findAttachmentById(Integer id) {
+        return attachmentDAO.findById(id);
+    }
 
-	/**
-	 * Finds all {@link UIPlugin}s
-	 */
-	public Collection<UIPlugin> findAll() {
-		return uiPluginDAO.findAll();
-	}
+    /**
+     * Remove a plugin, all its views, and attach points from the system.
+     */
+    public void deletePlugin(UIPlugin p) {
+        log.info("Deleting plugin " + p);
 
-	/**
-	 * Find all the views attached via a specific attach type
-	 * 
-	 * @return a collection of {@link AttachType}s
-	 */
-	public Collection<AttachType> findViews(AttachType type) {
-		return viewDAO.findFor(type);
-	}
+        uiPluginDAO.remove(p);
+    }
 
-	/**
-	 * Find all attachments for a specific type
-	 * 
-	 * @return a collection of {@link AttachmentDescriptor}s
-	 */
-	public Collection<AttachmentDescriptor> findAttachments(AttachType type,
-			AuthzSubject user) {
-		Resource root = resourceManager.findRootResource();
+    public void detach(Attachment a) {
+        log.info("Detaching " + a);
 
-		return convertAttachmentsToDescriptors(attachmentDAO.findFor(type),
-				root, user);
-	}
+        a.getView().removeAttachment(a);
+    }
 
-	public AttachmentDescriptor findAttachmentDescriptorById(Integer id,
-			AuthzSubject user) {
-		Attachment attachment = findAttachmentById(id);
-		List<Attachment> attachments = new ArrayList<Attachment>(1);
+    public void attachView(ViewMasthead view, ViewMastheadCategory cat) {
+        if (!view.getAttachments().isEmpty()) {
+            throw new IllegalArgumentException("View [" + view + "] already " + "attached");
+        }
 
-		attachments.add(attachment);
+        view.addAttachment(new AttachmentMasthead(view, cat));
 
-		Resource root = resourceManager.findRootResource();
-		Collection<AttachmentDescriptor> attachmentDescriptors = convertAttachmentsToDescriptors(
-				attachments, root, user);
+        log.info("Attaching [" + view + "] via [" + cat + "]");
+    }
 
-		if (attachmentDescriptors.isEmpty()) {
-			return null;
-		}
+    public void attachView(ViewAdmin view, ViewAdminCategory cat) {
+        if (!view.getAttachments().isEmpty()) {
+            throw new IllegalArgumentException("View [" + view + "] already " + "attached");
+        }
 
-		return attachmentDescriptors.iterator().next();
-	}
+        view.addAttachment(new AttachmentAdmin(view, cat));
 
-	/**
-	 * Find attachments for a resource.
-	 * 
-	 * @return a collection of {@link AttachmentDescriptor}s
-	 */
-	public Collection<AttachmentDescriptor> findAttachments(AppdefEntityID ent,
-			ViewResourceCategory cat, AuthzSubject user) {
-		Collection<Attachment> attachments;
+        log.info("Attaching [" + view + "] via [" + cat + "]");
+    }
 
-		if (ent.isGroup()) {
-			ResourceGroup group = resourceGroupManager
-					.findResourceGroupById(ent.getId());
+    public void attachView(ViewResource view, ViewResourceCategory cat, Resource r) {
+        for (Iterator<AttachmentResource> i = view.getAttachments().iterator(); i.hasNext();) {
+            AttachmentResource a = i.next();
 
-			attachments = attachmentResourceDAO.findFor(resourceManager
-					.findRootResource(), cat);
+            if (a.getCategory().equals(cat) && a.getResource().equals(r)) {
+                throw new IllegalArgumentException("View [" + view + "] is " + "already attached to [" + r + "] in [" +
+                                                   cat + "]");
+            }
+        }
 
-			if (!group.isMixed()) {
-				// For compatible groups add in attachments specific to that
-				// resource type.
-				Collection<Attachment> compatAttachments = attachmentResourceDAO
-						.findFor(group.getResourcePrototype(), cat);
+        view.addAttachment(new AttachmentResource(view, cat, r));
 
-				attachments.addAll(compatAttachments);
-			}
-		} else {
-			attachments = attachmentResourceDAO.findFor(resourceManager
-					.findResource(ent), cat);
-		}
+        log.info("Attaching [" + view + "] to [" + r + "] via [" + cat + "]");
+    }
 
-		Resource viewedResource = resourceManager.findResource(ent);
+    public void updatePlugin(UIPlugin p, String version) {
+        if (!p.getPluginVersion().equals(version)) {
+            p.setPluginVersion(version);
+        }
 
-		return convertAttachmentsToDescriptors(attachments, viewedResource,
-				user);
-	}
+        // TODO: What do we do here if the views for a particular plugin
+        // have changed? Work it out.
+    }
 
-	private Collection<AttachmentDescriptor> convertAttachmentsToDescriptors(
-			Collection<Attachment> attachments, Resource viewedRsrc,
-			AuthzSubject user) {
-		Collection<AttachmentDescriptor> attachmentDescriptors = new ArrayList<AttachmentDescriptor>();
+    /**
+     * Finds all {@link UIPlugin}s
+     */
+    public Collection<UIPlugin> findAll() {
+        return uiPluginDAO.findAll();
+    }
 
-		for (Iterator<Attachment> i = attachments.iterator(); i.hasNext();) {
-			Attachment attachment = i.next();
-			String pluginName = attachment.getView().getPlugin().getName();
-			AttachmentDescriptor attachmentDescriptor;
+    /**
+     * Find all the views attached via a specific attach type
+     * 
+     * @return a collection of {@link AttachType}s
+     */
+    public Collection<AttachType> findViews(AttachType type) {
+        return viewDAO.findFor(type);
+    }
 
-			try {
-				attachmentDescriptor = (AttachmentDescriptor) renditServer
-						.getAttachmentDescriptor(pluginName, attachment,
-								viewedRsrc, user);
-			} catch (Exception e) {
-				log.warn("Not returning attachment for [" + attachment
-						+ "], it " + "threw an exception", e);
-				continue;
-			}
+    /**
+     * Find all attachments for a specific type
+     * 
+     * @return a collection of {@link AttachmentDescriptor}s
+     */
+    public Collection<AttachmentDescriptor> findAttachments(AttachType type, AuthzSubject user) {
+        Resource root = resourceManager.findRootResource();
 
-			if (attachmentDescriptor != null) {
-				attachmentDescriptors.add(attachmentDescriptor);
-			} else {
-				log.debug("Not returning attachment for [" + attachment
-						+ "], the " + "plugin says not to render it");
-			}
-		}
+        return convertAttachmentsToDescriptors(attachmentDAO.findFor(type), root, user);
+    }
 
-		return attachmentDescriptors;
-	}
+    public AttachmentDescriptor findAttachmentDescriptorById(Integer id, AuthzSubject user) {
+        Attachment attachment = findAttachmentById(id);
+        List<Attachment> attachments = new ArrayList<Attachment>(1);
 
-	public static UIPluginManager getOne() {
-		return Bootstrap.getBean(UIPluginManager.class);
-	}
+        attachments.add(attachment);
+
+        Resource root = resourceManager.findRootResource();
+        Collection<AttachmentDescriptor> attachmentDescriptors = convertAttachmentsToDescriptors(attachments, root,
+            user);
+
+        if (attachmentDescriptors.isEmpty()) {
+            return null;
+        }
+
+        return attachmentDescriptors.iterator().next();
+    }
+
+    /**
+     * Find attachments for a resource.
+     * 
+     * @return a collection of {@link AttachmentDescriptor}s
+     */
+    public Collection<AttachmentDescriptor> findAttachments(AppdefEntityID ent, ViewResourceCategory cat,
+                                                            AuthzSubject user) {
+        Collection<Attachment> attachments;
+
+        if (ent.isGroup()) {
+            ResourceGroup group = resourceGroupManager.findResourceGroupById(ent.getId());
+
+            attachments = attachmentResourceDAO.findFor(resourceManager.findRootResource(), cat);
+
+            if (!group.isMixed()) {
+                // For compatible groups add in attachments specific to that
+                // resource type.
+                Collection<Attachment> compatAttachments = attachmentResourceDAO.findFor(group.getResourcePrototype(),
+                    cat);
+
+                attachments.addAll(compatAttachments);
+            }
+        } else {
+            attachments = attachmentResourceDAO.findFor(resourceManager.findResource(ent), cat);
+        }
+
+        Resource viewedResource = resourceManager.findResource(ent);
+
+        return convertAttachmentsToDescriptors(attachments, viewedResource, user);
+    }
+
+    private Collection<AttachmentDescriptor> convertAttachmentsToDescriptors(Collection<Attachment> attachments,
+                                                                             Resource viewedRsrc, AuthzSubject user) {
+        Collection<AttachmentDescriptor> attachmentDescriptors = new ArrayList<AttachmentDescriptor>();
+
+        for (Iterator<Attachment> i = attachments.iterator(); i.hasNext();) {
+            Attachment attachment = i.next();
+            String pluginName = attachment.getView().getPlugin().getName();
+            AttachmentDescriptor attachmentDescriptor;
+
+            try {
+                attachmentDescriptor = (AttachmentDescriptor) renditServer.getAttachmentDescriptor(pluginName,
+                    attachment, viewedRsrc, user);
+            } catch (Exception e) {
+                log.warn("Not returning attachment for [" + attachment + "], it " + "threw an exception", e);
+                continue;
+            }
+
+            if (attachmentDescriptor != null) {
+                attachmentDescriptors.add(attachmentDescriptor);
+            } else {
+                log.debug("Not returning attachment for [" + attachment + "], the " + "plugin says not to render it");
+            }
+        }
+
+        return attachmentDescriptors;
+    }
+
 }
