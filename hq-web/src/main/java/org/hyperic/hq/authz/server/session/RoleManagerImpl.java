@@ -1399,8 +1399,4 @@ public class RoleManagerImpl implements RoleManager {
         }
         return resourceDAO.findById(resource.getId());
     }
-
-    public static RoleManager getOne() {
-        return Bootstrap.getBean(RoleManager.class);
-    }
 }

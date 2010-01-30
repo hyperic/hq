@@ -71,13 +71,12 @@ import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.InvalidActionDataException;
 import org.hyperic.hq.events.Notify;
 import org.hyperic.hq.events.server.session.AlertRegulator;
-import org.hyperic.hq.hqu.RenditServer;
 import org.hyperic.hq.hqu.RenditServerImpl;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
+import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.hq.stats.ConcurrentStatsCollector;
 
 public class EmailAction extends EmailActionConfig
     implements ActionInterface, Notify

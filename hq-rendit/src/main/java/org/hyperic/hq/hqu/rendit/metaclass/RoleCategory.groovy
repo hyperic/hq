@@ -3,11 +3,12 @@ package org.hyperic.hq.hqu.rendit.metaclass
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.Operation
 import org.hyperic.hq.authz.server.session.Role
-import org.hyperic.hq.authz.server.session.RoleManagerImpl as RoleMan
+import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.authz.shared.RoleManager;
 import org.hyperic.hq.authz.shared.RoleValue
 
 class RoleCategory {
-    private static roleMan = RoleMan.one
+    private static roleMan = Bootstrap.getBean(RoleManager.class)
 
     static void setSubjects(Role role, AuthzSubject user, Collection subjects) {
         roleMan.removeSubjects(user, role.id,

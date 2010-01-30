@@ -545,10 +545,6 @@ public class ConfigManagerImpl implements ConfigManager {
         return res;
     }
 
-    public static ConfigManager getOne() {
-        return Bootstrap.getBean(ConfigManager.class);
-    }
-
     private ServerConfigStuff getServerStuffForService(Integer id) throws AppdefEntityNotFoundException {
 
         org.hyperic.hq.appdef.server.session.Service service = serviceDAO.findById(id);

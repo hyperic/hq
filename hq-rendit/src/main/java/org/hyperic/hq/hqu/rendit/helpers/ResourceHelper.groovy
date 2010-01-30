@@ -9,10 +9,11 @@ import org.hyperic.hq.appdef.server.session.ApplicationManagerImpl as AppMan
 import org.hyperic.hq.escalation.server.session.EscalationManagerImpl as EscMan
 import org.hyperic.hq.events.server.session.AlertManagerImpl as AlertMan
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerImpl as AlertDefMan
-import org.hyperic.hq.authz.server.session.RoleManagerImpl as RoleMan
+
 
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException
 import org.hyperic.hq.authz.shared.AuthzConstants
+import org.hyperic.hq.authz.shared.RoleManager;
 import org.hyperic.hibernate.PageInfo
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.ResourceManagerImpl
@@ -20,6 +21,7 @@ import org.hyperic.hq.authz.server.session.ResourceSortField
 import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.authz.server.session.ResourceGroup
 import org.hyperic.hq.bizapp.server.session.AppdefBossImpl as AppdefBoss
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.util.pager.PageControl
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants
@@ -83,8 +85,8 @@ class ResourceHelper extends BaseHelper {
             case 'services':  return ServiceMan.one.serviceCount
             case 'cpus': return PlatMan.one.cpuCount
             case 'applications': return AppMan.one.applicationCount
-            case 'roles': return RoleMan.one.roleCount
-            case 'users': return RoleMan.one.subjectCount
+            case 'roles': return Bootstrap.getBean(RoleManager.class).roleCount
+            case 'users': return Bootstrap.getBean(RoleManager.class).subjectCount
             case 'alerts': return AlertMan.one.alertCount
             case 'alertDefs': return AlertDefMan.one.activeCount
             case 'resources': return rman.resourceCount
