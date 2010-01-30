@@ -1,11 +1,11 @@
 package org.hyperic.hq.hqu.rendit.util
 
 import org.hyperic.hq.appdef.Agent
-import org.hyperic.hq.appdef.server.session.ConfigManagerImpl as ConfigMan
 import org.hyperic.hq.appdef.server.session.PlatformManagerImpl as PlatMan
 import org.hyperic.hq.appdef.server.session.ServerManagerImpl as ServerMan
 import org.hyperic.hq.appdef.server.session.ServiceManagerImpl as ServiceMan
 import org.hyperic.hq.appdef.shared.CPropManager;
+import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException
 import org.hyperic.hq.auth.shared.SessionManager
 import org.hyperic.hq.authz.server.session.AuthzSubject
@@ -34,7 +34,7 @@ class ResourceConfig {
     private static cpropMan  = Bootstrap.getBean(CPropManager.class)
     private static appBoss   = AppdefBoss.one
     private static prodBoss  = ProductBoss.one
-    private static configMan = ConfigMan.one
+    private static configMan = Bootstrap.getBean(ConfigManager.class)
     private static platMan   = PlatMan.one
     private static svrMan    = ServerMan.one
     private static svcMan    = ServiceMan.one
