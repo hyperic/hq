@@ -728,9 +728,9 @@ public class GalertManagerImpl implements GalertManager {
     public void startup() {
         _log.info("Galert manager starting up!");
 
+        hqApp.registerCallbackCaller(GroupChangeCallback.class);
         hqApp.registerCallbackListener(GroupChangeCallback.class,
-                                                     new GroupChangeCallback()
-                                                     {
+                                       new GroupChangeCallback() {
             public void postGroupCreate(ResourceGroup g) {
             }
 
@@ -759,15 +759,12 @@ public class GalertManagerImpl implements GalertManager {
             }
         });
 
-        hqApp
-             .registerCallbackListener(SubjectRemoveCallback.class,
+        hqApp.registerCallbackListener(SubjectRemoveCallback.class,
                                        new SubjectRemoveCallback() {
             public void subjectRemoved(AuthzSubject toDelete) {
-                _actionLogDAO
-                             .handleSubjectRemoval(toDelete);
+                _actionLogDAO.handleSubjectRemoval(toDelete);
             }
-        }
-             );
+        });
 
         GalertProcessor.getInstance().startupInitialize(_defDAO.findAll());
     }
