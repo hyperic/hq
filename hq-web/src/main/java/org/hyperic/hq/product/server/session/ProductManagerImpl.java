@@ -98,12 +98,13 @@ public class ProductManagerImpl implements ProductManager {
     private PlatformManager platformManager;
     private ServerManager serverManager;
     private ServiceManager serviceManager;
+    private AlertDefinitionXmlParser alertDefinitionXmlParser;
 
     @Autowired
     public ProductManagerImpl(PluginDAO pluginDao, AlertDefinitionManager alertDefinitionManager,
                               CPropManager cPropManager, TemplateManager templateManager, AuditManager auditManager,
                               ServerManager serverManager, ServiceManager serviceManager,
-                              PlatformManager platformManager) {
+                              PlatformManager platformManager, AlertDefinitionXmlParser alertDefinitionXmlParser) {
         this.pluginDao = pluginDao;
         this.alertDefinitionManager = alertDefinitionManager;
         this.cPropManager = cPropManager;
@@ -112,6 +113,7 @@ public class ProductManagerImpl implements ProductManager {
         this.serverManager = serverManager;
         this.serviceManager = serviceManager;
         this.platformManager = platformManager;
+        this.alertDefinitionXmlParser = alertDefinitionXmlParser;
     }
 
     /**
@@ -384,10 +386,8 @@ public class ProductManagerImpl implements ProductManager {
         if (alertDefns == null) {
             return;
         }
-        // TODO DI
-        AlertDefinitionXmlParser alertDefXmlParser = new AlertDefinitionXmlParser();
         try {
-            final Set<AlertDefinitionValue> alertDefs = alertDefXmlParser.parse(alertDefns);
+            final Set<AlertDefinitionValue> alertDefs = alertDefinitionXmlParser.parse(alertDefns);
             for (AlertDefinitionValue alertDefinition : alertDefs) {
                 try {
                     final AppdefEntityID id = new AppdefEntityID(alertDefinition.getAppdefType(), alertDefinition

@@ -35,6 +35,8 @@ import org.hyperic.hq.types.AlertCondition;
 import org.hyperic.hq.types.AlertDefinition;
 import org.hyperic.hq.types.AlertDefinitionsResponse;
 import org.hyperic.hq.types.XmlUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * Parser responsible for transforming AlertDefinitionsResponse XML to a Set of
@@ -42,6 +44,7 @@ import org.hyperic.hq.types.XmlUtil;
  * @author jhickey
  * 
  */
+@Component
 public class AlertDefinitionXmlParser {
 
     private static final Map EVENT_LEVEL_TO_NUM = new HashMap();
@@ -59,13 +62,7 @@ public class AlertDefinitionXmlParser {
     private final AuthzSubjectManager authzSubjectManager;
     private final AlertDefinitionManager alertDefinitionManager;
 
-    public AlertDefinitionXmlParser() {
-        this.authzSubjectManager = AuthzSubjectManagerImpl.getOne();
-        this.resourceManager = ResourceManagerImpl.getOne();
-        this.templateManager = TemplateManagerImpl.getOne();
-        this.alertDefinitionManager = AlertDefinitionManagerImpl.getOne();
-    }
-
+    @Autowired
     public AlertDefinitionXmlParser(ResourceManager resourceManager,
                                     TemplateManager templateManager,
                                     AuthzSubjectManager authzSubjectManager,

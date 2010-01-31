@@ -30,6 +30,7 @@ import java.util.ResourceBundle;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationAlertType;
@@ -56,8 +57,8 @@ public final class ClassicEscalationAlertType
     private void setup() {
         synchronized (INIT_LOCK) {
             if (_alertMan == null) {
-                _alertMan = AlertManagerImpl.getOne();
-                _defMan = AlertDefinitionManagerImpl.getOne();
+                _alertMan = Bootstrap.getBean(AlertManager.class);
+                _defMan = Bootstrap.getBean(AlertDefinitionManager.class);
             }
         }
     }
@@ -152,6 +153,6 @@ public final class ClassicEscalationAlertType
     }
 
     protected Collection getPerformersOfEscalation(Escalation escalation) {
-        return AlertDefinitionManagerImpl.getOne().getUsing(escalation);
+        return Bootstrap.getBean(AlertDefinitionManager.class).getUsing(escalation);
     }
 }

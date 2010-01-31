@@ -1,10 +1,12 @@
 package org.hyperic.hq.hqu.rendit.metaclass
 
-import org.hyperic.hq.events.server.session.AlertDefinitionManagerImpl as AdefMan
+
 import org.hyperic.hq.events.server.session.AlertDefinition
+import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.escalation.server.session.Escalation
 import org.hyperic.hq.escalation.server.session.EscalationManagerImpl as EscMan
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants
 import org.hyperic.hq.appdef.server.session.AppdefResourceType
@@ -16,7 +18,7 @@ class AlertDefinitionCategory {
 
     static void setEscalation(AlertDefinition d, AuthzSubject s,
                               Escalation e) {
-        AdefMan.one.setEscalation(s, d.getId(), e.getId()) 
+        Bootstrap.getBean(AlertDefinitionManager.class).setEscalation(s, d.getId(), e.getId()) 
     }
 
     static void unsetEscalation(AlertDefinition d, AuthzSubject s) {
@@ -35,7 +37,7 @@ class AlertDefinitionCategory {
     static void updateAlertDefinitionActiveStatus(AlertDefinition d,
                                                   AuthzSubject s,
                                                   boolean enable) {
-        AdefMan.one.updateAlertDefinitionActiveStatus(s, d, enable)
+        Bootstrap.getBean(AlertDefinitionManager.class).updateAlertDefinitionActiveStatus(s, d, enable)
     }
 
     static String urlFor(AlertDefinition d, String context) {
@@ -82,6 +84,6 @@ class AlertDefinitionCategory {
     }
 
     static void delete(AlertDefinition d, AuthzSubject user) {
-        AdefMan.one.deleteAlertDefinitions(user, [ d.id ] as Integer[])
+        Bootstrap.getBean(AlertDefinitionManager.class).deleteAlertDefinitions(user, [ d.id ] as Integer[])
     }
 }

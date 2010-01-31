@@ -37,7 +37,6 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.action.EnableAlertDefActionConfig;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.shared.EscalationManager;
 import org.hyperic.hq.events.ActionCreateException;
@@ -101,16 +100,11 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
 
     private EscalationManager escalationManager;
 
-    private HQApp hqApp;
-
-    private AvailabilityDownAlertDefinitionCache cache;
-
     @Autowired
     public AlertDefinitionManagerImpl(AlertPermissionManager alertPermissionManager, AlertDefinitionDAO alertDefDao,
                                       ActionDAO actionDao, AlertConditionDAO alertConditionDAO, TriggerDAO triggerDAO,
                                       MeasurementDAO measurementDAO, RegisteredTriggerManager registeredTriggerManager,
-                                      ResourceManager resourceManager, EscalationManager escalationManager,
-                                      HQApp hqApp, AvailabilityDownAlertDefinitionCache cache) {
+                                      ResourceManager resourceManager, EscalationManager escalationManager) {
         this.alertPermissionManager = alertPermissionManager;
         this.alertDefDao = alertDefDao;
         this.actionDao = actionDao;
@@ -120,8 +114,6 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
         this.registeredTriggerManager = registeredTriggerManager;
         this.resourceManager = resourceManager;
         this.escalationManager = escalationManager;
-        this.hqApp = hqApp;
-        this.cache = cache;
     }
 
     @PostConstruct
@@ -705,7 +697,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
      * @param id The alert def Id.
      * @return <code>true</code> if the alert definition is a resource type
      *         alert definition.
-     *
+     * 
      */
     public boolean isResourceTypeAlertDefinition(Integer id) {
         AlertDefinition ad = alertDefDao.get(id);
@@ -983,40 +975,4 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
     public int getActiveCount() {
         return alertDefDao.getNumActiveDefs();
     }
-
-    /**
-     * 
-     */
-    public void startup() {
-        log.info("Alert Definition Manager starting up!");
-
-        hqApp.registerCallbackListener(AlertDefinitionChangeCallback.class, new AlertDefinitionChangeCallback() {
-            public void postCreate(AlertDefinition def) {
-                removeFromCache(def);
-            }
-
-            public void postDelete(AlertDefinition def) {
-                removeFromCache(def);
-            }
-
-            public void postUpdate(AlertDefinition def) {
-                removeFromCache(def);
-            }
-
-            private void removeFromCache(AlertDefinition def) {
-                synchronized (cache) {
-                    cache.remove(def.getAppdefEntityId());
-
-                    for (AlertDefinition childDef : def.getChildren()) {
-                        cache.remove(childDef.getAppdefEntityId());
-                    }
-                }
-            }
-        });
-    }
-
-    public static AlertDefinitionManager getOne() {
-        return Bootstrap.getBean(AlertDefinitionManager.class);
-    }
-
 }

@@ -25,9 +25,9 @@ import org.hyperic.hq.appdef.server.session.ServerManagerImpl as ServerMan
 import org.hyperic.hq.appdef.server.session.ServiceManagerImpl as ServiceMan
 import org.hyperic.hq.bizapp.server.session.AppdefBossImpl as AppdefBoss
 import org.hyperic.hq.common.VetoException
-import org.hyperic.hq.events.server.session.AlertDefinitionManagerImpl as DefMan
+import org.hyperic.hq.events.shared.AlertDefinitionManager;
+import org.hyperic.hq.events.shared.AlertManager;
 import org.hyperic.hq.events.shared.EventLogManager;
-import org.hyperic.hq.events.server.session.AlertManagerImpl as AlertMan
 import org.hyperic.hq.control.server.session.ControlManagerImpl as CMan
 import org.hyperic.hq.product.PluginNotFoundException
 
@@ -62,8 +62,8 @@ class ResourceCategory {
     private static dman     = Bootstrap.getBean(MeasurementManager.class)
     private static authzMan = AuthzMan.one
     private static groupMan = GroupMan.one
-    private static defMan   = DefMan.one
-    private static alertMan = AlertMan.one
+    private static defMan   = Bootstrap.getBean(AlertDefinitionManager.class)
+    private static alertMan = Bootstrap.getBean(AlertManager.class)
     private static eventMan = Bootstrap.getBean(EventLogManager.class)
     private static cMan     = CMan.one
     private static csMan	= Bootstrap.getBean(ControlScheduleManager.class);

@@ -4,15 +4,16 @@ import org.hyperic.hibernate.PageInfo
 import org.hyperic.hq.events.server.session.AlertDefSortField
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.events.server.session.AlertDefinition
-import org.hyperic.hq.events.server.session.AlertDefinitionManagerImpl
-import org.hyperic.hq.events.server.session.AlertManagerImpl
+import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.events.shared.AlertDefinitionManager;
+import org.hyperic.hq.events.shared.AlertManager;
 import org.hyperic.hq.galerts.server.session.GalertManagerImpl
 import org.hyperic.hq.events.AlertSeverity
 
 class AlertHelper extends BaseHelper {
-    private alertMan  = AlertManagerImpl.one
+    private alertMan  = Bootstrap.getBean(AlertManager.class)
     private galertMan = GalertManagerImpl.one
-    private defMan    = AlertDefinitionManagerImpl.one
+    private defMan    = Bootstrap.getBean(AlertDefinitionManager.class)
     
     AlertHelper(AuthzSubject user) {
         super(user)

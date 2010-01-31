@@ -35,14 +35,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 /**
- * This class is an in-memory map of whether "availability down"
- * alert definitions exist for a resource
+ * This class is an in-memory map of whether "availability down" alert
+ * definitions exist for a resource
  */
 @Repository
 public class AvailabilityDownAlertDefinitionCache {
@@ -51,16 +52,21 @@ public class AvailabilityDownAlertDefinitionCache {
     public static final String CACHENAME = "AvailabilityDownAlertDefinitionCache";
     private final Object _cacheLock = new Object();
     private final Cache _cache;
+    private final AlertDefinitionManager alertDefinitionManager;
+    private final AuthzSubjectManager authzSubjectManager;
 
-    
-    public AvailabilityDownAlertDefinitionCache() {
+    @Autowired
+    public AvailabilityDownAlertDefinitionCache(AlertDefinitionManager alertDefinitionManager,
+                                                AuthzSubjectManager authzSubjectManager) {
+        this.alertDefinitionManager = alertDefinitionManager;
+        this.authzSubjectManager = authzSubjectManager;
         _cache = CacheManager.getInstance().getCache(CACHENAME);
     }
 
-    public boolean exists(AppdefEntityID key) {        
+    public boolean exists(AppdefEntityID key) {
         Boolean bool = null;
         Element el = _cache.get(key);
-        
+
         if (el != null) {
             bool = (Boolean) el.getObjectValue();
         } else {
@@ -71,12 +77,12 @@ public class AvailabilityDownAlertDefinitionCache {
 
     public void put(AppdefEntityID key, Boolean value) {
         Element el = new Element(key, value);
-                                                          
+
         synchronized (_cacheLock) {
             _cache.put(el);
         }
     }
-    
+
     public void remove(AppdefEntityID key) {
         synchronized (_cacheLock) {
             _cache.remove(key);
@@ -88,17 +94,15 @@ public class AvailabilityDownAlertDefinitionCache {
             _cache.removeAll();
         }
     }
-    
+
     private Boolean load(AppdefEntityID key) {
         Boolean value = null;
-             
-        try {
-            AlertDefinitionManager adm = AlertDefinitionManagerImpl.getOne();
-            AuthzSubject hqadmin = AuthzSubjectManagerImpl.getOne()
-                                        .getSubjectById(AuthzConstants.rootSubjectId);
-            Collection<AlertDefinition> alertDefs = adm.findAlertDefinitions(hqadmin, key);
 
-            for ( AlertDefinition def : alertDefs) {
+        try {
+            AuthzSubject hqadmin = authzSubjectManager.getSubjectById(AuthzConstants.rootSubjectId);
+            Collection<AlertDefinition> alertDefs = alertDefinitionManager.findAlertDefinitions(hqadmin, key);
+
+            for (AlertDefinition def : alertDefs) {
                 if (def.isActive() && def.isAvailability(false)) {
                     value = Boolean.TRUE;
                     break;
@@ -108,14 +112,12 @@ public class AvailabilityDownAlertDefinitionCache {
                 value = Boolean.FALSE;
             }
             put(key, value);
-            
+
         } catch (Exception e) {
             log.error("Could not get alert definitions for " + key, e);
         }
 
         return value;
     }
-
- 
 
 }
