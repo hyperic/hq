@@ -263,6 +263,4 @@ public interface AlertDefinitionManager {
 
     public int getActiveCount();
 
-    public void startup();
-
 }

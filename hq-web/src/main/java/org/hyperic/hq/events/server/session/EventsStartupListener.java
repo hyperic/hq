@@ -30,17 +30,14 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.StringTokenizer;
 
 import javax.annotation.PostConstruct;
 import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.PropertyNotFoundException;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.StartupListener;
-import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEvent;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.jdbc.DBUtil;
@@ -48,29 +45,55 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class EventsStartupListener
-    implements StartupListener
-{
-    private static final Log _log =
-        LogFactory.getLog(EventsStartupListener.class);
+public class EventsStartupListener implements StartupListener {
+    private static final Log _log = LogFactory.getLog(EventsStartupListener.class);
     private static final Object LOCK = new Object();
     private static AlertDefinitionChangeCallback _alertDefChangeCallback;
     private DBUtil dbUtil;
     private HQApp app;
     private ZeventEnqueuer zEventManager;
     private TriggersCreatedListener triggersCreatedListener;
-    private AlertDefinitionManager alertDefinitionManager;
-    
-    
+    private AlertConditionsSatisfiedListener alertConditionsSatisfiedListener;
+    private AvailabilityDownAlertDefinitionCache cache;
+
     @Autowired
     public EventsStartupListener(DBUtil dbUtil, HQApp app, ZeventEnqueuer zEventManager,
-                                 TriggersCreatedListener triggersCreatedListener, AlertDefinitionManager alertDefinitionManager) {
-       
+                                 TriggersCreatedListener triggersCreatedListener,
+                                 AlertConditionsSatisfiedListener alertConditionsSatisfiedListener,
+                                 AvailabilityDownAlertDefinitionCache cache) {
+
         this.dbUtil = dbUtil;
         this.app = app;
         this.zEventManager = zEventManager;
         this.triggersCreatedListener = triggersCreatedListener;
-        this.alertDefinitionManager = alertDefinitionManager;
+        this.alertConditionsSatisfiedListener = alertConditionsSatisfiedListener;
+        this.cache = cache;
+    }
+
+    private void registerAlertDefCacheCleanup() {
+        app.registerCallbackListener(AlertDefinitionChangeCallback.class, new AlertDefinitionChangeCallback() {
+            public void postCreate(AlertDefinition def) {
+                removeFromCache(def);
+            }
+
+            public void postDelete(AlertDefinition def) {
+                removeFromCache(def);
+            }
+
+            public void postUpdate(AlertDefinition def) {
+                removeFromCache(def);
+            }
+
+            private void removeFromCache(AlertDefinition def) {
+                synchronized (cache) {
+                    cache.remove(def.getAppdefEntityId());
+
+                    for (AlertDefinition childDef : def.getChildren()) {
+                        cache.remove(childDef.getAppdefEntityId());
+                    }
+                }
+            }
+        });
     }
 
     @PostConstruct
@@ -80,27 +103,22 @@ public class EventsStartupListener
         ClassicEscalationAlertType.class.getClass();
         AlertableRoleCalendarType.class.getClass();
 
-       
-
         synchronized (LOCK) {
-            _alertDefChangeCallback = (AlertDefinitionChangeCallback)
-                app.registerCallbackCaller(AlertDefinitionChangeCallback.class);
+            _alertDefChangeCallback = (AlertDefinitionChangeCallback) app
+                .registerCallbackCaller(AlertDefinitionChangeCallback.class);
         }
 
-       alertDefinitionManager.startup();
-       zEventManager.registerEventClass(AlertConditionsSatisfiedZEvent.class);
+        registerAlertDefCacheCleanup();
+        zEventManager.registerEventClass(AlertConditionsSatisfiedZEvent.class);
         Set<Class<?>> alertEvents = new HashSet<Class<?>>();
         alertEvents.add(AlertConditionsSatisfiedZEvent.class);
 
-        zEventManager.addBufferedListener(
-            alertEvents, new AlertConditionsSatisfiedListener());
-
+        zEventManager.addBufferedListener(alertEvents, alertConditionsSatisfiedListener);
 
         Set<Class<?>> triggerEvents = new HashSet<Class<?>>();
         triggerEvents.add(TriggersCreatedZevent.class);
 
-        zEventManager.addBufferedListener(
-                                                        triggerEvents, triggersCreatedListener);
+        zEventManager.addBufferedListener(triggerEvents, triggersCreatedListener);
 
         cleanupRegisteredTriggers();
     }
@@ -111,31 +129,23 @@ public class EventsStartupListener
         try {
             conn = dbUtil.getConnection();
             stmt = conn.createStatement();
-            int rows = stmt.executeUpdate(
-                "update EAM_ALERT_CONDITION set trigger_id = null " +
-                "WHERE exists (" +
-                    "select 1 from EAM_ALERT_DEFINITION WHERE deleted = '1' " +
-                    "AND EAM_ALERT_CONDITION.alert_definition_id = id" +
-                ")");
+            int rows = stmt.executeUpdate("update EAM_ALERT_CONDITION set trigger_id = null " + "WHERE exists ("
+                                          + "select 1 from EAM_ALERT_DEFINITION WHERE deleted = '1' "
+                                          + "AND EAM_ALERT_CONDITION.alert_definition_id = id" + ")");
             _log.info("disassociated " + rows + " triggers in EAM_ALERT_CONDITION" +
-                " from their deleted alert definitions");
-            rows = stmt.executeUpdate(
-                "delete from EAM_REGISTERED_TRIGGER WHERE exists (" +
-                    "select 1 from EAM_ALERT_DEFINITION WHERE deleted = '1' " +
-                    "AND EAM_REGISTERED_TRIGGER.alert_definition_id = id" +
-                ")");
+                      " from their deleted alert definitions");
+            rows = stmt.executeUpdate("delete from EAM_REGISTERED_TRIGGER WHERE exists ("
+                                      + "select 1 from EAM_ALERT_DEFINITION WHERE deleted = '1' "
+                                      + "AND EAM_REGISTERED_TRIGGER.alert_definition_id = id" + ")");
             _log.info("deleted " + rows + " rows from EAM_REGISTERED_TRIGGER");
         } catch (SQLException e) {
             _log.error(e, e);
         } catch (NamingException e) {
             _log.error(e, e);
         } finally {
-            DBUtil.closeJDBCObjects(
-                EventsStartupListener.class.getName(), conn, stmt, null);
+            DBUtil.closeJDBCObjects(EventsStartupListener.class.getName(), conn, stmt, null);
         }
     }
-
-   
 
     static AlertDefinitionChangeCallback getAlertDefinitionChangeCallback() {
         synchronized (LOCK) {

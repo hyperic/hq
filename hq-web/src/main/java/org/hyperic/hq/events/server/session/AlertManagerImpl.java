@@ -339,7 +339,7 @@ public class AlertManagerImpl implements AlertManager {
             }
 
             EscalatableCreator creator = new ClassicEscalatableCreator(alertDef, event, messagePublisher,
-                AlertManagerImpl.getOne());
+                this);
             Resource res = creator.getAlertDefinition().getResource();
             if (res == null || res.isInAsyncDeleteState()) {
                 return;
@@ -652,12 +652,7 @@ public class AlertManagerImpl implements AlertManager {
      * 
      */
     public void handleSubjectRemoval(AuthzSubject subject) {
-
         alertActionLogDAO.handleSubjectRemoval(subject);
-    }
-
-    public static AlertManager getOne() {
-        return Bootstrap.getBean(AlertManager.class);
     }
 
 }

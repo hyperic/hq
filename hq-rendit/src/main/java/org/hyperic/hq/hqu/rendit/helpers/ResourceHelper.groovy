@@ -7,8 +7,7 @@ import org.hyperic.hq.appdef.server.session.ServerManagerImpl as ServerMan
 import org.hyperic.hq.appdef.server.session.ServiceManagerImpl as ServiceMan
 import org.hyperic.hq.appdef.server.session.ApplicationManagerImpl as AppMan
 import org.hyperic.hq.escalation.server.session.EscalationManagerImpl as EscMan
-import org.hyperic.hq.events.server.session.AlertManagerImpl as AlertMan
-import org.hyperic.hq.events.server.session.AlertDefinitionManagerImpl as AlertDefMan
+
 
 
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException
