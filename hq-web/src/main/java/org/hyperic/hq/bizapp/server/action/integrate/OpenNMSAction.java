@@ -33,7 +33,6 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.appdef.server.session.PlatformManagerImpl;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
@@ -51,7 +50,7 @@ import org.hyperic.hq.events.ActionInterface;
 import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.events.AlertInterface;
 import org.hyperic.hq.events.InvalidActionDataException;
-import org.hyperic.hq.hqu.RenditServerImpl;
+import org.hyperic.hq.hqu.RenditServer;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.InvalidOptionException;
@@ -186,7 +185,7 @@ public class OpenNMSAction implements ActionInterface {
         File templateFile = new File(templateDir, filename);
         StringWriter output = new StringWriter();
         try {
-            RenditServerImpl.getInstance().renderTemplate(templateFile, params, 
+            Bootstrap.getBean(RenditServer.class).renderTemplate(templateFile, params, 
                                                       output);
             
             if (_log.isDebugEnabled())
