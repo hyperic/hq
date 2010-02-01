@@ -2,8 +2,8 @@ package org.hyperic.hq.hqu.rendit.metaclass
 
 import org.hyperic.hq.product.MetricValue
 import org.hyperic.hq.measurement.UnitsConvert
-import org.hyperic.hq.measurement.server.session.TemplateManagerImpl
 import org.hyperic.hq.measurement.shared.MeasurementManager;
+import org.hyperic.hq.measurement.shared.TemplateManager;
 import org.hyperic.hq.measurement.server.session.Measurement
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.shared.DataManager;
@@ -15,7 +15,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject
 
 class MetricCategory {
     private static dataMan = Bootstrap.getBean(DataManager.class)
-    private static tmplMan = TemplateManagerImpl.one
+    private static tmplMan = Bootstrap.getBean(TemplateManager.class)
     private static measMan = Bootstrap.getBean(MeasurementManager.class)
 
     static String urlFor(Measurement d, Map context) {

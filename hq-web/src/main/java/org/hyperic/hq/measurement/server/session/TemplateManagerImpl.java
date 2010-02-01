@@ -51,7 +51,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.shared.SRNManager;
@@ -66,8 +65,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * The TemplateManager can be used to
- * interact with Templates
+ * The TemplateManager can be used to interact with Templates
  */
 @Service
 @Transactional
@@ -555,9 +553,5 @@ public class TemplateManagerImpl implements TemplateManager {
                 template.setDesignate(designated);
             }
         }
-    }
-
-    public static TemplateManager getOne() {
-        return Bootstrap.getBean(TemplateManager.class);
     }
 }

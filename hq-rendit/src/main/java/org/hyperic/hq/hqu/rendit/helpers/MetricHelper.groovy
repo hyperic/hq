@@ -1,9 +1,9 @@
 package org.hyperic.hq.hqu.rendit.helpers
 
 import org.hyperic.hq.context.Bootstrap;
-import org.hyperic.hq.measurement.server.session.TemplateManagerImpl
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate
 import org.hyperic.hq.measurement.shared.MeasurementManager;
+import org.hyperic.hq.measurement.shared.TemplateManager;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplateSortField
 import org.hyperic.hibernate.PageInfo
 import org.hyperic.hq.authz.server.session.AuthzSubject
@@ -11,7 +11,7 @@ import org.hyperic.hq.measurement.server.session.Measurement
 import org.hyperic.util.pager.PageControl
 
 class MetricHelper extends BaseHelper {
-    private tmplMan = TemplateManagerImpl.one
+    private tmplMan = Bootstrap.getBean(TemplateManager.class)
     private measMan = Bootstrap.getBean(MeasurementManager.class)
 
     MetricHelper(AuthzSubject user) {

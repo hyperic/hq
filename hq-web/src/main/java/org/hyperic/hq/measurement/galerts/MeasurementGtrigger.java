@@ -47,6 +47,7 @@ import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.SimpleAlertAuxLog;
 import org.hyperic.hq.galerts.processor.FireReason;
 import org.hyperic.hq.galerts.processor.Gtrigger;
@@ -56,7 +57,6 @@ import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementManagerImpl;
 import org.hyperic.hq.measurement.server.session.MeasurementScheduleZevent;
 import org.hyperic.hq.measurement.server.session.MeasurementZevent;
-import org.hyperic.hq.measurement.server.session.TemplateManagerImpl;
 import org.hyperic.hq.measurement.server.session.MeasurementScheduleZevent.MeasurementScheduleZeventSource;
 import org.hyperic.hq.measurement.server.session.MeasurementZevent.MeasurementZeventPayload;
 import org.hyperic.hq.measurement.server.session.MeasurementZevent.MeasurementZeventSource;
@@ -750,7 +750,7 @@ public class MeasurementGtrigger
         _interestedEvents.clear();
         ResourceGroupManager gMan = ResourceGroupManagerImpl.getOne(); 
         AuthzSubjectManager sMan = AuthzSubjectManagerImpl.getOne(); 
-        TemplateManager tMan = TemplateManagerImpl.getOne(); 
+        TemplateManager tMan = Bootstrap.getBean(TemplateManager.class); 
             
         try {
             ResourceGroup g = gMan.findResourceGroupById(sMan.getOverlordPojo(),
