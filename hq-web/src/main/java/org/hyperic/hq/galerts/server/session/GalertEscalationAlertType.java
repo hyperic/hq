@@ -29,6 +29,7 @@ import java.util.Iterator;
 import java.util.ResourceBundle;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationAlertType;
@@ -52,7 +53,7 @@ public final class GalertEscalationAlertType
     private GalertManager getGalertMan() {
         synchronized (INIT_LOCK) {
             if (_alertMan == null) {
-                _alertMan = GalertManagerImpl.getOne();
+                _alertMan = Bootstrap.getBean(GalertManager.class);
             }
         }
         return _alertMan;

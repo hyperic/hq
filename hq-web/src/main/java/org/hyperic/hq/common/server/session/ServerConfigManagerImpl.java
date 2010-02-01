@@ -34,7 +34,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
@@ -49,7 +48,6 @@ import org.hyperic.hq.common.ConfigProperty;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManager;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.StringUtil;
@@ -107,56 +105,18 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
     protected final Log log = LogFactory.getLog(LOG_CTX);
     private ConfigPropertyDAO configPropertyDAO;
     private ServerConfigAuditFactory serverConfigAuditFactory;
+    private ServerConfigCache serverConfigCache;
 
     @Autowired
     public ServerConfigManagerImpl(DBUtil dbUtil, AuthzSubjectManager authzSubjectManager,
-                                   ConfigPropertyDAO configPropertyDAO, ServerConfigAuditFactory serverConfigAuditFactory) {
+                                   ConfigPropertyDAO configPropertyDAO,
+                                   ServerConfigAuditFactory serverConfigAuditFactory,
+                                   ServerConfigCache serverConfigCache) {
         this.dbUtil = dbUtil;
         this.authzSubjectManager = authzSubjectManager;
         this.configPropertyDAO = configPropertyDAO;
         this.serverConfigAuditFactory = serverConfigAuditFactory;
-    }
-
-    /**
-     * Get the "root" server configuration, that means those keys that have the
-     * NULL prefix.
-     * @return Properties
-     * 
-     */
-    public Properties getConfig() throws ConfigPropertyException {
-        return getConfig(null);
-    }
-
-    /**
-     * Get the server configuration
-     * @param prefix The prefix of the configuration to retrieve.
-     * @return Properties
-     * 
-     */
-    public Properties getConfig(String prefix) throws ConfigPropertyException {
-
-        Collection<ConfigProperty> allProps = getProps(prefix);
-        Properties props = new Properties();
-
-        for (ConfigProperty configProp : allProps) {
-            String key = configProp.getKey();
-            // Check if the key has a value
-            if (configProp.getValue() != null && configProp.getValue().length() != 0) {
-                props.setProperty(key, configProp.getValue());
-            } else {
-                // Use defaults
-                if (configProp.getDefaultValue() != null) {
-                    props.setProperty(key, configProp.getDefaultValue());
-                } else {
-                    // Otherwise return an empty key. We dont want to
-                    // prune any keys from the config.
-                    props.setProperty(key, "");
-                }
-            }
-        }
-
-        return props;
-
+        this.serverConfigCache = serverConfigCache;
     }
 
     private void createChangeAudit(AuthzSubject subject, String key, String oldVal, String newVal) {
@@ -255,14 +215,13 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
      */
     public void setConfig(AuthzSubject subject, String prefix, Properties newProps) throws ApplicationException,
         ConfigPropertyException {
-        ServerConfigCache cache = ServerConfigCache.getInstance();
 
         Properties tempProps = new Properties();
         tempProps.putAll(newProps);
 
         // get all properties
-        Collection<ConfigProperty> allProps = getProps(prefix);
-      
+        Collection<ConfigProperty> allProps = serverConfigCache.getProps(prefix);
+
         createChangeAudits(subject, allProps, newProps);
         for (ConfigProperty configProp : allProps) {
 
@@ -274,11 +233,11 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
                 // delete null values from prefixed properties
                 if (prefix != null && (propValue == null || propValue.equals("NULL"))) {
                     configPropertyDAO.remove(configProp);
-                    cache.remove(key);
+                    serverConfigCache.remove(key);
                 } else {
                     // non-prefixed properties never get deleted.
                     configProp.setValue(propValue);
-                    cache.put(key, propValue);
+                    serverConfigCache.put(key, propValue);
                 }
             } else if (prefix == null) {
                 // Bomb out if props are missing for non-prefixed properties
@@ -294,7 +253,7 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
                 String propValue = tempProps.getProperty(key);
                 // create the new property
                 configPropertyDAO.create(prefix, key, propValue, propValue);
-                cache.put(key, propValue);
+                serverConfigCache.put(key, propValue);
             }
         }
 
@@ -475,14 +434,6 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
         return configPropertyDAO.findAll();
     }
 
-    private Collection<ConfigProperty> getProps(String prefix) {
-        if (prefix == null) {
-            return configPropertyDAO.findAll();
-        } else {
-            return configPropertyDAO.findByPrefix(prefix);
-        }
-    }
-
     /**
      * Gets the GUID for this HQ server instance. The GUID is persistent for the
      * duration of an HQ install and is created upon the first call of this
@@ -515,20 +466,12 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
         return res;
     }
 
-    private InitialContext ic = null;
-
-    protected InitialContext getInitialContext() {
-        if (ic == null) {
-            try {
-                ic = new InitialContext();
-            } catch (NamingException e) {
-                throw new SystemException(e);
-            }
-        }
-        return ic;
+    public Properties getConfig() throws ConfigPropertyException {
+        return serverConfigCache.getConfig();
     }
 
-    public static ServerConfigManager getOne() {
-        return Bootstrap.getBean(ServerConfigManager.class);
+    public Properties getConfig(String prefix) throws ConfigPropertyException {
+        return serverConfigCache.getConfig(prefix);
     }
+
 }

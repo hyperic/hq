@@ -67,7 +67,7 @@ public abstract class Plugin extends MenuPage implements PageBeginRenderListener
                 .getParameter(RequestKeyConstants.PLUGIN_ID_PARAM);
         
         // Lookup the plugin
-        ProductBoss pBoss = ProductBossImpl.getOne();
+        ProductBoss pBoss = Bootstrap.getBean(ProductBoss.class);
         String baseUrl = null;
         int sessionId;
         AttachmentDescriptor attachDesc = null;

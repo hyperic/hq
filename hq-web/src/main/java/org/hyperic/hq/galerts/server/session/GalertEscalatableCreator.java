@@ -30,29 +30,27 @@ import org.hyperic.hq.escalation.server.session.EscalatableCreator;
 import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.galerts.shared.GalertManager;
 
-class GalertEscalatableCreator 
-    implements EscalatableCreator
-{
-    private static final GalertManager _gMan = 
-        GalertManagerImpl.getOne();
-    
-    private GalertDef          _def;
-    private ExecutionReason    _reason;
-    
-    GalertEscalatableCreator(GalertDef def, ExecutionReason reason) {
-        _def    = def;
-        _reason = reason;
+class GalertEscalatableCreator implements EscalatableCreator {
+    private final GalertManager galertManager;
+
+    private GalertDef definition;
+    private ExecutionReason reason;
+
+    GalertEscalatableCreator(GalertManager galertManager, GalertDef defintion, ExecutionReason reason) {
+        this.galertManager = galertManager;
+        this.definition = defintion;
+        this.reason = reason;
     }
-    
+
     public Escalatable createEscalatable() throws ResourceDeletedException {
-        return new GalertEscalatable(_gMan.createAlertLog(_def, _reason));
+        return new GalertEscalatable(galertManager.createAlertLog(definition, reason));
     }
-    
+
     static Escalatable createEscalatable(GalertLog log) {
         return new GalertEscalatable(log);
     }
 
     public AlertDefinitionInterface getAlertDefinition() {
-        return _def;
+        return definition;
     }
 }

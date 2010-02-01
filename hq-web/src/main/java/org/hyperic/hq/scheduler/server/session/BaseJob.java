@@ -32,6 +32,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.hibernate.SessionManager;
 import org.hyperic.util.StringUtil;
 import org.quartz.Job;
@@ -53,7 +54,7 @@ public abstract class BaseJob implements Job {
     
     protected AuthzSubjectManager getSubjectManager() {
         if (manager == null)
-            manager = AuthzSubjectManagerImpl.getOne();
+            manager = Bootstrap.getBean(AuthzSubjectManager.class);
         return manager;
     }
     

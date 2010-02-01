@@ -114,8 +114,7 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss {
                                     MeasurementManager measurementManager, DataManager dataManager,
                                     MeasurementBoss measurementBoss, ResourceGroupManager resourceGroupManager,
                                     GalertManager galertManager, AlertManager alertManager,
-                                    AlertDefinitionManager alertDefinitionManager,
-                                    EscalationManager escalationManager) {
+                                    AlertDefinitionManager alertDefinitionManager, EscalationManager escalationManager) {
         this.permissionManager = permissionManager;
         this.resourceManager = resourceManager;
         this.measurementManager = measurementManager;
@@ -292,7 +291,7 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss {
         }
     }
 
-    private String getResourceStatus(AuthzSubject subj, ResourceGroup group, long range)  {
+    private String getResourceStatus(AuthzSubject subj, ResourceGroup group, long range) {
         boolean debug = log.isDebugEnabled();
         long now = System.currentTimeMillis();
         StopWatch watch = new StopWatch(now);
@@ -360,7 +359,7 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss {
         return ALERT_UNKNOWN;
     }
 
-    private boolean isAckd(AuthzSubject subj, Alert alert)  {
+    private boolean isAckd(AuthzSubject subj, Alert alert) {
         AlertDefinition alertDef = alert.getAlertDefinition();
         // a resource alert may not have an associated escalation
         Escalation esc = alertDef.getEscalation();
@@ -370,10 +369,6 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss {
 
         EscalationState state = escalationManager.findEscalationState(alertDef);
         return state != null && state.getAcknowledgedBy() != null;
-    }
-
-    public static DashboardPortletBoss getOne() {
-        return Bootstrap.getBean(DashboardPortletBoss.class);
     }
 
 }

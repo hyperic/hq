@@ -35,6 +35,7 @@ import org.hyperic.hq.appdef.server.session.PlatformManagerImpl;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.context.Bootstrap;
@@ -83,7 +84,7 @@ public abstract class ControlJob extends BaseJob {
             ControlCommandsClient client =
                Bootstrap.getBean(ControlCommandsClientFactory.class).getClient(id);
             String pluginName  = id.toString();
-            String productName = PlatformManagerImpl.getOne()
+            String productName = Bootstrap.getBean(PlatformManager.class)
                 .getPlatformPluginName(id);
 
             ControlScheduleManager cLocal =

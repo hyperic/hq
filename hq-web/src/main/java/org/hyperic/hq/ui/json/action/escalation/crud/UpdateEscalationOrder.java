@@ -30,59 +30,61 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationAction;
-import org.hyperic.hq.escalation.server.session.EscalationManagerImpl;
 import org.hyperic.hq.escalation.shared.EscalationManager;
 import org.hyperic.hq.ui.json.action.JsonActionContext;
 import org.hyperic.hq.ui.json.action.escalation.BaseAction;
 import org.json.JSONException;
+import org.springframework.beans.factory.annotation.Autowired;
 
-public class UpdateEscalationOrder extends BaseAction {
-    private final Log _log = LogFactory.getLog(UpdateEscalationOrder.class);
+public class UpdateEscalationOrder
+    extends BaseAction {
 
-    public void execute(JsonActionContext context)
-        throws PermissionException, SessionTimeoutException,
-               SessionNotFoundException, JSONException, RemoteException 
-    {
+    private EscalationManager escalationManager;
+
+    @Autowired
+    public UpdateEscalationOrder(EscalationManager escalationManager) {
+        super();
+        this.escalationManager = escalationManager;
+    }
+
+    public void execute(JsonActionContext context) throws PermissionException, SessionTimeoutException,
+        SessionNotFoundException, JSONException, RemoteException {
         Map map = context.getParameterMap();
-        
+
         if (map.get(ID) == null) {
             throw new IllegalArgumentException("Escalation id not found");
         }
-        
+
         Integer id = context.getId();
         String[] sOrder = (String[]) map.get("viewEscalationUL[]");
-        
-        EscalationManager eMan = EscalationManagerImpl.getOne();
-        Escalation esc = eMan.findById(id);
-        List actions   = new ArrayList(sOrder.length);
-        
-        for (int i=0; i<sOrder.length; i++) {
+
+        Escalation esc = escalationManager.findById(id);
+        List actions = new ArrayList(sOrder.length);
+
+        for (int i = 0; i < sOrder.length; i++) {
             EscalationAction action;
             Integer actionId;
-            
+
             try {
                 actionId = Integer.valueOf(sOrder[i]);
-            } catch(NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 throw new SystemException("Bad order", e);
             }
-            
+
             action = esc.getAction(actionId);
             if (action == null) {
-                throw new IllegalArgumentException("Escalation does not " + 
-                                                   "contain an action with " +
-                                                   "id=" + actionId);
+                throw new IllegalArgumentException("Escalation does not " + "contain an action with " + "id=" +
+                                                   actionId);
             }
             actions.add(action);
         }
-        
-        eMan.updateEscalationOrder(esc, actions);
+
+        escalationManager.updateEscalationOrder(esc, actions);
     }
 }

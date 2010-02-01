@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat
 
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.Resource
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.authz.server.session.ResourceManagerImpl
 import org.hyperic.hq.appdef.shared.AppdefEntityID
@@ -415,7 +416,7 @@ abstract class BaseController {
         }
         
         def id = new AppdefEntityID(aeid)
-        ResourceManagerImpl.one.findResource(id)
+        Bootstrap.getBean(ResourceManager.class).findResource(id)
     }
 
     /**

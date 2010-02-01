@@ -7,8 +7,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.authz.server.session.Resource
-import org.hyperic.hq.authz.server.session.ResourceManagerImpl as rme
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.server.session.Measurement
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate
@@ -67,9 +67,9 @@ class SaascenterController extends BaseController
     private List<CloudProvider> getProviders() {
         if (!_providers) {
             _providers = []
-            if (rme.one.resourcesExistOfType('AWS'))
+            if (Bootstrap.getBean(ResourceManager.class).resourcesExistOfType('AWS'))
                 _providers += new AWSProvider()
-            if (rme.one.resourcesExistOfType('Salesforce.com'))
+            if (Bootstrap.getBean(ResourceManager.class).resourcesExistOfType('Salesforce.com'))
                 _providers += new SalesforceProvider()
             _providers.each { it.init(user) }
         }

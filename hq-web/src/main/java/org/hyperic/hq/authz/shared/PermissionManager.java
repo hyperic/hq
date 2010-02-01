@@ -595,7 +595,7 @@ public abstract class PermissionManager {
      *        AuthzConstants)
      */
     protected ResourceType getResourceType(String resType) throws NotFoundException{
-        return ResourceManagerImpl.getOne().findResourceTypeByName(resType);
+        return Bootstrap.getBean(ResourceManager.class).findResourceTypeByName(resType);
     }
 
     /**

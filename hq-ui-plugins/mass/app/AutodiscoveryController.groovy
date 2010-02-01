@@ -1,12 +1,12 @@
 import org.hyperic.hq.hqu.rendit.BaseController
 import org.hyperic.hq.appdef.shared.AIQueueManager
 import org.hyperic.util.pager.PageControl
-import org.hyperic.hq.appdef.server.session.AIQueueManagerImpl as AIQMan
 import org.hyperic.hq.appdef.shared.AIPlatformValue
 import org.hyperic.hq.appdef.shared.AIQueueConstants
 import org.hyperic.hq.appdef.server.session.Platform
 import org.hyperic.hq.appdef.server.session.Server
 import org.hyperic.hq.authz.server.session.AuthzSubject
+import org.hyperic.hq.context.Bootstrap;
 
 class AutodiscoveryController extends BaseController {
 
@@ -20,7 +20,7 @@ class AutodiscoveryController extends BaseController {
 
         String fqdn = params.getOne('fqdn')
 
-        def list = AIQMan.one.getQueue(user, true, true, 
+        def list = Bootstrap.getBean(AIQueueManager.class).getQueue(user, true, true, 
                                        false, PageControl.PAGE_ALL)
 
         List matching = getMatchingPlatforms(list, fqdn)
@@ -54,7 +54,7 @@ class AutodiscoveryController extends BaseController {
 
         String fqdn = params.getOne('fqdn')
 
-        AIQueueManager aiMan = AIQMan.one
+        AIQueueManager aiMan = Bootstrap.getBean(AIQueueManager.class)
 
         def list = aiMan.getQueue(user, true, true, 
                                   false, PageControl.PAGE_ALL)

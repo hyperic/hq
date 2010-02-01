@@ -109,7 +109,7 @@ public class EmailAction extends EmailActionConfig
     private ResourceDAO resourceDAO = Bootstrap.getBean(ResourceDAO.class);
 
     static {
-        ServerConfigManager sConf = ServerConfigManagerImpl.getOne();
+        ServerConfigManager sConf = Bootstrap.getBean(ServerConfigManager.class);
         int tmp = 0;
         try {
             final Properties props = sConf.getConfig();
@@ -146,7 +146,7 @@ public class EmailAction extends EmailActionConfig
     }
 
     protected final AuthzSubjectManager getSubjMan() {
-        return AuthzSubjectManagerImpl.getOne();
+        return Bootstrap.getBean(AuthzSubjectManager.class);
     }
 
     private String renderTemplate(String filename, Map params) {
@@ -204,7 +204,7 @@ public class EmailAction extends EmailActionConfig
         throws ActionExecuteException
     {
         try {
-            if (!AlertRegulator.getInstance().alertNotificationsAllowed()) {
+            if (!Bootstrap.getBean(AlertRegulator.class).alertNotificationsAllowed()) {
                 return ResourceBundle.getBundle(BUNDLE)
                             .getString("action.email.error.notificationDisabled");
             }
@@ -414,7 +414,7 @@ public class EmailAction extends EmailActionConfig
     }
 
     private static final EmailManager getEmailMan() {
-        return EmailManagerImpl.getOne();
+        return Bootstrap.getBean(EmailManager.class);
     }
 
     private static final long now() {

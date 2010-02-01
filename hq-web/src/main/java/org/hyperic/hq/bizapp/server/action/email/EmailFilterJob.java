@@ -28,6 +28,8 @@ package org.hyperic.hq.bizapp.server.action.email;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.bizapp.server.session.EmailManagerImpl;
+import org.hyperic.hq.bizapp.shared.EmailManager;
+import org.hyperic.hq.context.Bootstrap;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -48,6 +50,6 @@ public class EmailFilterJob implements Job {
         JobDataMap dataMap = context.getJobDetail().getJobDataMap();
         Integer appId = new Integer(dataMap.getString(APP_ID));
 
-        EmailManagerImpl.getOne().sendFiltered(appId);
+        Bootstrap.getBean(EmailManager.class).sendFiltered(appId);
     }
 }

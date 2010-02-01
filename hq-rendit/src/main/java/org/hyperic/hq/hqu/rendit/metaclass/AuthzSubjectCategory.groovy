@@ -4,15 +4,15 @@ package org.hyperic.hq.hqu.rendit.metaclass
 import org.hyperic.hq.auth.shared.AuthManager;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.auth.shared.SessionManager
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory
 import org.hyperic.hq.authz.server.session.AuthzSubject
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl as SubMan
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.util.config.ConfigResponse
 
 class AuthzSubjectCategory {
 
-    static subMan = SubMan.one
+    static subMan = Bootstrap.getBean(AuthzSubjectManager.class)
     static authMan = Bootstrap.getBean(AuthManager.class)
     static authzBoss = Bootstrap.getBean(AuthzBoss.class)
 

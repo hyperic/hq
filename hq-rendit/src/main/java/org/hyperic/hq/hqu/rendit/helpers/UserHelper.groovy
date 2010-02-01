@@ -3,8 +3,9 @@ package org.hyperic.hq.hqu.rendit.helpers
 import java.util.List
 
 
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl as SubjectMan
+
 import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.auth.shared.AuthManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject
 
@@ -12,7 +13,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject
  * The UserHelper can be used to find Users in the HQ system.
  */
 class UserHelper extends BaseHelper {
-    private subjectMan = SubjectMan.one
+    private subjectMan = Bootstrap.getBean(AuthzSubjectManager.class)
     private authMan = Bootstrap.getBean(AuthManager.class)
 
     UserHelper(AuthzSubject user) {

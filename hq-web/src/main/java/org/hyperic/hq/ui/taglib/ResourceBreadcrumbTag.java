@@ -339,7 +339,7 @@ public class ResourceBreadcrumbTag extends TagSupport {
             ((parent.isPlatform() && child.isServer()) ||
              (parent.isPlatform() && child.isService()) ||
              (parent.isServer() && child.isService()))) {
-            ResourceManager resourceManager = ResourceManagerImpl.getOne();
+            ResourceManager resourceManager =Bootstrap.getBean(ResourceManager.class);
             Resource parentResource = resourceManager.findResource(parent.getAppdefEntityId());
             Resource childResource = resourceManager.findResource(child.getAppdefEntityId());
     
@@ -355,7 +355,7 @@ public class ResourceBreadcrumbTag extends TagSupport {
         if ((parent.isPlatform() || 
              parent.isServer()   || 
              parent.isApplication()) && group.isAutoGroup()) {
-            ResourceManager resourceManager = ResourceManagerImpl.getOne();
+            ResourceManager resourceManager =Bootstrap.getBean(ResourceManager.class);
             Resource parentResource = resourceManager.findResource(parent.getAppdefEntityId());
             Resource parentOfAutoGroupResource = resourceManager.findResource(new AppdefEntityID(group.getResourceId()));
     
@@ -382,10 +382,10 @@ public class ResourceBreadcrumbTag extends TagSupport {
         boolean result = false;
         
         if (group.isGroup()) {
-            ResourceManager resourceManager = ResourceManagerImpl.getOne();
+            ResourceManager resourceManager =Bootstrap.getBean(ResourceManager.class);
             Resource groupResource = resourceManager.findResource(group.getAppdefEntityId());
             Resource memberResource = resourceManager.findResource(member.getAppdefEntityId());
-            ResourceGroupManager resourceGroupManager = ResourceGroupManagerImpl.getOne();
+            ResourceGroupManager resourceGroupManager = Bootstrap.getBean(ResourceGroupManager.class);
             ResourceGroup resourceGroup = resourceGroupManager.getResourceGroupByResource(groupResource);
             
             result = resourceGroupManager.isMember(resourceGroup, memberResource);
@@ -410,7 +410,7 @@ public class ResourceBreadcrumbTag extends TagSupport {
             ServletContext ctx = pageContext.getServletContext();
             AppdefBoss appdefBoss = Bootstrap.getBean(AppdefBoss.class);
             int sessionId = RequestUtils.getSessionId(request).intValue();
-            ResourceManager resourceManager = ResourceManagerImpl.getOne();
+            ResourceManager resourceManager =Bootstrap.getBean(ResourceManager.class);
             AppdefResourceTypeValue autoGroupResourceType = appdefBoss.findResourceTypeById(sessionId, (AppdefEntityTypeID) group.getAppdefEntityId());
             Resource memberResource = resourceManager.findResource(member.getAppdefEntityId());
 

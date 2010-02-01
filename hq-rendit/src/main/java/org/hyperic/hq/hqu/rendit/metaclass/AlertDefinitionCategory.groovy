@@ -1,11 +1,14 @@
 package org.hyperic.hq.hqu.rendit.metaclass
 
 
+import org.hyperic.hq.escalation.shared.EscalationManager;
 import org.hyperic.hq.events.server.session.AlertDefinition
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.escalation.server.session.Escalation
-import org.hyperic.hq.escalation.server.session.EscalationManagerImpl as EscMan
+import org.hyperic.hq.appdef.shared.PlatformManager;
+import org.hyperic.hq.appdef.shared.ServerManager;
+import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants
@@ -22,7 +25,7 @@ class AlertDefinitionCategory {
     }
 
     static void unsetEscalation(AlertDefinition d, AuthzSubject s) {
-        EscMan.one.setEscalation(ClassicEscalationAlertType.CLASSIC, d.getId(),
+        Bootstrap.getBean(EscalationManager.class).setEscalation(ClassicEscalationAlertType.CLASSIC, d.getId(),
                                  null)
     }
 
@@ -69,11 +72,11 @@ class AlertDefinitionCategory {
             appdefId = d.resource.prototype.instanceId
             
         if (d.appdefType == AppdefEntityConstants.APPDEF_TYPE_PLATFORM) {
-            return PlatformManagerImpl.one.findPlatformType(appdefId)
+            return Bootstrap.getBean(PlatformManager).findPlatformType(appdefId)
         } else if (d.appdefType == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
-            return ServerManagerImpl.one.findServerType(appdefId)
+            return Bootstrap.getBean(ServerManager.class).findServerType(appdefId)
         } else if (d.appdefType == AppdefEntityConstants.APPDEF_TYPE_SERVICE) {
-            return ServiceManagerImpl.one.findServiceType(appdefId)
+            return Bootstrap.getBean(ServiceManager.class).findServiceType(appdefId)
         } else {
             throw new RuntimeException("Unhandled appdef type: ${appdefId}")
         }

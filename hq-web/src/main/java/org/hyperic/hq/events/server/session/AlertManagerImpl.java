@@ -108,6 +108,8 @@ public class AlertManagerImpl implements AlertManager {
     private EscalationManager escalationManager;
 
     private MessagePublisher messagePublisher;
+    
+    private AlertRegulator alertRegulator;
 
     @Autowired
     public AlertManagerImpl(AlertPermissionManager alertPermissionManager, AlertDefinitionDAO alertDefDao,
@@ -115,7 +117,7 @@ public class AlertManagerImpl implements AlertManager {
                             AlertConditionDAO alertConditionDAO, MeasurementDAO measurementDAO,
                             ResourceManager resourceManager, AlertDefinitionManager alertDefinitionManager,
                             AuthzSubjectManager authzSubjectManager, EscalationManager escalationManager,
-                            MessagePublisher messagePublisher) {
+                            MessagePublisher messagePublisher, AlertRegulator alertRegulator) {
         this.alertPermissionManager = alertPermissionManager;
         this.alertDefDao = alertDefDao;
         this.alertActionLogDAO = alertActionLogDAO;
@@ -126,7 +128,7 @@ public class AlertManagerImpl implements AlertManager {
         this.alertDefinitionManager = alertDefinitionManager;
         this.authzSubjectManager = authzSubjectManager;
         this.escalationManager = escalationManager;
-
+        this.alertRegulator = alertRegulator;
         this.messagePublisher = messagePublisher;
     }
 
@@ -314,7 +316,7 @@ public class AlertManagerImpl implements AlertManager {
      * 
      */
     public void fireAlert(AlertConditionsSatisfiedZEvent event) {
-        if (!AlertRegulator.getInstance().alertsAllowed()) {
+        if (!alertRegulator.alertsAllowed()) {
             log.debug("Alert not firing because they are not allowed");
             return;
         }

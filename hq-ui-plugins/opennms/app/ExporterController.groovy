@@ -1,8 +1,10 @@
 import java.text.SimpleDateFormat
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hibernate.PageInfo
+import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.hqu.rendit.BaseController
 import org.hyperic.hq.authz.server.session.ResourceSortField
-import org.hyperic.hq.appdef.server.session.PlatformManagerImpl as PlatMan
+
 
 class ExporterController 
 	extends BaseController
@@ -14,7 +16,7 @@ class ExporterController
     def list(xml, params) {
         def formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
         def platforms = resourceHelper.findPlatforms(new PageInfo(ResourceSortField.NAME, true));
-        def man = PlatMan.one
+        def man = Bootstrap.getBean(PlatformManager.class)
         xml.'model-import'('foreign-source':'HQ', 'date-stamp':formatter.format(new Date())) {
             platforms.each { res ->   
                 def p = man.findPlatformById(res.instanceId)

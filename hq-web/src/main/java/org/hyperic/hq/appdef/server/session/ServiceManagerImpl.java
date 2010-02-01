@@ -73,7 +73,6 @@ import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
@@ -228,7 +227,7 @@ public class ServiceManagerImpl implements ServiceManager {
                 .findResourceTypeByName(AuthzConstants.serviceResType), target.getId(),
                 AuthzConstants.serviceOpRemoveService);
         } catch (NotFoundException e) {
-           throw new VetoException("Caught NotFoundException checking permission: " + e.getMessage()); // notgonnahappen
+            throw new VetoException("Caught NotFoundException checking permission: " + e.getMessage()); // notgonnahappen
         }
 
         // Check arguments
@@ -265,8 +264,8 @@ public class ServiceManagerImpl implements ServiceManager {
      * 
      */
     public Service createService(AuthzSubject subject, Integer serverId, Integer serviceTypeId, String name,
-                                 String desc, String location) throws ValidationException,
-        PermissionException, ServerNotFoundException, AppdefDuplicateNameException {
+                                 String desc, String location) throws ValidationException, PermissionException,
+        ServerNotFoundException, AppdefDuplicateNameException {
         Server server = serverDAO.findById(serverId);
         ServiceType serviceType = serviceTypeDAO.findById(serviceTypeId);
         return createService(subject, server, serviceType, name, desc, location, null);
@@ -343,7 +342,7 @@ public class ServiceManagerImpl implements ServiceManager {
             return (Integer[]) serviceIds.toArray(new Integer[0]);
         } catch (NotFoundException e) {
             // There are no viewable servers
-           return new Integer[0];
+            return new Integer[0];
         }
     }
 
@@ -465,7 +464,7 @@ public class ServiceManagerImpl implements ServiceManager {
      * 
      */
     public PageList<ServiceTypeValue> getViewableServiceTypes(AuthzSubject subject, PageControl pc)
-        throws  PermissionException, NotFoundException {
+        throws PermissionException, NotFoundException {
         // build the server types from the visible list of servers
         final List<Integer> authzPks = getViewableServices(subject);
         final Collection<ServiceType> serviceTypes = serviceDAO.getServiceTypes(authzPks, true);
@@ -502,8 +501,8 @@ public class ServiceManagerImpl implements ServiceManager {
      * @return A List of ServiceValue objects representing all of the services
      *         that the given subject is allowed to view.
      */
-    public PageList<ServiceValue> getAllServices(AuthzSubject subject, PageControl pc) throws 
-        PermissionException, NotFoundException {
+    public PageList<ServiceValue> getAllServices(AuthzSubject subject, PageControl pc) throws PermissionException,
+        NotFoundException {
         // valuePager converts local/remote interfaces to value objects
         // as it pages through them.
         return valuePager.seek(getViewableServices(subject, pc), pc);
@@ -514,8 +513,8 @@ public class ServiceManagerImpl implements ServiceManager {
      * @return List of ServiceLocals for which subject has
      *         AuthzConstants.serviceOpViewService
      */
-    private Collection<Service> getViewableServices(AuthzSubject subject, PageControl pc) throws 
-        PermissionException, NotFoundException {
+    private Collection<Service> getViewableServices(AuthzSubject subject, PageControl pc) throws PermissionException,
+        NotFoundException {
         // get list of pks user can view
         final Collection<Integer> authzPks = getViewableServices(subject);
         List<Service> services;
@@ -659,8 +658,8 @@ public class ServiceManagerImpl implements ServiceManager {
      *         set of service inventory that the subject is authorized to see.
      *         This includes all services as well as all clusters
      */
-    protected List<AppdefEntityID> getViewableServiceInventory(AuthzSubject whoami) throws 
-        PermissionException, NotFoundException {
+    protected List<AppdefEntityID> getViewableServiceInventory(AuthzSubject whoami) throws PermissionException,
+        NotFoundException {
         List<Integer> idList = getViewableServices(whoami);
         List<AppdefEntityID> ids = new ArrayList<AppdefEntityID>();
         for (int i = 0; i < idList.size(); i++) {
@@ -685,7 +684,7 @@ public class ServiceManagerImpl implements ServiceManager {
      * @return List of ServicePK's for which subject has
      *         AuthzConstants.serviceOpViewService
      */
-    protected List<Integer> getViewableServices(AuthzSubject whoami) throws  PermissionException, NotFoundException {
+    protected List<Integer> getViewableServices(AuthzSubject whoami) throws PermissionException, NotFoundException {
 
         Operation op = getOperationByName(resourceManager.findResourceTypeByName(AuthzConstants.serviceResType),
             AuthzConstants.serviceOpViewService);
@@ -1273,7 +1272,7 @@ public class ServiceManagerImpl implements ServiceManager {
     /**
      * 
      */
-    public void updateServiceTypes(String plugin, ServiceTypeInfo[] infos) throws  VetoException, NotFoundException {
+    public void updateServiceTypes(String plugin, ServiceTypeInfo[] infos) throws VetoException, NotFoundException {
         AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
 
         // First, put all of the infos into a Hash
@@ -1322,7 +1321,7 @@ public class ServiceManagerImpl implements ServiceManager {
                             svrtype = serverTypeDAO.findByName(sinfo.getServerName());
                             if (svrtype == null) {
                                 throw new NotFoundException("Unable to find server " + sinfo.getServerName() +
-                                                          " on which service '" + serviceType.getName() + "' relies");
+                                                            " on which service '" + serviceType.getName() + "' relies");
                             }
                             serverTypes.put(svrtype.getName(), svrtype);
                         }
@@ -1429,8 +1428,7 @@ public class ServiceManagerImpl implements ServiceManager {
      * ServerManager.removeServer when cascading a delete onto services.
      * 
      */
-    public void removeService(AuthzSubject subject, Service service) throws PermissionException,
-        VetoException {
+    public void removeService(AuthzSubject subject, Service service) throws PermissionException, VetoException {
         AppdefEntityID aeid = service.getEntityId();
         permissionManager.checkRemovePermission(subject, aeid);
 
@@ -1498,10 +1496,6 @@ public class ServiceManagerImpl implements ServiceManager {
      */
     public Number getServiceCount() {
         return serviceDAO.getServiceCount();
-    }
-
-    public static ServiceManager getOne() {
-        return Bootstrap.getBean(ServiceManager.class);
     }
 
     @PostConstruct

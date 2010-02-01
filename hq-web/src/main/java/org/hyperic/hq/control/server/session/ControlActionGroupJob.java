@@ -290,7 +290,7 @@ public class ControlActionGroupJob extends ControlJob {
      */
     private int getTimeout(AuthzSubject subject, AppdefEntityID id)
     {
-        ControlManager cMan = ControlManagerImpl.getOne();
+        ControlManager cMan = Bootstrap.getBean(ControlManager.class);
 
         int timeout;
         try {

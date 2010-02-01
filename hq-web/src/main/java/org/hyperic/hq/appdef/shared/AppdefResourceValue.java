@@ -33,11 +33,8 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
-import org.hyperic.hq.appdef.server.session.ApplicationManagerImpl;
 import org.hyperic.hq.appdef.server.session.ApplicationType;
-import org.hyperic.hq.appdef.server.session.PlatformManagerImpl;
 import org.hyperic.hq.appdef.server.session.PlatformType;
-import org.hyperic.hq.appdef.server.session.ServerManagerImpl;
 import org.hyperic.hq.appdef.server.session.ServerType;
 import org.hyperic.hq.appdef.server.session.ServiceManagerImpl;
 import org.hyperic.hq.appdef.server.session.ServiceType;
@@ -244,15 +241,15 @@ public abstract class AppdefResourceValue
     }
     
     private static PlatformType getPlatformTypeById(int id) {
-        return PlatformManagerImpl.getOne().findPlatformType(new Integer(id));
+        return Bootstrap.getBean(PlatformManager.class).findPlatformType(new Integer(id));
     }
 
     private static ServerType getServerTypeById(int id) {
-        return ServerManagerImpl.getOne().findServerType(new Integer(id));
+        return Bootstrap.getBean(ServerManager.class).findServerType(new Integer(id));
     }
 
     private static ServiceType getServiceTypeById(int id) {
-        return ServiceManagerImpl.getOne().findServiceType(new Integer(id));
+        return Bootstrap.getBean(ServiceManager.class).findServiceType(new Integer(id));
     }
 
     private static ApplicationType getApplicationTypeById(int id) {

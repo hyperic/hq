@@ -53,10 +53,6 @@ public class MetricAuxLogManagerImpl implements MetricAuxLogManager {
         this.metricAuxLogDAO = metricAuxLogDAO;
     }
 
-    public static MetricAuxLogManager getOne() {
-        return Bootstrap.getBean(MetricAuxLogManager.class);
-    }
-
     /**
      * 
      */

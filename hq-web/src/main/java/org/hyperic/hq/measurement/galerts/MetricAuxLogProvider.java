@@ -28,13 +28,14 @@ import java.util.ResourceBundle;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.AlertAuxLog;
 import org.hyperic.hq.events.AlertAuxLogProvider;
 import org.hyperic.hq.galerts.server.session.GalertAuxLog;
 import org.hyperic.hq.galerts.server.session.GalertDef;
-import org.hyperic.hq.galerts.server.session.GalertManagerImpl;
-import org.hyperic.hq.measurement.server.session.MetricAuxLogManagerImpl;
+import org.hyperic.hq.galerts.shared.GalertManager;
 import org.hyperic.hq.measurement.server.session.MetricAuxLogPojo;
+import org.hyperic.hq.measurement.shared.MetricAuxLogManager;
 
 /**
  * Metric information used as aux data for galerts
@@ -57,13 +58,13 @@ public class MetricAuxLogProvider
     }
 
     private GalertAuxLog findGAuxLog(int id) {
-        return GalertManagerImpl.getOne().findAuxLogById(new Integer(id));
+        return Bootstrap.getBean(GalertManager.class).findAuxLogById(new Integer(id));
     }
 
     public AlertAuxLog load(int auxLogId, long timestamp, String desc) {
         GalertAuxLog gAuxLog = findGAuxLog(auxLogId);
         MetricAuxLogPojo auxLog = 
-            MetricAuxLogManagerImpl.getOne().find(gAuxLog);
+            Bootstrap.getBean(MetricAuxLogManager.class).find(gAuxLog);
         
         return new MetricAuxLog(gAuxLog, auxLog);
     }
@@ -72,10 +73,10 @@ public class MetricAuxLogProvider
         MetricAuxLog logInfo = (MetricAuxLog)log;
         GalertAuxLog gAuxLog = findGAuxLog(auxLogId);
         
-        MetricAuxLogManagerImpl.getOne().create(gAuxLog, logInfo);
+        Bootstrap.getBean(MetricAuxLogManager.class).create(gAuxLog, logInfo);
     }
 
     public void deleteAll(GalertDef def) {
-        MetricAuxLogManagerImpl.getOne().removeAll(def);
+        Bootstrap.getBean(MetricAuxLogManager.class).removeAll(def);
     }
 }

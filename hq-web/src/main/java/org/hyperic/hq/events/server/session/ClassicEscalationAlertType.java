@@ -90,7 +90,7 @@ public final class ClassicEscalationAlertType
     }
     
     protected void setEscalation(Integer defId, Escalation escalation) {
-        EscalationManager escMan = EscalationManagerImpl.getOne();
+        EscalationManager escMan = Bootstrap.getBean(EscalationManager.class);
         AlertDefinition def = getDefMan().getByIdNoCheck(defId);
         // End any escalation we were previously doing.
         escMan.endEscalation(def);

@@ -105,7 +105,8 @@ public class ProductManagerImpl implements ProductManager {
     public ProductManagerImpl(PluginDAO pluginDao, AlertDefinitionManager alertDefinitionManager,
                               CPropManager cPropManager, TemplateManager templateManager, AuditManager auditManager,
                               ServerManager serverManager, ServiceManager serviceManager,
-                              PlatformManager platformManager, AlertDefinitionXmlParser alertDefinitionXmlParser, PluginAuditFactory pluginAuditFactory) {
+                              PlatformManager platformManager, AlertDefinitionXmlParser alertDefinitionXmlParser,
+                              PluginAuditFactory pluginAuditFactory) {
         this.pluginDao = pluginDao;
         this.alertDefinitionManager = alertDefinitionManager;
         this.cPropManager = cPropManager;
@@ -123,8 +124,7 @@ public class ProductManagerImpl implements ProductManager {
      * 
      * 
      */
-    private void updateAppdefEntities(String pluginName, TypeInfo[] entities) throws  
-         VetoException, NotFoundException {
+    private void updateAppdefEntities(String pluginName, TypeInfo[] entities) throws VetoException, NotFoundException {
         ArrayList<TypeInfo> platforms = new ArrayList<TypeInfo>();
         ArrayList<TypeInfo> servers = new ArrayList<TypeInfo>();
         ArrayList<TypeInfo> services = new ArrayList<TypeInfo>();
@@ -165,16 +165,9 @@ public class ProductManagerImpl implements ProductManager {
         }
     }
 
-   
     private ProductPluginManager getProductPluginManager() {
         return Bootstrap.getBean(ProductPluginDeployer.class).getProductPluginManager();
     }
-
-    public static ProductManager getOne() {
-        return Bootstrap.getBean(ProductManager.class);
-    }
-
-  
 
     /**
      */
@@ -250,8 +243,7 @@ public class ProductManagerImpl implements ProductManager {
     /**
      */
     @Transactional
-    public void deploymentNotify(String pluginName) throws PluginNotFoundException,  
-         VetoException, NotFoundException {
+    public void deploymentNotify(String pluginName) throws PluginNotFoundException, VetoException, NotFoundException {
         ProductPlugin pplugin = (ProductPlugin) getProductPluginManager().getPlugin(pluginName);
         PluginValue pluginVal;
         PluginInfo pInfo;
@@ -292,8 +284,7 @@ public class ProductManagerImpl implements ProductManager {
 
         if (created) {
             audit = pluginAuditFactory.deployAudit(pluginName, start, start);
-        }
-        else {
+        } else {
             audit = pluginAuditFactory.updateAudit(pluginName, start, start);
         }
 
@@ -327,8 +318,7 @@ public class ProductManagerImpl implements ProductManager {
         }
     }
 
-    private void updatePlugin(String pluginName) throws   
-        VetoException, PluginNotFoundException, NotFoundException {
+    private void updatePlugin(String pluginName) throws VetoException, PluginNotFoundException, NotFoundException {
         ProductPlugin pplugin = (ProductPlugin) getProductPluginManager().getPlugin(pluginName);
 
         PluginInfo pInfo = getProductPluginManager().getPluginInfo(pluginName);
@@ -384,8 +374,7 @@ public class ProductManagerImpl implements ProductManager {
         updatePlugin(pluginDao, pInfo);
     }
 
-    private void createAlertDefinitions(final PluginInfo pInfo) throws  
-         VetoException {
+    private void createAlertDefinitions(final PluginInfo pInfo) throws VetoException {
         final InputStream alertDefns = pInfo.resourceLoader.getResourceAsStream(ALERT_DEFINITIONS_XML_FILE);
         if (alertDefns == null) {
             return;

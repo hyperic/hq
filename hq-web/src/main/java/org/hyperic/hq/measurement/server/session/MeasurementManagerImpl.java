@@ -90,7 +90,7 @@ import org.hyperic.hq.product.MeasurementPluginManager;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.ProductPlugin;
-import org.hyperic.hq.product.server.session.ProductManagerImpl;
+import org.hyperic.hq.product.shared.ProductManager;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
@@ -119,16 +119,14 @@ public class MeasurementManagerImpl implements MeasurementManager {
     private MeasurementTemplateDAO measurementTemplateDAO;
     private AgentManager agentManager;
     private AgentMonitor agentMonitor;
-    
-   
 
     @Autowired
     public MeasurementManagerImpl(ResourceManager resourceManager, ResourceGroupManager resourceGroupManager,
                                   ApplicationDAO applicationDAO, PermissionManager permissionManager,
                                   AuthzSubjectManager authzSubjectManager, ConfigManager configManager,
                                   MetricDataCache metricDataCache, MeasurementDAO measurementDAO,
-                                  MeasurementTemplateDAO measurementTemplateDAO, AgentManager agentManager, AgentMonitor agentMonitor
-                                  ) {
+                                  MeasurementTemplateDAO measurementTemplateDAO, AgentManager agentManager,
+                                  AgentMonitor agentMonitor) {
         this.resourceManager = resourceManager;
         this.resourceGroupManager = resourceGroupManager;
         this.applicationDAO = applicationDAO;
@@ -154,10 +152,11 @@ public class MeasurementManagerImpl implements MeasurementManager {
 
     // TODO: Resolve circular dependency with ProductManager
     private MeasurementPluginManager getMeasurementPluginManager() throws Exception {
-        return (MeasurementPluginManager) ProductManagerImpl.getOne().getPluginManager(ProductPlugin.TYPE_MEASUREMENT);
+        return (MeasurementPluginManager) Bootstrap.getBean(ProductManager.class).getPluginManager(
+            ProductPlugin.TYPE_MEASUREMENT);
     }
-    
-    //TODO resolve circular dependency
+
+    // TODO resolve circular dependency
     private AgentScheduleSynchronizer getAgentScheduleSynchronizer() {
         return Bootstrap.getBean(AgentScheduleSynchronizer.class);
     }
@@ -719,13 +718,13 @@ public class MeasurementManagerImpl implements MeasurementManager {
 
                 Measurement m = metrics.get(0);
                 midMap.put(id, m);
-           } catch (NotFoundException e) {
+            } catch (NotFoundException e) {
                 // Throw an exception if we're only looking for one
                 // measurement
                 if (ids.length == 1) {
                     throw new MeasurementNotFoundException(cat + " metric for " + id + " not found");
                 }
-           }
+            }
         }
         return midMap;
     }
@@ -1306,7 +1305,7 @@ public class MeasurementManagerImpl implements MeasurementManager {
      * 
      */
     public void handleCreateRefreshEvents(List<ResourceZevent> events) {
-       
+
         List<AppdefEntityID> eids = new ArrayList<AppdefEntityID>();
 
         for (ResourceZevent z : events) {
@@ -1346,7 +1345,7 @@ public class MeasurementManagerImpl implements MeasurementManager {
                     // tracking is enabled. If so, enable it. We don't auto
                     // enable log or config tracking for update events since
                     // in the callback we don't know if that flag has changed.
-                    //TODO break circular dep preventing DI of TrackerManager
+                    // TODO break circular dep preventing DI of TrackerManager
                     Bootstrap.getBean(TrackerManager.class).enableTrackers(subject, id, c);
                 }
 
@@ -1543,7 +1542,4 @@ public class MeasurementManagerImpl implements MeasurementManager {
         getMeasurementProcessor().unschedule(aeids);
     }
 
-    public static MeasurementManager getOne() {
-        return Bootstrap.getBean(MeasurementManager.class);
-    }
 }

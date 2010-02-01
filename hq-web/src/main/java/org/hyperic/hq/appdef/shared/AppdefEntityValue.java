@@ -32,20 +32,12 @@ import java.util.List;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.server.session.Application;
-import org.hyperic.hq.appdef.server.session.ApplicationManagerImpl;
-import org.hyperic.hq.appdef.server.session.ApplicationType;
 import org.hyperic.hq.appdef.server.session.Platform;
-import org.hyperic.hq.appdef.server.session.PlatformManagerImpl;
-import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.server.session.Server;
-import org.hyperic.hq.appdef.server.session.ServerManagerImpl;
-import org.hyperic.hq.appdef.server.session.ServerType;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServiceManagerImpl;
-import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.context.Bootstrap;
@@ -93,21 +85,21 @@ public class AppdefEntityValue {
     
     private PlatformManager getPlatformManager() {
         if (platformManagerLocal == null) {
-            platformManagerLocal = PlatformManagerImpl.getOne();
+            platformManagerLocal = Bootstrap.getBean(PlatformManager.class);
         }
         return platformManagerLocal;
     }
 
     private ServerManager getServerManager() {
         if(serverManagerLocal == null){
-            serverManagerLocal = ServerManagerImpl.getOne();
+            serverManagerLocal = Bootstrap.getBean(ServerManager.class);
         }
         return serverManagerLocal;
     }
 
     private ServiceManager getServiceManager() {
         if(serviceManagerLocal == null){
-            serviceManagerLocal = ServiceManagerImpl.getOne();
+            serviceManagerLocal = Bootstrap.getBean(ServiceManager.class);
         }
         return serviceManagerLocal;
     }
@@ -177,7 +169,7 @@ public class AppdefEntityValue {
     private ResourceGroup getGroup()
         throws PermissionException, AppdefGroupNotFoundException {
         ResourceGroupManager groupMan = 
-            ResourceGroupManagerImpl.getOne();
+           Bootstrap.getBean(ResourceGroupManager.class);
         ResourceGroup g = 
             groupMan.findResourceGroupById(getSubject(), _id.getId());
         if (g == null) {
@@ -192,7 +184,7 @@ public class AppdefEntityValue {
     {
         if (group == null) {
             ResourceGroupManager groupMan = 
-                ResourceGroupManagerImpl.getOne();
+               Bootstrap.getBean(ResourceGroupManager.class);
             group = groupMan.getGroupConvert(getSubject(), getGroup());
         }
         return group;

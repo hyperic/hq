@@ -221,7 +221,7 @@ public class RESTService extends BaseService {
                     .toString();
             } else if (resourceIdParam != null) {
                 ResourceGroupManager rgman = 
-                    ResourceGroupManagerImpl.getOne();
+                    Bootstrap.getBean(ResourceGroupManager.class);
                 JSONArray arr = new JSONArray();
                 for (String group : groupsList)
                 {
@@ -242,7 +242,7 @@ public class RESTService extends BaseService {
                 PageInfo pi = PageInfo.create(PageControl.PAGE_ALL, null);
                 
                 DashboardPortletBoss dashBoss =
-                    DashboardPortletBossImpl.getOne();
+                    Bootstrap.getBean(DashboardPortletBoss.class);
 
                 res = dashBoss.getAlertCounts(me, gids, pi).toString();
             }
@@ -321,7 +321,7 @@ public class RESTService extends BaseService {
                     }
                 }
                 // Only do one metric
-                res = DashboardPortletBossImpl.getOne()
+                res = Bootstrap.getBean(DashboardPortletBoss.class)
                             .getMeasurementData(
                                     me, 
                                     new Integer(resourceIdParam),
@@ -387,7 +387,7 @@ public class RESTService extends BaseService {
                 try {
                     chartList = StringUtil.explode(res, Constants.DASHBOARD_DELIMITER);
                     if (chartList != null) {
-                        ResourceManager resMan = ResourceManagerImpl.getOne();
+                        ResourceManager resMan = Bootstrap.getBean(ResourceManager.class);
                         for (String chartCfg : chartList) {
                             List<String> chart =
                                 StringUtil.explode(chartCfg, ",");
@@ -448,7 +448,7 @@ public class RESTService extends BaseService {
                         JSONArray arr = new JSONArray();
     
                         ResourceManager resMan =
-                            ResourceManagerImpl.getOne();
+                            Bootstrap.getBean(ResourceManager.class);
                         
 
                         Matcher matcher;
@@ -549,7 +549,7 @@ public class RESTService extends BaseService {
                 for (int i=0; i<aeidJArray.length(); i++) {
                     AppdefEntityID aeid = new AppdefEntityID(aeidJArray.getString(i));
                     if (!aeid.isGroup()) {
-                        Resource resource = ResourceManagerImpl.getOne()
+                        Resource resource = Bootstrap.getBean(ResourceManager.class)
                                                 .findResource(aeid);                   
                     
                         Bootstrap.getBean(AppdefBoss.class)
@@ -709,7 +709,7 @@ public class RESTService extends BaseService {
         		
         	} else {
         		PlatformManager platformMgr = 
-        				PlatformManagerImpl.getOne();		
+        		    Bootstrap.getBean(PlatformManager.class);		
         		Platform platform = 
         				platformMgr.findPlatformById(Integer.valueOf(platformId));
         		PlatformType platformType = 

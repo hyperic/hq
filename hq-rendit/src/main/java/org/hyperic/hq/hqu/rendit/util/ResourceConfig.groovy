@@ -1,18 +1,19 @@
 package org.hyperic.hq.hqu.rendit.util
 
 import org.hyperic.hq.appdef.Agent
-import org.hyperic.hq.appdef.server.session.PlatformManagerImpl as PlatMan
-import org.hyperic.hq.appdef.server.session.ServerManagerImpl as ServerMan
-import org.hyperic.hq.appdef.server.session.ServiceManagerImpl as ServiceMan
+
 import org.hyperic.hq.appdef.shared.CPropManager;
+import org.hyperic.hq.appdef.shared.PlatformManager;
+import org.hyperic.hq.appdef.shared.ServerManager;
+import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.ProductBoss;
 import org.hyperic.hq.auth.shared.SessionManager
 import org.hyperic.hq.authz.server.session.AuthzSubject
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl as AuthzMan
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.server.session.Resource
-import org.hyperic.hq.bizapp.server.session.AppdefBossImpl as AppdefBoss
-import org.hyperic.hq.bizapp.server.session.ProductBossImpl as ProductBoss
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.bizapp.shared.AllConfigResponses
 import org.hyperic.hq.product.ProductPlugin
@@ -30,14 +31,14 @@ import org.hyperic.util.config.ConfigResponse
  * types (users?, roles?)
  */
 class ResourceConfig {
-    private static authzMan  = AuthzMan.one
+    private static authzMan  = Bootstrap.getBean(AuthzSubjectManager.class)
     private static cpropMan  = Bootstrap.getBean(CPropManager.class)
-    private static appBoss   = AppdefBoss.one
-    private static prodBoss  = ProductBoss.one
+    private static appBoss   = Bootstrap.getBean(AppdefBoss.class)
+    private static prodBoss  = Bootstrap.getBean(ProductBoss.class)
     private static configMan = Bootstrap.getBean(ConfigManager.class)
-    private static platMan   = PlatMan.one
-    private static svrMan    = ServerMan.one
-    private static svcMan    = ServiceMan.one
+    private static platMan   = Bootstrap.getBean(PlatformManager.class)
+    private static svrMan    = Bootstrap.getBean(ServerManager.class)
+    private static svcMan    = Bootstrap.getBean(ServiceManager.class)
      
     /**
      * *_FIELD_KEYS provides a mapping of string names onto closures which

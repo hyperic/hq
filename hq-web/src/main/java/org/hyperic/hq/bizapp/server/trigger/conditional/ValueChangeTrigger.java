@@ -78,7 +78,7 @@ public class ValueChangeTrigger
     private DataManager dataManager;
 
     public ValueChangeTrigger() {
-        this.measurementManager = MeasurementManagerImpl.getOne();
+        this.measurementManager = Bootstrap.getBean(MeasurementManager.class);
         this.dataManager = Bootstrap.getBean(DataManager.class);
     }
 

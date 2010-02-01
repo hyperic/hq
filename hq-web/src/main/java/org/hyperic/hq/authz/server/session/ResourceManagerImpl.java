@@ -64,9 +64,7 @@ import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.server.session.AppdefBossImpl;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
-import org.hyperic.hq.common.server.session.ResourceAudit;
 import org.hyperic.hq.common.server.session.ResourceAuditFactory;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.StringUtil;
@@ -143,7 +141,7 @@ public class ResourceManagerImpl implements ResourceManager {
      * @throws NotFoundException Unable to find a given or dependent entities.
      * 
      */
-    public ResourceType findResourceTypeByName(String name) throws NotFoundException{
+    public ResourceType findResourceTypeByName(String name) throws NotFoundException {
         ResourceType rt = resourceTypeDAO.findByName(name);
 
         if (rt == null) {
@@ -156,8 +154,8 @@ public class ResourceManagerImpl implements ResourceManager {
     /**
      * remove the authz resource entry
      */
-    public void removeAuthzResource(AuthzSubject subject, AppdefEntityID aeid, Resource r) throws 
-        PermissionException, VetoException {
+    public void removeAuthzResource(AuthzSubject subject, AppdefEntityID aeid, Resource r) throws PermissionException,
+        VetoException {
         if (log.isDebugEnabled())
             log.debug("Removing authz resource: " + aeid);
 
@@ -982,7 +980,7 @@ public class ResourceManagerImpl implements ResourceManager {
     public ResourceRelation getNetworkRelation() {
         return resourceRelationDAO.findById(AuthzConstants.RELATION_NETWORK_ID);
     }
-    
+
     public String getAppdefEntityName(AppdefEntityID appEnt) {
         Resource res = findResource(appEnt);
         if (res != null) {
@@ -991,8 +989,4 @@ public class ResourceManagerImpl implements ResourceManager {
         return appEnt.getAppdefKey();
     }
 
-
-    public static ResourceManager getOne() {
-        return Bootstrap.getBean(ResourceManager.class);
-    }
 }

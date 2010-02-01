@@ -38,11 +38,13 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
+import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.application.HQApp;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.ActionExecutionInfo;
 import org.hyperic.hq.events.ActionInterface;
@@ -97,7 +99,7 @@ public class OpenNMSAction implements ActionInterface {
         // Look up the platform
         AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(alertdef.getResource());
         AppdefEntityValue arv =
-            new AppdefEntityValue(aeid, AuthzSubjectManagerImpl.getOne()
+            new AppdefEntityValue(aeid, Bootstrap.getBean(AuthzSubjectManager.class)
                                           .getOverlordPojo());
         try {
             List platforms = arv.getAssociatedPlatforms(PageControl.PAGE_ALL);
@@ -105,7 +107,7 @@ public class OpenNMSAction implements ActionInterface {
             
             // Now get the POJO            
             params.put("platform",
-                       PlatformManagerImpl.getOne()
+                Bootstrap.getBean(PlatformManager.class)
                            .findPlatformById(platVal.getId()));
         } catch (AppdefEntityNotFoundException e) {
             params.put("platform", null);

@@ -1,19 +1,21 @@
 package org.hyperic.hq.hqu.rendit.metaclass
 
 import org.hyperic.hq.authz.server.session.Resource
-import org.hyperic.hq.authz.server.session.ResourceManagerImpl as ResourceMan
+import org.hyperic.hq.authz.server.session.ResourceManagerImpl
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.appdef.server.session.AppdefResource
 import org.hyperic.hq.appdef.server.session.AppdefResourceType
 import org.hyperic.hq.authz.shared.PermissionManagerFactory as PermManFactory
 import org.hyperic.hq.authz.shared.PermissionManager
+import org.hyperic.hq.context.Bootstrap;
 
 class AppdefCategory {
     static Resource getResource(AppdefResource r) {
-		ResourceMan.one.findResource(r.entityId) 
+		Bootstrap.getBean(ResourceManager.class).findResource(r.entityId) 
     }
 
     static Resource getResource(AppdefResourceType r) {
-		ResourceMan.one.findResourceByInstanceId(r.authzType, r.id)
+		Bootstrap.getBean(ResourceManager.class).findResourceByInstanceId(r.authzType, r.id)
     }
     
     /**

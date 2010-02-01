@@ -2,15 +2,16 @@ package org.hyperic.hq.hqu.rendit.helpers
 
 
 import org.hyperic.hq.authz.server.session.AuthzSubject
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl as SubMan
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl
 import org.hyperic.hq.authz.server.session.Role
 import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.RoleManager;
 import org.hyperic.hq.authz.shared.RoleValue
 import org.hyperic.hq.authz.server.session.Operation
 
 class RoleHelper extends BaseHelper {
-    def subMan = SubMan.one
+    def subMan = Bootstrap.getBean(AuthzSubjectManager.class)
     def roleMan = Bootstrap.getBean(RoleManager.class)
 
     RoleHelper(AuthzSubject user) {

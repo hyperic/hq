@@ -16,36 +16,19 @@ import org.hyperic.hq.events.shared.RegisteredTriggerManager;
 /**
  * Unit test of {@link RegisteredTriggers}
  * @author jhickey
- *
+ * 
  */
 public class RegisteredTriggersTest
-    extends TestCase
-{
-    private class MockAlertRegulator
-        extends AlertRegulator
-    {
-        private boolean alertsEnabled;
-
-        public MockAlertRegulator(boolean alertsEnabled) {
-            this.alertsEnabled = alertsEnabled;
-        }
-
-        public boolean alertNotificationsAllowed() {
-            return alertsEnabled;
-        }
-
-        public boolean alertsAllowed() {
-            return this.alertsEnabled;
-        }
-
-    }
+    extends TestCase {
 
     private RegisteredTriggerManager registeredTriggerManager;
 
     private RegisteredTriggers registeredTriggers;
 
+    private AlertRegulator alertRegulator;
+
     private void replay() {
-        EasyMock.replay(registeredTriggerManager);
+        EasyMock.replay(registeredTriggerManager, alertRegulator);
     }
 
     /**
@@ -54,8 +37,8 @@ public class RegisteredTriggersTest
     public void setUp() throws Exception {
         super.setUp();
         this.registeredTriggerManager = EasyMock.createMock(RegisteredTriggerManager.class);
-        this.registeredTriggers = new RegisteredTriggers(registeredTriggerManager);
-        AlertRegulator.setInstance(new MockAlertRegulator(true));
+        this.alertRegulator = EasyMock.createMock(AlertRegulator.class);
+        this.registeredTriggers = new RegisteredTriggers(registeredTriggerManager, alertRegulator);
     }
 
     /**
@@ -95,9 +78,7 @@ public class RegisteredTriggersTest
      * @throws InstantiationException
      * @throws IllegalAccessException
      */
-    public void testGetInterestedTriggersAlertsGloballyDisabled()
-    {
-        AlertRegulator.setInstance(new MockAlertRegulator(false));
+    public void testGetInterestedTriggersAlertsGloballyDisabled() {
         Integer triggerId = Integer.valueOf(987);
 
         Integer[] interestedInstances = new Integer[] { 123, 456 };
@@ -107,12 +88,12 @@ public class RegisteredTriggersTest
         EasyMock.expect(trigger1.getId()).andReturn(triggerId).times(2);
         EasyMock.expect(trigger1.getInterestedEventTypes()).andReturn(new Class[] { MockEvent.class });
         EasyMock.expect(trigger1.getInterestedInstanceIDs(MockEvent.class)).andReturn(interestedInstances);
-
+        EasyMock.expect(alertRegulator.alertsAllowed()).andReturn(false).times(5);
         EasyMock.replay(trigger1);
         replay();
         registeredTriggers.addTrigger(trigger1);
         assertTrue(registeredTriggers.getInterestedTriggers(MockEvent.class, 123).isEmpty());
-        
+
         assertFalse(registeredTriggers.isTriggerInterested(new MockEvent(7l, 123)));
         registeredTriggers.getInterestedTriggers(new MockEvent(3l, 123)).isEmpty();
         verify();
@@ -128,7 +109,6 @@ public class RegisteredTriggersTest
         registeredTriggers.init();
         verify();
     }
-
 
     /**
      * Verifies successful register of triggers and retrieval through instance
@@ -154,29 +134,36 @@ public class RegisteredTriggersTest
         EasyMock.expect(trigger2.isEnabled()).andReturn(true).times(2);
 
         EasyMock.replay(trigger1, trigger2);
+        EasyMock.expect(alertRegulator.alertsAllowed()).andReturn(true).times(7);
         replay();
         registeredTriggers.addTrigger(trigger1);
         registeredTriggers.addTrigger(trigger2);
 
-        Map<TriggerEventKey, Map<Integer, RegisterableTriggerInterface>> registeredTriggersMap = registeredTriggers.getTriggers();
+        Map<TriggerEventKey, Map<Integer, RegisterableTriggerInterface>> registeredTriggersMap = registeredTriggers
+            .getTriggers();
         assertEquals(2, registeredTriggersMap.size());
-        Map<Integer, RegisterableTriggerInterface> instance1 = registeredTriggersMap.get(new TriggerEventKey(MockEvent.class, 123));
+        Map<Integer, RegisterableTriggerInterface> instance1 = registeredTriggersMap.get(new TriggerEventKey(
+            MockEvent.class, 123));
         assertNotNull(instance1);
         assertEquals(2, instance1.size());
         assertNotNull(instance1.get(987));
         assertNotNull(instance1.get(trigger2Id));
 
-        Map<Integer, RegisterableTriggerInterface> instance2 = registeredTriggersMap.get(new TriggerEventKey(MockEvent.class, 456));
+        Map<Integer, RegisterableTriggerInterface> instance2 = registeredTriggersMap.get(new TriggerEventKey(
+            MockEvent.class, 456));
         assertNotNull(instance2);
         assertEquals(2, instance2.size());
         assertNotNull(instance2.get(987));
         assertNotNull(instance2.get(trigger2Id));
+        
+        
 
-      
-        Collection<RegisterableTriggerInterface> interestedTriggers = registeredTriggers.getInterestedTriggers(new MockEvent(7l, 123));
+        Collection<RegisterableTriggerInterface> interestedTriggers = registeredTriggers
+            .getInterestedTriggers(new MockEvent(7l, 123));
         assertEquals(2, interestedTriggers.size());
 
-        Collection<RegisterableTriggerInterface> interestedTriggers2 = registeredTriggers.getInterestedTriggers(new MockEvent(7l, 999));
+        Collection<RegisterableTriggerInterface> interestedTriggers2 = registeredTriggers
+            .getInterestedTriggers(new MockEvent(7l, 999));
         assertTrue(interestedTriggers2.isEmpty());
 
         assertTrue(registeredTriggers.isTriggerInterested(new MockEvent(7l, 123)));
@@ -187,8 +174,8 @@ public class RegisteredTriggersTest
     }
 
     /**
-     * Verifies successful register of triggers and retrieval of enabled triggers only through instance
-     * and static methods
+     * Verifies successful register of triggers and retrieval of enabled
+     * triggers only through instance and static methods
      */
     public void testRegisterAndRetrieveTriggerDisabled() {
         Integer triggerId = Integer.valueOf(987);
@@ -208,31 +195,37 @@ public class RegisteredTriggersTest
 
         EasyMock.expect(trigger1.isEnabled()).andReturn(true).times(2);
         EasyMock.expect(trigger2.isEnabled()).andReturn(false).times(2);
+        
+        EasyMock.expect(alertRegulator.alertsAllowed()).andReturn(true).times(7);
 
         EasyMock.replay(trigger1, trigger2);
         replay();
         registeredTriggers.addTrigger(trigger1);
         registeredTriggers.addTrigger(trigger2);
 
-        Map<TriggerEventKey, Map<Integer, RegisterableTriggerInterface>> registeredTriggersMap = registeredTriggers.getTriggers();
+        Map<TriggerEventKey, Map<Integer, RegisterableTriggerInterface>> registeredTriggersMap = registeredTriggers
+            .getTriggers();
         assertEquals(2, registeredTriggersMap.size());
-        Map<Integer, RegisterableTriggerInterface> instance1 = registeredTriggersMap.get(new TriggerEventKey(MockEvent.class, 123));
+        Map<Integer, RegisterableTriggerInterface> instance1 = registeredTriggersMap.get(new TriggerEventKey(
+            MockEvent.class, 123));
         assertNotNull(instance1);
         assertEquals(2, instance1.size());
         assertNotNull(instance1.get(987));
         assertNotNull(instance1.get(trigger2Id));
 
-        Map<Integer, RegisterableTriggerInterface> instance2 = registeredTriggersMap.get(new TriggerEventKey(MockEvent.class, 456));
+        Map<Integer, RegisterableTriggerInterface> instance2 = registeredTriggersMap.get(new TriggerEventKey(
+            MockEvent.class, 456));
         assertNotNull(instance2);
         assertEquals(2, instance2.size());
         assertNotNull(instance2.get(987));
         assertNotNull(instance2.get(trigger2Id));
 
-       
-        Collection<RegisterableTriggerInterface> interestedTriggers = registeredTriggers.getInterestedTriggers(new MockEvent(7l, 123));
+        Collection<RegisterableTriggerInterface> interestedTriggers = registeredTriggers
+            .getInterestedTriggers(new MockEvent(7l, 123));
         assertEquals(1, interestedTriggers.size());
 
-        Collection<RegisterableTriggerInterface> interestedTriggers2 = registeredTriggers.getInterestedTriggers(new MockEvent(7l, 999));
+        Collection<RegisterableTriggerInterface> interestedTriggers2 = registeredTriggers
+            .getInterestedTriggers(new MockEvent(7l, 999));
         assertTrue(interestedTriggers2.isEmpty());
 
         assertTrue(registeredTriggers.isTriggerInterested(new MockEvent(7l, 123)));
@@ -285,14 +278,15 @@ public class RegisteredTriggersTest
         registeredTriggers.removeTrigger(triggerId);
         EasyMock.verify(trigger1);
         Map<TriggerEventKey, Map<Integer, RegisterableTriggerInterface>> trigMap = registeredTriggers.getTriggers();
-        Map<Integer, RegisterableTriggerInterface> actualTriggers = trigMap.get(new TriggerEventKey(MockEvent.class, 123));
+        Map<Integer, RegisterableTriggerInterface> actualTriggers = trigMap.get(new TriggerEventKey(MockEvent.class,
+            123));
         assertNotNull(actualTriggers);
         assertEquals(1, actualTriggers.size());
         assertEquals(trigger2, (RegisterableTriggerInterface) actualTriggers.get(trigger2Id));
     }
 
     private void verify() {
-        EasyMock.verify(registeredTriggerManager);
+        EasyMock.verify(registeredTriggerManager, alertRegulator);
     }
 
 }

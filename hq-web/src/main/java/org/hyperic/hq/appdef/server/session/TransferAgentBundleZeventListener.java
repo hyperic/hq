@@ -25,14 +25,13 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -41,26 +40,27 @@ import org.springframework.stereotype.Component;
  * The Zevent Listener that transfers agent bundles.
  */
 @Component
-public class TransferAgentBundleZeventListener implements ZeventListener {
+public class TransferAgentBundleZeventListener implements ZeventListener<TransferAgentBundleZevent> {
     
     private final Log _log = LogFactory.getLog(TransferAgentBundleZeventListener.class);
     private AgentManager agentManager;
+    private AuthzSubjectManager authzSubjectManager;
     
     
     @Autowired
-    public TransferAgentBundleZeventListener(AgentManager agentManager) {
+    public TransferAgentBundleZeventListener(AgentManager agentManager, AuthzSubjectManager authzSubjectManager) {
         this.agentManager = agentManager;
+        this.authzSubjectManager = authzSubjectManager;
     }
 
     /**
      * @see org.hyperic.hq.zevents.ZeventListener#processEvents(java.util.List)
      */
-    public void processEvents(List events) {
-        AuthzSubject overlord = AuthzSubjectManagerImpl.getOne().getOverlordPojo();
+    public void processEvents(List<TransferAgentBundleZevent> events) {
+        AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
         
-        for (Iterator iter = events.iterator(); iter.hasNext();) {
-            TransferAgentBundleZevent zevent = (TransferAgentBundleZevent) iter.next();
-            
+        for ( TransferAgentBundleZevent zevent : events) {
+         
             try {
                 agentManager.transferAgentBundle(overlord, 
                                              zevent.getAgent(), 

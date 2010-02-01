@@ -75,7 +75,6 @@ import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.ResourceAuditFactory;
 import org.hyperic.hq.common.shared.AuditManager;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
@@ -1555,10 +1554,6 @@ public class ServerManagerImpl implements ServerManager {
      */
     public Number getServerCount() {
         return serverDAO.getServerCount();
-    }
-
-    public static ServerManager getOne() {
-        return Bootstrap.getBean(ServerManager.class);
     }
 
     @PostConstruct

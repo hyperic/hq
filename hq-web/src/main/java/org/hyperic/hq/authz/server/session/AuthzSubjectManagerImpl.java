@@ -43,7 +43,6 @@ import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.server.session.Crispo;
 import org.hyperic.hq.common.shared.CrispoManager;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -156,7 +155,8 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
             }
 
             target.setActive(active.booleanValue());
-            userAuditFactory.updateAudit(whoami, target, AuthzSubjectField.ACTIVE, target.getActive() + "", active + "");
+            userAuditFactory
+                .updateAudit(whoami, target, AuthzSubjectField.ACTIVE, target.getActive() + "", active + "");
         }
 
         if (dsn != null && !dsn.equals(target.getAuthDsn())) {
@@ -175,7 +175,8 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
 
         if (useHtml != null && target.getHtmlEmail() != useHtml.booleanValue()) {
             target.setHtmlEmail(useHtml.booleanValue());
-            userAuditFactory.updateAudit(whoami, target, AuthzSubjectField.HTML, target.getHtmlEmail() + "", useHtml + "");
+            userAuditFactory.updateAudit(whoami, target, AuthzSubjectField.HTML, target.getHtmlEmail() + "", useHtml +
+                                                                                                             "");
         }
 
         if (firstName != null && !firstName.equals(target.getFirstName())) {
@@ -466,7 +467,4 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
         return authzSubjectDAO.findById(AuthzConstants.overlordId);
     }
 
-    public static AuthzSubjectManager getOne() {
-        return Bootstrap.getBean(AuthzSubjectManager.class);
-    }
 }

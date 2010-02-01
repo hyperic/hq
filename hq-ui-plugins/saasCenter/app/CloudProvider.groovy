@@ -1,5 +1,6 @@
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl as AuthzMan
 import org.hyperic.hq.authz.server.session.AuthzSubject
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.hqu.rendit.helpers.ResourceHelper
 import org.hyperic.hq.hqu.rendit.helpers.MetricHelper
@@ -13,7 +14,7 @@ import org.hyperic.hq.measurement.server.session.Measurement
  * A CloudProvider represents a grouping of cloud services.
  */
 class CloudProvider {
-    def authzMan = AuthzMan.one
+    def authzMan = Bootstrap.getBean(AuthzSubjectManager.class)
     Log _log = LogFactory.getLog(this.getClass())
     private AuthzSubject   _user
     private ResourceHelper _rHelp

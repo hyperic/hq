@@ -1,7 +1,5 @@
-import org.hyperic.hq.bizapp.server.session.ProductBossImpl as PB
-import org.hyperic.hq.common.server.session.ServerConfigManagerImpl as SCM
 import org.hyperic.hq.context.Bootstrap;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl as subMan
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.appdef.server.session.Server
 import org.hyperic.hq.appdef.shared.AppdefEntityID
 import org.hyperic.hq.appdef.shared.CPropManager;
@@ -16,8 +14,10 @@ import org.hyperic.hq.hqu.rendit.html.HtmlUtil
 import org.hyperic.hq.hqu.rendit.html.DojoUtil
 import org.hyperic.hq.hqu.rendit.BaseController
 import org.hyperic.hq.hqu.rendit.util.HQUtil
+import org.hyperic.hq.bizapp.shared.ProductBoss;
 import org.hyperic.hq.common.DiagnosticThread
 import org.hyperic.hq.common.Humidor
+import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.util.jdbc.DBUtil
 import org.hyperic.hibernate.PageInfo
 import org.hyperic.hibernate.Util
@@ -109,7 +109,7 @@ class HealthController
     }
     
     private getAgentCProp(Agent a, Server s, String prop) {
-        def overlord = subMan.one.overlordPojo
+        def overlord = Bootstrap.getBean(AuthzSubjectManager.class).overlordPojo
         def aev = new AppdefEntityValue(AppdefEntityID.newServerID(s.id), overlord)
         def cprop = "N/A"
         try {
@@ -386,7 +386,7 @@ class HealthController
         def locals = [
             numCpu:           Runtime.runtime.availableProcessors(),
             fqdn:             s.getFQDN(),
-            guid:             SCM.one.getGUID(),
+            guid:             Bootstrap.getBean(ServerConfigManager.class).getGUID(),
             dbVersion:        runQueryAsText('version'),
             reportTime:       dateFormat.format(System.currentTimeMillis()),
             userName:         user.fullName,
@@ -407,10 +407,10 @@ class HealthController
             numActiveEscalations:  resourceHelper.find(count:'activeEscalations'),           
             metricsPerMinute: metricsPerMinute,
             diagnostics:      diagnostics,
-            hqVersion:        PB.one.version,
-            buildNumber:      PB.one.buildNumber,
+            hqVersion:        Bootstrap.getBean(ProductBoss.class).version,
+            buildNumber:      Bootstrap.getBean(ProductBoss.class).buildNumber,
             jvmProps:         System.properties,
-            schemaVersion:    SCM.one.config.getProperty('CAM_SCHEMA_VERSION'),
+            schemaVersion:    Bootstrap.getBean(ServerConfigManager.class).config.getProperty('CAM_SCHEMA_VERSION'),
             cmdLine:          cmdLine,
             procEnv:          procEnv,
             cpuInfos:         s.cpuInfoList,

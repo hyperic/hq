@@ -39,16 +39,16 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.context.Bootstrap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * The BizApp's interface to the Auth Subsystem
- * TODO this layer just exists to deal directly with the session ID (since service layer should not be aware of HTTP sessions).
- * We may be able to remove this once we properly integrate Spring Security context holder and possibly get rid of SessionManager
+ * The BizApp's interface to the Auth Subsystem TODO this layer just exists to
+ * deal directly with the session ID (since service layer should not be aware of
+ * HTTP sessions). We may be able to remove this once we properly integrate
+ * Spring Security context holder and possibly get rid of SessionManager
  * 
  */
 @Service
@@ -146,7 +146,4 @@ public class AuthBossImpl implements AuthBoss {
         return authManager.isUser(subject, username);
     }
 
-    public static AuthBoss getOne() {
-        return Bootstrap.getBean(AuthBoss.class);
-    }
 }

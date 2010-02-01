@@ -2,18 +2,20 @@ package org.hyperic.hq.hqu.rendit.metaclass
 
 import org.hyperic.hq.authz.server.session.ResourceGroup
 import org.hyperic.hq.authz.server.session.Resource
-import org.hyperic.hq.authz.server.session.ResourceManagerImpl as RsrcMan
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants
-import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl as GroupMan
+import org.hyperic.hq.context.Bootstrap;
+import org.springframework.security.provisioning.GroupManager;
 import org.hyperic.hq.authz.shared.AuthzConstants
 import org.hyperic.hq.events.shared.MaintenanceEventManager
 import org.hyperic.hq.authz.shared.PermissionManagerFactory
+import org.hyperic.hq.authz.shared.ResourceGroupManager;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.events.MaintenanceEvent
 
 class ResourceGroupCategory {
-    private static groupMan = GroupMan.one
-    private static rsrcMan  = RsrcMan.one
+    private static groupMan = Bootstrap.getBean(ResourceGroupManager.class)
+    private static rsrcMan  = Bootstrap.getBean(ResourceManager.class)
 
     private static MaintenanceEventManager maintMan =
         PermissionManagerFactory.getInstance().getMaintenanceEventManager();

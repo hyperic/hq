@@ -2,8 +2,8 @@ import java.text.DateFormat
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl as AuthzMan
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.context.Bootstrap;
@@ -13,6 +13,7 @@ import org.hyperic.hq.measurement.server.session.Measurement
 import org.hyperic.hq.measurement.shared.HighLowMetricValue
 import org.hyperic.hq.appdef.shared.AppdefEntityID
 import org.hyperic.hq.events.server.session.EventLog
+import org.hyperic.hq.events.shared.EventLogManager;
 import org.hyperic.hq.events.EventLogStatus
 import org.hyperic.hq.hqu.rendit.BaseController
 import org.hyperic.util.pager.PageControl
@@ -50,7 +51,7 @@ class HealthStripGenerator {
     private final DateFormat df =
          DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
          
-    private authzMan = AuthzMan.one
+    private authzMan = Bootstrap.getBean(AuthzSubjectManager.class)
     private availMan = Bootstrap.getBean(AvailabilityManager.class)
      
     Log log = LogFactory.getLog(this.getClass())
@@ -344,7 +345,7 @@ class HealthStripGenerator {
          for (resource in resources){
              def aeid = new AppdefEntityID(resource)
          
-              list.addAll(EventMan.one.findLogs(aeid, overlord, 
+              list.addAll(Bootstrap.getBean(EventLogManager.class).findLogs(aeid, overlord, 
                                           ["org.hyperic.hq.measurement.shared.ResourceLogEvent"] as String[], 
                                           begin, end).grep { it.status.equals("INF") } )
          } 

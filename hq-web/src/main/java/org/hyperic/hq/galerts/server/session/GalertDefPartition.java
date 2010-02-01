@@ -36,6 +36,7 @@ import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.escalation.server.session.EscalationManagerImpl;
 import org.hyperic.hq.escalation.shared.EscalationManager;
 import org.hyperic.hq.galerts.shared.GalertManager;
@@ -62,10 +63,10 @@ public abstract class GalertDefPartition
         new GalertDefPartition(0, "NORMAL", "galert.partition.normal") 
     {
         public void execute(Integer id, ExecutionReason execReason) {
-            GalertManager gman = GalertManagerImpl.getOne();
+            GalertManager gman = Bootstrap.getBean(GalertManager.class);
             GalertDef def = gman.findById(id);
 
-            GalertManagerImpl.getOne().startEscalation(def, execReason);
+            Bootstrap.getBean(GalertManager.class).startEscalation(def, execReason);
         }
     };
     
@@ -74,9 +75,9 @@ public abstract class GalertDefPartition
         new GalertDefPartition(1, "RECOVERY", "galert.partition.recovery") 
     {
         public void execute(Integer id, ExecutionReason execReason) {
-            EscalationManager eman = EscalationManagerImpl.getOne();
-            GalertManager gman = GalertManagerImpl.getOne();
-            AuthzSubjectManager aman = AuthzSubjectManagerImpl.getOne();
+            EscalationManager eman = Bootstrap.getBean(EscalationManager.class);
+            GalertManager gman = Bootstrap.getBean(GalertManager.class);
+            AuthzSubjectManager aman = Bootstrap.getBean(AuthzSubjectManager.class);
             AuthzSubject overlord = aman.getOverlordPojo();
             
             GalertDef def = gman.findById(id);

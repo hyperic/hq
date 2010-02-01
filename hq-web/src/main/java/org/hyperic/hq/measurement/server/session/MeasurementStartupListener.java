@@ -75,12 +75,15 @@ public class MeasurementStartupListener implements StartupListener {
     private SRNManager srnManager;
     private SynchronousAvailDataInserter synchronousAvailDataInserter;
     private SynchronousDataInserter synchronousDataInserter;
+    private MeasurementEnabler measurementEnabler;
 
     @Autowired
     public MeasurementStartupListener(ZeventEnqueuer zEventManager, MetricAuxLogManager metricAuxLogManager,
                                       MeasurementManager measurementManager, ServerConfigManager serverConfigManager,
                                       SRNManager srnManager, HQApp app,
-                                      SynchronousAvailDataInserter synchronousAvailDataInserter, SynchronousDataInserter synchronousDataInserter) {
+                                      SynchronousAvailDataInserter synchronousAvailDataInserter,
+                                      SynchronousDataInserter synchronousDataInserter,
+                                      MeasurementEnabler measurementEnabler) {
         this.zEventManager = zEventManager;
         this.metricAuxLogManager = metricAuxLogManager;
         this.measurementManager = measurementManager;
@@ -88,6 +91,7 @@ public class MeasurementStartupListener implements StartupListener {
         this.srnManager = srnManager;
         this.synchronousAvailDataInserter = synchronousAvailDataInserter;
         this.synchronousDataInserter = synchronousDataInserter;
+        this.measurementEnabler = measurementEnabler;
         MeasurementStartupListener.app = app;
     }
 
@@ -106,7 +110,7 @@ public class MeasurementStartupListener implements StartupListener {
         listenEvents.add(ResourceCreatedZevent.class);
         listenEvents.add(ResourceUpdatedZevent.class);
         listenEvents.add(ResourceRefreshZevent.class);
-        zEventManager.addBufferedListener(listenEvents, new MeasurementEnabler());
+        zEventManager.addBufferedListener(listenEvents, measurementEnabler);
 
         synchronized (LOCK) {
             _defEnableCallback = (DefaultMetricEnableCallback) app
@@ -164,11 +168,11 @@ public class MeasurementStartupListener implements StartupListener {
         cal.set(Calendar.MILLISECOND, 0);
         final long initialDelay = cal.getTimeInMillis() - now();
         _log.info("Starting Data Purge Worker");
-        Runnable dataPurgeJob = (Runnable)ProductProperties.getPropertyInstance("hyperic.hq.dataPurge");
-        if(dataPurgeJob == null) {
+        Runnable dataPurgeJob = (Runnable) ProductProperties.getPropertyInstance("hyperic.hq.dataPurge");
+        if (dataPurgeJob == null) {
             _log.fatal("Could not start DataPurgeWorker");
             return;
-        } 
+        }
         _dataPurgeFuture = app.getScheduler()
             .scheduleAtFixedRate(dataPurgeJob, initialDelay, MeasurementConstants.HOUR);
     }

@@ -1,15 +1,16 @@
 package org.hyperic.hq.hqu.rendit
 
-
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 
 import org.hyperic.hq.authz.server.session.AuthzSubject
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl as AuthzMan
+
 import org.hyperic.hq.authz.server.session.Resource
-import org.hyperic.hq.authz.server.session.ResourceManagerImpl as ResourceMan
+
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.context.Bootstrap;
-import org.hyperic.hq.appdef.server.session.PlatformManagerImpl as PlatMan
+import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.hqu.rendit.helpers.ResourceHelper
 import org.hyperic.hq.hqu.server.session.Attachment
 import org.hyperic.hq.hqu.server.session.UIPlugin
@@ -203,7 +204,7 @@ class HQUPlugin implements IHQUPlugin {
         }
 
         if (p.platforms == 'all') {
-            def platMan   = PlatMan.one
+            def platMan   = Bootstrap.getBean(PlatformManager.class)
             for (pt in platMan.findAllPlatformTypes()) {
                 if (p.byPlugin && pt.plugin != p.byPlugin)
                     continue
@@ -232,7 +233,7 @@ class HQUPlugin implements IHQUPlugin {
         }
         
         if (p.toRoot) {
-            def root = ResourceMan.one.findRootResource()
+            def root = Bootstrap.getBean(ResourceManager.class).findRootResource()
             if (!resourceAttached(view, root))
                 pMan.attachView(view, ViewResourceCategory.VIEWS, root)
         }
@@ -256,7 +257,7 @@ class HQUPlugin implements IHQUPlugin {
     }
     
     protected AuthzSubject getOverlord() {
-        AuthzMan.one.getOverlordPojo()
+		Bootstrap.getBean(AuthzSubjectManager.class).getOverlordPojo()
     }
     
     AttachmentDescriptor getAttachmentDescriptor(Attachment a, Resource r,

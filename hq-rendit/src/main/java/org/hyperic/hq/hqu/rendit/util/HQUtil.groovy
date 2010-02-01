@@ -1,9 +1,12 @@
 package org.hyperic.hq.hqu.rendit.util
 
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl as asm
+
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
+import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.common.shared.HQConstants
 import org.hyperic.hq.common.server.session.ServerConfigManagerImpl
+import org.hyperic.hq.context.Bootstrap;
 
 class HQUtil {
     private static final Object LOCK = new Object()
@@ -16,7 +19,7 @@ class HQUtil {
     static String getBaseURL() {
         synchronized (LOCK) { 
             if (BASE_URL == null) {
-                BASE_URL = ServerConfigManagerImpl.one.
+                BASE_URL = Bootstrap.getBean(ServerConfigManager).
                                  getConfig().getProperty(HQConstants.BaseURL)
                 if (BASE_URL[-1] == '/')
                     BASE_URL = BASE_URL[0..-2]
@@ -42,6 +45,6 @@ class HQUtil {
     }
     
     static AuthzSubject getOverlord() {
-        asm.one.overlordPojo
+        Bootstrap.getBean(AuthzSubjectManager.class).overlordPojo
     }    
 }

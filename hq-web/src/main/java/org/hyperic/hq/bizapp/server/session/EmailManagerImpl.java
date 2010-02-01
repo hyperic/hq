@@ -40,7 +40,6 @@ import javax.mail.internet.MimeMessage;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.appdef.server.session.PlatformManagerImpl;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -48,9 +47,10 @@ import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
 import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.server.action.email.EmailAction;
 import org.hyperic.hq.bizapp.server.action.email.EmailFilterJob;
 import org.hyperic.hq.bizapp.server.action.email.EmailRecipient;
@@ -76,20 +76,26 @@ import org.springframework.stereotype.Service;
 public class EmailManagerImpl implements EmailManager {
     private JavaMailSender mailSender;
     private ServerConfigManager serverConfigManager;
+    private AuthzSubjectManager authzSubjectManager;
+    private PlatformManager platformManager;
+    private ResourceManager resourceManager;
     final Log log = LogFactory.getLog(EmailManagerImpl.class);
 
-    public  static final String     JOB_GROUP      = "EmailFilterGroup";
-    private static final IntHashMap _alertBuffer   = new IntHashMap();
-    public  static final Object     SCHEDULER_LOCK = new Object();
+    public static final String JOB_GROUP = "EmailFilterGroup";
+    private static final IntHashMap _alertBuffer = new IntHashMap();
+    public static final Object SCHEDULER_LOCK = new Object();
 
     @Autowired
-    public EmailManagerImpl( JavaMailSender mailSender, ServerConfigManager serverConfigManager) {
+    public EmailManagerImpl(JavaMailSender mailSender, ServerConfigManager serverConfigManager,
+                            AuthzSubjectManager authzSubjectManager, PlatformManager platformManager, ResourceManager resourceManager) {
         this.mailSender = mailSender;
         this.serverConfigManager = serverConfigManager;
+        this.authzSubjectManager = authzSubjectManager;
+        this.platformManager = platformManager;
+        this.resourceManager = resourceManager;
     }
 
-    public void sendEmail(EmailRecipient[] addresses, String subject, String[] body, String[] htmlBody,
-                          Integer priority) {
+    public void sendEmail(EmailRecipient[] addresses, String subject, String[] body, String[] htmlBody, Integer priority) {
         MimeMessage mimeMessage = mailSender.createMimeMessage();
         try {
             InternetAddress from = getFromAddress();
@@ -117,20 +123,17 @@ public class EmailManagerImpl implements EmailManager {
 
             // Send to each recipient individually (for D.B. SMS)
             for (int i = 0; i < addresses.length; i++) {
-                mimeMessage.setRecipient(Message.RecipientType.TO,
-                                         addresses[i].getAddress());
+                mimeMessage.setRecipient(Message.RecipientType.TO, addresses[i].getAddress());
 
                 if (addresses[i].useHtml()) {
                     mimeMessage.setContent(htmlBody[i], "text/html");
                     if (log.isDebugEnabled()) {
-                        log.debug("Sending HTML Alert notification: " +
-                                  subject + " to " +
+                        log.debug("Sending HTML Alert notification: " + subject + " to " +
                                   addresses[i].getAddress().getAddress());
                     }
                 } else {
                     if (log.isDebugEnabled()) {
-                        log.debug("Sending Alert notification: " + subject +
-                                  " to " +
+                        log.debug("Sending Alert notification: " + subject + " to " +
                                   addresses[i].getAddress().getAddress());
                     }
                     mimeMessage.setContent(body[i], "text/plain");
@@ -161,54 +164,46 @@ public class EmailManagerImpl implements EmailManager {
 
     public void sendFiltered(Integer pid) {
         Hashtable cache;
-        int platId = pid.intValue();    // Convert to int for convenience
-        
+        int platId = pid.intValue(); // Convert to int for convenience
+
         synchronized (_alertBuffer) {
             if (!_alertBuffer.containsKey(platId))
                 return;
 
             cache = (Hashtable) _alertBuffer.remove(platId);
-        
+
             if (cache == null || cache.size() == 0)
                 return;
-        
+
             // Insert key again so that we continue filtering
             _alertBuffer.put(platId, null);
         }
-        
-        AppdefEntityID platEntId = AppdefEntityID.newPlatformID(pid); 
-        String platName = ResourceManagerImpl.getOne().getAppdefEntityName(platEntId);
-    
+
+        AppdefEntityID platEntId = AppdefEntityID.newPlatformID(pid);
+        String platName = resourceManager.getAppdefEntityName(platEntId);
+
         // The cache is organized by addresses
-        for (Iterator i = cache.entrySet().iterator(); i.hasNext(); ) {
-            Map.Entry ent = (Map.Entry)i.next();
-            EmailRecipient addr = (EmailRecipient)ent.getKey();
-            FilterBuffer msg = (FilterBuffer)ent.getValue();
-            
+        for (Iterator i = cache.entrySet().iterator(); i.hasNext();) {
+            Map.Entry ent = (Map.Entry) i.next();
+            EmailRecipient addr = (EmailRecipient) ent.getKey();
+            FilterBuffer msg = (FilterBuffer) ent.getValue();
+
             if (msg.getNumEnts() == 1 && addr.useHtml()) {
-                sendEmail(new EmailRecipient[] { addr },
-                          "[HQ] Filtered Notifications for " + platName,
-                          new String[] { "" }, new String[] { msg.getHtml() },
-                          null);
+                sendEmail(new EmailRecipient[] { addr }, "[HQ] Filtered Notifications for " + platName,
+                    new String[] { "" }, new String[] { msg.getHtml() }, null);
             } else {
                 addr.setHtml(false);
-                sendEmail(new EmailRecipient[] { addr },
-                          "[HQ] Filtered Notifications for " + platName,
-                           new String[] { msg.getText() }, new String[] { "" },
-                           null);
+                sendEmail(new EmailRecipient[] { addr }, "[HQ] Filtered Notifications for " + platName,
+                    new String[] { msg.getText() }, new String[] { "" }, null);
             }
         }
     }
 
-    
-    private void replaceAppdefEntityHolders(AppdefEntityID appEnt,
-                                            String[] strs) {
-        AuthzSubject overlord =
-            AuthzSubjectManagerImpl.getOne().getOverlordPojo();
+    private void replaceAppdefEntityHolders(AppdefEntityID appEnt, String[] strs) {
+        AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
 
         try {
-            AppdefEntityValue entVal =
-                new AppdefEntityValue(appEnt, overlord);
+            AppdefEntityValue entVal = new AppdefEntityValue(appEnt, overlord);
             String name = entVal.getName();
             String desc = entVal.getDescription();
 
@@ -217,10 +212,8 @@ public class EmailManagerImpl implements EmailManager {
             }
 
             for (int i = 0; i < strs.length; i++) {
-                strs[i] = strs[i].replaceAll(EmailAction.RES_NAME_HOLDER,
-                                             name);
-                strs[i] = strs[i].replaceAll(EmailAction.RES_DESC_HOLDER,
-                                             desc);
+                strs[i] = strs[i].replaceAll(EmailAction.RES_NAME_HOLDER, name);
+                strs[i] = strs[i].replaceAll(EmailAction.RES_DESC_HOLDER, desc);
             }
         } catch (AppdefEntityNotFoundException e) {
             log.error("Entity ID invalid", e);
@@ -229,14 +222,12 @@ public class EmailManagerImpl implements EmailManager {
             log.error("Overlord not allowed to lookup resource", e);
         }
     }
-    
-    public void sendAlert(AppdefEntityID appEnt, EmailRecipient[] addresses,
-                          String subject, String[] body, String[] htmlBody,
-                          int priority, boolean filter) {
+
+    public void sendAlert(AppdefEntityID appEnt, EmailRecipient[] addresses, String subject, String[] body,
+                          String[] htmlBody, int priority, boolean filter) {
         if (appEnt == null) {
             // Go ahead and just send the alert
-            sendEmail(addresses, subject, body, htmlBody,
-                      new Integer(priority));
+            sendEmail(addresses, subject, body, htmlBody, new Integer(priority));
             return;
         }
 
@@ -244,39 +235,38 @@ public class EmailManagerImpl implements EmailManager {
         String[] replStrs = new String[] { subject };
         replaceAppdefEntityHolders(appEnt, replStrs);
         subject = replStrs[0];
-            
+
         // See if alert needs to be filtered
         if (filter) {
-            PlatformManager pltMan =
-                PlatformManagerImpl.getOne();
+            
             try {
                 // Now let's look up the platform ID
                 Integer platId;
-                    
+
                 switch (appEnt.getType()) {
-                case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                    platId = appEnt.getId();
-                    break;
-                case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                    platId = pltMan.getPlatformIdByServer(appEnt.getId());
-                    break;
-                case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                    platId = pltMan.getPlatformIdByService(appEnt.getId());
-                    break;
-                default:
-                    platId = null;
-                    break;
+                    case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                        platId = appEnt.getId();
+                        break;
+                    case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                        platId = platformManager.getPlatformIdByServer(appEnt.getId());
+                        break;
+                    case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                        platId = platformManager.getPlatformIdByService(appEnt.getId());
+                        break;
+                    default:
+                        platId = null;
+                        break;
                 }
 
                 filter = false;
-                
+
                 // Let's see if we are adding or sending
                 if (platId != null) {
                     synchronized (_alertBuffer) {
                         if (_alertBuffer.containsKey(platId.intValue())) {
                             // Queue it up
                             Map cache = (Map) _alertBuffer.get(platId.intValue());
-                            
+
                             if (cache == null) {
                                 // Make sure we check again in 5 minutes
                                 cache = new Hashtable();
@@ -287,17 +277,17 @@ public class EmailManagerImpl implements EmailManager {
                                 FilterBuffer msg;
                                 if (cache.containsKey(addresses[i])) {
                                     // Create new buffer with previous body
-                                    msg = (FilterBuffer)cache.get(addresses[i]); 
+                                    msg = (FilterBuffer) cache.get(addresses[i]);
                                     msg.append("\n", "\n");
                                 } else {
                                     msg = new FilterBuffer();
                                 }
-    
+
                                 msg.incrementEntries();
                                 msg.append(body[i], htmlBody[i]);
                                 cache.put(addresses[i], msg);
                             }
-    
+
                             filter = true;
                         } else {
                             // Add a new queue
@@ -309,20 +299,20 @@ public class EmailManagerImpl implements EmailManager {
                 try {
                     scheduleJob(platId);
                 } catch (SchedulerException e) {
-                    //  Job probably already exists
+                    // Job probably already exists
                     log.error("Unable to reschedule job " + platId, e);
                 }
-    
+
                 if (filter)
                     return;
             } catch (PlatformNotFoundException e) {
                 log.error("Entity ID invalid: " + e);
             }
         }
-            
+
         sendEmail(addresses, subject, body, htmlBody, new Integer(priority));
     }
-    
+
     private void scheduleJob(Integer platId) throws SchedulerException {
         // Create new job name with the appId
         String name = EmailFilterJob.class.getName() + platId + "Job";
@@ -333,8 +323,7 @@ public class EmailManagerImpl implements EmailManager {
 
             Trigger[] triggers = scheduler.getTriggersOfJob(name, JOB_GROUP);
             if (triggers.length == 0) {
-                JobDetail jobDetail = new JobDetail(name, JOB_GROUP,
-                                                    EmailFilterJob.class);
+                JobDetail jobDetail = new JobDetail(name, JOB_GROUP, EmailFilterJob.class);
 
                 String appIdStr = platId.toString();
 
@@ -343,22 +332,15 @@ public class EmailManagerImpl implements EmailManager {
                 // XXX: Make this time configurable?
                 GregorianCalendar next = new GregorianCalendar();
                 next.add(GregorianCalendar.MINUTE, 5);
-                SimpleTrigger t = new SimpleTrigger(name + "Trigger", JOB_GROUP,
-                                                    next.getTime());
+                SimpleTrigger t = new SimpleTrigger(name + "Trigger", JOB_GROUP, next.getTime());
 
                 Date nextfire = scheduler.scheduleJob(jobDetail, t);
-                log.debug("Will queue alerts for platform " +
-                           platId + " until " + nextfire);
+                log.debug("Will queue alerts for platform " + platId + " until " + nextfire);
             } else {
                 // Already scheduled, there will only be a single trigger.
-                log.debug("Already queing alerts for platform " +
-                           platId + ", will fire at " +
-                           triggers[0].getNextFireTime());
+                log.debug("Already queing alerts for platform " + platId + ", will fire at " +
+                          triggers[0].getNextFireTime());
             }
         }
-    }
-
-    public static EmailManager getOne() {
-        return Bootstrap.getBean(EmailManager.class);
     }
 }

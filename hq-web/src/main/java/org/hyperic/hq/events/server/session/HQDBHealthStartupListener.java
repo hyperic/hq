@@ -39,7 +39,6 @@ import java.util.ResourceBundle;
 import javax.annotation.PostConstruct;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import javax.naming.InitialContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -50,9 +49,8 @@ import org.hyperic.hq.application.Scheduler;
 import org.hyperic.hq.application.StartupListener;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.bizapp.server.action.email.EmailRecipient;
-import org.hyperic.hq.bizapp.server.session.EmailManagerImpl;
+import org.hyperic.hq.bizapp.shared.EmailManager;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.util.jdbc.DBUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -72,11 +70,13 @@ public class HQDBHealthStartupListener implements StartupListener {
     private final Log log = LogFactory.getLog(HQDBHealthStartupListener.class);
     private HQApp hqApp;
     private DBUtil dbUtil;
+    private EmailManager emailManager;
 
     @Autowired
-    public HQDBHealthStartupListener(HQApp hqApp, DBUtil dbUtil) {
+    public HQDBHealthStartupListener(HQApp hqApp, DBUtil dbUtil, EmailManager emailManager) {
         this.hqApp = hqApp;
         this.dbUtil = dbUtil;
+        this.emailManager = emailManager;
     }
 
     /**
@@ -247,7 +247,7 @@ public class HQDBHealthStartupListener implements StartupListener {
 
                 Arrays.fill(body, sb.toString());
 
-                EmailManagerImpl.getOne().sendEmail(addresses, ResourceBundle.getBundle(BUNDLE).getString(
+                emailManager.sendEmail(addresses, ResourceBundle.getBundle(BUNDLE).getString(
                     "event.hqdbhealth.email.subject"), body, null, null);
             } catch (AddressException e) {
                 _log.error("Invalid email address: " + hqadminEmail);

@@ -21,7 +21,6 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -29,7 +28,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -38,26 +37,29 @@ import org.springframework.stereotype.Component;
  * The Zevent Listener that upgrades agents.
  */
 @Component
-public class UpgradeAgentZeventListener implements ZeventListener {
+public class UpgradeAgentZeventListener implements ZeventListener<UpgradeAgentZevent> {
 
     private final Log _log = LogFactory.getLog(UpgradeAgentZeventListener.class);
 
     private AgentManager agentManager;
 
+    private AuthzSubjectManager authzSubjectManager;
+
     @Autowired
-    public UpgradeAgentZeventListener(AgentManager agentManager) {
+    public UpgradeAgentZeventListener(AgentManager agentManager, AuthzSubjectManager authzSubjectManager) {
         this.agentManager = agentManager;
+        this.authzSubjectManager = authzSubjectManager;
     }
 
     /**
      * @see org.hyperic.hq.zevents.ZeventListener#processEvents(java.util.List)
      */
-    public void processEvents(List events) {
+    public void processEvents(List<UpgradeAgentZevent> events) {
 
-        AuthzSubject overlord = AuthzSubjectManagerImpl.getOne().getOverlordPojo();
+        AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
 
-        for (Iterator iter = events.iterator(); iter.hasNext();) {
-            UpgradeAgentZevent zevent = (UpgradeAgentZevent) iter.next();
+        for (UpgradeAgentZevent zevent : events) {
+
             final String bundleFileName = zevent.getAgentBundleFile();
             final AppdefEntityID aid = zevent.getAgent();
 

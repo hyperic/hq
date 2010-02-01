@@ -90,7 +90,6 @@ import org.hyperic.hq.common.ProductProperties;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.Audit;
-import org.hyperic.hq.common.server.session.ResourceAudit;
 import org.hyperic.hq.common.server.session.ResourceAuditFactory;
 import org.hyperic.hq.common.shared.AuditManager;
 import org.hyperic.hq.context.Bootstrap;
@@ -1797,10 +1796,6 @@ public class PlatformManagerImpl implements PlatformManager {
      */
     public Number getCpuCount() {
         return platformDAO.getCpuCount();
-    }
-
-    public static PlatformManager getOne() {
-        return Bootstrap.getBean(PlatformManager.class);
     }
 
     @PostConstruct

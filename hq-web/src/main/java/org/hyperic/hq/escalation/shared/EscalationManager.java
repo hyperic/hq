@@ -23,197 +23,159 @@ import org.hyperic.hq.events.ActionConfigInterface;
  * Local interface for EscalationManager.
  */
 public interface EscalationManager {
-	/**
-	 * Create a new escalation chain
-	 * 
-	 * @see Escalation for information on fields
-	 */
-	public Escalation createEscalation(String name, String description,
-			boolean pauseAllowed, long maxWaitTime, boolean notifyAll,
-			boolean repeat) throws DuplicateObjectException;
+    /**
+     * Create a new escalation chain
+     * 
+     * @see Escalation for information on fields
+     */
+    public Escalation createEscalation(String name, String description, boolean pauseAllowed, long maxWaitTime,
+                                       boolean notifyAll, boolean repeat) throws DuplicateObjectException;
 
-	public EscalationState findEscalationState(PerformsEscalations def);
+    public EscalationState findEscalationState(PerformsEscalations def);
 
-	/**
-	 * Update an escalation chain
-	 * 
-	 * @see Escalation for information on fields
-	 */
-	public void updateEscalation(AuthzSubject subject, Escalation esc,
-			String name, String description, boolean pauseAllowed,
-			long maxWaitTime, boolean notifyAll, boolean repeat)
-			throws DuplicateObjectException, PermissionException;
+    /**
+     * Update an escalation chain
+     * 
+     * @see Escalation for information on fields
+     */
+    public void updateEscalation(AuthzSubject subject, Escalation esc, String name, String description,
+                                 boolean pauseAllowed, long maxWaitTime, boolean notifyAll, boolean repeat)
+        throws DuplicateObjectException, PermissionException;
 
-	/**
-	 * Add an action to the end of an escalation chain. Any escalations
-	 * currently in progress using this chain will be canceled.
-	 */
-	public void addAction(Escalation e, ActionConfigInterface cfg, long waitTime);
+    /**
+     * Add an action to the end of an escalation chain. Any escalations
+     * currently in progress using this chain will be canceled.
+     */
+    public void addAction(Escalation e, ActionConfigInterface cfg, long waitTime);
 
-	/**
-	 * Remove an action from an escalation chain. Any escalations currently in
-	 * progress using this chain will be canceled.
-	 */
-	public void removeAction(Escalation e, Integer actId);
+    /**
+     * Remove an action from an escalation chain. Any escalations currently in
+     * progress using this chain will be canceled.
+     */
+    public void removeAction(Escalation e, Integer actId);
 
-	/**
-	 * Delete an escalation chain. This method will throw an exception if the
-	 * escalation chain is in use. TODO: Probably want to allow for the fact
-	 * that people DO want to delete while states exist.
-	 */
-	public void deleteEscalation(AuthzSubject subject, Escalation e)
-			throws PermissionException, ApplicationException;
+    /**
+     * Delete an escalation chain. This method will throw an exception if the
+     * escalation chain is in use. TODO: Probably want to allow for the fact
+     * that people DO want to delete while states exist.
+     */
+    public void deleteEscalation(AuthzSubject subject, Escalation e) throws PermissionException, ApplicationException;
 
-	public Escalation findById(Integer id);
+    public Escalation findById(Integer id);
 
-	public Escalation findById(AuthzSubject subject, Integer id)
-			throws PermissionException;
+    public Escalation findById(AuthzSubject subject, Integer id) throws PermissionException;
 
-	public Collection<Escalation> findAll(AuthzSubject subject)
-			throws PermissionException;
+    public Collection<Escalation> findAll(AuthzSubject subject) throws PermissionException;
 
-	public Escalation findByName(AuthzSubject subject, String name)
-			throws PermissionException;
+    public Escalation findByName(AuthzSubject subject, String name) throws PermissionException;
 
-	public Escalation findByName(String name);
+    public Escalation findByName(String name);
 
-	/**
-	 * Start an escalation. If the entity performing escalations does not have
-	 * an assigned escalation or if the escalation has already been started,
-	 * then this method call will be a no-op.
-	 * 
-	 * @param def
-	 *            The entity performing escalations.
-	 * @param creator
-	 *            Object which will create an {@link Escalatable} object if
-	 *            invoking this method actually starts an escalation.
-	 * @return <code>true</code> if the escalation is started;
-	 *         <code>false</code> if not because either there is no escalation
-	 *         assigned to the entity or the escalation is already in progress.
-	 */
-	public boolean startEscalation(PerformsEscalations def,
-			EscalatableCreator creator);
+    /**
+     * Start an escalation. If the entity performing escalations does not have
+     * an assigned escalation or if the escalation has already been started,
+     * then this method call will be a no-op.
+     * 
+     * @param def The entity performing escalations.
+     * @param creator Object which will create an {@link Escalatable} object if
+     *        invoking this method actually starts an escalation.
+     * @return <code>true</code> if the escalation is started;
+     *         <code>false</code> if not because either there is no escalation
+     *         assigned to the entity or the escalation is already in progress.
+     */
+    public boolean startEscalation(PerformsEscalations def, EscalatableCreator creator);
 
-	public Escalatable getEscalatable(EscalationState s);
+    public Escalatable getEscalatable(EscalationState s);
 
-	/**
-	 * End an escalation. This will remove all state for the escalation tied to
-	 * a specific definition.
-	 */
-	public void endEscalation(PerformsEscalations def);
+    /**
+     * End an escalation. This will remove all state for the escalation tied to
+     * a specific definition.
+     */
+    public void endEscalation(PerformsEscalations def);
 
-	/**
-	 * This method is only for internal use by the {@link EscalationRuntime}.
-	 * This method deletes in batch the given escalation states.
-	 * 
-	 * @param stateIds
-	 *            The Ids for the escalation states to delete.
-	 */
-	public void deleteAllEscalationStates(Integer[] stateIds);
+    /**
+     * Find an escalation based on the type and ID of the definition.
+     * 
+     * @return null if the definition defined by the ID does not have any
+     *         escalation associated with it
+     */
+    public Escalation findByDefId(EscalationAlertType type, Integer defId);
 
-	/**
-	 * This method is only for internal use by the {@link EscalationRuntime}. It
-	 * ensures that we have a session setup prior to executing any actions. This
-	 * method executes the action pointed at by the state, determines the next
-	 * stage of the escalation and (optionally) ends it, thus unscheduling any
-	 * further executions.
-	 */
-	public void executeState(Integer stateId);
+    /**
+     * Set the escalation for a given alert definition and type
+     */
+    public void setEscalation(EscalationAlertType type, Integer defId, Escalation escalation);
 
-	/**
-	 * Find an escalation based on the type and ID of the definition.
-	 * 
-	 * @return null if the definition defined by the ID does not have any
-	 *         escalation associated with it
-	 */
-	public Escalation findByDefId(EscalationAlertType type, Integer defId);
+    /**
+     * Acknowledge an alert, potentially sending out notifications.
+     * 
+     * @param subject Person who acknowledged the alert
+     * @param pause TODO
+     */
+    public boolean acknowledgeAlert(AuthzSubject subject, EscalationAlertType type, Integer alertId, String moreInfo,
+                                    long pause) throws PermissionException;
 
-	/**
-	 * Set the escalation for a given alert definition and type
-	 */
-	public void setEscalation(EscalationAlertType type, Integer defId,
-			Escalation escalation);
+    /**
+     * See if an alert is acknowledgeable
+     * 
+     * @return true if the alert is currently acknowledgeable
+     */
+    public boolean isAlertAcknowledgeable(Integer alertId, PerformsEscalations def);
 
-	/**
-	 * Acknowledge an alert, potentially sending out notifications.
-	 * 
-	 * @param subject
-	 *            Person who acknowledged the alert
-	 * @param pause
-	 *            TODO
-	 */
-	public boolean acknowledgeAlert(AuthzSubject subject,
-			EscalationAlertType type, Integer alertId, String moreInfo,
-			long pause) throws PermissionException;
+    /**
+     * Fix an alert for a an escalation if there is one currently running.
+     * 
+     * @return true if there was an alert to be fixed.
+     */
+    public boolean fixAlert(AuthzSubject subject, PerformsEscalations def, String moreInfo) throws PermissionException;
 
-	/**
-	 * See if an alert is acknowledgeable
-	 * 
-	 * @return true if the alert is currently acknowledgeable
-	 */
-	public boolean isAlertAcknowledgeable(Integer alertId,
-			PerformsEscalations def);
+    /**
+     * Fix an alert, potentially sending out notifications. The state of the
+     * escalation will be terminated and the alert will be marked fixed.
+     * 
+     * @param subject Person who fixed the alert
+     */
+    public void fixAlert(AuthzSubject subject, EscalationAlertType type, Integer alertId, String moreInfo)
+        throws PermissionException;
 
-	/**
-	 * Fix an alert for a an escalation if there is one currently running.
-	 * 
-	 * @return true if there was an alert to be fixed.
-	 */
-	public boolean fixAlert(AuthzSubject subject, PerformsEscalations def,
-			String moreInfo) throws PermissionException;
+    /**
+     * Fix an alert, potentially sending out notifications. The state of the
+     * escalation will be terminated and the alert will be marked fixed.
+     * 
+     * @param subject Person who fixed the alert
+     */
+    public void fixAlert(AuthzSubject subject, EscalationAlertType type, Integer alertId, String moreInfo,
+                         boolean suppressNotification) throws PermissionException;
 
-	/**
-	 * Fix an alert, potentially sending out notifications. The state of the
-	 * escalation will be terminated and the alert will be marked fixed.
-	 * 
-	 * @param subject
-	 *            Person who fixed the alert
-	 */
-	public void fixAlert(AuthzSubject subject, EscalationAlertType type,
-			Integer alertId, String moreInfo) throws PermissionException;
+    /**
+     * Re-order the actions for an escalation. If there are any states
+     * associated with the escalation, they will be cleared.
+     * 
+     * @param actions a list of {@link EscalationAction}s (already contained
+     *        within the escalation) specifying the new order.
+     */
+    public void updateEscalationOrder(Escalation esc, List<EscalationAction> actions);
 
-	/**
-	 * Fix an alert, potentially sending out notifications. The state of the
-	 * escalation will be terminated and the alert will be marked fixed.
-	 * 
-	 * @param subject
-	 *            Person who fixed the alert
-	 */
-	public void fixAlert(AuthzSubject subject, EscalationAlertType type,
-			Integer alertId, String moreInfo, boolean suppressNotification)
-			throws PermissionException;
+    /**
+     * Get the # of active escalations within HQ inventory
+     */
+    public Number getActiveEscalationCount();
 
-	/**
-	 * Re-order the actions for an escalation. If there are any states
-	 * associated with the escalation, they will be cleared.
-	 * 
-	 * @param actions
-	 *            a list of {@link EscalationAction}s (already contained within
-	 *            the escalation) specifying the new order.
-	 */
-	public void updateEscalationOrder(Escalation esc,
-			List<EscalationAction> actions);
+    /**
+     * Get the # of escalations within HQ inventory
+     */
+    public Number getEscalationCount();
 
-	/**
-	 * Get the # of active escalations within HQ inventory
-	 */
-	public Number getActiveEscalationCount();
+    public List<EscalationState> getActiveEscalations(int maxEscalations);
 
-	/**
-	 * Get the # of escalations within HQ inventory
-	 */
-	public Number getEscalationCount();
+    public String getLastFix(PerformsEscalations def);
 
-	public List<EscalationState> getActiveEscalations(int maxEscalations);
+    /**
+     * Called when subject is removed and therefore have to null out the
+     * acknowledgedBy field
+     */
+    public void handleSubjectRemoval(AuthzSubject subject);
 
-	public String getLastFix(PerformsEscalations def);
-
-	/**
-	 * Called when subject is removed and therefore have to null out the
-	 * acknowledgedBy field
-	 */
-	public void handleSubjectRemoval(AuthzSubject subject);
-
-	public void startup();
+    public void startup();
 
 }

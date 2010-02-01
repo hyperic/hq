@@ -3,6 +3,8 @@ package org.hyperic.hq.hqu.rendit.metaclass
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl
+import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.events.server.session.Alert
 import org.hyperic.hq.galerts.server.session.GalertDef
 import org.hyperic.hq.galerts.server.session.GalertLog
@@ -38,6 +40,6 @@ class AlertCategory {
         if (id == null)
             return null
             
-        AuthzSubjectManagerImpl.one.getSubjectById(id.toInteger())
+       Bootstrap.getBean(AuthzSubjectManager.class).getSubjectById(id.toInteger())
     }
 }

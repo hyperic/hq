@@ -1,14 +1,16 @@
 package org.hyperic.hq.hqu.rendit.helpers
 
+import org.hyperic.hq.context.Bootstrap;
+
 import java.util.Collection
 
 import org.hyperic.hq.authz.server.session.AuthzSubject
-import org.hyperic.hq.escalation.server.session.EscalationManagerImpl as EscMan
+import org.hyperic.hq.escalation.shared.EscalationManager;
 import org.hyperic.hq.escalation.server.session.Escalation
 import org.hyperic.hq.events.ActionInterface
 
 class EscalationHelper extends BaseHelper {
-    private escMan = EscMan.one
+    private escMan = Bootstrap.getBean(EscalationManager.class)
 
     EscalationHelper(AuthzSubject user) {
         super(user)

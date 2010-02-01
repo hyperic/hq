@@ -1,8 +1,9 @@
 import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.authz.server.session.ResourceGroup
+import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate
 import org.hyperic.hq.measurement.server.session.Measurement
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl as AuthzMan
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.hqu.rendit.helpers.ResourceHelper
 import org.apache.commons.logging.Log
@@ -67,7 +68,7 @@ class ChartData {
      * Convert a PerformanceMetric into a ChartData
      */
     static ChartData getChartData(String label, MetricName metric) {
-        AuthzSubject overlord = AuthzMan.one.overlordPojo
+        AuthzSubject overlord = Bootstrap.getBean(AuthzSubjectManager.class).overlordPojo
         ResourceHelper rHelp = new ResourceHelper(overlord)
         
         List<Measurement> measurements = []

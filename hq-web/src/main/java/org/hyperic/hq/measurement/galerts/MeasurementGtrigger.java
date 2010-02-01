@@ -674,7 +674,7 @@ public class MeasurementGtrigger
         List auxLogs = new ArrayList();
         MeasurementManager dmMan = getDMMan();
         AuthzSubject overlord = 
-            AuthzSubjectManagerImpl.getOne().getOverlordPojo();
+            Bootstrap.getBean(AuthzSubjectManager.class).getOverlordPojo();
         for (Iterator i=srcId2MetricValue.entrySet().iterator(); i.hasNext(); ) {
             Map.Entry ent = (Map.Entry)i.next();
             MeasurementZeventSource src = (MeasurementZeventSource)ent.getKey();
@@ -737,19 +737,19 @@ public class MeasurementGtrigger
     }
     
     private MeasurementManager getDMMan() {
-        return MeasurementManagerImpl.getOne();
+        return Bootstrap.getBean(MeasurementManager.class);
     }
     
     private ResourceGroupManager getRGMan() {
-        return ResourceGroupManagerImpl.getOne();
+        return Bootstrap.getBean(ResourceGroupManager.class);
     }
     
     public void setGroup(ResourceGroup rg) {
         _resourceGroup = rg;
         
         _interestedEvents.clear();
-        ResourceGroupManager gMan = ResourceGroupManagerImpl.getOne(); 
-        AuthzSubjectManager sMan = AuthzSubjectManagerImpl.getOne(); 
+        ResourceGroupManager gMan = Bootstrap.getBean(ResourceGroupManager.class); 
+        AuthzSubjectManager sMan = Bootstrap.getBean(AuthzSubjectManager.class); 
         TemplateManager tMan = Bootstrap.getBean(TemplateManager.class); 
             
         try {

@@ -38,6 +38,7 @@ import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -127,7 +128,7 @@ public class GroupUtil {
         throws AppdefEntityNotFoundException, PermissionException 
     {
         ResourceGroupManager groupMan = 
-            ResourceGroupManagerImpl.getOne();
+            Bootstrap.getBean(ResourceGroupManager.class);
 
         ResourceGroup group = groupMan.findResourceGroupById(entity.getId());
         return groupMan.getGroupConvert(subject, group);

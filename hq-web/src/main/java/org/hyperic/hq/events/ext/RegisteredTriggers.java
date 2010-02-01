@@ -53,10 +53,13 @@ public class RegisteredTriggers implements RegisterableTriggerRepository {
     private Map<TriggerEventKey, Map<Integer, RegisterableTriggerInterface>> triggers = new ConcurrentHashMap<TriggerEventKey, Map<Integer, RegisterableTriggerInterface>>();
 
     private RegisteredTriggerManager registeredTriggerManager;
+    
+    private AlertRegulator alertRegulator;
 
     @Autowired
-    public RegisteredTriggers(RegisteredTriggerManager registeredTriggerManager) {
+    public RegisteredTriggers(RegisteredTriggerManager registeredTriggerManager, AlertRegulator alertRegulator) {
         this.registeredTriggerManager = registeredTriggerManager;
+        this.alertRegulator = alertRegulator;
 
     }
 
@@ -72,7 +75,7 @@ public class RegisteredTriggers implements RegisterableTriggerRepository {
     public Collection<RegisterableTriggerInterface> getInterestedTriggers(Class<?> eventClass, Integer instanceId) {
         HashSet<RegisterableTriggerInterface> trigs = new HashSet<RegisterableTriggerInterface>();
         // All alerts are disabled, so no triggers should be processing events
-        if (!AlertRegulator.getInstance().alertsAllowed()) {
+        if (!alertRegulator.alertsAllowed()) {
             return trigs;
         }
         TriggerEventKey key = new TriggerEventKey(eventClass, instanceId.intValue());

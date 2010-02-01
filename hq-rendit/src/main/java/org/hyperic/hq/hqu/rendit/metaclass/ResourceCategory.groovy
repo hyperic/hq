@@ -2,17 +2,19 @@ package org.hyperic.hq.hqu.rendit.metaclass
 
 import org.hyperic.hq.authz.shared.AuthzConstants
 import org.hyperic.hq.authz.server.session.AuthzSubject
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl as AuthzMan
+import org.hyperic.hq.appdef.shared.PlatformManager;
+import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.control.shared.ControlManager;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.control.shared.ControlScheduleManager;
 import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.authz.server.session.ResourceGroup
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo
-import org.hyperic.hq.authz.server.session.ResourceManagerImpl as ResMan
-import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl as GroupMan
 import org.hyperic.hq.appdef.Agent
 import org.hyperic.hq.appdef.shared.AppdefEntityID
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants
+import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.server.session.Platform
@@ -20,15 +22,10 @@ import org.hyperic.hq.appdef.shared.PlatformValue
 import org.hyperic.hq.appdef.server.session.Server
 import org.hyperic.hq.appdef.server.session.Service
 import org.hyperic.hq.appdef.shared.ServerValue
-import org.hyperic.hq.appdef.server.session.PlatformManagerImpl as PlatMan
-import org.hyperic.hq.appdef.server.session.ServerManagerImpl as ServerMan
-import org.hyperic.hq.appdef.server.session.ServiceManagerImpl as ServiceMan
-import org.hyperic.hq.bizapp.server.session.AppdefBossImpl as AppdefBoss
 import org.hyperic.hq.common.VetoException
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.events.shared.AlertManager;
 import org.hyperic.hq.events.shared.EventLogManager;
-import org.hyperic.hq.control.server.session.ControlManagerImpl as CMan
 import org.hyperic.hq.product.PluginNotFoundException
 
 
@@ -38,10 +35,13 @@ import org.hyperic.hq.livedata.shared.LiveDataManager;
 import org.hyperic.hq.livedata.shared.LiveDataResult
 import org.hyperic.util.config.ConfigResponse
 import org.hyperic.util.pager.PageControl
+import org.hyperic.hq.authz.shared.ResourceGroupManager;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.hqu.rendit.util.ResourceConfig
 import org.hyperic.hq.hqu.rendit.helpers.ResourceHelper
 import org.hyperic.hq.auth.shared.SessionManager
 import org.hyperic.hq.events.AlertSeverity
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException
 
 /**
@@ -55,604 +55,600 @@ import org.hyperic.hq.authz.shared.PermissionException
  */
 
 class ResourceCategory {
-    private static liveDataMan = Bootstrap.getBean(LiveDataManager.class)
-    private static platMan  = PlatMan.one
-    private static svcMan   = ServiceMan.one
-    private static svrMan   = ServerMan.one 
-    private static dman     = Bootstrap.getBean(MeasurementManager.class)
-    private static authzMan = AuthzMan.one
-    private static groupMan = GroupMan.one
-    private static defMan   = Bootstrap.getBean(AlertDefinitionManager.class)
-    private static alertMan = Bootstrap.getBean(AlertManager.class)
-    private static eventMan = Bootstrap.getBean(EventLogManager.class)
-    private static cMan     = CMan.one
-    private static csMan	= Bootstrap.getBean(ControlScheduleManager.class);
-
-    /**
-     * Creates a URL for the resource.  This should typically only be called
-     * via HtmlUtil.linkTo (or from a controller).  
-     *
-     * Resources have the following contexts:
-     *  'alert' : Returns a link to the resource's alert definitions
-     *  'currentHealth' : Returns a link to the resource's default page with pre-set metric settings
-     *  - Otherwise, simply returns a link to the resource's default page.
-     */
-    static String urlFor(Resource r, String context) {
-        if (context == 'alert') {
-            return "/alerts/Config.do?mode=list&eid=${r.entityId}"
-        } else if (context == 'currentHealth') {
-        	return "/ResourceCurrentHealth.do?eid=${r.entityId}"
-        }
-        return "/Resource.do?eid=${r.entityId}"
-    }
-
-    /**
-     * Get the appdef type (1 = platform, 2=server, etc.) of a resource
-     * which is a prototype.
-     */
-    static getAppdefType(Resource r) {
-        def typeId = r.resourceType.id
-        
-        if (typeId == AuthzConstants.authzPlatformProto) {
-            return AppdefEntityConstants.APPDEF_TYPE_PLATFORM
-        } else if (typeId == AuthzConstants.authzServerProto) {
-            return AppdefEntityConstants.APPDEF_TYPE_SERVER
-	    } else if (typeId == AuthzConstants.authzServiceProto) {
-    	    return AppdefEntityConstants.APPDEF_TYPE_SERVICE
-	    } else {
-	        throw new RuntimeException("Resource [${r}] is not an appdef " + 
-	                                   "resource type")
-	    }
-    }
-    
-    static AppdefEntityID getEntityId(Resource r) {
-        if (r.resourceType == null) { // Possible that resource has been deleted
-            // Assume it's a platform
-            return AppdefEntityID.newPlatformID(r.instanceId)
-        }
-        
-        def typeId = r.resourceType.id
-        
-        if (typeId == AuthzConstants.authzPlatform) {
-            return AppdefEntityID.newPlatformID(r.instanceId)
-        } else if (typeId == AuthzConstants.authzServer) {
-            return AppdefEntityID.newServerID(r.instanceId)
-        } else if (typeId == AuthzConstants.authzService) {
-            return AppdefEntityID.newServiceID(r.instanceId)
-        } else if (typeId == AuthzConstants.authzApplication) {
-            return AppdefEntityID.newAppID(r.instanceId)
-        } else if (typeId == AuthzConstants.authzGroup) {
-            return AppdefEntityID.newGroupID(r.instanceId)
-        } else {
-            throw new RuntimeException("Resource [${r}] is not an appdef object.  " + 
-                                       "typeId=${typeId}")
-        }
-    }
-    
-    static String urlFor(AppdefEntityID aeid, String context) {
-    	return "/Resource.do?eid=${aeid}"
-    }
-    
-    static boolean getSupportsMonitoring(Resource r) {
-        def ent = r.entityId
-        ent.isPlatform() || ent.isServer() || ent.isService()
-    }
-
-    static Collection getDesignatedMetrics(Resource r) {
+	private static liveDataMan = Bootstrap.getBean(LiveDataManager.class)
+	private static platMan  = Bootstrap.getBean(PlatformManager.class)
+	private static svcMan   = Bootstrap.getBean(ServiceManager.class)
+	private static svrMan   = Bootstrap.getBean(ServerManager.class)
+	private static dman     = Bootstrap.getBean(MeasurementManager.class)
+	private static authzMan = Bootstrap.getBean(AuthzSubjectManager.class)
+	private static groupMan = Bootstrap.getBean(ResourceGroupManager.class)
+	private static defMan   = Bootstrap.getBean(AlertDefinitionManager.class)
+	private static alertMan = Bootstrap.getBean(AlertManager.class)
+	private static eventMan = Bootstrap.getBean(EventLogManager.class)
+	private static cMan     = Bootstrap.getBean(ControlManager.class)
+	private static csMan	= Bootstrap.getBean(ControlScheduleManager.class);
+	
+	/**
+	 * Creates a URL for the resource.  This should typically only be called
+	 * via HtmlUtil.linkTo (or from a controller).  
+	 *
+	 * Resources have the following contexts:
+	 *  'alert' : Returns a link to the resource's alert definitions
+	 *  'currentHealth' : Returns a link to the resource's default page with pre-set metric settings
+	 *  - Otherwise, simply returns a link to the resource's default page.
+	 */
+	static String urlFor(Resource r, String context) {
+		if (context == 'alert') {
+			return "/alerts/Config.do?mode=list&eid=${r.entityId}"
+		} else if (context == 'currentHealth') {
+			return "/ResourceCurrentHealth.do?eid=${r.entityId}"
+		}
+		return "/Resource.do?eid=${r.entityId}"
+	}
+	
+	/**
+	 * Get the appdef type (1 = platform, 2=server, etc.) of a resource
+	 * which is a prototype.
+	 */
+	static getAppdefType(Resource r) {
+		def typeId = r.resourceType.id
+		
+		if (typeId == AuthzConstants.authzPlatformProto) {
+			return AppdefEntityConstants.APPDEF_TYPE_PLATFORM
+		} else if (typeId == AuthzConstants.authzServerProto) {
+			return AppdefEntityConstants.APPDEF_TYPE_SERVER
+		} else if (typeId == AuthzConstants.authzServiceProto) {
+			return AppdefEntityConstants.APPDEF_TYPE_SERVICE
+		} else {
+			throw new RuntimeException("Resource [${r}] is not an appdef " + 
+			"resource type")
+		}
+	}
+	
+	static AppdefEntityID getEntityId(Resource r) {
+		if (r.resourceType == null) { // Possible that resource has been deleted
+			// Assume it's a platform
+			return AppdefEntityID.newPlatformID(r.instanceId)
+		}
+		
+		def typeId = r.resourceType.id
+		
+		if (typeId == AuthzConstants.authzPlatform) {
+			return AppdefEntityID.newPlatformID(r.instanceId)
+		} else if (typeId == AuthzConstants.authzServer) {
+			return AppdefEntityID.newServerID(r.instanceId)
+		} else if (typeId == AuthzConstants.authzService) {
+			return AppdefEntityID.newServiceID(r.instanceId)
+		} else if (typeId == AuthzConstants.authzApplication) {
+			return AppdefEntityID.newAppID(r.instanceId)
+		} else if (typeId == AuthzConstants.authzGroup) {
+			return AppdefEntityID.newGroupID(r.instanceId)
+		} else {
+			throw new RuntimeException("Resource [${r}] is not an appdef object.  " + 
+			"typeId=${typeId}")
+		}
+	}
+	
+	static String urlFor(AppdefEntityID aeid, String context) {
+		return "/Resource.do?eid=${aeid}"
+	}
+	
+	static boolean getSupportsMonitoring(Resource r) {
+		def ent = r.entityId
+		ent.isPlatform() || ent.isServer() || ent.isService()
+	}
+	
+	static Collection getDesignatedMetrics(Resource r) {
 		dman.findDesignatedMeasurements(r.entityId)
-    }
-
-    static Collection getEnabledMetrics(Resource r) {
-        dman.findEnabledMeasurements(null, r.entityId, null)
-    }
-
-    /**
-     * Get all metrics for a resource
-     */
-     static Collection getMetrics(Resource r) {
-        dman.findMeasurements(null, r)
-    }
-
-    /**
-     * Get the availability Measurement for a Resource.
-     */
-    static getAvailabilityMeasurement(Resource r) {
-        dman.getAvailabilityMeasurement(r)
-    }
-    
-    static List getAlertDefinitions(Resource r, AuthzSubject user) {
-        def alertDefs
-        if (r.isPlatform() || r.isServer() || r.isService()) {
-            // Individual alert definition
-            alertDefs = defMan.findAlertDefinitions(user, r.entityId)
-        } else {
-            // Resource type alert definition
-            alertDefs = defMan.findAlertDefinitions(user, r)
-        }
-        alertDefs.findAll { !it.deleted }
-    }
-
-    /**
-     * Get the alerts for a Resource
-     */    
-    static List getAlerts(Resource r, AuthzSubject user, long begin, long end,
-                          int count, AlertSeverity priority) {
-        def includes = [r.entityId]
-        alertMan.findAlerts(user, count, priority.code,
-                            end - begin, end, includes)
-    }
-
-    /**
-     * Get the event logs for a Resource
-     */
-    static List getLogs(Resource r, AuthzSubject user, long begin, long end) {
-        eventMan.findLogs(r.entityId, user, (String[])null, begin, end)
-    }
-
-    /**
-     * Get the control actions for a Resource
-     * @throws PermissionException If the user does not have sufficient permissions
-     */
-    static List getControlActions(Resource r, AuthzSubject user) {
-        try {
-            return cMan.getActions(user, r.entityId)
-        } catch (PluginNotFoundException e) {
-            return []
-        }
-    }
-    
-    /**
-     * Get the control history for a Resource
-     * @throws PermissionException If the user does not have sufficient permissions
-     */
-    static List getControlHistory(Resource r, AuthzSubject user) {
-    	return csMan.findJobHistory(user, r.entityId, PageControl.PAGE_ALL)
-    }
-
-    /**
-     * Run a control action on a Resource
-     * @throws PermissionException If the user does not have permission to
-     *         execute the action
-     * @throws PluginException If the resource does not support control.
-     */
-    static void runAction(Resource r, AuthzSubject user, String action,
-                          String arguments) {
-         cMan.doAction(user, r.entityId, action, arguments)
-    }
-
-    static boolean isGroup(Resource r) {
-        return r.resourceType.id == AuthzConstants.authzGroup
-    }
-    
-    static Collection getGroupMembers(Resource r, AuthzSubject user) {
-        if (!r.isGroup()) {
-            return Collections.EMPTY_LIST
-        }
-        
-        groupMan.findResourceGroupById(user, r.instanceId).resources
-    }
-    
-    /**
-     * Get a collection of {@link String}s, depicting the LiveData
-     * commands available to the specified resource for the specified user
-     */
-    static Collection getLiveDataCommands(Resource r, AuthzSubject user) {
-        try {
-            return liveDataMan.getCommands(user, r.entityId) as List
-        } catch (PluginNotFoundException e) {
-            return []
-        }
-    }
-
-    static LiveDataResult getLiveData(Resource r, AuthzSubject user, 
-                                      String cmd, ConfigResponse cfg)  
-    {
-        def lcmd = new LiveDataCommand(r.entityId, cmd, cfg)
-        liveDataMan.getData(user, lcmd)
-    }
-    
-    static List getLiveData(Collection resources, AuthzSubject user,
-                            String cmd, ConfigResponse cfg)
-    {
-        def cmds = []
-        for (r in resources) {
-            cmds << new LiveDataCommand(r.entityId, cmd, cfg)
-        }
-        liveDataMan.getData(user, cmds as LiveDataCommand[]) as List
-    }
-    
-    static boolean isPlatform(Resource r) {
-        r.resourceType.id == AuthzConstants.authzPlatform
-    }
-    
-    static boolean isServer(Resource r) {
-        r.resourceType.id == AuthzConstants.authzServer
-    }
-
-    static boolean isService(Resource r) {
-        r.resourceType.id == AuthzConstants.authzService
-    }
-    
-    static Platform toPlatform(Resource r) {
-        assert isPlatform(r)
-        platMan.findPlatformById(r.instanceId)
-    }
-    
-    static Server toServer(Resource r) {
-        assert isServer(r)
-        svrMan.findServerById(r.instanceId)
-    }
-
-    static Service toService(Resource r) {
-        assert isService(r)
-        svcMan.findServiceById(r.instanceId)
-    }
-    
-    static ResourceGroup toGroup(Resource r) {
-        assert isGroup(r)
-        groupMan.findResourceGroupById(authzMan.overlordPojo, r.instanceId)
-    }
-
-    static boolean isVirtual(Resource t) {
-        if (t.resourceType.id == AuthzConstants.authzServerProto) {
-            return svrMan.findServerType(t.instanceId)?.isVirtual() == true
-        }
-        false
-    }
-
-    /**
-     * Get the description for this Resource.  If no description exists (i.e.
-     * this is not a Platform, Server, or Service) an empty string is returned.
-     */
-    static String getDescription(Resource r) {
-        def description = null;
-        if (isPlatform(r)) {
-            description = toPlatform(r).getDescription()
-        } else if (isServer(r)) {
-            description = toServer(r).getDescription()
-        } else if (isService(r)) {
-            description = toService(r).getDescription()
-        }
-        return description == null ? "" : description
-    }
-    
-    /**
-     * @see documentation for ResourceConfig.  We don't return it directly
-     * here, as we'd like to abstract the thing doing the persisting
-     */
-    static Map getConfig(Resource r) {
-        def cfg = new ResourceConfig(r)
-        cfg.populate()
-        cfg.entries
-    }
-
-    /**
-     * @see ResourceConfig
-     */
-    static void setConfig(Resource r, Map m, AuthzSubject subject) {
-        (new ResourceConfig(r)).setProperties(m, subject)
-    }
-    
-    /**
-     * Get all the children of a resource, viewable by the passed user.
-     *
-     * @return a list of {@link Resource}s
-     */
-    static Collection getViewableChildren(Resource r, AuthzSubject user) {
-        def res = []
-        if (isPlatform(r)) {
-            def plat    = toPlatform(r)
-            plat.servers.each {
-                try {
-                    def resource = it.checkPerms(operation: 'view', user:user)
-                    res.add(resource)
-                } catch (PermissionException e) {
-                    // Ignore
-                }
-            }
-        } else if (isServer(r)) {
-            def svr = toServer(r)
-            svr.services.each {
-                try {
-                    def resource = it.checkPerms(operation: 'view', user:user)
-                    res.add(resource)
-                } catch (PermissionException e) {
-                    // Ignore
-                }
-            }
-        }
-        res
-    }
-    
-    /**
-     * Convoluted way to get the children from the root resource.
-     *
-     * @deprecated
-     */
-    static List getChildren(Resource r, Map args) {
-        if (r.isRoot()) {
-            // Need subsystem argument
-            assert args.inSubsystem, "Must specify an 'inSubsystem' argument " +
-                                     "[like 'appdef']"
-            if (args.inSubsystem == 'appdef') {
-                def overlord = authzMan.overlordPojo
-                def rhelp = new ResourceHelper(overlord)
-                return rhelp.findAllPlatforms()
-            } else { 
-                throw new IllegalArgumentException("Unknown subsystem, " + 
-                                                   "[${args.inSubsystem}]")
-            }
-        }
-        []
-    }
-
-    static boolean isPlatformPrototype(Resource r) {
-        return r.resourceType.id == AuthzConstants.authzPlatformProto
-    }
-
-    static boolean isServerPrototype(Resource r) {
-        return r.resourceType.id == AuthzConstants.authzServerProto
-    }
-
-    static boolean isServicePrototype(Resource r) {
-        return r.resourceType.id == AuthzConstants.authzServiceProto
-    }
-    
-    static Resource getPlatform(Resource r) {
-        def aeid = AppdefUtil.newAppdefEntityId(r)
-        def aeval = new AppdefEntityValue(aeid, authzMan.overlordPojo)
-        def plats = aeval.getAssociatedPlatforms(PageControl.PAGE_ALL);
-        def plat = plats[0]
-        return ResMan.one.findResource(plat.entityId)
-    }
-
-    /**
-     * Get the children of a resource, of a specific type.  Pass in the 
-     * root resource to get root-level appdef objects.
-     *
-     * "Give me the 'FileServer File' children of my 'Travistation.local' "
-     * 
-     * @return a list of {@link Resource}s
-     */
-    static List getChildrenByPrototype(Resource r, Resource proto) {
-        if (r.isRoot()) {
-            if (!proto.isPlatformPrototype()) {
-                // The only supported children of root is the platform, 
-                // but this could be expanded to also return things like 
-                // users, alert defs or any other resource types
-                return []
-            }
-            def typeRsrc = platMan.findPlatformType(proto.instanceId).resource
-            def rhelp    = new ResourceHelper(getOverlord())
-            return rhelp.find(byPrototype:typeRsrc)
-        }
-        
-        if (isPlatform(r)) {
-            Platform p = toPlatform(r)
-            if (proto.isServicePrototype()) {
-                def svcType = svcMan.findServiceType(proto.instanceId)
-                return svcMan.findPlatformServicesByType(p, svcType).resource
-            } else if (proto.isServerPrototype()) {
-                def svrType = svrMan.findServerType(proto.instanceId)
-                return svrMan.findServersByType(p, svrType).resource
-            } else {
-                // Else prototype is not a valid proto for the resource 
-                return []
-            }
-        } else if (isServer(r)) {
-            Server s = toServer(r)
-            def svcType = svcMan.findServiceType(proto.instanceId)
-            return svcMan.findServicesByType(s, svcType).resource
-        }
-        
-        []
-    }
-
-    static createInstance(Resource proto, Resource parent, String name,
-                          AuthzSubject subject, Map cfg, Agent agent, List ips)
-    {
-        if (!proto.isPlatformPrototype()) {
-            throw new RuntimeException("createInstance called for non-platform " +
-                                       "prototype, when platproto was " + 
-                                       "expected")
-        }
-        
-        if (!parent.isRoot())
-            throw new RuntimeException("Platforms can only be created as " + 
-                                       "children of root")
-
-        cfg = cfg + [:]
-        
-        def typeRsrc = platMan.findPlatformType(proto.instanceId)
-        def platVal = new PlatformValue()
-        ['fqdn'].each { 
-            if (!cfg[it]) 
-                throw new Exception("Must specify [${it}] when creating a " +
-                                    "platform")
-        }
-            
-        platVal.name     = name
-        platVal.description = cfg.description
-        platVal.fqdn     = cfg.fqdn
-        platVal.cpuCount = 1  // XXX:  How can we better gauge?
-        platVal.location = cfg.location
-
-        def plat  = platMan.createPlatform(subject, proto.instanceId,
-                                           platVal, agent.id)
-        for (ip in ips) {
-            platMan.addIp(plat, ip.address, ip.netmask, ip.mac)
-        }
-              
-        def res = plat.resource
-        setConfig(res, cfg, subject)
-        return res
-    }
-     
-
-    /**
-     * Create a new instance of this prototype:
-     */
-    static createInstance(Resource proto, Resource parent, 
-                          String name, AuthzSubject subject, Map cfg)
-    {
-        cfg = cfg + [:]  // Clone to avoid modifying someone else's cfg
-        
-        if (proto.isServicePrototype()) {
-            def serviceType = svcMan.findServiceType(proto.instanceId)
-            def serverType  = serviceType.serverType
-            
-            Server server
-            if (serverType.isVirtual() && parent.isPlatform()) {
-                // Parent points at the 'resource' version of the Platform, so
-                // we use the instanceId here, not the Resource.id
-                def servers = svrMan.getServersByPlatformServiceType(subject,
-                                                                     parent.instanceId,
-                                                                     proto.instanceId)
-                assert servers.size() == 1, "Unable to find appropriate virtual server for " +
-                                            proto.name + " parent = " + parent.name
-                
-                server = svrMan.findServerById(servers[0].id) // value -> pojo
-            } else if (parent.isServer()) {
-                // Normal case, create service on a server
-                server = toServer(parent)
-            } else {
-                // Invalid parameters
-                throw new IllegalArgumentException("Invalid prototypes passed to " +
-                                                   "createInstance, cannot create " +
-                                                   proto.name + " on " + parent.name)
-            }
-
-            if (!serverType.equals(server.getServerType())) {
-                throw new IllegalArgumentException("Cannot create resources of" +
-                                                   " type " + serviceType.name +
-                                                   " on " + server.getServerType().name)
-            }
-
-            def res = svcMan.createService(subject, server,  serviceType, name,
-                                           "", "", null).resource
-            setConfig(res, cfg, subject)
-            return res
-        } else if (proto.isServerPrototype() && parent.isPlatform()) {
-            Platform platform = toPlatform(parent)
-            def serverType = svrMan.findServerType(proto.instanceId)
-            def platformTypes = serverType.getPlatformTypes()
-            ServerValue sv = new ServerValue()
-            sv.name        = name
-
-            if (!platformTypes.contains(platform.getPlatformType())) {
-                throw new IllegalArgumentException("Cannot create resources of " +
-                                                   "type " + serverType.name +
-                                                   " on " + platform.getPlatformType().name)
-            }
-
-            if (cfg['installPath']) {
-                sv.installPath = cfg['installPath']
-            } else {
-                sv.installPath = ""
-            }
-
-            if (cfg['description']) {
-                sv.description = cfg['description']
-            } else {
-                sv.description = ""
-            }
-
-            if (cfg['autoIdentifier']) {
-                sv.autoinventoryIdentifier = cfg['autoIdentifier']
-            }
-
-            def res = svrMan.createServer(subject, platform.id,
-                                          proto.instanceId, sv).resource
-            setConfig(res, cfg, subject)
-            return res
-        } else {
-            throw new IllegalArgumentException("Cannot create resources of type " +
-                                               proto.name + " on resource " +
-                                               parent.name)
-        }
-    }
-
-    /**
-     * @deprecated Use ResourceHelper.createGroup
-     */
-    static ResourceGroup createGroup(Resource r, AuthzSubject user, String name,
-                                     String description, String location) {
-        def groupType
-        
-        if (r.isGroup()) {
-            if (r.name == AuthzConstants.rootResourceGroupName) {
-                groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS
-            }
-            else if (r.name == AuthzConstants.groupResourceTypeName) {
-                groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP
-            }
-            r = null
-        }
-        else if (r.id == AuthzConstants.authzApplicationProto) {
-            groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP
-            r = null
-        }
-        else {
-            switch (r.appdefType) {
-            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC
-                break
-            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS;
-                break
-            default:
-                throw new IllegalArgumentException("Invalid group compatibility"
-                                                   + " type specified")
-            }
-        }
-        
-        ResourceGroupCreateInfo cInfo = 
-            new ResourceGroupCreateInfo(name, description,
-                                        groupType,
-                                        r,      
-                                        location,
-                                        0,         // clusterId 
-                                        false,     // sytstem
-                                        false)     // private
-
-        // No roles or resources
-        groupMan.createResourceGroup(user, cInfo, [], [])
-    }
-
-    static void remove(Resource r, AuthzSubject user) {
-        def boss = AppdefBoss.one
-        def mgr = SessionManager.instance
-        def sessionId = mgr.put(user)
-        boss.removeAppdefEntity(sessionId, r.entityId)
-    }
-
-    /**
-     * Move a Resource.
-     */
-    static void moveTo(Resource target, AuthzSubject user, Resource destination) {
-
-        if (target.isService() && destination.isServer()) {
-            // Normal service move
-            svcMan.moveService(user, target.toService(), destination.toServer())
-        } else if (target.isService() && destination.isPlatform()) {
-            // Platform service move
-            svcMan.moveService(user, target.toService(), destination.toPlatform())
-        } else if (target.isServer() && destination.isPlatform()) {
-            // Server move
-            svrMan.moveServer(user, target.toServer(), destination.toPlatform())
-        } else {
-            // TODO: This matches incompatible type exception thrown from
-            // the manager layer.  Should investigate what is thrown here, since
-            // it is important to handle this exception gracefully from the
-            // client.
-            throw new VetoException("Not implemented: " +
-                                    " target=" + target.getResourceType().getName() +
-                                    " dest=" + destination.getResourceType().getName())
-        }
-    }
-
-    private static getOverlord() {
-        return authzMan.overlordPojo
-    }
+	}
+	
+	static Collection getEnabledMetrics(Resource r) {
+		dman.findEnabledMeasurements(null, r.entityId, null)
+	}
+	
+	/**
+	 * Get all metrics for a resource
+	 */
+	static Collection getMetrics(Resource r) {
+		dman.findMeasurements(null, r)
+	}
+	
+	/**
+	 * Get the availability Measurement for a Resource.
+	 */
+	static getAvailabilityMeasurement(Resource r) {
+		dman.getAvailabilityMeasurement(r)
+	}
+	
+	static List getAlertDefinitions(Resource r, AuthzSubject user) {
+		def alertDefs
+		if (r.isPlatform() || r.isServer() || r.isService()) {
+			// Individual alert definition
+			alertDefs = defMan.findAlertDefinitions(user, r.entityId)
+		} else {
+			// Resource type alert definition
+			alertDefs = defMan.findAlertDefinitions(user, r)
+		}
+		alertDefs.findAll { !it.deleted }
+	}
+	
+	/**
+	 * Get the alerts for a Resource
+	 */    
+	static List getAlerts(Resource r, AuthzSubject user, long begin, long end,
+	int count, AlertSeverity priority) {
+		def includes = [r.entityId]
+		alertMan.findAlerts(user, count, priority.code,
+				end - begin, end, includes)
+	}
+	
+	/**
+	 * Get the event logs for a Resource
+	 */
+	static List getLogs(Resource r, AuthzSubject user, long begin, long end) {
+		eventMan.findLogs(r.entityId, user, (String[])null, begin, end)
+	}
+	
+	/**
+	 * Get the control actions for a Resource
+	 * @throws PermissionException If the user does not have sufficient permissions
+	 */
+	static List getControlActions(Resource r, AuthzSubject user) {
+		try {
+			return cMan.getActions(user, r.entityId)
+		} catch (PluginNotFoundException e) {
+			return []
+		}
+	}
+	
+	/**
+	 * Get the control history for a Resource
+	 * @throws PermissionException If the user does not have sufficient permissions
+	 */
+	static List getControlHistory(Resource r, AuthzSubject user) {
+		return csMan.findJobHistory(user, r.entityId, PageControl.PAGE_ALL)
+	}
+	
+	/**
+	 * Run a control action on a Resource
+	 * @throws PermissionException If the user does not have permission to
+	 *         execute the action
+	 * @throws PluginException If the resource does not support control.
+	 */
+	static void runAction(Resource r, AuthzSubject user, String action,
+	String arguments) {
+		cMan.doAction(user, r.entityId, action, arguments)
+	}
+	
+	static boolean isGroup(Resource r) {
+		return r.resourceType.id == AuthzConstants.authzGroup
+	}
+	
+	static Collection getGroupMembers(Resource r, AuthzSubject user) {
+		if (!r.isGroup()) {
+			return Collections.EMPTY_LIST
+		}
+		
+		groupMan.findResourceGroupById(user, r.instanceId).resources
+	}
+	
+	/**
+	 * Get a collection of {@link String}s, depicting the LiveData
+	 * commands available to the specified resource for the specified user
+	 */
+	static Collection getLiveDataCommands(Resource r, AuthzSubject user) {
+		try {
+			return liveDataMan.getCommands(user, r.entityId) as List
+		} catch (PluginNotFoundException e) {
+			return []
+		}
+	}
+	
+	static LiveDataResult getLiveData(Resource r, AuthzSubject user, 
+	String cmd, ConfigResponse cfg) {
+		def lcmd = new LiveDataCommand(r.entityId, cmd, cfg)
+		liveDataMan.getData(user, lcmd)
+	}
+	
+	static List getLiveData(Collection resources, AuthzSubject user,
+	String cmd, ConfigResponse cfg) {
+		def cmds = []
+		for (r in resources) {
+			cmds << new LiveDataCommand(r.entityId, cmd, cfg)
+		}
+		liveDataMan.getData(user, cmds as LiveDataCommand[]) as List
+	}
+	
+	static boolean isPlatform(Resource r) {
+		r.resourceType.id == AuthzConstants.authzPlatform
+	}
+	
+	static boolean isServer(Resource r) {
+		r.resourceType.id == AuthzConstants.authzServer
+	}
+	
+	static boolean isService(Resource r) {
+		r.resourceType.id == AuthzConstants.authzService
+	}
+	
+	static Platform toPlatform(Resource r) {
+		assert isPlatform(r)
+		platMan.findPlatformById(r.instanceId)
+	}
+	
+	static Server toServer(Resource r) {
+		assert isServer(r)
+		svrMan.findServerById(r.instanceId)
+	}
+	
+	static Service toService(Resource r) {
+		assert isService(r)
+		svcMan.findServiceById(r.instanceId)
+	}
+	
+	static ResourceGroup toGroup(Resource r) {
+		assert isGroup(r)
+		groupMan.findResourceGroupById(authzMan.overlordPojo, r.instanceId)
+	}
+	
+	static boolean isVirtual(Resource t) {
+		if (t.resourceType.id == AuthzConstants.authzServerProto) {
+			return svrMan.findServerType(t.instanceId)?.isVirtual() == true
+		}
+		false
+	}
+	
+	/**
+	 * Get the description for this Resource.  If no description exists (i.e.
+	 * this is not a Platform, Server, or Service) an empty string is returned.
+	 */
+	static String getDescription(Resource r) {
+		def description = null;
+		if (isPlatform(r)) {
+			description = toPlatform(r).getDescription()
+		} else if (isServer(r)) {
+			description = toServer(r).getDescription()
+		} else if (isService(r)) {
+			description = toService(r).getDescription()
+		}
+		return description == null ? "" : description
+	}
+	
+	/**
+	 * @see documentation for ResourceConfig.  We don't return it directly
+	 * here, as we'd like to abstract the thing doing the persisting
+	 */
+	static Map getConfig(Resource r) {
+		def cfg = new ResourceConfig(r)
+		cfg.populate()
+		cfg.entries
+	}
+	
+	/**
+	 * @see ResourceConfig
+	 */
+	static void setConfig(Resource r, Map m, AuthzSubject subject) {
+		(new ResourceConfig(r)).setProperties(m, subject)
+	}
+	
+	/**
+	 * Get all the children of a resource, viewable by the passed user.
+	 *
+	 * @return a list of {@link Resource}s
+	 */
+	static Collection getViewableChildren(Resource r, AuthzSubject user) {
+		def res = []
+		if (isPlatform(r)) {
+			def plat    = toPlatform(r)
+			plat.servers.each {
+				try {
+					def resource = it.checkPerms(operation: 'view', user:user)
+					res.add(resource)
+				} catch (PermissionException e) {
+					// Ignore
+				}
+			}
+		} else if (isServer(r)) {
+			def svr = toServer(r)
+			svr.services.each {
+				try {
+					def resource = it.checkPerms(operation: 'view', user:user)
+					res.add(resource)
+				} catch (PermissionException e) {
+					// Ignore
+				}
+			}
+		}
+		res
+	}
+	
+	/**
+	 * Convoluted way to get the children from the root resource.
+	 *
+	 * @deprecated
+	 */
+	static List getChildren(Resource r, Map args) {
+		if (r.isRoot()) {
+			// Need subsystem argument
+			assert args.inSubsystem, "Must specify an 'inSubsystem' argument " +
+			"[like 'appdef']"
+			if (args.inSubsystem == 'appdef') {
+				def overlord = authzMan.overlordPojo
+				def rhelp = new ResourceHelper(overlord)
+				return rhelp.findAllPlatforms()
+			} else { 
+				throw new IllegalArgumentException("Unknown subsystem, " + 
+				"[${args.inSubsystem}]")
+			}
+		}
+		[]
+	}
+	
+	static boolean isPlatformPrototype(Resource r) {
+		return r.resourceType.id == AuthzConstants.authzPlatformProto
+	}
+	
+	static boolean isServerPrototype(Resource r) {
+		return r.resourceType.id == AuthzConstants.authzServerProto
+	}
+	
+	static boolean isServicePrototype(Resource r) {
+		return r.resourceType.id == AuthzConstants.authzServiceProto
+	}
+	
+	static Resource getPlatform(Resource r) {
+		def aeid = AppdefUtil.newAppdefEntityId(r)
+		def aeval = new AppdefEntityValue(aeid, authzMan.overlordPojo)
+		def plats = aeval.getAssociatedPlatforms(PageControl.PAGE_ALL);
+		def plat = plats[0]
+		return Bootstrap.getBean(ResourceManager.class).findResource(plat.entityId)
+	}
+	
+	/**
+	 * Get the children of a resource, of a specific type.  Pass in the 
+	 * root resource to get root-level appdef objects.
+	 *
+	 * "Give me the 'FileServer File' children of my 'Travistation.local' "
+	 * 
+	 * @return a list of {@link Resource}s
+	 */
+	static List getChildrenByPrototype(Resource r, Resource proto) {
+		if (r.isRoot()) {
+			if (!proto.isPlatformPrototype()) {
+				// The only supported children of root is the platform, 
+				// but this could be expanded to also return things like 
+				// users, alert defs or any other resource types
+				return []
+			}
+			def typeRsrc = platMan.findPlatformType(proto.instanceId).resource
+			def rhelp    = new ResourceHelper(getOverlord())
+			return rhelp.find(byPrototype:typeRsrc)
+		}
+		
+		if (isPlatform(r)) {
+			Platform p = toPlatform(r)
+			if (proto.isServicePrototype()) {
+				def svcType = svcMan.findServiceType(proto.instanceId)
+				return svcMan.findPlatformServicesByType(p, svcType).resource
+			} else if (proto.isServerPrototype()) {
+				def svrType = svrMan.findServerType(proto.instanceId)
+				return svrMan.findServersByType(p, svrType).resource
+			} else {
+				// Else prototype is not a valid proto for the resource 
+				return []
+			}
+		} else if (isServer(r)) {
+			Server s = toServer(r)
+			def svcType = svcMan.findServiceType(proto.instanceId)
+			return svcMan.findServicesByType(s, svcType).resource
+		}
+		
+		[]
+	}
+	
+	static createInstance(Resource proto, Resource parent, String name,
+	AuthzSubject subject, Map cfg, Agent agent, List ips) {
+		if (!proto.isPlatformPrototype()) {
+			throw new RuntimeException("createInstance called for non-platform " +
+			"prototype, when platproto was " + 
+			"expected")
+		}
+		
+		if (!parent.isRoot())
+			throw new RuntimeException("Platforms can only be created as " + 
+			"children of root")
+		
+		cfg = cfg + [:]
+		
+		def typeRsrc = platMan.findPlatformType(proto.instanceId)
+		def platVal = new PlatformValue()
+		['fqdn'].each { 
+			if (!cfg[it]) 
+				throw new Exception("Must specify [${it}] when creating a " +
+				"platform")
+		}
+		
+		platVal.name     = name
+		platVal.description = cfg.description
+		platVal.fqdn     = cfg.fqdn
+		platVal.cpuCount = 1  // XXX:  How can we better gauge?
+		platVal.location = cfg.location
+		
+		def plat  = platMan.createPlatform(subject, proto.instanceId,
+				platVal, agent.id)
+		for (ip in ips) {
+			platMan.addIp(plat, ip.address, ip.netmask, ip.mac)
+		}
+		
+		def res = plat.resource
+		setConfig(res, cfg, subject)
+		return res
+	}
+	
+	
+	/**
+	 * Create a new instance of this prototype:
+	 */
+	static createInstance(Resource proto, Resource parent, 
+	String name, AuthzSubject subject, Map cfg) {
+		cfg = cfg + [:]  // Clone to avoid modifying someone else's cfg
+		
+		if (proto.isServicePrototype()) {
+			def serviceType = svcMan.findServiceType(proto.instanceId)
+			def serverType  = serviceType.serverType
+			
+			Server server
+			if (serverType.isVirtual() && parent.isPlatform()) {
+				// Parent points at the 'resource' version of the Platform, so
+				// we use the instanceId here, not the Resource.id
+				def servers = svrMan.getServersByPlatformServiceType(subject,
+						parent.instanceId,
+						proto.instanceId)
+				assert servers.size() == 1, "Unable to find appropriate virtual server for " +
+				proto.name + " parent = " + parent.name
+				
+				server = svrMan.findServerById(servers[0].id) // value -> pojo
+			} else if (parent.isServer()) {
+				// Normal case, create service on a server
+				server = toServer(parent)
+			} else {
+				// Invalid parameters
+				throw new IllegalArgumentException("Invalid prototypes passed to " +
+				"createInstance, cannot create " +
+				proto.name + " on " + parent.name)
+			}
+			
+			if (!serverType.equals(server.getServerType())) {
+				throw new IllegalArgumentException("Cannot create resources of" +
+				" type " + serviceType.name +
+				" on " + server.getServerType().name)
+			}
+			
+			def res = svcMan.createService(subject, server,  serviceType, name,
+					"", "", null).resource
+			setConfig(res, cfg, subject)
+			return res
+		} else if (proto.isServerPrototype() && parent.isPlatform()) {
+			Platform platform = toPlatform(parent)
+			def serverType = svrMan.findServerType(proto.instanceId)
+			def platformTypes = serverType.getPlatformTypes()
+			ServerValue sv = new ServerValue()
+			sv.name        = name
+			
+			if (!platformTypes.contains(platform.getPlatformType())) {
+				throw new IllegalArgumentException("Cannot create resources of " +
+				"type " + serverType.name +
+				" on " + platform.getPlatformType().name)
+			}
+			
+			if (cfg['installPath']) {
+				sv.installPath = cfg['installPath']
+			} else {
+				sv.installPath = ""
+			}
+			
+			if (cfg['description']) {
+				sv.description = cfg['description']
+			} else {
+				sv.description = ""
+			}
+			
+			if (cfg['autoIdentifier']) {
+				sv.autoinventoryIdentifier = cfg['autoIdentifier']
+			}
+			
+			def res = svrMan.createServer(subject, platform.id,
+					proto.instanceId, sv).resource
+			setConfig(res, cfg, subject)
+			return res
+		} else {
+			throw new IllegalArgumentException("Cannot create resources of type " +
+			proto.name + " on resource " +
+			parent.name)
+		}
+	}
+	
+	/**
+	 * @deprecated Use ResourceHelper.createGroup
+	 */
+	static ResourceGroup createGroup(Resource r, AuthzSubject user, String name,
+	String description, String location) {
+		def groupType
+		
+		if (r.isGroup()) {
+			if (r.name == AuthzConstants.rootResourceGroupName) {
+				groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS
+			}
+			else if (r.name == AuthzConstants.groupResourceTypeName) {
+				groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP
+			}
+			r = null
+		}
+		else if (r.id == AuthzConstants.authzApplicationProto) {
+			groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP
+			r = null
+		}
+		else {
+			switch (r.appdefType) {
+				case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+					groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC
+					break
+				case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+				case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+					groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS;
+					break
+				default:
+					throw new IllegalArgumentException("Invalid group compatibility"
+					+ " type specified")
+			}
+		}
+		
+		ResourceGroupCreateInfo cInfo = 
+				new ResourceGroupCreateInfo(name, description,
+				groupType,
+				r,      
+				location,
+				0,         // clusterId 
+				false,     // sytstem
+				false)     // private
+		
+		// No roles or resources
+		groupMan.createResourceGroup(user, cInfo, [], [])
+	}
+	
+	static void remove(Resource r, AuthzSubject user) {
+		def boss = Bootstrap.getBean(AppdefBoss.class)
+		def mgr = SessionManager.instance
+		def sessionId = mgr.put(user)
+		boss.removeAppdefEntity(sessionId, r.entityId)
+	}
+	
+	/**
+	 * Move a Resource.
+	 */
+	static void moveTo(Resource target, AuthzSubject user, Resource destination) {
+		
+		if (target.isService() && destination.isServer()) {
+			// Normal service move
+			svcMan.moveService(user, target.toService(), destination.toServer())
+		} else if (target.isService() && destination.isPlatform()) {
+			// Platform service move
+			svcMan.moveService(user, target.toService(), destination.toPlatform())
+		} else if (target.isServer() && destination.isPlatform()) {
+			// Server move
+			svrMan.moveServer(user, target.toServer(), destination.toPlatform())
+		} else {
+			// TODO: This matches incompatible type exception thrown from
+			// the manager layer.  Should investigate what is thrown here, since
+			// it is important to handle this exception gracefully from the
+			// client.
+			throw new VetoException("Not implemented: " +
+			" target=" + target.getResourceType().getName() +
+			" dest=" + destination.getResourceType().getName())
+		}
+	}
+	
+	private static getOverlord() {
+		return authzMan.overlordPojo
+	}
 }

@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -23,38 +23,47 @@
  * USA.
  */
 
-package org.hyperic.hq.measurement.server.session;
+package org.hyperic.hq.events.server.session;
 
-import java.util.List;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.measurement.shared.MeasurementManager;
-import org.hyperic.hq.zevents.ZeventListener;
+import org.hyperic.hq.common.server.session.ServerConfigCache;
+import org.hyperic.hq.common.shared.HQConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+/**
+ * The {@link AlertRegulator} has the responsibility of limiting the generation
+ * of alerts.
+ */
 @Component
-public class MeasurementEnabler 
-    implements ZeventListener
-{
-    private final Log log = LogFactory.getLog(MeasurementEnabler.class.getName());
-    private MeasurementManager measurementManager;
-    
+public class AlertRegulatorImpl implements AlertRegulator {
+
+    private ServerConfigCache serverConfigCache;
+
     @Autowired
-    public MeasurementEnabler(MeasurementManager measurementManager) {
-        this.measurementManager = measurementManager;
+    public AlertRegulatorImpl(ServerConfigCache serverConfigCache) {
+        this.serverConfigCache = serverConfigCache;
     }
 
-    public void processEvents(List e) {
-        
-        if (log.isDebugEnabled()) {
-            log.debug("handling refresh event list size=" + e.size());
+    public boolean alertsAllowed() {
+        boolean allowed = true;
+        Boolean prop = serverConfigCache.getBooleanProperty(HQConstants.AlertsEnabled);
+        try {
+            allowed = prop.booleanValue();
+        } catch (NullPointerException e) {
+            //
         }
-        
-        measurementManager.handleCreateRefreshEvents(e);
+        return allowed;
     }
-    
-    public String toString() {
-        return "MeasurementEnabler";
+
+    public boolean alertNotificationsAllowed() {
+        boolean allowed = true;
+        Boolean prop = serverConfigCache.getBooleanProperty(HQConstants.AlertNotificationsEnabled);
+        try {
+            allowed = prop.booleanValue();
+        } catch (NullPointerException e) {
+            //
+        }
+        return allowed;
     }
+
 }

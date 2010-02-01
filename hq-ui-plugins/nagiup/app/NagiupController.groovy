@@ -1,5 +1,7 @@
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.appdef.server.session.CPropResourceSortField
 import org.hyperic.hq.bizapp.server.session.AppdefBossImpl
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.hqu.rendit.html.DojoUtil
 import org.hyperic.hq.hqu.rendit.BaseController
 import org.hyperic.util.units.UnitsFormat
@@ -14,7 +16,7 @@ class NagiupController
     private final NAGIUP_SCHEMA = [
         getData: {pageInfo, params ->
             def proto = resourceHelper.findResourcePrototype('Nagios Plugin') 
-            AppdefBossImpl.one.getServicesView(user, proto, 
+            Bootstrap.getBean(AppdefBoss.class).getServicesView(user, proto, 
                                                   'nagiosHost', 'Return Code',
                                                   pageInfo)
         },

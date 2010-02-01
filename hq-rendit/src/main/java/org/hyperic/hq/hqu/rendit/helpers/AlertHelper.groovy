@@ -3,6 +3,7 @@ package org.hyperic.hq.hqu.rendit.helpers
 import org.hyperic.hibernate.PageInfo
 import org.hyperic.hq.events.server.session.AlertDefSortField
 import org.hyperic.hq.authz.server.session.AuthzSubject
+import org.hyperic.hq.galerts.shared.GalertManager;
 import org.hyperic.hq.events.server.session.AlertDefinition
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
@@ -12,7 +13,7 @@ import org.hyperic.hq.events.AlertSeverity
 
 class AlertHelper extends BaseHelper {
     private alertMan  = Bootstrap.getBean(AlertManager.class)
-    private galertMan = GalertManagerImpl.one
+    private galertMan = Bootstrap.getBean(GalertManager.class)
     private defMan    = Bootstrap.getBean(AlertDefinitionManager.class)
     
     AlertHelper(AuthzSubject user) {
