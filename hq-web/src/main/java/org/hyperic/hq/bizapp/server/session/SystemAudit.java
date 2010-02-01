@@ -25,59 +25,20 @@
 package org.hyperic.hq.bizapp.server.session;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
 import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
-import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.AuditImportance;
-import org.hyperic.hq.common.server.session.AuditManagerImpl;
 import org.hyperic.hq.common.server.session.AuditNature;
 import org.hyperic.hq.common.server.session.AuditPurpose;
-import org.hyperic.util.i18n.MessageBundle;
 
-public class SystemAudit extends Audit {
-    private static final MessageBundle MSGS = 
-        MessageBundle.getBundle("org.hyperic.hq.bizapp.Resources");
-
-    public static final SystemAuditPurpose HQ_STARTED = 
-        new SystemAuditPurpose(0x3000, "hq started", 
-                                 "audit.hq.started");
-
-    public static class SystemAuditPurpose extends AuditPurpose {
-        SystemAuditPurpose(int code, String desc, String localeProp) { 
-            super(code, desc, localeProp, MSGS.getResourceBundle());
-        }
-    }
-
-    protected SystemAudit() {}
+public class SystemAudit
+    extends Audit {
     
-    SystemAudit(Resource r, AuthzSubject s, AuditPurpose p, 
-                AuditImportance i, AuditNature n, String msg)
-    { 
+    protected SystemAudit() {}
+
+    SystemAudit(Resource r, AuthzSubject s, AuditPurpose p, AuditImportance i, AuditNature n, String msg) {
         super(s, r, p, n, i, msg);
         setStartTime(System.currentTimeMillis());
         setEndTime(System.currentTimeMillis());
-    }
-
-    private static Resource getSystemResource() {
-        return ResourceManagerImpl.getOne()
-                .findResourceById(AuthzConstants.authzHQSystem);
-    }
-    
-    public static AuthzSubject getOverlord() {
-        return AuthzSubjectManagerImpl.getOne().getOverlordPojo();
-    }
-    
-    public static SystemAudit createUpAudit(long startupTime) {
-        String msg = MSGS.format("auditMsg.hq.started"); 
-        SystemAudit res = new SystemAudit(getSystemResource(), getOverlord(), 
-                                          HQ_STARTED, AuditImportance.MEDIUM, 
-                                          AuditNature.START, msg); 
-
-        res.setEndTime(System.currentTimeMillis());
-        res.setStartTime(res.getEndTime() - startupTime);
-        AuditManagerImpl.getOne().saveAudit(res);
-        return res;
     }
 }

@@ -106,13 +106,15 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
     public static final String LOG_CTX = "org.hyperic.hq.common.server.session.ServerConfigManagerImpl";
     protected final Log log = LogFactory.getLog(LOG_CTX);
     private ConfigPropertyDAO configPropertyDAO;
+    private ServerConfigAuditFactory serverConfigAuditFactory;
 
     @Autowired
     public ServerConfigManagerImpl(DBUtil dbUtil, AuthzSubjectManager authzSubjectManager,
-                                   ConfigPropertyDAO configPropertyDAO) {
+                                   ConfigPropertyDAO configPropertyDAO, ServerConfigAuditFactory serverConfigAuditFactory) {
         this.dbUtil = dbUtil;
         this.authzSubjectManager = authzSubjectManager;
         this.configPropertyDAO = configPropertyDAO;
+        this.serverConfigAuditFactory = serverConfigAuditFactory;
     }
 
     /**
@@ -159,42 +161,42 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
 
     private void createChangeAudit(AuthzSubject subject, String key, String oldVal, String newVal) {
         if (key.equals(HQConstants.BaseURL)) {
-            ServerConfigAudit.updateBaseURL(subject, newVal, oldVal);
+            serverConfigAuditFactory.updateBaseURL(subject, newVal, oldVal);
         } else if (key.equals(HQConstants.EmailSender)) {
-            ServerConfigAudit.updateFromEmail(subject, newVal, oldVal);
+            serverConfigAuditFactory.updateFromEmail(subject, newVal, oldVal);
         } else if (key.equals(HQConstants.ExternalHelp)) {
             boolean oldExternal = oldVal.equals("true");
             boolean newExternal = newVal.equals("true");
 
-            ServerConfigAudit.updateExternalHelp(subject, newExternal, oldExternal);
+            serverConfigAuditFactory.updateExternalHelp(subject, newExternal, oldExternal);
         } else if (key.equals(HQConstants.DataMaintenance)) {
             int oldHours = (int) (Long.parseLong(oldVal) / 60 / 60 / 1000);
             int newHours = (int) (Long.parseLong(newVal) / 60 / 60 / 1000);
-            ServerConfigAudit.updateDBMaint(subject, newHours, oldHours);
+            serverConfigAuditFactory.updateDBMaint(subject, newHours, oldHours);
         } else if (key.equals(HQConstants.DataPurgeRaw)) {
             int oldDays = (int) (Long.parseLong(oldVal) / 24 / 60 / 60 / 1000);
             int newDays = (int) (Long.parseLong(newVal) / 24 / 60 / 60 / 1000);
-            ServerConfigAudit.updateDeleteDetailed(subject, newDays, oldDays);
+            serverConfigAuditFactory.updateDeleteDetailed(subject, newDays, oldDays);
         } else if (key.equals(HQConstants.AlertPurge)) {
             int oldPurge = (int) (Long.parseLong(oldVal) / 24 / 60 / 60 / 1000);
             int newPurge = (int) (Long.parseLong(newVal) / 24 / 60 / 60 / 1000);
-            ServerConfigAudit.updateAlertPurgeInterval(subject, newPurge, oldPurge);
+            serverConfigAuditFactory.updateAlertPurgeInterval(subject, newPurge, oldPurge);
         } else if (key.equals(HQConstants.EventLogPurge)) {
             int oldPurge = (int) (Long.parseLong(oldVal) / 24 / 60 / 60 / 1000);
             int newPurge = (int) (Long.parseLong(newVal) / 24 / 60 / 60 / 1000);
-            ServerConfigAudit.updateEventPurgeInterval(subject, newPurge, oldPurge);
+            serverConfigAuditFactory.updateEventPurgeInterval(subject, newPurge, oldPurge);
         } else if (key.equals(HQConstants.AlertsEnabled)) {
             boolean oldEnabled = oldVal.equals("true");
             boolean newEnabled = newVal.equals("true");
-            ServerConfigAudit.updateAlertsEnabled(subject, newEnabled, oldEnabled);
+            serverConfigAuditFactory.updateAlertsEnabled(subject, newEnabled, oldEnabled);
         } else if (key.equals(HQConstants.AlertNotificationsEnabled)) {
             boolean oldEnabled = oldVal.equals("true");
             boolean newEnabled = newVal.equals("true");
-            ServerConfigAudit.updateAlertNotificationsEnabled(subject, newEnabled, oldEnabled);
+            serverConfigAuditFactory.updateAlertNotificationsEnabled(subject, newEnabled, oldEnabled);
         } else if (key.equals(HQConstants.HIERARCHICAL_ALERTING_ENABLED)) {
             boolean oldEnabled = oldVal.equals("true");
             boolean newEnabled = newVal.equals("true");
-            ServerConfigAudit.updateHierarchicalAlertingEnabled(subject, newEnabled, oldEnabled);
+            serverConfigAuditFactory.updateHierarchicalAlertingEnabled(subject, newEnabled, oldEnabled);
         }
     }
 

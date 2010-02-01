@@ -48,6 +48,7 @@ import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
@@ -113,7 +114,7 @@ public class AppdefEntityValue {
 
     private ApplicationManager getApplicationManager() {
         if (applicationManagerLocal == null) {
-            applicationManagerLocal = ApplicationManagerImpl.getOne();
+            applicationManagerLocal = Bootstrap.getBean(ApplicationManager.class);
         }
         return applicationManagerLocal;
     }

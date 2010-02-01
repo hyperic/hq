@@ -26,133 +26,14 @@ package org.hyperic.hq.common.server.session;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
-import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.bizapp.server.session.UpdateStatusMode;
-import org.hyperic.util.i18n.MessageBundle;
 
-public class ServerConfigAudit extends Audit {
-    private static final MessageBundle MSGS = 
-        MessageBundle.getBundle("org.hyperic.hq.common.Resources");
+public class ServerConfigAudit
+    extends Audit {
 
-    public static final ServerConfigAuditPurpose CONFIG_UPDATE = 
-        new ServerConfigAuditPurpose(0x6000, "server config update", 
-                                     "audit.serverConfig.update");
-
-    public static class ServerConfigAuditPurpose extends AuditPurpose {
-        ServerConfigAuditPurpose(int code, String desc, String localeProp) { 
-            super(code, desc, localeProp, MSGS.getResourceBundle());
-        }
-    }
-    
     protected ServerConfigAudit() {}
-
-    ServerConfigAudit(AuthzSubject s, Resource r, AuditPurpose p, 
-                      AuditImportance i, AuditNature n, String msg)  
-    { 
+    
+    ServerConfigAudit(AuthzSubject s, Resource r, AuditPurpose p, AuditImportance i, AuditNature n, String msg) {
         super(s, r, p, n, i, msg);
     }
 
-    private static Resource getSystemResource() {
-        return ResourceManagerImpl.getOne()
-                .findResourceById(AuthzConstants.authzHQSystem);
-    }
-    
-    private static ServerConfigAudit createAudit(AuthzSubject user,
-                                                 String propKey,
-                                                 String newVal, String old) 
-    {
-        ServerConfigAudit res = 
-            new ServerConfigAudit(user, getSystemResource(), CONFIG_UPDATE,
-                                  AuditImportance.HIGH, AuditNature.UPDATE,
-                                  MSGS.format(propKey, newVal, old));
-
-        res.setStartTime(System.currentTimeMillis());
-        res.setEndTime(System.currentTimeMillis());
-        res.setFieldName(propKey);
-        res.setOldFieldValue(old);
-        res.setNewFieldValue(newVal);
-        AuditManagerImpl.getOne().saveAudit(res);
-        return res;
-    }
-
-    public static ServerConfigAudit updateBaseURL(AuthzSubject user, 
-                                                  String newVal, String old) 
-    {
-        return createAudit(user, "auditMsg.serverConfig.baseUrl", newVal, old);
-    }
-    
-    public static ServerConfigAudit updateFromEmail(AuthzSubject user, 
-                                                    String newVal, String old) 
-    {
-        return createAudit(user, "auditMsg.serverConfig.fromEmail", newVal, 
-                           old);
-    }
-    
-    public static ServerConfigAudit updateAnnounce(AuthzSubject user, 
-                                                   UpdateStatusMode newVal,
-                                                   UpdateStatusMode old)
-    {
-        return createAudit(user, "auditMsg.serverConfig.announce", 
-                           newVal.getValue(), old.getValue()); 
-    }
-    
-    public static ServerConfigAudit 
-        updateExternalHelp(AuthzSubject user, boolean newVal, boolean old)
-    {
-        return createAudit(user, "auditMsg.serverConfig.help", newVal + "", 
-                           old + ""); 
-    }
-    
-    public static ServerConfigAudit updateDBMaint(AuthzSubject user, int newVal,
-                                                  int old)
-    {
-        return createAudit(user, "auditMsg.serverConfig.dbMaint", newVal + "", 
-                           old + ""); 
-    }
-    
-    public static ServerConfigAudit updateDeleteDetailed(AuthzSubject user, 
-                                                         int newVal, int old)
-    {
-        return createAudit(user, "auditMsg.serverConfig.deleteDetailed", 
-                           newVal + "", old + "");  
-    }
-    
-    public static ServerConfigAudit updateAlertPurgeInterval(AuthzSubject user, 
-                                                             int newVal, int old)
-    {
-        return createAudit(user, "auditMsg.serverConfig.alertPurge", 
-                           newVal + "", old + "");  
-    }
-    
-    public static ServerConfigAudit updateEventPurgeInterval(AuthzSubject user, 
-                                                             int newVal, int old)
-    {
-        return createAudit(user, "auditMsg.serverConfig.eventPurge", 
-                           newVal + "", old + "");  
-    }
-    
-    public static ServerConfigAudit updateAlertsEnabled(AuthzSubject user,
-                                                        boolean newVal,
-                                                        boolean old)
-    {
-        return createAudit(user, "auditMsg.serverConfig.alertsEnabled", 
-                           newVal + "", old + ""); 
-    }
-
-    public static ServerConfigAudit updateAlertNotificationsEnabled(AuthzSubject user,
-                                                                    boolean newVal,
-                                                                    boolean old)
-    {
-        return createAudit(user, "auditMsg.serverConfig.alertNotificationsEnabled", 
-                           newVal + "", old + ""); 
-    }
-    
-    public static ServerConfigAudit updateHierarchicalAlertingEnabled(AuthzSubject user,
-                                                                      boolean newVal,
-                                                                      boolean old)
-    {
-        return createAudit(user, "auditMsg.serverConfig.hierarchicalAlertingEnabled",
-                           newVal + "", old + "");
-    }
 }

@@ -24,66 +24,19 @@
  */
 package org.hyperic.hq.appdef.server.session;
 
-import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
 import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
-import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.AuditImportance;
-import org.hyperic.hq.common.server.session.AuditManagerImpl;
 import org.hyperic.hq.common.server.session.AuditNature;
 import org.hyperic.hq.common.server.session.AuditPurpose;
-import org.hyperic.util.i18n.MessageBundle;
 
 public class AIAudit extends Audit {
-    private static final MessageBundle MSGS = 
-        MessageBundle.getBundle("org.hyperic.hq.appdef.Resources");
 
-    public static final AIAuditPurpose IMPORT_RUNTIME = 
-        new AIAuditPurpose(0x1000, "runtime import", "audit.import.runtime");
-    public static final AIAuditPurpose IMPORT_APPROVE = 
-        new AIAuditPurpose(0x1001, "approve import", "audit.import.approve");
-
-    public static class AIAuditPurpose extends AuditPurpose {
-        AIAuditPurpose(int code, String desc, String localeProp) { 
-            super(code, desc, localeProp, MSGS.getResourceBundle());
-        }
-    }
-    
     protected AIAudit() {}
-
-    AIAudit(AuthzSubject s, Resource r, AuditPurpose p, AuditImportance i, 
-            AuditNature n, String msg) 
-    { 
+    
+    public AIAudit(AuthzSubject s, Resource r, AuditPurpose p, AuditImportance i, AuditNature n, String msg) {
         super(s, r, p, n, i, msg);
     }
 
-    private static Resource getSystemResource() {
-        return ResourceManagerImpl.getOne()
-            .findResourceById(AuthzConstants.authzHQSystem);
-    }
-    
-    public static AIAudit newImportAudit(AuthzSubject user) {
-        AIAudit res = new AIAudit(user, getSystemResource(), IMPORT_APPROVE, 
-                                  AuditImportance.HIGH,
-                                  AuditNature.CREATE,
-                                  MSGS.format("auditMsg.import.approve"));
-        
-        AuditManagerImpl.getOne().saveAudit(res);
-        return res;
-    }
-    
-    public static AIAudit newRuntimeImportAudit(Agent reporter) {
-        AuthzSubject overlord = 
-            AuthzSubjectManagerImpl.getOne().getOverlordPojo();
-        AIAudit res = new AIAudit(overlord, getSystemResource(), IMPORT_RUNTIME,
-                                  AuditImportance.MEDIUM, AuditNature.CREATE,
-                                  MSGS.format("auditMsg.import.runtime",
-                                              reporter.getAddress()));
-        
-        AuditManagerImpl.getOne().saveAudit(res);
-        return res;
-    }
 }

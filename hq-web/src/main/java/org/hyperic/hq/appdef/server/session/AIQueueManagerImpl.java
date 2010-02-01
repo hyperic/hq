@@ -109,6 +109,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
     private AuthzSubjectManager authzSubjectManager;
     private AgentCommandsClientFactory agentCommandsClientFactory;
     private AgentManager agentManager;
+    private AIAuditFactory aiAuditFactory;
     protected final Log log = LogFactory.getLog(AIQueueManagerImpl.class.getName());
 
     @Autowired
@@ -116,7 +117,9 @@ public class AIQueueManagerImpl implements AIQueueManager {
                               ConfigManager configManager, CPropManager cPropManager, PlatformDAO platformDAO,
                               PlatformManager platformManager, ServerManager serverManager,
                               PermissionManager permissionManager, AuditManager auditManager,
-                              AuthzSubjectManager authzSubjectManager, AgentCommandsClientFactory agentCommandsClientFactory, AgentManager agentManager) {
+                              AuthzSubjectManager authzSubjectManager,
+                              AgentCommandsClientFactory agentCommandsClientFactory, AgentManager agentManager,
+                              AIAuditFactory aiAuditFactory) {
 
         this.aIServerDAO = aIServerDAO;
         this.aiIpDAO = aiIpDAO;
@@ -131,6 +134,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
         this.authzSubjectManager = authzSubjectManager;
         this.agentCommandsClientFactory = agentCommandsClientFactory;
         this.agentManager = agentManager;
+        this.aiAuditFactory = aiAuditFactory;
     }
 
     /**
@@ -453,14 +457,14 @@ public class AIQueueManagerImpl implements AIQueueManager {
     @Transactional
     public List<AppdefResource> processQueue(AuthzSubject subject, List<Integer> platformList,
                                              List<Integer> serverList, List<Integer> ipList, int action)
-        throws  PermissionException, ValidationException,  AIQApprovalException {
+        throws PermissionException, ValidationException, AIQApprovalException {
         AuthzSubject s = authzSubjectManager.findSubjectById(subject.getId());
         boolean approved = false;
 
         try {
             if (action == AIQueueConstants.Q_DECISION_APPROVE) {
                 approved = true;
-                auditManager.pushContainer(AIAudit.newImportAudit(s));
+                auditManager.pushContainer(aiAuditFactory.newImportAudit(s));
             }
             return _processQueue(subject, platformList, serverList, ipList, action, true);
         } finally {
@@ -471,8 +475,8 @@ public class AIQueueManagerImpl implements AIQueueManager {
 
     private List<AppdefResource> _processQueue(AuthzSubject subject, List<Integer> platformList,
                                                List<Integer> serverList, List<Integer> ipList, int action,
-                                               boolean verifyLiveAgent) throws  PermissionException,
-        ValidationException,  AIQApprovalException {
+                                               boolean verifyLiveAgent) throws PermissionException,
+        ValidationException, AIQApprovalException {
         boolean isApproveAction = (action == AIQueueConstants.Q_DECISION_APPROVE);
         boolean isPurgeAction = (action == AIQueueConstants.Q_DECISION_PURGE);
         int i;
@@ -511,8 +515,8 @@ public class AIQueueManagerImpl implements AIQueueManager {
                 // runtime discovery and enable metrics.
                 if (isApproveAction && verifyLiveAgent) {
                     try {
-                        AgentCommandsClient client = agentCommandsClientFactory.getClient(
-                            agentManager.getAgent(aiplatform.getAgentToken()));
+                        AgentCommandsClient client = agentCommandsClientFactory.getClient(agentManager
+                            .getAgent(aiplatform.getAgentToken()));
                         client.ping();
                     } catch (AgentNotFoundException e) {
                         // In this case we just want to
@@ -661,8 +665,8 @@ public class AIQueueManagerImpl implements AIQueueManager {
      * Find a platform given an AI platform id
      * 
      */
-    public PlatformValue getPlatformByAI(AuthzSubject subject, int aiPlatformID) throws 
-        PermissionException, PlatformNotFoundException {
+    public PlatformValue getPlatformByAI(AuthzSubject subject, int aiPlatformID) throws PermissionException,
+        PlatformNotFoundException {
         AIPlatform aiplatform;
 
         // XXX Do authz check
@@ -746,7 +750,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
 
     /**
      * Check to see if the subject can perform an autoinventory scan on the
-     * specified resource. 
+     * specified resource.
      * 
      */
     public void checkAIScanPermission(AuthzSubject subject, AppdefEntityID id) throws PermissionException,

@@ -66,6 +66,8 @@
 	
 	<bean id="runtimeReportProcessor" class="org.hyperic.hq.autoinventory.server.session.RuntimeReportProcessor" scope="prototype"/>
 
+	<bean class="org.hyperic.hq.appdef.server.session.ResourceTreeGenerator"/>
+	
 	<context:mbean-export />
 	<context:mbean-server />
 

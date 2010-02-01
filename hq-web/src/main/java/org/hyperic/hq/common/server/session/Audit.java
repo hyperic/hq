@@ -79,7 +79,7 @@ public abstract class Audit
         return _startTime;
     }
     
-    protected void setStartTime(long t) {
+    public void setStartTime(long t) {
         _startTime = t;
     }
     
@@ -87,7 +87,7 @@ public abstract class Audit
         return _endTime;
     }
     
-    protected void setEndTime(long t) {
+    public void setEndTime(long t) {
         _endTime = t;
     }
     
@@ -147,7 +147,7 @@ public abstract class Audit
         return _fieldName;
     }
     
-    protected void setFieldName(String f) {
+    public void setFieldName(String f) {
         _fieldName = f;
     }
     
@@ -155,7 +155,7 @@ public abstract class Audit
         return _oldFieldValue;
     }
     
-    protected void setOldFieldValue(String f) {
+    public void setOldFieldValue(String f) {
         _oldFieldValue = f;
     }
     
@@ -163,7 +163,7 @@ public abstract class Audit
         return _newFieldValue;
     }
     
-    protected void setNewFieldValue(String v) {
+    public void setNewFieldValue(String v) {
         _newFieldValue = v;
     }
     

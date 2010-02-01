@@ -45,7 +45,7 @@ import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.shared.UpdateBoss;
-import org.hyperic.hq.common.server.session.ServerConfigAudit;
+import org.hyperic.hq.common.server.session.ServerConfigAuditFactory;
 import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.hqu.server.session.UIPlugin;
@@ -68,17 +68,19 @@ public class UpdateBossImpl implements UpdateBoss {
     private ServiceManager serviceManager;
     private UIPluginManager uiPluginManager;
     private UpdateStatusDAO updateDAO;
+    private ServerConfigAuditFactory serverConfigAuditFactory;
 
     @Autowired
     public UpdateBossImpl(UpdateStatusDAO updateDAO, ServerConfigManager serverConfigManager,
                           PlatformManager platformManager, ServerManager serverManager, ServiceManager serviceManager,
-                          UIPluginManager uiPluginManager) {
+                          UIPluginManager uiPluginManager, ServerConfigAuditFactory serverConfigAuditFactory) {
         this.updateDAO = updateDAO;
         this.serverConfigManager = serverConfigManager;
         this.platformManager = platformManager;
         this.serverManager = serverManager;
         this.serviceManager = serviceManager;
         this.uiPluginManager = uiPluginManager;
+        this.serverConfigAuditFactory = serverConfigAuditFactory;
     }
 
     private String getCheckURL() {
@@ -250,8 +252,9 @@ public class UpdateBossImpl implements UpdateBoss {
         AuthzSubject subject = SessionManager.getInstance().getSubject(sess);
         UpdateStatus status = getOrCreateStatus();
 
-        if (!status.getMode().equals(mode))
-            ServerConfigAudit.updateAnnounce(subject, mode, status.getMode());
+        if (!status.getMode().equals(mode)) {
+            serverConfigAuditFactory.updateAnnounce(subject, mode, status.getMode());
+        }
 
         status.setMode(mode);
 

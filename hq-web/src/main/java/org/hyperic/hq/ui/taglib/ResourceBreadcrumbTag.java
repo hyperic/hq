@@ -369,7 +369,7 @@ public class ResourceBreadcrumbTag extends TagSupport {
         boolean result = false;
         
         if (application.isApplication()) {
-            ApplicationManager applicationManager = ApplicationManagerImpl.getOne();
+            ApplicationManager applicationManager = Bootstrap.getBean(ApplicationManager.class);
             
             result = applicationManager.isApplicationMember(application.getAppdefEntityId(), 
                                                             member.getAppdefEntityId());
@@ -421,7 +421,7 @@ public class ResourceBreadcrumbTag extends TagSupport {
                 
                 if (parentAppdef.isApplication()) {
                     // ...if the parent is an application we need to determine if the other is a member...
-                    ApplicationManager applicationManager = ApplicationManagerImpl.getOne();
+                    ApplicationManager applicationManager = Bootstrap.getBean(ApplicationManager.class);
                     
                     result = applicationManager.isApplicationMember(parentAppdef, member.getAppdefEntityId());
                 } else {

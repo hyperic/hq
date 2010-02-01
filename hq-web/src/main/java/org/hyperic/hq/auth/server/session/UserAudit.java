@@ -25,98 +25,22 @@
 package org.hyperic.hq.auth.server.session;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectField;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.AuditImportance;
-import org.hyperic.hq.common.server.session.AuditManagerImpl;
 import org.hyperic.hq.common.server.session.AuditNature;
 import org.hyperic.hq.common.server.session.AuditPurpose;
-import org.hyperic.util.i18n.MessageBundle;
 
-public class UserAudit extends Audit {
-    private static final MessageBundle MSGS = 
-        MessageBundle.getBundle("org.hyperic.hq.auth.Resources");
-
-    public static final UserAuditPurpose USER_LOGIN = 
-        new UserAuditPurpose(0x4000, "user login", "audit.user.login"); 
-    public static final UserAuditPurpose USER_LOGOUT = 
-        new UserAuditPurpose(0x4001, "user logout", "audit.user.logout"); 
-    public static final UserAuditPurpose USER_CREATE = 
-        new UserAuditPurpose(0x4002, "user logout", "audit.user.create"); 
-    public static final UserAuditPurpose USER_UPDATE = 
-        new UserAuditPurpose(0x4003, "user logout", "audit.user.update"); 
-        
-
-    public static class UserAuditPurpose extends AuditPurpose {
-        UserAuditPurpose(int code, String desc, String localeProp) { 
-            super(code, desc, localeProp, MSGS.getResourceBundle());
-        }
-    }
-
-    protected UserAudit() {}
+public class UserAudit
+    extends Audit {
     
-    UserAudit(Resource r, AuthzSubject s, AuditPurpose p, 
-              AuditImportance i, AuditNature n, String msg)
-    { 
+    protected UserAudit() {}
+
+    UserAudit(Resource r, AuthzSubject s, AuditPurpose p, AuditImportance i, AuditNature n, String msg) {
         super(s, r, p, n, i, msg);
         long now = System.currentTimeMillis();
         setStartTime(now);
         setEndTime(now);
     }
 
-    public static UserAudit loginAudit(AuthzSubject user) {
-        String msg = MSGS.format("auditMsg.user.login", user.getFullName());
-        UserAudit res = new UserAudit(user.getResource(), user, USER_LOGIN,
-                                      AuditImportance.LOW, 
-                                      AuditNature.START, msg); 
-                                      
-        
-        AuditManagerImpl.getOne().saveAudit(res);
-        return res;
-    }
-    
-    public static UserAudit logoutAudit(AuthzSubject user) {
-        String msg = MSGS.format("auditMsg.user.logout", user.getFullName());
-        UserAudit res = new UserAudit(user.getResource(), user, USER_LOGOUT,
-                                      AuditImportance.LOW, 
-                                      AuditNature.STOP, msg); 
-        
-        AuditManagerImpl.getOne().saveAudit(res);
-        return res;
-    }
-    
-    public static UserAudit createAudit(AuthzSubject creator,
-                                        AuthzSubject newUser) 
-    {
-        String msg = MSGS.format("auditMsg.user.create", 
-                                 newUser.getFullName() + "(" + 
-                                 newUser.getName() + ")");
-        UserAudit res = new UserAudit(newUser.getResource(), creator, 
-                                      USER_CREATE, AuditImportance.HIGH, 
-                                      AuditNature.CREATE, msg); 
-        
-        AuditManagerImpl.getOne().saveAudit(res);
-        return res;
-    }
-    
-    public static UserAudit updateAudit(AuthzSubject updator,
-                                        AuthzSubject target,
-                                        AuthzSubjectField field,
-                                        String oldVal, String newVal) 
-    {
-        String msg = MSGS.format("auditMsg.user.update", 
-                                 target.getFullName(), field.getValue(), 
-                                 newVal);
-        UserAudit res = new UserAudit(target.getResource(), updator, 
-                                      USER_UPDATE, AuditImportance.LOW, 
-                                      AuditNature.UPDATE, msg); 
-        
-        res.setFieldName(field.getValue());
-        res.setOldFieldValue(oldVal);
-        res.setNewFieldValue(newVal);
-        AuditManagerImpl.getOne().saveAudit(res);
-        return res;
-    }
-    
 }

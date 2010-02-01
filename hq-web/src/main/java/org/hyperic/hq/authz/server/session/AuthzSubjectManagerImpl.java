@@ -32,7 +32,7 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.auth.server.session.UserAudit;
+import org.hyperic.hq.auth.server.session.UserAuditFactory;
 import org.hyperic.hq.auth.shared.SubjectNotFoundException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
@@ -70,16 +70,18 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
     private ResourceDAO resourceDAO;
     private CrispoManager crispoManager;
     private PermissionManager permissionManager;
+    private UserAuditFactory userAuditFactory;
 
     @Autowired
     public AuthzSubjectManagerImpl(AuthzSubjectDAO authzSubjectDAO, ResourceTypeDAO resourceTypeDAO,
                                    ResourceDAO resourceDAO, CrispoManager crispoManager,
-                                   PermissionManager permissionManager) {
+                                   PermissionManager permissionManager, UserAuditFactory userAuditFactory) {
         this.authzSubjectDAO = authzSubjectDAO;
         this.resourceTypeDAO = resourceTypeDAO;
         this.resourceDAO = resourceDAO;
         this.crispoManager = crispoManager;
         this.permissionManager = permissionManager;
+        this.userAuditFactory = userAuditFactory;
     }
 
     @PostConstruct
@@ -124,7 +126,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
         AuthzSubject subjectPojo = authzSubjectDAO.create(whoami, name, active, dsn, dept, email, first, last, phone,
             sms, html);
 
-        UserAudit.createAudit(whoami, subjectPojo);
+        userAuditFactory.createAudit(whoami, subjectPojo);
         return subjectPojo;
     }
 
@@ -154,7 +156,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
             }
 
             target.setActive(active.booleanValue());
-            UserAudit.updateAudit(whoami, target, AuthzSubjectField.ACTIVE, target.getActive() + "", active + "");
+            userAuditFactory.updateAudit(whoami, target, AuthzSubjectField.ACTIVE, target.getActive() + "", active + "");
         }
 
         if (dsn != null && !dsn.equals(target.getAuthDsn())) {
@@ -163,37 +165,37 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
 
         if (dept != null && !dept.equals(target.getDepartment())) {
             target.setDepartment(dept);
-            UserAudit.updateAudit(whoami, target, AuthzSubjectField.DEPT, target.getDepartment(), dept);
+            userAuditFactory.updateAudit(whoami, target, AuthzSubjectField.DEPT, target.getDepartment(), dept);
         }
 
         if (email != null && !email.equals(target.getEmailAddress())) {
             target.setEmailAddress(email);
-            UserAudit.updateAudit(whoami, target, AuthzSubjectField.EMAIL, target.getEmailAddress(), email);
+            userAuditFactory.updateAudit(whoami, target, AuthzSubjectField.EMAIL, target.getEmailAddress(), email);
         }
 
         if (useHtml != null && target.getHtmlEmail() != useHtml.booleanValue()) {
             target.setHtmlEmail(useHtml.booleanValue());
-            UserAudit.updateAudit(whoami, target, AuthzSubjectField.HTML, target.getHtmlEmail() + "", useHtml + "");
+            userAuditFactory.updateAudit(whoami, target, AuthzSubjectField.HTML, target.getHtmlEmail() + "", useHtml + "");
         }
 
         if (firstName != null && !firstName.equals(target.getFirstName())) {
             target.setFirstName(firstName);
-            UserAudit.updateAudit(whoami, target, AuthzSubjectField.FIRSTNAME, target.getFirstName(), firstName);
+            userAuditFactory.updateAudit(whoami, target, AuthzSubjectField.FIRSTNAME, target.getFirstName(), firstName);
         }
 
         if (lastName != null && !lastName.equals(target.getLastName())) {
             target.setLastName(lastName);
-            UserAudit.updateAudit(whoami, target, AuthzSubjectField.LASTNAME, target.getLastName(), lastName);
+            userAuditFactory.updateAudit(whoami, target, AuthzSubjectField.LASTNAME, target.getLastName(), lastName);
         }
 
         if (phone != null && !phone.equals(target.getPhoneNumber())) {
             target.setPhoneNumber(phone);
-            UserAudit.updateAudit(whoami, target, AuthzSubjectField.PHONE, target.getPhoneNumber(), phone);
+            userAuditFactory.updateAudit(whoami, target, AuthzSubjectField.PHONE, target.getPhoneNumber(), phone);
         }
 
         if (sms != null && !sms.equals(target.getSMSAddress())) {
             target.setSMSAddress(sms);
-            UserAudit.updateAudit(whoami, target, AuthzSubjectField.SMS, target.getSMSAddress(), sms);
+            userAuditFactory.updateAudit(whoami, target, AuthzSubjectField.SMS, target.getSMSAddress(), sms);
         }
     }
 

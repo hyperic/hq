@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-
-
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
@@ -104,15 +102,15 @@ public interface AppdefBoss {
      * Find all the server types defined in the system.
      * @return A list of ServerTypeValue objects.
      */
-    public PageList<ServerTypeValue> findAllServerTypes(int sessionID, PageControl pc) throws 
-        SessionNotFoundException, SessionTimeoutException, PermissionException;
+    public PageList<ServerTypeValue> findAllServerTypes(int sessionID, PageControl pc) throws SessionNotFoundException,
+        SessionTimeoutException, PermissionException;
 
     /**
      * Find all viewable server types defined in the system.
      * @return A list of ServerTypeValue objects.
      */
-    public PageList<ServerTypeValue> findViewableServerTypes(int sessionID, PageControl pc) throws 
-        SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException;
+    public PageList<ServerTypeValue> findViewableServerTypes(int sessionID, PageControl pc)
+        throws SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException;
 
     public List<AppdefResourceTypeValue> findAllApplicationTypes(int sessionID) throws ApplicationException;
 
@@ -121,8 +119,8 @@ public interface AppdefBoss {
     public PageList<ServiceTypeValue> findAllServiceTypes(int sessionID, PageControl pc)
         throws SessionTimeoutException, SessionNotFoundException, PermissionException;
 
-    public PageList<ServiceTypeValue> findViewableServiceTypes(int sessionID, PageControl pc) throws 
-        SessionTimeoutException, SessionNotFoundException, PermissionException, NotFoundException;
+    public PageList<ServiceTypeValue> findViewableServiceTypes(int sessionID, PageControl pc)
+        throws SessionTimeoutException, SessionNotFoundException, PermissionException, NotFoundException;
 
     public PageList<ServiceTypeValue> findViewablePlatformServiceTypes(int sessionID, Integer platId)
         throws SessionTimeoutException, SessionNotFoundException, PermissionException;
@@ -223,8 +221,8 @@ public interface AppdefBoss {
      * @return A List of PlatformValue objects representing all of the platforms
      *         that the given subject is allowed to view.
      */
-    public PageList<PlatformValue> findAllPlatforms(int sessionID, PageControl pc) throws 
-        SessionTimeoutException, SessionNotFoundException, PermissionException, NotFoundException;
+    public PageList<PlatformValue> findAllPlatforms(int sessionID, PageControl pc) throws SessionTimeoutException,
+        SessionNotFoundException, PermissionException, NotFoundException;
 
     /**
      * Get recently created platforms in the inventory.
@@ -233,8 +231,8 @@ public interface AppdefBoss {
      *         that the given subject is allowed to view that was created in the
      *         past time range specified.
      */
-    public PageList<PlatformValue> findRecentPlatforms(int sessionID, long range, int size) throws 
-        SessionTimeoutException, SessionNotFoundException, PermissionException, NotFoundException;
+    public PageList<PlatformValue> findRecentPlatforms(int sessionID, long range, int size)
+        throws SessionTimeoutException, SessionNotFoundException, PermissionException, NotFoundException;
 
     /**
      * Looks up and returns a list of value objects corresponding to the list of
@@ -274,8 +272,8 @@ public interface AppdefBoss {
         throws SessionTimeoutException, SessionNotFoundException, PermissionException;
 
     public Platform createPlatform(int sessionID, PlatformValue platformVal, Integer platTypePK, Integer agent)
-        throws ValidationException, SessionTimeoutException, SessionNotFoundException,
-        PermissionException, AppdefDuplicateNameException, AppdefDuplicateFQDNException, ApplicationException;
+        throws ValidationException, SessionTimeoutException, SessionNotFoundException, PermissionException,
+        AppdefDuplicateNameException, AppdefDuplicateFQDNException, ApplicationException;
 
     public AppdefResourceTypeValue findResourceTypeById(int sessionID, AppdefEntityTypeID id)
         throws SessionTimeoutException, SessionNotFoundException;
@@ -303,9 +301,9 @@ public interface AppdefBoss {
      * @return ServerValue - the saved server
      */
     public ServerValue createServer(int sessionID, ServerValue serverVal, Integer platformPK, Integer serverTypePK,
-                                    Map<String, String> cProps) throws ValidationException,
-        SessionTimeoutException, SessionNotFoundException, PermissionException, AppdefDuplicateNameException,
-        CPropKeyNotFoundException, NotFoundException;
+                                    Map<String, String> cProps) throws ValidationException, SessionTimeoutException,
+        SessionNotFoundException, PermissionException, AppdefDuplicateNameException, CPropKeyNotFoundException,
+        NotFoundException;
 
     /**
      * Create an application
@@ -313,8 +311,8 @@ public interface AppdefBoss {
      */
     public ApplicationValue createApplication(int sessionID, ApplicationValue appVal,
                                               Collection<ServiceValue> services, ConfigResponse protoProps)
-        throws ValidationException, SessionTimeoutException, SessionNotFoundException,
-        PermissionException, AppdefDuplicateNameException, NotFoundException;
+        throws ValidationException, SessionTimeoutException, SessionNotFoundException, PermissionException,
+        AppdefDuplicateNameException, NotFoundException;
 
     public ServiceValue createService(int sessionID, ServiceValue serviceVal, Integer serviceTypePK, AppdefEntityID aeid)
         throws SessionNotFoundException, SessionTimeoutException, ServerNotFoundException, PlatformNotFoundException,
@@ -344,8 +342,8 @@ public interface AppdefBoss {
 
     /**
      * Remove all delete resources Method is "NotSupported" since all the
-     * resource deletes may take longer than the transaction timeout. No
-     * need for a transaction in this context.
+     * resource deletes may take longer than the transaction timeout. No need
+     * for a transaction in this context.
      */
     public void removeDeletedResources() throws ApplicationException, VetoException;
 
@@ -374,8 +372,8 @@ public interface AppdefBoss {
      * @param cProps - the map with Custom Properties for the server
      */
     public ServerValue updateServer(int sessionId, ServerValue aServer, Map<String, String> cProps)
-        throws ValidationException, SessionTimeoutException, SessionNotFoundException,
-        PermissionException, UpdateException, AppdefDuplicateNameException, CPropKeyNotFoundException;
+        throws ValidationException, SessionTimeoutException, SessionNotFoundException, PermissionException,
+        UpdateException, AppdefDuplicateNameException, CPropKeyNotFoundException;
 
     public ServiceValue updateService(int sessionId, ServiceValue aService) throws PermissionException,
         ValidationException, SessionTimeoutException, SessionNotFoundException, UpdateException,
@@ -386,24 +384,24 @@ public interface AppdefBoss {
      * @param cProps - the map with Custom Properties for the service
      */
     public ServiceValue updateService(int sessionId, ServiceValue aService, Map<String, String> cProps)
-        throws ValidationException, SessionTimeoutException, SessionNotFoundException,
-        PermissionException, UpdateException, AppdefDuplicateNameException, CPropKeyNotFoundException, NotFoundException;
+        throws ValidationException, SessionTimeoutException, SessionNotFoundException, PermissionException,
+        UpdateException, AppdefDuplicateNameException, CPropKeyNotFoundException, NotFoundException;
 
     /**
      * Update a service with cProps.
      * @param cProps - the map with Custom Properties for the service
      */
     public ServiceValue updateService(AuthzSubject subject, ServiceValue aService, Map<String, String> cProps)
-        throws ValidationException, SessionTimeoutException, SessionNotFoundException,
-        PermissionException, UpdateException, AppdefDuplicateNameException, CPropKeyNotFoundException, NotFoundException;
+        throws ValidationException, SessionTimeoutException, SessionNotFoundException, PermissionException,
+        UpdateException, AppdefDuplicateNameException, CPropKeyNotFoundException, NotFoundException;
 
-    public PlatformValue updatePlatform(int sessionId, PlatformValue aPlatform) throws 
-        ValidationException, PermissionException, SessionTimeoutException, SessionNotFoundException, UpdateException,
-        ApplicationException, AppdefDuplicateNameException, AppdefDuplicateFQDNException;
+    public PlatformValue updatePlatform(int sessionId, PlatformValue aPlatform) throws ValidationException,
+        PermissionException, SessionTimeoutException, SessionNotFoundException, UpdateException, ApplicationException,
+        AppdefDuplicateNameException, AppdefDuplicateFQDNException;
 
-    public PlatformValue updatePlatform(AuthzSubject subject, PlatformValue aPlatform) throws 
-        ValidationException, PermissionException, SessionTimeoutException, SessionNotFoundException, UpdateException,
-        ApplicationException, AppdefDuplicateNameException, AppdefDuplicateFQDNException;
+    public PlatformValue updatePlatform(AuthzSubject subject, PlatformValue aPlatform) throws ValidationException,
+        PermissionException, SessionTimeoutException, SessionNotFoundException, UpdateException, ApplicationException,
+        AppdefDuplicateNameException, AppdefDuplicateFQDNException;
 
     public ApplicationValue updateApplication(int sessionId, ApplicationValue app) throws ApplicationException,
         PermissionException;
@@ -795,7 +793,5 @@ public interface AppdefBoss {
      * that supports navmap
      */
     public boolean isNavMapSupported();
-
-    public void startup();
-
+    
 }

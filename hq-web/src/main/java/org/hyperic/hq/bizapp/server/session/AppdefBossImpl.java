@@ -37,6 +37,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.PatternSyntaxException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.PageInfo;
@@ -139,10 +140,9 @@ import org.hyperic.hq.bizapp.shared.uibeans.ResourceTreeNode;
 import org.hyperic.hq.bizapp.shared.uibeans.SearchResult;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
+import org.hyperic.hq.common.ProductProperties;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
-import org.hyperic.hq.common.ProductProperties;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.events.shared.MaintenanceEventManager;
 import org.hyperic.hq.grouping.Critter;
@@ -167,7 +167,6 @@ import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
-import org.hyperic.hq.zevents.ZeventListener;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.pager.PageControl;
@@ -3186,39 +3185,5 @@ public class AppdefBossImpl implements AppdefBoss {
      */
     public boolean isNavMapSupported() {
         return appdefStatManager.isNavMapSupported();
-    }
-
-    /**
-     * 
-     */
-    public void startup() {
-        log.info("AppdefBoss Boss starting up!");
-
-        // Add listener to remove alert definition and alerts after resources
-        // are deleted.
-        HashSet<Class<ResourcesCleanupZevent>> events = new HashSet<Class<ResourcesCleanupZevent>>();
-        events.add(ResourcesCleanupZevent.class);
-        zEventManager.addBufferedListener(events, new ZeventListener<ResourcesCleanupZevent>() {
-            public void processEvents(List<ResourcesCleanupZevent> events) {
-                for (Iterator<ResourcesCleanupZevent> i = events.iterator(); i.hasNext();) {
-                    try {
-                        getOne().removeDeletedResources();
-                    } catch (Exception e) {
-                        log.error("removeDeletedResources() failed", e);
-                    }
-                    // Only need to run this once
-                    break;
-                }
-            }
-
-            public String toString() {
-                return "AppdefBoss.removeDeletedResources";
-            }
-        });
-        zEventManager.enqueueEventAfterCommit(new ResourcesCleanupZevent());
-    }
-
-    public static AppdefBoss getOne() {
-        return Bootstrap.getBean(AppdefBoss.class);
     }
 }

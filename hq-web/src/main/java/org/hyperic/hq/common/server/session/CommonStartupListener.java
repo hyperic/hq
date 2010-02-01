@@ -27,28 +27,39 @@ package org.hyperic.hq.common.server.session;
 
 import javax.annotation.PostConstruct;
 
+import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.StartupListener;
-import org.hyperic.hq.common.shared.AuditManager;
+import org.hyperic.hq.authz.server.session.ResourceDeleteCallback;
+import org.hyperic.hq.authz.server.session.SubjectRemoveCallback;
 import org.hyperic.hq.ui.shared.DashboardManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-@Service
-public class CommonStartupListener
-    implements StartupListener
-{
-    private AuditManager auditManager;
-    private DashboardManager dashboardManager;
-    
-    @Autowired
-    public CommonStartupListener(AuditManager auditManager, DashboardManager dashboardManager) {
-        this.auditManager = auditManager;
-        this.dashboardManager = dashboardManager;
-    }
 
+@Service
+public class CommonStartupListener implements StartupListener {
+    private SubjectDeleteWatcher subjectDeleteWatcher;
+    private ResourceDeleteWatcher resourceDeleteWatcher;
+    private DashboardManager dashboardManager;
+    private HQApp hqApp;
+
+    @Autowired
+    public CommonStartupListener(SubjectDeleteWatcher subjectDeleteWatcher,
+                                 ResourceDeleteWatcher resourceDeleteWatcher, DashboardManager dashboardManager,
+                                 HQApp hqApp) {
+        this.subjectDeleteWatcher = subjectDeleteWatcher;
+        this.resourceDeleteWatcher = resourceDeleteWatcher;
+        this.dashboardManager = dashboardManager;
+        this.hqApp = hqApp;
+    }
 
     @PostConstruct
     public void hqStarted() {
-        auditManager.startup();
+        registerDeleteWatchers();
         dashboardManager.startup();
+    }
+
+    private void registerDeleteWatchers() {
+        hqApp.registerCallbackListener(ResourceDeleteCallback.class, resourceDeleteWatcher);
+        hqApp.registerCallbackListener(SubjectRemoveCallback.class, subjectDeleteWatcher);
     }
 }

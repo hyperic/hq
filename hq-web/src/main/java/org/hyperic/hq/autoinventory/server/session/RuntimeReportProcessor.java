@@ -36,6 +36,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AIAudit;
+import org.hyperic.hq.appdef.server.session.AIAuditFactory;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.Service;
@@ -66,6 +67,7 @@ import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.AuditManagerImpl;
+import org.hyperic.hq.common.shared.AuditManager;
 import org.hyperic.hq.product.RuntimeResourceReport;
 import org.hyperic.hq.product.ServiceType;
 import org.hyperic.util.StringUtil;
@@ -89,18 +91,21 @@ public class RuntimeReportProcessor {
     private final CPropManager cpropManager;
 
     private final AgentManager agentManager;
+    
+    private AuditManager auditManager;
 
     private AuthzSubject _overlord;
     private List<ServiceMergeInfo> _serviceMerges = new ArrayList<ServiceMergeInfo>();
     private Set<ServiceType> serviceTypeMerges = new HashSet<ServiceType>();
     private String _agentToken;
     private ServiceTypeFactory serviceTypeFactory;
+    private AIAuditFactory aiAuditFactory;
 
     @Autowired
     public RuntimeReportProcessor(AutoinventoryManager aiMgr, PlatformManager platformMgr, ServerManager serverMgr,
                                   ServiceManager serviceMgr, ConfigManager configMgr, AuthzSubjectManager subjectMgr,
                                   CPropManager cpropMgr, AgentManager agentManager,
-                                  ServiceTypeFactory serviceTypeFactory) {
+                                  ServiceTypeFactory serviceTypeFactory, AIAuditFactory aiAuditFactory, AuditManager auditManager) {
         aiManager = aiMgr;
         platformManager = platformMgr;
         serverManager = serverMgr;
@@ -110,6 +115,8 @@ public class RuntimeReportProcessor {
         cpropManager = cpropMgr;
         this.agentManager = agentManager;
         this.serviceTypeFactory = serviceTypeFactory;
+        this.aiAuditFactory = aiAuditFactory;
+        this.auditManager = auditManager;
     }
 
     public void processRuntimeReport(AuthzSubject subject, String agentToken, CompositeRuntimeResourceReport crrr)
@@ -118,16 +125,16 @@ public class RuntimeReportProcessor {
         _agentToken = agentToken;
 
         Agent agent = agentManager.getAgent(_agentToken);
-        Audit audit = AIAudit.newRuntimeImportAudit(agent);
+        Audit audit = aiAuditFactory.newRuntimeImportAudit(agent);
         boolean pushed = false;
 
         try {
-            AuditManagerImpl.getOne().pushContainer(audit);
+            auditManager.pushContainer(audit);
             pushed = true;
             _processRuntimeReport(subject, crrr);
         } finally {
             if (pushed) {
-                AuditManagerImpl.getOne().popContainer(false);
+                auditManager.popContainer(false);
             }
         }
     }

@@ -26,88 +26,17 @@ package org.hyperic.hq.common.server.session;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
-import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.util.i18n.MessageBundle;
 
-public class ResourceAudit extends Audit {
-    private static final MessageBundle MSGS = 
-        MessageBundle.getBundle("org.hyperic.hq.common.Resources");
-
-    public static final ResourceAuditPurpose RESOURCE_CREATE = 
-        new ResourceAuditPurpose(0x2000, "resource create", 
-                                 "audit.resource.create");
-    public static final ResourceAuditPurpose RESOURCE_UPDATE = 
-        new ResourceAuditPurpose(0x2001, "resource update", 
-                                 "audit.resource.update");
-    public static final ResourceAuditPurpose RESOURCE_DELETE = 
-        new ResourceAuditPurpose(0x2002, "resource delete", 
-                                 "audit.resource.delete");
-    public static final ResourceAuditPurpose RESOURCE_MOVE =
-        new ResourceAuditPurpose(0x2003, "resource move",
-                                 "audit.resource.move");
-
-    public static class ResourceAuditPurpose extends AuditPurpose {
-        ResourceAuditPurpose(int code, String desc, String localeProp) { 
-            super(code, desc, localeProp, MSGS.getResourceBundle());
-        }
-    }
-
-    protected ResourceAudit() {}
+public class ResourceAudit
+    extends Audit {
     
-    ResourceAudit(Resource r, AuthzSubject s, AuditPurpose p, 
-                  AuditImportance i, AuditNature n, String msg, long start, 
-                  long end) 
-    { 
+    protected ResourceAudit() {}
+
+    ResourceAudit(Resource r, AuthzSubject s, AuditPurpose p, AuditImportance i, AuditNature n, String msg, long start,
+                  long end) {
         super(s, r, p, n, i, msg);
         setStartTime(start);
         setEndTime(end);
     }
 
-    public static ResourceAudit createResource(Resource r, AuthzSubject creator,
-                                               long start, long end)
-    {
-        String msg = MSGS.format("auditMsg.resource.create", 
-                                 r.getResourceType().getLocalizedName());
-        ResourceAudit res = new ResourceAudit(r, creator, RESOURCE_CREATE,
-                                              AuditImportance.MEDIUM, 
-                                              AuditNature.CREATE,
-                                              msg, start, end);  
-        
-        AuditManagerImpl.getOne().saveAudit(res);
-        return res;
-    }
-    
-    private static Resource getSystemResource() {
-        return ResourceManagerImpl.getOne()
-                .findResourceById(AuthzConstants.authzHQSystem);
-    }
-    
-    public static ResourceAudit deleteResource(Resource r, AuthzSubject creator,
-                                               long start, long end)
-    {
-        String msg = MSGS.format("auditMsg.resource.delete"); 
-        ResourceAudit res = new ResourceAudit(getSystemResource(), creator, 
-                                              RESOURCE_DELETE,
-                                              AuditImportance.HIGH, 
-                                              AuditNature.DELETE,
-                                              msg, start, end);  
-        
-        AuditManagerImpl.getOne().saveAudit(res);
-        return res;
-    }
-
-    public static ResourceAudit moveResource(Resource target, Resource destination,
-                                             AuthzSubject mover, long start,
-                                             long end)
-    {
-        String msg = MSGS.format("auditMsg.resource.move", destination.getName());
-        ResourceAudit res = new ResourceAudit(target, mover,
-                                              RESOURCE_MOVE,
-                                              AuditImportance.HIGH,
-                                              AuditNature.MOVE,
-                                              msg, start, end);
-        AuditManagerImpl.getOne().saveAudit(res);
-        return res;
-    }
 }

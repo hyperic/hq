@@ -69,11 +69,15 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManager;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.security.MD5;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -81,12 +85,12 @@ import org.springframework.transaction.annotation.Transactional;
 // TODO: Replace FQN after fixing HE-99
 @org.springframework.stereotype.Service
 @Transactional
-public class AgentManagerImpl implements AgentManager {
+public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     // XXX: These should go elsewhere.
     private static final String CAM_AGENT_TYPE = "covalent-eam";
     private static final String HQ_AGENT_REMOTING_TYPE = "hyperic-hq-remoting";
     private static final String HQ_PLUGINS_DIR = "/hq-plugins";
-    private static final String PLUGINS_EXTENSION = "-plugin"; 
+    private static final String PLUGINS_EXTENSION = "-plugin";
 
     private final Log log = LogFactory.getLog(AgentManagerImpl.class.getName());
     private AgentReportStatusDAO agentReportStatusDao;
@@ -99,6 +103,7 @@ public class AgentManagerImpl implements AgentManager {
     private ServerConfigManager serverConfigManager;
     private HQApp hqApp;
     private AgentCommandsClientFactory agentCommandsClientFactory;
+    private ApplicationContext applicationContext;
 
     @Autowired
     public AgentManagerImpl(AgentReportStatusDAO agentReportStatusDao, AgentTypeDAO agentTypeDao, AgentDAO agentDao,
@@ -163,7 +168,6 @@ public class AgentManagerImpl implements AgentManager {
      */
     public ResourceTree getEntitiesForAgent(AuthzSubject subject, String agentToken) throws AgentNotFoundException,
         PermissionException {
-        ResourceTreeGenerator generator;
 
         Agent agt = getAgentInternal(agentToken);
         Collection<Platform> plats = platformDao.findByAgent(agt);
@@ -176,7 +180,8 @@ public class AgentManagerImpl implements AgentManager {
             platIds[i] = AppdefEntityID.newPlatformID(plat.getId());
         }
 
-        generator = new ResourceTreeGenerator(subject);
+        ResourceTreeGenerator generator = Bootstrap.getBean(ResourceTreeGenerator.class);
+        generator.setSubject(subject);
         try {
             return generator.generate(platIds, ResourceTreeGenerator.TRAVERSE_UP);
         } catch (AppdefEntityNotFoundException exc) {
@@ -1031,4 +1036,9 @@ public class AgentManagerImpl implements AgentManager {
             }
         }
     }
+
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
+    }
+
 }

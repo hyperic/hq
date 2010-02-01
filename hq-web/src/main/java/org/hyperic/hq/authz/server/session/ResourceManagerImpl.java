@@ -65,6 +65,7 @@ import org.hyperic.hq.bizapp.server.session.AppdefBossImpl;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.ResourceAudit;
+import org.hyperic.hq.common.server.session.ResourceAuditFactory;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
@@ -107,6 +108,7 @@ public class ResourceManagerImpl implements ResourceManager {
     private PlatformTypeDAO platformTypeDAO;
     private ApplicationDAO applicationDAO;
     private PermissionManager permissionManager;
+    private ResourceAuditFactory resourceAuditFactory;
 
     @Autowired
     public ResourceManagerImpl(ResourceEdgeDAO resourceEdgeDAO, PlatformDAO platformDAO, ServerDAO serverDAO,
@@ -115,7 +117,7 @@ public class ResourceManagerImpl implements ResourceManager {
                                ResourceDAO resourceDAO, ResourceTypeDAO resourceTypeDAO,
                                ResourceRelationDAO resourceRelationDAO, ZeventEnqueuer zeventManager,
                                PlatformTypeDAO platformTypeDAO, ApplicationDAO applicationDAO,
-                               PermissionManager permissionManager) {
+                               PermissionManager permissionManager, ResourceAuditFactory resourceAuditFactory) {
         this.resourceEdgeDAO = resourceEdgeDAO;
         this.platformDAO = platformDAO;
         this.serverDAO = serverDAO;
@@ -131,6 +133,7 @@ public class ResourceManagerImpl implements ResourceManager {
         this.applicationDAO = applicationDAO;
         this.permissionManager = permissionManager;
         resourceTypePager = Pager.getDefaultPager();
+        this.resourceAuditFactory = resourceAuditFactory;
     }
 
     /**
@@ -210,7 +213,7 @@ public class ResourceManagerImpl implements ResourceManager {
             }
         }
 
-        ResourceAudit.createResource(res, owner, start, System.currentTimeMillis());
+        resourceAuditFactory.createResource(res, owner, start, System.currentTimeMillis());
         return res;
     }
 
@@ -249,7 +252,7 @@ public class ResourceManagerImpl implements ResourceManager {
             resourceEdgeDAO.create(ancestorEdge.getTo(), target, -distance, relation);
         }
 
-        ResourceAudit.moveResource(target, destination, owner, start, System.currentTimeMillis());
+        resourceAuditFactory.moveResource(target, destination, owner, start, System.currentTimeMillis());
     }
 
     /**
@@ -509,7 +512,7 @@ public class ResourceManagerImpl implements ResourceManager {
         if (debug) {
             watch.markTimeBegin("removeResourcePerms.audit");
         }
-        ResourceAudit.deleteResource(r, subj, now, now);
+        resourceAuditFactory.deleteResource(findResourceById(AuthzConstants.authzHQSystem), subj, now, now);
         if (debug) {
             watch.markTimeEnd("removeResourcePerms.audit");
             log.debug(watch);
@@ -524,7 +527,7 @@ public class ResourceManagerImpl implements ResourceManager {
         cb.preResourceDelete(r);
 
         final long now = System.currentTimeMillis();
-        ResourceAudit.deleteResource(r, subject, now, now);
+        resourceAuditFactory.deleteResource(findResourceById(AuthzConstants.authzHQSystem), subject, now, now);
         r.getGroupBag().clear();
         resourceDAO.remove(r);
     }

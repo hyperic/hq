@@ -43,6 +43,7 @@ import org.hyperic.hq.appdef.server.session.ServiceManagerImpl;
 import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.context.Bootstrap;
 
 /**
  * An abstract class which all appdef value objects inherit from
@@ -255,7 +256,7 @@ public abstract class AppdefResourceValue
     }
 
     private static ApplicationType getApplicationTypeById(int id) {
-        return ApplicationManagerImpl.getOne().findApplicationType(new Integer(id));
+        return Bootstrap.getBean(ApplicationManager.class).findApplicationType(new Integer(id));
     }
     
    

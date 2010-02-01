@@ -4,8 +4,10 @@ import java.text.SimpleDateFormat
 
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.Resource
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.authz.server.session.ResourceManagerImpl
 import org.hyperic.hq.appdef.shared.AppdefEntityID
+import org.hyperic.hq.hqu.shared.UIPluginManager;
 import org.hyperic.hq.hqu.rendit.html.FormGenerator
 import org.hyperic.hq.hqu.rendit.html.HtmlUtil
 import org.hyperic.hq.hqu.rendit.helpers.AgentHelper
@@ -26,7 +28,7 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload
 import org.apache.commons.fileupload.FileItemIterator
 import org.apache.commons.fileupload.FileItemStream
 
-import org.hyperic.hq.hqu.server.session.UIPluginManagerImpl
+
 import org.hyperic.hq.hqu.server.session.Attachment
 
 import org.json.JSONObject
@@ -398,7 +400,7 @@ abstract class BaseController {
      * request.
      */
     protected Attachment getViewAttachment() {
-        def uiMan = UIPluginManagerImpl.one
+        def uiMan = Bootstrap.getBean(UIPluginManager.class)
         def attachId = invokeArgs.request.parameterMap.getOne('attachId').toInteger()
         uiMan.findAttachmentById(attachId)
     }

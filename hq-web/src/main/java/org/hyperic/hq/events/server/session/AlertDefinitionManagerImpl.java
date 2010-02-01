@@ -30,7 +30,6 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
-import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -100,11 +99,14 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
 
     private EscalationManager escalationManager;
 
+    private AlertAuditFactory alertAuditFactory;
+
     @Autowired
     public AlertDefinitionManagerImpl(AlertPermissionManager alertPermissionManager, AlertDefinitionDAO alertDefDao,
                                       ActionDAO actionDao, AlertConditionDAO alertConditionDAO, TriggerDAO triggerDAO,
                                       MeasurementDAO measurementDAO, RegisteredTriggerManager registeredTriggerManager,
-                                      ResourceManager resourceManager, EscalationManager escalationManager) {
+                                      ResourceManager resourceManager, EscalationManager escalationManager,
+                                      AlertAuditFactory alertAuditFactory) {
         this.alertPermissionManager = alertPermissionManager;
         this.alertDefDao = alertDefDao;
         this.actionDao = actionDao;
@@ -114,6 +116,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
         this.registeredTriggerManager = registeredTriggerManager;
         this.resourceManager = resourceManager;
         this.escalationManager = escalationManager;
+        this.alertAuditFactory = alertAuditFactory;
     }
 
     @PostConstruct
@@ -327,7 +330,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
 
             if (child.isActive() != activate || child.isEnabled() != activate) {
                 child.setActiveStatus(activate);
-                AlertAudit.enableAlert(child, subj);
+                alertAuditFactory.enableAlert(child, subj);
                 registeredTriggerManager.setAlertDefinitionTriggersEnabled(child.getId(), activate);
             }
             child.setMtime(System.currentTimeMillis());
@@ -492,7 +495,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
         if (def.isActive() != activate || def.isEnabled() != activate) {
             def.setActiveStatus(activate);
             def.setMtime(System.currentTimeMillis());
-            AlertAudit.enableAlert(def, subj);
+            alertAuditFactory.enableAlert(def, subj);
             registeredTriggerManager.setAlertDefinitionTriggersEnabled(def.getId(), activate);
         }
 
@@ -580,7 +583,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
             }
 
             alertPermissionManager.canManageAlerts(subj, alertdef);
-            AlertAudit.deleteAlert(alertdef, subj);
+            alertAuditFactory.deleteAlert(alertdef, subj);
             deleteAlertDefinition(subj, alertdef, false);
         }
     }

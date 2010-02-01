@@ -76,7 +76,10 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -85,7 +88,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @org.springframework.stereotype.Service
 @Transactional
-public class ApplicationManagerImpl implements ApplicationManager {
+public class ApplicationManagerImpl implements ApplicationManager, ApplicationContextAware {
 
     protected final Log log = LogFactory.getLog(ApplicationManagerImpl.class.getName());
 
@@ -109,6 +112,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
     private ZeventEnqueuer zeventManager;
 
     private HQApp hqApp;
+    
+    private ApplicationContext applicationContext;
     
     
     @Autowired
@@ -726,7 +731,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
      */
     public ResourceTree getResourceTree(AuthzSubject subject, AppdefEntityID[] resources, int traversal)
         throws AppdefEntityNotFoundException, PermissionException {
-        ResourceTreeGenerator generator = new ResourceTreeGenerator(subject);
+        ResourceTreeGenerator generator = Bootstrap.getBean(ResourceTreeGenerator.class);
+        generator.setSubject(subject);
         return generator.generate(resources, traversal);
     }
 
@@ -799,10 +805,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
         });
     }
 
-    public static ApplicationManager getOne() {
-        return Bootstrap.getBean(ApplicationManager.class);
-    }
-
     @PostConstruct
     public void afterPropertiesSet() throws Exception {
 
@@ -821,6 +823,10 @@ public class ApplicationManagerImpl implements ApplicationManager {
             app.setLocation(app.getLocation().trim());
         if (app.getOpsContact() != null)
             app.setOpsContact(app.getOpsContact().trim());
+    }
+    
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
     }
 
 }

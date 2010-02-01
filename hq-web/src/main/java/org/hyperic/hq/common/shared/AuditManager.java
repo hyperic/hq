@@ -54,6 +54,4 @@ public interface AuditManager {
 
     public void handleSubjectDelete(AuthzSubject s);
 
-    public void startup();
-
 }

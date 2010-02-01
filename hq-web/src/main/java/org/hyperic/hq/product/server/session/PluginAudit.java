@@ -25,73 +25,22 @@
 package org.hyperic.hq.product.server.session;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
 import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
-import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.AuditImportance;
-import org.hyperic.hq.common.server.session.AuditManagerImpl;
 import org.hyperic.hq.common.server.session.AuditNature;
 import org.hyperic.hq.common.server.session.AuditPurpose;
-import org.hyperic.util.i18n.MessageBundle;
 
-public class PluginAudit extends Audit {
-    private static final MessageBundle MSGS = 
-        MessageBundle.getBundle("org.hyperic.hq.product.Resources");
-
-    public static final PluginAuditPurpose PLUGIN_DEPLOYED = 
-        new PluginAuditPurpose(0x9000, "plugin deployed", "audit.plugin.deploy"); 
-    public static final PluginAuditPurpose PLUGIN_UPDATED = 
-        new PluginAuditPurpose(0x9001, "plugin updated", "audit.plugin.update"); 
-        
-    public static class PluginAuditPurpose extends AuditPurpose {
-        PluginAuditPurpose(int code, String desc, String localeProp) { 
-            super(code, desc, localeProp, MSGS.getResourceBundle());
-        }
-    }
+public class PluginAudit
+    extends Audit {
 
     protected PluginAudit() {}
     
-    PluginAudit(Resource r, AuthzSubject s, AuditPurpose p, 
-                AuditImportance i, AuditNature n, String msg, long startTime,
-                long endTime)
-    { 
+    PluginAudit(Resource r, AuthzSubject s, AuditPurpose p, AuditImportance i, AuditNature n, String msg,
+                long startTime, long endTime) {
         super(s, r, p, n, i, msg);
         setStartTime(startTime);
         setEndTime(endTime);
     }
 
-    private static Resource getSystemResource() {
-        return ResourceManagerImpl.getOne()
-                .findResourceById(AuthzConstants.authzHQSystem);
-    }
-    
-    public static PluginAudit deployAudit(String pluginName, long start, 
-                                          long end) 
-    {
-        AuthzSubject overlord = 
-            AuthzSubjectManagerImpl.getOne().getOverlordPojo();
-        String msg = MSGS.format("auditMsg.plugin.deploy", pluginName);
-        PluginAudit res = new PluginAudit(getSystemResource(), overlord, 
-                                          PLUGIN_DEPLOYED, AuditImportance.HIGH,
-                                          AuditNature.CREATE, msg, start, end); 
-        
-        AuditManagerImpl.getOne().saveAudit(res);
-        return res;
-    }
-    
-    public static PluginAudit updateAudit(String pluginName, long start, 
-                                          long end) 
-    {
-        AuthzSubject overlord = 
-            AuthzSubjectManagerImpl.getOne().getOverlordPojo();
-        String msg = MSGS.format("auditMsg.plugin.update", pluginName);
-        PluginAudit res = new PluginAudit(getSystemResource(), overlord, 
-                                          PLUGIN_UPDATED, AuditImportance.HIGH,
-                                          AuditNature.UPDATE, msg, start, end); 
-        
-        AuditManagerImpl.getOne().saveAudit(res);
-        return res;
-    }
 }

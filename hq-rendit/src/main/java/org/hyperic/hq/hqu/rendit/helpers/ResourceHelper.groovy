@@ -5,7 +5,6 @@ import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl as GroupMan
 import org.hyperic.hq.appdef.server.session.PlatformManagerImpl as PlatMan
 import org.hyperic.hq.appdef.server.session.ServerManagerImpl as ServerMan
 import org.hyperic.hq.appdef.server.session.ServiceManagerImpl as ServiceMan
-import org.hyperic.hq.appdef.server.session.ApplicationManagerImpl as AppMan
 import org.hyperic.hq.escalation.server.session.EscalationManagerImpl as EscMan
 
 
@@ -20,6 +19,7 @@ import org.hyperic.hq.authz.server.session.ResourceSortField
 import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.authz.server.session.ResourceGroup
 import org.hyperic.hq.bizapp.server.session.AppdefBossImpl as AppdefBoss
+import org.hyperic.hq.appdef.shared.ApplicationManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.util.pager.PageControl
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo
@@ -83,7 +83,7 @@ class ResourceHelper extends BaseHelper {
             case 'servers':   return ServerMan.one.serverCount
             case 'services':  return ServiceMan.one.serviceCount
             case 'cpus': return PlatMan.one.cpuCount
-            case 'applications': return AppMan.one.applicationCount
+            case 'applications': return Bootstrap.getBean(ApplicationManager.class).applicationCount
             case 'roles': return Bootstrap.getBean(RoleManager.class).roleCount
             case 'users': return Bootstrap.getBean(RoleManager.class).subjectCount
             case 'alerts': return AlertMan.one.alertCount

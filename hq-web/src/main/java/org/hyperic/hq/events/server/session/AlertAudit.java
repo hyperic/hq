@@ -25,70 +25,21 @@
 package org.hyperic.hq.events.server.session;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.AuditImportance;
-import org.hyperic.hq.common.server.session.AuditManagerImpl;
 import org.hyperic.hq.common.server.session.AuditNature;
 import org.hyperic.hq.common.server.session.AuditPurpose;
-import org.hyperic.util.i18n.MessageBundle;
 
-public class AlertAudit extends Audit {
-    private static final MessageBundle MSGS = 
-        MessageBundle.getBundle("org.hyperic.hq.common.Resources");
-
-    public static final AlertAuditPurpose ALERT_ENABLE = 
-        new AlertAuditPurpose(0x5000, "alert enable", "audit.alert.enable");
-    public static final AlertAuditPurpose ALERT_DISABLE = 
-        new AlertAuditPurpose(0x5001, "alert disable", "audit.alert.disable");
-    public static final AlertAuditPurpose ALERT_DELETE = 
-        new AlertAuditPurpose(0x5002, "alert delete", "audit.alert.delete");
-
-    public static class AlertAuditPurpose extends AuditPurpose {
-        AlertAuditPurpose(int code, String desc, String localeProp) { 
-            super(code, desc, localeProp, MSGS.getResourceBundle());
-        }
-    }
+public class AlertAudit
+    extends Audit {
 
     protected AlertAudit() {}
     
-    AlertAudit(AlertDefinition def, AuthzSubject s, AuditPurpose p, 
-               AuditImportance i, AuditNature n, String msg, long time) 
-    { 
+    AlertAudit(AlertDefinition def, AuthzSubject s, AuditPurpose p, AuditImportance i, AuditNature n, String msg,
+               long time) {
         super(s, def.getResource(), p, n, i, msg);
         setStartTime(time);
         setEndTime(time);
     }
 
-    public static AlertAudit enableAlert(AlertDefinition def,
-                                         AuthzSubject modifier)
-    {
-        final boolean enabled = def.isActive();
-        String msg = enabled ?
-                MSGS.format("auditMsg.alert.enable", def.getName()) :
-                MSGS.format("auditMsg.alert.disable", def.getName());
-        AlertAudit res = new AlertAudit(def, modifier,
-                                        enabled ? ALERT_ENABLE : ALERT_DISABLE,
-                                        enabled ? AuditImportance.MEDIUM :
-                                                  AuditImportance.HIGH, 
-                                        enabled ? AuditNature.ENABLE :
-                                                  AuditNature.DISABLE,
-                                        msg, System.currentTimeMillis());  
-        
-        AuditManagerImpl.getOne().saveAudit(res);
-        return res;
-    }
-
-    public static AlertAudit deleteAlert(AlertDefinition def,
-                                         AuthzSubject modifier)
-    {
-        String msg = MSGS.format("auditMsg.alert.delete", def.getName());
-        AlertAudit res = new AlertAudit(def, modifier, ALERT_DELETE,
-                                        AuditImportance.HIGH, 
-                                        AuditNature.DELETE,
-                                        msg, System.currentTimeMillis());  
-        
-        AuditManagerImpl.getOne().saveAudit(res);
-        return res;
-    }
 }

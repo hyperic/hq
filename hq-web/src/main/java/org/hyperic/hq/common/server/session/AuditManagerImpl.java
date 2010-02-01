@@ -34,10 +34,7 @@ import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.TransactionListener;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceDeleteCallback;
-import org.hyperic.hq.authz.server.session.SubjectRemoveCallback;
 import org.hyperic.hq.common.shared.AuditManager;
-import org.hyperic.hq.context.Bootstrap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,12 +49,10 @@ public class AuditManagerImpl implements AuditManager {
     private static final ThreadLocal<Audit> CONTAINERS = new ThreadLocal<Audit>();
 
     private AuditDAO auditDao;
-    private HQApp hqApp;
 
     @Autowired
-    public AuditManagerImpl(AuditDAO auditDao, HQApp hqApp) {
+    public AuditManagerImpl(AuditDAO auditDao) {
         this.auditDao = auditDao;
-        this.hqApp = hqApp;
     }
 
     /**
@@ -222,32 +217,5 @@ public class AuditManagerImpl implements AuditManager {
      */
     public void handleSubjectDelete(AuthzSubject s) {
         auditDao.handleSubjectDelete(s);
-    }
-
-    private static class ResourceDeleteWatcher implements ResourceDeleteCallback {
-        public void preResourceDelete(Resource r) {
-            getOne().handleResourceDelete(r);
-        }
-    }
-
-    private static class SubjectDeleteWatcher implements SubjectRemoveCallback {
-        public void subjectRemoved(AuthzSubject toDelete) {
-            getOne().handleSubjectDelete(toDelete);
-        }
-    }
-
-    /**
-     * 
-     */
-    public void startup() {
-        log.info("Audit Manager starting up");
-
-        hqApp.registerCallbackListener(ResourceDeleteCallback.class, new ResourceDeleteWatcher());
-
-        hqApp.registerCallbackListener(SubjectRemoveCallback.class, new SubjectDeleteWatcher());
-    }
-
-    public static AuditManager getOne() {
-        return Bootstrap.getBean(AuditManager.class);
     }
 }

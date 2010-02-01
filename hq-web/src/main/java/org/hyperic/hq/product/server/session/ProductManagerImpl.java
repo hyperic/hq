@@ -99,12 +99,13 @@ public class ProductManagerImpl implements ProductManager {
     private ServerManager serverManager;
     private ServiceManager serviceManager;
     private AlertDefinitionXmlParser alertDefinitionXmlParser;
+    private PluginAuditFactory pluginAuditFactory;
 
     @Autowired
     public ProductManagerImpl(PluginDAO pluginDao, AlertDefinitionManager alertDefinitionManager,
                               CPropManager cPropManager, TemplateManager templateManager, AuditManager auditManager,
                               ServerManager serverManager, ServiceManager serviceManager,
-                              PlatformManager platformManager, AlertDefinitionXmlParser alertDefinitionXmlParser) {
+                              PlatformManager platformManager, AlertDefinitionXmlParser alertDefinitionXmlParser, PluginAuditFactory pluginAuditFactory) {
         this.pluginDao = pluginDao;
         this.alertDefinitionManager = alertDefinitionManager;
         this.cPropManager = cPropManager;
@@ -114,6 +115,7 @@ public class ProductManagerImpl implements ProductManager {
         this.serviceManager = serviceManager;
         this.platformManager = platformManager;
         this.alertDefinitionXmlParser = alertDefinitionXmlParser;
+        this.pluginAuditFactory = pluginAuditFactory;
     }
 
     /**
@@ -279,19 +281,21 @@ public class ProductManagerImpl implements ProductManager {
             log.info(pluginName + " does not define any resource types");
             updatePlugin(pluginDao, pInfo);
             if (created)
-                PluginAudit.deployAudit(pluginName, start, System.currentTimeMillis());
+                pluginAuditFactory.deployAudit(pluginName, start, System.currentTimeMillis());
             else
-                PluginAudit.updateAudit(pluginName, start, System.currentTimeMillis());
+                pluginAuditFactory.updateAudit(pluginName, start, System.currentTimeMillis());
             return;
         }
 
         Audit audit;
         boolean pushed = false;
 
-        if (created)
-            audit = PluginAudit.deployAudit(pluginName, start, start);
-        else
-            audit = PluginAudit.updateAudit(pluginName, start, start);
+        if (created) {
+            audit = pluginAuditFactory.deployAudit(pluginName, start, start);
+        }
+        else {
+            audit = pluginAuditFactory.updateAudit(pluginName, start, start);
+        }
 
         try {
             auditManager.pushContainer(audit);

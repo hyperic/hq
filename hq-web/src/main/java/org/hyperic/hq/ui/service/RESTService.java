@@ -194,7 +194,7 @@ public class RESTService extends BaseService {
                 
                 int sessionId = RequestUtils.getSessionId(_request).intValue();
                 
-                PageList resources = AppdefBossImpl.getOne()
+                PageList resources = Bootstrap.getBean(AppdefBoss.class)
                     .search(sessionId, AppdefEntityConstants.APPDEF_TYPE_GROUP,
                             regexFilterParam, null, null,
                             new int[] {
@@ -552,7 +552,7 @@ public class RESTService extends BaseService {
                         Resource resource = ResourceManagerImpl.getOne()
                                                 .findResource(aeid);                   
                     
-                        AppdefBossImpl.getOne()
+                        Bootstrap.getBean(AppdefBoss.class)
                                  .batchGroupAdd(
                                          user.getSessionId(),
                                          aeid,
@@ -567,7 +567,7 @@ public class RESTService extends BaseService {
                 }
 
                 PageList availableGroups = 
-                    AppdefBossImpl.getOne().findAllGroupsMemberExclusive(
+                    Bootstrap.getBean(AppdefBoss.class).findAllGroupsMemberExclusive(
                                                     user.getSessionId(),
                                                     PageControl.PAGE_ALL,
                                                     aeids);

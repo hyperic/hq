@@ -1,13 +1,14 @@
 package org.hyperic.hq.hqu.rendit.helpers
 
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hibernate.PageInfo
+import org.hyperic.hq.common.shared.AuditManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject
-import org.hyperic.hq.common.server.session.AuditManagerImpl
 import org.hyperic.hq.common.server.session.AuditPurpose
 import org.hyperic.hq.common.server.session.AuditImportance
 
 class AuditHelper extends BaseHelper {
-    private auditMan = AuditManagerImpl.one
+    private auditMan = Bootstrap.getBean(AuditManager.class)
     
     AuditHelper(AuthzSubject user) {
         super(user)

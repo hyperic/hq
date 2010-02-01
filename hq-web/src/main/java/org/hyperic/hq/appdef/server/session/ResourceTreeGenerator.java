@@ -34,6 +34,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
+import org.hyperic.hq.appdef.shared.ApplicationManager;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
@@ -48,6 +49,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.util.pager.PageControl;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An object which generates ResourceTree objects.  The
@@ -68,34 +70,33 @@ public class ResourceTreeGenerator {
     private static final int GO_UP   = 1 << 5;
     private static final int GO_DOWN = 1 << 6;
 
-    private final ServerManager  _serverMan;
-    private final ServiceManager _serviceMan;
-    private final AuthzSubject        _subject;
+    private final ServerManager  serverManager;
+    private final ServiceManager serviceManager;
+    private ApplicationManager applicationManager;
+    private AuthzSubject        _subject;
 
     // Caches so we don't do much work twice
-    private HashSet upPlats;    // Platform IDs which we've traversed up from
-    private HashSet upServers;  // Server IDs which we've traversed up from
-    private HashSet upServices; // Service IDs which we've traversed up from
-    private HashMap dnPlats;    // Platform IDs which we've traversed down from
-    private HashMap dnServers;  // Server IDs which we've traversed down from
-    private HashMap dnServices; // Service IDs which we've traversed down from
-    private HashSet dnApps;     // App IDs which we've traversed down from
+    private HashSet upPlats  = new HashSet();    // Platform IDs which we've traversed up from
+    private HashSet upServers = new HashSet();  // Server IDs which we've traversed up from
+    private HashSet upServices = new HashSet(); // Service IDs which we've traversed up from
+    private HashMap dnPlats = new HashMap();   // Platform IDs which we've traversed down from
+    private HashMap dnServers = new HashMap(); // Server IDs which we've traversed down from
+    private HashMap dnServices = new HashMap(); // Service IDs which we've traversed down from
+    private HashSet dnApps  = new HashSet();    // App IDs which we've traversed down from
 
-    ResourceTreeGenerator(AuthzSubject subject){
-        _subject = subject;
-
-        upPlats    = new HashSet();
-        upServers  = new HashSet();
-        upServices = new HashSet();
-        dnPlats    = new HashMap();
-        dnServers  = new HashMap();
-        dnServices = new HashMap();
-        dnApps     = new HashSet();
-
-        _serverMan  = ServerManagerImpl.getOne();
-        _serviceMan = ServiceManagerImpl.getOne();
+    
+    @Autowired
+    public ResourceTreeGenerator(ServerManager serverMan, ServiceManager serviceMan,
+                                 ApplicationManager applicationManager) {
+        this.serverManager = serverMan;
+        this.serviceManager = serviceMan;
+        this.applicationManager = applicationManager;
     }
 
+    public void setSubject(AuthzSubject subject) {
+        _subject = subject;
+    }
+    
     /**
      * Generate a tree which includes the passed IDs, as well as
      * their dependents (or dependencies) as per the traversal method.
@@ -218,7 +219,7 @@ public class ResourceTreeGenerator {
         if ((direction & GO_UP) != 0 && !upPlats.contains(platformID))
         {
             upPlats.add(platformID);
-            Collection servers = _serverMan.getViewableServers(_subject,
+            Collection servers = serverManager.getViewableServers(_subject,
                                                                platform);
 
             for (Iterator i = servers.iterator(); i.hasNext();) {
@@ -251,7 +252,7 @@ public class ResourceTreeGenerator {
 
             upServers.add(serverID);
             try {
-                services = _serviceMan.getServicesByServer(_subject, server);
+                services = serviceManager.getServicesByServer(_subject, server);
             } catch(AppdefEntityNotFoundException exc){
                 throw new SystemException("Internal inconsistancy: could not " +
                                           "find services for server '" + 
@@ -299,7 +300,7 @@ public class ResourceTreeGenerator {
             try {
                 AppdefEntityID id =
                     AppdefEntityID.newServiceID(service.getId());
-                apps = ApplicationManagerImpl.getOne()
+                apps = applicationManager
                     .getApplicationsByResource(_subject, id,
                                                PageControl.PAGE_ALL);
             } catch(ApplicationNotFoundException exc){
@@ -329,7 +330,7 @@ public class ResourceTreeGenerator {
         if ((direction & GO_DOWN) != 0) {
             try {
                 services =
-                    _serviceMan.getServicesByApplication(_subject, app.getId());
+                    serviceManager.getServicesByApplication(_subject, app.getId());
             } catch(AppdefEntityNotFoundException exc){
                 throw new SystemException("Internal inconsistancy: could " +
                                           "not get services on which " +
