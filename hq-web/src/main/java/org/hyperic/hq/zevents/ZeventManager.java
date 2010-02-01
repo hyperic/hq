@@ -48,7 +48,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.TransactionListener;
 import org.hyperic.hq.common.DiagnosticObject;
-import org.hyperic.hq.common.DiagnosticThread;
+import org.hyperic.hq.common.DiagnosticsLogger;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.util.PrintfFormat;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
@@ -56,6 +56,7 @@ import org.hyperic.util.thread.LoggingThreadGroup;
 import org.hyperic.util.thread.ThreadGroupFactory;
 import org.hyperic.util.thread.ThreadWatchdog;
 import org.hyperic.util.thread.ThreadWatchdog.InterruptToken;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -71,7 +72,7 @@ public class ZeventManager implements ZeventEnqueuer {
     private static final Log _log = LogFactory.getLog(ZeventManager.class);
 
     private static final Object INIT_LOCK = new Object();
-    private static ZeventManager INSTANCE;
+   
 
     // The thread group that the {@link EventQueueProcessor} comes from
     private final LoggingThreadGroup _threadGroup;
@@ -100,11 +101,13 @@ public class ZeventManager implements ZeventEnqueuer {
     private long _numEvents;
 
     private BlockingQueue  _eventQueue;
+    private DiagnosticsLogger diagnosticsLogger;
 
-
-    private ZeventManager() {
-        _threadGroup = new LoggingThreadGroup("ZEventProcessor");
-        _threadGroup.setDaemon(true);
+    @Autowired
+    public ZeventManager(DiagnosticsLogger diagnosticsLogger) {
+        this._threadGroup = new LoggingThreadGroup("ZEventProcessor");
+        this._threadGroup.setDaemon(true);
+        this.diagnosticsLogger = diagnosticsLogger;
     }
 
     private long getProp(Properties p, String propName, long defaultVal) {
@@ -185,7 +188,7 @@ public class ZeventManager implements ZeventEnqueuer {
             }
         };
 
-        DiagnosticThread.addDiagnosticObject(myDiag);
+        diagnosticsLogger.addDiagnosticObject(myDiag);
     }
 
     public long getQueueSize() {

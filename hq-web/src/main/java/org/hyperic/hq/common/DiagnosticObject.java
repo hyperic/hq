@@ -28,7 +28,7 @@ package org.hyperic.hq.common;
 /**
  * Interface for diagnostic objects.  Implementing classes are registered with
  * DiagnosticThread addDiagnosticObject() method.
- * @see DiagnosticThread
+ * @see DiagnosticsLogger
  */
 public interface DiagnosticObject {
     String getStatus();

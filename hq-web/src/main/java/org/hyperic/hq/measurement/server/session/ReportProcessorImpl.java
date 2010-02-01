@@ -74,17 +74,20 @@ public class ReportProcessorImpl implements ReportProcessor {
     private ServerManager serverManager;
     private ServiceManager serviceManager;
     private SRNManager srnManager;
+    private ReportStatsCollector reportStatsCollector;
 
     @Autowired
     public ReportProcessorImpl(MeasurementManager measurementManager, MeasurementProcessor measurementProcessor,
                                PlatformManager platformManager, ServerManager serverManager,
-                               ServiceManager serviceManager, SRNManager srnManager) {
+                               ServiceManager serviceManager, SRNManager srnManager,
+                               ReportStatsCollector reportStatsCollector) {
         this.measurementManager = measurementManager;
         this.measurementProcessor = measurementProcessor;
         this.platformManager = platformManager;
         this.serverManager = serverManager;
         this.serviceManager = serviceManager;
         this.srnManager = srnManager;
+        this.reportStatsCollector = reportStatsCollector;
     }
 
     private void addPoint(List<DataPoint> points, List<DataPoint> priorityPts, Measurement m, MetricValue[] vals) {
@@ -256,7 +259,7 @@ public class ReportProcessorImpl implements ReportProcessor {
             d.insertMetrics(dataPoints, isPriority);
             int size = dataPoints.size();
             long ts = System.currentTimeMillis();
-            ReportStatsCollector.getInstance().getCollector().add(size, ts);
+            reportStatsCollector.getCollector().add(size, ts);
         } catch (InterruptedException e) {
             throw new SystemException("Interrupted while attempting to " + "insert data");
         }
