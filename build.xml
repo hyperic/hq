@@ -134,6 +134,7 @@
 			<path location="${hq.common}/target/classes" />
 			<path location="${hq.pdk.shared}/target/classes" />
 			<path location="${hq.pdk.agent}/target/classes" />
+			<path location="${hq.agent}/target/classes" />
 	</path>
 	
 	<path id="agent.handler.compile.classpath">
@@ -152,6 +153,7 @@
 		<path location="${hq.util}/target/classes" />
 		<path location="${hq.common}/target/classes" />
 		<path location="${hq.pdk.shared}/target/classes" />
+		<path location="${hq.pdk.agent}/target/classes" />
 	</path>
 	
 	<path id="web.compile.classpath">
@@ -160,6 +162,7 @@
 		<path location="${hq.util}/target/classes" />
 		<path location="${hq.common}/target/classes" />
 		<path location="${hq.pdk.shared}/target/classes" />
+		<path location="${hq.web}/target/classes" />
 	</path>
 	
 	<path id="shared.compile.classpath">
@@ -167,6 +170,7 @@
 		<path refid="testjars" />
 		<path location="${hq.util}/target/classes" />
 		<path location="${hq.common}/target/classes" />
+		<path location="${hq.pdk.shared}/target/classes" />
 	</path>
 
 	<!-- Source common targets -->
@@ -1093,36 +1097,59 @@
 </target>
 
 <!-- Quality Targets -->
-<target name="test" depends="init,init-taskdefs,init-tests">
-   <test.do module.dir="${hq.agent}" compile.classpath.id="agent.compile.classpath"/>
-   <test.do module.dir="${hq.agent.handlers}/hq-agent-handler-autoinventory" compile.classpath.id="agent.handler.compile.classpath"/>
-   <test.do module.dir="${hq.agent.handlers}/hq-agent-handler-bizapp" compile.classpath.id="agent.handler.compile.classpath"/>
-   <test.do module.dir="${hq.agent.handlers}/hq-agent-handler-commands" compile.classpath.id="agent.handler.compile.classpath"/>
-   <test.do module.dir="${hq.agent.handlers}/hq-agent-handler-control" compile.classpath.id="agent.handler.compile.classpath"/>
-   <test.do module.dir="${hq.agent.handlers}/hq-agent-handler-livedata" compile.classpath.id="agent.handler.compile.classpath"/>
-   <test.do module.dir="${hq.agent.handlers}/hq-agent-handler-measurement" compile.classpath.id="agent.handler.compile.classpath"/>
-   <test.do module.dir="${hq.pdk.agent}" compile.classpath.id="agent.pdk.compile.classpath"/>
-   <test.do module.dir="${hq.common}" compile.classpath.id="shared.compile.classpath"/>
-   <test.do module.dir="${hq.util}" compile.classpath.id="shared.compile.classpath"/>
-	<test.do module.dir="${hq.pdk.shared}" compile.classpath.id="shared.compile.classpath"/>
-	<test.do module.dir="${hq.web}" compile.classpath.id="web.compile.classpath"/>
+<target name="test" depends="compile-tests,run-tests"/>
+
+<target name="compile-tests" depends="init,init-taskdefs,init-tests">
+   <test-compile module.dir="${hq.agent}" compile.classpath.id="agent.compile.classpath"/>
+   <test-compile module.dir="${hq.agent.handlers}/hq-agent-handler-autoinventory" compile.classpath.id="agent.handler.compile.classpath"/>
+   <test-compile module.dir="${hq.agent.handlers}/hq-agent-handler-bizapp" compile.classpath.id="agent.handler.compile.classpath"/>
+   <test-compile module.dir="${hq.agent.handlers}/hq-agent-handler-commands" compile.classpath.id="agent.handler.compile.classpath"/>
+   <test-compile module.dir="${hq.agent.handlers}/hq-agent-handler-control" compile.classpath.id="agent.handler.compile.classpath"/>
+   <test-compile module.dir="${hq.agent.handlers}/hq-agent-handler-livedata" compile.classpath.id="agent.handler.compile.classpath"/>
+   <test-compile module.dir="${hq.agent.handlers}/hq-agent-handler-measurement" compile.classpath.id="agent.handler.compile.classpath"/>
+   <test-compile module.dir="${hq.pdk.agent}" compile.classpath.id="agent.pdk.compile.classpath"/>
+   <test-compile module.dir="${hq.common}" compile.classpath.id="shared.compile.classpath"/>
+   <test-compile module.dir="${hq.util}" compile.classpath.id="shared.compile.classpath"/>
+	<test-compile module.dir="${hq.pdk.shared}" compile.classpath.id="shared.compile.classpath"/>
+	<test-compile module.dir="${hq.web}" compile.classpath.id="web.compile.classpath"/>
 </target>
 
-<target name="clover.instrument" depends="clover.init">
-    <instrument-module-with-tests module.dir="${hq.util}"/>
-	<instrument-module-with-tests module.dir="${hq.common}"/>
-	<instrument-module-with-tests module.dir="${hq.pdk.shared}"/>
-	<instrument-module-with-tests module.dir="${hq.web}"/>
-	<instrument-module-with-tests module.dir="${hq.pdk.agent}"/>
-	<instrument-module-with-tests module.dir="${hq.agent}"/>
-	<instrument-module-with-tests module.dir="${hq.agent.handlers}/hq-agent-handler-autoinventory"/>
-    <instrument-module-with-tests module.dir="${hq.agent.handlers}/hq-agent-handler-bizapp"/>
-    <instrument-module-with-tests module.dir="${hq.agent.handlers}/hq-agent-handler-commands"/>
-    <instrument-module-with-tests module.dir="${hq.agent.handlers}/hq-agent-handler-control"/>
-    <instrument-module-with-tests module.dir="${hq.agent.handlers}/hq-agent-handler-livedata"/>
-    <instrument-module-with-tests module.dir="${hq.agent.handlers}/hq-agent-handler-measurement"/>
-	<delete dir="${clover.staging.dir}" quiet="true"/>
-  </target>
+<target name="run-tests" depends="init,init-taskdefs,init-tests">
+   <test-run module.dir="${hq.agent}" classpath.id="agent.compile.classpath"/>
+   <test-run module.dir="${hq.agent.handlers}/hq-agent-handler-autoinventory" classpath.id="agent.handler.compile.classpath"/>
+   <test-run module.dir="${hq.agent.handlers}/hq-agent-handler-bizapp" classpath.id="agent.handler.compile.classpath"/>
+   <test-run module.dir="${hq.agent.handlers}/hq-agent-handler-commands" classpath.id="agent.handler.compile.classpath"/>
+   <test-run module.dir="${hq.agent.handlers}/hq-agent-handler-control" classpath.id="agent.handler.compile.classpath"/>
+   <test-run module.dir="${hq.agent.handlers}/hq-agent-handler-livedata" classpath.id="agent.handler.compile.classpath"/>
+   <test-run module.dir="${hq.agent.handlers}/hq-agent-handler-measurement" classpath.id="agent.handler.compile.classpath"/>
+   <test-run module.dir="${hq.pdk.agent}" classpath.id="agent.pdk.compile.classpath"/>
+   <test-run module.dir="${hq.common}" classpath.id="shared.compile.classpath"/>
+   <test-run module.dir="${hq.util}" classpath.id="shared.compile.classpath"/>
+	<test-run module.dir="${hq.pdk.shared}" classpath.id="shared.compile.classpath"/>
+	<test-run module.dir="${hq.web}" classpath.id="web.compile.classpath"/>
+</target>
+	
+
+<target name="instrument-tests" depends="clover.init">
+   	<instrument-module input.dir="${hq.util}/src/test/java" staging.dir="${hq.util}/target/clover/staging/src/test/java" resource.dir="${hq.util}/src/test/resources" output.dir="${hq.util}/target/test-classes" classpath.id="shared.compile.classpath"/>
+	<delete dir="${hq.util}/target/clover" quiet="true"/>
+	<instrument-module input.dir="${hq.common}/src/test/java" staging.dir="${hq.common}/target/clover/staging/src/test/java" resource.dir="${hq.common}/src/test/resources" output.dir="${hq.common}/target/test-classes" classpath.id="shared.compile.classpath"/>
+	<delete dir="${hq.common}/target/clover" quiet="true"/>
+	<instrument-module input.dir="${hq.pdk.shared}/src/test/java" staging.dir="${hq.pdk.shared}/target/clover/staging/src/test/java" resource.dir="${hq.pdk.shared}/src/test/resources" output.dir="${hq.pdk.shared}/target/test-classes" classpath.id="shared.compile.classpath"/>
+	<delete dir="${hq.pdk.shared}/target/clover" quiet="true"/>
+	<instrument-module input.dir="${hq.web}/src/test/java" staging.dir="${hq.web}/target/clover/staging/src/test/java" resource.dir="${hq.web}/src/test/resources" output.dir="${hq.web}/target/test-classes" classpath.id="web.compile.classpath"/>
+	<delete dir="${hq.web}/target/clover" quiet="true"/>
+	<instrument-module classpath.id="agent.pdk.compile.classpath" input.dir="${hq.pdk.agent}/src/test/java" resource.dir="${hq.pdk.agent}/src/test/resources" output.dir="${hq.pdk.agent}/target/test-classes" staging.dir="${hq.pdk.agent}/target/clover/staging/src/test/java"/>
+	<delete dir="${hq.pdk.agent}/target/clover" quiet="true"/>
+	<instrument-module classpath.id="agent.compile.classpath" input.dir="${hq.agent}/src/test/java" resource.dir="${hq.agent}/src/test/resources" output.dir="${hq.agent}/target/test-classes" staging.dir="${hq.agent}/target/clover/staging/src/test/java"/>
+	<delete dir="${hq.agent}/target/clover" quiet="true"/>
+	<instrument-agent-handler-tests handler.name="autoinventory"/>
+	<instrument-agent-handler-tests handler.name="bizapp"/>
+	<instrument-agent-handler-tests handler.name="commands"/>
+	<instrument-agent-handler-tests handler.name="control"/>
+	<instrument-agent-handler-tests handler.name="livedata"/>
+	<instrument-agent-handler-tests handler.name="measurement"/>
+ </target>
 
 
 <target name="build-instrumented-war" depends="instrument-war,compile-plugins,pack-plugins,pack-war">
@@ -1175,5 +1202,18 @@
 		<instrument-module classpath.id="agent.handler.compile.classpath" input.dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/src/main/java" resource.dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/src/main/resources" output.dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/target/classes" staging.dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/target/clover/staging/src/main/java"/>
 		<delete dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/target/clover" quiet="true"/>
 	</sequential>
-</macrodef>	
+</macrodef>
+
+<macrodef name="instrument-agent-handler-tests">
+	<attribute name="handler.name"/>
+	<sequential>
+		<path id="test.run.classpath">
+			<path refid="agent.handler.compile.classpath" />
+			<path location="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/target/classes" />
+		</path>
+		<instrument-module classpath.id="test.run.classpath" input.dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/src/test/java" resource.dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/src/test/resources" output.dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/target/test-classes" staging.dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/target/clover/staging/src/test/java"/>
+		<delete dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/target/clover" quiet="true"/>
+	</sequential>
+</macrodef>
+
 </project>
