@@ -15,6 +15,7 @@ import org.hyperic.hq.hqu.rendit.html.DojoUtil
 import org.hyperic.hq.hqu.rendit.BaseController
 import org.hyperic.hq.hqu.rendit.util.HQUtil
 import org.hyperic.hq.bizapp.shared.ProductBoss;
+import org.hyperic.hq.common.DiagnosticsLogger;
 import org.hyperic.hq.common.Humidor
 import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.util.jdbc.DBUtil
@@ -228,7 +229,8 @@ class HealthController
     }
 
     private getDiagnostics() {
-        DiagnosticsLogger.diagnosticObjects.sort {a, b -> a.name <=> b.name }
+        Bootstrap.getBean(DiagnosticsLogger.class)
+                 .diagnosticObjects.sort {a, b -> a.name <=> b.name }
     }
     
     def index(params) {
