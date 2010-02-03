@@ -7,6 +7,8 @@ import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.config.InvalidOptionValueException;
 import org.hyperic.util.config.StringConfigOption;
+import org.json.JSONArray;
+import org.json.JSONException;
 
 public class SnmpActionConfig implements ActionConfigInterface {
 
@@ -18,7 +20,7 @@ public class SnmpActionConfig implements ActionConfigInterface {
     protected String oid;
     protected String address;
     protected String snmpNotificationMechanism;
-    protected String variableBindings;  // in JSON format
+    protected String variableBindings;  // in JSONArray format
     
     private static String implementor =
         "com.hyperic.hq.bizapp.server.action.alert.SnmpAction";
@@ -67,10 +69,24 @@ public class SnmpActionConfig implements ActionConfigInterface {
     }
     
     /**
-     * Sets the variable bindings configuration in JSON format
+     * Sets the variable bindings configuration in JSONArray format
      */
     public void setVariableBindings(String variableBindings) {
-        this.variableBindings = variableBindings;
+        try {
+            if (variableBindings != null
+                    && variableBindings.length() > 0) {
+
+                // validate that the variable bindings is in JSONArray format
+                JSONArray j = new JSONArray(variableBindings);
+                this.variableBindings = j.toString();
+            } else {
+                this.variableBindings = variableBindings;
+            }
+        } catch (JSONException je) {
+            throw new IllegalArgumentException(
+                    "Variable bindings must be in a valid JSONArray format:" 
+                        + je.getMessage());
+        }
     }
     
     /* (non-Javadoc)
