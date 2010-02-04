@@ -3,7 +3,8 @@
   import org.hyperic.hq.hqu.rendit.util.HQUtil
   import org.hyperic.hq.measurement.MeasurementConstants
   import org.hyperic.hq.events.EventConstants
-  import org.hyperic.hq.escalation.server.session.EscalationManagerImpl
+  import org.hyperic.hq.escalation.shared.EscalationManager
+  import org.hyperic.hq.context.Bootstrap
   
   DateFormat df = DateFormat.getDateTimeInstance(DateFormat.LONG, 
                                                  DateFormat.LONG)
@@ -11,7 +12,7 @@
   
   def lastFix  = ""
   if (alertDef.performsEscalations()) {
-       lastFix = EscalationManagerImpl.one.getLastFix(alertDef)
+       lastFix = Bootstrap.getBean(EscalationManager.class).getLastFix(alertDef)
   }
   
   def addAuxLogs(prefix, logs, buf) {
