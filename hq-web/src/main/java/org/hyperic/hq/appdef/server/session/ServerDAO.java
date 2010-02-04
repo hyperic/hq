@@ -48,42 +48,22 @@ import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
 @Repository
-public class ServerDAO extends HibernateDAO<Server>
-{
+public class ServerDAO
+    extends HibernateDAO<Server> {
     @Autowired
     public ServerDAO(SessionFactory f) {
         super(Server.class, f);
-    }
-
-    public Server findById(Integer id)
-    {
-        return (Server)super.findById(id);
-    }
-
-    public Server get(Integer id)
-    {
-        return (Server)super.get(id);
-    }
-
-    public void save(Server entity)
-    {
-        super.save(entity);
-    }
-
-    public void remove(Server entity)
-    {
-        super.remove(entity);
     }
 
     public void create(Server s) {
         save(s);
     }
 
-    public Server create(ServerValue sv, Platform p)
-    {
-        ConfigResponseDB configResponse = DAOFactory.getDAOFactory()
-            .getConfigResponseDAO().create();
+    public Server create(ServerValue sv, Platform p) {
+        ConfigResponseDB configResponse = DAOFactory.getDAOFactory().getConfigResponseDAO()
+            .create();
 
         Server s = new Server();
         s.setName(sv.getName());
@@ -95,8 +75,7 @@ public class ServerDAO extends HibernateDAO<Server>
         } else {
             // Server was created by hand, use a generated AIID. (This matches
             // the behaviour in 2.7 and prior)
-            aiid = sv.getInstallPath() + "_" + System.currentTimeMillis() +
-                "_" + sv.getName();
+            aiid = sv.getInstallPath() + "_" + System.currentTimeMillis() + "_" + sv.getName();
             s.setAutoinventoryIdentifier(aiid);
         }
 
@@ -110,32 +89,24 @@ public class ServerDAO extends HibernateDAO<Server>
         s.setPlatform(p);
 
         Integer stid = sv.getServerType().getId();
-        ServerType st =
-            DAOFactory.getDAOFactory().getServerTypeDAO().findById(stid);
+        ServerType st = DAOFactory.getDAOFactory().getServerTypeDAO().findById(stid);
         s.setServerType(st);
         save(s);
         return s;
     }
 
     Server findServerByAIID(Platform platform, String autoinventoryID) {
-        String sql = "from Server where autoinventoryIdentifier = :aiid" +
-                     " and platform = :platform";
-        return (Server)getSession().createQuery(sql)
-            .setEntity("platform", platform)
-            .setString("aiid", autoinventoryID)
-            .uniqueResult();
+        String sql = "from Server where autoinventoryIdentifier = :aiid"
+                     + " and platform = :platform";
+        return (Server) getSession().createQuery(sql).setEntity("platform", platform).setString(
+            "aiid", autoinventoryID).uniqueResult();
     }
 
-    public Collection findAll_orderName(boolean asc)
-    {
-        String sql="from Server s join fetch s.serverType st " +
-                   "where st.virtual=false " +
-                   "order by s.resource.sortName " + (asc ? "asc" : "desc");
-        return getSession()
-            .createQuery(sql)
-            .setCacheable(true)
-            .setCacheRegion("Server.findAll_orderName")
-            .list();
+    public Collection findAll_orderName(boolean asc) {
+        String sql = "from Server s join fetch s.serverType st " + "where st.virtual=false " +
+                     "order by s.resource.sortName " + (asc ? "asc" : "desc");
+        return getSession().createQuery(sql).setCacheable(true).setCacheRegion(
+            "Server.findAll_orderName").list();
     }
 
     /**
@@ -143,11 +114,8 @@ public class ServerDAO extends HibernateDAO<Server>
      * @return {@link Collection} of {@link ServerType}
      */
     Collection<ServerType> getServerTypes(final List serverIds, final boolean asc) {
-        final String hql = new StringBuilder()
-            .append("SELECT distinct s.serverType")
-            .append(" FROM Server s")
-            .append(" WHERE s.id in (:svrs)")
-            .toString();
+        final String hql = new StringBuilder().append("SELECT distinct s.serverType").append(
+            " FROM Server s").append(" WHERE s.id in (:svrs)").toString();
         final HQDialect dialect = Util.getHQDialect();
         // can't go over 1000 due to the hibernate bug
         // http://opensource.atlassian.com/projects/hibernate/browse/HHH-1985
@@ -155,12 +123,11 @@ public class ServerDAO extends HibernateDAO<Server>
         final int maxExprs = (max == -1 || max > 1000) ? 1000 : max;
         // need a Set to quickly ensure ServiceTypes are unique btwn queries
         final Set set = new HashSet();
-        for (int i=0; i<serverIds.size(); i+=maxExprs) {
+        for (int i = 0; i < serverIds.size(); i += maxExprs) {
             final int last = Math.min(i + maxExprs, serverIds.size());
             final List sublist = serverIds.subList(i, last);
-            final List list = getSession().createQuery(hql)
-                .setParameterList("svrs", sublist, new IntegerType())
-                .list();
+            final List list = getSession().createQuery(hql).setParameterList("svrs", sublist,
+                new IntegerType()).list();
             // ServerType hashCode is by name
             set.addAll(list);
         }
@@ -169,89 +136,55 @@ public class ServerDAO extends HibernateDAO<Server>
         return rtn;
     }
 
-    public Collection<Server> findByType(Integer sTypeId)
-    {
-        String sql="from Server where serverType.id=?";
-        return getSession().createQuery(sql)
-            .setInteger(0, sTypeId.intValue())
-            .list();
+    public Collection<Server> findByType(Integer sTypeId) {
+        String sql = "from Server where serverType.id=?";
+        return getSession().createQuery(sql).setInteger(0, sTypeId.intValue()).list();
     }
 
-    public List<Server> findByPlatform_orderName(Integer id)
-    {
-        String sql="from Server where platform.id=? " +
-                   "order by resource.sortName";
-        return getSession().createQuery(sql)
-            .setInteger(0, id.intValue())
-            .list();
+    public List<Server> findByPlatform_orderName(Integer id) {
+        String sql = "from Server where platform.id=? " + "order by resource.sortName";
+        return getSession().createQuery(sql).setInteger(0, id.intValue()).list();
     }
 
-    public List<Server> findByPlatform_orderName(Integer id, Boolean virtual)
-    {
-        String sql="from Server where platform.id=? and " +
-                   "serverType.virtual=? " +
-                   "order by resource.sortName";
-        return getSession().createQuery(sql)
-            .setInteger(0, id.intValue())
-            .setBoolean(1, virtual.booleanValue())
-            .setCacheable(true)
-            .setCacheRegion("Server.findByPlatform_orderName")
-            .list();
+    public List<Server> findByPlatform_orderName(Integer id, Boolean virtual) {
+        String sql = "from Server where platform.id=? and " + "serverType.virtual=? "
+                     + "order by resource.sortName";
+        return getSession().createQuery(sql).setInteger(0, id.intValue()).setBoolean(1,
+            virtual.booleanValue()).setCacheable(true).setCacheRegion(
+            "Server.findByPlatform_orderName").list();
     }
 
-    public List<Server> findByPlatformAndType_orderName(Integer id, Integer tid)
-    {
-        String sql="from Server where platform.id=? and " +
-                   "serverType.id=? " +
-                   "order by resource.sortName";
-        return getSession().createQuery(sql)
-            .setInteger(0, id.intValue())
-            .setInteger(1, tid.intValue())
-            .list();
+    public List<Server> findByPlatformAndType_orderName(Integer id, Integer tid) {
+        String sql = "from Server where platform.id=? and " + "serverType.id=? "
+                     + "order by resource.sortName";
+        return getSession().createQuery(sql).setInteger(0, id.intValue()).setInteger(1,
+            tid.intValue()).list();
     }
 
-    public List<Server> findByPlatformAndType_orderName(Integer id, Integer tid,
-                                                Boolean isVirtual)
-    {
-        String sql="select s from Server s join s.serverType st " +
-                   "where s.platform.id=? and " +
-                   "st.id=? and " +
-                   "st.virtual=? " +
-                   "order by s.resource.sortName";
-        return getSession().createQuery(sql)
-            .setInteger(0, id.intValue())
-            .setInteger(1, tid.intValue())
-            .setBoolean(2, isVirtual.booleanValue())
-            .setCacheable(true)
-            .setCacheRegion("Server.findByPlatformAndType_orderName")
-            .list();
+    public List<Server> findByPlatformAndType_orderName(Integer id, Integer tid, Boolean isVirtual) {
+        String sql = "select s from Server s join s.serverType st " + "where s.platform.id=? and "
+                     + "st.id=? and " + "st.virtual=? " + "order by s.resource.sortName";
+        return getSession().createQuery(sql).setInteger(0, id.intValue()).setInteger(1,
+            tid.intValue()).setBoolean(2, isVirtual.booleanValue()).setCacheable(true)
+            .setCacheRegion("Server.findByPlatformAndType_orderName").list();
     }
 
-    public List findByServices(Integer[] ids)
-    {
-        return createCriteria()
-            .createAlias("services", "s")
-            .add( Expression.in("s.id", ids))
-            .setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)
-            .list();
+    public List findByServices(Integer[] ids) {
+        return createCriteria().createAlias("services", "s").add(Expression.in("s.id", ids))
+            .setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY).list();
     }
 
     public Server findByName(Platform plat, String name) {
-        String sql = "select s from Server s " +
-            "where s.platform = :plat and s.resource.sortName=:name";
+        String sql = "select s from Server s "
+                     + "where s.platform = :plat and s.resource.sortName=:name";
 
-        return (Server)getSession().createQuery(sql)
-            .setParameter("plat", plat)
-            .setParameter("name", name.toUpperCase())
-            .uniqueResult();
+        return (Server) getSession().createQuery(sql).setParameter("plat", plat).setParameter(
+            "name", name.toUpperCase()).uniqueResult();
     }
 
-    public List findByName(String name)
-    {
-        String sql="from Server where resource.sortName=?";
-        return getSession().createQuery(sql)
-            .setString(0, name.toUpperCase())
-            .list();
+    public List findByName(String name) {
+        String sql = "from Server where resource.sortName=?";
+        return getSession().createQuery(sql).setString(0, name.toUpperCase()).list();
     }
 
     public Resource findVirtualByInstanceId(Integer id) {
@@ -261,10 +194,9 @@ public class ServerDAO extends HibernateDAO<Server>
 
     public Collection<Server> findVirtualByProcessId(Integer id) {
         VirtualDAO dao = DAOFactory.getDAOFactory().getVirtualDAO();
-        Collection resources =
-            dao.findVirtualByProcessId(id, AuthzConstants.serverResType);
+        Collection resources = dao.findVirtualByProcessId(id, AuthzConstants.serverResType);
         List servers = new ArrayList();
-        for (Iterator it = resources.iterator(); it.hasNext(); ) {
+        for (Iterator it = resources.iterator(); it.hasNext();) {
             Virtual virt = (Virtual) it.next();
             servers.add(findById(virt.getId()));
         }
@@ -273,10 +205,9 @@ public class ServerDAO extends HibernateDAO<Server>
 
     public Collection<Server> findVirtualByPysicalId(Integer id) {
         VirtualDAO dao = DAOFactory.getDAOFactory().getVirtualDAO();
-        Collection resources =
-            dao.findVirtualByPysicalId(id, AuthzConstants.serverResType);
+        Collection resources = dao.findVirtualByPysicalId(id, AuthzConstants.serverResType);
         List servers = new ArrayList();
-        for (Iterator it = resources.iterator(); it.hasNext(); ) {
+        for (Iterator it = resources.iterator(); it.hasNext();) {
             Virtual virt = (Virtual) it.next();
             servers.add(findById(virt.getId()));
         }
@@ -284,23 +215,20 @@ public class ServerDAO extends HibernateDAO<Server>
     }
 
     public List<Object[]> getServerTypeCounts() {
-        String sql = "select t.name, count(*) from ServerType t, " +
-                     "Server s where s.serverType = t " +
-                     "group by t.name order by t.name";
+        String sql = "select t.name, count(*) from ServerType t, "
+                     + "Server s where s.serverType = t " + "group by t.name order by t.name";
 
         return getSession().createQuery(sql).list();
     }
 
     public Number getServerCount() {
-        String sql =
-            "select count(*) from Server s join s.serverType st " +
-            "where st.virtual=false";
-        return (Number)getSession().createQuery(sql).uniqueResult();
+        String sql = "select count(*) from Server s join s.serverType st "
+                     + "where st.virtual=false";
+        return (Number) getSession().createQuery(sql).uniqueResult();
     }
 
     void clearResource(Resource res) {
-        createQuery("update Server set resource = null where resource = ?")
-            .setParameter(0, res)
+        createQuery("update Server set resource = null where resource = ?").setParameter(0, res)
             .executeUpdate();
     }
 

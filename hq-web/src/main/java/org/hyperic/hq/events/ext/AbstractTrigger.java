@@ -68,16 +68,10 @@ public abstract class AbstractTrigger implements TriggerInterface, RegisterableT
 
     protected TriggerFiredEvent prepareTriggerFiredEvent(AbstractEvent source) {
         if (log.isDebugEnabled()) {
-            log.debug("Trigger [id=" + getId() + ", cls=" + getClass().getSimpleName() + "] creating TriggerFiredEvent");
+            log.debug("Trigger [id=" + getId() + ", cls=" + getClass().getSimpleName() +
+                      "] creating TriggerFiredEvent");
         }
         return new TriggerFiredEvent(getId(), source);
-    }
-
-    protected TriggerFiredEvent prepareTriggerFiredEvent(AbstractEvent[] sources) {
-        if (log.isDebugEnabled()) {
-            log.debug("Trigger [id=" + getId() + ", cls=" + getClass().getSimpleName() + "] creating TriggerFiredEvent");
-        }
-        return new TriggerFiredEvent(getId(), sources);
     }
 
     public void setAlertConditionEvaluator(AlertConditionEvaluator alertConditionEvaluator) {

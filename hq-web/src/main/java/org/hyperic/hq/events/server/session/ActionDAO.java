@@ -42,22 +42,6 @@ public class ActionDAO
         super(Action.class, f);
     }
 
-    public Action findById(Integer id) {
-        return (Action) super.findById(id);
-    }
-
-    public Action get(Integer id) {
-        return (Action) super.get(id);
-    }
-
-    public void save(Action entity) {
-        super.save(entity);
-    }
-
-    void remove(Action entity) {
-        super.remove(entity);
-    }
-
     private void removeActionCascade(Action action) {
         if (action.getParent() != null) {
             action.getParent().getChildrenBag().remove(action);
@@ -82,14 +66,12 @@ public class ActionDAO
     @SuppressWarnings("unchecked")
     void deleteAlertDefinition(AlertDefinition def) {
         // Find all actions
-        List<Action> actions =
-                               (List<Action>) createCriteria().add(Restrictions.eq("alertDefinition", def))
-                                                              .list();
+        List<Action> actions = (List<Action>) createCriteria().add(
+            Restrictions.eq("alertDefinition", def)).list();
 
         // Bulk update all actions
         String sql = "update Action set parent = null, deleted = true where " +
-                     (actions.size() > 0 ? "parent in (:acts) or" : "") +
-                     " alertDefinition = :def";
+                     (actions.size() > 0 ? "parent in (:acts) or" : "") + " alertDefinition = :def";
         Query q = createQuery(sql).setParameter("def", def);
 
         if (actions.size() > 0)
@@ -104,11 +86,9 @@ public class ActionDAO
      */
     @SuppressWarnings("unchecked")
     public List<Action> findByAlert(Alert a) {
-        String sql = "select a from Action a, AlertActionLog al " +
-                     "where a.id = al.action AND al.alert = :alert";
+        String sql = "select a from Action a, AlertActionLog al "
+                     + "where a.id = al.action AND al.alert = :alert";
 
-        return (List<Action>) getSession().createQuery(sql)
-                                          .setParameter("alert", a)
-                                          .list();
+        return (List<Action>) getSession().createQuery(sql).setParameter("alert", a).list();
     }
 }

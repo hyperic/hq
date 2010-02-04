@@ -28,32 +28,16 @@ package org.hyperic.hq.appdef.server.session;
 import java.util.Collection;
 
 import org.hibernate.SessionFactory;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
 @Repository
-public class PlatformTypeDAO extends HibernateDAO<PlatformType>
-{
+public class PlatformTypeDAO
+    extends HibernateDAO<PlatformType> {
     @Autowired
     public PlatformTypeDAO(SessionFactory f) {
         super(PlatformType.class, f);
-    }
-
-    public PlatformType findById(Integer id) {
-        return (PlatformType)super.findById(id);
-    }
-
-    public PlatformType get(Integer id) {
-        return (PlatformType)super.get(id);
-    }
-
-    public void save(PlatformType entity) {
-        super.save(entity);
-    }
-
-    public void remove(PlatformType entity) {
-        super.remove(entity);
     }
 
     public PlatformType create(String name, String plugin) {
@@ -64,15 +48,11 @@ public class PlatformTypeDAO extends HibernateDAO<PlatformType>
 
     public PlatformType findByName(String name) {
         String sql = "from PlatformType where name=?";
-        return (PlatformType)getSession().createQuery(sql)
-            .setString(0, name)
-            .uniqueResult();
+        return (PlatformType) getSession().createQuery(sql).setString(0, name).uniqueResult();
     }
 
     public Collection<PlatformType> findByPlugin(String plugin) {
         String sql = "from PlatformType where plugin=?";
-        return getSession().createQuery(sql)
-            .setString(0, plugin)
-            .list();
+        return getSession().createQuery(sql).setString(0, plugin).list();
     }
 }

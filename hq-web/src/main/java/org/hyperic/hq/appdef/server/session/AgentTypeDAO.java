@@ -26,39 +26,22 @@
 package org.hyperic.hq.appdef.server.session;
 
 import org.hibernate.SessionFactory;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.AgentType;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
 @Repository
-public class AgentTypeDAO extends HibernateDAO
-{
+public class AgentTypeDAO
+    extends HibernateDAO<AgentType> {
     @Autowired
     public AgentTypeDAO(SessionFactory f) {
         super(AgentType.class, f);
     }
 
-    public AgentType findById(Integer id)
-    {
-        return (AgentType)super.findById(id);
-    }
-
-    public void save(AgentType entity)
-    {
-        super.save(entity);
-    }
-
-    public void remove(AgentType entity)
-    {
-        super.remove(entity);
-    }
-
-    public AgentType findByName(String name)
-    {
+    public AgentType findByName(String name) {
         String sql = "from AgentType where lower(name)=?";
-        return (AgentType)getSession().createQuery(sql)
-            .setString(0, name.toLowerCase())
+        return (AgentType) getSession().createQuery(sql).setString(0, name.toLowerCase())
             .uniqueResult();
     }
 }

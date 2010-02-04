@@ -37,15 +37,4 @@ public class CrispoDAO
         super(Crispo.class, f);
     }
 
-    public Crispo findById(Integer id) {
-        return (Crispo) super.findById(id);
-    }
-
-    public void remove(Crispo c) {
-        super.remove(c);
-    }
-
-    public void save(Crispo c) {
-        super.save(c);
-    }
 }

@@ -50,34 +50,27 @@ public class AppServiceDAO
     private ServiceTypeDAO serviceTypeDAO;
 
     @Autowired
-    public AppServiceDAO(SessionFactory f, ResourceGroupDAO resourceGroupDAO, ServiceDAO serviceDAO,
-                         ServiceTypeDAO serviceTypeDAO) {
+    public AppServiceDAO(SessionFactory f, ResourceGroupDAO resourceGroupDAO,
+                         ServiceDAO serviceDAO, ServiceTypeDAO serviceTypeDAO) {
         super(AppService.class, f);
         this.resourceGroupDAO = resourceGroupDAO;
         this.serviceDAO = serviceDAO;
         this.serviceTypeDAO = serviceTypeDAO;
     }
 
-    public AppService findById(Integer id) {
-        return (AppService) super.findById(id);
-    }
-
-    public void save(AppService entity) {
-        super.save(entity);
-    }
-
     public void remove(AppService entity) {
         // Need to make sure that it's removed from the map table
-        Collection appDeps = DAOFactory.getDAOFactory().getAppSvcDepencyDAO().findByDependents(entity);
+        Collection appDeps = DAOFactory.getDAOFactory().getAppSvcDepencyDAO().findByDependents(
+            entity);
         for (Iterator it = appDeps.iterator(); it.hasNext();) {
             AppSvcDependency appDep = (AppSvcDependency) it.next();
             AppService appSvc = appDep.getAppService();
             appSvc.getAppSvcDependencies().remove(appDep);
-            super.remove(appDep);
+            getSession().delete(appDep);
         }
 
         for (Iterator it = entity.getAppSvcDependencies().iterator(); it.hasNext();) {
-            super.remove(it.next());
+            getSession().delete(it.next());
         }
         super.remove(entity);
     }
@@ -147,12 +140,14 @@ public class AppServiceDAO
     public List<AppService> findByApplication_orderName(Integer id) {
         // TODO: fix this query after authz conversion
         String sql = "select distinct a from " + "AppService a, Resource r, ResourceType t "
-                     + "where a.application.id=:appid and (" + "r.resourceType.id=t.id AND t.name=:groupType "
-                     + "AND a.resourceGroup.id IN (" + "SELECT id FROM ResourceGroup g where g.id = r.instanceId)"
-                     + " OR " + "(r.instanceId=a.service.id and "
+                     + "where a.application.id=:appid and ("
+                     + "r.resourceType.id=t.id AND t.name=:groupType "
+                     + "AND a.resourceGroup.id IN ("
+                     + "SELECT id FROM ResourceGroup g where g.id = r.instanceId)" + " OR "
+                     + "(r.instanceId=a.service.id and "
                      + "r.resourceType.id=t.id AND t.name=:serviceType))) " + "order by r.name";
-        return getSession().createQuery(sql).setInteger("appid", id.intValue()).setString("groupType", groupResType)
-            .setString("serviceType", serviceResType).list();
+        return getSession().createQuery(sql).setInteger("appid", id.intValue()).setString(
+            "groupType", groupResType).setString("serviceType", serviceResType).list();
     }
 
     public List<AppService> findByApplication_orderType(Integer id, boolean asc) {
@@ -167,32 +162,36 @@ public class AppServiceDAO
     }
 
     public Collection<AppService> findByApplication_orderSvcName(Integer id, boolean asc) {
-        String sql = "select distinct a from AppService a " + " join fetch a.service s " + "where a.application.id=? " +
-                     "order by s.name " + (asc ? "asc" : "desc");
+        String sql = "select distinct a from AppService a " + " join fetch a.service s " +
+                     "where a.application.id=? " + "order by s.name " + (asc ? "asc" : "desc");
         return getSession().createQuery(sql).setInteger(0, id.intValue()).list();
     }
 
     public Collection<AppService> findByApplication_orderSvcType(Integer id, boolean asc) {
         String sql = "select distinct a from AppService a " + " join fetch a.service s " +
-                     " join fetch a.serviceType st " + "where a.application.id=? " + "order by st.name " +
-                     (asc ? "asc" : "desc") + ", s.name";
+                     " join fetch a.serviceType st " + "where a.application.id=? " +
+                     "order by st.name " + (asc ? "asc" : "desc") + ", s.name";
         return getSession().createQuery(sql).setInteger(0, id.intValue()).list();
     }
 
     public Collection findEntryPointsByApp(Integer id) {
-        String sql = "select distinct a from AppService a " + "where a.application.id=? and a.isEntryPoint=true";
+        String sql = "select distinct a from AppService a "
+                     + "where a.application.id=? and a.isEntryPoint=true";
         return getSession().createQuery(sql).setInteger(0, id.intValue()).list();
     }
 
     public AppService findByAppAndService(Integer appId, Integer svcId) {
-        String sql = "select distinct a from AppService a " + "where a.application.id=? and a.service.id=?";
-        return (AppService) getSession().createQuery(sql).setInteger(0, appId.intValue()).setInteger(1,
-            svcId.intValue()).uniqueResult();
+        String sql = "select distinct a from AppService a "
+                     + "where a.application.id=? and a.service.id=?";
+        return (AppService) getSession().createQuery(sql).setInteger(0, appId.intValue())
+            .setInteger(1, svcId.intValue()).uniqueResult();
     }
 
     public AppService findByAppAndCluster(Application app, ResourceGroup g) {
-        String sql = "select distinct a from AppService a " + "where a.application=? and a.resourceGroup=?";
-        return (AppService) getSession().createQuery(sql).setParameter(0, app).setParameter(1, g).uniqueResult();
+        String sql = "select distinct a from AppService a "
+                     + "where a.application=? and a.resourceGroup=?";
+        return (AppService) getSession().createQuery(sql).setParameter(0, app).setParameter(1, g)
+            .uniqueResult();
     }
 
     public AppSvcDependency addDependentService(Integer appSvcPK, Integer depPK) {

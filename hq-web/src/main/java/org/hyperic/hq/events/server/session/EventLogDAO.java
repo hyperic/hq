@@ -1,5 +1,5 @@
 /*
-* NOTE: This copyright does *not* cover user programs that use HQ
+ * NOTE: This copyright does *not* cover user programs that use HQ
  * program services by normal system calls through the application
  * program interfaces provided as part of the Hyperic Plug-in Development
  * Kit or the Hyperic Client Development Kit - this is merely considered
@@ -51,28 +51,24 @@ import org.hyperic.hq.events.EventLogStatus;
 import org.hyperic.hq.measurement.server.session.Number;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
 @Repository
-public class EventLogDAO extends HibernateDAO<EventLog> {
+public class EventLogDAO
+    extends HibernateDAO<EventLog> {
     private final String TABLE_EVENT_LOG = "EAM_EVENT_LOG";
     private final String TABLE_EAM_NUMBERS = "EAM_NUMBERS";
     private PermissionManager permissionManager;
 
-    private static final List<String> VIEW_PERMISSIONS =
-        Arrays.asList(new String[] {
-            AuthzConstants.platformOpViewPlatform,
-            AuthzConstants.serverOpViewServer,
-            AuthzConstants.serviceOpViewService,
-            AuthzConstants.groupOpViewResourceGroup,
-        });
+    private static final List<String> VIEW_PERMISSIONS = Arrays
+        .asList(new String[] { AuthzConstants.platformOpViewPlatform,
+                              AuthzConstants.serverOpViewServer,
+                              AuthzConstants.serviceOpViewService,
+                              AuthzConstants.groupOpViewResourceGroup, });
 
     @Autowired
     public EventLogDAO(SessionFactory f, PermissionManager permissionManager) {
         super(EventLog.class, f);
         this.permissionManager = permissionManager;
-    }
-
-    public EventLog findById(Integer id) {
-        return (EventLog)super.findById(id);
     }
 
     EventLog create(EventLog res) {
@@ -100,77 +96,60 @@ public class EventLogDAO extends HibernateDAO<EventLog> {
     }
 
     /**
-     * Gets a list of {@link ResourceEventLog}s.  Most arguments
-     * are required.  pInfo is required to have a sort field of
-     * type {@link EventLogSortField}
-     *
-     * @param typeClass  Not required.  If specified, the results will
-     *                   all be of this class (.org.hy...ResourceLogEvent)
-     * @param inGroups   Not required.  If specified, a list of
-     *                   {@link ResourceGroup}s which will contain the resulting
-     *                   logs
+     * Gets a list of {@link ResourceEventLog}s. Most arguments are required.
+     * pInfo is required to have a sort field of type {@link EventLogSortField}
+     * 
+     * @param typeClass Not required. If specified, the results will all be of
+     *        this class (.org.hy...ResourceLogEvent)
+     * @param inGroups Not required. If specified, a list of
+     *        {@link ResourceGroup}s which will contain the resulting logs
      */
     List<ResourceEventLog> findLogs(AuthzSubject subject, long begin, long end, PageInfo pInfo,
-                  EventLogStatus maxStatus, String typeClass,
-                  Collection<ResourceGroup> inGroups)
-    {
-        EventLogSortField sort = (EventLogSortField)pInfo.getSort();
+                                    EventLogStatus maxStatus, String typeClass,
+                                    Collection<ResourceGroup> inGroups) {
+        EventLogSortField sort = (EventLogSortField) pInfo.getSort();
         boolean doGroupFilter = false;
         String groupFilterSql;
 
-        RolePermNativeSQL roleSql  = PermissionManagerFactory
-            .getInstance()
+        RolePermNativeSQL roleSql = PermissionManagerFactory.getInstance()
             .getRolePermissionNativeSQL("r", "subject", "opList");
-
 
         if (inGroups == null || inGroups.isEmpty())
             groupFilterSql = "";
         else {
             doGroupFilter = true;
-            groupFilterSql = " and exists ( " +
-            "select rgm.resource_id from EAM_RES_GRP_RES_MAP rgm " +
-            " join EAM_RESOURCE_GROUP g on rgm.resource_group_id = g.id " +
-            " where rgm.resource_id = r.id and g.id in (:inGroups) " +
-            "union all " +
-            " select g2.resource_id from EAM_RESOURCE_GROUP g2 " +
-            " where g2.resource_id = r.id and g2.id in (:inGroups) " +
-            ") ";
+            groupFilterSql = " and exists ( "
+                             + "select rgm.resource_id from EAM_RES_GRP_RES_MAP rgm "
+                             + " join EAM_RESOURCE_GROUP g on rgm.resource_group_id = g.id "
+                             + " where rgm.resource_id = r.id and g.id in (:inGroups) "
+                             + "union all " + " select g2.resource_id from EAM_RESOURCE_GROUP g2 "
+                             + " where g2.resource_id = r.id and g2.id in (:inGroups) " + ") ";
         }
 
-        String sql = "select {e.*}, r.* " +
-            "from EAM_RESOURCE r " +
-            "    join EAM_RESOURCE_TYPE rt on r.resource_type_id = rt.id " +
-            "    join EAM_EVENT_LOG e on e.resource_id = r.id " +
-            "where " +
-            "    e.timestamp between :begin and :end " +
-            groupFilterSql +
-            roleSql.getSQL() + " and " +
-            "    case " +
-            "        when e.status = 'ANY' then -1 " +
-            "        when e.status = 'ERR' then 3 " +
-            "        when e.status = 'WRN' then 4 " +
-            "        when e.status = 'INF' then 6 " +
-            "        when e.status = 'DBG' then 7 " +
-            "        else -1 " +
-            "    end <= :maxStatus ";
+        String sql = "select {e.*}, r.* " + "from EAM_RESOURCE r " +
+                     "    join EAM_RESOURCE_TYPE rt on r.resource_type_id = rt.id " +
+                     "    join EAM_EVENT_LOG e on e.resource_id = r.id " + "where " +
+                     "    e.timestamp between :begin and :end " + groupFilterSql +
+                     roleSql.getSQL() + " and " + "    case " +
+                     "        when e.status = 'ANY' then -1 " +
+                     "        when e.status = 'ERR' then 3 " +
+                     "        when e.status = 'WRN' then 4 " +
+                     "        when e.status = 'INF' then 6 " +
+                     "        when e.status = 'DBG' then 7 " + "        else -1 " +
+                     "    end <= :maxStatus ";
 
         if (typeClass != null) {
             sql += "    and type = :type ";
         }
 
-        sql += " order by " + sort.getSortString("r", "e") +
-            (pInfo.isAscending() ? "" : " DESC");
+        sql += " order by " + sort.getSortString("r", "e") + (pInfo.isAscending() ? "" : " DESC");
 
         if (!sort.equals(EventLogSortField.DATE)) {
-            sql += ", " + EventLogSortField.DATE.getSortString("r", "e") +
-                " DESC";
+            sql += ", " + EventLogSortField.DATE.getSortString("r", "e") + " DESC";
         }
 
-        Query q = getSession().createSQLQuery(sql)
-            .addEntity("e", EventLog.class)
-            .setLong("begin", begin)
-            .setLong("end", end)
-            .setInteger("maxStatus", maxStatus.getCode());
+        Query q = getSession().createSQLQuery(sql).addEntity("e", EventLog.class).setLong("begin",
+            begin).setLong("end", end).setInteger("maxStatus", maxStatus.getCode());
         roleSql.bindParams(q, subject, VIEW_PERMISSIONS);
 
         if (typeClass != null) {
@@ -179,7 +158,7 @@ public class EventLogDAO extends HibernateDAO<EventLog> {
 
         if (doGroupFilter) {
             List<Integer> inGroupIds = new ArrayList<Integer>(inGroups.size());
-            for (ResourceGroup g: inGroups) {
+            for (ResourceGroup g : inGroups) {
                 inGroupIds.add(g.getId());
             }
             q.setParameterList("inGroups", inGroupIds);
@@ -187,75 +166,55 @@ public class EventLogDAO extends HibernateDAO<EventLog> {
 
         List<EventLog> vals = pInfo.pageResults(q).list();
         List<ResourceEventLog> res = new ArrayList<ResourceEventLog>(vals.size());
-        for (EventLog e: vals) {
+        for (EventLog e : vals) {
             res.add(new ResourceEventLog(e.getResource(), e));
         }
         return res;
     }
 
-    List<EventLog> findByEntityAndStatus(Resource r, AuthzSubject user,
-                               long begin, long end,
-                               String status)
-    {
-        EdgePermCheck wherePermCheck =
-            permissionManager.makePermCheckHql("rez", false);
-        String hql = "select l from EventLog l " +
-            "join l.resource rez " +
-            wherePermCheck +
-            "and l.timestamp between :begin and :end " +
-            "and l.status = :status " +
-            "order by l.timestamp";
+    List<EventLog> findByEntityAndStatus(Resource r, AuthzSubject user, long begin, long end,
+                                         String status) {
+        EdgePermCheck wherePermCheck = permissionManager.makePermCheckHql("rez", false);
+        String hql = "select l from EventLog l " + "join l.resource rez " + wherePermCheck +
+                     "and l.timestamp between :begin and :end " + "and l.status = :status " +
+                     "order by l.timestamp";
 
-        Query q = createQuery(hql)
-            .setParameter("status", status)
-            .setLong("begin", begin)
-            .setLong("end", end);
-        return wherePermCheck.addQueryParameters(q, user, r, 0,
-                                                 VIEW_PERMISSIONS).list();
+        Query q = createQuery(hql).setParameter("status", status).setLong("begin", begin).setLong(
+            "end", end);
+        return wherePermCheck.addQueryParameters(q, user, r, 0, VIEW_PERMISSIONS).list();
     }
 
     List<EventLog> findByEntity(AuthzSubject subject, Resource r, long begin, long end,
-                      Collection<String> eventTypes)
-    {
-        EdgePermCheck wherePermCheck =
-            permissionManager.makePermCheckHql("rez", false);
-        String hql = " select l from EventLog l " +
-            "join l.resource rez " +
-            wherePermCheck +
-            "and l.timestamp between :begin and :end ";
+                                Collection<String> eventTypes) {
+        EdgePermCheck wherePermCheck = permissionManager.makePermCheckHql("rez", false);
+        String hql = " select l from EventLog l " + "join l.resource rez " + wherePermCheck +
+                     "and l.timestamp between :begin and :end ";
 
         if (!eventTypes.isEmpty())
             hql += "and l.type in (:eventTypes) ";
 
         hql += "order by l.timestamp";
 
-        Query q = createQuery(hql)
-            .setLong("begin", begin)
-            .setLong("end", end);
+        Query q = createQuery(hql).setLong("begin", begin).setLong("end", end);
 
         if (!eventTypes.isEmpty())
             q.setParameterList("eventTypes", eventTypes);
 
-        return wherePermCheck.addQueryParameters(q, subject, r,
-                                                 0, VIEW_PERMISSIONS).list();
+        return wherePermCheck.addQueryParameters(q, subject, r, 0, VIEW_PERMISSIONS).list();
     }
 
     List<EventLog> findByGroup(Resource g, long begin, long end, Collection<String> eventTypes) {
-        String hql = "select l from EventLog l join l.resource res " +
-                     "left outer join res.groupBag gb " +
-                     "left outer join gb.group g " +
-        		     "where (l.resource = :r or g.resource = :r) " +
-        		     "and l.timestamp between :begin and :end ";
+        String hql = "select l from EventLog l join l.resource res "
+                     + "left outer join res.groupBag gb " + "left outer join gb.group g "
+                     + "where (l.resource = :r or g.resource = :r) "
+                     + "and l.timestamp between :begin and :end ";
 
         if (!eventTypes.isEmpty())
             hql += "and l.type in (:eventTypes) ";
 
         hql += "order by l.timestamp";
 
-        Query q = createQuery(hql)
-            .setParameter("r", g)
-            .setLong("begin", begin)
-            .setLong("end", end);
+        Query q = createQuery(hql).setParameter("r", g).setLong("begin", begin).setLong("end", end);
 
         if (!eventTypes.isEmpty())
             q.setParameterList("eventTypes", eventTypes);
@@ -264,38 +223,32 @@ public class EventLogDAO extends HibernateDAO<EventLog> {
     }
 
     List<EventLog> findLastByType(Resource proto) {
-        String hql = "select {ev.*} from EAM_EVENT_LOG ev, " +
-            "(select resource_id, max(EAM_EVENT_LOG.timestamp) as maxt " +
-             "from EAM_EVENT_LOG, EAM_RESOURCE res " +
-             "where res.id = resource_id and " +
-                   "res.proto_id=:proto group by resource_id) l " +
-             "where l.resource_id = ev.resource_id and l.maxt = ev.timestamp";
+        String hql = "select {ev.*} from EAM_EVENT_LOG ev, "
+                     + "(select resource_id, max(EAM_EVENT_LOG.timestamp) as maxt "
+                     + "from EAM_EVENT_LOG, EAM_RESOURCE res " + "where res.id = resource_id and "
+                     + "res.proto_id=:proto group by resource_id) l "
+                     + "where l.resource_id = ev.resource_id and l.maxt = ev.timestamp";
 
-
-        return getSession().createSQLQuery(hql)
-            .addEntity("ev", EventLog.class)
-            .setInteger("proto", proto.getId().intValue())
-            .list();
+        return getSession().createSQLQuery(hql).addEntity("ev", EventLog.class).setInteger("proto",
+            proto.getId().intValue()).list();
     }
 
     List findBySubject(String subject) {
         String sql = "from EventLog e where e.subject = :subject";
 
-        return getSession().createQuery(sql)
-            .setParameter("subject", subject)
-            .list();
+        return getSession().createQuery(sql).setParameter("subject", subject).list();
     }
 
     /**
      * Retrieve the minimum timestamp amongst all event logs.
-     *
-     * @return The minimum timestamp or <code>-1</code> if there are no
-     *         event logs.
+     * 
+     * @return The minimum timestamp or <code>-1</code> if there are no event
+     *         logs.
      */
     long getMinimumTimeStamp() {
         String sql = "select min(l.timestamp) from EventLog l";
 
-        Long min = (Long)getSession().createQuery(sql).uniqueResult();
+        Long min = (Long) getSession().createQuery(sql).uniqueResult();
 
         if (min == null) {
             return -1;
@@ -306,44 +259,40 @@ public class EventLogDAO extends HibernateDAO<EventLog> {
 
     /**
      * Retrieve the total number of event logs.
-     *
+     * 
      * @return The total number of event logs.
      */
     int getTotalNumberLogs() {
         String sql = "select count(*) from EventLog";
 
-        java.lang.Number result =
-            (java.lang.Number) getSession().createQuery(sql).uniqueResult();
+        java.lang.Number result = (java.lang.Number) getSession().createQuery(sql).uniqueResult();
         return result.intValue();
     }
 
     /**
-     * Delete event logs by resource.
-     * TODO: Chunking?
-     *
+     * Delete event logs by resource. TODO: Chunking?
+     * 
      * @param r The resource in which to delete event logs
      * @return The number of entries deleted.
      */
     int deleteLogs(Resource r) {
         String sql = "delete EventLog l where resource = :resource";
 
-        return getSession().createQuery(sql)
-            .setParameter("resource", r)
-            .executeUpdate();
+        return getSession().createQuery(sql).setParameter("resource", r).executeUpdate();
     }
 
     /**
      * Delete event logs in chunks.
-     *
+     * 
      * @param from The timestamp to delete from.
      * @param to The timestamp to delete to.
-     * @param interval The timestamp interval (delta) by which the deletes
-     *                 are chunked.
+     * @param interval The timestamp interval (delta) by which the deletes are
+     *        chunked.
      * @return The number of event logs deleted.
      */
     int deleteLogs(long from, long to, long interval) {
-        String sql = "delete EventLog l where " +
-                     "l.timestamp >= :timeStart and l.timestamp <= :timeEnd";
+        String sql = "delete EventLog l where "
+                     + "l.timestamp >= :timeStart and l.timestamp <= :timeEnd";
 
         int rowsDeleted = 0;
         Session session = getSession();
@@ -363,7 +312,7 @@ public class EventLogDAO extends HibernateDAO<EventLog> {
     /**
      * Insert the event logs in batch, with batch size specified by the
      * <code>hibernate.jdbc.batch_size</code> configuration property.
-     *
+     * 
      * @param eventLogs The event logs to insert.
      */
     void insertLogs(EventLog[] eventLogs) {
@@ -375,7 +324,8 @@ public class EventLogDAO extends HibernateDAO<EventLog> {
         try {
             session.setFlushMode(FlushMode.MANUAL);
 
-            // We do not want to update the 2nd level cache with these event logs
+            // We do not want to update the 2nd level cache with these event
+            // logs
             session.setCacheMode(CacheMode.IGNORE);
 
             for (int i = 0; i < eventLogs.length; i++) {
@@ -390,81 +340,57 @@ public class EventLogDAO extends HibernateDAO<EventLog> {
         }
     }
 
-    private String getLogsExistSQL(Resource resource, long begin,
-                                   long end, int intervals,
+    private String getLogsExistSQL(Resource resource, long begin, long end, int intervals,
                                    EdgePermCheck wherePermCheck) {
         HQDialect dialect = Util.getHQDialect();
         StringBuilder sql = new StringBuilder();
         String resVar = wherePermCheck.getResourceVar();
         String permSql = wherePermCheck.getSql();
         if (!dialect.useEamNumbers()) {
-            for (int i=0; i<intervals; i++) {
-                sql.append("(SELECT ").append(i).append(" AS I FROM ")
-                   .append(TABLE_EVENT_LOG).append(" evlog")
-                   .append(" JOIN EAM_RESOURCE ").append(resVar).append(" on ")
-                   .append("evlog.resource_id = ").append(resVar).append(".id")
-                   .append(permSql)
-                   .append(" AND timestamp BETWEEN (:begin + (:interval * ")
-                   .append(i).append(")) AND ((:begin + (:interval * (")
-                   .append(i).append(" + 1))) - 1)")
-                   .append(" AND ").append(resVar).append(".id = :resourceId ")
-                   .append(dialect.getLimitString(1)).append(')');
-                if (i<intervals-1) {
+            for (int i = 0; i < intervals; i++) {
+                sql.append("(SELECT ").append(i).append(" AS I FROM ").append(TABLE_EVENT_LOG)
+                    .append(" evlog").append(" JOIN EAM_RESOURCE ").append(resVar).append(" on ")
+                    .append("evlog.resource_id = ").append(resVar).append(".id").append(permSql)
+                    .append(" AND timestamp BETWEEN (:begin + (:interval * ").append(i).append(
+                        ")) AND ((:begin + (:interval * (").append(i).append(" + 1))) - 1)")
+                    .append(" AND ").append(resVar).append(".id = :resourceId ").append(
+                        dialect.getLimitString(1)).append(')');
+                if (i < intervals - 1) {
                     sql.append(" UNION ALL ");
                 }
             }
-        }
-        else {
-            sql.append("SELECT i AS I FROM ").append(TABLE_EAM_NUMBERS)
-               .append(" WHERE i < ").append(intervals)
-               .append(" AND EXISTS (")
-               .append("SELECT 1 FROM ")
-               .append(TABLE_EVENT_LOG).append(" evlog")
-               .append(" JOIN EAM_RESOURCE ").append(resVar).append(" on ")
-               .append("evlog.resource_id = ").append(resVar).append(".id")
-               .append(permSql)
-               .append(" AND timestamp BETWEEN (:begin + (:interval")
-               .append(" * i)) AND ((:begin + (:interval")
-               .append(" * (i + 1))) - 1)")
-               .append(" AND ").append(resVar).append(".id = :resourceId ")
-               .append(dialect.getLimitString(1))
-               .append(')');
+        } else {
+            sql.append("SELECT i AS I FROM ").append(TABLE_EAM_NUMBERS).append(" WHERE i < ")
+                .append(intervals).append(" AND EXISTS (").append("SELECT 1 FROM ").append(
+                    TABLE_EVENT_LOG).append(" evlog").append(" JOIN EAM_RESOURCE ").append(resVar)
+                .append(" on ").append("evlog.resource_id = ").append(resVar).append(".id").append(
+                    permSql).append(" AND timestamp BETWEEN (:begin + (:interval").append(
+                    " * i)) AND ((:begin + (:interval").append(" * (i + 1))) - 1)").append(" AND ")
+                .append(resVar).append(".id = :resourceId ").append(dialect.getLimitString(1))
+                .append(')');
         }
         return sql.toString();
     }
 
-    boolean[] logsExistPerInterval(Resource resource, AuthzSubject subject,
-                                   long begin, long end, int intervals)
-    {
+    boolean[] logsExistPerInterval(Resource resource, AuthzSubject subject, long begin, long end,
+                                   int intervals) {
         long interval = (end - begin) / intervals;
-        EdgePermCheck wherePermCheck =
-            permissionManager.makePermCheckSql("rez", false);
+        EdgePermCheck wherePermCheck = permissionManager.makePermCheckSql("rez", false);
 
-        String sql = getLogsExistSQL(resource, begin, end, intervals,
-                                     wherePermCheck);
-        Query q = getSession().createSQLQuery(sql)
-            .addEntity("I",
-                org.hyperic.hq.measurement.server.session.Number.class)
-            .setInteger("resourceId", resource.getId().intValue())
-            .setLong("begin", begin)
-            .setLong("interval", interval);
-        List result = wherePermCheck.addQueryParameters(
-            q, subject, resource,  0, VIEW_PERMISSIONS).list();
+        String sql = getLogsExistSQL(resource, begin, end, intervals, wherePermCheck);
+        Query q = getSession().createSQLQuery(sql).addEntity("I",
+            org.hyperic.hq.measurement.server.session.Number.class).setInteger("resourceId",
+            resource.getId().intValue()).setLong("begin", begin).setLong("interval", interval);
+        List result = wherePermCheck.addQueryParameters(q, subject, resource, 0, VIEW_PERMISSIONS)
+            .list();
 
         boolean[] eventLogsInIntervals = new boolean[intervals];
 
-        for (Iterator i=result.iterator(); i.hasNext(); ) {
-            Number n = (Number)i.next();
-            eventLogsInIntervals[(int)n.getI()] = true;
+        for (Iterator i = result.iterator(); i.hasNext();) {
+            Number n = (Number) i.next();
+            eventLogsInIntervals[(int) n.getI()] = true;
         }
         return eventLogsInIntervals;
     }
 
-    void remove(EventLog l) {
-        super.remove(l);
-    }
-
-    void save(EventLog l) {
-        super.save(l);
-    }
 }

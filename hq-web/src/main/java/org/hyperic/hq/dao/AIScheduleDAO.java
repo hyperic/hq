@@ -36,62 +36,40 @@ import org.springframework.stereotype.Repository;
  * USA.
  */
 @Repository
-public class AIScheduleDAO extends HibernateDAO<AISchedule>
-{
+public class AIScheduleDAO
+    extends HibernateDAO<AISchedule> {
     @Autowired
     public AIScheduleDAO(SessionFactory f) {
         super(AISchedule.class, f);
     }
 
-    public AISchedule findById(Integer id)
+    public AISchedule create(AppdefEntityID entityId, String subject, String scanName,
+                             String scanDesc, ScheduleValue schedule, long nextFire,
+                             String triggerName, String jobName) throws ApplicationException
+
     {
-        return (AISchedule)super.findById(id);
+        try {
+            AISchedule s = new AISchedule();
+            s.setEntityId(entityId.getId());
+            s.setEntityType(new Integer(entityId.getType()));
+            s.setSubject(subject);
+            s.setScheduleValue(schedule);
+            s.setNextFireTime(nextFire);
+            s.setTriggerName(triggerName);
+            s.setJobName(jobName);
+            s.setJobOrderData(null);
+            s.setScanName(scanName);
+            s.setScanDesc(scanDesc);
+            save(s);
+            return s;
+        } catch (IOException e) {
+            throw new ApplicationException(e.getMessage());
+        }
     }
 
-    public void save(AISchedule entity)
-    {
-        super.save(entity);
-    }
-
-    public void remove(AISchedule entity)
-    {
-        super.remove(entity);
-    }
-
-    public AISchedule create(AppdefEntityID entityId,
-                             String subject,
-                             String scanName,
-                             String scanDesc,
-                             ScheduleValue schedule,
-                             long nextFire, String triggerName,
-                             String jobName) throws ApplicationException
-       
-    {
-            try {
-                AISchedule s = new AISchedule();
-                s.setEntityId(entityId.getId());
-                s.setEntityType(new Integer(entityId.getType()));
-                s.setSubject(subject);
-                s.setScheduleValue(schedule);
-                s.setNextFireTime(nextFire);
-                s.setTriggerName(triggerName);
-                s.setJobName(jobName);
-                s.setJobOrderData(null);
-                s.setScanName(scanName);
-                s.setScanDesc(scanDesc);
-                save(s);
-                return s;
-            } catch (IOException e) {
-                throw new ApplicationException(e.getMessage());
-            }
-    }
-
-    public AISchedule findByScanName(String name)
-    {
-        String sql="from AISchedule where scanName=?";
-        return (AISchedule)getSession().createQuery(sql)
-            .setString(0, name)
-            .uniqueResult();
+    public AISchedule findByScanName(String name) {
+        String sql = "from AISchedule where scanName=?";
+        return (AISchedule) getSession().createQuery(sql).setString(0, name).uniqueResult();
     }
 
     /**
@@ -100,8 +78,7 @@ public class AIScheduleDAO extends HibernateDAO<AISchedule>
      * @param id
      * @return
      */
-    public Collection findByEntityFireTimeDesc(int type, int id)
-    {
+    public Collection findByEntityFireTimeDesc(int type, int id) {
         return findByEntityFireTime(type, id, false);
     }
 
@@ -111,26 +88,19 @@ public class AIScheduleDAO extends HibernateDAO<AISchedule>
      * @param id
      * @return
      */
-    public Collection findByEntityFireTimeAsc(int type, int id)
-    {
+    public Collection findByEntityFireTimeAsc(int type, int id) {
         return findByEntityFireTime(type, id, true);
     }
 
     public Collection<AISchedule> findByEntityFireTime(int type, int id, boolean asc) {
-        String sql="from AISchedule where entityId=? and entityType=? " +
-                   "order by nextFireTime " + (asc ? "asc" : "desc");
-        return getSession().createQuery(sql)
-            .setInteger(0, id)
-            .setInteger(1, type)
-            .list();
+        String sql = "from AISchedule where entityId=? and entityType=? " +
+                     "order by nextFireTime " + (asc ? "asc" : "desc");
+        return getSession().createQuery(sql).setInteger(0, id).setInteger(1, type).list();
     }
 
     public Collection<AISchedule> findByEntityScanName(int type, int id, boolean asc) {
-        String sql="from AISchedule where entityId=? and entityType=? " +
-                   "order by scanName " + (asc ? "asc" : "desc");
-        return getSession().createQuery(sql)
-            .setInteger(0, id)
-            .setInteger(1, type)
-            .list();
+        String sql = "from AISchedule where entityId=? and entityType=? " + "order by scanName " +
+                     (asc ? "asc" : "desc");
+        return getSession().createQuery(sql).setInteger(0, id).setInteger(1, type).list();
     }
 }

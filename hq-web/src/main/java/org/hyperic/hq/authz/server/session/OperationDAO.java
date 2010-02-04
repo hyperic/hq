@@ -28,46 +28,28 @@ package org.hyperic.hq.authz.server.session;
 import java.util.Collection;
 
 import org.hibernate.SessionFactory;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
 @Repository
-public class OperationDAO extends HibernateDAO<Operation> {
-    
+public class OperationDAO
+    extends HibernateDAO<Operation> {
+
     @Autowired
     public OperationDAO(SessionFactory f) {
         super(Operation.class, f);
     }
 
-
-    Operation findById(Integer id) {
-        return (Operation) super.findById(id);
-    }
-
-    void save(Operation entity) {
-        super.save(entity);
-    }
-
-    void remove(Operation entity) {
-        super.remove(entity);
-    }
-
     public Operation findByTypeAndName(ResourceType type, String name) {
         String sql = "from Operation where resourceType=? and name=?";
 
-        return (Operation)getSession().createQuery(sql)
-            .setParameter(0, type)
-            .setString(1, name)
-            .setCacheable(true)
-            .setCacheRegion("Operation.findByTypeAndName")
-            .uniqueResult();
+        return (Operation) getSession().createQuery(sql).setParameter(0, type).setString(1, name)
+            .setCacheable(true).setCacheRegion("Operation.findByTypeAndName").uniqueResult();
     }
 
     public Collection findByRole(Integer roleId) {
         String sql = "select o from Role r join r.operations o where r.id = ?";
-        return getSession().createQuery(sql)
-            .setParameter(0, roleId)
-            .list();
+        return getSession().createQuery(sql).setParameter(0, roleId).list();
     }
 }

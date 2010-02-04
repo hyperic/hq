@@ -1,7 +1,5 @@
 package org.hyperic.hq.appdef.server.session;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hibernate.SessionFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
@@ -33,32 +31,15 @@ import org.springframework.stereotype.Repository;
  * USA.
  */
 @Repository
-public class ApplicationTypeDAO extends HibernateDAO<ApplicationType>
-{
-    private static final Log log = LogFactory.getLog(ApplicationTypeDAO.class);
+public class ApplicationTypeDAO
+    extends HibernateDAO<ApplicationType> {
 
     @Autowired
     public ApplicationTypeDAO(SessionFactory f) {
         super(ApplicationType.class, f);
     }
 
-    public ApplicationType findById(Integer id)
-    {
-        return (ApplicationType)super.findById(id);
-    }
-
-    public void save(ApplicationType entity)
-    {
-        super.save(entity);
-    }
-
-    public void remove(ApplicationType entity)
-    {
-        super.remove(entity);
-    }
-
-    public ApplicationType create(String name, String desc)
-    {
+    public ApplicationType create(String name, String desc) {
         ApplicationType type = new ApplicationType();
         type.setName(name);
         type.setDescription(desc);
@@ -66,21 +47,17 @@ public class ApplicationTypeDAO extends HibernateDAO<ApplicationType>
         return type;
     }
 
-    public ApplicationType findByName(String name)
-    {
-        String sql="from ApplicationType where sortName=?";
-        return (ApplicationType)getSession().createQuery(sql)
-            .setString(0, name.toUpperCase())
+    public ApplicationType findByName(String name) {
+        String sql = "from ApplicationType where sortName=?";
+        return (ApplicationType) getSession().createQuery(sql).setString(0, name.toUpperCase())
             .uniqueResult();
     }
 
-    public boolean supportsServiceType(ApplicationType at, Integer stPK)
-    {
+    public boolean supportsServiceType(ApplicationType at, Integer stPK) {
         if (at.getServiceTypes() == null) {
             return false;
         }
-        ServiceType serviceType = DAOFactory.getDAOFactory()
-            .getServiceTypeDAO().findById(stPK);
+        ServiceType serviceType = DAOFactory.getDAOFactory().getServiceTypeDAO().findById(stPK);
         return at.getServiceTypes().contains(serviceType);
     }
 }

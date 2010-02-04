@@ -36,18 +36,12 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class ResourceTypeDAO
-    extends HibernateDAO<ResourceType>
-{
-   
+    extends HibernateDAO<ResourceType> {
 
     @Autowired
     public ResourceTypeDAO(SessionFactory f) {
         super(ResourceType.class, f);
     }
-    
-    
-   
-
 
     ResourceType create(AuthzSubject creator, String name, boolean system) {
         ResourceType resType = new ResourceType(name, null, system);
@@ -55,21 +49,19 @@ public class ResourceTypeDAO
         save(resType);
 
         // ResourceTypes also have Resources associated with them, so create
-        // that and link  'em up.
-        //TODO resolve circular deps so can remove DAOFactory
+        // that and link 'em up.
+        // TODO resolve circular deps so can remove DAOFactory
         DAOFactory fact = DAOFactory.getDAOFactory();
-
 
         ResourceType typeResType = findTypeResourceType();
         Resource prototype = fact.getResourceDAO().findById(AuthzConstants.rootResourceId);
         Resource res = fact.getResourceDAO().create(typeResType, prototype, resType.getName(),
-                                   creator, resType.getId(), false);
+            creator, resType.getId(), false);
 
         resType.setResource(res);
 
-        ResourceGroup authzGroup =
-            DAOFactory.getDAOFactory().getResourceGroupDAO()
-            .findByName(AuthzConstants.authzResourceGroupName);
+        ResourceGroup authzGroup = DAOFactory.getDAOFactory().getResourceGroupDAO().findByName(
+            AuthzConstants.authzResourceGroupName);
         if (authzGroup == null) {
             throw new IllegalArgumentException("Resource Group not found: " +
                                                AuthzConstants.authzResourceGroupName);
@@ -77,14 +69,6 @@ public class ResourceTypeDAO
 
         fact.getResourceGroupDAO().addMembers(authzGroup, Collections.singleton(res));
         return resType;
-    }
-
-    public ResourceType findById(Integer id) {
-        return (ResourceType) super.findById(id);
-    }
-
-    public void save(ResourceType entity) {
-        super.save(entity);
     }
 
     public ResourceType findTypeResourceType() {
@@ -100,13 +84,9 @@ public class ResourceTypeDAO
         return true;
     }
 
-    public ResourceType findByName(String name)
-    {
+    public ResourceType findByName(String name) {
         String sql = "from ResourceType where name=?";
-        return (ResourceType)getSession().createQuery(sql)
-            .setString(0, name)
-            .setCacheable(true)
-            .setCacheRegion("ResourceType.findByName")
-            .uniqueResult();
+        return (ResourceType) getSession().createQuery(sql).setString(0, name).setCacheable(true)
+            .setCacheRegion("ResourceType.findByName").uniqueResult();
     }
 }

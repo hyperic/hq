@@ -41,28 +41,14 @@ public class ResourceAuxLogDAO
         super(ResourceAuxLogPojo.class, f);
     }
 
-    ResourceAuxLogPojo findById(Integer id) {
-        return (ResourceAuxLogPojo) super.findById(id);
-    }
-
-    void save(ResourceAuxLogPojo log) {
-        super.save(log);
-    }
-
-    void remove(ResourceAuxLogPojo log) {
-        super.remove(log);
-    }
-
     ResourceAuxLogPojo find(GalertAuxLog log) {
         return (ResourceAuxLogPojo) createCriteria().add(Expression.eq("auxLog", log))
-                                                    .uniqueResult();
+            .uniqueResult();
     }
 
     void removeAll(GalertDef def) {
         String sql = "delete from ResourceAuxLogPojo p where p.alertDef = :def";
 
-        getSession().createQuery(sql)
-                    .setParameter("def", def)
-                    .executeUpdate();
+        getSession().createQuery(sql).setParameter("def", def).executeUpdate();
     }
 }
