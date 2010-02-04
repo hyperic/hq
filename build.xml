@@ -409,7 +409,7 @@
 
 	<import file="${hq.home}/build_util/dbsetup-build.xml" />
 
-	<target name="build-war" description="Build and create the war" depends="compile,compile-plugins,pack-plugins,pack-war" />
+	<target name="build-war" description="Build and create the war" depends="compile,compile-rendit,compile-plugins,pack-rendit,pack-plugins,pack-war" />
 
 	<!-- ==================== UI packaging ==================== -->
 
@@ -545,6 +545,7 @@
 				<include name="hq-common.jar" />
 				<include name="hq-util.jar" />
 				<include name="hq-pdk-shared.jar" />
+				<include name="hqu-groovy.jar" />
 			</fileset>
 		</copy>
 		

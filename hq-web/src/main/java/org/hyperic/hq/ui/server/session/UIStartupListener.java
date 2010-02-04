@@ -26,6 +26,7 @@ package org.hyperic.hq.ui.server.session;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 
 import javax.annotation.PostConstruct;
@@ -73,13 +74,15 @@ public class UIStartupListener implements StartupListener {
     }
 
     private void initPlugins() {
-       
+        long start = System.currentTimeMillis();
+        log.info("Starting init Plugins: " + new Date());
         File warDir = hqApp.getWebAccessibleDir();
         File pluginDir = new File(warDir, "hqu");
-        File sysDir = new File(warDir + "/WEB-INF", "rendit_sys");
-        renditServer.setSysDir(sysDir);
+        //File sysDir = new File(warDir + "/WEB-INF", "rendit_sys");
+        //renditServer.setSysDir(sysDir);
 
-        log.info("HQU SysDir = [" + sysDir.getAbsolutePath() + "]");
+        
+        //log.info("HQU SysDir = [" + sysDir.getAbsolutePath() + "]");
         log.info("Watching for HQU plugins in [" + pluginDir.getAbsolutePath() + "]");
 
         DirWatcherCallback cb = new DirWatcherCallback() {
@@ -116,6 +119,7 @@ public class UIStartupListener implements StartupListener {
         Thread _watcherThread = new Thread(_watcher);
         _watcherThread.setDaemon(true);
         _watcherThread.start();
-
+        long end = System.currentTimeMillis();
+        log.info("End init Plugins: " + new Date() + " - change in millis: " + (end-start));
     }
 }

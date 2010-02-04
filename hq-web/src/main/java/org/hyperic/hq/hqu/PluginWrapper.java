@@ -113,7 +113,7 @@ public class PluginWrapper {
                 }
             }
             
-            urls.add(sysDir.toURL());
+ //           urls.add(sysDir.toURL());
             u = (URL[])urls.toArray(new URL[urls.size()]);
         } catch(MalformedURLException e) {
             throw new RuntimeException(e);
@@ -142,8 +142,13 @@ public class PluginWrapper {
     void loadDispatcher() throws Exception {
         doInContext(new Runnee() {
             public Object run() throws Exception {
-                Class c = _loader.parseClass(new File(_sysDir, DISPATCH_PATH));
+                //Class c = _loader.parseClass(new File(_sysDir, DISPATCH_PATH));
+                try{
+                Class c = _loader.loadClass("org.hyperic.hq.hqu.rendit.Dispatcher");
                 _dispatcher = (IDispatcher)c.newInstance();
+                }catch (Exception e){
+                    _log.error("Unable to load groovy class: org.hyperic.hq.hqu.rendit.Dispatcher", e);
+                }
                 return null;
             }
         });
