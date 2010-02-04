@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:p="http://www.springframework.org/schema/p"
-	xmlns:context="http://www.springframework.org/schema/context"
-	xmlns:tx="http://www.springframework.org/schema/tx"
-	xmlns:jee="http://www.springframework.org/schema/jee"
-	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:jee="http://www.springframework.org/schema/jee" xmlns:util="http://www.springframework.org/schema/util"
 	xmlns:task="http://www.springframework.org/schema/task"
 	xsi:schemaLocation="http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-2.0.xsd
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
@@ -14,19 +11,35 @@
 		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
-
-	<context:property-placeholder location="classpath:/spring-jdbc.properties, classpath:/mail-config.properties" />
+	<!--
+		hq-server.conf may be copied to the WEB-INF/classes dir by the
+		installer and should override any properties defined in other files,
+		so it's last on the list
+	-->
+	<bean
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"
+		p:ignoreResourceNotFound="true">
+		<property name="locations">
+			<list>
+				<value>classpath:/spring-jdbc.properties</value>
+				<value>classpath:/mail-config.properties</value>
+				<value>classpath:/quartz.properties</value>
+				<value>classpath:/hq-server.conf</value>
+			</list>
+		</property>
+	</bean>
 
 	<bean id="dataSource"
 		class="org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy">
 		<constructor-arg>
 			<bean class="org.apache.commons.dbcp.BasicDataSource"
-				p:driverClassName="${jdbc.driverClassName}" p:url="${jdbc.url}"
-				p:username="${jdbc.username}" p:password="${jdbc.password}"
-				p:defaultAutoCommit="false" />
+				p:driverClassName="${server.database-driver}" p:url="${server.database-url}"
+				p:username="${server.database-user}" p:password="${server.database-password}"
+				p:defaultAutoCommit="false" p:minIdle="${server.database-minpoolsize}"
+				p:maxIdle="${server.database-maxpoolsize}" p:maxWait="${server.database-blockingtimeout}" />
 		</constructor-arg>
 	</bean>
-	
+
 	<context:annotation-config />
 
 	<context:component-scan base-package="org.hyperic,com.hyperic" />
@@ -45,7 +58,8 @@
 	</bean>
 
 	<bean id="transactionManager"
-		class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+		class="org.springframework.orm.hibernate3.HibernateTransactionManager"
+		p:defaultTimeout="900">
 		<property name="sessionFactory" ref="sessionFactory" />
 	</bean>
 
@@ -61,13 +75,25 @@
 
 	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
 		<property name="dataSource" ref="dataSource" />
-		<property name="configLocation" value="classpath:/quartz.properties" />
+		<property name="quartzProperties">
+			<props>
+				<prop key="org.quartz.jobStore.driverDelegateClass">${server.quartzDelegate}</prop>
+				<prop key="org.quartz.scheduler.rmi.export">${quartz.scheduler.rmi.export}</prop>
+				<prop key="org.quartz.scheduler.rmi.proxy">${quartz.scheduler.rmi.proxy}</prop>
+				<prop key="org.quartz.threadPool.class">${quartz.threadPool.class}</prop>
+				<prop key="org.quartz.threadPool.threadCount">${quartz.threadPool.threadCount}</prop>
+				<prop key="org.quartz.threadPool.threadPriority">${quartz.threadPool.threadPriority}</prop>
+				<prop key="org.quartz.jobStore.useProperties">${quartz.jobStore.useProperties}</prop>
+			</props>
+		</property>
 	</bean>
-	
-	<bean id="runtimeReportProcessor" class="org.hyperic.hq.autoinventory.server.session.RuntimeReportProcessor" scope="prototype"/>
 
-	<bean class="org.hyperic.hq.appdef.server.session.ResourceTreeGenerator"/>
-	
+	<bean id="runtimeReportProcessor"
+		class="org.hyperic.hq.autoinventory.server.session.RuntimeReportProcessor"
+		scope="prototype" />
+
+	<bean class="org.hyperic.hq.appdef.server.session.ResourceTreeGenerator" />
+
 	<context:mbean-export />
 	<context:mbean-server />
 
@@ -81,27 +107,42 @@
 
 	<bean class="org.hyperic.hq.events.server.session.TriggersCreatedListener" />
 
-	<!-- This bean refers to various classes that should be loaded at startup. Its only interest is loading the classes listed 
-	     to have static blocks in them executed (which typically register event types) -->
+	<!--
+		This bean refers to various classes that should be loaded at startup.
+		Its only interest is loading the classes listed to have static blocks
+		in them executed (which typically register event types)
+	-->
 	<util:list id="tiggers">
-		<bean class="org.hyperic.hq.bizapp.server.trigger.conditional.AlertTrigger"/>
-		<bean class="org.hyperic.hq.bizapp.server.trigger.conditional.ConfigChangedTrigger"/>
-		<bean class="org.hyperic.hq.bizapp.server.trigger.conditional.ValueChangeTrigger"/>
-		<bean class="org.hyperic.hq.bizapp.server.trigger.conditional.ControlEventTrigger"/>
-		<bean class="org.hyperic.hq.bizapp.server.trigger.conditional.CustomPropertyTrigger"/>
-		<bean class="org.hyperic.hq.bizapp.server.trigger.conditional.LogEventTrigger"/>
-		<bean class="org.hyperic.hq.bizapp.server.trigger.conditional.MeasurementThresholdTrigger"/>
-		<bean class="org.hyperic.hq.bizapp.server.trigger.conditional.ValueChangeTrigger"/>
+		<bean class="org.hyperic.hq.bizapp.server.trigger.conditional.AlertTrigger" />
+		<bean
+			class="org.hyperic.hq.bizapp.server.trigger.conditional.ConfigChangedTrigger" />
+		<bean
+			class="org.hyperic.hq.bizapp.server.trigger.conditional.ValueChangeTrigger" />
+		<bean
+			class="org.hyperic.hq.bizapp.server.trigger.conditional.ControlEventTrigger" />
+		<bean
+			class="org.hyperic.hq.bizapp.server.trigger.conditional.CustomPropertyTrigger" />
+		<bean
+			class="org.hyperic.hq.bizapp.server.trigger.conditional.LogEventTrigger" />
+		<bean
+			class="org.hyperic.hq.bizapp.server.trigger.conditional.MeasurementThresholdTrigger" />
+		<bean
+			class="org.hyperic.hq.bizapp.server.trigger.conditional.ValueChangeTrigger" />
 	</util:list>
-	
+
 	<task:scheduler id="scheduler" />
-	
+
 	<task:scheduled-tasks scheduler="scheduler">
-    	<task:scheduled ref="availabilityCheckService" method="backfill" fixed-rate="120000"/>
-    	<task:scheduled ref="agentAIScanService" method="notifyAgents" fixed-rate="300000"/>
-    	<!--  This is meant to be disabled by default -->
-    	<!--  <task:scheduled ref="scheduleVerificationService" method="verifySchedules" fixed-rate="300000"/> -->
+		<task:scheduled ref="availabilityCheckService" method="backfill"
+			fixed-rate="120000" />
+		<task:scheduled ref="agentAIScanService" method="notifyAgents"
+			fixed-rate="300000" />
+		<!--  This is meant to be disabled by default -->
+		<!--
+			<task:scheduled ref="scheduleVerificationService"
+			method="verifySchedules" fixed-rate="300000"/>
+		-->
 	</task:scheduled-tasks>
-	
-	
+
+
 </beans>
