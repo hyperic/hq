@@ -28,18 +28,13 @@ import org.hibernate.SessionFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
 @Repository
-public class CalendarEntryDAO extends HibernateDAO {
+public class CalendarEntryDAO
+    extends HibernateDAO<CalendarEntry> {
     @Autowired
     public CalendarEntryDAO(SessionFactory f) {
         super(CalendarEntry.class, f);
     }
 
-    CalendarEntry findById(Integer id) {
-        return (CalendarEntry)super.findById(id);
-    }
-
-    void save(CalendarEntry ent) {
-        super.save(ent);
-    }
 }

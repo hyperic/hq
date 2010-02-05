@@ -33,35 +33,18 @@ import org.springframework.stereotype.Repository;
  * USA.
  */
 @Repository
-public class ConfigPropertyDAO extends HibernateDAO<ConfigProperty>
-{
+public class ConfigPropertyDAO
+    extends HibernateDAO<ConfigProperty> {
     @Autowired
     public ConfigPropertyDAO(SessionFactory f) {
         super(ConfigProperty.class, f);
-    }
-
-    public ConfigProperty findById(Integer id)
-    {
-        return (ConfigProperty)super.findById(id);
-    }
-
-    public void save(ConfigProperty entity)
-    {
-        super.save(entity);
     }
 
     protected boolean cacheFindAll() {
         return true;
     }
 
-    public void remove(ConfigProperty entity)
-    {
-        super.remove(entity);
-    }
-
-    public ConfigProperty create(String prefix, String key,
-                                 String val, String def)
-    {
+    public ConfigProperty create(String prefix, String key, String val, String def) {
         ConfigProperty c = new ConfigProperty();
         c.setPrefix(prefix);
         c.setKey(key);
@@ -71,11 +54,8 @@ public class ConfigPropertyDAO extends HibernateDAO<ConfigProperty>
         return c;
     }
 
-    public Collection<ConfigProperty> findByPrefix(String s)
-    {
-        String sql="from ConfigProperty where prefix=?";
-        return getSession().createQuery(sql)
-            .setString(0, s)
-            .list();
+    public Collection<ConfigProperty> findByPrefix(String s) {
+        String sql = "from ConfigProperty where prefix=?";
+        return getSession().createQuery(sql).setString(0, s).list();
     }
 }

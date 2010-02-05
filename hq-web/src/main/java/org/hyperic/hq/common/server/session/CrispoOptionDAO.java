@@ -17,33 +17,22 @@ public class CrispoOptionDAO
         super(CrispoOption.class, f);
     }
 
-    void remove(CrispoOption o) {
-        super.remove(o);
-    }
-
-    void save(CrispoOption o) {
-        super.save(o);
-    }
-
     /**
-     * Return a list of CrispoOption's that have a key that contains the
-     * given String key
+     * Return a list of CrispoOption's that have a key that contains the given
+     * String key
      * @param key The key to search for
-     * @return A List of CrispoOptions that have a key that contains the
-     *         given search key.
+     * @return A List of CrispoOptions that have a key that contains the given
+     *         search key.
      */
     @SuppressWarnings("unchecked")
     List<CrispoOption> findOptionsByKey(String key) {
-        return createCriteria().add(Restrictions.like("key",
-                                                      "%" + key + "%")).list();
+        return createCriteria().add(Restrictions.like("key", "%" + key + "%")).list();
     }
 
     @SuppressWarnings("unchecked")
     List<CrispoOption> findOptionsByValue(String val) {
-        String hql = "from CrispoOption o join o.array a where " +
-                     "o.optionValue = :val or a = :val";
-        return createQuery(hql)
-                               .setString("val", val)
-                               .list();
+        String hql = "from CrispoOption o join o.array a where "
+                     + "o.optionValue = :val or a = :val";
+        return createQuery(hql).setString("val", val).list();
     }
 }

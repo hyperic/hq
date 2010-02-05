@@ -124,19 +124,7 @@ public class RoleDAO
         return role;
     }
 
-    public Role get(Integer id) {
-        return (Role) super.get(id);
-    }
-
-    public Role findById(Integer id) {
-        return (Role) super.findById(id);
-    }
-
-    void save(Role entity) {
-        super.save(entity);
-    }
-
-    void remove(Role entity) {
+    public void remove(Role entity) {
         entity.clearCalendars();
         entity.clearResourceGroups();
         entity.clearSubjects();

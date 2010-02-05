@@ -50,40 +50,17 @@ public class MeasurementTemplateDAO
         this.catDAO = categoryDAO;
     }
 
-    public MeasurementTemplate get(Integer id) {
-        return (MeasurementTemplate) super.get(id);
-    }
-
-    public MeasurementTemplate findById(Integer id) {
-        return (MeasurementTemplate) super.findById(id);
-    }
-
-    /**
-     * Remove a MeasurementTemplate and it's associated Measurements.
-     */
-    void remove(MeasurementTemplate mt) {
-        super.remove(mt);
-    }
-
-    MeasurementTemplate create(String name, String alias, String units,
-                               int collectionType, boolean defaultOn,
-                               long defaultInterval, boolean designate,
-                               String template, MonitorableType monitorableType,
-                               Category cat, String plugin) {
-        MeasurementTemplate mt = new MeasurementTemplate(name, alias,
-                                                         units, collectionType,
-                                                         defaultOn,
-                                                         defaultInterval,
-                                                         designate,
-                                                         template,
-                                                         monitorableType,
-                                                         cat, plugin);
+    MeasurementTemplate create(String name, String alias, String units, int collectionType,
+                               boolean defaultOn, long defaultInterval, boolean designate,
+                               String template, MonitorableType monitorableType, Category cat,
+                               String plugin) {
+        MeasurementTemplate mt = new MeasurementTemplate(name, alias, units, collectionType,
+            defaultOn, defaultInterval, designate, template, monitorableType, cat, plugin);
         save(mt);
         return mt;
     }
 
-    void update(MeasurementTemplate mt, String pluginName,
-                MeasurementInfo info) {
+    void update(MeasurementTemplate mt, String pluginName, MeasurementInfo info) {
         // Load category
         Category cat;
         if (info.getCategory() != null) {
@@ -125,8 +102,7 @@ public class MeasurementTemplateDAO
             sql += " where t.defaultOn = :defaultOn ";
         }
 
-        sql += " order by " +
-               ((MeasurementTemplateSortField) pInfo.getSort()).getSortString("t");
+        sql += " order by " + ((MeasurementTemplateSortField) pInfo.getSort()).getSortString("t");
 
         Query q = getSession().createQuery(sql);
         if (defaultOn != null) {
@@ -147,36 +123,28 @@ public class MeasurementTemplateDAO
             return Collections.singletonList(res);
         }
 
-        return createCriteria()
-                               .add(Restrictions.in("id", ids))
-                               .setCacheable(true)
-                               .setCacheRegion("MeasurementTemplate.findTemplates")
-                               .list();
+        return createCriteria().add(Restrictions.in("id", ids)).setCacheable(true).setCacheRegion(
+            "MeasurementTemplate.findTemplates").list();
     }
 
     List<MeasurementTemplate> findTemplatesByMonitorableType(String type) {
-        PageInfo pInfo =
-                         PageInfo.getAll(MeasurementTemplateSortField.TEMPLATE_NAME, true);
+        PageInfo pInfo = PageInfo.getAll(MeasurementTemplateSortField.TEMPLATE_NAME, true);
         return findTemplatesByMonitorableType(pInfo, type, null);
     }
 
     @SuppressWarnings("unchecked")
     List<MeasurementTemplate> findTemplatesByMonitorableType(PageInfo pInfo, String type,
                                                              Boolean defaultOn) {
-        String sql =
-                     "select t from MeasurementTemplate t " +
-                     "join fetch t.monitorableType mt " +
-                     "where mt.name=:typeName";
+        String sql = "select t from MeasurementTemplate t " + "join fetch t.monitorableType mt "
+                     + "where mt.name=:typeName";
 
         if (defaultOn != null) {
             sql += " and t.defaultOn = :defaultOn";
         }
 
-        sql += " order by " +
-               ((MeasurementTemplateSortField) pInfo.getSort()).getSortString("t");
+        sql += " order by " + ((MeasurementTemplateSortField) pInfo.getSort()).getSortString("t");
 
-        Query q = getSession().createQuery(sql)
-                              .setString("typeName", type);
+        Query q = getSession().createQuery(sql).setString("typeName", type);
 
         if (defaultOn != null)
             q.setParameter("defaultOn", defaultOn);
@@ -185,55 +153,36 @@ public class MeasurementTemplateDAO
     }
 
     @SuppressWarnings("unchecked")
-    List<MeasurementTemplate> findTemplatesByMonitorableTypeAndCategory(String type,
-                                                                        String cat) {
-        String sql =
-                     "select t from MeasurementTemplate t " +
-                     "where t.monitorableType.name=? " +
-                     "and t.category.name=? " +
-                     "order by t.name";
+    List<MeasurementTemplate> findTemplatesByMonitorableTypeAndCategory(String type, String cat) {
+        String sql = "select t from MeasurementTemplate t " + "where t.monitorableType.name=? "
+                     + "and t.category.name=? " + "order by t.name";
 
-        return getSession().createQuery(sql)
-                           .setString(0, type)
-                           .setString(1, cat).list();
+        return getSession().createQuery(sql).setString(0, type).setString(1, cat).list();
     }
 
     @SuppressWarnings("unchecked")
     List<MeasurementTemplate> findDefaultsByMonitorableType(String mt, int appdefType) {
-        String sql =
-                     "select t from MeasurementTemplate t " +
-                     "join fetch t.monitorableType mt " +
-                     "where mt.name=? and mt.appdefType=? " +
-                     "and t.defaultOn = true " +
-                     "order by mt.name";
+        String sql = "select t from MeasurementTemplate t " + "join fetch t.monitorableType mt "
+                     + "where mt.name=? and mt.appdefType=? " + "and t.defaultOn = true "
+                     + "order by mt.name";
 
-        return getSession().createQuery(sql)
-                           .setString(0, mt)
-                           .setInteger(1, appdefType).list();
+        return getSession().createQuery(sql).setString(0, mt).setInteger(1, appdefType).list();
     }
 
     @SuppressWarnings("unchecked")
     List<MeasurementTemplate> findDesignatedByMonitorableType(String mt, int appdefType) {
-        String sql =
-                     "select t from MeasurementTemplate t " +
-                     "join fetch t.monitorableType mt " +
-                     "where mt.name=? and mt.appdefType=? " +
-                     "and t.designate = true " +
-                     "order by mt.name";
+        String sql = "select t from MeasurementTemplate t " + "join fetch t.monitorableType mt "
+                     + "where mt.name=? and mt.appdefType=? " + "and t.designate = true "
+                     + "order by mt.name";
 
-        return getSession().createQuery(sql)
-                           .setString(0, mt)
-                           .setInteger(1, appdefType).list();
+        return getSession().createQuery(sql).setString(0, mt).setInteger(1, appdefType).list();
     }
 
     @SuppressWarnings("unchecked")
     List<MeasurementTemplate> findRawByMonitorableType(MonitorableType mt) {
-        String sql =
-                     "select t from MeasurementTemplate t " +
-                     "where t.monitorableType=?";
+        String sql = "select t from MeasurementTemplate t " + "where t.monitorableType=?";
 
-        return getSession().createQuery(sql)
-                           .setParameter(0, mt).list();
+        return getSession().createQuery(sql).setParameter(0, mt).list();
     }
 
     @SuppressWarnings("unchecked")
@@ -253,13 +202,9 @@ public class MeasurementTemplateDAO
         // binary or BLOB attributes(?), but requires hibernate proxy
         // byte code instrumentation (RISKY!).
         //
-        String sql =
-                     "select m from MeasurementTemplate m " +
-                     "join fetch m.monitorableType mt " +
-                     "where mt.name = ? " +
-                     "order by m.name asc ";
+        String sql = "select m from MeasurementTemplate m " + "join fetch m.monitorableType mt "
+                     + "where mt.name = ? " + "order by m.name asc ";
 
-        return getSession().createQuery(sql)
-                           .setString(0, name).list();
+        return getSession().createQuery(sql).setString(0, name).list();
     }
 }

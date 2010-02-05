@@ -28,19 +28,14 @@ import org.hibernate.SessionFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
 @Repository
-public class AlertConditionLogDAO extends HibernateDAO {
+public class AlertConditionLogDAO
+    extends HibernateDAO<AlertConditionLog> {
 
     @Autowired
     public AlertConditionLogDAO(SessionFactory f) {
         super(AlertConditionLog.class, f);
     }
 
-    public AlertConditionLog findById(Integer id) {
-        return (AlertConditionLog)super.findById(id);
-    }
-
-    void save(AlertConditionLog log) {
-        super.save(log);
-    }
 }

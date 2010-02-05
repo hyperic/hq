@@ -31,32 +31,24 @@ import org.hibernate.SessionFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
 @Repository
 public class GalertAuxLogDAO
-    extends HibernateDAO
-{
+    extends HibernateDAO<GalertAuxLog> {
     @Autowired
     GalertAuxLogDAO(SessionFactory f) {
         super(GalertAuxLog.class, f);
     }
 
-    GalertAuxLog findById(Integer id) {
-        return (GalertAuxLog)super.findById(id);
-    }
-
     List findAll(GalertDef def) {
         String sql = "from GalertAuxLog l where l.alert.alertDef = :def";
 
-        return getSession().createQuery(sql)
-                   .setParameter("def", def)
-                   .list();
+        return getSession().createQuery(sql).setParameter("def", def).list();
     }
 
     void removeAll(GalertDef def) {
         String sql = "delete from GalertAuxLog l where l.alertDef = :def";
 
-        getSession().createQuery(sql)
-                    .setParameter("def", def)
-                    .executeUpdate();
+        getSession().createQuery(sql).setParameter("def", def).executeUpdate();
     }
 }

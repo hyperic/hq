@@ -33,27 +33,19 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
 @Repository
-public class AlertActionLogDAO extends HibernateDAO {
+public class AlertActionLogDAO
+    extends HibernateDAO<AlertActionLog> {
     @Autowired
     public AlertActionLogDAO(SessionFactory f) {
         super(AlertActionLog.class, f);
     }
 
-    public AlertActionLog findById(Integer id) {
-        return (AlertActionLog)super.findById(id);
+    public void savePersisted(PersistedObject entity) {
+        save((AlertActionLog) entity);
     }
 
-    public void save(AlertActionLog entity)
-    {
-        super.save(entity);
-    }
-
-    public void savePersisted(PersistedObject entity)
-    {
-        save((AlertActionLog)entity);
-    }
-    
     /**
      * @param alerts {@link Collection} of {@link Alert}s
      */
@@ -61,22 +53,15 @@ public class AlertActionLogDAO extends HibernateDAO {
         if (alerts.size() == 0) {
             return;
         }
-        final String hql = new StringBuilder()
-            .append("delete from AlertActionLog where alert in (:alerts)")
-            .toString();
-        getSession().createQuery(hql)
-            .setParameterList("alerts", alerts)
-            .executeUpdate();
+        final String hql = new StringBuilder().append(
+            "delete from AlertActionLog where alert in (:alerts)").toString();
+        getSession().createQuery(hql).setParameterList("alerts", alerts).executeUpdate();
     }
 
     void handleSubjectRemoval(AuthzSubject subject) {
-        String sql = "update AlertActionLog set " +
-                     "subject = null " +
-                     "where subject = :subject";
+        String sql = "update AlertActionLog set " + "subject = null " + "where subject = :subject";
 
-        getSession().createQuery(sql)
-                    .setParameter("subject", subject)
-                    .executeUpdate();
+        getSession().createQuery(sql).setParameter("subject", subject).executeUpdate();
     }
 
 }

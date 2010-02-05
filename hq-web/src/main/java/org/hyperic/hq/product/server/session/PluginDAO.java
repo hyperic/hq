@@ -31,30 +31,14 @@ import org.springframework.stereotype.Repository;
  * USA.
  */
 @Repository
-public class PluginDAO extends HibernateDAO
-{
+public class PluginDAO
+    extends HibernateDAO<Plugin> {
     @Autowired
     public PluginDAO(SessionFactory f) {
         super(Plugin.class, f);
     }
 
-    public Plugin findById(Integer id)
-    {
-        return (Plugin)super.findById(id);
-    }
-
-    public void save(Plugin entity)
-    {
-        super.save(entity);
-    }
-
-    public void remove(Plugin entity)
-    {
-        super.remove(entity);
-    }
-
-    public Plugin create(String name, String path, String md5)
-    {
+    public Plugin create(String name, String path, String md5) {
         Plugin p = new Plugin();
         p.setName(name);
         p.setPath(path);
@@ -63,11 +47,8 @@ public class PluginDAO extends HibernateDAO
         return p;
     }
 
-    public Plugin findByName(String name)
-    {
+    public Plugin findByName(String name) {
         String sql = "from Plugin where name=?";
-        return (Plugin)getSession().createQuery(sql)
-            .setString(0, name)
-            .uniqueResult();
+        return (Plugin) getSession().createQuery(sql).setString(0, name).uniqueResult();
     }
 }

@@ -33,70 +33,41 @@ import org.springframework.stereotype.Repository;
  * USA.
  */
 @Repository
-public class AIServerDAO extends HibernateDAO
-{
+public class AIServerDAO
+    extends HibernateDAO<AIServer> {
     @Autowired
     public AIServerDAO(SessionFactory f) {
         super(AIServer.class, f);
     }
 
-    public void remove(AIServer entity)
-    {
-        super.remove(entity);
-    }
-
-    public void save(AIServer entity)
-    {
-        super.save(entity);
-    }
-
-    public AIServer findById(Integer id)
-    {
-        return (AIServer)super.findById(id);
-    }
-
-    public AIServer get(Integer id)
-    {
-        return (AIServer)super.get(id);
-    }
-
-    public AIServer create(AIServerValue server)
-    {
+    public AIServer create(AIServerValue server) {
         AIServer as = new AIServer();
 
-        as.setInstallPath      (server.getInstallPath());
-        as.setAutoinventoryIdentifier
-                               (server.getAutoinventoryIdentifier());
-        as.setServicesAutomanaged
-                               (server.getServicesAutomanaged());
-        as.setName             (server.getName());
-        as.setQueueStatus      (server.getQueueStatus());
-        as.setDescription      (server.getDescription());
-        as.setDiff             (server.getDiff());
-        as.setIgnored          (server.getIgnored());
-        as.setServerTypeName   (server.getServerTypeName());
-        as.setProductConfig    (server.getProductConfig());
+        as.setInstallPath(server.getInstallPath());
+        as.setAutoinventoryIdentifier(server.getAutoinventoryIdentifier());
+        as.setServicesAutomanaged(server.getServicesAutomanaged());
+        as.setName(server.getName());
+        as.setQueueStatus(server.getQueueStatus());
+        as.setDescription(server.getDescription());
+        as.setDiff(server.getDiff());
+        as.setIgnored(server.getIgnored());
+        as.setServerTypeName(server.getServerTypeName());
+        as.setProductConfig(server.getProductConfig());
         as.setMeasurementConfig(server.getMeasurementConfig());
-        as.setControlConfig    (server.getControlConfig());
-        as.setCustomProperties (server.getCustomProperties());
+        as.setControlConfig(server.getControlConfig());
+        as.setCustomProperties(server.getCustomProperties());
         save(as);
         return as;
     }
 
-    public AIServer findByName(String name)
-    {
-        String sql="from AIServer where name=?";
-        return (AIServer)getSession().createQuery(sql)
-            .setString(0, name)
-            .uniqueResult();
+    public AIServer findByName(String name) {
+        String sql = "from AIServer where name=?";
+        return (AIServer) getSession().createQuery(sql).setString(0, name).uniqueResult();
     }
 
-    public Collection findByPlatformId(Integer platformid)
-    {
-        String sql="from AIServer where aIPlatform.id=?";
-        return getSession().createQuery(sql)
-            .setInteger(0, platformid.intValue())
-            .list();
+    public Collection findByPlatformId(Integer platformid) {
+        String sql = "from AIServer where aIPlatform.id=?";
+        return getSession().createQuery(sql).setInteger(0, platformid.intValue()).list();
     }
 
 }

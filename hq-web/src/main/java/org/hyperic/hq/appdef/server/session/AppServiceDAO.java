@@ -75,11 +75,11 @@ public class AppServiceDAO
             AppSvcDependency appDep = (AppSvcDependency) it.next();
             AppService appSvc = appDep.getAppService();
             appSvc.getAppSvcDependencies().remove(appDep);
-            super.remove(appDep);
+            getSession().delete(appDep);
         }
 
         for (Iterator it = entity.getAppSvcDependencies().iterator(); it.hasNext();) {
-            super.remove(it.next());
+            getSession().delete(it.next());
         }
         super.remove(entity);
     }

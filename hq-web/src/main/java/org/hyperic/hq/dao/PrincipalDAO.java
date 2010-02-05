@@ -36,30 +36,14 @@ import org.springframework.stereotype.Repository;
  *
  */
 @Repository
-public class PrincipalDAO extends HibernateDAO
-{
+public class PrincipalDAO
+    extends HibernateDAO<Principal> {
     @Autowired
     public PrincipalDAO(SessionFactory f) {
         super(Principal.class, f);
     }
 
-    public Principal findById(Integer id)
-    {
-        return (Principal)super.findById(id);
-    }
-
-    public void save(Principal entity)
-    {
-        super.save(entity);
-    }
-
-    public void remove(Principal entity)
-    {
-        super.remove(entity);
-    }
-
-    public Principal create(String principal, String passwordHash)
-    {
+    public Principal create(String principal, String passwordHash) {
         Principal p = new Principal();
 
         p.setPrincipal(principal);
@@ -68,16 +52,12 @@ public class PrincipalDAO extends HibernateDAO
         return p;
     }
 
-    public Principal findByUsername(String s)
-    {
+    public Principal findByUsername(String s) {
         String sql = "from Principal where principal=?";
-        return (Principal)getSession().createQuery(sql)
-            .setString(0, s)
-            .uniqueResult();
+        return (Principal) getSession().createQuery(sql).setString(0, s).uniqueResult();
     }
 
-    public Collection findAllUsers()
-    {
+    public Collection findAllUsers() {
         return findAll();
     }
 }

@@ -33,35 +33,14 @@ import org.springframework.stereotype.Repository;
  * USA.
  */
 @Repository
-public class AIIpDAO extends HibernateDAO
-{
+public class AIIpDAO
+    extends HibernateDAO<AIIp> {
     @Autowired
     public AIIpDAO(SessionFactory f) {
         super(AIIp.class, f);
     }
 
-    public AIIp findById(Integer id)
-    {
-        return (AIIp)super.findById(id);
-    }
-
-    public AIIp get(Integer id)
-    {
-        return (AIIp)super.get(id);
-    }
-
-    public void save(AIIp entity)
-    {
-        super.save(entity);
-    }
-
-    public void remove(AIIp entity)
-    {
-        super.remove(entity);
-    }
-
-    public AIIp create(AIIpValue ipv)
-    {
+    public AIIp create(AIIpValue ipv) {
         AIIp ip = new AIIp();
         ip.setAddress(ipv.getAddress());
         ip.setNetmask(ipv.getNetmask());
@@ -73,20 +52,13 @@ public class AIIpDAO extends HibernateDAO
         return ip;
     }
 
-    public List<AIIp> findByAddress(String addr)
-    {
-        String sql="from AIIp where address=?";
-        return getSession().createQuery(sql)
-            .setString(0, addr)
-            .list();
+    public List<AIIp> findByAddress(String addr) {
+        String sql = "from AIIp where address=?";
+        return getSession().createQuery(sql).setString(0, addr).list();
     }
 
-
-    public List<AIIp> findByMACAddress(String addr)
-    {
-        String sql="from AIIp where macAddress=?";
-        return getSession().createQuery(sql)
-            .setString(0, addr)
-            .list();
+    public List<AIIp> findByMACAddress(String addr) {
+        String sql = "from AIIp where macAddress=?";
+        return getSession().createQuery(sql).setString(0, addr).list();
     }
 }

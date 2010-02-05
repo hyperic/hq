@@ -61,8 +61,8 @@ public class ResourceDAO
         this.permissionManager = permissionManager;
     }
 
-    Resource create(ResourceType type, Resource prototype, String name, AuthzSubject creator, Integer instanceId,
-                    boolean system) {
+    Resource create(ResourceType type, Resource prototype, String name, AuthzSubject creator,
+                    Integer instanceId, boolean system) {
         Resource resource = createPrivate(type, prototype, name, creator, instanceId, system);
 
         /* add it to the root resource group */
@@ -74,8 +74,8 @@ public class ResourceDAO
         return resource;
     }
 
-    Resource createPrivate(ResourceType type, Resource prototype, String name, AuthzSubject creator,
-                           Integer instanceId, boolean system) {
+    Resource createPrivate(ResourceType type, Resource prototype, String name,
+                           AuthzSubject creator, Integer instanceId, boolean system) {
         if (type == null) {
             throw new IllegalArgumentException("ResourceType not set");
         }
@@ -91,18 +91,6 @@ public class ResourceDAO
 
     public Resource findRootResource() {
         return findById(AuthzConstants.rootResourceId);
-    }
-
-    public Resource findById(Integer id) {
-        return (Resource) super.findById(id);
-    }
-
-    public Resource get(Integer id) {
-        return (Resource) super.get(id);
-    }
-
-    public void save(Resource entity) {
-        super.save(entity);
     }
 
     public void remove(Resource entity) {
@@ -121,7 +109,8 @@ public class ResourceDAO
             /* overlord owns every thing */
             if (is = possibleOwner.equals(AuthzConstants.overlordId) == false) {
                 if (_log.isDebugEnabled() && possibleOwner != null) {
-                    _log.debug("User is " + possibleOwner + " owner is " + entity.getOwner().getId());
+                    _log.debug("User is " + possibleOwner + " owner is " +
+                               entity.getOwner().getId());
                 }
                 is = (possibleOwner.equals(entity.getOwner().getId()));
             }
@@ -156,8 +145,8 @@ public class ResourceDAO
             return get(rid);
         } else {
             String sql = "from Resource where instanceId = ? and " + "resourceType.id = ?";
-            Resource r = (Resource) getSession().createQuery(sql).setInteger(0, id.intValue()).setInteger(1,
-                typeId.intValue()).uniqueResult();
+            Resource r = (Resource) getSession().createQuery(sql).setInteger(0, id.intValue())
+                .setInteger(1, typeId.intValue()).uniqueResult();
 
             if (r != null) {
                 ridCache.put(new Element(key, r.getId()));
@@ -201,7 +190,8 @@ public class ResourceDAO
         String hql = "select rez from Resource rez " + wherePermCheck;
 
         Query q = createQuery(hql);
-        return wherePermCheck.addQueryParameters(q, subject, r, 0, Arrays.asList(VIEW_APPDEFS)).list();
+        return wherePermCheck.addQueryParameters(q, subject, r, 0, Arrays.asList(VIEW_APPDEFS))
+            .list();
     }
 
     @SuppressWarnings("unchecked")
@@ -227,72 +217,85 @@ public class ResourceDAO
         // before we do anything else.
         // Note: this should be refactored to use named queries so
         // that we can perform "fetch" optimization outside of the code
-        String sql = "select r from Resource r join r.resourceType rt " + "where r.system = :system and exists " +
-                     "(select rg from GroupMember g " + " join g.group rg " + " join g.resource rs " +
-                     "where ((rg.resource = r and rg.groupType = 15) or " + "(rt.name = :resSvcType and r = rs)) " +
+        String sql = "select r from Resource r join r.resourceType rt " +
+                     "where r.system = :system and exists " + "(select rg from GroupMember g " +
+                     " join g.group rg " + " join g.resource rs " +
+                     "where ((rg.resource = r and rg.groupType = 15) or " +
+                     "(rt.name = :resSvcType and r = rs)) " +
                      " and (r.owner.id = :subjId or exists " + "(select role from rg.roles role " +
-                     "join role.subjects subj " + "join role.operations op " + "where subj.id = :subjId and " +
-                     "op.name = case rt.name " + "when (:resSvcType) then '" + AuthzConstants.serviceOpViewService +
-                     "' " + "else '" + AuthzConstants.groupOpViewResourceGroup + "' end))) " + "order by r.sortName";
-        List resources = getSession().createQuery(sql).setBoolean("system", fSystem.booleanValue()).setInteger(
-            "subjId", user.intValue()).setString("resSvcType", AuthzConstants.serviceResType).list();
+                     "join role.subjects subj " + "join role.operations op " +
+                     "where subj.id = :subjId and " + "op.name = case rt.name " +
+                     "when (:resSvcType) then '" + AuthzConstants.serviceOpViewService + "' " +
+                     "else '" + AuthzConstants.groupOpViewResourceGroup + "' end))) " +
+                     "order by r.sortName";
+        List resources = getSession().createQuery(sql).setBoolean("system", fSystem.booleanValue())
+            .setInteger("subjId", user.intValue()).setString("resSvcType",
+                AuthzConstants.serviceResType).list();
 
         return resources;
     }
 
     public Collection findSvcRes_orderName(Boolean fSystem) {
-        String sql = "select r from Resource r join r.resourceType rt " + "where r.system = :system and "
-                     + "(rt.name = :resSvcType or " + "exists (select rg from ResourceGroup rg "
-                     + "join rg.resource r2 " + "where r = r2 and rg.groupType = 15)) " + "order by r.sortName ";
+        String sql = "select r from Resource r join r.resourceType rt "
+                     + "where r.system = :system and " + "(rt.name = :resSvcType or "
+                     + "exists (select rg from ResourceGroup rg " + "join rg.resource r2 "
+                     + "where r = r2 and rg.groupType = 15)) " + "order by r.sortName ";
 
-        List resources = getSession().createQuery(sql).setBoolean("system", fSystem.booleanValue()).setString(
-            "resSvcType", AuthzConstants.serviceResType).list();
+        List resources = getSession().createQuery(sql).setBoolean("system", fSystem.booleanValue())
+            .setString("resSvcType", AuthzConstants.serviceResType).list();
 
         return resources;
     }
 
     public Collection findInGroupAuthz_orderName(Integer userId, Integer groupId, Boolean fSystem) {
-        String sql = "select distinct r from Resource r " + " join r.resourceGroups rgg" + " join r.resourceGroups rg "
-                     + " join rg.roles role " + " join role.subjects subj " + " join role.operations op " + "where "
-                     + " r.system = :system and " + " rgg.id = :groupId and " + " (subj.id = :subjectId or "
-                     + "  r.owner.id = :subjectId or " + "  subj.authDsn = 'covalentAuthzInternalDsn') and "
-                     + " op.resourceType.id = r.resourceType.id and " + " (" + "  op.name = 'viewPlatform' or "
-                     + "  op.name = 'viewServer' or " + "  op.name = 'viewService' or "
-                     + "  op.name = 'viewApplication' or " + "  op.name = 'viewResourceGroup' )"
-                     + " order by r.sortName ";
-        return getSession().createQuery(sql).setBoolean("system", fSystem.booleanValue()).setInteger("groupId",
-            groupId.intValue()).setInteger("subjectId", userId.intValue()).list();
+        String sql = "select distinct r from Resource r " + " join r.resourceGroups rgg"
+                     + " join r.resourceGroups rg " + " join rg.roles role "
+                     + " join role.subjects subj " + " join role.operations op " + "where "
+                     + " r.system = :system and " + " rgg.id = :groupId and "
+                     + " (subj.id = :subjectId or " + "  r.owner.id = :subjectId or "
+                     + "  subj.authDsn = 'covalentAuthzInternalDsn') and "
+                     + " op.resourceType.id = r.resourceType.id and " + " ("
+                     + "  op.name = 'viewPlatform' or " + "  op.name = 'viewServer' or "
+                     + "  op.name = 'viewService' or " + "  op.name = 'viewApplication' or "
+                     + "  op.name = 'viewResourceGroup' )" + " order by r.sortName ";
+        return getSession().createQuery(sql).setBoolean("system", fSystem.booleanValue())
+            .setInteger("groupId", groupId.intValue()).setInteger("subjectId", userId.intValue())
+            .list();
     }
 
     public Collection findInGroup_orderName(Integer groupId, Boolean fSystem) {
-        String sql = "select distinct r from Resource r " + " join r.resourceGroups rgg" + " join r.resourceGroups rg "
-                     + " join rg.roles role " + " join role.subjects subj " + " join role.operations op " + "where "
-                     + " r.system = :system and " + " rgg.id = :groupId and " + " (subj.id=1 or r.owner.id=1 or "
+        String sql = "select distinct r from Resource r " + " join r.resourceGroups rgg"
+                     + " join r.resourceGroups rg " + " join rg.roles role "
+                     + " join role.subjects subj " + " join role.operations op " + "where "
+                     + " r.system = :system and " + " rgg.id = :groupId and "
+                     + " (subj.id=1 or r.owner.id=1 or "
                      + "  subj.authDsn = 'covalentAuthzInternalDsn') and "
-                     + " op.resourceType.id = r.resourceType.id and " + " (op.name = 'viewPlatform' or "
-                     + "  op.name = 'viewServer' or " + "  op.name = 'viewService' or "
-                     + "  op.name = 'viewApplication' or " + "  op.name='viewResourceGroup' )"
-                     + " order by r.sortName ";
+                     + " op.resourceType.id = r.resourceType.id and "
+                     + " (op.name = 'viewPlatform' or " + "  op.name = 'viewServer' or "
+                     + "  op.name = 'viewService' or " + "  op.name = 'viewApplication' or "
+                     + "  op.name='viewResourceGroup' )" + " order by r.sortName ";
 
-        return getSession().createQuery(sql).setBoolean("system", fSystem.booleanValue()).setInteger("groupId",
-            groupId.intValue()).list();
+        return getSession().createQuery(sql).setBoolean("system", fSystem.booleanValue())
+            .setInteger("groupId", groupId.intValue()).list();
     }
 
-    public Collection findScopeByOperationBatch(AuthzSubject subjLoc, Resource[] resLocArr, Operation[] opLocArr) {
+    public Collection findScopeByOperationBatch(AuthzSubject subjLoc, Resource[] resLocArr,
+                                                Operation[] opLocArr) {
         StringBuffer sb = new StringBuffer();
 
-        sb.append("SELECT DISTINCT r ").append("FROM Resource r ").append(" join r.resourceGroups g ").append(
-            " join g.roles e ").append(" join e.operations o ").append(" join e.subjects s ")
-            .append(" WHERE s.id = ? ").append(" AND ( ");
+        sb.append("SELECT DISTINCT r ").append("FROM Resource r ").append(
+            " join r.resourceGroups g ").append(" join g.roles e ").append(" join e.operations o ")
+            .append(" join e.subjects s ").append(" WHERE s.id = ? ").append(" AND ( ");
 
         for (int x = 0; x < resLocArr.length; x++) {
             if (x > 0)
                 sb.append(" OR ");
-            sb.append(" (o.id=").append(opLocArr[x].getId()).append(" AND r.id=").append(resLocArr[x].getId()).append(
-                ") ");
+            sb.append(" (o.id=").append(opLocArr[x].getId()).append(" AND r.id=").append(
+                resLocArr[x].getId()).append(") ");
         }
         sb.append(")");
-        return getSession().createQuery(sb.toString()).setInteger(0, subjLoc.getId().intValue()).list();
+        return getSession().createQuery(sb.toString()).setInteger(0, subjLoc.getId().intValue())
+            .list();
     }
 
     /**
@@ -306,15 +309,17 @@ public class ResourceDAO
     }
 
     int reassignResources(int oldOwner, int newOwner) {
-        return getSession()
-            .createQuery("UPDATE Resource " + "SET owner.id = :newOwner " + "WHERE owner.id = :oldOwner").setInteger(
-                "oldOwner", oldOwner).setInteger("newOwner", newOwner).executeUpdate();
+        return getSession().createQuery(
+            "UPDATE Resource " + "SET owner.id = :newOwner " + "WHERE owner.id = :oldOwner")
+            .setInteger("oldOwner", oldOwner).setInteger("newOwner", newOwner).executeUpdate();
     }
 
     boolean resourcesExistOfType(String typeName) {
-        String sql = "select r from Resource r " + "join r.prototype p " + "where p.name = :protoName";
+        String sql = "select r from Resource r " + "join r.prototype p "
+                     + "where p.name = :protoName";
 
-        return getSession().createQuery(sql).setParameter("protoName", typeName).setMaxResults(1).list().isEmpty() == false;
+        return getSession().createQuery(sql).setParameter("protoName", typeName).setMaxResults(1)
+            .list().isEmpty() == false;
     }
 
     @SuppressWarnings("unchecked")
@@ -328,18 +333,21 @@ public class ResourceDAO
         String sql = "select r from Resource r " + "where r.name = :name "
                      + " AND r.resourceType.id in (:platProto, :svrProto, :svcProto)";
 
-        return (Resource) getSession().createQuery(sql).setParameter("name", name).setParameter("platProto",
-            AuthzConstants.authzPlatformProto).setParameter("svrProto", AuthzConstants.authzServerProto).setParameter(
-            "svcProto", AuthzConstants.authzServiceProto).uniqueResult();
+        return (Resource) getSession().createQuery(sql).setParameter("name", name).setParameter(
+            "platProto", AuthzConstants.authzPlatformProto).setParameter("svrProto",
+            AuthzConstants.authzServerProto).setParameter("svcProto",
+            AuthzConstants.authzServiceProto).uniqueResult();
     }
 
     @SuppressWarnings("unchecked")
     List<Resource> findAllAppdefPrototypes() {
-        String sql = "select r from Resource r " + "where r.resourceType.id in (:platProto, :svrProto, :svcProto)";
+        String sql = "select r from Resource r "
+                     + "where r.resourceType.id in (:platProto, :svrProto, :svcProto)";
 
-        return (List) getSession().createQuery(sql).setParameter("platProto", AuthzConstants.authzPlatformProto)
-            .setParameter("svrProto", AuthzConstants.authzServerProto).setParameter("svcProto",
-                AuthzConstants.authzServiceProto).list();
+        return (List) getSession().createQuery(sql).setParameter("platProto",
+            AuthzConstants.authzPlatformProto).setParameter("svrProto",
+            AuthzConstants.authzServerProto).setParameter("svcProto",
+            AuthzConstants.authzServiceProto).list();
     }
 
     @SuppressWarnings("unchecked")
@@ -347,7 +355,9 @@ public class ResourceDAO
         String sql = "select distinct r.prototype from Resource r "
                      + "where r.resourceType.id in (:platProto, :svrProto, :svcProto) ";
 
-        return getSession().createQuery(sql).setParameter("platProto", AuthzConstants.authzPlatform).setParameter(
-            "svrProto", AuthzConstants.authzServer).setParameter("svcProto", AuthzConstants.authzService).list();
+        return getSession().createQuery(sql)
+            .setParameter("platProto", AuthzConstants.authzPlatform).setParameter("svrProto",
+                AuthzConstants.authzServer).setParameter("svcProto", AuthzConstants.authzService)
+            .list();
     }
 }

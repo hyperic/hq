@@ -61,22 +61,6 @@ public class ApplicationDAO
         this.appServiceDAO = appServiceDAO;
     }
 
-    public Application findById(Integer id) {
-        return (Application) super.findById(id);
-    }
-
-    public Application get(Integer id) {
-        return (Application) super.get(id);
-    }
-
-    void save(Application entity) {
-        super.save(entity);
-    }
-
-    void remove(Application entity) {
-        super.remove(entity);
-    }
-
     void addAppService(Application a, Integer added) {
 
         AppService as = appServiceDAO.findById(added);

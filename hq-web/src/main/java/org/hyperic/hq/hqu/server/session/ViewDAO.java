@@ -35,20 +35,14 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class ViewDAO
-    extends HibernateDAO
-{
+    extends HibernateDAO<View> {
     @Autowired
     ViewDAO(SessionFactory f) {
         super(View.class, f);
     }
 
-    View findById(Integer id) {
-        return (View)super.findById(id);
-    }
-
     Collection findFor(AttachType type) {
-        return createCriteria()
-            .add(Restrictions.eq("attachTypeEnum", new Integer(type.getCode())))
+        return createCriteria().add(Restrictions.eq("attachTypeEnum", new Integer(type.getCode())))
             .list();
     }
 }

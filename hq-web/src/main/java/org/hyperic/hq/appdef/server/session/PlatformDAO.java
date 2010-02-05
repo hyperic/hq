@@ -74,12 +74,8 @@ public class PlatformDAO
         getSession().flush();
     }
 
-    public void remove(Platform entity) {
-        super.remove(entity);
-    }
-
     public void remove(Ip ip) {
-        super.remove(ip);
+        getSession().delete(ip);
     }
 
     /**

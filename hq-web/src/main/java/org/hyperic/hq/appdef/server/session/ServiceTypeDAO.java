@@ -45,18 +45,9 @@ public class ServiceTypeDAO
         this.platformDAO = platformDAO;
     }
 
-    public ServiceType findById(Integer id) {
-        return (ServiceType) super.findById(id);
-    }
-
-    void save(ServiceType entity) {
-        super.save(entity);
-    }
-
-    void remove(ServiceType entity) {
+    public void remove(ServiceType entity) {
         // Remove self from ServerType
         entity.getServerType().getServiceTypes().remove(entity);
-
         super.remove(entity);
     }
 

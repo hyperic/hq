@@ -36,54 +36,36 @@ import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
 @Repository
-public class AuditDAO extends HibernateDAO {
+public class AuditDAO
+    extends HibernateDAO<Audit> {
     @Autowired
     public AuditDAO(SessionFactory f) {
         super(Audit.class, f);
     }
 
-    Audit findById(Integer id) {
-        return (Audit)super.findById(id);
-    }
-
-    void remove(Audit c) {
-        super.remove(c);
-    }
-
-    void save(Audit c) {
-        super.save(c);
-    }
-
     void handleResourceDelete(Resource r) {
-        String sql = "update Audit a set " +
-                     "a.resource.id = :rootResource, " +
-                     "a.original = false " +
-                     "where resource = :resource";
+        String sql = "update Audit a set " + "a.resource.id = :rootResource, "
+                     + "a.original = false " + "where resource = :resource";
 
-        getSession().createQuery(sql)
-            .setParameter("rootResource", AuthzConstants.rootResourceId)
-            .setParameter("resource", r)
-            .executeUpdate();
+        getSession().createQuery(sql).setParameter("rootResource", AuthzConstants.rootResourceId)
+            .setParameter("resource", r).executeUpdate();
     }
 
     void handleSubjectDelete(AuthzSubject s) {
         getSession().createQuery("delete Audit where subject = :subject")
-            .setParameter("subject", s)
-            .executeUpdate();
+            .setParameter("subject", s).executeUpdate();
     }
 
     List<Audit> find(PageInfo pInfo, AuthzSubject me, long startTime, long endTime,
-              AuditImportance minImportance, AuditPurpose purpose,
-              AuthzSubject target, String klazz)
-    {
-        AuditSortField sort = (AuditSortField)pInfo.getSort();
-        String sql = "select a from Audit a " +
-            "         join a.resource r " +
-            "         join a.subject s " +
-            "where a.importanceEnum >= :minImportance and " +
-            "      a.startTime >= :startTime and " +
-            "      a.endTime   <  :endTime ";
+                     AuditImportance minImportance, AuditPurpose purpose, AuthzSubject target,
+                     String klazz) {
+        AuditSortField sort = (AuditSortField) pInfo.getSort();
+        String sql = "select a from Audit a " + "         join a.resource r "
+                     + "         join a.subject s "
+                     + "where a.importanceEnum >= :minImportance and "
+                     + "      a.startTime >= :startTime and " + "      a.endTime   <  :endTime ";
 
         if (purpose != null)
             sql += " and a.purposeEnum = :purpose";
@@ -95,16 +77,14 @@ public class AuditDAO extends HibernateDAO {
             sql += " and a.subject = :subject";
 
         sql += " order by " + sort.getSortString("a", "r", "s") +
-            (pInfo.isAscending() ? "" : " DESC");
+               (pInfo.isAscending() ? "" : " DESC");
 
         if (!sort.equals(AuditSortField.START_TIME)) {
-            sql += ", " + AuditSortField.START_TIME.getSortString("a", "r", "s")
-                   + " DESC";
+            sql += ", " + AuditSortField.START_TIME.getSortString("a", "r", "s") + " DESC";
         }
 
         Query q = getSession().createQuery(sql)
-            .setInteger("minImportance", minImportance.getCode())
-            .setLong("startTime", startTime)
+            .setInteger("minImportance", minImportance.getCode()).setLong("startTime", startTime)
             .setLong("endTime", endTime);
 
         if (purpose != null)

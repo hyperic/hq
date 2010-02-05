@@ -37,28 +37,16 @@ import org.springframework.stereotype.Repository;
  *
  */
 @Repository
-public class ServerTypeDAO extends HibernateDAO<ServerType>
-{
+public class ServerTypeDAO
+    extends HibernateDAO<ServerType> {
     @Autowired
     public ServerTypeDAO(SessionFactory f) {
         super(ServerType.class, f);
     }
 
-    public ServerType findById(Integer id)
-    {
-        return (ServerType)super.findById(id);
-    }
-
-    public void save(ServerType entity)
-    {
-        super.save(entity);
-    }
-
-    public void remove(ServerType entity)
-    {
+    public void remove(ServerType entity) {
         // Remove self from PlatformType
-        for (Iterator it = entity.getPlatformTypes().iterator(); it.hasNext(); )
-        {
+        for (Iterator it = entity.getPlatformTypes().iterator(); it.hasNext();) {
             PlatformType platType = (PlatformType) it.next();
             platType.getServerTypesBag().remove(entity);
         }
@@ -66,34 +54,25 @@ public class ServerTypeDAO extends HibernateDAO<ServerType>
         super.remove(entity);
     }
 
-    public ServerType create(ServerType serverType)
-    {
+    public ServerType create(ServerType serverType) {
         save(serverType);
         return serverType;
     }
 
-    public ServerType findByName(String name)
-    {
-        String sql="from ServerType where sortName=?";
-        return (ServerType)getSession().createQuery(sql)
-            .setString(0, name.toUpperCase())
+    public ServerType findByName(String name) {
+        String sql = "from ServerType where sortName=?";
+        return (ServerType) getSession().createQuery(sql).setString(0, name.toUpperCase())
             .uniqueResult();
     }
 
-    public ServerType findByNameAndPlugin(String name, String plugin)
-    {
-        String sql="from ServerType where sortName=? and plugin=?";
-        return (ServerType)getSession().createQuery(sql)
-            .setString(0, name.toUpperCase())
-            .setString(1, plugin)
-            .uniqueResult();
+    public ServerType findByNameAndPlugin(String name, String plugin) {
+        String sql = "from ServerType where sortName=? and plugin=?";
+        return (ServerType) getSession().createQuery(sql).setString(0, name.toUpperCase())
+            .setString(1, plugin).uniqueResult();
     }
 
-    public Collection<ServerType> findByPlugin(String plugin)
-    {
-        String sql="from ServerType where plugin=?";
-        return getSession().createQuery(sql)
-            .setString(0, plugin)
-            .list();
+    public Collection<ServerType> findByPlugin(String plugin) {
+        String sql = "from ServerType where plugin=?";
+        return getSession().createQuery(sql).setString(0, plugin).list();
     }
 }

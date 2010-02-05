@@ -29,20 +29,14 @@ import org.hibernate.SessionFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
 @Repository
-public class MonitorableTypeDAO extends HibernateDAO {
-    
+public class MonitorableTypeDAO
+    extends HibernateDAO<MonitorableType> {
+
     @Autowired
     public MonitorableTypeDAO(SessionFactory f) {
         super(MonitorableType.class, f);
-    }
-
-    MonitorableType findById(Integer id) {
-        return (MonitorableType)super.findById(id);
-    }
-
-    void remove(MonitorableType entity) {
-        super.remove(entity);
     }
 
     MonitorableType create(String name, int appdefType, String plugin) {
@@ -55,7 +49,6 @@ public class MonitorableTypeDAO extends HibernateDAO {
 
     MonitorableType findByName(String name) {
         String sql = "from MonitorableType where name=?";
-        return (MonitorableType)getSession().createQuery(sql).
-            setString(0, name).uniqueResult();
+        return (MonitorableType) getSession().createQuery(sql).setString(0, name).uniqueResult();
     }
 }

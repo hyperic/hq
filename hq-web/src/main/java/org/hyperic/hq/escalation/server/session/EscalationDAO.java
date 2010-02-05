@@ -29,30 +29,16 @@ import org.hibernate.criterion.Expression;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
 @Repository
 public class EscalationDAO
-    extends HibernateDAO
-{
+    extends HibernateDAO<Escalation> {
     @Autowired
     EscalationDAO(SessionFactory f) {
         super(Escalation.class, f);
     }
 
-    Escalation findById(Integer id) {
-        return (Escalation)super.findById(id);
-    }
-
-    void save(Escalation e) {
-        super.save(e);
-    }
-
-    void remove(Escalation e) {
-        super.remove(e);
-    }
-
     Escalation findByName(String name) {
-        return (Escalation)
-            createCriteria().add(Expression.eq("name", name))
-                            .uniqueResult();
+        return (Escalation) createCriteria().add(Expression.eq("name", name)).uniqueResult();
     }
 }

@@ -29,15 +29,13 @@ import org.hibernate.SessionFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
 @Repository
-public class CategoryDAO extends HibernateDAO {
+public class CategoryDAO
+    extends HibernateDAO<Category> {
     @Autowired
     public CategoryDAO(SessionFactory f) {
         super(Category.class, f);
-    }
-
-    Category findById(Integer id) {
-        return (Category)super.findById(id);
     }
 
     Category create(String name) {
@@ -50,9 +48,7 @@ public class CategoryDAO extends HibernateDAO {
 
     Category findByName(String name) {
         String sql = "from Category where name=?";
-        return (Category)getSession().createQuery(sql).
-            setString(0, name).
-            setCacheable(true).
-            setCacheRegion("Category.findByName").uniqueResult();
+        return (Category) getSession().createQuery(sql).setString(0, name).setCacheable(true)
+            .setCacheRegion("Category.findByName").uniqueResult();
     }
 }

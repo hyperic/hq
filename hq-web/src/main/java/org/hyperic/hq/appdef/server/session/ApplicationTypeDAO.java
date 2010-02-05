@@ -41,18 +41,6 @@ public class ApplicationTypeDAO
         this.serviceTypeDAO = serviceTypeDAO;
     }
 
-    public ApplicationType findById(Integer id) {
-        return (ApplicationType) super.findById(id);
-    }
-
-    public void save(ApplicationType entity) {
-        super.save(entity);
-    }
-
-    public void remove(ApplicationType entity) {
-        super.remove(entity);
-    }
-
     public ApplicationType create(String name, String desc) {
         ApplicationType type = new ApplicationType();
         type.setName(name);

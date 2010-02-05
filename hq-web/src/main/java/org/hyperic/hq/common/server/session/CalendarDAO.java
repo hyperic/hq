@@ -30,31 +30,20 @@ import org.hibernate.SessionFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
 @Repository
-public class CalendarDAO extends HibernateDAO {
+public class CalendarDAO
+    extends HibernateDAO<Calendar> {
     @Autowired
     public CalendarDAO(SessionFactory f) {
         super(Calendar.class, f);
     }
 
-    Calendar findById(Integer id) {
-        return (Calendar)super.findById(id);
-    }
-
-    void remove(Calendar c) {
-        super.remove(c);
-    }
-
-    void save(Calendar c) {
-        super.save(c);
-    }
-
     void removeEntries(Calendar c) {
-        for (Iterator it = c.getEntriesBag().iterator(); it.hasNext(); ) {
-            super.remove(it.next());
+        for (Iterator it = c.getEntriesBag().iterator(); it.hasNext();) {
+            getSession().delete(it.next());
         }
         c.getEntriesBag().clear();
     }
-
 
 }

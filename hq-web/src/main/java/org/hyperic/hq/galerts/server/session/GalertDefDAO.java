@@ -50,24 +50,12 @@ public class GalertDefDAO
         super(GalertDef.class, sessionFactory);
     }
 
-    GalertDef findById(Integer id) {
-        return (GalertDef) super.findById(id);
-    }
-
-    void save(GalertDef def) {
-        super.save(def);
-    }
-
-    void remove(GalertDef def) {
-        super.remove(def);
-    }
-
     void remove(GtriggerInfo t) {
-        super.remove(t);
+        getSession().delete(t);
     }
 
     void save(GtriggerInfo t) {
-        super.save(t);
+        getSession().saveOrUpdate(t);
     }
 
     Collection<GalertDef> findAbsolutelyAllGalertDefs() {
@@ -78,9 +66,8 @@ public class GalertDefDAO
     Collection<GalertDef> findAbsolutelyAllGalertDefs(ResourceGroup g) {
         String sql = "from GalertDef d where d.group = :group";
 
-        return (Collection<GalertDef>) getSession().createQuery(sql)
-                                                   .setParameter("group", g)
-                                                   .list();
+        return (Collection<GalertDef>) getSession().createQuery(sql).setParameter("group", g)
+            .list();
     }
 
     /**
@@ -89,41 +76,36 @@ public class GalertDefDAO
      */
     @SuppressWarnings("unchecked")
     public List<GalertDef> findAll() {
-        return (List<GalertDef>) getSession().createQuery("from GalertDef d " +
-                                                          "where d.deleted = false " +
-                                                          "order by name").list();
+        return (List<GalertDef>) getSession().createQuery(
+            "from GalertDef d " + "where d.deleted = false " + "order by name").list();
     }
 
     @SuppressWarnings("unchecked")
     Collection<GalertDef> findAll(ResourceGroup g) {
-        String sql = "from GalertDef d where d.group = :group " +
-                     "and d.deleted = false order by name";
+        String sql = "from GalertDef d where d.group = :group "
+                     + "and d.deleted = false order by name";
 
-        return (Collection<GalertDef>) getSession().createQuery(sql)
-                                                   .setParameter("group", g)
-                                                   .list();
+        return (Collection<GalertDef>) getSession().createQuery(sql).setParameter("group", g)
+            .list();
     }
 
     @SuppressWarnings("unchecked")
-    List<GalertDef> findAll(AuthzSubject subj, AlertSeverity minSeverity,
-                            Boolean enabled, PageInfo pInfo) {
-        String sql = PermissionManagerFactory.getInstance()
-                                             .getGroupAlertDefsHQL();
+    List<GalertDef> findAll(AuthzSubject subj, AlertSeverity minSeverity, Boolean enabled,
+                            PageInfo pInfo) {
+        String sql = PermissionManagerFactory.getInstance().getGroupAlertDefsHQL();
 
         sql += " and d.deleted = false";
         if (enabled != null) {
-            sql += " and d.enabled = " +
-                   (enabled.booleanValue() ? "true" : "false");
+            sql += " and d.enabled = " + (enabled.booleanValue() ? "true" : "false");
         }
 
         sql += getOrderByClause(pInfo);
 
-        Query q = getSession().createQuery(sql)
-                              .setInteger("priority", minSeverity.getCode());
+        Query q = getSession().createQuery(sql).setInteger("priority", minSeverity.getCode());
 
         if (sql.indexOf("subj") > 0) {
-            q.setInteger("subj", subj.getId().intValue())
-             .setParameter("op", AuthzConstants.groupOpManageAlerts);
+            q.setInteger("subj", subj.getId().intValue()).setParameter("op",
+                AuthzConstants.groupOpManageAlerts);
         }
 
         return (List<GalertDef>) pInfo.pageResults(q).list();
@@ -135,26 +117,22 @@ public class GalertDefDAO
                      (pInfo.isAscending() ? "" : " DESC");
 
         if (!sort.equals(GalertDefSortField.CTIME)) {
-            res += ", " + GalertDefSortField.CTIME.getSortString("d", "g", "e") +
-                   " DESC";
+            res += ", " + GalertDefSortField.CTIME.getSortString("d", "g", "e") + " DESC";
         }
         return res;
     }
 
     int countByStrategy(ExecutionStrategyTypeInfo strat) {
-        String sql = "select count(*) from GalertDef d " +
-                     "where d.strategyInfo.type = :type";
+        String sql = "select count(*) from GalertDef d " + "where d.strategyInfo.type = :type";
 
-        return ((Integer) getSession().createQuery(sql)
-                                      .setParameter("type", strat)
-                                      .uniqueResult()).intValue();
+        return ((Integer) getSession().createQuery(sql).setParameter("type", strat).uniqueResult())
+            .intValue();
     }
 
     @SuppressWarnings("unchecked")
     Collection<GalertDef> getUsing(Escalation e) {
-        return (Collection<GalertDef>) getSession()
-                                                   .createQuery("from GalertDef where escalation = :esc")
-                                                   .setParameter("esc", e).list();
+        return (Collection<GalertDef>) getSession().createQuery(
+            "from GalertDef where escalation = :esc").setParameter("esc", e).list();
     }
 
 }
