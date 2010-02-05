@@ -25,6 +25,10 @@
 
 package org.hyperic.hq.plugin.weblogic;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Properties;
@@ -278,6 +282,20 @@ public class WeblogicUtil {
 		env.setSecurityPrincipal(props.getProperty(WeblogicMetric.PROP_ADMIN_USERNAME));
 
 		env.setSecurityCredentials(props.getProperty(WeblogicMetric.PROP_ADMIN_PASSWORD, ""));
+
+                if (WeblogicProductPlugin.useSSL2Ways()) {
+                    if (WeblogicProductPlugin.getSSL2WaysCert() != null && WeblogicProductPlugin.getSSL2WaysKey() != null) {
+                        try {
+                            InputStream[] chain = new InputStream[2];
+                            chain[0] = new FileInputStream(new File(WeblogicProductPlugin.getSSL2WaysKey()));
+                            chain[1] = new FileInputStream(new File(WeblogicProductPlugin.getSSL2WaysCert()));
+                            env.setSSLClientCertificate(chain);
+                            env.setSSLClientKeyPassword(WeblogicProductPlugin.getSSL2WaysKeyPass());
+                        } catch (IOException e) {
+                            throw new MetricUnreachableException("Bad SSL2Ways config", e);
+                        }
+                    }
+                }
 
 		Context ctx;
 
