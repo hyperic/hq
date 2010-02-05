@@ -3,7 +3,9 @@ package org.hyperic.hq.hqu.rendit.metaclass
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl
+import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl
 import org.hyperic.hq.events.server.session.Alert
+import org.hyperic.hq.events.server.session.ClassicEscalationAlertType
 import org.hyperic.hq.galerts.server.session.GalertDef
 import org.hyperic.hq.galerts.server.session.GalertLog
 
@@ -39,5 +41,13 @@ class AlertCategory {
             return null
             
         AuthzSubjectManagerEJBImpl.one.getSubjectById(id.toInteger())
+    }
+    
+    static void fix(Alert a, AuthzSubject subject, String reason) {
+    	EscalationManagerEJBImpl.one.fixAlert(
+			subject, 
+			ClassicEscalationAlertType.CLASSIC,
+            a.id,
+            reason)
     }
 }
