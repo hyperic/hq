@@ -1,7 +1,6 @@
 package org.hyperic.hq.product.server.session;
 
 import org.hibernate.SessionFactory;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.product.Plugin;
 import org.springframework.beans.factory.annotation.Autowired;

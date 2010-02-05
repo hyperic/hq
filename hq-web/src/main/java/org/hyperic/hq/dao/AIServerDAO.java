@@ -3,7 +3,6 @@ package org.hyperic.hq.dao;
 import java.util.Collection;
 
 import org.hibernate.SessionFactory;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.autoinventory.AIServer;
 import org.springframework.beans.factory.annotation.Autowired;

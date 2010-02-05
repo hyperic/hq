@@ -39,11 +39,11 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.FlushMode;
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.EdgePermCheck;
 import org.hyperic.hq.authz.shared.PermissionManager;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -66,8 +66,8 @@ public class ResourceDAO
         Resource resource = createPrivate(type, prototype, name, creator, instanceId, system);
 
         /* add it to the root resource group */
-        // TODO resolve circular dependencies to remove DAOFactory
-        ResourceGroupDAO resourceGroupDAO = DAOFactory.getDAOFactory().getResourceGroupDAO();
+        // TODO resolve circular dependencies to remove Bootstrap
+        ResourceGroupDAO resourceGroupDAO = Bootstrap.getBean(ResourceGroupDAO.class);
         ResourceGroup authzGroup = resourceGroupDAO.findRootGroup();
         resourceGroupDAO.addMembers(authzGroup, Collections.singleton(resource));
 

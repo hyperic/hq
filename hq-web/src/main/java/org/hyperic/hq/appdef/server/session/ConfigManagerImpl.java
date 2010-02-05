@@ -42,7 +42,6 @@ import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.autoinventory.AICompare;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.config.ConfigResponse;
@@ -96,22 +95,17 @@ public class ConfigManagerImpl implements ConfigManager {
      */
     @Transactional
     public ConfigResponseDB getConfigResponse(AppdefEntityID id) {
-
-        return getConfigResponse(configResponseDAO, id);
-    }
-
-    private ConfigResponseDB getConfigResponse(ConfigResponseDAO dao, AppdefEntityID id) {
         ConfigResponseDB config;
 
         switch (id.getType()) {
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                config = dao.findByPlatformId(id.getId());
+                config = platformDAO.findById(id.getId()).getConfigResponse();
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                config = dao.findByServerId(id.getId());
+                config = serverDAO.findById(id.getId()).getConfigResponse();
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                config = dao.findByServiceId(id.getId());
+                config = serviceDAO.findById(id.getId()).getConfigResponse();
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
             default:
@@ -452,7 +446,7 @@ public class ConfigManagerImpl implements ConfigManager {
             throw new IllegalArgumentException("Unknown config type: " + type);
         }
 
-        ConfigResponseDB existingConfig = getConfigResponse(configResponseDAO, id);
+        ConfigResponseDB existingConfig = getConfigResponse(id);
         return configureResponse(subject, existingConfig, id, productBytes, measurementBytes, controlBytes, rtBytes,
             null, sendConfigEvent, false);
     }

@@ -29,63 +29,53 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AIQApprovalException;
-import org.hyperic.hq.appdef.shared.CPropManager;
-import org.hyperic.hq.appdef.shared.ConfigManager;
-import org.hyperic.hq.appdef.shared.PlatformManager;
-import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.autoinventory.AIIp;
 import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.hq.autoinventory.AIServer;
+import org.hyperic.hq.dao.AIIpDAO;
+import org.hyperic.hq.dao.AIPlatformDAO;
+import org.hyperic.hq.dao.AIServerDAO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
- * The AIQueueConstants.Q_DECISION_PURGE means to remove the resource
- * from the ai queue.
+ * The AIQueueConstants.Q_DECISION_PURGE means to remove the resource from the
+ * ai queue.
  */
+@Component
 public class AIQRV_purge implements AIQResourceVisitor {
 
-    private static Log _log = LogFactory.getLog(AIQRV_purge.class);
+    private final Log log = LogFactory.getLog(AIQRV_purge.class);
+    private AIPlatformDAO aiPlatformDAO;
+    private AIIpDAO aiIpDAO;
+    private AIServerDAO aiServerDAO;
 
-    public void visitPlatform(AIPlatform aiplatform,
-                              AuthzSubject subject,
-                              PlatformManager pmLocal,
-                              ConfigManager configMgr,
-                              CPropManager cpropMgr,
-                              List createdResources)
-        throws AIQApprovalException, PermissionException
-    {
-        _log.info("Visiting platform: " + aiplatform.getId() +
-                  " fqdn=" + aiplatform.getFqdn());
-        DAOFactory.getDAOFactory().getAIPlatformDAO()
-            .remove(aiplatform);
+    @Autowired
+    public AIQRV_purge(AIPlatformDAO aiPlatformDAO, AIIpDAO aiIpDAO, AIServerDAO aiServerDAO) {
+        this.aiPlatformDAO = aiPlatformDAO;
+        this.aiIpDAO = aiIpDAO;
+        this.aiServerDAO = aiServerDAO;
     }
 
-    public void visitIp(AIIp aiip,
-                        AuthzSubject subject,
-                        PlatformManager pmLocal)
-        throws AIQApprovalException, PermissionException
-    {
-        _log.info("Visiting ip: " + aiip.getId() +
-                  " addr=" + aiip.getAddress());
-        DAOFactory.getDAOFactory().getAIIpDAO()
-            .remove(aiip);
+    public void visitPlatform(AIPlatform aiplatform, AuthzSubject subject, List createdResources)
+        throws AIQApprovalException, PermissionException {
+        log.info("Visiting platform: " + aiplatform.getId() + " fqdn=" + aiplatform.getFqdn());
+        aiPlatformDAO.remove(aiplatform);
     }
 
-    public void visitServer(AIServer aiserver,
-                            AuthzSubject subject,
-                            PlatformManager pmLocal,
-                            ServerManager smLocal,
-                            ConfigManager configMgr,
-                            CPropManager cpropMgr,
-                            List createdResources)
-        throws AIQApprovalException, PermissionException
-    {
-        _log.info("Visiting server: " + aiserver.getId() +
-                  " AIID=" + aiserver.getAutoinventoryIdentifier());
-        DAOFactory.getDAOFactory().getAIServerDAO()
-            .remove(aiserver);
+    public void visitIp(AIIp aiip, AuthzSubject subject) throws AIQApprovalException,
+        PermissionException {
+        log.info("Visiting ip: " + aiip.getId() + " addr=" + aiip.getAddress());
+        aiIpDAO.remove(aiip);
+    }
+
+    public void visitServer(AIServer aiserver, AuthzSubject subject, List createdResources)
+        throws AIQApprovalException, PermissionException {
+        log.info("Visiting server: " + aiserver.getId() + " AIID=" +
+                 aiserver.getAutoinventoryIdentifier());
+        aiServerDAO.remove(aiserver);
     }
 }

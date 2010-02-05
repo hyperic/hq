@@ -26,7 +26,6 @@ package org.hyperic.hq.escalation.server.session;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Expression;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;

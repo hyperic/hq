@@ -25,10 +25,9 @@
 
 package org.hyperic.hq.authz.server.session;
 
-import org.hyperic.util.pager.PagerProcessor;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.values.OwnedResourceGroupValue;
+import org.hyperic.util.pager.PagerProcessor;
 
 public class PagerProcessor_ownedResourceGroup implements PagerProcessor {
     private ResourceDAO dao = null;

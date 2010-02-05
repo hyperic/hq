@@ -27,15 +27,11 @@ package org.hyperic.hq.autoinventory.server.session;
 
 import java.util.Date;
 
-import org.hyperic.util.pager.PagerProcessorExt;
-import org.hyperic.util.pager.PagerEventHandler;
-
 import org.hyperic.hq.autoinventory.AISchedule;
 import org.hyperic.hq.context.Bootstrap;
-
-
-import org.hyperic.dao.DAOFactory;
-
+import org.hyperic.hq.dao.AIScheduleDAO;
+import org.hyperic.util.pager.PagerEventHandler;
+import org.hyperic.util.pager.PagerProcessorExt;
 import org.quartz.Scheduler;
 import org.quartz.Trigger;
 
@@ -63,7 +59,7 @@ public class PagerProcessor_ai_schedule implements PagerProcessorExt {
                     if (trigger == null) {
                         // Job no longer exists
                         try {
-                            DAOFactory.getDAOFactory().getAIScheduleDAO()
+                            Bootstrap.getBean(AIScheduleDAO.class)
                                 .remove(s);
                             return null;
                         } catch (Exception e) {

@@ -41,7 +41,6 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.ServiceCluster;
@@ -251,7 +250,7 @@ public class ServiceManagerImpl implements ServiceManager {
         resourceManager.moveResource(subject, target.getResource(), destination.getResource());
 
         // Flush to ensure the reschedule of metrics occurs
-        DAOFactory.getDAOFactory().getCurrentSession().flush();
+        serviceDAO.getSession().flush();
 
         // Reschedule metrics
         ResourceUpdatedZevent zevent = new ResourceUpdatedZevent(subject, target.getEntityId());

@@ -30,16 +30,19 @@ import java.util.Collection;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
 @Repository
-public class ServiceTypeDAO extends HibernateDAO<ServiceType>
-{
+public class ServiceTypeDAO
+    extends HibernateDAO<ServiceType> {
+    private PlatformDAO platformDAO;
+
     @Autowired
-    public ServiceTypeDAO(SessionFactory f) {
+    public ServiceTypeDAO(SessionFactory f, PlatformDAO platformDAO) {
         super(ServiceType.class, f);
+        this.platformDAO = platformDAO;
     }
 
     public ServiceType findById(Integer id) {
@@ -57,9 +60,7 @@ public class ServiceTypeDAO extends HibernateDAO<ServiceType>
         super.remove(entity);
     }
 
-    ServiceType create(String name, String plugin, String description,
-                       boolean internal)
-    {
+    ServiceType create(String name, String plugin, String description, boolean internal) {
         ServiceType st = new ServiceType();
         st.setName(name);
         st.setPlugin(plugin);
@@ -71,42 +72,29 @@ public class ServiceTypeDAO extends HibernateDAO<ServiceType>
     }
 
     public ServiceType findByName(String name) {
-        String sql="from ServiceType where sortName=?";
-        return (ServiceType)getSession().createQuery(sql)
-            .setString(0, name.toUpperCase())
-            .setCacheable(true)
-            .setCacheRegion("ServiceType.findByName")
-            .uniqueResult();
+        String sql = "from ServiceType where sortName=?";
+        return (ServiceType) getSession().createQuery(sql).setString(0, name.toUpperCase())
+            .setCacheable(true).setCacheRegion("ServiceType.findByName").uniqueResult();
     }
 
     public Collection<ServiceType> findByPlugin(String plugin) {
-        return createCriteria()
-            .add(Restrictions.eq("plugin", plugin))
-            .addOrder(Order.asc("sortName"))
-            .list();
+        return createCriteria().add(Restrictions.eq("plugin", plugin)).addOrder(
+            Order.asc("sortName")).list();
     }
 
     public Collection<ServiceType> findByServerType_orderName(int serverType, boolean asc) {
-        String sql="from ServiceType where serverType.id=? " +
-                   "order by sortName " +
-                   (asc ? "asc" : "desc");
-        return getSession().createQuery(sql)
-            .setInteger(0, serverType)
-            .list();
+        String sql = "from ServiceType where serverType.id=? " + "order by sortName " +
+                     (asc ? "asc" : "desc");
+        return getSession().createQuery(sql).setInteger(0, serverType).list();
     }
 
     public Collection<ServiceType> findVirtualServiceTypesByPlatform(int platformId) {
         // First get the platform
-        Platform platform =
-            DAOFactory.getDAOFactory().getPlatformDAO().findById(
-                new Integer(platformId));
+        Platform platform = platformDAO.findById(new Integer(platformId));
 
-        return createCriteria()
-            .createAlias("serverType", "svt")
-            .createAlias("svt.platformTypes", "pt")
-            .add(Restrictions.eq("svt.virtual", Boolean.TRUE))
-            .add(Restrictions.eq("pt.id", platform.getPlatformType().getId()))
-            .addOrder(Order.asc("sortName"))
-            .list();
+        return createCriteria().createAlias("serverType", "svt").createAlias("svt.platformTypes",
+            "pt").add(Restrictions.eq("svt.virtual", Boolean.TRUE)).add(
+            Restrictions.eq("pt.id", platform.getPlatformType().getId())).addOrder(
+            Order.asc("sortName")).list();
     }
 }
