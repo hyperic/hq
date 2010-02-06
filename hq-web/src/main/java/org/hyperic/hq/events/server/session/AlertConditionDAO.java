@@ -30,18 +30,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class AlertConditionDAO extends HibernateDAO {
-    
+public class AlertConditionDAO
+    extends HibernateDAO<AlertCondition> {
+
     @Autowired
     public AlertConditionDAO(SessionFactory f) {
         super(AlertCondition.class, f);
     }
 
-    public AlertCondition findById(Integer id) {
-        return (AlertCondition)super.findById(id);
-    }
-
-    void save(AlertCondition cond) {
-        super.save(cond);
-    }
 }

@@ -16,13 +16,22 @@
 	<bean id="mailSession" class="javax.mail.Session"
 		factory-method="getInstance">
 		<constructor-arg>
-			<util:properties location="classpath:/mail-config.properties"></util:properties>
+			<props>
+				<prop key="mail.transport.protocol">smtp</prop>
+				<prop key="mail.smtp.host">${server.mail.host}</prop>
+				<prop key="mail.smtp.port">${mail.smtp.port}</prop>
+				<prop key="mail.smtp.auth">${mail.smtp.auth}</prop>
+				<prop key="mail.smtp.socketFactory.class">${mail.smtp.socketFactory.class}</prop>
+				<prop key="mail.smtp.socketFactory.fallback">${mail.smtp.socketFactory.fallback}</prop>
+				<prop key="mail.smtp.starttls.enable">${mail.smtp.starttls.enable}</prop>
+				<prop key="mail.smtp.socketFactory.port">${mail.smtp.socketFactory.port}</prop>
+			</props>
 		</constructor-arg>
 		<constructor-arg ref="passwordAuthenticator" />
 	</bean>
 
 	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
-		<property name="host" value="${mail.smtp.host}"/>
+		<property name="host" value="${server.mail.host}"/>
 		<property name="session" ref="mailSession"/>
 	</bean>
 

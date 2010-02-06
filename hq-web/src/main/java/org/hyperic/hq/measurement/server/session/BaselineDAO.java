@@ -50,19 +50,10 @@ public class BaselineDAO
         super(Baseline.class, f);
     }
 
-    public Baseline findById(Integer id) {
-        return (Baseline) super.findById(id);
-    }
-
-    public void save(Baseline entity) {
-        super.save(entity);
-    }
-
-    public Baseline create(Measurement m, long computeTime,
-                           boolean userEntered, Double mean,
+    public Baseline create(Measurement m, long computeTime, boolean userEntered, Double mean,
                            Double minExpectedValue, Double maxExpectedValue) {
-        Baseline b = new Baseline(m, computeTime, userEntered, mean,
-                                  minExpectedValue, maxExpectedValue);
+        Baseline b = new Baseline(m, computeTime, userEntered, mean, minExpectedValue,
+            maxExpectedValue);
         m.setBaseline(b);
         save(b);
         return b;
@@ -74,46 +65,33 @@ public class BaselineDAO
     @SuppressWarnings("unchecked")
     public List<Measurement> findMeasurementsForBaselines(boolean enabled, long computeTime,
                                                           int maxResults) {
-        String sql = new StringBuffer().append("SELECT {m.*}")
-                                       .append(" FROM EAM_MEASUREMENT m")
-                                       .append(" LEFT JOIN EAM_MEASUREMENT_BL b on b.measurement_id = m.id")
-                                       .append(" JOIN EAM_MEASUREMENT_TEMPL t on m.template_id = t.id")
-                                       .append(" WHERE t.COLLECTION_TYPE=:collType")
-                                       .append(" AND m.ENABLED=:enabled")
-                                       .append(" AND m.COLL_INTERVAL is not null")
-                                       .append(" AND (b.id is null or b.compute_time < :computeTime) ")
-                                       .toString();
+        String sql = new StringBuffer().append("SELECT {m.*}").append(" FROM EAM_MEASUREMENT m")
+            .append(" LEFT JOIN EAM_MEASUREMENT_BL b on b.measurement_id = m.id").append(
+                " JOIN EAM_MEASUREMENT_TEMPL t on m.template_id = t.id").append(
+                " WHERE t.COLLECTION_TYPE=:collType").append(" AND m.ENABLED=:enabled").append(
+                " AND m.COLL_INTERVAL is not null").append(
+                " AND (b.id is null or b.compute_time < :computeTime) ").toString();
         int collType = MeasurementConstants.COLL_TYPE_DYNAMIC;
-        return getSession().createSQLQuery(sql)
-                           .addEntity("m", Measurement.class)
-                           .setBoolean("enabled", enabled)
-                           .setInteger("collType", collType)
-                           .setLong("computeTime", computeTime)
-                           .setMaxResults(maxResults)
-                           .list();
+        return getSession().createSQLQuery(sql).addEntity("m", Measurement.class).setBoolean(
+            "enabled", enabled).setInteger("collType", collType)
+            .setLong("computeTime", computeTime).setMaxResults(maxResults).list();
     }
 
     @SuppressWarnings("unchecked")
     public List<Baseline> findByInstance(int appdefType, int appdefId) {
-        String sql = "select b from Baseline b " +
-                     "where b.measurement.appdefType = ? and " +
-                     "b.measurement.instanceId = ? and " +
-                     "b.measurement.interval is not null";
+        String sql = "select b from Baseline b " + "where b.measurement.appdefType = ? and "
+                     + "b.measurement.instanceId = ? and " + "b.measurement.interval is not null";
 
-        return getSession().createQuery(sql)
-                           .setInteger(0, appdefType)
-                           .setInteger(1, appdefId).list();
+        return getSession().createQuery(sql).setInteger(0, appdefType).setInteger(1, appdefId)
+            .list();
     }
 
-    public Baseline findByTemplateForInstance(Integer mtId,
-                                              Integer instanceId) {
-        String sql = "select b from Baseline b " +
-                     "where b.measurement.template.id = ? and " +
-                     "b.measurement.instanceId = ?";
+    public Baseline findByTemplateForInstance(Integer mtId, Integer instanceId) {
+        String sql = "select b from Baseline b " + "where b.measurement.template.id = ? and "
+                     + "b.measurement.instanceId = ?";
 
-        return (Baseline) getSession().createQuery(sql)
-                                      .setInteger(0, mtId.intValue())
-                                      .setInteger(1, instanceId.intValue()).uniqueResult();
+        return (Baseline) getSession().createQuery(sql).setInteger(0, mtId.intValue()).setInteger(
+            1, instanceId.intValue()).uniqueResult();
     }
 
     int deleteByIds(Collection<Integer> ids) {
@@ -128,12 +106,11 @@ public class BaselineDAO
                 subIds.add(it.next());
             }
 
-            count += session.createQuery(hql).setParameterList("ids", subIds)
-                            .executeUpdate();
+            count += session.createQuery(hql).setParameterList("ids", subIds).executeUpdate();
 
             if (_log.isDebugEnabled()) {
-                _log.debug("deleteByMetricIds() " + subIds.size() + " of " +
-                           ids.size() + " metric IDs");
+                _log.debug("deleteByMetricIds() " + subIds.size() + " of " + ids.size() +
+                           " metric IDs");
             }
         }
 

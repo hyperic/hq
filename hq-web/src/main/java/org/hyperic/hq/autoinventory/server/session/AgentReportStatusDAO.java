@@ -34,24 +34,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class AgentReportStatusDAO extends HibernateDAO<AgentReportStatus> {
+public class AgentReportStatusDAO
+    extends HibernateDAO<AgentReportStatus> {
     @Autowired
     public AgentReportStatusDAO(SessionFactory f) {
         super(AgentReportStatus.class, f);
     }
 
-    public void remove(AgentReportStatus status) {
-        super.remove(status);
-    }
-
-    void save(AgentReportStatus status) {
-        super.save(status);
-    }
-
     public AgentReportStatus getReportStatus(Agent a) {
         String sql = "from AgentReportStatus where agent = :agent";
-        return (AgentReportStatus)getSession().createQuery(sql)
-            .setParameter("agent", a)
+        return (AgentReportStatus) getSession().createQuery(sql).setParameter("agent", a)
             .uniqueResult();
     }
 
@@ -69,12 +61,12 @@ public class AgentReportStatusDAO extends HibernateDAO<AgentReportStatus> {
     }
 
     /**
-     * Find a collection of {@link AgentReportStatus} where the services
-     * have not been totally processed.
+     * Find a collection of {@link AgentReportStatus} where the services have
+     * not been totally processed.
      */
     @SuppressWarnings("unchecked")
     Collection<AgentReportStatus> findDirtyStatus() {
-        String sql="from AgentReportStatus where serviceDirty = true";
+        String sql = "from AgentReportStatus where serviceDirty = true";
 
         return getSession().createQuery(sql).list();
     }

@@ -28,8 +28,8 @@ package org.hyperic.hq.events.server.session;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PersistedObject;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.measurement.MeasurementConstants;
@@ -39,37 +39,34 @@ import org.hyperic.hq.measurement.shared.ResourceLogEvent;
 import org.hyperic.util.units.FormattedNumber;
 
 public class AlertCondition
-    extends PersistedObject
-{
-    private int                 _type;
-    private boolean             _required;
-    private int                 _measurementId;
-    private String              _name;
-    private String              _comparator;
-    private double              _threshold;
-    private String              _optionStatus;
-    private AlertDefinition     _alertDefinition;
-    private RegisteredTrigger   _trigger;
-    private Collection          _logEntries;
+    extends PersistedObject {
+    private int _type;
+    private boolean _required;
+    private int _measurementId;
+    private String _name;
+    private String _comparator;
+    private double _threshold;
+    private String _optionStatus;
+    private AlertDefinition _alertDefinition;
+    private RegisteredTrigger _trigger;
+    private Collection _logEntries;
 
     private AlertConditionValue _value;
 
     protected AlertCondition() {
     }
 
-    AlertCondition(AlertDefinition def, AlertConditionValue val,
-                   RegisteredTrigger trigger)
-    {
-        _type            = val.getType();
-        _required        = val.getRequired();
-        _measurementId   = val.getMeasurementId();
-        _name            = val.getName();
-        _comparator      = val.getComparator();
-        _threshold       = val.getThreshold();
-        _optionStatus    = val.getOption();
+    AlertCondition(AlertDefinition def, AlertConditionValue val, RegisteredTrigger trigger) {
+        _type = val.getType();
+        _required = val.getRequired();
+        _measurementId = val.getMeasurementId();
+        _name = val.getName();
+        _comparator = val.getComparator();
+        _threshold = val.getThreshold();
+        _optionStatus = val.getOption();
         _alertDefinition = def;
-        _trigger         = trigger;
-        _logEntries      = Collections.EMPTY_LIST;
+        _trigger = trigger;
+        _logEntries = Collections.EMPTY_LIST;
     }
 
     public int getType() {
@@ -176,7 +173,7 @@ public class AlertCondition
     }
 
     public void setAlertConditionValue(AlertConditionValue val) {
-        TriggerDAO tDAO = DAOFactory.getDAOFactory().getTriggerDAO();
+        TriggerDAO tDAO = Bootstrap.getBean(TriggerDAO.class);
 
         setType(val.getType());
         setRequired(val.getRequired());
@@ -191,60 +188,52 @@ public class AlertCondition
     public String describe(Measurement dm) {
         StringBuffer text = new StringBuffer();
         switch (getType()) {
-        case EventConstants.TYPE_THRESHOLD:
-        case EventConstants.TYPE_BASELINE:
-            text.append(getName()).append(" ")
-                .append(getComparator()).append(" ");
+            case EventConstants.TYPE_THRESHOLD:
+            case EventConstants.TYPE_BASELINE:
+                text.append(getName()).append(" ").append(getComparator()).append(" ");
 
-            if (getType() == EventConstants.TYPE_BASELINE) {
-                text.append(getThreshold());
-                text.append("% of ");
+                if (getType() == EventConstants.TYPE_BASELINE) {
+                    text.append(getThreshold());
+                    text.append("% of ");
 
-                if (MeasurementConstants.BASELINE_OPT_MAX.equals(getOptionStatus())) {
-                    text.append("Max Value");
-                } else if (MeasurementConstants.BASELINE_OPT_MIN
-                        .equals(getOptionStatus())) {
-                    text.append("Min Value");
+                    if (MeasurementConstants.BASELINE_OPT_MAX.equals(getOptionStatus())) {
+                        text.append("Max Value");
+                    } else if (MeasurementConstants.BASELINE_OPT_MIN.equals(getOptionStatus())) {
+                        text.append("Min Value");
+                    } else {
+                        text.append("Baseline");
+                    }
                 } else {
-                    text.append("Baseline");
+                    FormattedNumber th = UnitsConvert.convert(getThreshold(), dm.getTemplate()
+                        .getUnits());
+                    text.append(th.toString());
                 }
-            } else {
-                FormattedNumber th =
-                    UnitsConvert.convert(getThreshold(),
-                                         dm.getTemplate().getUnits());
-                text.append(th.toString());
-            }
-            break;
-        case EventConstants.TYPE_CONTROL:
-            text.append(getName());
-            break;
-        case EventConstants.TYPE_CHANGE:
-            text.append(getName()).append(" value changed");
-            break;
-        case EventConstants.TYPE_CUST_PROP:
-            text.append(getName()).append(" value changed");
-            break;
-        case EventConstants.TYPE_LOG:
-            text.append("Event/Log Level(")
-                    .append(ResourceLogEvent.getLevelString(Integer
-                                    .parseInt(getName())))
-                    .append(")");
-            if (getOptionStatus() != null
-                    && getOptionStatus().length() > 0) {
-                text.append(" and matching substring ").append('"')
-                    .append(getOptionStatus()).append('"');
-            }
-            break;
-        case EventConstants.TYPE_CFG_CHG:
-            text.append("Config changed");
-            if (getOptionStatus() != null
-                    && getOptionStatus().length() > 0) {
-                text.append(": ")
-                    .append(getOptionStatus());
-            }
-            break;
-        default:
-            break;
+                break;
+            case EventConstants.TYPE_CONTROL:
+                text.append(getName());
+                break;
+            case EventConstants.TYPE_CHANGE:
+                text.append(getName()).append(" value changed");
+                break;
+            case EventConstants.TYPE_CUST_PROP:
+                text.append(getName()).append(" value changed");
+                break;
+            case EventConstants.TYPE_LOG:
+                text.append("Event/Log Level(").append(
+                    ResourceLogEvent.getLevelString(Integer.parseInt(getName()))).append(")");
+                if (getOptionStatus() != null && getOptionStatus().length() > 0) {
+                    text.append(" and matching substring ").append('"').append(getOptionStatus())
+                        .append('"');
+                }
+                break;
+            case EventConstants.TYPE_CFG_CHG:
+                text.append("Config changed");
+                if (getOptionStatus() != null && getOptionStatus().length() > 0) {
+                    text.append(": ").append(getOptionStatus());
+                }
+                break;
+            default:
+                break;
         }
 
         return text.toString();

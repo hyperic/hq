@@ -31,9 +31,9 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.events.AlertInterface;
@@ -238,11 +238,10 @@ public class Alert
     }
 
     protected void setAlertValue(AlertValue val) {
-        DAOFactory daoFactory = DAOFactory.getDAOFactory();
-        AlertDefinitionDAO aDao = daoFactory.getAlertDefDAO();
+        AlertDefinitionDAO aDao = Bootstrap.getBean(AlertDefinitionDAO.class);
         AlertDefinition def = aDao.findById(val.getAlertDefId());
-        AlertActionLogDAO alDao = daoFactory.getAlertActionLogDAO();
-        AlertConditionLogDAO aclDao = daoFactory.getAlertConditionLogDAO();
+        AlertActionLogDAO alDao = Bootstrap.getBean(AlertActionLogDAO.class);
+        AlertConditionLogDAO aclDao = Bootstrap.getBean(AlertConditionLogDAO.class);
 
         setFixed(false);
         setAlertDefinition(def);

@@ -38,7 +38,6 @@ import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.ApplicationDAO;
-import org.hyperic.hq.appdef.server.session.ConfigResponseDAO;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformDAO;
 import org.hyperic.hq.appdef.server.session.PlatformType;
@@ -95,7 +94,6 @@ public class ResourceManagerImpl implements ResourceManager {
     private ResourceEdgeDAO resourceEdgeDAO;
     private PlatformDAO platformDAO;
     private AuthzSubjectManager authzSubjectManager;
-    private ConfigResponseDAO configResponseDAO;
     private AuthzSubjectDAO authzSubjectDAO;
     private ResourceDAO resourceDAO;
     private ResourceTypeDAO resourceTypeDAO;
@@ -109,19 +107,20 @@ public class ResourceManagerImpl implements ResourceManager {
     private ResourceAuditFactory resourceAuditFactory;
 
     @Autowired
-    public ResourceManagerImpl(ResourceEdgeDAO resourceEdgeDAO, PlatformDAO platformDAO, ServerDAO serverDAO,
-                               ServiceDAO serviceDAO, AuthzSubjectManager authzSubjectManager,
-                               ConfigResponseDAO configResponseDAO, AuthzSubjectDAO authzSubjectDAO,
-                               ResourceDAO resourceDAO, ResourceTypeDAO resourceTypeDAO,
-                               ResourceRelationDAO resourceRelationDAO, ZeventEnqueuer zeventManager,
-                               PlatformTypeDAO platformTypeDAO, ApplicationDAO applicationDAO,
-                               PermissionManager permissionManager, ResourceAuditFactory resourceAuditFactory) {
+    public ResourceManagerImpl(ResourceEdgeDAO resourceEdgeDAO, PlatformDAO platformDAO,
+                               ServerDAO serverDAO, ServiceDAO serviceDAO,
+                               AuthzSubjectManager authzSubjectManager,
+                               AuthzSubjectDAO authzSubjectDAO, ResourceDAO resourceDAO,
+                               ResourceTypeDAO resourceTypeDAO,
+                               ResourceRelationDAO resourceRelationDAO,
+                               ZeventEnqueuer zeventManager, PlatformTypeDAO platformTypeDAO,
+                               ApplicationDAO applicationDAO, PermissionManager permissionManager,
+                               ResourceAuditFactory resourceAuditFactory) {
         this.resourceEdgeDAO = resourceEdgeDAO;
         this.platformDAO = platformDAO;
         this.serverDAO = serverDAO;
         this.serviceDAO = serviceDAO;
         this.authzSubjectManager = authzSubjectManager;
-        this.configResponseDAO = configResponseDAO;
         this.authzSubjectDAO = authzSubjectDAO;
         this.resourceDAO = resourceDAO;
         this.resourceTypeDAO = resourceTypeDAO;
@@ -154,8 +153,8 @@ public class ResourceManagerImpl implements ResourceManager {
     /**
      * remove the authz resource entry
      */
-    public void removeAuthzResource(AuthzSubject subject, AppdefEntityID aeid, Resource r) throws PermissionException,
-        VetoException {
+    public void removeAuthzResource(AuthzSubject subject, AppdefEntityID aeid, Resource r)
+        throws PermissionException, VetoException {
         if (log.isDebugEnabled())
             log.debug("Removing authz resource: " + aeid);
 
@@ -189,8 +188,8 @@ public class ResourceManagerImpl implements ResourceManager {
      * 
      * 
      */
-    public Resource createResource(AuthzSubject owner, ResourceType rt, Resource prototype, Integer instanceId,
-                                   String name, boolean system, Resource parent) {
+    public Resource createResource(AuthzSubject owner, ResourceType rt, Resource prototype,
+                                   Integer instanceId, String name, boolean system, Resource parent) {
         long start = System.currentTimeMillis();
 
         Resource res = resourceDAO.create(rt, prototype, name, owner, instanceId, system);
@@ -199,7 +198,8 @@ public class ResourceManagerImpl implements ResourceManager {
 
         resourceEdgeDAO.create(res, res, 0, relation); // Self-edge
         if (parent != null) {
-            Collection<ResourceEdge> ancestors = resourceEdgeDAO.findAncestorEdges(parent, relation);
+            Collection<ResourceEdge> ancestors = resourceEdgeDAO
+                .findAncestorEdges(parent, relation);
             resourceEdgeDAO.create(res, parent, -1, relation);
             resourceEdgeDAO.create(parent, res, 1, relation);
 
@@ -242,7 +242,8 @@ public class ResourceManagerImpl implements ResourceManager {
         resourceEdgeDAO.create(destination, target, 1, relation);
 
         // Ancestor edges to new destination resource
-        Collection<ResourceEdge> ancestors = resourceEdgeDAO.findAncestorEdges(destination, relation);
+        Collection<ResourceEdge> ancestors = resourceEdgeDAO.findAncestorEdges(destination,
+            relation);
         for (ResourceEdge ancestorEdge : ancestors) {
             int distance = ancestorEdge.getDistance() - 1;
 
@@ -250,7 +251,8 @@ public class ResourceManagerImpl implements ResourceManager {
             resourceEdgeDAO.create(ancestorEdge.getTo(), target, -distance, relation);
         }
 
-        resourceAuditFactory.moveResource(target, destination, owner, start, System.currentTimeMillis());
+        resourceAuditFactory.moveResource(target, destination, owner, start, System
+            .currentTimeMillis());
     }
 
     /**
@@ -290,7 +292,8 @@ public class ResourceManagerImpl implements ResourceManager {
         Resource resource = findResourceByInstanceId(type.getId(), instanceId);
 
         if (resource == null) {
-            throw new RuntimeException("Unable to find resourceType=" + type.getId() + " instanceId=" + instanceId);
+            throw new RuntimeException("Unable to find resourceType=" + type.getId() +
+                                       " instanceId=" + instanceId);
         }
         return resource;
     }
@@ -379,8 +382,8 @@ public class ResourceManagerImpl implements ResourceManager {
         return null;
     }
 
-    private Application findApplicationById(AuthzSubject subject, Integer id) throws ApplicationNotFoundException,
-        PermissionException {
+    private Application findApplicationById(AuthzSubject subject, Integer id)
+        throws ApplicationNotFoundException, PermissionException {
         try {
             Application app = applicationDAO.findById(id);
             permissionManager.checkViewPermission(subject, app.getEntityId());
@@ -430,8 +433,9 @@ public class ResourceManagerImpl implements ResourceManager {
      *         deleted
      * 
      */
-    public AppdefEntityID[] removeResourcePerms(AuthzSubject subj, Resource r, boolean nullResourceType)
-        throws VetoException, PermissionException {
+    public AppdefEntityID[] removeResourcePerms(AuthzSubject subj, Resource r,
+                                                boolean nullResourceType) throws VetoException,
+        PermissionException {
         final ResourceType resourceType = r.getResourceType();
 
         // Possible this resource has already been marked for deletion
@@ -510,7 +514,8 @@ public class ResourceManagerImpl implements ResourceManager {
         if (debug) {
             watch.markTimeBegin("removeResourcePerms.audit");
         }
-        resourceAuditFactory.deleteResource(findResourceById(AuthzConstants.authzHQSystem), subj, now, now);
+        resourceAuditFactory.deleteResource(findResourceById(AuthzConstants.authzHQSystem), subj,
+            now, now);
         if (debug) {
             watch.markTimeEnd("removeResourcePerms.audit");
             log.debug(watch);
@@ -525,7 +530,8 @@ public class ResourceManagerImpl implements ResourceManager {
         cb.preResourceDelete(r);
 
         final long now = System.currentTimeMillis();
-        resourceAuditFactory.deleteResource(findResourceById(AuthzConstants.authzHQSystem), subject, now, now);
+        resourceAuditFactory.deleteResource(findResourceById(AuthzConstants.authzHQSystem),
+            subject, now, now);
         r.getGroupBag().clear();
         resourceDAO.remove(r);
     }
@@ -565,11 +571,13 @@ public class ResourceManagerImpl implements ResourceManager {
      * @return Map of resource values
      * 
      */
-    public List<Integer> findViewableInstances(AuthzSubject subject, String typeName, String resName,
-                                               String appdefTypeStr, Integer typeId, PageControl pc) {
+    public List<Integer> findViewableInstances(AuthzSubject subject, String typeName,
+                                               String resName, String appdefTypeStr,
+                                               Integer typeId, PageControl pc) {
         // Authz type and/or resource name must be specified.
         if (typeName == null) {
-            throw new IllegalArgumentException("This method requires a valid authz type name argument");
+            throw new IllegalArgumentException(
+                "This method requires a valid authz type name argument");
         }
 
         PermissionManager pm = PermissionManagerFactory.getInstance();
@@ -615,7 +623,8 @@ public class ResourceManagerImpl implements ResourceManager {
             String typeName = type.getName();
 
             // Now fetch list by the type
-            List<Integer> ids = findViewableInstances(subject, typeName, null, null, null, PageControl.PAGE_ALL);
+            List<Integer> ids = findViewableInstances(subject, typeName, null, null, null,
+                PageControl.PAGE_ALL);
             if (ids.size() > 0) {
                 resourceMap.put(typeName, ids);
             }
@@ -681,7 +690,8 @@ public class ResourceManagerImpl implements ResourceManager {
      * @return PageList of resource values
      * 
      */
-    public PageList<Resource> findViewableSvcResources(AuthzSubject subject, String resourceName, PageControl pc) {
+    public PageList<Resource> findViewableSvcResources(AuthzSubject subject, String resourceName,
+                                                       PageControl pc) {
         Collection<Resource> resources;
 
         AuthzSubject subj = authzSubjectDAO.findById(subject.getId());
@@ -748,19 +758,22 @@ public class ResourceManagerImpl implements ResourceManager {
     public List<ResourceEdge> findResourceEdges(ResourceRelation relation, Integer resourceId,
                                                 List<Integer> platformTypeIds, String platformName) {
         if (relation == null || !relation.getId().equals(AuthzConstants.RELATION_NETWORK_ID)) {
-            throw new IllegalArgumentException("Only " + AuthzConstants.ResourceEdgeNetworkRelation +
+            throw new IllegalArgumentException("Only " +
+                                               AuthzConstants.ResourceEdgeNetworkRelation +
                                                " resource relationships are supported.");
         }
 
-        return resourceEdgeDAO.findDescendantEdgesByNetworkRelation(resourceId, platformTypeIds, platformName);
+        return resourceEdgeDAO.findDescendantEdgesByNetworkRelation(resourceId, platformTypeIds,
+            platformName);
     }
 
     /**
      *
      * 
      */
-    public void createResourceEdges(AuthzSubject subject, ResourceRelation relation, AppdefEntityID parent,
-                                    AppdefEntityID[] children) throws PermissionException, ResourceEdgeCreateException {
+    public void createResourceEdges(AuthzSubject subject, ResourceRelation relation,
+                                    AppdefEntityID parent, AppdefEntityID[] children)
+        throws PermissionException, ResourceEdgeCreateException {
         createResourceEdges(subject, relation, parent, children, false);
     }
 
@@ -769,17 +782,18 @@ public class ResourceManagerImpl implements ResourceManager {
 
         switch (id.getType()) {
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                config = configResponseDAO.findByPlatformId(id.getId());
+                config = platformDAO.findById(id.getId()).getConfigResponse();
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                config = configResponseDAO.findByServerId(id.getId());
+                config = serverDAO.findById(id.getId()).getConfigResponse();
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                config = configResponseDAO.findByServiceId(id.getId());
+                config = serviceDAO.findById(id.getId()).getConfigResponse();
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
             default:
-                throw new IllegalArgumentException("The passed entity type " + "does not support config " + "responses");
+                throw new IllegalArgumentException("The passed entity type "
+                                                   + "does not support config " + "responses");
         }
 
         return config;
@@ -801,12 +815,14 @@ public class ResourceManagerImpl implements ResourceManager {
      *
      * 
      */
-    public void createResourceEdges(AuthzSubject subject, ResourceRelation relation, AppdefEntityID parent,
-                                    AppdefEntityID[] children, boolean deleteExisting) throws PermissionException,
+    public void createResourceEdges(AuthzSubject subject, ResourceRelation relation,
+                                    AppdefEntityID parent, AppdefEntityID[] children,
+                                    boolean deleteExisting) throws PermissionException,
         ResourceEdgeCreateException {
 
         if (relation == null || !relation.getId().equals(AuthzConstants.RELATION_NETWORK_ID)) {
-            throw new ResourceEdgeCreateException("Only " + AuthzConstants.ResourceEdgeNetworkRelation +
+            throw new ResourceEdgeCreateException("Only " +
+                                                  AuthzConstants.ResourceEdgeNetworkRelation +
                                                   " resource relationships are supported.");
         }
 
@@ -822,7 +838,8 @@ public class ResourceManagerImpl implements ResourceManager {
             throw new ResourceEdgeCreateException("Platform id " + parent.getId() + " not found.");
         }
 
-        List<PlatformType> supportedPlatformTypes = new ArrayList<PlatformType>(findSupportedPlatformTypes());
+        List<PlatformType> supportedPlatformTypes = new ArrayList<PlatformType>(
+            findSupportedPlatformTypes());
 
         if (supportedPlatformTypes.contains(parentPlatform.getPlatformType())) {
             throw new ResourceEdgeCreateException(parentPlatform.getPlatformType().getName() +
@@ -841,11 +858,13 @@ public class ResourceManagerImpl implements ResourceManager {
         if (config != null) {
             String validationError = config.getValidationError();
             if (validationError != null) {
-                throw new ResourceEdgeCreateException("Resource id " + parentResource.getId() + ": " + validationError);
+                throw new ResourceEdgeCreateException("Resource id " + parentResource.getId() +
+                                                      ": " + validationError);
             }
         }
 
-        if (parentResource != null && !parentResource.isInAsyncDeleteState() && children != null && children.length > 0) {
+        if (parentResource != null && !parentResource.isInAsyncDeleteState() && children != null &&
+            children.length > 0) {
 
             try {
                 if (deleteExisting) {
@@ -871,11 +890,13 @@ public class ResourceManagerImpl implements ResourceManager {
                         childResource = childPlatform.getResource();
 
                         if (!supportedPlatformTypes.contains(childPlatform.getPlatformType())) {
-                            throw new ResourceEdgeCreateException(childPlatform.getPlatformType().getName() +
+                            throw new ResourceEdgeCreateException(childPlatform.getPlatformType()
+                                .getName() +
                                                                   " not supported as a dependent platform type.");
                         }
                     } catch (PlatformNotFoundException pe) {
-                        throw new ResourceEdgeCreateException("Platform id " + children[i].getId() + " not found.");
+                        throw new ResourceEdgeCreateException("Platform id " + children[i].getId() +
+                                                              " not found.");
                     }
 
                     // Check if child resource already exists in a network
@@ -891,14 +912,17 @@ public class ResourceManagerImpl implements ResourceManager {
                             continue;
                         } else {
                             // already exists with different parent
-                            throw new ResourceEdgeCreateException("Resource id " + childResource.getId() +
+                            throw new ResourceEdgeCreateException("Resource id " +
+                                                                  childResource.getId() +
                                                                   " already exists in another network hierarchy.");
                         }
                     } else if (existing.size() > 1) {
                         // a resource can only belong to one network hierarchy
                         // this is a data integrity issue if it happens
-                        throw new ResourceEdgeCreateException("Resource id " + childResource.getId() + " exists in " +
-                                                              existing.size() + " network hierarchies.");
+                        throw new ResourceEdgeCreateException("Resource id " +
+                                                              childResource.getId() +
+                                                              " exists in " + existing.size() +
+                                                              " network hierarchies.");
                     }
 
                     if (childResource != null && !childResource.isInAsyncDeleteState()) {
@@ -916,11 +940,13 @@ public class ResourceManagerImpl implements ResourceManager {
      *
      * 
      */
-    public void removeResourceEdges(AuthzSubject subject, ResourceRelation relation, AppdefEntityID parent,
-                                    AppdefEntityID[] children) throws PermissionException {
+    public void removeResourceEdges(AuthzSubject subject, ResourceRelation relation,
+                                    AppdefEntityID parent, AppdefEntityID[] children)
+        throws PermissionException {
 
         if (relation == null || !relation.getId().equals(AuthzConstants.RELATION_NETWORK_ID)) {
-            throw new IllegalArgumentException("Only " + AuthzConstants.ResourceEdgeNetworkRelation +
+            throw new IllegalArgumentException("Only " +
+                                               AuthzConstants.ResourceEdgeNetworkRelation +
                                                " resource relationships are supported.");
         }
 
@@ -960,7 +986,8 @@ public class ResourceManagerImpl implements ResourceManager {
         throws PermissionException {
 
         if (relation == null || !relation.getId().equals(AuthzConstants.RELATION_NETWORK_ID)) {
-            throw new IllegalArgumentException("Only " + AuthzConstants.ResourceEdgeNetworkRelation +
+            throw new IllegalArgumentException("Only " +
+                                               AuthzConstants.ResourceEdgeNetworkRelation +
                                                " resource relationships are supported.");
         }
 

@@ -28,12 +28,13 @@ package org.hyperic.hq.appdef;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServiceType;
+import org.hyperic.hq.appdef.server.session.ServiceTypeDAO;
 import org.hyperic.hq.appdef.shared.AppSvcClustIncompatSvcException;
 import org.hyperic.hq.appdef.shared.ServiceClusterValue;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.context.Bootstrap;
 
 public class ServiceCluster extends AppdefBean
 {
@@ -163,7 +164,7 @@ public class ServiceCluster extends AppdefBean
         if (val.getServiceType() != null) {
             Integer stid = val.getServiceType().getId();
             ServiceType st = 
-                DAOFactory.getDAOFactory().getServiceTypeDAO().findById(stid);
+                Bootstrap.getBean(ServiceTypeDAO.class).findById(stid);
             setServiceType(st);
         }
     }

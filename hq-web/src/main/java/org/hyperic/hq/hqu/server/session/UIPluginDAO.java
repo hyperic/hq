@@ -27,36 +27,21 @@ package org.hyperic.hq.hqu.server.session;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
 @Repository
 public class UIPluginDAO
-    extends HibernateDAO
-{
-    
+    extends HibernateDAO<UIPlugin> {
+
     @Autowired
     UIPluginDAO(SessionFactory f) {
         super(UIPlugin.class, f);
     }
 
-    UIPlugin findById(Integer id) {
-        return (UIPlugin)super.findById(id);
-    }
-
-    void save(UIPlugin p) {
-        super.save(p);
-    }
-
-    void remove(UIPlugin p) {
-        super.remove(p);
-    }
-
     UIPlugin findByName(String name) {
-        return (UIPlugin)createCriteria()
-            .add(Restrictions.eq("name", name))
-            .uniqueResult();
+        return (UIPlugin) createCriteria().add(Restrictions.eq("name", name)).uniqueResult();
     }
 
     UIPlugin create(String name, String version) {

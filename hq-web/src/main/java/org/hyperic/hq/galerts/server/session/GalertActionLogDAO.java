@@ -29,28 +29,18 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
 @Repository
-public class GalertActionLogDAO extends HibernateDAO {
+public class GalertActionLogDAO
+    extends HibernateDAO<GalertActionLog> {
     @Autowired
     GalertActionLogDAO(SessionFactory f) {
         super(GalertActionLog.class, f);
     }
 
-    GalertActionLog findById(Integer id) {
-        return (GalertActionLog)super.findById(id);
-    }
-
-    void save(GalertActionLog entity) {
-        super.save(entity);
-    }
-
     void handleSubjectRemoval(AuthzSubject subject) {
-        String sql = "update GalertActionLog set " +
-                     "subject = null " +
-                     "where subject = :subject";
+        String sql = "update GalertActionLog set " + "subject = null " + "where subject = :subject";
 
-        getSession().createQuery(sql)
-                    .setParameter("subject", subject)
-                    .executeUpdate();
+        getSession().createQuery(sql).setParameter("subject", subject).executeUpdate();
     }
 }

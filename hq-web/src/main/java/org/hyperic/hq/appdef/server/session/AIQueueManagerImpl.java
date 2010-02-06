@@ -110,16 +110,19 @@ public class AIQueueManagerImpl implements AIQueueManager {
     private AgentCommandsClientFactory agentCommandsClientFactory;
     private AgentManager agentManager;
     private AIAuditFactory aiAuditFactory;
+    private AIQResourceVisitorFactory aiqResourceVisitorFactory;
     protected final Log log = LogFactory.getLog(AIQueueManagerImpl.class.getName());
 
     @Autowired
-    public AIQueueManagerImpl(AIServerDAO aIServerDAO, AIIpDAO aiIpDAO, AIPlatformDAO aiPlatformDAO,
-                              ConfigManager configManager, CPropManager cPropManager, PlatformDAO platformDAO,
+    public AIQueueManagerImpl(AIServerDAO aIServerDAO, AIIpDAO aiIpDAO,
+                              AIPlatformDAO aiPlatformDAO, ConfigManager configManager,
+                              CPropManager cPropManager, PlatformDAO platformDAO,
                               PlatformManager platformManager, ServerManager serverManager,
                               PermissionManager permissionManager, AuditManager auditManager,
                               AuthzSubjectManager authzSubjectManager,
-                              AgentCommandsClientFactory agentCommandsClientFactory, AgentManager agentManager,
-                              AIAuditFactory aiAuditFactory) {
+                              AgentCommandsClientFactory agentCommandsClientFactory,
+                              AgentManager agentManager, AIAuditFactory aiAuditFactory,
+                              AIQResourceVisitorFactory aiqResourceVisitorFactory) {
 
         this.aIServerDAO = aIServerDAO;
         this.aiIpDAO = aiIpDAO;
@@ -135,6 +138,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
         this.agentCommandsClientFactory = agentCommandsClientFactory;
         this.agentManager = agentManager;
         this.aiAuditFactory = aiAuditFactory;
+        this.aiqResourceVisitorFactory = aiqResourceVisitorFactory;
     }
 
     /**
@@ -147,13 +151,13 @@ public class AIQueueManagerImpl implements AIQueueManager {
      * 
      */
     @Transactional
-    public AIPlatformValue queue(AuthzSubject subject, AIPlatformValue aiplatform, boolean updateServers,
-                                 boolean isApproval, boolean isReport) {
+    public AIPlatformValue queue(AuthzSubject subject, AIPlatformValue aiplatform,
+                                 boolean updateServers, boolean isApproval, boolean isReport) {
 
         // First, calculate queuestatus and diff with respect to
         // existing appdef data.
-        AIPlatformValue revisedAIplatform = appdefDiffProcessor.diffAgainstAppdef(subject, platformManager,
-            configManager, cPropManager, aiplatform);
+        AIPlatformValue revisedAIplatform = appdefDiffProcessor.diffAgainstAppdef(subject,
+            platformManager, configManager, cPropManager, aiplatform);
 
         // A null return from diffAgainstAppdef means that
         // the platform no longer exists in appdef, AND that the aiplatform
@@ -168,8 +172,8 @@ public class AIQueueManagerImpl implements AIQueueManager {
         }
 
         // Synchronize current AI data into existing queue.
-        revisedAIplatform = queueSynchronizer.sync(subject, this, aiPlatformDAO, revisedAIplatform, updateServers,
-            isApproval, isReport);
+        revisedAIplatform = queueSynchronizer.sync(subject, this, aiPlatformDAO, revisedAIplatform,
+            updateServers, isApproval, isReport);
 
         if (revisedAIplatform == null) {
             return null;
@@ -219,7 +223,8 @@ public class AIQueueManagerImpl implements AIQueueManager {
      * 
      */
     @Transactional
-    public PageList<AIPlatformValue> getQueue(AuthzSubject subject, boolean showIgnored, boolean showPlaceholders,
+    public PageList<AIPlatformValue> getQueue(AuthzSubject subject, boolean showIgnored,
+                                              boolean showPlaceholders,
                                               boolean showAlreadyProcessed, PageControl pc) {
         Collection<AIPlatform> queue;
         PageList<AIPlatformValue> results;
@@ -271,8 +276,8 @@ public class AIQueueManagerImpl implements AIQueueManager {
                 if (pValue == null && !canCreatePlatforms) {
                     if (log.isDebugEnabled()) {
                         log.debug("Removing platform because it doesn't exist" +
-                                  " and the current user doesn't have the " + "'createPlatform' permission: " +
-                                  aipLocal.getId());
+                                  " and the current user doesn't have the " +
+                                  "'createPlatform' permission: " + aipLocal.getId());
                     }
                     iter.remove();
 
@@ -284,8 +289,10 @@ public class AIQueueManagerImpl implements AIQueueManager {
                         permissionManager.checkModifyPermission(subject, aid);
                     } catch (PermissionException e) {
                         if (log.isDebugEnabled()) {
-                            log.debug("Removing platform because the " + "current user doesn't have the " +
-                                      "'modifyPlatform' permission." + " PlatformID=" + pValue.getId());
+                            log.debug("Removing platform because the " +
+                                      "current user doesn't have the " +
+                                      "'modifyPlatform' permission." + " PlatformID=" +
+                                      pValue.getId());
                         }
                         iter.remove();
                     }
@@ -296,7 +303,8 @@ public class AIQueueManagerImpl implements AIQueueManager {
             if (showPlaceholders) {
                 results = aiplatformPager.seek(queue, pc.getPagenum(), pc.getPagesize());
             } else {
-                results = aiplatformPagerNoPlaceholders.seek(queue, pc.getPagenum(), pc.getPagesize());
+                results = aiplatformPagerNoPlaceholders.seek(queue, pc.getPagenum(), pc
+                    .getPagesize());
             }
 
         } catch (Exception e) {
@@ -456,8 +464,9 @@ public class AIQueueManagerImpl implements AIQueueManager {
      */
     @Transactional
     public List<AppdefResource> processQueue(AuthzSubject subject, List<Integer> platformList,
-                                             List<Integer> serverList, List<Integer> ipList, int action)
-        throws PermissionException, ValidationException, AIQApprovalException {
+                                             List<Integer> serverList, List<Integer> ipList,
+                                             int action) throws PermissionException,
+        ValidationException, AIQApprovalException {
         AuthzSubject s = authzSubjectManager.findSubjectById(subject.getId());
         boolean approved = false;
 
@@ -474,9 +483,9 @@ public class AIQueueManagerImpl implements AIQueueManager {
     }
 
     private List<AppdefResource> _processQueue(AuthzSubject subject, List<Integer> platformList,
-                                               List<Integer> serverList, List<Integer> ipList, int action,
-                                               boolean verifyLiveAgent) throws PermissionException,
-        ValidationException, AIQApprovalException {
+                                               List<Integer> serverList, List<Integer> ipList,
+                                               int action, boolean verifyLiveAgent)
+        throws PermissionException, ValidationException, AIQApprovalException {
         boolean isApproveAction = (action == AIQueueConstants.Q_DECISION_APPROVE);
         boolean isPurgeAction = (action == AIQueueConstants.Q_DECISION_PURGE);
         int i;
@@ -489,7 +498,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
         List<AppdefResource> createdResources = new ArrayList<AppdefResource>();
 
         // Create our visitor based on the action
-        AIQResourceVisitor visitor = AIQResourceVisitorFactory.getVisitor(action);
+        AIQResourceVisitor visitor = aiqResourceVisitorFactory.getVisitor(action);
 
         if (platformList != null) {
             for (i = 0; i < platformList.size(); i++) {
@@ -515,8 +524,8 @@ public class AIQueueManagerImpl implements AIQueueManager {
                 // runtime discovery and enable metrics.
                 if (isApproveAction && verifyLiveAgent) {
                     try {
-                        AgentCommandsClient client = agentCommandsClientFactory.getClient(agentManager
-                            .getAgent(aiplatform.getAgentToken()));
+                        AgentCommandsClient client = agentCommandsClientFactory
+                            .getClient(agentManager.getAgent(aiplatform.getAgentToken()));
                         client.ping();
                     } catch (AgentNotFoundException e) {
                         // In this case we just want to
@@ -526,7 +535,8 @@ public class AIQueueManagerImpl implements AIQueueManager {
                         removeFromQueue(aiplatform);
                         continue;
                     } catch (AgentRemoteException e) {
-                        throw new AIQApprovalException("Error invoking remote method on agent " + e.getMessage(), e);
+                        throw new AIQApprovalException("Error invoking remote method on agent " +
+                                                       e.getMessage(), e);
                     } catch (AgentConnectionException e) {
                         // [HHQ-3249] if the IP is being updated then ping may
                         // fail but that is expected so ignore
@@ -534,14 +544,13 @@ public class AIQueueManagerImpl implements AIQueueManager {
                             final String msg = ", ignoring";
                             log.warn(msg);
                         } else {
-                            throw new AIQApprovalException("Error connecting or communicating with agent " +
-                                                           e.getMessage(), e);
+                            throw new AIQApprovalException(
+                                "Error connecting or communicating with agent " + e.getMessage(), e);
                         }
                     }
                 }
 
-                visitor.visitPlatform(aiplatform, subject, platformManager, configManager, cPropManager,
-                    createdResources);
+                visitor.visitPlatform(aiplatform, subject, createdResources);
                 if (!isPurgeAction)
                     aiplatformsToResync.put(id, marker);
             }
@@ -562,7 +571,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
                     else
                         throw new ObjectNotFoundException(id, AIIp.class.getName());
                 }
-                visitor.visitIp(aiip, subject, platformManager);
+                visitor.visitIp(aiip, subject);
                 if (!isPurgeAction) {
                     Integer pk = aiip.getAIPlatform().getId();
                     aiplatformsToResync.put(pk, marker);
@@ -573,7 +582,8 @@ public class AIQueueManagerImpl implements AIQueueManager {
             for (i = 0; i < serverList.size(); i++) {
                 final Integer id = (Integer) serverList.get(i);
                 if (id == null) {
-                    log.error("processQueue: " + aiplatform.getName() + " has a Server with ID=null");
+                    log.error("processQueue: " + aiplatform.getName() +
+                              " has a Server with ID=null");
                     continue;
                 }
                 final AIServer aiserver = aIServerDAO.get(id);
@@ -585,8 +595,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
                     }
                 }
 
-                visitor.visitServer(aiserver, subject, platformManager, serverManager, configManager, cPropManager,
-                    createdResources);
+                visitor.visitServer(aiserver, subject, createdResources);
                 if (isApproveAction) {
                     // Approved servers are removed from the queue
                     String aiid = aiserver.getAutoinventoryIdentifier();
@@ -665,8 +674,8 @@ public class AIQueueManagerImpl implements AIQueueManager {
      * Find a platform given an AI platform id
      * 
      */
-    public PlatformValue getPlatformByAI(AuthzSubject subject, int aiPlatformID) throws PermissionException,
-        PlatformNotFoundException {
+    public PlatformValue getPlatformByAI(AuthzSubject subject, int aiPlatformID)
+        throws PermissionException, PlatformNotFoundException {
         AIPlatform aiplatform;
 
         // XXX Do authz check
@@ -719,7 +728,8 @@ public class AIQueueManagerImpl implements AIQueueManager {
             // localhost doesn't give us any information. Long
             // term, when we are trying to match all addresses,
             // this can go away.
-            if ((address.equals(NetFlags.LOOPBACK_ADDRESS) || address.equals(NetFlags.ANY_ADDR)) && i.hasNext()) {
+            if ((address.equals(NetFlags.LOOPBACK_ADDRESS) || address.equals(NetFlags.ANY_ADDR)) &&
+                i.hasNext()) {
                 continue;
             }
 
@@ -737,15 +747,17 @@ public class AIQueueManagerImpl implements AIQueueManager {
      * Find an AI platform given an platform
      * 
      */
-    public Platform getPlatformByAI(AuthzSubject subject, AIPlatform aipLocal) throws PermissionException,
-        PlatformNotFoundException {
+    public Platform getPlatformByAI(AuthzSubject subject, AIPlatform aipLocal)
+        throws PermissionException, PlatformNotFoundException {
 
-        Platform p = platformManager.getPlatformByAIPlatform(subject, aipLocal.getAIPlatformValue());
+        Platform p = platformManager
+            .getPlatformByAIPlatform(subject, aipLocal.getAIPlatformValue());
 
         if (p != null)
             return p;
 
-        throw new PlatformNotFoundException("platform not found for ai " + "platform: " + aipLocal.getId());
+        throw new PlatformNotFoundException("platform not found for ai " + "platform: " +
+                                            aipLocal.getId());
     }
 
     /**
@@ -753,8 +765,8 @@ public class AIQueueManagerImpl implements AIQueueManager {
      * specified resource.
      * 
      */
-    public void checkAIScanPermission(AuthzSubject subject, AppdefEntityID id) throws PermissionException,
-        GroupNotCompatibleException {
+    public void checkAIScanPermission(AuthzSubject subject, AppdefEntityID id)
+        throws PermissionException, GroupNotCompatibleException {
         permissionManager.checkAIScanPermission(subject, id);
     }
 

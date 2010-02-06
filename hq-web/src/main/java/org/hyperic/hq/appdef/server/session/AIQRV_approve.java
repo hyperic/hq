@@ -50,340 +50,290 @@ import org.hyperic.hq.autoinventory.AIServer;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
- * The AIQueueConstants.Q_DECISION_APPROVE means to add the queued
- * resource to the appdef model.  This visitor merges the queued resource
- * into appdef.
+ * The AIQueueConstants.Q_DECISION_APPROVE means to add the queued resource to
+ * the appdef model. This visitor merges the queued resource into appdef.
  */
+@Component
 public class AIQRV_approve implements AIQResourceVisitor {
 
-    private static Log _log = LogFactory.getLog(AIQRV_approve.class);
-    private static final int Q_STATUS_ADDED =
-        AIQueueConstants.Q_STATUS_ADDED;
-    private static final int Q_STATUS_CHANGED =
-        AIQueueConstants.Q_STATUS_CHANGED;
-    private static final int Q_STATUS_REMOVED =
-        AIQueueConstants.Q_STATUS_REMOVED;
-    private static final int Q_STATUS_PLACEHOLDER =
-        AIQueueConstants.Q_STATUS_PLACEHOLDER;
+    private final Log log = LogFactory.getLog(AIQRV_approve.class);
+    private static final int Q_STATUS_ADDED = AIQueueConstants.Q_STATUS_ADDED;
+    private static final int Q_STATUS_CHANGED = AIQueueConstants.Q_STATUS_CHANGED;
+    private static final int Q_STATUS_REMOVED = AIQueueConstants.Q_STATUS_REMOVED;
+    private static final int Q_STATUS_PLACEHOLDER = AIQueueConstants.Q_STATUS_PLACEHOLDER;
+    private PlatformManager platformManager;
+    private ConfigManager configMgr;
+    private CPropManager cpropMgr;
+    private ServerManager serverManager;
 
-    public AIQRV_approve () {}
+    
+    @Autowired
+    public AIQRV_approve(PlatformManager platformManager, ConfigManager configMgr,
+                         CPropManager cpropMgr, ServerManager serverManager) {
+        this.platformManager = platformManager;
+        this.configMgr = configMgr;
+        this.cpropMgr = cpropMgr;
+        this.serverManager = serverManager;
+    }
 
-    public void visitPlatform(AIPlatform aiplatform,
-                              AuthzSubject subject,
-                              PlatformManager pmLocal,
-                              ConfigManager configMgr,
-                              CPropManager cpropMgr,
-                              List createdResources)
+    public void visitPlatform(AIPlatform aiplatform, AuthzSubject subject, List createdResources)
         throws AIQApprovalException, PermissionException {
 
         Integer id = aiplatform.getId();
         AppdefEntityID aid = null;
 
-        _log.info("Visiting platform: " + id + " fqdn=" + aiplatform.getFqdn());
+        log.info("Visiting platform: " + id + " fqdn=" + aiplatform.getFqdn());
         AIPlatformValue aiplatformValue = aiplatform.getAIPlatformValue();
-        Platform existingPlatform = getExistingPlatform(subject, pmLocal,
-                                                        aiplatformValue);
+        Platform existingPlatform = getExistingPlatform(subject, aiplatformValue);
         int qstat = aiplatform.getQueueStatus();
         switch (qstat) {
-        case Q_STATUS_PLACEHOLDER:
-            // We don't approve placeholders.  Just let them sit
-            // in the queue.
-            break;
+            case Q_STATUS_PLACEHOLDER:
+                // We don't approve placeholders. Just let them sit
+                // in the queue.
+                break;
 
-        case Q_STATUS_ADDED:
-            // This platform exists in the queue but not in appdef,
-            // so add it to appdef.
+            case Q_STATUS_ADDED:
+                // This platform exists in the queue but not in appdef,
+                // so add it to appdef.
 
-            if (existingPlatform != null) {
+                if (existingPlatform != null) {
 
-                throw new AIQApprovalException("Platform already added at id " +
-                                               existingPlatform.getId());
-            }
-            // Add the AI platform to appdef
-            Platform platform;
-            try {
-                platform =
-                    pmLocal.createPlatform(subject,
-                                           aiplatform.getAIPlatformValue());
-                aid = platform.getEntityId();
-                setCustomProperties(aiplatform, platform, cpropMgr);
-                _log.info("Created platform " + platform.getName() + " id="
-                          + platform.getId());
-                createdResources.add(platform);
-            } catch (PermissionException e) {
-                throw e;
-            }
-            catch (ValidationException e) {
-                throw new AIQApprovalException("Error creating platform from " +
-                                               "AI data.", e);
-            }
-            catch (ApplicationException e) {
-                throw new AIQApprovalException(e);
-            }
-
-           
-            
-            try {
-                configMgr.configureResponse(subject,
-                                            platform.getConfigResponse(), aid,
-                                            aiplatform.getProductConfig(),
-                                            aiplatform.getMeasurementConfig(),
-                                            aiplatform.getControlConfig(),
-                                            null, null, false, false);
-            } catch (Exception e) {
-                _log.warn("Error configuring platform: " + e, e);
-            }
-
-            break;
-
-        case Q_STATUS_CHANGED:
-            // This platform exists in the queue and in appdef.
-            // We wish to sync the appdef attributes to match
-            // the queue.
-            
-            // Check to make sure the platform is still in appdef.
-
-            // Update existing platform attributes.
-            try {
-                pmLocal.updateWithAI(aiplatformValue, subject);
-            } catch (Exception e) {
-                throw new AIQApprovalException("Error updating platform using "
-                                               + "AI data.", e);
-            }
-
-            setCustomProperties(aiplatform, existingPlatform, cpropMgr);
-
-            if (aiplatformValue.isPlatformDevice()) {
-                try {
-                    configMgr.
-                        configureResponse(subject,
-                                          existingPlatform.getConfigResponse(),
-                                          existingPlatform.getEntityId(),
-                                          aiplatform.getProductConfig(),
-                                          aiplatform.getMeasurementConfig(),
-                                          aiplatform.getControlConfig(),
-                                          null, null, true, false);
-                } catch (Exception e) {
-                    _log.warn("Error configuring platform: " + e, e);
+                    throw new AIQApprovalException("Platform already added at id " +
+                                                   existingPlatform.getId());
                 }
-            }
-            _log.info("Appdef platform updated.");
-            break;
+                // Add the AI platform to appdef
+                Platform platform;
+                try {
+                    platform = platformManager.createPlatform(subject, aiplatform
+                        .getAIPlatformValue());
+                    aid = platform.getEntityId();
+                    setCustomProperties(aiplatform, platform);
+                    log.info("Created platform " + platform.getName() + " id=" + platform.getId());
+                    createdResources.add(platform);
+                } catch (PermissionException e) {
+                    throw e;
+                } catch (ValidationException e) {
+                    throw new AIQApprovalException("Error creating platform from " + "AI data.", e);
+                } catch (ApplicationException e) {
+                    throw new AIQApprovalException(e);
+                }
 
-        case Q_STATUS_REMOVED:
-            // This platform has been removed (in other words, AI no longer
-            // detects it) however it is still present in the appdef model.
-            // We wish to remove the appdef platform.
+                try {
+                    configMgr.configureResponse(subject, platform.getConfigResponse(), aid,
+                        aiplatform.getProductConfig(), aiplatform.getMeasurementConfig(),
+                        aiplatform.getControlConfig(), null, null, false, false);
+                } catch (Exception e) {
+                    log.warn("Error configuring platform: " + e, e);
+                }
 
-            // If the platform has already been removed, do nothing.
-            if (existingPlatform == null) {
-                _log.warn("Platform has already been removed, cannot " +
-                          "remove aiplatform=" + id);
-                return;
-            }
+                break;
 
-            // Remove the platform
-            try {
-                pmLocal.removePlatform(subject, existingPlatform);
-            } catch (PermissionException e) {
-                throw e;
-            } catch (Exception e) {
-                throw new SystemException("Error removing platform using " +
-                                          "AI data.", e);
-            }
-            break;
+            case Q_STATUS_CHANGED:
+                // This platform exists in the queue and in appdef.
+                // We wish to sync the appdef attributes to match
+                // the queue.
 
-        default:
-            _log.error("Unknown queue state: " + qstat);
-            throw new SystemException("Unknown queue state: " + qstat);
+                // Check to make sure the platform is still in appdef.
+
+                // Update existing platform attributes.
+                try {
+                    platformManager.updateWithAI(aiplatformValue, subject);
+                } catch (Exception e) {
+                    throw new AIQApprovalException("Error updating platform using " + "AI data.", e);
+                }
+
+                setCustomProperties(aiplatform, existingPlatform);
+
+                if (aiplatformValue.isPlatformDevice()) {
+                    try {
+                        configMgr.configureResponse(subject, existingPlatform.getConfigResponse(),
+                            existingPlatform.getEntityId(), aiplatform.getProductConfig(),
+                            aiplatform.getMeasurementConfig(), aiplatform.getControlConfig(), null,
+                            null, true, false);
+                    } catch (Exception e) {
+                        log.warn("Error configuring platform: " + e, e);
+                    }
+                }
+                log.info("Appdef platform updated.");
+                break;
+
+            case Q_STATUS_REMOVED:
+                // This platform has been removed (in other words, AI no longer
+                // detects it) however it is still present in the appdef model.
+                // We wish to remove the appdef platform.
+
+                // If the platform has already been removed, do nothing.
+                if (existingPlatform == null) {
+                    log.warn("Platform has already been removed, cannot " + "remove aiplatform=" +
+                              id);
+                    return;
+                }
+
+                // Remove the platform
+                try {
+                    platformManager.removePlatform(subject, existingPlatform);
+                } catch (PermissionException e) {
+                    throw e;
+                } catch (Exception e) {
+                    throw new SystemException("Error removing platform using " + "AI data.", e);
+                }
+                break;
+
+            default:
+                log.error("Unknown queue state: " + qstat);
+                throw new SystemException("Unknown queue state: " + qstat);
         }
     }
 
-    public void visitIp(AIIp aiip, AuthzSubject subject,
-                        PlatformManager platformMan)
-        throws AIQApprovalException, PermissionException
-    {
-        Platform platform = getExistingPlatform(
-            subject, platformMan, aiip.getAIPlatform().getAIPlatformValue());
+    public void visitIp(AIIp aiip, AuthzSubject subject) throws AIQApprovalException,
+        PermissionException {
+        Platform platform = getExistingPlatform(subject, aiip.getAIPlatform().getAIPlatformValue());
         if (platform == null) {
-            _log.error("Error finding platform from AIIp Object, AIIpId=" +
-                aiip.getId() + ", AIPlatformId=" + aiip.getAIPlatform().getId());
+            log.error("Error finding platform from AIIp Object, AIIpId=" + aiip.getId() +
+                       ", AIPlatformId=" + aiip.getAIPlatform().getId());
             return;
         }
         int qstat = aiip.getQueueStatus();
         switch (qstat) {
-        case Q_STATUS_PLACEHOLDER:
-            // Nothing to do
-            break;
-        case Q_STATUS_ADDED:
-            platformMan.addIp(platform, aiip.getAddress(), aiip.getNetmask(),
-                aiip.getMacAddress());
-            break;
-        case Q_STATUS_CHANGED:
-            platformMan.updateIp(platform, aiip.getAddress(), aiip.getNetmask(),
-                aiip.getMacAddress());
-            break;
-        case Q_STATUS_REMOVED:
-            platformMan.removeIp(platform, aiip.getAddress(), aiip.getNetmask(),
-                aiip.getMacAddress());
-            break;
-        default:
-            _log.error("Unknown queue state: " + qstat);
-            throw new SystemException("Unknown queue state: " + qstat);
+            case Q_STATUS_PLACEHOLDER:
+                // Nothing to do
+                break;
+            case Q_STATUS_ADDED:
+                platformManager.addIp(platform, aiip.getAddress(), aiip.getNetmask(), aiip
+                    .getMacAddress());
+                break;
+            case Q_STATUS_CHANGED:
+                platformManager.updateIp(platform, aiip.getAddress(), aiip.getNetmask(), aiip
+                    .getMacAddress());
+                break;
+            case Q_STATUS_REMOVED:
+                platformManager.removeIp(platform, aiip.getAddress(), aiip.getNetmask(), aiip
+                    .getMacAddress());
+                break;
+            default:
+                log.error("Unknown queue state: " + qstat);
+                throw new SystemException("Unknown queue state: " + qstat);
         }
     }
 
-    public void visitServer(AIServer aiserver,
-                            AuthzSubject subject,
-                            PlatformManager pmLocal,
-                            ServerManager smLocal,
-                            ConfigManager configMgr,
-                            CPropManager cpropMgr,
-                            List createdResources)
-        throws AIQApprovalException, PermissionException
-    {
+    public void visitServer(AIServer aiserver, AuthzSubject subject, List createdResources)
+        throws AIQApprovalException, PermissionException {
         AIPlatform aiplatform = aiserver.getAIPlatform();
         AIPlatformValue aiplatformValue = aiplatform.getAIPlatformValue();
         // Get the aiplatform for this server
-        Platform existingPlatform = getExistingPlatform(subject, pmLocal,
-                                                        aiplatformValue);
+        Platform existingPlatform = getExistingPlatform(subject, aiplatformValue);
         int qstat = aiserver.getQueueStatus();
         switch (qstat) {
-        case Q_STATUS_PLACEHOLDER:
-            // We don't approve placeholders.  Just let them sit
-            // in the queue.
-            break;
-        case Q_STATUS_ADDED:
-            handleStatusAdded(subject, existingPlatform, aiplatformValue,
-                aiserver, configMgr, cpropMgr, createdResources,
-                smLocal);
-            break;
-        case Q_STATUS_CHANGED:
-            handleStatusChanged(subject, existingPlatform, aiplatformValue,
-                aiserver, configMgr, cpropMgr, createdResources,
-                smLocal);
-            break;
-        case Q_STATUS_REMOVED:
-            handleStatusRemoved(subject, existingPlatform, aiplatformValue,
-                aiserver, configMgr, cpropMgr, createdResources,
-                smLocal);
-            break;
-        default:
-            _log.error("Unknown queue state: " + qstat);
-            throw new SystemException("Unknown queue state: " + qstat);
+            case Q_STATUS_PLACEHOLDER:
+                // We don't approve placeholders. Just let them sit
+                // in the queue.
+                break;
+            case Q_STATUS_ADDED:
+                handleStatusAdded(subject, existingPlatform, aiplatformValue, aiserver,
+                    createdResources);
+                break;
+            case Q_STATUS_CHANGED:
+                handleStatusChanged(subject, existingPlatform, aiplatformValue, aiserver,
+                    createdResources);
+                break;
+            case Q_STATUS_REMOVED:
+                handleStatusRemoved(subject, existingPlatform, aiplatformValue, aiserver,
+                    createdResources);
+                break;
+            default:
+                log.error("Unknown queue state: " + qstat);
+                throw new SystemException("Unknown queue state: " + qstat);
         }
     }
-    
+
     private void handleStatusRemoved(AuthzSubject subject, Platform platform,
-                                     AIPlatformValue aiplatformValue,
-                                     AIServer aiserver,
-                                     ConfigManager configMgr,
-                                     CPropManager cpropMgr,
-                                     List createdResources,
-                                     ServerManager smLocal)
-        throws PermissionException
-    {
+                                     AIPlatformValue aiplatformValue, AIServer aiserver,
+
+                                     List createdResources) throws PermissionException {
         // If the platform has already been removed, do nothing.
         if (platform == null) {
-            _log.warn("Platform has already been removed, cannot " +
-                      "remove aiserver=" + aiserver.getId());
+            log.warn("Platform has already been removed, cannot " + "remove aiserver=" +
+                      aiserver.getId());
             return;
         }
         // This server has been removed (in other words, AI no longer
         // detects it) however it is still present in the appdef model.
         // We wish to remove the appdef platform.
         try {
-            Server server = getExistingServer(subject, platform, aiserver, smLocal);
+            Server server = getExistingServer(subject, platform, aiserver);
             if (server == null) {
                 // Server has already been removed, return.
-                _log.warn("Server has already been removed, cannot " +
-                          "remove aiserver=" + aiserver.getId());
+                log.warn("Server has already been removed, cannot " + "remove aiserver=" +
+                          aiserver.getId());
             }
-            _log.info("Removing Server...");
-            smLocal.removeServer(subject, server);
-       } catch (PermissionException e) {
-           throw e;
-       } catch (Exception e) {
-           throw new SystemException("Error updating platform to remove" +
-                                     " server, using AIServer data.", e);
-       }
+            log.info("Removing Server...");
+            serverManager.removeServer(subject, server);
+        } catch (PermissionException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new SystemException("Error updating platform to remove"
+                                      + " server, using AIServer data.", e);
+        }
     }
 
-    private void handleStatusChanged(AuthzSubject subject,
-                                     Platform platform,
-                                     AIPlatformValue aiplatformValue,
-                                     AIServer aiserver,
-                                     ConfigManager configMgr,
-                                     CPropManager cpropMgr,
-                                     List createdResources,
-                                     ServerManager smLocal)
-        throws PermissionException, AIQApprovalException
-    {
+    private void handleStatusChanged(AuthzSubject subject, Platform platform,
+                                     AIPlatformValue aiplatformValue, AIServer aiserver,
+
+                                     List createdResources) throws PermissionException,
+        AIQApprovalException {
         if (platform == null) {
-            throw new AIQApprovalException("HQ Platform does not exist for" +
-                                           " AI Platform ID " +
+            throw new AIQApprovalException("HQ Platform does not exist for" + " AI Platform ID " +
                                            aiplatformValue.getId());
         }
         // This server exists in the queue and in appdef.
         // We wish to sync the appdef attributes to match
         // the queue.
         try {
-            Server server = getExistingServer(subject, platform, aiserver, smLocal);
+            Server server = getExistingServer(subject, platform, aiserver);
             if (server == null) {
                 // XXX scottmf probably should not blow up here
                 // better to change status to added from changed??
-                throw new AIQApprovalException("Server id " + aiserver.getId() +
-                                               " not found");
+                throw new AIQApprovalException("Server id " + aiserver.getId() + " not found");
             }
             ServerValue serverValue = server.getServerValue();
             AIServerValue aiserverValue = aiserver.getAIServerValue();
-            serverValue = AIConversionUtil.mergeAIServerIntoServer(
-                aiserverValue, serverValue);
-            Server updated = smLocal.updateServer(subject, serverValue);
+            serverValue = AIConversionUtil.mergeAIServerIntoServer(aiserverValue, serverValue);
+            Server updated = serverManager.updateServer(subject, serverValue);
             try {
-                configMgr.configureResponse(subject, server.getConfigResponse(),
-                                            serverValue.getEntityId(),
-                                            aiserver.getProductConfig(),
-                                            aiserver.getMeasurementConfig(),
-                                            aiserver.getControlConfig(),
-                                            null, null, true, false);
+                configMgr.configureResponse(subject, server.getConfigResponse(), serverValue
+                    .getEntityId(), aiserver.getProductConfig(), aiserver.getMeasurementConfig(),
+                    aiserver.getControlConfig(), null, null, true, false);
             } catch (Exception configE) {
-                _log.warn("Error configuring server: " + configE, configE);
+                log.warn("Error configuring server: " + configE, configE);
             }
-            setCustomProperties(aiserver, updated, cpropMgr);
-            _log.info("Updated server (" + serverValue.getId() + "): " +
-                      serverValue);
+            setCustomProperties(aiserver, updated);
+            log.info("Updated server (" + serverValue.getId() + "): " + serverValue);
         } catch (PermissionException e) {
             throw e;
         } catch (Exception e) {
-            throw new SystemException("Error updating platform with " +
-                                      "new AIServer data.", e);
+            throw new SystemException("Error updating platform with " + "new AIServer data.", e);
         }
     }
 
-    private void handleStatusAdded(AuthzSubject subject,
-                                   Platform platform,
-                                   AIPlatformValue aiplatformValue,
-                                   AIServer aiserver,
-                                   ConfigManager configMgr,
-                                   CPropManager cpropMgr,
-                                   List createdResources,
-                                   ServerManager smLocal)
-        throws AIQApprovalException, PermissionException
-    {
+    private void handleStatusAdded(AuthzSubject subject, Platform platform,
+                                   AIPlatformValue aiplatformValue, AIServer aiserver,
+
+                                   List createdResources) throws AIQApprovalException,
+        PermissionException {
         // If the platform does not exist in appdef, throw an exception
         if (platform == null) {
-            throw new AIQApprovalException("HQ Platform does not exist for" +
-                                           " AI Platform ID " +
+            throw new AIQApprovalException("HQ Platform does not exist for" + " AI Platform ID " +
                                            aiplatformValue.getId());
         }
         // This server exists in the queue but not in appdef,
         // so add it to appdef.
         try {
             // Before we add it, make sure it's not already there...
-            Server server = getExistingServer(subject, platform, aiserver, smLocal);
+            Server server = getExistingServer(subject, platform, aiserver);
             if (server != null) {
                 // remove the server if it already exists.
                 // probably shouldn't get into the AIQ to begin with but
@@ -392,67 +342,58 @@ public class AIQRV_approve implements AIQResourceVisitor {
                 return;
             }
             AIServerValue aiserverValue = aiserver.getAIServerValue();
-            ServerValue serverValue = AIConversionUtil.convertAIServerToServer(
-                aiserverValue, smLocal);
-            serverValue = AIConversionUtil.mergeAIServerIntoServer(
-                aiserverValue, serverValue);
+            ServerValue serverValue = AIConversionUtil.convertAIServerToServer(aiserverValue,
+                serverManager);
+            serverValue = AIConversionUtil.mergeAIServerIntoServer(aiserverValue, serverValue);
 
             Integer serverTypePK = serverValue.getServerType().getId();
-            server = smLocal.createServer(subject, platform.getId(),
-                                          serverTypePK, serverValue);
+            server = serverManager.createServer(subject, platform.getId(), serverTypePK,
+                serverValue);
 
             try {
-                configMgr.configureResponse(subject, server.getConfigResponse(),
-                                            server.getEntityId(),
-                                            aiserver.getProductConfig(),
-                                            aiserver.getMeasurementConfig(),
-                                            aiserver.getControlConfig(),
-                                            null, /* RT config */
-                                            null, false, false);
+                configMgr.configureResponse(subject, server.getConfigResponse(), server
+                    .getEntityId(), aiserver.getProductConfig(), aiserver.getMeasurementConfig(),
+                    aiserver.getControlConfig(), null, /* RT config */
+                    null, false, false);
             } catch (Exception e) {
-                _log.warn("Error configuring server: " + e, e);
+                log.warn("Error configuring server: " + e, e);
             }
 
-            setCustomProperties(aiserver, server, cpropMgr);
-            
+            setCustomProperties(aiserver, server);
+
             createdResources.add(server);
-            _log.info("Created server (" + serverValue.getId() + "): " +
-                      serverValue);
+            log.info("Created server (" + serverValue.getId() + "): " + serverValue);
         } catch (PermissionException e) {
             throw e;
         } catch (Exception e) {
-            throw new SystemException("Error creating platform from " +
-                                      "AI data: " + e.getMessage(), e);
+            throw new SystemException("Error creating platform from " + "AI data: " +
+                                      e.getMessage(), e);
         }
     }
-    
+
     private void removeChild(AIPlatform aiPlatform, AIServer server) {
-        for (Iterator it=aiPlatform.getAIServers().iterator(); it.hasNext(); ) {
-            AIServer aiserver = (AIServer)it.next();
+        for (Iterator it = aiPlatform.getAIServers().iterator(); it.hasNext();) {
+            AIServer aiserver = (AIServer) it.next();
             if (aiserver.getId().equals(server.getId())) {
                 it.remove();
             }
         }
     }
 
-    private Server getExistingServer(AuthzSubject subject,
-                                     Platform platform,
-                                     AIServer aiserver,
-                                     ServerManager smLocal)
-        throws PermissionException, NotFoundException  {
-        Server server = smLocal.findServerByAIID(
-            subject, platform, aiserver.getAutoinventoryIdentifier());
+    private Server getExistingServer(AuthzSubject subject, Platform platform, AIServer aiserver)
+        throws PermissionException, NotFoundException {
+        Server server = serverManager.findServerByAIID(subject, platform, aiserver
+            .getAutoinventoryIdentifier());
         if (server != null || aiserver.getAIPlatform().isPlatformDevice()) {
             return server;
         }
-        ServerType serverType =
-            smLocal.findServerTypeByName(aiserver.getServerTypeName());
+        ServerType serverType = serverManager.findServerTypeByName(aiserver.getServerTypeName());
         // if (virtual == true) for this server type that means that there may
         // only be one server per platform of this type
         if (false == serverType.isVirtual()) {
             return null;
         }
-        List servers = smLocal.findServersByType(platform, serverType);
+        List servers = serverManager.findServersByType(platform, serverType);
         // servers.size() > 1 must be false if
         // serverType.isVirtual() == true
         // Unfortunately this is not enforced anywhere so we should do something
@@ -464,38 +405,32 @@ public class AIQRV_approve implements AIQResourceVisitor {
     }
 
     private Platform getExistingPlatform(AuthzSubject subject,
-                                         PlatformManager pmLocal,
-                                         AIPlatformValue aiplatform) {
+
+    AIPlatformValue aiplatform) {
         try {
-            return pmLocal.getPlatformByAIPlatform(subject, aiplatform);
+            return platformManager.getPlatformByAIPlatform(subject, aiplatform);
         } catch (PermissionException e) {
             throw new SystemException(e);
         }
     }
 
-    private static void setCustomProperties(AIPlatform aiplatform,
-                                            Platform platform,
-                                            CPropManager cpropMgr) {
+    private void setCustomProperties(AIPlatform aiplatform, Platform platform) {
         try {
-            int typeId =
-                platform.getPlatformType().getId().intValue();
-            cpropMgr.setConfigResponse(platform.getEntityId(),
-                                       typeId,
-                                       aiplatform.getCustomProperties());
+            int typeId = platform.getPlatformType().getId().intValue();
+            cpropMgr.setConfigResponse(platform.getEntityId(), typeId, aiplatform
+                .getCustomProperties());
         } catch (Exception e) {
-            _log.warn("Error setting platform custom properties: " + e, e);
+            log.warn("Error setting platform custom properties: " + e, e);
         }
     }
 
-    private static void setCustomProperties(AIServer aiserver,
-                                            Server server,
-                                            CPropManager cpropMgr) {
+    private void setCustomProperties(AIServer aiserver, Server server) {
         try {
             int typeId = server.getServerType().getId().intValue();
-            cpropMgr.setConfigResponse(server.getEntityId(), typeId,
-                                       aiserver.getCustomProperties());
+            cpropMgr
+                .setConfigResponse(server.getEntityId(), typeId, aiserver.getCustomProperties());
         } catch (Exception e) {
-            _log.warn("Error setting server custom properties: " + e, e);
+            log.warn("Error setting server custom properties: " + e, e);
         }
     }
 }

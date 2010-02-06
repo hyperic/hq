@@ -28,7 +28,6 @@ package org.hyperic.hq.appdef.server.session;
 import java.util.Collection;
 
 import org.hibernate.SessionFactory;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceDAO;
 import org.hyperic.hq.authz.server.session.Virtual;

@@ -28,26 +28,20 @@ package org.hyperic.hq.authz.server.session;
 import java.util.Collections;
 
 import org.hibernate.SessionFactory;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public class ResourceTypeDAO
-    extends HibernateDAO<ResourceType>
-{
-   
+    extends HibernateDAO<ResourceType> {
 
     @Autowired
     public ResourceTypeDAO(SessionFactory f) {
         super(ResourceType.class, f);
     }
-    
-    
-   
-
 
     ResourceType create(AuthzSubject creator, String name, boolean system) {
         ResourceType resType = new ResourceType(name, null, system);
@@ -55,27 +49,26 @@ public class ResourceTypeDAO
         save(resType);
 
         // ResourceTypes also have Resources associated with them, so create
-        // that and link  'em up.
-        //TODO resolve circular deps so can remove DAOFactory
-        DAOFactory fact = DAOFactory.getDAOFactory();
-
+        // that and link 'em up.
+        // TODO resolve circular deps so can remove Bootstrap
 
         ResourceType typeResType = findTypeResourceType();
-        Resource prototype = fact.getResourceDAO().findById(AuthzConstants.rootResourceId);
-        Resource res = fact.getResourceDAO().create(typeResType, prototype, resType.getName(),
-                                   creator, resType.getId(), false);
+        Resource prototype = Bootstrap.getBean(ResourceDAO.class).findById(
+            AuthzConstants.rootResourceId);
+        Resource res = Bootstrap.getBean(ResourceDAO.class).create(typeResType, prototype,
+            resType.getName(), creator, resType.getId(), false);
 
         resType.setResource(res);
 
-        ResourceGroup authzGroup =
-            DAOFactory.getDAOFactory().getResourceGroupDAO()
-            .findByName(AuthzConstants.authzResourceGroupName);
+        ResourceGroup authzGroup = Bootstrap.getBean(ResourceGroupDAO.class).findByName(
+            AuthzConstants.authzResourceGroupName);
         if (authzGroup == null) {
             throw new IllegalArgumentException("Resource Group not found: " +
                                                AuthzConstants.authzResourceGroupName);
         }
-
-        fact.getResourceGroupDAO().addMembers(authzGroup, Collections.singleton(res));
+        // TODO resolve circular deps so can remove Bootstrap
+        Bootstrap.getBean(ResourceGroupDAO.class)
+            .addMembers(authzGroup, Collections.singleton(res));
         return resType;
     }
 
@@ -100,13 +93,9 @@ public class ResourceTypeDAO
         return true;
     }
 
-    public ResourceType findByName(String name)
-    {
+    public ResourceType findByName(String name) {
         String sql = "from ResourceType where name=?";
-        return (ResourceType)getSession().createQuery(sql)
-            .setString(0, name)
-            .setCacheable(true)
-            .setCacheRegion("ResourceType.findByName")
-            .uniqueResult();
+        return (ResourceType) getSession().createQuery(sql).setString(0, name).setCacheable(true)
+            .setCacheRegion("ResourceType.findByName").uniqueResult();
     }
 }

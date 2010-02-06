@@ -27,36 +27,22 @@ package org.hyperic.hq.galerts.server.session;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Expression;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
 @Repository
 public class GtriggerTypeInfoDAO
-    extends HibernateDAO
-{
+    extends HibernateDAO<GtriggerTypeInfo> {
     @Autowired
     GtriggerTypeInfoDAO(SessionFactory f) {
         super(GtriggerTypeInfo.class, f);
     }
 
-    GtriggerTypeInfo findById(Integer id) {
-        return (GtriggerTypeInfo)super.findById(id);
-    }
-
-    void save(GtriggerTypeInfo tInfo) {
-        super.save(tInfo);
-    }
-
-    void remove(GtriggerTypeInfo tInfo) {
-        super.remove(tInfo);
-    }
-
     GtriggerTypeInfo find(GtriggerType type) {
         Class typeClass = type.getClass();
 
-        return (GtriggerTypeInfo) createCriteria()
-            .add(Expression.eq("typeClass", typeClass))
+        return (GtriggerTypeInfo) createCriteria().add(Expression.eq("typeClass", typeClass))
             .uniqueResult();
     }
 }

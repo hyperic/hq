@@ -40,9 +40,6 @@ import org.hyperic.util.pager.PageList;
 
 /**
  * Hibernate Data Access Object
- * The actual DAO is subclass of this object.
- * This class should actually be implemented with J2SE 5 Generics,
- * but we have to support JDK 1.4, :(
  */
 public abstract class HibernateDAO<T> {
     private Class<T> _persistentClass;
@@ -71,18 +68,19 @@ public abstract class HibernateDAO<T> {
         getSession().flush();
     }
 
-    protected Object findById(Serializable id) {
+    public T findById(Serializable id) {
         return findById(id, false);
     }
 
-    protected Object get(Serializable id) {
-        return getSession().get(getPersistentClass(), id);
+    @SuppressWarnings("unchecked")
+    public T get(Serializable id) {
+        return (T) getSession().get(getPersistentClass(), id);
     }
 
-    protected Object findById(Serializable id, boolean lock) {
-        return lock
-                   ? getSession().load(getPersistentClass(), id, LockMode.UPGRADE)
-                   : getSession().load(getPersistentClass(), id);
+    @SuppressWarnings("unchecked")
+    public T findById(Serializable id, boolean lock) {
+        return lock ? (T) getSession().load(getPersistentClass(), id, LockMode.UPGRADE)
+                   : (T) getSession().load(getPersistentClass(), id);
     }
 
     protected Criteria createCriteria() {
@@ -94,8 +92,8 @@ public abstract class HibernateDAO<T> {
     }
 
     /**
-     * This method is intended for sub-classes to specify whether or not
-     * their 'find-all' finder should be automatically added to the query-cache.
+     * This method is intended for sub-classes to specify whether or not their
+     * 'find-all' finder should be automatically added to the query-cache.
      * 
      * The findAll query will use the persistent class specified in the
      * constructor, and use the following cache region:
@@ -112,38 +110,32 @@ public abstract class HibernateDAO<T> {
     public List<T> findAll() {
         if (cacheFindAll()) {
             String region = getPersistentClass().getName() + ".findAll";
-            return getSession().createCriteria(getPersistentClass())
-                               .setCacheable(true)
-                               .setCacheRegion(region)
-                               .list();
+            return getSession().createCriteria(getPersistentClass()).setCacheable(true)
+                .setCacheRegion(region).list();
         }
         return getSession().createCriteria(getPersistentClass()).list();
     }
 
     @SuppressWarnings("unchecked")
     public Collection<T> findAllOrderByName() {
-        return getSession().createCriteria(getPersistentClass())
-                           .addOrder(Order.asc("name"))
-                           .list();
+        return getSession().createCriteria(getPersistentClass()).addOrder(Order.asc("name")).list();
     }
 
     public int size() {
-        return ((Number) getSession().createQuery("select count(*) from " + getPersistentClass().getName())
-                                     .uniqueResult())
-                                     .intValue();
+        return ((Number) getSession().createQuery(
+            "select count(*) from " + getPersistentClass().getName()).uniqueResult()).intValue();
     }
 
     public int size(Collection<T> coll) {
-        return ((Number) getSession()
-                                     .createFilter(coll, "select count(*)")
-                                     .uniqueResult()).intValue();
+        return ((Number) getSession().createFilter(coll, "select count(*)").uniqueResult())
+            .intValue();
     }
 
-    protected void save(Object entity) {
+    public void save(T entity) {
         getSession().saveOrUpdate(entity);
     }
 
-    protected void remove(Object entity) {
+    public void remove(T entity) {
         getSession().delete(entity);
     }
 
@@ -161,8 +153,7 @@ public abstract class HibernateDAO<T> {
     }
 
     @SuppressWarnings("unchecked")
-    protected PageList<T> getPagedResult(Criteria crit, Integer total,
-                                         PageControl pc) {
+    protected PageList<T> getPagedResult(Criteria crit, Integer total, PageControl pc) {
         if (pc.getPagesize() != PageControl.SIZE_UNLIMITED) {
             crit.setMaxResults(pc.getPagesize());
         }

@@ -34,36 +34,24 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class ExecutionStrategyTypeInfoDAO
     extends HibernateDAO<ExecutionStrategyTypeInfo> {
-    
+
     @Autowired
     public ExecutionStrategyTypeInfoDAO(SessionFactory f) {
         super(ExecutionStrategyTypeInfo.class, f);
     }
 
-    public ExecutionStrategyTypeInfo findById(Integer id) {
-        return (ExecutionStrategyTypeInfo) super.findById(id);
-    }
-
-    void save(ExecutionStrategyTypeInfo tInfo) {
-        super.save(tInfo);
-    }
-
     void save(ExecutionStrategyInfo info) {
-        super.save(info);
-    }
-
-    void remove(ExecutionStrategyTypeInfo tInfo) {
-        super.remove(tInfo);
+        getSession().saveOrUpdate(info);
     }
 
     void remove(ExecutionStrategyInfo info) {
-        super.remove(info);
+        getSession().delete(info);
     }
 
     public ExecutionStrategyTypeInfo find(ExecutionStrategyType sType) {
         Class<? extends ExecutionStrategyType> strategyClass = sType.getClass();
 
-        return (ExecutionStrategyTypeInfo) createCriteria().add(Expression.eq("typeClass", strategyClass))
-                                                           .uniqueResult();
+        return (ExecutionStrategyTypeInfo) createCriteria().add(
+            Expression.eq("typeClass", strategyClass)).uniqueResult();
     }
 }

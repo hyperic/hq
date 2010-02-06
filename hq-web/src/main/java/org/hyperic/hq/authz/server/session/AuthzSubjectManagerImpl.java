@@ -273,7 +273,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
      * 
      */
     public AuthzSubject getSubjectById(Integer id) {
-        return authzSubjectDAO.getById(id);
+        return authzSubjectDAO.get(id);
     }
 
     /** 

@@ -3,7 +3,6 @@ package org.hyperic.hq.dao;
 import java.util.Collection;
 
 import org.hibernate.SessionFactory;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AIServiceValue;
 import org.hyperic.hq.autoinventory.AIService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,48 +33,27 @@ import org.springframework.stereotype.Repository;
  * USA.
  */
 @Repository
-public class AIServiceDAO extends HibernateDAO
-{
+public class AIServiceDAO
+    extends HibernateDAO<AIService> {
     @Autowired
     public AIServiceDAO(SessionFactory f) {
         super(AIService.class, f);
     }
 
-    public AIService findById(Integer id)
-    {
-        return (AIService)super.findById(id);
-    }
-
-    public void save(AIService entity)
-    {
-        super.save(entity);
-    }
-
-    public void remove(AIService entity)
-    {
-        super.remove(entity);
-    }
-
-    public AIService create(AIServiceValue sv)
-    {
+    public AIService create(AIServiceValue sv) {
         AIService s = new AIService(sv);
         save(s);
         return s;
     }
 
-    public Collection findByType(String stName)
-    {
-        String sql="from AIService where serviceTypeName=?";
-        return getSession().createQuery(sql)
-            .setString(0, stName)
-            .list();
+    public Collection<AIService> findByType(String stName) {
+        String sql = "from AIService where serviceTypeName=?";
+        return getSession().createQuery(sql).setString(0, stName).list();
     }
 
-    public AIService findByName(String name)
-    {
-        String sql="from AIService where lower(name)=?";
-        return (AIService)getSession().createQuery(sql)
-            .setString(0, name.toLowerCase())
+    public AIService findByName(String name) {
+        String sql = "from AIService where lower(name)=?";
+        return (AIService) getSession().createQuery(sql).setString(0, name.toLowerCase())
             .uniqueResult();
     }
 

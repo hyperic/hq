@@ -32,29 +32,23 @@ import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
 @Repository
-public class ConfigResponseDAO extends HibernateDAO
-{
-    private PlatformDAO platformDAO;
-
-    private ServerDAO serverDAO;
-
-    private ServiceDAO serviceDAO;
+public class ConfigResponseDAO
+    extends HibernateDAO {
 
     @Autowired
-    public ConfigResponseDAO(SessionFactory f, PlatformDAO platformDAO, ServerDAO serverDAO, ServiceDAO serviceDAO) {
+    public ConfigResponseDAO(SessionFactory f) {
         super(ConfigResponseDB.class, f);
-        this.platformDAO = platformDAO;
-        this.serverDAO = serverDAO;
-        this.serviceDAO = serviceDAO;
+
     }
 
     public ConfigResponseDB findById(Integer id) {
-        return (ConfigResponseDB)super.findById(id);
+        return (ConfigResponseDB) super.findById(id);
     }
 
     public ConfigResponseDB get(Integer id) {
-        return (ConfigResponseDB)super.get(id);
+        return (ConfigResponseDB) super.get(id);
     }
 
     void save(ConfigResponseDB entity) {
@@ -86,39 +80,19 @@ public class ConfigResponseDAO extends HibernateDAO
             save(cLocal);
         } catch (EncodingException e) {
             // will never happen, we're setting up an empty response
-		}
+        }
         return cLocal;
     }
 
-    public ConfigResponseDB findByPlatformId(Integer id) {
-        Platform plat = platformDAO.findById(id);
-        return plat.getConfigResponse();
-    }
-
-    public ConfigResponseDB findByServerId(Integer id) {
-
-        Server server = serverDAO.findById(id);
-        return server.getConfigResponse();
-    }
-
-    public ConfigResponseDB findByServiceId(Integer id) {
-        Service service = serviceDAO.findById(id);
-        return service.getConfigResponse();
-    }
-
     /**
-     * ValidationError setter so that the version isn't incremented.  The issue
-     * is that when measurements are being scheduled during a resource
-     * creation process, it's possible that an error will be registering
-     * at the same time that the ConfigResponseDB object is being used somewhere
-     * else.
+     * ValidationError setter so that the version isn't incremented. The issue
+     * is that when measurements are being scheduled during a resource creation
+     * process, it's possible that an error will be registering at the same time
+     * that the ConfigResponseDB object is being used somewhere else.
      */
     void setValidationError(ConfigResponseDB resp, String error) {
-        String sql = "update ConfigResponseDB set validationError = ? " +
-        		     "where id = ?";
-        getSession().createQuery(sql)
-            .setString(0, error)
-            .setParameter(1, resp.getId())
+        String sql = "update ConfigResponseDB set validationError = ? " + "where id = ?";
+        getSession().createQuery(sql).setString(0, error).setParameter(1, resp.getId())
             .executeUpdate();
     }
 }

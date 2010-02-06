@@ -55,18 +55,6 @@ public class MetricAuxLogDAO
         super(MetricAuxLogPojo.class, f);
     }
 
-    MetricAuxLogPojo findById(Integer id) {
-        return (MetricAuxLogPojo) super.findById(id);
-    }
-
-    void save(MetricAuxLogPojo log) {
-        super.save(log);
-    }
-
-    void remove(MetricAuxLogPojo log) {
-        super.remove(log);
-    }
-
     int deleteByMetricIds(Collection<Integer> ids) {
         final String hql = "delete from MetricAuxLogPojo where metric.id in (:ids)";
 
@@ -89,7 +77,8 @@ public class MetricAuxLogDAO
             count += session.createQuery(hql).setParameterList("ids", subIds).executeUpdate();
 
             if (_log.isDebugEnabled()) {
-                _log.debug("deleteByMetricIds() " + subIds.size() + " of " + ids.size() + " metric IDs");
+                _log.debug("deleteByMetricIds() " + subIds.size() + " of " + ids.size() +
+                           " metric IDs");
             }
         }
 
@@ -113,7 +102,8 @@ public class MetricAuxLogDAO
         for (Iterator it = mids.iterator(); it.hasNext(); i++) {
             if (i != 0 && (i % maxExprs) == 0) {
                 metrics.add(it.next());
-                rtn.addAll(getSession().createQuery(sql).setParameterList("metrics", metrics).list());
+                rtn.addAll(getSession().createQuery(sql).setParameterList("metrics", metrics)
+                    .list());
                 metrics.clear();
             } else {
                 metrics.add(it.next());
@@ -135,14 +125,15 @@ public class MetricAuxLogDAO
      */
     void resetAuxType(Collection<Integer> mids) {
         String hql = "update GalertAuxLog g set g.auxType = :type "
-                     + "where exists (select p.id from MetricAuxLogPojo p " + "where p.auxLog = g and "
-                     + "p.metric.id in (:metrics))";
+                     + "where exists (select p.id from MetricAuxLogPojo p "
+                     + "where p.auxLog = g and " + "p.metric.id in (:metrics))";
 
         HQDialect dialect = Util.getHQDialect();
         int maxExprs;
         if (-1 == (maxExprs = dialect.getMaxExpressions())) {
-            getSession().createQuery(hql).setInteger("type", GalertAuxLogProvider.INSTANCE.getCode()).setParameterList(
-                "metrics", mids, new IntegerType()).executeUpdate();
+            getSession().createQuery(hql).setInteger("type",
+                GalertAuxLogProvider.INSTANCE.getCode()).setParameterList("metrics", mids,
+                new IntegerType()).executeUpdate();
             return;
         }
         int i = 0;
@@ -150,8 +141,9 @@ public class MetricAuxLogDAO
         for (Iterator it = mids.iterator(); it.hasNext(); i++) {
             if (i != 0 && (i % maxExprs) == 0) {
                 metrics.add(it.next());
-                getSession().createQuery(hql).setInteger("type", GalertAuxLogProvider.INSTANCE.getCode())
-                    .setParameterList("metrics", metrics, new IntegerType()).executeUpdate();
+                getSession().createQuery(hql).setInteger("type",
+                    GalertAuxLogProvider.INSTANCE.getCode()).setParameterList("metrics", metrics,
+                    new IntegerType()).executeUpdate();
                 metrics.clear();
             } else {
                 metrics.add(it.next());

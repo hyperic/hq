@@ -41,7 +41,6 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
@@ -432,7 +431,7 @@ public class ServerManagerImpl implements ServerManager {
         resourceManager.moveResource(subject, target.getResource(), destination.getResource());
 
         // Flush server move
-        DAOFactory.getDAOFactory().getCurrentSession().flush();
+        serverDAO.getSession().flush();
 
         // Reschedule metrics
         ResourceUpdatedZevent zevent = new ResourceUpdatedZevent(subject, target.getEntityId());
