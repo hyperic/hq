@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+	                    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+                        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+    <context:property-placeholder location="classpath:test-jdbc.properties, classpath:mail-config.properties"/>
+    <bean id="dataSource"
+          class="org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy">
+        <constructor-arg>
+            <bean class="org.apache.commons.dbcp.BasicDataSource"
+                  p:url="${jdbc.url}"
+                  p:driverClassName="${jdbc.driverClassName}"
+                  p:username="${jdbc.username}"
+                  p:password="${jdbc.password}"
+                  p:defaultAutoCommit="false" />
+        </constructor-arg>
+    </bean>
+    <bean class="org.hyperic.hq.shared.ContextSetter">
+        <property name="schemaFile" value="availabilityTests.xml.gz"/>
+    </bean>
+    <bean class="org.hyperic.hq.measurement.server.session.AvailabilityManagerTest"/>
+
+    <import resource="classpath:app-context.xml"/>
+    <import resource="classpath:jms-context.xml"/>
+    <import resource="classpath:security-context.xml"/>
+    <import resource="classpath:mail-context.xml"/>
+
+</beans>

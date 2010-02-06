@@ -770,20 +770,32 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             debugTimes(begin, "sendDataToEventHandlers", availPoints.size());
         }
     }
-
+    
     private void flushCreateAndRemoves() {
-        for (AvailabilityDataRLE rle : removeMap.get().values()) {
-            availabilityDataDAO.remove(rle);
+        for (Map.Entry<DataPoint, AvailabilityDataRLE> entry : removeMap.get().entrySet()) {
+            AvailabilityDataRLE rle = (AvailabilityDataRLE)entry.getValue();
+            // if we call remove() on an object which is already in the session
+            // hibernate will throw NonUniqueObjectExceptions
+            AvailabilityDataRLE tmp = availabilityDataDAO.get(rle.getAvailabilityDataId());
+            if (tmp != null) {
+                availabilityDataDAO.remove(tmp);
+            } else {
+                availabilityDataDAO.remove(rle);
+            }
         }
-        // for some reason if flush is not run, then create() will throw
-        // Hibernate NonUniqueObjectExceptions
+        // addData() could be overwriting RLE data points (i.e. from 0.0 to 1.0)
+        // with the same ID.  If this is the scenario, then we must run
+        // flush() in order to ensure that these old objects are not in the
+        // session when the equivalent create() on the same ID is run,
+        // thus avoiding NonUniqueObjectExceptions
         availabilityDataDAO.getSession().flush();
-        for (AvailabilityDataRLE rle : createMap.get().values()) {
+        for (Map.Entry<DataPoint, AvailabilityDataRLE> entry : createMap.get().entrySet()) {
+            AvailabilityDataRLE rle = (AvailabilityDataRLE)entry.getValue();
             AvailabilityDataId id = new AvailabilityDataId();
             id.setMeasurement(rle.getMeasurement());
             id.setStartime(rle.getStartime());
             availabilityDataDAO.create(rle.getMeasurement(), rle.getStartime(),
-                rle.getEndtime(), rle.getAvailVal());
+                        rle.getEndtime(), rle.getAvailVal());
         }
     }
 

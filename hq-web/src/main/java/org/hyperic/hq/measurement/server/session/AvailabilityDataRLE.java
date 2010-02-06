@@ -9,6 +9,7 @@ public class AvailabilityDataRLE
     private long _endtime;
     private double _availVal;
     private Measurement _measurement;
+    private AvailabilityDataId id;
     private static final long MAX_ENDTIME = Long.MAX_VALUE;
     
     public AvailabilityDataRLE() {
@@ -50,7 +51,10 @@ public class AvailabilityDataRLE
     }
 
     public AvailabilityDataId getAvailabilityDataId() {
-        return new AvailabilityDataId(_startime, _measurement);
+        if (id == null) {
+            id = new AvailabilityDataId(_startime, _measurement);
+        }
+        return id;
     }
 
     public long getStartime() {
@@ -89,6 +93,10 @@ public class AvailabilityDataRLE
         }
         
         return approxEndtime;
+    }
+    
+    public int hashCode() {
+        return getAvailabilityDataId().hashCode();
     }
 
     public boolean equals(Object rhs) {
