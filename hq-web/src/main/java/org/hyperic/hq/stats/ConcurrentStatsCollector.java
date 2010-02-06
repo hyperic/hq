@@ -37,7 +37,6 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -75,11 +74,9 @@ public final class ConcurrentStatsCollector {
     private String _currFilename;
     private FileWriter _file;
     private final String _baseDir;
-    private final ConcurrentLinkedQueue _queue = new ConcurrentLinkedQueue();
-    private final ScheduledThreadPoolExecutor _executor =
-        new ScheduledThreadPoolExecutor(1);
-    private static final ConcurrentStatsCollector _instance =
-        new ConcurrentStatsCollector();
+    private final ConcurrentLinkedQueue<StatsObject> _queue = new ConcurrentLinkedQueue<StatsObject>();
+    private final ScheduledThreadPoolExecutor _executor = new ScheduledThreadPoolExecutor(1);
+    private static final ConcurrentStatsCollector _instance = new ConcurrentStatsCollector();
     public static final int WRITE_PERIOD = 15;
     private final Sigar _sigar = new Sigar();
     private Long _pid;
@@ -113,31 +110,31 @@ public final class ConcurrentStatsCollector {
         ZEVENT_QUEUE_SIZE            = "ZEVENT_QUEUE_SIZE",
         TRIGGER_INIT_TIME            = "TRIGGER_INIT_TIME";
     // using tree due to ordering capabilities
-    private final Map _statKeys = new TreeMap();
+    private final Map<String, StatCollector> _statKeys = new TreeMap<String, StatCollector>();
     private AtomicBoolean _hasStarted = new AtomicBoolean(false);
     private final MBeanServer _mbeanServer;
 
     private ConcurrentStatsCollector() {
-    	final char fs = File.separatorChar;
-    	
-        	final String d =
-        		HQApp.getInstance().getRestartStorageDir().getAbsolutePath();
-        	final String logDir = "logs";
-        	final File logDirectory = new File(d+ fs + logDir);
-        	if(!(logDirectory.exists())) {
-        	   logDirectory.mkdir();
-        	}
-            final String logSuffix =
-            		logDir + fs + "hqstats" + fs;
-            _baseDir = d + fs + logSuffix;
+        final char fs = File.separatorChar;
+        String unittestPropStringVal =  System.getProperty("hq.unittest.run");
+        boolean inUnittestEnv = unittestPropStringVal == null ?
+            false : (new Boolean(unittestPropStringVal)).booleanValue();
+        if (!inUnittestEnv) {
+            final String d = HQApp.getInstance().getRestartStorageDir().getAbsolutePath();
+            final String jbossLogSuffix =
+                    "server" + fs + "default" + fs + "log" + fs + "hqstats" + fs;
+            _baseDir = d + fs + jbossLogSuffix;
             _log.info("using hqstats baseDir " + _baseDir);
             final File dir = new File(_baseDir);
             if (!dir.exists()) {
-            	dir.mkdir();
+                    dir.mkdir();
             }
-    		_mbeanServer = Bootstrap.getBean(MBeanServer.class);
-    		registerInternalStats();
-    	
+            _mbeanServer = Bootstrap.getBean(MBeanServer.class);
+            registerInternalStats();
+        } else {
+            _mbeanServer = null;
+            _baseDir = null;
+        }
     }
 
     public final void register(final String statId) {
@@ -223,8 +220,7 @@ public final class ConcurrentStatsCollector {
     private final void printHeader() {
         final StringBuilder buf = new StringBuilder("timestamp,");
         final String countAppend = "_COUNT";
-        for (Iterator it=_statKeys.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry entry = (Map.Entry)it.next();
+        for (Map.Entry<String, StatCollector> entry : _statKeys.entrySet()) {
             final String key = (String)entry.getKey();
             final StatCollector value = (StatCollector)entry.getValue();
             buf.append(key).append(',');
@@ -282,7 +278,7 @@ public final class ConcurrentStatsCollector {
     private class StatsWriter implements Runnable {
         public synchronized void run() {
             try {
-                Map stats = getStatsByKey();
+                Map<String, List<Number>> stats = getStatsByKey();
                 StringBuilder buf = getCSVBuf(stats);
                 final FileWriter fw = getFileWriter();
                 fw.append(buf.append("\n").toString());
@@ -303,11 +299,10 @@ public final class ConcurrentStatsCollector {
             }
             return _file;
         }
-        private final StringBuilder getCSVBuf(Map stats) {
+        private final StringBuilder getCSVBuf(Map<String, List<Number>> stats) {
             final StringBuilder rtn = new StringBuilder();
             rtn.append(System.currentTimeMillis()).append(',');
-            for (Iterator it=_statKeys.entrySet().iterator(); it.hasNext(); ) {
-                Map.Entry entry = (Map.Entry)it.next();
+            for (Map.Entry<String, StatCollector> entry : _statKeys.entrySet()) {
                 String key = (String)entry.getKey();
                 StatCollector stat = (StatCollector)entry.getValue();
                 if (stat != null) {
@@ -323,11 +318,10 @@ public final class ConcurrentStatsCollector {
                         continue;
                     }
                 } else {
-                    List list = (List)stats.get(key);
+                    List<Number> list = stats.get(key);
                     long total = 0l;
                     if (list != null) {
-                        for (Iterator iter = list.iterator(); iter.hasNext(); ) {
-                            Number val = (Number)iter.next();
+                        for (Number val : list) {
                             total += val.longValue();
                         }
                         rtn.append(total).append(',')
@@ -339,18 +333,18 @@ public final class ConcurrentStatsCollector {
             }
             return rtn;
         }
-        private Map getStatsByKey() {
-            final Map rtn = new HashMap();
-            final Object marker = new Object();
+        private Map<String, List<Number>> getStatsByKey() {
+            final Map<String, List<Number>> rtn = new HashMap<String, List<Number>>();
+            final StatsObject marker = new StatsObject(-1, null);
             _queue.add(marker);
-            List tmp;
+            List<Number> tmp;
             Object obj;
             while (marker != (obj = _queue.poll())) {
                 final StatsObject stat = (StatsObject)obj;
                 final String id = stat.getId();
                 final long val = stat.getVal();
-                if (null == (tmp = (List)rtn.get(id))) {
-                    tmp = new ArrayList();
+                if (null == (tmp = rtn.get(id))) {
+                    tmp = new ArrayList<Number>();
                     rtn.put(id, tmp);
                 }
                 tmp.add(new Long(val));
