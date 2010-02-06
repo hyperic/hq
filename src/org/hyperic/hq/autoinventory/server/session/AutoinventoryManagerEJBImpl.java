@@ -25,8 +25,13 @@
 
 package org.hyperic.hq.autoinventory.server.session;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -36,7 +41,6 @@ import java.util.Set;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 
@@ -46,6 +50,21 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.appdef.server.session.AIQueueManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.AgentCreateCallback;
+import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.AppdefResource;
+import org.hyperic.hq.appdef.server.session.CPropManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.Platform;
+import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
+import org.hyperic.hq.appdef.server.session.ResourceZevent;
+import org.hyperic.hq.appdef.server.session.Server;
+import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.Service;
+import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.AIAppdefResourceValue;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
@@ -58,27 +77,15 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
+import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
+import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ValidationException;
-import org.hyperic.hq.appdef.shared.ConfigFetchException;
-import org.hyperic.hq.appdef.server.session.AIQueueManagerEJBImpl;
-import org.hyperic.hq.appdef.server.session.AgentCreateCallback;
-import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
-import org.hyperic.hq.appdef.server.session.AppdefResource;
-import org.hyperic.hq.appdef.server.session.CPropManagerEJBImpl;
-import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
-import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
-import org.hyperic.hq.appdef.server.session.Server;
-import org.hyperic.hq.appdef.server.session.Service;
-import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
-import org.hyperic.hq.appdef.server.session.ServiceType;
-import org.hyperic.hq.appdef.server.session.ResourceZevent;
-import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
@@ -89,37 +96,36 @@ import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
+import org.hyperic.hq.autoinventory.AIHistory;
+import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.CompositeRuntimeResourceReport;
 import org.hyperic.hq.autoinventory.DuplicateAIScanNameException;
 import org.hyperic.hq.autoinventory.ScanConfigurationCore;
 import org.hyperic.hq.autoinventory.ScanState;
 import org.hyperic.hq.autoinventory.ScanStateCore;
-import org.hyperic.hq.autoinventory.AIPlatform;
-import org.hyperic.hq.autoinventory.AIHistory;
 import org.hyperic.hq.autoinventory.agent.client.AICommandsClient;
 import org.hyperic.hq.autoinventory.agent.client.AICommandsClientFactory;
 import org.hyperic.hq.autoinventory.server.session.RuntimeReportProcessor.ServiceMergeInfo;
 import org.hyperic.hq.autoinventory.shared.AIScheduleManagerLocal;
-import org.hyperic.hq.autoinventory.shared.AIScheduleManagerUtil;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerUtil;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.dao.AIHistoryDAO;
+import org.hyperic.hq.measurement.server.session.MeasurementProcessorEJBImpl;
+import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
 import org.hyperic.hq.product.AutoinventoryPluginManager;
 import org.hyperic.hq.product.GenericPlugin;
-import org.hyperic.hq.product.PluginManager;
-import org.hyperic.hq.product.PluginUpdater;
+import org.hyperic.hq.product.PluginException;
+import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ServerDetector;
-import org.hyperic.hq.product.PluginNotFoundException;
-import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.server.session.ProductManagerEJBImpl;
 import org.hyperic.hq.product.shared.ProductManagerLocal;
 import org.hyperic.hq.scheduler.ScheduleValue;
 import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
-import org.hyperic.hq.dao.AIHistoryDAO;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 
@@ -682,29 +688,24 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      */
     public void reportAIData(String agentToken, ScanStateCore stateCore)
         throws AutoinventoryException {
-
+        final boolean debug = _log.isDebugEnabled();
         ScanState state = new ScanState(stateCore);
-
         AIPlatformValue aiPlatform = state.getPlatform();
-
         // This could happen if there was a serious error in the scan,
         // and not even the platform could be detected.
         if ( state.getPlatform() == null ) {
             _log.warn("ScanState did not even contain a platform, ignoring.");
             return;
         }
-
         _log.info("Received auto-inventory report from " + aiPlatform.getFqdn() +
                  "; IPs -> " + getIps(aiPlatform.getAddedAIIpValues()) + 
                  "; CertDN -> " + aiPlatform.getCertdn() +
                  "; (" + state.getAllServers(_log).size() +  " servers)");
-
-        if (_log.isDebugEnabled()) {
+        if (debug) {
             _log.debug("AutoinventoryManager.reportAIData called, "
                       + "scan state=" + state);
             _log.debug("AISERVERS=" + state.getAllServers(_log));
         }
-
         // In the future we may want this method to act as
         // another user besides "admin".  It might make sense to have 
         // a user per-agent, so that actions that are agent-initiated 
@@ -713,69 +714,107 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         // In that case, we'd have to act as admin and be careful about 
         // what we allow that codepath to do.
         AuthzSubject subject = getHQAdmin();
-
         aiPlatform.setAgentToken(agentToken);
-
-        if (_log.isDebugEnabled()) {
+        if (debug) {
             _log.debug("AImgr.reportAIData: state.getPlatform()=" + aiPlatform);
         }
-        
+        addAIServersToAIPlatform(stateCore, state, aiPlatform);
+        AIQueueManagerLocal aiqLocal = getAIQueueManagerLocal();
+        aiPlatform = aiqLocal.queue(subject, aiPlatform, 
+                                    stateCore.getAreServersIncluded(), 
+                                    false, true);
+        approvePlatformDevice(subject, aiPlatform);
+        checkAgentAssignment(subject, agentToken, aiPlatform);
+    }
+
+    private void serializeObject(ScanStateCore stateCore) {
+        String className = stateCore.getClass().getName();
+        ObjectOutputStream oop = null;
+        OutputStream os = null;
+        try {
+            os = new FileOutputStream("statecore.out");
+            oop = new ObjectOutputStream(os);
+            oop.writeObject(stateCore);
+        } catch (IOException e) {
+            _log.error(e,e);
+        } finally {
+            try {
+                oop.flush();
+                oop.close();
+                os.close();
+            } catch (IOException e) {
+                _log.error(e,e);
+            }
+        }
+        System.out.println("Done serializing: " + className);
+    }
+
+    private void addAIServersToAIPlatform(ScanStateCore stateCore,
+                                          ScanState state,
+                                          AIPlatformValue aiPlatform)
+    throws AutoinventoryException {
         if (stateCore.getAreServersIncluded()) {
             Set serverSet = state.getAllServers(_log);
-
             final ServerManagerLocal svrMan = ServerManagerEJBImpl.getOne();
-            for (Iterator aiservers = serverSet.iterator();aiservers.hasNext();)
-            {
-                AIServerValue aiServer = (AIServerValue)aiservers.next();
-
+            for (Iterator it = serverSet.iterator(); it.hasNext();) {
+                AIServerValue aiServer = (AIServerValue)it.next();
                 // Ensure the server reported has a valid appdef type
                 try {
-                    svrMan. findServerTypeByName(aiServer.getServerTypeName());
+                    svrMan.findServerTypeByName(aiServer.getServerTypeName());
                 } catch (FinderException e) {
                     _log.error("Ignoring non-existent server type: " +
                                aiServer.getServerTypeName(), e);
                     continue;
                 }
-
                 aiPlatform.addAIServerValue(aiServer);
             }
         }
+    }
 
-        AIQueueManagerLocal aiqLocal;
-        try {
-            aiqLocal = getAIQueueManagerLocal();
-        } catch (Exception e) {
-            throw new SystemException(e);
-        }
-
-        try {
-            aiPlatform = aiqLocal.queue(subject, aiPlatform, 
-                                        stateCore.getAreServersIncluded(), 
-                                        false, true);
-        } catch ( SystemException cse ) {
-            throw cse;
-        } catch ( Exception e ) {
-            throw new SystemException(e);
-        }
-
+    private void approvePlatformDevice(AuthzSubject subject,
+                                       AIPlatformValue aiPlatform) {
         if (aiPlatform.isPlatformDevice()) {
             _log.info("Auto-approving inventory for " + aiPlatform.getFqdn());
-            List platforms = new ArrayList();
-            platforms.add(aiPlatform.getId());
-            List ips =
-                buildAIResourceIds(aiPlatform.getAIIpValues());
-            List servers =
-                buildAIResourceIds(aiPlatform.getAIServerValues());
-
+            List ips = buildAIResourceIds(aiPlatform.getAIIpValues());
+            List servers = buildAIResourceIds(aiPlatform.getAIServerValues());
+            List platforms = Collections.singletonList(aiPlatform.getId());
             try {
-                aiqLocal.processQueue(subject,
-                                      platforms, servers, ips, 
-                                      AIQueueConstants.Q_DECISION_APPROVE);
-            } catch (SystemException cse) {
-                throw cse;
+                AIQueueManagerLocal aiqLocal = getAIQueueManagerLocal();
+                aiqLocal.processQueue(subject, platforms, servers,
+                                      ips, AIQueueConstants.Q_DECISION_APPROVE);
             } catch (Exception e) {
                 throw new SystemException(e);
             }
+        }
+    }
+
+    private void checkAgentAssignment(AuthzSubject subj, String agentToken,
+                                      AIPlatformValue aiPlatform) {
+        try {
+            PlatformManagerLocal pMan = PlatformManagerEJBImpl.getOne();
+            Platform platform = pMan.getPlatformByAIPlatform(subj, aiPlatform);
+            if (platform != null) {
+                Agent agent = platform.getAgent();
+                if (agent == null || !agent.getAgentToken().equals(agentToken)) {
+                    Agent newAgent = AgentManagerEJBImpl.getOne().getAgent(agentToken);
+                    String fqdn = platform.getFqdn();
+                    Integer pid = platform.getId();
+                    _log.info("reassigning platform agent (fqdn=" + fqdn +
+                              ",id=" + pid + ") from=" + agent +
+                              " to=" + newAgent);
+                    platform.setAgent(newAgent);
+                    MeasurementProcessorLocal mProc =
+                        MeasurementProcessorEJBImpl.getOne();
+                    mProc.scheduleHierarchyAfterCommit(platform.getResource());
+                }
+            }
+        } catch (PermissionException e) {
+            // using admin, this should not happen
+            _log.error(e,e);
+        } catch (AgentNotFoundException e) {
+            // this is a problem since the agent should already exist in our
+            // inventory before it gets here.
+            _log.error(e,e);
         }
     }
 
