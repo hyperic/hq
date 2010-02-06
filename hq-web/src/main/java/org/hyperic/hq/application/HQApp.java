@@ -118,6 +118,9 @@ public class HQApp  implements ServletContextAware {
    
     @PostConstruct
     public void init() {
+        if (servletContext == null) {
+            return;
+        }
         String war = servletContext.getRealPath("/");
         File warDir = new File(war);
         setWebAccessibleDir(warDir);
