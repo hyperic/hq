@@ -396,7 +396,11 @@ public class ProductPluginDeployer implements Comparator<String> {
 
     @PostConstruct
     public void start() throws Exception {
-        String war = hqApp.getWebAccessibleDir().toString();
+        File file = hqApp.getWebAccessibleDir();
+        if (file == null) {
+            return;
+        }
+        String war = file.toString();
         // native libraries are deployed into another directory
         // which is not next to sigar.jar, so we drop this hint
         // to find it.
