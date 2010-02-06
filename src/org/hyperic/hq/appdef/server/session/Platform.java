@@ -97,7 +97,7 @@ public class Platform extends PlatformBase
         return _agent;
     }
 
-    void setAgent(Agent agent) {
+    public void setAgent(Agent agent) {
         _agent = agent;
     }
 
