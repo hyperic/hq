@@ -37,8 +37,7 @@
 		<property name="dataSource" ref="dataSource" />
 		<property name="mappingLocations" value="classpath:/**/*.hbm.xml" />
 		<property name="hibernateProperties">
-			<bean
-				class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+			<bean class="org.springframework.beans.factory.config.PropertiesFactoryBean">
 				<property name="location" value="classpath:/hibernate.properties" />
 			</bean>
 		</property>
@@ -83,7 +82,7 @@
 
 	<!-- This bean refers to various classes that should be loaded at startup. Its only interest is loading the classes listed 
 	     to have static blocks in them executed (which typically register event types) -->
-	<util:list id="tiggers">
+	<util:list id="triggers">
 		<bean class="org.hyperic.hq.bizapp.server.trigger.conditional.AlertTrigger"/>
 		<bean class="org.hyperic.hq.bizapp.server.trigger.conditional.ConfigChangedTrigger"/>
 		<bean class="org.hyperic.hq.bizapp.server.trigger.conditional.ValueChangeTrigger"/>
