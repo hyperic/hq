@@ -7,7 +7,7 @@ import org.springframework.context.ApplicationContext;
 
 
 public class Bootstrap  {
-    static ApplicationContext appContext;
+    public static ApplicationContext appContext;
     
    
     
