@@ -26,6 +26,7 @@
 package org.hyperic.hq.measurement.server.session;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -46,7 +47,11 @@ import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceEdge;
+import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.agent.client.AgentMonitor;
@@ -57,6 +62,7 @@ import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
 import org.hyperic.hq.measurement.shared.MeasurementProcessorUtil;
 import org.hyperic.hq.measurement.shared.SRNManagerLocal;
+import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.stats.ConcurrentStatsCollector;
 import org.hyperic.util.timer.StopWatch;
 
@@ -84,6 +90,26 @@ public class MeasurementProcessorEJBImpl
 
         AgentMonitor monitor = new AgentMonitor();
         return monitor.ping(a);
+    }
+    
+    /**
+     * Schedules enabled measurements for the entire ResourceEdge hierarchy
+     * based on the "containment" relationship.  These metrics are scheduled
+     * after the transaction is committed.
+     * @ejb:interface-method
+     */
+    public void scheduleHierarchyAfterCommit(Resource resource) {
+        ResourceManagerLocal rMan = ResourceManagerEJBImpl.getOne();
+        Collection resources =
+            rMan.findResourceEdges(rMan.getContainmentRelation(), resource);
+        List aeids = new ArrayList(resources.size()+1);
+        aeids.add(new AppdefEntityID(resource));
+        for (Iterator it=resources.iterator(); it.hasNext(); ) {
+            ResourceEdge e = (ResourceEdge) it.next();
+            aeids.add(new AppdefEntityID(e.getTo()));
+        }
+        AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(aeids);
+        ZeventManager.getInstance().enqueueEventAfterCommit(event);
     }
 
     /**
