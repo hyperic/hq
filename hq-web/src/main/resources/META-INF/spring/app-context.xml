@@ -48,7 +48,7 @@
 	<bean id="sessionFactory"
 		class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
 		<property name="dataSource" ref="dataSource" />
-		<property name="mappingLocations" value="classpath:/**/*.hbm.xml" />
+		<property name="mappingLocations" value="classpath:/hibernate/**/*.hbm.xml" />
 		<property name="hibernateProperties">
 			<bean class="org.springframework.beans.factory.config.PropertiesFactoryBean">
 				<property name="location" value="classpath:/hibernate.properties" />
