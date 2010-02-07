@@ -23,7 +23,7 @@
  * USA.
  */
 
-package org.hyperic.hq.shared;
+package org.hyperic.hq.context;
 
 import java.io.FileInputStream;
 import java.sql.Connection;

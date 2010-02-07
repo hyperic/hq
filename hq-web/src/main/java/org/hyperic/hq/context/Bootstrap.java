@@ -7,9 +7,7 @@ import org.springframework.context.ApplicationContext;
 
 
 public class Bootstrap  {
-    public static ApplicationContext appContext;
-    
-   
+    static ApplicationContext appContext;
     
     public static <T> T getBean(Class<T> beanClass)  {
         try {

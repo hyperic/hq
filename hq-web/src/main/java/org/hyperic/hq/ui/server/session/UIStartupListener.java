@@ -103,6 +103,9 @@ public class UIStartupListener implements StartupListener {
         };
 
         File[] plugins = pluginDir.listFiles();
+        if (plugins == null) {
+            return;
+        }
         for (int i = 0; i < plugins.length; i++) {
             try {
                 cb.fileAdded(plugins[i]);
