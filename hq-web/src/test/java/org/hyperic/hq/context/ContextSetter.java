@@ -25,12 +25,10 @@
 
 package org.hyperic.hq.context;
 
-import java.io.FileInputStream;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.util.zip.GZIPInputStream;
 
-import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -40,41 +38,31 @@ import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSet;
 import org.dbunit.operation.DatabaseOperation;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.unittest.server.UnitTestDBException;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 
-public class ContextSetter implements ApplicationContextAware {
-    
-    private final Log _log = LogFactory.getLog(ContextSetter.class);
+public class ContextSetter {
+
+    private final Log log = LogFactory.getLog(ContextSetter.class);
 
     @Autowired
     private DataSource dataSource;
 
     private String file;
-    
-    @Override
-    public void setApplicationContext(ApplicationContext ctx) throws BeansException {
-        Bootstrap.appContext = ctx;
-    }
-    
+
     public void setSchemaFile(String file) {
         this.file = file;
     }
-    
+
     /**
-     * Restore the unit test database to the original state specified 
-     * by the <code>test-dbsetup</code> Ant target.
+     * Restore the unit test database to the original state specified by the
+     * <code>test-dbsetup</code> Ant target.
      * 
      * @throws UnitTestDBException
      */
-    @PostConstruct
     public final void restoreDatabase() throws UnitTestDBException {
-        _log.info("Restoring unit test database from dump file.");
+        log.info("Restoring unit test database from dump file.");
         Connection conn = null;
         Statement stmt = null;
         try {
@@ -89,11 +77,9 @@ public class ContextSetter implements ApplicationContextAware {
             } else if (DBUtil.isMySQL(conn)) {
                 stmt.execute("set FOREIGN_KEY_CHECKS=0");
             }
-            String basedir = System.getProperty("basedir");
-            IDataSet dataset = new FlatXmlDataSet(
-                new GZIPInputStream(new FileInputStream(basedir + "/test-data/" + file)));
+            IDataSet dataset = new FlatXmlDataSet(new GZIPInputStream(getClass()
+                .getResourceAsStream(file)));
             DatabaseOperation.CLEAN_INSERT.execute(idbConn, dataset);
-            conn.commit();
         } catch (Exception e) {
             throw new UnitTestDBException(e);
         } finally {
