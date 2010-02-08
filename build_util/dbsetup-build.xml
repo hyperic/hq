@@ -4,8 +4,6 @@
 
   <!-- ==================== DBSetup ==================== -->
   <target name="dbsetup-init" depends="init-install-taskdefs" unless="dbsetup-init.isLoaded">
-	<property name="quartz.delegate" value="org.quartz.impl.jdbcjobstore.StdJDBCDelegate"/>
-	<property  name="hq.server.ds-mapping" value="MySQL"/>
     <mkdir dir="${build.dir}/sql" />
 
     <property name="dbsetup-init.isLoaded" value="t"/>
