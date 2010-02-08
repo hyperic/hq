@@ -72,6 +72,7 @@
 	</target>
 	
 	<target name="pack-rendit">
+		<mkdir dir="${build.dir}"/>
 		<!-- compiled classes -->
 		<jar file="${build.dir}/hqu-groovy.jar" basedir="${rendit_sys.dir}/target/classes"/>
 	

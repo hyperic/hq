@@ -1047,6 +1047,7 @@
 	<delete dir="${hq.agent}/target" />
 	<delete dir="${hq.web}/target" />
 	<delete dir="${hq.installer}/target" />
+	<delete dir="${rendit_sys.dir}/target/classes"/>
 	<delete includeemptydirs="true">
 		<fileset dir="${hq.agent.handlers}" defaultexcludes="false" includes="*/target/classes/**" />
 	</delete>
@@ -1154,7 +1155,7 @@
  </target>
 
 
-<target name="build-instrumented-war" depends="instrument-war,compile-plugins,pack-plugins,pack-war">
+<target name="build-instrumented-war" depends="instrument-war,compile-rendit,compile-plugins,pack-rendit,pack-plugins,pack-war">
 	<copy todir="${war.dir}/WEB-INF/lib/">
 		<fileset dir="${thirdparty.lib}">
 			<include name="com.springsource.com.cenqua.clover-2.4.2.jar" />
