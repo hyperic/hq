@@ -11,16 +11,7 @@
 		<macrodef name="hqu-copy">
 			<attribute name="wardir" />
 			<attribute name="plugindir"/>
-			<sequential>
-				<mkdir dir="@{wardir}/WEB-INF/rendit_sys" />
-				<copy todir="@{wardir}/WEB-INF/rendit_sys">
-					<fileset dir="${rendit_sys.dir}/src/main/java">
-						<include name="**/*.groovy" />
-					</fileset>
-					<fileset dir="${rendit_sys.dir}/src/main/resources">
-						<include name="**/*.properties" />
-					</fileset>
-				</copy>
+			 <sequential>
 				<mkdir dir="@{wardir}/hqu" />
 				<copy todir="@{wardir}/hqu">
 					<fileset dir="${plugindir}">
@@ -47,13 +38,17 @@
 			</sequential>
 		</macrodef>
 
-		<taskdef name="groovydoc" classname="org.codehaus.groovy.ant.Groovydoc" classpathref="alljars" />
-
 		<path id="compile.classpath">
 			<path refid="alljars" />
 			<path refid="testjars" />
+			<path location="${hq.common}/target/classes" />
+			<path location="${hq.pdk.shared}/target/classes" />
+			<path location="${hq.util}/target/classes" />
+			<path location="${hq.web}/target/classes" />
 		</path>
-
+		
+		<taskdef name="groovydoc" classname="org.codehaus.groovy.ant.Groovydoc" classpathref="compile.classpath" />
+		
 		<taskdef name="groovyc" classname="org.codehaus.groovy.ant.Groovyc">
 			<classpath refid="compile.classpath" />
 		</taskdef>

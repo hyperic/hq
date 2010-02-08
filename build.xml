@@ -204,7 +204,7 @@
 	<!-- ==================== Compile java sources ==================== -->
 
 
-	<target name="compile" depends="compile-shared,compile-web, compile-installer" />
+	<target name="compile" depends="compile-shared,compile-web,compile-installer" />
 
 	<target name="compile-shared" depends="init">
 		<compile-sources classpath.id="shared.compile.classpath" src.dir="${hq.util}/src/main/java" resource.dir="${hq.util}/src/main/resources" output.dir="${hq.util}/target/classes" />

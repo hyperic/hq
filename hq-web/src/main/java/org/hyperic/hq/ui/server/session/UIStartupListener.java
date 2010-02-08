@@ -78,11 +78,7 @@ public class UIStartupListener implements StartupListener {
         log.info("Starting init Plugins: " + new Date());
         File warDir = hqApp.getWebAccessibleDir();
         File pluginDir = new File(warDir, "hqu");
-        //File sysDir = new File(warDir + "/WEB-INF", "rendit_sys");
-        //renditServer.setSysDir(sysDir);
 
-        
-        //log.info("HQU SysDir = [" + sysDir.getAbsolutePath() + "]");
         log.info("Watching for HQU plugins in [" + pluginDir.getAbsolutePath() + "]");
 
         DirWatcherCallback cb = new DirWatcherCallback() {
