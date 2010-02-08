@@ -486,6 +486,7 @@
 				<include name="com.springsource.javax.transaction*.jar" />
 				<include name="com.springsource.com.sun.xml.bind-*.jar" />
 				<include name="com.springsource.javax.xml.*.jar" />
+				<include name="com.springsource.org.apache.xbean.spring*.jar"/>
 
 				<include name="*aopalliance*.jar" />
 				<include name="*dbcp*.jar" />
