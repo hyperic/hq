@@ -35,8 +35,8 @@ import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.context.ContextSetter;
 import org.hyperic.hq.context.TestContextLoader;
+import org.hyperic.hq.db.DatabasePopulator;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
@@ -78,13 +78,17 @@ public class AvailabilityManagerTest {
     @Autowired
     private AvailabilityCheckService availabilityCheckService;
     @Autowired
-    private ContextSetter dbPopulator;
+    private DatabasePopulator dbPopulator;
 
     public AvailabilityManagerTest() {
     }
 
     @Before
     public void initializeData() throws Exception {
+        //populate DB here so it will be rolled back with rest of test transaction
+        //can use DBPopulator or just create test data programatically
+        //TODO may not need to load all this data for every test - move this
+        //into only test methods that need it?
         dbPopulator.restoreDatabase();
     }
 

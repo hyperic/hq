@@ -23,7 +23,7 @@
  * USA.
  */
 
-package org.hyperic.hq.context;
+package org.hyperic.hq.db;
 
 import java.sql.Connection;
 import java.sql.Statement;
@@ -42,9 +42,9 @@ import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.unittest.server.UnitTestDBException;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class ContextSetter {
+public class DatabasePopulator {
 
-    private final Log log = LogFactory.getLog(ContextSetter.class);
+    private final Log log = LogFactory.getLog(DatabasePopulator.class);
 
     @Autowired
     private DataSource dataSource;
@@ -83,7 +83,7 @@ public class ContextSetter {
         } catch (Exception e) {
             throw new UnitTestDBException(e);
         } finally {
-            DBUtil.closeJDBCObjects(ContextSetter.class.getName(), conn, stmt, null);
+            DBUtil.closeJDBCObjects(DatabasePopulator.class.getName(), conn, stmt, null);
         }
     }
 
