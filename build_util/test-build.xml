@@ -9,69 +9,53 @@
 
 
 <target name="init-tests">
-    <delete dir="${junitResults.dir}"/>
-    <mkdir dir="${junitResults.dir}"/>
-    <condition property="test.halt" value="false" else="true">
-        <istrue value="${ci.build}"/>
-    </condition>
-    <echo message="Halt on error or failure: ${test.halt}"/>
+  <delete dir="${junitResults.dir}"/>
+  <mkdir dir="${junitResults.dir}"/>
+  <condition property="test.halt" value="false" else="true">
+	    <istrue value="${ci.build}"/>
+   </condition>
+   <echo message="Halt on error or failure: ${test.halt}"/>
 </target>
 
 <macrodef name="test-compile">
-    <attribute name="module.dir"/>
-    <attribute name="compile.classpath.id"/>
-    <sequential>
-        <path id="test.compile.classpath">
-            <path refid="@{compile.classpath.id}" />
-            <path location="@{module.dir}/target/classes" />
-        </path>
-        <compile-sources classpath.id="test.compile.classpath"
-                         src.dir="@{module.dir}/src/test/java"
-                         resource.dir="@{module.dir}/src/test/resources"
-                         output.dir="@{module.dir}/target/test-classes"/> 
-        <copy todir="@{module.dir}/target/test-classes" flatten="true">
-            <fileset dir="@{module.dir}/src/main/">
-                <include name="**/*-context.xml" />
-            </fileset>
-            <fileset file="${basedir}/version.properties"/>
-        </copy>
-        <copy todir="@{module.dir}/target/test-classes">
-            <fileset dir="@{module.dir}/src/test/java/">
-                <include name="**/*-context.xml" />
-            </fileset>
-        </copy>
-    </sequential>
+	<attribute name="module.dir"/>
+	<attribute name="compile.classpath.id"/>
+	<sequential>
+	<path id="test.compile.classpath">
+		<path refid="@{compile.classpath.id}" />
+		<path location="@{module.dir}/target/classes" />
+	</path>
+  	<compile-sources classpath.id="test.compile.classpath" src.dir="@{module.dir}/src/test/java" resource.dir="@{module.dir}/src/test/resources" output.dir="@{module.dir}/target/test-classes"/> 
+</sequential>
 </macrodef>
 
   <macrodef name="test-run">
     <attribute name="classpath.id"/>
     <attribute name="module.dir"/>
     <sequential>
-        <path id="test.run.classpath">
-            <path location="@{module.dir}/target/classes" />
-            <path location="@{module.dir}/target/test-classes" />
-            <fileset dir="hq-common/thirdparty/lib" includes="**/*.jar"/>
-            <path refid="@{classpath.id}" />
-        </path>
-        <junit reloading="no" fork="true" forkmode="once" printsummary="yes" haltOnError="${test.halt}" haltOnFailure="${test.halt}">
-            <jvmarg value="-Dtest.halt=${test.halt}"/>
-            <jvmarg value="-Dhq.unittest.run=true"/>
-            <jvmarg value="-Dbasedir=${basedir}"/>
-            <classpath refid="test.run.classpath"/>
-            <formatter type="xml"/>
-            <batchtest todir="${junitResults.dir}">
-                <fileset dir="@{module.dir}/target/test-classes">
-                    <include name="**/*Test.class"/>
-                    <!-- exclude integration test until we setup the DB -->
-                    <exclude name="**/AvailabilityManagerTest.class"/>
-                </fileset>
-            </batchtest>
-        </junit>
-    </sequential>
+	<path id="test.run.classpath">
+		   <path refid="@{classpath.id}" />
+			<path location="@{module.dir}/target/classes" />
+		 	<path location="@{module.dir}/target/test-classes" />
+	</path>
+    <junit reloading="no" fork="true" forkmode="once" printsummary="yes" haltOnError="${test.halt}" haltOnFailure="${test.halt}">
+       
+    <jvmarg value="-Dtest.halt=${test.halt}"/>
+	<jvmarg value="-Xmx512m"/>
+    <classpath refid="test.run.classpath"/>
+
+       <formatter type="xml"/>
+       <batchtest todir="${junitResults.dir}">
+           <fileset dir="@{module.dir}/target/test-classes">
+				<include name="**/*Test.class"/>
+           </fileset>
+      </batchtest>
+    </junit>
+  </sequential>
   </macrodef>
 
   <path id="clover.classpath">
-    <pathelement location="${thirdparty.lib}/com.springsource.com.cenqua.clover-2.4.2.jar" />
+	 <pathelement location="${thirdparty.lib}/com.springsource.com.cenqua.clover-2.4.2.jar" />
   </path>
 
   <target name="clover" depends="clover.pre, instrument-tests, run-tests" description="Executes all tests resulting from a compilation of the test tree returning test coverage metrics."/>
