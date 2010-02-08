@@ -63,11 +63,11 @@ import clover.edu.emory.mathcs.backport.java.util.Collections;
 @ContextConfiguration(loader = TestContextLoader.class, locations = { "classpath:META-INF/spring/*-context.xml", "AvailabilityManagerTest-context.xml" })
 public class AvailabilityManagerTest {
 
-    private final Log _log = LogFactory.getLog(AvailabilityManagerTest.class);
+    private final Log log = LogFactory.getLog(AvailabilityManagerTest.class);
     private static final String AVAIL_TAB = "HQ_AVAIL_DATA_RLE";
     private static final Integer PLAT_MEAS_ID = 10100;
     private static final Integer SERVICE_MEAS_ID = 10224;
-    private final List<DataPoint> _list = new ArrayList<DataPoint>();
+    private final List<DataPoint> list = new ArrayList<DataPoint>();
 
     @Autowired
     private AvailabilityManager aMan;
@@ -232,14 +232,14 @@ public class AvailabilityManagerTest {
             id = avail.getMeasurement().getId();
             String msg = id + ", " + avail.getStartime() + ", " + avail.getEndtime() + ", " +
                          avail.getAvailVal();
-            _log.error(msg);
+            log.error(msg);
         }
         AvailabilityCache cache = AvailabilityCache.getInstance();
         if (id == null) {
             return;
         }
         synchronized (cache) {
-            _log.error("Cache info -> " + cache.get(id).getTimestamp() + ", " +
+            log.error("Cache info -> " + cache.get(id).getTimestamp() + ", " +
                        cache.get(id).getValue());
         }
     }
@@ -485,7 +485,7 @@ public class AvailabilityManagerTest {
         for (AvailabilityDataRLE avail : avails) {
             dao.remove(avail);
         }
-        _log.info("deleted " + avails.size() + " rows from " + AVAIL_TAB +
+        log.info("deleted " + avails.size() + " rows from " + AVAIL_TAB +
                   " with measurement Id = " + PLAT_MEAS_ID);
     }
 
@@ -502,7 +502,7 @@ public class AvailabilityManagerTest {
         for (AvailabilityDataRLE avail : avails) {
             dao.remove(avail);
         }
-        _log.info("deleted " + avails.size() + " rows from " + AVAIL_TAB +
+        log.info("deleted " + avails.size() + " rows from " + AVAIL_TAB +
                   " with measurement Id = " + PLAT_MEAS_ID);
     }
 
@@ -513,7 +513,7 @@ public class AvailabilityManagerTest {
         for (AvailabilityDataRLE avail : avails) {
             Long endtime = new Long(avail.getEndtime());
             if (endtimes.contains(endtime)) {
-                _log.error("list for MID=" + measId + " contains two or more of the same endtime=" +
+                log.error("list for MID=" + measId + " contains two or more of the same endtime=" +
                            endtime);
                 return false;
             }
@@ -523,17 +523,17 @@ public class AvailabilityManagerTest {
                 continue;
             }
             if (last.getAvailVal() == avail.getAvailVal()) {
-                _log.error("consecutive availpoints have the same value");
+                log.error("consecutive availpoints have the same value");
                 return false;
             } else if (last.getEndtime() != avail.getStartime()) {
-                _log.error("there are gaps in the availability table");
+                log.error("there are gaps in the availability table");
                 return false;
             }
             last = avail;
         }
         AvailabilityCache cache = AvailabilityCache.getInstance();
         if (cache.get(measId).getValue() != lastPt.getValue()) {
-            _log.error("last avail data point does not match cache");
+            log.error("last avail data point does not match cache");
             return false;
         }
         return true;
@@ -541,20 +541,20 @@ public class AvailabilityManagerTest {
 
     private void addData(List<DataPoint> vals) {
         for (DataPoint val : vals) {
-            _log.info("adding timestamp=" + val.getTimestamp() + ", value=" + val.getValue());
+            log.info("adding timestamp=" + val.getTimestamp() + ", value=" + val.getValue());
         }
-        _list.clear();
-        _list.addAll(vals);
-        aMan.addData(_list);
+        list.clear();
+        list.addAll(vals);
+        aMan.addData(list);
         dao.getSession().clear();
     }
 
     private DataPoint addData(Integer measId, MetricValue mVal) {
-        _log.info("adding timestamp=" + mVal.getTimestamp() + ", value=" + mVal.getValue());
-        _list.clear();
+        log.info("adding timestamp=" + mVal.getTimestamp() + ", value=" + mVal.getValue());
+        list.clear();
         DataPoint pt = new DataPoint(measId, mVal);
-        _list.add(pt);
-        aMan.addData(_list);
+        list.add(pt);
+        aMan.addData(list);
         dao.getSession().clear();
         return pt;
     }
