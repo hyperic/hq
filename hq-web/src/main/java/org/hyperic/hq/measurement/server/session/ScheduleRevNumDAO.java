@@ -44,27 +44,11 @@ public class ScheduleRevNumDAO
         super(ScheduleRevNum.class, f);
     }
 
-    public ScheduleRevNum findById(SrnId id) {
-        return (ScheduleRevNum) super.findById(id);
-    }
-
-    public ScheduleRevNum get(SrnId id) {
-        return (ScheduleRevNum) super.get(id);
-    }
-
     public void remove(SrnId id) {
         ScheduleRevNum srn = findById(id);
         if (srn != null) {
             remove(srn);
         }
-    }
-
-    public void remove(ScheduleRevNum entity) {
-        super.remove(entity);
-    }
-
-    public void save(ScheduleRevNum entity) {
-        super.save(entity);
     }
 
     public ScheduleRevNum create(int entType, int entId) {
@@ -78,19 +62,14 @@ public class ScheduleRevNumDAO
     /**
      * Get the minimum collection intervals for all entities with metrics
      * enabled.
-     * @return A Collection of Object arrays with 3 entries, the Integer
-     *         type, the Integer id, and the Long collection interval.
+     * @return A Collection of Object arrays with 3 entries, the Integer type,
+     *         the Integer id, and the Long collection interval.
      */
     public Collection<Object[]> getMinIntervals() {
-        String sql =
-                     "select mt.appdefType, m.instanceId, min(m.interval) " +
-                     "from Measurement m, " +
-                     "MonitorableType mt, " +
-                     "MeasurementTemplate t " +
-                     "where m.enabled = true and " +
-                     "m.template.id = t.id and " +
-                     "t.monitorableType.id = mt.id " +
-                     "group by appdef_type, instance_id";
+        String sql = "select mt.appdefType, m.instanceId, min(m.interval) "
+                     + "from Measurement m, " + "MonitorableType mt, " + "MeasurementTemplate t "
+                     + "where m.enabled = true and " + "m.template.id = t.id and "
+                     + "t.monitorableType.id = mt.id " + "group by appdef_type, instance_id";
         return getSession().createQuery(sql).list();
     }
 
@@ -99,21 +78,14 @@ public class ScheduleRevNumDAO
      * @return The minimum collection interval for the given entity.
      */
     public Long getMinInterval(AppdefEntityID id) {
-        String sql =
-                     "select min(m.interval) " +
-                     "from Measurement m, " +
-                     "MonitorableType mt, " +
-                     "MeasurementTemplate t " +
-                     "where m.enabled = true and " +
-                     "m.instanceId = ? and " +
-                     "m.template.id = t.id and " +
-                     "t.monitorableType.id = mt.id and " +
-                     "mt.appdefType = ? " +
-                     "group by appdef_type, instance_id";
+        String sql = "select min(m.interval) " + "from Measurement m, " + "MonitorableType mt, "
+                     + "MeasurementTemplate t " + "where m.enabled = true and "
+                     + "m.instanceId = ? and " + "m.template.id = t.id and "
+                     + "t.monitorableType.id = mt.id and " + "mt.appdefType = ? "
+                     + "group by appdef_type, instance_id";
 
-        return (Long) getSession().createQuery(sql)
-                                  .setInteger(0, id.getID())
-                                  .setInteger(1, id.getType()).uniqueResult();
+        return (Long) getSession().createQuery(sql).setInteger(0, id.getID()).setInteger(1,
+            id.getType()).uniqueResult();
     }
 
     /**

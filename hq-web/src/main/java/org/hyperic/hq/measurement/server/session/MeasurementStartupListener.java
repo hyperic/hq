@@ -76,6 +76,7 @@ public class MeasurementStartupListener implements StartupListener {
     private SynchronousAvailDataInserter synchronousAvailDataInserter;
     private SynchronousDataInserter synchronousDataInserter;
     private MeasurementEnabler measurementEnabler;
+    private ReportStatsCollector reportStatsCollector;
 
     @Autowired
     public MeasurementStartupListener(ZeventEnqueuer zEventManager, MetricAuxLogManager metricAuxLogManager,
@@ -83,7 +84,7 @@ public class MeasurementStartupListener implements StartupListener {
                                       SRNManager srnManager, HQApp app,
                                       SynchronousAvailDataInserter synchronousAvailDataInserter,
                                       SynchronousDataInserter synchronousDataInserter,
-                                      MeasurementEnabler measurementEnabler) {
+                                      MeasurementEnabler measurementEnabler, ReportStatsCollector reportStatsCollector) {
         this.zEventManager = zEventManager;
         this.metricAuxLogManager = metricAuxLogManager;
         this.measurementManager = measurementManager;
@@ -92,6 +93,7 @@ public class MeasurementStartupListener implements StartupListener {
         this.synchronousAvailDataInserter = synchronousAvailDataInserter;
         this.synchronousDataInserter = synchronousDataInserter;
         this.measurementEnabler = measurementEnabler;
+        this.reportStatsCollector = reportStatsCollector;
         MeasurementStartupListener.app = app;
     }
 
@@ -195,7 +197,7 @@ public class MeasurementStartupListener implements StartupListener {
         }
 
         int repSize = Integer.parseInt(cfg.getProperty(PROP_REPSTATS_SIZE, "1000"));
-        ReportStatsCollector.getInstance().initialize(repSize);
+        reportStatsCollector.initialize(repSize);
     }
 
     public static void setAvailDataInserter(DataInserter d) {

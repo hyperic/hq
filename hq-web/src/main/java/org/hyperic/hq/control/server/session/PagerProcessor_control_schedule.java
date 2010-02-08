@@ -29,7 +29,6 @@ import java.util.Date;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.control.shared.ControlConstants;
 import org.hyperic.util.pager.PagerEventHandler;

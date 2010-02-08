@@ -251,8 +251,4 @@ public class RenditServerImpl implements RenditServer {
                                                
         plugin.invokeMethod(b);
     }
-
-    public static final RenditServer getInstance() {
-        return Bootstrap.getBean(RenditServer.class);
-    }
 }

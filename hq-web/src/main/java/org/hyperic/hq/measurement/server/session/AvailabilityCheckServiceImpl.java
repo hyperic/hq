@@ -54,8 +54,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service("availabilityCheckService")
 public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
     private final Log log = LogFactory.getLog(AvailabilityCheckServiceImpl.class);
-    private static final double AVAIL_DOWN = MeasurementConstants.AVAIL_DOWN,
-        AVAIL_PAUSED = MeasurementConstants.AVAIL_PAUSED, AVAIL_NULL = MeasurementConstants.AVAIL_NULL;
+    private static final double AVAIL_DOWN   = MeasurementConstants.AVAIL_DOWN;
+    private static final double AVAIL_PAUSED = MeasurementConstants.AVAIL_PAUSED;
+    private static final double AVAIL_NULL   = MeasurementConstants.AVAIL_NULL;
 
     private long startTime = 0;
     private long wait = 5 * MeasurementConstants.MINUTE;
@@ -65,7 +66,8 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
     private PermissionManager permissionManager;
 
     @Autowired
-    public AvailabilityCheckServiceImpl(AvailabilityManager availabilityManager, PermissionManager permissionManager) {
+    public AvailabilityCheckServiceImpl(AvailabilityManager availabilityManager,
+                                        PermissionManager permissionManager) {
         this.availabilityManager = availabilityManager;
         this.permissionManager = permissionManager;
     }
@@ -94,12 +96,12 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
      * @return {@link Map} of {@link Integer} to {@link ResourceDataPoint},
      *         Integer -> resource id
      */
-    private Map<Integer, ResourceDataPoint> getDownPlatforms(Date lDate) {
+    private Map<Integer, ResourceDataPoint> getDownPlatforms(long timeInMillis) {
         final boolean debug = log.isDebugEnabled();
         AvailabilityCache cache = AvailabilityCache.getInstance();
 
         List<Measurement> platformResources = availabilityManager.getPlatformResources();
-        final long now = TimingVoodoo.roundDownTime(lDate.getTime(), MeasurementConstants.MINUTE);
+        final long now = TimingVoodoo.roundDownTime(timeInMillis, MeasurementConstants.MINUTE);
         final String nowTimestamp = TimeUtil.toString(now);
         Map<Integer, ResourceDataPoint> rtn = new HashMap<Integer, ResourceDataPoint>(platformResources.size());
         Resource resource = null;
@@ -155,16 +157,24 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
 
     @Transactional
     public void backfill() {
+        backfill(System.currentTimeMillis(), false);
+    }
+
+    @Transactional
+    public void backfill(long timeInMillis) {
+        backfill(timeInMillis, true);
+    }
+
+    private void backfill(long current, boolean forceStart) {
         try {
-            Date lDate = new Date(System.currentTimeMillis());
             final boolean debug = log.isDebugEnabled();
             if (debug) {
+                Date lDate = new Date(current);
                 log.debug("Availability Check Service started executing: " + lDate);
             }
-            long current = lDate.getTime();
             // Don't start backfilling immediately
-            if (!canStart(current)) {
-                log.debug("not starting availability check");
+            if (!forceStart && !canStart(current)) {
+                log.info("not starting availability check");
                 return;
             }
             AvailabilityCache cache = AvailabilityCache.getInstance();
@@ -186,7 +196,7 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
                 // a big impact on the performance of availability insertion.
                 Map<Integer, DataPoint> backfillPoints = null;
                 synchronized (cache) {
-                    Map<Integer, ResourceDataPoint> downPlatforms = getDownPlatforms(lDate);
+                    Map<Integer, ResourceDataPoint> downPlatforms = getDownPlatforms(current);
                     backfillPoints = getBackfillPts(downPlatforms, current);
                     backfillAvails(new ArrayList<DataPoint>(backfillPoints.values()));
                 }

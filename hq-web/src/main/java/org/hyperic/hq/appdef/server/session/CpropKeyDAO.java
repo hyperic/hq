@@ -33,54 +33,29 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class CpropKeyDAO extends HibernateDAO
-{
+public class CpropKeyDAO
+    extends HibernateDAO<CpropKey> {
     @Autowired
     public CpropKeyDAO(SessionFactory f) {
         super(CpropKey.class, f);
     }
 
-    public CpropKey findById(Integer id) {
-        return (CpropKey)super.findById(id);
-    }
-
-    void save(CpropKey entity) {
-        super.save(entity);
-    }
-
-    void remove(CpropKey entity) {
-        super.remove(entity);
-    }
-
-    CpropKey create(int appdefType, int appdefTypeId, String key,
-                    String description)
-    {
-        CpropKey cpropkey = new CpropKey(appdefType, appdefTypeId,
-                                         key, description);
+    CpropKey create(int appdefType, int appdefTypeId, String key, String description) {
+        CpropKey cpropkey = new CpropKey(appdefType, appdefTypeId, key, description);
         save(cpropkey);
         return cpropkey;
     }
 
-    List<CpropKey> findByAppdefType(int appdefType, int appdefId)
-    {
-        String sql = "from CpropKey k where k.appdefType=? and " +
-                     "k.appdefTypeId = ?";
-        return getSession().createQuery(sql)
-            .setInteger(0, appdefType)
-            .setInteger(1, appdefId)
+    List<CpropKey> findByAppdefType(int appdefType, int appdefId) {
+        String sql = "from CpropKey k where k.appdefType=? and " + "k.appdefTypeId = ?";
+        return getSession().createQuery(sql).setInteger(0, appdefType).setInteger(1, appdefId)
             .list();
     }
 
-    CpropKey findByKey(int appdefType, int appdefTypeId, String key)
-    {
-        String sql = "from CpropKey k where k.appdefType=? and " +
-                     "k.appdefTypeId=? and k.key=?";
-        return (CpropKey)getSession().createQuery(sql)
-            .setInteger(0, appdefType)
-            .setInteger(1, appdefTypeId)
-            .setString(2, key)
-            .setCacheable(true)
-            .setCacheRegion("CpropKey.findByKey")
+    CpropKey findByKey(int appdefType, int appdefTypeId, String key) {
+        String sql = "from CpropKey k where k.appdefType=? and " + "k.appdefTypeId=? and k.key=?";
+        return (CpropKey) getSession().createQuery(sql).setInteger(0, appdefType).setInteger(1,
+            appdefTypeId).setString(2, key).setCacheable(true).setCacheRegion("CpropKey.findByKey")
             .uniqueResult();
     }
 }

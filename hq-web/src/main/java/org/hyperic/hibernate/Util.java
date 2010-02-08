@@ -53,7 +53,7 @@ import org.hibernate.engine.SessionImplementor;
 import org.hibernate.id.IdentifierGenerator;
 import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.common.DiagnosticObject;
-import org.hyperic.hq.common.DiagnosticThread;
+import org.hyperic.hq.common.DiagnosticsLogger;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.util.PrintfFormat;
 import org.hyperic.util.StringUtil;
@@ -172,7 +172,7 @@ public class Util {
                 return "ehcache";
             }
         };
-        DiagnosticThread.addDiagnosticObject(cacheDiagnostics);
+        Bootstrap.getBean(DiagnosticsLogger.class).addDiagnosticObject(cacheDiagnostics);
     }
 
     //TODO call this again sometime after SessionFactory is created

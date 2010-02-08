@@ -27,23 +27,22 @@ package org.hyperic.hq.measurement.server.session;
 import java.text.DateFormat;
 import java.util.Date;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.common.DiagnosticObject;
-import org.hyperic.hq.common.DiagnosticThread;
+import org.hyperic.hq.common.DiagnosticsLogger;
 import org.hyperic.util.PrintfFormat;
 import org.hyperic.util.stats.StatsCollector;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ReportStatsCollector {
-    private static final Log _log = 
-        LogFactory.getLog(ReportStatsCollector.class);
-    
-    private static final Object LOCK = new Object();
-    private static ReportStatsCollector INSTANCE;
-    private StatsCollector _stats;
-    
-    private ReportStatsCollector() {
-        DiagnosticThread.addDiagnosticObject(new DiagnosticObject() {
+
+    private final Object lock = new Object();
+    private StatsCollector stats;
+
+    @Autowired
+    public ReportStatsCollector(DiagnosticsLogger diagnosticsLogger) {
+        diagnosticsLogger.addDiagnosticObject(new DiagnosticObject() {
             public String getName() {
                 return "Metric Reports Stats";
             }
@@ -57,47 +56,33 @@ public class ReportStatsCollector {
             }
 
             public String getStatus() {
-                DateFormat fmt = 
-                    DateFormat.getDateTimeInstance(DateFormat.LONG,  
-                                                   DateFormat.LONG);
+                DateFormat fmt = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG);
                 long start = getCollector().getOldestTime();
-                long end   = getCollector().getNewestTime();
-                long now   = System.currentTimeMillis();
+                long end = getCollector().getNewestTime();
+                long now = System.currentTimeMillis();
                 double nMetrics = getCollector().valPerTimestamp(now) * 60;
                 PrintfFormat pfmt = new PrintfFormat("%.3f");
-                return "Metric Report Data\n" + 
-                     "    Start:     " + fmt.format(new Date(start)) + "\n" +
-                     "    End:       " + fmt.format(new Date(end)) + "\n" +
-                     "    Samples:   " + getCollector().getSize() + "\n" +
-                     "    Rate:      " + pfmt.sprintf(nMetrics) +  
-                     " kMetrics / min";
+                return "Metric Report Data\n" + "    Start:     " + fmt.format(new Date(start)) + "\n" +
+                       "    End:       " + fmt.format(new Date(end)) + "\n" + "    Samples:   " +
+                       getCollector().getSize() + "\n" + "    Rate:      " + pfmt.sprintf(nMetrics) + " kMetrics / min";
             }
         });
+        initialize(2);
     }
-    
+
     public void initialize(int numEnts) {
-        synchronized (LOCK) {
-            _stats = new StatsCollector(numEnts);
+        synchronized (lock) {
+            stats = new StatsCollector(numEnts);
         }
     }
-    
+
     public StatsCollector getCollector() {
-        synchronized (LOCK) {
-            return _stats;
+        synchronized (lock) {
+            return stats;
         }
     }
-    
+
     public String toString() {
         return "ReportStatsCollector";
-    }
-    
-    public static ReportStatsCollector getInstance() {
-        synchronized (LOCK) {
-            if (INSTANCE == null) {
-                INSTANCE = new ReportStatsCollector();
-                INSTANCE.initialize(2);  // Dummy initialization
-            }
-            return INSTANCE;
-        }
     }
 }

@@ -34,40 +34,19 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
 @Repository
-public class ControlHistoryDAO extends HibernateDAO<ControlHistory>
-{
+public class ControlHistoryDAO
+    extends HibernateDAO<ControlHistory> {
     @Autowired
     public ControlHistoryDAO(SessionFactory f) {
         super(ControlHistory.class, f);
     }
 
-    public ControlHistory findById(Integer id)
-    {
-        return (ControlHistory)super.findById(id);
-    }
-
-    void save(ControlHistory entity) {
-        super.save(entity);
-    }
-
-    void remove(ControlHistory entity) {
-        super.remove(entity);
-    }
-
-    ControlHistory create(AppdefEntityID entityId,
-                          Integer groupId,
-                          Integer batchId,
-                          String subject,
-                          String action,
-                          String args,
-                          Boolean scheduled,
-                          long startTime, long endTime,
-                          long dateScheduled,
-                          String status,
-                          String description,
-                          String message)
-    {
+    ControlHistory create(AppdefEntityID entityId, Integer groupId, Integer batchId,
+                          String subject, String action, String args, Boolean scheduled,
+                          long startTime, long endTime, long dateScheduled, String status,
+                          String description, String message) {
         ControlHistory h = new ControlHistory();
         h.setGroupId(groupId);
         h.setBatchId(batchId);
@@ -87,113 +66,72 @@ public class ControlHistoryDAO extends HibernateDAO<ControlHistory>
         return h;
     }
 
-    public Collection<ControlHistory> findByStartTime(long time, boolean asc)
-    {
-        return createCriteria()
-            .add(Expression.gt("startTime", new Long(time)))
-            .addOrder(asc ? Order.asc("startTime") : Order.desc("startTime"))
-            .list();
+    public Collection<ControlHistory> findByStartTime(long time, boolean asc) {
+        return createCriteria().add(Expression.gt("startTime", new Long(time))).addOrder(
+            asc ? Order.asc("startTime") : Order.desc("startTime")).list();
     }
 
-    public Collection<ControlHistory> findByEntity(int type, int id)
-    {
+    public Collection<ControlHistory> findByEntity(int type, int id) {
         return createFindByEntity(type, id).list();
     }
 
-    public Collection<ControlHistory> findByEntityStartTime(int type, int id, boolean asc)
-    {
-        return createFindByEntity(type, id)
-            .addOrder(asc ? Order.asc("startTime") : Order.desc("startTime"))
-            .list();
+    public Collection<ControlHistory> findByEntityStartTime(int type, int id, boolean asc) {
+        return createFindByEntity(type, id).addOrder(
+            asc ? Order.asc("startTime") : Order.desc("startTime")).list();
     }
 
-    public Collection<ControlHistory> findByEntityAction(int type, int id, boolean asc)
-    {
-        return createFindByEntity(type, id)
-            .addOrder(asc ? Order.asc("action") : Order.desc("action"))
-            .list();
+    public Collection<ControlHistory> findByEntityAction(int type, int id, boolean asc) {
+        return createFindByEntity(type, id).addOrder(
+            asc ? Order.asc("action") : Order.desc("action")).list();
     }
 
-    public Collection<ControlHistory> findByEntityStatus(int type, int id, boolean asc)
-    {
-        return createFindByEntity(type, id)
-            .addOrder(asc ? Order.asc("status") : Order.desc("status"))
-            .list();
+    public Collection<ControlHistory> findByEntityStatus(int type, int id, boolean asc) {
+        return createFindByEntity(type, id).addOrder(
+            asc ? Order.asc("status") : Order.desc("status")).list();
     }
 
-    public Collection<ControlHistory> findByEntityDuration(int type, int id, boolean asc)
-    {
-        return createFindByEntity(type, id)
-            .addOrder(asc ? Order.asc("duration") : Order.desc("duration"))
-            .list();
+    public Collection<ControlHistory> findByEntityDuration(int type, int id, boolean asc) {
+        return createFindByEntity(type, id).addOrder(
+            asc ? Order.asc("duration") : Order.desc("duration")).list();
     }
 
-    public Collection<ControlHistory> findByEntityDateScheduled(int type, int id, boolean asc)
-    {
-        return createFindByEntity(type, id)
-            .addOrder(asc
-                      ? Order.asc("dateScheduled")
-                      : Order.desc("dateScheduled"))
-            .list();
+    public Collection<ControlHistory> findByEntityDateScheduled(int type, int id, boolean asc) {
+        return createFindByEntity(type, id).addOrder(
+            asc ? Order.asc("dateScheduled") : Order.desc("dateScheduled")).list();
     }
 
-    public Collection<ControlHistory> findByGroupStartTime(int groupId,int batchId, boolean asc)
-    {
-        return createFindByGroup(groupId, batchId)
-            .addOrder(asc
-                      ? Order.asc("startTime")
-                      : Order.desc("startTime"))
-            .list();
+    public Collection<ControlHistory> findByGroupStartTime(int groupId, int batchId, boolean asc) {
+        return createFindByGroup(groupId, batchId).addOrder(
+            asc ? Order.asc("startTime") : Order.desc("startTime")).list();
     }
 
-    public Collection<ControlHistory> findByGroupAction(int groupId, int batchId, boolean asc)
-    {
-        return createFindByGroup(groupId, batchId)
-            .addOrder(asc
-                      ? Order.asc("action")
-                      : Order.desc("action"))
-            .list();
+    public Collection<ControlHistory> findByGroupAction(int groupId, int batchId, boolean asc) {
+        return createFindByGroup(groupId, batchId).addOrder(
+            asc ? Order.asc("action") : Order.desc("action")).list();
     }
 
-    public Collection<ControlHistory> findByGroupStatus(int groupId, int batchId, boolean asc)
-    {
-        return createFindByGroup(groupId, batchId)
-            .addOrder(asc
-                      ? Order.asc("status")
-                      : Order.desc("status"))
-            .list();
+    public Collection<ControlHistory> findByGroupStatus(int groupId, int batchId, boolean asc) {
+        return createFindByGroup(groupId, batchId).addOrder(
+            asc ? Order.asc("status") : Order.desc("status")).list();
     }
 
-    public Collection<ControlHistory> findByGroupDuration(int groupId, int batchId, boolean asc)
-    {
-        return createFindByGroup(groupId, batchId)
-            .addOrder(asc
-                      ? Order.asc("duration")
-                      : Order.desc("duration"))
-            .list();
+    public Collection<ControlHistory> findByGroupDuration(int groupId, int batchId, boolean asc) {
+        return createFindByGroup(groupId, batchId).addOrder(
+            asc ? Order.asc("duration") : Order.desc("duration")).list();
     }
 
-    public Collection<ControlHistory> findByGroupDateScheduled(int groupId, int batchId,
-                                               boolean asc)
-    {
-        return createFindByGroup(groupId, batchId)
-            .addOrder(asc
-                      ? Order.asc("dateScheduled")
-                      : Order.desc("dateScheduled"))
-            .list();
+    public Collection<ControlHistory> findByGroupDateScheduled(int groupId, int batchId, boolean asc) {
+        return createFindByGroup(groupId, batchId).addOrder(
+            asc ? Order.asc("dateScheduled") : Order.desc("dateScheduled")).list();
     }
 
-    private Criteria createFindByEntity(int type, int id)
-    {
-        return createCriteria()
-            .add(Expression.eq("entityType", new Integer(type)))
-            .add(Expression.eq("entityId", new Integer(id)));
+    private Criteria createFindByEntity(int type, int id) {
+        return createCriteria().add(Expression.eq("entityType", new Integer(type))).add(
+            Expression.eq("entityId", new Integer(id)));
     }
 
-    private Criteria createFindByGroup(int groupId, int batchId)
-    {
-        return createCriteria()
-            .add(Expression.eq("groupId", new Integer(groupId)))
-            .add(Expression.eq("batchId", new Integer(batchId)));
+    private Criteria createFindByGroup(int groupId, int batchId) {
+        return createCriteria().add(Expression.eq("groupId", new Integer(groupId))).add(
+            Expression.eq("batchId", new Integer(batchId)));
     }
 }

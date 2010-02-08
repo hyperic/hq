@@ -38,6 +38,8 @@ import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.server.session.AuthzBossImpl;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.hqu.RenditServer;
 import org.hyperic.hq.hqu.RenditServerImpl;
 import org.hyperic.hq.hqu.RequestInvocationBindings;
 import org.hyperic.hq.ui.util.RequestUtils;
@@ -196,7 +198,7 @@ public class RenditServlet
                                           req, resp, getServletContext());
         long start = System.currentTimeMillis();
         try {
-            RenditServerImpl.getInstance().handleRequest(plugin, b); 
+            Bootstrap.getBean(RenditServer.class).handleRequest(plugin, b); 
         } catch(Exception e) {
             throw new ServletException(e);
         } finally {

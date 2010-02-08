@@ -25,11 +25,9 @@
 
 package org.hyperic.hq.authz.server.session;
 
-import org.hyperic.util.pager.PagerProcessor;
-import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.authz.values.OwnedRoleValue;
 import org.hyperic.hq.context.Bootstrap;
-import org.hyperic.dao.DAOFactory;
+import org.hyperic.util.pager.PagerProcessor;
 
 public class PagerProcessor_ownedRole implements PagerProcessor {
  

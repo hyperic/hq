@@ -36,7 +36,6 @@ import java.util.Set;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.type.IntegerType;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.appdef.ConfigResponseDB;
@@ -48,20 +47,29 @@ import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
 @Repository
-public class ServiceDAO extends HibernateDAO<Service>
-{
+public class ServiceDAO
+    extends HibernateDAO<Service> {
+    private ConfigResponseDAO configResponseDAO;
+    private ServiceTypeDAO serviceTypeDAO;
+    private VirtualDAO virtualDAO;
+
     @Autowired
-    public ServiceDAO(SessionFactory f) {
+    public ServiceDAO(SessionFactory f, ConfigResponseDAO configResponseDAO,
+                      ServiceTypeDAO serviceTypeDAO, VirtualDAO virtualDAO) {
         super(Service.class, f);
+        this.configResponseDAO = configResponseDAO;
+        this.serviceTypeDAO = serviceTypeDAO;
+        this.virtualDAO = virtualDAO;
     }
 
     public Service findById(Integer id) {
-        return (Service)super.findById(id);
+        return (Service) super.findById(id);
     }
 
     public Service get(Integer id) {
-        return (Service)super.get(id);
+        return (Service) super.get(id);
     }
 
     public void save(Service entity) {
@@ -75,12 +83,9 @@ public class ServiceDAO extends HibernateDAO<Service>
     /**
      * NOTE: this method automatically sets the autoinventoryIdentifier = name
      */
-    public Service create(ServiceType type, Server server, String name,
-                          String desc, String modifiedBy, String location,
-                          String owner, Service parent)
-    {
-        ConfigResponseDB configResponse =
-            DAOFactory.getDAOFactory().getConfigResponseDAO().create();
+    public Service create(ServiceType type, Server server, String name, String desc,
+                          String modifiedBy, String location, String owner, Service parent) {
+        ConfigResponseDB configResponse = configResponseDAO.create();
 
         Service s = new Service();
         s.setName(name);
@@ -103,8 +108,7 @@ public class ServiceDAO extends HibernateDAO<Service>
     }
 
     public Service create(ServiceValue sv, Server parent) {
-        ConfigResponseDB configResponse =
-            DAOFactory.getDAOFactory().getConfigResponseDAO().create();
+        ConfigResponseDB configResponse = configResponseDAO.create();
 
         Service s = new Service();
         s.setName(sv.getName());
@@ -118,8 +122,7 @@ public class ServiceDAO extends HibernateDAO<Service>
 
         if (sv.getServiceType() != null) {
             Integer stId = sv.getServiceType().getId();
-            ServiceType st =
-                DAOFactory.getDAOFactory().getServiceTypeDAO().findById(stId);
+            ServiceType st = serviceTypeDAO.findById(stId);
             s.setServiceType(st);
         }
 
@@ -129,29 +132,21 @@ public class ServiceDAO extends HibernateDAO<Service>
         return s;
     }
 
-    public Service createService(Server s, ServiceValue sv)
-        throws ValidationException
-    {
+    public Service createService(Server s, ServiceValue sv) throws ValidationException {
         // validate the service
         s.validateNewService(sv);
         // get the Service home
         return create(sv, s);
     }
 
-    public Collection findByParent(Integer parentId)
-    {
-        String sql="from Service where parentService.id=?";
-        return createQuery(sql)
-            .setInteger(0, parentId.intValue())
-            .list();
+    public Collection findByParent(Integer parentId) {
+        String sql = "from Service where parentService.id=?";
+        return createQuery(sql).setInteger(0, parentId.intValue()).list();
     }
 
-    public Collection<Service> findByParentAndType(Integer parentId, Integer typeId)
-    {
-        String sql="from Service where parentService.id=? and serviceType.id=?";
-        return createQuery(sql)
-            .setInteger(0, parentId.intValue())
-            .setInteger(1, typeId.intValue())
+    public Collection<Service> findByParentAndType(Integer parentId, Integer typeId) {
+        String sql = "from Service where parentService.id=? and serviceType.id=?";
+        return createQuery(sql).setInteger(0, parentId.intValue()).setInteger(1, typeId.intValue())
             .list();
     }
 
@@ -160,11 +155,8 @@ public class ServiceDAO extends HibernateDAO<Service>
      * @return {@link Collection} of {@link ServiceType}
      */
     Collection<ServiceType> getServiceTypes(final List serviceIds, final boolean asc) {
-        final String hql = new StringBuilder()
-            .append("SELECT distinct s.serviceType")
-            .append(" FROM Service s")
-            .append(" WHERE s.id in (:svcs)")
-            .toString();
+        final String hql = new StringBuilder().append("SELECT distinct s.serviceType").append(
+            " FROM Service s").append(" WHERE s.id in (:svcs)").toString();
         final HQDialect dialect = Util.getHQDialect();
         // can't go over 1000 due to the hibernate bug
         // http://opensource.atlassian.com/projects/hibernate/browse/HHH-1985
@@ -172,12 +164,11 @@ public class ServiceDAO extends HibernateDAO<Service>
         final int maxExprs = (max == -1 || max > 1000) ? 1000 : max;
         // need a Set to quickly ensure ServiceTypes are unique btwn queries
         final Set set = new HashSet();
-        for (int i=0; i<serviceIds.size(); i+=maxExprs) {
+        for (int i = 0; i < serviceIds.size(); i += maxExprs) {
             final int last = Math.min(i + maxExprs, serviceIds.size());
             final List sublist = serviceIds.subList(i, last);
-            final List list = getSession().createQuery(hql)
-                .setParameterList("svcs", sublist, new IntegerType())
-                .list();
+            final List list = getSession().createQuery(hql).setParameterList("svcs", sublist,
+                new IntegerType()).list();
             // ServiceType hashCode is by name
             set.addAll(list);
         }
@@ -186,206 +177,130 @@ public class ServiceDAO extends HibernateDAO<Service>
         return rtn;
     }
 
-    public Collection findAll_orderName(boolean asc)
-    {
-        return getSession()
-            .createQuery("from Service order by resource.sortName " +
-                         (asc ? "asc" : "desc"))
-            .setCacheable(true)
-            .setCacheRegion("Service.findAll_orderName")
-            .list();
+    public Collection findAll_orderName(boolean asc) {
+        return getSession().createQuery(
+            "from Service order by resource.sortName " + (asc ? "asc" : "desc")).setCacheable(true)
+            .setCacheRegion("Service.findAll_orderName").list();
     }
 
-    public Collection findAll_orderCtime(boolean asc)
-    {
-        return createQuery("from Service order by creationTime " +
-                           (asc ? "asc" : "desc")).list();
+    public Collection findAll_orderCtime(boolean asc) {
+        return createQuery("from Service order by creationTime " + (asc ? "asc" : "desc")).list();
     }
 
-    public Collection<Service> findByType(Integer st, boolean asc)
-    {
-        String sql = "from Service where serviceType.id=? " +
-        		     "order by resource.sortName " + (asc ? "asc" : "desc");
-        return createQuery(sql)
-            .setInteger(0, st.intValue())
-            .list();
+    public Collection<Service> findByType(Integer st, boolean asc) {
+        String sql = "from Service where serviceType.id=? " + "order by resource.sortName " +
+                     (asc ? "asc" : "desc");
+        return createQuery(sql).setInteger(0, st.intValue()).list();
     }
 
-    public List findByName(String name)
-    {
-        String sql="from Service where resource.sortName=?";
-        return createQuery(sql)
-            .setString(0, name.toUpperCase())
-            .list();
+    public List findByName(String name) {
+        String sql = "from Service where resource.sortName=?";
+        return createQuery(sql).setString(0, name.toUpperCase()).list();
     }
 
     public Service findByName(Platform platform, String serviceName) {
-        String sql = "select v from Service v join v.server s " +
-                     "where s.platform = :platform and " +
-                           "v.resource.sortName = :name";
+        String sql = "select v from Service v join v.server s "
+                     + "where s.platform = :platform and " + "v.resource.sortName = :name";
 
-        return (Service) getSession().createQuery(sql)
-                .setParameter("platform", platform)
-                .setParameter("name", serviceName.toUpperCase())
-                .uniqueResult();
+        return (Service) getSession().createQuery(sql).setParameter("platform", platform)
+            .setParameter("name", serviceName.toUpperCase()).uniqueResult();
     }
 
     public Service findByName(Server server, String serviceName) {
-        String sql = "select v from Service v " +
-            "where v.server = :server and v.resource.sortName = :name";
+        String sql = "select v from Service v "
+                     + "where v.server = :server and v.resource.sortName = :name";
 
-        return (Service) createQuery(sql)
-            .setParameter("server", server)
-            .setParameter("name", serviceName.toUpperCase())
-            .uniqueResult();
+        return (Service) createQuery(sql).setParameter("server", server).setParameter("name",
+            serviceName.toUpperCase()).uniqueResult();
     }
 
     /**
      * @return {@link List} of {@link Service}
      */
     public List<Service> getByAIID(Server server, String aiid) {
-        final String sql = new StringBuilder()
-            .append("select s from Service s")
-            .append(" WHERE s.server = :server")
-            .append(" AND s.autoinventoryIdentifier = :aiid")
+        final String sql = new StringBuilder().append("select s from Service s").append(
+            " WHERE s.server = :server").append(" AND s.autoinventoryIdentifier = :aiid")
             .toString();
-        return createQuery(sql)
-            .setParameter("server", server)
-            .setParameter("aiid", aiid)
-            .list();
+        return createQuery(sql).setParameter("server", server).setParameter("aiid", aiid).list();
     }
 
-    public Collection<Service> findByPlatform_orderName(Integer id, boolean asc)
-    {
-        String sql="select sv from Service sv " +
-                   " join fetch sv.server s " +
-                   " join fetch s.platform p "+
-                   "where p.id=?" +
-                   "order by s.resource.sortName " +
-                   (asc ? "asc" : "desc");
-        return createQuery(sql)
-            .setInteger(0, id.intValue())
-            .list();
+    public Collection<Service> findByPlatform_orderName(Integer id, boolean asc) {
+        String sql = "select sv from Service sv " + " join fetch sv.server s " +
+                     " join fetch s.platform p " + "where p.id=?" +
+                     "order by s.resource.sortName " + (asc ? "asc" : "desc");
+        return createQuery(sql).setInteger(0, id.intValue()).list();
     }
 
-    public Collection<Service> findByPlatform_orderType(Integer id, boolean asc)
-    {
-        String sql="select sv from Service sv " +
-                   " join fetch sv.server s " +
-                   " join fetch s.serverType st " +
-                   " join fetch s.platform p "+
-                   "where p.id=?" +
-                   "order by st.sortName "+
-                   (asc ? "asc" : "desc") +
-                   ", s.sortName";
-        return createQuery(sql)
-            .setInteger(0, id.intValue())
-            .list();
+    public Collection<Service> findByPlatform_orderType(Integer id, boolean asc) {
+        String sql = "select sv from Service sv " + " join fetch sv.server s " +
+                     " join fetch s.serverType st " + " join fetch s.platform p " + "where p.id=?" +
+                     "order by st.sortName " + (asc ? "asc" : "desc") + ", s.sortName";
+        return createQuery(sql).setInteger(0, id.intValue()).list();
     }
 
     public List<Service> findPlatformServicesByType(Platform p, ServiceType st) {
-        String sql = "select v from Service v " +
-                  " join v.server s " +
-                  " join s.platform p " +
-                  " where " +
-                  "     p = :platform " +
-                  " and v.serviceType = :serviceType " +
-                  " order by v.resource.sortName";
+        String sql = "select v from Service v " + " join v.server s " + " join s.platform p "
+                     + " where " + "     p = :platform " + " and v.serviceType = :serviceType "
+                     + " order by v.resource.sortName";
 
-        return createQuery(sql)
-            .setParameter("platform", p)
-            .setParameter("serviceType", st)
-            .list();
+        return createQuery(sql).setParameter("platform", p).setParameter("serviceType", st).list();
     }
 
-    public Collection<Service> findPlatformServices_orderName(Integer platId,
-                                                     boolean asc)
-    {
-        String sql="select sv from Service sv " +
-                   " join fetch sv.server s " +
-                   " join fetch s.serverType st " +
-                   " join fetch s.platform p " +
-                   "where p.id=? " +
-                   " and st.virtual=? " +
-                   "order by sv.resource.sortName " +
-                   (asc ? "asc" : "desc");
-        return createQuery(sql)
-            .setInteger(0, platId.intValue())
-            .setBoolean(1, true)
-            .setCacheRegion("Service.findPlatformServices")
-            .setCacheable(true)
-            .list();
+    public Collection<Service> findPlatformServices_orderName(Integer platId, boolean asc) {
+        String sql = "select sv from Service sv " + " join fetch sv.server s " +
+                     " join fetch s.serverType st " + " join fetch s.platform p " +
+                     "where p.id=? " + " and st.virtual=? " + "order by sv.resource.sortName " +
+                     (asc ? "asc" : "desc");
+        return createQuery(sql).setInteger(0, platId.intValue()).setBoolean(1, true)
+            .setCacheRegion("Service.findPlatformServices").setCacheable(true).list();
     }
 
-    public List<Service> findByServer_orderName(Integer id)
-    {
-        String sql="from Service where server.id=? order by resource.sortName";
-        return createQuery(sql)
-            .setInteger(0, id.intValue())
-            .list();
+    public List<Service> findByServer_orderName(Integer id) {
+        String sql = "from Service where server.id=? order by resource.sortName";
+        return createQuery(sql).setInteger(0, id.intValue()).list();
     }
 
-    public List<Service> findByServer_orderType(Integer id)
-    {
-        String sql="select s from Service s " +
-                   " join fetch s.serviceType st " +
-                   "where s.server.id=? " +
-                   "order by st.sortName";
-        return createQuery(sql)
-            .setInteger(0, id.intValue())
-            .list();
+    public List<Service> findByServer_orderType(Integer id) {
+        String sql = "select s from Service s " + " join fetch s.serviceType st "
+                     + "where s.server.id=? " + "order by st.sortName";
+        return createQuery(sql).setInteger(0, id.intValue()).list();
     }
 
-    public List<Service> findByServerAndType_orderName(Integer id, Integer tid)
-    {
-        String sql="from Service where server.id=? and serviceType.id=? " +
-                   "order by resource.sortName";
-        return createQuery(sql)
-            .setInteger(0, id.intValue())
-            .setInteger(1, tid.intValue())
-            .setCacheable(true)
-            .setCacheRegion("Service.findByServerAndType")
-            .list();
+    public List<Service> findByServerAndType_orderName(Integer id, Integer tid) {
+        String sql = "from Service where server.id=? and serviceType.id=? "
+                     + "order by resource.sortName";
+        return createQuery(sql).setInteger(0, id.intValue()).setInteger(1, tid.intValue())
+            .setCacheable(true).setCacheRegion("Service.findByServerAndType").list();
     }
 
-    public Service findByApplication(Integer appId)
-    {
-        String sql="select s from Service s " +
-                   " join fetch s.appServices a " +
-                   "where a.application.id=? ";
-        return (Service) createQuery(sql)
-            .setInteger(0, appId.intValue())
-            .uniqueResult();
+    public Service findByApplication(Integer appId) {
+        String sql = "select s from Service s " + " join fetch s.appServices a "
+                     + "where a.application.id=? ";
+        return (Service) createQuery(sql).setInteger(0, appId.intValue()).uniqueResult();
     }
 
-    public Collection findAllClusterUnassigned_orderName(boolean asc)
-    {
-        String sql="from Service where serviceCluster is null " +
-                   "order by resource.sortName " +
-                   (asc ? "asc" : "desc");
+    public Collection findAllClusterUnassigned_orderName(boolean asc) {
+        String sql = "from Service where serviceCluster is null " + "order by resource.sortName " +
+                     (asc ? "asc" : "desc");
         return createQuery(sql).list();
     }
 
-    public Collection<Service> findAllClusterAppUnassigned_orderName(boolean asc)
-    {
-        String sql="from Service where serviceCluster is null and " +
-                   "appServices.size=0 " +
-                   "order by resource.sortName " +
-                   (asc ? "asc" : "desc");
+    public Collection<Service> findAllClusterAppUnassigned_orderName(boolean asc) {
+        String sql = "from Service where serviceCluster is null and " + "appServices.size=0 " +
+                     "order by resource.sortName " + (asc ? "asc" : "desc");
         return createQuery(sql).list();
     }
 
     public Resource findVirtualByInstanceId(Integer id) {
-        VirtualDAO dao = DAOFactory.getDAOFactory().getVirtualDAO();
-        return dao.findVirtualByInstanceId(id, AuthzConstants.serviceResType);
+
+        return virtualDAO.findVirtualByInstanceId(id, AuthzConstants.serviceResType);
     }
 
     public Collection<Service> findVirtualByProcessId(Integer id) {
-        VirtualDAO dao = DAOFactory.getDAOFactory().getVirtualDAO();
-        Collection resources =
-            dao.findVirtualByProcessId(id, AuthzConstants.serviceResType);
+
+        Collection resources = virtualDAO.findVirtualByProcessId(id, AuthzConstants.serviceResType);
         List services = new ArrayList();
-        for (Iterator it = resources.iterator(); it.hasNext(); ) {
+        for (Iterator it = resources.iterator(); it.hasNext();) {
             Virtual virt = (Virtual) it.next();
             services.add(findById(virt.getId()));
         }
@@ -393,11 +308,10 @@ public class ServiceDAO extends HibernateDAO<Service>
     }
 
     public Collection<Service> findVirtualByPysicalId(Integer id) {
-        VirtualDAO dao = DAOFactory.getDAOFactory().getVirtualDAO();
-        Collection resources =
-            dao.findVirtualByPysicalId(id, AuthzConstants.serviceResType);
+
+        Collection resources = virtualDAO.findVirtualByPysicalId(id, AuthzConstants.serviceResType);
         List services = new ArrayList();
-        for (Iterator it = resources.iterator(); it.hasNext(); ) {
+        for (Iterator it = resources.iterator(); it.hasNext();) {
             Virtual virt = (Virtual) it.next();
             services.add(findById(virt.getId()));
         }
@@ -405,21 +319,18 @@ public class ServiceDAO extends HibernateDAO<Service>
     }
 
     public List<Object[]> getServiceTypeCounts() {
-        String sql = "select t.name, count(*) from ServiceType t, " +
-                     "Service s where s.serviceType = t " +
-                     "group by t.name order by t.name";
+        String sql = "select t.name, count(*) from ServiceType t, "
+                     + "Service s where s.serviceType = t " + "group by t.name order by t.name";
 
         return createQuery(sql).list();
     }
 
     public Number getServiceCount() {
-        return (Number) createQuery("select count(*) from Service")
-            .uniqueResult();
+        return (Number) createQuery("select count(*) from Service").uniqueResult();
     }
 
     void clearResource(Resource res) {
-        createQuery("update Service set resource = null where resource = ?")
-            .setParameter(0, res)
+        createQuery("update Service set resource = null where resource = ?").setParameter(0, res)
             .executeUpdate();
     }
 
@@ -429,7 +340,6 @@ public class ServiceDAO extends HibernateDAO<Service>
     }
 
     public Service findByResource(Resource res) {
-        return (Service) createCriteria().add(Restrictions.eq("resource", res))
-            .uniqueResult();
+        return (Service) createCriteria().add(Restrictions.eq("resource", res)).uniqueResult();
     }
 }

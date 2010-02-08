@@ -9,8 +9,6 @@ import org.springframework.context.ApplicationContext;
 public class Bootstrap  {
     static ApplicationContext appContext;
     
-   
-    
     public static <T> T getBean(Class<T> beanClass)  {
         try {
             Collection<T> beans = appContext.getBeansOfType(beanClass).values();

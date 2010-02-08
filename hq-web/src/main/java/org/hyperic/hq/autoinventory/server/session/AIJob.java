@@ -48,13 +48,9 @@ import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.scheduler.server.session.BaseJob;
 import org.quartz.JobDataMap;
 
-public abstract class AIJob extends BaseJob {
+public abstract class AIJob
+    extends BaseJob {
 
-    // The time to wait in between checking if an AI scan has
-    // finished.  This is used to synchronize calls to the
-    // agent.
-    protected static final int JOB_WAIT_INTERVAL = 10000;
-    
     // Configuration parameters
     public static final String PROP_CONFIG = "scanConfig";
     public static final String PROP_SCAN_OS = "scanOs";
@@ -62,7 +58,7 @@ public abstract class AIJob extends BaseJob {
     public static final String PROP_SCANNAME = "scanName";
     public static final String PROP_SCANDESC = "scanDesc";
 
-    private final String STATUS_STARTED   = "scan running";
+    private final String STATUS_STARTED = "scan running";
 
     private final String STATUS_COMPLETED = "scan completed";
 
@@ -70,36 +66,23 @@ public abstract class AIJob extends BaseJob {
 
     /**
      * Do a control command on a single appdef entity
-     *
+     * 
      * @return The job id
      */
-    protected Integer doAgentScan(AppdefEntityID id,
-                                  AppdefEntityID gid,
-                                  Integer groupId,
-                                  Integer batchId,
-                                  AuthzSubject subject,
-                                  Date dateScheduled,
-                                  Boolean scheduled,
-                                  ScanConfigurationCore scanConfig,
-                                  String scanName,
-                                  String scanDesc)
-        throws AutoinventoryException
-    {
+    protected Integer doAgentScan(AppdefEntityID id, AppdefEntityID gid, Integer groupId,
+                                  Integer batchId, AuthzSubject subject, Date dateScheduled,
+                                  Boolean scheduled, ScanConfigurationCore scanConfig,
+                                  String scanName, String scanDesc) throws AutoinventoryException {
         long startTime = System.currentTimeMillis();
         AIHistory commandHistory = null;
         String errorMsg = null;
 
         try {
-            AICommandsClient client = 
-                Bootstrap.getBean(AICommandsClientFactory.class).getClient(id);
-            commandHistory =
-                createHistory(id, groupId, batchId,
-                              subject.getName(),
-                              scanConfig, scanName, scanDesc,
-                              scheduled, startTime, startTime,
-                              dateScheduled.getTime(),
-                              STATUS_STARTED,
-                              null);
+            AICommandsClient client = Bootstrap.getBean(AICommandsClientFactory.class)
+                .getClient(id);
+            commandHistory = createHistory(id, groupId, batchId, subject.getName(), scanConfig,
+                scanName, scanDesc, scheduled, startTime, startTime, dateScheduled.getTime(),
+                STATUS_STARTED, null);
             client.startScan(scanConfig);
 
         } catch (AutoinventoryException e) {
@@ -114,8 +97,8 @@ public abstract class AIJob extends BaseJob {
             errorMsg = "System error";
         } catch (NamingException e) {
             errorMsg = "System error";
-        }  finally {
-        
+        } finally {
+
             if (errorMsg != null) {
                 this.log.error("Unable to execute command: " + errorMsg);
 
@@ -124,17 +107,12 @@ public abstract class AIJob extends BaseJob {
                     if (commandHistory != null) {
                         removeHistory(commandHistory);
                     }
-                    createHistory(id, groupId, batchId,
-                                  subject.getName(), 
-                                  scanConfig, scanName, scanDesc,
-                                  scheduled, startTime, 
-                                  System.currentTimeMillis(),
-                                  dateScheduled.getTime(),
-                                  STATUS_COMPLETED,
-                                  errorMsg);
+                    createHistory(id, groupId, batchId, subject.getName(), scanConfig, scanName,
+                        scanDesc, scheduled, startTime, System.currentTimeMillis(), dateScheduled
+                            .getTime(), STATUS_COMPLETED, errorMsg);
                 } catch (Exception exc) {
-                    this.log.error("Unable to create history entry for " +
-                                   "failed autoinventory scan");
+                    this.log.error("Unable to create history entry for "
+                                   + "failed autoinventory scan");
                 }
 
                 throw new AutoinventoryException(errorMsg);
@@ -145,41 +123,24 @@ public abstract class AIJob extends BaseJob {
         return commandHistory.getId();
     }
 
-    protected void removeHistory(AIHistory history)
-        throws NamingException
-    {
+    protected void removeHistory(AIHistory history) throws NamingException {
         AutoinventoryManager alocal = getAutoInventoryManager();
         alocal.removeHistory(history);
     }
 
-    protected AIHistory createHistory(AppdefEntityID id,
-                                      Integer groupId,
-                                      Integer batchId,
-                                      String subjectName,
-                                      ScanConfigurationCore config,
-                                      String scanName,
-                                      String scanDesc,
-                                      Boolean scheduled,
-                                      long startTime,
-                                      long stopTime,
-                                      long scheduleTime,
-                                      String status,
-                                      String errorMessage)
-        throws  NamingException, AutoinventoryException
-    {
+    protected AIHistory createHistory(AppdefEntityID id, Integer groupId, Integer batchId,
+                                      String subjectName, ScanConfigurationCore config,
+                                      String scanName, String scanDesc, Boolean scheduled,
+                                      long startTime, long stopTime, long scheduleTime,
+                                      String status, String errorMessage) throws NamingException,
+        AutoinventoryException {
         AutoinventoryManager alocal = getAutoInventoryManager();
-        return alocal.createAIHistory(id, groupId, batchId, subjectName,
-                                      config, scanName, scanDesc,
-                                      scheduled, startTime,
-                                      stopTime, scheduleTime,
-                                      status,
-                                      errorMessage);
+        return alocal.createAIHistory(id, groupId, batchId, subjectName, config, scanName,
+            scanDesc, scheduled, startTime, stopTime, scheduleTime, status, errorMessage);
     }
 
-    protected void updateHistory(Integer jobId, long endTime,
-                                 String status, String message)
-        throws  NamingException
-    {
+    protected void updateHistory(Integer jobId, long endTime, String status, String message)
+        throws NamingException {
         AutoinventoryManager alocal = getAutoInventoryManager();
         alocal.updateAIHistory(jobId, endTime, status, message);
     }
@@ -193,11 +154,9 @@ public abstract class AIJob extends BaseJob {
     /**
      * loads the scan config object
      */
-    protected ScanConfigurationCore getScanConfig(JobDataMap dataMap)
-        throws IOException
-    {
-        String config = (String)dataMap.get(PROP_CONFIG);
-        
+    protected ScanConfigurationCore getScanConfig(JobDataMap dataMap) throws IOException {
+        String config = (String) dataMap.get(PROP_CONFIG);
+
         try {
             return ScanConfigurationCore.decode(config);
         } catch (AutoinventoryException e) {

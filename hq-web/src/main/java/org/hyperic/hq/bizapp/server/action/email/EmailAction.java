@@ -49,14 +49,11 @@ import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.Scheduler;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceDAO;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
-import org.hyperic.hq.bizapp.server.session.EmailManagerImpl;
 import org.hyperic.hq.bizapp.shared.EmailManager;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
-import org.hyperic.hq.common.server.session.ServerConfigManagerImpl;
 import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.escalation.server.session.Escalatable;
@@ -71,7 +68,7 @@ import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.InvalidActionDataException;
 import org.hyperic.hq.events.Notify;
 import org.hyperic.hq.events.server.session.AlertRegulator;
-import org.hyperic.hq.hqu.RenditServerImpl;
+import org.hyperic.hq.hqu.RenditServer;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.util.ConfigPropertyException;
@@ -155,7 +152,7 @@ public class EmailAction extends EmailActionConfig
         File templateFile = new File(templateDir, filename);
         StringWriter output = new StringWriter();
         try {
-            RenditServerImpl.getInstance().renderTemplate(templateFile, params,
+            Bootstrap.getBean(RenditServer.class).renderTemplate(templateFile, params,
                                                       output);
 
             if (_log.isDebugEnabled())

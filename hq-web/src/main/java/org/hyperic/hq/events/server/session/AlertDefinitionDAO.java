@@ -67,7 +67,8 @@ public class AlertDefinitionDAO
     private ResourceDAO rDao;
 
     @Autowired
-    public AlertDefinitionDAO(SessionFactory f, PermissionManager permissionManager, ActionDAO actDAO, TriggerDAO tDAO,
+    public AlertDefinitionDAO(SessionFactory f, PermissionManager permissionManager,
+                              ActionDAO actDAO, TriggerDAO tDAO,
                               AlertConditionDAO alertConditionDAO, ResourceDAO rDao) {
         super(AlertDefinition.class, f);
         this.permissionManager = permissionManager;
@@ -85,8 +86,8 @@ public class AlertDefinitionDAO
         super(AlertDefinition.class, sessionFactory);
     }
 
-    void remove(AlertDefinition def) {
-        super.remove(def.getAlertDefinitionState());
+    public void remove(AlertDefinition def) {
+        getSession().delete(def.getAlertDefinitionState());
         super.remove(def);
     }
 
@@ -112,8 +113,8 @@ public class AlertDefinitionDAO
         String sql = "FROM AlertDefinition a WHERE "
                      + "a.resource = :res AND a.deleted = false AND a.parent.id = :parent";
 
-        List<AlertDefinition> defs = getSession().createQuery(sql).setParameter("res", res).setInteger("parent",
-            parentId.intValue()).list();
+        List<AlertDefinition> defs = getSession().createQuery(sql).setParameter("res", res)
+            .setInteger("parent", parentId.intValue()).list();
 
         if (defs.size() == 0) {
             return null;
@@ -149,10 +150,6 @@ public class AlertDefinitionDAO
         }
     }
 
-    public AlertDefinition findById(Integer id) {
-        return (AlertDefinition) super.findById(id);
-    }
-
     /**
      * Find an alert definition by Id, loading from the given session.
      * 
@@ -166,21 +163,10 @@ public class AlertDefinitionDAO
         return (AlertDefinition) session.load(getPersistentClass(), id);
     }
 
-    /**
-     * Find an alert definition by Id, loading from the current session.
-     * 
-     * @param id The alert definition Id.
-     * @return The alert definition or <code>null</code> if no alert definition
-     *         exists with the given Id.
-     */
-    public AlertDefinition get(Integer id) {
-        return (AlertDefinition) super.get(id);
-    }
-
     @SuppressWarnings("unchecked")
     private List<AlertDefinition> findByResource(Resource res, String sort, boolean asc) {
-        String sql = "from AlertDefinition a where a.resource = :res and " + "a.deleted = false order by a." + sort +
-                     (asc ? " ASC" : " DESC");
+        String sql = "from AlertDefinition a where a.resource = :res and " +
+                     "a.deleted = false order by a." + sort + (asc ? " ASC" : " DESC");
 
         return getSession().createQuery(sql).setParameter("res", res).list();
     }
@@ -210,22 +196,24 @@ public class AlertDefinitionDAO
 
         Query q = createQuery(hql);
 
-        return wherePermCheck.addQueryParameters(q, subject, r, 0, Arrays.asList(MANAGE_ALERTS_OPS)).list();
+        return wherePermCheck
+            .addQueryParameters(q, subject, r, 0, Arrays.asList(MANAGE_ALERTS_OPS)).list();
     }
 
-    void save(AlertDefinition def) {
+    public void save(AlertDefinition def) {
         super.save(def);
 
         // Make sure there's a valid alert definition state
         if (def.getAlertDefinitionState() == null) {
             AlertDefinitionState state = new AlertDefinitionState(def);
             def.setAlertDefinitionState(state);
-            super.save(state);
+            getSession().saveOrUpdate(state);
         }
     }
 
     int deleteByAlertDefinition(AlertDefinition def) {
-        String sql = "update AlertDefinition " + "set escalation = null, deleted = true, parent = null, "
+        String sql = "update AlertDefinition "
+                     + "set escalation = null, deleted = true, parent = null, "
                      + "active = false where parent = :def";
 
         int ret = getSession().createQuery(sql).setParameter("def", def).executeUpdate();
@@ -260,7 +248,8 @@ public class AlertDefinitionDAO
                     authzTypeId = AuthzConstants.authzServiceProto;
                     break;
                 default:
-                    throw new IllegalArgumentException("Type " + val.getAppdefType() + " is not a valid type");
+                    throw new IllegalArgumentException("Type " + val.getAppdefType() +
+                                                       " is not a valid type");
             }
         } else {
             AppdefEntityID aeid = new AppdefEntityID(val.getAppdefType(), val.getAppdefId());
@@ -301,7 +290,8 @@ public class AlertDefinitionDAO
      * @param master {@link AlertDefinitionValue} object to retrieve values from
      *        in order to update clone. Object does not change.
      */
-    void setAlertDefinitionValueNoRels(final AlertDefinition clone, final AlertDefinitionValue master) {
+    void setAlertDefinitionValueNoRels(final AlertDefinition clone,
+                                       final AlertDefinitionValue master) {
 
         clone.setName(master.getName());
         clone.setDescription(master.getDescription());
@@ -322,8 +312,8 @@ public class AlertDefinitionDAO
     }
 
     @SuppressWarnings("unchecked")
-    List<AlertDefinition> findDefinitions(AuthzSubject subj, AlertSeverity minSeverity, Boolean enabled,
-                                          boolean excludeTypeBased, PageInfo pInfo) {
+    List<AlertDefinition> findDefinitions(AuthzSubject subj, AlertSeverity minSeverity,
+                                          Boolean enabled, boolean excludeTypeBased, PageInfo pInfo) {
         String sql = PermissionManagerFactory.getInstance().getAlertDefsHQL();
 
         sql += " and d.deleted = false and d.resource is not null ";
@@ -343,7 +333,8 @@ public class AlertDefinitionDAO
         Query q = getSession().createQuery(sql).setInteger("priority", minSeverity.getCode());
 
         if (sql.indexOf("subj") > 0) {
-            q.setInteger("subj", subj.getId().intValue()).setParameterList("ops", MANAGE_ALERTS_OPS);
+            q.setInteger("subj", subj.getId().intValue())
+                .setParameterList("ops", MANAGE_ALERTS_OPS);
         }
 
         return pInfo.pageResults(q).list();
@@ -351,7 +342,8 @@ public class AlertDefinitionDAO
 
     private String getOrderByClause(PageInfo pInfo) {
         AlertDefSortField sort = (AlertDefSortField) pInfo.getSort();
-        String res = " order by " + sort.getSortString("d", "r") + (pInfo.isAscending() ? "" : " DESC");
+        String res = " order by " + sort.getSortString("d", "r") +
+                     (pInfo.isAscending() ? "" : " DESC");
 
         if (!sort.equals(AlertDefSortField.CTIME)) {
             res += ", " + AlertDefSortField.CTIME.getSortString("d", "r") + " DESC";
@@ -379,28 +371,34 @@ public class AlertDefinitionDAO
     }
 
     boolean isEnabled(Integer id) {
-        return ((Boolean) getSession().createQuery("select enabled from AlertDefinition" + " where id = " + id)
-            .uniqueResult()).booleanValue();
+        return ((Boolean) getSession().createQuery(
+            "select enabled from AlertDefinition" + " where id = " + id).uniqueResult())
+            .booleanValue();
     }
 
     int setChildrenActive(AlertDefinition def, boolean active) {
         return createQuery(
             "update AlertDefinition set active = :active, " + "enabled = :active, mtime = :mtime "
-                + "where parent = :def").setBoolean("active", active).setLong("mtime", System.currentTimeMillis())
-            .setParameter("def", def).executeUpdate();
+                + "where parent = :def").setBoolean("active", active).setLong("mtime",
+            System.currentTimeMillis()).setParameter("def", def).executeUpdate();
     }
 
     int getNumActiveDefs() {
         String hql = "select count(*) from AlertDefinition where active = true and deleted = false and "
                      + "(parent_id is null or parent_id > 0)";
-        return ((Number) createQuery(hql).setCacheable(true).setCacheRegion("AlertDefinition.getNumActiveDefs")
-            .uniqueResult()).intValue();
+        return ((Number) createQuery(hql).setCacheable(true).setCacheRegion(
+            "AlertDefinition.getNumActiveDefs").uniqueResult()).intValue();
     }
 
     int setChildrenEscalation(AlertDefinition def, Escalation esc) {
-        return createQuery("update AlertDefinition set escalation = :esc, " + "mtime = :mtime where parent = :def")
-            .setParameter("esc", esc).setLong("mtime", System.currentTimeMillis()).setParameter("def", def)
-            .executeUpdate();
+        return createQuery(
+            "update AlertDefinition set escalation = :esc, " + "mtime = :mtime where parent = :def")
+            .setParameter("esc", esc).setLong("mtime", System.currentTimeMillis()).setParameter(
+                "def", def).executeUpdate();
+    }
+
+    public AlertDefinition findById(Integer id) {
+        return super.findById(id);
     }
 
 }

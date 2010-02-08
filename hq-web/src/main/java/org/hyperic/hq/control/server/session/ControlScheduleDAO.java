@@ -38,36 +38,16 @@ import org.springframework.stereotype.Repository;
  * USA.
  */
 @Repository
-public class ControlScheduleDAO extends HibernateDAO<ControlSchedule>
-{
+public class ControlScheduleDAO
+    extends HibernateDAO<ControlSchedule> {
     @Autowired
     public ControlScheduleDAO(SessionFactory f) {
         super(ControlSchedule.class, f);
     }
 
-    public ControlSchedule findById(Integer id)
-    {
-        return (ControlSchedule)super.findById(id);
-    }
-
-    void save(ControlSchedule entity)
-    {
-        super.save(entity);
-    }
-
-    void remove(ControlSchedule entity)
-    {
-        super.remove(entity);
-    }
-
-    ControlSchedule create(AppdefEntityID entityId,
-                           String subject,
-                           String action,
-                           ScheduleValue schedule,
-                           long nextFire, String triggerName,
-                           String jobName,
-                           String jobOrderData)
-    {
+    ControlSchedule create(AppdefEntityID entityId, String subject, String action,
+                           ScheduleValue schedule, long nextFire, String triggerName,
+                           String jobName, String jobOrderData) {
         ControlSchedule s = new ControlSchedule();
 
         try {
@@ -83,49 +63,31 @@ public class ControlScheduleDAO extends HibernateDAO<ControlSchedule>
             save(s);
             return s;
         } catch (IOException e) {
-          throw new RuntimeException(e);
+            throw new RuntimeException(e);
         }
     }
 
-
-    public Collection<ControlSchedule> findByFireTime(boolean asc)
-    {
-        return createCriteria()
-            .addOrder(asc
-                      ? Order.asc("nextFireTime")
-                      : Order.desc("nextFireTime"))
-            .list();
+    public Collection<ControlSchedule> findByFireTime(boolean asc) {
+        return createCriteria().addOrder(
+            asc ? Order.asc("nextFireTime") : Order.desc("nextFireTime")).list();
     }
 
-    public Collection<ControlSchedule> findByEntity(int type, int id)
-    {
+    public Collection<ControlSchedule> findByEntity(int type, int id) {
         return createFindByEntity(type, id).list();
     }
 
-    public Collection<ControlSchedule> findByEntityAction(int type, int id, boolean asc)
-    {
-        return
-            createFindByEntity(type, id)
-                .addOrder(asc
-                          ? Order.asc("action")
-                          : Order.desc("action"))
-                .list();
+    public Collection<ControlSchedule> findByEntityAction(int type, int id, boolean asc) {
+        return createFindByEntity(type, id).addOrder(
+            asc ? Order.asc("action") : Order.desc("action")).list();
     }
 
-    public Collection<ControlSchedule> findByEntityFireTime(int type, int id, boolean asc)
-    {
-        return
-            createFindByEntity(type, id)
-                .addOrder(asc
-                          ? Order.asc("nextFireTime")
-                          : Order.desc("nextFireTime"))
-                .list();
+    public Collection<ControlSchedule> findByEntityFireTime(int type, int id, boolean asc) {
+        return createFindByEntity(type, id).addOrder(
+            asc ? Order.asc("nextFireTime") : Order.desc("nextFireTime")).list();
     }
 
-    private Criteria createFindByEntity(int type, int id)
-    {
-        return createCriteria()
-            .add(Expression.eq("entityId", new Integer(id)))
-            .add(Expression.eq("entityType", new Integer(type)));
+    private Criteria createFindByEntity(int type, int id) {
+        return createCriteria().add(Expression.eq("entityId", new Integer(id))).add(
+            Expression.eq("entityType", new Integer(type)));
     }
 }

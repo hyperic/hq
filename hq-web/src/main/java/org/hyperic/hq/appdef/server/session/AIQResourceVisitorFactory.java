@@ -26,29 +26,42 @@
 package org.hyperic.hq.appdef.server.session;
 
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 public class AIQResourceVisitorFactory {
 
-    private static final AIQResourceVisitor RV_DEFER    = new AIQRV_defer();
-    private static final AIQResourceVisitor RV_APPROVE  = new AIQRV_approve();
-    private static final AIQResourceVisitor RV_IGNORE   = new AIQRV_ignore();
-    private static final AIQResourceVisitor RV_UNIGNORE = new AIQRV_unignore();
-    private static final AIQResourceVisitor RV_PURGE    = new AIQRV_purge();
+    private final AIQRV_defer defer;
+    private final AIQRV_approve approve;
+    private final AIQRV_ignore ignore;
+    private final AIQRV_unignore unignore;
+    private final AIQRV_purge purge;
 
-    public static AIQResourceVisitor getVisitor (int action) {
+    @Autowired
+    public AIQResourceVisitorFactory(AIQRV_defer defer, AIQRV_approve approve, AIQRV_ignore ignore,
+                                     AIQRV_unignore unignore, AIQRV_purge purge) {
+        this.defer = defer;
+        this.approve = approve;
+        this.ignore = ignore;
+        this.unignore = unignore;
+        this.purge = purge;
+    }
+
+    public AIQResourceVisitor getVisitor(int action) {
         switch (action) {
-        case AIQueueConstants.Q_DECISION_DEFER:
-            return RV_DEFER;
-        case AIQueueConstants.Q_DECISION_APPROVE:
-            return RV_APPROVE;
-        case AIQueueConstants.Q_DECISION_IGNORE:
-            return RV_IGNORE;
-        case AIQueueConstants.Q_DECISION_UNIGNORE:
-            return RV_UNIGNORE;
-        case AIQueueConstants.Q_DECISION_PURGE:
-            return RV_PURGE;
-        default:
-            throw new IllegalArgumentException("Unsupported action: " + action);
+            case AIQueueConstants.Q_DECISION_DEFER:
+                return defer;
+            case AIQueueConstants.Q_DECISION_APPROVE:
+                return approve;
+            case AIQueueConstants.Q_DECISION_IGNORE:
+                return ignore;
+            case AIQueueConstants.Q_DECISION_UNIGNORE:
+                return unignore;
+            case AIQueueConstants.Q_DECISION_PURGE:
+                return purge;
+            default:
+                throw new IllegalArgumentException("Unsupported action: " + action);
         }
     }
 }

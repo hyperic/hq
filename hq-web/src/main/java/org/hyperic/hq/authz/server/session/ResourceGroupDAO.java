@@ -69,25 +69,22 @@ public class ResourceGroupDAO
         super(ResourceGroup.class, sessionFactory);
     }
 
-    private void assertNameConstraints(String name)
-        throws GroupCreationException {
+    private void assertNameConstraints(String name) throws GroupCreationException {
         if (name == null || name.length() == 0 || name.length() > 100)
-            throw new GroupCreationException("Group name must be between " +
-                                             "1 and 100 characters in length");
+            throw new GroupCreationException("Group name must be between "
+                                             + "1 and 100 characters in length");
     }
 
-    private void assertDescriptionConstraints(String desc)
-        throws GroupCreationException {
+    private void assertDescriptionConstraints(String desc) throws GroupCreationException {
         if (desc != null && desc.length() > 100)
-            throw new GroupCreationException("Group description must be " +
-                                             "between 1 and 100 characters in length");
+            throw new GroupCreationException("Group description must be "
+                                             + "between 1 and 100 characters in length");
     }
 
-    private void assertLocationConstraints(String loc)
-        throws GroupCreationException {
+    private void assertLocationConstraints(String loc) throws GroupCreationException {
         if (loc != null && loc.length() > 100)
-            throw new GroupCreationException("Group location must be " +
-                                             "between 1 and 100 characters in length");
+            throw new GroupCreationException("Group location must be "
+                                             + "between 1 and 100 characters in length");
     }
 
     ResourceGroup create(AuthzSubject creator, ResourceGroupCreateInfo cInfo,
@@ -102,46 +99,43 @@ public class ResourceGroupDAO
             case AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP:
             case AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS:
                 if (cInfo.getResourcePrototype() != null) {
-                    throw new GroupCreationException("Cannot specify a prototype " +
-                                                     "for mixed groups");
+                    throw new GroupCreationException("Cannot specify a prototype "
+                                                     + "for mixed groups");
                 }
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS:
             case AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC:
                 if (cInfo.getResourcePrototype() == null) {
-                    throw new GroupCreationException("Compatable groups must " +
-                                                     "specify a prototype");
+                    throw new GroupCreationException("Compatable groups must "
+                                                     + "specify a prototype");
                 }
                 break;
         }
 
         ResourceGroup resGrp = new ResourceGroup(cInfo, creator);
 
-        ResourceType resType = resourceTypeDAO
-                                              .findById(AuthzConstants.authzGroup);
+        ResourceType resType = resourceTypeDAO.findById(AuthzConstants.authzGroup);
 
         assert resType != null;
 
         final Resource proto = rDao.findById(AuthzConstants.rootResourceId);
-        Resource r = cInfo.isPrivateGroup() ?
-                                           rDao.createPrivate(resType, proto, cInfo.getName(), creator,
-                                                              resGrp.getId(), cInfo.isSystem()) :
-                                           rDao.create(resType, proto, cInfo.getName(), creator,
-                                                       resGrp.getId(), cInfo.isSystem());
+        Resource r = cInfo.isPrivateGroup() ? rDao.createPrivate(resType, proto, cInfo.getName(),
+            creator, resGrp.getId(), cInfo.isSystem()) : rDao.create(resType, proto, cInfo
+            .getName(), creator, resGrp.getId(), cInfo.isSystem());
 
         resGrp.setResource(r);
         save(resGrp);
 
         /*
          * The following oddity is needed because the above rDao.create()
-         * flushes the session. If we don't refresh the object, then
-         * changing the instanceId here doens't seem to do anything. This
-         * is definitely a hacky workaround for a Hibernate issue.
+         * flushes the session. If we don't refresh the object, then changing
+         * the instanceId here doens't seem to do anything. This is definitely a
+         * hacky workaround for a Hibernate issue.
          */
         r = rDao.findById(r.getId());
         getSession().refresh(r);
         r.setInstanceId(resGrp.getId());
-        save(r);
+        getSession().saveOrUpdate(r);
         flushSession();
 
         setMembers(resGrp, new HashSet<Resource>(resources));
@@ -152,9 +146,7 @@ public class ResourceGroupDAO
 
     ResourceGroup findResourceGroup(Resource resource) {
         final String hql = "from ResourceGroup where resource = :resource";
-        return (ResourceGroup) createQuery(hql)
-                                               .setParameter("resource", resource)
-                                               .uniqueResult();
+        return (ResourceGroup) createQuery(hql).setParameter("resource", resource).uniqueResult();
     }
 
     void removeAllMembers(ResourceGroup group) {
@@ -166,19 +158,14 @@ public class ResourceGroupDAO
         if (!group.getId().equals(rootResourceGroupId)) {
             group.markDirty();
         }
-        createQuery("delete from GroupMember g " +
-                    "where g.group = :group")
-                                             .setParameter("group", group)
-                                             .executeUpdate();
+        createQuery("delete from GroupMember g " + "where g.group = :group").setParameter("group",
+            group).executeUpdate();
     }
 
     boolean isMember(ResourceGroup group, Resource resource) {
-        GroupMember gm = (GroupMember)
-                         createQuery("from GroupMember g where g.group = :group " +
-                                     " and g.resource = :resource")
-                                                                   .setParameter("group", group)
-                                                                   .setParameter("resource", resource)
-                                                                   .uniqueResult();
+        GroupMember gm = (GroupMember) createQuery(
+            "from GroupMember g where g.group = :group " + " and g.resource = :resource")
+            .setParameter("group", group).setParameter("resource", resource).uniqueResult();
 
         return gm != null;
     }
@@ -198,17 +185,13 @@ public class ResourceGroupDAO
         for (Resource r : members) {
             memberIds.add(r.getId());
         }
-        int numDeleted =
-                         createQuery("delete from GroupMember where group = :group " +
-                                     "and resource.id in (:members)")
-                                                                     .setParameter("group", group)
-                                                                     .setParameterList("members", memberIds)
-                                                                     .executeUpdate();
+        int numDeleted = createQuery(
+            "delete from GroupMember where group = :group " + "and resource.id in (:members)")
+            .setParameter("group", group).setParameterList("members", memberIds).executeUpdate();
 
         if (numDeleted != members.size()) {
-            _log.warn("Expected to delete " + members.size() + " members " +
-                      "but only deleted " + numDeleted + " (group=" +
-                      group.getId());
+            _log.warn("Expected to delete " + members.size() + " members " + "but only deleted " +
+                      numDeleted + " (group=" + group.getId());
         }
     }
 
@@ -240,17 +223,16 @@ public class ResourceGroupDAO
     }
 
     /**
-     * Get groups that a resource belongs to via the persistence mechanism
-     * (i.e. mapping table)
+     * Get groups that a resource belongs to via the persistence mechanism (i.e.
+     * mapping table)
      * 
      * @return {@link ResourceGroup}s
      */
     @SuppressWarnings("unchecked")
     Collection<ResourceGroup> getGroups(Resource r) {
-        return (Collection<ResourceGroup>) createQuery("select g.group from GroupMember g " +
-                                                       "where g.resource = :resource")
-                                                                                      .setParameter("resource", r)
-                                                                                      .list();
+        return (Collection<ResourceGroup>) createQuery(
+            "select g.group from GroupMember g " + "where g.resource = :resource").setParameter(
+            "resource", r).list();
     }
 
     /**
@@ -260,12 +242,10 @@ public class ResourceGroupDAO
      */
     @SuppressWarnings("unchecked")
     Collection<Resource> getMembers(ResourceGroup g) {
-        return (Collection<Resource>) createQuery("select g.resource from GroupMember g " +
-                                                  "where g.group = :group " +
-                                                  "and g.resource.resourceType is not null " +
-                                                  "order by g.resource.name")
-                                                                             .setParameter("group", g)
-                                                                             .list();
+        return (Collection<Resource>) createQuery(
+            "select g.resource from GroupMember g " + "where g.group = :group "
+                + "and g.resource.resourceType is not null " + "order by g.resource.name")
+            .setParameter("group", g).list();
     }
 
     /**
@@ -275,32 +255,15 @@ public class ResourceGroupDAO
      */
     @SuppressWarnings("unchecked")
     Map<String, Integer> getMemberTypes(ResourceGroup g) {
-        List<Object[]> counts =
-                                (List<Object[]>) createQuery("select p.name, count(r) from GroupMember g " +
-                                                             "join g.resource r " +
-                                                             "join r.prototype p " +
-                                                             "where g.group = :group group by p.name")
-                                                                                                      .setParameter(
-                                                                                                                    "group",
-                                                                                                                    g)
-                                                                                                      .list();
+        List<Object[]> counts = (List<Object[]>) createQuery(
+            "select p.name, count(r) from GroupMember g " + "join g.resource r "
+                + "join r.prototype p " + "where g.group = :group group by p.name").setParameter(
+            "group", g).list();
         Map<String, Integer> types = new HashMap<String, Integer>();
         for (Object[] objs : counts) {
             types.put((String) objs[0], (Integer) objs[1]);
         }
         return types;
-    }
-
-    public ResourceGroup findById(Integer id) {
-        return (ResourceGroup) super.findById(id);
-    }
-
-    public ResourceGroup get(Integer id) {
-        return (ResourceGroup) super.get(id);
-    }
-
-    public void save(ResourceGroup entity) {
-        super.save(entity);
     }
 
     public void remove(ResourceGroup entity) {
@@ -327,89 +290,67 @@ public class ResourceGroupDAO
     }
 
     public ResourceGroup findByName(String name) {
-        String sql =
-                     "from ResourceGroup g where lower(g.resource.name) = lower(?)";
-        return (ResourceGroup) getSession().createQuery(sql)
-                                           .setString(0, name)
-                                           .setCacheable(true)
-                                           .setCacheRegion("ResourceGroup.findByName")
-                                           .uniqueResult();
+        String sql = "from ResourceGroup g where lower(g.resource.name) = lower(?)";
+        return (ResourceGroup) getSession().createQuery(sql).setString(0, name).setCacheable(true)
+            .setCacheRegion("ResourceGroup.findByName").uniqueResult();
     }
 
     @SuppressWarnings("unchecked")
     public Collection<ResourceGroup> findByRoleIdAndSystem_orderName(Integer roleId,
-                                                                     boolean system,
-                                                                     boolean asc) {
+                                                                     boolean system, boolean asc) {
         String sql = "select g from ResourceGroup g join fetch g.roles r " +
-                     "where r.id = ? and g.system = ? " +
-                     "order by g.resource.sortName " + (asc ? "asc" : "desc");
-        return (Collection<ResourceGroup>) getSession().createQuery(sql)
-                                                       .setInteger(0, roleId.intValue())
-                                                       .setBoolean(1, system)
-                                                       .list();
+                     "where r.id = ? and g.system = ? " + "order by g.resource.sortName " +
+                     (asc ? "asc" : "desc");
+        return (Collection<ResourceGroup>) getSession().createQuery(sql).setInteger(0,
+            roleId.intValue()).setBoolean(1, system).list();
     }
 
     @SuppressWarnings("unchecked")
     public Collection<ResourceGroup> findWithNoRoles_orderName(boolean asc) {
-        String sql = "from ResourceGroup g " +
-                     "where g.roles.size = 0 and g.system = false " +
+        String sql = "from ResourceGroup g " + "where g.roles.size = 0 and g.system = false " +
                      "order by g.resource.sortName " + (asc ? "asc" : "desc");
         return (Collection<ResourceGroup>) getSession().createQuery(sql).list();
     }
 
     @SuppressWarnings("unchecked")
     public Collection<ResourceGroup> findByNotRoleId_orderName(Integer roleId, boolean asc) {
-        return (Collection<ResourceGroup>) getSession()
-                                                       .createQuery("from ResourceGroup g " +
-                                                                    "where ? not in (select id from g.roles) and " +
-                                                                    "g.system = false order by g.resource.sortName " +
-                                                                    (asc ? "asc" : "desc"))
-                                                       .setInteger(0, roleId.intValue())
-                                                       .list();
+        return (Collection<ResourceGroup>) getSession().createQuery(
+            "from ResourceGroup g " + "where ? not in (select id from g.roles) and " +
+                "g.system = false order by g.resource.sortName " + (asc ? "asc" : "desc"))
+            .setInteger(0, roleId.intValue()).list();
     }
 
     @SuppressWarnings("unchecked")
     public Collection<ResourceGroup> findCompatible(Resource proto) {
-        String sql =
-                     "from ResourceGroup g " +
-                     "where g.resourcePrototype = ? and " +
-                     "(g.groupType = ? or g.groupType = ?)";
+        String sql = "from ResourceGroup g " + "where g.resourcePrototype = ? and "
+                     + "(g.groupType = ? or g.groupType = ?)";
 
-        return (Collection<ResourceGroup>) getSession()
-                                                       .createQuery(sql)
-                                                       .setParameter(0, proto)
-                                                       .setInteger(1, AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS)
-                                                       .setInteger(2, AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC)
-                                                       .list();
+        return (Collection<ResourceGroup>) getSession().createQuery(sql).setParameter(0, proto)
+            .setInteger(1, AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS).setInteger(2,
+                AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC).list();
     }
 
     /**
-     * Return the maximum collection interval for the given template within
-     * the group.
+     * Return the maximum collection interval for the given template within the
+     * group.
      * 
      * @param g The group in question.
      * @param templateId The measurement template to query.
      * @return templateId The maximum collection time in milliseconds.
      */
     public Long getMaxCollectionInterval(ResourceGroup g, Integer templateId) {
-        String sql =
-                     "select max(m.interval) from Measurement m, GroupMember g " +
-                     "join g.group rg " +
-                     "join g.resource r " +
-                     "where m.instanceId = r.instanceId and " +
-                     "rg = ? and m.template.id = ?";
+        String sql = "select max(m.interval) from Measurement m, GroupMember g "
+                     + "join g.group rg " + "join g.resource r "
+                     + "where m.instanceId = r.instanceId and " + "rg = ? and m.template.id = ?";
 
-        return (Long) getSession().createQuery(sql)
-                                  .setParameter(0, g)
-                                  .setInteger(1, templateId.intValue())
-                                  .setCacheable(true)
-                                  .setCacheRegion("ResourceGroup.getMaxCollectionInterval")
-                                  .uniqueResult();
+        return (Long) getSession().createQuery(sql).setParameter(0, g).setInteger(1,
+            templateId.intValue()).setCacheable(true).setCacheRegion(
+            "ResourceGroup.getMaxCollectionInterval").uniqueResult();
     }
 
     /**
-     * Return a List of Measurements that are collecting for the given
-     * template ID and group.
+     * Return a List of Measurements that are collecting for the given template
+     * ID and group.
      * 
      * @param g The group in question.
      * @param templateId The measurement template to query.
@@ -418,24 +359,19 @@ public class ResourceGroupDAO
      */
     @SuppressWarnings("unchecked")
     public List<Measurement> getMetricsCollecting(ResourceGroup g, Integer templateId) {
-        String sql =
-                     "select m from Measurement m, GroupMember g " +
-                     "join g.group rg " +
-                     "join g.resource r " +
-                     "where m.instanceId = r.instanceId and " +
-                     "rg = ? and m.template.id = ? and m.enabled = true";
+        String sql = "select m from Measurement m, GroupMember g " + "join g.group rg "
+                     + "join g.resource r " + "where m.instanceId = r.instanceId and "
+                     + "rg = ? and m.template.id = ? and m.enabled = true";
 
-        return (List<Measurement>) getSession().createQuery(sql)
-                                               .setParameter(0, g)
-                                               .setInteger(1, templateId.intValue())
-                                               .setCacheable(true)
-                                               .setCacheRegion("ResourceGroup.getMetricsCollecting")
-                                               .list();
+        return (List<Measurement>) getSession().createQuery(sql).setParameter(0, g).setInteger(1,
+            templateId.intValue()).setCacheable(true).setCacheRegion(
+            "ResourceGroup.getMetricsCollecting").list();
     }
 
     @SuppressWarnings("unchecked")
     PageList<ResourceGroup> findGroupsClusionary(AuthzSubject subject, Resource member,
-                                                 Resource prototype, Collection<ResourceGroup> excludeGroups,
+                                                 Resource prototype,
+                                                 Collection<ResourceGroup> excludeGroups,
                                                  PageInfo pInfo, boolean inclusive) {
         ResourceGroupSortField sort = (ResourceGroupSortField) pInfo.getSort();
         String hql = "from ResourceGroup g where g.system = false and ";
@@ -449,11 +385,9 @@ public class ResourceGroupDAO
             if (protoType.equals(AuthzConstants.authzPlatformProto) ||
                 protoType.equals(AuthzConstants.authzServerProto) ||
                 protoType.equals(AuthzConstants.authzService)) {
-                hql += " or g.groupType = " +
-                       AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS;
+                hql += " or g.groupType = " + AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS;
             } else if (protoType.equals(AuthzConstants.authzApplicationProto)) {
-                hql += " or g.groupType = " +
-                       AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP;
+                hql += " or g.groupType = " + AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP;
             }
 
             hql += ") and ";
@@ -471,24 +405,20 @@ public class ResourceGroupDAO
             inclusionStr = " not ";
 
         PermissionManager pm = PermissionManagerFactory.getInstance();
-        hql += inclusionStr + " exists ( " +
-               " select m.id from GroupMember m " +
-               " where m.resource = :resource and m.group = g " +
-               ") ";
+        hql += inclusionStr + " exists ( " + " select m.id from GroupMember m " +
+               " where m.resource = :resource and m.group = g " + ") ";
 
         String pmql = pm.getOperableGroupsHQL(subject, "g",
-                                              inclusive ? AuthzConstants.groupOpViewResourceGroup :
-                                                       AuthzConstants.groupOpModifyResourceGroup);
+            inclusive ? AuthzConstants.groupOpViewResourceGroup
+                     : AuthzConstants.groupOpModifyResourceGroup);
 
         if (pmql.length() > 0)
             hql += pmql;
 
         String countHql = "select count(g.id) " + hql;
-        String actualHql = "select g " + hql + " order by " +
-                           sort.getSortString("g");
+        String actualHql = "select g " + hql + " order by " + sort.getSortString("g");
 
-        Query q = getSession().createQuery(countHql)
-                              .setParameter("resource", member);
+        Query q = getSession().createQuery(countHql).setParameter("resource", member);
 
         if (!excludes.isEmpty())
             q.setParameterList("excludes", excludes);
@@ -500,8 +430,7 @@ public class ResourceGroupDAO
             q.setInteger("subjId", subject.getId().intValue());
 
         int total = ((Number) (q.uniqueResult())).intValue();
-        q = getSession().createQuery(actualHql)
-                        .setParameter("resource", member);
+        q = getSession().createQuery(actualHql).setParameter("resource", member);
 
         if (prototype != null)
             q.setParameter("proto", prototype);
@@ -517,15 +446,11 @@ public class ResourceGroupDAO
     }
 
     @SuppressWarnings("unchecked")
-    public Collection<ResourceGroup> findByGroupType_orderName(boolean isAscending,
-                                                               int groupType) {
+    public Collection<ResourceGroup> findByGroupType_orderName(boolean isAscending, int groupType) {
         String sql = "from ResourceGroup g where g.groupType = :type" +
-                     " ORDER BY g.resource.name " +
-                     ((isAscending) ? "asc" : "desc");
-        return (Collection<ResourceGroup>) getSession()
-                                                       .createQuery(sql)
-                                                       .setInteger("type", groupType)
-                                                       .list();
+                     " ORDER BY g.resource.name " + ((isAscending) ? "asc" : "desc");
+        return (Collection<ResourceGroup>) getSession().createQuery(sql).setInteger("type",
+            groupType).list();
     }
 
     @SuppressWarnings("unchecked")

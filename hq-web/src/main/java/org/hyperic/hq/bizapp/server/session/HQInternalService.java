@@ -37,29 +37,30 @@ import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Service;
+
 @Service
 @ManagedResource("hyperic.jmx:name=HQInternal")
 public class HQInternalService implements HQInternalServiceMBean {
-    
-    
+
     private AgentManager agentManager;
     private MeasurementManager measurementManager;
     private PlatformManager platformManager;
     private ZeventEnqueuer zEventManager;
-    
-    
+    private ReportStatsCollector reportStatsCollector;
+
     @Autowired
-    public HQInternalService(AgentManager agentManager, MeasurementManager measurementManager, 
-                             PlatformManager platformManager, ZeventEnqueuer zEventManager) {
+    public HQInternalService(AgentManager agentManager, MeasurementManager measurementManager,
+                             PlatformManager platformManager, ZeventEnqueuer zEventManager,
+                             ReportStatsCollector reportStatsCollector) {
         this.agentManager = agentManager;
         this.measurementManager = measurementManager;
         this.platformManager = platformManager;
         this.zEventManager = zEventManager;
+        this.reportStatsCollector = reportStatsCollector;
     }
 
     public double getMetricInsertsPerMinute() {
-        double val = ReportStatsCollector.getInstance()
-                        .getCollector().valPerTimestamp(); 
+        double val = reportStatsCollector.getCollector().valPerTimestamp();
 
         return val * 1000.0 * 60.0;
     }
@@ -68,15 +69,14 @@ public class HQInternalService implements HQInternalServiceMBean {
         return agentManager.getAgentCountUsed();
     }
 
-    public double getMetricsCollectedPerMinute() { 
-        List<CollectionSummary> vals = measurementManager
-                        .findMetricCountSummaries();
+    public double getMetricsCollectedPerMinute() {
+        List<CollectionSummary> vals = measurementManager.findMetricCountSummaries();
         double total = 0.0;
-        
-        for (CollectionSummary s : vals ) {
-            total += (float)s.getTotal() / (float)s.getInterval();
+
+        for (CollectionSummary s : vals) {
+            total += (float) s.getTotal() / (float) s.getInterval();
         }
-        
+
         return total;
     }
 
@@ -87,7 +87,7 @@ public class HQInternalService implements HQInternalServiceMBean {
     public long getAgentRequests() {
         return AgentConnections.getInstance().getTotalConnections();
     }
-    
+
     public int getAgentConnections() {
         return AgentConnections.getInstance().getNumConnected();
     }

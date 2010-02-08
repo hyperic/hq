@@ -2,7 +2,11 @@
 
 <project name="test-build" basedir="..">
 
-<property file="${hq.home}/build_util/clover.properties"/>
+<property name="clover.output.dir" value="${build.dir}/clover"/>
+<property name="clover.db.file" value="${clover.output.dir}/db/clover.db"/>
+<property name="clover.enforce" value="false"/>
+<property name="clover.coverage" value="0%"/>
+
 
 <target name="init-tests">
   <delete dir="${junitResults.dir}"/>
@@ -13,7 +17,7 @@
    <echo message="Halt on error or failure: ${test.halt}"/>
 </target>
 
-<macrodef name="test.do">
+<macrodef name="test-compile">
 	<attribute name="module.dir"/>
 	<attribute name="compile.classpath.id"/>
 	<sequential>
@@ -21,28 +25,28 @@
 		<path refid="@{compile.classpath.id}" />
 		<path location="@{module.dir}/target/classes" />
 	</path>
-  	<compile-sources classpath.id="test.compile.classpath" src.dir="@{module.dir}/src/test/java" resource.dir="@{module.dir}/src/test/resources" output.dir="@{module.dir}/target/test-classes" />
-	<path id="test.run.classpath">
-	    <path refid="test.compile.classpath" />
-	 	<path location="@{module.dir}/target/test-classes" />
-	</path>
-    <test-run classpath.id="test.run.classpath" input.dir="@{module.dir}/target/test-classes"/>
+  	<compile-sources classpath.id="test.compile.classpath" src.dir="@{module.dir}/src/test/java" resource.dir="@{module.dir}/src/test/resources" output.dir="@{module.dir}/target/test-classes"/> 
 </sequential>
 </macrodef>
 
   <macrodef name="test-run">
     <attribute name="classpath.id"/>
-    <attribute name="input.dir"/>
+    <attribute name="module.dir"/>
     <sequential>
-
+	<path id="test.run.classpath">
+		   <path refid="@{classpath.id}" />
+			<path location="@{module.dir}/target/classes" />
+		 	<path location="@{module.dir}/target/test-classes" />
+	</path>
     <junit reloading="no" fork="true" forkmode="once" printsummary="yes" haltOnError="${test.halt}" haltOnFailure="${test.halt}">
        
     <jvmarg value="-Dtest.halt=${test.halt}"/>
-    <classpath refid="@{classpath.id}"/>
+	<jvmarg value="-Xmx512m"/>
+    <classpath refid="test.run.classpath"/>
 
        <formatter type="xml"/>
        <batchtest todir="${junitResults.dir}">
-           <fileset dir="@{input.dir}">
+           <fileset dir="@{module.dir}/target/test-classes">
 				<include name="**/*Test.class"/>
            </fileset>
       </batchtest>
@@ -54,25 +58,11 @@
 	 <pathelement location="${thirdparty.lib}/com.springsource.com.cenqua.clover-2.4.2.jar" />
   </path>
 
-  <target name="clover" depends="clover.pre, clover.instrument, clover.do, clover.post" description="Executes all tests resulting from a compilation of the test tree returning test coverage metrics."/>
+  <target name="clover" depends="clover.pre, instrument-tests, run-tests" description="Executes all tests resulting from a compilation of the test tree returning test coverage metrics."/>
 
   <target name="clover.pre">
     <delete dir="${clover.output.dir}" quiet="true"/>
     <mkdir dir="${clover.output.dir}"/>
-	<delete dir="${main.clover.classes.dir}" quiet="true"/>
-    <mkdir dir="${main.clover.classes.dir}"/>
-	<delete dir="${test.clover.classes.dir}" quiet="true"/>
-    <mkdir dir="${test.clover.classes.dir}"/>
-  </target>
-
-   <target name="clover.do" depends="clover.init, init-tests">
-    <path id="clover.run.classpath">
-       <pathelement location="${main.clover.classes.dir}"/>
-	   <pathelement location="${test.clover.classes.dir}"/>
-       <path refid="clover.classpath"/>
-       <path refid="testjars"/>
-    </path>
-    <test-run classpath.id="clover.run.classpath" input.dir="${test.clover.classes.dir}"/>
   </target>
 
   <macrodef name="instrument-module">
@@ -84,25 +74,10 @@
 	 <sequential>
 		<mkdir dir="@{staging.dir}"/>
 	  	<instrument input.dir="@{input.dir}" output.dir="@{staging.dir}"/>
-	   	<compile-sources classpath.id="@{classpath.id}" src.dir="@{staging.dir}" resource.dir="@{resource.dir}" output.dir="@{output.dir}"/>
+	   	<compile-sources classpath.id="@{classpath.id}" src.dir="@{staging.dir}" resource.dir="@{resource.dir}" output.dir="@{output.dir}"/>	
 	  </sequential>
   </macrodef>
 
-  <path id="clover.compile.classpath">
-        <path refid="clover.classpath"/>
-        <path refid="testjars"/>
-		<path location="${main.clover.classes.dir}"/>
-		<path location="${test.clover.classes.dir}"/>
-    </path>
-
-  <macrodef name="instrument-module-with-tests">
-	<attribute name="module.dir"/>
-	 <sequential>
-		<instrument-module input.dir="@{module.dir}/src/main/java" staging.dir="${main.clover.staging.dir}" resource.dir="@{module.dir}/src/main/resources" classpath.id="clover.compile.classpath" output.dir="${main.clover.classes.dir}"/>
-		<instrument-module input.dir="@{module.dir}/src/test/java" staging.dir="${test.clover.staging.dir}" resource.dir="@{module.dir}/src/test/resources" classpath.id="clover.compile.classpath" output.dir="${test.clover.classes.dir}"/>
-   </sequential>
-</macrodef>
-  
   <target name="clover.init" depends="init">
     <taskdef resource="cloverlib.xml" classpathref="clover.classpath"/>
   </target>

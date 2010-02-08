@@ -29,28 +29,21 @@ import java.util.Collection;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
 @Repository
 public class AttachmentDAO
-    extends HibernateDAO
-{
+    extends HibernateDAO<Attachment> {
     @Autowired
     AttachmentDAO(SessionFactory f) {
         super(Attachment.class, f);
     }
 
-    Attachment findById(Integer id) {
-        return (Attachment)super.findById(id);
-    }
-
     Collection findFor(AttachType type) {
         Integer typeCode = new Integer(type.getCode());
-        return createCriteria()
-            .createAlias("view", "v")
-            .add(Restrictions.eq("v.attachTypeEnum", typeCode))
-            .list();
+        return createCriteria().createAlias("view", "v").add(
+            Restrictions.eq("v.attachTypeEnum", typeCode)).list();
     }
 }

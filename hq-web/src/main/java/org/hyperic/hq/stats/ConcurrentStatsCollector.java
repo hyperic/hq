@@ -37,7 +37,6 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -75,69 +74,60 @@ public final class ConcurrentStatsCollector {
     private String _currFilename;
     private FileWriter _file;
     private final String _baseDir;
-    private final ConcurrentLinkedQueue _queue = new ConcurrentLinkedQueue();
-    private final ScheduledThreadPoolExecutor _executor =
-        new ScheduledThreadPoolExecutor(1);
-    private static final ConcurrentStatsCollector _instance =
-        new ConcurrentStatsCollector();
+    private final ConcurrentLinkedQueue<StatsObject> _queue = new ConcurrentLinkedQueue<StatsObject>();
+    private final ScheduledThreadPoolExecutor _executor = new ScheduledThreadPoolExecutor(1);
+    private static boolean enabled = true;
+    private static ConcurrentStatsCollector _instance;
     public static final int WRITE_PERIOD = 15;
     private final Sigar _sigar = new Sigar();
     private Long _pid;
     public static final String JVM_TOTAL_MEMORY = "JVM_TOTAL_MEMORY",
-        JVM_FREE_MEMORY              = "JVM_FREE_MEMORY",
-        JVM_MAX_MEMORY               = "JVM_MAX_MEMORY",
-        FIRE_ALERT_TIME              = "FIRE_ALERT_TIME",
-        EVENT_PROCESSING_TIME        = "EVENT_PROCESSING_TIME",
-        GALERT_FIRED_EVENT           = "GALERT_FIRED_EVENT",
-        EHCACHE_TOTAL_OBJECTS        = "EHCACHE_TOTAL_OBJECTS",
-        CONCURRENT_STATS_COLLECTOR   = "CONCURRENT_STATS_COLLECTOR",
+        JVM_FREE_MEMORY = "JVM_FREE_MEMORY", JVM_MAX_MEMORY = "JVM_MAX_MEMORY",
+        FIRE_ALERT_TIME = "FIRE_ALERT_TIME", EVENT_PROCESSING_TIME = "EVENT_PROCESSING_TIME",
+        GALERT_FIRED_EVENT = "GALERT_FIRED_EVENT", EHCACHE_TOTAL_OBJECTS = "EHCACHE_TOTAL_OBJECTS",
+        CONCURRENT_STATS_COLLECTOR = "CONCURRENT_STATS_COLLECTOR",
         LATHER_NUMBER_OF_CONNECTIONS = "LATHER_NUMBER_OF_CONNECTIONS",
         RUNTIME_PLATFORM_AND_SERVER_MERGER = "RUNTIME_PLATFORM_AND_SERVER_MERGER",
-        SIGAR_1MLOAD                 = "SIGAR_1MLOAD",
-        SIGAR_CPU                    = "SIGAR_CPU",
+        SIGAR_1MLOAD = "SIGAR_1MLOAD", SIGAR_CPU = "SIGAR_CPU",
         AVAIL_MANAGER_METRICS_INSERTED = "AVAIL_MANAGER_METRICS_INSERTED",
-        DATA_MANAGER_INSERT_TIME     = "DATA_MANAGER_INSERT_TIME",
-        SIGAR_PROC_RES_MEM           = "SIGAR_PROC_RES_MEM",
-        SIGAR_TCP_INERRS             = "SIGAR_TCP_INERRS",
-        SIGAR_TCP_RETRANS            = "SIGAR_TCP_RETRANS",
-        SIGAR_PAGEOUT                = "SIGAR_PAGEOUT",
-        SIGAR_PAGEIN                 = "SIGAR_PAGEIN",
-        JMS_QUEUE_PUBLISH_TIME       = "JMS_QUEUE_PUBLISH_TIME",
-        JMS_TOPIC_PUBLISH_TIME       = "JMS_TOPIC_PUBLISH_TIME",
-        METRIC_DATA_COMPRESS_TIME    = "METRIC_DATA_COMPRESS_TIME",
-        DB_ANALYZE_TIME              = "DB_ANALYZE_TIME",
-        PURGE_EVENT_LOGS_TIME        = "PURGE_EVENT_LOGS_TIME",
-        PURGE_MEASUREMENTS_TIME      = "PURGE_MEASUREMENTS_TIME",
-        MEASUREMENT_SCHEDULE_TIME    = "MEASUREMENT_SCHEDULE_TIME",
-        EMAIL_ACTIONS                = "EMAIL_ACTIONS",
-        ZEVENT_QUEUE_SIZE            = "ZEVENT_QUEUE_SIZE",
-        TRIGGER_INIT_TIME            = "TRIGGER_INIT_TIME";
+        DATA_MANAGER_INSERT_TIME = "DATA_MANAGER_INSERT_TIME",
+        SIGAR_PROC_RES_MEM = "SIGAR_PROC_RES_MEM", SIGAR_TCP_INERRS = "SIGAR_TCP_INERRS",
+        SIGAR_TCP_RETRANS = "SIGAR_TCP_RETRANS", SIGAR_PAGEOUT = "SIGAR_PAGEOUT",
+        SIGAR_PAGEIN = "SIGAR_PAGEIN", JMS_QUEUE_PUBLISH_TIME = "JMS_QUEUE_PUBLISH_TIME",
+        JMS_TOPIC_PUBLISH_TIME = "JMS_TOPIC_PUBLISH_TIME",
+        METRIC_DATA_COMPRESS_TIME = "METRIC_DATA_COMPRESS_TIME",
+        DB_ANALYZE_TIME = "DB_ANALYZE_TIME", PURGE_EVENT_LOGS_TIME = "PURGE_EVENT_LOGS_TIME",
+        PURGE_MEASUREMENTS_TIME = "PURGE_MEASUREMENTS_TIME",
+        MEASUREMENT_SCHEDULE_TIME = "MEASUREMENT_SCHEDULE_TIME", EMAIL_ACTIONS = "EMAIL_ACTIONS",
+        ZEVENT_QUEUE_SIZE = "ZEVENT_QUEUE_SIZE", TRIGGER_INIT_TIME = "TRIGGER_INIT_TIME";
     // using tree due to ordering capabilities
-    private final Map _statKeys = new TreeMap();
+    private final Map<String, StatCollector> _statKeys = new TreeMap<String, StatCollector>();
     private AtomicBoolean _hasStarted = new AtomicBoolean(false);
     private final MBeanServer _mbeanServer;
+   
 
     private ConcurrentStatsCollector() {
-    	final char fs = File.separatorChar;
-    	
-        	final String d =
-        		HQApp.getInstance().getRestartStorageDir().getAbsolutePath();
-        	final String logDir = "logs";
-        	final File logDirectory = new File(d+ fs + logDir);
-        	if(!(logDirectory.exists())) {
-        	   logDirectory.mkdir();
-        	}
-            final String logSuffix =
-            		logDir + fs + "hqstats" + fs;
+        final char fs = File.separatorChar;
+        if (ConcurrentStatsCollector.enabled) {
+            final String d = HQApp.getInstance().getRestartStorageDir().getAbsolutePath();
+            final String logDir = "logs";
+            final File logDirectory = new File(d + fs + logDir);
+            if (!(logDirectory.exists())) {
+                logDirectory.mkdir();
+            }
+            final String logSuffix = logDir + fs + "hqstats" + fs;
             _baseDir = d + fs + logSuffix;
             _log.info("using hqstats baseDir " + _baseDir);
             final File dir = new File(_baseDir);
             if (!dir.exists()) {
-            	dir.mkdir();
+                dir.mkdir();
             }
-    		_mbeanServer = Bootstrap.getBean(MBeanServer.class);
-    		registerInternalStats();
-    	
+            _mbeanServer = Bootstrap.getBean(MBeanServer.class);
+            registerInternalStats();
+        } else {
+            _mbeanServer = null;
+            _baseDir = null;
+        }
     }
 
     public final void register(final String statId) {
@@ -154,17 +144,16 @@ public final class ConcurrentStatsCollector {
 
     public final void register(final StatCollector stat) {
         // can't register any stats after the collector has been initially
-        // started due to the need for consistent ordering in the csv output file
+        // started due to the need for consistent ordering in the csv output
+        // file
         if (_hasStarted.get()) {
-            _log.warn(stat.getId() +
-                " attempted to register in stat collector although it has " +
-                " already been started, not allowing");
+            _log.warn(stat.getId() + " attempted to register in stat collector although it has " +
+                      " already been started, not allowing");
             return;
         }
         if (_statKeys.containsKey(stat.getId())) {
-            _log.warn(stat.getId() +
-                " attempted to register in stat collector although it has " +
-                " already been registered, not allowing");
+            _log.warn(stat.getId() + " attempted to register in stat collector although it has " +
+                      " already been registered, not allowing");
             return;
         }
         _statKeys.put(stat.getId(), stat);
@@ -191,8 +180,8 @@ public final class ConcurrentStatsCollector {
             _log.error(e.getMessage(), e);
         }
         printHeader();
-        _executor.scheduleWithFixedDelay(
-            new StatsWriter(), WRITE_PERIOD, WRITE_PERIOD, TimeUnit.SECONDS);
+        _executor.scheduleWithFixedDelay(new StatsWriter(), WRITE_PERIOD, WRITE_PERIOD,
+            TimeUnit.SECONDS);
         _hasStarted.set(true);
         _log.info("ConcurrentStatsCollector has started");
     }
@@ -203,6 +192,7 @@ public final class ConcurrentStatsCollector {
         final String name = file.getName();
         final FilenameFilter filter = new FilenameFilter() {
             final String _filename = name;
+
             public boolean accept(File dir, String name) {
                 if (dir.equals(path) && name.startsWith(_filename)) {
                     return true;
@@ -211,9 +201,8 @@ public final class ConcurrentStatsCollector {
             }
         };
         final File[] files = path.listFiles(filter);
-        final long oneWeekAgo =
-            System.currentTimeMillis() - (7*MeasurementConstants.DAY);
-        for (int i=0; i<files.length; i++) {
+        final long oneWeekAgo = System.currentTimeMillis() - (7 * MeasurementConstants.DAY);
+        for (int i = 0; i < files.length; i++) {
             if (files[i].lastModified() < oneWeekAgo) {
                 files[i].delete();
             }
@@ -223,10 +212,9 @@ public final class ConcurrentStatsCollector {
     private final void printHeader() {
         final StringBuilder buf = new StringBuilder("timestamp,");
         final String countAppend = "_COUNT";
-        for (Iterator it=_statKeys.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry entry = (Map.Entry)it.next();
-            final String key = (String)entry.getKey();
-            final StatCollector value = (StatCollector)entry.getValue();
+        for (Map.Entry<String, StatCollector> entry : _statKeys.entrySet()) {
+            final String key = (String) entry.getKey();
+            final StatCollector value = (StatCollector) entry.getValue();
             buf.append(key).append(',');
             // Only print the COUNT column if the StatCollector object doesn't
             // exist.
@@ -247,23 +235,26 @@ public final class ConcurrentStatsCollector {
     private final String getFilename(boolean withTimestamp) {
         final Calendar cal = Calendar.getInstance();
         final int month = 1 + cal.get(Calendar.MONTH);
-        final String monthStr = (month < 10) ? "0"+month : String.valueOf(month);
+        final String monthStr = (month < 10) ? "0" + month : String.valueOf(month);
         final int day = cal.get(Calendar.DAY_OF_MONTH);
-        final String dayStr = (day < 10) ? "0"+day : String.valueOf(day);
-        String rtn = BASE_FILENAME+"-"+monthStr+"-"+dayStr;
+        final String dayStr = (day < 10) ? "0" + day : String.valueOf(day);
+        String rtn = BASE_FILENAME + "-" + monthStr + "-" + dayStr;
         if (withTimestamp) {
             final int hour = cal.get(Calendar.HOUR_OF_DAY);
-            final String hourStr = (hour < 10) ? "0"+hour : String.valueOf(hour);
+            final String hourStr = (hour < 10) ? "0" + hour : String.valueOf(hour);
             final int min = cal.get(Calendar.MINUTE);
-            final String minStr = (min < 10) ? "0"+min : String.valueOf(min);
+            final String minStr = (min < 10) ? "0" + min : String.valueOf(min);
             final int sec = cal.get(Calendar.SECOND);
-            final String secStr = (sec < 10) ? "0"+sec : String.valueOf(sec);
-            rtn = rtn+"-"+hourStr+"."+minStr+"."+secStr;
+            final String secStr = (sec < 10) ? "0" + sec : String.valueOf(sec);
+            rtn = rtn + "-" + hourStr + "." + minStr + "." + secStr;
         }
         return _baseDir + rtn + ".csv";
     }
 
-    public static final ConcurrentStatsCollector getInstance() {
+    public static synchronized final ConcurrentStatsCollector getInstance() {
+        if(_instance == null) {
+            _instance = new ConcurrentStatsCollector();
+        }
         return _instance;
     }
 
@@ -282,7 +273,7 @@ public final class ConcurrentStatsCollector {
     private class StatsWriter implements Runnable {
         public synchronized void run() {
             try {
-                Map stats = getStatsByKey();
+                Map<String, List<Number>> stats = getStatsByKey();
                 StringBuilder buf = getCSVBuf(stats);
                 final FileWriter fw = getFileWriter();
                 fw.append(buf.append("\n").toString());
@@ -291,6 +282,7 @@ public final class ConcurrentStatsCollector {
                 _log.warn(e.getMessage(), e);
             }
         }
+
         private FileWriter getFileWriter() throws IOException {
             final String filename = getFilename(false);
             if (!_currFilename.equals(filename)) {
@@ -303,13 +295,13 @@ public final class ConcurrentStatsCollector {
             }
             return _file;
         }
-        private final StringBuilder getCSVBuf(Map stats) {
+
+        private final StringBuilder getCSVBuf(Map<String, List<Number>> stats) {
             final StringBuilder rtn = new StringBuilder();
             rtn.append(System.currentTimeMillis()).append(',');
-            for (Iterator it=_statKeys.entrySet().iterator(); it.hasNext(); ) {
-                Map.Entry entry = (Map.Entry)it.next();
-                String key = (String)entry.getKey();
-                StatCollector stat = (StatCollector)entry.getValue();
+            for (Map.Entry<String, StatCollector> entry : _statKeys.entrySet()) {
+                String key = (String) entry.getKey();
+                StatCollector stat = (StatCollector) entry.getValue();
                 if (stat != null) {
                     long value;
                     try {
@@ -323,15 +315,13 @@ public final class ConcurrentStatsCollector {
                         continue;
                     }
                 } else {
-                    List list = (List)stats.get(key);
+                    List<Number> list = stats.get(key);
                     long total = 0l;
                     if (list != null) {
-                        for (Iterator iter = list.iterator(); iter.hasNext(); ) {
-                            Number val = (Number)iter.next();
+                        for (Number val : list) {
                             total += val.longValue();
                         }
-                        rtn.append(total).append(',')
-                           .append(list.size()).append(",");
+                        rtn.append(total).append(',').append(list.size()).append(",");
                     } else {
                         rtn.append(',').append(',');
                     }
@@ -339,18 +329,19 @@ public final class ConcurrentStatsCollector {
             }
             return rtn;
         }
-        private Map getStatsByKey() {
-            final Map rtn = new HashMap();
-            final Object marker = new Object();
+
+        private Map<String, List<Number>> getStatsByKey() {
+            final Map<String, List<Number>> rtn = new HashMap<String, List<Number>>();
+            final StatsObject marker = new StatsObject(-1, null);
             _queue.add(marker);
-            List tmp;
+            List<Number> tmp;
             Object obj;
             while (marker != (obj = _queue.poll())) {
-                final StatsObject stat = (StatsObject)obj;
+                final StatsObject stat = (StatsObject) obj;
                 final String id = stat.getId();
                 final long val = stat.getVal();
-                if (null == (tmp = (List)rtn.get(id))) {
-                    tmp = new ArrayList();
+                if (null == (tmp = rtn.get(id))) {
+                    tmp = new ArrayList<Number>();
                     rtn.put(id, tmp);
                 }
                 tmp.add(new Long(val));
@@ -358,6 +349,7 @@ public final class ConcurrentStatsCollector {
             return rtn;
         }
     }
+
     private void gzipFile(final String filename) {
         new Thread() {
             public void run() {
@@ -366,11 +358,10 @@ public final class ConcurrentStatsCollector {
                 PrintStream pstream = null;
                 boolean succeed = false;
                 try {
-                    gfile = new FileOutputStream(filename+".gz");
+                    gfile = new FileOutputStream(filename + ".gz");
                     gstream = new GZIPOutputStream(gfile);
                     pstream = new PrintStream(gstream);
-                    BufferedReader reader =
-                        new BufferedReader(new FileReader(filename));
+                    BufferedReader reader = new BufferedReader(new FileReader(filename));
                     String tmp;
                     while (null != (tmp = reader.readLine())) {
                         pstream.append(tmp).append("\n");
@@ -386,10 +377,11 @@ public final class ConcurrentStatsCollector {
                     if (succeed) {
                         new File(filename).delete();
                     } else {
-                        new File(filename+".gz").delete();
+                        new File(filename + ".gz").delete();
                     }
                 }
             }
+
             private void close(OutputStream s) {
                 if (s != null) {
                     try {
@@ -405,13 +397,15 @@ public final class ConcurrentStatsCollector {
     private final void registerInternalStats() {
         register(new StatCollector() {
             private final CacheManager _cMan = CacheManager.getInstance();
+
             public String getId() {
                 return EHCACHE_TOTAL_OBJECTS;
             }
+
             public long getVal() {
                 long rtn = 0l;
                 String[] caches = _cMan.getCacheNames();
-                for (int i=0; i<caches.length; i++) {
+                for (int i = 0; i < caches.length; i++) {
                     rtn += _cMan.getCache(caches[i]).getStatistics().getObjectCount();
                 }
                 return rtn;
@@ -421,6 +415,7 @@ public final class ConcurrentStatsCollector {
             public String getId() {
                 return JVM_TOTAL_MEMORY;
             }
+
             public long getVal() {
                 return Runtime.getRuntime().totalMemory();
             }
@@ -429,6 +424,7 @@ public final class ConcurrentStatsCollector {
             public String getId() {
                 return JVM_FREE_MEMORY;
             }
+
             public long getVal() {
                 return Runtime.getRuntime().freeMemory();
             }
@@ -437,6 +433,7 @@ public final class ConcurrentStatsCollector {
             public String getId() {
                 return JVM_MAX_MEMORY;
             }
+
             public long getVal() {
                 return Runtime.getRuntime().maxMemory();
             }
@@ -445,9 +442,10 @@ public final class ConcurrentStatsCollector {
             public String getId() {
                 return SIGAR_1MLOAD;
             }
+
             public long getVal() throws StatUnreachableException {
                 try {
-                    return (long)_sigar.getLoadAverage()[0];
+                    return (long) _sigar.getLoadAverage()[0];
                 } catch (SigarException e) {
                     throw new StatUnreachableException(e.getMessage(), e);
                 }
@@ -457,9 +455,10 @@ public final class ConcurrentStatsCollector {
             public String getId() {
                 return SIGAR_CPU;
             }
+
             public long getVal() throws StatUnreachableException {
                 try {
-                    return (long)_sigar.getProcCpu(getProcPid()).getPercent();
+                    return (long) _sigar.getProcCpu(getProcPid()).getPercent();
                 } catch (SigarException e) {
                     throw new StatUnreachableException(e.getMessage(), e);
                 }
@@ -469,9 +468,10 @@ public final class ConcurrentStatsCollector {
             public String getId() {
                 return SIGAR_PROC_RES_MEM;
             }
+
             public long getVal() throws StatUnreachableException {
                 try {
-                    return (long)_sigar.getProcMem(getProcPid()).getResident();
+                    return (long) _sigar.getProcMem(getProcPid()).getResident();
                 } catch (SigarException e) {
                     throw new StatUnreachableException(e.getMessage(), e);
                 }
@@ -479,13 +479,15 @@ public final class ConcurrentStatsCollector {
         });
         register(new StatCollector() {
             private long last = 0;
+
             public String getId() {
                 return SIGAR_TCP_INERRS;
             }
+
             public long getVal() throws StatUnreachableException {
                 try {
                     long curr = _sigar.getTcp().getInErrs();
-                    long rtn =  curr - last;
+                    long rtn = curr - last;
                     last = curr;
                     return rtn;
                 } catch (SigarException e) {
@@ -495,13 +497,15 @@ public final class ConcurrentStatsCollector {
         });
         register(new StatCollector() {
             private long last = 0;
+
             public String getId() {
                 return SIGAR_TCP_RETRANS;
             }
+
             public long getVal() throws StatUnreachableException {
                 try {
                     long curr = _sigar.getTcp().getRetransSegs();
-                    long rtn =  curr - last;
+                    long rtn = curr - last;
                     last = curr;
                     return rtn;
                 } catch (SigarException e) {
@@ -511,13 +515,15 @@ public final class ConcurrentStatsCollector {
         });
         register(new StatCollector() {
             private long last = 0;
+
             public String getId() {
                 return SIGAR_PAGEOUT;
             }
+
             public long getVal() throws StatUnreachableException {
                 try {
                     long curr = _sigar.getSwap().getPageOut();
-                    long rtn =  curr - last;
+                    long rtn = curr - last;
                     last = curr;
                     return rtn;
                 } catch (SigarException e) {
@@ -527,13 +533,15 @@ public final class ConcurrentStatsCollector {
         });
         register(new StatCollector() {
             private long last = 0;
+
             public String getId() {
                 return SIGAR_PAGEIN;
             }
+
             public long getVal() throws StatUnreachableException {
                 try {
                     long curr = _sigar.getSwap().getPageIn();
-                    long rtn =  curr - last;
+                    long rtn = curr - last;
                     last = curr;
                     return rtn;
                 } catch (SigarException e) {
@@ -543,62 +551,47 @@ public final class ConcurrentStatsCollector {
         });
 
         register(new MBeanCollector("HIBERNATE_2ND_LEVEL_CACHE_HITS",
-            "Hibernate:type=statistics,application=hq",
-            "SecondLevelCacheHitCount", true));
+            "Hibernate:type=statistics,application=hq", "SecondLevelCacheHitCount", true));
 
         register(new MBeanCollector("HIBERNATE_2ND_LEVEL_CACHE_MISSES",
-            "Hibernate:type=statistics,application=hq",
-            "SecondLevelCacheMissCount", true));
+            "Hibernate:type=statistics,application=hq", "SecondLevelCacheMissCount", true));
 
         register(new MBeanCollector("HIBERNATE_QUERY_CACHE_MISSES",
-            "Hibernate:type=statistics,application=hq",
-            "QueryCacheMissCount", true));
+            "Hibernate:type=statistics,application=hq", "QueryCacheMissCount", true));
 
         register(new MBeanCollector("HIBERNATE_QUERY_CACHE_HITS",
-            "Hibernate:type=statistics,application=hq",
-            "QueryCacheHitCount", true));
+            "Hibernate:type=statistics,application=hq", "QueryCacheHitCount", true));
 
-        register(new MBeanCollector("ZEVENTS_PROCESSED",
-            "hyperic.jmx:name=HQInternal", "ZeventsProcessed", true));
+        register(new MBeanCollector("ZEVENTS_PROCESSED", "hyperic.jmx:name=HQInternal",
+            "ZeventsProcessed", true));
 
-        register(new MBeanCollector("ZEVENT_QUEUE_SIZE",
-            "hyperic.jmx:name=HQInternal", "ZeventQueueSize", false));
+        register(new MBeanCollector("ZEVENT_QUEUE_SIZE", "hyperic.jmx:name=HQInternal",
+            "ZeventQueueSize", false));
 
-        register(new MBeanCollector("PLATFORM_COUNT",
-            "hyperic.jmx:name=HQInternal", "PlatformCount", false));
+        register(new MBeanCollector("PLATFORM_COUNT", "hyperic.jmx:name=HQInternal",
+            "PlatformCount", false));
 
-        register(new MBeanCollector(
-            "EDEN_MEMORY_USED", "java.lang:type=MemoryPool,name=",
-            new String[] {"Par Eden Space", "PS Eden Space", "Eden Space"},
-            "Usage", "used"));
+        register(new MBeanCollector("EDEN_MEMORY_USED", "java.lang:type=MemoryPool,name=",
+            new String[] { "Par Eden Space", "PS Eden Space", "Eden Space" }, "Usage", "used"));
 
-        register(new MBeanCollector(
-            "SURVIVOR_MEMORY_USED", "java.lang:type=MemoryPool,name=",
-            new String[] {"Par Survivor Space", "PS Survivor Space",
-                          "Survivor Space"},
-            "Usage", "used"));
+        register(new MBeanCollector("SURVIVOR_MEMORY_USED", "java.lang:type=MemoryPool,name=",
+            new String[] { "Par Survivor Space", "PS Survivor Space", "Survivor Space" }, "Usage",
+            "used"));
 
-        register(new MBeanCollector(
-            "TENURED_MEMORY_USED", "java.lang:type=MemoryPool,name=",
-            new String[] {"CMS Old Gen", "PS Old Gen", "Tenured Gen"},
-            "Usage", "used"));
+        register(new MBeanCollector("TENURED_MEMORY_USED", "java.lang:type=MemoryPool,name=",
+            new String[] { "CMS Old Gen", "PS Old Gen", "Tenured Gen" }, "Usage", "used"));
 
-        register(new MBeanCollector(
-            "HEAP_MEMORY_USED", "java.lang:type=Memory",
-            new String[] {""}, "HeapMemoryUsage", "used"));
+        register(new MBeanCollector("HEAP_MEMORY_USED", "java.lang:type=Memory",
+            new String[] { "" }, "HeapMemoryUsage", "used"));
 
-        register(new MBeanCollector(
-            "JVM_MARKSWEEP_GC", "java.lang:type=GarbageCollector,name=",
-            new String[] {"ConcurrentMarkSweep", "PS MarkSweep"},
-            "CollectionTime", true));
+        register(new MBeanCollector("JVM_MARKSWEEP_GC", "java.lang:type=GarbageCollector,name=",
+            new String[] { "ConcurrentMarkSweep", "PS MarkSweep" }, "CollectionTime", true));
 
-        register(new MBeanCollector(
-            "JVM_COPY_GC", "java.lang:type=GarbageCollector,name=",
-            new String[] {"Copy", "ParNew", "PS Scavenge"}, "CollectionTime",
-            true));
+        register(new MBeanCollector("JVM_COPY_GC", "java.lang:type=GarbageCollector,name=",
+            new String[] { "Copy", "ParNew", "PS Scavenge" }, "CollectionTime", true));
 
         register(LATHER_NUMBER_OF_CONNECTIONS);
-    	register(GALERT_FIRED_EVENT);
+        register(GALERT_FIRED_EVENT);
         register(CONCURRENT_STATS_COLLECTOR);
     }
 
@@ -611,19 +604,14 @@ public final class ConcurrentStatsCollector {
     }
 
     private class MBeanCollector implements StatCollector {
-        private final String _id,
-                             _objectName,
-                             _attrName,
-                             _valProp;
-        private final String [] _names;
+        private final String _id, _objectName, _attrName, _valProp;
+        private final String[] _names;
         private StatUnreachableException _ex = null;
         private int failures = 0;
-        private final boolean _isComposite,
-                              _isTrend;
+        private final boolean _isComposite, _isTrend;
         private long _last = 0l;
 
-        MBeanCollector(String id, String objectName, String[] names,
-                       String attrName, boolean trend) {
+        MBeanCollector(String id, String objectName, String[] names, String attrName, boolean trend) {
             _id = id;
             _objectName = objectName;
             _attrName = attrName;
@@ -633,19 +621,17 @@ public final class ConcurrentStatsCollector {
             _isTrend = trend;
         }
 
-        MBeanCollector(String id, String objectName, String attrName,
-                       boolean trend) {
+        MBeanCollector(String id, String objectName, String attrName, boolean trend) {
             _id = id;
             _objectName = objectName;
             _attrName = attrName;
-            _names = new String[] {""};
+            _names = new String[] { "" };
             _valProp = null;
             _isComposite = false;
             _isTrend = trend;
         }
 
-        MBeanCollector(String id, String objectName, String[] names,
-                       String attrName, String valProp) {
+        MBeanCollector(String id, String objectName, String[] names, String attrName, String valProp) {
             _names = names;
             _id = id;
             _objectName = objectName;
@@ -660,13 +646,13 @@ public final class ConcurrentStatsCollector {
         }
 
         public final long getVal() throws StatUnreachableException {
-            // no need to keep generating a new exception.  If it fails
+            // no need to keep generating a new exception. If it fails
             // 10 times, assume that the mbean server is not on.
             if (_ex != null && failures >= 10) {
                 throw _ex;
             }
             Exception exception = null;
-            for (int i=0; i<_names.length; i++) {
+            for (int i = 0; i < _names.length; i++) {
                 try {
                     if (_isComposite) {
                         long val = getComposite(_names[i]);
@@ -689,35 +675,28 @@ public final class ConcurrentStatsCollector {
             throw _ex;
         }
 
-        private final long getComposite(String name)
-            throws StatUnreachableException,
-                   AttributeNotFoundException,
-                   InstanceNotFoundException,
-                   MBeanException,
-                   ReflectionException,
-                   MalformedObjectNameException,
-                   NullPointerException {
+        private final long getComposite(String name) throws StatUnreachableException,
+            AttributeNotFoundException, InstanceNotFoundException, MBeanException,
+            ReflectionException, MalformedObjectNameException, NullPointerException {
             final ObjectName objName = new ObjectName(_objectName + name);
-            final CompositeDataSupport cds =
-                (CompositeDataSupport)_mbeanServer.getAttribute(
-                    objName, _attrName);
-            final long val = ((Number)cds.get(_valProp)).longValue();
+            final CompositeDataSupport cds = (CompositeDataSupport) _mbeanServer.getAttribute(
+                objName, _attrName);
+            final long val = ((Number) cds.get(_valProp)).longValue();
             failures = 0;
             return val;
         }
 
-        private final long getValue(String name)
-            throws MalformedObjectNameException,
-                   NullPointerException,
-                   AttributeNotFoundException,
-                   InstanceNotFoundException,
-                   MBeanException,
-                   ReflectionException {
+        private final long getValue(String name) throws MalformedObjectNameException,
+            NullPointerException, AttributeNotFoundException, InstanceNotFoundException,
+            MBeanException, ReflectionException {
             final ObjectName _objName = new ObjectName(_objectName + name);
-            long rtn = ((Number)_mbeanServer.getAttribute(
-                _objName, _attrName)).longValue();
+            long rtn = ((Number) _mbeanServer.getAttribute(_objName, _attrName)).longValue();
             failures = 0;
             return rtn;
         }
+    }
+
+    public static void setEnabled(boolean enabled) {
+        ConcurrentStatsCollector.enabled = enabled;
     }
 }

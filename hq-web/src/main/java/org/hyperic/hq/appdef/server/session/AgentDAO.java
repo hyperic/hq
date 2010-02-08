@@ -37,35 +37,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class AgentDAO extends HibernateDAO<Agent>
-{
+public class AgentDAO
+    extends HibernateDAO<Agent> {
     @Autowired
     public AgentDAO(SessionFactory f) {
         super(Agent.class, f);
     }
 
-    public void save(Agent entity) {
-        super.save(entity);
-    }
-
-    public void remove(Agent entity) {
-        super.remove(entity);
-    }
-
-    public Agent get(Integer id) {
-        return (Agent)super.get(id);
-    }
-
-    public Agent findById(Integer id) {
-        return (Agent)super.findById(id);
-    }
-
-    public Agent create(AgentType type, String address, Integer port,
-                        boolean unidirectional, String authToken,
-                        String agentToken, String version)
-    {
-        Agent ag = new Agent(type, address, port, unidirectional, authToken,
-                             agentToken, version);
+    public Agent create(AgentType type, String address, Integer port, boolean unidirectional,
+                        String authToken, String agentToken, String version) {
+        Agent ag = new Agent(type, address, port, unidirectional, authToken, agentToken, version);
         save(ag);
         return ag;
     }
@@ -73,56 +54,43 @@ public class AgentDAO extends HibernateDAO<Agent>
     @SuppressWarnings("unchecked")
     public List<Agent> findByIP(String ip) {
         String hql = "from Agent where address=:address";
-        return (List<Agent>)getSession()
-            .createQuery(hql)
-            .setString("address", ip)
-            .list();
+        return (List<Agent>) getSession().createQuery(hql).setString("address", ip).list();
     }
 
     public int countUsed() {
-        return ((Number)getSession()
-            .createQuery("select count(distinct a) from Platform p " +
-                         "join p.agent a").uniqueResult()).intValue();
+        return ((Number) getSession().createQuery(
+            "select count(distinct a) from Platform p " + "join p.agent a").uniqueResult())
+            .intValue();
 
     }
 
     public Agent findByIpAndPort(String address, int port) {
         String sql = "from Agent where address=? and port=?";
-        return (Agent)getSession().createQuery(sql)
-            .setString(0, address)
-            .setInteger(1, port)
+        return (Agent) getSession().createQuery(sql).setString(0, address).setInteger(1, port)
             .uniqueResult();
     }
 
     public Agent findByAgentToken(String token) {
         String sql = "from Agent where agentToken=?";
-        return (Agent)getSession().createQuery(sql)
-            .setString(0, token)
-            .setCacheRegion("Agent.findByAgentToken")
-            .setCacheable(true)
-            .uniqueResult();
+        return (Agent) getSession().createQuery(sql).setString(0, token).setCacheRegion(
+            "Agent.findByAgentToken").setCacheable(true).uniqueResult();
     }
 
     @SuppressWarnings("unchecked")
     public List<Agent> findAgents(PageInfo pInfo) {
-        final AgentSortField sort = (AgentSortField)pInfo.getSort();
-        final StringBuilder sql = new StringBuilder()
-            .append("select distinct a from Platform p ")
-            .append(" JOIN p.agent a")
-            .append(" JOIN p.resource r")
-            .append(" WHERE r.resourceType is not null")
-            .append(" ORDER BY ").append(sort.getSortString("a"))
-            .append((pInfo.isAscending() ? "" : " DESC"));
+        final AgentSortField sort = (AgentSortField) pInfo.getSort();
+        final StringBuilder sql = new StringBuilder().append("select distinct a from Platform p ")
+            .append(" JOIN p.agent a").append(" JOIN p.resource r").append(
+                " WHERE r.resourceType is not null").append(" ORDER BY ").append(
+                sort.getSortString("a")).append((pInfo.isAscending() ? "" : " DESC"));
 
         // Secondary sort by CTime
         if (!sort.equals(AgentSortField.CTIME)) {
-            sql.append(", ")
-               .append(AgentSortField.CTIME.getSortString("a"))
-               .append(" DESC");
+            sql.append(", ").append(AgentSortField.CTIME.getSortString("a")).append(" DESC");
         }
 
         final Query q = getSession().createQuery(sql.toString());
 
-        return (List<Agent>)pInfo.pageResults(q).list();
+        return (List<Agent>) pInfo.pageResults(q).list();
     }
 }
