@@ -24,6 +24,7 @@
 				<value>classpath:/spring-jdbc.properties</value>
 				<value>classpath:/mail-config.properties</value>
 				<value>classpath:/quartz.properties</value>
+				<value>classpath:/jms.properties</value>
 				<value>classpath:/hq-server.conf</value>
 			</list>
 		</property>
