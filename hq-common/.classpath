@@ -115,5 +115,10 @@
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.web-3.0.0.RELEASE.jar" sourcepath="thirdparty/lib-src/org.springframework.web-sources-3.0.0.RELEASE.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.web.servlet-3.0.0.RELEASE.jar" sourcepath="thirdparty/lib-src/org.springframework.web.servlet-sources-3.0.0.RELEASE.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.web.struts-3.0.0.RELEASE.jar" sourcepath="thirdparty/lib-src/org.springframework.web.struts-sources-3.0.0.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/hibernate/dom4j-1.6.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/mysql_jdbc/mysql-connector-java-5.0.5-bin.jar"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/hibernate/antlr-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/hibernate/cglib-2.1.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/hibernate/asm.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
