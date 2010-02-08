@@ -67,7 +67,6 @@ import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Service;
 
-
 /**
  * ProductPlugin deployer. We accept $PLUGIN_DIR/*.{jar,xml}
  * 
@@ -82,7 +81,8 @@ public class ProductPluginDeployer implements Comparator<String> {
     private static final String PLUGIN_DIR = "hq-plugins";
     private static final String HQU = "hqu";
 
-    private static final String TAB_DATA = MeasurementConstants.TAB_DATA, MEAS_VIEW = MeasTabManagerUtil.MEAS_VIEW;
+    private static final String TAB_DATA = MeasurementConstants.TAB_DATA,
+        MEAS_VIEW = MeasTabManagerUtil.MEAS_VIEW;
 
     private HQApp hqApp;
     private DBUtil dbUtil;
@@ -98,7 +98,8 @@ public class ProductPluginDeployer implements Comparator<String> {
     private String _hquDir;
 
     @Autowired
-    public ProductPluginDeployer(HQApp hqApp, DBUtil dbUtil, RenditServer renditServer, ProductManager productManager) {
+    public ProductPluginDeployer(HQApp hqApp, DBUtil dbUtil, RenditServer renditServer,
+                                 ProductManager productManager) {
         this.hqApp = hqApp;
         this.dbUtil = dbUtil;
         this.renditServer = renditServer;
@@ -397,19 +398,15 @@ public class ProductPluginDeployer implements Comparator<String> {
     @PostConstruct
     public void start() throws Exception {
         File file = hqApp.getWebAccessibleDir();
-        if (file == null) {
-            return;
-        }
-        String war = file.toString();
-        // native libraries are deployed into another directory
-        // which is not next to sigar.jar, so we drop this hint
-        // to find it.
-        System.setProperty("org.hyperic.sigar.path", war + "/WEB-INF/sigar_bin/lib");
-
-        _hquDir = war + "/" + HQU;
-
-        _pluginDir = war + "/WEB-INF/" + PLUGIN_DIR;
-
+        if (file != null) {
+            String war = file.toString();
+            _hquDir = war + "/" + HQU;
+            _pluginDir = war + "/WEB-INF/" + PLUGIN_DIR;
+            // native libraries are deployed into another directory
+            // which is not next to sigar.jar, so we drop this hint
+            // to find it.
+            System.setProperty("org.hyperic.sigar.path", war + "/WEB-INF/sigar_bin/lib");
+        } 
         File propFile = ProductPluginManager.PLUGIN_PROPERTIES_FILE;
         _ppm = new ProductPluginManager(propFile);
         _ppm.setRegisterTypes(true);
@@ -417,21 +414,24 @@ public class ProductPluginDeployer implements Comparator<String> {
         if (propFile.canRead()) {
             _log.info("Loaded custom properties from: " + propFile);
         }
+        if (file != null) {           
+            try {
+                // hq.war contains sigar_bin/lib with the
+                // native sigar libraries. we set sigar.install.home
+                // here so plugins which use sigar can find it during
+                // Sigar.load()
 
-        try {
-            // hq.war contains sigar_bin/lib with the
-            // native sigar libraries. we set sigar.install.home
-            // here so plugins which use sigar can find it during Sigar.load()
-
-            String path = war + "/WEB-INF/sigar_bin";
-            _ppm.setProperty("sigar.install.home", path);
-        } catch (Exception e) {
-            _log.error(e);
-        }
-
-        ProductPluginManager.setPdkPluginsDir(war + "/WEB-INF/hq-plugins");
+                String path = file.toString() + "/WEB-INF/sigar_bin";
+                _ppm.setProperty("sigar.install.home", path);
+            } catch (Exception e) {
+                _log.error(e);
+            }
+            ProductPluginManager.setPdkPluginsDir(file.toString() + "/WEB-INF/hq-plugins");
+        }   
         _ppm.init();
-        serverStarted();
+        if(file != null) {
+            serverStarted();
+        }
     }
 
     /**
