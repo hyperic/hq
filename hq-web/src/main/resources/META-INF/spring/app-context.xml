@@ -51,6 +51,14 @@
 		<property name="mappingLocations" value="classpath:/hibernate/**/*.hbm.xml" />
 		<property name="hibernateProperties">
 			<bean class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+				<property name="properties">
+					<props>
+						<prop key="hibernate.connection.driver_class">${server.database-driver}</prop>
+						<prop key="hibernate.connection.url">${server.database-url}</prop>
+						<prop key="hibernate.connection.username">${server.database-user}</prop>
+						<prop key="hibernate.connection.password">${server.database-password}</prop>
+					</props>
+				</property>
 				<property name="location" value="classpath:/hibernate.properties" />
 			</bean>
 		</property>
