@@ -4,7 +4,7 @@
 
    <!-- Hibernate common targets -->
 
-  <property name="hibernate-static-properties" location="${hq.home}/hq-web/src/main/resources/hibernate.properties" />
+ 
   <property name="hibernate-properties" location="${build.dir}/sql/hibernate.properties" />
   <property name="hibernate-hq-config" location="${hq.home}/hq-web/src/main/resources/hibernate/hibernate.hq-cfg-xml" />
   <property name="hibernate-mapping.xslt" location="${hq.home}/hq-web/src/main/resources/hibernate/hibernate-mapping.xsl" /> 

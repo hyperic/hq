@@ -11,10 +11,7 @@
 	<!-- Default build properties -->
 	<property file="build.properties" />
 
-	<!-- Hibernate properties -->
-   <property file="${hq.home}/hq-web/src/main/resources/hibernate.properties" />
-
-  <!-- Version file -->
+    <!-- Version file -->
 	<property name="version.properties" value="${hq.home}/version.properties" />
 	<property file="${version.properties}" />
 
