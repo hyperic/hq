@@ -69,6 +69,9 @@
 		<groovyc destdir="${rendit_sys.dir}/target/classes" srcdir="${rendit_sys.dir}/src/main/java" listfiles="true">
 			<classpath refid="compile.classpath" />
 		</groovyc>
+		<copy todir="${rendit_sys.dir}/target/classes" >
+			<fileset dir="${rendit_sys.dir}/src/main/resources"/>
+		</copy>
 	</target>
 	
 	<target name="pack-rendit">

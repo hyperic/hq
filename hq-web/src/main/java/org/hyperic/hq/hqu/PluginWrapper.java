@@ -80,9 +80,7 @@ public class PluginWrapper {
     }
 
     PluginWrapper(File pluginDir, File sysDir, ClassLoader parentLoader) {
-        URLClassLoader urlLoader;
-        List<URL> urls = new ArrayList<URL>();
-        URL[] urlArray;
+        GroovyClassLoader groovyLoader = new GroovyClassLoader(parentLoader);
 
         _pluginDir = pluginDir;
 
@@ -100,30 +98,27 @@ public class PluginWrapper {
                         File tmpJar = File.createTempFile(prefix, ".jar", tmpDir);
                         FileUtil.copyFile(files[i], tmpJar);
                         tmpJar.deleteOnExit();
-                        urls.add(tmpJar.toURL());
+                        groovyLoader.addURL(tmpJar.toURL());
+                        _log.info("Added url [" +tmpJar.toURL() + "] to plugin [" + pluginDir + "]");
                     }
                 }
             }
-
-            urlArray = (URL[]) urls.toArray(new URL[urls.size()]);
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-        _log.info("Loading plugin in [" + pluginDir + "] with loaders for: " + urls);
-        urlLoader = URLClassLoader.newInstance(urlArray, parentLoader);
-        _loader = new GroovyClassLoader(urlLoader);
+        _loader = groovyLoader;
     }
 
-    private Object doInContext(Runnee c) throws Exception {
+    private Object doInContext(Runnee runnable) throws Exception {
         Thread curThread = Thread.currentThread();
         ClassLoader oldLoader = curThread.getContextClassLoader();
 
         try {
             curThread.setContextClassLoader(_loader);
-            return c.run();
+            return runnable.run();
         } finally {
             curThread.setContextClassLoader(oldLoader);
         }

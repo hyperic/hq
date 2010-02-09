@@ -36,15 +36,15 @@ class DefaultControllerDispatcher {
             throw new Exception("Invalid request path")
         }
         
-        def loader = new GroovyClassLoader(this.class.classLoader)
-        loader.addURL(appDir.toURL())
-        loader.addURL(etcDir.toURL())
+        def classLoader = Thread.currentThread().contextClassLoader
+        classLoader.addURL(appDir.toURL())
+        classLoader.addURL(etcDir.toURL())
         def controller = Class.forName(controllerName, true, 
-                                       loader).newInstance()
+                                       classLoader).newInstance()
 
         try {
             def b = ResourceBundle.getBundle("${p.name}_i18n", 
-                                             invokeArgs.request.locale, loader)
+                                             invokeArgs.request.locale, classLoader)
             controller.setLocaleBundle(new BundleMapFacade(b))
         } catch(MissingResourceException e) {
             log.warn "Unable to find resource bundle for " + 
