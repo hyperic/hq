@@ -2585,7 +2585,9 @@ span.returnToLink {
 }
 
 .formButtonContainer {
-	margin-top:25px; 
+	background-color:#fff;
+	margin-bottom:10px;
+	padding:10px 0; 
 	text-align:center; 
 	width:100%;
 }
