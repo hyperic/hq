@@ -171,7 +171,7 @@
                 tr.appendChild(td1);
                 td1.setAttribute((document.all ? 'className' : 'class'), "ListCellCheckbox");
 
-                if (aList[i].fixed) {
+                if (aList[i].fixed || !aList[i].canTakeAction) {
                   td1.innerHTML = "&nbsp;";
                 }
                 else {
@@ -226,7 +226,7 @@
                 td6.setAttribute((document.all ? 'className' : 'class'), "resourceNameAlert");
 
                 td6.setAttribute("align", "center");
-                if (aList[i].acknowledgeable) {
+                if (aList[i].acknowledgeable && aList[i].canTakeAction) {
                     var ackAnchor = document.createElement("a");
                      td6.appendChild(ackAnchor);
                      ackAnchor.setAttribute("text-decoration", "none");
@@ -241,7 +241,6 @@
                     ackAnchor.href = "javascript:MyAlertCenter.acknowledgeAlert('" + checkbox.id + "');";
                     ackInstruction.style.display = "";
                 } else {
-                    
                     imgNode = document.createElement('img');
                     imgNode.setAttribute("src", "images/spacer.gif");
                     td6.appendChild(imgNode);

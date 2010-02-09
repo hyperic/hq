@@ -30,7 +30,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.ejb.FinderException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 
@@ -42,6 +41,7 @@ import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -87,7 +87,7 @@ public class GalertBossEJBImpl
    implements SessionBean 
 {
     private final Log _log = LogFactory.getLog(GalertBossEJBImpl.class); 
-
+    
     private SessionManager          _sessMan;
     private GalertManagerLocal      _galertMan;
     private GtriggerManagerLocal    _triggerMan;
@@ -206,8 +206,8 @@ public class GalertBossEJBImpl
                                 .getOne().findResourceGroupById(subj, gid);
         PageList defList = null;
         try {
-            SessionBase.canManageAlerts(subj,
-                                        new AppdefEntityID(g.getResource()));        
+            // ...check that user can view alert definitions...
+            SessionBase.canViewAlertDefinition(subj, new AppdefEntityID(g.getResource()));
             
             defList = _galertMan.findAlertDefs(g, pc);
         } catch (PermissionException e) {
@@ -260,11 +260,12 @@ public class GalertBossEJBImpl
     {
         AuthzSubject subject = _sessMan.getSubject(sessionId);        
         Escalatable esc = _galertMan.findEscalatableAlert(id);
+        Resource resource = esc.getDefinition().getDefinitionInfo().getResource();
         
         // HQ-1295: Does user have sufficient permissions?
-        SessionBase.canManageAlerts(subject, 
-                                    esc.getDefinition().getDefinitionInfo());
-
+        // ...check that users can view alerts...
+        SessionBase.canViewAlertDefinition(subject, new AppdefEntityID(resource));
+        
         return esc;
     }    
 
@@ -319,15 +320,15 @@ public class GalertBossEJBImpl
         PageList alertLogs = null;
         
         try {
-            SessionBase.canManageAlerts(subj,
-                                        new AppdefEntityID(g.getResource()));
-        
+            // ...check that user can view alert definitions...
+            SessionBase.canViewAlertDefinition(subj, new AppdefEntityID(g.getResource()));
+            
             // Don't need to have any results
             PageControl pc = new PageControl();
+            
             pc.setPagesize(0);
         
-            alertLogs =
-                _galertMan.findAlertLogsByTimeWindow(g, begin, end, pc);
+            alertLogs = _galertMan.findAlertLogsByTimeWindow(g, begin, end, pc);
         } catch (PermissionException e) {
             // user does not have sufficient permissions, so display no alerts
             alertLogs = new PageList();
@@ -358,10 +359,10 @@ public class GalertBossEJBImpl
         JSONArray jarr = new JSONArray(); 
         
         try {
-            SessionBase.canManageAlerts(subj,
-                                        new AppdefEntityID(g.getResource()));
-            alertLogs =
-                _galertMan.findAlertLogsByTimeWindow(g, begin, end, pc);
+         // ...check that user can view alert definitions...
+            SessionBase.canViewAlertDefinition(subj, new AppdefEntityID(g.getResource()));
+            
+            alertLogs = _galertMan.findAlertLogsByTimeWindow(g, begin, end, pc);
         
             for (Iterator i = alertLogs.iterator(); i.hasNext(); ) {
                 GalertLog alert = (GalertLog) i.next();

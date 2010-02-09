@@ -461,6 +461,10 @@ public interface AttrConstants {
     // AppdefResourceTypeValue object
     public static final String RESOURCE_TYPE_ATTR = "ResourceType";
     
+    public static final String CAN_TAKE_ACTION_ON_ALERT_ATTR = "canTakeAction";
+    public static final String CAN_MODIFY_ALERT_ATTR = "canModify";
+    public static final String IS_SUPER_USER = "isSuperUser";
+    
     /**
      * The request or session scope attribute under which actions
      * store the <code>Array</code> of requested

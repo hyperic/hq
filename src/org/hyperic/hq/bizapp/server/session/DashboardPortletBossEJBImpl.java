@@ -62,6 +62,7 @@ import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
 import org.hyperic.hq.events.server.session.AlertManagerEJBImpl;
 import org.hyperic.hq.events.server.session.AlertSortField;
+import org.hyperic.hq.events.server.session.SessionBase;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
 import org.hyperic.hq.galerts.server.session.GalertLog;
@@ -256,7 +257,7 @@ public class DashboardPortletBossEJBImpl
             for (Iterator i = galerts.iterator(); i.hasNext();) {
                 galert = (GalertLog)i.next();
                 try {
-                    checkAlertingPermission(subj, galert.getAlertDef().getAppdefID());
+                    SessionBase.canViewAlertDefinition(subj, galert.getAlertDef().getAppdefID());
                 } catch (PermissionException pe) {
                     // continue to next group alert
                     continue;

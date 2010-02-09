@@ -43,11 +43,13 @@ import org.apache.struts.util.MessageResources;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.events.AlertDefinitionInterface;
+import org.hyperic.hq.events.server.session.SessionBase;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
@@ -56,7 +58,6 @@ import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.json.JSONObject;
 
@@ -83,8 +84,6 @@ public class ViewAction extends BaseAction {
         		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
         		user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
-        
-        
         String token;
 
         try {
@@ -113,7 +112,6 @@ public class ViewAction extends BaseAction {
         List entityIds = DashboardUtils.preferencesAsEntityIds(resKey, dashPrefs);
         AppdefEntityID[] arrayIds =
             (AppdefEntityID[])entityIds.toArray(new AppdefEntityID[0]);
-
         int count = Integer.parseInt(dashPrefs.getValue(countKey));
         int priority = Integer.parseInt(dashPrefs.getValue(priorityKey).trim());
         long timeRange = Long.parseLong(dashPrefs.getValue(timeKey));
@@ -156,6 +154,16 @@ public class ViewAction extends BaseAction {
             eid = new AppdefEntityID(def.getResource());
             aVal = new AppdefEntityValue(eid, subject);
             
+            boolean canTakeAction = false;
+            
+            try {
+                SessionBase.canFixAcknowledgeAlerts(subject, eid);
+                
+                canTakeAction = true;
+            } catch(PermissionException e) {
+                // We can view it, but can't take action on it
+            }
+            
             JSONObject jAlert = new JSONObject();
             jAlert.put("alertId", alert.getId());
             jAlert.put("appdefKey", eid.getAppdefKey());
@@ -167,7 +175,8 @@ public class ViewAction extends BaseAction {
             jAlert.put("alertType",
                        alert.getDefinition().getAlertType().getCode());
             jAlert.put("maxPauseTime", maxPauseTime);
-
+            jAlert.put("canTakeAction", canTakeAction);
+            
             a.add(jAlert);
         }
 

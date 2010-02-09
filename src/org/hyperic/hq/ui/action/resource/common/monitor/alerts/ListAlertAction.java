@@ -38,7 +38,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.escalation.server.session.Escalation;
@@ -47,10 +49,8 @@ import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertCondition;
 import org.hyperic.hq.events.server.session.AlertConditionLog;
 import org.hyperic.hq.events.server.session.AlertDefinition;
-import org.hyperic.hq.events.shared.AlertConditionLogValue;
+import org.hyperic.hq.events.server.session.SessionBase;
 import org.hyperic.hq.events.shared.AlertConditionValue;
-import org.hyperic.hq.events.shared.AlertDefinitionValue;
-import org.hyperic.hq.events.shared.AlertValue;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.measurement.server.session.Measurement;
@@ -141,10 +141,25 @@ public class ListAlertAction extends TilesAction {
         }
 
         PageList uiBeans = new PageList();
+        AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
+        AuthzSubject subject = authzBoss.getCurrentSubject(sessionId); 
+        boolean canTakeAction = false;
+
+        try {
+            // ...check that the user can fix/acknowledge...
+            SessionBase.canFixAcknowledgeAlerts(subject, appEntId);
+            
+            canTakeAction = true;
+        } catch(PermissionException e) {
+            // ...the user can't fix/acknowledge...
+        }
+
+        request.setAttribute(Constants.CAN_TAKE_ACTION_ON_ALERT_ATTR, canTakeAction);
         
         for (Iterator<Alert> itr = alerts.iterator();itr.hasNext();) {
             Alert alert = itr.next();
             AlertDefinition alertDefinition = alert.getAlertDefinition();
+            
             AlertBean bean = new AlertBean(alert.getId(), 
             							   alert.getCtime(),
             							   alertDefinition.getId(), 
@@ -153,9 +168,10 @@ public class ListAlertAction extends TilesAction {
             							   appEntId.getId(),
                                            new Integer(appEntId.getType()),
                                            alert.isFixed(), 
-                                           alert.isAckable());
+                                           alert.isAckable(),
+                                           canTakeAction);
             Escalation escalation = alertDefinition.getEscalation();
-            
+
             if (escalation != null && escalation.isPauseAllowed()) {
             	bean.setMaxPauseTime(escalation.getMaxPauseTime());
             }

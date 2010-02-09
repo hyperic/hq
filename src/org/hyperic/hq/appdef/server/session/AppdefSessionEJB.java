@@ -66,6 +66,7 @@ import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.events.server.session.SessionBase;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.zevents.ZeventManager;
@@ -433,30 +434,8 @@ public abstract class AppdefSessionEJB
      * @ejb:transaction type="Required"
      */
     public void checkAlertingPermission(AuthzSubject subject, AppdefEntityID id)
-        throws PermissionException {
-        int type = id.getType();
-        String opName;
-        switch (type) {
-            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                opName = AuthzConstants.platformOpManageAlerts;
-                break;
-            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                opName = AuthzConstants.serverOpManageAlerts;
-                break;
-            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                opName = AuthzConstants.serviceOpManageAlerts;
-                break;
-            case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-                opName = AuthzConstants.appOpManageAlerts;
-                break;
-            case AppdefEntityConstants.APPDEF_TYPE_GROUP:
-                opName = AuthzConstants.groupOpManageAlerts;
-                break;                
-            default:
-                throw new InvalidAppdefTypeException("Unknown type: " + type);
-        }
-        // now check
-        checkPermission(subject, id, opName);
+    throws PermissionException {
+        SessionBase.canFixAcknowledgeAlerts(subject, id);
     }
     
     /**
@@ -469,28 +448,35 @@ public abstract class AppdefSessionEJB
         List entityIds = new ArrayList();
         try {
             PermissionManager pm = PermissionManagerFactory.getInstance();
+            
+            // ...this method is used to determine which alerts can viewed by a given user,
+            // within the new scheme this is based on the user's ability to view a resource,
+            // if they can view the resource, they can view the alerts...
+            
             // platforms 
             List platIds = 
                 pm.findOperationScopeBySubject(subj,
-                                               AuthzConstants.platformOpManageAlerts,
+                                               AuthzConstants.platformOpViewPlatform,
                                                AuthzConstants.platformResType);
             for(int i = 0; i < platIds.size(); i++) {
                 Integer id = (Integer)platIds.get(i);
                 entityIds.add(AppdefEntityID.newPlatformID(id));                                                             
             }
+            
             // servers
             List serverIds = 
                 pm.findOperationScopeBySubject(subj,
-                                               AuthzConstants.serverOpManageAlerts,
+                                               AuthzConstants.serverOpViewServer,
                                                AuthzConstants.serverResType);
             for(int i = 0; i < serverIds.size(); i++) {
                 Integer id = (Integer)serverIds.get(i);
                 entityIds.add(AppdefEntityID.newServerID(id));                                                                           
             }
+            
             // services
             List serviceIds =
                 pm.findOperationScopeBySubject(subj,
-                                               AuthzConstants.serviceOpManageAlerts,
+                                               AuthzConstants.serviceOpViewService,
                                                AuthzConstants.serviceResType);
             for(int i = 0; i < serviceIds.size(); i++) {
                 Integer id = (Integer)serviceIds.get(i);
@@ -500,7 +486,7 @@ public abstract class AppdefSessionEJB
             // Groups
             List groupids = 
                 pm.findOperationScopeBySubject(subj, 
-                                               AuthzConstants.groupOpManageAlerts,
+                                               AuthzConstants.groupOpViewResourceGroup,
                                                AuthzConstants.groupResType);
             for (int i=0; i<groupids.size(); i++) {
                 Integer id = (Integer)groupids.get(i);

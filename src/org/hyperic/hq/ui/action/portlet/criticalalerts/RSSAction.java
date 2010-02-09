@@ -26,6 +26,7 @@
 package org.hyperic.hq.ui.action.portlet.criticalalerts;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -71,8 +72,7 @@ public class RSSAction extends BaseRSSAction {
                                  ActionForm form,
                                  HttpServletRequest request,
                                  HttpServletResponse response)
-        throws Exception 
-    {
+    throws Exception {
         RSSFeed feed = getNewRSSFeed(request);
         
         // Set title
@@ -83,16 +83,15 @@ public class RSSAction extends BaseRSSAction {
         ServletContext ctx = getServlet().getServletContext();
         EventsBoss boss = ContextUtils.getEventsBoss(ctx);
         AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx); 
-            
         String user = getUsername(request);
         List list;
+        
         try {
             // Set the managingEditor
             setManagingEditor(request);
             
             // Get user preferences
             ConfigResponse preferences = getUserPreferences(request, user);
-
             int count = Integer.parseInt(preferences
                 .getValue(".dashContent.criticalalerts.numberOfAlerts").trim());
             int priority = Integer.parseInt(preferences
@@ -100,10 +99,11 @@ public class RSSAction extends BaseRSSAction {
             long timeRange = Long.parseLong(preferences
                 .getValue(".dashContent.criticalalerts.past").trim());
 
-            list = boss.findRecentAlerts(user, count, priority, timeRange, 
-                                         null);
+            list = boss.findRecentAlerts(user, count, priority, timeRange, null);
         } catch (Exception e) {
-            throw new ServletException("Error finding recent alerts", e);
+            log.warn("Error finding recent alerts", e);
+            
+            list = new ArrayList();
         }
 
         for (Iterator i = list.iterator(); i.hasNext(); ) {
@@ -111,8 +111,8 @@ public class RSSAction extends BaseRSSAction {
             AlertDefinitionInterface defInfo = 
                 alert.getDefinition().getDefinitionInfo();
             AppdefEntityID aeid = new AppdefEntityID(defInfo.getResource());
-                
             DateSpecifics specs = new DateSpecifics();
+
             specs.setDateFormat(new SimpleDateFormat(res.getMessage(
                 Constants.UNIT_FORMAT_PREFIX_KEY + "epoch-millis")));
             
@@ -123,12 +123,12 @@ public class RSSAction extends BaseRSSAction {
                                    request.getLocale(), specs);
 
             String desc;
+            
             if (alert.getAlertInfo().isFixed()) {
                 desc = fmtd.toString() + " " +
                     res.getMessage("parenthesis", res.getMessage(
                                    "resource.common.alert.action.fixed.label"));
-            }
-            else {
+            } else {
                 desc = "<table cellspacing=4><tr>" +
                           "<td>" + fmtd.toString() + "</td>" +
                           "<td><a href='" + feed.getBaseUrl() +
@@ -151,7 +151,6 @@ public class RSSAction extends BaseRSSAction {
             
             AuthzSubject subject = aBoss.getCurrentSubject(user);
             AppdefEntityValue resource = new AppdefEntityValue(aeid, subject); 
-
             String link = feed.getBaseUrl() +
                 "/alerts/Alerts.do?mode=viewAlert&eid=" +
                 aeid.getAppdefKey() + "&a=" + alert.getId();
@@ -159,6 +158,7 @@ public class RSSAction extends BaseRSSAction {
             feed.addItem(resource.getName()+ " " + defInfo.getName(), link, 
                          desc, alert.getAlertInfo().getTimestamp()); 
         }
+
         request.setAttribute("rssFeed", feed);
         
         return mapping.findForward(Constants.RSS_URL);

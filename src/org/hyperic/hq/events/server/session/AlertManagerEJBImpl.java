@@ -183,7 +183,9 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      */
     public int deleteAlerts(AuthzSubject subj, AppdefEntityID id)
         throws PermissionException {
-        canManageAlerts(subj, id);
+        // ...check that user has modify permission on alert definition's resource...
+        canModifyAlertDefinition(subj, id);
+
         return getAlertDAO().deleteByResource(findResource(id));
     }
 
@@ -194,7 +196,9 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      */
     public int deleteAlerts(AuthzSubject subj, AlertDefinition ad)
         throws RemoveException, PermissionException {
-        canManageAlerts(subj, ad);
+        // ...check that user has modify permission on alert definition's resource...
+        canModifyAlertDefinition(subj, ad.getAppdefEntityId());
+
         return getAlertDAO().deleteByAlertDefinition(ad);
     }
 
@@ -452,10 +456,12 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
     public PageList findAlerts(AuthzSubject subj, AppdefEntityID id,
                                PageControl pc)
         throws PermissionException {
-        canManageAlerts(subj, id);
+        // ...check that user has view permission on alert definition's resource...
+        canViewAlertDefinition(subj, id);
+
+        Resource resource = findResource(id);
         List alerts;
 
-        final Resource resource = findResource(id);
         if (pc.getSortattribute() == SortAttribute.NAME) {
             alerts = getAlertDAO().findByResourceSortByAlertDef(resource);
         } else {
@@ -478,12 +484,15 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
                                long begin, long end, PageControl pc)
         throws PermissionException
     {
-        canManageAlerts(subj, id);
+        
+        // ...check that user has view permission on alert definition's resource...
+        canViewAlertDefinition(subj, id);
+
+        Resource resource = findResource(id);
         List alerts =
-            getAlertDAO().findByAppdefEntityInRange(findResource(id),
+            getAlertDAO().findByAppdefEntityInRange(resource,
                                                     begin, end,
-                                                    pc.getSortattribute() ==
-                                                        SortAttribute.NAME,
+                                                    pc.getSortattribute() == SortAttribute.NAME,
                                                     pc.isAscending());
 
         return pojoPager.seek(alerts, pc);

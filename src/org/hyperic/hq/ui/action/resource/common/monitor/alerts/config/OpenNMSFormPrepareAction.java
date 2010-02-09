@@ -35,8 +35,13 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.actions.TilesAction;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.events.InvalidActionDataException;
+import org.hyperic.hq.events.server.session.SessionBase;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.ui.action.resource.common.monitor.alerts.AlertDefUtil;
 import org.hyperic.hq.ui.util.ContextUtils;
@@ -60,10 +65,9 @@ public class OpenNMSFormPrepareAction extends TilesAction {
         ServletContext ctx = getServlet().getServletContext();
         int sessionID = RequestUtils.getSessionId(request).intValue();
         EventsBoss eb = ContextUtils.getEventsBoss(ctx);
-
-        AlertDefinitionValue adv = AlertDefUtil.getAlertDefinition
-            (request, sessionID, eb);
+        AlertDefinitionValue adv = AlertDefUtil.getAlertDefinition(request, sessionID, eb);
         OpenNMSForm oForm = (OpenNMSForm) form;
+        
         try {
             oForm.importAction(adv);
         } catch (InvalidActionDataException e) {
@@ -72,6 +76,19 @@ public class OpenNMSFormPrepareAction extends TilesAction {
             _log.error("Invalid OpenNMSAction", e);
         }
 
+        // ...check to see if user has the ability to modify...
+        try {
+            AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
+            AuthzSubject subject = authzBoss.getCurrentSubject(sessionID); 
+            
+            SessionBase.canModifyAlertDefinition(subject, new AppdefEntityID(adv.getAppdefType(), adv.getAppdefId()));
+            
+            oForm.setCanModify(true);
+        } catch(PermissionException e) {
+            // We can view it, but can't modify it
+            oForm.setCanModify(false);
+        }
+        
         return null;
     }
 }

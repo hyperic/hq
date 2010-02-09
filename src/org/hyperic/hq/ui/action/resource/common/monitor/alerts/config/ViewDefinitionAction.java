@@ -38,10 +38,16 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.RoleManagerEJBImpl;
+import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.bizapp.server.action.integrate.OpenNMSAction;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.events.EventConstants;
+import org.hyperic.hq.events.server.session.SessionBase;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.ui.Constants;
@@ -132,6 +138,24 @@ public class ViewDefinitionAction extends TilesAction {
 
         // enablement
         AlertDefUtil.setEnablementRequestAttributes(request, adv);
+        
+        try {
+            AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
+            AuthzSubject subject = authzBoss.getCurrentSubject(sessionID); 
+            
+            if (PermissionManagerFactory.getInstance().hasAdminPermission(subject.getId())) {
+                request.setAttribute(Constants.IS_SUPER_USER, true);
+            } else {
+                request.setAttribute(Constants.IS_SUPER_USER, false);
+            }
+            
+            SessionBase.canModifyAlertDefinition(subject, new AppdefEntityID(adv.getAppdefType(), adv.getAppdefId()));
+            
+            request.setAttribute(Constants.CAN_MODIFY_ALERT_ATTR, true);
+        } catch(PermissionException e) {
+            // We can view it, but can't take action on it
+            request.setAttribute(Constants.CAN_MODIFY_ALERT_ATTR, false);
+        }
         
         return null;
     }

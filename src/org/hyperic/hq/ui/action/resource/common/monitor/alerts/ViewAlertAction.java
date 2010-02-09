@@ -41,20 +41,21 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.events.EventConstants;
-import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertActionLog;
 import org.hyperic.hq.events.server.session.AlertConditionLog;
 import org.hyperic.hq.events.server.session.AlertDefinition;
+import org.hyperic.hq.events.server.session.SessionBase;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
-import org.hyperic.hq.events.shared.AlertDefinitionValue;
-import org.hyperic.hq.events.shared.AlertValue;
 import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.ui.Constants;
@@ -237,6 +238,18 @@ public class ViewAlertAction extends TilesAction {
                                      PageControl.PAGE_ALL);
         request.setAttribute(Constants.AVAIL_USERS_ATTR, availableUsers);
 
+        // ...check to see if user has the ability to fix/acknowledge...
+        try {
+            AuthzSubject subject = authzBoss.getCurrentSubject(sessionID); 
+            
+            SessionBase.canFixAcknowledgeAlerts(subject, alertDefinition.getAppdefEntityId());
+            
+            request.setAttribute(Constants.CAN_TAKE_ACTION_ON_ALERT_ATTR, true);
+        } catch(PermissionException e) {
+            // We can view it, but can't take action on it
+            request.setAttribute(Constants.CAN_TAKE_ACTION_ON_ALERT_ATTR, false);
+        }
+        
         return null;
     }
 }

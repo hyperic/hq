@@ -53,7 +53,8 @@ public class ResourceForm extends ScheduleForm {
 
     private Integer resourceType;
     private List resourceTypes;
-
+    private boolean canModify = false;
+    
     //-------------------------------------constructors
 
     //-------------------------------------public methods
@@ -63,6 +64,14 @@ public class ResourceForm extends ScheduleForm {
      */
     public String getName() {
         return name;
+    }
+
+    public boolean isCanModify() {
+        return canModify;
+    }
+
+    public void setCanModify(boolean canModify) {
+        this.canModify = canModify;
     }
 
     /** sets the name.
@@ -229,6 +238,7 @@ public class ResourceForm extends ScheduleForm {
         rid = null;
         resourceType = null;
         resourceTypes = null;
+        canModify = false;
     }
 
     public ActionErrors validate(ActionMapping mapping, HttpServletRequest request) {

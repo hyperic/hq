@@ -55,10 +55,13 @@ import org.hyperic.hq.appdef.shared.AppdefInventorySummary;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
+import org.hyperic.hq.events.server.session.SessionBase;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
@@ -214,7 +217,7 @@ public class ResourceHubPortalAction extends BaseAction {
             navHierarchy += "All " + StringUtil.toUpperCaseAt(
                     AppdefEntityConstants.typeToString(entityType), 0) + "s";
         }
-
+        
         Integer g = hubForm.getG();
         int groupType;
         if (g == null || g.intValue() < SELECTOR_GROUP_COMPAT) {
@@ -319,6 +322,7 @@ public class ResourceHubPortalAction extends BaseAction {
                                       hubForm.isAny(), hubForm.isOwn(),
                                       hubForm.isUnavail(), pc);
 
+        
         // Generate root breadcrumb url based on the filter criteria submitted...
         String rootBrowseUrl = BreadcrumbUtil.createRootBrowseURL(mapping.getInput(), hubForm, pc);
         
@@ -329,13 +333,33 @@ public class ResourceHubPortalAction extends BaseAction {
 
         request.setAttribute(Constants.ALL_RESOURCES_ATTR, resources);
 
-        ArrayList ids = new ArrayList();
+        boolean canModify = false;
+        List ids = new ArrayList();
+        
         if (resources != null) {
+            if (resources.size() > 0 && AppdefEntityConstants.APPDEF_TYPE_APPLICATION != resourceType) {
+                // ...use the first element to check permission, since there's not an easy way to this that I know of...
+                try {
+                    AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
+                    AuthzSubject subject = authzBoss.getCurrentSubject(sessionId);
+                    AppdefResourceValue resource = (AppdefResourceValue) resources.get(0);
+                  
+                    // ...check to see if user can modify resources of this type...
+                    SessionBase.canModifyAlertDefinition(subject, resource.getEntityId());
+                    
+                    canModify = true;
+                } catch(PermissionException e) {
+                    // ...user doesn't have permission to modify this resource type...
+                }    
+            }
+            
             for (Iterator it = resources.iterator(); it.hasNext();) {
                 AppdefResourceValue rv = (AppdefResourceValue) it.next();
                 ids.add(rv.getEntityId());
             }
         }
+        
+        request.setAttribute(Constants.CAN_MODIFY_ALERT_ATTR, canModify);
         
         watch.markTimeBegin("batchGetIndicators");
         if (ids.size() > 0) {

@@ -779,8 +779,8 @@ public class EscalationManagerEJBImpl
         }
 
         // HQ-1295: Does user have sufficient permissions?
-        SessionBase.canManageAlerts(subject, 
-                                    esc.getDefinition().getDefinitionInfo());
+        // ...check if user can fix/acknowledge this alert...
+        SessionBase.canFixAcknowledgeAlerts(subject, esc.getDefinition().getDefinitionInfo());
 
         if (fixed) {  
             if (moreInfo == null || moreInfo.trim().length() == 0)
