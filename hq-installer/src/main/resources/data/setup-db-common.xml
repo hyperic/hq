@@ -125,16 +125,7 @@
 
   <target name="replace-dbservice-values">
     <echo>using url: ${server.database-url} </echo>
-    <property name="server.deploy"
-              value="${server.installdir}/server-${version}/hq-engine/server/default/deploy"/>
-    <property name="server.installed-ear"
-              value="${server.deploy}/${hyperic.ear.tag}"/>
-    <replace file="${server.deploy}/${hyperic.db-service.tag}">
-      <replacefilter token="@@@JDBC_URL@@@" value="${server.database-url}"/>
-      <replacefilter token="@@@JDBC_DRIVER@@@" value="${server.database-driver}"/>
-      <replacefilter token="@@@JDBC_USER@@@" value="${server.database-user}"/>
-      <replacefilter token="@@@JDBC_PASSWORD@@@" value="${server.database-password}"/>
-    </replace>
+    
 
     <crypto value="${server.admin.password}" property="server.admin.password.encrypted"/>
 

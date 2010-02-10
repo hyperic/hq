@@ -133,7 +133,7 @@
          jdbcUrl="${hq.jdbc.url}" 
          jdbcUser="${hq.jdbc.user}"
          jdbcPassword="${hq.jdbc.password}"
-         typeMap="${hq.home}/hq-installer/src/main/resources/sql/common-dbsetup-typemap.xml"
+         typeMap="${hq.home}/hq-installer/src/main/resources/data/common-dbsetup-typemap.xml"
          data="${data}"
          sqlFile="${basedir}/build/sql/dbsetup-all-${hq.server.ds-mapping}-install.sql"
          noexec="false"
@@ -159,7 +159,7 @@
       <property name="jdbc.url" value="${hq.jdbc.url}"/>
       <property name="jdbc.user" value="${hq.jdbc.user}"/>
       <property name="jdbc.password" value="${hq.jdbc.password}"/>
-      <property name="typemap.file" value="${hq.home}/hq-installer/src/main/resources/sql/common-dbsetup-typemap.xml"/>
+      <property name="typemap.file" value="${hq.home}/hq-installer/src/main/resources/data/common-dbsetup-typemap.xml"/>
       <property name="schema.target" value="${hq.schema.target.version}"/>
     </ant>
   </target>

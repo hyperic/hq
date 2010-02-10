@@ -1,15 +1,10 @@
 
    <!-- Hibernate common targets -->
 
-  <property name="build.dir" location="${server.installdir}/server-${version}/tmp" />
-  <property name="hq-ear.dir" location="${server.installdir}/server-${version}/hq-engine/server/default/deploy/hq.ear" />
-  <property name="hibernate-properties" location="${install.dir}/etc/hibernate/hibernate.properties" />
+  <property name="build.dir" location="${install.dir}/tmp" />
+  <property name="hq-war.dir" location="${server.installdir}/server-${version}/hq-engine/webapps/ROOT" />
   <property name="hibernate-properties-gen" location="${build.dir}/hibernate/hibernate.properties" />
-  <property name="hibernate-hq-config" location="${install.dir}/etc/hibernate/hibernate.hq-cfg-xml" />
-  <property name="hibernate-mapping.xslt" location="${install.dir}/etc/hibernate/hibernate-mapping.xsl" /> 
-  <property name="hibernate-config.xslt" location="${install.dir}/etc/hibernate/hibernate-config.xsl" />
-  <property name="hibernate-sql" location="${install.dir}/etc/hibernate/sql" />
-  <property name="hibernate-jar" location="${hq-ear.dir}/lib/hibernate3.jar" />
+  <property name="hibernate-jar" location="${hq-war.dir}/WEB-INF/lib/hibernate3.jar" />
   
   <target name="common-taskdefs" unless="init-taskdefs.notrequired">
     <taskdef name="for" classname="net.sf.antcontrib.logic.For">
@@ -31,8 +26,6 @@
   </target>
 
   <target name="hibernate-taskdefs" depends="hibernate-init-taskdefs">
-    <!-- Always using the HypericDS datasource -->
-    <property name="hq.server.datasource" value="java:/HypericDS"/>
     <switch value="${server.database}">
       <case value="Oracle8">
         <property name="hyperic.dialect" value="Oracle" />
@@ -64,91 +57,15 @@
   </target>
 
   <target name="hibernate-prep" depends="hibernate-taskdefs">
-    <delete failonerror="false">
-      <fileset dir="${hq-ear.dir}/META-INF" includes="**/*.hbm.xml,**/*.cfg.xml" />
-      <fileset dir="${build.dir}/hibernate" />
-    </delete>
-    <mkdir dir="${build.dir}" />
-    <mkdir dir="${build.dir}/hibernate" />
-    <mkdir dir="${build.dir}/hibernate/sql" />
-    <mkdir dir="${build.dir}/hibernate/classes" />
-
-    <unjar dest="${build.dir}/hibernate/classes">
-      <fileset dir="${hq-ear.dir}">
-        <include name="hq*.jar" />
-      </fileset>
-    </unjar>
-
-    <!-- Copy regular .hbm.xml files -->
-    <copy todir="${hq-ear.dir}/META-INF">
-      <fileset dir="${hibernate-sql}">
-        <include name="**/*.hbm.xml"/>
-        <exclude name="**/Sequence.hbm.xml" unless="include.hq.sequence.table"/>
-	  </fileset>			
-    </copy>
-    
-    <copy todir="${build.dir}/hibernate/sql">
-      <fileset dir="${hibernate-sql}" includes="**/*.hq-xml" />
-    </copy>
-
-    <!-- generate hibernate mapping files from hyperic mapping file -->
-
-    <style
-        basedir="${build.dir}/hibernate/sql"
-        destdir="${hq-ear.dir}/META-INF"
-        style="${hibernate-mapping.xslt}">
-
-      <include name="**/*.hq-xml" />
-
-      <param name="dialect" expression="${hyperic.dialect}" />
-
-      <mapper>
-        <chainedmapper>
-          <globmapper from="*.hq-xml" to="*.hbm.xml" />
-        </chainedmapper>
-      </mapper>
-
-      <xmlcatalog>
-        <classpath>
-          <pathelement location="${hibernate-jar}" />
-        </classpath>
-        <dtd
-            publicId="-//Hibernate/Hibernate Mapping DTD 3.0//EN"
-            location="org/hibernate/hibernate-mapping-3.0.dtd"/>
-      </xmlcatalog>
-    </style>
-
-    <!-- export hibernate properties (these values can be from .hq/build.properties file) -->
-    <pathconvert property="hbm-files" pathsep=",">
-      <path>
-        <fileset dir="${hq-ear.dir}/META-INF">
-          <include name="**/*.hbm.xml"/>
-        </fileset>
-      </path>
-      <mapper>
-        <globmapper from="${hq-ear.dir}${file.separator}" to="" handledirsep="true" />
-      </mapper>
-    </pathconvert>
-    <for param="file" list="${hbm-files}">
-      <sequential>
-        <property name="mapping.@{file}" value="@{file}" />
-      </sequential>
-    </for>
-
-    <property file="${hibernate-properties}" />
-    <echoproperties destfile="${hibernate-properties-gen}.xml" format="xml">
-      <propertyset>
-        <propertyref prefix="mapping."/>
-        <propertyref prefix="hibernate."/>
-        <propertyref prefix="hq."/>
-      </propertyset>
-    </echoproperties>
-
+	<mkdir dir="${build.dir}"/>
+	<mkdir dir="${build.dir}/hibernate"/>
     <property name="hibernate.connection.url" value="${server.database-url}" />
     <property name="hibernate.connection.driver_class" value="${server.database-driver}" />
     <property name="hibernate.connection.username" value="${server.database-user}" />
     <property name="hibernate.connection.password" value="${server.database-password}" />
     <property name="hibernate.connection.pool_size" value="0" />
+	<property name="hq.schema.statement.delimiter" value=";"/>
+	<property name="hq.schema.export" value="true"/>
 
     <echoproperties destfile="${hibernate-properties-gen}" format="text">
       <propertyset>
@@ -159,28 +76,11 @@
         <propertyref name="hibernate.connection.password"/>
         <propertyref name="hibernate.connection.password"/>
         <propertyref name="hibernate.connection.pool_size"/>
+		<propertyref name="hq.schema.statement.delimiter"/>
+		<propertyref name="hq.schema.export"/>
       </propertyset>
     </echoproperties> 
 
-    <!-- generate hibernate configuration file  -->
-    <style
-        style="${hibernate-config.xslt}"
-        in="${hibernate-hq-config}"
-        out="${hq-ear.dir}/META-INF/hibernate.cfg.xml">
-
-      <param name="dialect" expression="${hyperic.dialect}" />
-      <param name="properties" expression="${hibernate-properties-gen}.xml" />
-
-      <!-- search hibernate-mapping.dtd in the classpath -->
-      <xmlcatalog>
-        <classpath>
-          <pathelement location="${hibernate-jar}" />
-        </classpath>
-        <dtd
-            publicId="-//Hibernate/Hibernate Configuration DTD 3.0//EN"
-            location="org/hibernate/hibernate-configuration-3.0.dtd"/>
-      </xmlcatalog>
-    </style>
   </target>
 
   <target name="hibernate-schema-create-init">
@@ -189,14 +89,14 @@
   </target>
 
   <target name="hibernate-schema-create" depends="hibernate-prep,hibernate-schema-create-init">
-      
     <hibernatetool>
       <classpath>
-        <path location="${hq-ear.dir}" />
-        <path location="${build.dir}/hibernate/classes" />
+        <path location="${hq-war.dir}/WEB-INF/classes" />
+ 		<path location="${hq-war.dir}/WEB-INF/lib/hq-common.jar" />
+		<path location="${hq-war.dir}/WEB-INF/lib/hq-util.jar" />
       </classpath>
       <configuration propertyFile="${hibernate-properties-gen}">
-        <fileset dir="${hq-ear.dir}">
+        <fileset dir="${hq-war.dir}/WEB-INF/classes/hibernate">
           <include name="**/*.hbm.xml" />
         </fileset>
       </configuration>
@@ -221,14 +121,15 @@
     <delete failonerror="false" file="${build.dir}/sql/hibernate.sql" />
     <mkdir dir="${build.dir}/sql" />
     <hibernatetool>
-      <classpath>
-        <path location="${hq-ear.dir}" />
-        <path location="${build.dir}/hibernate/classes" />
-      </classpath>
-      <configuration propertyFile="${hibernate-properties-gen}">
-        <fileset dir="${hq-ear.dir}">
-          <include name="**/*.hbm.xml" />
-        </fileset>
+    	  <classpath>
+	        <path location="${hq-war.dir}/WEB-INF/classes" />
+			<path location="${hq-war.dir}/WEB-INF/lib/hq-common.jar" />
+			<path location="${hq-war.dir}/WEB-INF/lib/hq-util.jar" />
+	      </classpath>
+	      <configuration propertyFile="${hibernate-properties-gen}">
+	        <fileset dir="${hq-war.dir}/WEB-INF/classes/hibernate">
+	          <include name="**/*.hbm.xml" />
+	        </fileset>
       </configuration>
 
       <hbm2ddl
@@ -248,15 +149,14 @@
   <target name="hibernate-schema-validation" depends="hibernate-prep">
     <taskdef name="validate-schema"
              classname="org.hibernate.tool.hbm2ddl.SchemaValidatorTask">
-      <classpath>
-        <path location="${hq-ear.dir}" />
-        <path location="${build.dir}/hibernate/classes" />
-      </classpath>
-    </taskdef>
-    <validate-schema properties="${hibernate-properties-gen}">
-      <fileset dir="${hq-ear.dir}">
-        <include name="**/*.hbm.xml" />
-      </fileset>
+     		  <classpath>
+		        <path location="${hq-war.dir}/WEB-INF/classes" />
+		      </classpath>
+		</taskdef>
+		  <validate-schema properties="${hibernate-properties-gen}">
+		        <fileset dir="${hq-war.dir}/WEB-INF/classes/hibernate">
+		          <include name="**/*.hbm.xml" />
+		        </fileset>
     </validate-schema>
   </target>
 
