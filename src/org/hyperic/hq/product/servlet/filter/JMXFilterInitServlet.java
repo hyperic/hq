@@ -27,9 +27,10 @@ package org.hyperic.hq.product.servlet.filter;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.WeakHashMap;
+import java.util.Collections;
+import java.util.Map;
 
-import javax.management.InstanceAlreadyExistsException;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
 import javax.management.ObjectName;
@@ -63,11 +64,11 @@ public class JMXFilterInitServlet extends HttpServlet {
     private static JMXFilterInitServlet singleton;
     
     // ContextName -> JMXFilter
-    private static Hashtable filters = new Hashtable();
+    private static Map filters = Collections.synchronizedMap(new WeakHashMap());
     // CL -> JMXSessionListener
-    private static Hashtable listeners = new Hashtable();
+    private static Map listeners = Collections.synchronizedMap(new WeakHashMap());
     
-    private static Hashtable contextInfoByCL = new Hashtable(); 
+    private static Map contextInfoByCL = Collections.synchronizedMap(new WeakHashMap());
 
     public static void registerFilter( JMXFilter f ) {
         // XXX:  We could use the thread class loader to make sure we don't
