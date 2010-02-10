@@ -18,6 +18,7 @@
     <!-- look at your Driver docs to see what these might be -->
     <connection-property name="char.encoding">UTF-8</connection-property>
     <transaction-isolation>TRANSACTION_READ_COMMITTED</transaction-isolation>
+    <check-valid-connection-sql>@@@server.connection-validation-sql@@@</check-valid-connection-sql>
 
     <!--pooling parameters-->
     <min-pool-size>@@@server.database-minpoolsize@@@</min-pool-size>

@@ -115,6 +115,15 @@ public class HQMain {
                 symbols.setProperty("server.database-url",
                                     jdbcUrl + "?protocolVersion=2");
             }
+            
+            // Database connection validation: "select 1" except in the case of Oracle,
+            // where it's "select 1 from dual"
+            String validationSQL = "select 1";
+            if ("Oracle".equals(symbols.getProperty("server.database"))) {
+                validationSQL += " from dual";
+            }
+            symbols.setProperty("server.connection-validation-sql", validationSQL);
+            
         } finally {
             if (fi != null) fi.close();
         }
