@@ -172,15 +172,7 @@ __ll__
 
     <!-- Parameterized names of things to deploy -->
     <echo>^^^INFO: Preparing to install...</echo>
-    <property name="hyperic.db-service.tag" value="hq-ds.xml" />
-    <property name="covalent.jbossmq-service.tag" value="jbossmq-service.xml" />
-    <property name="hq.ear.tag" value="hq.ear" />
-    <property name="covalent.tc-service.tag" value="tomcat41-service.xml" />
-    <property name="covalent.jboss-service.tag" value="jboss-service.xml" />
-	<property name="jboss.server" value="server/default"/>
-	<property name="jboss.home" value="${server.installdir}/server-${version}/hq-engine"/>
-	<property name="embedded-tomcat.home"
-		value="${jboss.home}/${jboss.server}/deploy/jbossweb-tomcat41.sar"/>
+	<property name="tomcat.home" value="${server.installdir}/server-${version}/hq-engine"/>
     <condition property="script-ext" value=".bat">
       <os family="windows"/>
     </condition>
@@ -334,7 +326,7 @@ __ll__
 
     <!-- Do a sanity check - is anything listening on the server port now? -->
     <echo>^^^DEBUG: Checking server JRMP port...</echo>
-    <condition property="server.jboss.server.port.isAlreadyUsed">
+    <condition property="server.tomcat.server.port.isAlreadyUsed">
       <socket server="127.0.0.1" port="${hq-engine.server.port}"/>
     </condition>
     <antcall target="fail-if-mbean-port-used"/>
@@ -411,7 +403,7 @@ __ll__
       for the HQ server.
     </msgfail>
   </target>
-  <target name="fail-if-mbean-port-used" if="server.jboss.server.port.isAlreadyUsed">
+  <target name="fail-if-mbean-port-used" if="server.tomcat.server.port.isAlreadyUsed">
     <msgfail>^^^ERROR:\
       There is another program using port ${hq-engine.server.port}.
       Please choose a different value for the hq-engine.server.port property.
@@ -498,17 +490,12 @@ ${errMsg}
     <!-- Setup conf directory -->
     <echo>^^^INFO: Creating server configuration files...</echo>
     <property name="conf-dir" value="${server.product.dir}/conf"/>
-    <mkdir dir="${conf-dir}/templates"/>
-    <copy todir="${conf-dir}/templates">
-      <fileset dir="${install.dir}/data/hq-engine" includes="**"/>
-    </copy>
     <antcall target="copy-license"/>
     <antcall target="generate-hq-server-conf"/>
 
-    <property name="jboss.home"
+    <property name="tomcat.home"
               value="${server.product.dir}/hq-engine"/>
-    <property name="deploy-dir"
-              value="${jboss.home}/server/default/deploy"/>
+   
 
     <echo>^^^INFO: Copying binaries and libraries to server installation...</echo>
 
@@ -654,7 +641,7 @@ ${errMsg}
     <ant antfile="${install.dir}/data/debug/install-build.xml"
          target="install">
       <property name="debug.home" value="${install.dir}/data/debug"/>
-      <property name="jboss.home" value="${jboss.home}"/>
+      <property name="tomcat.home" value="${tomcat.home}"/>
     </ant>
   </target>
 
