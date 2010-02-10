@@ -4,10 +4,6 @@
 
    <!-- Hibernate common targets -->
 
-<<<<<<< HEAD
- 
-=======
->>>>>>> HE-474
   <property name="hibernate-properties" location="${build.dir}/sql/hibernate.properties" />
   <property name="hibernate-jar" location="${hq.home}/thirdparty/lib/hibernate/hibernate3.jar" />
   
