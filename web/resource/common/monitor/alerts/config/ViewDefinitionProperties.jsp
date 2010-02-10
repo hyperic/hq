@@ -56,7 +56,7 @@
   	<tr valign="top">
     	<td width="20%" class="BlockLabel"><fmt:message key="common.label.Name"/></td>
     	<td width="30%" class="BlockContent"><c:out value="${alertDef.name}"/>
-	    	<c:if test="${alertDef.parentId > 0 && isSuperUser}">
+	    	<c:if test="${canViewResourceTypeAlertTemplate}">
 	    		<br/>
 	        	<html:link page="/alerts/Config.do?mode=viewDefinition&aetid=${Resource.appdefResourceTypeValue.appdefTypeKey}&ad=${alertDef.parentId}">
 	          		<fmt:message key="alert.config.props.PB.ViewTypeDef"/>

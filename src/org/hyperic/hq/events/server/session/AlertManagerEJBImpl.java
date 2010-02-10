@@ -183,8 +183,8 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      */
     public int deleteAlerts(AuthzSubject subj, AppdefEntityID id)
         throws PermissionException {
-        // ...check that user has modify permission on alert definition's resource...
-        canModifyAlertDefinition(subj, id);
+        // ...check that user has delete permission on alert definition's resource...
+        canDeleteAlertDefinition(subj, id);
 
         return getAlertDAO().deleteByResource(findResource(id));
     }
@@ -196,8 +196,8 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      */
     public int deleteAlerts(AuthzSubject subj, AlertDefinition ad)
         throws RemoveException, PermissionException {
-        // ...check that user has modify permission on alert definition's resource...
-        canModifyAlertDefinition(subj, ad.getAppdefEntityId());
+        // ...check that user has delete permission on alert definition's resource...
+        canDeleteAlertDefinition(subj, ad.getAppdefEntityId());
 
         return getAlertDAO().deleteByAlertDefinition(ad);
     }

@@ -216,14 +216,13 @@ public class AlertDefinitionManagerEJBImpl
                PermissionException
     {
         if (EventConstants.TYPE_ALERT_DEF_ID.equals(a.getParentId())) {
-            // ...check that user has modify permission on alert definition's resource...
-            canModifyAlertDefinition(subj, new AppdefEntityTypeID(a.getAppdefType(),
-                                                                  a.getAppdefId()));
+            // ...check that user has access to resource type alert definitions alert definition's resource...
+            canCreateResourceTypeAlertDefinitionTemplate(subj);
         // Subject permissions should have already been checked when creating
         // the parent (resource type) alert definition.
         } else if (!a.parentIdHasBeenSet()) {
-            // ...check that user has modify permission on alert definition's resource...
-            canModifyAlertDefinition(subj, new AppdefEntityID(a.getAppdefType(), 
+            // ...check that user has create permission on alert definition's resource...
+            canCreateAlertDefinition(subj, new AppdefEntityID(a.getAppdefType(), 
                                                               a.getAppdefId()));
         }
         
@@ -765,8 +764,8 @@ public class AlertDefinitionManagerEJBImpl
                 continue;
             }
             
-            // ...check that user has modify permission on alert definitions...
-            canModifyAlertDefinition(subj, alertDefinition.getAppdefEntityId());
+            // ...check that user has delete permission on alert definitions...
+            canDeleteAlertDefinition(subj, alertDefinition.getAppdefEntityId());
 
             AlertAudit.deleteAlert(alertDefinition, subj);
 

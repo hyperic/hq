@@ -38,6 +38,7 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.RoleManagerEJBImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -143,10 +144,18 @@ public class ViewDefinitionAction extends TilesAction {
             AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
             AuthzSubject subject = authzBoss.getCurrentSubject(sessionID); 
             
-            if (PermissionManagerFactory.getInstance().hasAdminPermission(subject.getId())) {
-                request.setAttribute(Constants.IS_SUPER_USER, true);
-            } else {
-                request.setAttribute(Constants.IS_SUPER_USER, false);
+            try {
+                request.setAttribute(Constants.CAN_VIEW_RESOURCE_TYPE_ALERT_TEMPLATE_ATTR, false);
+                
+                // ...is this alert definition spawned from a resource alert template?..
+                if (adv.getParentId() > 0) {
+                    // ...if so, check to see if we have permission to view it...
+                    SessionBase.canViewResourceTypeAlertDefinitionTemplate(subject);
+                
+                    request.setAttribute(Constants.CAN_VIEW_RESOURCE_TYPE_ALERT_TEMPLATE_ATTR, true);
+                }
+            } catch(PermissionException pe) {
+                // ...no permission, keep it moving...
             }
             
             SessionBase.canModifyAlertDefinition(subject, new AppdefEntityID(adv.getAppdefType(), adv.getAppdefId()));

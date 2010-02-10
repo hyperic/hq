@@ -463,7 +463,7 @@ public interface AttrConstants {
     
     public static final String CAN_TAKE_ACTION_ON_ALERT_ATTR = "canTakeAction";
     public static final String CAN_MODIFY_ALERT_ATTR = "canModify";
-    public static final String IS_SUPER_USER = "isSuperUser";
+    public static final String CAN_VIEW_RESOURCE_TYPE_ALERT_TEMPLATE_ATTR = "canViewResourceTypeAlertTemplate";
     
     /**
      * The request or session scope attribute under which actions
