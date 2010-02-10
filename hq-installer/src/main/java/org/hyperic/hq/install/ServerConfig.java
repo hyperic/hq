@@ -112,7 +112,7 @@ public class ServerConfig extends BaseConfig {
     public static final String Q_PORT_JNP
         = "What port should the "+PN+" server use for the jnp service?";
     public static final String Q_PORT_MBEAN
-        = "What port should the "+PN+" server use for the mbean server?";
+        = "What port should the "+PN+" server expose for remote JMX connections?";
     public static final String Q_WEBAPP_URL
         = "Enter the base URL for the "+PN+" server's web-based GUI";
     public static final String Q_MAIL_HOST
