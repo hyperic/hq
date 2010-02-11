@@ -63,6 +63,9 @@
 				<property name="location" value="classpath:/hibernate.properties" />
 			</bean>
 		</property>
+		<property name="entityInterceptor">
+			<bean class="org.hyperic.hibernate.HypericInterceptor" />
+		</property>
 	</bean>
 
 	<bean id="transactionManager"
