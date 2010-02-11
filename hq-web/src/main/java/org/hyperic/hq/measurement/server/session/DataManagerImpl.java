@@ -923,7 +923,7 @@ public class DataManagerImpl implements DataManager {
         }
 
         if (usesMetricUnion(begin, end, useAggressiveRollup)) {
-            return MeasTabManagerUtil.getUnionStatement(begin, end, measIds);
+            return MeasurementUnionStatementBuilder.getUnionStatement(begin, end, measIds);
         } else if (now - this.purge1h < begin) {
             return TAB_DATA_1H;
         } else if (now - this.purge6h < begin) {
@@ -1434,7 +1434,7 @@ public class DataManagerImpl implements DataManager {
         try {
             conn = dbUtil.getConnection();
 
-            final String metricUnion = MeasTabManagerUtil.getUnionStatement(8 * HOUR, m.getId().intValue());
+            final String metricUnion = MeasurementUnionStatementBuilder.getUnionStatement(8 * HOUR, m.getId().intValue());
             StringBuilder sqlBuf = new StringBuilder().append("SELECT timestamp, value FROM ").append(metricUnion)
                 .append(", (SELECT MAX(timestamp) AS maxt").append(" FROM ").append(metricUnion).append(") mt ")
                 .append("WHERE measurement_id = ").append(m.getId()).append(" AND timestamp = maxt");
@@ -1605,8 +1605,8 @@ public class DataManagerImpl implements DataManager {
     }
 
     private StringBuilder getLastDataPointsSQL(long timestamp, Integer[] measIds) {
-        String tables = (timestamp != MeasurementConstants.TIMERANGE_UNLIMITED) ? MeasTabManagerUtil.getUnionStatement(
-            timestamp, System.currentTimeMillis(), measIds) : MeasTabManagerUtil.getUnionStatement(getPurgeRaw(),
+        String tables = (timestamp != MeasurementConstants.TIMERANGE_UNLIMITED) ? MeasurementUnionStatementBuilder.getUnionStatement(
+            timestamp, System.currentTimeMillis(), measIds) : MeasurementUnionStatementBuilder.getUnionStatement(getPurgeRaw(),
             measIds);
 
         StringBuilder sqlBuf = new StringBuilder("SELECT measurement_id, value, timestamp" + " FROM " + tables + ", " +

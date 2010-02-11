@@ -10,6 +10,7 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import org.easymock.EasyMock;
+import org.hyperic.hq.events.AlertConditionEvaluatorStateRepository;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.MockEvent;
 import org.hyperic.hq.events.TriggerFiredEvent;

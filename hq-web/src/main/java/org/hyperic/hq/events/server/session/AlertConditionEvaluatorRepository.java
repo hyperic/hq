@@ -2,6 +2,9 @@ package org.hyperic.hq.events.server.session;
 
 import java.util.Map;
 
+import org.hyperic.hq.events.AlertConditionEvaluatorStateRepository;
+
+
 /**
  * Repository of {@link AlertConditionEvaluator}s
  * @author jhickey

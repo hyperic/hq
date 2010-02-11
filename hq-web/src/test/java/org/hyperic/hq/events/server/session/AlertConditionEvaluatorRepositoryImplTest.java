@@ -4,9 +4,10 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.easymock.EasyMock;
-
 import junit.framework.TestCase;
+
+import org.easymock.EasyMock;
+import org.hyperic.hq.events.AlertConditionEvaluatorStateRepository;
 /**
  * Unit test of the {@link AlertConditionEvaluatorRepositoryImpl}
  * @author jhickey

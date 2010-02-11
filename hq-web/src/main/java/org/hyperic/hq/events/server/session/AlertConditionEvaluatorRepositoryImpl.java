@@ -11,6 +11,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.ShutdownCallback;
+import org.hyperic.hq.events.AlertConditionEvaluatorStateRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
