@@ -1,5 +1,6 @@
 package org.hyperic.hq.events.server.session;
 
+
 /**
  * Factory for creation of an {@link AlertConditionEvaluator} for a specified
  * {@link AlertDefinition}

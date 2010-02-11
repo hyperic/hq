@@ -121,7 +121,7 @@
 	<path id="custom-ant-tasks.path">
 		<path refid="alljars" />
 		<path location="${hq.installer}/target/classes" />
-		<path location="${hq.web}/target/classes" />
+		<path location="${hq.common}/target/classes" />
 		<path location="${hq.util}/target/classes" />
 	</path>
 	
@@ -411,9 +411,17 @@
 
 	<import file="${hq.home}/build_util/dbsetup-build.xml" />
 
-	<target name="build-war" description="Build and create the war" depends="compile,compile-rendit,compile-plugins,pack-rendit,pack-plugins,pack-war" />
 
-	<!-- ==================== UI packaging ==================== -->
+
+	<!-- ==================== Packaging ==================== -->
+	
+	<target name="build-hq-installer" description="Builds the hq-installer jar" depends="compile-installer,pack-hq-installer"/>
+	
+	<target name="pack-hq-installer" description="Packs the hq-installer jar">
+		<jar basedir="${hq.installer}/target/classes" jarfile="${build.dir}/hq-installer.jar"/>
+	</target>
+	
+	<target name="build-war" description="Build and create the war" depends="compile,compile-rendit,compile-plugins,pack-rendit,pack-plugins,pack-war" />
 
 	<target name="pack-war" description="Create the war directory structure ( use if you modify .jsp or other web files, but no sources )">
 		<mkdir dir="${war.dir}" />
@@ -501,6 +509,10 @@
 			<fileset dir="${thirdparty.lib}/mysql_jdbc">
 				<include name="mysql-connector-java-5.0.5-bin.jar" />
 			</fileset>
+			
+			<fileset dir="${thirdparty.lib}/postgresql" includes="postgresql-8.2-*.jdbc3.jar"/>
+			
+			<fileset dir="${thirdparty.lib}/oracle_jdbc" includes="*.jar" />
 
 			<fileset dir="${hibernate.lib}">
 				<include name="*.jar" />

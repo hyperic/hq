@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.tools.ant.BuildException;
-import org.hyperic.hq.events.server.session.AlertConditionEvaluatorStateRepository;
-import org.hyperic.hq.events.server.session.FileAlertConditionEvaluatorStateRepository;
+import org.hyperic.hq.events.AlertConditionEvaluatorStateRepository;
+import org.hyperic.hq.events.FileAlertConditionEvaluatorStateRepository;
 import org.hyperic.util.jdbc.DBUtil;
 
 /**

@@ -57,7 +57,7 @@ import org.springframework.web.context.ServletContextAware;
  * This class represents the central concept of the Hyperic HQ application.
  * (not the Application resource)
  */
-@Component
+@Component("hqApp")
 public class HQApp  implements ServletContextAware {
     private static final Log _log = LogFactory.getLog(HQApp.class);
    

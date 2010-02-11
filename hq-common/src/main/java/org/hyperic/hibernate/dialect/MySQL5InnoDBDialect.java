@@ -41,7 +41,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.measurement.MeasurementConstants;
-import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
+import org.hyperic.hq.measurement.shared.MeasRangeObj;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.timer.StopWatch;
@@ -180,6 +180,49 @@ public class MySQL5InnoDBDialect
         }
         return rtn;
     }
+    
+
+    /**
+     * Get the UNION statement from the detailed measurement tables based on
+     * the beginning of the time range.
+     * @param begin The beginning of the time range.
+     * @param end The end of the time range
+     * @param measId The array of measurement ids to set the where clause against
+     * @return The UNION SQL statement.
+     */
+    private String getUnionStatement(Integer[] measIds, long timestamp) {
+        StringBuilder sql = new StringBuilder();
+        String measInStmt = getMeasInStmt(measIds, true);
+        sql.append("(SELECT * FROM ").
+            append(MeasRangeObj.getInstance().getTable(timestamp)).
+            append(" WHERE timestamp = ").append(timestamp).
+            append(measInStmt).
+            append(") ").append(TAB_DATA);
+        return sql.toString();
+    }
+    
+    private String getMeasInStmt(Integer[] measIds, boolean prependAnd) {
+        if (measIds.length == 0) {
+            return "";
+        }
+        StringBuilder rtn = new StringBuilder();
+        rtn.append(" "+((prependAnd) ? "AND" : "")+" measurement_id");
+        // mysql gets a perf boost from using "=" as apposed to "in"
+        if (measIds.length == 1) {
+            rtn.append(" = "+measIds[0]);
+            return rtn.toString();
+        }
+        rtn.append(" in (");
+        for (int i=0; i<measIds.length; i++) {
+            if (measIds[i] == null) {
+                continue;
+            }
+            rtn.append(measIds[i]+",");
+        }
+        rtn.deleteCharAt(rtn.length()-1);
+        rtn.append(")");
+        return rtn.toString();
+    }
 
     public Map getLastData(Connection conn, String minMax,
                            Map resMap, Map lastMap, Integer[] iids,
@@ -205,7 +248,7 @@ public class MySQL5InnoDBDialect
                     (Integer[])obj.getList().toArray(new Integer[0]);
                 if (table.endsWith(TAB_DATA))
                 {
-                    table = MeasTabManagerUtil.getUnionStatement(measIds,
+                    table = getUnionStatement(measIds,
                                                     lastTime.longValue());
                 }
 
