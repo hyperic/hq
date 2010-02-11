@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. agentpork.cfg
+. etc/multiagent.properties
 
 echo "Creating clone $1"
 
@@ -11,7 +11,8 @@ do
 	ln -s ../master/$f clones/clone_$1/$f
 done
 
-ln clones/master/hq-agent.sh clones/clone_$1/hq-agent.sh
+ln -s ../wrapper clones/clone_$1/wrapper
+cp hq-agent-nowrapper.sh  clones/clone_$1/hq-agent-nowrapper.sh
 
 clone_port=$(($CLONE_LISTEN_STARTPORT + $1))
 
@@ -22,4 +23,5 @@ cat etc/agent.properties | \
 	sed -e s/@CLONE_LISTENPORT@/${clone_port}/ \
 > clones/clone_$1/agent.properties
 
-(cd clones/clone_$1 && ./hq-agent.sh start && ./hq-agent.sh stop)
+cd clones/clone_$1
+nohup ./hq-agent-nowrapper.sh start 2>&1 > console.out & 
