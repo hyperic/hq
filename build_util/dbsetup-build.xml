@@ -14,7 +14,7 @@
   <target name="dbsetup-combine-check">
     <uptodate property="dbsetup-combine.notrequired"
               targetfile="${build.dir}/sql/dbsetup-combine.tstamp">
-      <srcfiles dir="${hq.home}/hq-installer/src/main/resources/sql">
+      <srcfiles dir="${hq.home}/hq-installer/sql">
         <include name="*.xml"/>
         <include name="**/*.hq-xml"/>
       </srcfiles>
@@ -33,12 +33,12 @@
     <switch value="${hqee.build}">
       <case value="true">
         <copy todir="${build.dir}/sql">
-          <fileset dir="${hq.home}/hq-installer/src/main/resources/sql" includes="*-data.xml" />
+          <fileset dir="${hq.home}/hq-installer/sql" includes="*-data.xml" />
         </copy>
       </case>
       <default>
         <copy todir="${build.dir}/sql">
-          <fileset dir="${hq.home}/hq-installer/src/main/resources/sql" includes="*-data.xml" excludes="rt-data.xml" />
+          <fileset dir="${hq.home}/hq-installer/sql" includes="*-data.xml" excludes="rt-data.xml" />
         </copy>
       </default>
     </switch>
@@ -133,7 +133,7 @@
          jdbcUrl="${hq.jdbc.url}" 
          jdbcUser="${hq.jdbc.user}"
          jdbcPassword="${hq.jdbc.password}"
-         typeMap="${hq.home}/hq-installer/src/main/resources/sql/common-dbsetup-typemap.xml"
+         typeMap="${hq.home}/hq-installer/data/common-dbsetup-typemap.xml"
          data="${data}"
          sqlFile="${basedir}/build/sql/dbsetup-all-${hq.server.ds-mapping}-install.sql"
          noexec="false"
@@ -152,14 +152,14 @@
           description="Create an empty schema in the database, without any data."/>
 
   <target name="dbsetup-upgrade" depends="init-install-taskdefs">
-    <ant antfile="${hq.home}/hq-installer/src/main/resources/data/db-upgrade.xml"
+    <ant antfile="${hq.home}/hq-installer/data/db-upgrade.xml"
          target="upgrade"
          inheritAll="true"
          inheritRefs="true">
       <property name="jdbc.url" value="${hq.jdbc.url}"/>
       <property name="jdbc.user" value="${hq.jdbc.user}"/>
       <property name="jdbc.password" value="${hq.jdbc.password}"/>
-      <property name="typemap.file" value="${hq.home}/hq-installer/src/main/resources/sql/common-dbsetup-typemap.xml"/>
+      <property name="typemap.file" value="${hq.home}/hq-installer/data/common-dbsetup-typemap.xml"/>
       <property name="schema.target" value="${hq.schema.target.version}"/>
     </ant>
   </target>

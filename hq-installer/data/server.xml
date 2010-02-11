@@ -91,20 +91,20 @@
     </fail>
   </target>
 
-  <!-- Check for anything bound to jboss/mbean 1099 PR4926 -->
+  <!-- Check for anything bound to mbean 1099 PR4926 -->
   <target name="detect-mbean-port-conflict-and-fail">
-    <echo>^^^DEBUG: Checking jboss mbean port...</echo>
-    <condition property="server.jboss.mbean.portConflict">
+    <echo>^^^DEBUG: Checking mbean port...</echo>
+    <condition property="server.tomcat.mbean.portConflict">
       <socket server="127.0.0.1" port="${hq-engine.server.port}"/>
     </condition>
     <antcall target="fail-mbean-port-conflict-message"/>
   </target>
 
-  <target name="fail-mbean-port-conflict-message" if="server.jboss.mbean.portConflict">
+  <target name="fail-mbean-port-conflict-message" if="server.tomcat.mbean.portConflict">
     <fail>
-      There is already a program using one of JBoss's required ports (${hq-engine.server.port}).
+      There is already a program using the port specified for remote JMX connection to Tomcat (${hq-engine.server.port}).
       This may indicate an attempt to start two similarly configured instances 
-      of HQ/JBoss.
+      of HQ/Tomcat.
     </fail>
   </target>
 

@@ -194,7 +194,7 @@ public class DataCompressImpl implements DataCompress {
         long last;
 
         // Compress hourly data
-        String metricUnion = MeasTabManagerUtil.getUnionStatement((now - HOUR), now);
+        String metricUnion = MeasurementUnionStatementBuilder.getUnionStatement((now - HOUR), now);
         last = compressData(metricUnion, TAB_DATA_1H, HOUR, now);
         // Purge, ensuring we don't purge data not yet compressed.
         truncateMeasurementData(Math.min(now - this.purgeRaw, last));

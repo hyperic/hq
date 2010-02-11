@@ -9914,51 +9914,52 @@ has already been defined.
                        value="FALSE" />
   </schemaSpec>
 
+  
   <schemaSpec version="3.151">
-    <export-counters exportDir="${jboss.home}"/>
-    <export-recovery-conditions exportDir="${jboss.home}"/>
-    <schema-directSQL>
-      <statement desc="Convert frequency type of DURATION to frequency type EVERYTIME">
-        UPDATE EAM_ALERT_DEFINITION SET FREQUENCY_TYPE = 0 WHERE FREQUENCY_TYPE = 1
-      </statement>
-      <statement desc="Convert frequency type of NO_DUP to frequency type EVERYTIME">
-        UPDATE EAM_ALERT_DEFINITION SET FREQUENCY_TYPE = 0 WHERE FREQUENCY_TYPE = 3
-      </statement>
-      <statement desc="Drop Index ACT_ON_TRIGGER_ID_IDX" targetDB='oracle'>
-        DROP INDEX ACT_ON_TRIGGER_ID_IDX
-      </statement>
-      <statement desc="Drop Index ACT_ON_TRIGGER_ID_IDX" targetDB='postgresql'>
-        DROP INDEX ACT_ON_TRIGGER_ID_IDX
-      </statement>
-      <statement desc="Drop Foreign Key Constraint on ACT_ON_TRIGGER_ID" targetDB='mysql'>
-        ALTER TABLE EAM_ALERT_DEFINITION DROP FOREIGN KEY FK975407845BC79AEA
-      </statement>
-      <statement desc="Drop Index ACT_ON_TRIGGER_ID_IDX" targetDB='mysql'>
-        ALTER TABLE EAM_ALERT_DEFINITION DROP INDEX ACT_ON_TRIGGER_ID_IDX
-      </statement>
-      <statement desc="Drop unused EAM_ALERT_DEFINITION column ACT_ON_TRIGGER_ID">
-        ALTER TABLE EAM_ALERT_DEFINITION DROP COLUMN ACT_ON_TRIGGER_ID
-      </statement>
-      <statement desc="Delete MultiConditionTrigger from EAM_REGISTERED_TRIGGER">
-        DELETE FROM EAM_REGISTERED_TRIGGER WHERE CLASSNAME = 'org.hyperic.hq.bizapp.server.trigger.conditional.MultiConditionTrigger'
-      </statement>
-      <statement desc="Delete AvertTrigger from EAM_REGISTERED_TRIGGER">
-        DELETE FROM EAM_REGISTERED_TRIGGER WHERE CLASSNAME = 'org.hyperic.hq.bizapp.server.trigger.frequency.AvertTrigger'
-      </statement>
-      <statement desc="Delete CounterTrigger from EAM_REGISTERED_TRIGGER">
-        DELETE FROM EAM_REGISTERED_TRIGGER WHERE CLASSNAME = 'org.hyperic.hq.bizapp.server.trigger.frequency.CounterTrigger'
-      </statement>
-      <statement desc="Delete DurationTrigger from EAM_REGISTERED_TRIGGER">
-        DELETE FROM EAM_REGISTERED_TRIGGER WHERE CLASSNAME = 'org.hyperic.hq.bizapp.server.trigger.frequency.DurationTrigger'
-      </statement>
-      <statement desc="Drop table EAM_TRIGGER_EVENT">
-        DROP TABLE EAM_TRIGGER_EVENT
-      </statement>
-      <statement desc="Drop table EAM_FIRED_TRIGGER">
-        DROP TABLE EAM_FIRED_TRIGGER
-      </statement>
-    </schema-directSQL>  
-  </schemaSpec>
+  	    <export-counters exportDir="${jboss.home}"/>
+  	    <schema-directSQL>
+  	      <statement desc="Convert frequency type of DURATION to frequency type EVERYTIME">
+  	        UPDATE EAM_ALERT_DEFINITION SET FREQUENCY_TYPE = 0 WHERE FREQUENCY_TYPE = 1
+  	      </statement>
+  	      <statement desc="Convert frequency type of NO_DUP to frequency type EVERYTIME">
+  	        UPDATE EAM_ALERT_DEFINITION SET FREQUENCY_TYPE = 0 WHERE FREQUENCY_TYPE = 3
+  	      </statement>
+  	      <statement desc="Drop Index ACT_ON_TRIGGER_ID_IDX" targetDB='oracle'>
+  	        DROP INDEX ACT_ON_TRIGGER_ID_IDX
+  	      </statement>
+  	      <statement desc="Drop Index ACT_ON_TRIGGER_ID_IDX" targetDB='postgresql'>
+  	        DROP INDEX ACT_ON_TRIGGER_ID_IDX
+  	      </statement>
+  	      <statement desc="Drop Foreign Key Constraint on ACT_ON_TRIGGER_ID" targetDB='mysql'>
+  	        ALTER TABLE EAM_ALERT_DEFINITION DROP FOREIGN KEY FK975407845BC79AEA
+  	      </statement>
+  	      <statement desc="Drop Index ACT_ON_TRIGGER_ID_IDX" targetDB='mysql'>
+  	        ALTER TABLE EAM_ALERT_DEFINITION DROP INDEX ACT_ON_TRIGGER_ID_IDX
+  	      </statement>
+  	      <statement desc="Drop unused EAM_ALERT_DEFINITION column ACT_ON_TRIGGER_ID">
+  	        ALTER TABLE EAM_ALERT_DEFINITION DROP COLUMN ACT_ON_TRIGGER_ID
+  	      </statement>
+  	      <statement desc="Delete MultiConditionTrigger from EAM_REGISTERED_TRIGGER">
+  	        DELETE FROM EAM_REGISTERED_TRIGGER WHERE CLASSNAME = 'org.hyperic.hq.bizapp.server.trigger.conditional.MultiConditionTrigger'
+  	      </statement>
+  	      <statement desc="Delete AvertTrigger from EAM_REGISTERED_TRIGGER">
+  	        DELETE FROM EAM_REGISTERED_TRIGGER WHERE CLASSNAME = 'org.hyperic.hq.bizapp.server.trigger.frequency.AvertTrigger'
+  	      </statement>
+  	      <statement desc="Delete CounterTrigger from EAM_REGISTERED_TRIGGER">
+  	        DELETE FROM EAM_REGISTERED_TRIGGER WHERE CLASSNAME = 'org.hyperic.hq.bizapp.server.trigger.frequency.CounterTrigger'
+  	      </statement>
+  	      <statement desc="Delete DurationTrigger from EAM_REGISTERED_TRIGGER">
+  	        DELETE FROM EAM_REGISTERED_TRIGGER WHERE CLASSNAME = 'org.hyperic.hq.bizapp.server.trigger.frequency.DurationTrigger'
+  	      </statement>
+  	      <statement desc="Drop table EAM_TRIGGER_EVENT">
+  	        DROP TABLE EAM_TRIGGER_EVENT
+  	      </statement>
+  	      <statement desc="Drop table EAM_FIRED_TRIGGER">
+  	        DROP TABLE EAM_FIRED_TRIGGER
+  	      </statement>
+  	    </schema-directSQL>  
+  	</schemaSpec>
+
 
   <!-- Fixes upgrade inconsistencies on EAM_ESCALATION_STATE table -->
   <!-- need fail="false" for these.  This is due to the inconsistent

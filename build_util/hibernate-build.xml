@@ -4,11 +4,7 @@
 
    <!-- Hibernate common targets -->
 
- 
   <property name="hibernate-properties" location="${build.dir}/sql/hibernate.properties" />
-  <property name="hibernate-hq-config" location="${hq.home}/hq-web/src/main/resources/hibernate/hibernate.hq-cfg-xml" />
-  <property name="hibernate-mapping.xslt" location="${hq.home}/hq-web/src/main/resources/hibernate/hibernate-mapping.xsl" /> 
-  <property name="hibernate-config.xslt" location="${hq.home}/hq-web/src/main/resources/hibernate/hibernate-config.xsl" />
   <property name="hibernate-jar" location="${hq.home}/thirdparty/lib/hibernate/hibernate3.jar" />
   
   <path id="hibernate-classpath">
@@ -23,7 +19,6 @@
         <include name="**/*.hbm.xml"/>
       </srcfiles>
       <srcfiles dir="${hq.home}/hq-web/src/main/resources">
-        <include name="hibernate/**/*.hq-cfg-xml"/>
         <include name="hibernate/**/*.ftl"/>
       </srcfiles>
       <srcfiles dir="${hq.home}">

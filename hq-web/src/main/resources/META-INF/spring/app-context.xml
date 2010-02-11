@@ -25,6 +25,7 @@
 				<value>classpath:/mail-config.properties</value>
 				<value>classpath:/quartz.properties</value>
 				<value>classpath:/jms.properties</value>
+				<value>classpath:/hibernate.properties</value>
 				<value>classpath:/hq-server.conf</value>
 			</list>
 		</property>
@@ -58,9 +59,11 @@
 						<prop key="hibernate.connection.url">${server.database-url}</prop>
 						<prop key="hibernate.connection.username">${server.database-user}</prop>
 						<prop key="hibernate.connection.password">${server.database-password}</prop>
+						<prop key="hibernate.dialect">${server.hibernate.dialect}</prop>
 					</props>
 				</property>
-				<property name="location" value="classpath:/hibernate.properties" />
+				<property name="location" value="classpath:/hibernate.properties" /> 
+				<property name="localOverride" value="true"/>
 			</bean>
 		</property>
 		<property name="entityInterceptor">
@@ -104,6 +107,10 @@
 		scope="prototype" />
 
 	<bean class="org.hyperic.hq.appdef.server.session.ResourceTreeGenerator" />
+	
+	<bean class="org.hyperic.hq.events.FileAlertConditionEvaluatorStateRepository">
+		<constructor-arg value="#{hqApp.restartStorageDir}"/>
+	</bean>
 
 	<context:mbean-export />
 	<context:mbean-server />

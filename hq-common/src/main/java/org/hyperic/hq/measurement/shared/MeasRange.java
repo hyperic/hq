@@ -25,8 +25,6 @@
 
 package org.hyperic.hq.measurement.shared;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hyperic.util.TimeUtil;
 
 public class MeasRange
@@ -34,7 +32,8 @@ public class MeasRange
     private long minTime,
                  maxTime;
     private String table;
-    MeasRange(String table, long minTime, long maxTime) {
+    
+    public MeasRange(String table, long minTime, long maxTime) {
         this.table = table;
         this.minTime = minTime;
         this.maxTime = maxTime;

@@ -1,11 +1,15 @@
-package org.hyperic.hq.events.server.session;
+package org.hyperic.hq.events;
 
 import java.io.Serializable;
 import java.util.Map;
 
+
+
+
+
 /**
- * Repository to save and access state of {@link AlertConditionEvaluator}s and
- * their associated {@link ExecutionStrategy}s.
+ * Repository to save and access state of AlertConditionEvaluators and
+ * their associated ExecutionStrategys.
  * @author jhickey
  * 
  */
@@ -13,7 +17,7 @@ public interface AlertConditionEvaluatorStateRepository {
     /**
      * 
      * @return A Map where key is alert definition ID and value is the
-     *         Serializable stored state of the {@link AlertConditionEvaluator}
+     *         Serializable stored state of the AlertConditionEvaluator
      *         with that ID.
      */
     Map<Integer, Serializable> getAlertConditionEvaluatorStates();
@@ -21,23 +25,23 @@ public interface AlertConditionEvaluatorStateRepository {
     /**
      * 
      * @return A Map where key is alert definition ID and value is the
-     *         Serializable stored state of the {@link ExecutionStrategy} with
+     *         Serializable stored state of the ExecutionStrategy with
      *         that ID.
      */
     Map<Integer, Serializable> getExecutionStrategyStates();
 
     /**
-     * Persists states of {@link AlertConditionEvaluator}s
+     * Persists states of AlertConditionEvaluators
      * @param alertConditionEvaluatorStates A Map where key is alert definition
      *        ID and value is the Serializable state of the
-     *        {@link AlertConditionEvaluator} with that ID.
+     *        AlertConditionEvaluator with that ID.
      */
     void saveAlertConditionEvaluatorStates(Map<Integer, Serializable> alertConditionEvaluatorStates);
 
     /**
-     * Persists states of {@link ExecutionStrategy}s
+     * Persists states of  ExecutionStrategys
      * @param executionStrategyStates A Map where key is alert definition ID and
-     *        value is the Serializable state of the {@link ExecutionStrategy}
+     *        value is the Serializable state of the  ExecutionStrategy
      *        with that ID.
      */
     void saveExecutionStrategyStates(Map<Integer, Serializable> executionStrategyStates);

@@ -39,13 +39,13 @@ import org.hyperic.util.StringUtil;
 import org.hyperic.lather.LatherValue;
 import org.hyperic.lather.xcode.LatherXCoder;
 
-public class TestSpeed
+public class SpeedTest
     extends TestCase
 {
     private static final int NUM_MEAS   = 1000;
     private static final int NUM_VALUES = 1000;
     
-    public TestSpeed(String name){
+    public SpeedTest(String name){
         super(name);
     }
 
@@ -59,7 +59,7 @@ public class TestSpeed
 
         for(int i=0; i<NUM_MEAS; i++){
             res.addIntToList("measCID", cid);
-            res.addStringToList("measDSN", TestXCoder.getRandomString(r));
+            res.addStringToList("measDSN", XCoderTest.getRandomString(r));
             res.addDoubleToList("measVal", r.nextDouble());
         }
         return res;

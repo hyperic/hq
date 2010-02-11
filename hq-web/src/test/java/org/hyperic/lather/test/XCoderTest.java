@@ -36,7 +36,7 @@ import junit.framework.TestCase;
 import org.hyperic.lather.LatherValue;
 import org.hyperic.lather.xcode.LatherXCoder;
 
-public class TestXCoder
+public class XCoderTest
     extends TestCase
 {
     private int DO_STRING  = 1 << 0;
@@ -52,7 +52,7 @@ public class TestXCoder
     private int DO_LONG    = 1 << 10;
     private int MAX_VAL    = 1 << 11;
 
-    public TestXCoder(String name){
+    public XCoderTest(String name){
         super(name);
     }
 

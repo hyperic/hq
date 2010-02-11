@@ -15,6 +15,7 @@ import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.server.session.DataPoint;
 import org.hyperic.hq.measurement.server.session.Measurement;
+import org.hyperic.hq.measurement.server.session.MeasurementUnionStatementBuilder;
 import org.hyperic.hq.measurement.shared.DataManager;
 import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
@@ -134,7 +135,7 @@ public class DataPopulatorService implements DataPopulatorServiceMBean {
 
     private DataPoint getLastDataPoint(Integer mid) throws Exception {
 
-        String table = MeasTabManagerUtil.getUnionStatement(
+        String table = MeasurementUnionStatementBuilder.getUnionStatement(
             getDetailedPurgeInterval(), mid.intValue());
         final String SQL =
             "SELECT timestamp, value FROM " + table +
