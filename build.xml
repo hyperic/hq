@@ -407,6 +407,48 @@
 
 	<!-- ==================== Packaging ==================== -->
 	
+	<!-- Bring in tasks for rolling the archives -->
+  <import file="${hq.home}/build_util/archive-build.xml"/>
+
+   <target name="unpack-tomcat" description="Prepare Tomcat for use within HQ, mainly used by archive">
+    <delete dir="${build.dir}/apache-tomcat-${tomcat.version}"/>
+    <mkdir dir="${build.dir}/apache-tomcat-${tomcat.version}"/>
+    <mkdir dir="${build.dir}/staging"/>
+	<get src="http://www.mirrorservice.org/sites/ftp.apache.org/tomcat/tomcat-6/v${tomcat.version}/bin/apache-tomcat-${tomcat.version}.zip"
+				dest="${build.dir}/staging/tomcat.zip" verbose="true" usetimestamp="true"/>
+	<unzip src="${build.dir}/staging/tomcat.zip" dest="${build.dir}"/>
+
+    <!-- Do regular prepare stuff -->
+    <antcall target="prepare-tomcat">
+      <param name="tomcat.home" value="${build.dir}/apache-tomcat-${tomcat.version}"/>
+    </antcall>
+
+  </target>
+
+  <target name="prepare-tomcat">
+	  <!-- Overlay any modified files -->
+	  <copy todir="${tomcat.home}">
+		<fileset dir="${hq.installer}/hq-engine" includes="**"/>
+	</copy>
+	<!-- Add generated keystore -->
+	<available property="available.keystore"
+               file="${tomcat.home}/conf/hyperic.keystore"/>
+    <antcall target="prepare-ssl"/>
+  </target>
+	 
+	 <target name="unpack-ant">
+	    <delete dir="${build.dir}/ant"/>
+		<mkdir dir="${build.dir}/ant"/>
+		<mkdir dir="${build.dir}/staging"/>
+		<get src="http://archive.apache.org/dist/ant/binaries/apache-ant-1.7.1-bin.tar.bz2"
+				dest="${build.dir}/staging/ant.tar.bz2" verbose="true" usetimestamp="true"/>
+	    <untar src="${build.dir}/staging/ant.tar.bz2" 
+	           dest="${build.dir}/ant"
+	           compression="bzip2"/>
+	 </target>
+	
+	
+	   
 	<target name="build-hq-installer" description="Builds the hq-installer jar" depends="compile-installer,pack-hq-installer"/>
 	
 	<target name="pack-hq-installer" description="Packs the hq-installer jar">
@@ -491,18 +533,9 @@
     </antcall>
   </target>
 
-  <target name="unpack-ant">
-    <delete dir="${build.dir}/ant"/>
-	<mkdir dir="${build.dir}/ant"/>
-	<mkdir dir="${build.dir}/staging"/>
-	<get src="http://archive.apache.org/dist/ant/binaries/apache-ant-1.7.1-bin.tar.bz2"
-			dest="${build.dir}/staging/ant.tar.bz2" verbose="true" usetimestamp="true"/>
-    <untar src="${build.dir}/staging/ant.tar.bz2" 
-           dest="${build.dir}/ant"
-           compression="bzip2"/>
-  </target>
+ 
 	
-	<target name="build-war" description="Build and create the war" depends="compile,compile-rendit,compile-plugins,pack-rendit,pack-plugins,pack-war" />
+  <target name="build-war" description="Build and create the war" depends="compile,compile-rendit,compile-plugins,pack-rendit,pack-plugins,pack-war" />
 
 	<target name="pack-war" description="Create the war directory structure ( use if you modify .jsp or other web files, but no sources )">
 		<mkdir dir="${war.dir}" />
