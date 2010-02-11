@@ -78,7 +78,7 @@
 	  </sequential>
   </macrodef>
 
-  <target name="clover.init" depends="init">
+  <target name="clover.init">
     <taskdef resource="cloverlib.xml" classpathref="clover.classpath"/>
   </target>
 

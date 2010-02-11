@@ -8,6 +8,8 @@
 
   &hibernate-build;
 
+  <property name="data.dir" value="${install.dir}/data"/>
+  
   <target name="direct-error">
     <fail>
       This buildfile is used as a utility for other setup files.
