@@ -10,6 +10,9 @@
 
 	<!-- Default build properties -->
 	<property file="build.properties" />
+	
+	<property name="release.comment" value="Development Build" />
+	<property name="hq.isDev" value="true" />
 
     <!-- Version file -->
 	<property name="version.properties" value="${hq.home}/version.properties" />
@@ -175,17 +178,6 @@
 	<import file="${hq.home}/build_util/util-build.xml" />
 	<import file="${hq.home}/build_util/test-build.xml" />
 
-	<target name="init-props" unless="init-props.notrequired">
-		<property file="${version.properties}" />
-		<property name="release.comment" value="Development Build" />
-		<property name="hq.isDev" value="true" />
-		<echo>${release.comment}, version: ${version}, build number: ${build}</echo>
-		<property name="init-props.notrequired" value="true" />
-	</target>
-
-	<target name="init" depends="init-props" unless="init.notrequired">
-		<property name="init.notrequired" value="true" />
-	</target>
 
 	<target name="init-taskdefs" unless="init-taskdefs.notrequired">
 		<taskdef resource="net/sf/antcontrib/antcontrib.properties" classpathref="antjars" />
@@ -208,7 +200,7 @@
 
 	<target name="compile" depends="compile-shared,compile-web,compile-installer" />
 
-	<target name="compile-shared" depends="init">
+	<target name="compile-shared">
 		<compile-sources classpath.id="shared.compile.classpath" src.dir="${hq.util}/src/main/java" resource.dir="${hq.util}/src/main/resources" output.dir="${hq.util}/target/classes" />
 		<compile-sources classpath.id="shared.compile.classpath" src.dir="${hq.common}/src/main/java" resource.dir="${hq.common}/src/main/resources" output.dir="${hq.common}/target/classes" />
 		<compile-sources classpath.id="shared.compile.classpath" src.dir="${hq.pdk.shared}/src/main/java" resource.dir="${hq.pdk.shared}/src/main/resources" output.dir="${hq.pdk.shared}/target/classes" />
@@ -420,6 +412,95 @@
 	<target name="pack-hq-installer" description="Packs the hq-installer jar">
 		<jar basedir="${hq.installer}/target/classes" jarfile="${build.dir}/hq-installer.jar"/>
 	</target>
+	
+	<target name="pack-installer" description="Pack the installer" 
+          depends="dbsetup-uncombine,dbsetup-combine">
+
+    <delete dir="${installer.dir}"/>
+    <mkdir dir="${installer.dir}"/>
+    <mkdir dir="${installer.dir}/bin"/>
+    <mkdir dir="${installer.dir}/lib"/>
+    <mkdir dir="${installer.dir}/data"/>
+    <mkdir dir="${installer.dir}/logs"/>
+
+    <!-- Pack installer jar -->
+    <antcall target="pack-hq-installer"/>
+
+    <antcall target="pack-common" />
+
+    <copy todir="${installer.dir}/lib">
+	   	<fileset dir="${build.dir}">
+			<include name="hq-common.jar" />
+			<include name="hq-util.jar" />
+			<include name="hq-installer.jar" />
+		</fileset>
+	</copy>
+
+    <!-- Unpack and cleanup ant -->
+    <antcall target="unpack-ant"/>
+
+    <!-- Copy ant binaries and database setup utilities -->
+    <copy todir="${installer.dir}/bin" flatten="true">
+      <fileset dir="${build.dir}/ant" includes="**/bin/*">
+        <exclude name="**/bin/*.pl"/>
+        <exclude name="**/bin/*.py"/>
+        <exclude name="**/bin/antRun*"/>
+      </fileset>
+    </copy>
+
+    <!-- Copy ant libs and DB driver libs -->
+    <copy todir="${installer.dir}/lib" flatten="true">
+      <fileset dir="${build.dir}/ant" includes="**/lib/*"/>
+      <fileset dir="${sigar.lib}" includes="**"/>
+      <fileset dir="${thirdparty.lib}">
+        <include name="postgresql/postgresql-8.2-*.jdbc3.jar"/>
+        <include name="mysql_jdbc/mysql*.jar"/>
+        <include name="oro-2.0.8.jar" />
+        <include name="ant-contrib.jar" />
+        <include name="commons-logging-1.0.4.jar"/>
+        <include name="commons-collections-3.2.jar"/>
+        <include name="hibernate/*.jar"/>
+        <include name="groovy-all-1.6.jar"/>
+        <include name="json.jar"/>
+      </fileset>
+    </copy>
+
+    <!-- Copy dbsetup files -->
+    <copy todir="${installer.dir}/data"
+          file="${build.dir}/sql/schema-orig.xml"/>
+    <copy todir="${installer.dir}/data"
+          file="${build.dir}/sql/data-orig.xml"/>
+   
+    <!-- Copy install binaries and data -->
+    <copy todir="${installer.dir}/bin">
+      <fileset dir="${hq.installer}/bin" includes="*setup*"/>
+      <fileset dir="${hq.installer}/bin" includes="db-*.sh"/>
+      <fileset dir="${hq.installer}/bin" includes="db-*.bat"/>
+    </copy>
+    <copy todir="${installer.dir}/data">
+      <fileset dir="${hq.installer}/data" includes="**"/>
+    </copy>
+
+	<antcall target="write-version-file">
+    <param name="version-file"
+             value="${installer.dir}/data/version.properties"/>
+     </antcall>
+
+    <antcall target="chmod-exec">
+      <param name="chmod.dir" value="${installer.dir}"/>
+    </antcall>
+  </target>
+
+  <target name="unpack-ant">
+    <delete dir="${build.dir}/ant"/>
+	<mkdir dir="${build.dir}/ant"/>
+	<mkdir dir="${build.dir}/staging"/>
+	<get src="http://archive.apache.org/dist/ant/binaries/apache-ant-1.7.1-bin.tar.bz2"
+			dest="${build.dir}/staging/ant.tar.bz2" verbose="true" usetimestamp="true"/>
+    <untar src="${build.dir}/staging/ant.tar.bz2" 
+           dest="${build.dir}/ant"
+           compression="bzip2"/>
+  </target>
 	
 	<target name="build-war" description="Build and create the war" depends="compile,compile-rendit,compile-plugins,pack-rendit,pack-plugins,pack-war" />
 
@@ -1112,7 +1193,7 @@
 <!-- Quality Targets -->
 <target name="test" depends="compile-tests,run-tests"/>
 
-<target name="compile-tests" depends="init,init-taskdefs,init-tests">
+<target name="compile-tests" depends="init-taskdefs,init-tests">
    <test-compile module.dir="${hq.agent}" compile.classpath.id="agent.compile.classpath"/>
    <test-compile module.dir="${hq.agent.handlers}/hq-agent-handler-autoinventory" compile.classpath.id="agent.handler.compile.classpath"/>
    <test-compile module.dir="${hq.agent.handlers}/hq-agent-handler-bizapp" compile.classpath.id="agent.handler.compile.classpath"/>
@@ -1127,7 +1208,7 @@
 	<test-compile module.dir="${hq.web}" compile.classpath.id="web.compile.classpath"/>
 </target>
 
-<target name="run-tests" depends="init,init-taskdefs,init-tests">
+<target name="run-tests" depends="init-taskdefs,init-tests">
    <test-run module.dir="${hq.agent}" classpath.id="agent.compile.classpath"/>
    <test-run module.dir="${hq.agent.handlers}/hq-agent-handler-autoinventory" classpath.id="agent.handler.compile.classpath"/>
    <test-run module.dir="${hq.agent.handlers}/hq-agent-handler-bizapp" classpath.id="agent.handler.compile.classpath"/>
