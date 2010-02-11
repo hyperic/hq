@@ -66,6 +66,9 @@
 				<property name="localOverride" value="true"/>
 			</bean>
 		</property>
+		<property name="entityInterceptor">
+			<bean class="org.hyperic.hibernate.HypericInterceptor" />
+		</property>
 	</bean>
 
 	<bean id="transactionManager"
