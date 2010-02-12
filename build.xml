@@ -11,12 +11,11 @@
 	<!-- Default build properties -->
 	<property file="build.properties" />
 	
-	<property name="release.comment" value="Development Build" />
-	<property name="hq.isDev" value="true" />
-
     <!-- Version file -->
 	<property name="version.properties" value="${hq.home}/version.properties" />
 	<property file="${version.properties}" />
+	<property name="release.comment" value="Development Build" />
+	<property name="hq.isDev" value="true" />
 
 	<!-- ==================== Defaults ==================== -->
 	<property name="hq.web" location="${hq.home}/hq-web" />
