@@ -216,6 +216,7 @@
       <replacefilter token="@@@server.database-driver@@@" value="${hq.jdbc.driver}"/>
       <replacefilter token="@@@server.database-user@@@" value="${hq.jdbc.user}"/>
       <replacefilter token="@@@server.database-password@@@" value="${hq.jdbc.password}"/>
+      <replacefilter token="@@@server.connection-validation-sql@@@" value="${hq.validation.sql}"/>
       <replacefilter token="@@@server.database-minpoolsize@@@" value="5"/>
       <replacefilter token="@@@server.database-maxpoolsize@@@" value="90"/>
       <replacefilter token="@@@server.database-blockingtimeout@@@" value="10000"/>
