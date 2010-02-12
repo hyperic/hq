@@ -1019,7 +1019,7 @@ public class RoleManagerImpl implements RoleManager {
         // Grep out the specified roles
         ArrayList<Role> roles = new ArrayList<Role>();
 
-        for (Role r : roles) {
+        for (Role r : foundRoles) {
             if (!index.contains(r.getId())) {
                 roles.add(r);
             }
