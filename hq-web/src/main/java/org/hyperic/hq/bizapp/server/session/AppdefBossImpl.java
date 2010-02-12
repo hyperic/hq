@@ -2598,7 +2598,7 @@ public class AppdefBossImpl implements AppdefBoss {
 
         for (Resource rv : authzResources) {
             AppdefEntityID id = AppdefUtil.newAppdefEntityId(rv);
-            if (!assigned.contains(id)) {
+            if (!assignedIds.contains(id)) {
                 toBePaged.add(id);
             }
         }
