@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <!DOCTYPE plugin [
-  <!ENTITY multi-process-metrics SYSTEM "/pdk/plugins/multi-process-metrics.xml">
+  <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
 ]>
 
 <!--
@@ -29,9 +29,12 @@
   USA.
  -->
 
-<plugin package="org.hyperic.hq.plugin.sybase">
+<plugin package="org.hyperic.hq.plugin.sybase" class="SysbaseProductPlugin">
   <classpath>
     <include name="pdk/lib/jdbc/jconn3.jar"/>
+    <include name="pdk/lib/jdbc/jconn4.jar"/>
+    <include name="pdk/lib/jdbc/jTDS3.jar"/>
+    <include name="pdk/lib/jdbc/jTDS4.jar"/>
   </classpath>
 
   <!-- we use a dummy jmx object name -->
@@ -158,7 +161,7 @@
   </metrics>
 
   <filter name="template">
-    exec:timeout=%timeout%,file=${sysmon_script},args=-s %serverName% -i %interval% -u %jdbcUser% -p '%jdbcPassword%':${alias}
+        sbSysmon:interval=%interval%,jdbcUrl=%jdbcUrl%,jdbcUser=%jdbcUser%,jdbcPassword=%jdbcPassword%:${alias}
   </filter>
   <metrics name="SybaseAvailability">
     <metric name="Availability"
@@ -204,6 +207,10 @@
     <plugin type="autoinventory"
             class="SybaseServerDetector"/>
     <metrics include="Sybase 12.x Instance"/>
+    <properties>
+       <property name="instance"
+                 description="Database instance to monitor"/>
+    </properties>
   </server>
 
   <server name="Sybase"
@@ -221,10 +228,10 @@
                  description="Sybase Version"/>
     </properties>
 
-    <config>
+    <config type="measurement">
       <option name="jdbcUrl"
               description="JDBC Url (NOTE: localhost may not work)"
-              default="jdbc:sybase:Tds:&lt;hostname&gt;:4100/master"/>
+              default="jdbc:sybase:Tds:localhost:4100"/>
       <option name="jdbcUser"
               description="JDBC User"
               default="sa"/>
@@ -243,21 +250,29 @@
     </config>
 
     <service name="sp_sysmonEngine">
+      <plugin type="measurement"
+              class="EngineMeasurementPlugin"/>
       <config>
         <option name="engine"
                 description="Sybase Engine Stats"/>
+        <option name="id"
+                description="Sybase Engine ID Stats"/>
       </config>
-      <metrics include="SybaseAvailability"/>
-      <filter name="template">
-        exec:timeout=%timeout%,file=${sysmon_script},args=-s %serverName% -i %interval% -u %jdbcUser% -p '%jdbcPassword%':%engine%.${alias}
-      </filter>
       <metrics>
+      <metric name="Availability"
+        alias="Availability"
+            template="sybase.engine.sql:id=%id%:${alias}"
+        category="AVAILABILITY"
+        indicator="true"
+        units="percentage"
+        collectionType="dynamic"/>
         <metric name="Engine Utilization"
                 category="THROUGHPUT"
                 indicator="true"
                 units="percentage"
                 collectionType="dynamic"/>
       </metrics>
+      &process-metrics;
     </service>
 
     <service name="storage">
@@ -273,11 +288,15 @@
         <option name="pagesize"
                 description="Sybase Server Pagesize"/>
       </config>
-      <metrics include="SybaseAvailability"/>
       <filter name="template">
         ${domain}:Type=storage,database=%database%,segment=%segment%,pagesize=%pagesize%:${alias}
       </filter>
       <metrics>
+        <metric name="Availability"
+                category="AVAILABILITY"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"/>
         <metric name="Storage Used"
                 category="UTILIZATION"
                 indicator="true"
@@ -300,11 +319,15 @@
         <option name="cachename"
                 description="Name of Cache"/>
       </config>
-      <metrics include="SybaseAvailability"/>
       <filter name="template">
-        exec:timeout=%timeout%,file=${sysmon_script},args=-s %serverName% -i %interval% -u %jdbcUser% -p '%jdbcPassword%':%cachename%.${alias}
+        sbSysmon:interval=%interval%,jdbcUrl=%jdbcUrl%,jdbcUser=%jdbcUser%,jdbcPassword=%jdbcPassword%:%cachename%.${alias}
       </filter>
       <metrics>
+        <metric name="Availability"
+                category="AVAILABILITY"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"/>
         <metric name="Cache Hits Ratio"
                 category="THROUGHPUT"
                 indicator="true"
@@ -327,11 +350,15 @@
         <option name="configoption"
                 description="Config Option"/>
       </config>
-      <metrics include="SybaseAvailability"/>
       <filter name="template">
         ${domain}:Type=sp_monitorconfig,configoption=%configoption%:${alias}
       </filter>
       <metrics>
+        <metric name="Availability"
+                category="AVAILABILITY"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"/>
         <metric name="Active"
                 category="THROUGHPUT"
                 indicator="true"
@@ -360,14 +387,6 @@
       </metrics>
     </service>
 
-    <service name="DataServer Process Metrics">
-      <config>
-        <option name="process.query"
-                default="State.Name.eq=dataserver"
-                description="PTQL for Sybase DataServer Process"/>
-      </config>
-      &multi-process-metrics;
-    </service>
   </server>
 
   <server name="Sybase"

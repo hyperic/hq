@@ -29,7 +29,7 @@ public class SybasePluginUtil
 {
     static boolean DEBUG = false;
 
-    static final String JDBC_DRIVER    = "com.sybase.jdbc3.jdbc.SybDriver",
+    static final String JDBC_DRIVER    = "com.sybase.jdbcx.SybDriver",
                         DEFAULT_URL    = "jdbc:sybase:Tds:localhost:4100/master",
                         PROP_ENGINE    = "engine",
                         PROP_PAGESIZE  = "pagesize",

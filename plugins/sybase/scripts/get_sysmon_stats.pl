@@ -212,7 +212,7 @@ sub getArgs
              "username=s" => \$Username,
              "u=s" => \$Username,
              "passwd" => \$Passwd,
-             "p=s" => \$Passwd,
+             "p:s" => \$Passwd,
              "server" => \$Server,
              "s=s" => \$Server,
              "help" => \$bool_help,
