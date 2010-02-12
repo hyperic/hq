@@ -1,11 +1,12 @@
 package org.hyperic.hq.context;
 
+import java.util.Arrays;
 import java.util.Collection;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 
-import clover.edu.emory.mathcs.backport.java.util.Arrays;
+
 
 
 public class Bootstrap  {
