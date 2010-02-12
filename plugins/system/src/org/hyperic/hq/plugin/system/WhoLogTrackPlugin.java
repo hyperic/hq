@@ -26,7 +26,6 @@
 package org.hyperic.hq.plugin.system;
 
 import org.hyperic.hq.product.LogTrackPlugin;
-import org.hyperic.hq.product.TrackEvent;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
 import org.hyperic.sigar.Who;
@@ -73,14 +72,10 @@ public class WhoLogTrackPlugin implements Runnable {
                 msg += " (" + host + ")";
             }
 
-            TrackEvent event =
-                new TrackEvent(this.plugin.getName(),
-                               time,
-                               LogTrackPlugin.LOGLEVEL_INFO,
-                               "system",
-                               msg);
-                                                  
-            this.plugin.getManager().reportEvent(event);
+            this.plugin.reportEvent(time,
+                                    LogTrackPlugin.LOGLEVEL_INFO,
+                                    "system",
+                                    msg);
         }
 
         this.lastTime = System.currentTimeMillis();
