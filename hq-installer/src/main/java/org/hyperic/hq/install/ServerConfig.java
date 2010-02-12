@@ -101,8 +101,6 @@ public class ServerConfig
     public static final String Q_PORT_WEBAPP_SECURE = "What port should the " + PN +
                                                       " server's web-based GUI listen " +
                                                       "on for secure https communication?";
-    public static final String Q_PORT_JNP = "What port should the " + PN +
-                                            " server use for the jnp service?";
     public static final String Q_PORT_MBEAN = "What port should the " + PN +
                                               " server expose for remote JMX connections?";
     public static final String Q_WEBAPP_URL = "Enter the base URL for the " + PN +
@@ -214,7 +212,7 @@ public class ServerConfig
 
                     schema.addOption(new HiddenConfigOption("server.webapp.secure.port", "7443"));
 
-                    schema.addOption(new HiddenConfigOption("hq-engine.jnp.port", "2099"));
+                    
 
                     schema.addOption(new HiddenConfigOption("hq-engine.server.port", "9093"));
                 } else {
@@ -224,8 +222,7 @@ public class ServerConfig
                     schema.addOption(new PortConfigOption("server.webapp.secure.port",
                         Q_PORT_WEBAPP_SECURE, new Integer(7443)));
 
-                    schema.addOption(new PortConfigOption("hq-engine.jnp.port", Q_PORT_JNP,
-                        new Integer(2099)));
+                   
 
                     schema.addOption(new PortConfigOption("hq-engine.server.port", Q_PORT_MBEAN,
                         new Integer(9093)));
