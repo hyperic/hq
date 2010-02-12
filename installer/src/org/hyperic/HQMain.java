@@ -119,7 +119,8 @@ public class HQMain {
             // Database connection validation: "select 1" except in the case of Oracle,
             // where it's "select 1 from dual"
             String validationSQL = "select 1";
-            if ("Oracle".equals(symbols.getProperty("server.database"))) {
+            String dbProp = symbols.getProperty("server.database");
+            if (dbProp != null && dbProp.startsWith("Oracle")) {
                 validationSQL += " from dual";
             }
             symbols.setProperty("server.connection-validation-sql", validationSQL);
