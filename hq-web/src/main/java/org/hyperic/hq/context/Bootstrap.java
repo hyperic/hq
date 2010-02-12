@@ -5,12 +5,15 @@ import java.util.Collection;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 
+import clover.edu.emory.mathcs.backport.java.util.Arrays;
+
 
 public class Bootstrap  {
     static ApplicationContext appContext;
     
     public static <T> T getBean(Class<T> beanClass)  {
         try {
+            System.out.println("BOOTSTRAP:Bean Defs:" + Arrays.asList(appContext.getBeanDefinitionNames()));
             Collection<T> beans = appContext.getBeansOfType(beanClass).values();
             if(beans.isEmpty() && appContext.getParent() != null) {
                 beans = appContext.getParent().getBeansOfType(beanClass).values();
