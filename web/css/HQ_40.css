@@ -2607,3 +2607,29 @@ span.returnToLink {
 	text-align:center; 
 	width:100%;
 }
+
+.resourceTypeColumn {
+	padding: 8px 3px; 
+	text-align: right; 
+	width: 20%;	
+}
+
+.permissionColumn {
+	padding-left: 15px;
+}
+
+.capabilitiesColumn {
+	padding-left: 5px; 
+	width: 60%;
+}
+
+.alertCapability {
+	width: 10%;	
+}
+	
+.controlCapability {
+	width: 50%;	
+}
+.bottomBorder {
+	border-bottom: 1px solid #eee;
+}

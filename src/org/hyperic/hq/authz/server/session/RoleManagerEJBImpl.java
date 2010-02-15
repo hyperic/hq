@@ -593,41 +593,20 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
     }
 
     /**
-     * Get role permission Map
+     * Get operations
      * For a given role id, find the resource types and permissions
      * which are supported by it
      * @param subject
      * @param roleId
-     * @return map - keys are resource type names, values are lists of operation
-     * values which are supported on the resouce type.
+     * @return list - values are lists of operation
      * @ejb:interface-method
      */ 
-    public Map getRoleOperationMap(AuthzSubject subject, Integer roleId)
+    public List getRoleOperations(AuthzSubject subject, Integer roleId)
         throws PermissionException {
-        Map theMap = new HashMap();
         // find the role by id
         Role role = getRoleDAO().findById(roleId);
         // now get the operations
-        Collection operations = role.getOperations();
-        // now for each operation, get the supported resource type
-        Iterator operationIt = operations.iterator();
-        while (operationIt.hasNext()) {
-            Operation anOp = (Operation) operationIt.next();
-            // now get the resource Type for the op
-            ResourceType resType = anOp.getResourceType();
-            // check if there's a key for this entry
-            if (theMap.containsKey(resType.getName())) {
-                // looks like this res type is accounted for
-                // add the operation to the list
-                ((List) theMap.get(resType.getName())).add(anOp);
-            } else {
-                // key's not there, add it
-                List opList = new ArrayList();
-                opList.add(anOp);
-                theMap.put(resType.getName(), opList);
-            }
-        }
-        return theMap;
+        return new ArrayList(role.getOperations());
     }
 
     /**

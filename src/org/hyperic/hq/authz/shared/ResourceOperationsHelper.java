@@ -1,47 +1,100 @@
 package org.hyperic.hq.authz.shared;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.authz.server.session.Resource;
 
 public class ResourceOperationsHelper {
+    // This number should be equal to the max number of operation codes per resource
+    private final static int MULTIPLIER = 6;
+    
     // Resource type codes...
-    private final static int PLATFORM = 0;
-    private final static int SERVER = 5;
-    private final static int SERVICE = 10;
-    private final static int GROUP = 15;
+    public final static int PLATFORM = 0;
+    public final static int SERVER = 1 * MULTIPLIER;
+    public final static int SERVICE = 2 * MULTIPLIER;
+    public final static int GROUP = 3 * MULTIPLIER;
+    public final static int APPLICATION = 4 * MULTIPLIER;
+    public final static int USER = 5 * MULTIPLIER;
+    public final static int ROLE = 6 * MULTIPLIER;
+    public final static int ESCALATION = 7 * MULTIPLIER;
     
     // Operation codes...these are added to the resource type code to get the actual operation
-    private final static int CREATE = 0;
-    private final static int READ = 1;
-    private final static int UPDATE = 2;
-    private final static int DELETE = 3;
-    private final static int MANAGE_ALERTS = 4;
+    public final static int CREATE = 0;
+    public final static int READ = 1;
+    public final static int UPDATE = 2;
+    public final static int DELETE = 3;
+    public final static int MANAGE_ALERTS = 4;
+    public final static int MANAGE_CONTROLS = 5;
     
-    // Array containing all the operations for each resource type...
-    // ORDER IS IMPORTANT!
-    private final static String[] operationsArray = {
-       AuthzConstants.platformOpCreatePlatform,
-       AuthzConstants.platformOpViewPlatform,
-       AuthzConstants.platformOpModifyPlatform,
-       AuthzConstants.platformOpRemovePlatform,
-       AuthzConstants.platformOpManageAlerts,
-       AuthzConstants.serverOpCreateServer,
-       AuthzConstants.serverOpViewServer,
-       AuthzConstants.serverOpModifyServer,
-       AuthzConstants.serverOpRemoveServer,
-       AuthzConstants.serverOpManageAlerts,
-       AuthzConstants.serviceOpCreateService,
-       AuthzConstants.serviceOpViewService,
-       AuthzConstants.serviceOpModifyService,
-       AuthzConstants.serviceOpRemoveService,
-       AuthzConstants.serviceOpManageAlerts,
-       AuthzConstants.groupOpCreateResourceGroup,
-       AuthzConstants.groupOpViewResourceGroup,
-       AuthzConstants.groupOpModifyResourceGroup,
-       AuthzConstants.groupOpRemoveResourceGroup,
-       AuthzConstants.groupOpManageAlerts
-    };
+    // Permission Levels...
+    public final static int NO_PERMISSIONS = 0;
+    public final static int READ_ONLY_PERMISSION = 1;
+    public final static int READ_WRITE_PERMISSIONS = 2;
+    public final static int FULL_PERMISSIONS = 3;
+    
+    private static List operationsList;
+    
+    public ResourceOperationsHelper() {
+        // ArrayList containing all the operations for each resource type...
+        // ORDER IS IMPORTANT!
+        operationsList = new ArrayList(48);
+        
+        operationsList.add(AuthzConstants.platformOpCreatePlatform);
+        operationsList.add(AuthzConstants.platformOpViewPlatform);
+        operationsList.add(AuthzConstants.platformOpModifyPlatform);
+        operationsList.add(AuthzConstants.platformOpRemovePlatform);
+        operationsList.add(AuthzConstants.platformOpManageAlerts);
+        operationsList.add(AuthzConstants.platformOpControlPlatform);
+        operationsList.add(AuthzConstants.serverOpCreateServer);
+        operationsList.add(AuthzConstants.serverOpViewServer);
+        operationsList.add(AuthzConstants.serverOpModifyServer);
+        operationsList.add(AuthzConstants.serverOpRemoveServer);
+        operationsList.add(AuthzConstants.serverOpManageAlerts);
+        operationsList.add(AuthzConstants.serverOpControlServer);
+        operationsList.add(AuthzConstants.serviceOpCreateService);
+        operationsList.add(AuthzConstants.serviceOpViewService);
+        operationsList.add(AuthzConstants.serviceOpModifyService);
+        operationsList.add(AuthzConstants.serviceOpRemoveService);
+        operationsList.add(AuthzConstants.serviceOpManageAlerts);
+        operationsList.add(AuthzConstants.serviceOpControlService);
+        operationsList.add(AuthzConstants.groupOpCreateResourceGroup);
+        operationsList.add(AuthzConstants.groupOpViewResourceGroup);
+        operationsList.add(AuthzConstants.groupOpModifyResourceGroup);
+        operationsList.add(AuthzConstants.groupOpRemoveResourceGroup);
+        operationsList.add(AuthzConstants.groupOpManageAlerts);
+        operationsList.add(null);
+        operationsList.add(AuthzConstants.appOpCreateApplication);
+        operationsList.add(AuthzConstants.appOpViewApplication);
+        operationsList.add(AuthzConstants.appOpModifyApplication);
+        operationsList.add(AuthzConstants.appOpRemoveApplication);
+        operationsList.add(null);
+        operationsList.add(AuthzConstants.appOpControlApplication);
+        operationsList.add(AuthzConstants.subjectOpCreateSubject);
+        operationsList.add(AuthzConstants.subjectOpViewSubject);
+        operationsList.add(AuthzConstants.subjectOpModifySubject);
+        operationsList.add(AuthzConstants.subjectOpRemoveSubject);
+        operationsList.add(null);
+        operationsList.add(null);
+        operationsList.add(AuthzConstants.roleOpCreateRole);
+        operationsList.add(AuthzConstants.roleOpViewRole);
+        operationsList.add(AuthzConstants.roleOpModifyRole);
+        operationsList.add(AuthzConstants.roleOpRemoveRole);
+        operationsList.add(null);
+        operationsList.add(null);
+        operationsList.add(AuthzConstants.escOpCreateEscalation);
+        operationsList.add(AuthzConstants.escOpViewEscalation);
+        operationsList.add(AuthzConstants.escOpModifyEscalation);
+        operationsList.add(AuthzConstants.escOpRemoveEscalation);
+        operationsList.add(null);
+        operationsList.add(null);
+    }
 
+    public String getOperationName(int resourceTypeCode, int operationCode) {
+        return (String) operationsList.get(resourceTypeCode + operationCode);
+    }
+    
     public String getCreateOperation(Resource resource) 
     throws IllegalArgumentException {
         return getOperation(resource, CREATE);
@@ -65,6 +118,11 @@ public class ResourceOperationsHelper {
     public String getManageAlertOperation(Resource resource) 
     throws IllegalArgumentException {
         return getOperation(resource, MANAGE_ALERTS);
+    }
+
+    public String getManageControlOperation(Resource resource) 
+    throws IllegalArgumentException {
+        return getOperation(resource, MANAGE_CONTROLS);
     }
     
     public String getCreateOperation(int resourceTypeId) 
@@ -91,7 +149,12 @@ public class ResourceOperationsHelper {
     throws IllegalArgumentException {
         return getOperation(resourceTypeId, MANAGE_ALERTS);
     }
-    
+
+    public String getManageControlOperation(int resourceTypeId) 
+    throws IllegalArgumentException {
+        return getOperation(resourceTypeId, MANAGE_CONTROLS);
+    }
+   
     public String getResourceType(Resource resource)
     throws IllegalArgumentException, UnsupportedOperationException {
         if (resource == null || resource.getResourceType() == null) {
@@ -151,6 +214,40 @@ public class ResourceOperationsHelper {
             throw new IllegalArgumentException("resourceType must be a platform, server, service or group resource type.");
         }
         
-        return operationsArray[resourceTypeCode + operationCode];
+        return getOperationName(resourceTypeCode, operationCode);
+    }
+    
+    public CodePair getResourceTypeOperationCodePair(String operationName) {
+        int index = operationsList.indexOf(operationName);
+        int resourceTypeCode = ((index < MULTIPLIER) ? 0 : index/MULTIPLIER) * MULTIPLIER;
+        int operationCode = index - resourceTypeCode;
+        
+        return new CodePair(resourceTypeCode, operationCode);
+    }
+    
+    public class CodePair {
+        int resourceTypeCode;
+        int operationCode;
+        
+        public CodePair(int resourceTypeCode, int operationCode) {
+            this.resourceTypeCode = resourceTypeCode;
+            this.operationCode = operationCode;
+        }
+        
+        public int getResourceTypeCode() {
+            return resourceTypeCode;
+        }
+        
+        public void setResourceTypeCode(int resourceTypeCode) {
+            this.resourceTypeCode = resourceTypeCode;
+        }
+        
+        public int getOperationCode() {
+            return operationCode;
+        }
+        
+        public void setOperationCode(int operationCode) {
+            this.operationCode = operationCode;
+        }
     }
 }

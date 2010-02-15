@@ -31,8 +31,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.ejb.FinderException;
@@ -357,7 +360,7 @@ public class PermissionManagerImpl
         }
         return operationPager.seek(ops, pc.getPagenum(), pc.getPagesize());
     }
-
+    
     public Collection getGroupResources(Integer subjectId,
                                         Integer groupId, Boolean fsystem) {
         return getResourceDAO().findInGroup_orderName(groupId, fsystem);
