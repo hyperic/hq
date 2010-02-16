@@ -56,8 +56,7 @@ end;
 
 function ValidateServerHQEngineConfig(hMSI)
 begin    
-	if (ValidatePortProperty(hMSI, "HQ_ENGINE_PORT") && 
-		ValidatePortProperty(hMSI, "HQ_ENGINE_JNP_PORT")) then
+	if (ValidatePortProperty(hMSI, "HQ_ENGINE_PORT")) then
 		MsiSetProperty ( hMSI , "VALIDATE_SERVER_HQ_ENGINE_CONFIG" , "1" );   
 	else
 		MsiSetProperty ( hMSI , "VALIDATE_SERVER_HQ_ENGINE_CONFIG" , "0" );   

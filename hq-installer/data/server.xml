@@ -75,22 +75,6 @@
     <property name="setup-conf.done" value="true"/>
   </target>
 
-  <!-- Check for anything bound to jboss/jndi PR4926 -->
-  <target name="detect-port-conflict-and-fail">
-    <echo>^^^DEBUG: Checking jboss jndi port...</echo>
-    <condition property="server.jboss.portConflict">
-      <socket server="127.0.0.1" port="${hq-engine.jnp.port}"/>
-    </condition>
-    <antcall target="fail-port-conflict-message"/>
-  </target>
-  <target name="fail-port-conflict-message" if="server.jboss.portConflict">
-    <fail>
-      There is already a program using one of JBoss's required ports (${hq-engine.jnp.port}).
-      This may indicate an attempt to start two similarly configured instances 
-      of HQ/JBoss.
-    </fail>
-  </target>
-
   <!-- Check for anything bound to mbean 1099 PR4926 -->
   <target name="detect-mbean-port-conflict-and-fail">
     <echo>^^^DEBUG: Checking mbean port...</echo>
@@ -109,7 +93,7 @@
   </target>
 
   <target name="sh-setup"
-          depends="setup-conf,detect-port-conflict-and-fail,detect-mbean-port-conflict-and-fail"/>
+          depends="setup-conf,detect-mbean-port-conflict-and-fail"/>
 
   <target name="check-pgsql-already-running" if="pqsql.already.running">
     <echo>^^^INFO: Built-in database is already running</echo>
@@ -144,7 +128,6 @@
     <waitfor>
       <not>
         <or>
-          <socket server="127.0.0.1" port="${hq-engine.jnp.port}"/>
           <socket server="127.0.0.1" port="${hq-engine.server.port}"/>
           <socket server="127.0.0.1" port="${server.webapp.port}"/>
         </or>
