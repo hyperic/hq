@@ -10885,6 +10885,22 @@ has already been defined.
                         precision="500" columnType="VARCHAR2" />
   </schemaSpec>
 
+  <schemaSpec version="3.194"> 
+  	<schema-directSQL>  
+        <statement desc="Adding create group permission...">
+           INSERT INTO EAM_OPERATION(ID,VERSION_COL,NAME,RESOURCE_TYPE_ID) VALUES (29,0,'createResourceGroup',3);
+        </statement>   
+        <statement desc="Adding view escalation permission...">
+           INSERT INTO EAM_OPERATION(ID,VERSION_COL,NAME,RESOURCE_TYPE_ID) VALUES (415,0,'viewEscalation',0);
+        </statement>   
+  		<statement desc="Adding create group permission to all existing roles (for backwards-compatibility)...">
+  			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID) SELECT ID,29 FROM EAM_ROLE;
+  		</statement>
+  		<statement desc="Adding view escalation permission to all existing roles (for backwards-compatibility)...">
+  			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID) SELECT ID,415 FROM EAM_ROLE;
+  		</statement>
+    </schema-directSQL>
+  </schemaSpec>
 </dbupgrade>
 </target>
 </project>
