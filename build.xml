@@ -10,8 +10,8 @@
 
 	<!-- Default build properties -->
 	<property file="build.properties" />
-	
-    <!-- Version file -->
+
+	<!-- Version file -->
 	<property name="version.properties" value="${hq.home}/version.properties" />
 	<property file="${version.properties}" />
 	<property name="release.comment" value="Development Build" />
@@ -63,7 +63,7 @@
 	<property name="pdk.plugins" location="${pdk.dir}/plugins" />
 	<property name="pdk.mibs" location="${pdk.dir}/mibs" />
 	<property name="pdk.scripts" location="${pdk.dir}/scripts" />
-	
+
 	<!-- This is used by the PluginJar task to resolve location of included XML during validation -->
 	<property name="agent.pdkDir" location="${build.dir}" />
 
@@ -85,11 +85,11 @@
 		<fileset dir="${sigar.lib}" includes="*.jar" />
 		<fileset dir="${db2monitor.dir}" includes="lib/db2monitor.jar" />
 	</path>
-	
+
 	<path id="antjars">
 		<fileset dir="${thirdparty.lib}" includes="ant*.jar" />
 	</path>
-		
+
 	<path id="alljars">
 		<path refid="pdknative" />
 		<fileset dir="${thirdparty.lib}" includes="*.jar" excludes="ant*.jar, strutstest-*.jar,cactus*.jar,mockejb.jar,mockrunner-ejb.jar,dbunit*.jar,jaas.jar" />
@@ -116,10 +116,10 @@
 	</path>
 
 	<path id="pdkjars">
-		<path location="${hq.pdk.shared}/target/classes"/>
+		<path location="${hq.pdk.shared}/target/classes" />
 		<path location="${hq.common}/target/classes" />
 		<path location="${hq.util}/target/classes" />
-		<path refid="alljars"/>
+		<path refid="alljars" />
 	</path>
 
 	<path id="custom-ant-tasks.path">
@@ -128,18 +128,18 @@
 		<path location="${hq.common}/target/classes" />
 		<path location="${hq.util}/target/classes" />
 	</path>
-	
+
 	<path id="agent.compile.classpath">
-			<path refid="alljars" />
-			<path refid="testjars" />
-			<path location="${hq.util}/target/classes" />
-			<path location="${hq.common}/target/classes" />
-			<path location="${hq.lather}/target/classes" />
-			<path location="${hq.pdk.shared}/target/classes" />
-			<path location="${hq.pdk.agent}/target/classes" />
-			<path location="${hq.agent}/target/classes" />
+		<path refid="alljars" />
+		<path refid="testjars" />
+		<path location="${hq.util}/target/classes" />
+		<path location="${hq.common}/target/classes" />
+		<path location="${hq.lather}/target/classes" />
+		<path location="${hq.pdk.shared}/target/classes" />
+		<path location="${hq.pdk.agent}/target/classes" />
+		<path location="${hq.agent}/target/classes" />
 	</path>
-	
+
 	<path id="agent.handler.compile.classpath">
 		<path refid="alljars" />
 		<path refid="testjars" />
@@ -150,7 +150,7 @@
 		<path location="${hq.pdk.agent}/target/classes" />
 		<path location="${hq.agent}/target/classes" />
 	</path>
-	
+
 	<path id="agent.pdk.compile.classpath">
 		<path refid="alljars" />
 		<path refid="testjars" />
@@ -160,7 +160,7 @@
 		<path location="${hq.pdk.shared}/target/classes" />
 		<path location="${hq.pdk.agent}/target/classes" />
 	</path>
-	
+
 	<path id="web.compile.classpath">
 		<path refid="alljars" />
 		<path refid="testjars" />
@@ -170,7 +170,7 @@
 		<path location="${hq.pdk.shared}/target/classes" />
 		<path location="${hq.web}/target/classes" />
 	</path>
-	
+
 	<path id="shared.compile.classpath">
 		<path refid="alljars" />
 		<path refid="testjars" />
@@ -194,11 +194,11 @@
 		<taskdef name="hqplugin" classname="org.hyperic.hq.product.ant.PluginJar" classpathref="pdkjars" />
 		<property name="init-taskdefs.notrequired" value="true" />
 	</target>
-	
+
 	<target name="init-install-taskdefs" depends="init-taskdefs" unless="init-install-taskdefs.notrequired">
 		<taskdef resource="org/hyperic/tools/ant/ant-tools.properties" classpathref="custom-ant-tasks.path" />
 		<property name="init-install-taskdefs.notrequired" value="true" />
-	 </target>
+	</target>
 
 
 	<!-- ==================== Compile java sources ==================== -->
@@ -219,7 +219,7 @@
 			<fileset dir="${hq.web}/src/main/java" excludes="**/*.java" />
 		</copy>
 	</target>
-	
+
 
 	<target name="compile-installer">
 		<path id="compile.classpath">
@@ -233,7 +233,7 @@
 		<compile-sources classpath.id="compile.classpath" src.dir="${hq.installer}/src/main/java" resource.dir="${hq.installer}/src/main/resources" output.dir="${hq.installer}/target/classes" />
 	</target>
 
-	<target name="compile-agent" depends="compile-agent-pdk">	
+	<target name="compile-agent" depends="compile-agent-pdk">
 		<compile-sources classpath.id="agent.compile.classpath" src.dir="${hq.agent}/src/main/java" resource.dir="${hq.agent}/src/main/resources" output.dir="${hq.agent}/target/classes" />
 		<compile-agent-handlers classpath.id="agent.handler.compile.classpath" handler.name="autoinventory" />
 		<compile-agent-handlers classpath.id="agent.handler.compile.classpath" handler.name="bizapp" />
@@ -242,9 +242,9 @@
 		<compile-agent-handlers classpath.id="agent.handler.compile.classpath" handler.name="livedata" />
 		<compile-agent-handlers classpath.id="agent.handler.compile.classpath" handler.name="measurement" />
 	</target>
-	
+
 	<target name="compile-agent-pdk" depends="compile-shared">
-			<compile-sources classpath.id="agent.pdk.compile.classpath" src.dir="${hq.pdk.agent}/src/main/java" resource.dir="${hq.pdk.agent}/src/main/resources" output.dir="${hq.pdk.agent}/target/classes" />
+		<compile-sources classpath.id="agent.pdk.compile.classpath" src.dir="${hq.pdk.agent}/src/main/java" resource.dir="${hq.pdk.agent}/src/main/resources" output.dir="${hq.pdk.agent}/target/classes" />
 	</target>
 
 	<macrodef name="compile-agent-handlers">
@@ -261,7 +261,7 @@
 				</src>
 			</hq-javac>
 			<copy toDir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/target/classes">
-				<fileset dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/src/main/resources" includes="*" erroronmissingdir="false"/>
+				<fileset dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/src/main/resources" includes="*" erroronmissingdir="false" />
 			</copy>
 		</sequential>
 	</macrodef>
@@ -413,249 +413,236 @@
 
 
 	<!-- ==================== Packaging ==================== -->
-	
-	<!-- Bring in tasks for rolling the archives -->
-  <import file="${hq.home}/build_util/archive-build.xml"/>
 
-  <target name="check-release">
-    <available property="pgsql.dir.available" file="${pgsql.dir}"/>
-    <fail unless="pgsql.dir.available">
+	<!-- Bring in tasks for rolling the archives -->
+	<import file="${hq.home}/build_util/archive-build.xml" />
+
+	<target name="check-release">
+		<available property="pgsql.dir.available" file="${pgsql.dir}" />
+		<fail unless="pgsql.dir.available">
         PostgreSQL binaries not found at ${pgsql.dir}.  Either change
         this property in your ~/.hq/build.properties to point to a working
         copy of the pgsql project or checkout a copy to ${pgsql.dir}
     </fail>
-  </target>
-
- <target name="archive-prep" depends="build-agent,build-war,pdk-javadoc,unpack-tomcat,pack-installer,pack-installer-archive"/>
-
- <target name="pack-installer-archive" description="Packs the hyperic-hq-installer directory">
-    <property name="archive-dir" 
-              location="${archive.build.dir}/${archive.basename}-installer" />
-    <mkdir dir="${archive-dir}" />
-
-  <!-- Copy agent dir -->
-    <copy toDir="${archive-dir}/agent-${version}">
-      <fileset dir="${agent.dir}">
-        <include name="**" />
-      </fileset>
-    </copy>
-
-    <!-- Copy installer dir -->
-    <copy toDir="${archive-dir}/installer-${version}">
-      <fileset dir="${build.dir}/installer">
-        <include name="**" />
-      </fileset>
-    </copy>
-
-   <!-- Copy SNMP and RT packages -->
-    <copy toDir="${archive-dir}/agent-${version}/bundles/${agent.bundle.dir}/product_connectors">
-      <fileset dir="${hq.bin}/product_connectors">
-        <include name="**" />
-      </fileset>
-    </copy>
-
-    <!-- Make server dirs -->
-    <mkdir dir="${archive-dir}/server-${version}"/>
-    <mkdir dir="${archive-dir}/server-${version}/bin"/>
-	<mkdir dir="${archive-dir}/server-${version}/conf"/>
-    <mkdir dir="${archive-dir}/server-${version}/logs"/>
-   
-
-    <!-- Copy Tomcat -->
-    <copy toDir="${archive-dir}/server-${version}/hq-engine">
-      <fileset dir="${build.dir}/apache-tomcat-${tomcat.version}">
-        <include name="**" />
-      </fileset>
-    </copy>
-
-    <!-- Copy server README -->
-    <copy toFile="${archive-dir}/server-${version}/README.txt"
-          file="${hq.installer}/SERVER-README.txt"/>
-    <replace file="${archive-dir}/server-${version}/README.txt">
-      <replacefilter token="@@@VERSION@@@" value="${version}"/>
-    </replace>
-
-    <!-- Copy agent README -->
-    <copy toFile="${archive-dir}/agent-${version}/README.txt"
-          file="${hq.installer}/AGENT-README.txt"/>
-    <replace file="${archive-dir}/agent-${version}/README.txt">
-      <replacefilter token="@@@VERSION@@@" value="${version}"/>
-    </replace>
-
-    <!-- Copy server startup scripts -->
-    <copy todir="${archive-dir}/server-${version}/bin">
-		<fileset dir="${hq.bootstrap}/bin" includes="**"/>
-	</copy>
-    <copy todir="${archive-dir}/server-${version}/bin" file="${launcher.dir}/hq-server.exe" />
-
-    <!-- Copy WAR -->
-    <property name="archive-war-dir"
-              value="${archive-dir}/server-${version}/hq-engine/webapps/ROOT"/>
-   <delete dir="${archive-war-dir}"/>
-   <mkdir dir="${archive-war-dir}"/>
-    <copy toDir="${archive-war-dir}">
-      <fileset dir="${war.dir}">
-        <include name="**" />
-      </fileset>
-    </copy>
-
-	<!--Copy production-specific tomcat and HQ war files (must be done after deploying WAR to overwrite webapp config) -->
-    <antcall target="prepare-tomcat">
-      <param name="tomcat.home" value="${archive-dir}/server-${version}/hq-engine"/>
-    </antcall>
-
-    <!-- Copy setup scripts to top-level of install bundle -->
-    <copy toFile="${archive-dir}/setup.sh" file="${hq.installer}/bin/setup.sh"/>
-    <copy toFile="${archive-dir}/setup.bat" file="${hq.installer}/bin/setup.bat"/>
-    <!-- Replace version token in  setup scripts -->
-    <replace file="${archive-dir}/setup.sh" token="@@@VERSION@@@" value="${version}"/>
-    <replace file="${archive-dir}/setup.bat" token="@@@VERSION@@@" value="${version}"/>
-    <!-- Remote setup scripts from installer's bin dir -->
-    <delete file="${archive-dir}/installer-${version}/bin/setup.sh"/>
-    <delete file="${archive-dir}/installer-${version}/bin/setup.bat"/>
-
-    <!-- Set file permissions -->
-    <antcall target="chmod-exec">
-      <param name="chmod.dir" value="${archive.build.dir}"/>
-    </antcall>
-
-    <!-- Packup the agent and server dirs -->
-    <antcall target="compress-dir">
-      <param name="archive-dir" value="${archive-dir}/agent-${version}"/>
-      <param name="archive-file" value="${archive-dir}/agent-${version}.tgz"/>
-      <param name="remove-archive-dir" value="true"/>
-    </antcall>
-    <antcall target="compress-dir">
-      <param name="archive-dir" value="${archive-dir}/server-${version}"/>
-      <param name="archive-file" value="${archive-dir}/server-${version}.tgz"/>
-      <param name="remove-archive-dir" value="true"/>
-    </antcall>
-  </target>
-
-   <target name="archive-full" depends="check-release,archive-prep">
-    <antcall target="roll-archives"/>
-  </target>
-
-   <target name="unpack-tomcat" description="Prepare Tomcat for use within HQ, mainly used by archive">
-    <delete dir="${build.dir}/apache-tomcat-${tomcat.version}"/>
-    <mkdir dir="${build.dir}/apache-tomcat-${tomcat.version}"/>
-    <mkdir dir="${build.dir}/staging"/>
-	<get src="http://www.mirrorservice.org/sites/ftp.apache.org/tomcat/tomcat-6/v${tomcat.version}/bin/apache-tomcat-${tomcat.version}.zip"
-				dest="${build.dir}/staging/tomcat.zip" verbose="true" usetimestamp="true"/>
-	<unzip src="${build.dir}/staging/tomcat.zip" dest="${build.dir}"/>
-  </target>
-
-  <target name="prepare-tomcat">
-	  <!-- Overlay any modified files -->
-	  <copy todir="${tomcat.home}" overwrite="true">
-		<fileset dir="${hq.installer}/hq-engine" includes="**"/>
-	</copy>
-	<!-- Add generated keystore -->
-	<available property="available.keystore"
-               file="${tomcat.home}/conf/hyperic.keystore"/>
-    <antcall target="prepare-ssl"/>
-  </target>
-	 
-	 <target name="unpack-ant">
-	    <delete dir="${build.dir}/ant"/>
-		<mkdir dir="${build.dir}/ant"/>
-		<mkdir dir="${build.dir}/staging"/>
-		<get src="http://archive.apache.org/dist/ant/binaries/apache-ant-1.7.1-bin.tar.bz2"
-				dest="${build.dir}/staging/ant.tar.bz2" verbose="true" usetimestamp="true"/>
-	    <untar src="${build.dir}/staging/ant.tar.bz2" 
-	           dest="${build.dir}/ant"
-	           compression="bzip2"/>
-	 </target>
-	
-	
-	   
-	<target name="build-hq-installer" description="Builds the hq-installer jar" depends="compile-installer,pack-hq-installer"/>
-	
-	<target name="pack-hq-installer" description="Packs the hq-installer jar">
-		<jar basedir="${hq.installer}/target/classes" jarfile="${build.dir}/hq-installer.jar"/>
 	</target>
-	
-	<target name="pack-installer" description="Pack the installer" 
-          depends="dbsetup-uncombine,dbsetup-combine">
 
-    <delete dir="${installer.dir}"/>
-    <mkdir dir="${installer.dir}"/>
-    <mkdir dir="${installer.dir}/bin"/>
-    <mkdir dir="${installer.dir}/lib"/>
-    <mkdir dir="${installer.dir}/data"/>
-    <mkdir dir="${installer.dir}/logs"/>
+	<target name="archive-prep" depends="build-agent,build-war,pdk-javadoc,unpack-tomcat,pack-installer,pack-installer-archive" />
 
-    <!-- Pack installer jar -->
-    <antcall target="pack-hq-installer"/>
+	<target name="pack-installer-archive" description="Packs the hyperic-hq-installer directory">
+		<property name="archive-dir" location="${archive.build.dir}/${archive.basename}-installer" />
+		<mkdir dir="${archive-dir}" />
 
-    <antcall target="pack-common" />
+		<!-- Copy agent dir -->
+		<copy toDir="${archive-dir}/agent-${version}">
+			<fileset dir="${agent.dir}">
+				<include name="**" />
+			</fileset>
+		</copy>
 
-    <copy todir="${installer.dir}/lib">
-	   	<fileset dir="${build.dir}">
-			<include name="hq-common.jar" />
-			<include name="hq-util.jar" />
-			<include name="hq-installer.jar" />
-		</fileset>
-	</copy>
+		<!-- Copy installer dir -->
+		<copy toDir="${archive-dir}/installer-${version}">
+			<fileset dir="${build.dir}/installer">
+				<include name="**" />
+			</fileset>
+		</copy>
 
-    <!-- Unpack and cleanup ant -->
-    <antcall target="unpack-ant"/>
+		<!-- Copy SNMP and RT packages -->
+		<copy toDir="${archive-dir}/agent-${version}/bundles/${agent.bundle.dir}/product_connectors">
+			<fileset dir="${hq.bin}/product_connectors">
+				<include name="**" />
+			</fileset>
+		</copy>
 
-    <!-- Copy ant binaries and database setup utilities -->
-    <copy todir="${installer.dir}/bin" flatten="true">
-      <fileset dir="${build.dir}/ant" includes="**/bin/*">
-        <exclude name="**/bin/*.pl"/>
-        <exclude name="**/bin/*.py"/>
-        <exclude name="**/bin/antRun*"/>
-      </fileset>
-    </copy>
+		<!-- Make server dirs -->
+		<mkdir dir="${archive-dir}/server-${version}" />
+		<mkdir dir="${archive-dir}/server-${version}/bin" />
+		<mkdir dir="${archive-dir}/server-${version}/conf" />
+		<mkdir dir="${archive-dir}/server-${version}/logs" />
 
-    <!-- Copy ant libs and DB driver libs -->
-    <copy todir="${installer.dir}/lib" flatten="true">
-      <fileset dir="${build.dir}/ant" includes="**/lib/*"/>
-      <fileset dir="${sigar.lib}" includes="**"/>
-      <fileset dir="${thirdparty.lib}">
-        <include name="postgresql/postgresql-8.2-*.jdbc3.jar"/>
-        <include name="mysql_jdbc/mysql*.jar"/>
-        <include name="oro-2.0.8.jar" />
-        <include name="ant-contrib.jar" />
-        <include name="commons-logging-1.0.4.jar"/>
-        <include name="commons-collections-3.2.jar"/>
-        <include name="hibernate/*.jar"/>
-        <include name="groovy-all-1.6.jar"/>
-        <include name="json.jar"/>
-      </fileset>
-    </copy>
 
-    <!-- Copy dbsetup files -->
-    <copy todir="${installer.dir}/data"
-          file="${build.dir}/sql/schema-orig.xml"/>
-    <copy todir="${installer.dir}/data"
-          file="${build.dir}/sql/data-orig.xml"/>
-   
-    <!-- Copy install binaries and data -->
-    <copy todir="${installer.dir}/bin">
-      <fileset dir="${hq.installer}/bin" includes="*setup*"/>
-      <fileset dir="${hq.installer}/bin" includes="db-*.sh"/>
-      <fileset dir="${hq.installer}/bin" includes="db-*.bat"/>
-    </copy>
-    <copy todir="${installer.dir}/data">
-      <fileset dir="${hq.installer}/data" includes="**"/>
-    </copy>
+		<!-- Copy Tomcat -->
+		<copy toDir="${archive-dir}/server-${version}/hq-engine">
+			<fileset dir="${build.dir}/apache-tomcat-${tomcat.version}">
+				<include name="**" />
+			</fileset>
+		</copy>
 
-	<antcall target="write-version-file">
-    <param name="version-file"
-             value="${installer.dir}/data/version.properties"/>
-     </antcall>
+		<!-- Copy server README -->
+		<copy toFile="${archive-dir}/server-${version}/README.txt" file="${hq.installer}/SERVER-README.txt" />
+		<replace file="${archive-dir}/server-${version}/README.txt">
+			<replacefilter token="@@@VERSION@@@" value="${version}" />
+		</replace>
 
-    <antcall target="chmod-exec">
-      <param name="chmod.dir" value="${installer.dir}"/>
-    </antcall>
-  </target>
+		<!-- Copy agent README -->
+		<copy toFile="${archive-dir}/agent-${version}/README.txt" file="${hq.installer}/AGENT-README.txt" />
+		<replace file="${archive-dir}/agent-${version}/README.txt">
+			<replacefilter token="@@@VERSION@@@" value="${version}" />
+		</replace>
 
- 
-	
-  <target name="build-war" description="Build and create the war" depends="compile,compile-rendit,compile-plugins,pack-rendit,pack-plugins,pack-war" />
+		<!-- Copy server startup scripts -->
+		<copy todir="${archive-dir}/server-${version}/bin">
+			<fileset dir="${hq.bootstrap}/bin" includes="**" />
+		</copy>
+		<copy todir="${archive-dir}/server-${version}/bin" file="${launcher.dir}/hq-server.exe" />
+
+		<!-- Copy WAR -->
+		<property name="archive-war-dir" value="${archive-dir}/server-${version}/hq-engine/webapps/ROOT" />
+		<delete dir="${archive-war-dir}" />
+		<mkdir dir="${archive-war-dir}" />
+		<copy toDir="${archive-war-dir}">
+			<fileset dir="${war.dir}">
+				<include name="**" />
+			</fileset>
+		</copy>
+
+		<!--Copy production-specific tomcat and HQ war files (must be done after deploying WAR to overwrite webapp config) -->
+		<antcall target="prepare-tomcat">
+			<param name="tomcat.home" value="${archive-dir}/server-${version}/hq-engine" />
+		</antcall>
+
+		<!-- Copy setup scripts to top-level of install bundle -->
+		<copy toFile="${archive-dir}/setup.sh" file="${hq.installer}/bin/setup.sh" />
+		<copy toFile="${archive-dir}/setup.bat" file="${hq.installer}/bin/setup.bat" />
+		<!-- Replace version token in  setup scripts -->
+		<replace file="${archive-dir}/setup.sh" token="@@@VERSION@@@" value="${version}" />
+		<replace file="${archive-dir}/setup.bat" token="@@@VERSION@@@" value="${version}" />
+		<!-- Remote setup scripts from installer's bin dir -->
+		<delete file="${archive-dir}/installer-${version}/bin/setup.sh" />
+		<delete file="${archive-dir}/installer-${version}/bin/setup.bat" />
+
+		<!-- Set file permissions -->
+		<antcall target="chmod-exec">
+			<param name="chmod.dir" value="${archive.build.dir}" />
+		</antcall>
+
+		<!-- Packup the agent and server dirs -->
+		<antcall target="compress-dir">
+			<param name="archive-dir" value="${archive-dir}/agent-${version}" />
+			<param name="archive-file" value="${archive-dir}/agent-${version}.tgz" />
+			<param name="remove-archive-dir" value="true" />
+		</antcall>
+		<antcall target="compress-dir">
+			<param name="archive-dir" value="${archive-dir}/server-${version}" />
+			<param name="archive-file" value="${archive-dir}/server-${version}.tgz" />
+			<param name="remove-archive-dir" value="true" />
+		</antcall>
+	</target>
+
+	<target name="archive-full" depends="check-release,archive-prep">
+		<antcall target="roll-archives" />
+	</target>
+
+	<target name="unpack-tomcat" description="Prepare Tomcat for use within HQ, mainly used by archive">
+		<delete dir="${build.dir}/apache-tomcat-${tomcat.version}" />
+		<mkdir dir="${build.dir}/apache-tomcat-${tomcat.version}" />
+		<mkdir dir="${build.dir}/staging" />
+		<get src="http://www.mirrorservice.org/sites/ftp.apache.org/tomcat/tomcat-6/v${tomcat.version}/bin/apache-tomcat-${tomcat.version}.zip" dest="${build.dir}/staging/tomcat.zip" verbose="true" usetimestamp="true" />
+		<unzip src="${build.dir}/staging/tomcat.zip" dest="${build.dir}" />
+	</target>
+
+	<target name="prepare-tomcat">
+		<!-- Overlay any modified files -->
+		<copy todir="${tomcat.home}" overwrite="true">
+			<fileset dir="${hq.installer}/hq-engine" includes="**" />
+		</copy>
+		<!-- Add generated keystore -->
+		<available property="available.keystore" file="${tomcat.home}/conf/hyperic.keystore" />
+		<antcall target="prepare-ssl" />
+	</target>
+
+	<target name="unpack-ant">
+		<delete dir="${build.dir}/ant" />
+		<mkdir dir="${build.dir}/ant" />
+		<mkdir dir="${build.dir}/staging" />
+		<get src="http://archive.apache.org/dist/ant/binaries/apache-ant-1.7.1-bin.tar.bz2" dest="${build.dir}/staging/ant.tar.bz2" verbose="true" usetimestamp="true" />
+		<untar src="${build.dir}/staging/ant.tar.bz2" dest="${build.dir}/ant" compression="bzip2" />
+	</target>
+
+
+
+	<target name="build-hq-installer" description="Builds the hq-installer jar" depends="compile-installer,pack-hq-installer" />
+
+	<target name="pack-hq-installer" description="Packs the hq-installer jar">
+		<jar basedir="${hq.installer}/target/classes" jarfile="${build.dir}/hq-installer.jar" />
+	</target>
+
+	<target name="pack-installer" description="Pack the installer" depends="dbsetup-uncombine,dbsetup-combine">
+
+		<delete dir="${installer.dir}" />
+		<mkdir dir="${installer.dir}" />
+		<mkdir dir="${installer.dir}/bin" />
+		<mkdir dir="${installer.dir}/lib" />
+		<mkdir dir="${installer.dir}/data" />
+		<mkdir dir="${installer.dir}/logs" />
+
+		<!-- Pack installer jar -->
+		<antcall target="pack-hq-installer" />
+
+		<antcall target="pack-common" />
+
+		<copy todir="${installer.dir}/lib">
+			<fileset dir="${build.dir}">
+				<include name="hq-common.jar" />
+				<include name="hq-util.jar" />
+				<include name="hq-installer.jar" />
+			</fileset>
+		</copy>
+
+		<!-- Unpack and cleanup ant -->
+		<antcall target="unpack-ant" />
+
+		<!-- Copy ant binaries and database setup utilities -->
+		<copy todir="${installer.dir}/bin" flatten="true">
+			<fileset dir="${build.dir}/ant" includes="**/bin/*">
+				<exclude name="**/bin/*.pl" />
+				<exclude name="**/bin/*.py" />
+				<exclude name="**/bin/antRun*" />
+			</fileset>
+		</copy>
+
+		<!-- Copy ant libs and DB driver libs -->
+		<copy todir="${installer.dir}/lib" flatten="true">
+			<fileset dir="${build.dir}/ant" includes="**/lib/*" />
+			<fileset dir="${sigar.lib}" includes="**" />
+			<fileset dir="${thirdparty.lib}">
+				<include name="postgresql/postgresql-8.2-*.jdbc3.jar" />
+				<include name="mysql_jdbc/mysql*.jar" />
+				<include name="oro-2.0.8.jar" />
+				<include name="ant-contrib.jar" />
+				<include name="commons-logging-1.0.4.jar" />
+				<include name="commons-collections-3.2.jar" />
+				<include name="hibernate/*.jar" />
+				<include name="groovy-all-1.6.jar" />
+				<include name="json.jar" />
+			</fileset>
+		</copy>
+
+		<!-- Copy dbsetup files -->
+		<copy todir="${installer.dir}/data" file="${build.dir}/sql/schema-orig.xml" />
+		<copy todir="${installer.dir}/data" file="${build.dir}/sql/data-orig.xml" />
+
+		<!-- Copy install binaries and data -->
+		<copy todir="${installer.dir}/bin">
+			<fileset dir="${hq.installer}/bin" includes="*setup*" />
+			<fileset dir="${hq.installer}/bin" includes="db-*.sh" />
+			<fileset dir="${hq.installer}/bin" includes="db-*.bat" />
+		</copy>
+		<copy todir="${installer.dir}/data">
+			<fileset dir="${hq.installer}/data" includes="**" />
+		</copy>
+
+		<antcall target="write-version-file">
+			<param name="version-file" value="${installer.dir}/data/version.properties" />
+		</antcall>
+
+		<antcall target="chmod-exec">
+			<param name="chmod.dir" value="${installer.dir}" />
+		</antcall>
+	</target>
+
+
+
+	<target name="build-war" description="Build and create the war" depends="compile,compile-rendit,compile-plugins,pack-rendit,pack-plugins,pack-war" />
 
 	<target name="pack-war" description="Create the war directory structure ( use if you modify .jsp or other web files, but no sources )">
 		<mkdir dir="${war.dir}" />
@@ -674,7 +661,7 @@
 				<include name="**" />
 			</fileset>
 		</copy>
-		
+
 		<!-- Write version file to WEB-INF/classes -->
 		<antcall target="write-version-file">
 			<param name="version-file" value="${war.dir}/WEB-INF/classes/version.properties" />
@@ -693,7 +680,7 @@
 				<include name="snmp4j.jar" />
 				<include name="dnsjava-2.0.3.jar" />
 				<include name="ehcache-1.5.0.jar" />
-				<include name="jdom-1.1.jar"/>
+				<include name="jdom-1.1.jar" />
 				<include name="jsr107cache-1.0.jar" />
 				<!-- EHCache 1.5 dep -->
 				<include name="json.jar" />
@@ -725,7 +712,7 @@
 				<include name="com.springsource.javax.transaction*.jar" />
 				<include name="com.springsource.com.sun.xml.bind-*.jar" />
 				<include name="com.springsource.javax.xml.*.jar" />
-				<include name="com.springsource.org.apache.xbean.spring*.jar"/>
+				<include name="com.springsource.org.apache.xbean.spring*.jar" />
 
 				<include name="*aopalliance*.jar" />
 				<include name="*dbcp*.jar" />
@@ -736,14 +723,14 @@
 			<fileset dir="${sigar.lib}">
 				<include name="sigar.jar" />
 			</fileset>
-		
+
 
 			<fileset dir="${thirdparty.lib}/mysql_jdbc">
 				<include name="mysql-connector-java-5.0.5-bin.jar" />
 			</fileset>
-			
-			<fileset dir="${thirdparty.lib}/postgresql" includes="postgresql-8.2-*.jdbc3.jar"/>
-			
+
+			<fileset dir="${thirdparty.lib}/postgresql" includes="postgresql-8.2-*.jdbc3.jar" />
+
 			<fileset dir="${thirdparty.lib}/oracle_jdbc" includes="*.jar" />
 
 			<fileset dir="${hibernate.lib}">
@@ -778,13 +765,13 @@
 				<exclude name="sigar.jar" />
 			</fileset>
 		</copy>
-		
-		<mkdir dir="${war.dir}/WEB-INF/gconsoleTemplates"/>
-	  
-	    <copy todir="${war.dir}/WEB-INF/gconsoleTemplates" failonerror="false">
-	       <fileset dir="${user.home}/.hq/gconsoleTemplates"/>
-	    </copy>
-	 
+
+		<mkdir dir="${war.dir}/WEB-INF/gconsoleTemplates" />
+
+		<copy todir="${war.dir}/WEB-INF/gconsoleTemplates" failonerror="false">
+			<fileset dir="${user.home}/.hq/gconsoleTemplates" />
+		</copy>
+
 		<antcall target="pack-common" />
 
 		<copy todir="${war.dir}/WEB-INF/lib/">
@@ -796,15 +783,15 @@
 				<include name="hqu-groovy.jar" />
 			</fileset>
 		</copy>
-		
-		<antcall target="copy-plugins-to-server"/>
+
+		<antcall target="copy-plugins-to-server" />
 
 		<!-- Pack UI plugins -->
 		<antcall target="hqu-deploy">
-			<param name="wardir" value="${war.dir}"/>
+			<param name="wardir" value="${war.dir}" />
 		</antcall>
-		
- 	</target>
+
+	</target>
 
 	<!-- ==================== PDK packaging ==================== -->
 	<target name="pdk-javadoc">
@@ -837,20 +824,20 @@
 </target>
 
 <target name="pack-common" description="Pack the common jars">
-	<jar basedir="${hq.util}/target/classes" jarfile="${build.dir}/hq-util.jar">
-	</jar>
-	
-	<jar basedir="${hq.common}/target/classes" jarfile="${build.dir}/hq-common.jar">
-	</jar>
-	
-	<jar basedir="${hq.lather}/target/classes" jarfile="${build.dir}/hq-lather.jar">
-	</jar>
-	
-	<jar basedir="${hq.pdk.shared}/target/classes" jarfile="${build.dir}/hq-pdk-shared.jar">
-		<manifest>
-			<attribute name="Main-Class" value="org.hyperic.hq.product.util.PluginMain" />
-		</manifest>
-	</jar>
+<jar basedir="${hq.util}/target/classes" jarfile="${build.dir}/hq-util.jar">
+</jar>
+
+<jar basedir="${hq.common}/target/classes" jarfile="${build.dir}/hq-common.jar">
+</jar>
+
+<jar basedir="${hq.lather}/target/classes" jarfile="${build.dir}/hq-lather.jar">
+</jar>
+
+<jar basedir="${hq.pdk.shared}/target/classes" jarfile="${build.dir}/hq-pdk-shared.jar">
+	<manifest>
+		<attribute name="Main-Class" value="org.hyperic.hq.product.util.PluginMain" />
+	</manifest>
+</jar>
 </target>
 
 <target name="pack-pdk-lib" description="Pack the PDK lib jars">
@@ -1092,44 +1079,42 @@
 </copy>
 </target>
 
- <target name="copy-plugins-to-server" depends="init-taskdefs">
-	<mkdir dir="${war.dir}/WEB-INF/hq-plugins"/>
-	<mkdir dir="${war.dir}/WEB-INF/hq-plugins/scripting"/>
-	
-	<copy todir="${war.dir}/WEB-INF/hq-plugins">
-      <fileset dir="${plugin.dir}"
-               excludes="${plugins.exclude}">
-        <exclude name="*-scripting-plugin.jar"/>
-        <include name="*-plugin.jar"/>
-      </fileset>
-    </copy>
+<target name="copy-plugins-to-server" depends="init-taskdefs">
+<mkdir dir="${war.dir}/WEB-INF/hq-plugins" />
+<mkdir dir="${war.dir}/WEB-INF/hq-plugins/scripting" />
 
-    <copy todir="${war.dir}/WEB-INF/hq-plugins">
+<copy todir="${war.dir}/WEB-INF/hq-plugins">
+	<fileset dir="${plugin.dir}" excludes="${plugins.exclude}">
+		<exclude name="*-scripting-plugin.jar" />
+		<include name="*-plugin.jar" />
+	</fileset>
+</copy>
+
+<copy todir="${war.dir}/WEB-INF/hq-plugins">
 	<!-- copy shared xml pieces-->
-	   <fileset dir="${hq.plugins}/process/src/main/resources">
-		   <include name="*.xml"/>
-	    </fileset>
-	   <fileset dir="${hq.plugins}/jvm/src/main/resources" includes="*.xml"/>
-    </copy>
+	<fileset dir="${hq.plugins}/process/src/main/resources">
+		<include name="*.xml" />
+	</fileset>
+	<fileset dir="${hq.plugins}/jvm/src/main/resources" includes="*.xml" />
+</copy>
 
-    <copy todir="${war.dir}/WEB-INF/hq-plugins/scripting">
-      <fileset dir="${plugin.dir}"
-               excludes="${plugins.exclude}">
-        <include name="*-scripting-plugin.jar"/>
-      </fileset>
-      <fileset dir="${thirdparty.lib}">
-        <include name="groovy-all-1.6.jar" />
-      </fileset>
-    </copy>
+<copy todir="${war.dir}/WEB-INF/hq-plugins/scripting">
+	<fileset dir="${plugin.dir}" excludes="${plugins.exclude}">
+		<include name="*-scripting-plugin.jar" />
+	</fileset>
+	<fileset dir="${thirdparty.lib}">
+		<include name="groovy-all-1.6.jar" />
+	</fileset>
+</copy>
 
-    <plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/activemq/src/main/resources/activemq-plugin.xml"/>
-    <plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/geronimo/src/main/resources/geronimo-plugin.xml"/>
-    <plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/glassfish/src/main/resources/glassfish-plugin.xml"/>
-    <plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/hq-internal/src/main/resources/hq-internal-plugin.xml"/>
-    <plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/jetty/src/main/resources/jetty-plugin.xml"/>
-    <plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/jmx/src/main/resources/jmx-plugin.xml"/>
-    <plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/resin/src/main/resources/resin-plugin.xml"/>
-	<plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/sendmail/src/main/resources/sendmail-plugin.xml"/>
+<plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/activemq/src/main/resources/activemq-plugin.xml" />
+<plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/geronimo/src/main/resources/geronimo-plugin.xml" />
+<plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/glassfish/src/main/resources/glassfish-plugin.xml" />
+<plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/hq-internal/src/main/resources/hq-internal-plugin.xml" />
+<plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/jetty/src/main/resources/jetty-plugin.xml" />
+<plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/jmx/src/main/resources/jmx-plugin.xml" />
+<plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/resin/src/main/resources/resin-plugin.xml" />
+<plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/sendmail/src/main/resources/sendmail-plugin.xml" />
 
 </target>
 
@@ -1261,37 +1246,37 @@
 <!-- ==================== Generic targets ==================== -->
 
 <target name="clean" description="Clean the build directories">
-	<delete dir="${build.dir}" />
-	<delete dir="${hq.util}/target" />
-	<delete dir="${hq.common}/target" />
-	<delete dir="${hq.lather}/target" />
-	<delete dir="${hq.pdk.shared}/target" />
-	<delete dir="${hq.pdk.agent}/target" />
-	<delete dir="${hq.agent}/target" />
-	<delete dir="${hq.web}/target" />
-	<delete dir="${hq.installer}/target" />
-	<delete dir="${rendit_sys.dir}/target/classes"/>
-	<delete includeemptydirs="true">
-		<fileset dir="${hq.agent.handlers}" defaultexcludes="false" includes="*/target/classes/**" />
-	</delete>
-	<delete includeemptydirs="true">
-		<fileset dir="${hq.plugins}" defaultexcludes="false" includes="*/target/classes/**" />
-	</delete>
+<delete dir="${build.dir}" />
+<delete dir="${hq.util}/target" />
+<delete dir="${hq.common}/target" />
+<delete dir="${hq.lather}/target" />
+<delete dir="${hq.pdk.shared}/target" />
+<delete dir="${hq.pdk.agent}/target" />
+<delete dir="${hq.agent}/target" />
+<delete dir="${hq.web}/target" />
+<delete dir="${hq.installer}/target" />
+<delete dir="${rendit_sys.dir}/target/classes" />
+<delete includeemptydirs="true">
+	<fileset dir="${hq.agent.handlers}" defaultexcludes="false" includes="*/target/classes/**" />
+</delete>
+<delete includeemptydirs="true">
+	<fileset dir="${hq.plugins}" defaultexcludes="false" includes="*/target/classes/**" />
+</delete>
 </target>
 
 <target name="deploy" description="Copy the war to tomcat deploy dir ( slow )">
-	<!-- Deploy app as ROOT -->
-	<delete dir="${tomcat.deploy.dir}/ROOT" />
-	<mkdir dir="${tomcat.deploy.dir}/ROOT" />
-	<copy todir="${tomcat.deploy.dir}/ROOT">
-		<fileset dir="${war.dir}" includes="**" />
-	</copy>
+<!-- Deploy app as ROOT -->
+<delete dir="${tomcat.deploy.dir}/ROOT" />
+<mkdir dir="${tomcat.deploy.dir}/ROOT" />
+<copy todir="${tomcat.deploy.dir}/ROOT">
+	<fileset dir="${war.dir}" includes="**" />
+</copy>
 </target>
 
 <target name="redeploy" depends="undeploy,deploy" />
 
 <target name="undeploy" description="Remove the war from tomcat deploy dir">
-	<delete dir="${tomcat.deploy.dir}/ROOT" />
+<delete dir="${tomcat.deploy.dir}/ROOT" />
 </target>
 
 <target name="hq-javadoc" depends="hibernate-prep">
@@ -1323,129 +1308,129 @@
 </target>
 
 <!-- Quality Targets -->
-<target name="test" depends="compile-tests,run-tests"/>
+<target name="test" depends="compile-tests,run-tests" />
 
 <target name="compile-tests" depends="init-taskdefs,init-tests">
-   <test-compile module.dir="${hq.agent}" compile.classpath.id="agent.compile.classpath"/>
-   <test-compile module.dir="${hq.agent.handlers}/hq-agent-handler-autoinventory" compile.classpath.id="agent.handler.compile.classpath"/>
-   <test-compile module.dir="${hq.agent.handlers}/hq-agent-handler-bizapp" compile.classpath.id="agent.handler.compile.classpath"/>
-   <test-compile module.dir="${hq.agent.handlers}/hq-agent-handler-commands" compile.classpath.id="agent.handler.compile.classpath"/>
-   <test-compile module.dir="${hq.agent.handlers}/hq-agent-handler-control" compile.classpath.id="agent.handler.compile.classpath"/>
-   <test-compile module.dir="${hq.agent.handlers}/hq-agent-handler-livedata" compile.classpath.id="agent.handler.compile.classpath"/>
-   <test-compile module.dir="${hq.agent.handlers}/hq-agent-handler-measurement" compile.classpath.id="agent.handler.compile.classpath"/>
-   <test-compile module.dir="${hq.pdk.agent}" compile.classpath.id="agent.pdk.compile.classpath"/>
-   <test-compile module.dir="${hq.common}" compile.classpath.id="shared.compile.classpath"/>
-   <test-compile module.dir="${hq.util}" compile.classpath.id="shared.compile.classpath"/>
- 	<test-compile module.dir="${hq.lather}" compile.classpath.id="shared.compile.classpath"/>
-	<test-compile module.dir="${hq.pdk.shared}" compile.classpath.id="shared.compile.classpath"/>
-	<test-compile module.dir="${hq.web}" compile.classpath.id="web.compile.classpath"/>
+<test-compile module.dir="${hq.agent}" compile.classpath.id="agent.compile.classpath" />
+<test-compile module.dir="${hq.agent.handlers}/hq-agent-handler-autoinventory" compile.classpath.id="agent.handler.compile.classpath" />
+<test-compile module.dir="${hq.agent.handlers}/hq-agent-handler-bizapp" compile.classpath.id="agent.handler.compile.classpath" />
+<test-compile module.dir="${hq.agent.handlers}/hq-agent-handler-commands" compile.classpath.id="agent.handler.compile.classpath" />
+<test-compile module.dir="${hq.agent.handlers}/hq-agent-handler-control" compile.classpath.id="agent.handler.compile.classpath" />
+<test-compile module.dir="${hq.agent.handlers}/hq-agent-handler-livedata" compile.classpath.id="agent.handler.compile.classpath" />
+<test-compile module.dir="${hq.agent.handlers}/hq-agent-handler-measurement" compile.classpath.id="agent.handler.compile.classpath" />
+<test-compile module.dir="${hq.pdk.agent}" compile.classpath.id="agent.pdk.compile.classpath" />
+<test-compile module.dir="${hq.common}" compile.classpath.id="shared.compile.classpath" />
+<test-compile module.dir="${hq.util}" compile.classpath.id="shared.compile.classpath" />
+<test-compile module.dir="${hq.lather}" compile.classpath.id="shared.compile.classpath" />
+<test-compile module.dir="${hq.pdk.shared}" compile.classpath.id="shared.compile.classpath" />
+<test-compile module.dir="${hq.web}" compile.classpath.id="web.compile.classpath" />
 </target>
 
 <target name="run-tests" depends="init-taskdefs,init-tests">
-   <test-run module.dir="${hq.agent}" classpath.id="agent.compile.classpath"/>
-   <test-run module.dir="${hq.agent.handlers}/hq-agent-handler-autoinventory" classpath.id="agent.handler.compile.classpath"/>
-   <test-run module.dir="${hq.agent.handlers}/hq-agent-handler-bizapp" classpath.id="agent.handler.compile.classpath"/>
-   <test-run module.dir="${hq.agent.handlers}/hq-agent-handler-commands" classpath.id="agent.handler.compile.classpath"/>
-   <test-run module.dir="${hq.agent.handlers}/hq-agent-handler-control" classpath.id="agent.handler.compile.classpath"/>
-   <test-run module.dir="${hq.agent.handlers}/hq-agent-handler-livedata" classpath.id="agent.handler.compile.classpath"/>
-   <test-run module.dir="${hq.agent.handlers}/hq-agent-handler-measurement" classpath.id="agent.handler.compile.classpath"/>
-   <test-run module.dir="${hq.pdk.agent}" classpath.id="agent.pdk.compile.classpath"/>
-   <test-run module.dir="${hq.common}" classpath.id="shared.compile.classpath"/>
-   <test-run module.dir="${hq.util}" classpath.id="shared.compile.classpath"/>
-	<test-run module.dir="${hq.lather}" classpath.id="shared.compile.classpath"/>
-	<test-run module.dir="${hq.pdk.shared}" classpath.id="shared.compile.classpath"/>
-	<test-run module.dir="${hq.web}" classpath.id="web.compile.classpath"/>
+<test-run module.dir="${hq.agent}" classpath.id="agent.compile.classpath" />
+<test-run module.dir="${hq.agent.handlers}/hq-agent-handler-autoinventory" classpath.id="agent.handler.compile.classpath" />
+<test-run module.dir="${hq.agent.handlers}/hq-agent-handler-bizapp" classpath.id="agent.handler.compile.classpath" />
+<test-run module.dir="${hq.agent.handlers}/hq-agent-handler-commands" classpath.id="agent.handler.compile.classpath" />
+<test-run module.dir="${hq.agent.handlers}/hq-agent-handler-control" classpath.id="agent.handler.compile.classpath" />
+<test-run module.dir="${hq.agent.handlers}/hq-agent-handler-livedata" classpath.id="agent.handler.compile.classpath" />
+<test-run module.dir="${hq.agent.handlers}/hq-agent-handler-measurement" classpath.id="agent.handler.compile.classpath" />
+<test-run module.dir="${hq.pdk.agent}" classpath.id="agent.pdk.compile.classpath" />
+<test-run module.dir="${hq.common}" classpath.id="shared.compile.classpath" />
+<test-run module.dir="${hq.util}" classpath.id="shared.compile.classpath" />
+<test-run module.dir="${hq.lather}" classpath.id="shared.compile.classpath" />
+<test-run module.dir="${hq.pdk.shared}" classpath.id="shared.compile.classpath" />
+<test-run module.dir="${hq.web}" classpath.id="web.compile.classpath" />
 </target>
-	
+
 
 <target name="instrument-tests" depends="clover.init">
-   	<instrument-module input.dir="${hq.util}/src/test/java" staging.dir="${hq.util}/target/clover/staging/src/test/java" resource.dir="${hq.util}/src/test/resources" output.dir="${hq.util}/target/test-classes" classpath.id="shared.compile.classpath"/>
-	<delete dir="${hq.util}/target/clover" quiet="true"/>
-	<instrument-module input.dir="${hq.common}/src/test/java" staging.dir="${hq.common}/target/clover/staging/src/test/java" resource.dir="${hq.common}/src/test/resources" output.dir="${hq.common}/target/test-classes" classpath.id="shared.compile.classpath"/>
-	<delete dir="${hq.common}/target/clover" quiet="true"/>
-	<instrument-module input.dir="${hq.lather}/src/test/java" staging.dir="${hq.lather}/target/clover/staging/src/test/java" resource.dir="${hq.lather}/src/test/resources" output.dir="${hq.lather}/target/test-classes" classpath.id="shared.compile.classpath"/>
-	<delete dir="${hq.lather}/target/clover" quiet="true"/>
-	<instrument-module input.dir="${hq.pdk.shared}/src/test/java" staging.dir="${hq.pdk.shared}/target/clover/staging/src/test/java" resource.dir="${hq.pdk.shared}/src/test/resources" output.dir="${hq.pdk.shared}/target/test-classes" classpath.id="shared.compile.classpath"/>
-	<delete dir="${hq.pdk.shared}/target/clover" quiet="true"/>
-	<instrument-module input.dir="${hq.web}/src/test/java" staging.dir="${hq.web}/target/clover/staging/src/test/java" resource.dir="${hq.web}/src/test/resources" output.dir="${hq.web}/target/test-classes" classpath.id="web.compile.classpath"/>
-	<delete dir="${hq.web}/target/clover" quiet="true"/>
-	<instrument-module classpath.id="agent.pdk.compile.classpath" input.dir="${hq.pdk.agent}/src/test/java" resource.dir="${hq.pdk.agent}/src/test/resources" output.dir="${hq.pdk.agent}/target/test-classes" staging.dir="${hq.pdk.agent}/target/clover/staging/src/test/java"/>
-	<delete dir="${hq.pdk.agent}/target/clover" quiet="true"/>
-	<instrument-module classpath.id="agent.compile.classpath" input.dir="${hq.agent}/src/test/java" resource.dir="${hq.agent}/src/test/resources" output.dir="${hq.agent}/target/test-classes" staging.dir="${hq.agent}/target/clover/staging/src/test/java"/>
-	<delete dir="${hq.agent}/target/clover" quiet="true"/>
-	<instrument-agent-handler-tests handler.name="autoinventory"/>
-	<instrument-agent-handler-tests handler.name="bizapp"/>
-	<instrument-agent-handler-tests handler.name="commands"/>
-	<instrument-agent-handler-tests handler.name="control"/>
-	<instrument-agent-handler-tests handler.name="livedata"/>
-	<instrument-agent-handler-tests handler.name="measurement"/>
- </target>
+<instrument-module input.dir="${hq.util}/src/test/java" staging.dir="${hq.util}/target/clover/staging/src/test/java" resource.dir="${hq.util}/src/test/resources" output.dir="${hq.util}/target/test-classes" classpath.id="shared.compile.classpath" />
+<delete dir="${hq.util}/target/clover" quiet="true" />
+<instrument-module input.dir="${hq.common}/src/test/java" staging.dir="${hq.common}/target/clover/staging/src/test/java" resource.dir="${hq.common}/src/test/resources" output.dir="${hq.common}/target/test-classes" classpath.id="shared.compile.classpath" />
+<delete dir="${hq.common}/target/clover" quiet="true" />
+<instrument-module input.dir="${hq.lather}/src/test/java" staging.dir="${hq.lather}/target/clover/staging/src/test/java" resource.dir="${hq.lather}/src/test/resources" output.dir="${hq.lather}/target/test-classes" classpath.id="shared.compile.classpath" />
+<delete dir="${hq.lather}/target/clover" quiet="true" />
+<instrument-module input.dir="${hq.pdk.shared}/src/test/java" staging.dir="${hq.pdk.shared}/target/clover/staging/src/test/java" resource.dir="${hq.pdk.shared}/src/test/resources" output.dir="${hq.pdk.shared}/target/test-classes" classpath.id="shared.compile.classpath" />
+<delete dir="${hq.pdk.shared}/target/clover" quiet="true" />
+<instrument-module input.dir="${hq.web}/src/test/java" staging.dir="${hq.web}/target/clover/staging/src/test/java" resource.dir="${hq.web}/src/test/resources" output.dir="${hq.web}/target/test-classes" classpath.id="web.compile.classpath" />
+<delete dir="${hq.web}/target/clover" quiet="true" />
+<instrument-module classpath.id="agent.pdk.compile.classpath" input.dir="${hq.pdk.agent}/src/test/java" resource.dir="${hq.pdk.agent}/src/test/resources" output.dir="${hq.pdk.agent}/target/test-classes" staging.dir="${hq.pdk.agent}/target/clover/staging/src/test/java" />
+<delete dir="${hq.pdk.agent}/target/clover" quiet="true" />
+<instrument-module classpath.id="agent.compile.classpath" input.dir="${hq.agent}/src/test/java" resource.dir="${hq.agent}/src/test/resources" output.dir="${hq.agent}/target/test-classes" staging.dir="${hq.agent}/target/clover/staging/src/test/java" />
+<delete dir="${hq.agent}/target/clover" quiet="true" />
+<instrument-agent-handler-tests handler.name="autoinventory" />
+<instrument-agent-handler-tests handler.name="bizapp" />
+<instrument-agent-handler-tests handler.name="commands" />
+<instrument-agent-handler-tests handler.name="control" />
+<instrument-agent-handler-tests handler.name="livedata" />
+<instrument-agent-handler-tests handler.name="measurement" />
+</target>
 
 
 <target name="build-instrumented-war" depends="instrument-war,compile-rendit,compile-plugins,pack-rendit,pack-plugins,pack-war">
-	<copy todir="${war.dir}/WEB-INF/lib/">
-		<fileset dir="${thirdparty.lib}">
-			<include name="com.springsource.com.cenqua.clover-2.4.2.jar" />
-		</fileset>
-	</copy>
+<copy todir="${war.dir}/WEB-INF/lib/">
+<fileset dir="${thirdparty.lib}">
+<include name="com.springsource.com.cenqua.clover-2.4.2.jar" />
+</fileset>
+</copy>
 </target>
 
 <target name="instrument-common" depends="clover.init">
-	<instrument-module input.dir="${hq.util}/src/main/java" staging.dir="${hq.util}/target/clover/staging/src/main/java" resource.dir="${hq.util}/src/main/resources" output.dir="${hq.util}/target/classes" classpath.id="shared.compile.classpath"/>
-	<delete dir="${hq.util}/target/clover" quiet="true"/>
-	<instrument-module input.dir="${hq.common}/src/main/java" staging.dir="${hq.common}/target/clover/staging/src/main/java" resource.dir="${hq.common}/src/main/resources" output.dir="${hq.common}/target/classes" classpath.id="shared.compile.classpath"/>
-	<delete dir="${hq.common}/target/clover" quiet="true"/>
-	<instrument-module input.dir="${hq.lather}/src/main/java" staging.dir="${hq.lather}/target/clover/staging/src/main/java" resource.dir="${hq.lather}/src/main/resources" output.dir="${hq.lather}/target/classes" classpath.id="shared.compile.classpath"/>
-	<delete dir="${hq.lather}/target/clover" quiet="true"/>
-	<instrument-module input.dir="${hq.pdk.shared}/src/main/java" staging.dir="${hq.pdk.shared}/target/clover/staging/src/main/java" resource.dir="${hq.pdk.shared}/src/main/resources" output.dir="${hq.pdk.shared}/target/classes" classpath.id="shared.compile.classpath"/>
-	<delete dir="${hq.pdk.shared}/target/clover" quiet="true"/>
+<instrument-module input.dir="${hq.util}/src/main/java" staging.dir="${hq.util}/target/clover/staging/src/main/java" resource.dir="${hq.util}/src/main/resources" output.dir="${hq.util}/target/classes" classpath.id="shared.compile.classpath" />
+<delete dir="${hq.util}/target/clover" quiet="true" />
+<instrument-module input.dir="${hq.common}/src/main/java" staging.dir="${hq.common}/target/clover/staging/src/main/java" resource.dir="${hq.common}/src/main/resources" output.dir="${hq.common}/target/classes" classpath.id="shared.compile.classpath" />
+<delete dir="${hq.common}/target/clover" quiet="true" />
+<instrument-module input.dir="${hq.lather}/src/main/java" staging.dir="${hq.lather}/target/clover/staging/src/main/java" resource.dir="${hq.lather}/src/main/resources" output.dir="${hq.lather}/target/classes" classpath.id="shared.compile.classpath" />
+<delete dir="${hq.lather}/target/clover" quiet="true" />
+<instrument-module input.dir="${hq.pdk.shared}/src/main/java" staging.dir="${hq.pdk.shared}/target/clover/staging/src/main/java" resource.dir="${hq.pdk.shared}/src/main/resources" output.dir="${hq.pdk.shared}/target/classes" classpath.id="shared.compile.classpath" />
+<delete dir="${hq.pdk.shared}/target/clover" quiet="true" />
 </target>
 
 <target name="instrument-war" depends="instrument-common">
-	<instrument-module input.dir="${hq.web}/src/main/java" staging.dir="${hq.web}/target/clover/staging/src/main/java" resource.dir="${hq.web}/src/main/resources" output.dir="${hq.web}/target/classes" classpath.id="web.compile.classpath"/>
-	<delete dir="${hq.web}/target/clover" quiet="true"/>
-	<antcall target="compile-installer"/>
+<instrument-module input.dir="${hq.web}/src/main/java" staging.dir="${hq.web}/target/clover/staging/src/main/java" resource.dir="${hq.web}/src/main/resources" output.dir="${hq.web}/target/classes" classpath.id="web.compile.classpath" />
+<delete dir="${hq.web}/target/clover" quiet="true" />
+<antcall target="compile-installer" />
 </target>
 
 <target name="build-instrumented-agent" depends="instrument-agent,compile-plugins,pack-pdk,pack-agent">
-	<copy todir="${agent.dir}/bundles/${agent.bundle.dir}/lib">
-			<fileset dir="${thirdparty.lib}">
-				<include name="com.springsource.com.cenqua.clover-2.4.2.jar" />
-			</fileset>
-	</copy>
+<copy todir="${agent.dir}/bundles/${agent.bundle.dir}/lib">
+<fileset dir="${thirdparty.lib}">
+<include name="com.springsource.com.cenqua.clover-2.4.2.jar" />
+</fileset>
+</copy>
 </target>
 
 <target name="instrument-agent" depends="instrument-common">
- 	<instrument-module classpath.id="agent.pdk.compile.classpath" input.dir="${hq.pdk.agent}/src/main/java" resource.dir="${hq.pdk.agent}/src/main/resources" output.dir="${hq.pdk.agent}/target/classes" staging.dir="${hq.pdk.agent}/target/clover/staging/src/main/java"/>
-	<delete dir="${hq.pdk.agent}/target/clover" quiet="true"/>
-	<instrument-module classpath.id="agent.compile.classpath" input.dir="${hq.agent}/src/main/java" resource.dir="${hq.agent}/src/main/resources" output.dir="${hq.agent}/target/classes" staging.dir="${hq.agent}/target/clover/staging/src/main/java"/>
-	<delete dir="${hq.agent}/target/clover" quiet="true"/>
-	<instrument-agent-handler handler.name="autoinventory"/>
-	<instrument-agent-handler handler.name="bizapp"/>
-	<instrument-agent-handler handler.name="commands"/>
-	<instrument-agent-handler handler.name="control"/>
-	<instrument-agent-handler handler.name="livedata"/>
-	<instrument-agent-handler handler.name="measurement"/>
+<instrument-module classpath.id="agent.pdk.compile.classpath" input.dir="${hq.pdk.agent}/src/main/java" resource.dir="${hq.pdk.agent}/src/main/resources" output.dir="${hq.pdk.agent}/target/classes" staging.dir="${hq.pdk.agent}/target/clover/staging/src/main/java" />
+<delete dir="${hq.pdk.agent}/target/clover" quiet="true" />
+<instrument-module classpath.id="agent.compile.classpath" input.dir="${hq.agent}/src/main/java" resource.dir="${hq.agent}/src/main/resources" output.dir="${hq.agent}/target/classes" staging.dir="${hq.agent}/target/clover/staging/src/main/java" />
+<delete dir="${hq.agent}/target/clover" quiet="true" />
+<instrument-agent-handler handler.name="autoinventory" />
+<instrument-agent-handler handler.name="bizapp" />
+<instrument-agent-handler handler.name="commands" />
+<instrument-agent-handler handler.name="control" />
+<instrument-agent-handler handler.name="livedata" />
+<instrument-agent-handler handler.name="measurement" />
 </target>
 
 <macrodef name="instrument-agent-handler">
-	<attribute name="handler.name"/>
-	<sequential>
-		<instrument-module classpath.id="agent.handler.compile.classpath" input.dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/src/main/java" resource.dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/src/main/resources" output.dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/target/classes" staging.dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/target/clover/staging/src/main/java"/>
-		<delete dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/target/clover" quiet="true"/>
-	</sequential>
+<attribute name="handler.name" />
+<sequential>
+<instrument-module classpath.id="agent.handler.compile.classpath" input.dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/src/main/java" resource.dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/src/main/resources" output.dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/target/classes" staging.dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/target/clover/staging/src/main/java" />
+<delete dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/target/clover" quiet="true" />
+</sequential>
 </macrodef>
 
 <macrodef name="instrument-agent-handler-tests">
-	<attribute name="handler.name"/>
-	<sequential>
-		<path id="test.run.classpath">
-			<path refid="agent.handler.compile.classpath" />
-			<path location="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/target/classes" />
-		</path>
-		<instrument-module classpath.id="test.run.classpath" input.dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/src/test/java" resource.dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/src/test/resources" output.dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/target/test-classes" staging.dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/target/clover/staging/src/test/java"/>
-		<delete dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/target/clover" quiet="true"/>
-	</sequential>
+<attribute name="handler.name" />
+<sequential>
+<path id="test.run.classpath">
+<path refid="agent.handler.compile.classpath" />
+<path location="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/target/classes" />
+</path>
+<instrument-module classpath.id="test.run.classpath" input.dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/src/test/java" resource.dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/src/test/resources" output.dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/target/test-classes" staging.dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/target/clover/staging/src/test/java" />
+<delete dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/target/clover" quiet="true" />
+</sequential>
 </macrodef>
 
 </project>
