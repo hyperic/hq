@@ -61,7 +61,9 @@ import org.springframework.transaction.annotation.Transactional;
 @TestExecutionListeners( { DependencyInjectionTestExecutionListener.class,
                           TransactionalTestExecutionListener.class })
 @Transactional
-@ContextConfiguration(loader = TestContextLoader.class, locations = { "classpath:META-INF/spring/*-context.xml", "AvailabilityManagerTest-context.xml" })
+@ContextConfiguration(loader    = TestContextLoader.class,
+                      locations = { "classpath:META-INF/spring/*-context.xml",
+                                    "AvailabilityManagerTest-context.xml" })
 public class AvailabilityManagerTest {
 
     private final Log log = LogFactory.getLog(AvailabilityManagerTest.class);
@@ -561,8 +563,7 @@ public class AvailabilityManagerTest {
     }
 
     private static final long now() {
-        // return System.currentTimeMillis();
-        return 1265438400000l;
+        return System.currentTimeMillis();
     }
 
 }
