@@ -14,5 +14,6 @@
 	<classpathentry exported="true" kind="con" path="GROOVY_SUPPORT"/>
 	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/hq-util"/>
 	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/hq-pdk-shared"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/hq-lather"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

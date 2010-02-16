@@ -23,6 +23,7 @@
 	<property name="hq.common" location="${hq.home}/hq-common" />
 	<property name="hq.util" location="${hq.home}/hq-util" />
 	<property name="hq.pdk.shared" location="${hq.home}/hq-pdk-shared" />
+	<property name="hq.lather" location="${hq.home}/hq-lather" />
 	<property name="hq.pdk.agent" location="${hq.home}/hq-agent/hq-agent-pdk" />
 	<property name="hq.agent" location="${hq.home}/hq-agent/hq-agent-core" />
 	<property name="hq.agent.handlers" location="${hq.home}/hq-agent/hq-agent-handlers" />
@@ -36,7 +37,6 @@
 
 	<!-- Native libs -->
 	<property name="hq.bin" location="${hq.common}/thirdparty/hq_bin" />
-	<property name="lather.lib" location="${hq.bin}/lather_bin" />
 	<property name="sigar.lib" location="${hq.bin}/sigar_bin/lib" />
 	<property name="db2monitor.dir" location="${hq.bin}/db2monitor_bin" />
 	<property name="launcher.dir" location="${hq.bin}/launcher_bin" />
@@ -89,7 +89,6 @@
 		
 	<path id="alljars">
 		<path refid="pdknative" />
-		<fileset dir="${lather.lib}" includes="lather.jar" />
 		<fileset dir="${thirdparty.lib}" includes="*.jar" excludes="ant*.jar, strutstest-*.jar,cactus*.jar,mockejb.jar,mockrunner-ejb.jar,dbunit*.jar,jaas.jar" />
 		<fileset dir="${thirdparty.lib}" includes="*.zip" />
 		<fileset dir="${thirdparty.lib}/oracle_jdbc" includes="*.jar" />
@@ -132,6 +131,7 @@
 			<path refid="testjars" />
 			<path location="${hq.util}/target/classes" />
 			<path location="${hq.common}/target/classes" />
+			<path location="${hq.lather}/target/classes" />
 			<path location="${hq.pdk.shared}/target/classes" />
 			<path location="${hq.pdk.agent}/target/classes" />
 			<path location="${hq.agent}/target/classes" />
@@ -142,6 +142,7 @@
 		<path refid="testjars" />
 		<path location="${hq.util}/target/classes" />
 		<path location="${hq.common}/target/classes" />
+		<path location="${hq.lather}/target/classes" />
 		<path location="${hq.pdk.shared}/target/classes" />
 		<path location="${hq.pdk.agent}/target/classes" />
 		<path location="${hq.agent}/target/classes" />
@@ -152,6 +153,7 @@
 		<path refid="testjars" />
 		<path location="${hq.util}/target/classes" />
 		<path location="${hq.common}/target/classes" />
+		<path location="${hq.lather}/target/classes" />
 		<path location="${hq.pdk.shared}/target/classes" />
 		<path location="${hq.pdk.agent}/target/classes" />
 	</path>
@@ -161,6 +163,7 @@
 		<path refid="testjars" />
 		<path location="${hq.util}/target/classes" />
 		<path location="${hq.common}/target/classes" />
+		<path location="${hq.lather}/target/classes" />
 		<path location="${hq.pdk.shared}/target/classes" />
 		<path location="${hq.web}/target/classes" />
 	</path>
@@ -170,6 +173,7 @@
 		<path refid="testjars" />
 		<path location="${hq.util}/target/classes" />
 		<path location="${hq.common}/target/classes" />
+		<path location="${hq.lather}/target/classes" />
 		<path location="${hq.pdk.shared}/target/classes" />
 	</path>
 
@@ -202,6 +206,7 @@
 	<target name="compile-shared">
 		<compile-sources classpath.id="shared.compile.classpath" src.dir="${hq.util}/src/main/java" resource.dir="${hq.util}/src/main/resources" output.dir="${hq.util}/target/classes" />
 		<compile-sources classpath.id="shared.compile.classpath" src.dir="${hq.common}/src/main/java" resource.dir="${hq.common}/src/main/resources" output.dir="${hq.common}/target/classes" />
+		<compile-sources classpath.id="shared.compile.classpath" src.dir="${hq.lather}/src/main/java" resource.dir="${hq.lather}/src/main/resources" output.dir="${hq.lather}/target/classes" />
 		<compile-sources classpath.id="shared.compile.classpath" src.dir="${hq.pdk.shared}/src/main/java" resource.dir="${hq.pdk.shared}/src/main/resources" output.dir="${hq.pdk.shared}/target/classes" />
 	</target>
 
@@ -615,9 +620,7 @@
 			<fileset dir="${sigar.lib}">
 				<include name="sigar.jar" />
 			</fileset>
-			<fileset dir="${lather.lib}">
-				<include name="lather.jar" />
-			</fileset>
+		
 
 			<fileset dir="${thirdparty.lib}/mysql_jdbc">
 				<include name="mysql-connector-java-5.0.5-bin.jar" />
@@ -672,6 +675,7 @@
 			<fileset dir="${build.dir}">
 				<include name="hq-common.jar" />
 				<include name="hq-util.jar" />
+				<include name="hq-lather.jar" />
 				<include name="hq-pdk-shared.jar" />
 				<include name="hqu-groovy.jar" />
 			</fileset>
@@ -740,6 +744,9 @@
 	<jar basedir="${hq.common}/target/classes" jarfile="${build.dir}/hq-common.jar">
 	</jar>
 	
+	<jar basedir="${hq.lather}/target/classes" jarfile="${build.dir}/hq-lather.jar">
+	</jar>
+	
 	<jar basedir="${hq.pdk.shared}/target/classes" jarfile="${build.dir}/hq-pdk-shared.jar">
 		<manifest>
 			<attribute name="Main-Class" value="org.hyperic.hq.product.util.PluginMain" />
@@ -757,11 +764,6 @@
 <copy todir="${pdk.lib}" file="${build.dir}/hq-util.jar" />
 <copy todir="${pdk.lib}" file="${build.dir}/hq-pdk-shared.jar" />
 
-<jar basedir="${hq.pdk.shared}/target/classes" jarfile="${pdk.lib}/hq-pdk-shared.jar">
-	<manifest>
-		<attribute name="Main-Class" value="org.hyperic.hq.product.util.PluginMain" />
-	</manifest>
-</jar>
 
 <jar basedir="${hq.pdk.agent}/target/classes" jarfile="${pdk.lib}/hq-pdk-agent.jar">
 </jar>
@@ -1057,9 +1059,7 @@
 <touch file="${agent.dir}/log/agent.log" />
 <touch file="${agent.dir}/bundles/${agent.bundle.dir}/tmp/empty" />
 
-<copy todir="${agent.dir}/bundles/${agent.bundle.dir}/lib">
-	<fileset dir="${lather.lib}" includes="lather.jar" />
-</copy>
+<copy todir="${agent.dir}/bundles/${agent.bundle.dir}/lib" file="${build.dir}/hq-lather.jar" />
 
 <copy todir="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/lib">
 	<fileset dir="${thirdparty.lib}/hibernate" includes="concurrent*.jar" />
@@ -1165,6 +1165,7 @@
 	<delete dir="${build.dir}" />
 	<delete dir="${hq.util}/target" />
 	<delete dir="${hq.common}/target" />
+	<delete dir="${hq.lather}/target" />
 	<delete dir="${hq.pdk.shared}/target" />
 	<delete dir="${hq.pdk.agent}/target" />
 	<delete dir="${hq.agent}/target" />
@@ -1236,6 +1237,7 @@
    <test-compile module.dir="${hq.pdk.agent}" compile.classpath.id="agent.pdk.compile.classpath"/>
    <test-compile module.dir="${hq.common}" compile.classpath.id="shared.compile.classpath"/>
    <test-compile module.dir="${hq.util}" compile.classpath.id="shared.compile.classpath"/>
+ 	<test-compile module.dir="${hq.lather}" compile.classpath.id="shared.compile.classpath"/>
 	<test-compile module.dir="${hq.pdk.shared}" compile.classpath.id="shared.compile.classpath"/>
 	<test-compile module.dir="${hq.web}" compile.classpath.id="web.compile.classpath"/>
 </target>
@@ -1251,6 +1253,7 @@
    <test-run module.dir="${hq.pdk.agent}" classpath.id="agent.pdk.compile.classpath"/>
    <test-run module.dir="${hq.common}" classpath.id="shared.compile.classpath"/>
    <test-run module.dir="${hq.util}" classpath.id="shared.compile.classpath"/>
+	<test-run module.dir="${hq.lather}" classpath.id="shared.compile.classpath"/>
 	<test-run module.dir="${hq.pdk.shared}" classpath.id="shared.compile.classpath"/>
 	<test-run module.dir="${hq.web}" classpath.id="web.compile.classpath"/>
 </target>
@@ -1261,6 +1264,8 @@
 	<delete dir="${hq.util}/target/clover" quiet="true"/>
 	<instrument-module input.dir="${hq.common}/src/test/java" staging.dir="${hq.common}/target/clover/staging/src/test/java" resource.dir="${hq.common}/src/test/resources" output.dir="${hq.common}/target/test-classes" classpath.id="shared.compile.classpath"/>
 	<delete dir="${hq.common}/target/clover" quiet="true"/>
+	<instrument-module input.dir="${hq.lather}/src/test/java" staging.dir="${hq.lather}/target/clover/staging/src/test/java" resource.dir="${hq.lather}/src/test/resources" output.dir="${hq.lather}/target/test-classes" classpath.id="shared.compile.classpath"/>
+	<delete dir="${hq.lather}/target/clover" quiet="true"/>
 	<instrument-module input.dir="${hq.pdk.shared}/src/test/java" staging.dir="${hq.pdk.shared}/target/clover/staging/src/test/java" resource.dir="${hq.pdk.shared}/src/test/resources" output.dir="${hq.pdk.shared}/target/test-classes" classpath.id="shared.compile.classpath"/>
 	<delete dir="${hq.pdk.shared}/target/clover" quiet="true"/>
 	<instrument-module input.dir="${hq.web}/src/test/java" staging.dir="${hq.web}/target/clover/staging/src/test/java" resource.dir="${hq.web}/src/test/resources" output.dir="${hq.web}/target/test-classes" classpath.id="web.compile.classpath"/>
@@ -1291,6 +1296,8 @@
 	<delete dir="${hq.util}/target/clover" quiet="true"/>
 	<instrument-module input.dir="${hq.common}/src/main/java" staging.dir="${hq.common}/target/clover/staging/src/main/java" resource.dir="${hq.common}/src/main/resources" output.dir="${hq.common}/target/classes" classpath.id="shared.compile.classpath"/>
 	<delete dir="${hq.common}/target/clover" quiet="true"/>
+	<instrument-module input.dir="${hq.lather}/src/main/java" staging.dir="${hq.lather}/target/clover/staging/src/main/java" resource.dir="${hq.lather}/src/main/resources" output.dir="${hq.lather}/target/classes" classpath.id="shared.compile.classpath"/>
+	<delete dir="${hq.lather}/target/clover" quiet="true"/>
 	<instrument-module input.dir="${hq.pdk.shared}/src/main/java" staging.dir="${hq.pdk.shared}/target/clover/staging/src/main/java" resource.dir="${hq.pdk.shared}/src/main/resources" output.dir="${hq.pdk.shared}/target/classes" classpath.id="shared.compile.classpath"/>
 	<delete dir="${hq.pdk.shared}/target/clover" quiet="true"/>
 </target>

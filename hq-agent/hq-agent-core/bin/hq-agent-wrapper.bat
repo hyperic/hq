@@ -98,7 +98,7 @@ set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\log4j-1.2.14.jar
 set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\sigar.jar
 set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\commons-httpclient-3.1.jar
 set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\commons-codec-1.3.jar
-set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%AGENT_LIB%\lather.jar
+set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%AGENT_LIB%\hq-lather.jar
 
 set CLIENT_CLASS=org.hyperic.hq.bizapp.agent.client.AgentClient
 
