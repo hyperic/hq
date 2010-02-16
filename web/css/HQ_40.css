@@ -2609,8 +2609,7 @@ span.returnToLink {
 }
 
 .resourceTypeColumn {
-	padding: 8px 3px; 
-	text-align: right; 
+	padding: 8px 3px 8px 15px;
 	width: 20%;	
 }
 
@@ -2624,11 +2623,11 @@ span.returnToLink {
 }
 
 .alertCapability {
-	width: 10%;	
+	width: 15%;	
 }
 	
 .controlCapability {
-	width: 50%;	
+	width: 45%;	
 }
 .bottomBorder {
 	border-bottom: 1px solid #eee;
