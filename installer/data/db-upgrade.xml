@@ -10885,7 +10885,7 @@ has already been defined.
                         precision="500" columnType="VARCHAR2" />
   </schemaSpec>
 
-  <schemaSpec version="3.194"> 
+  <schemaSpec version="3.195"> 
   	<schema-directSQL>  
         <statement desc="Adding create group permission...">
            INSERT INTO EAM_OPERATION(ID,VERSION_COL,NAME,RESOURCE_TYPE_ID) VALUES (29,0,'createResourceGroup',3);
