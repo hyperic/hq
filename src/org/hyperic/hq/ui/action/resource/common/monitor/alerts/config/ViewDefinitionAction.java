@@ -148,7 +148,7 @@ public class ViewDefinitionAction extends TilesAction {
                 request.setAttribute(Constants.CAN_VIEW_RESOURCE_TYPE_ALERT_TEMPLATE_ATTR, false);
                 
                 // ...is this alert definition spawned from a resource alert template?..
-                if (adv.getParentId() > 0) {
+                if (adv.getParentId() != null && adv.getParentId() > 0) {
                     // ...if so, check to see if we have permission to view it...
                     SessionBase.canViewResourceTypeAlertDefinitionTemplate(subject);
                 
