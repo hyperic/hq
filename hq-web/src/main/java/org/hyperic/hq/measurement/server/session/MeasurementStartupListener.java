@@ -41,6 +41,7 @@ import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.StartupListener;
+import org.hyperic.hq.authz.server.session.AuthzStartupListener;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceDeleteCallback;
 import org.hyperic.hq.common.ProductProperties;
@@ -84,7 +85,7 @@ public class MeasurementStartupListener implements StartupListener {
                                       SRNManager srnManager, HQApp app,
                                       SynchronousAvailDataInserter synchronousAvailDataInserter,
                                       SynchronousDataInserter synchronousDataInserter,
-                                      MeasurementEnabler measurementEnabler, ReportStatsCollector reportStatsCollector) {
+                                      MeasurementEnabler measurementEnabler, ReportStatsCollector reportStatsCollector, AuthzStartupListener authzStartupListener) {
         this.zEventManager = zEventManager;
         this.metricAuxLogManager = metricAuxLogManager;
         this.measurementManager = measurementManager;
@@ -95,6 +96,7 @@ public class MeasurementStartupListener implements StartupListener {
         this.measurementEnabler = measurementEnabler;
         this.reportStatsCollector = reportStatsCollector;
         MeasurementStartupListener.app = app;
+        //TODO injecting AuthzStartupListener so ResourceDeleteCallback handler registered first
     }
 
     @PostConstruct
