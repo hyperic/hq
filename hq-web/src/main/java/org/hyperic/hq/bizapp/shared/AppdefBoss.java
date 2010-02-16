@@ -490,7 +490,7 @@ public interface AppdefBoss {
 
     public ResourceGroup findGroupById(int sessionId, Integer groupId) throws PermissionException, SessionException;
 
-    public Map<String, Integer> getResourceTypeCountMap(int sessionId, Integer groupId) throws PermissionException,
+    public Map<String, Number> getResourceTypeCountMap(int sessionId, Integer groupId) throws PermissionException,
         SessionException;
 
     public AppdefGroupValue findGroup(int sessionId, Integer id) throws PermissionException, SessionException;

@@ -254,14 +254,14 @@ public class ResourceGroupDAO
      * @return {@link Resource}s
      */
     @SuppressWarnings("unchecked")
-    Map<String, Integer> getMemberTypes(ResourceGroup g) {
+    Map<String, Number> getMemberTypes(ResourceGroup g) {
         List<Object[]> counts = (List<Object[]>) createQuery(
             "select p.name, count(r) from GroupMember g " + "join g.resource r "
                 + "join r.prototype p " + "where g.group = :group group by p.name").setParameter(
             "group", g).list();
-        Map<String, Integer> types = new HashMap<String, Integer>();
+        Map<String, Number> types = new HashMap<String, Number>();
         for (Object[] objs : counts) {
-            types.put((String) objs[0], (Integer) objs[1]);
+            types.put((String) objs[0], (Number) objs[1]);
         }
         return types;
     }

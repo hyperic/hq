@@ -1894,7 +1894,7 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
-    public Map<String, Integer> getResourceTypeCountMap(int sessionId, Integer groupId) throws PermissionException,
+    public Map<String, Number> getResourceTypeCountMap(int sessionId, Integer groupId) throws PermissionException,
         SessionException {
         ResourceGroup g = findGroupById(sessionId, groupId);
         return resourceGroupManager.getMemberTypes(g);
