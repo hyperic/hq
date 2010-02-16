@@ -40,7 +40,6 @@ import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.TransactionListener;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
-import org.hyperic.hq.escalation.shared.EscalationManager;
 import org.hyperic.hq.events.ActionExecutionInfo;
 import org.hyperic.hq.events.server.session.Action;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,21 +97,7 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
         _executor.createThreads(3); // # of threads to service requests
     }
 
-    /**
-     * This class actually performs the execution of a given segment of an
-     * escalation. These are queued up and run by the executor thread pool.
-     */
-    private class EscalationRunner implements Runnable {
-        private Integer _stateId;
-
-        private EscalationRunner(Integer stateId) {
-            _stateId = stateId;
-        }
-
-        public void run() {
-            runEscalation(_stateId);
-        }
-    }
+   
 
     /**
      * This class is invoked when the clock daemon wakes up and decides that it
@@ -374,10 +359,6 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
         }
     }
 
-    private void runEscalation(Integer stateId) {
-        _log.debug("Running escalation state [" + stateId + "]");
-        executeState(stateId);
-    }
     
     /**
      * Check if the escalation state or its associated escalating entity has
