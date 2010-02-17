@@ -2,7 +2,7 @@
    <!-- Hibernate common targets -->
 
   <property name="build.dir" location="${install.dir}/tmp" />
-  <property name="hq-war.dir" location="${server.installdir}/server-${version}/hq-engine/webapps/ROOT" />
+  <property name="hq-war.dir" location="${server.installdir}/server-${version}/hq-engine/hq-server/webapps/ROOT" />
   <property name="hibernate-properties-gen" location="${build.dir}/hibernate/hibernate.properties" />
   <property name="hibernate-jar" location="${hq-war.dir}/WEB-INF/lib/hibernate3.jar" />
   

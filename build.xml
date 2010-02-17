@@ -461,7 +461,7 @@
 
 
 		<!-- Copy Tomcat -->
-		<copy toDir="${archive-dir}/server-${version}/hq-engine">
+		<copy toDir="${archive-dir}/server-${version}/hq-engine/hq-server">
 			<fileset dir="${build.dir}/apache-tomcat-${tomcat.version}">
 				<include name="**" />
 			</fileset>
@@ -486,7 +486,7 @@
 		<copy todir="${archive-dir}/server-${version}/bin" file="${launcher.dir}/hq-server.exe" />
 
 		<!-- Copy WAR -->
-		<property name="archive-war-dir" value="${archive-dir}/server-${version}/hq-engine/webapps/ROOT" />
+		<property name="archive-war-dir" value="${archive-dir}/server-${version}/hq-engine/hq-server/webapps/ROOT" />
 		<delete dir="${archive-war-dir}" />
 		<mkdir dir="${archive-war-dir}" />
 		<copy toDir="${archive-war-dir}">
@@ -497,7 +497,7 @@
 
 		<!--Copy production-specific tomcat and HQ war files (must be done after deploying WAR to overwrite webapp config) -->
 		<antcall target="prepare-tomcat">
-			<param name="tomcat.home" value="${archive-dir}/server-${version}/hq-engine" />
+			<param name="tomcat.home" value="${archive-dir}/server-${version}/hq-engine/hq-server" />
 		</antcall>
 
 		<!-- Copy setup scripts to top-level of install bundle -->
@@ -528,10 +528,6 @@
 		</antcall>
 	</target>
 
-	<target name="archive-full" depends="check-release,archive-prep">
-		<antcall target="roll-archives" />
-	</target>
-
 	<target name="unpack-tomcat" description="Prepare Tomcat for use within HQ, mainly used by archive">
 		<delete dir="${build.dir}/apache-tomcat-${tomcat.version}" />
 		<mkdir dir="${build.dir}/apache-tomcat-${tomcat.version}" />
@@ -543,7 +539,7 @@
 	<target name="prepare-tomcat">
 		<!-- Overlay any modified files -->
 		<copy todir="${tomcat.home}" overwrite="true">
-			<fileset dir="${hq.installer}/hq-engine" includes="**" />
+			<fileset dir="${hq.installer}/hq-server" includes="**" />
 		</copy>
 		<!-- Add generated keystore -->
 		<available property="available.keystore" file="${tomcat.home}/conf/hyperic.keystore" />
@@ -731,7 +727,7 @@
 
 			<fileset dir="${thirdparty.lib}/postgresql" includes="postgresql-8.2-*.jdbc3.jar" />
 
-			<fileset dir="${thirdparty.lib}/oracle_jdbc" includes="*.jar" />
+
 
 			<fileset dir="${hibernate.lib}">
 				<include name="*.jar" />
@@ -793,516 +789,486 @@
 
 	</target>
 
-	<!-- ==================== PDK packaging ==================== -->
-	<target name="pdk-javadoc">
-		<property name="pdk.javadoc" location="${pdk.dir}/javadoc" />
-		<property name="pdk.version" value="${version}" />
-		<property name="pdk.title" value="Hyperic HQ Plugin API" />
-		<mkdir dir="${pdk.javadoc}" />
-		<javadoc destdir="${pdk.javadoc}" private="false" version="true" author="false" maxmemory="256M" windowtitle="${pdk.title}">
-			<sourcepath>
-				<pathelement location="${hq.pdk.shared}/src/main/java" />
-				<pathelement location="${hq.pdk.agent}/src/main/java" />
-			</sourcepath>
-			<fileset dir="${hq.pdk.shared}/src/main/java">
-				<include name="**/*.java" />
-			</fileset>
-			<fileset dir="${hq.pdk.agent}/src/main/java">
-				<include name="**/*.java" />
-			</fileset>
-			<classpath>
-				<path refid="shared.compile.classpath" />
-			</classpath>
-			<doctitle>${pdk.title}</doctitle>
-			<header>
-				<![CDATA[<font size="2">${pdk.title} v. ${pdk.version}</font>]]>
-      </header>
-		<bottom>
-			<![CDATA[Copyright &#169; 2004-2006 Hyperic, Inc. <a href="mailto:support@hyperic.net">support@hyperic.net</a>, All Rights Reserved.]]>
-      </bottom>
-</javadoc>
-</target>
+	<target name="pack-common" description="Pack the common jars">
+		<jar basedir="${hq.util}/target/classes" jarfile="${build.dir}/hq-util.jar">
+		</jar>
 
-<target name="pack-common" description="Pack the common jars">
-<jar basedir="${hq.util}/target/classes" jarfile="${build.dir}/hq-util.jar">
-</jar>
+		<jar basedir="${hq.common}/target/classes" jarfile="${build.dir}/hq-common.jar">
+		</jar>
 
-<jar basedir="${hq.common}/target/classes" jarfile="${build.dir}/hq-common.jar">
-</jar>
+		<jar basedir="${hq.lather}/target/classes" jarfile="${build.dir}/hq-lather.jar">
+		</jar>
 
-<jar basedir="${hq.lather}/target/classes" jarfile="${build.dir}/hq-lather.jar">
-</jar>
+		<jar basedir="${hq.pdk.shared}/target/classes" jarfile="${build.dir}/hq-pdk-shared.jar">
+			<manifest>
+				<attribute name="Main-Class" value="org.hyperic.hq.product.util.PluginMain" />
+			</manifest>
+		</jar>
+	</target>
 
-<jar basedir="${hq.pdk.shared}/target/classes" jarfile="${build.dir}/hq-pdk-shared.jar">
-	<manifest>
-		<attribute name="Main-Class" value="org.hyperic.hq.product.util.PluginMain" />
-	</manifest>
-</jar>
-</target>
+	<target name="pack-pdk-lib" description="Pack the PDK lib jars">
+		<mkdir dir="${pdk.lib}" />
+		<mkdir dir="${pdk.mibs}" />
 
-<target name="pack-pdk-lib" description="Pack the PDK lib jars">
-<mkdir dir="${pdk.lib}" />
-<mkdir dir="${pdk.mibs}" />
+		<antcall target="pack-common" />
 
-<antcall target="pack-common" />
-
-<copy todir="${pdk.lib}" file="${build.dir}/hq-common.jar" />
-<copy todir="${pdk.lib}" file="${build.dir}/hq-util.jar" />
-<copy todir="${pdk.lib}" file="${build.dir}/hq-pdk-shared.jar" />
+		<copy todir="${pdk.lib}" file="${build.dir}/hq-common.jar" />
+		<copy todir="${pdk.lib}" file="${build.dir}/hq-util.jar" />
+		<copy todir="${pdk.lib}" file="${build.dir}/hq-pdk-shared.jar" />
 
 
-<jar basedir="${hq.pdk.agent}/target/classes" jarfile="${pdk.lib}/hq-pdk-agent.jar">
-</jar>
+		<jar basedir="${hq.pdk.agent}/target/classes" jarfile="${pdk.lib}/hq-pdk-agent.jar">
+		</jar>
 
-<copy todir="${pdk.lib}">
-	<fileset dir="${sigar.lib}" includes="*.*" />
-	<fileset dir="${thirdparty.lib}">
-		<!-- commons-{collections,beanutils} not in the
+		<copy todir="${pdk.lib}">
+			<fileset dir="${sigar.lib}" includes="*.*" />
+			<fileset dir="${thirdparty.lib}">
+				<!-- commons-{collections,beanutils} not in the
              agent classpath but required for
              PluginDumper scripts -->
-		<include name="commons-collections-3.2.jar" />
-		<include name="commons-beanutils-1.8.0.jar" />
-		<include name="commons-logging-1.0.4.jar" />
-		<include name="log4j-1.2.14.jar" />
-		<include name="oro-2.0.8.jar" />
-		<!-- RT -->
-		<include name="snmp4j.jar" />
-		<!-- All SNMP monitoring -->
-		<include name="ant.jar" />
-		<!-- AI scans + util.TokenReplacer -->
-		<include name="junit-3.8.jar" />
-		<!-- test to help with support issues -->
-		<include name="junit-4.4.jar" />
-		<include name="commons-httpclient-3.1.jar" />
-		<!-- Lather -->
-		<include name="commons-codec-1.3.jar" />
-		<!-- HTTPClient dep -->
-		<!-- WebSphere: must be in the main classloader for reasons unknown -->
-		<include name="activation.jar" />
-		<!-- for hq-plugin.xml parser -->
-		<include name="jdom-1.1.jar" />
-		<!-- for PluginDumper args parser -->
-		<include name="getopt.jar" />
-		<include name="tomcat-jk.jar" />
-		<!-- for SSH collector within netservices plugin -->
-		<include name="jsch-0.1.34.jar" />
-		<!-- for DNS collector within netservices plugin -->
-		<include name="dnsjava-2.0.3.jar" />
-		<!-- for JMX based plugins -->
-		<include name="mx4j/*.jar" />
-		<!-- for XPathAPI -->
-		<include name="xalan.jar" />
-		<include name="xml-apis.jar" />
-		<!-- for live data translation -->
-		<include name="json.jar" />
-		<include name="xstream-1.3.1.jar" />
-		<include name="xpp3_min-1.1.4c.jar" />
-		<!-- for WS/Xen -->
-		<include name="xmlrpc-client-3.1.jar" />
-		<include name="xmlrpc-common-3.1.jar" />
-		<include name="ws-commons-util-1.0.2.jar" />
-	</fileset>
-	<fileset dir="${tapestry_lib}">
-		<!-- for CollectorThread -->
-		<include name="backport-util-concurrent-3.1.jar" />
-	</fileset>
-</copy>
+				<include name="commons-collections-3.2.jar" />
+				<include name="commons-beanutils-1.8.0.jar" />
+				<include name="commons-logging-1.0.4.jar" />
+				<include name="log4j-1.2.14.jar" />
+				<include name="oro-2.0.8.jar" />
+				<!-- RT -->
+				<include name="snmp4j.jar" />
+				<!-- All SNMP monitoring -->
+				<include name="ant.jar" />
+				<!-- AI scans + util.TokenReplacer -->
+				<include name="junit-3.8.jar" />
+				<!-- test to help with support issues -->
+				<include name="junit-4.4.jar" />
+				<include name="commons-httpclient-3.1.jar" />
+				<!-- Lather -->
+				<include name="commons-codec-1.3.jar" />
+				<!-- HTTPClient dep -->
+				<!-- WebSphere: must be in the main classloader for reasons unknown -->
+				<include name="activation.jar" />
+				<!-- for hq-plugin.xml parser -->
+				<include name="jdom-1.1.jar" />
+				<!-- for PluginDumper args parser -->
+				<include name="getopt.jar" />
+				<include name="tomcat-jk.jar" />
+				<!-- for SSH collector within netservices plugin -->
+				<include name="jsch-0.1.34.jar" />
+				<!-- for DNS collector within netservices plugin -->
+				<include name="dnsjava-2.0.3.jar" />
+				<!-- for JMX based plugins -->
+				<include name="mx4j/*.jar" />
+				<!-- for XPathAPI -->
+				<include name="xalan.jar" />
+				<include name="xml-apis.jar" />
+				<!-- for live data translation -->
+				<include name="json.jar" />
+				<include name="xstream-1.3.1.jar" />
+				<include name="xpp3_min-1.1.4c.jar" />
+				<!-- for WS/Xen -->
+				<include name="xmlrpc-client-3.1.jar" />
+				<include name="xmlrpc-common-3.1.jar" />
+				<include name="ws-commons-util-1.0.2.jar" />
+			</fileset>
+			<fileset dir="${tapestry_lib}">
+				<!-- for CollectorThread -->
+				<include name="backport-util-concurrent-3.1.jar" />
+			</fileset>
+		</copy>
 
 
 
-<!-- Copy jdbc drivers for use with jdbc based plugins -->
-<mkdir dir="${pdk.lib}/jdbc" />
-<copy toDir="${pdk.lib}/jdbc">
-	<fileset dir="${thirdparty.lib}/mysql_jdbc" includes="mysql*.jar" />
-	<!-- Postgres plugin uses the 7.4.3 driver -->
-	<fileset dir="${thirdparty.lib}/postgresql" includes="postgresql-7.4.3.jar" />
-</copy>
-</target>
+		<!-- Copy jdbc drivers for use with jdbc based plugins -->
+		<mkdir dir="${pdk.lib}/jdbc" />
+		<copy toDir="${pdk.lib}/jdbc">
+			<fileset dir="${thirdparty.lib}/mysql_jdbc" includes="mysql*.jar" />
+			<!-- Postgres plugin uses the 7.4.3 driver -->
+			<fileset dir="${thirdparty.lib}/postgresql" includes="postgresql-7.4.3.jar" />
+		</copy>
+	</target>
 
-<!-- Build the plugins -->
-<target name="pack-plugins" depends="init-taskdefs">
+	<!-- Build the plugins -->
+	<target name="pack-plugins" depends="init-taskdefs">
 
-<mkdir dir="${plugin.dir}" />
+		<mkdir dir="${plugin.dir}" />
 
-<copy todir="${plugin.dir}">
-	<!-- copy shared xml pieces prior to validation-->
-	<fileset dir="${hq.plugins}/process/src/main/resources">
-		<include name="*.xml" />
-	</fileset>
-	<fileset dir="${hq.plugins}/jvm/src/main/resources" includes="*.xml" />
-</copy>
+		<copy todir="${plugin.dir}">
+			<!-- copy shared xml pieces prior to validation-->
+			<fileset dir="${hq.plugins}/process/src/main/resources">
+				<include name="*.xml" />
+			</fileset>
+			<fileset dir="${hq.plugins}/jvm/src/main/resources" includes="*.xml" />
+		</copy>
 
 
-<hqplugin name="apache" />
+		<hqplugin name="apache" />
 
 
-<hqplugin name="tomcat" />
+		<hqplugin name="tomcat" />
 
-<hqplugin name="iplanet" />
+		<hqplugin name="iplanet" />
 
-<hqplugin name="oracle" />
+		<hqplugin name="oracle" />
 
-<hqplugin name="oc4j" />
+		<hqplugin name="oc4j" />
 
-<hqplugin name="db2">
-	<fileset dir="${db2monitor.dir}" includes="lib/*" />
-</hqplugin>
+		<hqplugin name="db2">
+			<fileset dir="${db2monitor.dir}" includes="lib/*" />
+		</hqplugin>
 
-<hqplugin name="postgresql" />
+		<hqplugin name="postgresql" />
 
-<hqplugin name="mysql" />
+		<hqplugin name="mysql" />
 
-<hqplugin name="samba" />
+		<hqplugin name="samba" />
 
-<hqplugin name="spring" />
+		<hqplugin name="spring" />
 
-<hqplugin name="sybase" />
+		<hqplugin name="sybase" />
 
-<hqplugin name="mysql_stats" />
+		<hqplugin name="mysql_stats" />
 
-<hqplugin name="coldfusion" />
+		<hqplugin name="coldfusion" />
 
-<hqplugin name="alfresco" />
+		<hqplugin name="alfresco" />
 
-<hqplugin name="zimbra" />
+		<hqplugin name="zimbra" />
 
-<hqplugin name="openldap" />
+		<hqplugin name="openldap" />
 
-<hqplugin name="servlet" />
+		<hqplugin name="servlet" />
 
-<hqplugin name="jboss" />
+		<hqplugin name="jboss" />
 
-<hqplugin name="system" />
+		<hqplugin name="system" />
 
-<hqplugin name="weblogic" />
+		<hqplugin name="weblogic" />
 
-<hqplugin name="websphere" />
+		<hqplugin name="websphere" />
 
-<hqplugin name="hqagent" />
+		<hqplugin name="hqagent" />
 
-<hqplugin name="exchange" />
+		<hqplugin name="exchange" />
 
-<hqplugin name="iis" />
+		<hqplugin name="iis" />
 
-<hqplugin name="dotnet" />
+		<hqplugin name="dotnet" />
 
-<hqplugin name="mssql" />
+		<hqplugin name="mssql" />
 
-<hqplugin name="ntp" />
+		<hqplugin name="ntp" />
 
-<hqplugin name="bind" />
+		<hqplugin name="bind" />
 
-<hqplugin name="postfix" />
+		<hqplugin name="postfix" />
 
-<hqplugin name="sqlquery" />
+		<hqplugin name="sqlquery" />
 
-<hqplugin name="netdevice" />
+		<hqplugin name="netdevice" />
 
-<hqplugin name="netservices" />
+		<hqplugin name="netservices" />
 
-<hqplugin name="nagios" />
+		<hqplugin name="nagios" />
 
-<hqplugin name="ntds" />
+		<hqplugin name="ntds" />
 
-<hqplugin name="memcached" />
+		<hqplugin name="memcached" />
 
-<hqplugin name="perlbal" />
+		<hqplugin name="perlbal" />
 
-<hqplugin name="informix" />
+		<hqplugin name="informix" />
 
-<hqplugin name="vim" />
+		<hqplugin name="vim" />
 
-<hqplugin name="vmware" />
+		<hqplugin name="vmware" />
 
-<hqplugin name="xen">
-	<!-- XXX Xen sdk built w/ 1.6 + mods for Xen 4.0 compat -->
-	<fileset dir="${hq.plugins}/xen/target/classes" includes="com/xensource/xenapi/*.class" />
-</hqplugin>
+		<hqplugin name="xen">
+			<!-- XXX Xen sdk built w/ 1.6 + mods for Xen 4.0 compat -->
+			<fileset dir="${hq.plugins}/xen/target/classes" includes="com/xensource/xenapi/*.class" />
+		</hqplugin>
 
-<hqplugin name="groovy-scripting" />
+		<hqplugin name="groovy-scripting" />
 
-</target>
+	</target>
 
-<!-- Copy plugins -->
-<target name="copy-plugins" depends="init-taskdefs">
-<mkdir dir="${pdk.plugins}" />
-<mkdir dir="${pdk.plugins}/scripting" />
+	<!-- Copy plugins -->
+	<target name="copy-plugins" depends="init-taskdefs">
+		<mkdir dir="${pdk.plugins}" />
+		<mkdir dir="${pdk.plugins}/scripting" />
 
-<copy todir="${pdk.plugins}">
-	<!-- copy shared xml pieces prior to validation-->
-	<fileset dir="${hq.plugins}/process/src/main/resources">
-		<include name="*.xml" />
-	</fileset>
-	<fileset dir="${hq.plugins}/jvm/src/main/resources" includes="*.xml" />
-</copy>
+		<copy todir="${pdk.plugins}">
+			<!-- copy shared xml pieces prior to validation-->
+			<fileset dir="${hq.plugins}/process/src/main/resources">
+				<include name="*.xml" />
+			</fileset>
+			<fileset dir="${hq.plugins}/jvm/src/main/resources" includes="*.xml" />
+		</copy>
 
-<echo message="Copying plugins from: ${plugin.dir}" />
+		<echo message="Copying plugins from: ${plugin.dir}" />
 
-<!-- Copy plugins to agent -->
-<copy todir="${pdk.plugins}">
-	<fileset dir="${plugin.dir}" excludes="${plugins.exclude}">
-		<exclude name="*-scripting-plugin.jar" />
-		<include name="*-plugin.jar" />
-	</fileset>
-</copy>
+		<!-- Copy plugins to agent -->
+		<copy todir="${pdk.plugins}">
+			<fileset dir="${plugin.dir}" excludes="${plugins.exclude}">
+				<exclude name="*-scripting-plugin.jar" />
+				<include name="*-plugin.jar" />
+			</fileset>
+		</copy>
 
-<copy todir="${pdk.plugins}/scripting">
-	<fileset dir="${plugin.dir}" excludes="${plugins.exclude}">
-		<include name="*-scripting-plugin.jar" />
-	</fileset>
-	<fileset dir="${thirdparty.lib}">
-		<include name="groovy-all-1.6.jar" />
-	</fileset>
-</copy>
+		<copy todir="${pdk.plugins}/scripting">
+			<fileset dir="${plugin.dir}" excludes="${plugins.exclude}">
+				<include name="*-scripting-plugin.jar" />
+			</fileset>
+			<fileset dir="${thirdparty.lib}">
+				<include name="groovy-all-1.6.jar" />
+			</fileset>
+		</copy>
 
 
-<mkdir dir="${pdk.dir}/examples" />
-<plugincopy todir="${pdk.dir}/examples">
-	<fileset dir="hq-plugins/examples/src/main/resources" includes="*.xml" />
-</plugincopy>
+		<mkdir dir="${pdk.dir}/examples" />
+		<plugincopy todir="${pdk.dir}/examples">
+			<fileset dir="hq-plugins/examples/src/main/resources" includes="*.xml" />
+		</plugincopy>
 
 
-<plugincopy todir="${pdk.plugins}" file="hq-plugins/activemq/src/main/resources/activemq-plugin.xml" />
-<plugincopy todir="${pdk.plugins}" file="hq-plugins/geronimo/src/main/resources/geronimo-plugin.xml" />
-<plugincopy todir="${pdk.plugins}" file="hq-plugins/glassfish/src/main/resources/glassfish-plugin.xml" />
-<plugincopy todir="${pdk.plugins}" file="hq-plugins/hq-internal/src/main/resources/hq-internal-plugin.xml" />
-<plugincopy todir="${pdk.plugins}" file="hq-plugins/jetty/src/main/resources/jetty-plugin.xml" />
-<plugincopy todir="${pdk.plugins}" file="hq-plugins/jmx/src/main/resources/jmx-plugin.xml" />
-<plugincopy todir="${pdk.plugins}" file="hq-plugins/resin/src/main/resources/resin-plugin.xml" />
-<plugincopy todir="${pdk.plugins}" file="hq-plugins/sendmail/src/main/resources/sendmail-plugin.xml" />
+		<plugincopy todir="${pdk.plugins}" file="hq-plugins/activemq/src/main/resources/activemq-plugin.xml" />
+		<plugincopy todir="${pdk.plugins}" file="hq-plugins/geronimo/src/main/resources/geronimo-plugin.xml" />
+		<plugincopy todir="${pdk.plugins}" file="hq-plugins/glassfish/src/main/resources/glassfish-plugin.xml" />
+		<plugincopy todir="${pdk.plugins}" file="hq-plugins/hq-internal/src/main/resources/hq-internal-plugin.xml" />
+		<plugincopy todir="${pdk.plugins}" file="hq-plugins/jetty/src/main/resources/jetty-plugin.xml" />
+		<plugincopy todir="${pdk.plugins}" file="hq-plugins/jmx/src/main/resources/jmx-plugin.xml" />
+		<plugincopy todir="${pdk.plugins}" file="hq-plugins/resin/src/main/resources/resin-plugin.xml" />
+		<plugincopy todir="${pdk.plugins}" file="hq-plugins/sendmail/src/main/resources/sendmail-plugin.xml" />
 
 
-<!-- Copy scripts -->
-<mkdir dir="${pdk.scripts}" />
-<copy todir="${pdk.scripts}">
-	<fileset dir="${hq.pdk.agent}/scripts" includes="*.*" />
-</copy>
-</target>
+		<!-- Copy scripts -->
+		<mkdir dir="${pdk.scripts}" />
+		<copy todir="${pdk.scripts}">
+			<fileset dir="${hq.pdk.agent}/scripts" includes="*.*" />
+		</copy>
+	</target>
 
-<target name="copy-plugins-to-server" depends="init-taskdefs">
-<mkdir dir="${war.dir}/WEB-INF/hq-plugins" />
-<mkdir dir="${war.dir}/WEB-INF/hq-plugins/scripting" />
+	<target name="copy-plugins-to-server" depends="init-taskdefs">
+		<mkdir dir="${war.dir}/WEB-INF/hq-plugins" />
+		<mkdir dir="${war.dir}/WEB-INF/hq-plugins/scripting" />
 
-<copy todir="${war.dir}/WEB-INF/hq-plugins">
-	<fileset dir="${plugin.dir}" excludes="${plugins.exclude}">
-		<exclude name="*-scripting-plugin.jar" />
-		<include name="*-plugin.jar" />
-	</fileset>
-</copy>
+		<copy todir="${war.dir}/WEB-INF/hq-plugins">
+			<fileset dir="${plugin.dir}" excludes="${plugins.exclude}">
+				<exclude name="*-scripting-plugin.jar" />
+				<include name="*-plugin.jar" />
+			</fileset>
+		</copy>
 
-<copy todir="${war.dir}/WEB-INF/hq-plugins">
-	<!-- copy shared xml pieces-->
-	<fileset dir="${hq.plugins}/process/src/main/resources">
-		<include name="*.xml" />
-	</fileset>
-	<fileset dir="${hq.plugins}/jvm/src/main/resources" includes="*.xml" />
-</copy>
+		<copy todir="${war.dir}/WEB-INF/hq-plugins">
+			<!-- copy shared xml pieces-->
+			<fileset dir="${hq.plugins}/process/src/main/resources">
+				<include name="*.xml" />
+			</fileset>
+			<fileset dir="${hq.plugins}/jvm/src/main/resources" includes="*.xml" />
+		</copy>
 
-<copy todir="${war.dir}/WEB-INF/hq-plugins/scripting">
-	<fileset dir="${plugin.dir}" excludes="${plugins.exclude}">
-		<include name="*-scripting-plugin.jar" />
-	</fileset>
-	<fileset dir="${thirdparty.lib}">
-		<include name="groovy-all-1.6.jar" />
-	</fileset>
-</copy>
+		<copy todir="${war.dir}/WEB-INF/hq-plugins/scripting">
+			<fileset dir="${plugin.dir}" excludes="${plugins.exclude}">
+				<include name="*-scripting-plugin.jar" />
+			</fileset>
+			<fileset dir="${thirdparty.lib}">
+				<include name="groovy-all-1.6.jar" />
+			</fileset>
+		</copy>
 
-<plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/activemq/src/main/resources/activemq-plugin.xml" />
-<plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/geronimo/src/main/resources/geronimo-plugin.xml" />
-<plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/glassfish/src/main/resources/glassfish-plugin.xml" />
-<plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/hq-internal/src/main/resources/hq-internal-plugin.xml" />
-<plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/jetty/src/main/resources/jetty-plugin.xml" />
-<plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/jmx/src/main/resources/jmx-plugin.xml" />
-<plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/resin/src/main/resources/resin-plugin.xml" />
-<plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/sendmail/src/main/resources/sendmail-plugin.xml" />
+		<plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/activemq/src/main/resources/activemq-plugin.xml" />
+		<plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/geronimo/src/main/resources/geronimo-plugin.xml" />
+		<plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/glassfish/src/main/resources/glassfish-plugin.xml" />
+		<plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/hq-internal/src/main/resources/hq-internal-plugin.xml" />
+		<plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/jetty/src/main/resources/jetty-plugin.xml" />
+		<plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/jmx/src/main/resources/jmx-plugin.xml" />
+		<plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/resin/src/main/resources/resin-plugin.xml" />
+		<plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/sendmail/src/main/resources/sendmail-plugin.xml" />
 
-</target>
+	</target>
 
 
-<target name="pack-pdk" description="Pack the PDK" depends="pack-pdk-lib,pack-plugins,copy-plugins" />
+	<target name="pack-pdk" description="Pack the PDK" depends="pack-pdk-lib,pack-plugins,copy-plugins" />
 
-<!-- ==================== Agent packaging ==================== -->
-<!-- XXX use property to control debug/release properties -->
+	<!-- ==================== Agent packaging ==================== -->
+	<!-- XXX use property to control debug/release properties -->
 
-<target name="pack-agent" description="Pack the agent">
-<mkdir dir="${agent.dir}" />
-<mkdir dir="${agent.dir}/bin" />
-<mkdir dir="${agent.dir}/log" />
-<mkdir dir="${agent.dir}/conf" />
-<mkdir dir="${agent.dir}/wrapper" />
-<mkdir dir="${agent.dir}/wrapper/lib" />
-<mkdir dir="${agent.dir}/wrapper/sbin" />
-<mkdir dir="${agent.dir}/bundles/${agent.bundle.dir}/lib" />
-<mkdir dir="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/lib" />
-<mkdir dir="${agent.dir}/bundles/${agent.bundle.dir}/rcfiles" />
-<mkdir dir="${agent.dir}/bundles/${agent.bundle.dir}/tmp" />
-<mkdir dir="${agent.dir}/bundles/${agent.bundle.dir}/conf" />
+	<target name="pack-agent" description="Pack the agent">
+		<mkdir dir="${agent.dir}" />
+		<mkdir dir="${agent.dir}/bin" />
+		<mkdir dir="${agent.dir}/log" />
+		<mkdir dir="${agent.dir}/conf" />
+		<mkdir dir="${agent.dir}/wrapper" />
+		<mkdir dir="${agent.dir}/wrapper/lib" />
+		<mkdir dir="${agent.dir}/wrapper/sbin" />
+		<mkdir dir="${agent.dir}/bundles/${agent.bundle.dir}/lib" />
+		<mkdir dir="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/lib" />
+		<mkdir dir="${agent.dir}/bundles/${agent.bundle.dir}/rcfiles" />
+		<mkdir dir="${agent.dir}/bundles/${agent.bundle.dir}/tmp" />
+		<mkdir dir="${agent.dir}/bundles/${agent.bundle.dir}/conf" />
 
-<!-- Touch the agent log file so that "smart" unzippers don't forget
+		<!-- Touch the agent log file so that "smart" unzippers don't forget
          to create the log directory -->
-<touch file="${agent.dir}/log/agent.log" />
-<touch file="${agent.dir}/bundles/${agent.bundle.dir}/tmp/empty" />
+		<touch file="${agent.dir}/log/agent.log" />
+		<touch file="${agent.dir}/bundles/${agent.bundle.dir}/tmp/empty" />
 
-<copy todir="${agent.dir}/bundles/${agent.bundle.dir}/lib" file="${build.dir}/hq-lather.jar" />
+		<copy todir="${agent.dir}/bundles/${agent.bundle.dir}/lib" file="${build.dir}/hq-lather.jar" />
 
-<copy todir="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/lib">
-	<fileset dir="${thirdparty.lib}/hibernate" includes="concurrent*.jar" />
-</copy>
+		<copy todir="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/lib">
+			<fileset dir="${thirdparty.lib}/hibernate" includes="concurrent*.jar" />
+		</copy>
 
-<jar basedir="${hq.agent.handlers}/hq-agent-handler-autoinventory/target/classes" jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/hq-agent-handler-autoinventory.jar">
-	<manifest>
-		<attribute name="Main-Class" value="org.hyperic.hq.autoinventory.agent.server.AutoinventoryCommandsServer" />
-	</manifest>
-</jar>
+		<jar basedir="${hq.agent.handlers}/hq-agent-handler-autoinventory/target/classes" jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/hq-agent-handler-autoinventory.jar">
+			<manifest>
+				<attribute name="Main-Class" value="org.hyperic.hq.autoinventory.agent.server.AutoinventoryCommandsServer" />
+			</manifest>
+		</jar>
 
-<jar basedir="${hq.agent.handlers}/hq-agent-handler-bizapp/target/classes" jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/hq-agent-handler-bizapp.jar">
-	<manifest>
-		<attribute name="Main-Class" value="org.hyperic.hq.bizapp.agent.server.CommandsServer" />
-	</manifest>
-</jar>
+		<jar basedir="${hq.agent.handlers}/hq-agent-handler-bizapp/target/classes" jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/hq-agent-handler-bizapp.jar">
+			<manifest>
+				<attribute name="Main-Class" value="org.hyperic.hq.bizapp.agent.server.CommandsServer" />
+			</manifest>
+		</jar>
 
-<jar basedir="${hq.agent.handlers}/hq-agent-handler-measurement/target/classes" jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/hq-agent-handler-measurement.jar">
-	<manifest>
-		<attribute name="Main-Class" value="org.hyperic.hq.measurement.agent.server.MeasurementCommandsServer" />
-	</manifest>
-</jar>
+		<jar basedir="${hq.agent.handlers}/hq-agent-handler-measurement/target/classes" jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/hq-agent-handler-measurement.jar">
+			<manifest>
+				<attribute name="Main-Class" value="org.hyperic.hq.measurement.agent.server.MeasurementCommandsServer" />
+			</manifest>
+		</jar>
 
-<jar basedir="${hq.agent.handlers}/hq-agent-handler-commands/target/classes" jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/hq-agent-handler-commands.jar">
-	<manifest>
-		<attribute name="Main-Class" value="org.hyperic.hq.agent.server.AgentCommandsServer" />
-	</manifest>
-</jar>
+		<jar basedir="${hq.agent.handlers}/hq-agent-handler-commands/target/classes" jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/hq-agent-handler-commands.jar">
+			<manifest>
+				<attribute name="Main-Class" value="org.hyperic.hq.agent.server.AgentCommandsServer" />
+			</manifest>
+		</jar>
 
-<jar basedir="${hq.agent.handlers}/hq-agent-handler-control/target/classes" jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/hq-agent-handler-control.jar">
-	<manifest>
-		<attribute name="Main-Class" value="org.hyperic.hq.control.agent.server.ControlCommandsServer" />
-	</manifest>
-</jar>
+		<jar basedir="${hq.agent.handlers}/hq-agent-handler-control/target/classes" jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/hq-agent-handler-control.jar">
+			<manifest>
+				<attribute name="Main-Class" value="org.hyperic.hq.control.agent.server.ControlCommandsServer" />
+			</manifest>
+		</jar>
 
-<jar basedir="${hq.agent.handlers}/hq-agent-handler-livedata/target/classes" jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/hq-agent-handler-livedata.jar">
-	<manifest>
-		<attribute name="Main-Class" value="org.hyperic.hq.livedata.agent.server.LiveDataCommandsServer" />
-	</manifest>
-</jar>
+		<jar basedir="${hq.agent.handlers}/hq-agent-handler-livedata/target/classes" jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/hq-agent-handler-livedata.jar">
+			<manifest>
+				<attribute name="Main-Class" value="org.hyperic.hq.livedata.agent.server.LiveDataCommandsServer" />
+			</manifest>
+		</jar>
 
-<!-- Agent jars -->
-<jar basedir="${hq.agent}/target/classes" jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/hq-agent-core.jar">
-</jar>
+		<!-- Agent jars -->
+		<jar basedir="${hq.agent}/target/classes" jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/hq-agent-core.jar">
+		</jar>
 
-<!-- version.properties to agent lib -->
-<antcall target="write-version-file">
-	<param name="version-file" value="${agent.dir}/bundles/${agent.bundle.dir}/lib/version.properties" />
-</antcall>
+		<!-- version.properties to agent lib -->
+		<antcall target="write-version-file">
+			<param name="version-file" value="${agent.dir}/bundles/${agent.bundle.dir}/lib/version.properties" />
+		</antcall>
 
-<copy todir="${agent.dir}/wrapper/sbin">
-	<fileset dir="${wrapper.bin}" includes="*" />
-</copy>
+		<copy todir="${agent.dir}/wrapper/sbin">
+			<fileset dir="${wrapper.bin}" includes="*" />
+		</copy>
 
-<copy todir="${agent.dir}/wrapper/lib">
-	<fileset dir="${wrapper.lib}" includes="*" />
-</copy>
+		<copy todir="${agent.dir}/wrapper/lib">
+			<fileset dir="${wrapper.lib}" includes="*" />
+		</copy>
 
 
 
-<!-- TODO: Copy and replace properties -->
-<copy file="${hq.agent}/src/main/resources/agent.properties" tofile="${agent.dir}/conf/agent.properties" />
+		<!-- TODO: Copy and replace properties -->
+		<copy file="${hq.agent}/src/main/resources/agent.properties" tofile="${agent.dir}/conf/agent.properties" />
 
-<copy file="${hq.agent}/src/main/resources/wrapper-master.conf" tofile="${agent.dir}/conf/wrapper.conf" />
+		<copy file="${hq.agent}/src/main/resources/wrapper-master.conf" tofile="${agent.dir}/conf/wrapper.conf" />
 
-<copy file="${hq.agent}/bin/background.sh" tofile="${agent.dir}/bundles/${agent.bundle.dir}/background.sh" />
-<copy file="${hq.agent}/bin/background.bat" tofile="${agent.dir}/bundles/${agent.bundle.dir}/background.bat" />
-<copy file="${hq.agent}/src/main/resources/agent.jaas.config" tofile="${agent.dir}/bundles/${agent.bundle.dir}/jaas.config" />
-<copy file="${hq.agent}/bin/agent.rc" tofile="${agent.dir}/bundles/${agent.bundle.dir}/rcfiles/agent.rc" />
+		<copy file="${hq.agent}/bin/background.sh" tofile="${agent.dir}/bundles/${agent.bundle.dir}/background.sh" />
+		<copy file="${hq.agent}/bin/background.bat" tofile="${agent.dir}/bundles/${agent.bundle.dir}/background.bat" />
+		<copy file="${hq.agent}/src/main/resources/agent.jaas.config" tofile="${agent.dir}/bundles/${agent.bundle.dir}/jaas.config" />
+		<copy file="${hq.agent}/bin/agent.rc" tofile="${agent.dir}/bundles/${agent.bundle.dir}/rcfiles/agent.rc" />
 
-<!-- DEPRECATED: replaced hq-agent.exe with Java Service Wrapper
+		<!-- DEPRECATED: replaced hq-agent.exe with Java Service Wrapper
     <copy file="${launcher.dir}/hq-agent.exe"
         tofile="${agent.dir}/bundles/${agent.bundle.dir}/hq-agent.exe" />
     -->
-<copy file="${hq.agent}/bin/hq-agent-master.sh" tofile="${agent.dir}/bin/hq-agent.sh" />
-<copy file="${hq.agent}/bin/hq-agent-master.bat" tofile="${agent.dir}/bin/hq-agent.bat" />
+		<copy file="${hq.agent}/bin/hq-agent-master.sh" tofile="${agent.dir}/bin/hq-agent.sh" />
+		<copy file="${hq.agent}/bin/hq-agent-master.bat" tofile="${agent.dir}/bin/hq-agent.bat" />
 
-<copy file="${hq.agent}/bin/hq-agent.sh" tofile="${agent.dir}/bundles/${agent.bundle.dir}/bin/hq-agent-nowrapper.sh" />
+		<copy file="${hq.agent}/bin/hq-agent.sh" tofile="${agent.dir}/bundles/${agent.bundle.dir}/bin/hq-agent-nowrapper.sh" />
 
-<copy file="${hq.agent}/bin/hq-agent-wrapper.bat" tofile="${agent.dir}/bundles/${agent.bundle.dir}/bin/hq-agent.bat" />
-<copy file="${hq.agent}/bin/hq-agent-wrapper.sh" tofile="${agent.dir}/bundles/${agent.bundle.dir}/bin/hq-agent.sh" />
+		<copy file="${hq.agent}/bin/hq-agent-wrapper.bat" tofile="${agent.dir}/bundles/${agent.bundle.dir}/bin/hq-agent.bat" />
+		<copy file="${hq.agent}/bin/hq-agent-wrapper.sh" tofile="${agent.dir}/bundles/${agent.bundle.dir}/bin/hq-agent.sh" />
 
-<copy file="${hq.agent}/src/main/resources/wrapper.conf" tofile="${agent.dir}/bundles/${agent.bundle.dir}/conf/wrapper.conf" />
+		<copy file="${hq.agent}/src/main/resources/wrapper.conf" tofile="${agent.dir}/bundles/${agent.bundle.dir}/conf/wrapper.conf" />
 
-<copy file="${hq.agent}/src/main/resources/rollback.properties" tofile="${agent.dir}/conf/rollback.properties" />
-<replace file="${agent.dir}/conf/rollback.properties">
-	<replacefilter token="@@@AGENT_BUNDLE_DIR@@@" value="${agent.bundle.dir}" />
-</replace>
+		<copy file="${hq.agent}/src/main/resources/rollback.properties" tofile="${agent.dir}/conf/rollback.properties" />
+		<replace file="${agent.dir}/conf/rollback.properties">
+			<replacefilter token="@@@AGENT_BUNDLE_DIR@@@" value="${agent.bundle.dir}" />
+		</replace>
 
-<antcall target="chmod-exec">
-	<param name="chmod.dir" value="${agent.dir}" />
-</antcall>
+		<antcall target="chmod-exec">
+			<param name="chmod.dir" value="${agent.dir}" />
+		</antcall>
 
-</target>
+	</target>
 
-<target name="build-agent" description="Build and pack the agent directory structure" depends="compile-agent,compile-plugins,pack-pdk,pack-agent" />
+	<target name="build-agent" description="Build and pack the agent directory structure" depends="compile-agent,compile-plugins,pack-pdk,pack-agent" />
 
 
 
-<!-- ==================== Generic targets ==================== -->
+	<!-- ==================== Generic targets ==================== -->
 
-<target name="clean" description="Clean the build directories">
-<delete dir="${build.dir}" />
-<delete dir="${hq.util}/target" />
-<delete dir="${hq.common}/target" />
-<delete dir="${hq.lather}/target" />
-<delete dir="${hq.pdk.shared}/target" />
-<delete dir="${hq.pdk.agent}/target" />
-<delete dir="${hq.agent}/target" />
-<delete dir="${hq.web}/target" />
-<delete dir="${hq.installer}/target" />
-<delete dir="${rendit_sys.dir}/target/classes" />
-<delete includeemptydirs="true">
-	<fileset dir="${hq.agent.handlers}" defaultexcludes="false" includes="*/target/classes/**" />
-</delete>
-<delete includeemptydirs="true">
-	<fileset dir="${hq.plugins}" defaultexcludes="false" includes="*/target/classes/**" />
-</delete>
-</target>
+	<target name="clean" description="Clean the build directories">
+		<delete dir="${build.dir}" />
+		<delete dir="${hq.util}/target" />
+		<delete dir="${hq.common}/target" />
+		<delete dir="${hq.lather}/target" />
+		<delete dir="${hq.pdk.shared}/target" />
+		<delete dir="${hq.pdk.agent}/target" />
+		<delete dir="${hq.agent}/target" />
+		<delete dir="${hq.web}/target" />
+		<delete dir="${hq.installer}/target" />
+		<delete dir="${rendit_sys.dir}/target/classes" />
+		<delete includeemptydirs="true">
+			<fileset dir="${hq.agent.handlers}" defaultexcludes="false" includes="*/target/classes/**" />
+		</delete>
+		<delete includeemptydirs="true">
+			<fileset dir="${hq.plugins}" defaultexcludes="false" includes="*/target/classes/**" />
+		</delete>
+	</target>
 
-<target name="deploy" description="Copy the war to tomcat deploy dir ( slow )">
-<!-- Deploy app as ROOT -->
-<delete dir="${tomcat.deploy.dir}/ROOT" />
-<mkdir dir="${tomcat.deploy.dir}/ROOT" />
-<copy todir="${tomcat.deploy.dir}/ROOT">
-	<fileset dir="${war.dir}" includes="**" />
-</copy>
-</target>
+	<target name="deploy" description="Copy the war to tomcat deploy dir ( slow )">
+		<!-- Deploy app as ROOT -->
+		<delete dir="${tomcat.deploy.dir}/ROOT" />
+		<mkdir dir="${tomcat.deploy.dir}/ROOT" />
+		<copy todir="${tomcat.deploy.dir}/ROOT">
+			<fileset dir="${war.dir}" includes="**" />
+		</copy>
+	</target>
 
-<target name="redeploy" depends="undeploy,deploy" />
+	<target name="redeploy" depends="undeploy,deploy" />
 
-<target name="undeploy" description="Remove the war from tomcat deploy dir">
-<delete dir="${tomcat.deploy.dir}/ROOT" />
-</target>
+	<target name="undeploy" description="Remove the war from tomcat deploy dir">
+		<delete dir="${tomcat.deploy.dir}/ROOT" />
+	</target>
 
-<target name="hq-javadoc" depends="hibernate-prep">
-<!-- 
+	<target name="hq-javadoc" depends="hibernate-prep">
+		<!-- 
     set this in ~/hq/build.properties if you want it someplace other than 
     your source tree 
     -->
-<property name="hq.javadoc.dest.dir" location="${build.dir}/javadoc" />
-<property name="hq.api.version" value="${version}" />
-<mkdir dir="${hq.javadoc.dest.dir}" />
-<javadoc destdir="${hq.javadoc.dest.dir}" private="false" package="false" version="true" author="true" maxmemory="256M" use="true" packagenames="org.hyperic.*" additionalparam="-breakiterator" overview="doc/javadoc-overview.html" windowtitle="Hyperic HQ Management System">
-	<sourcepath>
-		<pathelement location="src" />
-		<pathelement location="build/src" />
-	</sourcepath>
-	<classpath>
-		<path refid="alljars" />
-		<pathelement location="build/classes" />
-	</classpath>
-	<doctitle>
-		<![CDATA[ Hyperic HQ  <br>API Specification ]]></doctitle>
-	<header>
-		<![CDATA[<font size="2">Hyperic HQ v. ${hq.api.version}</font>]]>
+		<property name="hq.javadoc.dest.dir" location="${build.dir}/javadoc" />
+		<property name="hq.api.version" value="${version}" />
+		<mkdir dir="${hq.javadoc.dest.dir}" />
+		<javadoc destdir="${hq.javadoc.dest.dir}" private="false" package="false" version="true" author="true" maxmemory="256M" use="true" packagenames="org.hyperic.*" additionalparam="-breakiterator" overview="doc/javadoc-overview.html" windowtitle="Hyperic HQ Management System">
+			<sourcepath>
+				<pathelement location="src" />
+				<pathelement location="build/src" />
+			</sourcepath>
+			<classpath>
+				<path refid="alljars" />
+				<pathelement location="build/classes" />
+			</classpath>
+			<doctitle>
+				<![CDATA[ Hyperic HQ  <br>API Specification ]]></doctitle>
+			<header>
+				<![CDATA[<font size="2">Hyperic HQ v. ${hq.api.version}</font>]]>
       </header>
-<bottom>
-	<![CDATA[Copyright &#169; 2004-2006 Hyperic, Inc. <a href="mailto:info@hyperic.net">info@hyperic.net</a>, All Rights Reserved.]]>
+		<bottom>
+			<![CDATA[Copyright &#169; 2004-2006 Hyperic, Inc. <a href="mailto:info@hyperic.net">info@hyperic.net</a>, All Rights Reserved.]]>
       </bottom>
 </javadoc>
 </target>
@@ -1369,9 +1335,9 @@
 
 <target name="build-instrumented-war" depends="instrument-war,compile-rendit,compile-plugins,pack-rendit,pack-plugins,pack-war">
 <copy todir="${war.dir}/WEB-INF/lib/">
-<fileset dir="${thirdparty.lib}">
-<include name="com.springsource.com.cenqua.clover-2.4.2.jar" />
-</fileset>
+	<fileset dir="${thirdparty.lib}">
+		<include name="com.springsource.com.cenqua.clover-2.4.2.jar" />
+	</fileset>
 </copy>
 </target>
 
@@ -1394,9 +1360,9 @@
 
 <target name="build-instrumented-agent" depends="instrument-agent,compile-plugins,pack-pdk,pack-agent">
 <copy todir="${agent.dir}/bundles/${agent.bundle.dir}/lib">
-<fileset dir="${thirdparty.lib}">
-<include name="com.springsource.com.cenqua.clover-2.4.2.jar" />
-</fileset>
+	<fileset dir="${thirdparty.lib}">
+		<include name="com.springsource.com.cenqua.clover-2.4.2.jar" />
+	</fileset>
 </copy>
 </target>
 
@@ -1416,20 +1382,20 @@
 <macrodef name="instrument-agent-handler">
 <attribute name="handler.name" />
 <sequential>
-<instrument-module classpath.id="agent.handler.compile.classpath" input.dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/src/main/java" resource.dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/src/main/resources" output.dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/target/classes" staging.dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/target/clover/staging/src/main/java" />
-<delete dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/target/clover" quiet="true" />
+	<instrument-module classpath.id="agent.handler.compile.classpath" input.dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/src/main/java" resource.dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/src/main/resources" output.dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/target/classes" staging.dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/target/clover/staging/src/main/java" />
+	<delete dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/target/clover" quiet="true" />
 </sequential>
 </macrodef>
 
 <macrodef name="instrument-agent-handler-tests">
 <attribute name="handler.name" />
 <sequential>
-<path id="test.run.classpath">
-<path refid="agent.handler.compile.classpath" />
-<path location="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/target/classes" />
-</path>
-<instrument-module classpath.id="test.run.classpath" input.dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/src/test/java" resource.dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/src/test/resources" output.dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/target/test-classes" staging.dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/target/clover/staging/src/test/java" />
-<delete dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/target/clover" quiet="true" />
+	<path id="test.run.classpath">
+		<path refid="agent.handler.compile.classpath" />
+		<path location="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/target/classes" />
+	</path>
+	<instrument-module classpath.id="test.run.classpath" input.dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/src/test/java" resource.dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/src/test/resources" output.dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/target/test-classes" staging.dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/target/clover/staging/src/test/java" />
+	<delete dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/target/clover" quiet="true" />
 </sequential>
 </macrodef>
 
