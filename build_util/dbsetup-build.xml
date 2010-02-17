@@ -24,19 +24,18 @@
 	</target>
 
 	<target name="dbsetup-combine" depends="dbsetup-init,dbsetup-combine-check" unless="dbsetup-combine.notrequired">
-
 		<delete quiet="true" dir="${build.dir}/sql" />
 		<mkdir dir="${build.dir}/sql" />
+		<copy todir="${build.dir}/sql">
+			<fileset dir="${hq.home}/hq-installer/sql" includes="*-data.xml" />
+		</copy>
 		<switch value="${hqee.build}">
 			<case value="true">
 				<copy todir="${build.dir}/sql">
-					<fileset dir="${hq.home}/hq-installer/sql" includes="*-data.xml" />
+					<fileset dir="${basedir}/hqee-installer/sql" includes="*-data.xml" />
 				</copy>
 			</case>
 			<default>
-				<copy todir="${build.dir}/sql">
-					<fileset dir="${hq.home}/hq-installer/sql" includes="*-data.xml" excludes="rt-data.xml" />
-				</copy>
 			</default>
 		</switch>
 
