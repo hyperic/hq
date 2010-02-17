@@ -533,6 +533,7 @@
   </target>
 
  
+  <target name="build-all" description="Builds all components" depends="build-agent,build-war" />
 	
   <target name="build-war" description="Build and create the war" depends="compile,compile-rendit,compile-plugins,pack-rendit,pack-plugins,pack-war" />
 
