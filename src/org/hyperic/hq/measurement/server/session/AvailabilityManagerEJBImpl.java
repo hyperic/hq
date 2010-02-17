@@ -793,10 +793,12 @@ public class AvailabilityManagerEJBImpl
             AvailabilityDataRLE rle = (AvailabilityDataRLE)entry.getValue();
             // if we call remove() on an object which is already in the session
             // hibernate will throw NonUniqueObjectExceptions
-            if (_dao.getSession().contains(rle)) {
-                _dao.getSession().evict(rle);
+            AvailabilityDataRLE tmp = _dao.getById(rle.getAvailabilityDataId());
+            if (tmp != null) {
+                _dao.remove(tmp);
+            } else {
+                _dao.remove(rle);
             }
-            _dao.remove(rle);
         }
         // addData() could be overwriting RLE data points (i.e. from 0.0 to 1.0)
         // with the same ID.  If this is the scenario, then we must run

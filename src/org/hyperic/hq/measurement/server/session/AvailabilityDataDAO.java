@@ -459,4 +459,8 @@ public class AvailabilityDataDAO extends HibernateDAO {
         save(availObj);
         return availObj;
     }
+
+    public AvailabilityDataRLE getById(AvailabilityDataId id) {
+        return (AvailabilityDataRLE) get(id);
+    }
 }
