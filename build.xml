@@ -731,7 +731,7 @@
 
 			<fileset dir="${thirdparty.lib}/postgresql" includes="postgresql-8.2-*.jdbc3.jar" />
 
-			<fileset dir="${thirdparty.lib}/oracle_jdbc" includes="*.jar" />
+
 
 			<fileset dir="${hibernate.lib}">
 				<include name="*.jar" />
