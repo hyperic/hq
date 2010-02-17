@@ -61,7 +61,7 @@
 			<fileset dir="${agent.dir}" />
 		</copy>
 		<property name="connectors.dir" location="${build.dir}/${archive.basename}-agent-${version}/product_connectors" />
-		
+
 		<!-- Copy SNMP and RT packages -->
 		<copy toDir="${connectors.dir}">
 			<fileset dir="${hq.bin}/product_connectors">
@@ -135,5 +135,41 @@
 		<echo message="Generating a SSL key for https" />
 		<genkey alias="HQ" keystore="${tomcat.home}/conf/hyperic.keystore" keyalg="rsa" storepass="hyperic" dname="CN=Hyperic HQ, OU=HQ, O=hyperic.net, C=US" />
 	</target>
+
+	<!-- ==================== PDK packaging ==================== -->
+	<target name="pdk-javadoc">
+		<property name="pdk.javadoc" location="${pdk.dir}/javadoc" />
+		<property name="pdk.version" value="${version}" />
+		<property name="pdk.title" value="Hyperic HQ Plugin API" />
+		<mkdir dir="${pdk.javadoc}" />
+		<javadoc destdir="${pdk.javadoc}" private="false" version="true" author="false" maxmemory="256M" windowtitle="${pdk.title}">
+			<sourcepath>
+				<pathelement location="${hq.pdk.shared}/src/main/java" />
+				<pathelement location="${hq.pdk.agent}/src/main/java" />
+			</sourcepath>
+			<fileset dir="${hq.pdk.shared}/src/main/java">
+				<include name="**/*.java" />
+			</fileset>
+			<fileset dir="${hq.pdk.agent}/src/main/java">
+				<include name="**/*.java" />
+			</fileset>
+			<classpath>
+				<path refid="shared.compile.classpath" />
+			</classpath>
+			<doctitle>${pdk.title}</doctitle>
+			<header>
+				<![CDATA[<font size="2">${pdk.title} v. ${pdk.version}</font>]]>
+	      </header>
+		<bottom>
+			<![CDATA[Copyright &#169; 2004-2006 Hyperic, Inc. <a href="mailto:support@hyperic.net">support@hyperic.net</a>, All Rights Reserved.]]>
+	      </bottom>
+</javadoc>
+</target>
+
+<target name="archive-prep" depends="build-agent,build-war,pdk-javadoc,unpack-tomcat,pack-installer,pack-installer-archive" />
+
+<target name="archive-full" depends="check-release,archive-prep">
+<antcall target="roll-archives" />
+</target>
 
 </project>
