@@ -60,10 +60,8 @@
 		<copy todir="${build.dir}/${archive.basename}-agent-${version}">
 			<fileset dir="${agent.dir}" />
 		</copy>
-
 		<property name="connectors.dir" location="${build.dir}/${archive.basename}-agent-${version}/product_connectors" />
-
-
+		
 		<!-- Copy SNMP and RT packages -->
 		<copy toDir="${connectors.dir}">
 			<fileset dir="${hq.bin}/product_connectors">
@@ -83,15 +81,15 @@
 	<target name="roll-platform-specific-archive">
 		<!-- Is there a postgresql bundle available for this platform? -->
 		<available property="pgsql.available" file="${pgsql.dir}/${archive-suffix}" />
-		<delete dir="${archive-dir}/installer-${version}/data/hqdb" />
+		<delete dir="${archive-dir}-installer/installer-${version}/data/hqdb" />
 		<antcall target="bundle-pgsql" />
 
 		<!-- include the license-info file -->
-		<copy file="${hq.home}/LICENSES.txt" toFile="${archive-dir}/LICENSES.txt" />
+		<copy file="${hq.home}/LICENSES.txt" toFile="${archive-dir}-installer/LICENSES.txt" />
 
 		<!-- Packup the whole thing -->
 		<antcall target="compress-dir">
-			<param name="archive-dir" value="${archive-dir}" />
+			<param name="archive-dir" value="${archive-dir}-installer" />
 			<param name="archive-file" value="${build.dir}/${archive.basename}-installer-${version}-${build}-${archive-suffix}.${compress-mode}" />
 			<param name="compress-mode" value="${compress-mode}" />
 		</antcall>
@@ -106,7 +104,6 @@
 	</target>
 
 	<target name="roll-upgrade-agent-bundle" description="Rolls the bundle required for the agent auto upgrade">
-
 		<delete dir="${build.dir}/agent-upgrade" />
 		<mkdir dir="${build.dir}/agent-upgrade" />
 
@@ -118,8 +115,8 @@
 	</target>
 
 	<target name="bundle-pgsql" if="pgsql.available">
-		<mkdir dir="${archive-dir}/installer-${version}/data/hqdb" />
-		<copy todir="${archive-dir}/installer-${version}/data/hqdb">
+		<mkdir dir="${archive-dir}-installer/installer-${version}/data/hqdb" />
+		<copy todir="${archive-dir}-installer/installer-${version}/data/hqdb">
 			<fileset dir="${pgsql.dir}/${archive-suffix}">
 				<include name="*.sh" />
 				<include name="*.bat" />
@@ -127,8 +124,8 @@
 				<include name="pgsql.zip" />
 			</fileset>
 		</copy>
-		<mkdir dir="${archive-dir}/installer-${version}/data/hqdb/conf" />
-		<copy todir="${archive-dir}/installer-${version}/data/hqdb/conf">
+		<mkdir dir="${archive-dir}-installer/installer-${version}/data/hqdb/conf" />
+		<copy todir="${archive-dir}-installer/installer-${version}/data/hqdb/conf">
 			<fileset dir="${pgsql.dir}/${archive-suffix}/conf" includes="**" />
 		</copy>
 	</target>
