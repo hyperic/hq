@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.ui.action.resource.group.inventory;
 
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
