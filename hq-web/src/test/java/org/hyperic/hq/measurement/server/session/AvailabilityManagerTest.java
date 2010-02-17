@@ -95,7 +95,6 @@ public class AvailabilityManagerTest {
         dbPopulator.restoreDatabase();
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testFindLastAvail() {
         List<AvailabilityDataRLE> rle = dao.findLastAvail(Collections.singletonList(10100));
@@ -455,7 +454,6 @@ public class AvailabilityManagerTest {
         Assert.assertTrue(isAvailDataRLEValid(PLAT_MEAS_ID, pt));
     }
 
-    @SuppressWarnings("unchecked")
     private boolean isAvailDataRLEValid(Integer mId, DataPoint lastPt) {
         List<Integer> mids = Collections.singletonList(mId);
         return isAvailDataRLEValid(mids, lastPt);
