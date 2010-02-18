@@ -149,7 +149,7 @@ public interface ResourceGroupManager
     /**
      * Get the member type counts of a group
      */
-    public Map<String, Integer> getMemberTypes(ResourceGroup g);
+    public Map<String, Number> getMemberTypes(ResourceGroup g);
 
     /**
      * Get all the groups a resource belongs to

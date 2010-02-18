@@ -10,17 +10,17 @@
 	<target name="hqu-init" unless="hqu-init.notrequired">
 		<macrodef name="hqu-copy">
 			<attribute name="wardir" />
-			<attribute name="plugindir"/>
-			 <sequential>
+			<attribute name="plugindir" />
+			<sequential>
 				<mkdir dir="@{wardir}/hqu" />
 				<copy todir="@{wardir}/hqu">
 					<fileset dir="${plugindir}">
 						<exclude name="scaffold/**" />
 						<exclude name="extra/**" />
 						<exclude name="old/**" />
-						<exclude name="**/.classpath"/>
-						<exclude name="**/.project"/>
-						<exclude name="**/target/**"/>
+						<exclude name="**/.classpath" />
+						<exclude name="**/.project" />
+						<exclude name="**/target/**" />
 					</fileset>
 				</copy>
 			</sequential>
@@ -46,13 +46,13 @@
 			<path location="${hq.util}/target/classes" />
 			<path location="${hq.web}/target/classes" />
 		</path>
-		
+
 		<taskdef name="groovydoc" classname="org.codehaus.groovy.ant.Groovydoc" classpathref="compile.classpath" />
-		
+
 		<taskdef name="groovyc" classname="org.codehaus.groovy.ant.Groovyc">
 			<classpath refid="compile.classpath" />
 		</taskdef>
-			
+
 		<property name="hqu-init.notrequired" value="true" />
 	</target>
 
@@ -60,27 +60,27 @@
 	<target name="hqu-deploy" depends="hqu-init">
 		<property name="wardir" value="${tomcat.deploy.dir}/ROOT" />
 		<property name="plugindir" value="${basedir}/hq-ui-plugins" />
-		<hqu-copy wardir="${wardir}" plugindir="{plugindir}"/>
+		<hqu-copy wardir="${wardir}" plugindir="{plugindir}" />
 	</target>
-	
+
 	<target name="compile-rendit" depends="hqu-init">
 		<mkdir dir="${rendit_sys.dir}/target/classes" />
 		<!-- compile the groovy scripts as a check -->
 		<groovyc destdir="${rendit_sys.dir}/target/classes" srcdir="${rendit_sys.dir}/src/main/java" listfiles="true">
 			<classpath refid="compile.classpath" />
 		</groovyc>
-		<copy todir="${rendit_sys.dir}/target/classes" >
-			<fileset dir="${rendit_sys.dir}/src/main/resources"/>
+		<copy todir="${rendit_sys.dir}/target/classes">
+			<fileset dir="${rendit_sys.dir}/src/main/resources" />
 		</copy>
 	</target>
-	
+
 	<target name="pack-rendit">
-		<mkdir dir="${build.dir}"/>
+		<mkdir dir="${build.dir}" />
 		<!-- compiled classes -->
-		<jar file="${build.dir}/hqu-groovy.jar" basedir="${rendit_sys.dir}/target/classes"/>
-	
+		<jar file="${build.dir}/hqu-groovy.jar" basedir="${rendit_sys.dir}/target/classes" />
+
 		<!-- script sources -->
-		<jar file="${build.dir}/hqu-groovy-source.jar" basedir="${rendit_sys.dir}/src/main/java"/>	
+		<jar file="${build.dir}/hqu-groovy-source.jar" basedir="${rendit_sys.dir}/src/main/java" />
 	</target>
 
 	<target name="hqu-undeploy" depends="hqu-init">
