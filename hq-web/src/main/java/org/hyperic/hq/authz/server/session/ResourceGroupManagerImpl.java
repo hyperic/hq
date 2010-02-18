@@ -381,7 +381,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
      * Get the member type counts of a group
      * 
      */
-    public Map<String, Integer> getMemberTypes(ResourceGroup g) {
+    public Map<String, Number> getMemberTypes(ResourceGroup g) {
         return resourceGroupDAO.getMemberTypes(g);
     }
 

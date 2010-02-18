@@ -67,6 +67,7 @@ import org.quartz.SchedulerException;
 import org.quartz.SimpleTrigger;
 import org.quartz.Trigger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
@@ -129,12 +130,14 @@ public class EmailManagerImpl implements EmailManager {
                     mimeMessage.setContent(htmlBody[i], "text/html");
                     if (log.isDebugEnabled()) {
                         log.debug("Sending HTML Alert notification: " + subject + " to " +
-                                  addresses[i].getAddress().getAddress());
+                                  addresses[i].getAddress().getAddress() +
+                                  "\n" + htmlBody[i]);
                     }
                 } else {
                     if (log.isDebugEnabled()) {
                         log.debug("Sending Alert notification: " + subject + " to " +
-                                  addresses[i].getAddress().getAddress());
+                                  addresses[i].getAddress().getAddress() +
+                                  "\n" + body[i]);
                     }
                     mimeMessage.setContent(body[i], "text/plain");
                 }
@@ -143,7 +146,10 @@ public class EmailManagerImpl implements EmailManager {
             }
         } catch (MessagingException e) {
             log.error("Error sending email: " + subject);
-            log.debug("Messaging Error sending email", e);
+            log.debug("MessagingException sending email", e);
+        } catch (MailException me) {
+            log.error("Error sending email: " + subject);
+            log.debug("MailException sending email", me);
         }
     }
 

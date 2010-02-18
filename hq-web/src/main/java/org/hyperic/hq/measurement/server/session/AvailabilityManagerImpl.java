@@ -688,8 +688,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
                 updateCache(availPoints, updateList, outOfOrderAvail);
                 debugTimes(begin, "updateCache", availPoints.size());
                 begin = getDebugTime(debug);
-                currAvails = createCurrAvails(
-                    outOfOrderAvail, updateList);
+                currAvails = createCurrAvails(outOfOrderAvail, updateList);
                 debugTimes(begin, "setCurrAvails", outOfOrderAvail.size() + updateList.size());
                 state = captureCurrAvailState(currAvails);
                 begin = getDebugTime(debug);

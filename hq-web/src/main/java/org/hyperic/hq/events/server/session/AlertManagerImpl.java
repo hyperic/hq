@@ -508,7 +508,7 @@ public class AlertManagerImpl implements AlertManager {
         // Time voodoo the end time to the nearest minute so that we might
         // be able to use cached results
         endTime = TimingVoodoo.roundUpTime(endTime, 60000);
-        Integer count = alertDAO.countByCreateTimeAndPriority(subj, endTime - timeRange, endTime, 0, false, true,
+        Number count = alertDAO.countByCreateTimeAndPriority(subj, endTime - timeRange, endTime, 0, false, true,
             groupId, null);
         if (count != null)
             return count.intValue();
