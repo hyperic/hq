@@ -9,7 +9,7 @@ CLIENT_CMD="${JAVA_HOME}/bin/java -client \
         -Dagent.mode=thread \
         -Djava.security.auth.login.config=jaas.config \
         -Djava.net.preferIPv4Stack=true \
-	-Dcom.sun.management.jmxremote \
+        -Dcom.sun.management.jmxremote \
         $CLONE_JAVA_FLAGS \
         -cp $CLONE_CP org.hyperic.util.thread.MultiRunner $1"
 
