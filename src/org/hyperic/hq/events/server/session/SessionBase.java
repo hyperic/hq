@@ -164,8 +164,6 @@ public abstract class SessionBase {
         return ResourceManagerEJBImpl.getOne().findResource(id);
     }
 
-    private static ResourceOperationsHelper resourceOperationsHelper = new ResourceOperationsHelper();
-    
     public static void canViewResourceTypeAlertDefinitionTemplate(AuthzSubject user)
     throws PermissionException {
         // ...right now, you have to be a member of the super user's role to do anything with
@@ -210,14 +208,14 @@ public abstract class SessionBase {
     throws PermissionException {
         // ...we need to check the resource associated with the alert definition to determine 
         // if the user can view the alert definition.  Must have read permission on resource...
-        checkAlertDefinitionPermission(user, entityId, resourceOperationsHelper.getReadOperation(entityId.getType()));
+        checkAlertDefinitionPermission(user, entityId, ResourceOperationsHelper.getReadOperation(entityId.getType()));
     }
     
     public static void canModifyAlertDefinition(AuthzSubject user, AppdefEntityID entityId)
     throws PermissionException {
         // ...we need to check the resource associated with the alert definition to determine 
         // if the user can modify the alert definition.  Must have modify permission on resource...
-        checkAlertDefinitionPermission(user, entityId, resourceOperationsHelper.getUpdateOperation(entityId.getType()));
+        checkAlertDefinitionPermission(user, entityId, ResourceOperationsHelper.getUpdateOperation(entityId.getType()));
     }
     
     public static void canCreateAlertDefinition(AuthzSubject user, AppdefEntityID entityId)
@@ -226,7 +224,7 @@ public abstract class SessionBase {
         // if the user can modify the alert definition.  Must have modify permission on resource...
         // TODO ...If we introduce finer grained permission for Alert definition, we can make the change here
         // and the rest should just work...
-        checkAlertDefinitionPermission(user, entityId, resourceOperationsHelper.getUpdateOperation(entityId.getType()));
+        checkAlertDefinitionPermission(user, entityId, ResourceOperationsHelper.getUpdateOperation(entityId.getType()));
     }
 
     public static void canDeleteAlertDefinition(AuthzSubject user, AppdefEntityID entityId)
@@ -235,7 +233,7 @@ public abstract class SessionBase {
         // if the user can modify the alert definition.  Must have modify permission on resource...
         // TODO ...If we introduce finer grained permission for Alert definition, we can make the change here
         // and the rest should just work...
-        checkAlertDefinitionPermission(user, entityId, resourceOperationsHelper.getUpdateOperation(entityId.getType()));
+        checkAlertDefinitionPermission(user, entityId, ResourceOperationsHelper.getUpdateOperation(entityId.getType()));
     }
 
     private static void checkAlertDefinitionPermission(AuthzSubject user, AppdefEntityID id, String operationName) 
@@ -303,9 +301,9 @@ public abstract class SessionBase {
             
             // ...then check if we have fix/acknowledge permissions on alert...
             checkPermission(user.getId(), 
-                            resourceOperationsHelper.getResourceType(resourceTypeId), 
+                            ResourceOperationsHelper.getResourceType(resourceTypeId), 
                             entityId.getId(), 
-                            resourceOperationsHelper.getManageAlertOperation(resourceTypeId));            
+                            ResourceOperationsHelper.getManageAlertOperation(resourceTypeId));            
         }
     }
     

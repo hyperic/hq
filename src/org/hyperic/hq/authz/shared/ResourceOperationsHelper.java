@@ -36,7 +36,7 @@ public class ResourceOperationsHelper {
     
     private static List operationsList;
     
-    public ResourceOperationsHelper() {
+    static {
         // ArrayList containing all the operations for each resource type...
         // ORDER IS IMPORTANT!
         operationsList = new ArrayList(48);
@@ -88,74 +88,74 @@ public class ResourceOperationsHelper {
         operationsList.add(AuthzConstants.escOpModifyEscalation);
         operationsList.add(AuthzConstants.escOpRemoveEscalation);
         operationsList.add(null);
-        operationsList.add(null);
+        operationsList.add(null);       
     }
-
-    public String getOperationName(int resourceTypeCode, int operationCode) {
+    
+    public static String getOperationName(int resourceTypeCode, int operationCode) {
         return (String) operationsList.get(resourceTypeCode + operationCode);
     }
     
-    public String getCreateOperation(Resource resource) 
+    public static String getCreateOperation(Resource resource) 
     throws IllegalArgumentException {
         return getOperation(resource, CREATE);
     }
 
-    public String getReadOperation(Resource resource) 
+    public static String getReadOperation(Resource resource) 
     throws IllegalArgumentException {
         return getOperation(resource, READ);
     }
 
-    public String getUpdateOperation(Resource resource) 
+    public static String getUpdateOperation(Resource resource) 
     throws IllegalArgumentException {
         return getOperation(resource, UPDATE);
     }
 
-    public String getDeleteOperation(Resource resource) 
+    public static String getDeleteOperation(Resource resource) 
     throws IllegalArgumentException {
         return getOperation(resource, DELETE);
     }
 
-    public String getManageAlertOperation(Resource resource) 
+    public static String getManageAlertOperation(Resource resource) 
     throws IllegalArgumentException {
         return getOperation(resource, MANAGE_ALERTS);
     }
 
-    public String getManageControlOperation(Resource resource) 
+    public static String getManageControlOperation(Resource resource) 
     throws IllegalArgumentException {
         return getOperation(resource, MANAGE_CONTROLS);
     }
     
-    public String getCreateOperation(int resourceTypeId) 
+    public static String getCreateOperation(int resourceTypeId) 
     throws IllegalArgumentException {
         return getOperation(resourceTypeId, CREATE);
     }
 
-    public String getReadOperation(int resourceTypeId) 
+    public static String getReadOperation(int resourceTypeId) 
     throws IllegalArgumentException {
         return getOperation(resourceTypeId, READ);
     }
 
-    public String getUpdateOperation(int resourceTypeId) 
+    public static String getUpdateOperation(int resourceTypeId) 
     throws IllegalArgumentException {
         return getOperation(resourceTypeId, UPDATE);
     }
 
-    public String getDeleteOperation(int resourceTypeId) 
+    public static String getDeleteOperation(int resourceTypeId) 
     throws IllegalArgumentException {
         return getOperation(resourceTypeId, DELETE);
     }
 
-    public String getManageAlertOperation(int resourceTypeId) 
+    public static String getManageAlertOperation(int resourceTypeId) 
     throws IllegalArgumentException {
         return getOperation(resourceTypeId, MANAGE_ALERTS);
     }
 
-    public String getManageControlOperation(int resourceTypeId) 
+    public static String getManageControlOperation(int resourceTypeId) 
     throws IllegalArgumentException {
         return getOperation(resourceTypeId, MANAGE_CONTROLS);
     }
    
-    public String getResourceType(Resource resource)
+    public static String getResourceType(Resource resource)
     throws IllegalArgumentException, UnsupportedOperationException {
         if (resource == null || resource.getResourceType() == null) {
             throw new IllegalArgumentException("resource must be not be null and must have a valid resource type.");
@@ -166,7 +166,7 @@ public class ResourceOperationsHelper {
         return getResourceType(resourceTypeId);
     }
     
-    public String getResourceType(int resourceTypeId)
+    public static String getResourceType(int resourceTypeId)
     throws IllegalArgumentException, UnsupportedOperationException {
         switch (resourceTypeId) {
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
@@ -182,14 +182,14 @@ public class ResourceOperationsHelper {
         }
     }
     
-    private String getOperation(Resource resource, int operationCode) 
+    private static String getOperation(Resource resource, int operationCode) 
     throws IllegalArgumentException {
         int resourceTypeId = resource.getResourceType().getId().intValue();
         
         return getOperation(resourceTypeId, operationCode);
     }
     
-    private String getOperation(int resourceTypeId, int operationCode)
+    private static String getOperation(int resourceTypeId, int operationCode)
     throws IllegalArgumentException {
         int resourceTypeCode;
         
@@ -217,7 +217,7 @@ public class ResourceOperationsHelper {
         return getOperationName(resourceTypeCode, operationCode);
     }
     
-    public CodePair getResourceTypeOperationCodePair(String operationName) {
+    public static CodePair getResourceTypeOperationCodePair(String operationName) {
         int index = operationsList.indexOf(operationName);
         int resourceTypeCode = ((index < MULTIPLIER) ? 0 : index/MULTIPLIER) * MULTIPLIER;
         int operationCode = index - resourceTypeCode;
@@ -225,7 +225,7 @@ public class ResourceOperationsHelper {
         return new CodePair(resourceTypeCode, operationCode);
     }
     
-    public class CodePair {
+    public static class CodePair {
         int resourceTypeCode;
         int operationCode;
         
