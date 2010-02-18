@@ -315,6 +315,7 @@ public class ServiceManagerImpl implements ServiceManager {
      * @param servTypeId service type id.
      * @return An array of service IDs.
      */
+    @Transactional(readOnly=true)
     public Integer[] getServiceIds(AuthzSubject subject, Integer servTypeId) throws PermissionException {
 
         try {
@@ -349,6 +350,7 @@ public class ServiceManagerImpl implements ServiceManager {
      * @return List of ServiceValue objects
      * 
      */
+    @Transactional(readOnly=true)
     public List<ServiceValue> findServicesById(AuthzSubject subject, Integer[] serviceIds)
         throws ServiceNotFoundException, PermissionException {
         List<ServiceValue> serviceList = new ArrayList<ServiceValue>(serviceIds.length);
@@ -364,6 +366,7 @@ public class ServiceManagerImpl implements ServiceManager {
      * Find Service by Id.
      * 
      */
+    @Transactional(readOnly=true)
     public Service findServiceById(Integer id) throws ServiceNotFoundException {
         Service service = getServiceById(id);
 
@@ -380,6 +383,7 @@ public class ServiceManagerImpl implements ServiceManager {
      * 
      * @return The Service identified by this id, or null if it does not exist.
      */
+    @Transactional(readOnly=true)
     public Service getServiceById(Integer id) {
         return serviceDAO.get(id);
     }
@@ -390,6 +394,7 @@ public class ServiceManagerImpl implements ServiceManager {
      * 
      * @return The Service identified by this id.
      */
+    @Transactional(readOnly=true)
     public Service getServiceById(AuthzSubject subject, Integer id) throws ServiceNotFoundException,
         PermissionException {
 
@@ -404,6 +409,7 @@ public class ServiceManagerImpl implements ServiceManager {
      * @return {@link List} of {@link Service}
      * 
      */
+    @Transactional(readOnly=true)
     public List<Service> getServicesByAIID(Server server, String aiid) {
         return serviceDAO.getByAIID(server, aiid);
     }
@@ -413,6 +419,7 @@ public class ServiceManagerImpl implements ServiceManager {
      * @param name corresponds to the EAM_RESOURCE.sort_name column
      * 
      */
+    @Transactional(readOnly=true)
     public Service getServiceByName(Server server, String name) {
         return serviceDAO.findByName(server, name);
     }
@@ -420,6 +427,7 @@ public class ServiceManagerImpl implements ServiceManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public Service getServiceByName(Platform platform, String name) {
         return serviceDAO.findByName(platform, name);
     }
@@ -428,6 +436,7 @@ public class ServiceManagerImpl implements ServiceManager {
      * Find a ServiceType by id
      * 
      */
+    @Transactional(readOnly=true)
     public ServiceType findServiceType(Integer id) throws ObjectNotFoundException {
         return serviceTypeDAO.findById(id);
     }
@@ -436,6 +445,7 @@ public class ServiceManagerImpl implements ServiceManager {
      * Find service type by name
      * 
      */
+    @Transactional(readOnly=true)
     public ServiceType findServiceTypeByName(String name) {
         return serviceTypeDAO.findByName(name);
     }
@@ -443,6 +453,7 @@ public class ServiceManagerImpl implements ServiceManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public Collection<Service> findDeletedServices() {
         return serviceDAO.findDeletedServices();
     }
@@ -451,6 +462,7 @@ public class ServiceManagerImpl implements ServiceManager {
      * @return PageList of ServiceTypeValues
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<ServiceTypeValue> getAllServiceTypes(AuthzSubject subject, PageControl pc) {
         Collection<ServiceType> serviceTypes = serviceTypeDAO.findAll();
         // valuePager converts local/remote interfaces to value objects
@@ -462,6 +474,7 @@ public class ServiceManagerImpl implements ServiceManager {
      * @return List of ServiceTypeValues
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<ServiceTypeValue> getViewableServiceTypes(AuthzSubject subject, PageControl pc)
         throws PermissionException, NotFoundException {
         // build the server types from the visible list of servers
@@ -476,6 +489,7 @@ public class ServiceManagerImpl implements ServiceManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<ServiceTypeValue> getServiceTypesByServerType(AuthzSubject subject, int serverTypeId) {
         Collection<ServiceType> serviceTypes = serviceTypeDAO.findByServerType_orderName(serverTypeId, true);
         if (serviceTypes.size() == 0) {
@@ -487,6 +501,7 @@ public class ServiceManagerImpl implements ServiceManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<ServiceTypeValue> findVirtualServiceTypesByPlatform(AuthzSubject subject, Integer platformId) {
         Collection<ServiceType> serviceTypes = serviceTypeDAO.findVirtualServiceTypesByPlatform(platformId.intValue());
         if (serviceTypes.size() == 0) {
@@ -500,6 +515,7 @@ public class ServiceManagerImpl implements ServiceManager {
      * @return A List of ServiceValue objects representing all of the services
      *         that the given subject is allowed to view.
      */
+    @Transactional(readOnly=true)
     public PageList<ServiceValue> getAllServices(AuthzSubject subject, PageControl pc) throws PermissionException,
         NotFoundException {
         // valuePager converts local/remote interfaces to value objects
@@ -586,6 +602,7 @@ public class ServiceManagerImpl implements ServiceManager {
      *         services that the given subject is allowed to view.
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<ServiceValue> getAllClusterAppUnassignedServices(AuthzSubject subject, PageControl pc)
         throws PermissionException, NotFoundException {
         // get list of pks user can view
@@ -734,6 +751,7 @@ public class ServiceManagerImpl implements ServiceManager {
      * Get services by server and type.
      * 
      */
+    @Transactional(readOnly=true)
     public PageList getServicesByServer(AuthzSubject subject, Integer serverId, PageControl pc)
         throws ServiceNotFoundException, ServerNotFoundException, PermissionException {
         return getServicesByServer(subject, serverId, null, pc);
@@ -742,6 +760,7 @@ public class ServiceManagerImpl implements ServiceManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<ServiceValue> getServicesByServer(AuthzSubject subject, Integer serverId, Integer svcTypeId,
                                                       PageControl pc) throws ServiceNotFoundException,
         PermissionException {
@@ -782,6 +801,7 @@ public class ServiceManagerImpl implements ServiceManager {
      * Get service POJOs by server and type.
      * 
      */
+    @Transactional(readOnly=true)
     public List getServicesByServer(AuthzSubject subject, Server server) throws PermissionException,
         ServiceNotFoundException {
         return filterUnviewable(subject, server.getServices());
@@ -790,6 +810,7 @@ public class ServiceManagerImpl implements ServiceManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public Integer[] getServiceIdsByServer(AuthzSubject subject, Integer serverId, Integer svcTypeId)
         throws ServiceNotFoundException, PermissionException {
         if (svcTypeId == null)
@@ -819,6 +840,7 @@ public class ServiceManagerImpl implements ServiceManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public List<ServiceValue> getServicesByType(AuthzSubject subject, String svcName, boolean asc)
         throws PermissionException, InvalidAppdefTypeException {
         ServiceType st = serviceTypeDAO.findByName(svcName);
@@ -841,6 +863,7 @@ public class ServiceManagerImpl implements ServiceManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public PageList getServicesByService(AuthzSubject subject, Integer serviceId, PageControl pc)
         throws ServiceNotFoundException, PermissionException {
         return getServicesByService(subject, serviceId, APPDEF_RES_TYPE_UNDEFINED, pc);
@@ -850,6 +873,7 @@ public class ServiceManagerImpl implements ServiceManager {
      * Get services by server.
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<ServiceValue> getServicesByService(AuthzSubject subject, Integer serviceId, Integer svcTypeId,
                                                        PageControl pc) throws ServiceNotFoundException,
         PermissionException {
@@ -862,6 +886,7 @@ public class ServiceManagerImpl implements ServiceManager {
      * Get service IDs by service.
      * 
      */
+    @Transactional(readOnly=true)
     public Integer[] getServiceIdsByService(AuthzSubject subject, Integer serviceId, Integer svcTypeId)
         throws ServiceNotFoundException, PermissionException {
         // find any children
@@ -882,6 +907,7 @@ public class ServiceManagerImpl implements ServiceManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public PageList getServicesByPlatform(AuthzSubject subject, Integer platId, PageControl pc)
         throws ServiceNotFoundException, PlatformNotFoundException, PermissionException {
         return getServicesByPlatform(subject, platId, APPDEF_RES_TYPE_UNDEFINED, pc);
@@ -891,6 +917,7 @@ public class ServiceManagerImpl implements ServiceManager {
      * Get platform services (children of virtual servers)
      * 
      */
+    @Transactional(readOnly=true)
     public PageList getPlatformServices(AuthzSubject subject, Integer platId, PageControl pc)
         throws PlatformNotFoundException, PermissionException, ServiceNotFoundException {
         return getPlatformServices(subject, platId, APPDEF_RES_TYPE_UNDEFINED, pc);
@@ -901,6 +928,7 @@ public class ServiceManagerImpl implements ServiceManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public PageList getPlatformServices(AuthzSubject subject, Integer platId, Integer typeId, PageControl pc)
         throws PlatformNotFoundException, PermissionException, ServiceNotFoundException {
         pc = PageControl.initDefaults(pc, SortAttribute.SERVICE_NAME);
@@ -913,6 +941,7 @@ public class ServiceManagerImpl implements ServiceManager {
      * specified type.
      * 
      */
+    @Transactional(readOnly=true)
     public List<Service> findServicesByType(Server server, ServiceType st) {
         return serviceDAO.findByServerAndType_orderName(server.getId(), st.getId());
     }
@@ -921,6 +950,7 @@ public class ServiceManagerImpl implements ServiceManager {
      * Get platform service POJOs
      * 
      */
+    @Transactional(readOnly=true)
     public List<Service> findPlatformServicesByType(Platform p, ServiceType st) {
         return serviceDAO.findPlatformServicesByType(p, st);
     }
@@ -930,6 +960,7 @@ public class ServiceManagerImpl implements ServiceManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public Collection getPlatformServices(AuthzSubject subject, Integer platId) throws ServiceNotFoundException,
         PermissionException {
         Collection<Service> services = serviceDAO.findPlatformServices_orderName(platId, true);
@@ -941,6 +972,7 @@ public class ServiceManagerImpl implements ServiceManager {
      * a specified type
      * 
      */
+    @Transactional(readOnly=true)
     public Map<Integer, List> getMappedPlatformServices(AuthzSubject subject, Integer platId, PageControl pc)
         throws PlatformNotFoundException, PermissionException, ServiceNotFoundException {
         pc = PageControl.initDefaults(pc, SortAttribute.SERVICE_NAME);
@@ -977,6 +1009,7 @@ public class ServiceManagerImpl implements ServiceManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<ServiceValue> getServicesByPlatform(AuthzSubject subject, Integer platId, Integer svcTypeId,
                                                         PageControl pc) throws ServiceNotFoundException,
         PlatformNotFoundException, PermissionException {
@@ -1002,6 +1035,7 @@ public class ServiceManagerImpl implements ServiceManager {
      *         representing all of the services that the given subject is
      *         allowed to view.
      */
+    @Transactional(readOnly=true)
     public PageList getServicesByApplication(AuthzSubject subject, Integer appId, PageControl pc)
         throws ApplicationNotFoundException, ServiceNotFoundException, PermissionException {
         return getServicesByApplication(subject, appId, APPDEF_RES_TYPE_UNDEFINED, pc);
@@ -1015,6 +1049,7 @@ public class ServiceManagerImpl implements ServiceManager {
      * @throws ApplicationNotFoundException if the appId is bogus
      * @throws ServiceNotFoundException if services could not be looked up
      */
+    @Transactional(readOnly=true)
     public PageList getServicesByApplication(AuthzSubject subject, Integer appId, Integer svcTypeId, PageControl pc)
         throws PermissionException, ApplicationNotFoundException, ServiceNotFoundException {
         return filterAndPage(getServicesByApplication(appId, pc), subject, svcTypeId, pc);
@@ -1027,6 +1062,7 @@ public class ServiceManagerImpl implements ServiceManager {
      * @throws ApplicationNotFoundException if the appId is bogus
      * @throws ServiceNotFoundException if services could not be looked up
      */
+    @Transactional(readOnly=true)
     public List getServicesByApplication(AuthzSubject subject, Integer appId) throws PermissionException,
         ApplicationNotFoundException, ServiceNotFoundException {
         return filterUnviewable(subject, getServicesByApplication(appId, PageControl.PAGE_ALL));
@@ -1076,6 +1112,7 @@ public class ServiceManagerImpl implements ServiceManager {
      *         representing all of the services that the given subject is
      *         allowed to view.
      */
+    @Transactional(readOnly=true)
     public PageList getServiceInventoryByApplication(AuthzSubject subject, Integer appId, PageControl pc)
         throws ApplicationNotFoundException, ServiceNotFoundException, PermissionException {
         return getServiceInventoryByApplication(subject, appId, APPDEF_RES_TYPE_UNDEFINED, pc);
@@ -1086,6 +1123,7 @@ public class ServiceManagerImpl implements ServiceManager {
      * API.
      * 
      */
+    @Transactional(readOnly=true)
     public PageList getFlattenedServicesByApplication(AuthzSubject subject, Integer appId, Integer typeId,
                                                       PageControl pc) throws ApplicationNotFoundException,
         ServiceNotFoundException, PermissionException {
@@ -1120,6 +1158,7 @@ public class ServiceManagerImpl implements ServiceManager {
      *         representing all of the services that the given subject is
      *         allowed to view.
      */
+    @Transactional(readOnly=true)
     public PageList getServiceInventoryByApplication(AuthzSubject subject, Integer appId, Integer svcTypeId,
                                                      PageControl pc) throws ApplicationNotFoundException,
         ServiceNotFoundException, PermissionException {
@@ -1142,6 +1181,7 @@ public class ServiceManagerImpl implements ServiceManager {
      * @return A List of ServiceValue objects representing all of the services
      *         that the given subject is allowed to view.
      */
+    @Transactional(readOnly=true)
     public Integer[] getFlattenedServiceIdsByApplication(AuthzSubject subject, Integer appId)
         throws ServiceNotFoundException, PermissionException, ApplicationNotFoundException {
 
@@ -1383,6 +1423,7 @@ public class ServiceManagerImpl implements ServiceManager {
      * Map a ResourceGroup to ServiceCluster, just temporary, should be able to
      * remove when done with the ServiceCluster to ResourceGroup Migration
      */
+    @Transactional(readOnly=true)
     public ServiceCluster getServiceCluster(ResourceGroup group) {
         if (group == null) {
             return null;
@@ -1485,6 +1526,7 @@ public class ServiceManagerImpl implements ServiceManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public List<Object[]> getServiceTypeCounts() {
         return serviceDAO.getServiceTypeCounts();
     }
@@ -1493,6 +1535,7 @@ public class ServiceManagerImpl implements ServiceManager {
      * Get the # of services within HQ inventory
      * 
      */
+    @Transactional(readOnly=true)
     public Number getServiceCount() {
         return serviceDAO.getServiceCount();
     }

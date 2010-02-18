@@ -167,6 +167,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public Measurement getAvailMeasurement(Resource resource) {
         return measurementDAO.findAvailMeasurement(resource);
     }
@@ -174,6 +175,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public List<Measurement> getPlatformResources() {
         return measurementDAO.findAvailMeasurementsByInstances(
             AppdefEntityConstants.APPDEF_TYPE_PLATFORM, null);
@@ -184,6 +186,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public long getDowntime(Resource resource, long begin, long end)
     throws MeasurementNotFoundException {
         Measurement meas = measurementDAO.findAvailMeasurement(resource);
@@ -213,6 +216,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public List<Integer> getAllAvailIds() {
         return measurementDAO.findAllAvailIds();
     }
@@ -220,6 +224,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public List<Measurement> getAvailMeasurementChildren(Resource resource,
                                                          String resourceRelationType) {
         final List<Integer> sList = Collections.singletonList(resource.getId());
@@ -237,6 +242,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      *         {@link Measurement}
      * 
      */
+    @Transactional(readOnly=true)
     public Map<Integer, List<Measurement>> getAvailMeasurementChildren(
             List<Integer> resourceIds, String resourceRelationType) {
         final List<Object[]> objects = measurementDAO.findRelatedAvailMeasurements(
@@ -247,6 +253,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public List<Measurement> getAvailMeasurementParent(
             Resource resource, String resourceRelationType) {
         final List<Integer> sList = Collections.singletonList(resource.getId());
@@ -261,6 +268,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public Map<Integer, List<Measurement>> getAvailMeasurementParent(
             List<Integer> resourceIds, String resourceRelationType) {
         final List<Object[]> objects =
@@ -291,6 +299,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<HighLowMetricValue> getHistoricalAvailData(
             Measurement m, long begin, long end, PageControl pc,
             boolean prependUnknowns) {
@@ -314,6 +323,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      * @see org.hyperic.hq.measurement.MeasurementConstants#AVAIL_UNKNOWN
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<HighLowMetricValue> getHistoricalAvailData(
             Integer[] mids, long begin, long end, long interval,
             PageControl pc, boolean prependUnknowns) {
@@ -330,6 +340,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      * @return List<AvailabilityDataRLE>
      * 
      */
+    @Transactional(readOnly=true)
     public List<AvailabilityDataRLE> getHistoricalAvailData(Resource res,
                                                             long begin, long end) {
         return availabilityDataDAO.getHistoricalAvails(res, begin, end);
@@ -474,6 +485,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      *         [IND_CFG_COUNT] [IND_LAST_TIME]
      * 
      */
+    @Transactional(readOnly=true)
     public Map<Integer, double[]> getAggregateData(Integer[] mids, long begin,
                                                    long end) {
         List<Object[]> avails =
@@ -487,6 +499,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      *         [IND_MAX] [IND_CFG_COUNT] [IND_LAST_TIME]
      * 
      */
+    @Transactional(readOnly=true)
     public Map<Integer, double[]> getAggregateDataByTemplate(Integer[] mids,
                                                              long begin,
                                                              long end) {
@@ -501,6 +514,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      *         [IND_MAX] [IND_CFG_COUNT] [IND_LAST_TIME]
      * 
      */
+    @Transactional(readOnly=true)
     public Map<Integer, double[]> getAggregateData(Integer[] tids, Integer[] iids,
                                                    long begin, long end) {
         List<Object[]> avails =
@@ -562,6 +576,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      * @return Map<Integer, MetricValue> Integer => Measurement.getId()
      * 
      */
+    @Transactional(readOnly=true)
     public Map<Integer, MetricValue> getLastAvail(
             Collection<? extends Object> resources,
             Map<Integer, List<Measurement>> measCache) {
@@ -612,6 +627,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public MetricValue getLastAvail(Measurement m) {
         Map<Integer, MetricValue> map = getLastAvail(new Integer[] { m.getId() });
         MetricValue mv = (MetricValue) map.get(m.getId());
@@ -630,6 +646,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      *         the measurementId
      * 
      */
+    @Transactional(readOnly=true)
     public Map<Integer, MetricValue> getLastAvail(Integer[] mids) {
         if (mids.length == 0) {
             return Collections.emptyMap();
@@ -664,6 +681,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      *        unavail entities will be returned.
      * 
      */
+    @Transactional(readOnly=true)
     public List<DownMetricValue> getUnavailEntities(List<Integer> includes) {
         List<DownMetricValue> rtn;
         if (includes != null) {

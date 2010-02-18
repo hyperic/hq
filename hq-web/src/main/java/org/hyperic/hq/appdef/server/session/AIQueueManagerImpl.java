@@ -222,7 +222,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
      * 
      * 
      */
-    @Transactional
+    @Transactional(readOnly=true)
     public PageList<AIPlatformValue> getQueue(AuthzSubject subject, boolean showIgnored,
                                               boolean showPlaceholders,
                                               boolean showAlreadyProcessed, PageControl pc) {
@@ -322,7 +322,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
      * @return An AIPlatformValue with the given id, or null if that platform id
      *         is not present in the queue.
      */
-    @Transactional
+    @Transactional(readOnly=true)
     public AIPlatformValue findAIPlatformById(AuthzSubject subject, int aiplatformID) {
 
         AIPlatform aiplatform = aiPlatformDAO.get(new Integer(aiplatformID));
@@ -342,7 +342,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
      * @return The AIPlatformValue with the given FQDN, or null if that FQDN
      *         does not exist in the queue.
      */
-    @Transactional
+    @Transactional(readOnly=true)
     public AIPlatformValue findAIPlatformByFqdn(AuthzSubject subject, String fqdn) {
         AIPlatform aiplatform = null;
         AIPlatformValue aiplatformValue = null;
@@ -367,7 +367,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
      * @return The AIServerValue with the given id, or null if that server id
      *         does not exist in the queue.
      */
-    @Transactional
+    @Transactional(readOnly=true)
     public AIServerValue findAIServerById(AuthzSubject subject, int serverID) {
         AIServer aiserver = aIServerDAO.get(new Integer(serverID));
 
@@ -397,7 +397,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
      * @return The AIServerValue with the given id, or null if that server name
      *         does not exist in the queue.
      */
-    @Transactional
+    @Transactional(readOnly=true)
     public AIServerValue findAIServerByName(AuthzSubject subject, String name) {
         // XXX Do authz check
         AIServer aiserver = aIServerDAO.findByName(name);
@@ -415,7 +415,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
      * 
      * @return The AIIp with the given id, or null if that ip does not exist.
      */
-    @Transactional
+    @Transactional(readOnly=true)
     public AIIpValue findAIIpById(AuthzSubject subject, int ipID) {
         AIIp aiip = aiIpDAO.get(new Integer(ipID));
         if (aiip == null) {
@@ -432,7 +432,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
      * @return The AIIpValue with the given address, or null if an ip with that
      *         address does not exist in the queue.
      */
-    @Transactional
+    @Transactional(readOnly=true)
     public AIIpValue findAIIpByAddress(AuthzSubject subject, String address) {
         // XXX Do authz check
         List<AIIp> aiips = aiIpDAO.findByAddress(address);
@@ -674,6 +674,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
      * Find a platform given an AI platform id
      * 
      */
+    @Transactional(readOnly=true)
     public PlatformValue getPlatformByAI(AuthzSubject subject, int aiPlatformID)
         throws PermissionException, PlatformNotFoundException {
         AIPlatform aiplatform;
@@ -687,6 +688,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
      * Get a platform given an AI platform, returns null if none found
      * 
      */
+    @Transactional(readOnly=true)
     public AIPlatformValue getAIPlatformByPlatformID(AuthzSubject subject, Integer platformID) {
         AIPlatform aip = getAIPlatformByPlatformID(platformID);
         return (aip == null) ? null : aip.getAIPlatformValue();
@@ -747,6 +749,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
      * Find an AI platform given an platform
      * 
      */
+    @Transactional(readOnly=true)
     public Platform getPlatformByAI(AuthzSubject subject, AIPlatform aipLocal)
         throws PermissionException, PlatformNotFoundException {
 
@@ -765,6 +768,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
      * specified resource.
      * 
      */
+    @Transactional(readOnly=true)
     public void checkAIScanPermission(AuthzSubject subject, AppdefEntityID id)
         throws PermissionException, GroupNotCompatibleException {
         permissionManager.checkAIScanPermission(subject, id);

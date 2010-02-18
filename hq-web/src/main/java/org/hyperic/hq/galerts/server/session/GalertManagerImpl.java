@@ -176,6 +176,7 @@ public class GalertManagerImpl implements GalertManager {
      * Find all alert definitions for the specified group
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<GalertDef> findAlertDefs(ResourceGroup g, PageControl pc) {
         Pager pager = Pager.getDefaultPager();
         // TODO: G
@@ -192,6 +193,7 @@ public class GalertManagerImpl implements GalertManager {
      *        {@link GalertDefSortField}
      * 
      */
+    @Transactional(readOnly=true)
     public List<GalertDef> findAlertDefs(AuthzSubject subj, AlertSeverity minSeverity, Boolean enabled, PageInfo pInfo) {
         return _defDAO.findAll(subj, minSeverity, enabled, pInfo);
     }
@@ -199,6 +201,7 @@ public class GalertManagerImpl implements GalertManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public Collection<ExecutionStrategyTypeInfo> findAllStrategyTypes() {
         return _stratTypeDAO.findAll();
     }
@@ -206,6 +209,7 @@ public class GalertManagerImpl implements GalertManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public ExecutionStrategyTypeInfo findStrategyType(Integer id) {
         return _stratTypeDAO.findById(id);
     }
@@ -213,6 +217,7 @@ public class GalertManagerImpl implements GalertManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public ExecutionStrategyTypeInfo findStrategyType(ExecutionStrategyType t) {
         return _stratTypeDAO.find(t);
     }
@@ -220,6 +225,7 @@ public class GalertManagerImpl implements GalertManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public GalertDef findById(Integer id) {
         return _defDAO.findById(id);
     }
@@ -227,6 +233,7 @@ public class GalertManagerImpl implements GalertManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public GalertAuxLog findAuxLogById(Integer id) {
         return _auxLogDAO.findById(id);
     }
@@ -239,6 +246,7 @@ public class GalertManagerImpl implements GalertManager {
      * @return The list of Gtriggers.
      * 
      */
+    @Transactional(readOnly=true)
     public List<Gtrigger> getTriggersById(Integer id, GalertDefPartition partition) {
         List<Gtrigger> triggers = new ArrayList<Gtrigger>();
 
@@ -319,6 +327,7 @@ public class GalertManagerImpl implements GalertManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public List<GalertLog> findAlertLogs(GalertDef def) {
         return _logDAO.findAll(def.getGroup());
     }
@@ -326,6 +335,7 @@ public class GalertManagerImpl implements GalertManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public GalertLog findLastFixedByDef(GalertDef def) {
         try {
             return _logDAO.findLastByDefinition(def, true);
@@ -345,6 +355,7 @@ public class GalertManagerImpl implements GalertManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public Escalatable findEscalatableAlert(Integer id) {
         GalertLog alert = _logDAO.findById(id);
         _logDAO.getSession().refresh(alert);
@@ -354,6 +365,7 @@ public class GalertManagerImpl implements GalertManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public GalertLog findAlertLog(Integer id) {
         return _logDAO.findById(id);
     }
@@ -361,6 +373,7 @@ public class GalertManagerImpl implements GalertManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public List<GalertLog> findAlertLogs(ResourceGroup group) {
         return _logDAO.findAll(group);
     }
@@ -368,6 +381,7 @@ public class GalertManagerImpl implements GalertManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<GalertLog> findAlertLogsByTimeWindow(ResourceGroup group, long begin, long end, PageControl pc) {
         return _logDAO.findByTimeWindow(group, begin, end, pc);
     }
@@ -444,6 +458,7 @@ public class GalertManagerImpl implements GalertManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public List<GalertLog> findAlerts(AuthzSubject subj, AlertSeverity severity, long timeRange, long endTime,
                                       boolean inEsc, boolean notFixed, Integer groupId, PageInfo pInfo) {
         return findAlerts(subj, severity, timeRange, endTime, inEsc, notFixed, groupId, null, pInfo);
@@ -452,6 +467,7 @@ public class GalertManagerImpl implements GalertManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public List<GalertLog> findAlerts(AuthzSubject subj, AlertSeverity severity, long timeRange, long endTime,
                                       boolean inEsc, boolean notFixed, Integer groupId, Integer galertDefId,
                                       PageInfo pInfo) {
@@ -655,6 +671,7 @@ public class GalertManagerImpl implements GalertManager {
      * Returns a list of {@link GalertDef}s using the passed escalation.
      * 
      */
+    @Transactional(readOnly=true)
     public Collection<GalertDef> getUsing(Escalation e) {
         return _defDAO.getUsing(e);
     }

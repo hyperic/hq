@@ -62,6 +62,7 @@ public class ResourceAuxLogManagerImpl implements ResourceAuxLogManager {
 
     /**
      */
+    @Transactional(readOnly=true)
     public ResourceAuxLogPojo find(GalertAuxLog log) {
         return resourceAuxLogDao.find(log);
     }

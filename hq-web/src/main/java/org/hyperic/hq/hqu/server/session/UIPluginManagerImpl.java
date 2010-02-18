@@ -115,18 +115,22 @@ public class UIPluginManagerImpl implements UIPluginManager {
         return res;
     }
 
+    @Transactional(readOnly=true)
     public UIPlugin findPluginByName(String name) {
         return uiPluginDAO.findByName(name);
     }
 
+    @Transactional(readOnly=true)
     public UIPlugin findPluginById(Integer id) {
         return uiPluginDAO.findById(id);
     }
 
+    @Transactional(readOnly=true)
     public View findViewById(Integer id) {
         return viewDAO.findById(id);
     }
 
+    @Transactional(readOnly=true)
     public Attachment findAttachmentById(Integer id) {
         return attachmentDAO.findById(id);
     }
@@ -193,6 +197,7 @@ public class UIPluginManagerImpl implements UIPluginManager {
     /**
      * Finds all {@link UIPlugin}s
      */
+    @Transactional(readOnly=true)
     public Collection<UIPlugin> findAll() {
         return uiPluginDAO.findAll();
     }
@@ -202,6 +207,7 @@ public class UIPluginManagerImpl implements UIPluginManager {
      * 
      * @return a collection of {@link AttachType}s
      */
+    @Transactional(readOnly=true)
     public Collection<AttachType> findViews(AttachType type) {
         return viewDAO.findFor(type);
     }
@@ -211,12 +217,14 @@ public class UIPluginManagerImpl implements UIPluginManager {
      * 
      * @return a collection of {@link AttachmentDescriptor}s
      */
+    @Transactional(readOnly=true)
     public Collection<AttachmentDescriptor> findAttachments(AttachType type, AuthzSubject user) {
         Resource root = resourceManager.findRootResource();
 
         return convertAttachmentsToDescriptors(attachmentDAO.findFor(type), root, user);
     }
 
+    @Transactional(readOnly=true)
     public AttachmentDescriptor findAttachmentDescriptorById(Integer id, AuthzSubject user) {
         Attachment attachment = findAttachmentById(id);
         List<Attachment> attachments = new ArrayList<Attachment>(1);
@@ -239,6 +247,7 @@ public class UIPluginManagerImpl implements UIPluginManager {
      * 
      * @return a collection of {@link AttachmentDescriptor}s
      */
+    @Transactional(readOnly=true)
     public Collection<AttachmentDescriptor> findAttachments(AppdefEntityID ent, ViewResourceCategory cat,
                                                             AuthzSubject user) {
         Collection<Attachment> attachments;

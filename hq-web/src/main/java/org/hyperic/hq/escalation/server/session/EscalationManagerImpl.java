@@ -108,6 +108,7 @@ public class EscalationManagerImpl implements EscalationManager {
         return escalation;
     }
 
+    @Transactional(readOnly=true)
     public EscalationState findEscalationState(PerformsEscalations def) {
         return escalationStateDAO.find(def);
     }
@@ -218,22 +219,27 @@ public class EscalationManagerImpl implements EscalationManager {
         escalationDAO.remove(escalation);
     }
 
+    @Transactional(readOnly=true)
     public Escalation findById(Integer id) {
         return escalationDAO.findById(id);
     }
 
+    @Transactional(readOnly=true)
     public Escalation findById(AuthzSubject subject, Integer id) throws PermissionException {
         return escalationDAO.findById(id);
     }
 
+    @Transactional(readOnly=true)
     public Collection<Escalation> findAll(AuthzSubject subject) throws PermissionException {
         return escalationDAO.findAllOrderByName();
     }
 
+    @Transactional(readOnly=true)
     public Escalation findByName(AuthzSubject subject, String name) throws PermissionException {
         return escalationDAO.findByName(name);
     }
 
+    @Transactional(readOnly=true)
     public Escalation findByName(String name) {
         return escalationDAO.findByName(name);
     }
@@ -351,6 +357,7 @@ public class EscalationManagerImpl implements EscalationManager {
         return existsInCache || existsInDb;
     }
 
+    @Transactional(readOnly=true)
     public Escalatable getEscalatable(EscalationState escalationState) {
         return escalationRuntime.getEscalatable(escalationState);
     }
@@ -378,6 +385,7 @@ public class EscalationManagerImpl implements EscalationManager {
      * @return null if the definition defined by the ID does not have any
      *         escalation associated with it
      */
+    @Transactional(readOnly=true)
     public Escalation findByDefId(EscalationAlertType escalationAlertType, Integer definitionId) {
         return escalationAlertType.findDefinition(definitionId).getEscalation();
     }
@@ -450,6 +458,7 @@ public class EscalationManagerImpl implements EscalationManager {
      * 
      * @return true if the alert is currently acknowledgeable
      */
+    @Transactional(readOnly=true)
     public boolean isAlertAcknowledgeable(Integer alertId, PerformsEscalations alertDefinition) {
         if (alertDefinition.getEscalation() != null) {
             EscalationState escState = escalationStateDAO.find(alertDefinition);
@@ -693,6 +702,7 @@ public class EscalationManagerImpl implements EscalationManager {
     /**
      * Get the # of active escalations within HQ inventory
      */
+    @Transactional(readOnly=true)
     public Number getActiveEscalationCount() {
         return new Integer(escalationStateDAO.size());
     }
@@ -700,14 +710,17 @@ public class EscalationManagerImpl implements EscalationManager {
     /**
      * Get the # of escalations within HQ inventory
      */
+    @Transactional(readOnly=true)
     public Number getEscalationCount() {
         return new Integer(escalationDAO.size());
     }
 
+    @Transactional(readOnly=true)
     public List<EscalationState> getActiveEscalations(int maxEscalations) {
         return escalationStateDAO.getActiveEscalations(maxEscalations);
     }
 
+    @Transactional(readOnly=true)
     public String getLastFix(PerformsEscalations def) {
         if (def != null) {
             EscalationAlertType type = def.getAlertType();

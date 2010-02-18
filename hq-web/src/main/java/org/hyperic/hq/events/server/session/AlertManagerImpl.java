@@ -236,6 +236,7 @@ public class AlertManagerImpl implements AlertManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public AlertValue getById(Integer id) {
         return (AlertValue) valuePager.processOne(alertDAO.get(id));
     }
@@ -245,6 +246,7 @@ public class AlertManagerImpl implements AlertManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public Alert findAlertById(Integer id) {
         Alert alert = alertDAO.findById(id);
         Hibernate.initialize(alert);
@@ -260,6 +262,7 @@ public class AlertManagerImpl implements AlertManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public Alert findLastUnfixedByDefinition(AuthzSubject subj, Integer id) {
         try {
             AlertDefinition def = alertDefDao.findById(id);
@@ -275,6 +278,7 @@ public class AlertManagerImpl implements AlertManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public Alert findLastFixedByDefinition(AlertDefinition def) {
         try {
             return alertDAO.findLastByDefinition(def, true);
@@ -287,6 +291,7 @@ public class AlertManagerImpl implements AlertManager {
      * Get the # of alerts within HQ inventory
      * 
      */
+    @Transactional(readOnly=true)
     public Number getAlertCount() {
         return new Integer(alertDAO.size());
     }
@@ -295,6 +300,7 @@ public class AlertManagerImpl implements AlertManager {
      * Get the number of alerts for the given array of AppdefEntityID's
      * 
      */
+    @Transactional(readOnly=true)
     public int[] getAlertCount(AppdefEntityID[] ids) {
         AlertDAO dao = alertDAO;
         int[] counts = new int[ids.length];
@@ -315,6 +321,7 @@ public class AlertManagerImpl implements AlertManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public void fireAlert(AlertConditionsSatisfiedZEvent event) {
         if (!alertRegulator.alertsAllowed()) {
             log.debug("Alert not firing because they are not allowed");
@@ -373,6 +380,7 @@ public class AlertManagerImpl implements AlertManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     @SuppressWarnings("unchecked")
     public PageList<Alert> findAlerts(AuthzSubject subj, AppdefEntityID id, PageControl pc) throws PermissionException {
         alertPermissionManager.canManageAlerts(subj, id);
@@ -397,6 +405,7 @@ public class AlertManagerImpl implements AlertManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     @SuppressWarnings("unchecked")
     public PageList<Alert> findAlerts(AuthzSubject subj, AppdefEntityID id, long begin, long end, PageControl pc)
         throws PermissionException {
@@ -411,6 +420,7 @@ public class AlertManagerImpl implements AlertManager {
      * A more optimized look up which includes the permission checking
      * 
      */
+    @Transactional(readOnly=true)
     public List<Alert> findAlerts(Integer subj, int priority, long timeRange, long endTime, boolean inEsc,
                                   boolean notFixed, Integer groupId, PageInfo pageInfo) throws PermissionException {
         return findAlerts(subj, priority, timeRange, endTime, inEsc, notFixed, groupId, null, pageInfo);
@@ -421,6 +431,7 @@ public class AlertManagerImpl implements AlertManager {
      * @return {@link List} of {@link Alert}s
      * 
      */
+    @Transactional(readOnly=true)
     public List<Alert> findAlerts(Integer subj, int priority, long timeRange, long endTime, boolean inEsc,
                                   boolean notFixed, Integer groupId, Integer alertDefId, PageInfo pageInfo)
         throws PermissionException {
@@ -447,6 +458,7 @@ public class AlertManagerImpl implements AlertManager {
      *        null for all.
      * 
      */
+    @Transactional(readOnly=true)
     public List<Alert> findAlerts(AuthzSubject subj, int count, int priority, long timeRange, long endTime,
                                   List<AppdefEntityID> includes) throws PermissionException {
         List<Alert> result = new ArrayList<Alert>();
@@ -494,6 +506,7 @@ public class AlertManagerImpl implements AlertManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public List<Escalatable> findEscalatables(AuthzSubject subj, int count, int priority, long timeRange, long endTime,
                                               List<AppdefEntityID> includes) throws PermissionException {
         List<Alert> alerts = findAlerts(subj, count, priority, timeRange, endTime, includes);
@@ -504,6 +517,7 @@ public class AlertManagerImpl implements AlertManager {
      * A more optimized look up which includes the permission checking
      * 
      */
+    @Transactional(readOnly=true)
     public int getUnfixedCount(Integer subj, long timeRange, long endTime, Integer groupId) throws PermissionException {
         // Time voodoo the end time to the nearest minute so that we might
         // be able to use cached results
@@ -534,6 +548,7 @@ public class AlertManagerImpl implements AlertManager {
      * Get the long reason for an alert
      * 
      */
+    @Transactional(readOnly=true)
     public String getShortReason(Alert alert) {
         AlertDefinition def = alert.getAlertDefinition();
         AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(def.getResource());
@@ -594,6 +609,7 @@ public class AlertManagerImpl implements AlertManager {
      * Get the long reason for an alert
      * 
      */
+    @Transactional(readOnly=true)
     public String getLongReason(Alert alert) {
         final String indent = "    ";
 

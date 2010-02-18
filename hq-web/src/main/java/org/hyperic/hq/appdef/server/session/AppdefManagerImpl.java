@@ -152,6 +152,7 @@ public class AppdefManagerImpl implements AppdefManager {
      * @throws PermissionException
      * 
      */
+    @Transactional(readOnly=true)
     public Map<String, AppdefEntityID> getControllablePlatformTypes(AuthzSubject subject) throws PermissionException {
         List<Integer> typeIds = findOperableResourceColumn(subject, "EAM_PLATFORM", "platform_type_id",
             AuthzConstants.platformResType, AuthzConstants.platformOpControlPlatform, null);
@@ -176,6 +177,7 @@ public class AppdefManagerImpl implements AppdefManager {
      * @throws PermissionException
      * 
      */
+    @Transactional(readOnly=true)
     public Map<String, AppdefEntityID> getControllablePlatformNames(AuthzSubject subject, int tid)
         throws PermissionException {
         List<Integer> ids = findOperableResourceColumn(subject, "EAM_PLATFORM", "id", AuthzConstants.platformResType,
@@ -202,6 +204,7 @@ public class AppdefManagerImpl implements AppdefManager {
      * @throws PermissionException
      * 
      */
+    @Transactional(readOnly=true)
     public Map<String, AppdefEntityTypeID> getControllableServerTypes(AuthzSubject subject) throws PermissionException {
         List<Integer> typeIds = findOperableResourceColumn(subject, "EAM_SERVER", "server_type_id",
             AuthzConstants.serverResType, AuthzConstants.serverOpControlServer, null);
@@ -229,6 +232,7 @@ public class AppdefManagerImpl implements AppdefManager {
      * @throws PermissionException
      * 
      */
+    @Transactional(readOnly=true)
     public Map<String, AppdefEntityID> getControllableServerNames(AuthzSubject subject, int tid)
         throws PermissionException {
         List<Integer> ids = findOperableResourceColumn(subject, "EAM_SERVER", "id", AuthzConstants.serverResType,
@@ -255,6 +259,7 @@ public class AppdefManagerImpl implements AppdefManager {
      * @throws PermissionException
      * 
      */
+    @Transactional(readOnly=true)
     public Map<String, AppdefEntityTypeID> getControllableServiceTypes(AuthzSubject subject) throws PermissionException {
         List<Integer> typeIds = findOperableResourceColumn(subject, "EAM_SERVICE", "service_type_id",
             AuthzConstants.serviceResType, AuthzConstants.serviceOpControlService, null);
@@ -281,6 +286,7 @@ public class AppdefManagerImpl implements AppdefManager {
      * @throws PermissionException
      * 
      */
+    @Transactional(readOnly=true)
     public Map<String, AppdefEntityID> getControllableServiceNames(AuthzSubject subject, int tid)
         throws PermissionException {
         List<Integer> ids = findOperableResourceColumn(subject, "EAM_SERVICE", "id", AuthzConstants.serviceResType,

@@ -948,6 +948,7 @@ public class DataManagerImpl implements DataManager {
      * @return the list of data points
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<HighLowMetricValue> getHistoricalData(Measurement m, long begin, long end, PageControl pc,
                                                           boolean prependAvailUnknowns) {
         if (m.getTemplate().isAvailability()) {
@@ -968,6 +969,7 @@ public class DataManagerImpl implements DataManager {
      * @return the list of data points
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<HighLowMetricValue> getHistoricalData(Measurement m, long begin, long end, PageControl pc) {
         return getHistoricalData(m, begin, end, pc, false);
     }
@@ -1073,6 +1075,7 @@ public class DataManagerImpl implements DataManager {
      * @return the An array of aggregate values
      * 
      */
+    @Transactional(readOnly=true)
     public double[] getAggregateData(final List<Measurement> measurements, final long begin, final long end) {
         checkTimeArguments(begin, end);
         long interval = end - begin;
@@ -1103,6 +1106,7 @@ public class DataManagerImpl implements DataManager {
      *         represents templateId to data points
      * 
      */
+    @Transactional(readOnly=true)
     public Map<Integer, double[]> getAggregateDataByTemplate(final List<Measurement> measurements, final long begin,
                                                              final long end) {
         // the idea here is to try and match the exact query executed by
@@ -1202,6 +1206,7 @@ public class DataManagerImpl implements DataManager {
      * @return the list of data points
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<HighLowMetricValue> getHistoricalData(List<Measurement> measurements, long begin, long end,
                                                           long interval, int type, boolean returnMetricNulls,
                                                           PageControl pc) {
@@ -1411,6 +1416,7 @@ public class DataManagerImpl implements DataManager {
      * @return The MetricValue or null if one does not exist.
      * 
      */
+    @Transactional(readOnly=true)
     public MetricValue getLastHistoricalData(Measurement m) {
         if (m.getTemplate().isAvailability()) {
             return availabilityManager.getLastAvail(m);
@@ -1477,6 +1483,7 @@ public class DataManagerImpl implements DataManager {
      *         used by the Metric viewer and Availabilty Summary portlets.
      * 
      */
+    @Transactional(readOnly=true)
     public Map<Integer, MetricValue> getLastDataPoints(List<Measurement> measurements, long timestamp) {
         List<Integer> availIds = new ArrayList<Integer>();
         List<Integer> measurementIds = new ArrayList<Integer>();
@@ -1562,6 +1569,7 @@ public class DataManagerImpl implements DataManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public ArrayList<Integer> getCachedDataPoints(Integer[] ids, Map<Integer, MetricValue> data, long timestamp) {
 
         ArrayList<Integer> nodata = new ArrayList<Integer>();
@@ -1647,6 +1655,7 @@ public class DataManagerImpl implements DataManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public double[] getBaselineData(Measurement meas, long begin, long end) {
         if (meas.getTemplate().getAlias().equalsIgnoreCase("availability")) {
             Integer[] mids = new Integer[1];
@@ -1709,6 +1718,7 @@ public class DataManagerImpl implements DataManager {
      * @return the Map of data points
      * 
      */
+    @Transactional(readOnly=true)
     public Map<Integer, double[]> getAggregateDataByMetric(Integer[] tids, Integer[] iids, long begin, long end,
                                                            boolean useAggressiveRollup) {
         checkTimeArguments(begin, end);
@@ -1820,6 +1830,7 @@ public class DataManagerImpl implements DataManager {
      * @return the map of data points
      * 
      */
+    @Transactional(readOnly=true)
     public Map<Integer, double[]> getAggregateDataByMetric(List<Measurement> measurements, long begin, long end,
                                                            boolean useAggressiveRollup) {
         checkTimeArguments(begin, end);
@@ -1920,6 +1931,7 @@ public class DataManagerImpl implements DataManager {
     }
 
     // TODO remove after HE-54 allows injection
+    @Transactional(readOnly=true)
     public Analyzer getAnalyzer() {
         boolean analyze = true;
         try {

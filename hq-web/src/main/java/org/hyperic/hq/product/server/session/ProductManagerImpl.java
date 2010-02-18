@@ -171,12 +171,14 @@ public class ProductManagerImpl implements ProductManager {
 
     /**
      */
+    @Transactional(readOnly=true)
     public TypeInfo getTypeInfo(AppdefEntityValue value) throws PermissionException, AppdefEntityNotFoundException {
         return getProductPluginManager().getTypeInfo(value.getBasePlatformName(), value.getTypeName());
     }
 
     /**
      */
+    @Transactional(readOnly=true)
     public PluginManager getPluginManager(String type) throws PluginException {
         return getProductPluginManager().getPluginManager(type);
     }
@@ -184,6 +186,7 @@ public class ProductManagerImpl implements ProductManager {
     /**
      */
     // TODO: G
+    @Transactional(readOnly=true)
     public String getMonitoringHelp(AppdefEntityValue entityVal, Map<?, ?> props) throws PluginNotFoundException,
         PermissionException, AppdefEntityNotFoundException {
         TypeInfo info = getTypeInfo(entityVal);
@@ -196,6 +199,7 @@ public class ProductManagerImpl implements ProductManager {
 
     /**
      */
+    @Transactional(readOnly=true)
     public ConfigSchema getConfigSchema(String type, String name, AppdefEntityValue entityVal,
                                         ConfigResponse baseResponse) throws PluginException,
         AppdefEntityNotFoundException, PermissionException {

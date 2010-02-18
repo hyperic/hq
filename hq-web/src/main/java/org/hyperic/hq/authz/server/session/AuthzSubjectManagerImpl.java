@@ -96,6 +96,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
      * @return The value-object of the subject of the given name and
      *         authenticating source.
      */
+    @Transactional(readOnly=true)
     public AuthzSubject findSubjectByAuth(String name, String authDsn) throws SubjectNotFoundException {
         AuthzSubject subject = authzSubjectDAO.findByAuth(name, authDsn);
         if (subject == null) {
@@ -204,6 +205,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
      * Check if a subject can modify users
      * 
      */
+    @Transactional(readOnly=true)
     public void checkModifyUsers(AuthzSubject caller) throws PermissionException {
 
         permissionManager.check(caller.getId(), resourceTypeDAO.findTypeResourceType(), AuthzConstants.rootResourceId,
@@ -245,6 +247,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public AuthzSubject findByAuth(String name, String authDsn) {
         return authzSubjectDAO.findByAuth(name, authDsn);
     }
@@ -252,6 +255,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public AuthzSubject findSubjectById(AuthzSubject whoami, Integer id) throws PermissionException {
 
         // users can see their own entries without requiring special permission
@@ -265,6 +269,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
     /** 
      * 
      */
+    @Transactional(readOnly=true)
     public AuthzSubject findSubjectById(Integer id) {
         return authzSubjectDAO.findById(id);
     }
@@ -272,6 +277,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
     /** 
      * 
      */
+    @Transactional(readOnly=true)
     public AuthzSubject getSubjectById(Integer id) {
         return authzSubjectDAO.get(id);
     }
@@ -279,6 +285,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
     /** 
      * 
      */
+    @Transactional(readOnly=true)
     public AuthzSubject findSubjectByName(AuthzSubject whoami, String name) throws PermissionException {
         return findSubjectByName(name);
     }
@@ -286,6 +293,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
     /** 
      * 
      */
+    @Transactional(readOnly=true)
     public AuthzSubject findSubjectByName(String name) {
         return authzSubjectDAO.findByName(name);
     }
@@ -293,6 +301,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
     /** 
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<AuthzSubject> findMatchingName(String name, PageControl pc) {
         return authzSubjectDAO.findMatchingName(name, pc);
     }
@@ -302,6 +311,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
      * 
      * @param excludes the IDs of subjects to exclude from result
      */
+    @Transactional(readOnly=true)
     public PageList<AuthzSubjectValue> getAllSubjects(AuthzSubject whoami, Collection<Integer> excludes, PageControl pc)
         throws NotFoundException, PermissionException {
 
@@ -368,6 +378,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
      * @param ids the subject ids
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<AuthzSubjectValue> getSubjectsById(AuthzSubject subject, Integer[] ids, PageControl pc)
         throws PermissionException {
 
@@ -402,6 +413,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
      * @return The e-mail address of the subject
      * 
      */
+    @Transactional(readOnly=true)
     public String getEmailById(Integer id) {
         AuthzSubject subject = authzSubjectDAO.findById(id);
         return subject.getEmailAddress();
@@ -413,6 +425,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
      * @return The e-mail address of the subject
      * 
      */
+    @Transactional(readOnly=true)
     public String getEmailByName(String userName) {
         AuthzSubject subject = authzSubjectDAO.findByName(userName);
         return subject.getEmailAddress();
@@ -422,6 +435,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
      * Get the Preferences for a specified user
      * 
      */
+    @Transactional(readOnly=true)
     public ConfigResponse getUserPrefs(AuthzSubject who, Integer subjId) throws PermissionException {
         // users can always see their own prefs.
         if (!who.getId().equals(subjId)) {
@@ -463,6 +477,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public AuthzSubject getOverlordPojo() {
         return authzSubjectDAO.findById(AuthzConstants.overlordId);
     }

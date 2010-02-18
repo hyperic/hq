@@ -314,6 +314,7 @@ public class MeasurementManagerImpl implements MeasurementManager {
 
     /**
      */
+    @Transactional(readOnly=true)
     public Measurement findMeasurementById(Integer mid) {
         return measurementDAO.findById(mid);
     }
@@ -430,6 +431,7 @@ public class MeasurementManagerImpl implements MeasurementManager {
      * Look up a Measurement for a Resource and Measurement alias
      * @return a The Measurement for the Resource of the given alias.
      */
+    @Transactional(readOnly=true)
     public Measurement getMeasurement(AuthzSubject s, Resource r, String alias) throws MeasurementNotFoundException {
         Measurement m = measurementDAO.findByAliasAndID(alias, r);
         if (m == null) {
@@ -441,6 +443,7 @@ public class MeasurementManagerImpl implements MeasurementManager {
     /**
      * Get a Measurement by Id.
      */
+    @Transactional(readOnly=true)
     public Measurement getMeasurement(Integer mid) {
         return measurementDAO.get(mid);
     }
@@ -449,6 +452,7 @@ public class MeasurementManagerImpl implements MeasurementManager {
      * Get the live measurement values for a given resource.
      * @param id The id of the resource
      */
+    @Transactional(readOnly=true)
     public void getLiveMeasurementValues(AuthzSubject subject, AppdefEntityID id) throws PermissionException,
         LiveMeasurementException, MeasurementNotFoundException {
         List<Measurement> mcol = measurementDAO.findEnabledByResource(resourceManager.findResource(id));
@@ -491,6 +495,7 @@ public class MeasurementManagerImpl implements MeasurementManager {
      * 
      * @return a The number of metrics enabled for the given entity
      */
+    @Transactional(readOnly=true)
     public int getEnabledMetricsCount(AuthzSubject subject, AppdefEntityID id) {
         final Resource res = resourceManager.findResource(id);
         if (res == null || res.isInAsyncDeleteState()) {
@@ -508,6 +513,7 @@ public class MeasurementManagerImpl implements MeasurementManager {
      *         {@link Measurement}s
      * @throws PermissionException
      */
+    @Transactional(readOnly=true)
     public Map<Resource, List<Measurement>> findMeasurements(AuthzSubject subject,
                                                              Map<Integer, List<Integer>> resIdsToTemplIds)
         throws PermissionException {
@@ -540,6 +546,7 @@ public class MeasurementManagerImpl implements MeasurementManager {
      * @param aeid The entity id.
      * @return a Measurement value
      */
+    @Transactional(readOnly=true)
     public Measurement findMeasurement(AuthzSubject subject, Integer tid, AppdefEntityID aeid)
         throws MeasurementNotFoundException {
         List<Measurement> metrics = measurementDAO.findByTemplatesForInstance(new Integer[] { tid }, resourceManager
@@ -564,6 +571,7 @@ public class MeasurementManagerImpl implements MeasurementManager {
      *        stale copies, potentially always forcing a sync with the database.
      * @return The Measurement
      */
+    @Transactional(readOnly=true)
     public Measurement findMeasurement(AuthzSubject subject, Integer tid, Integer iid, boolean allowStale)
         throws MeasurementNotFoundException {
 
@@ -582,6 +590,7 @@ public class MeasurementManagerImpl implements MeasurementManager {
      * 
      * @return a list of Measurement's
      */
+    @Transactional(readOnly=true)
     public List<Measurement> findMeasurements(AuthzSubject subject, Integer tid, AppdefEntityID[] aeids) {
         ArrayList<Measurement> results = new ArrayList<Measurement>();
         for (AppdefEntityID aeid : aeids) {
@@ -596,6 +605,7 @@ public class MeasurementManagerImpl implements MeasurementManager {
      * 
      * @return An array of Measurement ids.
      */
+    @Transactional(readOnly=true)
     public Integer[] findMeasurementIds(AuthzSubject subject, Integer tid, Integer[] ids) {
         List<Integer> results = measurementDAO.findIdsByTemplateForInstances(tid, ids);
         return results.toArray(new Integer[results.size()]);
@@ -608,6 +618,7 @@ public class MeasurementManagerImpl implements MeasurementManager {
      * 
      * @return a List of Measurement objects.
      */
+    @Transactional(readOnly=true)
     public List<Measurement> findMeasurements(AuthzSubject subject, AppdefEntityID id, String cat, PageControl pc) {
         List<Measurement> meas;
 
@@ -626,6 +637,7 @@ public class MeasurementManagerImpl implements MeasurementManager {
      * 
      * @return a list of {@link Measurement}
      */
+    @Transactional(readOnly=true)
     public List<Measurement> findEnabledMeasurements(AuthzSubject subject, AppdefEntityID id, String cat) {
         List<Measurement> mcol;
 
@@ -643,6 +655,7 @@ public class MeasurementManagerImpl implements MeasurementManager {
      * 
      * @return A List of Measurements
      */
+    @Transactional(readOnly=true)
     public List<Measurement> findDesignatedMeasurements(AppdefEntityID id) {
         return measurementDAO.findDesignatedByResource(resourceManager.findResource(id));
     }
@@ -652,6 +665,7 @@ public class MeasurementManagerImpl implements MeasurementManager {
      * 
      * @return A List of Measurements
      */
+    @Transactional(readOnly=true)
     public List<Measurement> findDesignatedMeasurements(AuthzSubject subject, AppdefEntityID id, String cat) {
         return measurementDAO.findDesignatedByResourceForCategory(resourceManager.findResource(id), cat);
     }
@@ -661,6 +675,7 @@ public class MeasurementManagerImpl implements MeasurementManager {
      * 
      * @return A List of Measurements
      */
+    @Transactional(readOnly=true)
     public List<Measurement> findDesignatedMeasurements(AuthzSubject subject, ResourceGroup g, String cat) {
         return measurementDAO.findDesignatedByCategoryForGroup(g, cat);
     }
@@ -670,6 +685,7 @@ public class MeasurementManagerImpl implements MeasurementManager {
      * @deprecated Use getAvailabilityMeasurement(Resource) instead.
      * 
      */
+    @Transactional(readOnly=true)
     public Measurement getAvailabilityMeasurement(AuthzSubject subject, AppdefEntityID id) {
         return getAvailabilityMeasurement(resourceManager.findResource(id));
     }
@@ -677,6 +693,7 @@ public class MeasurementManagerImpl implements MeasurementManager {
     /**
      * Get an Availability Measurement by Resource. May return null.
      */
+    @Transactional(readOnly=true)
     public Measurement getAvailabilityMeasurement(Resource r) {
         return measurementDAO.findAvailMeasurement(r);
     }
@@ -685,6 +702,7 @@ public class MeasurementManagerImpl implements MeasurementManager {
      * Look up a list of Measurement objects by category
      * 
      */
+    @Transactional(readOnly=true)
     public List<Measurement> findMeasurementsByCategory(String cat) {
         return measurementDAO.findByCategory(cat);
     }
@@ -699,6 +717,7 @@ public class MeasurementManagerImpl implements MeasurementManager {
      * @return A List of designated Measurements keyed by AppdefEntityID
      * 
      */
+    @Transactional(readOnly=true)
     public Map<AppdefEntityID, Measurement> findDesignatedMeasurements(AuthzSubject subject, AppdefEntityID[] ids,
                                                                        String cat) throws MeasurementNotFoundException {
 
@@ -736,6 +755,7 @@ public class MeasurementManagerImpl implements MeasurementManager {
      * @return {@link Map} of {@link Integer} to {@link List} of
      *         {@link Measurement}s, Integer => Resource.getId(),
      */
+    @Transactional(readOnly=true)
     public Map<Integer, List<Measurement>> getAvailMeasurements(Collection<?> resources) {
         final Map<Integer, List<Measurement>> rtn = new HashMap<Integer, List<Measurement>>(resources.size());
         final List<Resource> res = new ArrayList<Resource>(resources.size());
@@ -850,6 +870,7 @@ public class MeasurementManagerImpl implements MeasurementManager {
      *         entities, and the intervals differ or some enabled/not enabled,
      *         then the value will be "0" to denote varying intervals.
      */
+    @Transactional(readOnly=true)
     public Map<Integer, Long> findMetricIntervals(AuthzSubject subject, AppdefEntityID[] aeids, Integer[] tids) {
         final Long disabled = new Long(-1);
         MeasurementDAO ddao = measurementDAO;
@@ -902,6 +923,7 @@ public class MeasurementManagerImpl implements MeasurementManager {
     /**
      * @return List<Object[]> - [0] = Measurement, [1] MeasurementTemplate
      */
+    @Transactional(readOnly=true)
     public List<Object[]> findAllEnabledMeasurementsAndTemplates() {
         return measurementDAO.findAllEnabledMeasurementsAndTemplates();
     }
@@ -911,6 +933,7 @@ public class MeasurementManagerImpl implements MeasurementManager {
      * Measurements and enqueue for scheduling after commit
      * 
      */
+    @Transactional(readOnly=true)
     public void enableMeasurements(AuthzSubject subject, AppdefEntityID[] aeids, Integer[] mtids, long interval)
         throws MeasurementNotFoundException, MeasurementCreateException, TemplateNotFoundException, PermissionException {
 
@@ -1198,6 +1221,7 @@ public class MeasurementManagerImpl implements MeasurementManager {
      * XXX: not sure why all the findMeasurements require an authz if they do
      * not check the viewPermissions??
      */
+    @Transactional(readOnly=true)
     public List<Measurement> findMeasurements(AuthzSubject subject, Resource res) {
         return measurementDAO.findByResource(res);
     }
@@ -1275,6 +1299,7 @@ public class MeasurementManagerImpl implements MeasurementManager {
      * 
      * @return a list of {@link CollectionSummary} beans
      */
+    @Transactional(readOnly=true)
     public List<CollectionSummary> findMetricCountSummaries() {
         return measurementDAO.findMetricCountSummaries();
     }
@@ -1285,6 +1310,7 @@ public class MeasurementManagerImpl implements MeasurementManager {
      * {@link Measurement} that contains the Server Offset value
      * 
      */
+    @Transactional(readOnly=true)
     public List<Object[]> findAgentOffsetTuples() {
         return measurementDAO.findAgentOffsetTuples();
     }
@@ -1295,6 +1321,7 @@ public class MeasurementManagerImpl implements MeasurementManager {
      * @return a map of {@link Agent} onto Longs indicating how many metrics
      *         that agent is collecting.
      */
+    @Transactional(readOnly=true)
     public Map<Agent, Long> findNumMetricsPerAgent() {
         return measurementDAO.findNumMetricsPerAgent();
     }
@@ -1391,6 +1418,7 @@ public class MeasurementManagerImpl implements MeasurementManager {
      * @param config Configuration to check
      * 
      */
+    @Transactional(readOnly=true)
     public void checkConfiguration(AuthzSubject subject, AppdefEntityID entity, ConfigResponse config)
         throws PermissionException, InvalidConfigException, AppdefEntityNotFoundException {
         String[] templates = getTemplatesToCheck(subject, entity);
@@ -1418,6 +1446,7 @@ public class MeasurementManagerImpl implements MeasurementManager {
     /**
      * @return List {@link Measurement} of MeasurementIds
      */
+    @Transactional(readOnly=true)
     public List<Measurement> getMeasurements(Integer[] tids, Integer[] aeids) {
         return measurementDAO.findMeasurements(tids, aeids);
     }

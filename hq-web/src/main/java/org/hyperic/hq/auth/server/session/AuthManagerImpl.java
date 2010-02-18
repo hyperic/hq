@@ -141,6 +141,7 @@ public class AuthManagerImpl implements AuthManager {
      * @param subject The subject of the currently logged in user
      * @param username The username of the user to get
      */
+    @Transactional(readOnly=true)
     public boolean isUser(AuthzSubject subject, String username) {
         return principalDao.findByUsername(username) != null;
     }
@@ -150,6 +151,7 @@ public class AuthManagerImpl implements AuthManager {
      * 
      * @param subject The subject for whom to return the principle
      */
+    @Transactional(readOnly=true)
     public Principal getPrincipal(AuthzSubject subject) {
         return principalDao.findByUsername(subject.getName());
     }

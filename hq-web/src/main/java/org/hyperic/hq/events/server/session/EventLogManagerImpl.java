@@ -136,6 +136,7 @@ public class EventLogManagerImpl implements EventLogManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public List<EventLog> findLastLogs(Resource proto) {
         return eventLogDAO.findLastByType(proto);
     }
@@ -152,6 +153,7 @@ public class EventLogManagerImpl implements EventLogManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public List<ResourceEventLog> findLogs(AuthzSubject subject, long begin, long end, PageInfo pInfo,
                                            EventLogStatus maxStatus, String typeClass,
                                            Collection<ResourceGroup> inGroups) {
@@ -165,6 +167,7 @@ public class EventLogManagerImpl implements EventLogManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     @SuppressWarnings("unchecked")
     public List<EventLog> findLogs(AppdefEntityID ent, AuthzSubject user, String[] eventTypes, long begin, long end) {
         Resource r = resourceManager.findResource(ent);
@@ -194,6 +197,7 @@ public class EventLogManagerImpl implements EventLogManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public List<EventLog> findLogs(AppdefEntityID ent, AuthzSubject user, String status, long begin, long end) {
         Resource r = resourceManager.findResource(ent);
         return eventLogDAO.findByEntityAndStatus(r, user, begin, end, status);
@@ -205,6 +209,7 @@ public class EventLogManagerImpl implements EventLogManager {
      * @return The total number of event logs.
      * 
      */
+    @Transactional(readOnly=true)
     public int getTotalNumberLogs() {
         return eventLogDAO.getTotalNumberLogs();
     }
@@ -225,6 +230,7 @@ public class EventLogManagerImpl implements EventLogManager {
      *         specified.
      * 
      */
+    @Transactional(readOnly=true)
     public boolean[] logsExistPerInterval(AppdefEntityID entityId, AuthzSubject subject, long begin, long end,
                                           int intervals) {
         Resource r = resourceManager.findResource(entityId);

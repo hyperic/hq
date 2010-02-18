@@ -121,6 +121,7 @@ public class ProductBossImpl implements ProductBoss {
      *        config response must exist. Else as many values as can be gotten
      *        are tried.
      */
+    @Transactional(readOnly=true)
     public ConfigResponse[] getMergedGroupConfigResponse(int sessionId, String productType, int groupId,
                                                          boolean required) throws AppdefEntityNotFoundException,
         PermissionException, ConfigFetchException, SessionNotFoundException, SessionTimeoutException, EncodingException {
@@ -160,6 +161,7 @@ public class ProductBossImpl implements ProductBoss {
      *        config response must exist. Else as many values as can be gotten
      *        are tried.
      */
+    @Transactional(readOnly=true)
     public ConfigResponse getMergedConfigResponse(int sessionId, String productType, AppdefEntityID id, boolean required)
         throws AppdefEntityNotFoundException, EncodingException, PermissionException, ConfigFetchException,
         SessionNotFoundException, SessionTimeoutException {
@@ -172,6 +174,7 @@ public class ProductBossImpl implements ProductBoss {
 
     /**
      */
+    @Transactional(readOnly=true)
     public ConfigResponse getMergedConfigResponse(AuthzSubject subject, String productType, AppdefEntityID id,
                                                   boolean required) throws AppdefEntityNotFoundException,
         PermissionException, ConfigFetchException, EncodingException {
@@ -181,6 +184,7 @@ public class ProductBossImpl implements ProductBoss {
 
     /**
      */
+    @Transactional(readOnly=true)
     public ConfigResponseDB getConfigResponse(int sessionId, AppdefEntityID id) throws AppdefEntityNotFoundException,
         SessionNotFoundException, SessionTimeoutException {
         sessionManager.authenticate(sessionId);
@@ -189,6 +193,7 @@ public class ProductBossImpl implements ProductBoss {
 
     /**
      */
+    @Transactional(readOnly=true)
     public String getMonitoringHelp(int sessionId, AppdefEntityID id, Map<?, ?> props) throws PluginNotFoundException,
         PermissionException, AppdefEntityNotFoundException, SessionNotFoundException, SessionTimeoutException {
         AppdefEntityValue aval = new AppdefEntityValue(id, getOverlord());
@@ -200,6 +205,7 @@ public class ProductBossImpl implements ProductBoss {
      * base entities have not yet been configured, an exception will be thrown
      * indicating which resource must be configured.
      */
+    @Transactional(readOnly=true)
     public ConfigSchema getConfigSchema(int sessionId, AppdefEntityID id, String type, ConfigResponse resp)
         throws SessionTimeoutException, SessionNotFoundException, PluginException, PermissionException,
         AppdefEntityNotFoundException {
@@ -209,6 +215,7 @@ public class ProductBossImpl implements ProductBoss {
 
     /**
      */
+    @Transactional(readOnly=true)
     public ConfigSchema getConfigSchema(int sessionId, AppdefEntityID id, String type) throws ConfigFetchException,
         EncodingException, PluginNotFoundException, PluginException, SessionTimeoutException, SessionNotFoundException,
         PermissionException, AppdefEntityNotFoundException {
@@ -242,6 +249,7 @@ public class ProductBossImpl implements ProductBoss {
      * @param validateFlow If true a ConfigFetchException will be thrown if the
      *        appropriate base entities are not already configured.
      */
+    @Transactional(readOnly=true)
     public ConfigSchemaAndBaseResponse getConfigSchemaAndBaseResponse(AuthzSubject subject, AppdefEntityID id,
                                                                       String type, boolean validateFlow)
         throws ConfigFetchException, EncodingException, PluginNotFoundException, PluginException, PermissionException,
@@ -269,6 +277,7 @@ public class ProductBossImpl implements ProductBoss {
 
     /**
      */
+    @Transactional(readOnly=true)
     public ConfigSchema getConfigSchema(AuthzSubject subject, AppdefEntityID id, String type, boolean validateFlow)
         throws ConfigFetchException, EncodingException, PluginNotFoundException, PluginException, PermissionException,
         AppdefEntityNotFoundException {
@@ -282,6 +291,7 @@ public class ProductBossImpl implements ProductBoss {
      * @param type One of ProductPlugin.TYPE_*
      * @param baseResponse the response object of the given type
      */
+    @Transactional(readOnly=true)
     private ConfigSchema getConfigSchema(AppdefEntityID id, String type, ConfigResponse baseResponse)
         throws PluginException, PermissionException, AppdefEntityNotFoundException {
 
@@ -357,6 +367,7 @@ public class ProductBossImpl implements ProductBoss {
     /**
      * Gets the version number
      */
+    @Transactional(readOnly=true)
     public String getVersion() {
         return ProductProperties.getVersion();
     }
@@ -364,6 +375,7 @@ public class ProductBossImpl implements ProductBoss {
     /**
      * Gets the build number, date, and type.
      */
+    @Transactional(readOnly=true)
     public String getBuildNumber() {
         String build = ProductProperties.getBuild();
         String buildDate = ProductProperties.getBuildDate();
@@ -434,6 +446,7 @@ public class ProductBossImpl implements ProductBoss {
     /**
      * Find {@link AttachmentDescriptor}s attached to the target type
      */
+    @Transactional(readOnly=true)
     public Collection<AttachmentDescriptor> findAttachments(int sessionId, AttachType type) throws SessionException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         return uiPluginManager.findAttachments(type, subject);
@@ -442,6 +455,7 @@ public class ProductBossImpl implements ProductBoss {
     /**
      * Find {@link AttachmentDescriptor}s attached to the target type
      */
+    @Transactional(readOnly=true)
     public Collection<AttachmentDescriptor> findAttachments(int sessionId, AppdefEntityID ent, ViewResourceCategory cat)
         throws SessionException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
@@ -450,6 +464,7 @@ public class ProductBossImpl implements ProductBoss {
 
     /**
      */
+    @Transactional(readOnly=true)
     public AttachmentDescriptor findAttachment(int sessionId, Integer descId) throws SessionException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         return uiPluginManager.findAttachmentDescriptorById(descId, subject);
@@ -458,6 +473,7 @@ public class ProductBossImpl implements ProductBoss {
     /**
      * Get an attachment view by ID
      */
+    @Transactional(readOnly=true)
     public View findViewById(int sessionId, Integer id) {
         return uiPluginManager.findViewById(id);
     }

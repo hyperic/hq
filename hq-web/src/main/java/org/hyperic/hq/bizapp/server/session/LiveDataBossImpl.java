@@ -63,6 +63,7 @@ public class LiveDataBossImpl implements LiveDataBoss {
     /**
      * Get live data for a given resource
      */
+    @Transactional(readOnly=true)
     public LiveDataResult getLiveData(int sessionId, LiveDataCommand command)
         throws PermissionException, AgentNotFoundException,
         AppdefEntityNotFoundException, LiveDataException,
@@ -74,6 +75,7 @@ public class LiveDataBossImpl implements LiveDataBoss {
     /**
      * Get live data for the given commands
      */
+    @Transactional(readOnly=true)
     public LiveDataResult[] getLiveData(int sessionId,
                                         LiveDataCommand[] commands)
         throws PermissionException, AgentNotFoundException,
@@ -86,6 +88,7 @@ public class LiveDataBossImpl implements LiveDataBoss {
     /**
      * Get the commands for a given resource.
      */
+    @Transactional(readOnly=true)
     public String[] getLiveDataCommands(int sessionId, AppdefEntityID id)
         throws PluginException, PermissionException,
         SessionTimeoutException, SessionNotFoundException {
@@ -96,6 +99,7 @@ public class LiveDataBossImpl implements LiveDataBoss {
     /**
      * Get the ConfigSchema for this resource
      */
+    @Transactional(readOnly=true)
     public ConfigSchema getConfigSchema(int sessionId, AppdefEntityID id,
                                         String command)
         throws PluginException, PermissionException,

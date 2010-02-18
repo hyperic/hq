@@ -347,6 +347,7 @@ public class EventsBossImpl implements EventsBoss {
      * Get the number of alerts for the given array of AppdefEntityID's
      * 
      */
+    @Transactional(readOnly=true)
     public int[] getAlertCount(int sessionID, AppdefEntityID[] ids) throws SessionNotFoundException,
         SessionTimeoutException, PermissionException{
         AuthzSubject subject = sessionManager.getSubject(sessionID);
@@ -781,6 +782,7 @@ public class EventsBossImpl implements EventsBoss {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public List<ActionValue> getActionsForAlert(int sessionId, Integer alertId) throws SessionNotFoundException,
         SessionTimeoutException {
         sessionManager.authenticate(sessionId);
@@ -873,6 +875,7 @@ public class EventsBossImpl implements EventsBoss {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public AlertDefinitionValue getAlertDefinition(int sessionID, Integer id) throws SessionNotFoundException,
         SessionTimeoutException,  PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
@@ -884,6 +887,7 @@ public class EventsBossImpl implements EventsBoss {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public Alert getAlert(int sessionID, Integer id) throws SessionNotFoundException, SessionTimeoutException,
         AlertNotFoundException {
         sessionManager.authenticate(sessionID);
@@ -901,6 +905,7 @@ public class EventsBossImpl implements EventsBoss {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<AlertDefinitionValue> findAllAlertDefinitions(int sessionID) throws SessionNotFoundException,
         SessionTimeoutException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
@@ -912,6 +917,7 @@ public class EventsBossImpl implements EventsBoss {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<AlertDefinitionValue> findAlertDefinitions(int sessionID, AppdefEntityID id, PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
@@ -922,6 +928,7 @@ public class EventsBossImpl implements EventsBoss {
      * Get a collection of alert definitions for a resource or resource type
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<AlertDefinitionValue> findAlertDefinitions(int sessionID, AppdefEntityTypeID id, PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
@@ -933,6 +940,7 @@ public class EventsBossImpl implements EventsBoss {
      * @return Map of AlertDefinition names and IDs
      * 
      */
+    @Transactional(readOnly=true)
     public Map<String, Integer> findAlertDefinitionNames(int sessionID, AppdefEntityID id, Integer parentId)
         throws SessionNotFoundException, SessionTimeoutException, AppdefEntityNotFoundException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
@@ -944,6 +952,7 @@ public class EventsBossImpl implements EventsBoss {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<Alert> findAlerts(int sessionID, AppdefEntityID id, PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
@@ -955,6 +964,7 @@ public class EventsBossImpl implements EventsBoss {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<Alert> findAlerts(int sessionID, AppdefEntityID id, long begin, long end, PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
@@ -971,6 +981,7 @@ public class EventsBossImpl implements EventsBoss {
      * @return a list of {@link Escalatable}s
      * 
      */
+    @Transactional(readOnly=true)
     public List<Escalatable> findRecentAlerts(String username, int count, int priority, long timeRange,
                                               AppdefEntityID[] ids) throws LoginException, ApplicationException,
         ConfigPropertyException {
@@ -988,6 +999,7 @@ public class EventsBossImpl implements EventsBoss {
      * @return a list of {@link Escalatable}s
      * 
      */
+    @Transactional(readOnly=true)
     public List<Escalatable> findRecentAlerts(int sessionID, int count, int priority, long timeRange,
                                               AppdefEntityID[] ids) throws SessionNotFoundException,
         SessionTimeoutException, PermissionException {
@@ -1067,6 +1079,7 @@ public class EventsBossImpl implements EventsBoss {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public ConfigSchema getActionConfigSchema(int sessionID, String actionClass) throws SessionNotFoundException,
         SessionTimeoutException, EncodingException {
         sessionManager.authenticate(sessionID);
@@ -1089,6 +1102,7 @@ public class EventsBossImpl implements EventsBoss {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public ConfigSchema getRegisteredTriggerConfigSchema(int sessionID, String triggerClass)
         throws SessionNotFoundException, SessionTimeoutException, EncodingException {
         sessionManager.authenticate(sessionID);
@@ -1141,6 +1155,7 @@ public class EventsBossImpl implements EventsBoss {
     /**
      * retrieve escalation by alert definition id.
      */
+    @Transactional(readOnly=true)
     private Escalation findEscalationByAlertDefId(Integer id, EscalationAlertType type) throws PermissionException {
         return escalationManager.findByDefId(type, id);
     }
@@ -1150,6 +1165,7 @@ public class EventsBossImpl implements EventsBoss {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public Integer getEscalationIdByAlertDefId(int sessionID, Integer id, EscalationAlertType alertType)
         throws SessionTimeoutException, SessionNotFoundException, PermissionException{
         sessionManager.authenticate(sessionID);
@@ -1199,6 +1215,7 @@ public class EventsBossImpl implements EventsBoss {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public Escalation findEscalationById(int sessionID, Integer id) throws SessionTimeoutException,
         SessionNotFoundException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
@@ -1238,6 +1255,7 @@ public class EventsBossImpl implements EventsBoss {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public List<EscalationState> getActiveEscalations(int sessionId, int maxEscalations) throws SessionException {
         sessionManager.authenticate(sessionId);
 
@@ -1248,6 +1266,7 @@ public class EventsBossImpl implements EventsBoss {
      * Gets the escalatable associated with the specified state
      * 
      */
+    @Transactional(readOnly=true)
     public Escalatable getEscalatable(int sessionId, EscalationState state) throws SessionException {
         sessionManager.authenticate(sessionId);
         return escalationManager.getEscalatable(state);
@@ -1261,6 +1280,7 @@ public class EventsBossImpl implements EventsBoss {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public JSONArray listAllEscalationName(int sessionID) throws JSONException, SessionTimeoutException,
         SessionNotFoundException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
@@ -1426,6 +1446,7 @@ public class EventsBossImpl implements EventsBoss {
      * Get the last fix if available
      * 
      */
+    @Transactional(readOnly=true)
     public String getLastFix(int sessionID, Integer defId) throws SessionNotFoundException, SessionTimeoutException,
         PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
@@ -1440,6 +1461,7 @@ public class EventsBossImpl implements EventsBoss {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public MaintenanceEvent getMaintenanceEvent(int sessionId, Integer groupId) throws SessionNotFoundException,
         SessionTimeoutException, PermissionException, SchedulerException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);

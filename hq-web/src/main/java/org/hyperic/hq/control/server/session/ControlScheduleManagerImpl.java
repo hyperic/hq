@@ -159,7 +159,7 @@ public class ControlScheduleManagerImpl
      * 
      * 
      */
-    @Transactional
+    @Transactional(readOnly=true)
     public PageList<ControlHistory> getRecentControlActions(AuthzSubject subject, int rows, long window)
         throws ApplicationException {
         StopWatch watch = new StopWatch();
@@ -209,7 +209,7 @@ public class ControlScheduleManagerImpl
      * 
      * 
      */
-    @Transactional
+    @Transactional(readOnly=true)
     public PageList<ControlSchedule> getPendingControlActions(AuthzSubject subject, int rows)
         throws ApplicationException {
         StopWatch watch = new StopWatch();
@@ -254,7 +254,7 @@ public class ControlScheduleManagerImpl
      * XXX: This could also take a page control, although we would ignore
      * everything except for the size
      */
-    @Transactional
+    @Transactional(readOnly=true)
     public PageList<ControlFrequencyValue> getOnDemandControlFrequency(AuthzSubject subject, int numToReturn)
         throws ApplicationException {
         Connection conn = null;
@@ -316,7 +316,7 @@ public class ControlScheduleManagerImpl
      * 
      * 
      */
-    @Transactional
+    @Transactional(readOnly=true)
     public PageList<ControlSchedule> findScheduledJobs(AuthzSubject subject, AppdefEntityID id, PageControl pc)
         throws ScheduledJobNotFoundException {
 
@@ -357,7 +357,7 @@ public class ControlScheduleManagerImpl
      * 
      * 
      */
-    @Transactional
+    @Transactional(readOnly=true)
     public PageList<ControlHistory> findJobHistory(AuthzSubject subject, AppdefEntityID id, PageControl pc)
         throws PermissionException, AppdefEntityNotFoundException, GroupNotCompatibleException {
         if (id.isGroup()) {
@@ -415,7 +415,7 @@ public class ControlScheduleManagerImpl
      * 
      * 
      */
-    @Transactional
+    @Transactional(readOnly=true)
     public PageList<ControlHistory> findGroupJobHistory(AuthzSubject subject, int batchId, AppdefEntityID id,
                                                         PageControl pc) throws ApplicationException {
 
@@ -503,7 +503,7 @@ public class ControlScheduleManagerImpl
      * 
      * 
      */
-    @Transactional
+    @Transactional(readOnly=true)
     public ControlHistory getCurrentJob(AuthzSubject whoami, AppdefEntityID id) throws ApplicationException {
         Collection<ControlHistory> historyLocals = controlHistoryDAO.findByEntityStartTime(id.getType(), id.getID(),
             false);
@@ -522,7 +522,7 @@ public class ControlScheduleManagerImpl
      * 
      * 
      */
-    @Transactional
+    @Transactional(readOnly=true)
     public ControlHistory getJobByJobId(AuthzSubject subject, Integer id) throws ApplicationException {
 
         try {
@@ -540,7 +540,7 @@ public class ControlScheduleManagerImpl
      * 
      * 
      */
-    @Transactional
+    @Transactional(readOnly=true)
     public ControlHistory getLastJob(AuthzSubject subject, AppdefEntityID id) throws ApplicationException {
         Collection<ControlHistory> historyLocals = controlHistoryDAO.findByEntityStartTime(id.getType(), id.getID(),
             false);
@@ -559,7 +559,7 @@ public class ControlScheduleManagerImpl
      * 
      * 
      */
-    @Transactional
+    @Transactional(readOnly=true)
     public ControlSchedule getControlJob(AuthzSubject subject, Integer id) throws PluginException {
 
         try {
@@ -776,7 +776,7 @@ public class ControlScheduleManagerImpl
      * 
      * 
      */
-    @Transactional
+    @Transactional(readOnly=true)
     public ControlHistory getJobHistoryValue(Integer jobId) throws ApplicationException {
         try {
             return controlHistoryDAO.findById(jobId);

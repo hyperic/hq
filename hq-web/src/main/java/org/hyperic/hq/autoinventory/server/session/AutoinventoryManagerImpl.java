@@ -164,7 +164,7 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
      * @return A Map, where the keys are the names of the ServerTypeValues, and
      *         the values are the ServerSignature objects.
      */
-    @Transactional
+    @Transactional(readOnly=true)
     public Map<String, ServerSignature> getServerSignatures(AuthzSubject subject, List<ServerTypeValue> serverTypes)
         throws AutoinventoryException {
         // Plug server type names into a map for quick retrieval
@@ -203,6 +203,7 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
      * @param id The entity id to check.
      * @return true if the given resource supports runtime auto-discovery.
      */
+    @Transactional(readOnly=true)
     public boolean isRuntimeDiscoverySupported(AuthzSubject subject, AppdefEntityID id) {
         boolean retVal;
 
@@ -469,7 +470,7 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
      * Get status for an autoinventory scan.
      * @param aid The appdef entity whose agent we'll talk to.
      */
-    @Transactional
+    @Transactional(readOnly=true)
     public ScanStateCore getScanStatus(AuthzSubject subject, AppdefEntityID aid) throws AgentNotFoundException,
         AgentConnectionException, AgentRemoteException, AutoinventoryException {
 
@@ -528,7 +529,7 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
     /**
      * Get status for an autoinventory scan, given the agentToken
      */
-    @Transactional
+    @Transactional(readOnly=true)
     public ScanStateCore getScanStatusByAgentToken(AuthzSubject subject, String agentToken)
         throws AgentNotFoundException, AgentConnectionException, AgentRemoteException, AutoinventoryException {
         log.info("AutoinventoryManager.getScanStatus called");
@@ -693,7 +694,7 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
      * Returns a list of {@link Agent}s which still need to send in a runtime
      * scan (their last runtime scan was unsuccessfully processed)
      */
-    @Transactional
+    @Transactional(readOnly=true)
     public List<Agent> findAgentsRequiringRuntimeScan() {
         Collection<AgentReportStatus> dirties = agentReportStatusDao.findDirtyStatus();
         List<Agent> res = new ArrayList<Agent>(dirties.size());

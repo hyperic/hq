@@ -68,12 +68,14 @@ public class CrispoManagerImpl implements CrispoManager {
     /**
      * @return all the {@link Crispo}s in the system
      */
+    @Transactional(readOnly=true)
     public Collection<Crispo> findAll() {
         return crispoDao.findAll();
     }
 
     /**
      */
+    @Transactional(readOnly=true)
     public Crispo findById(Integer id) {
         return crispoDao.findById(id);
     }
@@ -111,6 +113,7 @@ public class CrispoManagerImpl implements CrispoManager {
      * @return A list of CrispoOptions that have a key that matches in whole
      *         or part the given key parameter.
      */
+    @Transactional(readOnly=true)
     public List<CrispoOption> findOptionByKey(String key) {
         return crispoOptionDao.findOptionsByKey(key);
     }
@@ -122,6 +125,7 @@ public class CrispoManagerImpl implements CrispoManager {
      * @return A list of CrispoOptions that have a value (in the array) that
      *         matches
      */
+    @Transactional(readOnly=true)
     public List<CrispoOption> findOptionByValue(String val) {
         return crispoOptionDao.findOptionsByValue(val);
     }

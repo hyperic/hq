@@ -73,6 +73,7 @@ public class MetricAuxLogManagerImpl implements MetricAuxLogManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public MetricAuxLogPojo find(GalertAuxLog log) {
         return metricAuxLogDAO.find(log);
     }

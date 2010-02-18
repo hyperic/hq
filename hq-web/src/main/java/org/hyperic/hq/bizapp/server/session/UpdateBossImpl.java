@@ -232,6 +232,7 @@ public class UpdateBossImpl implements UpdateBoss {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public String getUpdateReport() {
         UpdateStatus status = getOrCreateStatus();
 
@@ -267,6 +268,7 @@ public class UpdateBossImpl implements UpdateBoss {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public UpdateStatusMode getUpdateMode() {
         return getOrCreateStatus().getMode();
     }

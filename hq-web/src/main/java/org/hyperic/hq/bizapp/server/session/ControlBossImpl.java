@@ -158,6 +158,7 @@ public class ControlBossImpl implements ControlBoss {
     /**
      * Get the actions supported for an appdef entity
      */
+    @Transactional(readOnly=true)
     public List<String> getActions(int sessionId, AppdefEntityID id) throws PluginNotFoundException,
         AppdefEntityNotFoundException, SessionNotFoundException, SessionTimeoutException, PermissionException,
         GroupNotCompatibleException {
@@ -169,6 +170,7 @@ public class ControlBossImpl implements ControlBoss {
     /**
      * Get the actions supported for an appdef entity type
      */
+    @Transactional(readOnly=true)
     public List<String> getActions(int sessionId, AppdefEntityTypeID aetid) throws PluginNotFoundException,
         PermissionException, SessionNotFoundException, SessionTimeoutException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
@@ -179,6 +181,7 @@ public class ControlBossImpl implements ControlBoss {
     /**
      * Check if a group has been enabled for control
      */
+    @Transactional(readOnly=true)
     public boolean isGroupControlEnabled(int sessionId, AppdefEntityID id) throws AppdefEntityNotFoundException,
         PermissionException, SessionNotFoundException, SessionTimeoutException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
@@ -189,6 +192,7 @@ public class ControlBossImpl implements ControlBoss {
     /**
      * Check if the entity's resource supports control
      */
+    @Transactional(readOnly=true)
     public boolean isControlSupported(int sessionId, AppdefResourceValue res) throws SessionNotFoundException,
         SessionTimeoutException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
@@ -200,6 +204,7 @@ public class ControlBossImpl implements ControlBoss {
     /**
      * Check if the entity's resource supports control
      */
+    @Transactional(readOnly=true)
     public boolean isControlSupported(int sessionId, AppdefEntityTypeID tid) throws SessionNotFoundException,
         SessionTimeoutException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
@@ -211,6 +216,7 @@ public class ControlBossImpl implements ControlBoss {
      * Check if anything has been enabled for control
      * 
      */
+    @Transactional(readOnly=true)
     public boolean isControlEnabled(int sessionId) throws SessionNotFoundException, SessionTimeoutException,
         PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
@@ -235,6 +241,7 @@ public class ControlBossImpl implements ControlBoss {
     /**
      * Check if an entity has been enabled for control
      */
+    @Transactional(readOnly=true)
     public boolean isControlEnabled(int sessionId, AppdefEntityID id) throws AppdefEntityNotFoundException,
         SessionNotFoundException, SessionTimeoutException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
@@ -247,6 +254,7 @@ public class ControlBossImpl implements ControlBoss {
      * 
      * @return List of scheduled actions
      */
+    @Transactional(readOnly=true)
     public PageList<ControlSchedule> findScheduledJobs(int sessionId, AppdefEntityID id, PageControl pc)
         throws PluginException, ScheduledJobNotFoundException, SessionNotFoundException, SessionTimeoutException,
         PermissionException {
@@ -270,6 +278,7 @@ public class ControlBossImpl implements ControlBoss {
      * 
      * @TODO Implement page controls, Authz integration
      */
+    @Transactional(readOnly=true)
     public PageList<ControlHistory> findJobHistory(int sessionId, AppdefEntityID id, PageControl pc)
         throws PluginException, ApplicationException, PermissionException, SessionNotFoundException,
         SessionTimeoutException {
@@ -281,6 +290,7 @@ public class ControlBossImpl implements ControlBoss {
     /**
      * Group job history detail on group appdef id
      */
+    @Transactional(readOnly=true)
     public PageList<ControlHistory> findGroupJobHistory(int sessionId, AppdefEntityID id, int batchJobId, PageControl pc)
         throws PluginException, ApplicationException, SessionNotFoundException, SessionTimeoutException,
         PermissionException, AppdefGroupNotFoundException {
@@ -311,6 +321,7 @@ public class ControlBossImpl implements ControlBoss {
      * 
      * @return currently running ControlJob.
      */
+    @Transactional(readOnly=true)
     public ControlHistory getCurrentJob(int sessionId, AppdefEntityID id) throws ApplicationException,
         PermissionException, SessionNotFoundException, SessionTimeoutException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
@@ -323,6 +334,7 @@ public class ControlBossImpl implements ControlBoss {
      * 
      * @return last ControlJob that ran
      */
+    @Transactional(readOnly=true)
     public ControlHistory getJobByJobId(int sessionId, Integer id) throws ApplicationException, PermissionException,
         SessionNotFoundException, SessionTimeoutException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
@@ -335,6 +347,7 @@ public class ControlBossImpl implements ControlBoss {
      * 
      * @return last ControlJob that ran
      */
+    @Transactional(readOnly=true)
     public ControlHistory getLastJob(int sessionId, AppdefEntityID id) throws ApplicationException,
         PermissionException, SessionNotFoundException, SessionTimeoutException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
@@ -349,6 +362,7 @@ public class ControlBossImpl implements ControlBoss {
      * 
      * @return The control job that was requested
      */
+    @Transactional(readOnly=true)
     public ControlSchedule getControlJob(int sessionId, Integer id) throws PluginException, ApplicationException,
         PermissionException, SessionNotFoundException, SessionTimeoutException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
@@ -373,6 +387,7 @@ public class ControlBossImpl implements ControlBoss {
     /**
      * Get a list of recent control actions in decending order
      */
+    @Transactional(readOnly=true)
     public PageList<ControlHistory> getRecentControlActions(int sessionId, int rows, long window)
         throws ApplicationException, PermissionException, SessionNotFoundException, SessionTimeoutException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
@@ -387,6 +402,7 @@ public class ControlBossImpl implements ControlBoss {
      * @throws ApplicationException if user is not found
      * @throws LoginException if user account has been disabled
      */
+    @Transactional(readOnly=true)
     public PageList<ControlHistory> getRecentControlActions(String user, int rows, long window) throws LoginException,
         ApplicationException {
         int sessionId = authBoss.getUnauthSessionId(user);
@@ -397,6 +413,7 @@ public class ControlBossImpl implements ControlBoss {
     /**
      * Get a list of pending control actions in decending order
      */
+    @Transactional(readOnly=true)
     public PageList<ControlSchedule> getPendingControlActions(int sessionId, int rows) throws ApplicationException,
         PermissionException, SessionNotFoundException, SessionTimeoutException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
@@ -407,6 +424,7 @@ public class ControlBossImpl implements ControlBoss {
     /**
      * Get a list of most active control operations
      */
+    @Transactional(readOnly=true)
     public PageList<ControlFrequencyValue> getOnDemandControlFrequency(int sessionId, int numToReturn)
         throws ApplicationException, PermissionException, ApplicationException, SessionNotFoundException,
         SessionTimeoutException {
@@ -435,6 +453,7 @@ public class ControlBossImpl implements ControlBoss {
      * @return A map of PlatformType names and AppdefEntityTypeIDs.
      * @throws PermissionException
      */
+    @Transactional(readOnly=true)
     public Map<String, AppdefEntityID> findControllablePlatformTypes(int sessionID) throws SessionNotFoundException,
         SessionTimeoutException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
@@ -448,6 +467,7 @@ public class ControlBossImpl implements ControlBoss {
      * @return A map of ServerType names and AppdefEntityTypeIDs.
      * @throws PermissionException
      */
+    @Transactional(readOnly=true)
     public Map<String, AppdefEntityTypeID> findControllableServerTypes(int sessionID) throws SessionNotFoundException,
         SessionTimeoutException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
@@ -461,6 +481,7 @@ public class ControlBossImpl implements ControlBoss {
      * @return A map of ServiceType names and AppdefEntityTypeIDs.
      * @throws PermissionException
      */
+    @Transactional(readOnly=true)
     public Map<String, AppdefEntityTypeID> findControllableServiceTypes(int sessionID) throws SessionNotFoundException,
         SessionTimeoutException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
@@ -474,6 +495,7 @@ public class ControlBossImpl implements ControlBoss {
      * @return A map of Service names and AppdefEntityIDs.
      * @throws PermissionException
      */
+    @Transactional(readOnly=true)
     public Map<String, AppdefEntityID> findControllableResourceNames(int sessionID, AppdefEntityTypeID aetid)
         throws SessionNotFoundException, SessionException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);

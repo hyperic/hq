@@ -566,6 +566,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
     /**
      * Returns the {@link AlertDefinition}s using the passed escalation.
      */
+    @Transactional(readOnly=true)
     public Collection<AlertDefinition> getUsing(Escalation e) {
         return alertDefDao.getUsing(e);
     }
@@ -651,6 +652,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
      * @throws PermissionException if user does not have permission to manage
      *         alerts
      */
+    @Transactional(readOnly=true)
     public AlertDefinitionValue getById(AuthzSubject subj, Integer id) throws PermissionException {
         AlertDefinitionValue adv = null;
         AlertDefinition ad = getByIdAndCheck(subj, id);
@@ -665,6 +667,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
      * @throws PermissionException if user does not have permission to manage
      *         alerts
      */
+    @Transactional(readOnly=true)
     public AlertDefinition getByIdAndCheck(AuthzSubject subj, Integer id) throws PermissionException {
         AlertDefinition ad = alertDefDao.get(id);
         if (ad != null) {
@@ -690,6 +693,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
      * 
      * @param id The alert def Id.
      */
+    @Transactional(readOnly=true)
     public AlertDefinition getByIdNoCheck(Integer id) {
         return alertDefDao.get(id);
     }
@@ -702,6 +706,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
      *         alert definition.
      * 
      */
+    @Transactional(readOnly=true)
     public boolean isResourceTypeAlertDefinition(Integer id) {
         AlertDefinition ad = alertDefDao.get(id);
         return ad.isResourceTypeDefinition();
@@ -710,6 +715,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public AlertDefinition findAlertDefinitionById(Integer id) {
         return alertDefDao.findById(id);
     }
@@ -718,6 +724,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
      * Get an alert definition's name
      * 
      */
+    @Transactional(readOnly=true)
     public String getNameById(Integer id) {
         return alertDefDao.get(id).getName();
     }
@@ -726,6 +733,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
      * Get an alert definition's conditions
      * 
      */
+    @Transactional(readOnly=true)
     public AlertConditionValue[] getConditionsById(Integer id) {
         AlertDefinition def = alertDefDao.get(id);
         Collection<AlertCondition> conds = def.getConditions();
@@ -742,6 +750,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
      * Get list of alert conditions for a resource or resource type
      * 
      */
+    @Transactional(readOnly=true)
     public boolean isAlertDefined(AppdefEntityID id, Integer parentId) {
         Resource res = resourceManager.findResource(id);
         return alertDefDao.findChildAlertDef(res, parentId) != null;
@@ -753,6 +762,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
      * @return a PageList of {@link AlertDefinitionValue} objects
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<AlertDefinitionValue> findAllAlertDefinitions(AuthzSubject subj) {
         List<AlertDefinitionValue> vals = new ArrayList<AlertDefinitionValue>();
 
@@ -772,6 +782,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
      * Get list of all child conditions
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<AlertDefinitionValue> findChildAlertDefinitions(Integer id) {
         AlertDefinition def = alertDefDao.findById(id);
         List<AlertDefinitionValue> vals = new ArrayList<AlertDefinitionValue>();
@@ -800,6 +811,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
      *         definition is found for the resource.
      * 
      */
+    @Transactional(readOnly=true)
     public Integer findChildAlertDefinitionId(AppdefEntityID aeid, Integer pid, boolean allowStale) {
         Resource res = resourceManager.findResource(aeid);
         AlertDefinition def = alertDefDao.findChildAlertDef(res, pid, true);
@@ -821,6 +833,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public List<AlertDefinition> findAlertDefinitions(AuthzSubject subj, AlertSeverity minSeverity, Boolean enabled,
                                                       boolean excludeTypeBased, PageInfo pInfo) {
         return alertDefDao.findDefinitions(subj, minSeverity, enabled, excludeTypeBased, pInfo);
@@ -834,6 +847,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
      *        {@link AlertDefSortField}
      * 
      */
+    @Transactional(readOnly=true)
     public List<AlertDefinition> findTypeBasedDefinitions(AuthzSubject subj, Boolean enabled, PageInfo pInfo)
         throws PermissionException {
         if (!PermissionManagerFactory.getInstance().hasAdminPermission(subj.getId())) {
@@ -847,6 +861,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
      * @throws PermissionException if user cannot manage alerts for resource
      * 
      */
+    @Transactional(readOnly=true)
     public List<AlertDefinition> findAlertDefinitions(AuthzSubject subject, AppdefEntityID id)
         throws PermissionException {
         alertPermissionManager.canManageAlerts(subject, id);
@@ -857,6 +872,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<AlertDefinitionValue> findAlertDefinitions(AuthzSubject subj, AppdefEntityID id, PageControl pc)
         throws PermissionException {
         alertPermissionManager.canManageAlerts(subj, id);
@@ -876,6 +892,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
      * Get list of alert definitions for a resource type.
      * 
      */
+    @Transactional(readOnly=true)
     public List<AlertDefinition> findAlertDefinitions(AuthzSubject subject, Resource prototype)
         throws PermissionException {
         // TODO: Check admin permission?
@@ -886,6 +903,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
      * Get list of alert conditions for a resource or resource type
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<AlertDefinitionValue> findAlertDefinitions(AuthzSubject subj, AppdefEntityTypeID aetid,
                                                                PageControl pc) throws PermissionException {
         Resource res = resourceManager.findResourcePrototype(aetid);
@@ -906,6 +924,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
      * @return a list of alert definitions
      * 
      */
+    @Transactional(readOnly=true)
     public List<AlertDefinition> findRelatedAlertDefinitions(AuthzSubject subj, Resource res) {
         return alertDefDao.findByRootResource(subj, res);
     }
@@ -914,6 +933,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
      * Get list of children alert definition for a parent alert definition
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<AlertDefinitionValue> findAlertDefinitionChildren(Integer id) {
         AlertDefinition def = alertDefDao.findById(id);
 
@@ -926,6 +946,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
      * Get list of alert definition names for a resource
      * 
      */
+    @Transactional(readOnly=true)
     public SortedMap<String, Integer> findAlertDefinitionNames(AuthzSubject subj, AppdefEntityID id, Integer parentId)
         throws PermissionException {
         if (parentId == null) {
@@ -938,6 +959,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
      * Get list of alert definition names for a resource
      * 
      */
+    @Transactional(readOnly=true)
     public SortedMap<String, Integer> findAlertDefinitionNames(AppdefEntityID id, Integer parentId) {
         AlertDefinitionDAO aDao = alertDefDao;
         TreeMap<String, Integer> ret = new TreeMap<String, Integer>();
@@ -968,6 +990,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
      * Return array of two values: enabled and act on trigger ID
      * 
      */
+    @Transactional(readOnly=true)
     public boolean isEnabled(Integer id) {
         return alertDefDao.isEnabled(id);
     }
@@ -975,6 +998,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public int getActiveCount() {
         return alertDefDao.getNumActiveDefs();
     }

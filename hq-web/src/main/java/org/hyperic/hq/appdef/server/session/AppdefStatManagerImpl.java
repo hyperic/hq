@@ -137,7 +137,7 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
      * Return map of platform counts.
      * </p>
      */
-    @Transactional(propagation = Propagation.SUPPORTS)
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly=true)
     public Map<String, Integer> getPlatformCountsByTypeMap(AuthzSubject subject) {
         Map<String, Integer> platMap = new HashMap<String, Integer>();
         Statement stmt = null;
@@ -185,7 +185,7 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
      * </p>
      * 
      */
-    @Transactional(propagation = Propagation.SUPPORTS)
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly=true)
     public int getPlatformsCount(AuthzSubject subject) {
         Statement stmt = null;
         ResultSet rs = null;
@@ -229,7 +229,7 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
      * </p>
      * 
      */
-    @Transactional(propagation = Propagation.SUPPORTS)
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly=true)
     public Map<String, Integer> getServerCountsByTypeMap(AuthzSubject subject) {
         Map<String, Integer> servMap = new HashMap<String, Integer>();
         Statement stmt = null;
@@ -274,7 +274,7 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
      * Return servers count.
      * </p>
      */
-    @Transactional(propagation = Propagation.SUPPORTS)
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly=true)
     public int getServersCount(AuthzSubject subject) {
         Statement stmt = null;
         ResultSet rs = null;
@@ -311,7 +311,7 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
      * Return map of service counts.
      * </p>
      */
-    @Transactional(propagation = Propagation.SUPPORTS)
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly=true)
     public Map<String, Integer> getServiceCountsByTypeMap(AuthzSubject subject) {
         Map<String, Integer> svcMap = new HashMap<String, Integer>();
         Statement stmt = null;
@@ -356,7 +356,7 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
      * Return services count.
      * </p>
      */
-    @Transactional(propagation = Propagation.SUPPORTS)
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly=true)
     public int getServicesCount(AuthzSubject subject) {
         Statement stmt = null;
         ResultSet rs = null;
@@ -393,7 +393,7 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
      * Return map of app counts.
      * </p>
      */
-    @Transactional(propagation = Propagation.SUPPORTS)
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly=true)
     public Map<String, Integer> getApplicationCountsByTypeMap(AuthzSubject subject) {
         Map<String, Integer> appMap = new HashMap<String, Integer>();
         Statement stmt = null;
@@ -438,7 +438,7 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
      * Return apps count.
      * </p>
      */
-    @Transactional(propagation = Propagation.SUPPORTS)
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly=true)
     public int getApplicationsCount(AuthzSubject subject) {
         Statement stmt = null;
         ResultSet rs = null;
@@ -475,7 +475,7 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
      * Return map of grp counts.
      * </p>
      */
-    @Transactional(propagation = Propagation.SUPPORTS)
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly=true)
     public Map<Integer, Integer> getGroupCountsMap(AuthzSubject subject) {
         Map<Integer, Integer> grpMap = new HashMap<Integer, Integer>();
         Statement stmt = null;
@@ -546,7 +546,7 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
      * Return directly connected resource tree for node level platform
      * </p>
      */
-    @Transactional(propagation = Propagation.SUPPORTS)
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly=true)
     public ResourceTreeNode[] getNavMapDataForPlatform(AuthzSubject subject, Integer platformId)
         throws PlatformNotFoundException, PermissionException {
         try {
@@ -707,7 +707,7 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
      * Return directly connected resource tree for node level server
      * </p>
      */
-    @Transactional(propagation = Propagation.SUPPORTS)
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly=true)
     public ResourceTreeNode[] getNavMapDataForServer(AuthzSubject subject, Integer serverId)
         throws ServerNotFoundException, PermissionException {
         Server server = serverManager.findServerById(serverId);
@@ -848,7 +848,7 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
      * Return directly connected resource tree for node level service
      * </p>
      */
-    @Transactional(propagation = Propagation.SUPPORTS)
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly=true)
     public ResourceTreeNode[] getNavMapDataForService(AuthzSubject subject, Integer serviceId)
         throws ServiceNotFoundException, PermissionException {
         Service service = serviceManager.findServiceById(serviceId);
@@ -1050,7 +1050,7 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
      * Return directly connected resource tree for node level service
      * </p>
      */
-    @Transactional(propagation = Propagation.SUPPORTS)
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly=true)
     public ResourceTreeNode[] getNavMapDataForApplication(AuthzSubject subject, Integer appId)
         throws ApplicationNotFoundException, PermissionException {
         Application app = applicationManager.findApplicationById(subject, appId);
@@ -1148,7 +1148,7 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
      * Return resources for autogroups
      * </p>
      */
-    @Transactional(propagation = Propagation.SUPPORTS)
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly=true)
     public ResourceTreeNode[] getNavMapDataForAutoGroup(AuthzSubject subject, AppdefEntityID[] parents, Integer resType)
         throws AppdefEntityNotFoundException, PermissionException {
         try {
@@ -1382,7 +1382,7 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
      * Return resources for groups (not autogroups)
      * </p>
      */
-    @Transactional(propagation = Propagation.SUPPORTS)
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly=true)
     public ResourceTreeNode[] getNavMapDataForGroup(AuthzSubject subject, Integer groupId) throws PermissionException {
 
         ResourceGroup group = resourceGroupManager.findResourceGroupById(subject, groupId);

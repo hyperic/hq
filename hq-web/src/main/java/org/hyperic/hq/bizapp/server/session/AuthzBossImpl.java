@@ -120,6 +120,7 @@ public class AuthzBossImpl implements AuthzBoss {
      * @return true - if user has adminsterCAM op false otherwise
      * 
      */
+    @Transactional(readOnly=true)
     public boolean hasAdminPermission(int sessionId) throws  SessionTimeoutException,
         SessionNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
@@ -133,6 +134,7 @@ public class AuthzBossImpl implements AuthzBoss {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public List<ResourceType> getAllResourceTypes(Integer sessionId, PageControl pc) throws PermissionException, SessionTimeoutException, SessionNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         return resourceManager.getAllResourceTypes(subject, pc);
@@ -145,6 +147,7 @@ public class AuthzBossImpl implements AuthzBoss {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public List<ResourceType> getAllResourceTypes(Integer sessionId) throws 
         PermissionException, SessionTimeoutException, SessionNotFoundException {
         return getAllResourceTypes(sessionId, null);
@@ -157,6 +160,7 @@ public class AuthzBossImpl implements AuthzBoss {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public List<Operation> getAllOperations(Integer sessionId, PageControl pc) throws 
         PermissionException, SessionTimeoutException, SessionNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
@@ -170,6 +174,7 @@ public class AuthzBossImpl implements AuthzBoss {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public List<Operation> getAllOperations(Integer sessionId) throws  PermissionException,
         SessionTimeoutException, SessionNotFoundException {
         return getAllOperations(sessionId, null);
@@ -182,6 +187,7 @@ public class AuthzBossImpl implements AuthzBoss {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<AuthzSubjectValue> getAllSubjects(Integer sessionId, Collection<Integer> excludes, PageControl pc)
         throws  SessionTimeoutException, SessionNotFoundException, PermissionException, NotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
@@ -195,6 +201,7 @@ public class AuthzBossImpl implements AuthzBoss {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<AuthzSubjectValue> getSubjectsById(Integer sessionId, Integer[] ids, PageControl pc)
         throws PermissionException, SessionTimeoutException, SessionNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
@@ -207,6 +214,7 @@ public class AuthzBossImpl implements AuthzBoss {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<AuthzSubject> getSubjectsByName(Integer sessionId, String name, PageControl pc)
         throws PermissionException, SessionTimeoutException, SessionNotFoundException {
         sessionManager.getSubject(sessionId);
@@ -220,6 +228,7 @@ public class AuthzBossImpl implements AuthzBoss {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public List<ResourceGroupValue> getAllResourceGroups(Integer sessionId, PageControl pc) throws 
         PermissionException, SessionTimeoutException, SessionNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
@@ -233,6 +242,7 @@ public class AuthzBossImpl implements AuthzBoss {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<ResourceGroupValue> getResourceGroupsById(Integer sessionId, Integer[] ids, PageControl pc)
         throws  PermissionException, SessionTimeoutException, SessionNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
@@ -242,6 +252,7 @@ public class AuthzBossImpl implements AuthzBoss {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public Map<AppdefEntityID, Resource> findResourcesByIds(Integer sessionId, AppdefEntityID[] entities)
         throws SessionNotFoundException, SessionTimeoutException {
         // get the user
@@ -359,6 +370,7 @@ public class AuthzBossImpl implements AuthzBoss {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public AuthzSubject getCurrentSubject(int sessionid) throws SessionException {
         return sessionManager.getSubject(sessionid);
     }
@@ -366,6 +378,7 @@ public class AuthzBossImpl implements AuthzBoss {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public AuthzSubject getCurrentSubject(String name) throws SessionException, ApplicationException {
         int sessionId = authBoss.getUnauthSessionId(name);
         return getCurrentSubject(sessionId);
@@ -380,6 +393,7 @@ public class AuthzBossImpl implements AuthzBoss {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public AuthzSubject findSubjectById(Integer sessionId, Integer subjectId) throws SessionNotFoundException,
         SessionTimeoutException, PermissionException {
         // check for timeout
@@ -393,6 +407,7 @@ public class AuthzBossImpl implements AuthzBoss {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public AuthzSubject findSubjectByName(Integer sessionId, String subjectName) throws 
         SessionTimeoutException, SessionNotFoundException, PermissionException {
         // check for timeout
@@ -409,6 +424,7 @@ public class AuthzBossImpl implements AuthzBoss {
      * more information
      * 
      */
+    @Transactional(readOnly=true)
     public AuthzSubject findSubjectByNameNoAuthz(Integer sessionId, String subjectName) throws 
         SessionTimeoutException, SessionNotFoundException, PermissionException {
         // check for timeout
@@ -423,6 +439,7 @@ public class AuthzBossImpl implements AuthzBoss {
      * @throws LoginException
      * 
      */
+    @Transactional(readOnly=true)
     public ConfigResponse getUserPrefs(String username) throws SessionNotFoundException, ApplicationException,
         ConfigPropertyException {
         int sessionId = authBoss.getUnauthSessionId(username);
@@ -434,6 +451,7 @@ public class AuthzBossImpl implements AuthzBoss {
      * Return a ConfigResponse matching the UserPreferences
      * 
      */
+    @Transactional(readOnly=true)
     public ConfigResponse getUserPrefs(Integer sessionId, Integer subjectId) {
         try {
             AuthzSubject who = sessionManager.getSubject(sessionId);
@@ -458,6 +476,7 @@ public class AuthzBossImpl implements AuthzBoss {
      * Get the current user's dashboard
      * 
      */
+    @Transactional(readOnly=true)
     public ConfigResponse getUserDashboardConfig(Integer sessionId) throws SessionNotFoundException,
         SessionTimeoutException, PermissionException {
         AuthzSubject subj = sessionManager.getSubject(sessionId);
@@ -468,6 +487,7 @@ public class AuthzBossImpl implements AuthzBoss {
      * Get the email of a user by name
      * 
      */
+    @Transactional(readOnly=true)
     public String getEmailByName(Integer sessionId, String userName) throws  SessionTimeoutException,
         SessionNotFoundException {
         sessionManager.authenticate(sessionId.intValue());
@@ -478,6 +498,7 @@ public class AuthzBossImpl implements AuthzBoss {
      * Get the email of a user by id
      * 
      */
+    @Transactional(readOnly=true)
     public String getEmailById(Integer sessionId, Integer userId) throws  SessionTimeoutException,
         SessionNotFoundException {
         sessionManager.authenticate(sessionId.intValue());

@@ -290,6 +290,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * @throws SessionTimeoutException
      * 
      */
+    @Transactional(readOnly=true)
     public AppdefResourceType findCommonResourceType(int sessionID, String[] aeids)
         throws AppdefEntityNotFoundException, PermissionException, SessionNotFoundException, SessionTimeoutException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
@@ -335,6 +336,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * @return A list of PlatformTypeValue objects.
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<PlatformTypeValue> findAllPlatformTypes(int sessionID, PageControl pc)
         throws SessionTimeoutException, SessionNotFoundException, PermissionException {
 
@@ -350,6 +352,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * @return A list of PlatformTypeValue objects.
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<PlatformTypeValue> findViewablePlatformTypes(int sessionID, PageControl pc)
         throws SessionTimeoutException, SessionNotFoundException, PermissionException, NotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
@@ -364,6 +367,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * @return A list of ServerTypeValue objects.
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<ServerTypeValue> findAllServerTypes(int sessionID, PageControl pc) throws SessionNotFoundException,
         SessionTimeoutException, PermissionException {
 
@@ -377,6 +381,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * @return A list of ServerTypeValue objects.
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<ServerTypeValue> findViewableServerTypes(int sessionID, PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
@@ -386,6 +391,7 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public List<AppdefResourceTypeValue> findAllApplicationTypes(int sessionID) throws ApplicationException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
 
@@ -396,6 +402,7 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public ApplicationType findApplicationTypeById(int sessionId, Integer id) throws ApplicationException {
         sessionManager.authenticate(sessionId);
         return applicationManager.findApplicationType(id);
@@ -404,6 +411,7 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<ServiceTypeValue> findAllServiceTypes(int sessionID, PageControl pc)
         throws SessionTimeoutException, SessionNotFoundException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
@@ -413,6 +421,7 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<ServiceTypeValue> findViewableServiceTypes(int sessionID, PageControl pc)
         throws SessionTimeoutException, SessionNotFoundException, PermissionException, NotFoundException {
 
@@ -423,6 +432,7 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<ServiceTypeValue> findViewablePlatformServiceTypes(int sessionID, Integer platId)
         throws SessionTimeoutException, SessionNotFoundException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
@@ -432,6 +442,7 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public ApplicationValue findApplicationById(int sessionID, Integer id) throws AppdefEntityNotFoundException,
         PermissionException, SessionTimeoutException, SessionNotFoundException {
 
@@ -465,6 +476,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<? extends AppdefResourceValue> findChildResources(int sessionID, AppdefEntityID parent,
                                                                       AppdefEntityTypeID childResourceType,
                                                                       PageControl pc) throws SessionException,
@@ -497,6 +509,7 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<ApplicationValue> findApplications(int sessionID, AppdefEntityID id, PageControl pc)
         throws AppdefEntityNotFoundException, PermissionException, SessionTimeoutException, SessionNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
@@ -506,6 +519,7 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<ServiceValue> findPlatformServices(int sessionID, Integer platformId, PageControl pc)
         throws AppdefEntityNotFoundException, PermissionException, SessionTimeoutException, SessionNotFoundException {
         // Get the AuthzSubject for the user's session
@@ -516,6 +530,7 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<ServiceValue> findPlatformServices(int sessionID, Integer platformId, Integer typeId, PageControl pc)
         throws AppdefEntityNotFoundException, PermissionException, SessionTimeoutException, SessionNotFoundException {
         // Get the AuthzSubject for the user's session
@@ -527,6 +542,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * Find service inventory by application - including services and clusters
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<AppdefResourceValue> findServiceInventoryByApplication(int sessionID, Integer appId, PageControl pc)
         throws AppdefEntityNotFoundException, SessionException, PermissionException {
         AppdefEntityID aeid = AppdefEntityID.newAppID(appId);
@@ -540,6 +556,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * @return A list of ServiceValue objects.
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<AppdefResourceValue> findServicesByServer(int sessionID, Integer serverId, PageControl pc)
         throws AppdefEntityNotFoundException, PermissionException, SessionException {
         AppdefEntityID aeid = AppdefEntityID.newServerID(serverId);
@@ -591,6 +608,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * Find the platform by service.
      * 
      */
+    @Transactional(readOnly=true)
     public PlatformValue findPlatformByDependentID(int sessionID, AppdefEntityID entityId)
         throws AppdefEntityNotFoundException, SessionTimeoutException, SessionNotFoundException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
@@ -610,6 +628,7 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public ServerValue findServerByService(int sessionID, Integer serviceID) throws AppdefEntityNotFoundException,
         SessionTimeoutException, SessionNotFoundException, PermissionException {
         return (ServerValue) findServers(sessionID, AppdefEntityID.newServiceID(serviceID), null).get(0);
@@ -664,6 +683,7 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<ServerTypeValue> findServerTypesByPlatform(int sessionID, Integer platformId, PageControl pc)
         throws AppdefEntityNotFoundException, PermissionException, SessionTimeoutException, SessionNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
@@ -673,6 +693,7 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<ServerTypeValue> findServerTypesByPlatformType(int sessionID, Integer platformId, PageControl pc)
         throws AppdefEntityNotFoundException, SessionTimeoutException, SessionNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
@@ -727,6 +748,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * @return A List of PlatformValue objects representing all of the platforms
      *         that the given subject is allowed to view.
      */
+    @Transactional(readOnly=true)
     public PageList<PlatformValue> findAllPlatforms(int sessionID, PageControl pc) throws SessionTimeoutException,
         SessionNotFoundException, PermissionException, NotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
@@ -742,6 +764,7 @@ public class AppdefBossImpl implements AppdefBoss {
      *         that the given subject is allowed to view that was created in the
      *         past time range specified.
      */
+    @Transactional(readOnly=true)
     public PageList<PlatformValue> findRecentPlatforms(int sessionID, long range, int size)
         throws SessionTimeoutException, SessionNotFoundException, PermissionException, NotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
@@ -756,6 +779,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * @return list of appdefResourceValue
      * 
      */
+    @Transactional(readOnly=true)
     @SuppressWarnings("unchecked")
     public PageList<AppdefResourceValue> findByIds(int sessionId, AppdefEntityID[] entities, PageControl pc)
         throws PermissionException, SessionTimeoutException, SessionNotFoundException {
@@ -809,7 +833,8 @@ public class AppdefBossImpl implements AppdefBoss {
      * caller to know the instance-id's corresponding type. Similarly, the
      * return value is upcasted.
      * 
-     * */
+     */
+    @Transactional(readOnly=true)
     public AppdefResourceValue findById(int sessionId, AppdefEntityID entityId) throws AppdefEntityNotFoundException,
         PermissionException, SessionTimeoutException, SessionNotFoundException {
         // get the user
@@ -826,7 +851,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * represented by the instance id passed in. The method does not require the
      * caller to know the instance-id's corresponding type. Similarly, the
      * return value is upcasted.
-     * */
+     */
     private AppdefResourceValue findById(AuthzSubject subject, AppdefEntityID entityId)
         throws AppdefEntityNotFoundException, PermissionException, SessionTimeoutException, SessionNotFoundException {
         AppdefEntityValue aeval = new AppdefEntityValue(entityId, subject);
@@ -850,6 +875,7 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public PlatformValue findPlatformById(int sessionID, Integer id) throws AppdefEntityNotFoundException,
         SessionTimeoutException, SessionNotFoundException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
@@ -859,6 +885,7 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public Agent findResourceAgent(AppdefEntityID entityId) throws AppdefEntityNotFoundException,
         SessionTimeoutException, SessionNotFoundException, PermissionException, AgentNotFoundException {
         return agentManager.getAgent(entityId);
@@ -867,6 +894,7 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public ServerValue findServerById(int sessionID, Integer id) throws AppdefEntityNotFoundException,
         SessionTimeoutException, SessionNotFoundException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
@@ -876,6 +904,7 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public ServiceValue findServiceById(int sessionID, Integer id) throws AppdefEntityNotFoundException,
         SessionTimeoutException, SessionNotFoundException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
@@ -887,6 +916,7 @@ public class AppdefBossImpl implements AppdefBoss {
      *         three group specific resource types.
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<AppdefResourceTypeValue> findAllResourceTypes(int sessionId, PageControl pc)
         throws SessionTimeoutException, SessionNotFoundException, PermissionException {
         return findAllResourceTypes(sessionId, APPDEF_TYPE_UNDEFINED, pc);
@@ -897,6 +927,7 @@ public class AppdefBossImpl implements AppdefBoss {
      *         particular entity type.
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<AppdefResourceTypeValue> findAllResourceTypes(int sessionId, int entType, PageControl pc)
         throws SessionTimeoutException, SessionNotFoundException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
@@ -982,6 +1013,7 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public AppdefResourceTypeValue findResourceTypeById(int sessionID, AppdefEntityTypeID id)
         throws SessionTimeoutException, SessionNotFoundException {
         try {
@@ -1008,6 +1040,7 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public PlatformType findPlatformTypeById(int sessionID, Integer id) throws PlatformNotFoundException,
         SessionTimeoutException, SessionNotFoundException {
         sessionManager.authenticate(sessionID);
@@ -1017,6 +1050,7 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public PlatformType findPlatformTypeByName(int sessionID, String name) throws PlatformNotFoundException,
         SessionTimeoutException, SessionNotFoundException {
         sessionManager.authenticate(sessionID);
@@ -1026,6 +1060,7 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public ServiceType findServiceTypeById(int sessionID, Integer id) throws SessionTimeoutException,
         SessionNotFoundException {
         sessionManager.authenticate(sessionID);
@@ -1035,6 +1070,7 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<ServiceTypeValue> findServiceTypesByServerType(int sessionID, int serverTypeId)
         throws SessionTimeoutException, SessionNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
@@ -1044,6 +1080,7 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public ServerType findServerTypeById(int sessionID, Integer id) throws SessionTimeoutException,
         SessionNotFoundException {
         sessionManager.authenticate(sessionID);
@@ -1672,6 +1709,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * Get the dependency tree for a given application
      * 
      */
+    @Transactional(readOnly=true)
     public DependencyTree getAppDependencyTree(int sessionId, Integer appId) throws ApplicationException,
         PermissionException {
         try {
@@ -1885,6 +1923,7 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public ResourceGroup findGroupById(int sessionId, Integer groupId) throws PermissionException, SessionException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
 
@@ -1894,6 +1933,7 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public Map<String, Integer> getResourceTypeCountMap(int sessionId, Integer groupId) throws PermissionException,
         SessionException {
         ResourceGroup g = findGroupById(sessionId, groupId);
@@ -1903,6 +1943,7 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public AppdefGroupValue findGroup(int sessionId, Integer id) throws PermissionException, SessionException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         ResourceGroup group = resourceGroupManager.findResourceGroupById(subject, id);
@@ -1912,6 +1953,7 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public Collection<ResourceGroup> getGroupsForResource(int sessionId, Resource r) throws SessionNotFoundException,
         SessionTimeoutException {
         sessionManager.authenticate(sessionId);
@@ -1926,6 +1968,7 @@ public class AppdefBossImpl implements AppdefBoss {
      *         id is incorrect.
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<AppdefGroupValue> findGroups(int sessionId, Integer[] groupIds, PageControl pc)
         throws PermissionException, SessionException {
         List<AppdefGroupValue> toBePaged = new ArrayList<AppdefGroupValue>(groupIds.length);
@@ -1943,6 +1986,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<AppdefGroupValue> findAllGroupsMemberInclusive(int sessionId, PageControl pc, AppdefEntityID entity)
         throws PermissionException, SessionTimeoutException, SessionNotFoundException, ApplicationException {
         return findAllGroupsMemberInclusive(sessionId, pc, entity, new Integer[0]);
@@ -1954,7 +1998,8 @@ public class AppdefBossImpl implements AppdefBoss {
      * filter to remove unwanted groups.
      * @param entity for use in group member filtering.
      * @return List containing AppdefGroupValue.
-     * */
+     */
+    @Transactional(readOnly=true)
     private PageList<AppdefGroupValue> findAllGroupsMemberInclusive(int sessionId, PageControl pc,
                                                                     AppdefEntityID entity, Integer[] excludeIds)
         throws PermissionException, SessionTimeoutException, SessionNotFoundException, ApplicationException {
@@ -1982,7 +2027,8 @@ public class AppdefBossImpl implements AppdefBoss {
      * @param entity for use in group member filtering.
      * @return List containing AppdefGroupValue.
      * 
-     * */
+     */
+    @Transactional(readOnly=true)
     public PageList<AppdefGroupValue> findAllGroupsMemberExclusive(int sessionId, PageControl pc, AppdefEntityID entity)
         throws PermissionException, SessionTimeoutException, SessionNotFoundException {
         return findAllGroupsMemberExclusive(sessionId, pc, entity, null, null);
@@ -1994,7 +2040,8 @@ public class AppdefBossImpl implements AppdefBoss {
      * @param entity for use in group member filtering.
      * @return List containing AppdefGroupValue.
      * 
-     * */
+     */
+    @Transactional(readOnly=true)
     public PageList<AppdefGroupValue> findAllGroupsMemberExclusive(int sessionId, PageControl pc,
                                                                    AppdefEntityID entity, Integer[] removeIds)
         throws PermissionException, SessionTimeoutException, SessionNotFoundException {
@@ -2008,7 +2055,8 @@ public class AppdefBossImpl implements AppdefBoss {
      * @param entity for use in group member filtering.
      * @return List containing AppdefGroupValue.
      * 
-     * */
+     */
+    @Transactional(readOnly=true)
     public PageList<AppdefGroupValue> findAllGroupsMemberExclusive(int sessionId, PageControl pc,
                                                                    AppdefEntityID entity, Integer[] removeIds,
                                                                    Resource resourceType) throws PermissionException,
@@ -2040,7 +2088,8 @@ public class AppdefBossImpl implements AppdefBoss {
      * @param entity for use in group member filtering.
      * @return List containing AppdefGroupValue.
      * 
-     * */
+     */
+    @Transactional(readOnly=true)
     public PageList<AppdefGroupValue> findAllGroupsMemberExclusive(int sessionId, PageControl pc,
                                                                    AppdefEntityID[] entities)
         throws PermissionException, SessionException {
@@ -2071,7 +2120,8 @@ public class AppdefBossImpl implements AppdefBoss {
      * Produce list of all group pojos where caller is authorized
      * @return List containing AppdefGroup.
      * 
-     * */
+     */
+    @Transactional(readOnly=true)
     public Collection<ResourceGroup> findAllGroupPojos(int sessionId) throws PermissionException,
         SessionTimeoutException, SessionNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
@@ -2185,6 +2235,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * @return page list of value objects that extend AppdefResourceValue
      * 
      */
+    @Transactional(readOnly=true)
     public PageList findCompatInventory(int sessionId, int groupType, int appdefTypeId, int groupEntTypeId,
                                         int appdefResTypeId, String resourceName, AppdefEntityID[] pendingEntities,
                                         PageControl pc) throws AppdefEntityNotFoundException, PermissionException,
@@ -2216,6 +2267,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * @return page list of value objects that extend AppdefResourceValue
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<AppdefResourceValue> findCompatInventory(int sessionId, int appdefTypeId, int appdefResTypeId,
                                                              AppdefEntityID groupEntity,
                                                              AppdefEntityID[] pendingEntities, String resourceName,
@@ -2387,6 +2439,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * Perform a search for resources from the resource hub
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<AppdefResourceValue> search(int sessionId, int appdefTypeId, String searchFor,
                                                 AppdefEntityTypeID appdefResType, Integer groupId, int[] groupSubType,
                                                 boolean matchAny, boolean matchOwn, boolean matchUnavail, PageControl pc)
@@ -2536,6 +2589,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * Perform a search for resources
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<SearchResult> search(int sessionId, String searchFor, PageControl pc)
         throws SessionTimeoutException, SessionNotFoundException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
@@ -2565,6 +2619,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * @return page list of value objects that extend AppdefResourceValue
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<AppdefResourceValue> findAvailableServicesForApplication(int sessionId, Integer appId,
                                                                              AppdefEntityID[] pendingEntities,
                                                                              String resourceName, PageControl pc)
@@ -2720,6 +2775,7 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public AppdefResourcePermissions getResourcePermissions(int sessionId, AppdefEntityID id)
         throws SessionNotFoundException, SessionTimeoutException {
         AuthzSubject who = sessionManager.getSubject(sessionId);
@@ -2729,6 +2785,7 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public int getAgentCount(int sessionId) throws SessionNotFoundException, SessionTimeoutException {
         sessionManager.authenticate(sessionId);
         return agentManager.getAgentCount();
@@ -2737,6 +2794,7 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public List<Agent> findAllAgents(int sessionId) throws SessionNotFoundException, SessionTimeoutException {
         sessionManager.authenticate(sessionId);
         return agentManager.getAgents();
@@ -2747,6 +2805,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * listening
      * 
      */
+    @Transactional(readOnly=true)
     public Agent findAgentByIpAndPort(int sessionId, String ip, int port) throws SessionNotFoundException,
         SessionTimeoutException, AgentNotFoundException {
         sessionManager.authenticate(sessionId);
@@ -2778,6 +2837,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * @return The properties stored for a specific entity ID
      * 
      */
+    @Transactional(readOnly=true)
     public Properties getCPropDescEntries(int sessionId, AppdefEntityID id) throws SessionNotFoundException,
         SessionTimeoutException, PermissionException, AppdefEntityNotFoundException {
         sessionManager.authenticate(sessionId);
@@ -2791,6 +2851,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * @return a List of CPropKeyValue objects
      * 
      */
+    @Transactional(readOnly=true)
     public List<CpropKey> getCPropKeys(int sessionId, int appdefType, int appdefTypeId)
         throws SessionNotFoundException, SessionTimeoutException {
         sessionManager.authenticate(sessionId);
@@ -2805,6 +2866,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * @throws AppdefEntityNotFoundException
      * 
      */
+    @Transactional(readOnly=true)
     public List<CpropKey> getCPropKeys(int sessionId, AppdefEntityID aeid) throws SessionNotFoundException,
         SessionTimeoutException, AppdefEntityNotFoundException, PermissionException {
         AuthzSubject who = sessionManager.getSubject(sessionId);
@@ -2819,6 +2881,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * Get the appdef inventory summary visible to a user
      * 
      */
+    @Transactional(readOnly=true)
     public AppdefInventorySummary getInventorySummary(int sessionId, boolean countTypes)
         throws SessionNotFoundException, SessionTimeoutException {
         AuthzSubject who = sessionManager.getSubject(sessionId);
@@ -2830,6 +2893,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * Suitable for populating an HTML selector.
      * 
      */
+    @Transactional(readOnly=true)
     public String[][] getAppdefTypeStrArrMap() {
         int[] validTypes = AppdefEntityConstants.getAppdefTypes();
         String[][] retVal = new String[validTypes.length][2];

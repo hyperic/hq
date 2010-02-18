@@ -49,6 +49,7 @@ public class GtriggerManagerImpl implements GtriggerManager {
 
     /**
      */
+    @Transactional(readOnly=true)
     public GtriggerTypeInfo findTriggerType(GtriggerType type) {
         return gtriggerTypeInfoDao.find(type);
     }

@@ -138,6 +138,7 @@ public class ApplicationManagerImpl implements ApplicationManager, ApplicationCo
      * @return list of ApplicationTypeValue objects
      * 
      */
+    @Transactional(readOnly=true)
     public List<AppdefResourceTypeValue> getAllApplicationTypes(AuthzSubject who)  {
         List<ApplicationType> all = applicationTypeDAO.findAll();
         List<AppdefResourceTypeValue> ret = new ArrayList<AppdefResourceTypeValue>(all.size());
@@ -151,6 +152,7 @@ public class ApplicationManagerImpl implements ApplicationManager, ApplicationCo
      * Get ApplicationType by ID
      * 
      */
+    @Transactional(readOnly=true)
     public ApplicationType findApplicationType(Integer id) {
         return applicationTypeDAO.findById(id);
     }
@@ -310,6 +312,7 @@ public class ApplicationManagerImpl implements ApplicationManager, ApplicationCo
      * @param subject
      * @param appId
      */
+    @Transactional(readOnly=true)
     public DependencyTree getServiceDepsForApp(AuthzSubject subject, Integer pk) throws ApplicationNotFoundException,
         PermissionException {
         try {
@@ -327,6 +330,7 @@ public class ApplicationManagerImpl implements ApplicationManager, ApplicationCo
      * Get the # of applications within HQ inventory
      * 
      */
+    @Transactional(readOnly=true)
     public Number getApplicationCount() {
         return new Integer(applicationDAO.size());
     }
@@ -371,6 +375,7 @@ public class ApplicationManagerImpl implements ApplicationManager, ApplicationCo
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public Application findApplicationById(AuthzSubject subject, Integer id) throws ApplicationNotFoundException,
         PermissionException {
         try {
@@ -385,6 +390,7 @@ public class ApplicationManagerImpl implements ApplicationManager, ApplicationCo
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public Collection<Application> findDeletedApplications() {
         return applicationDAO.findDeletedApplications();
     }
@@ -397,6 +403,7 @@ public class ApplicationManagerImpl implements ApplicationManager, ApplicationCo
      * @return A List of ApplicationValue objects representing all of the
      *         applications that the given subject is allowed to view.
      */
+    @Transactional(readOnly=true)
     public PageList<ApplicationValue> getAllApplications(AuthzSubject subject, PageControl pc) throws 
         PermissionException, NotFoundException {
         Collection<Integer> authzPks = getViewableApplications(subject);
@@ -464,6 +471,7 @@ public class ApplicationManagerImpl implements ApplicationManager, ApplicationCo
      * @retur list of AppServiceValue objects
      * 
      */
+    @Transactional(readOnly=true)
     public List<AppServiceValue> getApplicationServices(AuthzSubject subject, Integer appId)
         throws ApplicationNotFoundException, PermissionException {
         // find the application
@@ -668,6 +676,7 @@ public class ApplicationManagerImpl implements ApplicationManager, ApplicationCo
      * Get all applications for a resource.
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<ApplicationValue> getApplicationsByResource(AuthzSubject subject, AppdefEntityID resource,
                                                                 PageControl pc) throws ApplicationNotFoundException,
         PermissionException {
@@ -704,6 +713,7 @@ public class ApplicationManagerImpl implements ApplicationManager, ApplicationCo
      * @return A List of ApplicationValue objects which use the specified
      *         resource.
      */
+    @Transactional(readOnly=true)
     public Integer[] getApplicationIDsByResource(AppdefEntityID resource) throws ApplicationNotFoundException {
         Collection<Application> apps = getApplicationsByResource(resource, PageControl.PAGE_ALL);
 
@@ -719,6 +729,7 @@ public class ApplicationManagerImpl implements ApplicationManager, ApplicationCo
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public boolean isApplicationMember(AppdefEntityID application, AppdefEntityID service) {
         return applicationDAO.isApplicationService(application.getId().intValue(), service.getId().intValue());
     }
@@ -729,6 +740,7 @@ public class ApplicationManagerImpl implements ApplicationManager, ApplicationCo
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public ResourceTree getResourceTree(AuthzSubject subject, AppdefEntityID[] resources, int traversal)
         throws AppdefEntityNotFoundException, PermissionException {
         ResourceTreeGenerator generator = Bootstrap.getBean(ResourceTreeGenerator.class);

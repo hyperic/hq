@@ -79,6 +79,7 @@ public class EventLogBossImpl implements EventLogBoss {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public List<EventLog> getEvents(int sessionId, String eventType, AppdefEntityID id, long beginTime, long endTime)
         throws SessionNotFoundException, SessionTimeoutException {
         // We ignore the subject for now
@@ -95,6 +96,7 @@ public class EventLogBossImpl implements EventLogBoss {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public List<EventLog> getEvents(int sessionId, String eventType, AppdefEntityID ids[], long beginTime, long endTime)
         throws SessionNotFoundException, SessionTimeoutException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
@@ -117,6 +119,7 @@ public class EventLogBossImpl implements EventLogBoss {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public List<EventLog> getEvents(int sessionId, AppdefEntityID aeid, String[] eventTypes, long beginTime,
                                     long endTime) throws SessionNotFoundException, SessionTimeoutException {
         AuthzSubject user = sessionManager.getSubject(sessionId);
@@ -131,6 +134,7 @@ public class EventLogBossImpl implements EventLogBoss {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public List<EventLog> getEvents(int sessionId, AppdefEntityID aeid, String status, long beginTime, long endTime)
         throws SessionNotFoundException, SessionTimeoutException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
@@ -146,6 +150,7 @@ public class EventLogBossImpl implements EventLogBoss {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public boolean[] logsExistPerInterval(int sessionId, AppdefEntityID aeid, long beginTime, long endTime,
                                           int intervals) throws SessionNotFoundException, SessionTimeoutException {
         // We ignore the subject for now.

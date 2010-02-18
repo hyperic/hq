@@ -119,6 +119,7 @@ public class SRNManagerImpl implements SRNManager {
      * @param aid The entity id to lookup
      * @return The SRN for the given entity
      */
+    @Transactional(readOnly=true)
     public ScheduleRevNum get(AppdefEntityID aid) {
         SRNCache cache = SRNCache.getInstance();
         return cache.get(aid);
@@ -248,6 +249,7 @@ public class SRNManagerImpl implements SRNManager {
      * 
      * @return A list of ScheduleReNum objects that are out of sync.
      */
+    @Transactional(readOnly=true)
     public List<AppdefEntityID> getOutOfSyncEntities() {
         List<ScheduleRevNum> srns = getOutOfSyncSRNs(3);
         ArrayList<AppdefEntityID> toReschedule = new ArrayList<AppdefEntityID>(srns.size());
@@ -267,6 +269,7 @@ public class SRNManagerImpl implements SRNManager {
      * @param intervals The number of intervals to go back
      * @return A List of ScheduleRevNum objects.
      */
+    @Transactional(readOnly=true)
     public List<ScheduleRevNum> getOutOfSyncSRNs(int intervals) {
         SRNCache cache = SRNCache.getInstance();
         List<SrnId> srnIds = cache.getKeys();

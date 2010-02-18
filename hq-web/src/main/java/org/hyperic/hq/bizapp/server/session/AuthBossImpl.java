@@ -74,7 +74,7 @@ public class AuthBossImpl implements AuthBoss {
      * @throws ApplicationException if user is not found
      * @throws LoginException if user account has been disabled
      */
-    @Transactional(propagation = Propagation.SUPPORTS)
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly=true)
     public int getUnauthSessionId(String user) throws ApplicationException {
         try {
             SessionManager mgr = SessionManager.getInstance();
@@ -141,6 +141,7 @@ public class AuthBossImpl implements AuthBoss {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public boolean isUser(int sessionID, String username) throws SessionTimeoutException, SessionNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         return authManager.isUser(subject, username);

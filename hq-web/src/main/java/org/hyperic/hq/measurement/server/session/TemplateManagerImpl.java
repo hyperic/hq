@@ -93,6 +93,7 @@ public class TemplateManagerImpl implements TemplateManager {
     /**
      * Get a MeasurementTemplate
      */
+    @Transactional(readOnly=true)
     public MeasurementTemplate getTemplate(Integer id) {
         return measurementTemplateDAO.get(id);
     }
@@ -100,6 +101,7 @@ public class TemplateManagerImpl implements TemplateManager {
     /**
      * Look up measurement templates for an array of template IDs
      */
+    @Transactional(readOnly=true)
     public List<MeasurementTemplate> getTemplates(List<Integer> ids) {
         Integer[] mtids = ids.toArray(new Integer[ids.size()]);
         return measurementTemplateDAO.findTemplates(mtids);
@@ -111,6 +113,7 @@ public class TemplateManagerImpl implements TemplateManager {
      * @throws TemplateNotFoundException if no measurement templates are found.
      * @return a MeasurementTemplate value
      */
+    @Transactional(readOnly=true)
     public List<MeasurementTemplate> getTemplates(Integer[] ids, PageControl pc) throws TemplateNotFoundException {
         List<MeasurementTemplate> mts = measurementTemplateDAO.findTemplates(ids);
 
@@ -135,6 +138,7 @@ public class TemplateManagerImpl implements TemplateManager {
      * 
      * @return a list of {@link MeasurementTemplate}s
      */
+    @Transactional(readOnly=true)
     public List<MeasurementTemplate> findTemplates(AuthzSubject user, PageInfo pInfo, Boolean defaultOn)
         throws PermissionException {
         assertSuperUser(user);
@@ -151,6 +155,7 @@ public class TemplateManagerImpl implements TemplateManager {
      * 
      * @return a list of {@link MeasurementTemplate}s
      */
+    @Transactional(readOnly=true)
     public List<MeasurementTemplate> findTemplatesByMonitorableType(AuthzSubject user, PageInfo pInfo, String type,
                                                                     Boolean defaultOn) throws PermissionException {
         assertSuperUser(user);
@@ -170,6 +175,7 @@ public class TemplateManagerImpl implements TemplateManager {
      * 
      * @return a MeasurementTemplate value
      */
+    @Transactional(readOnly=true)
     public List<MeasurementTemplate> findTemplates(String type, String cat, Integer[] excludeIds, PageControl pc) {
         List<MeasurementTemplate> templates;
         if (cat == null) {
@@ -209,6 +215,7 @@ public class TemplateManagerImpl implements TemplateManager {
      * 
      * @return a MeasurementTemplate value
      */
+    @Transactional(readOnly=true)
     public List<MeasurementTemplate> findTemplates(String type, long filters, String keyword) {
         MeasurementTemplateDAO dao = measurementTemplateDAO;
         List<MeasurementTemplate> mts;
@@ -282,6 +289,7 @@ public class TemplateManagerImpl implements TemplateManager {
      * 
      * @return an array of ID values
      */
+    @Transactional(readOnly=true)
     public Integer[] findTemplateIds(String type) {
         List<MeasurementTemplate> mts = measurementTemplateDAO.findTemplatesByMonitorableType(type);
 
@@ -394,6 +402,7 @@ public class TemplateManagerImpl implements TemplateManager {
      * 
      * @todo: This should just return the pojo and be named getMonitorableType.
      */
+    @Transactional(readOnly=true)
     public MonitorableType getMonitorableType(String pluginName, TypeInfo info) {
         MonitorableType t = monitorableTypeDAO.findByName(info.getName());
 
