@@ -35,7 +35,6 @@ loadWebappPort () {
 }
 
 loadDBPort () {
-
   TMPPROPFILE="${SERVER_HOME}/hqdb/data/.postgresql.conf.tmp"
   DBCONF="${SERVER_HOME}/hqdb/data/postgresql.conf"
   cat ${DBCONF} | grep port | tr -d ' \t' | grep -v '^#' | sed 's/#.*//g' > ${TMPPROPFILE}
@@ -248,24 +247,14 @@ if [ $THISOS = "SunOS" ] ; then
 	esac
 fi
 
-# Start the server
-infoOut "Booting the HQ server (Using JAVA_OPTS=${HQ_JAVA_OPTS})..."
-cd ${SERVER_HOME}/hq-engine/bin
-JBOSSUS=RUNASIS \
-JBOSSHOME=${ENGINE_HOME} \
-  ${JAVA} -server \
-    ${HQ_JAVA_OPTS} \
-    -Dprogram.name=hq-server \
-    -Dserver.home=${SERVER_HOME} \
-    -Dengine.home=${ENGINE_HOME} \
-    -Djava.awt.headless=true \
-    -Djava.net.preferIPv4Stack=true \
-    -classpath ${ENGINE_HOME}/bin/run.jar \
-    org.jboss.Main -b 0.0.0.0 > ${SERVER_LOG} 2>&1 &
+  # Start the server
+  infoOut "Booting the HQ server (Using JAVA_OPTS=${HQ_JAVA_OPTS})..."
+  HQ_JAVA_OPTS="${HQ_JAVA_OPTS}" \
+  SERVER_HOME="${SERVER_HOME}" \
+  ENGINE_HOME="${ENGINE_HOME}" \
+  SERVER_PID="${SERVER_PID}" \
+  ${SERVER_HOME}/bin/hq-engine.sh start
 
-  # Save the pid to a pidfile
-  HQPID=$!
-  echo "${HQPID}" > ${SERVER_PID}
 
   # Wait for the webapp to come up
   debugOut "Waiting for webapp port to come up..."
@@ -277,33 +266,29 @@ JBOSSHOME=${ENGINE_HOME} \
   fi
 }
 
-doStopSignal () {
-
-  SIGNAME=${1}
-  if [ "x${SIGNAME}" = "x" ] ; then
-    infoOut "No signal specified"
-    exit 127
+doStop () { 
+ #Stop the server 
+ if [ "x${1}" = "x" ]; then 
+    ENGINE_HOME="${ENGINE_HOME}" \
+    SERVER_PID="${SERVER_PID}" \
+    ${SERVER_HOME}/bin/hq-engine.sh stop
+ else
+    ENGINE_HOME="${ENGINE_HOME}" \
+    SERVER_PID="${SERVER_PID}" \
+    ${SERVER_HOME}/bin/hq-engine.sh halt
   fi
-
-  # Do we have a pidfile?
-  debugOut "checking pidfile exists: ${SERVER_PID}"
+  
+  #Double check that server is actually stopped
   if [ -f "${SERVER_PID}" ] ; then
-    HQPID=`cat ${SERVER_PID} | tr -d ' '`
-    if [ "x${HQPID}" = "x" ] ; then
-      infoOut "HQ pid file was empty: ${SERVER_PID}"
-      exit 127
-    fi
-    kill -${SIGNAME} ${HQPID} 2> /dev/null
-    
-    waitForPid ${HQPID} 60
-    if [ $? -eq 0 ] ; then
-      exit 1
-    fi
-    rm -f ${SERVER_PID}
-  else 
-    infoOut "HQ server not running (no pid file found: ${SERVER_PID})"
+	HQPID=`cat ${SERVER_PID} | tr -d ' '`
+   	waitForPid ${HQPID} 60
+	if [ $? -eq 0 ] ; then
+	    exit 1
+	fi
+	rm -f ${SERVER_PID}
   fi
-
+  
+  
   # Stop builtin db if there is one
   debugOut "checking hqdb dir exists: ${SERVER_HOME}/hqdb"
   if [ -d ${SERVER_HOME}/hqdb ] ; then
@@ -324,12 +309,10 @@ doStopSignal () {
   fi
 }
 
-doStop () {
-  doStopSignal "TERM"
-}
+
 
 doHalt () {
-  doStopSignal "KILL"
+  doStop "FORCE"
 }
 
 cd `dirname $0`/..

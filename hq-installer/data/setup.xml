@@ -524,7 +524,8 @@ ${errMsg}
         <include name="ant-launcher.jar"/>
         <include name="commons-logging-1.0.4.jar"/>
         <include name="hq-installer.jar"/>
-        <include name="hq-boot.jar"/>
+    	<include name="hq-util.jar"/>
+      	<include name="hq-common.jar"/>
         <include name="oro-2.0.8.jar"/>
         <include name="sigar-x86-winnt.dll"/>
         <include name="libsigar-hppa2.0-hp-hpux-11.x.sl"/>

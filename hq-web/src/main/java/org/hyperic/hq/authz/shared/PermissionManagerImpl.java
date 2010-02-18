@@ -40,9 +40,7 @@ import javax.naming.NamingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Query;
-import org.hyperic.hq.appdef.server.session.CloningBossImpl;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
-import org.hyperic.hq.appdef.shared.CloningBoss;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.server.session.Resource;
@@ -53,10 +51,7 @@ import org.hyperic.hq.authz.server.session.RoleDAO;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.context.Bootstrap;
-import org.hyperic.hq.events.server.session.HierarchicalAlertingManagerImpl;
-import org.hyperic.hq.events.server.session.MaintenanceEventManagerImpl;
 import org.hyperic.hq.events.shared.HierarchicalAlertingManager;
 import org.hyperic.hq.events.shared.MaintenanceEventManager;
 import org.hyperic.util.StringUtil;
@@ -580,10 +575,10 @@ public class PermissionManagerImpl
     }
 
     public MaintenanceEventManager getMaintenanceEventManager() {
-        return MaintenanceEventManagerImpl.getOne();
+        return (MaintenanceEventManager)Bootstrap.getBean("MaintenanceEventManager");
     }
 
     public HierarchicalAlertingManager getHierarchicalAlertingManager() {
-        return HierarchicalAlertingManagerImpl.getOne();
+        return (HierarchicalAlertingManager)Bootstrap.getBean("HierarchicalAlertingManager");
     }
 }
