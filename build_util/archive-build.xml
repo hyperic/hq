@@ -78,18 +78,35 @@
 		<delete dir="${build.dir}/${archive.basename}-agent-${version}" />
 	</target>
 
-	<target name="roll-platform-specific-archive">
+	<target name="roll-platform-specific-archive" depends="init-taskdefs">
+		<if>
+			<equals arg1="${jre-file}" arg2="" />
+			<then>
+				<delete dir="${archive-dir}/installer-${version}/jres" />
+			</then>
+			<else>
+				<delete>
+					<fileset dir="${archive-dir}/installer-${version}" includes="jres/**" />
+				</delete>
+				<copy todir="${archive-dir}/installer-${version}/jres">
+					<fileset dir="${jre.dir}">
+						<include name="${jre-file}" />
+					</fileset>
+				</copy>
+			</else>
+		</if>
+
 		<!-- Is there a postgresql bundle available for this platform? -->
 		<available property="pgsql.available" file="${pgsql.dir}/${archive-suffix}" />
-		<delete dir="${archive-dir}-installer/installer-${version}/data/hqdb" />
+		<delete dir="${archive-dir}/installer-${version}/data/hqdb" />
 		<antcall target="bundle-pgsql" />
 
 		<!-- include the license-info file -->
-		<copy file="${hq.home}/LICENSES.txt" toFile="${archive-dir}-installer/LICENSES.txt" />
+		<copy file="${hq.home}/LICENSES.txt" toFile="${archive-dir}/LICENSES.txt" />
 
 		<!-- Packup the whole thing -->
 		<antcall target="compress-dir">
-			<param name="archive-dir" value="${archive-dir}-installer" />
+			<param name="archive-dir" value="${archive-dir}" />
 			<param name="archive-file" value="${build.dir}/${archive.basename}-installer-${version}-${build}-${archive-suffix}.${compress-mode}" />
 			<param name="compress-mode" value="${compress-mode}" />
 		</antcall>
