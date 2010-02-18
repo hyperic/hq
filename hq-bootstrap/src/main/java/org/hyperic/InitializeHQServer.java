@@ -41,7 +41,7 @@ public class InitializeHQServer extends Task {
     public void execute () throws BuildException{
         validateAttributes();
         try {
-            HQMain.initialize(serverHome, engineHome);
+            new ServerInitializer(serverHome, engineHome).initialize();
 
         } catch (Exception e) {
             throw new BuildException("Error preparing HQ engine: "

@@ -205,6 +205,10 @@
 
 
 	<target name="compile" depends="compile-shared,compile-web,compile-installer" />
+	
+	<target name="compile-bootstrap">
+		<compile-sources classpath.id="shared.compile.classpath" src.dir="${hq.bootstrap}/src/main/java" resource.dir="${hq.bootstrap}/src/main/resources" output.dir="${hq.bootstrap}/target/classes" />
+	</target>
 
 	<target name="compile-shared">
 		<compile-sources classpath.id="shared.compile.classpath" src.dir="${hq.util}/src/main/java" resource.dir="${hq.util}/src/main/resources" output.dir="${hq.util}/target/classes" />
@@ -432,8 +436,11 @@
         copy of the pgsql project or checkout a copy to ${pgsql.dir}
     </fail>
 	</target>
+	
+	<target name="pack-bootstrap">
+		<jar basedir="${hq.bootstrap}/target/classes" jarfile="${build.dir}/hq-bootstrap.jar"/>
+	</target>
 
-	<target name="archive-prep" depends="build-agent,build-war,pdk-javadoc,unpack-tomcat,pack-installer,pack-installer-archive" />
 
 	<target name="pack-installer-archive" description="Packs the hyperic-hq-installer directory">
 		<property name="archive-dir" location="${archive.build.dir}/${archive.basename}-installer" />
@@ -465,6 +472,7 @@
 		<mkdir dir="${archive-dir}/server-${version}/bin" />
 		<mkdir dir="${archive-dir}/server-${version}/conf" />
 		<mkdir dir="${archive-dir}/server-${version}/logs" />
+		<mkdir dir="${archive-dir}/server-${version}/lib"/>
 
 
 		<!-- Copy Tomcat -->
@@ -491,6 +499,13 @@
 			<fileset dir="${hq.bootstrap}/bin" includes="**" />
 		</copy>
 		<copy todir="${archive-dir}/server-${version}/bin" file="${launcher.dir}/hq-server.exe" />
+		
+		<!-- Pack server lib for bootstrap-->
+		<antcall target="compile-bootstrap"/>
+		<antcall target="pack-bootstrap"/>
+		<copy todir="${archive-dir}/server-${version}/lib">
+			<fileset dir="${build.dir}" includes="hq-bootstrap.jar"/>
+		</copy>		
 
 		<!-- Copy WAR -->
 		<property name="archive-war-dir" value="${archive-dir}/server-${version}/hq-engine/hq-server/webapps/ROOT" />
