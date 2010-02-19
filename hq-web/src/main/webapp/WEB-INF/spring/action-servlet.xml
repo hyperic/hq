@@ -539,11 +539,9 @@
 		class="org.hyperic.hq.ui.json.action.escalation.crud.UpdateEscalationOrder" />
 	<bean name="/escalation/removeAction"
 		class="org.hyperic.hq.ui.json.action.escalation.crud.RemoveAction" />
-	<bean name="/escalation/removeEscalation"
-		class="org.hyperic.hq.ui.json.action.escalation.crud.RemoveEscalation" />
 	<bean name="/escalation/jsonByEscalationId"
 		class="org.hyperic.hq.ui.json.action.escalation.finder.JsonByEscalationId" />
-	<bean name="/escalation/listAllEscalationName"
+	<bean name="/escalation/ListAllEscalationName"
 		class="org.hyperic.hq.ui.json.action.escalation.finder.ListAllEscalationName" />
 	<bean name="/escalation/ListActiveEscalations"
 		class="org.hyperic.hq.ui.json.action.escalation.finder.ListActiveEscalations" />
