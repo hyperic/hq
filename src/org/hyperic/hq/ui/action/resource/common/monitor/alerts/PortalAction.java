@@ -40,6 +40,9 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.util.MessageResources;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.GalertBoss;
 import org.hyperic.hq.escalation.server.session.Escalatable;
@@ -47,6 +50,7 @@ import org.hyperic.hq.events.AlertNotFoundException;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
+import org.hyperic.hq.events.server.session.SessionBase;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.AlertValue;
 import org.hyperic.hq.galerts.server.session.GalertEscalationAlertType;
@@ -119,8 +123,28 @@ public class PortalAction extends ResourceController {
 
         Portal portal = Portal.createPortal();
         AppdefEntityID aeid = RequestUtils.getEntityId(request);
+        
+        boolean canTakeAction = false;
+
+        try {
+            ServletContext ctx = getServlet().getServletContext();
+            int sessionId = RequestUtils.getSessionId(request).intValue();
+            AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
+            AuthzSubject subject = authzBoss.getCurrentSubject(sessionId); 
+            
+            // ...check that the user can fix/acknowledge...
+            SessionBase.canFixAcknowledgeAlerts(subject, aeid);
+            
+            canTakeAction = true;
+        } catch(PermissionException e) {
+            // ...the user can't fix/acknowledge...
+        }
+
+        request.setAttribute(Constants.CAN_TAKE_ACTION_ON_ALERT_ATTR, canTakeAction);
+
         setTitle(aeid, portal, "alerts.alert.platform.AlertList.Title");
         portal.setDialog(false);
+        
         if (aeid.isGroup()) {
             portal.addPortlet(new Portlet(".events.group.alert.list"), 1);
             

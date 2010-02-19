@@ -351,7 +351,7 @@
 		<display:column width="7%" property="fixed" title="alerts.alert.AlertList.ListHeader.Fixed">
   			<display:booleandecorator flagKey="yesno"/>
 		</display:column>
-		<display:column width="11%" property="acknowledgeable" title="alerts.alert.AlertList.ListHeader.Acknowledge"
+		<display:column width="11%" property="acknowledgeableAndCanTakeAction" title="alerts.alert.AlertList.ListHeader.Acknowledge"
                     href="/alerts/RemoveAlerts.do?eid=${Resource.entityId.appdefKey}&alerts=${Alert.id}&buttonAction=ACKNOWLEDGE">
   			<display:booleandecorator flagKey="acknowledgeable"/>
 		</display:column>

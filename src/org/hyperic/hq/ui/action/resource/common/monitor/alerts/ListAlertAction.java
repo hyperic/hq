@@ -153,8 +153,6 @@ public class ListAlertAction extends TilesAction {
         } catch(PermissionException e) {
             // ...the user can't fix/acknowledge...
         }
-
-        request.setAttribute(Constants.CAN_TAKE_ACTION_ON_ALERT_ATTR, canTakeAction);
         
         for (Iterator<Alert> itr = alerts.iterator();itr.hasNext();) {
             Alert alert = itr.next();

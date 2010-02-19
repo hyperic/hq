@@ -45,6 +45,7 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.Escalation;
@@ -63,6 +64,7 @@ import org.hyperic.hq.galerts.server.session.GtriggerType;
 import org.hyperic.hq.galerts.server.session.GtriggerTypeInfo;
 import org.hyperic.hq.galerts.shared.GalertManagerLocal;
 import org.hyperic.hq.galerts.shared.GtriggerManagerLocal;
+import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.util.TimeUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
@@ -359,8 +361,10 @@ public class GalertBossEJBImpl
         JSONArray jarr = new JSONArray(); 
         
         try {
-         // ...check that user can view alert definitions...
-            SessionBase.canViewAlertDefinition(subj, new AppdefEntityID(g.getResource()));
+            AppdefEntityID entityId = new AppdefEntityID(g.getResource());
+
+            // ...check that user can view alert definitions...
+            SessionBase.canViewAlertDefinition(subj, entityId);
             
             alertLogs = _galertMan.findAlertLogsByTimeWindow(g, begin, end, pc);
         
@@ -379,16 +383,27 @@ public class GalertBossEJBImpl
                     maxPauseTime = esc.getMaxPauseTime();
                 }
                 
+                boolean canTakeAction = false;
+
+                try {
+                    // ...check that the user can fix/acknowledge...
+                    SessionBase.canFixAcknowledgeAlerts(subj, entityId);
+                    
+                    canTakeAction = true;
+                } catch(PermissionException e) {
+                    // ...the user can't fix/acknowledge...
+                }
+
                 jarr.put(new JSONObject()
                     .put("id", alert.getId())
                     .put("time", date)
                     .put("name", alert.getAlertDefinitionInterface().getName())
                     .put("defId", alert.getAlertDefinitionInterface().getId())
-                    .put("priority",
-                        alert.getAlertDefinitionInterface().getPriority())
+                    .put("priority", alert.getAlertDefinitionInterface().getPriority())
                     .put("reason", alert.getShortReason())
                     .put("fixed", alert.isFixed())
                     .put("acknowledgeable", alert.isAcknowledgeable())
+                    .put("canTakeAction", canTakeAction)
                     .put("maxPauseTime", maxPauseTime));
             }
         } catch (PermissionException e) {
