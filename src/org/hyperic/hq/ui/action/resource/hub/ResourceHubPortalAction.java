@@ -337,7 +337,7 @@ public class ResourceHubPortalAction extends BaseAction {
         List ids = new ArrayList();
         
         if (resources != null) {
-            if (resources.size() > 0 && AppdefEntityConstants.APPDEF_TYPE_APPLICATION != resourceType) {
+            if (resources.size() > 0 && DEFAULT_RESOURCE_TYPE != resourceType && AppdefEntityConstants.APPDEF_TYPE_APPLICATION != resourceType) {
                 // ...use the first element to check permission, since there's not an easy way to this that I know of...
                 try {
                     AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
