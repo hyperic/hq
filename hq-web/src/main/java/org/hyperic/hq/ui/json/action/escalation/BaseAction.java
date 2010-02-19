@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2010], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -75,8 +75,10 @@ public abstract class BaseAction extends Action
     protected void streamResult(JsonActionContext context)
             throws JSONException, IOException
     {
-        context.getJSONResult().write(
+        if (context.getJSONResult() != null) {
+            context.getJSONResult().write(
                 context.getWriter(),
                 context.isPrettyPrint());
+        }
     }
 }
