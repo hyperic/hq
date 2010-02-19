@@ -1,180 +1,159 @@
-<?xml version="1.0"?>
+<?xml version='1.0' encoding='utf-8'?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
 
-<project name="server" default="sh-setup" basedir=".">
+      http://www.apache.org/licenses/LICENSE-2.0
 
-  <property environment="ENV"/>
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<!-- Note:  A "Server" is not itself a "Container", so you may not
+     define subcomponents such as "Valves" at this level.
+     Documentation at /docs/config/server.html
+ -->
+<Server port="8005" shutdown="SHUTDOWN">
 
-  <path id="serverjars">
-    <fileset dir="${server.home}/lib" includes="*.jar"/>
-  </path>
+  <!--APR library loader. Documentation at /docs/apr.html -->
+  <Listener className="org.apache.catalina.core.AprLifecycleListener" SSLEngine="on" />
+  <!--Initialize Jasper prior to webapps are loaded. Documentation at /docs/jasper-howto.html -->
+  <Listener className="org.apache.catalina.core.JasperListener" />
+  <!-- Prevent memory leaks due to use of particular java/javax APIs-->
+  <Listener className="org.apache.catalina.core.JreMemoryLeakPreventionListener" />
+  <!-- JMX Support for the Tomcat server. Documentation at /docs/non-existent.html -->
+  <Listener className="org.apache.catalina.mbeans.ServerLifecycleListener" />
+  <Listener className="org.apache.catalina.mbeans.GlobalResourcesLifecycleListener" />
 
-  <target name="init">
-    <fail unless="server.home">
-      No server.home property defined.
-    </fail>
-    <fail unless="engine.home">
-      No engine.home property defined.
-    </fail>
-    <fail unless="ENV.JAVA_HOME">
-      No JAVA_HOME environment variable defined.
-    </fail>
+  <!-- Global JNDI resources
+       Documentation at /docs/jndi-resources-howto.html
+  -->
+  <GlobalNamingResources>
+    <!-- Editable user database that can also be used by
+         UserDatabaseRealm to authenticate users
+    -->
+    <Resource name="UserDatabase" auth="Container"
+              type="org.apache.catalina.UserDatabase"
+              description="User database that can be updated and saved"
+              factory="org.apache.catalina.users.MemoryUserDatabaseFactory"
+              pathname="conf/tomcat-users.xml" />
+  </GlobalNamingResources>
 
-    <available property="postgresql.available" file="${server.home}/hqdb"/>
+  <!-- A "Service" is a collection of one or more "Connectors" that share
+       a single "Container" Note:  A "Service" is not itself a "Container", 
+       so you may not define subcomponents such as "Valves" at this level.
+       Documentation at /docs/config/service.html
+   -->
+  <Service name="Catalina">
+  
+    <!--The connectors can use a shared executor, you can define one or more named thread pools-->
+    <!--
+    <Executor name="tomcatThreadPool" namePrefix="catalina-exec-" 
+        maxThreads="150" minSpareThreads="4"/>
+    -->
+    
+    
+    <!-- A "Connector" represents an endpoint by which requests are received
+         and responses are returned. Documentation at :
+         Java HTTP Connector: /docs/config/http.html (blocking & non-blocking)
+         Java AJP  Connector: /docs/config/ajp.html
+         APR (HTTP/AJP) Connector: /docs/apr.html
+         Define a non-SSL HTTP/1.1 Connector on port 8080
+    -->
+    <Connector port="${server.webapp.port}" maxThreads="500" strategy="ms" maxHttpHeaderSize="8192"
+         emptySessionPath="true" protocol="HTTP/1.1"
+         enableLookups="false" redirectPort="${server.webapp.secure.port}" acceptCount="100"
+         connectionTimeout="20000" disableUploadTimeout="true" compression="on"
+         compressableMimeType="text/html,text/xml,text/plain,text/css,text/javascript"/>
+    
+    <!-- A "Connector" using the shared thread pool-->
+    <!--
+    <Connector executor="tomcatThreadPool"
+               port="8080" protocol="HTTP/1.1" 
+               connectionTimeout="20000" 
+               redirectPort="8443" />
+    -->           
+    <!-- Define a SSL HTTP/1.1 Connector on port 8443
+         This connector uses the JSSE configuration, when using APR, the 
+         connector should be using the OpenSSL style configuration
+         described in the APR documentation -->
+    
+     <!-- SSL/TLS Connector configuration using the hyperic keystore -->
+    <Connector port="${server.webapp.secure.port}" 
+         maxThreads="500" strategy="ms" maxHttpHeaderSize="8192"
+         emptySessionPath="true" protocol="HTTP/1.1" SSLEnabled="true"
+         scheme="https" secure="true" clientAuth="false" 
+         keystoreFile="${catalina.base}/conf/hyperic.keystore"
+         keystorePass="hyperic"
+         truststoreFile="${catalina.base}/conf/hyperic.keystore"
+         truststorePass="hyperic" 
+         sslProtocol = "TLS" />
+    
 
-    <taskdef resource="net/sf/antcontrib/antcontrib.properties"
-             classpathref="serverjars"/>
-    <taskdef resource="org/hyperic/tools/ant/ant-tools.properties"
-             classpathref="serverjars"/>
+    <!-- Define an AJP 1.3 Connector on port 9009 -->
+    <Connector port="9009" protocol="AJP/1.3"
+         emptySessionPath="true" enableLookups="false" redirectPort="${server.webapp.secure.port}" />
 
-    <!-- If the user has defined TMPDIR in the environment, use that
-         for Java's temp dir.  Otherwise, leave it be.  -->
-    <if>
-      <isset property="ENV.TMPDIR"/>
-      <then>
-        <property name="tmpdir" value="${ENV.TMPDIR}"/>
-      </then>
-      <else>
-        <property name="tmpdir" value="${java.io.tmpdir}"/>
-      </else>
-    </if>
 
-    <condition property="isWin32">
-      <os family="windows"/>
-    </condition>
+    <!-- An Engine represents the entry point (within Catalina) that processes
+         every request.  The Engine implementation for Tomcat stand alone
+         analyzes the HTTP headers included with the request, and passes them
+         on to the appropriate Host (virtual host).
+         Documentation at /docs/config/engine.html -->
 
-    <condition property="script-ext" value=".bat">
-      <os family="windows"/>
-    </condition>
-    <condition property="script-ext" value=".sh">
-      <os family="unix"/>
-    </condition>
-  </target>
+    <!-- You should set jvmRoute to support load-balancing via AJP ie :
+    <Engine name="Catalina" defaultHost="localhost" jvmRoute="jvm1">         
+    --> 
+    <Engine name="Catalina" defaultHost="localhost">
 
-  <target name="setup-pgsql" depends="init,load-conf-props" 
-          if="postgresql.available">
-    <absolutePath property="pgsql.home" path="${server.home}/hqdb"/>
-    <property name="db-start" 
-              value="${server.home}/bin/db-start${script-ext}"/>
-    <property name="db-stop"
-              value="${server.home}/bin/db-stop${script-ext}"/>
-    <property name="pgdata" value="${pgsql.home}/data"/>
-    <property name="pglog"  value="${server.home}/logs/hqdb.log"/>
-    <property name="server.hqdb.dir" value="${pgsql.home}"/>
-    <available property="pgsql.already.running"
-               file="${pgdata}/postmaster.pid"/>
-  </target>
+      <!--For clustering, please take a look at documentation at:
+          /docs/cluster-howto.html  (simple how to)
+          /docs/config/cluster.html (reference documentation) -->
+      <!--
+      <Cluster className="org.apache.catalina.ha.tcp.SimpleTcpCluster"/>
+      -->        
 
-  <target name="load-conf-props" unless="load-conf-props.done">
-    <property file="${server.home}/conf/hq-server.conf"/>
-    <property name="load-conf-props.done" value="true"/>
-  </target>
-  <target name="setup-conf" depends="load-conf-props" unless="setup-conf.done">
-    <taskdef name="init-hq" classname="org.hyperic.InitializeHQServer"
-             classpathref="serverjars"/>
-    <init-hq serverHome="${server.home}" engineHome="${engine.home}"/>
-    <property name="setup-conf.done" value="true"/>
-  </target>
+      <!-- The request dumper valve dumps useful debugging information about
+           the request and response data received and sent by Tomcat.
+           Documentation at: /docs/config/valve.html -->
+      <!--
+      <Valve className="org.apache.catalina.valves.RequestDumperValve"/>
+      -->
 
-  <!-- Check for anything bound to mbean 1099 PR4926 -->
-  <target name="detect-mbean-port-conflict-and-fail">
-    <echo>^^^DEBUG: Checking mbean port...</echo>
-    <condition property="server.tomcat.mbean.portConflict">
-      <socket server="127.0.0.1" port="${hq-engine.server.port}"/>
-    </condition>
-    <antcall target="fail-mbean-port-conflict-message"/>
-  </target>
+      <!-- This Realm uses the UserDatabase configured in the global JNDI
+           resources under the key "UserDatabase".  Any edits
+           that are performed against this UserDatabase are immediately
+           available for use by the Realm.  -->
+      <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
+             resourceName="UserDatabase"/>
 
-  <target name="fail-mbean-port-conflict-message" if="server.tomcat.mbean.portConflict">
-    <fail>
-      There is already a program using the port specified for remote JMX connection to Tomcat (${hq-engine.server.port}).
-      This may indicate an attempt to start two similarly configured instances 
-      of HQ/Tomcat.
-    </fail>
-  </target>
+      <!-- Define the default virtual host
+           Note: XML Schema validation will not work with Xerces 2.2.
+       -->
+      <Host name="localhost"  appBase="webapps"
+            unpackWARs="true" autoDeploy="true"
+            xmlValidation="false" xmlNamespaceAware="false">
 
-  <target name="sh-setup"
-          depends="setup-conf,detect-mbean-port-conflict-and-fail"/>
+        <!-- SingleSignOn valve, share authentication between web applications
+             Documentation at: /docs/config/valve.html -->
+        <!--
+        <Valve className="org.apache.catalina.authenticator.SingleSignOn" />
+        -->
 
-  <target name="check-pgsql-already-running" if="pqsql.already.running">
-    <echo>^^^INFO: Built-in database is already running</echo>
-  </target>
+        <!-- Access log processes all example.
+             Documentation at: /docs/config/valve.html -->
+        <!--
+        <Valve className="org.apache.catalina.valves.AccessLogValve" directory="logs"  
+               prefix="localhost_access_log." suffix=".txt" pattern="common" resolveHosts="false"/>
+        -->
 
-  <target name="start-postgresql"
-          depends="init,setup-pgsql,check-pgsql-already-running"
-          if="postgresql.available"
-          unless="pgsql.already.running">
-    <echo>^^^INFO: Starting built-in database... </echo>
-    <if>
-      <istrue value="${isWin32}"/>
-      <then>
-      <!-- Fix hang on windows Bug #28135, #5003-->
-      <exec executable="${db-start}"
-            spawn="true" 
-            dir="${server.home}"/>
-      </then>
-      <else>
-      <exec executable="${db-start}"
-            dir="${server.home}"
-            error="${pglog}"
-            timeout="60000"
-            failonerror="true"/>
-      </else>
-    </if>
-  </target>
-
-  <target name="stop-postgresql" depends="init,setup-pgsql" if="postgresql.available">
-    <!-- Make sure the HQ server is down first -->
-    <echo>^^^INFO: Waiting for server to stop...</echo>
-    <waitfor>
-      <not>
-        <or>
-          <socket server="127.0.0.1" port="${hq-engine.server.port}"/>
-          <socket server="127.0.0.1" port="${server.webapp.port}"/>
-        </or>
-      </not>
-    </waitfor>
-
-    <echo>^^^INFO: Stopping built-in database... </echo>
-    <if>
-      <istrue value="${isWin32}"/>
-      <then>
-      <!-- Fix hang on windows Bug #28135, #5003-->
-      <exec executable="${db-stop}"
-            spawn="true" 
-            dir="${server.home}"/>
-      </then>
-      <else>
-      <exec executable="${db-stop}"
-            dir="${server.home}"
-            error="${pglog}"
-            timeout="60000"
-            failonerror="true"/>
-      </else>
-    </if>
-    <echo>^^^INFO: Built-in database stopped.</echo>
-  </target>
-
-  <target name="select-port" unless="server.postgresql.port">
-    <property file="${server.hqdb.dir}/data/postgresql.conf"
-              prefix="postgresql.conf"/>
-    <property name="server.postgresql.port"
-              value="${postgresql.conf.port}"/>
-  </target>
-
-  <target name="wait-postgresql"
-          depends="init,setup-pgsql,select-port"
-          if="postgresql.available">
-    <echo>^^^DEBUG: Waiting for built-in database to start (on port ${server.postgresql.port})...</echo>
-    <waitfor maxwait="60" maxwaitunit="second"
-             checkevery="2" checkeveryunit="second"
-             timeoutproperty="hqdb.startup.error">
-      <socket server="127.0.0.1" port="${server.postgresql.port}"/>
-    </waitfor>
-    <msgfail if="hqdb.startup.error">^^^ERROR:\
-An error occurred trying to start the HQ built-in database.  More
- information may be available in the ${pglog} file.
-    </msgfail>
-    <sleep seconds="5"/>
-  </target>
-
-</project>
+      </Host>
+    </Engine>
+  </Service>
+</Server>
