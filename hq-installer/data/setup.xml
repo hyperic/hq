@@ -324,13 +324,6 @@ __ll__
     </condition>
     <antcall target="fail-if-webapp-secure-port-used"/>
 
-    <!-- Do a sanity check - is anything listening on the server port now? -->
-    <echo>^^^DEBUG: Checking remote MBeanServer connection port...</echo>
-    <condition property="server.tomcat.server.port.isAlreadyUsed">
-      <socket server="127.0.0.1" port="${hq-engine.server.port}"/>
-    </condition>
-    <antcall target="fail-if-mbean-port-used"/>
-
     <!-- Hack to set the builtin flag if hqdb exists in previous install -->
     <available file="${server.upgradedir}/hqdb" property="using.builtin.db"/>
 
@@ -380,16 +373,6 @@ __ll__
     <msgfail>^^^ERROR:\
       There is another program using port ${server.webapp.secure.port}.
       Please choose a different value for the server.webapp.secure.port property.
-    	
-      Run the setup program with the "-full" option so that you
-      can pick either an alternate port or a different database to use
-      for the HQ server.
-    </msgfail>
-  </target>
-  <target name="fail-if-mbean-port-used" if="server.tomcat.server.port.isAlreadyUsed">
-    <msgfail>^^^ERROR:\
-      There is another program using port ${hq-engine.server.port}.
-      Please choose a different value for the hq-engine.server.port property.
     	
       Run the setup program with the "-full" option so that you
       can pick either an alternate port or a different database to use
@@ -524,7 +507,8 @@ ${errMsg}
         <include name="ant-launcher.jar"/>
         <include name="commons-logging-1.0.4.jar"/>
         <include name="hq-installer.jar"/>
-        <include name="hq-boot.jar"/>
+    	<include name="hq-util.jar"/>
+      	<include name="hq-common.jar"/>
         <include name="oro-2.0.8.jar"/>
         <include name="sigar-x86-winnt.dll"/>
         <include name="libsigar-hppa2.0-hp-hpux-11.x.sl"/>

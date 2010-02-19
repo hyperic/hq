@@ -27,7 +27,6 @@ package org.hyperic.hq.events.server.session;
 
 import java.util.Map;
 
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.shared.HierarchicalAlertingManager;
 import org.hyperic.hq.measurement.ext.MeasurementEvent;
 import org.hyperic.hq.measurement.server.session.ResourceDataPoint;
@@ -59,13 +58,6 @@ public class HierarchicalAlertingManagerImpl implements HierarchicalAlertingMana
      */
     public void performSecondaryAvailabilityCheck(Map<Integer, ResourceDataPoint> downPlatforms) {
         //   
-    }
-
-    /**
-     * Get local home object
-     */
-    public static HierarchicalAlertingManager getOne() {
-        return (HierarchicalAlertingManager)Bootstrap.getBean("HierarchicalAlertingManager");
     }
 
 }

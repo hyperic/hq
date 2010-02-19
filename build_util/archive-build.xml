@@ -132,8 +132,8 @@
 	</target>
 
 	<target name="bundle-pgsql" if="pgsql.available">
-		<mkdir dir="${archive-dir}-installer/installer-${version}/data/hqdb" />
-		<copy todir="${archive-dir}-installer/installer-${version}/data/hqdb">
+		<mkdir dir="${archive-dir}/installer-${version}/data/hqdb" />
+		<copy todir="${archive-dir}/installer-${version}/data/hqdb">
 			<fileset dir="${pgsql.dir}/${archive-suffix}">
 				<include name="*.sh" />
 				<include name="*.bat" />
@@ -141,8 +141,8 @@
 				<include name="pgsql.zip" />
 			</fileset>
 		</copy>
-		<mkdir dir="${archive-dir}-installer/installer-${version}/data/hqdb/conf" />
-		<copy todir="${archive-dir}-installer/installer-${version}/data/hqdb/conf">
+		<mkdir dir="${archive-dir}/installer-${version}/data/hqdb/conf" />
+		<copy todir="${archive-dir}/installer-${version}/data/hqdb/conf">
 			<fileset dir="${pgsql.dir}/${archive-suffix}/conf" includes="**" />
 		</copy>
 	</target>
