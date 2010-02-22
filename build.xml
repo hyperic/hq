@@ -561,7 +561,7 @@
 	<target name="prepare-tomcat">
 		<!-- Overlay any modified files -->
 		<copy todir="${tomcat.home}" overwrite="true">
-			<fileset dir="${hq.installer}/hq-server" includes="**" />
+			<fileset dir="${hq.installer}/hq-engine" includes="**" />
 		</copy>
 		<!-- Add generated keystore -->
 		<available property="available.keystore" file="${tomcat.home}/conf/hyperic.keystore" />
