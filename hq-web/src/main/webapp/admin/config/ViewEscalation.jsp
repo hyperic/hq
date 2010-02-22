@@ -56,11 +56,9 @@ var selUserEsc;
 var selActionTypeEsc;
 
 function requestViewEscalation() {
-    var alertDefId = dojo11.byId('alertDefId').value;
-    var url = '<html:rewrite page="/escalation/jsonByEscalationId/"/>';
-    url += escape('<c:out value="${param.escId}"/>');
-    url += '.do';
-    
+    var url = '<html:rewrite page="/escalation/jsonByEscalationId.do"/>';
+    url += '?id=' + escape('<c:out value="${param.escId}"/>');
+    url += "&preventCache=" + new Date().getTime();
     new Ajax.Request(url, {method: 'get', onSuccess:showViewEscResponse, onFailure :reportError});
 }
 
@@ -415,7 +413,6 @@ function updateEscView(originalRequest) {
     dojo11.byId('escMsg').innerHTML = "The action has been added to the escalation. The escalation is complete. You can add additional actions as needed.";
     cancelAddEscalation();
     setTimeout("requestViewEscalation()", 1200);
-    //requestViewEscalation();
 }
 
 function hideAddEscButtons() {
@@ -814,12 +811,9 @@ function showResponseRemoved() {
 }
 
 function removeAction(id) {
-    var urlBegin = '<html:rewrite action="/escalation/removeAction/';
-        var urlEnd = '.do"/>';
-    var url = urlBegin + id + urlEnd;
-
-    var id = dojo11.byId('id').value;
-    var pars = "EscId=" + id;
+    var url = '<html:rewrite action="/escalation/removeAction.do"/>';
+    var pars = "id=" + id;
+    pars += "&EscId=" + dojo11.byId('id').value;
 
     new Ajax.Request(url, {method: 'post', parameters: pars, onComplete: showResponseRemoved, onFailure :reportError});
 }

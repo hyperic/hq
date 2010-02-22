@@ -2314,26 +2314,13 @@
               type="org.springframework.web.struts.DelegatingActionProxy"
               />
 
-      <action path="/escalation/remove*/*"
+      <action path="/escalation/removeAction"
               scope="request"
-              type="org.springframework.web.struts.DelegatingActionProxy"
-              parameter="{2}"
-              />
+              type="org.springframework.web.struts.DelegatingActionProxy"/>
 
-      <action path="/escalation/jsonBy*/*"
+      <action path="/escalation/jsonByEscalationId"
               scope="request"
-              type="org.springframework.web.struts.DelegatingActionProxy"
-              parameter="{2}"/>
-
-      <action path="/escalation/listAll*Name"
-              scope="request"
-              type="org.springframework.web.struts.DelegatingActionProxy"
-              parameter="{2}"/>
-
-      <action path="/escalation/json*ByAlertDefId/*"
-              scope="request"
-              type="org.springframework.web.struts.DelegatingActionProxy"
-              parameter="{2}"/>
+              type="org.springframework.web.struts.DelegatingActionProxy"/>
 
       <action path="/escalation/ListAllEscalationName"
               scope="request"
