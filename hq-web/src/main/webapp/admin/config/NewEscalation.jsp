@@ -14,7 +14,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
 
-  Copyright (C) [2004-2009], Hyperic, Inc.
+  Copyright (C) [2004-2010], Hyperic, Inc.
   This file is part of HQ.
 
   HQ is free software; you can redistribute it and/or modify
@@ -220,15 +220,6 @@ function showViewEscResponse(originalRequest) {
       usersEditDiv.innerHTML = " ";
       dojo11.byId('pauseTimeText').innerHTML = 'Allow user to pause escalation: ' + allowPause + "<br>";
    }    
-}
-onloads.push(requestViewEscalation);
-
-function requestViewEscalation() {
-    var alertDefId = dojo11.byId('alertDefId').value;
-    var url = '<html:rewrite page="/escalation/jsonByEscalationId/"/>';
-    url += escape('<c:out value="${param.escId}"/>');
-    url += '.do';
-    new Ajax.Request(url, {method: 'get', onSuccess:showViewEscResponse, onFailure :reportError});
 }
 
 function editEscalation (row) {

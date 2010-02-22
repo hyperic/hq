@@ -75,25 +75,8 @@
     <property name="setup-conf.done" value="true"/>
   </target>
 
-  <!-- Check for anything bound to mbean 1099 PR4926 -->
-  <target name="detect-mbean-port-conflict-and-fail">
-    <echo>^^^DEBUG: Checking mbean port...</echo>
-    <condition property="server.tomcat.mbean.portConflict">
-      <socket server="127.0.0.1" port="${hq-engine.server.port}"/>
-    </condition>
-    <antcall target="fail-mbean-port-conflict-message"/>
-  </target>
-
-  <target name="fail-mbean-port-conflict-message" if="server.tomcat.mbean.portConflict">
-    <fail>
-      There is already a program using the port specified for remote JMX connection to Tomcat (${hq-engine.server.port}).
-      This may indicate an attempt to start two similarly configured instances 
-      of HQ/Tomcat.
-    </fail>
-  </target>
-
   <target name="sh-setup"
-          depends="setup-conf,detect-mbean-port-conflict-and-fail"/>
+          depends="setup-conf"/>
 
   <target name="check-pgsql-already-running" if="pqsql.already.running">
     <echo>^^^INFO: Built-in database is already running</echo>
@@ -127,10 +110,7 @@
     <echo>^^^INFO: Waiting for server to stop...</echo>
     <waitfor>
       <not>
-        <or>
-          <socket server="127.0.0.1" port="${hq-engine.server.port}"/>
           <socket server="127.0.0.1" port="${server.webapp.port}"/>
-        </or>
       </not>
     </waitfor>
 

@@ -124,7 +124,7 @@ class HealthController
         if (!HQUtil.isEnterpriseEdition())
             return ""
             
-        def lman = com.hyperic.hq.license.LicenseManager.instance()
+        def lman = Bootstrap.getBean(com.hyperic.hq.license.LicenseManager.class)
         "${lman.getCountPerAgent(a)}"
     }
     

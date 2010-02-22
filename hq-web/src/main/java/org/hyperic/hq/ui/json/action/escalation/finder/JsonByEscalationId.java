@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2010], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -26,22 +26,25 @@
 package org.hyperic.hq.ui.json.action.escalation.finder;
 
 import org.hyperic.hq.bizapp.shared.EventsBoss;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.ui.json.JSONResult;
 import org.hyperic.hq.ui.json.action.JsonActionContext;
 import org.hyperic.hq.ui.json.action.escalation.BaseAction;
+import org.springframework.beans.factory.annotation.Autowired;
 
-public class JsonByEscalationId 
-    extends BaseAction
-{
-    public void execute(JsonActionContext ctx)
-        throws Exception
-    {
-        EventsBoss eBoss = Bootstrap.getBean(EventsBoss.class);
+public class JsonByEscalationId
+    extends BaseAction {
 
-        Escalation e = eBoss.findEscalationById(ctx.getSessionId(), 
-                                                ctx.getId());
+    private EventsBoss eBoss;
+
+    @Autowired
+    public JsonByEscalationId(EventsBoss eBoss) {
+        super();
+        this.eBoss = eBoss;
+    }
+
+    public void execute(JsonActionContext ctx) throws Exception {
+        Escalation e = eBoss.findEscalationById(ctx.getSessionId(), ctx.getId());
         ctx.setJSONResult(new JSONResult(Escalation.getJSON(e)));
     }
 }
