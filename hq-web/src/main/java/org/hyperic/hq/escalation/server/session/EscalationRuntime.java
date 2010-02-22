@@ -17,4 +17,6 @@ public interface EscalationRuntime {
     void scheduleEscalation(final EscalationState state);
     
     void unscheduleAllEscalationsFor(PerformsEscalations def);
+    
+    void executeState(Integer stateId);
 }

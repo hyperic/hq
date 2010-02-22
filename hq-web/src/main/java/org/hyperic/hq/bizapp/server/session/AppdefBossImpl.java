@@ -1934,7 +1934,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * 
      */
     @Transactional(readOnly=true)
-    public Map<String, Integer> getResourceTypeCountMap(int sessionId, Integer groupId) throws PermissionException,
+    public Map<String, Number> getResourceTypeCountMap(int sessionId, Integer groupId) throws PermissionException,
         SessionException {
         ResourceGroup g = findGroupById(sessionId, groupId);
         return resourceGroupManager.getMemberTypes(g);
@@ -2653,7 +2653,7 @@ public class AppdefBossImpl implements AppdefBoss {
 
         for (Resource rv : authzResources) {
             AppdefEntityID id = AppdefUtil.newAppdefEntityId(rv);
-            if (!assigned.contains(id)) {
+            if (!assignedIds.contains(id)) {
                 toBePaged.add(id);
             }
         }

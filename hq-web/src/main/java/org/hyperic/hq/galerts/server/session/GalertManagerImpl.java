@@ -705,7 +705,7 @@ public class GalertManagerImpl implements GalertManager {
     public void startup() {
         _log.info("Galert manager starting up!");
 
-        hqApp.registerCallbackCaller(GroupChangeCallback.class);
+       
         hqApp.registerCallbackListener(GroupChangeCallback.class, new GroupChangeCallback() {
             public void postGroupCreate(ResourceGroup g) {
             }

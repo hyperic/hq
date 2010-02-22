@@ -733,7 +733,7 @@ public class ResourceManagerImpl implements ResourceManager {
 
         // TODO: Move filtering into QL
         ArrayList<Resource> ordResources = new ArrayList<Resource>(resources.size());
-        for (Resource res : ordResources) {
+        for (Resource res : resources) {
             if (StringUtil.stringDoesNotExist(res.getName(), resourceName)) {
                 continue;
             }

@@ -31,6 +31,7 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import org.hyperic.hq.appdef.server.session.AppdefStartupListener;
 import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
@@ -46,11 +47,14 @@ import org.springframework.stereotype.Service;
 public class AIStartupListener implements StartupListener {
     private AutoinventoryManager autoinventoryManager;
     private ZeventEnqueuer zEventManager;
-   
+
     @Autowired
-    public AIStartupListener(AutoinventoryManager autoinventoryManager, ZeventEnqueuer zEventManager) {
+    public AIStartupListener(AutoinventoryManager autoinventoryManager,
+                             ZeventEnqueuer zEventManager,
+                             AppdefStartupListener appdefStartupListener) {
         this.autoinventoryManager = autoinventoryManager;
         this.zEventManager = zEventManager;
+        // TODO AppdefStartupListener injected for AgentCreateCallback handler
     }
 
     @PostConstruct

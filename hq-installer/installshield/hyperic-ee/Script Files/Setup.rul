@@ -57,8 +57,7 @@
 #define  SERVER_MULTICAST_PORT_INDEX  13
 #define  SERVER_POSTGRESQL_PORT_INDEX 14
 #define  HQ_ENGINE_PORT_INDEX  15
-#define  HQ_ENGINE_JNP_PORT_INDEX  16 
-#define SERVER_WINDOWS_TEMP_INDEX 17   
+#define SERVER_WINDOWS_TEMP_INDEX 16   
 
 // agent properties 
 #define  AGENT_INSTALLDIR_INDEX 0  
@@ -81,7 +80,7 @@ function PopulateConfig(hMSI)
     STRING  sInstallDir, sAddLocal, sInsertLine, sMailHost, sFormattedDir, sDatabasePassword, 
     	sDatabaseUser, sMailSender, sAdminUser, sAdminPassword, sAdminEmail, 
     	sBaseUrl, sWebAppHost, sWebAppPort, sWebAppSecurePort, sMulticastAddr, sMulticastPort,
-    	sPostgresqlPort, sHqEnginePort, sHqEngineJnpPort, sDatabaseUrl, sWindowsTemp;    
+    	sPostgresqlPort, sHqEnginePort, sDatabaseUrl, sWindowsTemp;    
     LIST listProperties; 
 begin  
     listProperties = GetMSIProperties(hMSI); 
@@ -107,7 +106,6 @@ begin
     sMulticastPort = GetIndexedProperty(listProperties, SERVER_MULTICAST_PORT_INDEX); 
     sPostgresqlPort = GetIndexedProperty(listProperties, SERVER_POSTGRESQL_PORT_INDEX);
     sHqEnginePort = GetIndexedProperty(listProperties, HQ_ENGINE_PORT_INDEX); 
-    sHqEngineJnpPort = GetIndexedProperty(listProperties, HQ_ENGINE_JNP_PORT_INDEX); 
     sDatabaseUrl = FixPath("jdbc:postgresql://127.0.0.1:" + sPostgresqlPort + "/hqdb?protocolVersion=2");
     sWindowsTemp =  GetIndexedProperty(listProperties, SERVER_WINDOWS_TEMP_INDEX); 
     ListDestroy ( listProperties );   
@@ -144,8 +142,7 @@ begin
 	    ListAddString ( listProperties, "server.mail.sender=" + sMailSender, AFTER );    
 	    ListAddString ( listProperties, "server.multicast.addr=" + sMulticastAddr, AFTER ); 
 	    ListAddString ( listProperties, "server.multicast.port=" + sMulticastPort, AFTER );    
-	    ListAddString ( listProperties, "hq-engine.server.port=" + sHqEnginePort, AFTER );
-	    ListAddString ( listProperties, "hq-engine.jnp.port=" + sHqEngineJnpPort, AFTER );    
+	    ListAddString ( listProperties, "hq-engine.server.port=" + sHqEnginePort, AFTER );    
 	    ListAddString ( listProperties, "server.ha.bind_addr=*.*", AFTER );  
     	WritePropertiesToFile(listProperties, sWindowsTemp, SETUP_FILE);   
     	ListDestroy ( listProperties );

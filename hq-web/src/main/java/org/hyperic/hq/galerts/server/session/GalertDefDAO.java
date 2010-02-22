@@ -125,7 +125,7 @@ public class GalertDefDAO
     int countByStrategy(ExecutionStrategyTypeInfo strat) {
         String sql = "select count(*) from GalertDef d " + "where d.strategyInfo.type = :type";
 
-        return ((Integer) getSession().createQuery(sql).setParameter("type", strat).uniqueResult())
+        return ((Number) getSession().createQuery(sql).setParameter("type", strat).uniqueResult())
             .intValue();
     }
 

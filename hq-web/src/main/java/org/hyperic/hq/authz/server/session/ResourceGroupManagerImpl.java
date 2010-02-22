@@ -389,7 +389,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
      * 
      */
     @Transactional(readOnly=true)
-    public Map<String, Integer> getMemberTypes(ResourceGroup g) {
+    public Map<String, Number> getMemberTypes(ResourceGroup g) {
         return resourceGroupDAO.getMemberTypes(g);
     }
 

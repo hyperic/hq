@@ -40,7 +40,6 @@ import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.TransactionListener;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
-import org.hyperic.hq.escalation.shared.EscalationManager;
 import org.hyperic.hq.events.ActionExecutionInfo;
 import org.hyperic.hq.events.server.session.Action;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,22 +95,6 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
         _executor = new PooledExecutor(new LinkedQueue());
         _executor.setKeepAliveTime(-1); // Threads never die off
         _executor.createThreads(3); // # of threads to service requests
-    }
-
-    /**
-     * This class actually performs the execution of a given segment of an
-     * escalation. These are queued up and run by the executor thread pool.
-     */
-    private class EscalationRunner implements Runnable {
-        private Integer _stateId;
-
-        private EscalationRunner(Integer stateId) {
-            _stateId = stateId;
-        }
-
-        public void run() {
-            runEscalation(_stateId);
-        }
     }
 
     /**
@@ -372,11 +355,6 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
             _stateIdsToTasks.put(stateId, task);
             _esclEntityIdsToStateIds.put(new EscalatingEntityIdentifier(state), stateId);
         }
-    }
-
-    private void runEscalation(Integer stateId) {
-        _log.debug("Running escalation state [" + stateId + "]");
-        executeState(stateId);
     }
 
     /**

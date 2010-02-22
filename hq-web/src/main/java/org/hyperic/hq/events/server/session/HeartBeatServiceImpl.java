@@ -59,7 +59,7 @@ public class HeartBeatServiceImpl implements HeartBeatService {
      * 
      * @param beatTime The heart beat time.
      */
-    @Transactional(readOnly=true)
+    @Transactional
     public void dispatchHeartBeat(Date beatTime) {
         log.debug("Heart Beat Service started dispatching a heart beat: " + beatTime + ", timestamp=" +
                   beatTime.getTime());

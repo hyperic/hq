@@ -28,6 +28,8 @@ package org.hyperic.hq.galerts.server.session;
 import javax.annotation.PostConstruct;
 
 import org.hyperic.hq.application.StartupListener;
+import org.hyperic.hq.authz.server.session.AuthzStartupListener;
+import org.hyperic.hq.authz.server.session.GroupingStartupListener;
 import org.hyperic.hq.galerts.shared.GalertManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -39,8 +41,9 @@ public class GalertStartupListener
     
     
     @Autowired
-    public GalertStartupListener(GalertManager gAlertManager) {
+    public GalertStartupListener(GalertManager gAlertManager, AuthzStartupListener authzStartupListener, GroupingStartupListener groupingStartupListener) {
         this.gAlertManager = gAlertManager;
+        //TODO only injecting AuthzStartupListener so SubjectRemoveCallback handler registered first and GroupingStartupListener for GroupChangeCallback
     }
 
     @PostConstruct

@@ -178,7 +178,8 @@ public class ProductManagerImpl implements ProductManager {
 
     /**
      */
-    @Transactional(readOnly=true)
+    //TODO This is a get method, but the transaction cannot be read-only since modifications are made.
+    @Transactional
     public PluginManager getPluginManager(String type) throws PluginException {
         return getProductPluginManager().getPluginManager(type);
     }

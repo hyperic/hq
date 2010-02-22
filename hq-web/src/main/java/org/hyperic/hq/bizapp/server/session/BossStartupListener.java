@@ -4,6 +4,7 @@ import javax.annotation.PostConstruct;
 
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.StartupListener;
+import org.hyperic.hq.authz.server.session.AuthzStartupListener;
 import org.hyperic.hq.bizapp.shared.EventLogBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
@@ -25,10 +26,15 @@ public class BossStartupListener implements StartupListener {
     private ResourceCleanupEventListenerRegistrar resourceCleanupEventListenerRegistrar;
 
     @Autowired
-    public BossStartupListener(EventsBoss eventsBoss, EventLogBoss eventLogBoss, ProductBoss productBoss,
-                               UpdateFetcher updateFetcher, HQApp hqApp,
+    public BossStartupListener(
+                               EventsBoss eventsBoss,
+                               EventLogBoss eventLogBoss,
+                               ProductBoss productBoss,
+                               UpdateFetcher updateFetcher,
+                               HQApp hqApp,
                                MeasurementStartupListener measurementStartupListener,
-                               ResourceCleanupEventListenerRegistrar resourceCleanupEventListenerRegistrar) {
+                               ResourceCleanupEventListenerRegistrar resourceCleanupEventListenerRegistrar,
+                               AuthzStartupListener authzStartupListener) {
         this.eventsBoss = eventsBoss;
         this.eventLogBoss = eventLogBoss;
         this.productBoss = productBoss;
@@ -36,7 +42,9 @@ public class BossStartupListener implements StartupListener {
         this.hqApp = hqApp;
         this.resourceCleanupEventListenerRegistrar = resourceCleanupEventListenerRegistrar;
         // TODO MeasurementStartupListener has to be initialized first to
-        // register the DefaultMetricEnableCallback handler. Injecting the
+        // register the DefaultMetricEnableCallback handler and
+        // AuthzStartupListener register the ResourceDeleteCallback. Injecting
+        // the
         // listener here purely to wait for that
     }
 
@@ -46,7 +54,8 @@ public class BossStartupListener implements StartupListener {
         eventLogBoss.startup();
         resourceCleanupEventListenerRegistrar.registerResourceCleanupListener();
         productBoss.preload();
-        updateCallback = (UpdateReportAppender) hqApp.registerCallbackCaller(UpdateReportAppender.class);
+        updateCallback = (UpdateReportAppender) hqApp
+            .registerCallbackCaller(UpdateReportAppender.class);
         LoggingThreadGroup grp = new LoggingThreadGroup("Update Notifier");
         Thread t = new Thread(grp, updateFetcher, "Update Notifier");
         t.start();

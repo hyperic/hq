@@ -27,6 +27,7 @@ package org.hyperic.hq.measurement.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -54,13 +55,15 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 import org.springframework.transaction.annotation.Transactional;
 
-import clover.edu.emory.mathcs.backport.java.util.Collections;
+
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @TestExecutionListeners( { DependencyInjectionTestExecutionListener.class,
                           TransactionalTestExecutionListener.class })
 @Transactional
-@ContextConfiguration(loader = TestContextLoader.class, locations = { "classpath:META-INF/spring/*-context.xml", "AvailabilityManagerTest-context.xml" })
+@ContextConfiguration(loader    = TestContextLoader.class,
+                      locations = { "classpath:META-INF/spring/*-context.xml",
+                                    "AvailabilityManagerTest-context.xml" })
 public class AvailabilityManagerTest {
 
     private final Log log = LogFactory.getLog(AvailabilityManagerTest.class);
@@ -92,7 +95,6 @@ public class AvailabilityManagerTest {
         dbPopulator.restoreDatabase();
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testFindLastAvail() {
         List<AvailabilityDataRLE> rle = dao.findLastAvail(Collections.singletonList(10100));
@@ -452,7 +454,6 @@ public class AvailabilityManagerTest {
         Assert.assertTrue(isAvailDataRLEValid(PLAT_MEAS_ID, pt));
     }
 
-    @SuppressWarnings("unchecked")
     private boolean isAvailDataRLEValid(Integer mId, DataPoint lastPt) {
         List<Integer> mids = Collections.singletonList(mId);
         return isAvailDataRLEValid(mids, lastPt);
@@ -560,8 +561,7 @@ public class AvailabilityManagerTest {
     }
 
     private static final long now() {
-        // return System.currentTimeMillis();
-        return 1265438400000l;
+        return System.currentTimeMillis();
     }
 
 }

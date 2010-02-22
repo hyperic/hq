@@ -29,6 +29,7 @@ import javax.annotation.PostConstruct;
 
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.StartupListener;
+import org.hyperic.hq.authz.server.session.AuthzStartupListener;
 import org.hyperic.hq.authz.server.session.ResourceDeleteCallback;
 import org.hyperic.hq.authz.server.session.SubjectRemoveCallback;
 import org.hyperic.hq.ui.shared.DashboardManager;
@@ -44,12 +45,15 @@ public class CommonStartupListener implements StartupListener {
 
     @Autowired
     public CommonStartupListener(SubjectDeleteWatcher subjectDeleteWatcher,
-                                 ResourceDeleteWatcher resourceDeleteWatcher, DashboardManager dashboardManager,
-                                 HQApp hqApp) {
+                                 ResourceDeleteWatcher resourceDeleteWatcher,
+                                 DashboardManager dashboardManager, HQApp hqApp,
+                                 AuthzStartupListener authzStartupListener) {
         this.subjectDeleteWatcher = subjectDeleteWatcher;
         this.resourceDeleteWatcher = resourceDeleteWatcher;
         this.dashboardManager = dashboardManager;
         this.hqApp = hqApp;
+        // TODO injecting AuthzStartupListener so ResourceDeleteCallback and
+        // SubjectRemoveCallback handler registered first
     }
 
     @PostConstruct

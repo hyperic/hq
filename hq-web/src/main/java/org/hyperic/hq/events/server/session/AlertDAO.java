@@ -142,7 +142,7 @@ public class AlertDAO
         return pageInfo.pageResults(q).list();
     }
 
-    Integer countByCreateTimeAndPriority(Integer subj, long begin, long end, int priority,
+    Number countByCreateTimeAndPriority(Integer subj, long begin, long end, int priority,
                                          boolean inEsc, boolean notFixed, Integer groupId,
                                          Integer alertDefId) {
         String[] ops = new String[] { AuthzConstants.platformOpManageAlerts,
@@ -160,7 +160,7 @@ public class AlertDAO
             q.setInteger("subj", subj.intValue()).setParameterList("ops", ops);
         }
 
-        return (Integer) q.uniqueResult();
+        return (Number) q.uniqueResult();
     }
 
     @SuppressWarnings("unchecked")

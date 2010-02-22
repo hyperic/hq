@@ -27,7 +27,6 @@ package org.hyperic.hq.events.server.session;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.events.shared.MaintenanceEventManager;
 import org.quartz.SchedulerException;
@@ -36,75 +35,59 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The MaintenanceEventManager provides APIs to manage maintenance events.
- *
- *
+ * 
+ * 
  */
 @Service("MaintenanceEventManager")
 @Transactional
-public class MaintenanceEventManagerImpl 
-    implements MaintenanceEventManager
-{
-	/**
+public class MaintenanceEventManagerImpl implements MaintenanceEventManager {
+    /**
      * Get the maintenance event for the group
      * 
-     *  
+     * 
      */
-    public MaintenanceEvent getMaintenanceEvent(AuthzSubject subject,
-    											Integer groupId)
-        throws PermissionException, SchedulerException 
-    {
+    public MaintenanceEvent getMaintenanceEvent(AuthzSubject subject, Integer groupId)
+        throws PermissionException, SchedulerException {
         return null;
     }
-        
+
     /**
      * Unschedule a maintenance event
      * 
-     *  
+     * 
      */
     public void unschedule(AuthzSubject subject, MaintenanceEvent event)
-    	throws PermissionException, SchedulerException
-    {
-        throw new UnsupportedOperationException();    	
+        throws PermissionException, SchedulerException {
+        throw new UnsupportedOperationException();
     }
 
     /**
      * Schedule or reschedule a maintenance event
      * 
-     *  
-     */    
-    public MaintenanceEvent schedule(AuthzSubject subject, MaintenanceEvent event) 
-    	throws PermissionException, SchedulerException
-    {
+     * 
+     */
+    public MaintenanceEvent schedule(AuthzSubject subject, MaintenanceEvent event)
+        throws PermissionException, SchedulerException {
         throw new UnsupportedOperationException();
     }
 
     /**
-     * Disable or enable monitors (alerts, measurements) for the group
-     * and its resources during the maintenance event.
+     * Disable or enable monitors (alerts, measurements) for the group and its
+     * resources during the maintenance event.
      * 
-     *  
-     */        
-    public void manageMonitors(AuthzSubject admin, MaintenanceEvent event) 
-		throws PermissionException
-	{
-        throw new UnsupportedOperationException();    	
-	}
+     * 
+     */
+    public void manageMonitors(AuthzSubject admin, MaintenanceEvent event)
+        throws PermissionException {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * Perform group permission check
      * 
-     *  
+     * 
      */
-    public boolean canSchedule(AuthzSubject subject, MaintenanceEvent event) 
-    {
-        throw new UnsupportedOperationException();    	
+    public boolean canSchedule(AuthzSubject subject, MaintenanceEvent event) {
+        throw new UnsupportedOperationException();
     }
-    
-    /**
-     * Get local home object
-     */
-    public static MaintenanceEventManager getOne() {
-       return (MaintenanceEventManager)Bootstrap.getBean("MaintenanceEventManager");
-    }
-    
 }
