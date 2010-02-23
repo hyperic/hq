@@ -3,6 +3,7 @@
 # Start/Stop the HQ container
 #
 doStart () {
+  JAVA_OPTS="" \
   CATALINA_OPTS="${HQ_JAVA_OPTS} -Dhq.server.home=${SERVER_HOME} -Dcatalina.config=file://${ENGINE_HOME}/hq-server/conf/hq-catalina.properties -Dcom.sun.management.jmxremote" \
   CATALINA_PID="${SERVER_PID}" \
   ${ENGINE_HOME}/hq-server/bin/startup.sh >/dev/null
