@@ -150,7 +150,7 @@
 	<target name="prepare-ssl" unless="available.keystore">
 		<!-- Server key for ssl -->
 		<echo message="Generating a SSL key for https" />
-		<genkey alias="HQ" keystore="${tomcat.home}/conf/hyperic.keystore" keyalg="rsa" storepass="hyperic" dname="CN=Hyperic HQ, OU=HQ, O=hyperic.net, C=US" />
+		<genkey alias="HQ" keystore="${tomcat.home}/hq-server/conf/hyperic.keystore" keyalg="rsa" storepass="hyperic" dname="CN=Hyperic HQ, OU=HQ, O=hyperic.net, C=US" />
 	</target>
 
 	<!-- ==================== PDK packaging ==================== -->

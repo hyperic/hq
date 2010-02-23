@@ -25,5 +25,6 @@
 	<classpathentry kind="lib" path="/hq-common/thirdparty/lib/com.springsource.javax.transaction-1.1.0.jar"/>
 	<classpathentry kind="lib" path="/hq-common/thirdparty/lib/spring/org.springframework.beans-3.0.0.RELEASE.jar"/>
 	<classpathentry kind="lib" path="/hq-common/thirdparty/lib/spring/org.springframework.context-3.0.0.RELEASE.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

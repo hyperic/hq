@@ -7,5 +7,7 @@
 	<classpathentry exported="true" kind="con" path="GROOVY_SUPPORT"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/hq-web"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/hq-rendit"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/hq-util"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/hq-common"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

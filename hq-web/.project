@@ -4,6 +4,10 @@
 	<comment></comment>
 	<projects>
 		<project>Servers</project>
+		<project>hq-common</project>
+		<project>hq-lather</project>
+		<project>hq-util</project>
+		<project>hq-pdk-shared</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
