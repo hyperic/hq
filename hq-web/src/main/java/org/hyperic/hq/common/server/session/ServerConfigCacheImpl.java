@@ -59,6 +59,7 @@ public class ServerConfigCacheImpl implements ServerConfigCache {
         this.configPropertyDAO = configPropertyDAO;
     }
 
+    @Transactional(readOnly=true)
     public String getProperty(String key) {        
         String val = null;
         Element el = _cache.get(key);
@@ -73,7 +74,8 @@ public class ServerConfigCacheImpl implements ServerConfigCache {
         }
         return val;
     }
-        
+
+    @Transactional(readOnly=true)    
     public Boolean getBooleanProperty(String key) {
         Boolean bool = null;
         String prop = getProperty(key);
@@ -122,6 +124,7 @@ public class ServerConfigCacheImpl implements ServerConfigCache {
      * @return Properties
      * 
      */
+    @Transactional(readOnly=true)
     public Properties getConfig() throws ConfigPropertyException {
         return getConfig(null);
     }
@@ -132,6 +135,7 @@ public class ServerConfigCacheImpl implements ServerConfigCache {
      * @return Properties
      * 
      */
+    @Transactional(readOnly=true)
     public Properties getConfig(String prefix) throws ConfigPropertyException {
 
         Collection<ConfigProperty> allProps = getProps(prefix);
@@ -157,8 +161,8 @@ public class ServerConfigCacheImpl implements ServerConfigCache {
         return props;
 
     }
-    
-   
+
+    @Transactional(readOnly=true)
     public Collection<ConfigProperty> getProps(String prefix) {
         if (prefix == null) {
             return configPropertyDAO.findAll();

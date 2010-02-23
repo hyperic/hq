@@ -106,6 +106,7 @@ public class AIBossImpl implements AIBoss {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<AIScheduleValue> findScheduledJobs(int sessionId, AppdefEntityID id, PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
@@ -119,6 +120,7 @@ public class AIBossImpl implements AIBoss {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public AIScheduleValue findScheduledJobById(int sessionId, Integer id) throws SessionNotFoundException,
         SessionTimeoutException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
@@ -136,6 +138,7 @@ public class AIBossImpl implements AIBoss {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<AIHistory> findJobHistory(int sessionId, AppdefEntityID id, PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
@@ -167,6 +170,7 @@ public class AIBossImpl implements AIBoss {
      *         the values are the ServerSignature objects.
      * 
      */
+    @Transactional(readOnly=true)
     public Map<String, ServerSignature> getServerSignatures(int sessionID, List<ServerTypeValue> serverTypes)
         throws SessionTimeoutException, SessionNotFoundException, PermissionException, AutoinventoryException {
 
@@ -252,6 +256,7 @@ public class AIBossImpl implements AIBoss {
      * @param platformID The platform ID of the platform to get scan status for.
      * 
      */
+    @Transactional(readOnly=true)
     public ScanStateCore getScanStatus(int sessionID, int platformID) throws SessionTimeoutException,
         SessionNotFoundException, PermissionException, AgentNotFoundException, AgentConnectionException,
         AgentRemoteException, AutoinventoryException {
@@ -267,6 +272,7 @@ public class AIBossImpl implements AIBoss {
      * Get status for a running autoinventory scan given the agentToken
      * 
      */
+    @Transactional(readOnly=true)
     public ScanStateCore getScanStatusByAgentToken(int sessionID, String agentToken) throws SessionTimeoutException,
         SessionNotFoundException, PermissionException, AgentNotFoundException, AgentConnectionException,
         AgentRemoteException, AutoinventoryException {
@@ -292,6 +298,7 @@ public class AIBossImpl implements AIBoss {
      *         the autoinventory queue.
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<AIPlatformValue> getQueue(int sessionID, boolean showIgnored, boolean showPlaceholders,
                                               PageControl pc) throws SessionNotFoundException, SessionTimeoutException {
         return getQueue(sessionID, showIgnored, showPlaceholders, false, pc);
@@ -313,6 +320,7 @@ public class AIBossImpl implements AIBoss {
      *         the autoinventory queue.
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<AIPlatformValue> getQueue(int sessionID, boolean showIgnored, boolean showPlaceholders,
                                               boolean showAlreadyProcessed, PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException {
@@ -327,6 +335,7 @@ public class AIBossImpl implements AIBoss {
      * Get details on a single platform from the AI queue, by aiplatformID
      * 
      */
+    @Transactional(readOnly=true)
     public AIPlatformValue findAIPlatformById(int sessionID, int aiplatformID) throws SessionNotFoundException,
         SessionTimeoutException {
 
@@ -346,6 +355,7 @@ public class AIBossImpl implements AIBoss {
      * Get details on a single platform from the AI queue, by FQDN
      * 
      */
+    @Transactional(readOnly=true)
     public AIPlatformValue findAIPlatformByFqdn(int sessionID, String fqdn) throws SessionNotFoundException,
         SessionTimeoutException {
 
@@ -358,6 +368,7 @@ public class AIBossImpl implements AIBoss {
      * Get details on a single server from the AI queue, by serverID
      * 
      */
+    @Transactional(readOnly=true)
     public AIServerValue findAIServerById(int sessionID, int serverID) throws SessionNotFoundException,
         SessionTimeoutException {
 
@@ -370,6 +381,7 @@ public class AIBossImpl implements AIBoss {
      * Get details on a single server from the AI queue, by name
      * 
      */
+    @Transactional(readOnly=true)
     public AIServerValue findAIServerByName(int sessionID, String name) throws SessionNotFoundException,
         SessionTimeoutException {
 
@@ -381,6 +393,7 @@ public class AIBossImpl implements AIBoss {
      * Get details on a single ip from the AI queue, by ipID
      * 
      */
+    @Transactional(readOnly=true)
     public AIIpValue findAIIpById(int sessionID, int ipID) throws SessionNotFoundException, SessionTimeoutException {
 
         AuthzSubject subject = sessionManager.getSubject(sessionID);
@@ -391,6 +404,7 @@ public class AIBossImpl implements AIBoss {
      * Get details on a single ip from the AI queue, by address
      * 
      */
+    @Transactional(readOnly=true)
     public AIIpValue findAIIpByAddress(int sessionID, String address) throws SessionNotFoundException,
         SessionTimeoutException {
 
@@ -451,6 +465,7 @@ public class AIBossImpl implements AIBoss {
      * Find an AI Platform from an appdef platform
      * 
      */
+    @Transactional(readOnly=true)
     public AIPlatformValue findAIPlatformByPlatformID(int sessionId, Integer platformID)
         throws SessionNotFoundException, SessionTimeoutException, PermissionException, PlatformNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);

@@ -64,6 +64,7 @@ public class CloningBossImpl implements CloningBoss {
      *        resource sortname
      * 
      */
+    @Transactional(readOnly=true)
     public List<Platform> findPlatformsByTypeAndName(AuthzSubject subj, Integer pType, String nameRegEx) {
         throw new UnsupportedOperationException();
     }

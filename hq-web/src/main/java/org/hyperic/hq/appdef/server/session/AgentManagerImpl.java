@@ -166,6 +166,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     /**
      * Get a list of all the entities which can be serviced by an Agent.
      */
+    @Transactional(readOnly=true)
     public ResourceTree getEntitiesForAgent(AuthzSubject subject, String agentToken) throws AgentNotFoundException,
         PermissionException {
 
@@ -196,6 +197,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      * 
      * @return a list of {@link Agent}s
      */
+    @Transactional(readOnly=true)
     public List<Agent> findAgents(PageInfo pInfo) {
         return agentDao.findAgents(pInfo);
     }
@@ -203,6 +205,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     /**
      * Get a list of all the agents in the system
      */
+    @Transactional(readOnly=true)
     public List<Agent> getAgents() {
         return new ArrayList<Agent>(agentDao.findAll());
     }
@@ -210,6 +213,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     /**
      * Get a count of all the agents in the system
      */
+    @Transactional(readOnly=true)
     public int getAgentCount() {
         return agentDao.size();
     }
@@ -217,6 +221,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     /**
      * Get a count of the agents which are actually used (i.e. have platforms)
      */
+    @Transactional(readOnly=true)
     public int getAgentCountUsed() {
         return agentDao.countUsed();
     }
@@ -366,6 +371,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
 
     /**
      */
+    @Transactional(readOnly=true)
     public List<Agent> findAgentsByIP(String ip) {
         return agentDao.findByIP(ip);
     }
@@ -429,6 +435,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      * Find an agent by the token which is Required for the agent to send when
      * it connects.
      */
+    @Transactional(readOnly=true)
     public void checkAgentAuth(String agentToken) throws AgentUnauthorizedException {
         Agent agent = agentDao.findByAgentToken(agentToken);
         if (agent == null) {
@@ -438,12 +445,14 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
 
     /**
      */
+    @Transactional(readOnly=true)
     public AgentConnection getAgentConnection(String method, String connIp, Integer agentId) {
         return AgentConnections.getInstance().agentConnected(method, connIp, agentId);
     }
 
     /**
      */
+    @Transactional(readOnly=true)
     public void disconnectAgent(AgentConnection a) {
         AgentConnections.getInstance().disconnectAgent(a);
     }
@@ -451,6 +460,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     /**
      */
     // TODO: G (does this return Agents or AgentConnection?)
+    @Transactional(readOnly=true)
     public Collection getConnectedAgents() {
         return AgentConnections.getInstance().getConnected();
     }
@@ -458,6 +468,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     /**
      * Find an agent listening on a specific IP & port
      */
+    @Transactional(readOnly=true)
     public Agent getAgent(String ip, int port) throws AgentNotFoundException {
         return this.getAgentInternal(ip, port);
     }
@@ -467,6 +478,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      * @param agentToken the agent token to look for
      * @return An Agent representing the agent that has the given token.
      */
+    @Transactional(readOnly=true)
     public Agent getAgent(String agentToken) throws AgentNotFoundException {
         return this.getAgentInternal(agentToken);
     }
@@ -478,12 +490,14 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      * @return <code>true</code> if the agent token is unique;
      *         <code>false</code> if it is already assigned to an agent.
      */
+    @Transactional(readOnly=true)
     public boolean isAgentTokenUnique(String agentToken) {
         return agentDao.findByAgentToken(agentToken) == null;
     }
 
     /**
      */
+    @Transactional(readOnly=true)
     public Agent findAgent(Integer id) {
         return agentDao.findById(id);
     }
@@ -491,6 +505,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     /**
      * Get an Agent by id.
      */
+    @Transactional(readOnly=true)
     public Agent getAgent(Integer id) {
         return agentDao.get(id);
     }
@@ -499,6 +514,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      * Find an agent which can service the given entity ID
      * @return An agent which is set to manage the specified ID
      */
+    @Transactional(readOnly=true)
     public Agent getAgent(AppdefEntityID aID) throws AgentNotFoundException {
         try {
             Platform platform = null;
@@ -548,6 +564,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      *         side.
      * @throws AgentConnectionException if the connection to the agent fails.
      */
+    @Transactional(readOnly=true)
     public String getCurrentAgentBundle(AuthzSubject subject, AppdefEntityID aid) throws PermissionException,
         AgentNotFoundException, AgentRemoteException, AgentConnectionException {
 

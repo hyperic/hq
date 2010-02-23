@@ -64,6 +64,7 @@ public class CalendarManagerImpl implements CalendarManager {
 	 * 
 	 * @return {@link Calendar}s
 	 */
+    @Transactional(readOnly=true)
 	public Collection<Calendar> findAll() {
 		return calendarDAO.findAll();
 	}
@@ -115,10 +116,18 @@ public class CalendarManagerImpl implements CalendarManager {
 		calendarDAO.removeEntries(c);
 	}
 
+	/**
+	 * 
+	 */
+    @Transactional(readOnly=true)
 	public Calendar findCalendarById(int id) {
 		return calendarDAO.findById(new Integer(id));
 	}
 
+    /**
+     * 
+     */
+    @Transactional(readOnly=true)
 	public CalendarEntry findEntryById(int id) {
 		return calendarEntryDAO.findById(new Integer(id));
 	}

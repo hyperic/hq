@@ -241,6 +241,7 @@ public class ControlManagerImpl implements ControlManager {
      * Get the supported actions for an appdef entity from the local
      * ControlPluginManager
      */
+    @Transactional(readOnly=true)
     public List<String> getActions(AuthzSubject subject, AppdefEntityID id) throws PermissionException,
         PluginNotFoundException, AppdefEntityNotFoundException, GroupNotCompatibleException {
         if (id.isGroup()) {
@@ -263,6 +264,7 @@ public class ControlManagerImpl implements ControlManager {
      * Get the supported actions for an appdef entity from the local
      * ControlPluginManager
      */
+    @Transactional(readOnly=true)
     public List<String> getActions(AuthzSubject subject, AppdefEntityTypeID aetid) throws PluginNotFoundException {
         String pluginName = aetid.getAppdefResourceType().getName();
         return controlPluginManager.getActions(pluginName);
@@ -274,6 +276,7 @@ public class ControlManagerImpl implements ControlManager {
      * enabled for control.
      * @return flag - true if group is enabled
      */
+    @Transactional(readOnly=true)
     public boolean isGroupControlEnabled(AuthzSubject subject, AppdefEntityID id) throws AppdefEntityNotFoundException,
         PermissionException {
         if (!id.isGroup()) {
@@ -310,6 +313,7 @@ public class ControlManagerImpl implements ControlManager {
      * @param resType - appdef entity (of all kinds inc. groups)
      * @return flag - true if supported
      */
+    @Transactional(readOnly=true)
     public boolean isControlSupported(AuthzSubject subject, String resType) {
         try {
             controlPluginManager.getPlugin(resType);
@@ -325,6 +329,7 @@ public class ControlManagerImpl implements ControlManager {
      * @param resType - appdef entity (of all kinds inc. groups)
      * @return flag - true if supported
      */
+    @Transactional(readOnly=true)
     public boolean isControlSupported(AuthzSubject subject, AppdefEntityID id, String resType) {
         try {
             if (id.isGroup()) {
@@ -356,6 +361,7 @@ public class ControlManagerImpl implements ControlManager {
      * Check if a an entity has been enabled for control.
      * @return flag - true if enabled
      */
+    @Transactional(readOnly=true)
     public boolean isControlEnabled(AuthzSubject subject, AppdefEntityID id) {
         try {
             checkControlEnabled(subject, id);
@@ -368,6 +374,7 @@ public class ControlManagerImpl implements ControlManager {
     /**
      * Check if an entity has been enabled for control
      */
+    @Transactional(readOnly=true)
     public void checkControlEnabled(AuthzSubject subject, AppdefEntityID id) throws PluginException {
         ConfigResponseDB config;
 
@@ -385,6 +392,7 @@ public class ControlManagerImpl implements ControlManager {
     /**
      * Get the control config response
      */
+    @Transactional(readOnly=true)
     public ConfigResponse getConfigResponse(AuthzSubject subject, AppdefEntityID id) throws PluginException {
         ConfigResponseDB config;
         try {
@@ -415,6 +423,7 @@ public class ControlManagerImpl implements ControlManager {
      * @param pluginName Name of the plugin to get the config for
      * @param merge If true, merge the product and control config data
      */
+    @Transactional(readOnly=true)
     public byte[] getPluginConfiguration(String pluginName, boolean merge) throws PluginException {
         try {
             AppdefEntityID id = new AppdefEntityID(pluginName);

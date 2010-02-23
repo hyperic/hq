@@ -257,7 +257,7 @@ public class AIScheduleManagerImpl
      * 
      * 
      */
-    @Transactional
+    @Transactional(readOnly=true)
     public PageList<AIScheduleValue> findScheduledJobs(AuthzSubject subject, AppdefEntityID id, PageControl pc) throws NotFoundException {
 
         // default the sorting to the next fire time
@@ -289,7 +289,7 @@ public class AIScheduleManagerImpl
      * 
      * 
      */
-    @Transactional
+    @Transactional(readOnly=true)
     public AISchedule findScheduleByID(AuthzSubject subject, Integer id) {
 
         return aiScheduleDao.findById(id);
@@ -301,7 +301,7 @@ public class AIScheduleManagerImpl
      * 
      * 
      */
-    @Transactional
+    @Transactional(readOnly=true)
     public PageList<AIHistory> findJobHistory(AuthzSubject subject, AppdefEntityID id, PageControl pc) throws NotFoundException {
 
         // default the sorting to the date started
@@ -353,6 +353,7 @@ public class AIScheduleManagerImpl
         }
     }
 
+    @Transactional(readOnly=true)
     public void checkUniqueName(AIScheduleDAO aiScheduleLocalHome, String scanName) throws DuplicateAIScanNameException {
 
         // Ensure that the name is not a duplicate.

@@ -148,6 +148,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
      *         why is this method called find() but calls dao.get()???
      * 
      */
+    @Transactional(readOnly=true)
     public ResourceGroup findResourceGroupById(AuthzSubject whoami, Integer id) throws PermissionException {
         ResourceGroup group = resourceGroupDAO.get(id);
         if (group == null) {
@@ -166,6 +167,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
      * Find the group that has the given ID. Does not do any authz checking
      * 
      */
+    @Transactional(readOnly=true)
     public ResourceGroup findResourceGroupById(Integer id) {
         return resourceGroupDAO.findById(id);
     }
@@ -179,6 +181,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
      *         requested group
      * 
      */
+    @Transactional(readOnly=true)
     public ResourceGroup findResourceGroupByName(AuthzSubject whoami, String name) throws PermissionException {
         ResourceGroup group = resourceGroupDAO.findByName(name);
 
@@ -193,6 +196,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public Collection<ResourceGroup> findDeletedGroups() {
         return resourceGroupDAO.findDeletedGroups();
     }
@@ -354,6 +358,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
      * @return list of authorized resources in this group.
      * 
      */
+    @Transactional(readOnly=true)
     public Collection<Resource> getResources(AuthzSubject whoami, Integer id) {
         return PermissionManagerFactory.getInstance().getGroupResources(whoami.getId(), id, Boolean.FALSE);
     }
@@ -362,6 +367,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
      * Get all the resource groups including the root resource group.
      * 
      */
+    @Transactional(readOnly=true)
     public List<ResourceGroupValue> getAllResourceGroups(AuthzSubject subject, PageControl pc)
         throws PermissionException {
         return getAllResourceGroups(subject, pc, false);
@@ -373,6 +379,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
      * @return {@link Resource}s
      * 
      */
+    @Transactional(readOnly=true)
     public Collection<Resource> getMembers(ResourceGroup g) {
         return resourceGroupDAO.getMembers(g);
     }
@@ -381,6 +388,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
      * Get the member type counts of a group
      * 
      */
+    @Transactional(readOnly=true)
     public Map<String, Number> getMemberTypes(ResourceGroup g) {
         return resourceGroupDAO.getMemberTypes(g);
     }
@@ -391,6 +399,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
      * @return {@link ResourceGroup}s
      * 
      */
+    @Transactional(readOnly=true)
     public Collection<ResourceGroup> getGroups(Resource r) {
         return resourceGroupDAO.getGroups(r);
     }
@@ -399,6 +408,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
      * Get the # of groups within HQ inventory
      * 
      */
+    @Transactional(readOnly=true)
     public Number getGroupCount() {
         return new Integer(resourceGroupDAO.size());
     }
@@ -407,6 +417,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
      * Returns true if the passed resource is a member of the given group.
      * 
      */
+    @Transactional(readOnly=true)
     public boolean isMember(ResourceGroup group, Resource resource) {
         return resourceGroupDAO.isMember(group, resource);
     }
@@ -415,6 +426,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
      * Get the # of members in a group
      * 
      */
+    @Transactional(readOnly=true)
     public int getNumMembers(ResourceGroup g) {
         return getMembers(g).size();
     }
@@ -423,6 +435,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
      * Temporary method to convert a ResourceGroup into an AppdefGroupValue
      * 
      */
+    @Transactional(readOnly=true)
     public AppdefGroupValue getGroupConvert(AuthzSubject subj, ResourceGroup g) {
         AppdefGroupValue retVal = new AppdefGroupValue();
         Collection<Resource> members = getMembers(g);
@@ -469,7 +482,8 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
      *        {@link ResourceGroupSortField}
      * 
      * 
-     * */
+     */
+    @Transactional(readOnly=true)
     public PageList<ResourceGroup> findGroupsNotContaining(AuthzSubject subject, Resource member, Resource prototype,
                                                            Collection<ResourceGroup> excGrps, PageInfo pInfo) {
         return resourceGroupDAO.findGroupsClusionary(subject, member, prototype, excGrps, pInfo, false);
@@ -489,8 +503,8 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
      *        {@link ResourceGroupSortField}
      * 
      * 
-     * */
-
+     */
+    @Transactional(readOnly=true)
     public PageList<ResourceGroup> findGroupsContaining(AuthzSubject subject, Resource member,
                                                         Collection<ResourceGroup> excludeGroups, PageInfo pInfo) {
         return resourceGroupDAO.findGroupsClusionary(subject, member, null, excludeGroups, pInfo, true);
@@ -500,6 +514,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
      * Get all the resource groups excluding the root resource group.
      * 
      */
+    @Transactional(readOnly=true)
     public Collection<ResourceGroup> getAllResourceGroups(AuthzSubject subject, boolean excludeRoot)
         throws PermissionException {
         // first get the list of groups subject can view
@@ -542,6 +557,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public Collection<ResourceGroup> getAllResourceGroups() {
         return resourceGroupDAO.findAll();
     }
@@ -552,6 +568,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public Collection<ResourceGroup> getCompatibleResourceGroups(AuthzSubject subject, Resource resProto)
         throws PermissionException, NotFoundException {
         // first get the list of groups subject can view
@@ -575,6 +592,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
     /**
      * Get all the resource groups excluding the root resource group and paged
      */
+    @Transactional(readOnly=true)
     private PageList<ResourceGroupValue> getAllResourceGroups(AuthzSubject subject, PageControl pc, boolean excludeRoot)
         throws PermissionException {
         Collection<ResourceGroup> groups = getAllResourceGroups(subject, excludeRoot);
@@ -588,6 +606,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
      * @param pc Paging information for the request
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<ResourceGroupValue> getResourceGroupsById(AuthzSubject whoami, Integer[] ids, PageControl pc)
         throws PermissionException {
         if (ids.length == 0)
@@ -637,6 +656,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
      * @exception NotFoundException Unable to find a group by id
      * 
      */
+    @Transactional(readOnly=true)
     public AuthzSubject getResourceGroupOwner(Integer gid) throws NotFoundException {
         Resource gResource = resourceManager.findResourceByInstanceId(resourceManager
             .findResourceTypeByName(AuthzConstants.groupResourceTypeName), gid);
@@ -646,6 +666,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public ResourceGroup getResourceGroupByResource(Resource resource) {
         return resourceGroupDAO.findResourceGroup(resource);
     }
@@ -685,6 +706,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
      *         belong here. Evict, evict! -- JMT 04/01/08
      * 
      */
+    @Transactional(readOnly=true)
     public long getMaxCollectionInterval(ResourceGroup g, Integer templateId) {
         Long max = resourceGroupDAO.getMaxCollectionInterval(g, templateId);
 
@@ -708,11 +730,13 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
      *         TODO: This does not belong here. Evict, evict! -- JMT 04/01/08
      * 
      */
+    @Transactional(readOnly=true)
     public List<Measurement> getMetricsCollecting(ResourceGroup g, Integer templateId) {
 
         return resourceGroupDAO.getMetricsCollecting(g, templateId);
     }
 
+    @Transactional(readOnly=true)
     public ResourceRelation getContainmentRelation() {
         return resourceRelationDAO.findById(AuthzConstants.RELATION_CONTAINMENT_ID);
     }

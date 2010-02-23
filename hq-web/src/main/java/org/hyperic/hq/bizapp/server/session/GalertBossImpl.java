@@ -105,6 +105,7 @@ public class GalertBossImpl implements GalertBoss {
 
     /**
      */
+    @Transactional(readOnly=true)
     public ExecutionStrategyTypeInfo findStrategyType(int sessionId, ExecutionStrategyType type)
         throws PermissionException, SessionException {
         sessionManager.authenticate(sessionId);
@@ -114,6 +115,7 @@ public class GalertBossImpl implements GalertBoss {
 
     /**
      */
+    @Transactional(readOnly=true)
     public GtriggerTypeInfo findTriggerType(int sessionId, GtriggerType type)
         throws SessionException {
         sessionManager.authenticate(sessionId);
@@ -166,6 +168,7 @@ public class GalertBossImpl implements GalertBoss {
      * @return a collection of {@link AlertDefinitionBean}s
      * @throws PermissionException
      */
+    @Transactional(readOnly=true)
     public PageList<GalertDef> findDefinitions(int sessionId, Integer gid, PageControl pc)
         throws SessionException, PermissionException {
         AuthzSubject subj = sessionManager.getSubject(sessionId);
@@ -207,6 +210,7 @@ public class GalertBossImpl implements GalertBoss {
 
     /**
      */
+    @Transactional(readOnly=true)
     public GalertDef findDefinition(int sessionId, Integer id)
         throws SessionException {
         sessionManager.authenticate(sessionId);
@@ -215,6 +219,7 @@ public class GalertBossImpl implements GalertBoss {
 
     /**
      */
+    @Transactional(readOnly=true)
     public Escalatable findEscalatableAlert(int sessionId, Integer id)
         throws SessionException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
@@ -292,6 +297,7 @@ public class GalertBossImpl implements GalertBoss {
      * DAO finder convention
      * 
      */
+    @Transactional(readOnly=true)
     public JSONObject findAlertLogs(int sessionId, Integer gid, long begin,
                                     long end, PageControl pc)
         throws JSONException, SessionTimeoutException, SessionNotFoundException,
@@ -349,6 +355,7 @@ public class GalertBossImpl implements GalertBoss {
     /**
      * Get the last fix if available
      */
+    @Transactional(readOnly=true)
     public String getLastFix(int sessionID, GalertDef def)
         throws SessionNotFoundException, SessionTimeoutException {
         return escalationManager.getLastFix(def);

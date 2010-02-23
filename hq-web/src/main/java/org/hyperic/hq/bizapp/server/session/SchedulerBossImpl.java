@@ -65,6 +65,7 @@ public class SchedulerBossImpl implements SchedulerBoss {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public String[] getJobGroupNames(int sessionID) throws SessionNotFoundException, SessionTimeoutException,
         SchedulerException {
         sessionManager.authenticate(sessionID);
@@ -76,6 +77,7 @@ public class SchedulerBossImpl implements SchedulerBoss {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public String[] getTriggerGroupNames(int sessionID) throws SessionNotFoundException, SessionTimeoutException,
         SchedulerException {
         sessionManager.authenticate(sessionID);
@@ -89,6 +91,7 @@ public class SchedulerBossImpl implements SchedulerBoss {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public String[] getJobNames(int sessionID, String jobGroup) throws SessionNotFoundException,
         SessionTimeoutException, SchedulerException {
         sessionManager.authenticate(sessionID);
@@ -102,6 +105,7 @@ public class SchedulerBossImpl implements SchedulerBoss {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public String[] getTriggerNames(int sessionID, String triggerGroup) throws SessionNotFoundException,
         SessionTimeoutException, SchedulerException {
         sessionManager.authenticate(sessionID);
@@ -113,6 +117,7 @@ public class SchedulerBossImpl implements SchedulerBoss {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     @SuppressWarnings("unchecked")
     public Key[] getCurrentlyExecutingJobs(int sessionID) throws SessionNotFoundException, SessionTimeoutException,
         SchedulerException {

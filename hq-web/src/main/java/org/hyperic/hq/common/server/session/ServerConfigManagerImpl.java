@@ -429,6 +429,7 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
      * Get all the {@link ConfigProperty}s
      * 
      */
+    @Transactional(readOnly=true)
     public Collection<ConfigProperty> getConfigProperties() {
 
         return configPropertyDAO.findAll();
@@ -442,6 +443,7 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public String getGUID() {
         Properties p;
 
@@ -466,10 +468,12 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
         return res;
     }
 
+    @Transactional(readOnly=true)
     public Properties getConfig() throws ConfigPropertyException {
         return serverConfigCache.getConfig();
     }
 
+    @Transactional(readOnly=true)
     public Properties getConfig(String prefix) throws ConfigPropertyException {
         return serverConfigCache.getConfig(prefix);
     }

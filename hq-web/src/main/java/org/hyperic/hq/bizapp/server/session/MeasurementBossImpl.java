@@ -214,6 +214,7 @@ public class MeasurementBossImpl implements MeasurementBoss
      * Get Autogroup member ids
      * 
      */
+    @Transactional(readOnly=true)
     public AppdefEntityID[] getAutoGroupMemberIDs(AuthzSubject subject,
                                                   AppdefEntityID[] aids,
                                                   AppdefEntityTypeID ctype)
@@ -253,6 +254,7 @@ public class MeasurementBossImpl implements MeasurementBoss
      * 
      * @return a PageList of MeasurementTemplateValue objects
      */
+    @Transactional(readOnly=true)
     public List<MeasurementTemplate> findMeasurementTemplates(int sessionId,
                                          AppdefEntityTypeID typeId,
                                          String category,
@@ -268,6 +270,7 @@ public class MeasurementBossImpl implements MeasurementBoss
      * 
      * @return a PageList of MeasurementTemplateValue objects based on entity
      */
+    @Transactional(readOnly=true)
     public List<MeasurementTemplate> findMeasurementTemplates(int sessionId,
                                          AppdefEntityID aeid)
         throws SessionTimeoutException, SessionNotFoundException,
@@ -288,6 +291,7 @@ public class MeasurementBossImpl implements MeasurementBoss
      * @return a List of MeasurementTemplateValue objects
      * 
      */
+    @Transactional(readOnly=true)
     public List<MeasurementTemplate> findMeasurementTemplates(int sessionId, String mtype,
                                          PageControl pc)
         throws SessionTimeoutException, SessionNotFoundException {
@@ -298,6 +302,7 @@ public class MeasurementBossImpl implements MeasurementBoss
     /** Retrieve list of measurement templates given specific IDs
      * 
      */
+    @Transactional(readOnly=true)
     public List<MeasurementTemplate> findMeasurementTemplates(String user, Integer[] ids,
                                          PageControl pc)
         throws LoginException, ApplicationException, ConfigPropertyException {
@@ -309,6 +314,7 @@ public class MeasurementBossImpl implements MeasurementBoss
      * @return a List of MeasurementTemplateValue objects
      * 
      */
+    @Transactional(readOnly=true)
     public List<MeasurementTemplate> findMeasurementTemplates(int sessionId, Integer[] ids,
                                              PageControl pc)
         throws SessionTimeoutException, SessionNotFoundException,
@@ -320,6 +326,7 @@ public class MeasurementBossImpl implements MeasurementBoss
     /** Retrieve a measurement template given specific ID
      * 
      */
+    @Transactional(readOnly=true)
     public MeasurementTemplate getMeasurementTemplate(int sessionId, Integer id)
         throws SessionNotFoundException, SessionTimeoutException,
                TemplateNotFoundException {
@@ -332,6 +339,7 @@ public class MeasurementBossImpl implements MeasurementBoss
      * @return The availabililty metric template.
      * 
      */
+    @Transactional(readOnly=true)
     public MeasurementTemplate getAvailabilityMetricTemplate(
             int sessionId, AppdefEntityID aid, AppdefEntityTypeID ctype)
         throws SessionNotFoundException, SessionTimeoutException,
@@ -362,6 +370,7 @@ public class MeasurementBossImpl implements MeasurementBoss
      * @param measCache Map<Integer, Measurement> may be null.
      * Integer represents the AppdefEntityID.getId()
      */
+    @Transactional(readOnly=true)
     private MeasurementTemplate getAvailabilityMetricTemplate(
         AuthzSubject subj, AppdefEntityID aeid, Map<Integer,List<Measurement>> measCache)
         throws AppdefEntityNotFoundException,
@@ -459,6 +468,7 @@ public class MeasurementBossImpl implements MeasurementBoss
      * @return template of availabililty metric
      * 
      */
+    @Transactional(readOnly=true)
     public MeasurementTemplate getAvailabilityMetricTemplate(
         int sessionId, AppdefEntityID aeid)
         throws MeasurementNotFoundException, SessionNotFoundException,
@@ -474,6 +484,7 @@ public class MeasurementBossImpl implements MeasurementBoss
      * @return Array of Measurement IDs
      * 
      */
+    @Transactional(readOnly=true)
     public List<MeasurementTemplate> getDesignatedTemplates(int sessionId, AppdefEntityID id,
                                        Set<String> cats) 
         throws SessionNotFoundException, SessionTimeoutException,
@@ -501,6 +512,7 @@ public class MeasurementBossImpl implements MeasurementBoss
      * @return Array of Measuremnt ids
      * 
      */
+    @Transactional(readOnly=true)
     public List<MeasurementTemplate> getAGDesignatedTemplates(int sessionId, AppdefEntityID[] aids, 
                                          AppdefEntityTypeID ctype, Set<String> cats) 
         throws SessionNotFoundException, SessionTimeoutException,
@@ -776,6 +788,7 @@ public class MeasurementBossImpl implements MeasurementBoss
      * @param id measurement id
      * 
      */
+    @Transactional(readOnly=true)
     public Measurement getMeasurement(int sessionID, Integer id)
         throws SessionTimeoutException, SessionNotFoundException,
                MeasurementNotFoundException {
@@ -788,6 +801,7 @@ public class MeasurementBossImpl implements MeasurementBoss
      * @param tids The template IDs to get
      * 
      */
+    @Transactional(readOnly=true)
     public MetricValue[] getLastMetricValue(int sessionId,
                                             AppdefEntityID aeid,
                                             Integer[] tids)
@@ -818,6 +832,7 @@ public class MeasurementBossImpl implements MeasurementBoss
      * @param interval The allowable time in ms to go back looking for data.
      * 
      */
+    @Transactional(readOnly=true)
     public MetricValue[] getLastMetricValue(int sessionId,
                                             List<Measurement> measurements,
                                             long interval)
@@ -840,6 +855,7 @@ public class MeasurementBossImpl implements MeasurementBoss
      * Get the last indicator metric values
      * 
      */
+    @Transactional(readOnly=true)
     public Map<Integer,MetricValue> getLastIndicatorValues(Integer sessionId, AppdefEntityID aeid) {
         
         List<Measurement> metrics = measurementManager.findDesignatedMeasurements(aeid);
@@ -879,6 +895,7 @@ public class MeasurementBossImpl implements MeasurementBoss
     /*
      * Private function to find the group measurements
      */
+    @Transactional(readOnly=true)
     private PageList<MetricConfigSummary> findGroupMeasurements(int sessionId, AppdefEntityID gid,
                                            String cat, PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException,
@@ -892,6 +909,7 @@ public class MeasurementBossImpl implements MeasurementBoss
     /*
      * Private function to find the group measurements
      */
+    @Transactional(readOnly=true)
     private PageList<MetricConfigSummary> findGroupMeasurements(int sessionId, List<AppdefEntityID> grpMembers,
                                            String cat, PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException,
@@ -976,6 +994,7 @@ public class MeasurementBossImpl implements MeasurementBoss
      *
      * 
      */
+    @Transactional(readOnly=true)
     public Measurement findMeasurement(int sessionId, Integer tid,
                                        AppdefEntityID id)
         throws SessionNotFoundException, SessionTimeoutException,
@@ -993,6 +1012,7 @@ public class MeasurementBossImpl implements MeasurementBoss
      * @return List of Measurement objects
      * 
      */
+    @Transactional(readOnly=true)
     public List findMeasurements(int sessionId, AppdefEntityID id,
                                  PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException,
@@ -1018,6 +1038,7 @@ public class MeasurementBossImpl implements MeasurementBoss
      * @return a List of Measurement objects
      * 
      */
+    @Transactional(readOnly=true)
     public List<Measurement> findMeasurements(int sessionId, Integer tid,
                                  AppdefEntityID[] entIds)
         throws SessionTimeoutException, SessionNotFoundException,
@@ -1052,6 +1073,7 @@ public class MeasurementBossImpl implements MeasurementBoss
      * @return a PageList of Measurement objects
      * 
      */
+    @Transactional(readOnly=true)
     public List<MetricConfigSummary> findEnabledAGMeasurements(int sessionId,
                                           AppdefEntityID parentId,
                                           AppdefEntityTypeID childType,
@@ -1070,6 +1092,7 @@ public class MeasurementBossImpl implements MeasurementBoss
      * @return a PageList of Measurement objects
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<MetricConfigSummary> findEnabledMeasurements(int sessionId, AppdefEntityID id,
                                             String cat, PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException,
@@ -1117,6 +1140,7 @@ public class MeasurementBossImpl implements MeasurementBoss
      * @return a PageList of MetricValue objects
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<HighLowMetricValue> findMeasurementData(int sessionId, Measurement m,
                                         long begin, long end, PageControl pc) {
         return dataManager.getHistoricalData(m, begin, end, pc);
@@ -1134,6 +1158,7 @@ public class MeasurementBossImpl implements MeasurementBoss
      * @return a PageList of MetricValue objects
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<HighLowMetricValue> findMeasurementData(int sessionId, Integer tid,
                                         AppdefEntityID aid, long begin,
                                         long end, long interval,
@@ -1171,6 +1196,7 @@ public class MeasurementBossImpl implements MeasurementBoss
      * @return a PageList of MetricValue objects
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<HighLowMetricValue> findMeasurementData(int sessionId, Integer tid,
                                         AppdefEntityID aid,
                                         AppdefEntityTypeID ctype,
@@ -1201,6 +1227,7 @@ public class MeasurementBossImpl implements MeasurementBoss
      * @return a PageList of MetricValue objects
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<HighLowMetricValue> findMeasurementData(int sessionId, Integer tid,
                                         List<AppdefEntityID> entIds,
                                         long begin, long end, long interval,
@@ -1236,6 +1263,7 @@ public class MeasurementBossImpl implements MeasurementBoss
      * @return a PageList of MetricValue objects
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<HighLowMetricValue> findMeasurementData(String user, AppdefEntityID aid,
                                         MeasurementTemplate tmpl,
                                         long begin, long end, long interval,
@@ -1257,6 +1285,7 @@ public class MeasurementBossImpl implements MeasurementBoss
      * @return a PageList of MetricValue objects
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<HighLowMetricValue> findMeasurementData(int sessionId, AppdefEntityID aid,
                                         MeasurementTemplate tmpl,
                                         long begin, long end, long interval,
@@ -1311,6 +1340,7 @@ public class MeasurementBossImpl implements MeasurementBoss
      * @throws LoginException
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<HighLowMetricValue> findAGMeasurementData(String user, AppdefEntityID[] aids,
                                           MeasurementTemplate tmpl,
                                           AppdefEntityTypeID ctype,
@@ -1333,6 +1363,7 @@ public class MeasurementBossImpl implements MeasurementBoss
      * @return a PageList of MetricValue objects
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<HighLowMetricValue> findAGMeasurementData(int sessionId, AppdefEntityID[] aids,
                                           MeasurementTemplate tmpl,
                                           AppdefEntityTypeID ctype,
@@ -1364,6 +1395,7 @@ public class MeasurementBossImpl implements MeasurementBoss
      * Returns metadata for particular measurement
      * 
      */
+    @Transactional(readOnly=true)
     public List<MeasurementMetadataSummary> findMetricMetadata(int sessionId, AppdefEntityID aid,
                                    AppdefEntityTypeID ctype, Integer tid)
         throws SessionNotFoundException, SessionTimeoutException,
@@ -1473,6 +1505,7 @@ public class MeasurementBossImpl implements MeasurementBoss
      * @see org.hyperic.hq.bizapp.shared.uibeans.MetricDisplaySummary
      * 
      */
+    @Transactional(readOnly=true)
     public MetricDisplaySummary findMetric(int sessionId, AppdefEntityID aeid,
                                            AppdefEntityTypeID ctype,
                                            Integer tid, long begin, long end)
@@ -1536,6 +1569,7 @@ public class MeasurementBossImpl implements MeasurementBoss
      * @see org.hyperic.hq.bizapp.shared.uibeans.MetricDisplaySummary
      * 
      */
+    @Transactional(readOnly=true)
     public MetricDisplaySummary findMetric(int sessionId, List resources,
                                            Integer tid, long begin, long end)
         throws SessionTimeoutException, SessionNotFoundException,
@@ -1790,6 +1824,7 @@ public class MeasurementBossImpl implements MeasurementBoss
      * @return Map of measure templates and resource metric lists
      * 
      */
+    @Transactional(readOnly=true)
     public Map<MeasurementTemplate, List<MetricDisplaySummary>> findResourceMetricSummary(int sessionId,
                                          AppdefEntityID[] entIds,
                                          long begin, long end)
@@ -1883,7 +1918,10 @@ public class MeasurementBossImpl implements MeasurementBoss
         }                
         return result;
     }
-    
+    /**
+     * 
+     */
+    @Transactional(readOnly=true)
     public Map<String,Set<MetricDisplaySummary>> findMetrics(int sessionId, AppdefEntityID entId, long begin,
                            long end, PageControl pc)
      throws SessionTimeoutException, SessionNotFoundException,
@@ -1903,6 +1941,7 @@ public class MeasurementBossImpl implements MeasurementBoss
      * @throws AppdefCompatException
      * 
      */
+    @Transactional(readOnly=true)
     public Map<String,Set<MetricDisplaySummary>> findMetrics(int sessionId, AppdefEntityID[] entIds,
                            long filters, String keyword, long begin, long end,
                            boolean showNoCollect)
@@ -1975,6 +2014,7 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
      * @see org.hyperic.hq.bizapp.shared.uibeans.MetricDisplaySummary
      * 
      */
+    @Transactional(readOnly=true)
     public Map<String,Set<MetricDisplaySummary>> findMetrics(int sessionId, AppdefEntityID entId, List<Integer> mtids,
                            long begin, long end)
         throws SessionTimeoutException, SessionNotFoundException,
@@ -2140,9 +2180,9 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
         }
         return result;
     }
-    
-    public MetricDisplaySummary
-    getMetricDisplaySummary(MeasurementTemplate tmpl, Long interval,
+
+    @Transactional(readOnly=true)
+    public MetricDisplaySummary getMetricDisplaySummary(MeasurementTemplate tmpl, Long interval,
                             long begin, long end, double[] data,
                             int totalConfigured) {
     // Create a new metric summary bean
@@ -2496,6 +2536,7 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
      * @throws AppdefCompatException
      * 
      */
+    @Transactional(readOnly=true)
     public Map<String,Set<MetricDisplaySummary>> findAGPlatformMetricsByType(int sessionId, 
                                            AppdefEntityTypeID platTypeId,
                                            long begin, long end,
@@ -2700,6 +2741,7 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
      * @throws AppdefCompatException
      * 
      */
+    @Transactional(readOnly=true)
     public Map<String,Set<MetricDisplaySummary>> findAGMetricsByType(int sessionId, AppdefEntityID[] entIds,
                                    AppdefEntityTypeID typeId, long filters,
                                    String keyword, long begin, long end,
@@ -3049,6 +3091,7 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
      * @return List of ResourceTypeDisplaySummary beans
      * 
      */
+    @Transactional(readOnly=true)
     public List<ResourceTypeDisplaySummary> findSummarizedServerCurrentHealth(int sessionId, 
                                                   AppdefEntityID entId)
         throws SessionTimeoutException, SessionNotFoundException,
@@ -3084,6 +3127,7 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
      * @return List a list of ResourceTypeDisplaySummary beans
      * 
      */
+    @Transactional(readOnly=true)
     public List<ResourceTypeDisplaySummary> findSummarizedPlatformServiceCurrentHealth(int sessionId,
                                                            AppdefEntityID entId)
         throws SessionTimeoutException, SessionNotFoundException,
@@ -3098,6 +3142,7 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public List<ResourceTypeDisplaySummary> findSummarizedServiceCurrentHealth(int sessionId,
                                                    AppdefEntityID entId)
         throws SessionTimeoutException, SessionNotFoundException,
@@ -3124,6 +3169,7 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
      * @return List of ResourceDisplaySummary beans
      * 
      */
+    @Transactional(readOnly=true)
     public List<ResourceDisplaySummary> findGroupCurrentHealth(int sessionId, Integer id)
         throws SessionTimeoutException, SessionNotFoundException,
                AppdefEntityNotFoundException, PermissionException {
@@ -3251,6 +3297,7 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
      * @return List of ResourceDisplaySummary beans
      * 
      */
+    @Transactional(readOnly=true)
     public List<ResourceDisplaySummary> findVirtualsCurrentHealth(int sessionId,
                                          AppdefEntityID entId)
         throws SessionTimeoutException, SessionNotFoundException,
@@ -3573,6 +3620,7 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
      * @return PageList of ResourceDisplaySummary beans
      * 
      */
+    @Transactional(readOnly=true)
     public List<ResourceDisplaySummary> findResourcesCurrentHealth(String user, AppdefEntityID[] entIds)
         throws LoginException, ApplicationException, PermissionException,
                AppdefEntityNotFoundException, SessionNotFoundException,
@@ -3590,6 +3638,7 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
      * @return PageList of ResourceDisplaySummary beans
      * 
      */
+    @Transactional(readOnly=true)
     public List<ResourceDisplaySummary> findResourcesCurrentHealth(int sessionId, 
                                            AppdefEntityID[] entIds)
         throws AppdefEntityNotFoundException, PermissionException,
@@ -3613,6 +3662,7 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
      * @return PageList of ResourceDisplaySummary beans
      * 
      */
+    @Transactional(readOnly=true)
     public List<ResourceDisplaySummary> findHostsCurrentHealth(int sessionId, AppdefEntityID entId,
                                        PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException,
@@ -3675,6 +3725,7 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
      * @return PageList of ResourceDisplaySummary beans
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<ResourceDisplaySummary> findPlatformsCurrentHealth(int sessionId, 
                                                AppdefEntityID entId,
                                                PageControl pc)
@@ -3699,6 +3750,7 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
      * @return a list of ResourceDisplaySummary beans
      * 
      */
+    @Transactional(readOnly=true)
     public List<ResourceDisplaySummary> findAGPlatformsCurrentHealthByType(int sessionId,
                                                    Integer platTypeId)
         throws SessionTimeoutException, SessionNotFoundException,
@@ -3754,6 +3806,7 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
      * @return a list of ResourceDisplaySummary beans
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<ResourceDisplaySummary> findServersCurrentHealth(int sessionId,
                                              AppdefEntityID entId,
                                              PageControl pc)
@@ -3791,6 +3844,7 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
      * @return a list of ResourceDisplaySummary beans
      * 
      */
+    @Transactional(readOnly=true)
     public List<ResourceDisplaySummary> findAGServersCurrentHealthByType(int sessionId,
                                                  AppdefEntityID[] entIds,
                                                  Integer serverTypeId)
@@ -3824,6 +3878,7 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
      * @return a list of ResourceDisplaySummary beans
      * 
      */
+    @Transactional(readOnly=true)
     public List<ResourceDisplaySummary> findAGServicesCurrentHealthByType(int sessionId,
                                                   AppdefEntityID[] entIds,
                                                   Integer serviceTypeId)
@@ -3848,6 +3903,7 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
      * Get Availability measurement for a given entitiy
      * 
      */
+    @Transactional(readOnly=true)
     public double getAvailability(AuthzSubject subj, AppdefEntityID id)
         throws AppdefEntityNotFoundException,
                PermissionException {
@@ -3860,6 +3916,7 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
      * @param availCache optional cache of <Integer, MetricValue>
      *  Integer => Measurement.getId(), may be null
      */
+    @Transactional(readOnly=true)
     private double getAvailability(AuthzSubject subject, AppdefEntityID id,
                                    Map<Integer,List<Measurement>> measCache, Map<Integer,MetricValue> availCache)
         throws AppdefEntityNotFoundException,
@@ -3894,6 +3951,7 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
      * @param id the Appdef entity ID
      * 
      */
+    @Transactional(readOnly=true)
     public double getAvailability(int sessionId, AppdefEntityID id)
         throws SessionTimeoutException, SessionNotFoundException,
                AppdefEntityNotFoundException, PermissionException {
@@ -3905,6 +3963,7 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
      * @return a MetricValue for the availability
      * 
      */
+    @Transactional(readOnly=true)
     public double getAGAvailability(int sessionId, AppdefEntityID[] aids,
                                     AppdefEntityTypeID ctype)
         throws SessionTimeoutException, SessionNotFoundException,
@@ -3933,6 +3992,7 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
      * @throws AppdefCompatException
      * 
      */
+    @Transactional(readOnly=true)
     public List<ProblemMetricSummary> findAllMetrics(int sessionId, AppdefEntityID aeid,
                                    AppdefEntityTypeID ctype,
                                    long begin, long end)
@@ -3957,7 +4017,10 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
         }
         return result;
     }
-    
+    /**
+     * 
+     */
+    @Transactional(readOnly=true)
     public List<ProblemMetricSummary> findAllMetrics(int sessionId, AppdefEntityID aeid,
                                   long begin, long end)
         throws SessionTimeoutException, SessionNotFoundException,
@@ -3980,6 +4043,10 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
         return result;
     }
     
+    /**
+     * 
+     */
+    @Transactional(readOnly=true)
     public List<ProblemMetricSummary> findAllMetrics(int sessionId, AppdefEntityID[] aeids,
                                   long begin, long end)
         throws SessionTimeoutException, SessionNotFoundException,
@@ -4010,6 +4077,7 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
      * list of UI beans
      * 
      */
+    @Transactional(readOnly=true)
     public List findAllMetrics(int sessionId, AppdefEntityID aeid,
                                    AppdefEntityID[] hosts,
                                    AppdefEntityTypeID[] children,
@@ -4064,7 +4132,11 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
         
         return result;
     }
-    
+
+    /**
+     * 
+     */
+    @Transactional(readOnly=true)
     public double[] getAvailability(AuthzSubject subject,
                                        AppdefEntityID[] ids)
         throws AppdefEntityNotFoundException,
@@ -4073,6 +4145,10 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
         return getAvailability(subject, ids, getMidMap(getResources(ids)), null);
     }
     
+    /**
+     * 
+     */
+    @Transactional(readOnly=true)
     public List<AppdefEntityID> getAGMemberIds(AuthzSubject subject,
                                   AppdefEntityID parentAid,
                                   AppdefEntityTypeID ctype)
@@ -4088,6 +4164,7 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
      * list of UI beans
      * 
      */
+    @Transactional(readOnly=true)
     public List findAllMetrics(int sessionId, AppdefEntityID aeid,
                                    AppdefEntityID[] hosts,
                                    AppdefEntityTypeID[] children,
@@ -4148,6 +4225,7 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
      * Get the availability metric for a given resource
      * 
      */
+    @Transactional(readOnly=true)
     public Measurement findAvailabilityMetric(int sessionId,
                                                      AppdefEntityID id)
         throws SessionTimeoutException, SessionNotFoundException

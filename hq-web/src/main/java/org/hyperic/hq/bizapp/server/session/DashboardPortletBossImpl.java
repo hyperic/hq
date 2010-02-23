@@ -137,6 +137,7 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss {
      * @throws PermissionException
      * 
      */
+    @Transactional(readOnly=true)
     public JSONArray getMeasurementData(AuthzSubject subj, Integer resId, Integer mtid, AppdefEntityTypeID ctype,
                                         long begin, long end) throws PermissionException {
         JSONArray rtn = new JSONArray();
@@ -202,6 +203,7 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss {
      * @throws JSONException
      * 
      */
+    @Transactional(readOnly=true)
     public JSONObject getAllGroups(AuthzSubject subj) throws PermissionException, JSONException {
         JSONObject rtn = new JSONObject();
         Collection<ResourceGroup> groups = resourceGroupManager.getAllResourceGroups(subj, true);
@@ -215,6 +217,7 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public JSONObject getAlertCounts(AuthzSubject subj, List<Integer> groupIds, PageInfo pageInfo)
         throws PermissionException, JSONException {
         final long PORTLET_RANGE = MeasurementConstants.DAY * 3;

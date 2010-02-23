@@ -620,6 +620,7 @@ public class ServerManagerImpl implements ServerManager {
      * @return list of serverTypeValues
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<ServerTypeValue> getAllServerTypes(AuthzSubject subject, PageControl pc) {
         // valuePager converts local/remote interfaces to value objects
         // as it pages through them.
@@ -629,6 +630,7 @@ public class ServerManagerImpl implements ServerManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public Server getServerByName(Platform host, String name) {
         return serverDAO.findByName(host, name);
     }
@@ -638,6 +640,7 @@ public class ServerManagerImpl implements ServerManager {
      * @return list of serverTypeValues
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<ServerTypeValue> getViewableServerTypes(AuthzSubject subject, PageControl pc)
         throws PermissionException, NotFoundException {
         // build the server types from the visible list of servers
@@ -653,6 +656,7 @@ public class ServerManagerImpl implements ServerManager {
      * @return list of serverTypeValues
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<ServerTypeValue> getServerTypesByPlatform(AuthzSubject subject, Integer platId, PageControl pc)
         throws PermissionException, PlatformNotFoundException, ServerNotFoundException {
         return getServerTypesByPlatform(subject, platId, true, pc);
@@ -663,6 +667,7 @@ public class ServerManagerImpl implements ServerManager {
      * @return list of serverTypeValues
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<ServerTypeValue> getServerTypesByPlatform(AuthzSubject subject, Integer platId,
                                                               boolean excludeVirtual, PageControl pc)
         throws PermissionException, PlatformNotFoundException, ServerNotFoundException {
@@ -686,6 +691,7 @@ public class ServerManagerImpl implements ServerManager {
      * @return A list of ServerTypeValue objects for thie PlatformType.
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<ServerTypeValue> getServerTypesByPlatformType(AuthzSubject subject, Integer platformTypeId,
                                                                   PageControl pc) throws PlatformNotFoundException {
         PlatformType platType = platformTypeDAO.findById(platformTypeId);
@@ -698,6 +704,7 @@ public class ServerManagerImpl implements ServerManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public Server findServerByAIID(AuthzSubject subject, Platform platform, String aiid) throws PermissionException {
         permissionManager.checkViewPermission(subject, platform.getEntityId());
         return serverDAO.findServerByAIID(platform, aiid);
@@ -707,6 +714,7 @@ public class ServerManagerImpl implements ServerManager {
      * Find a Server by Id.
      * 
      */
+    @Transactional(readOnly=true)
     public Server findServerById(Integer id) throws ServerNotFoundException {
         Server server = getServerById(id);
 
@@ -722,6 +730,7 @@ public class ServerManagerImpl implements ServerManager {
      * 
      * @return The Server with the given id, or null if not found.
      */
+    @Transactional(readOnly=true)
     public Server getServerById(Integer id) {
         return serverDAO.get(id);
     }
@@ -730,6 +739,7 @@ public class ServerManagerImpl implements ServerManager {
      * Find a ServerType by id
      * 
      */
+    @Transactional(readOnly=true)
     public ServerType findServerType(Integer id) {
         return serverTypeDAO.findById(id);
     }
@@ -740,6 +750,7 @@ public class ServerManagerImpl implements ServerManager {
      * @return ServerTypeValue
      * 
      */
+    @Transactional(readOnly=true)
     public ServerType findServerTypeByName(String name) throws NotFoundException {
         ServerType type = serverTypeDAO.findByName(name);
         if (type == null) {
@@ -751,6 +762,7 @@ public class ServerManagerImpl implements ServerManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public List<Server> findServersByType(Platform p, ServerType st) {
         return serverDAO.findByPlatformAndType_orderName(p.getId(), st.getId());
     }
@@ -758,6 +770,7 @@ public class ServerManagerImpl implements ServerManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public Collection<Server> findDeletedServers() {
         return serverDAO.findDeletedServers();
     }
@@ -766,6 +779,7 @@ public class ServerManagerImpl implements ServerManager {
      * Get server lite value by id. Does not check permission.
      * 
      */
+    @Transactional(readOnly=true)
     public Server getServerById(AuthzSubject subject, Integer id) throws ServerNotFoundException, PermissionException {
         Server server = findServerById(id);
         permissionManager.checkViewPermission(subject, server.getEntityId());
@@ -780,6 +794,7 @@ public class ServerManagerImpl implements ServerManager {
      * @param servTypeId server type id.
      * @return An array of Server IDs.
      */
+    @Transactional(readOnly=true)
     public Integer[] getServerIds(AuthzSubject subject, Integer servTypeId) throws PermissionException {
 
         try {
@@ -814,6 +829,7 @@ public class ServerManagerImpl implements ServerManager {
      * Get server by service.
      * 
      */
+    @Transactional(readOnly=true)
     public ServerValue getServerByService(AuthzSubject subject, Integer sID) throws ServerNotFoundException,
         ServiceNotFoundException, PermissionException {
         Service svc = serviceDAO.findById(sID);
@@ -827,6 +843,7 @@ public class ServerManagerImpl implements ServerManager {
      * returned list.
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<ServerValue> getServersByServices(AuthzSubject subject, List<AppdefEntityID> sIDs)
         throws PermissionException, ServerNotFoundException {
         Set<Server> servers = new HashSet<Server>();
@@ -848,6 +865,7 @@ public class ServerManagerImpl implements ServerManager {
      * @return A List of ServerValue objects representing all of the servers
      *         that the given subject is allowed to view.
      */
+    @Transactional(readOnly=true)
     public PageList<ServerValue> getAllServers(AuthzSubject subject, PageControl pc) throws PermissionException,
         NotFoundException {
         Collection<Server> servers = getViewableServers(subject, pc);
@@ -863,6 +881,7 @@ public class ServerManagerImpl implements ServerManager {
      * @return List of ServerLocals for which subject has
      *         AuthzConstants.serverOpViewServer
      */
+    @Transactional(readOnly=true)
     private Collection<Server> getViewableServers(AuthzSubject subject, PageControl pc) throws PermissionException,
         NotFoundException {
         Collection<Server> servers;
@@ -886,6 +905,7 @@ public class ServerManagerImpl implements ServerManager {
      * @param serverIds {@link Collection} of {@link Server.getId}
      * @return {@link Collection} of {@link Server}
      */
+    @Transactional(readOnly=true)
     private Collection<Server> getServersFromIds(Collection<Integer> serverIds, boolean asc) {
         final List<Server> rtn = new ArrayList<Server>(serverIds.size());
         for (Integer id : serverIds) {
@@ -908,6 +928,7 @@ public class ServerManagerImpl implements ServerManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public Collection<Server> getViewableServers(AuthzSubject subject, Platform platform) {
         return filterViewableServers(platform.getServers(), subject);
     }
@@ -972,6 +993,7 @@ public class ServerManagerImpl implements ServerManager {
      * @return A PageList of ServerValue objects representing servers on the
      *         specified platform that the subject is allowed to view.
      */
+    @Transactional(readOnly=true)
     public PageList<ServerValue> getServersByPlatform(AuthzSubject subject, Integer platId, boolean excludeVirtual,
                                                       PageControl pc) throws ServerNotFoundException,
         PlatformNotFoundException, PermissionException {
@@ -990,6 +1012,7 @@ public class ServerManagerImpl implements ServerManager {
      * @return A PageList of ServerValue objects representing servers on the
      *         specified platform that the subject is allowed to view.
      */
+    @Transactional(readOnly=true)
     public PageList<ServerValue> getServersByPlatform(AuthzSubject subject, Integer platId, Integer servTypeId,
                                                       boolean excludeVirtual, PageControl pc)
         throws ServerNotFoundException, PlatformNotFoundException, PermissionException {
@@ -1009,6 +1032,7 @@ public class ServerManagerImpl implements ServerManager {
      * @return A PageList of ServerValue objects representing servers on the
      *         specified platform that the subject is allowed to view.
      */
+    @Transactional(readOnly=true)
     public PageList<ServerValue> getServersByPlatformServiceType(AuthzSubject subject, Integer platId, Integer svcTypeId)
         throws ServerNotFoundException, PlatformNotFoundException, PermissionException {
         PageControl pc = PageControl.PAGE_ALL;
@@ -1036,6 +1060,7 @@ public class ServerManagerImpl implements ServerManager {
      * @return A PageList of ServerValue objects representing servers on the
      *         specified platform that the subject is allowed to view.
      */
+    @Transactional(readOnly=true)
     public List<ServerValue> getServersByType(AuthzSubject subject, String name) throws PermissionException,
         InvalidAppdefTypeException {
         try {
@@ -1071,6 +1096,7 @@ public class ServerManagerImpl implements ServerManager {
      * @return An array of Integer[] which represent the ServerIds specified
      *         platform that the subject is allowed to view.
      */
+    @Transactional(readOnly=true)
     public Integer[] getServerIdsByPlatform(AuthzSubject subject, Integer platId) throws ServerNotFoundException,
         PlatformNotFoundException, PermissionException {
         return getServerIdsByPlatform(subject, platId, APPDEF_RES_TYPE_UNDEFINED, true);
@@ -1085,6 +1111,7 @@ public class ServerManagerImpl implements ServerManager {
      * @param platId platform id.
      * @return An array of Integer[] which represent the ServerIds
      */
+    @Transactional(readOnly=true)
     public Integer[] getServerIdsByPlatform(AuthzSubject subject, Integer platId, Integer servTypeId)
         throws ServerNotFoundException, PlatformNotFoundException, PermissionException {
         return getServerIdsByPlatform(subject, platId, servTypeId, true);
@@ -1100,6 +1127,7 @@ public class ServerManagerImpl implements ServerManager {
      * @return A PageList of ServerValue objects representing servers on the
      *         specified platform that the subject is allowed to view.
      */
+    @Transactional(readOnly=true)
     public Integer[] getServerIdsByPlatform(AuthzSubject subject, Integer platId, Integer servTypeId,
                                             boolean excludeVirtual) throws ServerNotFoundException,
         PlatformNotFoundException, PermissionException {
@@ -1123,6 +1151,7 @@ public class ServerManagerImpl implements ServerManager {
      * @return A List of ServerValue objects representing servers that support
      *         the given application that the subject is allowed to view.
      */
+    @Transactional(readOnly=true)
     private Collection<Server> getServersByApplicationImpl(AuthzSubject subject, Integer appId, Integer servTypeId)
         throws ServerNotFoundException, ApplicationNotFoundException, PermissionException {
 
@@ -1215,6 +1244,7 @@ public class ServerManagerImpl implements ServerManager {
      * @return A List of ServerValue objects representing servers that support
      *         the given application that the subject is allowed to view.
      */
+    @Transactional(readOnly=true)
     public PageList<ServerValue> getServersByApplication(AuthzSubject subject, Integer appId, PageControl pc)
         throws ServerNotFoundException, ApplicationNotFoundException, PermissionException {
         return getServersByApplication(subject, appId, APPDEF_RES_TYPE_UNDEFINED, pc);
@@ -1230,6 +1260,7 @@ public class ServerManagerImpl implements ServerManager {
      * @return A List of ServerValue objects representing servers that support
      *         the given application that the subject is allowed to view.
      */
+    @Transactional(readOnly=true)
     public PageList<ServerValue> getServersByApplication(AuthzSubject subject, Integer appId, Integer servTypeId,
                                                          PageControl pc) throws ServerNotFoundException,
         ApplicationNotFoundException, PermissionException {
@@ -1249,6 +1280,7 @@ public class ServerManagerImpl implements ServerManager {
      * @return A List of ServerValue objects representing servers that support
      *         the given application that the subject is allowed to view.
      */
+    @Transactional(readOnly=true)
     public Integer[] getServerIdsByApplication(AuthzSubject subject, Integer appId, Integer servTypeId)
         throws ServerNotFoundException, ApplicationNotFoundException, PermissionException {
         Collection<Server> servers = getServersByApplicationImpl(subject, appId, servTypeId);
@@ -1542,6 +1574,7 @@ public class ServerManagerImpl implements ServerManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public List<Object[]> getServerTypeCounts() {
         return serverDAO.getServerTypeCounts();
     }
@@ -1551,6 +1584,7 @@ public class ServerManagerImpl implements ServerManager {
      * server types.
      * 
      */
+    @Transactional(readOnly=true)
     public Number getServerCount() {
         return serverDAO.getServerCount();
     }

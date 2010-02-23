@@ -97,8 +97,6 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
         _executor.createThreads(3); // # of threads to service requests
     }
 
-   
-
     /**
      * This class is invoked when the clock daemon wakes up and decides that it
      * is time to look at an escalation.
@@ -359,7 +357,6 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
         }
     }
 
-    
     /**
      * Check if the escalation state or its associated escalating entity has
      * been deleted.
@@ -368,6 +365,7 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
      * @return <code>true</code> if the escalation state or escalating entity
      *         has been deleted.
      */
+    @Transactional(readOnly = true)
     private boolean hasEscalationStateOrEscalatingEntityBeenDeleted(EscalationState escalationState) {
         if (escalationState == null) {
             return true;
@@ -384,7 +382,7 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
             return true;
         }
     }
-    
+
     @Transactional
     public void endEscalation(EscalationState escalationState) {
         if (escalationState != null) {
@@ -392,7 +390,7 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
             unscheduleEscalation(escalationState);
         }
     }
-    
+
     @Transactional
     public void executeState(Integer stateId) {
         // Use a get() so that the state is retrieved from the
@@ -466,8 +464,8 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
                       escalationState.getEscalation().getName() + "]", e);
         }
     }
-    
-    @Transactional
+
+    @Transactional(readOnly = true)
     public Escalatable getEscalatable(EscalationState escalationState) {
         return escalationState.getAlertType().findEscalatable(new Integer(escalationState.getAlertId()));
     }

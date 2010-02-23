@@ -146,10 +146,12 @@ public class RoleManagerImpl implements RoleManager {
     /**
 	 * 
 	 */
+    @Transactional(readOnly=true)
     public boolean isRootRoleMember(AuthzSubject subject) {
         return getRootRoleIfMember(subject) != null;
     }
 
+    @Transactional(readOnly=true)
     private Role getRootRoleIfMember(AuthzSubject subject) {
         // Look up the root role
         Role rootRole = roleDAO.findById(AuthzConstants.rootRoleId);
@@ -493,6 +495,7 @@ public class RoleManagerImpl implements RoleManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public Number getRoleCount() {
         return new Integer(roleDAO.size());
     }
@@ -502,6 +505,7 @@ public class RoleManagerImpl implements RoleManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public Number getSubjectCount() {
         return new Integer(authzSubjectDAO.size());
     }
@@ -511,6 +515,7 @@ public class RoleManagerImpl implements RoleManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public Role getRoleById(int id) {
         return roleDAO.get(new Integer(id));
     }
@@ -518,6 +523,7 @@ public class RoleManagerImpl implements RoleManager {
     /**
 	 * 
 	 */
+    @Transactional(readOnly=true)
     public Role findRoleById(int id) {
         return lookupRole(new Integer(id));
     }
@@ -525,6 +531,7 @@ public class RoleManagerImpl implements RoleManager {
     /**
 	 * 
 	 */
+    @Transactional(readOnly=true)
     public Role findRoleByName(String name) {
         return roleDAO.findByName(name);
     }
@@ -592,6 +599,7 @@ public class RoleManagerImpl implements RoleManager {
      *         values which are supported on the resouce type.
      * 
      */
+    @Transactional(readOnly=true)
     public Map<String, List<Operation>> getRoleOperationMap(AuthzSubject subject, Integer roleId)
         throws PermissionException {
         Map<String, List<Operation>> theMap = new HashMap<String, List<Operation>>();
@@ -623,6 +631,7 @@ public class RoleManagerImpl implements RoleManager {
      * @return a list of {@link Role}s
      * 
      */
+    @Transactional(readOnly=true)
     public Collection<Role> getAllRoles() {
         return roleDAO.findAll();
     }
@@ -642,6 +651,7 @@ public class RoleManagerImpl implements RoleManager {
      * @return List a list of RoleValues
      * 
      */
+    @Transactional(readOnly=true)
     public List<RoleValue> getAllRoles(AuthzSubject subject, PageControl pc)  {
         pc = PageControl.initDefaults(pc, SortAttribute.ROLE_NAME);
         Collection<Role> roles = getAllRoles(subject, pc.getSortattribute(), pc.isAscending());
@@ -657,6 +667,7 @@ public class RoleManagerImpl implements RoleManager {
      * @return List a list of OwnedRoleValues
      * 
      */
+    @Transactional(readOnly=true)
     public List<OwnedRoleValue> getAllOwnedRoles(AuthzSubject subject, PageControl pc) {
         Collection<Role> roles = roleDAO.findAll();
         pc = PageControl.initDefaults(pc, SortAttribute.ROLE_NAME);
@@ -670,6 +681,7 @@ public class RoleManagerImpl implements RoleManager {
      * @throws NotFoundException if sort attribute is unrecognized
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<OwnedRoleValue> getAllNonSystemOwnedRoles(AuthzSubject subject, Integer[] excludeIds, PageControl pc)
         throws PermissionException, NotFoundException {
 
@@ -715,6 +727,7 @@ public class RoleManagerImpl implements RoleManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<RoleValue> getRolesById(AuthzSubject whoami, Integer[] ids, PageControl pc)
         throws PermissionException {
 
@@ -799,6 +812,7 @@ public class RoleManagerImpl implements RoleManager {
      * @return Set of Roles
      * 
      */
+    @Transactional(readOnly=true)
     public List<RoleValue> getRoles(AuthzSubject subjectValue, PageControl pc) throws PermissionException {
         Collection<Role> roles = subjectValue.getRoles();
         pc = PageControl.initDefaults(pc, SortAttribute.ROLE_NAME);
@@ -814,6 +828,7 @@ public class RoleManagerImpl implements RoleManager {
      * @return Set of Roles
      * 
      */
+    @Transactional(readOnly=true)
     public List<OwnedRoleValue> getOwnedRoles(AuthzSubject subject, PageControl pc) throws PermissionException {
         Collection<Role> roles = subject.getRoles();
         pc = PageControl.initDefaults(pc, SortAttribute.ROLE_NAME);
@@ -832,6 +847,7 @@ public class RoleManagerImpl implements RoleManager {
      *         this role.
   
      */
+    @Transactional(readOnly=true)
     public PageList<OwnedRoleValue> getNonSystemOwnedRoles(AuthzSubject callerSubjectValue,
                                                            AuthzSubject intendedSubjectValue, PageControl pc)
         throws PermissionException {
@@ -849,6 +865,7 @@ public class RoleManagerImpl implements RoleManager {
      * @throws PermissionException caller is not allowed to perform listRoles on
      *         this role.
      */
+    @Transactional(readOnly=true)
     public PageList<OwnedRoleValue> getNonSystemOwnedRoles(AuthzSubject callerSubjectValue,
                                                            AuthzSubject intendedSubjectValue, Integer[] excludeIds,
                                                            PageControl pc) throws PermissionException {
@@ -924,6 +941,7 @@ public class RoleManagerImpl implements RoleManager {
      *
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<RoleValue> getAvailableRoles(AuthzSubject whoami, boolean system, Integer subjectId,
                                                  Integer[] roleIds, PageControl pc) throws PermissionException,
         NotFoundException{
@@ -994,6 +1012,7 @@ public class RoleManagerImpl implements RoleManager {
      * @throws NotFoundException if the sort attribute was not recognized
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<RoleValue> getAvailableGroupRoles(AuthzSubject whoami, Integer groupId, Integer[] roleIds,
                                                       PageControl pc) throws PermissionException, NotFoundException {
         Collection<Role> foundRoles;
@@ -1056,6 +1075,7 @@ public class RoleManagerImpl implements RoleManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<ResourceGroupValue> getResourceGroupsByRoleIdAndSystem(AuthzSubject subject, Integer roleId,
                                                                            boolean system, PageControl pc)
         throws PermissionException, NotFoundException {
@@ -1092,6 +1112,7 @@ public class RoleManagerImpl implements RoleManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<RoleValue> getResourceGroupRoles(AuthzSubject whoami, Integer groupId, PageControl pc)
         throws PermissionException {
         ResourceGroup resGrp = resourceGroupDAO.findById(groupId);
@@ -1155,6 +1176,7 @@ public class RoleManagerImpl implements RoleManager {
      * @throws NotFoundException
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<ResourceGroupValue> getAvailableResourceGroups(AuthzSubject whoami, Integer roleId,
                                                                    Integer[] groupIds, PageControl pc)
         throws PermissionException, NotFoundException {
@@ -1229,6 +1251,7 @@ public class RoleManagerImpl implements RoleManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<AuthzSubjectValue> getSubjects(AuthzSubject whoami, Integer roleId, PageControl pc)
         throws PermissionException, NotFoundException {
         Role roleLocal = roleDAO.get(roleId);
@@ -1290,6 +1313,7 @@ public class RoleManagerImpl implements RoleManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<AuthzSubjectValue> getAvailableSubjects(AuthzSubject whoami, Integer roleId, Integer[] subjectIds,
                                                             PageControl pc) throws PermissionException, NotFoundException {
         Role roleLocal = lookupRole(roleId);
@@ -1366,6 +1390,7 @@ public class RoleManagerImpl implements RoleManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public Collection<Operation> findAllOperations() {
         return operationDAO.findAllOrderByName();
     }

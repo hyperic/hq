@@ -66,6 +66,7 @@ public class ConfigBossImpl implements ConfigBoss {
      * Get the top-level configuration properties
      * 
      */
+    @Transactional(readOnly=true)
     public Properties getConfig() throws ConfigPropertyException {
         return serverConfigManager.getConfig();
     }
@@ -74,6 +75,7 @@ public class ConfigBossImpl implements ConfigBoss {
      * Get the configuration properties for a specified prefix
      * 
      */
+    @Transactional(readOnly=true)
     public Properties getConfig(String prefix) throws ConfigPropertyException {
         return serverConfigManager.getConfig(prefix);
     }

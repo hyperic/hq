@@ -93,7 +93,7 @@ public class ConfigManagerImpl implements ConfigManager {
      * 
      * 
      */
-    @Transactional
+    @Transactional(readOnly=true)
     public ConfigResponseDB getConfigResponse(AppdefEntityID id) {
         ConfigResponseDB config;
 
@@ -132,6 +132,7 @@ public class ConfigManagerImpl implements ConfigManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public String getPluginName(AppdefEntityID id) throws AppdefEntityNotFoundException {
         Integer intID = id.getId();
         String pname;
@@ -199,7 +200,8 @@ public class ConfigManagerImpl implements ConfigManager {
      * 
      * 
      */
-    @Transactional
+
+    @Transactional(readOnly=true)
     public ConfigResponse getMergedConfigResponse(AuthzSubject subject, String productType, AppdefEntityID id,
                                                   boolean required) throws AppdefEntityNotFoundException,
         ConfigFetchException, EncodingException, PermissionException {

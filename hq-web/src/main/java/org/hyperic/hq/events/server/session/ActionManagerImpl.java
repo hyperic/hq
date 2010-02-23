@@ -63,6 +63,7 @@ public class ActionManagerImpl implements ActionManager {
      * 
      * @return a collection of {@link ActionValue}s
      */
+    @Transactional(readOnly=true)
     public List<ActionValue> getActionsForAlert(int alertId) {
         Alert alert = alertDAO.findById(new Integer(alertId));
         Collection<Action> actions = actionDAO.findByAlert(alert);

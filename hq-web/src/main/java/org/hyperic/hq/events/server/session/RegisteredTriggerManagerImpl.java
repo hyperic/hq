@@ -97,6 +97,7 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public void initializeTriggers(RegisterableTriggerRepository registeredTriggerRepository) {
         log.debug("Initializing triggers");
         long startTime = System.currentTimeMillis();
@@ -277,6 +278,7 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public RegisteredTrigger findById(Integer id) {
         return triggerDAO.findById(id);
     }

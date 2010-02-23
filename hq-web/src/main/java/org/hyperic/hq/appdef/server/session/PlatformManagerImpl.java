@@ -205,6 +205,7 @@ public class PlatformManagerImpl implements PlatformManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public PlatformType findPlatformType(Integer id) throws ObjectNotFoundException {
         return platformTypeDAO.findById(id);
     }
@@ -216,6 +217,7 @@ public class PlatformManagerImpl implements PlatformManager {
      * @return platformTypeValue
      * 
      */
+    @Transactional(readOnly=true)
     public PlatformType findPlatformTypeByName(String type) throws PlatformNotFoundException {
         PlatformType ptype = platformTypeDAO.findByName(type);
         if (ptype == null) {
@@ -228,6 +230,7 @@ public class PlatformManagerImpl implements PlatformManager {
      * @return {@link PlatformType}s
      * 
      */
+    @Transactional(readOnly=true)
     public Collection<PlatformType> findAllPlatformTypes() {
         return platformTypeDAO.findAll();
     }
@@ -236,6 +239,7 @@ public class PlatformManagerImpl implements PlatformManager {
      * @return {@link PlatformType}s
      * 
      */
+    @Transactional(readOnly=true)
     public Collection<PlatformType> findSupportedPlatformTypes() {
         Collection<PlatformType> platformTypes = findAllPlatformTypes();
 
@@ -252,6 +256,7 @@ public class PlatformManagerImpl implements PlatformManager {
      * @return {@link PlatformType}s
      * 
      */
+    @Transactional(readOnly=true)
     public Collection<PlatformType> findUnsupportedPlatformTypes() {
         Collection<PlatformType> platformTypes = findAllPlatformTypes();
 
@@ -267,6 +272,7 @@ public class PlatformManagerImpl implements PlatformManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public Resource findResource(PlatformType pt) {
 
         ResourceType rType;
@@ -286,6 +292,7 @@ public class PlatformManagerImpl implements PlatformManager {
      * @return List of PlatformTypeValues
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<PlatformTypeValue> getAllPlatformTypes(AuthzSubject subject, PageControl pc) {
         Collection<PlatformType> platTypes = platformTypeDAO.findAllOrderByName();
         // valuePager converts local/remote interfaces to value objects
@@ -299,6 +306,7 @@ public class PlatformManagerImpl implements PlatformManager {
      * @return List of PlatformTypeValues
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<PlatformTypeValue> getViewablePlatformTypes(AuthzSubject subject, PageControl pc)
         throws PermissionException, NotFoundException {
 
@@ -326,6 +334,7 @@ public class PlatformManagerImpl implements PlatformManager {
      *         generic plugin manager.
      * 
      */
+    @Transactional(readOnly=true)
     public String getPlatformPluginName(AppdefEntityID id) throws AppdefEntityNotFoundException {
         Platform p;
         String typeName;
@@ -599,6 +608,7 @@ public class PlatformManagerImpl implements PlatformManager {
      * @return A List of PlatformValue objects representing all of the platforms
      *         that the given subject is allowed to view.
      */
+    @Transactional(readOnly=true)
     public PageList<PlatformValue> getAllPlatforms(AuthzSubject subject, PageControl pc) throws PermissionException,
         NotFoundException {
 
@@ -624,6 +634,7 @@ public class PlatformManagerImpl implements PlatformManager {
      *         that the given subject is allowed to view that were created
      *         within the given range.
      */
+    @Transactional(readOnly=true)
     public PageList<PlatformValue> getRecentPlatforms(AuthzSubject subject, long range, int size)
         throws PermissionException, NotFoundException {
         PageControl pc = new PageControl(0, size);
@@ -651,6 +662,7 @@ public class PlatformManagerImpl implements PlatformManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public Platform getPlatformById(AuthzSubject subject, Integer id) throws PlatformNotFoundException,
         PermissionException {
         Platform platform = findPlatformById(id);
@@ -669,6 +681,7 @@ public class PlatformManagerImpl implements PlatformManager {
      * @throws PlatformNotFoundException If the given Platform is not found.
      * 
      */
+    @Transactional(readOnly=true)
     public Platform findPlatformById(Integer id) throws PlatformNotFoundException {
         Platform platform = platformDAO.get(id);
 
@@ -690,6 +703,7 @@ public class PlatformManagerImpl implements PlatformManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public Platform getPlatformByAIPlatform(AuthzSubject subject, AIPlatformValue aiPlatform)
         throws PermissionException {
         Platform p = null;
@@ -793,6 +807,7 @@ public class PlatformManagerImpl implements PlatformManager {
      *         agentToken or null if one does not exist.
      * 
      */
+    @Transactional(readOnly=true)
     public Platform getPhysPlatformByAgentToken(String agentToken) {
         try {
 
@@ -857,6 +872,7 @@ public class PlatformManagerImpl implements PlatformManager {
      * @param subject - who is trying this
      * @param name - the name of the platform
      */
+    @Transactional(readOnly=true)
     public PlatformValue getPlatformByName(AuthzSubject subject, String name) throws PlatformNotFoundException,
         PermissionException {
         Platform p = platformDAO.findByName(name);
@@ -871,6 +887,7 @@ public class PlatformManagerImpl implements PlatformManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public Platform getPlatformByName(String name) {
         return platformDAO.findBySortName(name);
     }
@@ -880,6 +897,7 @@ public class PlatformManagerImpl implements PlatformManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public Platform findPlatformByFqdn(AuthzSubject subject, String fqdn) throws PlatformNotFoundException,
         PermissionException {
         Platform p;
@@ -901,6 +919,7 @@ public class PlatformManagerImpl implements PlatformManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public Collection<Platform> getPlatformByIpAddr(AuthzSubject subject, String address) throws PermissionException {
         return platformDAO.findByIpAddr(address);
     }
@@ -910,6 +929,7 @@ public class PlatformManagerImpl implements PlatformManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public Collection<Integer> getPlatformPksByAgentToken(AuthzSubject subject, String agentToken)
         throws PlatformNotFoundException {
         Collection<Platform> platforms = platformDAO.findByAgentToken(agentToken);
@@ -933,6 +953,7 @@ public class PlatformManagerImpl implements PlatformManager {
      * @param serviceId service ID.
      * @return the Platform
      */
+    @Transactional(readOnly=true)
     public PlatformValue getPlatformByService(AuthzSubject subject, Integer serviceId)
         throws PlatformNotFoundException, PermissionException {
         Platform p = platformDAO.findByServiceId(serviceId);
@@ -952,6 +973,7 @@ public class PlatformManagerImpl implements PlatformManager {
      * @param serviceId service ID.
      * @return the Platform
      */
+    @Transactional(readOnly=true)
     public Integer getPlatformIdByService(Integer serviceId) throws PlatformNotFoundException {
         Platform p = platformDAO.findByServiceId(serviceId);
         if (p == null) {
@@ -967,6 +989,7 @@ public class PlatformManagerImpl implements PlatformManager {
      * @param subject The subject trying to list services.
      * @param serverId Server ID.
      */
+    @Transactional(readOnly=true)
     public PlatformValue getPlatformByServer(AuthzSubject subject, Integer serverId) throws PlatformNotFoundException,
         PermissionException {
         Server server = serverDAO.get(serverId);
@@ -988,6 +1011,7 @@ public class PlatformManagerImpl implements PlatformManager {
      * 
      * @param serverId Server ID.
      */
+    @Transactional(readOnly=true)
     public Integer getPlatformIdByServer(Integer serverId) throws PlatformNotFoundException {
         Server server = serverDAO.get(serverId);
 
@@ -1003,6 +1027,7 @@ public class PlatformManagerImpl implements PlatformManager {
      * 
      * @param subject The subject trying to list services.
      */
+    @Transactional(readOnly=true)
     public PageList<PlatformValue> getPlatformsByServers(AuthzSubject subject, List<AppdefEntityID> sIDs)
         throws PlatformNotFoundException, PermissionException {
         Set<Integer> authzPks;
@@ -1042,6 +1067,7 @@ public class PlatformManagerImpl implements PlatformManager {
      * @return A List of ApplicationValue objects representing all of the
      *         services that the given subject is allowed to view.
      */
+    @Transactional(readOnly=true)
     public PageList<PlatformValue> getPlatformsByApplication(AuthzSubject subject, Integer appId, PageControl pc)
         throws ApplicationNotFoundException, PlatformNotFoundException, PermissionException {
 
@@ -1150,6 +1176,7 @@ public class PlatformManagerImpl implements PlatformManager {
      * @return A PageList of ServerValue objects representing servers on the
      *         specified platform that the subject is allowed to view.
      */
+    @Transactional(readOnly=true)
     public Integer[] getPlatformIds(AuthzSubject subject, Integer platTypeId) throws PermissionException {
 
         try {
@@ -1186,6 +1213,7 @@ public class PlatformManagerImpl implements PlatformManager {
      * @return A PageList of ServerValue objects representing servers on the
      *         specified platform that the subject is allowed to view.
      */
+    @Transactional(readOnly=true)
     public List<Platform> getPlatformsByType(AuthzSubject subject, String type) throws PermissionException,
         InvalidAppdefTypeException {
         try {
@@ -1273,6 +1301,7 @@ public class PlatformManagerImpl implements PlatformManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<PlatformValue> findPlatformsByIpAddr(AuthzSubject subject, String addr, PageControl pc)
         throws PermissionException {
         Collection<Platform> platforms = platformDAO.findByIpAddr(addr);
@@ -1289,6 +1318,7 @@ public class PlatformManagerImpl implements PlatformManager {
      *        resource sortname XXX scottmf need to add permission checking
      * 
      */
+    @Transactional(readOnly=true)
     public List<Platform> findPlatformPojosByTypeAndName(AuthzSubject subj, Integer pType, String regEx) {
         return platformDAO.findByTypeAndRegEx(pType, regEx);
     }
@@ -1301,6 +1331,7 @@ public class PlatformManagerImpl implements PlatformManager {
      * @return a list of {@link Platform}s
      * 
      */
+    @Transactional(readOnly=true)
     @SuppressWarnings("unchecked")
     public List<Platform> findParentPlatformPojosByNetworkRelation(AuthzSubject subj, List<Integer> platformTypeIds,
                                                                    String platformName, Boolean hasChildren) {
@@ -1335,6 +1366,7 @@ public class PlatformManagerImpl implements PlatformManager {
      * @return a list of {@link Platform}s
      * 
      */
+    @Transactional(readOnly=true)
     @SuppressWarnings("unchecked")
     public List<Platform> findPlatformPojosByNoNetworkRelation(AuthzSubject subj, List<Integer> platformTypeIds,
                                                                String platformName) {
@@ -1369,6 +1401,7 @@ public class PlatformManagerImpl implements PlatformManager {
      * @return a list of {@link Platform}s
      * 
      */
+    @Transactional(readOnly=true)
     public Collection<Platform> findPlatformPojosByIpAddr(String addr) {
         return platformDAO.findByIpAddr(addr);
     }
@@ -1376,6 +1409,7 @@ public class PlatformManagerImpl implements PlatformManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public Collection<Platform> findDeletedPlatforms() {
         return platformDAO.findDeletedPlatforms();
     }
@@ -1780,6 +1814,7 @@ public class PlatformManagerImpl implements PlatformManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public List<Object[]> getPlatformTypeCounts() {
         return platformDAO.getPlatformTypeCounts();
     }
@@ -1787,6 +1822,7 @@ public class PlatformManagerImpl implements PlatformManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public Number getPlatformCount() {
         return platformDAO.getPlatformCount();
     }
@@ -1794,6 +1830,7 @@ public class PlatformManagerImpl implements PlatformManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public Number getCpuCount() {
         return platformDAO.getCpuCount();
     }

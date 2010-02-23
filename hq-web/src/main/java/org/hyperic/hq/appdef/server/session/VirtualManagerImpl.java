@@ -86,6 +86,7 @@ public class VirtualManagerImpl implements VirtualManager {
      * @return a list of virtual platform values
      * 
      */
+    @Transactional(readOnly=true)
     public List<PlatformValue> findVirtualPlatformsByVM(AuthzSubject subject, Integer vmId)
         throws PlatformNotFoundException, PermissionException {
         Collection<Platform> platforms = platformDAO.findVirtualByProcessId(vmId);
@@ -101,6 +102,7 @@ public class VirtualManagerImpl implements VirtualManager {
      * @return a list of virtual server values
      * 
      */
+    @Transactional(readOnly=true)
     public List<ServerValue> findVirtualServersByVM(AuthzSubject subject, Integer vmId) throws ServerNotFoundException,
         PermissionException {
         Collection<Server> servers = serverDAO.findVirtualByProcessId(vmId);
@@ -117,6 +119,7 @@ public class VirtualManagerImpl implements VirtualManager {
      * @return a list of virtual service values
      * 
      */
+    @Transactional(readOnly=true)
     public List<ServiceValue> findVirtualServicesByVM(AuthzSubject subject, Integer vmId)
         throws ServiceNotFoundException, PermissionException {
         Collection<Service> services = serviceDAO.findVirtualByProcessId(vmId);
@@ -132,6 +135,7 @@ public class VirtualManagerImpl implements VirtualManager {
      * @return list of virtual resource values
      * 
      */
+    @Transactional(readOnly=true)
     public List<AppdefResourceValue> findVirtualResourcesByPhysical(AuthzSubject subject, AppdefEntityID aeid)
         throws AppdefEntityNotFoundException, PermissionException {
         Collection<AppdefResource> appResources = new ArrayList<AppdefResource>();

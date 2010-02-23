@@ -140,6 +140,7 @@ public class ResourceManagerImpl implements ResourceManager {
      * @throws NotFoundException Unable to find a given or dependent entities.
      * 
      */
+    @Transactional(readOnly=true)
     public ResourceType findResourceTypeByName(String name) throws NotFoundException {
         ResourceType rt = resourceTypeDAO.findByName(name);
 
@@ -170,6 +171,7 @@ public class ResourceManagerImpl implements ResourceManager {
      * Find a resource, acting as a resource prototype.
      * 
      */
+    @Transactional(readOnly=true)
     public Resource findResourcePrototypeByName(String name) {
         return resourceDAO.findResourcePrototypeByName(name);
     }
@@ -179,6 +181,7 @@ public class ResourceManagerImpl implements ResourceManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public boolean resourcesExistOfType(String typeName) {
         return resourceDAO.resourcesExistOfType(typeName);
     }
@@ -259,6 +262,7 @@ public class ResourceManagerImpl implements ResourceManager {
      * Get the # of resources within HQ inventory
      * 
      */
+    @Transactional(readOnly=true)
     public Number getResourceCount() {
         return new Integer(resourceDAO.size());
     }
@@ -267,6 +271,7 @@ public class ResourceManagerImpl implements ResourceManager {
      * Get the # of resource types within HQ inventory
      * 
      */
+    @Transactional(readOnly=true)
     public Number getResourceTypeCount() {
         return new Integer(resourceTypeDAO.size());
     }
@@ -276,6 +281,7 @@ public class ResourceManagerImpl implements ResourceManager {
      * @param type This ResourceType.
      * 
      */
+    @Transactional(readOnly=true)
     public Resource getResourceTypeResource(Integer typeId) {
         ResourceType resourceType = resourceTypeDAO.findById(typeId);
         return resourceType.getResource();
@@ -288,6 +294,7 @@ public class ResourceManagerImpl implements ResourceManager {
      * @return The value-object of the Resource of the given ID.
      * 
      */
+    @Transactional(readOnly=true)
     public Resource findResourceByInstanceId(ResourceType type, Integer instanceId) {
         Resource resource = findResourceByInstanceId(type.getId(), instanceId);
 
@@ -301,6 +308,7 @@ public class ResourceManagerImpl implements ResourceManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public Resource findResourceByInstanceId(Integer typeId, Integer instanceId) {
         return resourceDAO.findByInstanceId(typeId, instanceId);
     }
@@ -309,6 +317,7 @@ public class ResourceManagerImpl implements ResourceManager {
      * Find's the root (id=0) resource
      * 
      */
+    @Transactional(readOnly=true)
     public Resource findRootResource() {
         return resourceDAO.findRootResource();
     }
@@ -316,6 +325,7 @@ public class ResourceManagerImpl implements ResourceManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public Resource findResourceById(Integer id) {
         return resourceDAO.findById(id);
     }
@@ -327,6 +337,7 @@ public class ResourceManagerImpl implements ResourceManager {
      * @return The value-object of the Resource of the given ID.
      * 
      */
+    @Transactional(readOnly=true)
     public Resource findResourceByTypeAndInstanceId(String type, Integer instanceId) {
         ResourceType resType = resourceTypeDAO.findByName(type);
         return resourceDAO.findByInstanceId(resType.getId(), instanceId);
@@ -348,6 +359,7 @@ public class ResourceManagerImpl implements ResourceManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public Resource findResource(AppdefEntityID aeid) {
         try {
             final Integer id = aeid.getId();
@@ -396,6 +408,7 @@ public class ResourceManagerImpl implements ResourceManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public Resource findResourcePrototype(AppdefEntityTypeID id) {
         return findPrototype(id);
     }
@@ -557,6 +570,7 @@ public class ResourceManagerImpl implements ResourceManager {
      * 
      */
     // TODO: G
+    @Transactional(readOnly=true)
     public List<ResourceType> getAllResourceTypes(AuthzSubject subject, PageControl pc) {
         Collection<ResourceType> resTypes = resourceTypeDAO.findAll();
         pc = PageControl.initDefaults(pc, SortAttribute.RESTYPE_NAME);
@@ -571,6 +585,7 @@ public class ResourceManagerImpl implements ResourceManager {
      * @return Map of resource values
      * 
      */
+    @Transactional(readOnly=true)
     public List<Integer> findViewableInstances(AuthzSubject subject, String typeName,
                                                String resName, String appdefTypeStr,
                                                Integer typeId, PageControl pc) {
@@ -591,6 +606,7 @@ public class ResourceManagerImpl implements ResourceManager {
      * @return Map of resource values
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<Resource> findViewables(AuthzSubject subject, String searchFor, PageControl pc) {
         PermissionManager pm = PermissionManagerFactory.getInstance();
         List<Integer> resIds = pm.findViewableResources(subject, searchFor, pc);
@@ -614,6 +630,7 @@ public class ResourceManagerImpl implements ResourceManager {
      * @return Map of resource values
      * 
      */
+    @Transactional(readOnly=true)
     public Map<String, List<Integer>> findAllViewableInstances(AuthzSubject subject) {
         // First get all resource types
         Map<String, List<Integer>> resourceMap = new HashMap<String, List<Integer>>();
@@ -636,6 +653,7 @@ public class ResourceManagerImpl implements ResourceManager {
      * Find all the resources which are descendants of the given resource
      * 
      */
+    @Transactional(readOnly=true)
     public List<Resource> findResourcesByParent(AuthzSubject subject, Resource res) {
         return resourceDAO.findByResource(subject, res);
     }
@@ -648,6 +666,7 @@ public class ResourceManagerImpl implements ResourceManager {
      * @return a list of {@link Resource}s
      * 
      */
+    @Transactional(readOnly=true)
     public List<Resource> findResourcesOfType(int resourceType, PageInfo pInfo) {
         return resourceDAO.findResourcesOfType(resourceType, pInfo);
     }
@@ -657,6 +676,7 @@ public class ResourceManagerImpl implements ResourceManager {
      * @return a list of {@link Resource}s
      * 
      */
+    @Transactional(readOnly=true)
     public List<Resource> findResourcesOfPrototype(Resource proto, PageInfo pInfo) {
         return resourceDAO.findResourcesOfPrototype(proto, pInfo);
     }
@@ -667,6 +687,7 @@ public class ResourceManagerImpl implements ResourceManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public List<Resource> findAppdefPrototypes() {
         return resourceDAO.findAppdefPrototypes();
     }
@@ -677,6 +698,7 @@ public class ResourceManagerImpl implements ResourceManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public List<Resource> findAllAppdefPrototypes() {
         return resourceDAO.findAllAppdefPrototypes();
     }
@@ -690,6 +712,7 @@ public class ResourceManagerImpl implements ResourceManager {
      * @return PageList of resource values
      * 
      */
+    @Transactional(readOnly=true)
     public PageList<Resource> findViewableSvcResources(AuthzSubject subject, String resourceName,
                                                        PageControl pc) {
         Collection<Resource> resources;
@@ -731,6 +754,7 @@ public class ResourceManagerImpl implements ResourceManager {
      * @return Array of resources owned by the given subject.
      * 
      */
+    @Transactional(readOnly=true)
     public Collection<Resource> findResourceByOwner(AuthzSubject owner) {
         return resourceDAO.findByOwner(owner);
     }
@@ -739,6 +763,7 @@ public class ResourceManagerImpl implements ResourceManager {
      *
      * 
      */
+    @Transactional(readOnly=true)
     public Collection<ResourceEdge> findResourceEdges(ResourceRelation relation, Resource parent) {
         return resourceEdgeDAO.findDescendantEdges(parent, relation);
     }
@@ -747,6 +772,7 @@ public class ResourceManagerImpl implements ResourceManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public boolean isResourceChildOf(Resource parent, Resource child) {
         return resourceEdgeDAO.isResourceChildOf(parent, child);
     }
@@ -755,6 +781,7 @@ public class ResourceManagerImpl implements ResourceManager {
      *
      * 
      */
+    @Transactional(readOnly=true)
     public List<ResourceEdge> findResourceEdges(ResourceRelation relation, Integer resourceId,
                                                 List<Integer> platformTypeIds, String platformName) {
         if (relation == null || !relation.getId().equals(AuthzConstants.RELATION_NETWORK_ID)) {
@@ -1000,14 +1027,17 @@ public class ResourceManagerImpl implements ResourceManager {
         resourceEdgeDAO.deleteEdges(parent, relation);
     }
 
+    @Transactional(readOnly=true)
     public ResourceRelation getContainmentRelation() {
         return resourceRelationDAO.findById(AuthzConstants.RELATION_CONTAINMENT_ID);
     }
 
+    @Transactional(readOnly=true)
     public ResourceRelation getNetworkRelation() {
         return resourceRelationDAO.findById(AuthzConstants.RELATION_NETWORK_ID);
     }
 
+    @Transactional(readOnly=true)
     public String getAppdefEntityName(AppdefEntityID appEnt) {
         Resource res = findResource(appEnt);
         if (res != null) {

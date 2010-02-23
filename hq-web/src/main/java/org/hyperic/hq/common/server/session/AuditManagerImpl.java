@@ -89,6 +89,7 @@ public class AuditManagerImpl implements AuditManager {
      * 
      * 
      */
+    @Transactional(readOnly=true)
     public Audit getCurrentAudit() {
         return CONTAINERS.get();
     }
@@ -200,6 +201,7 @@ public class AuditManagerImpl implements AuditManager {
     /**
      * 
      */
+    @Transactional(readOnly=true)
     public List<Audit> find(AuthzSubject me, PageInfo pInfo, long startTime, long endTime,
                             AuditImportance minImportance, AuditPurpose purpose, AuthzSubject target, String klazz) {
         return auditDao.find(pInfo, me, startTime, endTime, minImportance, purpose, target, klazz);

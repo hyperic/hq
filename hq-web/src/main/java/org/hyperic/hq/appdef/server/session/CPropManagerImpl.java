@@ -99,6 +99,7 @@ public class CPropManagerImpl implements CPropManager {
      * 
      * @return a List of CPropKeyValue objects
      */
+    @Transactional(readOnly=true)
     public List<CpropKey> getKeys(int appdefType, int appdefTypeId) {
         return cPropKeyDAO.findByAppdefType(appdefType, appdefTypeId);
     }
@@ -130,6 +131,7 @@ public class CPropManagerImpl implements CPropManager {
     /**
      * find appdef resource type
      */
+    @Transactional(readOnly=true)
     public AppdefResourceType findResourceType(TypeInfo info) {
         int type = info.getType();
 
@@ -147,6 +149,7 @@ public class CPropManagerImpl implements CPropManager {
     /**
      * find Cprop by key to a resource type based on a TypeInfo object.
      */
+    @Transactional(readOnly=true)
     public CpropKey findByKey(AppdefResourceType appdefType, String key) {
         int type = appdefType.getAppdefType();
         int instanceId = appdefType.getId().intValue();
@@ -330,6 +333,7 @@ public class CPropManagerImpl implements CPropManager {
      *        is not found
      * @throw AppdefEntityNotFoundException if the passed entity is not found
      */
+    @Transactional(readOnly=true)
     public String getValue(AppdefEntityValue aVal, String key) throws CPropKeyNotFoundException,
         AppdefEntityNotFoundException, PermissionException {
         PreparedStatement stmt = null;
@@ -442,6 +446,7 @@ public class CPropManagerImpl implements CPropManager {
      *         Properties object will be returned if there are no custom
      *         properties defined for the resource
      */
+    @Transactional(readOnly=true)
     public Properties getEntries(AppdefEntityID aID) throws PermissionException, AppdefEntityNotFoundException {
         return getEntries(aID, "propkey");
     }
@@ -454,6 +459,7 @@ public class CPropManagerImpl implements CPropManager {
      * 
      * @return The properties stored for a specific entity ID
      */
+    @Transactional(readOnly=true)
     public Properties getDescEntries(AppdefEntityID aID) throws PermissionException, AppdefEntityNotFoundException {
         return getEntries(aID, "description");
     }
@@ -523,8 +529,9 @@ public class CPropManagerImpl implements CPropManager {
     }
 
     /**
-     * Get all Cprops values with specified key name, irregardless of type
+     * Get all Cprops values with specified key name, regardless of type
      */
+    @Transactional(readOnly=true)
     public List<Cprop> getCPropValues(AppdefResourceTypeValue appdefType, String key, boolean asc) {
         int type = appdefType.getAppdefType();
         int instanceId = appdefType.getId().intValue();

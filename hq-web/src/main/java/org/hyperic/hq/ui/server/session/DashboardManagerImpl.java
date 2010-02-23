@@ -92,14 +92,12 @@ public class DashboardManagerImpl implements DashboardManager {
 
     /**
      */
-    public UserDashboardConfig getUserDashboard(AuthzSubject me,
-                                                AuthzSubject user)
-        throws PermissionException {
+    @Transactional(readOnly = true)
+    public UserDashboardConfig getUserDashboard(AuthzSubject me, AuthzSubject user) throws PermissionException {
         PermissionManager permMan = PermissionManagerFactory.getInstance();
 
         if (!me.equals(user) && !permMan.hasAdminPermission(me.getId())) {
-            throw new PermissionException("You are unauthorized to see this " +
-                                          "dashboard");
+            throw new PermissionException("You are unauthorized to see this " + "dashboard");
         }
 
         return dashDao.findDashboard(user);
@@ -107,12 +105,11 @@ public class DashboardManagerImpl implements DashboardManager {
 
     /**
      */
-    public RoleDashboardConfig getRoleDashboard(AuthzSubject me, Role r)
-        throws PermissionException {
+    @Transactional(readOnly = true)
+    public RoleDashboardConfig getRoleDashboard(AuthzSubject me, Role r) throws PermissionException {
         PermissionManager permMan = PermissionManagerFactory.getInstance();
 
-        permMan.check(me.getId(), r.getResource().getResourceType(),
-                      r.getId(), AuthzConstants.roleOpModifyRole);
+        permMan.check(me.getId(), r.getResource().getResourceType(), r.getId(), AuthzConstants.roleOpModifyRole);
 
         return dashDao.findDashboard(r);
     }
@@ -123,15 +120,12 @@ public class DashboardManagerImpl implements DashboardManager {
 
     /**
      */
-    public UserDashboardConfig createUserDashboard(AuthzSubject me,
-                                                   AuthzSubject user,
-                                                   String name)
+    public UserDashboardConfig createUserDashboard(AuthzSubject me, AuthzSubject user, String name)
         throws PermissionException {
         PermissionManager permMan = PermissionManagerFactory.getInstance();
 
         if (!me.equals(user) && !permMan.hasAdminPermission(me.getId())) {
-            throw new PermissionException("You are unauthorized to create " +
-                                          "this dashboard");
+            throw new PermissionException("You are unauthorized to create " + "this dashboard");
         }
 
         Crispo cfg = crispoManager.create(getDefaultConfig());
@@ -142,13 +136,10 @@ public class DashboardManagerImpl implements DashboardManager {
 
     /**
      */
-    public RoleDashboardConfig createRoleDashboard(AuthzSubject me, Role r,
-                                                   String name)
-        throws PermissionException {
+    public RoleDashboardConfig createRoleDashboard(AuthzSubject me, Role r, String name) throws PermissionException {
         PermissionManager permMan = PermissionManagerFactory.getInstance();
 
-        permMan.check(me.getId(), r.getResource().getResourceType(),
-                      r.getId(), AuthzConstants.roleOpModifyRole);
+        permMan.check(me.getId(), r.getResource().getResourceType(), r.getId(), AuthzConstants.roleOpModifyRole);
 
         Crispo cfg = crispoManager.create(getDefaultConfig());
         RoleDashboardConfig dash = new RoleDashboardConfig(r, name, cfg);
@@ -159,24 +150,19 @@ public class DashboardManagerImpl implements DashboardManager {
     /**
      * Reconfigure a user's dashboard
      */
-    public void configureDashboard(AuthzSubject me, DashboardConfig cfg,
-                                   ConfigResponse newCfg)
+    public void configureDashboard(AuthzSubject me, DashboardConfig cfg, ConfigResponse newCfg)
         throws PermissionException {
         if (!isEditable(me, cfg)) {
-            throw new PermissionException("You are unauthorized to modify " +
-                                          "this dashboard");
+            throw new PermissionException("You are unauthorized to modify " + "this dashboard");
         }
         crispoManager.update(cfg.getCrispo(), newCfg);
     }
 
     /**
      */
-    public void renameDashboard(AuthzSubject me, DashboardConfig cfg,
-                                String name)
-        throws PermissionException {
+    public void renameDashboard(AuthzSubject me, DashboardConfig cfg, String name) throws PermissionException {
         if (!isEditable(me, cfg)) {
-            throw new PermissionException("You are unauthorized to modify " +
-                                          "this dashboard");
+            throw new PermissionException("You are unauthorized to modify " + "this dashboard");
         }
         cfg.setName(name);
     }
@@ -184,6 +170,7 @@ public class DashboardManagerImpl implements DashboardManager {
     /**
      * Determine if a dashboard is editable by the passed user
      */
+    @Transactional(readOnly = true)
     public boolean isEditable(AuthzSubject me, DashboardConfig dash) {
         PermissionManager permMan = PermissionManagerFactory.getInstance();
 
@@ -195,13 +182,12 @@ public class DashboardManagerImpl implements DashboardManager {
 
     /**
      */
-    public Collection<DashboardConfig> getDashboards(AuthzSubject me)
-        throws PermissionException {
+    @Transactional(readOnly = true)
+    public Collection<DashboardConfig> getDashboards(AuthzSubject me) throws PermissionException {
         Collection<DashboardConfig> res = new ArrayList<DashboardConfig>();
 
         PermissionManager permMan = PermissionManagerFactory.getInstance();
-        if (permMan.hasGuestRole() &&
-            permMan.hasAdminPermission(me.getId())) {
+        if (permMan.hasGuestRole() && permMan.hasAdminPermission(me.getId())) {
             res.addAll(dashDao.findAllRoleDashboards());
             res.add(getUserDashboard(me, me));
             return res;
@@ -233,8 +219,7 @@ public class DashboardManagerImpl implements DashboardManager {
 
                 if (!val.equals(newVal)) {
                     crispoManager.updateOption(o, newVal);
-                    log.debug("Update option key=" + o.getKey() +
-                              " old =" + val + " new =" + newVal);
+                    log.debug("Update option key=" + o.getKey() + " old =" + val + " new =" + newVal);
                 }
             }
         }
@@ -242,8 +227,8 @@ public class DashboardManagerImpl implements DashboardManager {
 
     /**
      */
-    public ConfigResponse getRssUserPreferences(String user, String token)
-        throws LoginException {
+    @Transactional(readOnly = true)
+    public ConfigResponse getRssUserPreferences(String user, String token) throws LoginException {
         ConfigResponse preferences;
         try {
             AuthzSubject me = authzSubjectManager.findSubjectByName(user);
@@ -262,8 +247,7 @@ public class DashboardManagerImpl implements DashboardManager {
 
     private String removeResource(String val, String resource) {
         val = StringUtil.remove(val, resource);
-        val = StringUtil.replace(val, Constants.EMPTY_DELIMITER,
-                                 Constants.DASHBOARD_DELIMITER);
+        val = StringUtil.replace(val, Constants.EMPTY_DELIMITER, Constants.DASHBOARD_DELIMITER);
         return val;
     }
 
@@ -273,110 +257,91 @@ public class DashboardManagerImpl implements DashboardManager {
         log.info("Dashboard Manager starting up");
 
         // Register callback for subject removal
-        hqApp
-             .registerCallbackListener(SubjectRemoveCallback.class,
-                                       new SubjectRemoveCallback() {
+        hqApp.registerCallbackListener(SubjectRemoveCallback.class, new SubjectRemoveCallback() {
             public void subjectRemoved(AuthzSubject toDelete) {
                 dashDao.handleSubjectRemoval(toDelete);
             }
-        }
-             );
+        });
 
         // Register callback for role removal
-        hqApp
-             .registerCallbackListener(RoleRemoveCallback.class,
-                                       new RoleRemoveCallback() {
+        hqApp.registerCallbackListener(RoleRemoveCallback.class, new RoleRemoveCallback() {
             public void roleRemoved(Role r) {
                 RoleDashboardConfig cfg = dashDao.findDashboard(r);
 
                 if (cfg == null)
                     return;
 
-                List<CrispoOption> opts = crispoManager.findOptionByKey(
-                                                       Constants.DEFAULT_DASHBOARD_ID);
+                List<CrispoOption> opts = crispoManager.findOptionByKey(Constants.DEFAULT_DASHBOARD_ID);
 
                 for (CrispoOption opt : opts) {
-                    if (Integer.valueOf(opt.getValue()).equals(
-                                                               cfg.getId())) {
+                    if (Integer.valueOf(opt.getValue()).equals(cfg.getId())) {
                         crispoManager.updateOption(opt, null);
                     }
                 }
 
                 dashDao.handleRoleRemoval(r);
             }
-        }
-             );
+        });
 
         // Register callback for role creation
-        hqApp
-             .registerCallbackListener(RoleCreateCallback.class,
-                                       new RoleCreateCallback() {
+        hqApp.registerCallbackListener(RoleCreateCallback.class, new RoleCreateCallback() {
             public void roleCreated(Role r) {
                 Crispo cfg = crispoManager.create(getDefaultConfig());
-                RoleDashboardConfig dash =
-                                           new RoleDashboardConfig(r, r.getName() +
-                                                                      " Role Dashboard", cfg);
+                RoleDashboardConfig dash = new RoleDashboardConfig(r, r.getName() + " Role Dashboard", cfg);
                 dashDao.save(dash);
             }
-        }
-             );
+        });
 
         // Register callback for subject removed from role
-        hqApp
-             .registerCallbackListener(RoleRemoveFromSubjectCallback.class,
-                                       new RoleRemoveFromSubjectCallback() {
-            public void roleRemovedFromSubject(Role r,
-                                               AuthzSubject from) {
+        hqApp.registerCallbackListener(RoleRemoveFromSubjectCallback.class, new RoleRemoveFromSubjectCallback() {
+            public void roleRemovedFromSubject(Role r, AuthzSubject from) {
                 RoleDashboardConfig cfg = dashDao.findDashboard(r);
                 Crispo c = from.getPrefs();
                 if (c != null) {
                     for (CrispoOption opt : c.getOptions()) {
-                        if (opt.getKey()
-                               .equals(Constants.DEFAULT_DASHBOARD_ID)
-                            && Integer.valueOf(opt.getValue())
-                                      .equals(cfg.getId())) {
+                        if (opt.getKey().equals(Constants.DEFAULT_DASHBOARD_ID) &&
+                            Integer.valueOf(opt.getValue()).equals(cfg.getId())) {
                             crispoManager.updateOption(opt, null);
                             break;
                         }
                     }
                 }
             }
-        }
-             );
+        });
     }
-    
-    public List<DashboardConfig> findEditableDashboardConfigs(WebUser user, AuthzBoss boss) 
-    throws SessionNotFoundException, SessionTimeoutException, PermissionException, RemoteException
-    {
+
+    @Transactional(readOnly = true)
+    public List<DashboardConfig> findEditableDashboardConfigs(WebUser user, AuthzBoss boss)
+        throws SessionNotFoundException, SessionTimeoutException, PermissionException, RemoteException {
         AuthzSubject me = boss.findSubjectById(user.getSessionId(), user.getSubject().getId());
-            
+
         Collection<DashboardConfig> dashboardCollection = getDashboards(me);
         List<DashboardConfig> editableDashboardConfigs = new ArrayList<DashboardConfig>();
-        
+
         for (DashboardConfig config : dashboardCollection) {
             if (isEditable(me, config)) {
                 editableDashboardConfigs.add(config);
             }
         }
-        
-        return editableDashboardConfigs; 
+
+        return editableDashboardConfigs;
     }
-    
-    public List<Dashboard> findEditableDashboards(WebUser user, AuthzBoss boss)
-    throws SessionNotFoundException, SessionTimeoutException, PermissionException, RemoteException
-    {
+
+    @Transactional(readOnly = true)
+    public List<Dashboard> findEditableDashboards(WebUser user, AuthzBoss boss) throws SessionNotFoundException,
+        SessionTimeoutException, PermissionException, RemoteException {
         List<DashboardConfig> dashboardConfigs = findEditableDashboardConfigs(user, boss);
         List<Dashboard> editableDashboards = new ArrayList<Dashboard>();
-        
+
         for (DashboardConfig config : dashboardConfigs) {
             Dashboard dashboard = new Dashboard();
-            
+
             dashboard.set_name(config.getName());
             dashboard.setId(config.getId());
-            
+
             editableDashboards.add(dashboard);
-        }       
-        
+        }
+
         return editableDashboards;
     }
 
@@ -385,24 +350,26 @@ public class DashboardManagerImpl implements DashboardManager {
      * @param id the id of the dashboard
      * @param user current user
      * @param boss the authzboss
-     * @return the DashboardConfig of the corresponding DashboardId or null if none
+     * @return the DashboardConfig of the corresponding DashboardId or null if
+     *         none
      */
+    @Transactional(readOnly = true)
     public DashboardConfig findDashboard(Integer id, WebUser user, AuthzBoss boss) {
         Collection<DashboardConfig> dashboardCollection;
-        
+
         try {
             AuthzSubject me = boss.findSubjectById(user.getSessionId(), user.getSubject().getId());
             dashboardCollection = getDashboards(me);
         } catch (Exception e) {
             return null;
         }
-        
+
         for (DashboardConfig config : dashboardCollection) {
             if (config.getId().equals(id)) {
                 return config;
             }
         }
-        
+
         return null;
     }
 }
