@@ -50,8 +50,7 @@
 	<property name="tapestry_lib" location="${thirdparty.lib}/tapestry" />
 
 	<property name="webapp.home" location="${hq.home}/hq-web/src/main/webapp" />
-	<property name="ear.dir" location="${build.dir}/hq.ear" />
-	<property name="war.dir" location="${build.dir}/hq.war" />
+	<property name="war.dir" location="${hq.web}/target/war-expanded" />
 	<property name="ROOT.war" location="${build.dir}/ROOT.war" />
 	<property name="agent.dir" location="${build.dir}/agent" />
 	<property name="agent.bundle.dir" value="agent-${version}-${build}" />
@@ -1245,12 +1244,12 @@
 		<delete dir="${hq.agent}/target" />
 		<delete dir="${hq.web}/target" />
 		<delete dir="${hq.installer}/target" />
-		<delete dir="${rendit_sys.dir}/target/classes" />
+		<delete dir="${rendit_sys.dir}/target" />
 		<delete includeemptydirs="true">
-			<fileset dir="${hq.agent.handlers}" defaultexcludes="false" includes="*/target/classes/**" />
+			<fileset dir="${hq.agent.handlers}" defaultexcludes="false" includes="*/target/**" />
 		</delete>
 		<delete includeemptydirs="true">
-			<fileset dir="${hq.plugins}" defaultexcludes="false" includes="*/target/classes/**" />
+			<fileset dir="${hq.plugins}" defaultexcludes="false" includes="*/target/**" />
 		</delete>
 	</target>
 
