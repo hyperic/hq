@@ -145,13 +145,13 @@ public class ResourceDecorator extends ColumnDecorator implements Tag {
 			AppdefResourceValue resource = getResource();
 			Boolean doFunction = getFunction();
 			
-			if (doFunction) {
+			if (Boolean.TRUE.equals(doFunction)) {
 				return doFunction(resource);
 			}
 
 			Boolean doType = getType();
 			
-			if (doType) {
+			if (Boolean.TRUE.equals(doType)) {
 				return doType(resource);
 			}
 		} catch (NullPointerException npe) {
