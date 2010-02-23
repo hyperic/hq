@@ -158,11 +158,11 @@
 	</bean>
 
 	<bean id="authenticationManager" class="org.springframework.security.authentication.ProviderManager">
-     		<property name="providers">
-       			<list> 
-       				<ref local="anonymousAuthenticationProvider" />
-        			<ref local="internalAuthenticationProvider" />
-       			</list> 
-     		</property>
+     	<property name="providers">
+       		<list> 
+       			<ref local="anonymousAuthenticationProvider" />
+        		<ref local="internalAuthenticationProvider" />
+       		</list> 
+     	</property>
     </bean>     
 </beans>
