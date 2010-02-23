@@ -59,6 +59,17 @@
 		<url-pattern>/assets/*</url-pattern>
 	</servlet-mapping>
 
+	<servlet>
+        <servlet-name>webapp</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>webapp</servlet-name>
+        <url-pattern>/app/*</url-pattern>
+    </servlet-mapping>
+
 	<!-- URLRewite Filter -->
 	<filter>
 		<filter-name>UrlRewriteFilter</filter-name>

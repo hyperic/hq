@@ -24,7 +24,8 @@
         <form-bean name="NewUserForm"
                  type="org.hyperic.hq.ui.action.admin.user.NewForm"/>
 
-       
+        <form-bean name="RegisterUserForm"
+                 type="org.hyperic.hq.ui.action.admin.user.EditForm"/>
 
         <form-bean name="EditPasswordForm"
                  type="org.hyperic.hq.ui.action.admin.user.EditPasswordForm"/>
@@ -472,7 +473,18 @@
                        redirect="true"/>
       </action>      
 
-    
+	  <action path="/admin/user/Register*"
+              name="RegisterUserForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.admin.user.Register{1}Action"
+              input="/admin/user/UserAdmin.do?mode=register">
+      		<set-property property="workflow" value="user/Register"/>
+        	<forward name="success" path="/Dashboard.do"/>
+        	<forward name="failure" path="/admin/user/UserAdmin.do?mode=register"/>
+        	<forward name="reset" path="/admin/user/UserAdmin.do?mode=register" redirect="true"/>
+        	<forward name="logout" path="/Logout.do"/>
+      </action>
+          
       <!-- end user admin actions / -->
 
       <!-- Admin plugins -->

@@ -434,7 +434,7 @@ a:visited,a:hover,a {
 }
 
 .fieldRow input {
-    float: left
+    float: left;
 }
 
 .fieldRow input[readonly='readonly'] {
@@ -461,16 +461,68 @@ fieldset {
     margin: 6px 0 0
 }
 
+#content .loginPanel {
+	margin:10% auto 0;
+}
+
 .loginPanel {
-    width: 330px;
+    width: 350px;
     border: 3px solid #B0F6FF;
     background: #fff;
-    margin: 150px auto 0;
-    padding: 16px 16px 10px;
+	padding: 16px 16px 10px;
+	text-align: left;
     -moz-border-radius: 8px;
     -webkit-border-radius: 8px;
     -moz-box-shadow: 0 3px 3px #999;
 	-webkit-box-shadow: 0 3px 3px #999;
+}
+
+.loginPanel .fieldRow {
+    height:33px;
+    max-height:21px;
+    position:relative;
+    clear:none;
+}
+
+.loginPanel .fieldRow input {
+    position:absolute;
+    right:5px;
+    top:5px;
+    float:none;
+}
+
+.loginPanel .fieldRow label {
+    top: 5px;
+    position: absolute;
+    text-align:left;
+    float:none;
+}
+
+.loginPanel input[type="password"], .loginPanel input[type="text"] {
+    margin-right:5px;
+}
+
+.loginPanel input[type="submit"] {
+	font-size: 1.1em ! important;
+}
+
+.loginPanel .submitButtonContainer {
+	text-align: right; 
+	margin-right: 10px;
+}
+
+.loginPanel .guestUserLinkContainer {
+	margin-top: 5px; 
+	text-align: right;
+}
+
+.loginPanel .guestUser {
+	color:#45A8DF;
+	margin-right:0;
+}
+
+.loginButtons {
+	text-align: right;	
 }
 
 .loginPanel form fieldset {
@@ -484,10 +536,6 @@ fieldset {
 .loginPanel form fieldset p label {
 	font-weight: bold;
 	padding-left: 5px;
-}
-
-.loginPanel form fieldset p input[type="submit"] {
-	float: right;	
 }
 
 .fieldsetTitle {
@@ -1374,10 +1422,6 @@ textarea {
 
 select {
     padding: 2px;
-}
-
-.loginPanel input[type="password"], .loginPanel input[type="text"] {
-    width: 200px
 }
 
 .ToolbarContent td {
@@ -2340,17 +2384,17 @@ button span{
 	width:auto;
 	overflow:visible;
     border: 1px solid #84B96D;
-    background-color: #2DBF3D;
-    -moz-border-radius: 3px;
-    -webkit-border-radius: 3px;
+    background: #2DBF3D url(../images/4.0/backgrounds/button-green-background.jpg) repeat-x bottom;
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
     border-radius: 3px;
-    padding: 3px 5px;
+    padding: 3px 15px;
     cursor:pointer;
 }
 
 .button42disabled {
 	color: #888;
-	background-color: #ccc;
+	background: #bbb url(../images/4.0/backgrounds/button-grey-background.jpg) repeat-x bottom;
 	border-color: #aaa;	
 	cursor: default
 }
@@ -2437,4 +2481,154 @@ span.returnToLink {
 	color: #333;
 	border-bottom: 1px solid #eee;
 	font-style: italic;
+}
+
+.autoGroupIcon {
+	background: url(../images/icon_auto-group.gif) no-repeat;
+	height: 10px;
+	width: 11px;
+}
+
+.clusterIcon {
+	background: url(../images/icon_auto-group.gif) no-repeat;
+	height: 10px;
+	width: 11px;
+}
+
+.timelineOn {
+	background: url(../images/timeline_on.gif) repeat-x;
+	height: 10px;
+	width: 9px;
+}
+
+.timelineOff {
+	background: url(../images/timeline_off.gif) repeat-x;
+	height: 10px;
+	width: 9px;
+}
+
+.timelineDown {
+	background: url(../images/timeline_down.gif) repeat-x;
+	height: 10px;
+	width: 9px;
+}
+
+.timelineUnknown {
+	background: url(../images/timeline_unknown.gif) repeat-x;
+	height: 10px;
+	width: 9px;
+}
+
+.timelineGreen {
+	background: url(../images/timeline_green.gif) repeat-x;
+	height: 10px;
+	width: 9px;
+}
+
+.timelineOrange {
+	background: url(../images/timeline_orange.gif) repeat-x;
+	height: 10px;
+	width: 9px;
+}
+
+.timelineYellow {
+	background: url(../images/timeline_yellow.gif) repeat-x;
+	height: 10px;
+	width: 9px;
+}
+
+.timelineRed {
+	background: url(../images/timeline_red.gif) repeat-x;
+	height: 10px;
+	width: 9px;
+}
+
+.resourceCommentIcon {
+	background: url(../images/comment.gif) no-repeat 0 3px;
+	height: 14px;
+	width: 14px;
+}
+
+.availabilityRed {
+	display:inline-block;
+	background: url(../images/icon_available_red.gif) no-repeat;
+	height: 12px;
+	width: 12px;
+}
+
+.availabilityOrange {
+	display:inline-block;
+	background: url(../images/icon_available_orange.gif) no-repeat;
+	height: 12px;
+	width: 12px;
+}
+
+.availabilityYellow {
+	display:inline-block;
+	background: url(../images/icon_available_yellow.gif) no-repeat;
+	height: 12px;
+	width: 12px;
+}
+
+.availabilityGreen {
+	display:inline-block;
+	background: url(../images/icon_available_green.gif) no-repeat;
+	height: 12px;
+	width: 12px;
+}
+
+.availabilityError {
+	display:inline-block;
+	background: url(../images/icon_available_error.gif) no-repeat;
+	height: 12px;
+	width: 12px;
+}
+
+.formButtonContainer {
+	background-color:#fff;
+	margin-bottom:10px;
+	padding:10px 0; 
+	text-align:center; 
+	width:100%;
+}
+
+.formButtonContainer input[type=button] {
+	margin-right:8px;
+}
+
+.formButtonContainer .reset,
+.formButtonContainer .cancel {
+	background: #bbb url(../images/4.0/backgrounds/button-grey-background.jpg) repeat-x bottom;
+	border-color:#ddd;
+}
+
+.footerMessageContainer {
+	margin-top:15px; 
+	text-align:center; 
+	width:100%;
+}
+
+.resourceTypeColumn {
+	padding: 8px 3px 8px 15px;
+	width: 20%;	
+}
+
+.permissionColumn {
+	padding-left: 15px;
+}
+
+.capabilitiesColumn {
+	padding-left: 5px; 
+	width: 60%;
+}
+
+.alertCapability {
+	width: 15%;	
+}
+	
+.controlCapability {
+	width: 45%;	
+}
+.bottomBorder {
+	border-bottom: 1px solid #eee;
 }
