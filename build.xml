@@ -518,7 +518,7 @@
 
 		<!--Copy production-specific tomcat and HQ war files (must be done after deploying WAR to overwrite webapp config) -->
 		<antcall target="prepare-tomcat">
-			<param name="tomcat.home" value="${archive-dir}/server-${version}/hq-engine/hq-server" />
+			<param name="tomcat.home" value="${archive-dir}/server-${version}/hq-engine" />
 		</antcall>
 
 		<!-- Copy setup scripts to top-level of install bundle -->
