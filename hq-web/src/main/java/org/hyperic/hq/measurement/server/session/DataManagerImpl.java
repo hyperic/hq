@@ -693,9 +693,7 @@ public class DataManagerImpl implements DataManager {
             // XXX scottmf, may not make a difference transactionally since
             // we use ConnectionReleaseMode.AFTER_STATEMENT
             conn = dbUtil.getConnection();
-        } catch (NamingException e) {
-            log.error("Failed to retrieve data source", e);
-        } catch (SQLException e) {
+        }  catch (SQLException e) {
             log.error("Failed to retrieve connection from data source", e);
         }
 
@@ -1030,9 +1028,7 @@ public class DataManagerImpl implements DataManager {
             } catch (SQLException e) {
                 throw new SystemException("Can't lookup historical data for " + m, e);
             }
-        } catch (NamingException e) {
-            throw new SystemException(ERR_DB, e);
-        } catch (SQLException e) {
+        }  catch (SQLException e) {
             throw new SystemException("Can't open connection", e);
         } finally {
             DBUtil.closeJDBCObjects(LOG_CTX, conn, stmt, rs);
@@ -1314,8 +1310,6 @@ public class DataManagerImpl implements DataManager {
             return getPageList(begin, end, interval, rtn, returnNulls, pc);
         } catch (SQLException e) {
             throw new SystemException(e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
         } finally {
             DBUtil.closeJDBCObjects(LOG_CTX, conn, stmt, rs);
         }
@@ -1461,9 +1455,7 @@ public class DataManagerImpl implements DataManager {
                 // No cached value, nothing in the database
                 return null;
             }
-        } catch (NamingException e) {
-            throw new SystemException(ERR_DB, e);
-        } catch (SQLException e) {
+        }  catch (SQLException e) {
             log.error("Unable to look up historical data for " + m, e);
             throw new SystemException(e);
         } finally {
@@ -1551,9 +1543,7 @@ public class DataManagerImpl implements DataManager {
             }
         } catch (SQLException e) {
             throw new SystemException("Cannot get last values", e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } finally {
+        }  finally {
             DBUtil.closeJDBCObjects(LOG_CTX, conn, stmt, null);
             if (log.isDebugEnabled()) {
                 log.debug("getLastDataPoints(): Statement query elapsed " + "time: " + timer.getElapsed());
@@ -1697,8 +1687,6 @@ public class DataManagerImpl implements DataManager {
             return data;
         } catch (SQLException e) {
             throw new MeasurementDataSourceException("Can't get baseline data for: " + id, e);
-        } catch (NamingException e) {
-            throw new SystemException(ERR_DB, e);
         } finally {
             DBUtil.closeJDBCObjects(LOG_CTX, conn, stmt, rs);
         }
@@ -1810,9 +1798,7 @@ public class DataManagerImpl implements DataManager {
         } catch (SQLException e) {
             log.debug("getAggregateDataByMetric()", e);
             throw new SystemException(e);
-        } catch (NamingException e) {
-            throw new SystemException(ERR_DB, e);
-        } finally {
+        }  finally {
             DBUtil.closeJDBCObjects(LOG_CTX, conn, stmt, null);
         }
     }
@@ -1923,9 +1909,7 @@ public class DataManagerImpl implements DataManager {
         } catch (SQLException e) {
             log.debug("getAggregateDataByMetric()", e);
             throw new SystemException(e);
-        } catch (NamingException e) {
-            throw new SystemException(ERR_DB, e);
-        } finally {
+        }  finally {
             DBUtil.closeJDBCObjects(LOG_CTX, conn, stmt, null);
         }
     }

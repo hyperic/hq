@@ -60,55 +60,42 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
 
-
 public class PermissionManagerImpl
-    extends PermissionManager
-{
-    private static final Log _log =
-        LogFactory.getLog(PermissionManagerImpl.class.getName());
+    extends PermissionManager {
+    private static final Log _log = LogFactory.getLog(PermissionManagerImpl.class.getName());
 
     private final String _falseToken;
-    
+
     private DBUtil dbUtil;
 
-    private static final String VIEWABLE_SELECT =
-        "SELECT instance_id, EAM_RESOURCE.sort_name, EAM_RESOURCE.id, " +
-                            "EAM_RESOURCE.resource_type_id " +
-        "FROM EAM_RESOURCE ";
+    private static final String VIEWABLE_SELECT = "SELECT instance_id, EAM_RESOURCE.sort_name, EAM_RESOURCE.id, "
+                                                  + "EAM_RESOURCE.resource_type_id "
+                                                  + "FROM EAM_RESOURCE ";
 
-    private static final String VIEWABLE_CLAUSE =
-        " EAM_RESOURCE.fsystem = DB_FALSE_TOKEN AND " +
-        "EAM_RESOURCE.resource_type_id = " +
-        "(SELECT rt.id FROM EAM_RESOURCE_TYPE rt WHERE rt.name = ?) ";
+    private static final String VIEWABLE_CLAUSE = " EAM_RESOURCE.fsystem = DB_FALSE_TOKEN AND "
+                                                  + "EAM_RESOURCE.resource_type_id = "
+                                                  + "(SELECT rt.id FROM EAM_RESOURCE_TYPE rt WHERE rt.name = ?) ";
 
-    private static final String VIEWABLE_BYNAME_SQL =
-        " AND (lower(EAM_RESOURCE.name) like lower('%$$resName$$%') OR " +
-        " EAM_RESOURCE.instance_id in (SELECT appdef_id FROM EAM_CPROP, " +
-        " EAM_CPROP_KEY WHERE keyid = EAM_CPROP_KEY.id AND " +
-        " appdef_type = ? AND lower(propvalue) like lower('%$$resName$$%'))) ";
+    private static final String VIEWABLE_BYNAME_SQL = " AND (lower(EAM_RESOURCE.name) like lower('%$$resName$$%') OR "
+                                                      + " EAM_RESOURCE.instance_id in (SELECT appdef_id FROM EAM_CPROP, "
+                                                      + " EAM_CPROP_KEY WHERE keyid = EAM_CPROP_KEY.id AND "
+                                                      + " appdef_type = ? AND lower(propvalue) like lower('%$$resName$$%'))) ";
 
-    private static final String ALL_RESOURCE_SQL =
-        "SELECT res.instance_id FROM EAM_RESOURCE res, EAM_OPERATION o " +
-        "WHERE o.resource_type_id = res.resource_type_id and o.id = ?";
+    private static final String ALL_RESOURCE_SQL = "SELECT res.instance_id FROM EAM_RESOURCE res, EAM_OPERATION o "
+                                                   + "WHERE o.resource_type_id = res.resource_type_id and o.id = ?";
 
-    private static final String VIEWABLE_SEARCH =
-        "WHERE EAM_RESOURCE.fsystem = DB_FALSE_TOKEN AND " +
-              "RESOURCE_TYPE_ID IN (3, 301, 303, 305, 308)  AND "+
-              "(SORT_NAME LIKE UPPER(?) OR " +
-               "PROTO_ID IN (SELECT ID FROM EAM_RESOURCE " +
-                            "WHERE PROTO_ID = 0 AND SORT_NAME LIKE UPPER(?))) ";
-    
-   
+    private static final String VIEWABLE_SEARCH = "WHERE EAM_RESOURCE.fsystem = DB_FALSE_TOKEN AND "
+                                                  + "RESOURCE_TYPE_ID IN (3, 301, 303, 305, 308)  AND "
+                                                  + "(SORT_NAME LIKE UPPER(?) OR "
+                                                  + "PROTO_ID IN (SELECT ID FROM EAM_RESOURCE "
+                                                  + "WHERE PROTO_ID = 0 AND SORT_NAME LIKE UPPER(?))) ";
 
     private Connection getConnection() throws SQLException {
-        try {
-            return dbUtil.getConnection();
-        } catch (NamingException e) {
-            throw new SQLException("Failed to retrieve datasource: "+e);
-        }
+
+        return dbUtil.getConnection();
+
     }
 
-    
     public PermissionManagerImpl(DBUtil dbUtil) {
         Connection conn = null;
         this.dbUtil = dbUtil;
@@ -116,77 +103,64 @@ public class PermissionManagerImpl
             conn = getConnection();
             _falseToken = DBUtil.getBooleanValue(false, conn);
         } catch (Exception e) {
-            throw new SystemException("Unable to initialize " +
-                                      "PermissionManager:" + e, e);
+            throw new SystemException("Unable to initialize " + "PermissionManager:" + e, e);
         } finally {
             DBUtil.closeConnection(PermissionManagerImpl.class, conn);
         }
     }
 
-    public void check(Integer subject, ResourceType type, Integer instanceId,
-                      String operation)
-        throws PermissionException {}
+    public void check(Integer subject, ResourceType type, Integer instanceId, String operation)
+        throws PermissionException {
+    }
 
-    public void check(Integer subjectId, Integer typeId, Integer instanceId,
-                      Integer operationId)
-        throws PermissionException {}
+    public void check(Integer subjectId, Integer typeId, Integer instanceId, Integer operationId)
+        throws PermissionException {
+    }
 
-    public void check(Integer subjectId, String resType, Integer instanceId,
-                      String operation)
-        throws PermissionException {}
+    public void check(Integer subjectId, String resType, Integer instanceId, String operation)
+        throws PermissionException {
+    }
 
     public boolean hasAdminPermission(Integer who) {
         return true;
     }
-    
-   
 
     public List<Integer> findOperationScopeBySubject(AuthzSubject subj, String opName,
-                                            String resType)
-        throws NotFoundException, PermissionException
-    {
+                                                     String resType) throws NotFoundException,
+        PermissionException {
         if (_log.isDebugEnabled()) {
-            _log.debug("Checking Scope for Operation: " + opName +
-                       " subject: " + subj);
+            _log.debug("Checking Scope for Operation: " + opName + " subject: " + subj);
         }
-        
+
         ResourceType resTypeBean = getResourceTypeDAO().findByName(resType);
-        
+
         if (resTypeBean != null) {
-            Operation op =
-                getOperationDAO().findByTypeAndName(resTypeBean, opName);
-            
+            Operation op = getOperationDAO().findByTypeAndName(resTypeBean, opName);
+
             if (op != null) {
                 return findOperationScopeBySubject(subj, op.getId());
             }
         }
-        
+
         return new ArrayList<Integer>();
     }
 
     public List<Integer> findOperationScopeBySubject(AuthzSubject subj, Integer opId)
-        throws NotFoundException, PermissionException
-    {
+        throws NotFoundException, PermissionException {
         if (_log.isDebugEnabled()) {
-            _log.debug("Checking Scope for Operation: " + opId + " subject: " +
-                       subj);
+            _log.debug("Checking Scope for Operation: " + opId + " subject: " + subj);
         }
-        
+
         List<Integer> scope = findScopeBySQL(subj, opId);
 
         if (_log.isDebugEnabled()) {
-            _log.debug("Scope check returned a size of : " + scope.size() +
-                       " items");
+            _log.debug("Scope check returned a size of : " + scope.size() + " items");
         }
         return scope;
     }
 
-    public Resource[]
-        findOperationScopeBySubjectBatch(AuthzSubject whoami,
-                                         ResourceValue[] resArr,
-                                         String[] opArr)
-        throws ApplicationException
-    {
+    public Resource[] findOperationScopeBySubjectBatch(AuthzSubject whoami, ResourceValue[] resArr,
+                                                       String[] opArr) throws ApplicationException {
         if (resArr == null) {
             throw new IllegalArgumentException("At least one resource required");
         }
@@ -195,56 +169,47 @@ public class PermissionManagerImpl
 
         return (Resource[]) resLocArr.toArray(new Resource[resLocArr.size()]);
     }
-    
+
     protected RoleDAO getRoleDAO() {
         return Bootstrap.getBean(RoleDAO.class);
     }
-    
+
     protected ResourceGroupDAO getResourceGroupDAO() {
         return Bootstrap.getBean(ResourceGroupDAO.class);
     }
-    
+
     private Resource lookupResource(ResourceValue resource) {
         if (resource.getId() == null) {
             ResourceType type = resource.getResourceType();
-            return getResourceDAO().findByInstanceId(type,
-                                                     resource.getInstanceId());
+            return getResourceDAO().findByInstanceId(type, resource.getInstanceId());
         }
         return getResourceDAO().findById(resource.getId());
     }
-    
-   
-    
+
     private Set toPojos(Object[] vals) {
         Set ret = new HashSet();
         if (vals == null || vals.length == 0) {
             return ret;
         }
 
-
         RoleDAO roleDao = null;
         ResourceGroupDAO resGrpDao = null;
         for (int i = 0; i < vals.length; i++) {
             if (vals[i] instanceof Operation) {
                 ret.add(vals[i]);
-            }
-            else if (vals[i] instanceof ResourceValue) {
+            } else if (vals[i] instanceof ResourceValue) {
                 ret.add(lookupResource((ResourceValue) vals[i]));
-            }
-            else if (vals[i] instanceof RoleValue) {
+            } else if (vals[i] instanceof RoleValue) {
                 if (roleDao == null) {
                     roleDao = getRoleDAO();
                 }
                 ret.add(roleDao.findById(((RoleValue) vals[i]).getId()));
-            }
-            else if (vals[i] instanceof ResourceGroupValue) {
+            } else if (vals[i] instanceof ResourceGroupValue) {
                 if (resGrpDao == null) {
                     resGrpDao = getResourceGroupDAO();
                 }
-                ret.add(resGrpDao.findById(
-                    ((ResourceGroupValue) vals[i]).getId()));
-            }
-            else {
+                ret.add(resGrpDao.findById(((ResourceGroupValue) vals[i]).getId()));
+            } else {
                 _log.error("Invalid type.");
             }
 
@@ -253,9 +218,8 @@ public class PermissionManagerImpl
         return ret;
     }
 
-    public List<Integer> findViewableResources(AuthzSubject subj, String resType,
-                                      String resName, String appdefTypeStr,
-                                      Integer typeId, PageControl pc) {
+    public List<Integer> findViewableResources(AuthzSubject subj, String resType, String resName,
+                                               String appdefTypeStr, Integer typeId, PageControl pc) {
         List<Integer> viewableInstances = new ArrayList<Integer>();
 
         Connection conn = null;
@@ -267,16 +231,14 @@ public class PermissionManagerImpl
             String sql = VIEWABLE_SELECT;
             if (appdefTypeStr != null && typeId != null) {
                 sql += ", EAM_" + appdefTypeStr.toUpperCase() +
-                " appdef WHERE EAM_RESOURCE.instance_id = appdef.id AND " +
-                " appdef." + appdefTypeStr + "_type_id = ? AND ";
-            }
-            else {
+                       " appdef WHERE EAM_RESOURCE.instance_id = appdef.id AND " + " appdef." +
+                       appdefTypeStr + "_type_id = ? AND ";
+            } else {
                 sql += " WHERE ";
             }
             sql += VIEWABLE_CLAUSE;
 
-            if (resName != null)
-            {
+            if (resName != null) {
                 // Support wildcards
                 resName = resName.replace('*', '%');
                 resName = resName.replace('?', '_');
@@ -287,7 +249,7 @@ public class PermissionManagerImpl
 
             sql += "ORDER BY EAM_RESOURCE.sort_name ";
 
-            if(!pc.isAscending()) {
+            if (!pc.isAscending()) {
                 sql = sql + "DESC";
             }
             sql = StringUtil.replace(sql, "DB_FALSE_TOKEN", _falseToken);
@@ -307,7 +269,7 @@ public class PermissionManagerImpl
             _log.debug("Viewable SQL: " + sql);
             rs = stmt.executeQuery();
 
-            for(i = 1; rs.next(); i++) {
+            for (i = 1; rs.next(); i++) {
                 viewableInstances.add(new Integer(rs.getInt(1)));
             }
             return viewableInstances;
@@ -319,8 +281,7 @@ public class PermissionManagerImpl
         }
     }
 
-    public List<Integer> findViewableResources(AuthzSubject subj, String searchFor,
-                                      PageControl pc) {
+    public List<Integer> findViewableResources(AuthzSubject subj, String searchFor, PageControl pc) {
         List<Integer> viewableInstances = new ArrayList<Integer>();
 
         Connection conn = null;
@@ -331,18 +292,16 @@ public class PermissionManagerImpl
             String sql = VIEWABLE_SELECT + VIEWABLE_SEARCH;
 
             // TODO: change sort by
-            sql += "ORDER BY EAM_RESOURCE.resource_type_id, " +
-            		        "EAM_RESOURCE.sort_name ";
+            sql += "ORDER BY EAM_RESOURCE.resource_type_id, " + "EAM_RESOURCE.sort_name ";
 
-            if(!pc.isAscending()) {
+            if (!pc.isAscending()) {
                 sql = sql + "DESC";
             }
             sql = StringUtil.replace(sql, "DB_FALSE_TOKEN", _falseToken);
 
             if (searchFor == null) {
                 searchFor = "%";
-            }
-            else {
+            } else {
                 // Support wildcards
                 searchFor = '%' + searchFor.replace('*', '%') + '%';
             }
@@ -354,12 +313,11 @@ public class PermissionManagerImpl
             stmt.setString(i++, searchFor);
 
             if (_log.isDebugEnabled())
-                _log.debug("Viewable search for (" + searchFor + ") SQL: " +
-                           sql);
+                _log.debug("Viewable search for (" + searchFor + ") SQL: " + sql);
 
             rs = stmt.executeQuery();
 
-            for(i = 1; rs.next(); i++) {
+            for (i = 1; rs.next(); i++) {
                 viewableInstances.add(new Integer(rs.getInt(3)));
             }
             return viewableInstances;
@@ -371,9 +329,8 @@ public class PermissionManagerImpl
         }
     }
 
-    private List<Integer> findScopeBySQL(AuthzSubject subj, Integer opId)
-        throws NotFoundException, PermissionException
-    {
+    private List<Integer> findScopeBySQL(AuthzSubject subj, Integer opId) throws NotFoundException,
+        PermissionException {
         Pager defaultPager = Pager.getDefaultPager();
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -387,7 +344,7 @@ public class PermissionManagerImpl
             rs = stmt.executeQuery();
             // now build the list
             instanceIds = new ArrayList<Integer>();
-            for(int i = 1; rs.next(); i++) {
+            for (int i = 1; rs.next(); i++) {
                 instanceIds.add(new Integer(rs.getInt(1)));
             }
             return instanceIds;
@@ -399,20 +356,13 @@ public class PermissionManagerImpl
         }
     }
 
-    public String getResourceTypeSQL(String instanceId, Integer subjectId,
-                                     String resType, String op) {
-        return
-            "SELECT RES.ID FROM EAM_RESOURCE RES, " +
-            " EAM_RESOURCE_TYPE RT " +
-            "WHERE " + instanceId + " = RES.INSTANCE_ID " +
-            "  AND RES.FSYSTEM = " + _falseToken +
-            "  AND RES.RESOURCE_TYPE_ID = RT.ID " +
-            "  AND RT.NAME = '" + resType + "'";
+    public String getResourceTypeSQL(String instanceId, Integer subjectId, String resType, String op) {
+        return "SELECT RES.ID FROM EAM_RESOURCE RES, " + " EAM_RESOURCE_TYPE RT " + "WHERE " +
+               instanceId + " = RES.INSTANCE_ID " + "  AND RES.FSYSTEM = " + _falseToken +
+               "  AND RES.RESOURCE_TYPE_ID = RT.ID " + "  AND RT.NAME = '" + resType + "'";
     }
 
-    public List getAllOperations(AuthzSubject subject, PageControl pc)
-        throws PermissionException
-    {
+    public List getAllOperations(AuthzSubject subject, PageControl pc) throws PermissionException {
         Role rootRole = getRoleDAO().findById(AuthzConstants.rootRoleId);
         Set ops = new HashSet();
         ops.addAll(rootRole.getOperations());
@@ -426,8 +376,8 @@ public class PermissionManagerImpl
         return operationPager.seek(ops, pc.getPagenum(), pc.getPagesize());
     }
 
-    public Collection<Resource> getGroupResources(Integer subjectId,
-                                        Integer groupId, Boolean fsystem) {
+    public Collection<Resource> getGroupResources(Integer subjectId, Integer groupId,
+                                                  Boolean fsystem) {
         return getResourceDAO().findInGroup_orderName(groupId, fsystem);
     }
 
@@ -435,10 +385,8 @@ public class PermissionManagerImpl
         return getResourceDAO().findSvcRes_orderName(fsystem);
     }
 
-    public RolePermNativeSQL getRolePermissionNativeSQL(String resourceVar,
-                                                        String subjectParam,
-                                                        String opListParam)
-    {
+    public RolePermNativeSQL getRolePermissionNativeSQL(String resourceVar, String subjectParam,
+                                                        String opListParam) {
         return new RolePermNativeSQL() {
             public String getSQL() {
                 return "";
@@ -450,123 +398,93 @@ public class PermissionManagerImpl
         };
     }
 
-
-    public String getAlertsHQL(boolean inEscalation, boolean notFixed,
-                               Integer groupId, Integer alertDefId,
-                               boolean count) {
+    public String getAlertsHQL(boolean inEscalation, boolean notFixed, Integer groupId,
+                               Integer alertDefId, boolean count) {
         // Join with Resource for sorting
-        return "select " + (count ? "count(a)" : "a") + " from " +
-                (inEscalation ? "EscalationState es, " : "") +
-        		"Alert a " +
-                "join a.alertDefinition d " +
-                "join d.resource r " +
-          "where r.resourceType is not null and " +
-                (groupId == null ? "" :
-                    "exists (select rg from r.groupBag rg " +
-                             "where rg.group.id = " + groupId + ") and ") +
-               "a.ctime between :begin and :end and " +
-                (notFixed ? " a.fixed = false and " : "") +
-                (alertDefId == null ? "" : "d.id = " + alertDefId + " and ") +
-                "d.priority >= :priority " +
-                (inEscalation ? "and a.id = es.alertId and " +
-                		            "es.alertDefinitionId = d.id " : "");
+        return "select " +
+               (count ? "count(a)" : "a") +
+               " from " +
+               (inEscalation ? "EscalationState es, " : "") +
+               "Alert a " +
+               "join a.alertDefinition d " +
+               "join d.resource r " +
+               "where r.resourceType is not null and " +
+               (groupId == null ? "" : "exists (select rg from r.groupBag rg " +
+                                       "where rg.group.id = " + groupId + ") and ") +
+               "a.ctime between :begin and :end and " + (notFixed ? " a.fixed = false and " : "") +
+               (alertDefId == null ? "" : "d.id = " + alertDefId + " and ") +
+               "d.priority >= :priority " +
+               (inEscalation ? "and a.id = es.alertId and " + "es.alertDefinitionId = d.id " : "");
     }
 
     public String getAlertDefsHQL() {
-        return "select d from AlertDefinition d " +
-               "join d.resource r " +
-          "where r.resourceType is not null and d.priority >= :priority";
+        return "select d from AlertDefinition d " + "join d.resource r "
+               + "where r.resourceType is not null and d.priority >= :priority";
     }
 
-    public String getGroupAlertsHQL(boolean inEscalation, boolean notFixed,
-                                    Integer groupId, Integer galertDefId) {
-        return "select a from " +
-                (inEscalation ? "EscalationState es, " : "") +
-                "GalertLog a " +
-               "join a.alertDef d " +
-         "where " +
-          (groupId != null ? " g.id = " + groupId + " and " : "") +
-          "a.timestamp between :begin and :end " +
-           (notFixed ? " and a.fixed = false " : "") +
-           (galertDefId == null ? "" : "and d.id = " + galertDefId + " ") +
-           "and d.severityEnum >= :priority " +
-                (inEscalation ? "and a.id = es.alertId and " +
-                                    "es.alertDefinitionId = d.id " : "");
+    public String getGroupAlertsHQL(boolean inEscalation, boolean notFixed, Integer groupId,
+                                    Integer galertDefId) {
+        return "select a from " + (inEscalation ? "EscalationState es, " : "") + "GalertLog a " +
+               "join a.alertDef d " + "where " +
+               (groupId != null ? " g.id = " + groupId + " and " : "") +
+               "a.timestamp between :begin and :end " + (notFixed ? " and a.fixed = false " : "") +
+               (galertDefId == null ? "" : "and d.id = " + galertDefId + " ") +
+               "and d.severityEnum >= :priority " +
+               (inEscalation ? "and a.id = es.alertId and " + "es.alertDefinitionId = d.id " : "");
     }
 
     public String getGroupAlertDefsHQL() {
-        return "select d from GalertDef d " +
-               "join d.group g " +
-               "join d.escalation e " +
-         "where d.severityEnum >= :priority ";
+        return "select d from GalertDef d " + "join d.group g " + "join d.escalation e "
+               + "where d.severityEnum >= :priority ";
     }
 
     public boolean hasGuestRole() {
         return false;
     }
 
-    public EdgePermCheck makePermCheckSql(String subjectParam,
-                                             String resVar,
-                                             String resParam,
-                                             String distanceParam,
-                                             String opsParam,
-                                             boolean includeDescendants) {
-        final Integer cId = AuthzConstants.RELATION_CONTAINMENT_ID;
-        final String oper = (includeDescendants) ? ">=" : "=";
-        final String sql = new StringBuilder()
-            .append(" JOIN EAM_RESOURCE_EDGE edge")
-            .append(" ON ").append(resVar).append(".id = edge.TO_ID")
-            .append(" AND ").append(resVar).append(".id = edge.FROM_ID")
-            .append(" WHERE edge.distance ")
-                .append(oper).append(" :").append(distanceParam)
-            .append(" AND edge.rel_id = ").append(cId)
-            .append(" AND ").append(resVar).append(".id = :").append(resParam)
-            .append(" ").toString();
-
-        return new EdgePermCheck(sql, subjectParam, resVar, resParam,
-                                 distanceParam, opsParam) {
-            public Query addQueryParameters(Query q, AuthzSubject subject,
-                                            Resource r, int distance,
-                                            List ops) {
-                return q.setInteger(getDistanceParam(), distance)
-                        .setInteger(getResourceParam(), r.getId().intValue());
-            }
-        };
-    }
-
-    public EdgePermCheck makePermCheckHql(String subjectParam,
-                                          String resourceVar,
-                                          String resourceParam,
-                                          String distanceParam,
-                                          String opsParam,
+    public EdgePermCheck makePermCheckSql(String subjectParam, String resVar, String resParam,
+                                          String distanceParam, String opsParam,
                                           boolean includeDescendants) {
         final Integer cId = AuthzConstants.RELATION_CONTAINMENT_ID;
         final String oper = (includeDescendants) ? ">=" : "=";
-        final String sql = new StringBuilder()
-            .append("join ").append(resourceVar).append(".toEdges _e ")
-            .append("join _e.from _fromResource ")
-            .append("where ")
-            .append(" _fromResource = :" ).append(resourceParam)
-            .append(" AND _e.distance ").append(oper)
-            .append(" :").append(distanceParam)
-            .append(" AND _e.relation.id = ").append(cId).append(' ')
+        final String sql = new StringBuilder().append(" JOIN EAM_RESOURCE_EDGE edge")
+            .append(" ON ").append(resVar).append(".id = edge.TO_ID").append(" AND ")
+            .append(resVar).append(".id = edge.FROM_ID").append(" WHERE edge.distance ").append(
+                oper).append(" :").append(distanceParam).append(" AND edge.rel_id = ").append(cId)
+            .append(" AND ").append(resVar).append(".id = :").append(resParam).append(" ")
             .toString();
 
-        return new EdgePermCheck(sql, subjectParam, resourceVar,
-                                 resourceParam, distanceParam, opsParam)
-        {
-            public Query addQueryParameters(Query q, AuthzSubject subject,
-                                            Resource r, int distance, List ops)
-            {
-                return q.setInteger(getDistanceParam(), distance)
-                        .setParameter(getResourceParam(), r);
+        return new EdgePermCheck(sql, subjectParam, resVar, resParam, distanceParam, opsParam) {
+            public Query addQueryParameters(Query q, AuthzSubject subject, Resource r,
+                                            int distance, List ops) {
+                return q.setInteger(getDistanceParam(), distance).setInteger(getResourceParam(),
+                    r.getId().intValue());
             }
         };
     }
 
-    public String getOperableGroupsHQL(AuthzSubject subject,
-                                       String alias,
-                                       String oper) {
+    public EdgePermCheck makePermCheckHql(String subjectParam, String resourceVar,
+                                          String resourceParam, String distanceParam,
+                                          String opsParam, boolean includeDescendants) {
+        final Integer cId = AuthzConstants.RELATION_CONTAINMENT_ID;
+        final String oper = (includeDescendants) ? ">=" : "=";
+        final String sql = new StringBuilder().append("join ").append(resourceVar).append(
+            ".toEdges _e ").append("join _e.from _fromResource ").append("where ").append(
+            " _fromResource = :").append(resourceParam).append(" AND _e.distance ").append(oper)
+            .append(" :").append(distanceParam).append(" AND _e.relation.id = ").append(cId)
+            .append(' ').toString();
+
+        return new EdgePermCheck(sql, subjectParam, resourceVar, resourceParam, distanceParam,
+            opsParam) {
+            public Query addQueryParameters(Query q, AuthzSubject subject, Resource r,
+                                            int distance, List ops) {
+                return q.setInteger(getDistanceParam(), distance).setParameter(getResourceParam(),
+                    r);
+            }
+        };
+    }
+
+    public String getOperableGroupsHQL(AuthzSubject subject, String alias, String oper) {
         return "";
     }
 
@@ -575,10 +493,10 @@ public class PermissionManagerImpl
     }
 
     public MaintenanceEventManager getMaintenanceEventManager() {
-        return (MaintenanceEventManager)Bootstrap.getBean("MaintenanceEventManager");
+        return (MaintenanceEventManager) Bootstrap.getBean("MaintenanceEventManager");
     }
 
     public HierarchicalAlertingManager getHierarchicalAlertingManager() {
-        return (HierarchicalAlertingManager)Bootstrap.getBean("HierarchicalAlertingManager");
+        return (HierarchicalAlertingManager) Bootstrap.getBean("HierarchicalAlertingManager");
     }
 }

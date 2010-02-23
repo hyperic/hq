@@ -140,9 +140,7 @@ public class EventsStartupListener implements StartupListener {
             _log.info("deleted " + rows + " rows from EAM_REGISTERED_TRIGGER");
         } catch (SQLException e) {
             _log.error(e, e);
-        } catch (NamingException e) {
-            _log.error(e, e);
-        } finally {
+        }  finally {
             DBUtil.closeJDBCObjects(EventsStartupListener.class.getName(), conn, stmt, null);
         }
     }

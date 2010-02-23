@@ -289,8 +289,6 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
             }
         } catch (SQLException e) {
             log.error("Error analyzing table", e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
         } finally {
             DBUtil.closeConnection(LOG_CTX, conn);
         }
@@ -329,9 +327,7 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
         } catch (SQLException e) {
             log.error("Error analyzing metric tables", e);
             throw new SystemException(e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } finally {
+        }  finally {
             DBUtil.closeConnection(LOG_CTX, conn);
         }
         return duration;
@@ -365,9 +361,7 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
         } catch (SQLException e) {
             log.error("Error vacuuming database: " + e.getMessage(), e);
             return duration;
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } finally {
+        }  finally {
             DBUtil.closeConnection(LOG_CTX, conn);
         }
     }
@@ -395,8 +389,6 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
         } catch (SQLException e) {
             log.error("Error vacuuming database: " + e.getMessage(), e);
             return duration;
-        } catch (NamingException e) {
-            throw new SystemException(e);
         } finally {
             DBUtil.closeConnection(LOG_CTX, conn);
         }
