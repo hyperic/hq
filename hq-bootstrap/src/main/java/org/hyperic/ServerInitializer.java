@@ -84,7 +84,7 @@ public class ServerInitializer {
     private void loadServerProps() throws IOException {
         FileInputStream fi = null;
         File confFile = new File(serverHome + File.separator + "conf" + File.separator +
-                                   "hq-server.conf");
+                                 "hq-server.conf");
         if (!confFile.exists()) {
             error("No hq-server.conf file found. Expected to find it at: " + confFile.getPath());
         }
@@ -142,10 +142,11 @@ public class ServerInitializer {
         FileInputStream fi = null;
         FileOutputStream fo = null;
         try {
+            String targetLicenseDir = engineHome + File.separator + "hq-server" + File.separator +
+                                "webapps" + File.separator + "ROOT" + File.separator + "license";
+            new File(targetLicenseDir).mkdir();
             fi = new FileInputStream(licenseFile);
-            fo = new FileOutputStream(engineHome + File.separator + "hq-server" + File.separator +
-                                      "webapps" + File.separator + "ROOT" + File.separator +
-                                      "license" + File.separator + "license.xml");
+            fo = new FileOutputStream(targetLicenseDir +File.separator + "license.xml");
             copyStream(fi, fo);
         } finally {
             if (fi != null)
@@ -175,7 +176,6 @@ public class ServerInitializer {
         }
     }
 
-   
     private void copyStream(InputStream is, OutputStream os) throws IOException {
 
         byte[] buf = new byte[2048];
