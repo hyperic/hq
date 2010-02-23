@@ -321,7 +321,7 @@ public class AlertManagerImpl implements AlertManager {
      * 
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional
     public void fireAlert(AlertConditionsSatisfiedZEvent event) {
         if (!alertRegulator.alertsAllowed()) {
             log.debug("Alert not firing because they are not allowed");
