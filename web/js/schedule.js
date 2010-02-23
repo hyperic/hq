@@ -71,7 +71,7 @@ var weekArr = new Array("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", 
 
 var yearArr = new Array();
 for (i=0; i<SEL_NUMYEARS; i++) {
-  yearArr[i] = i + SEL_STARTYEAR;
+  yearArr[i] = SEL_STARTYEAR - i;
 }
 /*----------- end DECLARATIONS -----------*/
 
