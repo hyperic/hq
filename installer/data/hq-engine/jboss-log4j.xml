@@ -175,7 +175,7 @@
   
   <!-- Use this category to log every instance of a group alert firing.
 	   Comment out if the log messages become unwieldy.
-  <category name="  org.hyperic.hq.galerts.processor.MemGalertDef.Fired">
+  <category name="org.hyperic.hq.galerts.processor.MemGalertDef.Fired">
     <priority value="DEBUG" />
   </category>
   -->
