@@ -16,6 +16,7 @@ import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
@@ -69,6 +70,8 @@ public interface ServerManager {
         VetoException;
 
     public void handleResourceDelete(Resource resource);
+    
+    ServerType createServerType(ServerTypeInfo sinfo, String plugin) throws NotFoundException;
 
     /**
      * Find all server types

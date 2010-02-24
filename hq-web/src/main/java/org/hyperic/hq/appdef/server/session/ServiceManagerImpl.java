@@ -1369,14 +1369,10 @@ public class ServiceManagerImpl implements ServiceManager {
                 }
             }
 
-            Resource prototype = resourceManager.findRootResource();
+           
 
             // Now create the left-overs
             for (ServiceTypeInfo sinfo : infoMap.values()) {
-
-                ServiceType stype = serviceTypeDAO.create(sinfo.getName(), plugin, sinfo.getDescription(), sinfo
-                    .getInternal());
-
                 // Lookup the server type
                 ServerType servType;
                 if (serverTypes.containsKey(sinfo.getServerName())) {
@@ -1385,14 +1381,22 @@ public class ServiceManagerImpl implements ServiceManager {
                     servType = serverTypeDAO.findByName(sinfo.getServerName());
                     serverTypes.put(servType.getName(), servType);
                 }
-                stype.setServerType(servType);
-                resourceManager.createResource(overlord, resourceManager
-                    .findResourceTypeByName(AuthzConstants.servicePrototypeTypeName), prototype, stype.getId(), stype
-                    .getName(), false, null);
+                createServiceType(sinfo, plugin, servType);
             }
         } finally {
             serviceTypeDAO.getSession().flush();
         }
+    }
+    
+    public ServiceType createServiceType(ServiceTypeInfo sinfo, String plugin, ServerType servType) throws NotFoundException {
+        Resource prototype = resourceManager.findRootResource();
+        ServiceType stype = serviceTypeDAO.create(sinfo.getName(), plugin, sinfo.getDescription(), sinfo
+            .getInternal());
+        stype.setServerType(servType);
+        resourceManager.createResource(authzSubjectManager.getOverlordPojo(), resourceManager
+            .findResourceTypeByName(AuthzConstants.servicePrototypeTypeName), prototype, stype.getId(), stype
+            .getName(), false, null);
+        return stype;
     }
 
     /**

@@ -23,6 +23,15 @@ import org.hyperic.util.pager.PageList;
  * Local interface for PlatformManager.
  */
 public interface PlatformManager {
+    
+    /**
+     * Create a PlatformType
+     * @param name The name of the platform type
+     * @param plugin The name of the plugin managing the platformType
+     * @return
+     * @throws NotFoundException
+     */
+    PlatformType createPlatformType(String name, String plugin) throws NotFoundException;
     /**
      * Find a PlatformType by id
      */
