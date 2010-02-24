@@ -1,6 +1,5 @@
 package org.hyperic.hq.context;
 
-import java.util.Arrays;
 import java.util.Collection;
 
 import org.springframework.beans.BeansException;
@@ -48,5 +47,9 @@ public class Bootstrap  {
             e.printStackTrace();
         }
         return null;
+    }
+    
+    public static boolean hasAppContext() {
+        return Bootstrap.appContext != null;
     }
 }

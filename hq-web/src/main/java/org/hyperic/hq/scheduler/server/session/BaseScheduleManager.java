@@ -133,8 +133,6 @@ public abstract class BaseScheduleManager {
         try {
             conn = dbUtil.getConnection();
             this.dbType = DBUtil.getDBType(conn);
-        } catch (NamingException e) {
-            throw new SystemException(e);
         } catch (SQLException e) {
             // log and continue
         } finally {

@@ -294,7 +294,7 @@ public class DBUtil {
     /**
      * get a connection for a datasource
      */
-    public Connection getConnection() throws SQLException, NamingException {
+    public Connection getConnection() throws SQLException {
         return dataSource.getConnection();
     }
 

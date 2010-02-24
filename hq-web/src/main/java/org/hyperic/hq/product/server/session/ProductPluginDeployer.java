@@ -123,9 +123,7 @@ public class ProductPluginDeployer implements Comparator<String> {
             }
         } catch (SQLException e) {
             log.error("SQLException creating connection: ", e);
-        } catch (NamingException e) {
-            log.error("NamingException creating connection: ", e);
-        } finally {
+        }  finally {
             DBUtil.closeConnection(ProductPluginDeployer.class, conn);
         }
     }
