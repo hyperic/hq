@@ -67,6 +67,8 @@ import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
 import org.hyperic.hq.events.server.session.SessionBase;
 import org.hyperic.hq.escalation.server.session.EscalatableCreator;
 import org.hyperic.hq.galerts.server.session.GalertEscalationAlertType;
+import org.hyperic.hq.galerts.server.session.GalertLog;
+import org.hyperic.hq.galerts.server.session.GalertManagerEJBImpl;
 import org.hyperic.util.units.FormattedNumber;
 import org.hyperic.util.units.UnitNumber;
 import org.hyperic.util.units.UnitsConstants;
@@ -84,8 +86,9 @@ import org.hyperic.util.units.UnitsFormat;
 public class EscalationManagerEJBImpl
     implements SessionBean 
 {
-    private final Log _log = LogFactory.getLog(EscalationManagerEJBImpl.class);
-
+    private final Log log = LogFactory.getLog(EscalationManagerEJBImpl.class);
+    private final boolean debug = log.isDebugEnabled();
+    
     private final EscalationDAO       _esclDAO;
     private final EscalationStateDAO  _stateDAO;
     
@@ -230,16 +233,19 @@ public class EscalationManagerEJBImpl
             EscalationAlertType aType = (EscalationAlertType)i.next();
             
             if (aType.escalationInUse(e)) {
-                if (_log.isDebugEnabled()) {
-                    _log.debug("Escalation [" + e.getId() + ", " + e.getName() +
+                if (debug) {
+                    log.debug("Escalation [" + e.getId() + ", " + e.getName() +
                                "] in use by:");
+                    
                     Collection performers = aType.getPerformersOfEscalation(e);
+                    
                     for (Iterator j=performers.iterator(); j.hasNext(); ) {
                         PerformsEscalations p = (PerformsEscalations)j.next();
                         
-                        _log.debug("[" + p.getName() + " id=" + p.getId() +"]");
+                        log.debug("[" + p.getName() + " id=" + p.getId() +"]");
                     }
                 }
+                
                 throw new ApplicationException("The escalation is currently " +
                                                "in use");
             }
@@ -343,12 +349,12 @@ public class EscalationManagerEJBImpl
                 if (!alert.getAlertInfo().isFixed()) {
 	                EscalationState curState = new EscalationState(alert);
 	                _stateDAO.save(curState);
-	                _log.debug("Escalation started: state=" + curState.getId());
+	                log.debug("Escalation started: state=" + curState.getId());
 	                EscalationRuntime.getInstance().scheduleEscalation(curState);    
 	                started = true;
                 }
             } catch (ResourceDeletedException e) {
-                _log.debug(e);
+                log.debug(e);
             } finally {
                 if (!started) {
                     EscalationRuntime.getInstance()
@@ -357,7 +363,7 @@ public class EscalationManagerEJBImpl
             }
         
         } catch (InterruptedException e) {
-            _log.error("Failed to start escalation for " +
+            log.error("Failed to start escalation for " +
                        "alert def id="+def.getId()+
                        "; type="+def.getAlertType().getCode(), e);
         }
@@ -376,7 +382,7 @@ public class EscalationManagerEJBImpl
             // Checks if there is a committed escalation state for this def.
             existsInDb = _stateDAO.find(def) != null;                
         } catch (Exception e) {
-            _log.warn("There is already one escalation in progress for " +
+            log.warn("There is already one escalation in progress for " +
                     "alert def id="+def.getId()+
                     "; type="+def.getAlertType().getCode());
           // HHQ-915: A hibernate exception will occur when looking up the 
@@ -411,7 +417,7 @@ public class EscalationManagerEJBImpl
         }
                 
         if (existsInCache || existsInDb) {
-            _log.debug("startEscalation called on [" + def + "] but it was " +
+            log.debug("startEscalation called on [" + def + "] but it was " +
             "already running");            
         }
         
@@ -490,31 +496,54 @@ public class EscalationManagerEJBImpl
         
         // XXX -- Need to make sure the application is running before
         //        we allow this to proceed
-        final boolean debug = _log.isDebugEnabled();
-        if (debug) _log.debug("Executing state[" + s.getId() + "]");
+        if (debug) log.debug("Executing state[" + s.getId() + "]");
         if (actionIdx >= e.getActions().size()) {
             if (e.isRepeat() && e.getActions().size() > 0) {
                 actionIdx = 0;          // Loop back
             }
             else {
-                if (debug) _log.debug("Reached the end of the escalation state[" + 
+                if (debug) log.debug("Reached the end of the escalation state[" + 
                                       s.getId() + "].  Ending it");
                 endEscalation(s);
                 return;
             }
         }
-        
+
         eAction = (EscalationAction)e.getActions().get(actionIdx);
         action = eAction.getAction();
 
-        AlertDAO dao = DAOFactory.getDAOFactory().getAlertDAO();
-        Alert alert = dao.getById(new Integer(s.getAlertId()));
-        // HHQ-3499, need to make sure that the alertId that is pointed to by
-        // the escalation still exists
-        if (alert == null) {
-            endEscalation(s);
-            return;
+        // TODO this needs to be looked at further.  Ideally, I should be able to 
+        //      call getEscalatables and do a simple null check or catch an expected
+        //      HQ exception and not worry about checking for alert types explicitly
+        //      but after talking with folks about it, sounds like it would require 
+        //      touching a lot more plumbing code...
+        EscalationAlertType alertType = s.getAlertType();
+        boolean isAlertNotFound = true;
+        
+        try {
+            if (alertType instanceof GalertEscalationAlertType) {
+                isAlertNotFound = (GalertManagerEJBImpl.getOne().findAlertLog(s.getAlertId()) == null);
+            } else if (alertType instanceof ClassicEscalationAlertType) {
+                // HHQ-3499, need to make sure that the alertId that is pointed to by
+                // the escalation still exists
+                AlertDAO dao = DAOFactory.getDAOFactory().getAlertDAO();
+                
+                isAlertNotFound = (dao.getById(new Integer(s.getAlertId())) == null);
+            } 
+        } catch(Exception ex) {
+            log.warn("An unexpected error has occurred while checking if alert with id[" + s.getAlertId() + " and escalation type [" + s.getAlertType().getClass().getName() + "] exists.", ex);
+            // ...could not determine whether or not the alert exists, so we'll assume it doesn't and 
+            // end the escalation below...
         }
+        
+        if (isAlertNotFound) {
+            if (debug) log.debug("Alert with id[" + s.getAlertId() + " and escalation type [" + s.getAlertType().getClass().getName() + "] was not found. Canceling escalation...");
+            
+            endEscalation(s);
+            
+            return;            
+        }
+        
         Escalatable esc = getEscalatable(s);
         
         // HQ-1348: End escalation if alert is already fixed
@@ -530,7 +559,7 @@ public class EscalationManagerEJBImpl
         long nextTime = System.currentTimeMillis() + 
             Math.max(offset, eAction.getWaitTime());
             
-        if (debug) _log.debug("Moving onto next state of escalation, but chillin' for "
+        if (debug) log.debug("Moving onto next state of escalation, but chillin' for "
                               + eAction.getWaitTime() + " ms");
         s.setNextAction(actionIdx + 1);
         s.setNextActionTime(nextTime);
@@ -555,7 +584,7 @@ public class EscalationManagerEJBImpl
             String detail = action.executeAction(esc.getAlertInfo(), execInfo);            
             type.logActionDetails(esc, action, detail, null);
         } catch(Exception exc) {
-            _log.error("Unable to execute action [" + 
+            log.error("Unable to execute action [" + 
                        action.getClassName() + "] for escalation definition [" +
                        s.getEscalation().getName() + "]", exc);
         }
@@ -711,7 +740,7 @@ public class EscalationManagerEJBImpl
         // Strange condition, since we shouldn't have an escalation state if
         // it has been fixed.
         if (e.getAlertInfo().isFixed()) {
-            _log.warn("Found a fixed alert inside an escalation.  alert=" + 
+            log.warn("Found a fixed alert inside an escalation.  alert=" + 
                       alertId + " defid=" + def.getDefinitionInfo().getId() + 
                       " alertType=" + state.getAlertType().getCode());
             return false;
@@ -764,14 +793,14 @@ public class EscalationManagerEJBImpl
         boolean acknowledged = !fixed;
         
         if (esc.getAlertInfo().isFixed()) {
-            _log.warn(subject.getFullName() + " attempted to fix or " +
+            log.warn(subject.getFullName() + " attempted to fix or " +
                       " acknowledge the " + type + " id=" + alertId + 
                       " but it was already fixed"); 
             return;
         }
         
         if (state == null && acknowledged) {
-            _log.debug(subject.getFullName() + " acknowledged alertId[" + 
+            log.debug(subject.getFullName() + " acknowledged alertId[" + 
                        alertId + "] for type [" + type + "], but it wasn't " +
                        "running or was previously acknowledged.  " + 
                        "Button Masher?");
@@ -786,7 +815,7 @@ public class EscalationManagerEJBImpl
             if (moreInfo == null || moreInfo.trim().length() == 0)
                 moreInfo = "(Fixed by " + subject.getFullName() + ")";
             
-            _log.debug(subject.getFullName() + " has fixed alertId=" + alertId);
+            log.debug(subject.getFullName() + " has fixed alertId=" + alertId);
             type.changeAlertState(esc, subject, EscalationStateChange.FIXED);
             type.logActionDetails(esc, null, moreInfo, subject);
             if (state != null)
@@ -797,13 +826,13 @@ public class EscalationManagerEJBImpl
             }
             
             if (state.getAcknowledgedBy() != null) {
-                _log.warn(subject.getFullName() + " attempted to acknowledge "+
+                log.warn(subject.getFullName() + " attempted to acknowledge "+
                           type + " alert=" + alertId + " but it was already "+
                           "acknowledged by " + 
                           state.getAcknowledgedBy().getFullName());
                 return;
             }
-            _log.debug(subject.getFullName() + " has acknowledged alertId=" + 
+            log.debug(subject.getFullName() + " has acknowledged alertId=" + 
                        alertId);
             type.changeAlertState(esc, subject,
                                   EscalationStateChange.ACKNOWLEDGED);
@@ -857,7 +886,7 @@ public class EscalationManagerEJBImpl
                 Notify n = (Notify) a.getInitializedAction();
                 n.send(alert, EscalationStateChange.FIXED, msg, notified);
             } catch(Exception e) {
-                _log.warn("Unable to send fixed notification alert", e);
+                log.warn("Unable to send fixed notification alert", e);
             }
         }
     }
@@ -894,7 +923,7 @@ public class EscalationManagerEJBImpl
                                       EscalationStateChange.ACKNOWLEDGED,
                        msg, notified);
             } catch(Exception e) {
-                _log.warn("Unable to send notification alert", e);
+                log.warn("Unable to send notification alert", e);
             }
         }
         
@@ -977,7 +1006,7 @@ public class EscalationManagerEJBImpl
      * @ejb:interface-method  
      */
     public void startup() {
-        _log.info("Starting up Escalation subsystem");
+        log.info("Starting up Escalation subsystem");
         
         // Need to initialize the types that we know
         EscalationAlertType[] types = new EscalationAlertType[] {
@@ -985,13 +1014,13 @@ public class EscalationManagerEJBImpl
                 GalertEscalationAlertType.GALERT
         };
         
-        boolean debugLog = _log.isDebugEnabled();
+        boolean debugLog = log.isDebugEnabled();
         
         for (Iterator i=_stateDAO.findAll().iterator(); i.hasNext(); ) {
             EscalationState state = (EscalationState)i.next();
             
             if (debugLog) {
-            	_log.debug("Loading escalation state [" + state.getId() + "]");
+            	log.debug("Loading escalation state [" + state.getId() + "]");
             }
             EscalationRuntime.getInstance().scheduleEscalation(state);
         }
