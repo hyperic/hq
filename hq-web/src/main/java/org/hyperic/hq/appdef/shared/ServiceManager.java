@@ -10,6 +10,7 @@ import java.util.Map;
 import org.hyperic.hq.appdef.ServiceCluster;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.Server;
+import org.hyperic.hq.appdef.server.session.ServerType;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -20,6 +21,7 @@ import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.product.ServiceTypeInfo;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
@@ -111,6 +113,8 @@ public interface ServiceManager {
     public ServiceType findServiceTypeByName(String name);
 
     public Collection<Service> findDeletedServices();
+    
+    ServiceType createServiceType(ServiceTypeInfo sinfo, String plugin, ServerType servType) throws NotFoundException;
 
     public PageList<ServiceTypeValue> getAllServiceTypes(AuthzSubject subject, PageControl pc);
 

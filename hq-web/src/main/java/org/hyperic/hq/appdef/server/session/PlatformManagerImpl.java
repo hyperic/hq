@@ -1634,18 +1634,23 @@ public class PlatformManagerImpl implements PlatformManager {
             }
         }
 
-        Resource prototype = resourceManager.findRootResource();
-        AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
+       
 
         // Now create the left-overs
         for (PlatformTypeInfo pinfo : infoMap.values()) {
-
-            log.debug("Creating new PlatformType: " + pinfo.getName());
-            PlatformType pt = platformTypeDAO.create(pinfo.getName(), plugin);
-            resourceManager.createResource(overlord, resourceManager
-                .findResourceTypeByName(AuthzConstants.platformPrototypeTypeName), prototype, pt.getId(), pt.getName(),
-                false, null);
+            createPlatformType(pinfo.getName(),plugin);
         }
+    }
+    
+    public PlatformType createPlatformType(String name, String plugin) throws NotFoundException {
+        log.debug("Creating new PlatformType: " + name);
+        Resource prototype = resourceManager.findRootResource();
+        AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
+        PlatformType pt = platformTypeDAO.create(name, plugin);
+        resourceManager.createResource(overlord, resourceManager
+            .findResourceTypeByName(AuthzConstants.platformPrototypeTypeName), prototype, pt.getId(), pt.getName(),
+            false, null);
+        return pt;
     }
 
     /**

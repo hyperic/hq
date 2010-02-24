@@ -1399,26 +1399,31 @@ public class ServerManagerImpl implements ServerManager {
             }
         }
 
-        Resource prototype = resourceManager.findRootResource();
+       
 
         // Now create the left-overs
         for (ServerTypeInfo sinfo : infoMap.values()) {
-
-            ServerType stype = new ServerType();
-
-            log.debug("Creating new ServerType: " + sinfo.getName());
-            stype.setPlugin(plugin);
-            stype.setName(sinfo.getName());
-            stype.setDescription(sinfo.getDescription());
-            stype.setVirtual(sinfo.isVirtual());
-            String newPlats[] = sinfo.getValidPlatformTypes();
-            findAndSetPlatformType(newPlats, stype);
-
-            stype = serverTypeDAO.create(stype);
-            resourceManager.createResource(overlord, resourceManager
-                .findResourceTypeByName(AuthzConstants.serverPrototypeTypeName), prototype, stype.getId(), stype
-                .getName(), false, null); // No parent
+            createServerType(sinfo,plugin);
         }
+    }
+    
+    public ServerType createServerType(ServerTypeInfo sinfo, String plugin) throws NotFoundException {
+        Resource prototype = resourceManager.findRootResource();
+        ServerType stype = new ServerType();
+
+        log.debug("Creating new ServerType: " + sinfo.getName());
+        stype.setPlugin(plugin);
+        stype.setName(sinfo.getName());
+        stype.setDescription(sinfo.getDescription());
+        stype.setVirtual(sinfo.isVirtual());
+        String newPlats[] = sinfo.getValidPlatformTypes();
+        findAndSetPlatformType(newPlats, stype);
+
+        stype = serverTypeDAO.create(stype);
+        resourceManager.createResource(authzSubjectManager.getOverlordPojo(), resourceManager
+            .findResourceTypeByName(AuthzConstants.serverPrototypeTypeName), prototype, stype.getId(), stype
+            .getName(), false, null); // No parent
+        return stype;
     }
 
     /**
