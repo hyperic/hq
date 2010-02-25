@@ -1,24 +1,28 @@
 package org.hyperic.hq.measurement.server.session;
 
 import junit.framework.TestCase;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class AvailabilityCacheTest extends TestCase {
 
     private static Log _log = LogFactory.getLog(AvailabilityCacheTest.class);
-
-    private AvailabilityCache getClearedCache() {
-        AvailabilityCache cache = AvailabilityCache.getInstance();
-        cache.clear();
-        return cache;
+    private AvailabilityCache cache;
+    
+    public void setUp() throws Exception {
+        super.setUp();
+        this.cache = new AvailabilityCache();
     }
 
+    public void tearDown() throws Exception {
+        super.tearDown();
+        cache.clear();
+    }
+  
     public void testCacheTransactionThreads() throws Exception {
-        AvailabilityCache cache = getClearedCache();
         Thread thread = new Thread() {
             public void run() {
-                AvailabilityCache cache = AvailabilityCache.getInstance();
                 int id = 0;
                 cache.beginTran();
                 DataPoint dp = new DataPoint(id, 1.0, 1);
@@ -51,7 +55,6 @@ public class AvailabilityCacheTest extends TestCase {
     }
 
     public void testCacheTransaction2() throws Exception {
-        AvailabilityCache cache = getClearedCache();
         int id = 0;
         DataPoint first = new DataPoint(id, 0.0, 0);
         cache.put(new Integer(id), first);
@@ -68,7 +71,6 @@ public class AvailabilityCacheTest extends TestCase {
     }
 
     public void testCacheTransaction1() throws Exception {
-        AvailabilityCache cache = getClearedCache();
         int id = 0;
         DataPoint first = new DataPoint(id, 0.0, 0);
         cache.put(new Integer(id), first);
@@ -85,8 +87,6 @@ public class AvailabilityCacheTest extends TestCase {
     }
     
     public void testCacheTransaction0() throws Exception {
-        AvailabilityCache cache = getClearedCache();
-
         cache.beginTran();
         int id = 0;
         DataPoint dp = new DataPoint(id, 0, 0);
@@ -100,9 +100,7 @@ public class AvailabilityCacheTest extends TestCase {
      * Test a full load of the cache.
      * @throws Exception If any error occurs within the test.
      */
-    public void testLoadFull() throws Exception {
-        AvailabilityCache cache = getClearedCache();
-        
+    public void testLoadFull() throws Exception { 
         int i = 0;
         long start = System.currentTimeMillis();
         DataPoint dp = new DataPoint(0, 0, 0);
@@ -121,8 +119,6 @@ public class AvailabilityCacheTest extends TestCase {
      * @throws Exception If any error occurs within the test.
      */
     public void testLoadFullOneUpdate() throws Exception {
-        AvailabilityCache cache = getClearedCache();
-
         int i = 0;
         DataPoint dp = new DataPoint(0, 0, 0);
         for (; i < AvailabilityCache.CACHESIZE; i++) {
@@ -139,8 +135,6 @@ public class AvailabilityCacheTest extends TestCase {
      * @throws Exception If any error occurs within the test.
      */
     public void testUpdates() throws Exception {
-        AvailabilityCache cache = getClearedCache();
-
         DataPoint dp = new DataPoint(0, 0, 0);
         int i = 0;
         for (; i < 10; i++) {
@@ -157,8 +151,6 @@ public class AvailabilityCacheTest extends TestCase {
      * @throws Exception If any error occurs within the test.
      */
     public void testGet() throws Exception {
-        AvailabilityCache cache = getClearedCache();
-
         DataPoint dp = new DataPoint(0, 0, System.currentTimeMillis());
         cache.put(new Integer(0), dp);
 
@@ -176,8 +168,6 @@ public class AvailabilityCacheTest extends TestCase {
      * @throws Exception If any error occurs within the test.
      */
     public void testGetDefaultState() throws Exception {
-        AvailabilityCache cache = getClearedCache();
-
         DataPoint defaultState = new DataPoint(0, 0, System.currentTimeMillis());
 
         // Test the default was returned
@@ -195,8 +185,6 @@ public class AvailabilityCacheTest extends TestCase {
      * @throws Exception If any error occurs within the test.
      */
     public void testCacheIncrement() throws Exception {
-        AvailabilityCache cache = getClearedCache();
-
         int i = 0;
         DataPoint dp = new DataPoint(0, 0, 0);
         for (; i < AvailabilityCache.CACHESIZE * 2; i++) {

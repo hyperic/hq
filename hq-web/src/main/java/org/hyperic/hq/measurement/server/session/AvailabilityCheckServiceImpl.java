@@ -64,12 +64,14 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
     private boolean isRunning = false;
     private AvailabilityManager availabilityManager;
     private PermissionManager permissionManager;
+    private AvailabilityCache availabilityCache;
 
     @Autowired
     public AvailabilityCheckServiceImpl(AvailabilityManager availabilityManager,
-                                        PermissionManager permissionManager) {
+                                        PermissionManager permissionManager, AvailabilityCache availabilityCache) {
         this.availabilityManager = availabilityManager;
         this.permissionManager = permissionManager;
+        this.availabilityCache = availabilityCache;
     }
 
     // End is at least more than 1 interval away
@@ -98,21 +100,21 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
      */
     private Map<Integer, ResourceDataPoint> getDownPlatforms(long timeInMillis) {
         final boolean debug = log.isDebugEnabled();
-        AvailabilityCache cache = AvailabilityCache.getInstance();
+       
 
         List<Measurement> platformResources = availabilityManager.getPlatformResources();
         final long now = TimingVoodoo.roundDownTime(timeInMillis, MeasurementConstants.MINUTE);
         final String nowTimestamp = TimeUtil.toString(now);
         Map<Integer, ResourceDataPoint> rtn = new HashMap<Integer, ResourceDataPoint>(platformResources.size());
         Resource resource = null;
-        synchronized (cache) {
+        synchronized (availabilityCache) {
             for (Measurement meas : platformResources) {
 
                 long interval = meas.getInterval();
                 long end = getEndWindow(now, meas);
                 long begin = getBeginWindow(end, meas);
                 DataPoint defaultPt = new DataPoint(meas.getId().intValue(), AVAIL_NULL, end);
-                DataPoint last = cache.get(meas.getId(), defaultPt);
+                DataPoint last = availabilityCache.get(meas.getId(), defaultPt);
                 long lastTimestamp = last.getTimestamp();
                 if (debug) {
                     String msg = "Checking availability for " + last + ", CacheValue=(" +
@@ -177,7 +179,7 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
                 log.info("not starting availability check");
                 return;
             }
-            AvailabilityCache cache = AvailabilityCache.getInstance();
+           
             synchronized (IS_RUNNING_LOCK) {
                 if (isRunning) {
                     log.warn("Availability Check Service is already running, " + "bailing out");
@@ -195,7 +197,7 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
                 // The code must be extremely efficient or else it will have
                 // a big impact on the performance of availability insertion.
                 Map<Integer, DataPoint> backfillPoints = null;
-                synchronized (cache) {
+                synchronized (availabilityCache) {
                     Map<Integer, ResourceDataPoint> downPlatforms = getDownPlatforms(current);
                     backfillPoints = getBackfillPts(downPlatforms, current);
                     backfillAvails(new ArrayList<DataPoint>(backfillPoints.values()));
@@ -236,7 +238,7 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
     private Map<Integer, DataPoint> getBackfillPts(Map<Integer, ResourceDataPoint> downPlatforms, long current) {
         final boolean debug = log.isDebugEnabled();
 
-        final AvailabilityCache cache = AvailabilityCache.getInstance();
+       
         final Map<Integer, DataPoint> rtn = new HashMap<Integer, DataPoint>();
         final List<Integer> resourceIds = new ArrayList<Integer>(downPlatforms.keySet());
         final Map<Integer, List<Measurement>> rHierarchy = availabilityManager.getAvailMeasurementChildren(resourceIds,
@@ -268,7 +270,7 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
                 }
                 final long end = getEndWindow(current, meas);
                 final DataPoint defaultPt = new DataPoint(meas.getId().intValue(), AVAIL_NULL, end);
-                final DataPoint lastPt = cache.get(meas.getId(), defaultPt);
+                final DataPoint lastPt = availabilityCache.get(meas.getId(), defaultPt);
                 final long backfillTime = lastPt.getTimestamp() + meas.getInterval();
                 if (backfillTime > current) {
                     continue;

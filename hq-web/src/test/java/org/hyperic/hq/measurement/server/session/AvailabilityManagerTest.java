@@ -48,6 +48,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,6 +60,7 @@ import org.springframework.transaction.annotation.Transactional;
 @ContextConfiguration(loader    = TestContextLoader.class,
                       locations = { "classpath:META-INF/spring/*-context.xml",
                                     "AvailabilityManagerTest-context.xml" })
+@DirtiesContext
 public class AvailabilityManagerTest {
 
     private final Log log = LogFactory.getLog(AvailabilityManagerTest.class);
@@ -77,6 +79,9 @@ public class AvailabilityManagerTest {
     private AvailabilityCheckService availabilityCheckService;
     @Autowired
     private DatabasePopulator dbPopulator;
+    
+    @Autowired
+    private AvailabilityCache availabilityCache;
 
     public AvailabilityManagerTest() {
     }
@@ -231,13 +236,13 @@ public class AvailabilityManagerTest {
                          avail.getAvailVal();
             log.error(msg);
         }
-        AvailabilityCache cache = AvailabilityCache.getInstance();
+       
         if (id == null) {
             return;
         }
-        synchronized (cache) {
-            log.error("Cache info -> " + cache.get(id).getTimestamp() + ", " +
-                       cache.get(id).getValue());
+        synchronized (availabilityCache) {
+            log.error("Cache info -> " + availabilityCache.get(id).getTimestamp() + ", " +
+                       availabilityCache.get(id).getValue());
         }
     }
 
@@ -469,8 +474,7 @@ public class AvailabilityManagerTest {
     }
 
     private void setupAvailabilityTable() throws Exception {
-        AvailabilityCache cache = AvailabilityCache.getInstance();
-        cache.clear();
+        availabilityCache.clear();
         dao.getSession().clear();
         boolean descending = false;
         long start = 0l;
@@ -486,8 +490,7 @@ public class AvailabilityManagerTest {
     }
 
     private void setupAvailabilityTable(Integer measId) throws Exception {
-        AvailabilityCache cache = AvailabilityCache.getInstance();
-        cache.clear();
+        availabilityCache.clear();
         dao.getSession().clear();
         boolean descending = false;
         long start = 0l;
@@ -527,8 +530,8 @@ public class AvailabilityManagerTest {
             }
             last = avail;
         }
-        AvailabilityCache cache = AvailabilityCache.getInstance();
-        if (cache.get(measId).getValue() != lastPt.getValue()) {
+       
+        if (availabilityCache.get(measId).getValue() != lastPt.getValue()) {
             log.error("last avail data point does not match cache");
             return false;
         }

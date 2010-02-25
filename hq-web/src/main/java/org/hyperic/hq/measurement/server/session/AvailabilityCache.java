@@ -34,6 +34,7 @@ import net.sf.ehcache.Element;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.stereotype.Repository;
 
 /**
  * Dynamic EhCache that is allowed to grow over time as needed.
@@ -42,6 +43,7 @@ import org.apache.commons.logging.LogFactory;
  * and due to its nature may not have the data being sought at any given time.
  * Use AvailabilityManager.getLastAvail().
  */
+@Repository
 public class AvailabilityCache {
 
     // Default configuration
@@ -55,16 +57,16 @@ public class AvailabilityCache {
     private boolean _inTran = false;
 
     // The internal EhCache
-    private static Cache _cache;
+    private Cache _cache;
     // Cache.getSize() is expensive so we keep out own cache size count.
-    private static int _cacheMaxSize;
-    private static int _cacheSize;
+    private int _cacheMaxSize;
+    private int _cacheSize;
 
-    private static Log _log = LogFactory.getLog(AvailabilityCache.class);
+    private final Log _log = LogFactory.getLog(AvailabilityCache.class);
 
-    private static final AvailabilityCache _instance = new AvailabilityCache();
+   
 
-    private AvailabilityCache() {
+    public AvailabilityCache() {
         CacheManager cm = CacheManager.getInstance();
         // Allow configuration of this cache throgh ehcache.xml
         _cache = cm.getCache(CACHENAME);
@@ -80,27 +82,18 @@ public class AvailabilityCache {
         _cacheMaxSize = _cache.getCacheConfiguration().getMaxElementsInMemory();
     }
 
-    /**
-     * DO NOT USE THIS unless it is to maintain Availability RLE state as in
-     * AvailabilityManager.addData() OR Backfiller operations!!!
-     * Use {@link AvailabilityManager.getLastAvail}
-     * @return The singleton instance of the AvailabilityCache.
-     */
-    public static AvailabilityCache getInstance() {
-        return _instance;
-    }
+   
     
     private void captureCacheState(Integer metricId) {
         synchronized (_tranCacheState) {
             if (!_inTran || !Thread.currentThread().equals(_tranThread)) {
                 return;
             }
-            AvailabilityCache cache = AvailabilityCache.getInstance();
             if (_tranCacheState.containsKey(metricId)) {
                 return;
             }
             DataPoint pt;
-            pt = (DataPoint)cache.get(metricId);
+            pt = (DataPoint)get(metricId);
             // doesn't matter if point is null
             _tranCacheState.put(metricId, pt);
         }

@@ -27,30 +27,35 @@ package org.hyperic.hq.measurement.server.session;
 
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.context.Bootstrap;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class SRNCache {
 
     // The cache name, must match the definition in ehcache.xml
-    private static String CACHENAME = "SRNCache";
+    private static final String CACHENAME = "SRNCache";
 
-    private static Cache cache;
+    private Cache cache;
 
-    private static SRNCache singleton = new SRNCache();
+    private ScheduleRevNumDAO scheduleRevNumDAO;
 
-    private ScheduleRevNumDAO scheduleRevNumDAO = Bootstrap.getBean(ScheduleRevNumDAO.class);
+    @Autowired
+    public SRNCache(ScheduleRevNumDAO scheduleRevNumDAO) {
+        this.scheduleRevNumDAO = scheduleRevNumDAO;
 
-    public static SRNCache getInstance() {
-        return singleton;
     }
 
-    private SRNCache() {
-        cache = CacheManager.getInstance().getCache(CACHENAME);
+    @PostConstruct
+    public void initEhCache() {
+        this.cache = CacheManager.getInstance().getCache(CACHENAME);
     }
 
     /**
@@ -74,8 +79,8 @@ public class SRNCache {
 
     /**
      * Get the SRN entry from the cache falling back to loading from the
-     * database if the SRN is not found. Since the SRNCache is pre-populated
-     * the fallback to the database should only occur in clustered setups.
+     * database if the SRN is not found. Since the SRNCache is pre-populated the
+     * fallback to the database should only occur in clustered setups.
      */
     public ScheduleRevNum get(SrnId id) {
         Element el = cache.get(id);
