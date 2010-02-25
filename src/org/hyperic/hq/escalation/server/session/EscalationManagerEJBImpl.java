@@ -60,14 +60,12 @@ import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.Notify;
 import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.ActionManagerEJBImpl;
-import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertDAO;
 import org.hyperic.hq.events.server.session.AlertRegulator;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
 import org.hyperic.hq.events.server.session.SessionBase;
 import org.hyperic.hq.escalation.server.session.EscalatableCreator;
 import org.hyperic.hq.galerts.server.session.GalertEscalationAlertType;
-import org.hyperic.hq.galerts.server.session.GalertLog;
 import org.hyperic.hq.galerts.server.session.GalertManagerEJBImpl;
 import org.hyperic.util.units.FormattedNumber;
 import org.hyperic.util.units.UnitNumber;
@@ -86,9 +84,7 @@ import org.hyperic.util.units.UnitsFormat;
 public class EscalationManagerEJBImpl
     implements SessionBean 
 {
-    private final Log log = LogFactory.getLog(EscalationManagerEJBImpl.class);
-    private final boolean debug = log.isDebugEnabled();
-    
+    private final Log log = LogFactory.getLog(EscalationManagerEJBImpl.class);    
     private final EscalationDAO       _esclDAO;
     private final EscalationStateDAO  _stateDAO;
     
@@ -226,6 +222,8 @@ public class EscalationManagerEJBImpl
     public void deleteEscalation(AuthzSubject subject, Escalation e) 
         throws PermissionException, ApplicationException
     {
+        final boolean debug = log.isDebugEnabled();
+
         SessionBase.canRemoveEscalation(subject.getId());
         
         List alertTypes = EscalationAlertType.getAll();
@@ -476,6 +474,8 @@ public class EscalationManagerEJBImpl
      * @ejb:interface-method  
      */
     public void executeState(Integer stateId) {
+        final boolean debug = log.isDebugEnabled();
+
         // Use a get() so that the state is retrieved from the 
         // database (in case the escalation state was deleted 
         // in a separate session when ending an escalation).
