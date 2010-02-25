@@ -58,13 +58,15 @@ public class SRNManagerImpl implements SRNManager {
     private AuthzSubjectManager authzSubjectManager;
     private MeasurementManager measurementManager;
     private ScheduleRevNumDAO scheduleRevNumDAO;
+    private SRNCache srnCache;
 
     @Autowired
     public SRNManagerImpl(AuthzSubjectManager authzSubjectManager, MeasurementManager measurementManager,
-                          ScheduleRevNumDAO scheduleRevNumDAO) {
+                          ScheduleRevNumDAO scheduleRevNumDAO, SRNCache srnCache) {
         this.authzSubjectManager = authzSubjectManager;
         this.measurementManager = measurementManager;
         this.scheduleRevNumDAO = scheduleRevNumDAO;
+        this.srnCache = srnCache;
     }
 
     // TODO resolve circular dependency
@@ -77,10 +79,8 @@ public class SRNManagerImpl implements SRNManager {
      * initialized.
      */
     public void initializeCache() {
-        SRNCache cache = SRNCache.getInstance();
-
-        synchronized (cache) {
-            if (cache.getSize() > 0) {
+        synchronized (srnCache) {
+            if (srnCache.getSize() > 0) {
                 return;
             }
 
@@ -88,7 +88,7 @@ public class SRNManagerImpl implements SRNManager {
             Collection<ScheduleRevNum> srns = scheduleRevNumDAO.findAll();
             log.info("Loaded " + srns.size() + " SRN entries.");
             for (ScheduleRevNum srn : srns) {
-                cache.put(srn);
+                srnCache.put(srn);
             }
 
             log.info("Fetching minimum metric collection intervals.");
@@ -98,11 +98,11 @@ public class SRNManagerImpl implements SRNManager {
             final boolean debug = log.isDebugEnabled();
             for (Object[] ent : entities) {
                 SrnId id = new SrnId(((Integer) ent[0]).intValue(), ((Integer) ent[1]).intValue());
-                ScheduleRevNum srn = cache.get(id);
+                ScheduleRevNum srn = srnCache.get(id);
                 if (srn == null) {
                     // Create the SRN if it does not exist.
                     srn = scheduleRevNumDAO.create(((Integer) ent[0]).intValue(), ((Integer) ent[1]).intValue());
-                    cache.put(srn);
+                    srnCache.put(srn);
                 }
                 if (debug) {
                     log.debug("Setting min interval to " + ((Long) ent[2]).longValue() + " for ent " + id);
@@ -121,8 +121,7 @@ public class SRNManagerImpl implements SRNManager {
      */
     @Transactional(readOnly=true)
     public ScheduleRevNum get(AppdefEntityID aid) {
-        SRNCache cache = SRNCache.getInstance();
-        return cache.get(aid);
+        return srnCache.get(aid);
     }
 
     /**
@@ -131,9 +130,8 @@ public class SRNManagerImpl implements SRNManager {
      * @param aid The AppdefEntityID to remove.
      */
     public void removeSrn(AppdefEntityID aid) {
-        SRNCache cache = SRNCache.getInstance();
         SrnId id = new SrnId(aid.getType(), aid.getID());
-        if (cache.remove(id)) {
+        if (srnCache.remove(id)) {
             scheduleRevNumDAO.remove(id);
         }
     }
@@ -145,9 +143,7 @@ public class SRNManagerImpl implements SRNManager {
      * @param newMin The new minimum interval
      * @return The ScheduleRevNum for the given entity id
      */
-    public int incrementSrn(AppdefEntityID aid, long newMin) {
-        SRNCache cache = SRNCache.getInstance();
-
+    public int incrementSrn(AppdefEntityID aid, long newMin) {        
         SrnId id = new SrnId(aid.getType(), aid.getID());
         ScheduleRevNum srn = scheduleRevNumDAO.get(id);
         final boolean debug = log.isDebugEnabled();
@@ -159,7 +155,7 @@ public class SRNManagerImpl implements SRNManager {
                 log.debug("Creating SRN for appdef id=" + aid.getID());
             }
             srn = scheduleRevNumDAO.create(aid.getType(), aid.getID());
-            cache.put(srn);
+            srnCache.put(srn);
             return srn.getSrn();
         }
 
@@ -184,7 +180,7 @@ public class SRNManagerImpl implements SRNManager {
                     srn.setMinInterval(defaultMin.longValue());
                 }
             }
-            cache.put(srn);
+            srnCache.put(srn);
         }
         return srn.getSrn();
     }
@@ -197,12 +193,11 @@ public class SRNManagerImpl implements SRNManager {
      *         corresponding appdef entity. (i.e. Out of sync)
      */
     public Collection<AppdefEntityID> reportAgentSRNs(SRN[] srns) {
-        SRNCache cache = SRNCache.getInstance();
         HashSet<AppdefEntityID> nonEntities = new HashSet<AppdefEntityID>();
         final boolean debug = log.isDebugEnabled();
 
         for (int i = 0; i < srns.length; i++) {
-            ScheduleRevNum srn = cache.get(srns[i].getEntity());
+            ScheduleRevNum srn = srnCache.get(srns[i].getEntity());
 
             if (srn == null) {
                 log.error("Agent's reporting for non-existing entity: " + srns[i].getEntity());
@@ -271,15 +266,14 @@ public class SRNManagerImpl implements SRNManager {
      */
     @Transactional(readOnly=true)
     public List<ScheduleRevNum> getOutOfSyncSRNs(int intervals) {
-        SRNCache cache = SRNCache.getInstance();
-        List<SrnId> srnIds = cache.getKeys();
+        List<SrnId> srnIds = srnCache.getKeys();
 
         ArrayList<ScheduleRevNum> toReschedule = new ArrayList<ScheduleRevNum>();
 
         long current = System.currentTimeMillis();
         final boolean debug = log.isDebugEnabled();
         for (SrnId id : srnIds) {
-            ScheduleRevNum srn = cache.get(id);
+            ScheduleRevNum srn = srnCache.get(id);
 
             long maxInterval = intervals * srn.getMinInterval();
             long curInterval = current - srn.getLastReported();
@@ -306,15 +300,14 @@ public class SRNManagerImpl implements SRNManager {
      * @return The new ScheduleRevNum object.
      */
     public ScheduleRevNum refreshSRN(AppdefEntityID eid) {
-        SRNCache cache = SRNCache.getInstance();
         ScheduleRevNum srn = scheduleRevNumDAO.create(eid.getType(), eid.getID());
 
-        cache.put(srn);
+        srnCache.put(srn);
 
         Long min = scheduleRevNumDAO.getMinInterval(eid);
         srn.setMinInterval(min.longValue());
 
-        cache.put(srn);
+        srnCache.put(srn);
 
         return srn;
     }

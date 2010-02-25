@@ -34,10 +34,13 @@ import org.springframework.stereotype.Component;
 public class SynchronousAvailDataInserter implements DataInserter {
     
     private final AvailabilityManager availabilityManager;
+    
+    private final AvailabilityCache availabilityCache;
 
     @Autowired
-    public SynchronousAvailDataInserter(AvailabilityManager availabilityManager) {
+    public SynchronousAvailDataInserter(AvailabilityManager availabilityManager, AvailabilityCache availabilityCache) {
         this.availabilityManager = availabilityManager;
+        this.availabilityCache = availabilityCache;
     }
 
     public void insertMetrics(List availData)
@@ -46,7 +49,7 @@ public class SynchronousAvailDataInserter implements DataInserter {
     }
 
     public Object getLock() {
-        return AvailabilityCache.getInstance();
+        return this.availabilityCache;
     }
 
     public void insertMetrics(List metricData, boolean isPriority)

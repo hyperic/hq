@@ -77,17 +77,19 @@ public class TemplateManagerImpl implements TemplateManager {
     private MonitorableTypeDAO monitorableTypeDAO;
     private ScheduleRevNumDAO scheduleRevNumDAO;
     private SRNManager srnManager;
+    private SRNCache srnCache;
 
     @Autowired
     public TemplateManagerImpl(CategoryDAO categoryDAO, MeasurementDAO measurementDAO,
                                MeasurementTemplateDAO measurementTemplateDAO, MonitorableTypeDAO monitorableTypeDAO,
-                               ScheduleRevNumDAO scheduleRevNumDAO, SRNManager srnManager) {
+                               ScheduleRevNumDAO scheduleRevNumDAO, SRNManager srnManager, SRNCache srnCache) {
         this.categoryDAO = categoryDAO;
         this.measurementDAO = measurementDAO;
         this.measurementTemplateDAO = measurementTemplateDAO;
         this.monitorableTypeDAO = monitorableTypeDAO;
         this.scheduleRevNumDAO = scheduleRevNumDAO;
         this.srnManager = srnManager;
+        this.srnCache = srnCache;
     }
 
     /**
@@ -336,11 +338,9 @@ public class TemplateManagerImpl implements TemplateManager {
             toReschedule.addAll(appdefEntityIds);
         }
 
-        SRNCache cache = SRNCache.getInstance();
-
         int count = 0;
         for (AppdefEntityID id : toReschedule) {
-            ScheduleRevNum srn = cache.get(id);
+            ScheduleRevNum srn = srnCache.get(id);
             if (srn != null) {
                 srnManager.incrementSrn(id, Math.min(interval, srn.getMinInterval()));
                 if (++count % 100 == 0) {

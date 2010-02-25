@@ -33,7 +33,7 @@
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/dnsjava-2.0.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/easymock-2.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/easymockclassextension-2.3.jar"/>
-	<classpathentry exported="true" kind="lib" path="thirdparty/lib/ehcache-1.5.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/ehcache-1.5.0.jar" sourcepath="thirdparty/lib-src/com.springsource.net.sf.ehcache-sources-1.5.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/getopt.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/groovy-all-1.6.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/henplus.jar"/>

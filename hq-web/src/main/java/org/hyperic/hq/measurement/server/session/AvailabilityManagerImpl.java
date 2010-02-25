@@ -112,17 +112,19 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     private MeasurementDAO measurementDAO;
     private MessagePublisher messagePublisher;
     private RegisteredTriggers registeredTriggers;
+    private AvailabilityCache availabilityCache;
 
     @Autowired
     public AvailabilityManagerImpl(ResourceManager resourceManager, MessagePublisher messenger,
                                    AvailabilityDataDAO availabilityDataDAO, MeasurementDAO measurementDAO,
-                                   MessagePublisher messagePublisher, RegisteredTriggers registeredTriggers) {
+                                   MessagePublisher messagePublisher, RegisteredTriggers registeredTriggers, AvailabilityCache availabilityCache) {
         this.resourceManager = resourceManager;
         this.messenger = messenger;
         this.availabilityDataDAO = availabilityDataDAO;
         this.measurementDAO = measurementDAO;
         this.messagePublisher = messagePublisher;
         this.registeredTriggers = registeredTriggers;
+        this.availabilityCache = availabilityCache;
     }
 
     // To break AvailabilityManager - MeasurementManager circular dependency
@@ -667,16 +669,16 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         }
         List<DataPoint> updateList = new ArrayList<DataPoint>(availPoints.size());
         List<DataPoint> outOfOrderAvail = new ArrayList<DataPoint>(availPoints.size());
-        AvailabilityCache cache = AvailabilityCache.getInstance();
+       
         Map<DataPoint, AvailabilityDataRLE> createMap = new HashMap<DataPoint, AvailabilityDataRLE>();
         Map<DataPoint, AvailabilityDataRLE> removeMap = new HashMap<DataPoint, AvailabilityDataRLE>();
         final boolean debug = _log.isDebugEnabled();
         long begin = -1;
         Map<Integer, StringBuilder> state = null;
         Map<Integer, TreeSet<AvailabilityDataRLE>> currAvails = Collections.EMPTY_MAP;
-        synchronized (cache) {
+        synchronized (availabilityCache) {
             try {
-                cache.beginTran();
+                availabilityCache.beginTran();
                 begin = getDebugTime(debug);
                 updateCache(availPoints, updateList, outOfOrderAvail);
                 debugTimes(begin, "updateCache", availPoints.size());
@@ -692,11 +694,11 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
                 flushCreateAndRemoves(createMap, removeMap);
                 logErrorInfo(state, availPoints, currAvails);
                 debugTimes(begin, "updateOutOfOrderState", outOfOrderAvail.size());
-                cache.commitTran();
+                availabilityCache.commitTran();
             } catch (Throwable e) {
                 logErrorInfo(state, availPoints, currAvails);
                 _log.error(e.getMessage(), e);
-                cache.rollbackTran();
+                availabilityCache.rollbackTran();
                 throw new SystemException(e);
             }
         }
@@ -842,8 +844,8 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         }
         Measurement meas = avail.getMeasurement();
         if (avail.getEndtime() == MAX_AVAIL_TIMESTAMP) {
-            AvailabilityCache cache = AvailabilityCache.getInstance();
-            DataPoint tmp = cache.get(pt.getMetricId());
+          
+            DataPoint tmp = availabilityCache.get(pt.getMetricId());
             if (tmp == null || pt.getTimestamp() >= tmp.getTimestamp()) {
                 updateAvailVal(avail, pt.getValue(), currAvails, createMap, removeMap);
             } else {
@@ -1146,7 +1148,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     private void updateStates(List<DataPoint> states, Map<Integer, TreeSet<AvailabilityDataRLE>> currAvails,
                               Map<DataPoint, AvailabilityDataRLE> createMap,
                               Map<DataPoint, AvailabilityDataRLE> removeMap) {
-        AvailabilityCache cache = AvailabilityCache.getInstance();
+       
         if (states.size() == 0) {
             return;
         }
@@ -1157,7 +1159,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             try {
                 // need to check again since there could be multiple
                 // states with the same id in the list
-                DataPoint currState = cache.get(state.getMetricId());
+                DataPoint currState = availabilityCache.get(state.getMetricId());
                 if (currState != null && currState.getValue() == state.getValue()) {
                     continue;
                 }
@@ -1166,7 +1168,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
                     _log.debug("state " + state + " was updated, cache updated: " + updateCache);
                 }
                 if (updateCache) {
-                    cache.put(state.getMetricId(), state);
+                    availabilityCache.put(state.getMetricId(), state);
                 }
             } catch (BadAvailStateException e) {
                 _log.warn(e.getMessage());
@@ -1195,7 +1197,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         if (availPoints.size() == 0) {
             return;
         }
-        AvailabilityCache cache = AvailabilityCache.getInstance();
+      
         final boolean debug = _log.isDebugEnabled();
         for (DataPoint pt : availPoints) {
             int id = pt.getMetricId().intValue();
@@ -1203,7 +1205,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             double val = mval.getValue();
             long timestamp = mval.getTimestamp();
             DataPoint newState = new DataPoint(id, val, timestamp);
-            DataPoint oldState = cache.get(new Integer(id));
+            DataPoint oldState = availabilityCache.get(new Integer(id));
             // we do not want to update the state if it changes
             // instead change it when the db is changed in order
             // to ensure the state of memory to db
@@ -1218,7 +1220,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
                     _log.debug(msg);
                 }
             } else {
-                cache.put(new Integer(id), newState);
+                availabilityCache.put(new Integer(id), newState);
             }
         }
     }
@@ -1341,12 +1343,12 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     }
 
     private Integer isAvailDataRLEValid(Map<Integer, TreeSet<AvailabilityDataRLE>> currAvails) {
-        AvailabilityCache cache = AvailabilityCache.getInstance();
-        synchronized (cache) {
+    
+        synchronized (availabilityCache) {
             for (Map.Entry<Integer, TreeSet<AvailabilityDataRLE>> entry : currAvails.entrySet()) {
                 Integer mId = entry.getKey();
                 Collection<AvailabilityDataRLE> rles = entry.getValue();
-                if (!isAvailDataRLEValid(mId, cache.get(mId), rles)) {
+                if (!isAvailDataRLEValid(mId, availabilityCache.get(mId), rles)) {
                     return mId;
                 }
             }
@@ -1383,8 +1385,8 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             }
             last = avail;
         }
-        AvailabilityCache cache = AvailabilityCache.getInstance();
-        if (((DataPoint) cache.get(measId)).getValue() != lastPt.getValue()) {
+       
+        if (((DataPoint) availabilityCache.get(measId)).getValue() != lastPt.getValue()) {
             _log.error("last avail data point does not match cache");
             return false;
         }
