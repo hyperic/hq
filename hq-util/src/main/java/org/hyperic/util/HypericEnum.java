@@ -118,12 +118,6 @@ public abstract class HypericEnum
         
         synchronized (_enumsByClass) {
             Set vals = (Set)_enumsByClass.get(_implClass);
-            
-            if (getByCode(_implClass, code) != null) {
-                throw new IllegalStateException("2 enumerations of class [" + 
-                                                _implClass + "] have the " + 
-                                                "same code[" + code + "]");
-            }
             if (vals == null) {
                 vals = new HashSet();
                 _enumsByClass.put(_implClass, vals);
