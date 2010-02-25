@@ -35,7 +35,7 @@ public abstract class DefaultServerDetector extends ServerDetector implements Au
     private Pattern regExpInstall = Pattern.compile("([^ ]*) *(\\d*\\.\\d*\\.\\d*\\.\\d*) *([^ ]*)");
     private boolean ISWin = false;
     private String db2ls;
-    private List<String> entry_types;
+    private List entry_types;
     private String list_database;
 
     public List getServerResources(ConfigResponse conf) throws PluginException {
@@ -50,18 +50,18 @@ public abstract class DefaultServerDetector extends ServerDetector implements Au
                 RegistryKey key = RegistryKey.LocalMachine.openSubKey("SOFTWARE\\IBM\\DB2\\InstalledCopies");
                 String instances[] = key.getSubKeyNames();
                 key.close();
-                for (String instance : instances) {
-                    key = RegistryKey.LocalMachine.openSubKey("SOFTWARE\\IBM\\DB2\\InstalledCopies\\" + instance + "\\CurrentVersion");
+                for (int n=0;n<instances.length;n++) {
+                    key = RegistryKey.LocalMachine.openSubKey("SOFTWARE\\IBM\\DB2\\InstalledCopies\\" + instances[n] + "\\CurrentVersion");
                     String version = key.getStringValue("Version") + "." + key.getStringValue("Release") + "." + key.getStringValue("Modification") + "." + key.getStringValue("Fix Level");
                     key.close();
-                    getLog().debug(instance + "-->" + version);
+                    getLog().debug(instances[n] + "-->" + version);
                     if (regExpVersion.matcher(version).find()) {
-                        key = RegistryKey.LocalMachine.openSubKey("SOFTWARE\\IBM\\DB2\\InstalledCopies\\" + instance);
+                        key = RegistryKey.LocalMachine.openSubKey("SOFTWARE\\IBM\\DB2\\InstalledCopies\\" + instances[n]);
                         String path = key.getStringValue("DB2 Path Name");
                         key.close();
                         res.addAll(createServers(path.trim()));
                     } else {
-                        getLog().debug("[getServerResources] bad version: '" + instance + " " + version + "'");
+                        getLog().debug("[getServerResources] bad version: '" + instances[n] + " " + version + "'");
                     }
                 }
             } catch (Win32Exception ex) {
@@ -74,8 +74,8 @@ public abstract class DefaultServerDetector extends ServerDetector implements Au
                 String sal = inputStreamAsString(cmd.getInputStream());
                 getLog().debug("[getServerResources] sal=" + sal);
                 String[] installs = sal.split("\n");
-                for (String install : installs) {
-                    Matcher m = regExpInstall.matcher(install);
+                for (int n=0;n<installs.length;n++) {
+                    Matcher m = regExpInstall.matcher(installs[n]);
                     if (m.find()) {
                         if (regExpVersion.matcher(m.group(2)).find()) {
                             getLog().debug("[getServerResources] found: '" + m.group() + "'");
@@ -94,7 +94,6 @@ public abstract class DefaultServerDetector extends ServerDetector implements Au
         return res;
     }
 
-    @Override
     public void init(PluginManager manager) throws PluginException {
         db2ls = manager.getProperties().getProperty("db2.jdbc.db2ls", "db2ls");
 

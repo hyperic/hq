@@ -13,7 +13,6 @@ import org.hyperic.hq.product.MetricValue;
  */
 public class TableSpaceMeasurement extends PoolMeasurement {
 
-    @Override
     protected void postProcessResults(Map results) {
         super.postProcessResults(results);
         if (results.get("TBSP_UTILIZATION_PERCENT") != null) {

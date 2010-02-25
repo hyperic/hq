@@ -13,7 +13,6 @@ import org.hyperic.hq.product.MetricValue;
  */
 public class DataBaseMeasurement extends PoolMeasurement {
 
-    @Override
     protected void postProcessResults(Map results) {
         super.postProcessResults(results);
         results.put("LOCK_LIST_IN_USE", new MetricValue(((MetricValue) results.get("LOCK_LIST_IN_USE")).getValue() * 4));

@@ -28,7 +28,6 @@ public class Measurement extends CachedJDBCMeasurement {
     private static final String EXEC_TIME_ATTR = "QueryExecTime";
     private static final Hashtable cache = new Hashtable();
 
-    @Override
     protected String getQuery(Metric metric) {
         if (getLog().isDebugEnabled()) {
             getLog().debug("*******************");
@@ -49,7 +48,6 @@ public class Measurement extends CachedJDBCMeasurement {
         return sql;
     }
 
-    @Override
     protected void getDriver() throws ClassNotFoundException {
         try {
             Class.forName("com.ibm.db2.jcc.DB2Driver");
@@ -59,13 +57,11 @@ public class Measurement extends CachedJDBCMeasurement {
         }
     }
 
-    @Override
     protected Connection getConnection(String url, String user, String pass) throws SQLException {
         getLog().debug("[getConnection] url='" + url + "' user='" + user + "' pass='******'");
         return DriverManager.getConnection(url, user, pass);
     }
 
-    @Override
     Map processResulSet(ResultSet rs, Metric metric) throws MetricNotFoundException {
         Map res = new HashMap();
         String prefix = "";

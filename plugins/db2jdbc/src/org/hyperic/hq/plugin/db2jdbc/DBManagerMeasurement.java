@@ -12,7 +12,6 @@ import org.hyperic.hq.product.Metric;
  */
 public class DBManagerMeasurement extends Measurement {
 
-    @Override
     protected String getQuery(Metric metric) {
         if (getLog().isDebugEnabled()) {
             getLog().debug("*******************");

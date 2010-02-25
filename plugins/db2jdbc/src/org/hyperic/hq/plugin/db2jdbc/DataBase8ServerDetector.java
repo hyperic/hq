@@ -6,6 +6,7 @@
 package org.hyperic.hq.plugin.db2jdbc;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.PluginException;
@@ -20,7 +21,6 @@ import org.hyperic.util.config.ConfigResponse;
  */
 public class DataBase8ServerDetector extends DataBaseServerDetector {
 
-    @Override
     protected List discoverServices(ConfigResponse config) throws PluginException {
         List res = new ArrayList();
         String type = getTypeInfo().getName();
@@ -30,30 +30,32 @@ public class DataBase8ServerDetector extends DataBaseServerDetector {
          * Table
          */
         String schema = config.getValue("db2.jdbc.user").toUpperCase();
-        List<String> tbl = getList(config, "select TABLE_NAME from table (SNAPSHOT_TABLE('sample', -2)) as T"); // XXX revisar si se pueden sacar de otro sitio WHERE TABSCHEMA='" + schema + "'");
-        for (String tbName : tbl) {
+        Iterator tbl = getList(config, "select TABLE_NAME from table (SNAPSHOT_TABLE('sample', -2)) as T").iterator(); // XXX revisar si se pueden sacar de otro sitio WHERE TABSCHEMA='" + schema + "'");
+        while (tbl.hasNext()) {
+            String tbName = (String) tbl.next();
 //            if (!tbName.toUpperCase().startsWith("SYS")) {
-                ServiceResource tb = new ServiceResource();
-                tb.setType(type + " Table");
-                tb.setServiceName("Table " + schema + "." + tbName);
+            ServiceResource tb = new ServiceResource();
+            tb.setType(type + " Table");
+            tb.setServiceName("Table " + schema + "." + tbName);
 
-                ConfigResponse conf = new ConfigResponse();
-                conf.setValue("table", tbName);
-                conf.setValue("schema", schema);
-                setProductConfig(tb, conf);
-                tb.setMeasurementConfig();
-                tb.setResponseTimeConfig(new ConfigResponse());
-                tb.setControlConfig();
+            ConfigResponse conf = new ConfigResponse();
+            conf.setValue("table", tbName);
+            conf.setValue("schema", schema);
+            setProductConfig(tb, conf);
+            tb.setMeasurementConfig();
+            tb.setResponseTimeConfig(new ConfigResponse());
+            tb.setControlConfig();
 
-                res.add(tb);
+            res.add(tb);
 //            }
         }
 
         /**
          * Table Space
          */
-        List<String> tbspl = getList(config, "select TABLESPACE_NAME from table (SNAPSHOT_TBS('sample', -2)) as T");
-        for (String tbspName : tbspl) {
+        Iterator tbspl = getList(config, "select TABLESPACE_NAME from table (SNAPSHOT_TBS('sample', -2)) as T").iterator();
+        while (tbspl.hasNext()) {
+            String tbspName = (String) tbspl.next();
             ServiceResource bpS = new ServiceResource();
             bpS.setType(type + " Table Space");
             bpS.setServiceName("Table Space " + tbspName);
@@ -71,8 +73,9 @@ public class DataBase8ServerDetector extends DataBaseServerDetector {
         /**
          * Buffer Pool
          */
-        List<String> bpl = getList(config, "select BP_NAME from table (SNAPSHOT_BP('sample', -2)) as T");
-        for (String bpName : bpl) {
+        Iterator bpl = getList(config, "select BP_NAME from table (SNAPSHOT_BP('sample', -2)) as T").iterator();
+        while (bpl.hasNext()) {
+            String bpName = (String) bpl.next();
             ServiceResource bpS = new ServiceResource();
             bpS.setType(type + " Buffer Pool");
             bpS.setServiceName("Buffer Pool " + bpName);
@@ -92,24 +95,24 @@ public class DataBase8ServerDetector extends DataBaseServerDetector {
          */
         /*List<String> mpl = getList(config, "SELECT concat(concat(POOL_ID, '|'), COALESCE(POOL_SECONDARY_ID,'')) as name FROM SYSIBMADM.SNAPDB_MEMORY_POOL where POOL_SECONDARY_ID is NULL or POOL_ID='BP'");
         for (String mpN : mpl) {
-            String[] names = mpN.split("\\|");
-            String mpId=names[0].trim();
-            String mpSId=(names.length==2)?names[1].trim():"";
-            String mpName=(mpId+" "+mpSId).trim();
+        String[] names = mpN.split("\\|");
+        String mpId=names[0].trim();
+        String mpSId=(names.length==2)?names[1].trim():"";
+        String mpName=(mpId+" "+mpSId).trim();
 
-            ServiceResource mpS = new ServiceResource();
-            mpS.setType(type + " Memory Pool");
-            mpS.setServiceName("Memory Pool " + mpName);
+        ServiceResource mpS = new ServiceResource();
+        mpS.setType(type + " Memory Pool");
+        mpS.setServiceName("Memory Pool " + mpName);
 
-            ConfigResponse conf = new ConfigResponse();
-            conf.setValue("pool_id", mpId);
-            conf.setValue("sec_pool_id", mpSId);
-            setProductConfig(mpS, conf);
-            mpS.setMeasurementConfig();
-            mpS.setResponseTimeConfig(new ConfigResponse());
-            mpS.setControlConfig();
+        ConfigResponse conf = new ConfigResponse();
+        conf.setValue("pool_id", mpId);
+        conf.setValue("sec_pool_id", mpSId);
+        setProductConfig(mpS, conf);
+        mpS.setMeasurementConfig();
+        mpS.setResponseTimeConfig(new ConfigResponse());
+        mpS.setControlConfig();
 
-            res.add(mpS);
+        res.add(mpS);
         }*/
 
         return res;

@@ -27,11 +27,9 @@ public abstract class CachedJDBCMeasurement extends JDBCMeasurementPlugin {
     private static final String EXEC_TIME_ATTR = "QueryExecTime";
     private static final Hashtable cache = new Hashtable();
 
-    @Override
     protected void initQueries() {
     }
 
-    @Override
     protected String getDefaultURL() {
         return "";
     }

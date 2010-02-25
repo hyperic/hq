@@ -16,7 +16,6 @@ import org.hyperic.hq.product.MetricValue;
  */
 public class TableMeasurement extends Measurement {
 
-    @Override
     public MetricValue getValue(Metric metric) throws MetricUnreachableException, MetricNotFoundException {
         MetricValue res;
         try {
@@ -31,7 +30,6 @@ public class TableMeasurement extends Measurement {
         return res;
     }
 
-    @Override
     protected void postProcessResults(Map results) {
         if (results.get("DATA_OBJECT_P_SIZE") != null) {
             results.put("TOTAL_SIZE", new MetricValue(((MetricValue) results.get("DATA_OBJECT_P_SIZE")).getValue() +

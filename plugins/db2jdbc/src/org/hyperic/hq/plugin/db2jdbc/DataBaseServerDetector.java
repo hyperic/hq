@@ -10,6 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -28,7 +29,6 @@ public class DataBaseServerDetector extends DefaultServerDetector {
     private Pattern regExpDataBases = Pattern.compile("Database (\\d*) entry:");
     //private Pattern regExpDataBases = Pattern.compile("Database name[^=]*= (\\S*)[^L]*Local database directory[^=]*= (\\S*)");
 
-    @Override
     protected List discoverServices(ConfigResponse config) throws PluginException {
         getLog().debug("discoverServices config=" + config);
         List res = new ArrayList();
@@ -45,8 +45,9 @@ public class DataBaseServerDetector extends DefaultServerDetector {
          * Table Space
          */
         String schema = user;
-        List<String> tbl = getList(config, "SELECT TABNAME FROM SYSIBMADM.ADMINTABINFO WHERE TABSCHEMA='" + schema + "'");
-        for (String tbName : tbl) {
+        Iterator tbl = getList(config, "SELECT TABNAME FROM SYSIBMADM.ADMINTABINFO WHERE TABSCHEMA='" + schema + "'").iterator();
+        while (tbl.hasNext()) {
+            String tbName = (String) tbl.next();
             if (!tbName.toUpperCase().startsWith("SYS")) {
                 ServiceResource tb = new ServiceResource();
                 tb.setType(type + " Table");
@@ -67,8 +68,9 @@ public class DataBaseServerDetector extends DefaultServerDetector {
         /**
          * Table Space
          */
-        List<String> tbspl = getList(config, "SELECT TBSP_NAME FROM SYSIBMADM.TBSP_UTILIZATION where TBSP_TYPE='DMS'");
-        for (String tbspName : tbspl) {
+        Iterator tbspl = getList(config, "SELECT TBSP_NAME FROM SYSIBMADM.TBSP_UTILIZATION where TBSP_TYPE='DMS'").iterator();
+        while (tbspl.hasNext()) {
+            String tbspName =(String) tbspl.next();
             ServiceResource bpS = new ServiceResource();
             bpS.setType(type + " Table Space");
             bpS.setServiceName("Table Space " + tbspName);
@@ -86,8 +88,9 @@ public class DataBaseServerDetector extends DefaultServerDetector {
         /**
          * Buffer Pool
          */
-        List<String> bpl = getList(config, "SELECT BP_NAME FROM SYSIBMADM.BP_HITRATIO");
-        for (String bpName : bpl) {
+        Iterator bpl = getList(config, "SELECT BP_NAME FROM SYSIBMADM.BP_HITRATIO").iterator();
+        while (bpl.hasNext()) {
+            String bpName = (String) bpl.next();
             ServiceResource bpS = new ServiceResource();
             bpS.setType(type + " Buffer Pool");
             bpS.setServiceName("Buffer Pool " + bpName);
@@ -105,8 +108,9 @@ public class DataBaseServerDetector extends DefaultServerDetector {
         /**
          * Mempory Pool
          */
-        List<String> mpl = getList(config, "SELECT concat(concat(POOL_ID, '|'), COALESCE(POOL_SECONDARY_ID,'')) as name FROM SYSIBMADM.SNAPDB_MEMORY_POOL where POOL_SECONDARY_ID is NULL or POOL_ID='BP'");
-        for (String mpN : mpl) {
+        Iterator mpl = getList(config, "SELECT concat(concat(POOL_ID, '|'), COALESCE(POOL_SECONDARY_ID,'')) as name FROM SYSIBMADM.SNAPDB_MEMORY_POOL where POOL_SECONDARY_ID is NULL or POOL_ID='BP'").iterator();
+        while (mpl.hasNext()) {
+            String mpN = (String) mpl.next();
             String[] names = mpN.split("\\|");
             String mpId = names[0].trim();
             String mpSId = (names.length == 2) ? names[1].trim() : "";
