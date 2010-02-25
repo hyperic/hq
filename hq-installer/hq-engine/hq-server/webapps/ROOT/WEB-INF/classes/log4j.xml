@@ -9,7 +9,6 @@
 
 	<!-- Provides Console Logging -->
 	<appender name="CONSOLE" class="org.apache.log4j.ConsoleAppender">
-		<param name="Threshold" value="INFO" />
 		<param name="Target" value="System.out" />
 
 		<layout class="org.apache.log4j.PatternLayout">
