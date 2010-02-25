@@ -522,7 +522,7 @@ public class EscalationManagerEJBImpl
         
         try {
             if (alertType instanceof GalertEscalationAlertType) {
-                isAlertNotFound = (GalertManagerEJBImpl.getOne().findAlertLog(s.getAlertId()) == null);
+                isAlertNotFound = (GalertManagerEJBImpl.getOne().getAlertLog(s.getAlertId()) == null);
             } else if (alertType instanceof ClassicEscalationAlertType) {
                 // HHQ-3499, need to make sure that the alertId that is pointed to by
                 // the escalation still exists

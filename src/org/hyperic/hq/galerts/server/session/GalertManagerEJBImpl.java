@@ -371,6 +371,13 @@ public class GalertManagerEJBImpl
     /**
      * @ejb:interface-method  
      */
+    public GalertLog getAlertLog(Integer id) {
+        return _logDAO.getById(id);
+    }
+
+    /**
+     * @ejb:interface-method  
+     */
     public GalertLog findAlertLog(Integer id) {
         return _logDAO.findById(id);
     }

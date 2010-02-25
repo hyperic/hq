@@ -57,6 +57,10 @@ class GalertLogDAO
         return (GalertLog)super.findById(id);
     }
 
+    GalertLog getById(Integer id) {
+        return (GalertLog)super.get(id);
+    }
+
     void save(GalertLog log) {
         super.save(log);
     }
