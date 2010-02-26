@@ -40,6 +40,7 @@ import java.text.NumberFormat;
 import javax.imageio.ImageIO;
 
 import org.hyperic.hq.application.HQApp;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.util.data.IDataPoint;
 
 public class AvailabilityReportChart extends Chart{
@@ -75,17 +76,17 @@ public class AvailabilityReportChart extends Chart{
         InputStream i;
         
         try {
-            i = new FileInputStream(new File(HQApp.getInstance().getWebAccessibleDir() + "/images/icon_available_green.gif"));
+            i = Bootstrap.getResource("images/icon_available_green.gif").getInputStream();
            
             GOOD_CIRCLE = ImageIO.read(i);
             i.close();
             
-            i = new FileInputStream(new File(HQApp.getInstance().getWebAccessibleDir() + "/images/icon_available_red.gif"));
+            i = Bootstrap.getResource("images/icon_available_red.gif").getInputStream();
           
             DANGER_CIRCLE = ImageIO.read(i);
             i.close();
             
-            i = new FileInputStream(new File(HQApp.getInstance().getWebAccessibleDir() + "/images/icon_available_error.gif"));
+            i = Bootstrap.getResource("images/icon_available_error.gif").getInputStream();
            
             UNKNOWN_CIRCLE = ImageIO.read(i);
             i.close();       

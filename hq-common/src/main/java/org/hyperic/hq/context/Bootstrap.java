@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.io.Resource;
 
 
 
@@ -51,5 +52,9 @@ public class Bootstrap  {
     
     public static boolean hasAppContext() {
         return Bootstrap.appContext != null;
+    }
+    
+    public static Resource getResource(String location) {
+        return Bootstrap.appContext.getResource(location);
     }
 }

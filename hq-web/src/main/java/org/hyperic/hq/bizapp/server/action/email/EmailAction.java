@@ -133,7 +133,7 @@ public class EmailAction extends EmailActionConfig
         _alertThreshold = tmp;
         
         if (_alertThreshold > 0) {
-            HQApp.getInstance().getScheduler().scheduleWithFixedDelay(
+            Bootstrap.getBean(Scheduler.class).scheduleWithFixedDelay(
                 new ThresholdWorker(), Scheduler.NO_INITIAL_DELAY,
                 EVALUATION_PERIOD);
         }
@@ -147,11 +147,10 @@ public class EmailAction extends EmailActionConfig
     }
 
     private String renderTemplate(String filename, Map params) {
-        File templateDir = new File(HQApp.getInstance().getWebAccessibleDir() + 
-                                    "/WEB-INF/alertTemplates");
-        File templateFile = new File(templateDir, filename);
         StringWriter output = new StringWriter();
         try {
+            File templateDir = Bootstrap.getResource("WEB-INF/alertTemplates").getFile();
+            File templateFile = new File(templateDir, filename);
             Bootstrap.getBean(RenditServer.class).renderTemplate(templateFile, params,
                                                       output);
 
