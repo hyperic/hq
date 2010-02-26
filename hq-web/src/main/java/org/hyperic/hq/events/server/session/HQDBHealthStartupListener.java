@@ -71,12 +71,14 @@ public class HQDBHealthStartupListener implements StartupListener {
     private HQApp hqApp;
     private DBUtil dbUtil;
     private EmailManager emailManager;
+    private Scheduler scheduler;
 
     @Autowired
-    public HQDBHealthStartupListener(HQApp hqApp, DBUtil dbUtil, EmailManager emailManager) {
+    public HQDBHealthStartupListener(HQApp hqApp, DBUtil dbUtil, EmailManager emailManager, Scheduler scheduler) {
         this.hqApp = hqApp;
         this.dbUtil = dbUtil;
         this.emailManager = emailManager;
+        this.scheduler = scheduler;
     }
 
     /**
@@ -90,7 +92,7 @@ public class HQDBHealthStartupListener implements StartupListener {
         log.info("Scheduling HQ DB Health to perform a health check every " + (HEALTH_CHECK_PERIOD_MILLIS / 1000) +
                  " sec");
 
-        Scheduler scheduler = hqApp.getScheduler();
+      
 
         scheduler.scheduleAtFixedRate(new HQDBHealthTask(), Scheduler.NO_INITIAL_DELAY, HEALTH_CHECK_PERIOD_MILLIS);
     }

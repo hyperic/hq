@@ -29,9 +29,9 @@ import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.bizapp.agent.client.SecureAgentConnection;
 import org.hyperic.hq.transport.AgentProxyFactory;
+import org.hyperic.hq.transport.ServerTransport;
 import org.hyperic.util.i18n.MessageBundle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -48,10 +48,13 @@ public class LiveDataCommandsClientFactory {
 
     private AgentManager agentManager;
     
+    private ServerTransport serverTransport;
+    
     
     @Autowired
-    public LiveDataCommandsClientFactory(AgentManager agentManager) {
+    public LiveDataCommandsClientFactory(AgentManager agentManager, ServerTransport serverTransport) {
         this.agentManager = agentManager;
+        this.serverTransport = serverTransport;
     }
 
     public LiveDataCommandsClient getClient(AppdefEntityID aid) 
@@ -72,7 +75,7 @@ public class LiveDataCommandsClientFactory {
     
     private LiveDataCommandsClient getClient(Agent agent) {
         if (agent.isNewTransportAgent()) {
-            AgentProxyFactory factory = HQApp.getInstance().getAgentProxyFactory();
+            AgentProxyFactory factory = serverTransport.getAgentProxyFactory();
 
             return new LiveDataCommandsClientImpl(agent, factory);
         } else {

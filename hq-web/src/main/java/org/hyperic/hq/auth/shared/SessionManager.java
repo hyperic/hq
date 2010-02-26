@@ -29,11 +29,12 @@ import java.util.Random;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.application.HQApp;
+import org.hyperic.hq.application.Scheduler;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.util.collection.IntHashMap;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 @Component
 public class SessionManager {
@@ -43,7 +44,8 @@ public class SessionManager {
     private static final long DEFAULT_TIMEOUT = 90 * 1000 * 60;
     private static final long HOUR = MeasurementConstants.HOUR;
 
-    public SessionManager() {
+    @Autowired
+    public SessionManager(Scheduler scheduler) {
         final Runnable task = new Runnable() {
             public void run() {
                 try {
@@ -56,7 +58,7 @@ public class SessionManager {
                 }
             }
         };
-        HQApp.getInstance().getScheduler().scheduleAtFixedRate(
+        scheduler.scheduleAtFixedRate(
             task, HOUR, HOUR);
     }
 

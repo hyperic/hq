@@ -122,6 +122,10 @@
 	<bean class="org.hyperic.hq.bizapp.server.session.LatherBossImpl">
 		<constructor-arg ref="latherDispatcher" />
 	</bean>
+	
+	<bean class="org.hyperic.hq.transport.ServerTransport">
+		<constructor-arg value="4"/>
+	</bean>
 
 	<bean class="org.hyperic.hq.events.server.session.TriggersCreatedListener" />
 
@@ -161,6 +165,10 @@
 			method="verifySchedules" fixed-rate="300000"/>
 		-->
 	</task:scheduled-tasks>
+	
+	<bean class="org.hyperic.hq.application.Scheduler">
+		<constructor-arg value="10"/>
+	</bean>
 	
 	
 </beans>

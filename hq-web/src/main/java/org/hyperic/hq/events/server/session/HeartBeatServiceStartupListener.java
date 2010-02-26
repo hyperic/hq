@@ -55,11 +55,13 @@ public class HeartBeatServiceStartupListener implements StartupListener {
 
     private HQApp hqApp;
     private HeartBeatService heartBeatService;
+    private Scheduler scheduler;
 
     @Autowired
-    public HeartBeatServiceStartupListener(HQApp hqApp, HeartBeatService heartBeatService) {
+    public HeartBeatServiceStartupListener(HQApp hqApp, HeartBeatService heartBeatService, Scheduler scheduler) {
         this.hqApp = hqApp;
         this.heartBeatService = heartBeatService;
+        this.scheduler = scheduler;
     }
 
     /**
@@ -73,7 +75,7 @@ public class HeartBeatServiceStartupListener implements StartupListener {
         log.info("Scheduling Heart Beat Service to dispatch heart beats every " + (HEART_BEAT_PERIOD_MILLIS / 1000) +
                  " sec");
 
-        Scheduler scheduler = hqApp.getScheduler();
+      
 
         scheduler.scheduleAtFixedRate(new HeartBeatServiceTask(), Scheduler.NO_INITIAL_DELAY, HEART_BEAT_PERIOD_MILLIS);
     }
