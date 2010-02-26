@@ -58,7 +58,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RunWith(SpringJUnit4ClassRunner.class)
 @Transactional
 @ContextConfiguration(loader    = TestContextLoader.class,
-                      locations = { "classpath:META-INF/spring/*-context.xml",
+                      locations = { "classpath*:META-INF/spring/*-context.xml",
                                     "AvailabilityManagerTest-context.xml" })
 @DirtiesContext
 public class AvailabilityManagerTest {
