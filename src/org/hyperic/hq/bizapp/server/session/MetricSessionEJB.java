@@ -615,6 +615,9 @@ public class MetricSessionEJB extends BizappSessionEJB {
             }
             if (debug) watch.markTimeBegin("findResource size=" + size);
             final Resource res = rMan.findResource(id);
+            if (res == null || res.isInAsyncDeleteState()) {
+                continue;
+            }
             if (debug) watch.markTimeEnd("findResource size=" + size);
             List list;
             if (null != measCache

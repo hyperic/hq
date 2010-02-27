@@ -43,6 +43,7 @@ import javax.ejb.SessionContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
@@ -809,7 +810,11 @@ public class MeasurementManagerEJBImpl extends SessionEJB
             } else {
                 resource = resMan.findResourceById((Integer) o);
             }
-            if (resource == null || resource.isInAsyncDeleteState()) {
+            try {
+                if (resource == null || resource.isInAsyncDeleteState()) {
+                    continue;
+                }
+            } catch (ObjectNotFoundException e) {
                 continue;
             }
             final ResourceType type = resource.getResourceType();
