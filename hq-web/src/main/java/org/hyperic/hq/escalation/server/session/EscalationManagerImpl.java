@@ -30,6 +30,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -46,6 +48,8 @@ import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.Notify;
 import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.AlertRegulator;
+import org.hyperic.hq.events.server.session.AlertableRoleCalendarType;
+import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
 import org.hyperic.hq.events.shared.ActionManager;
 import org.hyperic.util.units.FormattedNumber;
 import org.hyperic.util.units.UnitNumber;
@@ -70,9 +74,12 @@ public class EscalationManagerImpl implements EscalationManager {
     private MessagePublisher messagePublisher;
 
     @Autowired
-    public EscalationManagerImpl(ActionManager actionManager, AlertPermissionManager alertPermissionManager,
-                                 EscalationDAO escalationDAO, EscalationStateDAO escalationStateDAO,
-                                 MessagePublisher messagePublisher, EscalationRuntime escalationRuntime, AlertRegulator alertRegulator) {
+    public EscalationManagerImpl(ActionManager actionManager,
+                                 AlertPermissionManager alertPermissionManager,
+                                 EscalationDAO escalationDAO,
+                                 EscalationStateDAO escalationStateDAO,
+                                 MessagePublisher messagePublisher,
+                                 EscalationRuntime escalationRuntime, AlertRegulator alertRegulator) {
         this.actionManager = actionManager;
         this.alertPermissionManager = alertPermissionManager;
         this.escalationDAO = escalationDAO;
@@ -82,11 +89,20 @@ public class EscalationManagerImpl implements EscalationManager {
         this.alertRegulator = alertRegulator;
     }
 
+    @PostConstruct
+    public void initializeEnums() {
+        // Make sure the escalation enumeration is loaded and registered so
+        // that the escalations run
+        ClassicEscalationAlertType.class.getClass();
+        AlertableRoleCalendarType.class.getClass();
+    }
+
     private void assertEscalationNameIsUnique(String name) throws DuplicateObjectException {
         Escalation escalation;
 
         if ((escalation = escalationDAO.findByName(name)) != null) {
-            throw new DuplicateObjectException("An escalation with that name " + "already exists", escalation);
+            throw new DuplicateObjectException("An escalation with that name " + "already exists",
+                escalation);
         }
     }
 
@@ -95,8 +111,9 @@ public class EscalationManagerImpl implements EscalationManager {
      * 
      * @see Escalation for information on fields
      */
-    public Escalation createEscalation(String name, String description, boolean pauseAllowed, long maxWaitTime,
-                                       boolean notifyAll, boolean repeat) throws DuplicateObjectException {
+    public Escalation createEscalation(String name, String description, boolean pauseAllowed,
+                                       long maxWaitTime, boolean notifyAll, boolean repeat)
+        throws DuplicateObjectException {
         Escalation escalation;
 
         assertEscalationNameIsUnique(name);
@@ -108,7 +125,7 @@ public class EscalationManagerImpl implements EscalationManager {
         return escalation;
     }
 
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public EscalationState findEscalationState(PerformsEscalations def) {
         return escalationStateDAO.find(def);
     }
@@ -118,8 +135,9 @@ public class EscalationManagerImpl implements EscalationManager {
      * 
      * @see Escalation for information on fields
      */
-    public void updateEscalation(AuthzSubject subject, Escalation escalation, String name, String description,
-                                 boolean pauseAllowed, long maxWaitTime, boolean notifyAll, boolean repeat)
+    public void updateEscalation(AuthzSubject subject, Escalation escalation, String name,
+                                 String description, boolean pauseAllowed, long maxWaitTime,
+                                 boolean notifyAll, boolean repeat)
         throws DuplicateObjectException, PermissionException {
         alertPermissionManager.canModifyEscalation(subject.getId());
 
@@ -189,8 +207,8 @@ public class EscalationManagerImpl implements EscalationManager {
      * TODO: Probably want to allow for the fact that people DO want to delete
      * while states exist.
      */
-    public void deleteEscalation(AuthzSubject subject, Escalation escalation) throws PermissionException,
-        ApplicationException {
+    public void deleteEscalation(AuthzSubject subject, Escalation escalation)
+        throws PermissionException, ApplicationException {
         alertPermissionManager.canRemoveEscalation(subject.getId());
 
         List<EscalationAlertType> escalationAlertTypes = EscalationAlertType.getAll();
@@ -200,7 +218,8 @@ public class EscalationManagerImpl implements EscalationManager {
 
             if (escalationAlertType.escalationInUse(escalation)) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Escalation [" + escalation.getId() + ", " + escalation.getName() + "] in use by:");
+                    log.debug("Escalation [" + escalation.getId() + ", " + escalation.getName() +
+                              "] in use by:");
 
                     Collection<PerformsEscalations> performers = escalationAlertType
                         .getPerformersOfEscalation(escalation);
@@ -208,7 +227,8 @@ public class EscalationManagerImpl implements EscalationManager {
                     for (Iterator<PerformsEscalations> j = performers.iterator(); j.hasNext();) {
                         PerformsEscalations alertDefinition = j.next();
 
-                        log.debug("[" + alertDefinition.getName() + " id=" + alertDefinition.getId() + "]");
+                        log.debug("[" + alertDefinition.getName() + " id=" +
+                                  alertDefinition.getId() + "]");
                     }
                 }
 
@@ -219,27 +239,27 @@ public class EscalationManagerImpl implements EscalationManager {
         escalationDAO.remove(escalation);
     }
 
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public Escalation findById(Integer id) {
         return escalationDAO.findById(id);
     }
 
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public Escalation findById(AuthzSubject subject, Integer id) throws PermissionException {
         return escalationDAO.findById(id);
     }
 
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public Collection<Escalation> findAll(AuthzSubject subject) throws PermissionException {
         return escalationDAO.findAllOrderByName();
     }
 
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public Escalation findByName(AuthzSubject subject, String name) throws PermissionException {
         return escalationDAO.findByName(name);
     }
 
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public Escalation findByName(String name) {
         return escalationDAO.findByName(name);
     }
@@ -305,12 +325,14 @@ public class EscalationManagerImpl implements EscalationManager {
                 log.debug(e);
             } finally {
                 if (!started) {
-                    escalationRuntime.removeFromUncommittedEscalationStateCache(alertDefinition, false);
+                    escalationRuntime.removeFromUncommittedEscalationStateCache(alertDefinition,
+                        false);
                 }
             }
 
         } catch (InterruptedException e) {
-            log.error("Failed to start escalation for " + "alert def id=" + alertDefinition.getId() + "; type=" +
+            log.error("Failed to start escalation for " + "alert def id=" +
+                      alertDefinition.getId() + "; type=" +
                       alertDefinition.getAlertType().getCode(), e);
         }
 
@@ -319,15 +341,18 @@ public class EscalationManagerImpl implements EscalationManager {
 
     private boolean escalationStateExists(PerformsEscalations alertDefinition) {
         // Checks if there is an uncommitted escalation state for this def.
-        boolean existsInCache = escalationRuntime.addToUncommittedEscalationStateCache(alertDefinition);
+        boolean existsInCache = escalationRuntime
+            .addToUncommittedEscalationStateCache(alertDefinition);
         boolean existsInDb = false;
 
         try {
             // Checks if there is a committed escalation state for this def.
             existsInDb = escalationStateDAO.find(alertDefinition) != null;
         } catch (Exception e) {
-            log.warn("There is already one escalation in progress for " + "alert def id=" + alertDefinition.getId() +
-                     "; type=" + alertDefinition.getAlertType().getCode());
+            log
+                .warn("There is already one escalation in progress for " + "alert def id=" +
+                      alertDefinition.getId() + "; type=" +
+                      alertDefinition.getAlertType().getCode());
 
             // HHQ-915: A hibernate exception will occur when looking up the
             // escalation state if more than one exists. This shouldn't happen,
@@ -351,13 +376,14 @@ public class EscalationManagerImpl implements EscalationManager {
         }
 
         if (existsInCache || existsInDb) {
-            log.debug("startEscalation called on [" + alertDefinition + "] but it was " + "already running");
+            log.debug("startEscalation called on [" + alertDefinition + "] but it was " +
+                      "already running");
         }
 
         return existsInCache || existsInDb;
     }
 
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public Escalatable getEscalatable(EscalationState escalationState) {
         return escalationRuntime.getEscalatable(escalationState);
     }
@@ -385,7 +411,7 @@ public class EscalationManagerImpl implements EscalationManager {
      * @return null if the definition defined by the ID does not have any
      *         escalation associated with it
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public Escalation findByDefId(EscalationAlertType escalationAlertType, Integer definitionId) {
         return escalationAlertType.findDefinition(definitionId).getEscalation();
     }
@@ -393,7 +419,8 @@ public class EscalationManagerImpl implements EscalationManager {
     /**
      * Set the escalation for a given alert definition and type
      */
-    public void setEscalation(EscalationAlertType escalationAlertType, Integer defId, Escalation escalation) {
+    public void setEscalation(EscalationAlertType escalationAlertType, Integer defId,
+                              Escalation escalation) {
         escalationAlertType.setEscalation(defId, escalation);
     }
 
@@ -403,8 +430,9 @@ public class EscalationManagerImpl implements EscalationManager {
      * @param subject Person who acknowledged the alert
      * @param pause TODO
      */
-    public boolean acknowledgeAlert(AuthzSubject subject, EscalationAlertType escalationAlertType, Integer alertId,
-                                    String moreInfo, long pause) throws PermissionException {
+    public boolean acknowledgeAlert(AuthzSubject subject, EscalationAlertType escalationAlertType,
+                                    Integer alertId, String moreInfo, long pause)
+        throws PermissionException {
         Escalatable alert = escalationAlertType.findEscalatable(alertId);
         PerformsEscalations alertDefinition = alert.getDefinition();
 
@@ -432,8 +460,8 @@ public class EscalationManagerImpl implements EscalationManager {
             } else {
                 nextTime = System.currentTimeMillis() + pause;
 
-                FormattedNumber fmtd = UnitsFormat.format(new UnitNumber(pause, UnitsConstants.UNIT_DURATION,
-                    UnitsConstants.SCALE_MILLI));
+                FormattedNumber fmtd = UnitsFormat.format(new UnitNumber(pause,
+                    UnitsConstants.UNIT_DURATION, UnitsConstants.SCALE_MILLI));
 
                 moreInfo = " and paused escalation for " + fmtd + ". " + moreInfo;
             }
@@ -458,13 +486,14 @@ public class EscalationManagerImpl implements EscalationManager {
      * 
      * @return true if the alert is currently acknowledgeable
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public boolean isAlertAcknowledgeable(Integer alertId, PerformsEscalations alertDefinition) {
         if (alertDefinition.getEscalation() != null) {
             EscalationState escState = escalationStateDAO.find(alertDefinition);
 
             if (escState != null) {
-                if (escState.getAlertId() == alertId.intValue() && escState.getAcknowledgedBy() == null) {
+                if (escState.getAlertId() == alertId.intValue() &&
+                    escState.getAcknowledgedBy() == null) {
                     return true;
                 }
             }
@@ -478,8 +507,8 @@ public class EscalationManagerImpl implements EscalationManager {
      * 
      * @return true if there was an alert to be fixed.
      */
-    public boolean fixAlert(AuthzSubject subject, PerformsEscalations alertDefinition, String moreInfo)
-        throws PermissionException {
+    public boolean fixAlert(AuthzSubject subject, PerformsEscalations alertDefinition,
+                            String moreInfo) throws PermissionException {
         EscalationState escalationState = escalationStateDAO.find(alertDefinition);
 
         if (escalationState == null) {
@@ -500,7 +529,8 @@ public class EscalationManagerImpl implements EscalationManager {
             return false;
         }
 
-        fixOrNotify(subject, escalation, escalationState, escalationState.getAlertType(), true, moreInfo, false);
+        fixOrNotify(subject, escalation, escalationState, escalationState.getAlertType(), true,
+            moreInfo, false);
 
         return true;
     }
@@ -511,8 +541,8 @@ public class EscalationManagerImpl implements EscalationManager {
      * 
      * @param subject Person who fixed the alert
      */
-    public void fixAlert(AuthzSubject subject, EscalationAlertType escalationAlertType, Integer alertId, String moreInfo)
-        throws PermissionException {
+    public void fixAlert(AuthzSubject subject, EscalationAlertType escalationAlertType,
+                         Integer alertId, String moreInfo) throws PermissionException {
         fixAlert(subject, escalationAlertType, alertId, moreInfo, false);
     }
 
@@ -522,30 +552,34 @@ public class EscalationManagerImpl implements EscalationManager {
      * 
      * @param subject Person who fixed the alert
      */
-    public void fixAlert(AuthzSubject subject, EscalationAlertType escalationAlertType, Integer alertId,
-                         String moreInfo, boolean suppressNotification) throws PermissionException {
+    public void fixAlert(AuthzSubject subject, EscalationAlertType escalationAlertType,
+                         Integer alertId, String moreInfo, boolean suppressNotification)
+        throws PermissionException {
         Escalatable escalation = escalationAlertType.findEscalatable(alertId);
         EscalationState escalationState = escalationStateDAO.find(escalation);
 
-        fixOrNotify(subject, escalation, escalationState, escalationAlertType, true, moreInfo, suppressNotification);
+        fixOrNotify(subject, escalation, escalationState, escalationAlertType, true, moreInfo,
+            suppressNotification);
     }
 
-    private void fixOrNotify(AuthzSubject subject, Escalatable alert, EscalationState escalationState,
-                             EscalationAlertType escalationAlertType, boolean fixed, String moreInfo,
-                             boolean suppressNotification) throws PermissionException {
+    private void fixOrNotify(AuthzSubject subject, Escalatable alert,
+                             EscalationState escalationState,
+                             EscalationAlertType escalationAlertType, boolean fixed,
+                             String moreInfo, boolean suppressNotification)
+        throws PermissionException {
         Integer alertId = alert.getAlertInfo().getId();
         boolean acknowledged = !fixed;
 
         if (alert.getAlertInfo().isFixed()) {
-            log.warn(subject.getFullName() + " attempted to fix or " + " acknowledge the " + escalationAlertType +
-                     " id=" + alertId + " but it was already fixed");
+            log.warn(subject.getFullName() + " attempted to fix or " + " acknowledge the " +
+                     escalationAlertType + " id=" + alertId + " but it was already fixed");
             return;
         }
 
         if (escalationState == null && acknowledged) {
             log.debug(subject.getFullName() + " acknowledged alertId[" + alertId + "] for type [" +
-                      escalationAlertType + "], but it wasn't " + "running or was previously acknowledged.  " +
-                      "Button Masher?");
+                      escalationAlertType + "], but it wasn't " +
+                      "running or was previously acknowledged.  " + "Button Masher?");
             return;
         }
 
@@ -571,34 +605,37 @@ public class EscalationManagerImpl implements EscalationManager {
             }
 
             if (escalationState.getAcknowledgedBy() != null) {
-                log.warn(subject.getFullName() + " attempted to acknowledge " + escalationAlertType + " alert=" +
-                         alertId + " but it was already " + "acknowledged by " +
-                         escalationState.getAcknowledgedBy().getFullName());
+                log.warn(subject.getFullName() + " attempted to acknowledge " +
+                         escalationAlertType + " alert=" + alertId + " but it was already " +
+                         "acknowledged by " + escalationState.getAcknowledgedBy().getFullName());
 
                 return;
             }
 
             log.debug(subject.getFullName() + " has acknowledged alertId=" + alertId);
 
-            escalationAlertType.changeAlertState(alert, subject, EscalationStateChange.ACKNOWLEDGED);
-            escalationAlertType.logActionDetails(alert, null, subject.getFullName() + " acknowledged " + "the alert" +
+            escalationAlertType
+                .changeAlertState(alert, subject, EscalationStateChange.ACKNOWLEDGED);
+            escalationAlertType.logActionDetails(alert, null, subject.getFullName() +
+                                                              " acknowledged " + "the alert" +
                                                               moreInfo, subject);
             escalationState.setAcknowledgedBy(subject);
         }
 
         if (!suppressNotification && alertRegulator.alertNotificationsAllowed()) {
             if (escalationState != null) {
-                sendNotifications(escalationState, alert, subject, escalationState.getEscalation().isNotifyAll(),
-                    fixed, moreInfo);
+                sendNotifications(escalationState, alert, subject, escalationState.getEscalation()
+                    .isNotifyAll(), fixed, moreInfo);
             } else if (fixed) { // The alert's escalation chain has completed
                 sendFixedNotifications(subject, alert, moreInfo);
             }
         }
     }
 
-    private String getNotificationMessage(AuthzSubject subject, boolean fixed, Escalatable alert, String moreInfo) {
-        return subject.getFullName() + " has " + (fixed ? "fixed" : "acknowledged") + " the alert raised by [" +
-               alert.getDefinition().getName() + "]. " + moreInfo;
+    private String getNotificationMessage(AuthzSubject subject, boolean fixed, Escalatable alert,
+                                          String moreInfo) {
+        return subject.getFullName() + " has " + (fixed ? "fixed" : "acknowledged") +
+               " the alert raised by [" + alert.getDefinition().getName() + "]. " + moreInfo;
     }
 
     /**
@@ -642,8 +679,9 @@ public class EscalationManagerImpl implements EscalationManager {
      * @param state State specifying the escalation chain to use
      * @param notifyAll If false, only send to previously executed actions.
      */
-    private void sendNotifications(EscalationState escalationState, Escalatable alert, AuthzSubject subject,
-                                   boolean notifyAll, boolean fixed, String moreInfo) {
+    private void sendNotifications(EscalationState escalationState, Escalatable alert,
+                                   AuthzSubject subject, boolean notifyAll, boolean fixed,
+                                   String moreInfo) {
         String notificationMessage = getNotificationMessage(subject, fixed, alert, moreInfo);
 
         List<EscalationAction> escalationActions = escalationState.getEscalation().getActions();
@@ -663,15 +701,17 @@ public class EscalationManagerImpl implements EscalationManager {
 
                 notify = (Notify) action.getInitializedAction();
 
-                notify.send(alert, fixed ? EscalationStateChange.FIXED : EscalationStateChange.ACKNOWLEDGED,
-                    notificationMessage, new HashSet());
+                notify.send(alert, fixed ? EscalationStateChange.FIXED
+                                        : EscalationStateChange.ACKNOWLEDGED, notificationMessage,
+                    new HashSet());
             } catch (Exception e) {
                 log.warn("Unable to send notification alert", e);
             }
         }
 
         // Send event to be logged
-        messagePublisher.publishMessage(EventConstants.EVENTS_TOPIC, new EscalationEvent(alert, notificationMessage));
+        messagePublisher.publishMessage(EventConstants.EVENTS_TOPIC, new EscalationEvent(alert,
+            notificationMessage));
     }
 
     /**
@@ -690,7 +730,8 @@ public class EscalationManagerImpl implements EscalationManager {
             EscalationAction action = i.next();
 
             if (escalation.getAction(action.getAction().getId()) == null) {
-                throw new IllegalArgumentException("Action id=" + action.getAction().getId() + " not found");
+                throw new IllegalArgumentException("Action id=" + action.getAction().getId() +
+                                                   " not found");
             }
         }
 
@@ -702,7 +743,7 @@ public class EscalationManagerImpl implements EscalationManager {
     /**
      * Get the # of active escalations within HQ inventory
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public Number getActiveEscalationCount() {
         return new Integer(escalationStateDAO.size());
     }
@@ -710,17 +751,17 @@ public class EscalationManagerImpl implements EscalationManager {
     /**
      * Get the # of escalations within HQ inventory
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public Number getEscalationCount() {
         return new Integer(escalationDAO.size());
     }
 
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public List<EscalationState> getActiveEscalations(int maxEscalations) {
         return escalationStateDAO.getActiveEscalations(maxEscalations);
     }
 
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public String getLastFix(PerformsEscalations def) {
         if (def != null) {
             EscalationAlertType type = def.getAlertType();

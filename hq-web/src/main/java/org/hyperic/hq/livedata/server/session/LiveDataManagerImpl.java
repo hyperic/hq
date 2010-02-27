@@ -52,6 +52,14 @@ import org.hyperic.hq.livedata.FormatType;
 import org.hyperic.hq.livedata.LiveDataFormatter;
 import org.hyperic.hq.livedata.agent.client.LiveDataCommandsClient;
 import org.hyperic.hq.livedata.agent.client.LiveDataCommandsClientFactory;
+import org.hyperic.hq.livedata.formatters.CpuInfoFormatter;
+import org.hyperic.hq.livedata.formatters.CpuPercFormatter;
+import org.hyperic.hq.livedata.formatters.DfFormatter;
+import org.hyperic.hq.livedata.formatters.IfconfigFormatter;
+import org.hyperic.hq.livedata.formatters.NetstatFormatter;
+import org.hyperic.hq.livedata.formatters.ToStringFormatter;
+import org.hyperic.hq.livedata.formatters.TopFormatter;
+import org.hyperic.hq.livedata.formatters.WhoFormatter;
 import org.hyperic.hq.livedata.shared.LiveDataCommand;
 import org.hyperic.hq.livedata.shared.LiveDataException;
 import org.hyperic.hq.livedata.shared.LiveDataManager;
@@ -94,7 +102,7 @@ public class LiveDataManagerImpl implements LiveDataManager {
     }
 
     @PostConstruct
-    public void initCache() {
+    public void init() {
         // Initialize local objects
         try {
             manager = (LiveDataPluginManager) productManager.getPluginManager(ProductPlugin.TYPE_LIVE_DATA);
@@ -102,6 +110,14 @@ public class LiveDataManagerImpl implements LiveDataManager {
         } catch (Exception e) {
             log.error("Unable to initialize LiveData manager", e);
         }
+        registerFormatter(new ToStringFormatter());
+        registerFormatter(new CpuPercFormatter());
+        registerFormatter(new WhoFormatter());
+        registerFormatter(new TopFormatter());
+        registerFormatter(new CpuInfoFormatter());
+        registerFormatter(new DfFormatter());
+        registerFormatter(new IfconfigFormatter());
+        registerFormatter(new NetstatFormatter());
     }
 
     /**
@@ -325,6 +341,7 @@ public class LiveDataManagerImpl implements LiveDataManager {
             throw new PluginNotFoundException("No plugin found for " + id, e);
         }
     }
+   
 
     /**
      * 

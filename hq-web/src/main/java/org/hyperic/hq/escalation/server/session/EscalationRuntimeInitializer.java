@@ -23,12 +23,26 @@
  * USA.
  */
 
-package org.hyperic.hq.application;
+package org.hyperic.hq.escalation.server.session;
 
-public interface StartupListener {
-    /**
-     * Called by the HQ Application as classes in the startup_classes.txt
-     * files are invoked.
-     */
-    void hqStarted(); 
+import javax.annotation.PostConstruct;
+
+import org.hyperic.hq.escalation.shared.EscalationManager;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Component
+public class EscalationRuntimeInitializer  {
+    private EscalationManager escalationManager;
+
+    @Autowired
+    public EscalationRuntimeInitializer(EscalationManager escalationManager) {
+        this.escalationManager = escalationManager;
+    }
+
+    @PostConstruct
+    public void startEscalationManager() {
+        escalationManager.startup();
+    }
+
 }

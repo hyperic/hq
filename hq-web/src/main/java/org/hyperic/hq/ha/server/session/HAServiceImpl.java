@@ -33,7 +33,6 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.ha.HAService;
 import org.hyperic.hq.ha.HAUtil;
 import org.hyperic.hq.ha.server.mbean.HAMBean;
-import org.hyperic.hq.measurement.server.session.MeasurementStartupListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -55,7 +54,7 @@ public class HAServiceImpl implements HAService
     public void start() {
         startHAService();
         //TODO re-enable start/stop of data purge when HA solution is finished
-        //MeasurementStartupListener.startDataPurgeWorker();
+        //MeasurementSystemInitializer.startDataPurgeWorker();
         HAUtil.setHAService(this);
     }
     

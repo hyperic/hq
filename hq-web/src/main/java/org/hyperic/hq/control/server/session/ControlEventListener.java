@@ -25,36 +25,52 @@
 
 package org.hyperic.hq.control.server.session;
 
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.List;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceZevent;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.control.shared.ControlScheduleManager;
+import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ControlEventListener implements ZeventListener {
+public class ControlEventListener implements ZeventListener<ResourceZevent> {
 
     private final Log _log = LogFactory.getLog(ControlEventListener.class);
     private ControlScheduleManager controlScheduleManager;
     private AuthzSubjectManager authzSubjectManager;
+    private ZeventEnqueuer zEventManager;
 
     @Autowired
-    public ControlEventListener(ControlScheduleManager controlScheduleManager, AuthzSubjectManager authzSubjectManager) {
+    public ControlEventListener(ControlScheduleManager controlScheduleManager,
+                                AuthzSubjectManager authzSubjectManager,
+                                ZeventEnqueuer zEventManager) {
         this.controlScheduleManager = controlScheduleManager;
         this.authzSubjectManager = authzSubjectManager;
+        this.zEventManager = zEventManager;
     }
 
-    public void processEvents(List events) {
-        for (Iterator i = events.iterator(); i.hasNext();) {
-            ResourceZevent z = (ResourceZevent) i.next();
+    @PostConstruct
+    public void subscribe() {
+        // Add listener to remove scheduled control actions after resources
+        // are deleted.
+        HashSet<Class<ResourceDeletedZevent>> events = new HashSet<Class<ResourceDeletedZevent>>();
+        events.add(ResourceDeletedZevent.class);
+        zEventManager.addBufferedListener(events, this);
+    }
+
+    public void processEvents(List<ResourceZevent> events) {
+        for (ResourceZevent z : events) {
             AuthzSubject subject = authzSubjectManager.findSubjectById(z.getAuthzSubjectId());
             AppdefEntityID id = z.getAppdefEntityID();
 

@@ -27,11 +27,14 @@ package org.hyperic.hq.appdef.server.session;
 
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
+import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -45,14 +48,20 @@ public class TransferAgentBundleZeventListener implements ZeventListener<Transfe
     private final Log _log = LogFactory.getLog(TransferAgentBundleZeventListener.class);
     private AgentManager agentManager;
     private AuthzSubjectManager authzSubjectManager;
-    
+    private ZeventEnqueuer zEventManager;
     
     @Autowired
-    public TransferAgentBundleZeventListener(AgentManager agentManager, AuthzSubjectManager authzSubjectManager) {
+    public TransferAgentBundleZeventListener(AgentManager agentManager, AuthzSubjectManager authzSubjectManager, ZeventEnqueuer zEventManager) {
         this.agentManager = agentManager;
         this.authzSubjectManager = authzSubjectManager;
+        this.zEventManager = zEventManager;
     }
 
+    @PostConstruct
+    public void subscribe() {
+        zEventManager.addBufferedListener(TransferAgentBundleZevent.class, this);
+    }
+    
     /**
      * @see org.hyperic.hq.zevents.ZeventListener#processEvents(java.util.List)
      */
