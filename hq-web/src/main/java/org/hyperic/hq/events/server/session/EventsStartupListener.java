@@ -48,7 +48,6 @@ import org.springframework.stereotype.Service;
 public class EventsStartupListener implements StartupListener {
     private static final Log _log = LogFactory.getLog(EventsStartupListener.class);
     private static final Object LOCK = new Object();
-    private static AlertDefinitionChangeCallback _alertDefChangeCallback;
     private DBUtil dbUtil;
     private HQApp app;
     private ZeventEnqueuer zEventManager;
@@ -70,31 +69,7 @@ public class EventsStartupListener implements StartupListener {
         this.cache = cache;
     }
 
-    private void registerAlertDefCacheCleanup() {
-        app.registerCallbackListener(AlertDefinitionChangeCallback.class, new AlertDefinitionChangeCallback() {
-            public void postCreate(AlertDefinition def) {
-                removeFromCache(def);
-            }
-
-            public void postDelete(AlertDefinition def) {
-                removeFromCache(def);
-            }
-
-            public void postUpdate(AlertDefinition def) {
-                removeFromCache(def);
-            }
-
-            private void removeFromCache(AlertDefinition def) {
-                synchronized (cache) {
-                    cache.remove(def.getAppdefEntityId());
-
-                    for (AlertDefinition childDef : def.getChildren()) {
-                        cache.remove(childDef.getAppdefEntityId());
-                    }
-                }
-            }
-        });
-    }
+   
 
     @PostConstruct
     public void hqStarted() {
@@ -103,12 +78,7 @@ public class EventsStartupListener implements StartupListener {
         ClassicEscalationAlertType.class.getClass();
         AlertableRoleCalendarType.class.getClass();
 
-        synchronized (LOCK) {
-            _alertDefChangeCallback = (AlertDefinitionChangeCallback) app
-                .registerCallbackCaller(AlertDefinitionChangeCallback.class);
-        }
-
-        registerAlertDefCacheCleanup();
+      
         zEventManager.registerEventClass(AlertConditionsSatisfiedZEvent.class);
         Set<Class<?>> alertEvents = new HashSet<Class<?>>();
         alertEvents.add(AlertConditionsSatisfiedZEvent.class);
@@ -142,12 +112,6 @@ public class EventsStartupListener implements StartupListener {
             _log.error(e, e);
         }  finally {
             DBUtil.closeJDBCObjects(EventsStartupListener.class.getName(), conn, stmt, null);
-        }
-    }
-
-    static AlertDefinitionChangeCallback getAlertDefinitionChangeCallback() {
-        synchronized (LOCK) {
-            return _alertDefChangeCallback;
         }
     }
 }

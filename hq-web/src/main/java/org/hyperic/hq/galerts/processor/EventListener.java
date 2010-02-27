@@ -32,9 +32,9 @@ import org.hyperic.hq.zevents.ZeventListener;
 class EventListener 
     implements ZeventListener
 {
-    private final GalertProcessor _aProc;
+    private final GalertProcessorImpl _aProc;
     
-    EventListener(GalertProcessor aProc) {
+    EventListener(GalertProcessorImpl aProc) {
         _aProc = aProc;
     }
     

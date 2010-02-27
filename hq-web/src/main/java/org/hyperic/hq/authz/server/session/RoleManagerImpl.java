@@ -56,12 +56,14 @@ import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.server.session.Calendar;
 import org.hyperic.hq.common.shared.CalendarManager;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -72,7 +74,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-public class RoleManagerImpl implements RoleManager {
+public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
 
     private final Log log = LogFactory.getLog(RoleManagerImpl.class);
     private Pager subjectPager;
@@ -92,6 +94,7 @@ public class RoleManagerImpl implements RoleManager {
     private ResourceDAO resourceDAO;
     private CalendarManager calendarManager;
     private PermissionManager permissionManager;
+    private ApplicationContext applicationContext;
 
     @Autowired
     public RoleManagerImpl(RoleCalendarDAO roleCalendarDAO, OperationDAO operationDAO,
@@ -260,8 +263,7 @@ public class RoleManagerImpl implements RoleManager {
             // Associated resource groups
             roleLocal.setResourceGroups(gLocals);
         }
-
-        AuthzStartupListener.getRoleCreateCallback().roleCreated(roleLocal);
+        applicationContext.publishEvent(new RoleCreatedEvent(roleLocal));
         return roleLocal.getId();
     }
 
@@ -283,8 +285,7 @@ public class RoleManagerImpl implements RoleManager {
 
         permissionManager.check(whoami.getId(), role.getResource().getResourceType(), role.getId(),
             AuthzConstants.roleOpRemoveRole);
-
-        AuthzStartupListener.getRoleRemoveCallback().roleRemoved(role);
+        applicationContext.publishEvent(new RoleDeleteRequestedEvent(role));
         for (RoleCalendar c : role.getCalendars()) {
             removeCalendar(c);
         }
@@ -794,11 +795,9 @@ public class RoleManagerImpl implements RoleManager {
      */
     public void removeRoles(AuthzSubject whoami, AuthzSubject subject, Integer[] roles) throws PermissionException {
         Collection<Role> roleLocals = getRolesByIds(whoami, roles, PageControl.PAGE_ALL);
-
-        RoleRemoveFromSubjectCallback callback = AuthzStartupListener.getRoleRemoveFromSubjectCallback();
-
+   
         for (Role role : roleLocals) {
-            callback.roleRemovedFromSubject(role, subject);
+            applicationContext.publishEvent(new RoleRemoveFromSubjectRequestedEvent(subject, role));
             subject.removeRole(role);
         }
     }
@@ -1424,4 +1423,9 @@ public class RoleManagerImpl implements RoleManager {
         }
         return resourceDAO.findById(resource.getId());
     }
+
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+       this.applicationContext = applicationContext;
+    }
+
 }

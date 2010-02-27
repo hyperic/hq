@@ -70,7 +70,6 @@ public class AIStartupListener implements StartupListener {
         events.add(ResourceUpdatedZevent.class);
         events.add(ResourceRefreshZevent.class);
         zEventManager.addBufferedListener(events, new RuntimeAIEnabler());
-        autoinventoryManager.startup();
     }
 
     /**

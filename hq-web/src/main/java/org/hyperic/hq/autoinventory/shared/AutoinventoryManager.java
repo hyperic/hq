@@ -24,7 +24,6 @@ import org.hyperic.hq.autoinventory.DuplicateAIScanNameException;
 import org.hyperic.hq.autoinventory.ScanConfigurationCore;
 import org.hyperic.hq.autoinventory.ScanStateCore;
 import org.hyperic.hq.autoinventory.ServerSignature;
-import org.hyperic.hq.autoinventory.server.session.RuntimeReportProcessor.ServiceMergeInfo;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.scheduler.ScheduleValue;
 import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
@@ -41,7 +40,8 @@ public interface AutoinventoryManager {
      * @return A Map, where the keys are the names of the ServerTypeValues, and
      *         the values are the ServerSignature objects.
      */
-    public Map<String, ServerSignature> getServerSignatures(AuthzSubject subject, List<ServerTypeValue> serverTypes)
+    public Map<String, ServerSignature> getServerSignatures(AuthzSubject subject,
+                                                            List<ServerTypeValue> serverTypes)
         throws AutoinventoryException;
 
     /**
@@ -59,7 +59,8 @@ public interface AutoinventoryManager {
      * @param id The AppdefEntityID of the resource to turn off runtime config
      *        for.
      */
-    public void turnOffRuntimeDiscovery(AuthzSubject subject, AppdefEntityID id) throws PermissionException;
+    public void turnOffRuntimeDiscovery(AuthzSubject subject, AppdefEntityID id)
+        throws PermissionException;
 
     /**
      * Turn off runtime-autodiscovery for a server that no longer exists. We
@@ -76,8 +77,8 @@ public interface AutoinventoryManager {
     /**
      * Toggle Runtime-AI config for the given server.
      */
-    public void toggleRuntimeScan(AuthzSubject subject, AppdefEntityID id, boolean enable) throws PermissionException,
-        AutoinventoryException, ResourceDeletedException;
+    public void toggleRuntimeScan(AuthzSubject subject, AppdefEntityID id, boolean enable)
+        throws PermissionException, AutoinventoryException, ResourceDeletedException;
 
     /**
      * Start an autoinventory scan.
@@ -91,16 +92,18 @@ public interface AutoinventoryManager {
      *        is null, then the scan will be run as an immediate, one-time only
      *        scan.
      */
-    public void startScan(AuthzSubject subject, AppdefEntityID aid, ScanConfigurationCore scanConfig, String scanName,
-                          String scanDesc, ScheduleValue schedule) throws AgentConnectionException,
-        AgentNotFoundException, AutoinventoryException, DuplicateAIScanNameException, ScheduleWillNeverFireException,
-        PermissionException;
+    public void startScan(AuthzSubject subject, AppdefEntityID aid,
+                          ScanConfigurationCore scanConfig, String scanName, String scanDesc,
+                          ScheduleValue schedule) throws AgentConnectionException,
+        AgentNotFoundException, AutoinventoryException, DuplicateAIScanNameException,
+        ScheduleWillNeverFireException, PermissionException;
 
     /**
      * Start an autoinventory scan by agentToken
      */
     public void startScan(AuthzSubject subject, String agentToken, ScanConfigurationCore scanConfig)
-        throws AgentConnectionException, AgentNotFoundException, AutoinventoryException, PermissionException;
+        throws AgentConnectionException, AgentNotFoundException, AutoinventoryException,
+        PermissionException;
 
     /**
      * Stop an autoinventory scan.
@@ -112,16 +115,19 @@ public interface AutoinventoryManager {
      * Get status for an autoinventory scan.
      * @param aid The appdef entity whose agent we'll talk to.
      */
-    public ScanStateCore getScanStatus(AuthzSubject subject, AppdefEntityID aid) throws AgentNotFoundException,
-        AgentConnectionException, AgentRemoteException, AutoinventoryException;
+    public ScanStateCore getScanStatus(AuthzSubject subject, AppdefEntityID aid)
+        throws AgentNotFoundException, AgentConnectionException, AgentRemoteException,
+        AutoinventoryException;
 
     /**
      * create AIHistory
      */
-    public AIHistory createAIHistory(AppdefEntityID id, Integer groupId, Integer batchId, String subjectName,
-                                     ScanConfigurationCore config, String scanName, String scanDesc, Boolean scheduled,
-                                     long startTime, long stopTime, long scheduleTime, String status,
-                                     String errorMessage) throws AutoinventoryException;
+    public AIHistory createAIHistory(AppdefEntityID id, Integer groupId, Integer batchId,
+                                     String subjectName, ScanConfigurationCore config,
+                                     String scanName, String scanDesc, Boolean scheduled,
+                                     long startTime, long stopTime, long scheduleTime,
+                                     String status, String errorMessage)
+        throws AutoinventoryException;
 
     /**
      * remove AIHistory
@@ -137,7 +143,8 @@ public interface AutoinventoryManager {
      * Get status for an autoinventory scan, given the agentToken
      */
     public ScanStateCore getScanStatusByAgentToken(AuthzSubject subject, String agentToken)
-        throws AgentNotFoundException, AgentConnectionException, AgentRemoteException, AutoinventoryException;
+        throws AgentNotFoundException, AgentConnectionException, AgentRemoteException,
+        AutoinventoryException;
 
     /**
      * Called by agents to report platforms, servers, and services detected via
@@ -146,7 +153,8 @@ public interface AutoinventoryManager {
      * @param stateCore The ScanState that was detected during the autoinventory
      *        scan.
      */
-    public void reportAIData(String agentToken, ScanStateCore stateCore) throws AutoinventoryException;
+    public void reportAIData(String agentToken, ScanStateCore stateCore)
+        throws AutoinventoryException;
 
     /**
      * Called by agents to report resources detected at runtime via
@@ -170,8 +178,8 @@ public interface AutoinventoryManager {
      *        the runtime autoinventory scan.
      */
     public void reportAIRuntimeReport(String agentToken, CompositeRuntimeResourceReport crrr)
-        throws AutoinventoryException, PermissionException, ValidationException, ApplicationException;
-
+        throws AutoinventoryException, PermissionException, ValidationException,
+        ApplicationException;
 
     /**
      * Returns a list of {@link Agent}s which still need to send in a runtime
@@ -180,8 +188,6 @@ public interface AutoinventoryManager {
     public List<Agent> findAgentsRequiringRuntimeScan();
 
     public void notifyAgentsNeedingRuntimeScan();
-
-    public void startup();
 
     /**
      * Handle ResourceZEvents for enabling runtime autodiscovery.

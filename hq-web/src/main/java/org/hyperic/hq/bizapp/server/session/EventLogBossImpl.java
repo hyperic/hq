@@ -28,21 +28,17 @@ package org.hyperic.hq.bizapp.server.session;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceDeleteCallback;
+import org.hyperic.hq.authz.server.session.ResourceDeleteRequestedEvent;
 import org.hyperic.hq.bizapp.shared.EventLogBoss;
-import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.events.server.session.EventLog;
 import org.hyperic.hq.events.shared.EventLogManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,21 +49,17 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-public class EventLogBossImpl implements EventLogBoss {
-
-    private final Log log = LogFactory.getLog(EventLogBossImpl.class);
+public class EventLogBossImpl implements EventLogBoss,
+    ApplicationListener<ResourceDeleteRequestedEvent> {
 
     private EventLogManager eventLogManager;
 
     private SessionManager sessionManager;
 
-    private HQApp hqApp;
-
     @Autowired
-    public EventLogBossImpl(EventLogManager eventLogManager, SessionManager sessionManager, HQApp hqApp) {
+    public EventLogBossImpl(EventLogManager eventLogManager, SessionManager sessionManager) {
         this.eventLogManager = eventLogManager;
         this.sessionManager = sessionManager;
-        this.hqApp = hqApp;
     }
 
     /**
@@ -79,9 +71,10 @@ public class EventLogBossImpl implements EventLogBoss {
      * 
      * 
      */
-    @Transactional(readOnly=true)
-    public List<EventLog> getEvents(int sessionId, String eventType, AppdefEntityID id, long beginTime, long endTime)
-        throws SessionNotFoundException, SessionTimeoutException {
+    @Transactional(readOnly = true)
+    public List<EventLog> getEvents(int sessionId, String eventType, AppdefEntityID id,
+                                    long beginTime, long endTime) throws SessionNotFoundException,
+        SessionTimeoutException {
         // We ignore the subject for now
         sessionManager.authenticate(sessionId);
         return getEvents(sessionId, eventType, new AppdefEntityID[] { id }, beginTime, endTime);
@@ -96,14 +89,16 @@ public class EventLogBossImpl implements EventLogBoss {
      * 
      * 
      */
-    @Transactional(readOnly=true)
-    public List<EventLog> getEvents(int sessionId, String eventType, AppdefEntityID ids[], long beginTime, long endTime)
-        throws SessionNotFoundException, SessionTimeoutException {
+    @Transactional(readOnly = true)
+    public List<EventLog> getEvents(int sessionId, String eventType, AppdefEntityID ids[],
+                                    long beginTime, long endTime) throws SessionNotFoundException,
+        SessionTimeoutException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         List<EventLog> events = new ArrayList<EventLog>();
 
         for (int i = 0; i < ids.length; i++) {
-            events.addAll(eventLogManager.findLogs(ids[i], subject, new String[] { eventType }, beginTime, endTime));
+            events.addAll(eventLogManager.findLogs(ids[i], subject, new String[] { eventType },
+                beginTime, endTime));
         }
 
         return events;
@@ -119,9 +114,10 @@ public class EventLogBossImpl implements EventLogBoss {
      * 
      * 
      */
-    @Transactional(readOnly=true)
-    public List<EventLog> getEvents(int sessionId, AppdefEntityID aeid, String[] eventTypes, long beginTime,
-                                    long endTime) throws SessionNotFoundException, SessionTimeoutException {
+    @Transactional(readOnly = true)
+    public List<EventLog> getEvents(int sessionId, AppdefEntityID aeid, String[] eventTypes,
+                                    long beginTime, long endTime) throws SessionNotFoundException,
+        SessionTimeoutException {
         AuthzSubject user = sessionManager.getSubject(sessionId);
         return eventLogManager.findLogs(aeid, user, eventTypes, beginTime, endTime);
     }
@@ -134,9 +130,10 @@ public class EventLogBossImpl implements EventLogBoss {
      * 
      * 
      */
-    @Transactional(readOnly=true)
-    public List<EventLog> getEvents(int sessionId, AppdefEntityID aeid, String status, long beginTime, long endTime)
-        throws SessionNotFoundException, SessionTimeoutException {
+    @Transactional(readOnly = true)
+    public List<EventLog> getEvents(int sessionId, AppdefEntityID aeid, String status,
+                                    long beginTime, long endTime) throws SessionNotFoundException,
+        SessionTimeoutException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         return eventLogManager.findLogs(aeid, subject, status, beginTime, endTime);
     }
@@ -150,25 +147,16 @@ public class EventLogBossImpl implements EventLogBoss {
      * 
      * 
      */
-    @Transactional(readOnly=true)
-    public boolean[] logsExistPerInterval(int sessionId, AppdefEntityID aeid, long beginTime, long endTime,
-                                          int intervals) throws SessionNotFoundException, SessionTimeoutException {
+    @Transactional(readOnly = true)
+    public boolean[] logsExistPerInterval(int sessionId, AppdefEntityID aeid, long beginTime,
+                                          long endTime, int intervals)
+        throws SessionNotFoundException, SessionTimeoutException {
         // We ignore the subject for now.
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         return eventLogManager.logsExistPerInterval(aeid, subject, beginTime, endTime, intervals);
     }
 
-    /**
-     * 
-     */
-    public void startup() {
-        log.info("Event Log Boss starting up!");
-
-        hqApp.registerCallbackListener(ResourceDeleteCallback.class, new ResourceDeleteCallback() {
-            public void preResourceDelete(Resource r) throws VetoException {
-
-                eventLogManager.deleteLogs(r);
-            }
-        });
+    public void onApplicationEvent(ResourceDeleteRequestedEvent event) {
+        eventLogManager.deleteLogs(event.getResource());
     }
 }

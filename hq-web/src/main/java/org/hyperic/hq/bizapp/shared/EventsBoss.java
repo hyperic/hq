@@ -60,23 +60,26 @@ public interface EventsBoss {
      * Create an alert definition
      */
     public AlertDefinitionValue createAlertDefinition(int sessionID, AlertDefinitionValue adval)
-        throws org.hyperic.hq.events.AlertDefinitionCreateException, PermissionException, InvalidOptionException,
-        InvalidOptionValueException, SessionException;
+        throws org.hyperic.hq.events.AlertDefinitionCreateException, PermissionException,
+        InvalidOptionException, InvalidOptionValueException, SessionException;
 
     /**
      * Create an alert definition for a resource type
      */
-    public AlertDefinitionValue createResourceTypeAlertDefinition(int sessionID, AppdefEntityTypeID aetid,
+    public AlertDefinitionValue createResourceTypeAlertDefinition(int sessionID,
+                                                                  AppdefEntityTypeID aetid,
                                                                   AlertDefinitionValue adval)
-        throws org.hyperic.hq.events.AlertDefinitionCreateException, PermissionException, InvalidOptionException,
-        InvalidOptionValueException, SessionNotFoundException, SessionTimeoutException;
+        throws org.hyperic.hq.events.AlertDefinitionCreateException, PermissionException,
+        InvalidOptionException, InvalidOptionValueException, SessionNotFoundException,
+        SessionTimeoutException;
 
     public void inheritResourceTypeAlertDefinition(AuthzSubject subject, AppdefEntityID id)
-        throws org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException, PermissionException, InvalidOptionException,
-        InvalidOptionValueException, AlertDefinitionCreateException;
+        throws org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException, PermissionException,
+        InvalidOptionException, InvalidOptionValueException, AlertDefinitionCreateException;
 
     public Action createAction(int sessionID, Integer adid, String className, ConfigResponse config)
-        throws SessionNotFoundException, SessionTimeoutException, ActionCreateException, PermissionException;
+        throws SessionNotFoundException, SessionTimeoutException, ActionCreateException,
+        PermissionException;
 
     /**
      * Activate/deactivate a collection of alert definitions
@@ -87,44 +90,47 @@ public interface EventsBoss {
     /**
      * Activate or deactivate alert definitions by AppdefEntityID.
      */
-    public void activateAlertDefinitions(int sessionID, org.hyperic.hq.appdef.shared.AppdefEntityID[] eids,
-                                         boolean activate) throws SessionNotFoundException, SessionTimeoutException,
-        AppdefEntityNotFoundException, PermissionException;
+    public void activateAlertDefinitions(int sessionID,
+                                         org.hyperic.hq.appdef.shared.AppdefEntityID[] eids,
+                                         boolean activate) throws SessionNotFoundException,
+        SessionTimeoutException, AppdefEntityNotFoundException, PermissionException;
 
     /**
      * Update just the basics
      */
-    public void updateAlertDefinitionBasic(int sessionID, Integer alertDefId, String name, String desc, int priority,
-                                           boolean activate) throws SessionNotFoundException, SessionTimeoutException,
-        PermissionException;
+    public void updateAlertDefinitionBasic(int sessionID, Integer alertDefId, String name,
+                                           String desc, int priority, boolean activate)
+        throws SessionNotFoundException, SessionTimeoutException, PermissionException;
 
-    public void updateAlertDefinition(int sessionID, AlertDefinitionValue adval) throws TriggerCreateException,
-        InvalidOptionException, InvalidOptionValueException, AlertConditionCreateException, ActionCreateException,
-        SessionNotFoundException, SessionTimeoutException;
+    public void updateAlertDefinition(int sessionID, AlertDefinitionValue adval)
+        throws TriggerCreateException, InvalidOptionException, InvalidOptionValueException,
+        AlertConditionCreateException, ActionCreateException, SessionNotFoundException,
+        SessionTimeoutException;
 
     /**
      * Get actions for a given alert.
      * @param alertId the alert id
      */
-    public List<ActionValue> getActionsForAlert(int sessionId, Integer alertId) throws SessionNotFoundException,
-        SessionTimeoutException;
+    public List<ActionValue> getActionsForAlert(int sessionId, Integer alertId)
+        throws SessionNotFoundException, SessionTimeoutException;
 
     /**
      * Update an action
      */
-    public void updateAction(int sessionID, ActionValue aval) throws SessionNotFoundException, SessionTimeoutException;
+    public void updateAction(int sessionID, ActionValue aval) throws SessionNotFoundException,
+        SessionTimeoutException;
 
     /**
      * Delete a collection of alert definitions
      */
-    public void deleteAlertDefinitions(int sessionID, java.lang.Integer[] ids) throws SessionNotFoundException,
-        SessionTimeoutException, PermissionException;
+    public void deleteAlertDefinitions(int sessionID, java.lang.Integer[] ids)
+        throws SessionNotFoundException, SessionTimeoutException, PermissionException;
 
     /**
      * Delete list of alerts
      */
-    public void deleteAlerts(int sessionID, java.lang.Integer[] ids) throws SessionNotFoundException,
-        SessionTimeoutException, PermissionException;
+    public void deleteAlerts(int sessionID, java.lang.Integer[] ids)
+        throws SessionNotFoundException, SessionTimeoutException, PermissionException;
 
     /**
      * Delete all alerts for a resource
@@ -140,47 +146,51 @@ public interface EventsBoss {
 
     /**
      * Delete all alerts for a list of alert definitions
-     *
+     * 
      */
-    public int deleteAlertsForDefinitions(int sessionID, java.lang.Integer[] adids) throws SessionNotFoundException,
-        SessionTimeoutException, PermissionException;
+    public int deleteAlertsForDefinitions(int sessionID, java.lang.Integer[] adids)
+        throws SessionNotFoundException, SessionTimeoutException, PermissionException;
 
     /**
      * Get an alert definition by ID
      */
-    public AlertDefinitionValue getAlertDefinition(int sessionID, Integer id) throws SessionNotFoundException,
-        SessionTimeoutException, PermissionException;
+    public AlertDefinitionValue getAlertDefinition(int sessionID, Integer id)
+        throws SessionNotFoundException, SessionTimeoutException, PermissionException;
 
     /**
      * Find an alert by ID
      */
-    public Alert getAlert(int sessionID, Integer id) throws SessionNotFoundException, SessionTimeoutException,
-        AlertNotFoundException;
+    public Alert getAlert(int sessionID, Integer id) throws SessionNotFoundException,
+        SessionTimeoutException, AlertNotFoundException;
 
     /**
      * Get a list of all alert definitions
      */
-    public PageList<AlertDefinitionValue> findAllAlertDefinitions(int sessionID) throws SessionNotFoundException,
-        SessionTimeoutException, PermissionException;
+    public PageList<AlertDefinitionValue> findAllAlertDefinitions(int sessionID)
+        throws SessionNotFoundException, SessionTimeoutException, PermissionException;
 
     /**
      * Get a collection of alert definitions for a resource
      */
-    public PageList<AlertDefinitionValue> findAlertDefinitions(int sessionID, AppdefEntityID id, PageControl pc)
+    public PageList<AlertDefinitionValue> findAlertDefinitions(int sessionID, AppdefEntityID id,
+                                                               PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException, PermissionException;
 
     /**
      * Get a collection of alert definitions for a resource or resource type
      */
-    public PageList<AlertDefinitionValue> findAlertDefinitions(int sessionID, AppdefEntityTypeID id, PageControl pc)
+    public PageList<AlertDefinitionValue> findAlertDefinitions(int sessionID,
+                                                               AppdefEntityTypeID id, PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException, PermissionException;
 
     /**
      * Find all alert definition names for a resource
      * @return Map of AlertDefinition names and IDs
      */
-    public Map<String, Integer> findAlertDefinitionNames(int sessionID, AppdefEntityID id, Integer parentId)
-        throws SessionNotFoundException, SessionTimeoutException, AppdefEntityNotFoundException, PermissionException;
+    public Map<String, Integer> findAlertDefinitionNames(int sessionID, AppdefEntityID id,
+                                                         Integer parentId)
+        throws SessionNotFoundException, SessionTimeoutException, AppdefEntityNotFoundException,
+        PermissionException;
 
     /**
      * Find all alerts for an appdef resource
@@ -191,8 +201,9 @@ public interface EventsBoss {
     /**
      * Find all alerts for an appdef resource
      */
-    public PageList<Alert> findAlerts(int sessionID, AppdefEntityID id, long begin, long end, PageControl pc)
-        throws SessionNotFoundException, SessionTimeoutException, PermissionException;
+    public PageList<Alert> findAlerts(int sessionID, AppdefEntityID id, long begin, long end,
+                                      PageControl pc) throws SessionNotFoundException,
+        SessionTimeoutException, PermissionException;
 
     /**
      * Search alerts given a set of criteria
@@ -203,9 +214,10 @@ public interface EventsBoss {
      * @param ids the IDs of resources to include or null for ALL
      * @return a list of {@link Escalatable}s
      */
-    public List<Escalatable> findRecentAlerts(String username, int count, int priority, long timeRange,
-                                              org.hyperic.hq.appdef.shared.AppdefEntityID[] ids) throws LoginException,
-        ApplicationException, ConfigPropertyException;
+    public List<Escalatable> findRecentAlerts(String username, int count, int priority,
+                                              long timeRange,
+                                              org.hyperic.hq.appdef.shared.AppdefEntityID[] ids)
+        throws LoginException, ApplicationException, ConfigPropertyException;
 
     /**
      * Search recent alerts given a set of criteria
@@ -216,21 +228,24 @@ public interface EventsBoss {
      * @param ids the IDs of resources to include or null for ALL
      * @return a list of {@link Escalatable}s
      */
-    public List<Escalatable> findRecentAlerts(int sessionID, int count, int priority, long timeRange,
+    public List<Escalatable> findRecentAlerts(int sessionID, int count, int priority,
+                                              long timeRange,
                                               org.hyperic.hq.appdef.shared.AppdefEntityID[] ids)
         throws SessionNotFoundException, SessionTimeoutException, PermissionException;
 
     /**
      * Get config schema info for an action class
      */
-    public ConfigSchema getActionConfigSchema(int sessionID, String actionClass) throws SessionNotFoundException,
-        SessionTimeoutException, org.hyperic.util.config.EncodingException;
+    public ConfigSchema getActionConfigSchema(int sessionID, String actionClass)
+        throws SessionNotFoundException, SessionTimeoutException,
+        org.hyperic.util.config.EncodingException;
 
     /**
      * Get config schema info for a trigger class
      */
     public ConfigSchema getRegisteredTriggerConfigSchema(int sessionID, String triggerClass)
-        throws SessionNotFoundException, SessionTimeoutException, org.hyperic.util.config.EncodingException;
+        throws SessionNotFoundException, SessionTimeoutException,
+        org.hyperic.util.config.EncodingException;
 
     public void deleteEscalationByName(int sessionID, String name) throws SessionTimeoutException,
         SessionNotFoundException, PermissionException, org.hyperic.hq.common.ApplicationException;
@@ -241,19 +256,22 @@ public interface EventsBoss {
     /**
      * remove escalation by id
      */
-    public void deleteEscalationById(int sessionID, java.lang.Integer[] ids) throws SessionTimeoutException,
-        SessionNotFoundException, PermissionException, org.hyperic.hq.common.ApplicationException;
+    public void deleteEscalationById(int sessionID, java.lang.Integer[] ids)
+        throws SessionTimeoutException, SessionNotFoundException, PermissionException,
+        org.hyperic.hq.common.ApplicationException;
 
     /**
      * retrieve escalation name by alert definition id.
      */
-    public Integer getEscalationIdByAlertDefId(int sessionID, Integer id, EscalationAlertType alertType)
+    public Integer getEscalationIdByAlertDefId(int sessionID, Integer id,
+                                               EscalationAlertType alertType)
         throws SessionTimeoutException, SessionNotFoundException, PermissionException;
 
     /**
      * set escalation name by alert definition id.
      */
-    public void setEscalationByAlertDefId(int sessionID, Integer id, Integer escId, EscalationAlertType alertType)
+    public void setEscalationByAlertDefId(int sessionID, Integer id, Integer escId,
+                                          EscalationAlertType alertType)
         throws SessionTimeoutException, SessionNotFoundException, PermissionException;
 
     /**
@@ -265,7 +283,8 @@ public interface EventsBoss {
     /**
      * retrieve escalation JSONObject by alert definition id.
      */
-    public JSONObject jsonEscalationByAlertDefId(int sessionID, Integer id, EscalationAlertType alertType)
+    public JSONObject jsonEscalationByAlertDefId(int sessionID, Integer id,
+                                                 EscalationAlertType alertType)
         throws org.hyperic.hq.auth.shared.SessionException, PermissionException, JSONException;
 
     /**
@@ -277,8 +296,8 @@ public interface EventsBoss {
     public void addAction(int sessionID, Escalation e, ActionConfigInterface cfg, long waitTime)
         throws SessionTimeoutException, SessionNotFoundException, PermissionException;
 
-    public void removeAction(int sessionID, Integer escId, Integer actId) throws SessionTimeoutException,
-        SessionNotFoundException, PermissionException;
+    public void removeAction(int sessionID, Integer escId, Integer actId)
+        throws SessionTimeoutException, SessionNotFoundException, PermissionException;
 
     /**
      * Retrieve a list of {@link EscalationState}s, representing the active
@@ -297,70 +316,75 @@ public interface EventsBoss {
      * retrieve all escalation policy names as a Array of JSONObject. Escalation
      * json finders begin with json* to be consistent with DAO finder convention
      */
-    public JSONArray listAllEscalationName(int sessionID) throws JSONException, SessionTimeoutException,
-        SessionNotFoundException, PermissionException;
+    public JSONArray listAllEscalationName(int sessionID) throws JSONException,
+        SessionTimeoutException, SessionNotFoundException, PermissionException;
 
     /**
      * Create a new escalation. If alertDefId is non-null, the escalation will
      * also be associated with the given alert definition.
      */
-    public Escalation createEscalation(int sessionID, String name, String desc, boolean allowPause, long maxWaitTime,
-                                       boolean notifyAll, boolean repeat, EscalationAlertType alertType,
-                                       Integer alertDefId) throws SessionTimeoutException, SessionNotFoundException,
-        PermissionException, DuplicateObjectException;
+    public Escalation createEscalation(int sessionID, String name, String desc, boolean allowPause,
+                                       long maxWaitTime, boolean notifyAll, boolean repeat,
+                                       EscalationAlertType alertType, Integer alertDefId)
+        throws SessionTimeoutException, SessionNotFoundException, PermissionException,
+        DuplicateObjectException;
 
     /**
      * Update basic escalation properties
      */
-    public void updateEscalation(int sessionID, Escalation escalation, String name, String desc, long maxWait,
-                                 boolean pausable, boolean notifyAll, boolean repeat) throws SessionTimeoutException,
-        SessionNotFoundException, PermissionException, DuplicateObjectException;
+    public void updateEscalation(int sessionID, Escalation escalation, String name, String desc,
+                                 long maxWait, boolean pausable, boolean notifyAll, boolean repeat)
+        throws SessionTimeoutException, SessionNotFoundException, PermissionException,
+        DuplicateObjectException;
 
-    public boolean acknowledgeAlert(int sessionID, EscalationAlertType alertType, Integer alertID, long pauseWaitTime,
-                                    String moreInfo) throws SessionTimeoutException, SessionNotFoundException,
-        PermissionException, ActionExecuteException;
+    public boolean acknowledgeAlert(int sessionID, EscalationAlertType alertType, Integer alertID,
+                                    long pauseWaitTime, String moreInfo)
+        throws SessionTimeoutException, SessionNotFoundException, PermissionException,
+        ActionExecuteException;
 
     /**
      * Fix a single alert. Method is "NotSupported" since all the alert fixes
-     * may take longer than the transaction timeout. No need for a
-     * transaction in this context.
+     * may take longer than the transaction timeout. No need for a transaction
+     * in this context.
      */
-    public void fixAlert(int sessionID, EscalationAlertType alertType, Integer alertID, String moreInfo)
-        throws SessionTimeoutException, SessionNotFoundException, PermissionException, ActionExecuteException;
+    public void fixAlert(int sessionID, EscalationAlertType alertType, Integer alertID,
+                         String moreInfo) throws SessionTimeoutException, SessionNotFoundException,
+        PermissionException, ActionExecuteException;
 
     /**
      * Fix a batch of alerts. Method is "NotSupported" since all the alert fixes
-     * may take longer than the transaction timeout. No need for a
-     * transaction in this context.
+     * may take longer than the transaction timeout. No need for a transaction
+     * in this context.
      */
-    public void fixAlert(int sessionID, EscalationAlertType alertType, Integer alertID, String moreInfo,
-                         boolean fixAllPrevious) throws SessionTimeoutException, SessionNotFoundException,
-        PermissionException, ActionExecuteException;
+    public void fixAlert(int sessionID, EscalationAlertType alertType, Integer alertID,
+                         String moreInfo, boolean fixAllPrevious) throws SessionTimeoutException,
+        SessionNotFoundException, PermissionException, ActionExecuteException;
 
     /**
      * Get the last fix if available
      */
-    public String getLastFix(int sessionID, Integer defId) throws SessionNotFoundException, SessionTimeoutException,
-        PermissionException;
+    public String getLastFix(int sessionID, Integer defId) throws SessionNotFoundException,
+        SessionTimeoutException, PermissionException;
 
     /**
      * Get a maintenance event by group id
      */
-    public MaintenanceEvent getMaintenanceEvent(int sessionId, Integer groupId) throws SessionNotFoundException,
-        SessionTimeoutException, PermissionException, SchedulerException;
+    public MaintenanceEvent getMaintenanceEvent(int sessionId, Integer groupId)
+        throws SessionNotFoundException, SessionTimeoutException, PermissionException,
+        SchedulerException;
 
     /**
      * Schedule a maintenance event
      */
     public MaintenanceEvent scheduleMaintenanceEvent(int sessionId, MaintenanceEvent event)
-        throws SessionNotFoundException, SessionTimeoutException, PermissionException, SchedulerException;
+        throws SessionNotFoundException, SessionTimeoutException, PermissionException,
+        SchedulerException;
 
     /**
      * Schedule a maintenance event
      */
-    public void unscheduleMaintenanceEvent(int sessionId, MaintenanceEvent event) throws SessionNotFoundException,
-        SessionTimeoutException, PermissionException, SchedulerException;
-
-    public void startup();
+    public void unscheduleMaintenanceEvent(int sessionId, MaintenanceEvent event)
+        throws SessionNotFoundException, SessionTimeoutException, PermissionException,
+        SchedulerException;
 
 }

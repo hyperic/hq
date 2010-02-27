@@ -29,12 +29,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.galerts.server.session.GalertAuxLog;
 import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.measurement.galerts.MetricAuxLog;
 import org.hyperic.hq.measurement.shared.MetricAuxLogManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,7 +43,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-public class MetricAuxLogManagerImpl implements MetricAuxLogManager {
+public class MetricAuxLogManagerImpl implements MetricAuxLogManager, ApplicationListener<MetricsDeleteRequestedEvent> {
     private static final int CHUNKSIZE = 500;
 
     private MetricAuxLogDAO metricAuxLogDAO;
@@ -85,7 +85,8 @@ public class MetricAuxLogManagerImpl implements MetricAuxLogManager {
      * 
      * 
      */
-    public void metricsDeleted(Collection<Integer> mids) {
+    public void onApplicationEvent(MetricsDeleteRequestedEvent event) {
+        Collection<Integer> mids = event.getMetricIds();
         if (mids != null) {
 
             List<Integer> asList = (mids instanceof List<?> ? (List<Integer>) mids : new ArrayList<Integer>(mids));
@@ -96,5 +97,6 @@ public class MetricAuxLogManagerImpl implements MetricAuxLogManager {
                 metricAuxLogDAO.deleteByMetricIds(asList.subList(i, end));
             }
         }
+        
     }
 }

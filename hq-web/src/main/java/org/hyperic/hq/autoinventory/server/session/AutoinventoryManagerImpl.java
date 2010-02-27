@@ -39,7 +39,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.Agent;
-import org.hyperic.hq.appdef.server.session.AgentCreateCallback;
+import org.hyperic.hq.appdef.server.session.AgentCreatedEvent;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceZevent;
@@ -61,7 +61,6 @@ import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ValidationException;
-import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
@@ -100,6 +99,7 @@ import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -107,7 +107,8 @@ import org.springframework.transaction.annotation.Transactional;
  * and their relationships
  */
 @org.springframework.stereotype.Service
-public class AutoinventoryManagerImpl implements AutoinventoryManager {
+public class AutoinventoryManagerImpl implements AutoinventoryManager,
+    ApplicationListener<AgentCreatedEvent> {
     private Log log = LogFactory.getLog(AutoinventoryManagerImpl.class.getName());
 
     private AutoinventoryPluginManager aiPluginManager;
@@ -125,19 +126,21 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
     private AuthzSubjectManager authzSubjectManager;
     private AIQueueManager aiQueueManager;
     private PermissionManager permissionManager;
-    private HQApp hqApp;
     private AICommandsClientFactory aiCommandsClientFactory;
     private ServiceMerger serviceMerger;
     private RuntimePlatformAndServerMerger runtimePlatformAndServerMerger;
 
     @Autowired
-    public AutoinventoryManagerImpl(AgentReportStatusDAO agentReportStatusDao, AIHistoryDAO aiHistoryDao,
-                                    AIPlatformDAO aiPlatformDao, ProductManager productManager,
-                                    ServerManager serverManager, AIScheduleManager aiScheduleManager,
+    public AutoinventoryManagerImpl(AgentReportStatusDAO agentReportStatusDao,
+                                    AIHistoryDAO aiHistoryDao, AIPlatformDAO aiPlatformDao,
+                                    ProductManager productManager, ServerManager serverManager,
+                                    AIScheduleManager aiScheduleManager,
                                     ResourceManager resourceManager, ConfigManager configManager,
-                                    AuthzSubjectManager authzSubjectManager, AIQueueManager aiQueueManager,
-                                    PermissionManager permissionManager, HQApp hqApp,
-                                    AICommandsClientFactory aiCommandsClientFactory, ServiceMerger serviceMerger,
+                                    AuthzSubjectManager authzSubjectManager,
+                                    AIQueueManager aiQueueManager,
+                                    PermissionManager permissionManager,
+                                    AICommandsClientFactory aiCommandsClientFactory,
+                                    ServiceMerger serviceMerger,
                                     RuntimePlatformAndServerMerger runtimePlatformAndServerMerger) {
         this.agentReportStatusDao = agentReportStatusDao;
         this.aiHistoryDao = aiHistoryDao;
@@ -150,7 +153,6 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
         this.authzSubjectManager = authzSubjectManager;
         this.aiQueueManager = aiQueueManager;
         this.permissionManager = permissionManager;
-        this.hqApp = hqApp;
         this.aiCommandsClientFactory = aiCommandsClientFactory;
         this.serviceMerger = serviceMerger;
         this.runtimePlatformAndServerMerger = runtimePlatformAndServerMerger;
@@ -164,8 +166,9 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
      * @return A Map, where the keys are the names of the ServerTypeValues, and
      *         the values are the ServerSignature objects.
      */
-    @Transactional(readOnly=true)
-    public Map<String, ServerSignature> getServerSignatures(AuthzSubject subject, List<ServerTypeValue> serverTypes)
+    @Transactional(readOnly = true)
+    public Map<String, ServerSignature> getServerSignatures(AuthzSubject subject,
+                                                            List<ServerTypeValue> serverTypes)
         throws AutoinventoryException {
         // Plug server type names into a map for quick retrieval
         HashMap<String, ServerTypeValue> stNames = null;
@@ -203,7 +206,7 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
      * @param id The entity id to check.
      * @return true if the given resource supports runtime auto-discovery.
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public boolean isRuntimeDiscoverySupported(AuthzSubject subject, AppdefEntityID id) {
         boolean retVal;
 
@@ -242,7 +245,8 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
      *        for.
      */
     @Transactional
-    public void turnOffRuntimeDiscovery(AuthzSubject subject, AppdefEntityID id) throws PermissionException {
+    public void turnOffRuntimeDiscovery(AuthzSubject subject, AppdefEntityID id)
+        throws PermissionException {
         AICommandsClient client;
 
         try {
@@ -254,7 +258,8 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
         try {
             client.pushRuntimeDiscoveryConfig(id.getType(), id.getID(), null, null, null);
         } catch (AgentRemoteException e) {
-            throw new SystemException("Error turning off runtime-autodiscovery " + "for resource (" + id + "): " + e);
+            throw new SystemException("Error turning off runtime-autodiscovery " +
+                                      "for resource (" + id + "): " + e);
         }
 
     }
@@ -282,15 +287,16 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
         try {
             client.pushRuntimeDiscoveryConfig(id.getType(), id.getID(), null, null, null);
         } catch (AgentRemoteException e) {
-            throw new SystemException("Error turning off runtime-autodiscovery " + "for resource (" + id + "): " + e);
+            throw new SystemException("Error turning off runtime-autodiscovery " +
+                                      "for resource (" + id + "): " + e);
         }
     }
 
     /**
      * Toggle Runtime-AI config for the given server.
      */
-    public void toggleRuntimeScan(AuthzSubject subject, AppdefEntityID id, boolean enable) throws PermissionException,
-        AutoinventoryException, ResourceDeletedException {
+    public void toggleRuntimeScan(AuthzSubject subject, AppdefEntityID id, boolean enable)
+        throws PermissionException, AutoinventoryException, ResourceDeletedException {
         Resource res = resourceManager.findResource(id);
         // if resource is asynchronously deleted ignore
         if (res == null || res.isInAsyncDeleteState()) {
@@ -317,7 +323,8 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
         } catch (ConfigFetchException e) {
             // No config, no need to turn off auto-discovery.
         } catch (Exception e) {
-            throw new AutoinventoryException("Error enabling Runtime-AI for " + "server: " + e.getMessage(), e);
+            throw new AutoinventoryException("Error enabling Runtime-AI for " + "server: " +
+                                             e.getMessage(), e);
         }
     }
 
@@ -327,8 +334,8 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
      * @param res The appdef entity ID of the server.
      * @param response The configuration info.
      */
-    private void pushRuntimeDiscoveryConfig(AuthzSubject subject, AppdefResource res, ConfigResponse response)
-        throws PermissionException {
+    private void pushRuntimeDiscoveryConfig(AuthzSubject subject, AppdefResource res,
+                                            ConfigResponse response) throws PermissionException {
         AppdefEntityID aeid = res.getEntityId();
         if (!isRuntimeDiscoverySupported(subject, aeid)) {
             return;
@@ -356,10 +363,11 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
         }
 
         try {
-            client.pushRuntimeDiscoveryConfig(aeid.getType(), aeid.getID(), typeName, name, response);
+            client.pushRuntimeDiscoveryConfig(aeid.getType(), aeid.getID(), typeName, name,
+                response);
         } catch (AgentRemoteException e) {
-            throw new SystemException("Error pushing metric config response to " + "agent for server (" + res + "): " +
-                                      e);
+            throw new SystemException("Error pushing metric config response to " +
+                                      "agent for server (" + res + "): " + e);
         }
 
     }
@@ -377,16 +385,17 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
      *        scan.
      */
     @Transactional
-    public void startScan(AuthzSubject subject, AppdefEntityID aid, ScanConfigurationCore scanConfig, String scanName,
-                          String scanDesc, ScheduleValue schedule) throws AgentConnectionException,
-        AgentNotFoundException, AutoinventoryException, DuplicateAIScanNameException, ScheduleWillNeverFireException,
-        PermissionException {
+    public void startScan(AuthzSubject subject, AppdefEntityID aid,
+                          ScanConfigurationCore scanConfig, String scanName, String scanDesc,
+                          ScheduleValue schedule) throws AgentConnectionException,
+        AgentNotFoundException, AutoinventoryException, DuplicateAIScanNameException,
+        ScheduleWillNeverFireException, PermissionException {
         try {
 
             permissionManager.checkAIScanPermission(subject, aid);
 
-            ConfigResponse config = configManager.getMergedConfigResponse(subject, ProductPlugin.TYPE_MEASUREMENT, aid,
-                false);
+            ConfigResponse config = configManager.getMergedConfigResponse(subject,
+                ProductPlugin.TYPE_MEASUREMENT, aid, false);
 
             if (log.isDebugEnabled()) {
                 log.debug("startScan config=" + config);
@@ -395,7 +404,8 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
             scanConfig.setConfigResponse(config);
 
             // All scans go through the scheduler.
-            aiScheduleManager.doScheduledScan(subject, aid, scanConfig, scanName, scanDesc, schedule);
+            aiScheduleManager.doScheduledScan(subject, aid, scanConfig, scanName, scanDesc,
+                schedule);
         } catch (ScheduleWillNeverFireException e) {
             throw e;
         } catch (DuplicateAIScanNameException ae) {
@@ -415,7 +425,8 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
      */
     @Transactional
     public void startScan(AuthzSubject subject, String agentToken, ScanConfigurationCore scanConfig)
-        throws AgentConnectionException, AgentNotFoundException, AutoinventoryException, PermissionException {
+        throws AgentConnectionException, AgentNotFoundException, AutoinventoryException,
+        PermissionException {
 
         log.info("AutoinventoryManager.startScan called");
 
@@ -423,7 +434,8 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
         // re-call using the other startScan method
         AIPlatform aipLocal = aiPlatformDao.findByAgentToken(agentToken);
         if (aipLocal == null) {
-            throw new AutoinventoryException("No platform in auto-discovery " + "queue with agentToken=" + agentToken);
+            throw new AutoinventoryException("No platform in auto-discovery " +
+                                             "queue with agentToken=" + agentToken);
         }
         PlatformValue pValue;
         try {
@@ -431,13 +443,16 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
 
             // It does exist. Call the other startScan method so that
             // authz checks will apply
-            startScan(subject, AppdefEntityID.newPlatformID(pValue.getId()), scanConfig, null, null, null);
+            startScan(subject, AppdefEntityID.newPlatformID(pValue.getId()), scanConfig, null,
+                null, null);
             return;
 
         } catch (PlatformNotFoundException e) {
-            log.warn("startScan: no platform exists for queued AIPlatform: " + aipLocal.getId() + ": " + e);
+            log.warn("startScan: no platform exists for queued AIPlatform: " + aipLocal.getId() +
+                     ": " + e);
         } catch (Exception e) {
-            log.error("startScan: error starting scan for AIPlatform: " + aipLocal.getId() + ": " + e, e);
+            log.error("startScan: error starting scan for AIPlatform: " + aipLocal.getId() + ": " +
+                      e, e);
             throw new SystemException(e);
         }
 
@@ -470,9 +485,10 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
      * Get status for an autoinventory scan.
      * @param aid The appdef entity whose agent we'll talk to.
      */
-    @Transactional(readOnly=true)
-    public ScanStateCore getScanStatus(AuthzSubject subject, AppdefEntityID aid) throws AgentNotFoundException,
-        AgentConnectionException, AgentRemoteException, AutoinventoryException {
+    @Transactional(readOnly = true)
+    public ScanStateCore getScanStatus(AuthzSubject subject, AppdefEntityID aid)
+        throws AgentNotFoundException, AgentConnectionException, AgentRemoteException,
+        AutoinventoryException {
 
         log.info("AutoinventoryManager.getScanStatus called");
         ScanStateCore core;
@@ -497,12 +513,15 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
      * create AIHistory
      */
     @Transactional
-    public AIHistory createAIHistory(AppdefEntityID id, Integer groupId, Integer batchId, String subjectName,
-                                     ScanConfigurationCore config, String scanName, String scanDesc, Boolean scheduled,
-                                     long startTime, long stopTime, long scheduleTime, String status,
-                                     String errorMessage) throws AutoinventoryException {
-        return aiHistoryDao.create(id, groupId, batchId, subjectName, config, scanName, scanDesc, scheduled, startTime,
-            stopTime, scheduleTime, status, null /* description */, errorMessage);
+    public AIHistory createAIHistory(AppdefEntityID id, Integer groupId, Integer batchId,
+                                     String subjectName, ScanConfigurationCore config,
+                                     String scanName, String scanDesc, Boolean scheduled,
+                                     long startTime, long stopTime, long scheduleTime,
+                                     String status, String errorMessage)
+        throws AutoinventoryException {
+        return aiHistoryDao.create(id, groupId, batchId, subjectName, config, scanName, scanDesc,
+            scheduled, startTime, stopTime, scheduleTime, status, null /* description */,
+            errorMessage);
     }
 
     /**
@@ -529,9 +548,10 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
     /**
      * Get status for an autoinventory scan, given the agentToken
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public ScanStateCore getScanStatusByAgentToken(AuthzSubject subject, String agentToken)
-        throws AgentNotFoundException, AgentConnectionException, AgentRemoteException, AutoinventoryException {
+        throws AgentNotFoundException, AgentConnectionException, AgentRemoteException,
+        AutoinventoryException {
         log.info("AutoinventoryManager.getScanStatus called");
         ScanStateCore core;
         try {
@@ -578,7 +598,8 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
      * @param stateCore The ScanState that was detected during the autoinventory
      *        scan.
      */
-    public void reportAIData(String agentToken, ScanStateCore stateCore) throws AutoinventoryException {
+    public void reportAIData(String agentToken, ScanStateCore stateCore)
+        throws AutoinventoryException {
 
         ScanState state = new ScanState(stateCore);
 
@@ -593,8 +614,8 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
 
         // TODO: G
         log.info("Received auto-inventory report from " + aiPlatform.getFqdn() + "; IPs -> " +
-                 getIps(aiPlatform.getAddedAIIpValues()) + "; CertDN -> " + aiPlatform.getCertdn() + "; (" +
-                 state.getAllServers(log).size() + " servers)");
+                 getIps(aiPlatform.getAddedAIIpValues()) + "; CertDN -> " + aiPlatform.getCertdn() +
+                 "; (" + state.getAllServers(log).size() + " servers)");
 
         if (log.isDebugEnabled()) {
             log.debug("AutoinventoryManager.reportAIData called, " + "scan state=" + state);
@@ -625,7 +646,8 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
                 try {
                     serverManager.findServerTypeByName(aiServer.getServerTypeName());
                 } catch (NotFoundException e) {
-                    log.error("Ignoring non-existent server type: " + aiServer.getServerTypeName(), e);
+                    log.error("Ignoring non-existent server type: " + aiServer.getServerTypeName(),
+                        e);
                     continue;
                 }
 
@@ -634,7 +656,8 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
         }
 
         try {
-            aiPlatform = aiQueueManager.queue(subject, aiPlatform, stateCore.getAreServersIncluded(), false, true);
+            aiPlatform = aiQueueManager.queue(subject, aiPlatform, stateCore
+                .getAreServersIncluded(), false, true);
         } catch (SystemException cse) {
             throw cse;
         } catch (Exception e) {
@@ -649,7 +672,8 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
             List<Integer> servers = buildAIResourceIds(aiPlatform.getAIServerValues());
 
             try {
-                aiQueueManager.processQueue(subject, platforms, servers, ips, AIQueueConstants.Q_DECISION_APPROVE);
+                aiQueueManager.processQueue(subject, platforms, servers, ips,
+                    AIQueueConstants.Q_DECISION_APPROVE);
             } catch (SystemException cse) {
                 throw cse;
             } catch (Exception e) {
@@ -686,7 +710,8 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
      */
     @Transactional
     public void reportAIRuntimeReport(String agentToken, CompositeRuntimeResourceReport crrr)
-        throws AutoinventoryException, PermissionException, ValidationException, ApplicationException {
+        throws AutoinventoryException, PermissionException, ValidationException,
+        ApplicationException {
         runtimePlatformAndServerMerger.schedulePlatformAndServerMerges(agentToken, crrr);
     }
 
@@ -694,7 +719,7 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
      * Returns a list of {@link Agent}s which still need to send in a runtime
      * scan (their last runtime scan was unsuccessfully processed)
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public List<Agent> findAgentsRequiringRuntimeScan() {
         Collection<AgentReportStatus> dirties = agentReportStatusDao.findDirtyStatus();
         List<Agent> res = new ArrayList<Agent>(dirties.size());
@@ -706,7 +731,8 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
                 log.debug("Agent [" + s.getAgent().getAgentToken() + "] is serviceDirty");
                 res.add(s.getAgent());
             } else {
-                log.debug("Agent [" + s.getAgent().getAgentToken() + "] is serviceDirty, but in process");
+                log.debug("Agent [" + s.getAgent().getAgentToken() +
+                          "] is serviceDirty, but in process");
             }
         }
         return res;
@@ -740,16 +766,8 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
         }
     }
 
-    /**
-     */
-    @Transactional
-    public void startup() {
-        AgentCreateCallback listener = new AgentCreateCallback() {
-            public void agentCreated(Agent agent) {
-                serviceMerger.markServiceClean(agent, false);
-            }
-        };
-        hqApp.registerCallbackListener(AgentCreateCallback.class, listener);
+    public void onApplicationEvent(AgentCreatedEvent event) {
+        serviceMerger.markServiceClean(event.getAgent(), false);
     }
 
     /**

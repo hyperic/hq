@@ -48,7 +48,10 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,7 +61,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
+public class AuthzSubjectManagerImpl implements AuthzSubjectManager, ApplicationContextAware {
 
     private final Log log = LogFactory.getLog(AuthzSubjectManagerImpl.class);
 
@@ -70,11 +73,14 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
     private CrispoManager crispoManager;
     private PermissionManager permissionManager;
     private UserAuditFactory userAuditFactory;
+    private ApplicationContext applicationContext;
 
     @Autowired
-    public AuthzSubjectManagerImpl(AuthzSubjectDAO authzSubjectDAO, ResourceTypeDAO resourceTypeDAO,
-                                   ResourceDAO resourceDAO, CrispoManager crispoManager,
-                                   PermissionManager permissionManager, UserAuditFactory userAuditFactory) {
+    public AuthzSubjectManagerImpl(AuthzSubjectDAO authzSubjectDAO,
+                                   ResourceTypeDAO resourceTypeDAO, ResourceDAO resourceDAO,
+                                   CrispoManager crispoManager,
+                                   PermissionManager permissionManager,
+                                   UserAuditFactory userAuditFactory) {
         this.authzSubjectDAO = authzSubjectDAO;
         this.resourceTypeDAO = resourceTypeDAO;
         this.resourceDAO = resourceDAO;
@@ -96,11 +102,13 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
      * @return The value-object of the subject of the given name and
      *         authenticating source.
      */
-    @Transactional(readOnly=true)
-    public AuthzSubject findSubjectByAuth(String name, String authDsn) throws SubjectNotFoundException {
+    @Transactional(readOnly = true)
+    public AuthzSubject findSubjectByAuth(String name, String authDsn)
+        throws SubjectNotFoundException {
         AuthzSubject subject = authzSubjectDAO.findByAuth(name, authDsn);
         if (subject == null) {
-            throw new SubjectNotFoundException("Can't find subject: name=" + name + ",authDsn=" + authDsn);
+            throw new SubjectNotFoundException("Can't find subject: name=" + name + ",authDsn=" +
+                                               authDsn);
         }
         return subject;
     }
@@ -111,20 +119,21 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
      * @return Value-object for the new Subject.
      * 
      */
-    public AuthzSubject createSubject(AuthzSubject whoami, String name, boolean active, String dsn, String dept,
-                                      String email, String first, String last, String phone, String sms, boolean html)
+    public AuthzSubject createSubject(AuthzSubject whoami, String name, boolean active, String dsn,
+                                      String dept, String email, String first, String last,
+                                      String phone, String sms, boolean html)
         throws PermissionException, ApplicationException {
 
-        permissionManager.check(whoami.getId(), resourceTypeDAO.findTypeResourceType(), AuthzConstants.rootResourceId,
-            AuthzConstants.subjectOpCreateSubject);
+        permissionManager.check(whoami.getId(), resourceTypeDAO.findTypeResourceType(),
+            AuthzConstants.rootResourceId, AuthzConstants.subjectOpCreateSubject);
 
         AuthzSubject existing = authzSubjectDAO.findByName(name);
         if (existing != null) {
             throw new ApplicationException("A system user already exists with " + name);
         }
 
-        AuthzSubject subjectPojo = authzSubjectDAO.create(whoami, name, active, dsn, dept, email, first, last, phone,
-            sms, html);
+        AuthzSubject subjectPojo = authzSubjectDAO.create(whoami, name, active, dsn, dept, email,
+            first, last, phone, sms, html);
 
         userAuditFactory.createAudit(whoami, subjectPojo);
         return subjectPojo;
@@ -140,9 +149,9 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
      *        null, then no change will be made to them.
      * 
      */
-    public void updateSubject(AuthzSubject whoami, AuthzSubject target, Boolean active, String dsn, String dept,
-                              String email, String firstName, String lastName, String phone, String sms, Boolean useHtml)
-        throws PermissionException {
+    public void updateSubject(AuthzSubject whoami, AuthzSubject target, Boolean active, String dsn,
+                              String dept, String email, String firstName, String lastName,
+                              String phone, String sms, Boolean useHtml) throws PermissionException {
 
         if (!whoami.getId().equals(target.getId())) {
             permissionManager.check(whoami.getId(), resourceTypeDAO.findTypeResourceType().getId(),
@@ -156,8 +165,9 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
             }
 
             target.setActive(active.booleanValue());
-            userAuditFactory
-                .updateAudit(whoami, target, AuthzSubjectField.ACTIVE, target.getActive() + "", active + "");
+            userAuditFactory.updateAudit(whoami, target, AuthzSubjectField.ACTIVE, target
+                .getActive() +
+                                                                                   "", active + "");
         }
 
         if (dsn != null && !dsn.equals(target.getAuthDsn())) {
@@ -166,38 +176,45 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
 
         if (dept != null && !dept.equals(target.getDepartment())) {
             target.setDepartment(dept);
-            userAuditFactory.updateAudit(whoami, target, AuthzSubjectField.DEPT, target.getDepartment(), dept);
+            userAuditFactory.updateAudit(whoami, target, AuthzSubjectField.DEPT, target
+                .getDepartment(), dept);
         }
 
         if (email != null && !email.equals(target.getEmailAddress())) {
             target.setEmailAddress(email);
-            userAuditFactory.updateAudit(whoami, target, AuthzSubjectField.EMAIL, target.getEmailAddress(), email);
+            userAuditFactory.updateAudit(whoami, target, AuthzSubjectField.EMAIL, target
+                .getEmailAddress(), email);
         }
 
         if (useHtml != null && target.getHtmlEmail() != useHtml.booleanValue()) {
             target.setHtmlEmail(useHtml.booleanValue());
-            userAuditFactory.updateAudit(whoami, target, AuthzSubjectField.HTML, target.getHtmlEmail() + "", useHtml +
-                                                                                                             "");
+            userAuditFactory.updateAudit(whoami, target, AuthzSubjectField.HTML, target
+                .getHtmlEmail() +
+                                                                                 "", useHtml + "");
         }
 
         if (firstName != null && !firstName.equals(target.getFirstName())) {
             target.setFirstName(firstName);
-            userAuditFactory.updateAudit(whoami, target, AuthzSubjectField.FIRSTNAME, target.getFirstName(), firstName);
+            userAuditFactory.updateAudit(whoami, target, AuthzSubjectField.FIRSTNAME, target
+                .getFirstName(), firstName);
         }
 
         if (lastName != null && !lastName.equals(target.getLastName())) {
             target.setLastName(lastName);
-            userAuditFactory.updateAudit(whoami, target, AuthzSubjectField.LASTNAME, target.getLastName(), lastName);
+            userAuditFactory.updateAudit(whoami, target, AuthzSubjectField.LASTNAME, target
+                .getLastName(), lastName);
         }
 
         if (phone != null && !phone.equals(target.getPhoneNumber())) {
             target.setPhoneNumber(phone);
-            userAuditFactory.updateAudit(whoami, target, AuthzSubjectField.PHONE, target.getPhoneNumber(), phone);
+            userAuditFactory.updateAudit(whoami, target, AuthzSubjectField.PHONE, target
+                .getPhoneNumber(), phone);
         }
 
         if (sms != null && !sms.equals(target.getSMSAddress())) {
             target.setSMSAddress(sms);
-            userAuditFactory.updateAudit(whoami, target, AuthzSubjectField.SMS, target.getSMSAddress(), sms);
+            userAuditFactory.updateAudit(whoami, target, AuthzSubjectField.SMS, target
+                .getSMSAddress(), sms);
         }
     }
 
@@ -205,11 +222,11 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
      * Check if a subject can modify users
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public void checkModifyUsers(AuthzSubject caller) throws PermissionException {
 
-        permissionManager.check(caller.getId(), resourceTypeDAO.findTypeResourceType(), AuthzConstants.rootResourceId,
-            AuthzConstants.subjectOpModifySubject);
+        permissionManager.check(caller.getId(), resourceTypeDAO.findTypeResourceType(),
+            AuthzConstants.rootResourceId, AuthzConstants.subjectOpModifySubject);
     }
 
     /**
@@ -238,16 +255,15 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
         // Reassign all resources to the root user before deleting
         resourceDAO.reassignResources(subject.intValue(), AuthzConstants.rootSubjectId.intValue());
 
-        // Call the subject remove callback before subject is actually removed
-        AuthzStartupListener.getSubjectRemoveCallback().subjectRemoved(toDelete);
-
+        applicationContext.publishEvent(new SubjectDeleteRequestedEvent(toDelete));
+     
         authzSubjectDAO.remove(toDelete);
     }
 
     /**
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public AuthzSubject findByAuth(String name, String authDsn) {
         return authzSubjectDAO.findByAuth(name, authDsn);
     }
@@ -255,7 +271,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
     /**
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public AuthzSubject findSubjectById(AuthzSubject whoami, Integer id) throws PermissionException {
 
         // users can see their own entries without requiring special permission
@@ -269,7 +285,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
     /** 
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public AuthzSubject findSubjectById(Integer id) {
         return authzSubjectDAO.findById(id);
     }
@@ -277,7 +293,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
     /** 
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public AuthzSubject getSubjectById(Integer id) {
         return authzSubjectDAO.get(id);
     }
@@ -285,15 +301,16 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
     /** 
      * 
      */
-    @Transactional(readOnly=true)
-    public AuthzSubject findSubjectByName(AuthzSubject whoami, String name) throws PermissionException {
+    @Transactional(readOnly = true)
+    public AuthzSubject findSubjectByName(AuthzSubject whoami, String name)
+        throws PermissionException {
         return findSubjectByName(name);
     }
 
     /** 
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public AuthzSubject findSubjectByName(String name) {
         return authzSubjectDAO.findByName(name);
     }
@@ -301,7 +318,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
     /** 
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public PageList<AuthzSubject> findMatchingName(String name, PageControl pc) {
         return authzSubjectDAO.findMatchingName(name, pc);
     }
@@ -311,8 +328,9 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
      * 
      * @param excludes the IDs of subjects to exclude from result
      */
-    @Transactional(readOnly=true)
-    public PageList<AuthzSubjectValue> getAllSubjects(AuthzSubject whoami, Collection<Integer> excludes, PageControl pc)
+    @Transactional(readOnly = true)
+    public PageList<AuthzSubjectValue> getAllSubjects(AuthzSubject whoami,
+                                                      Collection<Integer> excludes, PageControl pc)
         throws NotFoundException, PermissionException {
 
         pc = PageControl.initDefaults(pc, SortAttribute.SUBJECT_NAME);
@@ -351,14 +369,16 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
 
             case SortAttribute.FIRST_NAME:
                 if (who.isRoot())
-                    subjects = authzSubjectDAO.findAllRoot_orderFirstName(excludes, pc.isAscending());
+                    subjects = authzSubjectDAO.findAllRoot_orderFirstName(excludes, pc
+                        .isAscending());
                 else
                     subjects = authzSubjectDAO.findAll_orderFirstName(excludes, pc.isAscending());
                 break;
 
             case SortAttribute.LAST_NAME:
                 if (who.isRoot())
-                    subjects = authzSubjectDAO.findAllRoot_orderLastName(excludes, pc.isAscending());
+                    subjects = authzSubjectDAO
+                        .findAllRoot_orderLastName(excludes, pc.isAscending());
                 else
                     subjects = authzSubjectDAO.findAll_orderLastName(excludes, pc.isAscending());
                 break;
@@ -378,9 +398,9 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
      * @param ids the subject ids
      * 
      */
-    @Transactional(readOnly=true)
-    public PageList<AuthzSubjectValue> getSubjectsById(AuthzSubject subject, Integer[] ids, PageControl pc)
-        throws PermissionException {
+    @Transactional(readOnly = true)
+    public PageList<AuthzSubjectValue> getSubjectsById(AuthzSubject subject, Integer[] ids,
+                                                       PageControl pc) throws PermissionException {
 
         // PR7251 - Sometimes and for no good reason, different parts of the UI
         // call this method with an empty ids array. In this case, simply return
@@ -403,8 +423,8 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
         }
 
         // Need to convert to value objects
-        return new PageList<AuthzSubjectValue>(subjectPager.seek(subjects, PageControl.PAGE_ALL), subjects
-            .getTotalSize());
+        return new PageList<AuthzSubjectValue>(subjectPager.seek(subjects, PageControl.PAGE_ALL),
+            subjects.getTotalSize());
     }
 
     /**
@@ -413,7 +433,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
      * @return The e-mail address of the subject
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public String getEmailById(Integer id) {
         AuthzSubject subject = authzSubjectDAO.findById(id);
         return subject.getEmailAddress();
@@ -425,7 +445,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
      * @return The e-mail address of the subject
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public String getEmailByName(String userName) {
         AuthzSubject subject = authzSubjectDAO.findByName(userName);
         return subject.getEmailAddress();
@@ -435,13 +455,13 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
      * Get the Preferences for a specified user
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public ConfigResponse getUserPrefs(AuthzSubject who, Integer subjId) throws PermissionException {
         // users can always see their own prefs.
         if (!who.getId().equals(subjId)) {
             // check that the caller can see users
-            permissionManager.check(who.getId(), resourceTypeDAO.findTypeResourceType(), AuthzConstants.rootResourceId,
-                AuthzConstants.subjectOpViewSubject);
+            permissionManager.check(who.getId(), resourceTypeDAO.findTypeResourceType(),
+                AuthzConstants.rootResourceId, AuthzConstants.subjectOpViewSubject);
         }
 
         AuthzSubject targ = authzSubjectDAO.findById(subjId);
@@ -455,13 +475,14 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
      * Set the Preferences for a specified user
      * 
      */
-    public void setUserPrefs(AuthzSubject who, Integer subjId, ConfigResponse prefs) throws PermissionException {
+    public void setUserPrefs(AuthzSubject who, Integer subjId, ConfigResponse prefs)
+        throws PermissionException {
         // check to see if the user attempting the modification
         // is the same as the one being modified
         if (!(who.getId().intValue() == subjId.intValue())) {
 
-            permissionManager.check(who.getId(), resourceTypeDAO.findTypeResourceType(), AuthzConstants.rootResourceId,
-                AuthzConstants.subjectOpModifySubject);
+            permissionManager.check(who.getId(), resourceTypeDAO.findTypeResourceType(),
+                AuthzConstants.rootResourceId, AuthzConstants.subjectOpModifySubject);
         }
 
         AuthzSubject targ = authzSubjectDAO.findById(subjId);
@@ -477,9 +498,13 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
     /**
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public AuthzSubject getOverlordPojo() {
         return authzSubjectDAO.findById(AuthzConstants.overlordId);
     }
 
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
+    }
+    
 }

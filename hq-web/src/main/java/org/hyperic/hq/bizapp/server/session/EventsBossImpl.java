@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
 import javax.security.auth.login.LoginException;
 
 import org.apache.commons.logging.Log;
@@ -57,16 +58,15 @@ import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServiceManager;
-import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceDeleteCallback;
+import org.hyperic.hq.authz.server.session.ResourceDeleteRequestedEvent;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.SubjectRemoveCallback;
+import org.hyperic.hq.authz.server.session.SubjectDeleteRequestedEvent;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -79,7 +79,6 @@ import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationAlertType;
@@ -120,8 +119,8 @@ import org.hyperic.hq.galerts.server.session.GalertLogSortField;
 import org.hyperic.hq.galerts.shared.GalertManager;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.action.MetricAlertAction;
-import org.hyperic.hq.measurement.server.session.DefaultMetricEnableCallback;
 import org.hyperic.hq.measurement.server.session.Measurement;
+import org.hyperic.hq.measurement.server.session.MetricsEnabledEvent;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventListener;
@@ -140,6 +139,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -148,7 +149,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-public class EventsBossImpl implements EventsBoss {
+public class EventsBossImpl implements EventsBoss, ApplicationListener<ApplicationEvent> {
     private Log log = LogFactory.getLog(EventsBossImpl.class);
 
     private static final String BUNDLE = "org.hyperic.hq.bizapp.Resources";
@@ -186,21 +187,20 @@ public class EventsBossImpl implements EventsBoss {
     private ResourceGroupManager resourceGroupManager;
 
     private AuthzSubjectManager authzSubjectManager;
-    
-    private HQApp app;
-    
+
     private ZeventEnqueuer zEventManager;
 
     @Autowired
     public EventsBossImpl(SessionManager sessionManager, ActionManager actionManager,
                           AlertDefinitionManager alertDefinitionManager, AlertManager alertManager,
                           AppdefBoss appdefBoss, AuthBoss authBoss,
-                          EscalationManager escalationManager, MeasurementManager measurementManager,
-                          PlatformManager platformManager, RegisteredTriggerManager registeredTriggerManager,
+                          EscalationManager escalationManager,
+                          MeasurementManager measurementManager, PlatformManager platformManager,
+                          RegisteredTriggerManager registeredTriggerManager,
                           ResourceManager resourceManager, ServerManager serverManager,
                           ServiceManager serviceManager, PermissionManager permissionManager,
                           GalertManager galertManager, ResourceGroupManager resourceGroupManager,
-                          AuthzSubjectManager authzSubjectManager, HQApp app, ZeventEnqueuer zEventManager) {
+                          AuthzSubjectManager authzSubjectManager, ZeventEnqueuer zEventManager) {
         this.sessionManager = sessionManager;
         this.actionManager = actionManager;
         this.alertDefinitionManager = alertDefinitionManager;
@@ -218,7 +218,6 @@ public class EventsBossImpl implements EventsBoss {
         this.galertManager = galertManager;
         this.resourceGroupManager = resourceGroupManager;
         this.authzSubjectManager = authzSubjectManager;
-        this.app = app;
         this.zEventManager = zEventManager;
     }
 
@@ -238,8 +237,8 @@ public class EventsBossImpl implements EventsBoss {
     /*
      * How the Boss figures out which triggers to create based on conditions
      */
-    private void createTriggers(AuthzSubject subject, AlertDefinitionValue alertdef) throws TriggerCreateException,
-        InvalidOptionException, InvalidOptionValueException {
+    private void createTriggers(AuthzSubject subject, AlertDefinitionValue alertdef)
+        throws TriggerCreateException, InvalidOptionException, InvalidOptionValueException {
         registeredTriggerManager.createTriggers(subject, alertdef);
     }
 
@@ -257,9 +256,9 @@ public class EventsBossImpl implements EventsBoss {
      * @return <code>true</code> if cloning succeeded; <code>false</code> if
      *         cloning failed.
      */
-    private boolean cloneParentConditions(AuthzSubject subject, AppdefEntityID id, AlertDefinitionValue adval,
-                                          AlertConditionValue[] conds, boolean failSilently)
-        throws MeasurementNotFoundException {
+    private boolean cloneParentConditions(AuthzSubject subject, AppdefEntityID id,
+                                          AlertDefinitionValue adval, AlertConditionValue[] conds,
+                                          boolean failSilently) throws MeasurementNotFoundException {
         // scrub and copy the parent's conditions
         adval.removeAllConditions();
 
@@ -276,16 +275,19 @@ public class EventsBossImpl implements EventsBoss {
                     // since changes to the Measurement aren't cascaded
                     // on saving the AlertCondition.
                     try {
-                        Measurement dmv = measurementManager.findMeasurement(subject, tid, id.getId(), true);
+                        Measurement dmv = measurementManager.findMeasurement(subject, tid, id
+                            .getId(), true);
                         clone.setMeasurementId(dmv.getId().intValue());
                     } catch (MeasurementNotFoundException e) {
-                        log.error("No measurement found for entity " + id + " associated with template id=" + tid +
+                        log.error("No measurement found for entity " + id +
+                                  " associated with template id=" + tid +
                                   ". Alert definition name [" + adval.getName() + "]");
                         log.debug("Root cause", e);
 
                         if (failSilently) {
-                            log.info("Alert condition creation failed. " + "The alert definition for entity " + id +
-                                     " with name [" + adval.getName() + "] should not be created.");
+                            log.info("Alert condition creation failed. " +
+                                     "The alert definition for entity " + id + " with name [" +
+                                     adval.getName() + "] should not be created.");
                             // Just set to 0, it'll never fire
                             clone.setMeasurementId(0);
                             return false;
@@ -298,8 +300,8 @@ public class EventsBossImpl implements EventsBoss {
                 case EventConstants.TYPE_ALERT:
 
                     // Don't need to synch the child alert definition Id lookup.
-                    Integer recoverId = alertDefinitionManager.findChildAlertDefinitionId(id, new Integer(clone
-                        .getMeasurementId()), true);
+                    Integer recoverId = alertDefinitionManager.findChildAlertDefinitionId(id,
+                        new Integer(clone.getMeasurementId()), true);
 
                     if (recoverId == null) {
                         // recoverId should never be null, but if it is and
@@ -307,8 +309,10 @@ public class EventsBossImpl implements EventsBoss {
                         // are disabled, just move on.
                         assert false : "recover Id should not be null.";
 
-                        log.error("A recovery alert has no associated recover "
-                                  + "from alert. Setting alert condition " + "measurement Id to 0.");
+                        log
+                            .error("A recovery alert has no associated recover "
+                                   + "from alert. Setting alert condition "
+                                   + "measurement Id to 0.");
                         clone.setMeasurementId(0);
                     } else {
                         clone.setMeasurementId(recoverId.intValue());
@@ -324,16 +328,18 @@ public class EventsBossImpl implements EventsBoss {
         return true;
     }
 
-    private void cloneParentActions(AppdefEntityID id, AlertDefinitionValue child, ActionValue[] actions) {
+    private void cloneParentActions(AppdefEntityID id, AlertDefinitionValue child,
+                                    ActionValue[] actions) {
         child.removeAllActions();
         for (int i = 0; i < actions.length; i++) {
             ActionValue childAct;
             try {
-                ActionInterface actInst = (ActionInterface) Class.forName(actions[i].getClassname()).newInstance();
+                ActionInterface actInst = (ActionInterface) Class
+                    .forName(actions[i].getClassname()).newInstance();
                 ConfigResponse config = ConfigResponse.decode(actions[i].getConfig());
                 actInst.setParentActionConfig(id, config);
-                childAct = new ActionValue(null, actInst.getImplementor(), actInst.getConfigResponse().encode(),
-                    actions[i].getId());
+                childAct = new ActionValue(null, actInst.getImplementor(), actInst
+                    .getConfigResponse().encode(), actions[i].getId());
             } catch (Exception e) {
                 // Not a valid action, skip it then
                 log.debug(actions[i].getClassname(), e);
@@ -347,9 +353,9 @@ public class EventsBossImpl implements EventsBoss {
      * Get the number of alerts for the given array of AppdefEntityID's
      * 
      */
-    @Transactional(readOnly=true)
-    public int[] getAlertCount(int sessionID, AppdefEntityID[] ids) throws SessionNotFoundException,
-        SessionTimeoutException, PermissionException{
+    @Transactional(readOnly = true)
+    public int[] getAlertCount(int sessionID, AppdefEntityID[] ids)
+        throws SessionNotFoundException, SessionTimeoutException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
 
         int[] counts = alertManager.getAlertCount(ids);
@@ -423,7 +429,8 @@ public class EventsBossImpl implements EventsBoss {
             setMetricAlertAction(adval);
 
             // Now create the alert definition
-            AlertDefinitionValue created = alertDefinitionManager.createAlertDefinition(subject, adval);
+            AlertDefinitionValue created = alertDefinitionManager.createAlertDefinition(subject,
+                adval);
 
             if (parent == null) {
                 parent = created;
@@ -438,7 +445,8 @@ public class EventsBossImpl implements EventsBoss {
      * 
      * 
      */
-    public AlertDefinitionValue createResourceTypeAlertDefinition(int sessionID, AppdefEntityTypeID aetid,
+    public AlertDefinitionValue createResourceTypeAlertDefinition(int sessionID,
+                                                                  AppdefEntityTypeID aetid,
                                                                   AlertDefinitionValue adval)
         throws AlertDefinitionCreateException, PermissionException, InvalidOptionException,
         InvalidOptionValueException, SessionNotFoundException, SessionTimeoutException {
@@ -474,7 +482,8 @@ public class EventsBossImpl implements EventsBoss {
                 entIds = serviceManager.getServiceIds(subject, aetid.getId());
                 break;
             default:
-                throw new InvalidOptionException("Alerts cannot be defined on appdef entity type " + aetid.getType());
+                throw new InvalidOptionException("Alerts cannot be defined on appdef entity type " +
+                                                 aetid.getType());
         }
 
         ArrayList<RegisteredTriggerValue> triggers = new ArrayList<RegisteredTriggerValue>();
@@ -491,13 +500,15 @@ public class EventsBossImpl implements EventsBoss {
             adval.removeAllTriggers();
 
             try {
-                boolean succeeded = cloneParentConditions(subject, id, adval, parent.getConditions(), true);
+                boolean succeeded = cloneParentConditions(subject, id, adval, parent
+                    .getConditions(), true);
 
                 if (!succeeded) {
                     continue;
                 }
             } catch (MeasurementNotFoundException e) {
-                throw new AlertDefinitionCreateException("Expected parent condition cloning to fail silently", e);
+                throw new AlertDefinitionCreateException(
+                    "Expected parent condition cloning to fail silently", e);
             }
 
             // Create the triggers
@@ -521,7 +532,8 @@ public class EventsBossImpl implements EventsBoss {
         AlertConditionValue[] conds = adval.getConditions();
         for (int i = 0; i < conds.length; i++) {
             if (conds[i].getType() == EventConstants.TYPE_THRESHOLD ||
-                conds[i].getType() == EventConstants.TYPE_BASELINE || conds[i].getType() == EventConstants.TYPE_CHANGE) {
+                conds[i].getType() == EventConstants.TYPE_BASELINE ||
+                conds[i].getType() == EventConstants.TYPE_CHANGE) {
                 ActionValue action = new ActionValue();
                 action.setClassname(MetricAlertAction.class.getName());
 
@@ -543,8 +555,8 @@ public class EventsBossImpl implements EventsBoss {
      * 
      */
     public void inheritResourceTypeAlertDefinition(AuthzSubject subject, AppdefEntityID id)
-        throws AppdefEntityNotFoundException, PermissionException, InvalidOptionException, InvalidOptionValueException,
-        AlertDefinitionCreateException {
+        throws AppdefEntityNotFoundException, PermissionException, InvalidOptionException,
+        InvalidOptionValueException, AlertDefinitionCreateException {
         AppdefEntityValue rv = new AppdefEntityValue(id, subject);
         AppdefResourceType type = rv.getAppdefResourceType();
 
@@ -554,9 +566,11 @@ public class EventsBossImpl implements EventsBoss {
         // The alert definitions should be returned sorted by creation time.
         // This should minimize the possibility of creating a recovery alert
         // before the recover from alert.
-        PageControl pc = new PageControl(0, PageControl.SIZE_UNLIMITED, PageControl.SORT_ASC, SortAttribute.CTIME);
+        PageControl pc = new PageControl(0, PageControl.SIZE_UNLIMITED, PageControl.SORT_ASC,
+            SortAttribute.CTIME);
 
-        List<AlertDefinitionValue> defs = alertDefinitionManager.findAlertDefinitions(subject, aetid, pc);
+        List<AlertDefinitionValue> defs = alertDefinitionManager.findAlertDefinitions(subject,
+            aetid, pc);
 
         ArrayList<RegisteredTriggerValue> triggers = new ArrayList<RegisteredTriggerValue>();
         for (AlertDefinitionValue adval : defs) {
@@ -572,13 +586,15 @@ public class EventsBossImpl implements EventsBoss {
             adval.setAppdefId(id.getId());
 
             try {
-                boolean succeeded = cloneParentConditions(subject, id, adval, adval.getConditions(), true);
+                boolean succeeded = cloneParentConditions(subject, id, adval,
+                    adval.getConditions(), true);
 
                 if (!succeeded) {
                     continue;
                 }
             } catch (MeasurementNotFoundException e) {
-                throw new AlertDefinitionCreateException("Expected parent condition cloning to fail silently", e);
+                throw new AlertDefinitionCreateException(
+                    "Expected parent condition cloning to fail silently", e);
             }
 
             // Create the triggers
@@ -600,8 +616,8 @@ public class EventsBossImpl implements EventsBoss {
      * 
      */
     public Action createAction(int sessionID, Integer adid, String className, ConfigResponse config)
-        throws SessionNotFoundException, SessionTimeoutException, ActionCreateException, 
-         PermissionException {
+        throws SessionNotFoundException, SessionTimeoutException, ActionCreateException,
+        PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
 
         ArrayList<AlertDefinition> alertdefs = new ArrayList<AlertDefinition>();
@@ -636,7 +652,7 @@ public class EventsBossImpl implements EventsBoss {
      * 
      */
     public void activateAlertDefinitions(int sessionID, Integer[] ids, boolean activate)
-        throws SessionNotFoundException, SessionTimeoutException,  PermissionException {
+        throws SessionNotFoundException, SessionTimeoutException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         alertDefinitionManager.updateAlertDefinitionsActiveStatus(subject, ids, activate);
     }
@@ -647,7 +663,8 @@ public class EventsBossImpl implements EventsBoss {
      * 
      */
     public void activateAlertDefinitions(int sessionID, AppdefEntityID[] eids, boolean activate)
-        throws SessionNotFoundException, SessionTimeoutException, AppdefEntityNotFoundException, PermissionException {
+        throws SessionNotFoundException, SessionTimeoutException, AppdefEntityNotFoundException,
+        PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
 
         boolean debugEnabled = log.isDebugEnabled();
@@ -662,7 +679,8 @@ public class EventsBossImpl implements EventsBoss {
                 ResourceGroup group = resourceGroupManager.findResourceGroupById(eid.getId());
 
                 // Get the group alerts
-                Collection<GalertDef> allAlerts = galertManager.findAlertDefs(group, PageControl.PAGE_ALL);
+                Collection<GalertDef> allAlerts = galertManager.findAlertDefs(group,
+                    PageControl.PAGE_ALL);
                 for (GalertDef galertDef : allAlerts) {
                     galertManager.enable(galertDef, activate);
                     if (debugEnabled) {
@@ -676,17 +694,19 @@ public class EventsBossImpl implements EventsBoss {
                     updateAlertDefinitionsActiveStatus(subject, res, activate);
                 }
             } else {
-                updateAlertDefinitionsActiveStatus(subject, resourceManager.findResource(eid), activate);
+                updateAlertDefinitionsActiveStatus(subject, resourceManager.findResource(eid),
+                    activate);
             }
         }
     }
 
-    private void updateAlertDefinitionsActiveStatus(AuthzSubject subject, Resource res, boolean activate)
-        throws PermissionException {
+    private void updateAlertDefinitionsActiveStatus(AuthzSubject subject, Resource res,
+                                                    boolean activate) throws PermissionException {
         boolean debugEnabled = log.isDebugEnabled();
         String status = (activate ? "enabled" : "disabled");
 
-        Collection<AlertDefinition> allAlerts = alertDefinitionManager.findRelatedAlertDefinitions(subject, res);
+        Collection<AlertDefinition> allAlerts = alertDefinitionManager.findRelatedAlertDefinitions(
+            subject, res);
 
         for (AlertDefinition alertDef : allAlerts) {
             alertDefinitionManager.updateAlertDefinitionActiveStatus(subject, alertDef, activate);
@@ -701,19 +721,21 @@ public class EventsBossImpl implements EventsBoss {
      * 
      * 
      */
-    public void updateAlertDefinitionBasic(int sessionID, Integer alertDefId, String name, String desc, int priority,
-                                           boolean activate) throws SessionNotFoundException, SessionTimeoutException,
-          PermissionException {
+    public void updateAlertDefinitionBasic(int sessionID, Integer alertDefId, String name,
+                                           String desc, int priority, boolean activate)
+        throws SessionNotFoundException, SessionTimeoutException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
-        alertDefinitionManager.updateAlertDefinitionBasic(subject, alertDefId, name, desc, priority, activate);
+        alertDefinitionManager.updateAlertDefinitionBasic(subject, alertDefId, name, desc,
+            priority, activate);
     }
 
     /**
      * 
      */
-    public void updateAlertDefinition(int sessionID, AlertDefinitionValue adval) throws TriggerCreateException,
-        InvalidOptionException, InvalidOptionValueException, AlertConditionCreateException, ActionCreateException,
-          SessionNotFoundException, SessionTimeoutException {
+    public void updateAlertDefinition(int sessionID, AlertDefinitionValue adval)
+        throws TriggerCreateException, InvalidOptionException, InvalidOptionValueException,
+        AlertConditionCreateException, ActionCreateException, SessionNotFoundException,
+        SessionTimeoutException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
 
         // Verify that there are some conditions to evaluate
@@ -727,7 +749,8 @@ public class EventsBossImpl implements EventsBoss {
             // A little more work to do for group and type alert definition
             adval = alertDefinitionManager.updateAlertDefinition(adval);
 
-            List<AlertDefinitionValue> children = alertDefinitionManager.findAlertDefinitionChildren(adval.getId());
+            List<AlertDefinitionValue> children = alertDefinitionManager
+                .findAlertDefinitionChildren(adval.getId());
 
             for (AlertDefinitionValue child : children) {
 
@@ -782,9 +805,9 @@ public class EventsBossImpl implements EventsBoss {
      * 
      * 
      */
-    @Transactional(readOnly=true)
-    public List<ActionValue> getActionsForAlert(int sessionId, Integer alertId) throws SessionNotFoundException,
-        SessionTimeoutException {
+    @Transactional(readOnly = true)
+    public List<ActionValue> getActionsForAlert(int sessionId, Integer alertId)
+        throws SessionNotFoundException, SessionTimeoutException {
         sessionManager.authenticate(sessionId);
         return actionManager.getActionsForAlert(alertId.intValue());
     }
@@ -794,7 +817,8 @@ public class EventsBossImpl implements EventsBoss {
      * 
      * 
      */
-    public void updateAction(int sessionID, ActionValue aval) throws SessionNotFoundException, SessionTimeoutException {
+    public void updateAction(int sessionID, ActionValue aval) throws SessionNotFoundException,
+        SessionTimeoutException {
         sessionManager.authenticate(sessionID);
         actionManager.updateAction(aval);
     }
@@ -804,8 +828,8 @@ public class EventsBossImpl implements EventsBoss {
      * 
      * 
      */
-    public void deleteAlertDefinitions(int sessionID, Integer[] ids) throws SessionNotFoundException,
-        SessionTimeoutException,  PermissionException {
+    public void deleteAlertDefinitions(int sessionID, Integer[] ids)
+        throws SessionNotFoundException, SessionTimeoutException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         alertDefinitionManager.deleteAlertDefinitions(subject, ids);
     }
@@ -815,8 +839,8 @@ public class EventsBossImpl implements EventsBoss {
      * 
      * 
      */
-    public void deleteAlerts(int sessionID, Integer[] ids) throws SessionNotFoundException, SessionTimeoutException,
-         PermissionException {
+    public void deleteAlerts(int sessionID, Integer[] ids) throws SessionNotFoundException,
+        SessionTimeoutException, PermissionException {
         sessionManager.authenticate(sessionID);
         alertManager.deleteAlerts(ids);
     }
@@ -827,7 +851,7 @@ public class EventsBossImpl implements EventsBoss {
      * 
      */
     public int deleteAlerts(int sessionID, AppdefEntityID aeid) throws SessionNotFoundException,
-        SessionTimeoutException,  PermissionException {
+        SessionTimeoutException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         return alertManager.deleteAlerts(subject, aeid);
     }
@@ -838,7 +862,7 @@ public class EventsBossImpl implements EventsBoss {
      * 
      */
     public int deleteAlerts(int sessionID, long begin, long end) throws SessionNotFoundException,
-        SessionTimeoutException,  PermissionException {
+        SessionTimeoutException, PermissionException {
         sessionManager.authenticate(sessionID);
         // XXX - check security
         return alertManager.deleteAlerts(begin, end);
@@ -850,8 +874,8 @@ public class EventsBossImpl implements EventsBoss {
      * 
      * 
      */
-    public int deleteAlertsForDefinitions(int sessionID, Integer[] adids) throws SessionNotFoundException,
-        SessionTimeoutException,  PermissionException {
+    public int deleteAlertsForDefinitions(int sessionID, Integer[] adids)
+        throws SessionNotFoundException, SessionTimeoutException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
 
         // Delete alerts for definition and its children
@@ -875,9 +899,9 @@ public class EventsBossImpl implements EventsBoss {
      * 
      * 
      */
-    @Transactional(readOnly=true)
-    public AlertDefinitionValue getAlertDefinition(int sessionID, Integer id) throws SessionNotFoundException,
-        SessionTimeoutException,  PermissionException {
+    @Transactional(readOnly = true)
+    public AlertDefinitionValue getAlertDefinition(int sessionID, Integer id)
+        throws SessionNotFoundException, SessionTimeoutException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         return alertDefinitionManager.getById(subject, id);
     }
@@ -887,9 +911,9 @@ public class EventsBossImpl implements EventsBoss {
      * 
      * 
      */
-    @Transactional(readOnly=true)
-    public Alert getAlert(int sessionID, Integer id) throws SessionNotFoundException, SessionTimeoutException,
-        AlertNotFoundException {
+    @Transactional(readOnly = true)
+    public Alert getAlert(int sessionID, Integer id) throws SessionNotFoundException,
+        SessionTimeoutException, AlertNotFoundException {
         sessionManager.authenticate(sessionID);
 
         Alert alert = alertManager.findAlertById(id);
@@ -905,9 +929,9 @@ public class EventsBossImpl implements EventsBoss {
      * 
      * 
      */
-    @Transactional(readOnly=true)
-    public PageList<AlertDefinitionValue> findAllAlertDefinitions(int sessionID) throws SessionNotFoundException,
-        SessionTimeoutException, PermissionException {
+    @Transactional(readOnly = true)
+    public PageList<AlertDefinitionValue> findAllAlertDefinitions(int sessionID)
+        throws SessionNotFoundException, SessionTimeoutException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         return alertDefinitionManager.findAllAlertDefinitions(subject);
     }
@@ -917,8 +941,9 @@ public class EventsBossImpl implements EventsBoss {
      * 
      * 
      */
-    @Transactional(readOnly=true)
-    public PageList<AlertDefinitionValue> findAlertDefinitions(int sessionID, AppdefEntityID id, PageControl pc)
+    @Transactional(readOnly = true)
+    public PageList<AlertDefinitionValue> findAlertDefinitions(int sessionID, AppdefEntityID id,
+                                                               PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         return alertDefinitionManager.findAlertDefinitions(subject, id, pc);
@@ -928,8 +953,9 @@ public class EventsBossImpl implements EventsBoss {
      * Get a collection of alert definitions for a resource or resource type
      * 
      */
-    @Transactional(readOnly=true)
-    public PageList<AlertDefinitionValue> findAlertDefinitions(int sessionID, AppdefEntityTypeID id, PageControl pc)
+    @Transactional(readOnly = true)
+    public PageList<AlertDefinitionValue> findAlertDefinitions(int sessionID,
+                                                               AppdefEntityTypeID id, PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         return alertDefinitionManager.findAlertDefinitions(subject, id, pc);
@@ -940,9 +966,11 @@ public class EventsBossImpl implements EventsBoss {
      * @return Map of AlertDefinition names and IDs
      * 
      */
-    @Transactional(readOnly=true)
-    public Map<String, Integer> findAlertDefinitionNames(int sessionID, AppdefEntityID id, Integer parentId)
-        throws SessionNotFoundException, SessionTimeoutException, AppdefEntityNotFoundException, PermissionException {
+    @Transactional(readOnly = true)
+    public Map<String, Integer> findAlertDefinitionNames(int sessionID, AppdefEntityID id,
+                                                         Integer parentId)
+        throws SessionNotFoundException, SessionTimeoutException, AppdefEntityNotFoundException,
+        PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         return alertDefinitionManager.findAlertDefinitionNames(subject, id, parentId);
     }
@@ -952,7 +980,7 @@ public class EventsBossImpl implements EventsBoss {
      * 
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public PageList<Alert> findAlerts(int sessionID, AppdefEntityID id, PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
@@ -964,9 +992,10 @@ public class EventsBossImpl implements EventsBoss {
      * 
      * 
      */
-    @Transactional(readOnly=true)
-    public PageList<Alert> findAlerts(int sessionID, AppdefEntityID id, long begin, long end, PageControl pc)
-        throws SessionNotFoundException, SessionTimeoutException, PermissionException {
+    @Transactional(readOnly = true)
+    public PageList<Alert> findAlerts(int sessionID, AppdefEntityID id, long begin, long end,
+                                      PageControl pc) throws SessionNotFoundException,
+        SessionTimeoutException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         return alertManager.findAlerts(subject, id, begin, end, pc);
     }
@@ -981,10 +1010,10 @@ public class EventsBossImpl implements EventsBoss {
      * @return a list of {@link Escalatable}s
      * 
      */
-    @Transactional(readOnly=true)
-    public List<Escalatable> findRecentAlerts(String username, int count, int priority, long timeRange,
-                                              AppdefEntityID[] ids) throws LoginException, ApplicationException,
-        ConfigPropertyException {
+    @Transactional(readOnly = true)
+    public List<Escalatable> findRecentAlerts(String username, int count, int priority,
+                                              long timeRange, AppdefEntityID[] ids)
+        throws LoginException, ApplicationException, ConfigPropertyException {
         int sessionId = authBoss.getUnauthSessionId(username);
         return findRecentAlerts(sessionId, count, priority, timeRange, ids);
     }
@@ -999,19 +1028,20 @@ public class EventsBossImpl implements EventsBoss {
      * @return a list of {@link Escalatable}s
      * 
      */
-    @Transactional(readOnly=true)
-    public List<Escalatable> findRecentAlerts(int sessionID, int count, int priority, long timeRange,
-                                              AppdefEntityID[] ids) throws SessionNotFoundException,
-        SessionTimeoutException, PermissionException {
+    @Transactional(readOnly = true)
+    public List<Escalatable> findRecentAlerts(int sessionID, int count, int priority,
+                                              long timeRange, AppdefEntityID[] ids)
+        throws SessionNotFoundException, SessionTimeoutException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         long cur = System.currentTimeMillis();
 
-        List<AppdefEntityID> appentResources = ids != null ? appentResources = Arrays.asList(ids) : null;
+        List<AppdefEntityID> appentResources = ids != null ? appentResources = Arrays.asList(ids)
+                                                          : null;
 
         // Assume if user can be alerted, then they can view resource,
         // otherwise, it'll be filtered out later anyways
-        List<Escalatable> alerts = alertManager.findEscalatables(subject, count, priority, timeRange, cur,
-            appentResources);
+        List<Escalatable> alerts = alertManager.findEscalatables(subject, count, priority,
+            timeRange, cur, appentResources);
 
         // CheckAlertingScope now only used for galerts
         if (ids == null) {
@@ -1019,8 +1049,8 @@ public class EventsBossImpl implements EventsBoss {
             appentResources = permissionManager.checkAlertingScope(subject);
         }
 
-        List<Escalatable> galerts = galertManager.findEscalatables(subject, count, priority, timeRange, cur,
-            appentResources);
+        List<Escalatable> galerts = galertManager.findEscalatables(subject, count, priority,
+            timeRange, cur, appentResources);
         alerts.addAll(galerts);
 
         Collections.sort(alerts, new Comparator<Escalatable>() {
@@ -1079,9 +1109,9 @@ public class EventsBossImpl implements EventsBoss {
      * 
      * 
      */
-    @Transactional(readOnly=true)
-    public ConfigSchema getActionConfigSchema(int sessionID, String actionClass) throws SessionNotFoundException,
-        SessionTimeoutException, EncodingException {
+    @Transactional(readOnly = true)
+    public ConfigSchema getActionConfigSchema(int sessionID, String actionClass)
+        throws SessionNotFoundException, SessionTimeoutException, EncodingException {
         sessionManager.authenticate(sessionID);
         ActionInterface iface;
         try {
@@ -1102,7 +1132,7 @@ public class EventsBossImpl implements EventsBoss {
      * 
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public ConfigSchema getRegisteredTriggerConfigSchema(int sessionID, String triggerClass)
         throws SessionNotFoundException, SessionTimeoutException, EncodingException {
         sessionManager.authenticate(sessionID);
@@ -1155,8 +1185,9 @@ public class EventsBossImpl implements EventsBoss {
     /**
      * retrieve escalation by alert definition id.
      */
-    @Transactional(readOnly=true)
-    private Escalation findEscalationByAlertDefId(Integer id, EscalationAlertType type) throws PermissionException {
+    @Transactional(readOnly = true)
+    private Escalation findEscalationByAlertDefId(Integer id, EscalationAlertType type)
+        throws PermissionException {
         return escalationManager.findByDefId(type, id);
     }
 
@@ -1165,9 +1196,10 @@ public class EventsBossImpl implements EventsBoss {
      * 
      * 
      */
-    @Transactional(readOnly=true)
-    public Integer getEscalationIdByAlertDefId(int sessionID, Integer id, EscalationAlertType alertType)
-        throws SessionTimeoutException, SessionNotFoundException, PermissionException{
+    @Transactional(readOnly = true)
+    public Integer getEscalationIdByAlertDefId(int sessionID, Integer id,
+                                               EscalationAlertType alertType)
+        throws SessionTimeoutException, SessionNotFoundException, PermissionException {
         sessionManager.authenticate(sessionID);
         Escalation esc = findEscalationByAlertDefId(id, alertType);
         return esc == null ? null : esc.getId();
@@ -1178,7 +1210,8 @@ public class EventsBossImpl implements EventsBoss {
      * 
      * 
      */
-    public void setEscalationByAlertDefId(int sessionID, Integer id, Integer escId, EscalationAlertType alertType)
+    public void setEscalationByAlertDefId(int sessionID, Integer id, Integer escId,
+                                          EscalationAlertType alertType)
         throws SessionTimeoutException, SessionNotFoundException, PermissionException {
         sessionManager.authenticate(sessionID);
         Escalation escalation = findEscalationById(sessionID, escId);
@@ -1203,7 +1236,8 @@ public class EventsBossImpl implements EventsBoss {
      * 
      * 
      */
-    public JSONObject jsonEscalationByAlertDefId(int sessionID, Integer id, EscalationAlertType alertType)
+    public JSONObject jsonEscalationByAlertDefId(int sessionID, Integer id,
+                                                 EscalationAlertType alertType)
         throws SessionException, PermissionException, JSONException {
         sessionManager.authenticate(sessionID);
         Escalation e = findEscalationByAlertDefId(id, alertType);
@@ -1215,7 +1249,7 @@ public class EventsBossImpl implements EventsBoss {
      * 
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public Escalation findEscalationById(int sessionID, Integer id) throws SessionTimeoutException,
         SessionNotFoundException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
@@ -1239,8 +1273,8 @@ public class EventsBossImpl implements EventsBoss {
     /**
      * 
      */
-    public void removeAction(int sessionID, Integer escId, Integer actId) throws SessionTimeoutException,
-        SessionNotFoundException, PermissionException {
+    public void removeAction(int sessionID, Integer escId, Integer actId)
+        throws SessionTimeoutException, SessionNotFoundException, PermissionException {
         sessionManager.authenticate(sessionID);
         Escalation e = escalationManager.findById(escId);
 
@@ -1255,8 +1289,9 @@ public class EventsBossImpl implements EventsBoss {
      * 
      * 
      */
-    @Transactional(readOnly=true)
-    public List<EscalationState> getActiveEscalations(int sessionId, int maxEscalations) throws SessionException {
+    @Transactional(readOnly = true)
+    public List<EscalationState> getActiveEscalations(int sessionId, int maxEscalations)
+        throws SessionException {
         sessionManager.authenticate(sessionId);
 
         return escalationManager.getActiveEscalations(maxEscalations);
@@ -1266,7 +1301,7 @@ public class EventsBossImpl implements EventsBoss {
      * Gets the escalatable associated with the specified state
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public Escalatable getEscalatable(int sessionId, EscalationState state) throws SessionException {
         sessionManager.authenticate(sessionId);
         return escalationManager.getEscalatable(state);
@@ -1280,9 +1315,9 @@ public class EventsBossImpl implements EventsBoss {
      * 
      * 
      */
-    @Transactional(readOnly=true)
-    public JSONArray listAllEscalationName(int sessionID) throws JSONException, SessionTimeoutException,
-        SessionNotFoundException, PermissionException {
+    @Transactional(readOnly = true)
+    public JSONArray listAllEscalationName(int sessionID) throws JSONException,
+        SessionTimeoutException, SessionNotFoundException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         Collection<Escalation> all = escalationManager.findAll(subject);
         JSONArray jarr = new JSONArray();
@@ -1302,15 +1337,17 @@ public class EventsBossImpl implements EventsBoss {
      * 
      * 
      */
-    public Escalation createEscalation(int sessionID, String name, String desc, boolean allowPause, long maxWaitTime,
-                                       boolean notifyAll, boolean repeat, EscalationAlertType alertType,
-                                       Integer alertDefId) throws SessionTimeoutException, SessionNotFoundException,
-        PermissionException, DuplicateObjectException {
+    public Escalation createEscalation(int sessionID, String name, String desc, boolean allowPause,
+                                       long maxWaitTime, boolean notifyAll, boolean repeat,
+                                       EscalationAlertType alertType, Integer alertDefId)
+        throws SessionTimeoutException, SessionNotFoundException, PermissionException,
+        DuplicateObjectException {
         sessionManager.authenticate(sessionID);
 
         // XXX -- We need to do perm-checking here
 
-        Escalation res = escalationManager.createEscalation(name, desc, allowPause, maxWaitTime, notifyAll, repeat);
+        Escalation res = escalationManager.createEscalation(name, desc, allowPause, maxWaitTime,
+            notifyAll, repeat);
 
         if (alertDefId != null) {
             // The alert def needs to use this escalation
@@ -1324,33 +1361,38 @@ public class EventsBossImpl implements EventsBoss {
      * 
      * 
      */
-    public void updateEscalation(int sessionID, Escalation escalation, String name, String desc, long maxWait,
-                                 boolean pausable, boolean notifyAll, boolean repeat) throws SessionTimeoutException,
-        SessionNotFoundException, PermissionException, DuplicateObjectException {
+    public void updateEscalation(int sessionID, Escalation escalation, String name, String desc,
+                                 long maxWait, boolean pausable, boolean notifyAll, boolean repeat)
+        throws SessionTimeoutException, SessionNotFoundException, PermissionException,
+        DuplicateObjectException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
 
-        escalationManager.updateEscalation(subject, escalation, name, desc, pausable, maxWait, notifyAll, repeat);
+        escalationManager.updateEscalation(subject, escalation, name, desc, pausable, maxWait,
+            notifyAll, repeat);
     }
 
     /**
      * 
      */
-    public boolean acknowledgeAlert(int sessionID, EscalationAlertType alertType, Integer alertID, long pauseWaitTime,
-                                    String moreInfo) throws SessionTimeoutException, SessionNotFoundException,
-        PermissionException, ActionExecuteException {
+    public boolean acknowledgeAlert(int sessionID, EscalationAlertType alertType, Integer alertID,
+                                    long pauseWaitTime, String moreInfo)
+        throws SessionTimeoutException, SessionNotFoundException, PermissionException,
+        ActionExecuteException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
 
-        return escalationManager.acknowledgeAlert(subject, alertType, alertID, moreInfo, pauseWaitTime);
+        return escalationManager.acknowledgeAlert(subject, alertType, alertID, moreInfo,
+            pauseWaitTime);
     }
 
     /**
      * Fix a single alert. TODO: remove comment below Method WAS "NotSupported"
-     * since all the alert fixes may take longer than the transaction
-     * timeout. No need for a transaction in this context.
+     * since all the alert fixes may take longer than the transaction timeout.
+     * No need for a transaction in this context.
      * 
      */
-    public void fixAlert(int sessionID, EscalationAlertType alertType, Integer alertID, String moreInfo)
-        throws SessionTimeoutException, SessionNotFoundException, PermissionException, ActionExecuteException {
+    public void fixAlert(int sessionID, EscalationAlertType alertType, Integer alertID,
+                         String moreInfo) throws SessionTimeoutException, SessionNotFoundException,
+        PermissionException, ActionExecuteException {
         fixAlert(sessionID, alertType, alertID, moreInfo, false);
     }
 
@@ -1360,9 +1402,9 @@ public class EventsBossImpl implements EventsBoss {
      * transaction timeout. No need for a transaction in this context.
      * 
      */
-    public void fixAlert(int sessionID, EscalationAlertType alertType, Integer alertID, String moreInfo,
-                         boolean fixAllPrevious) throws SessionTimeoutException, SessionNotFoundException,
-        PermissionException, ActionExecuteException {
+    public void fixAlert(int sessionID, EscalationAlertType alertType, Integer alertID,
+                         String moreInfo, boolean fixAllPrevious) throws SessionTimeoutException,
+        SessionNotFoundException, PermissionException, ActionExecuteException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
 
         if (fixAllPrevious) {
@@ -1372,8 +1414,8 @@ public class EventsBossImpl implements EventsBoss {
                     moreInfo = "";
                 }
                 StringBuffer sb = new StringBuffer();
-                MessageFormat messageFormat = new MessageFormat(ResourceBundle.getBundle(BUNDLE).getString(
-                    "events.alert.fixAllPrevious"));
+                MessageFormat messageFormat = new MessageFormat(ResourceBundle.getBundle(BUNDLE)
+                    .getString("events.alert.fixAllPrevious"));
                 messageFormat.format(new String[] { Long.toString(fixCount) }, sb, null);
                 moreInfo = sb.toString() + moreInfo;
             }
@@ -1388,8 +1430,9 @@ public class EventsBossImpl implements EventsBoss {
      * transaction in this context.
      */
     @SuppressWarnings("unchecked")
-    private long fixPreviousAlerts(int sessionID, EscalationAlertType alertType, Integer alertID, String moreInfo)
-        throws SessionTimeoutException, SessionNotFoundException, PermissionException, ActionExecuteException {
+    private long fixPreviousAlerts(int sessionID, EscalationAlertType alertType, Integer alertID,
+                                   String moreInfo) throws SessionTimeoutException,
+        SessionNotFoundException, PermissionException, ActionExecuteException {
         StopWatch watch = new StopWatch();
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         long fixCount = 0;
@@ -1400,22 +1443,23 @@ public class EventsBossImpl implements EventsBoss {
         watch.markTimeBegin("fixPreviousAlerts: findAlerts");
         if (alertType.equals(ClassicEscalationAlertType.CLASSIC)) {
             AlertInterface alert = alertManager.findAlertById(alertID);
-            alertsToFix = alertManager.findAlerts(subject.getId(), 0, alert.getTimestamp(), alert.getTimestamp(),
-                false, true, null, alert.getAlertDefinitionInterface().getId(), PageInfo.getAll(AlertSortField.DATE,
-                    false));
+            alertsToFix = alertManager.findAlerts(subject.getId(), 0, alert.getTimestamp(), alert
+                .getTimestamp(), false, true, null, alert.getAlertDefinitionInterface().getId(),
+                PageInfo.getAll(AlertSortField.DATE, false));
 
         } else if (alertType.equals(GalertEscalationAlertType.GALERT)) {
             AlertInterface alert = galertManager.findAlertLog(alertID);
-            alertsToFix = galertManager.findAlerts(subject, AlertSeverity.LOW, alert.getTimestamp(), alert
-                .getTimestamp(), false, true, null, alert.getAlertDefinitionInterface().getId(), PageInfo.getAll(
-                GalertLogSortField.DATE, false));
+            alertsToFix = galertManager.findAlerts(subject, AlertSeverity.LOW,
+                alert.getTimestamp(), alert.getTimestamp(), false, true, null, alert
+                    .getAlertDefinitionInterface().getId(), PageInfo.getAll(
+                    GalertLogSortField.DATE, false));
         } else {
             alertsToFix = Collections.EMPTY_LIST;
         }
         watch.markTimeEnd("fixPreviousAlerts: findAlerts");
 
-        log.debug("fixPreviousAlerts: alertId = " + alertID + ", previous alerts to fix = " + (alertsToFix.size() - 1) +
-                  ", time = " + watch);
+        log.debug("fixPreviousAlerts: alertId = " + alertID + ", previous alerts to fix = " +
+                  (alertsToFix.size() - 1) + ", time = " + watch);
 
         watch.markTimeBegin("fixPreviousAlerts: fixAlert");
         try {
@@ -1423,7 +1467,8 @@ public class EventsBossImpl implements EventsBoss {
                 try {
                     // Suppress notifications for all previous alerts.
                     if (!alert.getId().equals(alertID)) {
-                        escalationManager.fixAlert(subject, alertType, alert.getId(), moreInfo, true);
+                        escalationManager.fixAlert(subject, alertType, alert.getId(), moreInfo,
+                            true);
                         fixCount++;
                     }
                 } catch (PermissionException pe) {
@@ -1435,8 +1480,8 @@ public class EventsBossImpl implements EventsBoss {
             }
         } finally {
             watch.markTimeEnd("fixPreviousAlerts: fixAlert");
-            log.debug("fixPreviousAlerts: alertId = " + alertID + ", previous alerts fixed = " + fixCount +
-                      ", time = " + watch);
+            log.debug("fixPreviousAlerts: alertId = " + alertID + ", previous alerts fixed = " +
+                      fixCount + ", time = " + watch);
 
         }
         return fixCount;
@@ -1446,9 +1491,9 @@ public class EventsBossImpl implements EventsBoss {
      * Get the last fix if available
      * 
      */
-    @Transactional(readOnly=true)
-    public String getLastFix(int sessionID, Integer defId) throws SessionNotFoundException, SessionTimeoutException,
-        PermissionException {
+    @Transactional(readOnly = true)
+    public String getLastFix(int sessionID, Integer defId) throws SessionNotFoundException,
+        SessionTimeoutException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
 
         // Look for the last fixed alert
@@ -1461,9 +1506,10 @@ public class EventsBossImpl implements EventsBoss {
      * 
      * 
      */
-    @Transactional(readOnly=true)
-    public MaintenanceEvent getMaintenanceEvent(int sessionId, Integer groupId) throws SessionNotFoundException,
-        SessionTimeoutException, PermissionException, SchedulerException {
+    @Transactional(readOnly = true)
+    public MaintenanceEvent getMaintenanceEvent(int sessionId, Integer groupId)
+        throws SessionNotFoundException, SessionTimeoutException, PermissionException,
+        SchedulerException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
 
         return getMaintenanceEventManager().getMaintenanceEvent(subject, groupId);
@@ -1475,7 +1521,8 @@ public class EventsBossImpl implements EventsBoss {
      * 
      */
     public MaintenanceEvent scheduleMaintenanceEvent(int sessionId, MaintenanceEvent event)
-        throws SessionNotFoundException, SessionTimeoutException, PermissionException, SchedulerException {
+        throws SessionNotFoundException, SessionTimeoutException, PermissionException,
+        SchedulerException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         event.setModifiedBy(subject.getName());
 
@@ -1487,46 +1534,44 @@ public class EventsBossImpl implements EventsBoss {
      * 
      * 
      */
-    public void unscheduleMaintenanceEvent(int sessionId, MaintenanceEvent event) throws SessionNotFoundException,
-        SessionTimeoutException, PermissionException, SchedulerException {
+    public void unscheduleMaintenanceEvent(int sessionId, MaintenanceEvent event)
+        throws SessionNotFoundException, SessionTimeoutException, PermissionException,
+        SchedulerException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         event.setModifiedBy(subject.getName());
 
         getMaintenanceEventManager().unschedule(subject, event);
     }
 
-    /**
-     * 
-     */
+    public void onApplicationEvent(ApplicationEvent event) {
+        if (event instanceof ResourceDeleteRequestedEvent) {
+            alertDefinitionManager.disassociateResource(((ResourceDeleteRequestedEvent) event)
+                .getResource());
+        } else if (event instanceof MetricsEnabledEvent) {
+            metricsEnabled(((MetricsEnabledEvent) event).getEntityId());
+        } else if (event instanceof SubjectDeleteRequestedEvent) {
+            subjectRemoved(((SubjectDeleteRequestedEvent) event).getSubject());
+        }
+    }
+
+    private void metricsEnabled(AppdefEntityID ent) {
+        try {
+            log.info("Inheriting type-based alert defs for " + ent);
+            AuthzSubject hqadmin = authzSubjectManager.getSubjectById(AuthzConstants.rootSubjectId);
+            inheritResourceTypeAlertDefinition(hqadmin, ent);
+        } catch (Exception e) {
+            throw new SystemException(e);
+        }
+    }
+
+    private void subjectRemoved(AuthzSubject toDelete) {
+        escalationManager.handleSubjectRemoval(toDelete);
+        alertManager.handleSubjectRemoval(toDelete);
+    }
+
+    @PostConstruct
     public void startup() {
         log.info("Events Boss starting up!");
-
-        
-        app.registerCallbackListener(DefaultMetricEnableCallback.class, new DefaultMetricEnableCallback() {
-            public void metricsEnabled(AppdefEntityID ent) {
-                try {
-                    log.info("Inheriting type-based alert defs for " + ent);
-                    AuthzSubject hqadmin = authzSubjectManager.getSubjectById(AuthzConstants.rootSubjectId);
-                    inheritResourceTypeAlertDefinition(hqadmin, ent);
-                } catch (Exception e) {
-                    throw new SystemException(e);
-                }
-            }
-        });
-
-        app.registerCallbackListener(ResourceDeleteCallback.class, new ResourceDeleteCallback() {
-            public void preResourceDelete(Resource r) throws VetoException {
-                alertDefinitionManager.disassociateResource(r);
-            }
-        });
-
-        app.registerCallbackListener(SubjectRemoveCallback.class, new SubjectRemoveCallback() {
-            public void subjectRemoved(AuthzSubject toDelete) {
-                escalationManager.handleSubjectRemoval(toDelete);
-                alertManager.handleSubjectRemoval(toDelete);
-            }
-
-        });
 
         // Add listener to remove alert definition and alerts after resources
         // are deleted.
