@@ -40,6 +40,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
@@ -49,13 +50,10 @@ import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.escalation.EscalationEvent;
 import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
 import org.hyperic.hq.escalation.shared.EscalationManagerUtil;
-import org.hyperic.hq.escalation.server.session.Escalation;
-import org.hyperic.hq.escalation.server.session.Escalatable;
-import org.hyperic.hq.escalation.server.session.EscalationAlertType;
-import org.hyperic.hq.escalation.server.session.PerformsEscalations;
-import org.hyperic.hq.escalation.server.session.EscalationState;
 import org.hyperic.hq.events.ActionConfigInterface;
 import org.hyperic.hq.events.ActionExecutionInfo;
+import org.hyperic.hq.events.AlertDefinitionInterface;
+import org.hyperic.hq.events.AlertInterface;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.Notify;
 import org.hyperic.hq.events.server.session.Action;
@@ -64,7 +62,6 @@ import org.hyperic.hq.events.server.session.AlertDAO;
 import org.hyperic.hq.events.server.session.AlertRegulator;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
 import org.hyperic.hq.events.server.session.SessionBase;
-import org.hyperic.hq.escalation.server.session.EscalatableCreator;
 import org.hyperic.hq.galerts.server.session.GalertEscalationAlertType;
 import org.hyperic.hq.galerts.server.session.GalertManagerEJBImpl;
 import org.hyperic.util.units.FormattedNumber;
@@ -442,7 +439,7 @@ public class EscalationManagerEJBImpl
     private void endEscalation(EscalationState state) {
         if (state != null) {
             // make sure we have the updated state to avoid StaleStateExceptions
-            state = _stateDAO.findById(state.getId());
+            state = _stateDAO.getById(state.getId());
             if (state == null) {
                 return;
             }
@@ -517,32 +514,10 @@ public class EscalationManagerEJBImpl
         //      HQ exception and not worry about checking for alert types explicitly
         //      but after talking with folks about it, sounds like it would require 
         //      touching a lot more plumbing code...
-        EscalationAlertType alertType = s.getAlertType();
-        boolean isAlertNotFound = true;
-        
-        try {
-            if (alertType instanceof GalertEscalationAlertType) {
-                isAlertNotFound =
-                    GalertManagerEJBImpl.getOne().getAlertLog(new Integer(s.getAlertId())) == null;
-            } else if (alertType instanceof ClassicEscalationAlertType) {
-                // HHQ-3499, need to make sure that the alertId that is pointed to by
-                // the escalation still exists
-                AlertDAO dao = DAOFactory.getDAOFactory().getAlertDAO();
-                
-                isAlertNotFound = (dao.getById(new Integer(s.getAlertId())) == null);
-            } 
-        } catch(Exception ex) {
-            log.warn("An unexpected error has occurred while checking if alert with id[" + s.getAlertId() + " and escalation type [" + s.getAlertType().getClass().getName() + "] exists.", ex);
-            // ...could not determine whether or not the alert exists, so we'll assume it doesn't and 
-            // end the escalation below...
-        }
-        
-        if (isAlertNotFound) {
-            if (debug) log.debug("Alert with id[" + s.getAlertId() + " and escalation type [" + s.getAlertType().getClass().getName() + "] was not found. Canceling escalation...");
-            
+        if (!escIsValid(s)) {
+            if (debug) log.debug("alert cannot be escalated, since it is not valid.");
             endEscalation(s);
-            
-            return;            
+            return;
         }
         
         Escalatable esc = getEscalatable(s);
@@ -591,6 +566,41 @@ public class EscalationManagerEJBImpl
         }
     }
     
+    private boolean escIsValid(EscalationState s) {
+        final boolean debug = log.isDebugEnabled();
+        EscalationAlertType alertType = s.getAlertType();
+        AlertInterface alert = null;
+        // HHQ-3499, need to make sure that the alertId that is pointed to by
+        // the escalation still exists
+        if (alertType instanceof GalertEscalationAlertType) {
+            alert = GalertManagerEJBImpl.getOne().getAlertLog(new Integer(s.getAlertId()));
+        } else if (alertType instanceof ClassicEscalationAlertType) {
+            AlertDAO dao = DAOFactory.getDAOFactory().getAlertDAO();
+            alert = dao.getById(new Integer(s.getAlertId()));
+        } 
+        if (alert == null) {
+            if (debug) log.debug("Alert with id[" + s.getAlertId() + 
+                                 " and escalation type [" + s.getAlertType().getClass().getName() + 
+                                 "] was not found.");
+            return false;
+        }
+        AlertDefinitionInterface def = alert.getAlertDefinitionInterface();
+        if (def == null) {
+            if (debug) log.debug("AlertDef from alertid=" + s.getAlertId() + 
+                                 " was not found.");
+            endEscalation(s);
+            return false;
+        }
+        Resource r = def.getResource();
+        if (r == null || r.isInAsyncDeleteState()) {
+            if (debug) log.debug("Resource from alertid=" + s.getAlertId() + 
+                                 " was not found.");
+            endEscalation(s);
+            return false;
+        }
+        return true;
+    }
+
     /**
      * Check if the escalation state or its associated escalating entity 
      * has been deleted.

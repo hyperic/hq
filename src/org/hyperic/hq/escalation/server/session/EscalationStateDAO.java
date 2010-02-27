@@ -41,6 +41,10 @@ class EscalationStateDAO
         super(EscalationState.class, f);
     }
 
+    EscalationState getById(Integer id) {
+        return (EscalationState)super.get(id);
+    }
+
     EscalationState findById(Integer id) {
         return (EscalationState)super.findById(id);
     }
