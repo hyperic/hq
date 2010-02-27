@@ -104,13 +104,17 @@ public class StopWatch {
     }
 
     private void writeBuf(String marker, List tsList, StringBuffer buf) {
-        long total = 0l;
+        long total = -1;
         for (Iterator it=tsList.iterator();it.hasNext();) {
             TimeSlice ts = (TimeSlice)it.next();
-            total += ts.getElapsed();
+            Long elapsed = ts.getElapsed();
+            if (elapsed == null) {
+                continue;
+            }
+            total += elapsed.longValue();
         }
         buf.append(" [").append(marker).append("=")
-           .append(StringUtil.formatDuration(total, 2, true))
+           .append((total < 0) ? "null" : StringUtil.formatDuration(total, 2, true))
            .append("]");
     }
 
@@ -121,16 +125,19 @@ public class StopWatch {
 
         public TimeSlice (String marker) {
             _marker = marker;
-            _begin = _end=now();
+            _begin = now();
+            _end = 0;
         }
 
         public void setFinished () {
             _end= now();
         }
         
-        public long getElapsed() {
-            final long end = (_end == 0) ? now() : _end;
-            return end - _begin;
+        public Long getElapsed() {
+            if (_end == 0) {
+                return null;
+            }
+            return new Long(_end - _begin);
         }
     }
 }
