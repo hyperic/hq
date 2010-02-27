@@ -68,7 +68,10 @@ import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -80,7 +83,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional
 @Service
-public class ResourceGroupManagerImpl implements ResourceGroupManager {
+public class ResourceGroupManagerImpl implements ResourceGroupManager, ApplicationContextAware {
     private Pager _groupPager;
     private Pager _ownedGroupPager;
     private static final String GROUP_PAGER = PagerProcessor_resourceGroup.class.getName();
@@ -95,6 +98,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
     private ResourceGroupDAO resourceGroupDAO;
     private ResourceDAO resourceDAO;
     private ResourceRelationDAO resourceRelationDAO;
+    private ApplicationContext applicationContext;
 
     @Autowired
     public ResourceGroupManagerImpl(ResourceEdgeDAO resourceEdgeDAO, AuthzSubjectManager authzSubjectManager,
@@ -136,8 +140,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
         ResourceGroup res = resourceGroupDAO.create(whoami, cInfo, resources, roles);
 
         resourceEdgeDAO.create(res.getResource(), res.getResource(), 0, getContainmentRelation()); // Self-edge
-
-        GroupingStartupListener.getCallbackObj().postGroupCreate(res);
+        applicationContext.publishEvent(new GroupCreatedEvent(res));
         return res;
     }
 
@@ -267,8 +270,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
         checkGroupPermission(whoami, group.getId(), AuthzConstants.perm_removeResourceGroup);
         // TODO scottmf, this should be invoking a pre-transaction callback
         eventLogManager.deleteLogs(group.getResource());
-
-        GroupingStartupListener.getCallbackObj().preGroupDelete(group);
+        applicationContext.publishEvent(new GroupDeleteRequestedEvent(group));
         resourceGroupDAO.remove(group);
 
         resourceGroupDAO.getSession().flush();
@@ -289,7 +291,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
 
     private void addResources(ResourceGroup group, List<Resource> resources) {
         resourceGroupDAO.addMembers(group, resources);
-        GroupingStartupListener.getCallbackObj().groupMembersChanged(group);
+        applicationContext.publishEvent(new GroupMembersChangedEvent(group));
     }
 
     /**
@@ -301,7 +303,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
         checkGroupPermission(whoami, group.getId(), AuthzConstants.perm_modifyResourceGroup);
 
         resourceGroupDAO.addMembers(group, Collections.singleton(resource));
-        GroupingStartupListener.getCallbackObj().groupMembersChanged(group);
+        applicationContext.publishEvent(new GroupMembersChangedEvent(group));
         return group;
     }
 
@@ -316,7 +318,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
         checkGroupPermission(whoami, group.getId(), AuthzConstants.perm_modifyResourceGroup);
 
         resourceGroupDAO.removeMembers(group, resources);
-        GroupingStartupListener.getCallbackObj().groupMembersChanged(group);
+        applicationContext.publishEvent(new GroupMembersChangedEvent(group));
     }
 
     /**
@@ -347,7 +349,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
         checkGroupPermission(whoami, group.getId(), AuthzConstants.perm_modifyResourceGroup);
 
         resourceGroupDAO.setMembers(group, resources);
-        GroupingStartupListener.getCallbackObj().groupMembersChanged(group);
+        applicationContext.publishEvent(new GroupMembersChangedEvent(group));
     }
 
     /**
@@ -760,4 +762,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
         return resourceDAO.findByInstanceId(authzType, id.getId());
     }
 
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+       this.applicationContext = applicationContext;
+    }
 }

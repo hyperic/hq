@@ -1,4 +1,4 @@
-import org.hyperic.hq.application.HQApp;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.hqu.rendit.BaseController
 import org.hyperic.hq.hqu.rendit.html.HtmlUtil
 
@@ -101,7 +101,7 @@ class JmxController extends BaseController
     
     private getServerFilters() {
         def filters = []
-        File dir = new File(HQApp.getInstance().getWebAccessibleDir(),"hqu/jmx/conf");
+        File dir = Bootstrap.getResource("hqu/jmx/conf").getFile();
         XmlParser parser = new XmlParser()
         def children = dir.listFiles();
         for (child in children) {

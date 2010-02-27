@@ -59,14 +59,12 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
-import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.autoinventory.server.session.AgentReportStatus;
 import org.hyperic.hq.autoinventory.server.session.AgentReportStatusDAO;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.context.Bootstrap;
@@ -78,6 +76,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.core.io.Resource;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -101,14 +100,14 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     private PermissionManager permissionManager;
     private PlatformDAO platformDao;
     private ServerConfigManager serverConfigManager;
-    private HQApp hqApp;
     private AgentCommandsClientFactory agentCommandsClientFactory;
     private ApplicationContext applicationContext;
 
     @Autowired
-    public AgentManagerImpl(AgentReportStatusDAO agentReportStatusDao, AgentTypeDAO agentTypeDao, AgentDAO agentDao,
-                            ServiceDAO serviceDao, ServerDAO serverDao, PermissionManager permissionManager,
-                            PlatformDAO platformDao, ServerConfigManager serverConfigManager, HQApp hqApp,
+    public AgentManagerImpl(AgentReportStatusDAO agentReportStatusDao, AgentTypeDAO agentTypeDao,
+                            AgentDAO agentDao, ServiceDAO serviceDao, ServerDAO serverDao,
+                            PermissionManager permissionManager, PlatformDAO platformDao,
+                            ServerConfigManager serverConfigManager,
                             AgentCommandsClientFactory agentCommandsClientFactory) {
         this.agentReportStatusDao = agentReportStatusDao;
         this.agentTypeDao = agentTypeDao;
@@ -118,7 +117,6 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         this.permissionManager = permissionManager;
         this.platformDao = platformDao;
         this.serverConfigManager = serverConfigManager;
-        this.hqApp = hqApp;
         this.agentCommandsClientFactory = agentCommandsClientFactory;
     }
 
@@ -166,9 +164,9 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     /**
      * Get a list of all the entities which can be serviced by an Agent.
      */
-    @Transactional(readOnly=true)
-    public ResourceTree getEntitiesForAgent(AuthzSubject subject, String agentToken) throws AgentNotFoundException,
-        PermissionException {
+    @Transactional(readOnly = true)
+    public ResourceTree getEntitiesForAgent(AuthzSubject subject, String agentToken)
+        throws AgentNotFoundException, PermissionException {
 
         Agent agt = getAgentInternal(agentToken);
         Collection<Platform> plats = platformDao.findByAgent(agt);
@@ -197,7 +195,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      * 
      * @return a list of {@link Agent}s
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public List<Agent> findAgents(PageInfo pInfo) {
         return agentDao.findAgents(pInfo);
     }
@@ -205,7 +203,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     /**
      * Get a list of all the agents in the system
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public List<Agent> getAgents() {
         return new ArrayList<Agent>(agentDao.findAll());
     }
@@ -213,7 +211,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     /**
      * Get a count of all the agents in the system
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public int getAgentCount() {
         return agentDao.size();
     }
@@ -221,7 +219,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     /**
      * Get a count of the agents which are actually used (i.e. have platforms)
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public int getAgentCountUsed() {
         return agentDao.countUsed();
     }
@@ -231,18 +229,20 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      * 'hyperic-hq-remoting' agent. This type of agent may be configured to use
      * either a bidirectional or unidirectional transport.
      */
-    public Agent createNewTransportAgent(String address, Integer port, String authToken, String agentToken,
-                                         String version, boolean unidirectional) throws AgentCreateException {
+    public Agent createNewTransportAgent(String address, Integer port, String authToken,
+                                         String agentToken, String version, boolean unidirectional)
+        throws AgentCreateException {
         AgentType type = agentTypeDao.findByName(HQ_AGENT_REMOTING_TYPE);
         if (type == null) {
             throw new SystemException("Unable to find agent type '" + HQ_AGENT_REMOTING_TYPE + "'");
         }
-        Agent agent = agentDao.create(type, address, port, unidirectional, authToken, agentToken, version);
+        Agent agent = agentDao.create(type, address, port, unidirectional, authToken, agentToken,
+            version);
         logAgentWarning(address, port.intValue(), unidirectional);
         try {
-            AppdefStartupListener.getAgentCreateCallback().agentCreated(agent);
-        } catch (VetoException e) {
-            throw new AgentCreateException("Agent creation vetoed", e);
+            applicationContext.publishEvent(new AgentCreatedEvent(agent));
+        } catch (Exception e) {
+            throw new AgentCreateException("Error creating agent", e);
         }
         return agent;
     }
@@ -251,8 +251,8 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      * Create a new Agent object. The type of the agent that is created is the
      * legacy 'covalent-eam' type.
      */
-    public Agent createLegacyAgent(String address, Integer port, String authToken, String agentToken, String version)
-        throws AgentCreateException {
+    public Agent createLegacyAgent(String address, Integer port, String authToken,
+                                   String agentToken, String version) throws AgentCreateException {
         AgentType type = agentTypeDao.findByName(CAM_AGENT_TYPE);
         if (type == null) {
             throw new SystemException("Unable to find agent type '" + CAM_AGENT_TYPE + "'");
@@ -260,9 +260,9 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         Agent agent = agentDao.create(type, address, port, false, authToken, agentToken, version);
         logAgentWarning(address, port.intValue(), false);
         try {
-            AppdefStartupListener.getAgentCreateCallback().agentCreated(agent);
-        } catch (VetoException e) {
-            throw new AgentCreateException("Agent creation vetoed", e);
+            applicationContext.publishEvent(new AgentCreatedEvent(agent));
+        } catch (Exception e) {
+            throw new AgentCreateException("Error creating agent", e);
         }
         return agent;
     }
@@ -274,8 +274,9 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      * either a bidirectional or unidirectional transport.
      * @return An Agent object representing the updated agent
      */
-    public Agent updateNewTransportAgent(String agentToken, String ip, int port, String authToken, String version,
-                                         boolean unidirectional) throws AgentNotFoundException {
+    public Agent updateNewTransportAgent(String agentToken, String ip, int port, String authToken,
+                                         String version, boolean unidirectional)
+        throws AgentNotFoundException {
         AgentType type = agentTypeDao.findByName(HQ_AGENT_REMOTING_TYPE);
 
         if (type == null) {
@@ -300,8 +301,8 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      * 'covalent-eam' type.
      * @return An Agent object representing the updated agent
      */
-    public Agent updateLegacyAgent(String agentToken, String ip, int port, String authToken, String version)
-        throws AgentNotFoundException {
+    public Agent updateLegacyAgent(String agentToken, String ip, int port, String authToken,
+                                   String version) throws AgentNotFoundException {
         AgentType type = agentTypeDao.findByName(CAM_AGENT_TYPE);
 
         if (type == null) {
@@ -326,8 +327,9 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      * configured to use either a bidirectional or unidirectional transport.
      * @return An Agent object representing the updated agent
      */
-    public Agent updateNewTransportAgent(String ip, int port, String authToken, String agentToken, String version,
-                                         boolean unidirectional) throws AgentNotFoundException {
+    public Agent updateNewTransportAgent(String ip, int port, String authToken, String agentToken,
+                                         String version, boolean unidirectional)
+        throws AgentNotFoundException {
         AgentType type = agentTypeDao.findByName(HQ_AGENT_REMOTING_TYPE);
 
         if (type == null) {
@@ -350,8 +352,8 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      * is updated is the legacy 'covalent-eam' type.
      * @return An Agent object representing the updated agent
      */
-    public Agent updateLegacyAgent(String ip, int port, String authToken, String agentToken, String version)
-        throws AgentNotFoundException {
+    public Agent updateLegacyAgent(String ip, int port, String authToken, String agentToken,
+                                   String version) throws AgentNotFoundException {
         AgentType type = agentTypeDao.findByName(CAM_AGENT_TYPE);
 
         if (type == null) {
@@ -371,7 +373,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
 
     /**
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public List<Agent> findAgentsByIP(String ip) {
         return agentDao.findByIP(ip);
     }
@@ -387,8 +389,8 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      * @param port The new port
      * @return An Agent object representing the updated agent
      */
-    public Agent updateNewTransportAgent(String agentToken, String ip, int port, boolean unidirectional)
-        throws AgentNotFoundException {
+    public Agent updateNewTransportAgent(String agentToken, String ip, int port,
+                                         boolean unidirectional) throws AgentNotFoundException {
         AgentType type = agentTypeDao.findByName(HQ_AGENT_REMOTING_TYPE);
 
         if (type == null) {
@@ -414,7 +416,8 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      * @param port The new port
      * @return An Agent object representing the updated agent
      */
-    public Agent updateLegacyAgent(String agentToken, String ip, int port) throws AgentNotFoundException {
+    public Agent updateLegacyAgent(String agentToken, String ip, int port)
+        throws AgentNotFoundException {
         AgentType type = agentTypeDao.findByName(CAM_AGENT_TYPE);
 
         if (type == null) {
@@ -435,7 +438,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      * Find an agent by the token which is Required for the agent to send when
      * it connects.
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public void checkAgentAuth(String agentToken) throws AgentUnauthorizedException {
         Agent agent = agentDao.findByAgentToken(agentToken);
         if (agent == null) {
@@ -445,14 +448,14 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
 
     /**
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public AgentConnection getAgentConnection(String method, String connIp, Integer agentId) {
         return AgentConnections.getInstance().agentConnected(method, connIp, agentId);
     }
 
     /**
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public void disconnectAgent(AgentConnection a) {
         AgentConnections.getInstance().disconnectAgent(a);
     }
@@ -460,7 +463,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     /**
      */
     // TODO: G (does this return Agents or AgentConnection?)
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public Collection getConnectedAgents() {
         return AgentConnections.getInstance().getConnected();
     }
@@ -468,7 +471,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     /**
      * Find an agent listening on a specific IP & port
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public Agent getAgent(String ip, int port) throws AgentNotFoundException {
         return this.getAgentInternal(ip, port);
     }
@@ -478,7 +481,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      * @param agentToken the agent token to look for
      * @return An Agent representing the agent that has the given token.
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public Agent getAgent(String agentToken) throws AgentNotFoundException {
         return this.getAgentInternal(agentToken);
     }
@@ -490,14 +493,14 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      * @return <code>true</code> if the agent token is unique;
      *         <code>false</code> if it is already assigned to an agent.
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public boolean isAgentTokenUnique(String agentToken) {
         return agentDao.findByAgentToken(agentToken) == null;
     }
 
     /**
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public Agent findAgent(Integer id) {
         return agentDao.findById(id);
     }
@@ -505,7 +508,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     /**
      * Get an Agent by id.
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public Agent getAgent(Integer id) {
         return agentDao.get(id);
     }
@@ -514,7 +517,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      * Find an agent which can service the given entity ID
      * @return An agent which is set to manage the specified ID
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public Agent getAgent(AppdefEntityID aID) throws AgentNotFoundException {
         try {
             Platform platform = null;
@@ -536,7 +539,8 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
                     platform = platformDao.findById(aID.getId());
                     break;
                 default:
-                    throw new AgentNotFoundException("Request for agent from an " + "entity which can return "
+                    throw new AgentNotFoundException("Request for agent from an "
+                                                     + "entity which can return "
                                                      + "multiple agents");
             }
             if (platform == null) {
@@ -564,9 +568,10 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      *         side.
      * @throws AgentConnectionException if the connection to the agent fails.
      */
-    @Transactional(readOnly=true)
-    public String getCurrentAgentBundle(AuthzSubject subject, AppdefEntityID aid) throws PermissionException,
-        AgentNotFoundException, AgentRemoteException, AgentConnectionException {
+    @Transactional(readOnly = true)
+    public String getCurrentAgentBundle(AuthzSubject subject, AppdefEntityID aid)
+        throws PermissionException, AgentNotFoundException, AgentRemoteException,
+        AgentConnectionException {
 
         // check permissions
         permissionManager.checkCreatePlatformPermission(subject);
@@ -596,8 +601,8 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      * @throws InterruptedException if enqueuing the Zevent is interrupted.
      */
     public void upgradeAgentAsync(AuthzSubject subject, AppdefEntityID aid, String bundleFileName)
-        throws PermissionException, FileNotFoundException, AgentNotFoundException, ConfigPropertyException,
-        InterruptedException {
+        throws PermissionException, FileNotFoundException, AgentNotFoundException,
+        ConfigPropertyException, InterruptedException {
 
         // check permissions
         permissionManager.checkCreatePlatformPermission(subject);
@@ -606,13 +611,18 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         getAgent(aid);
 
         // check bundle file existence
-        File src = resolveAgentBundleFile(bundleFileName);
+        try {
+            File src = resolveAgentBundleFile(bundleFileName);
 
-        if (!src.exists()) {
-            throw new FileNotFoundException("file does not exist: " + src);
+            if (!src.exists()) {
+                throw new FileNotFoundException("file does not exist: " + src);
+            }
+        } catch (IOException e) {
+            throw new FileNotFoundException("Error loading agent bundle file: " + e.getMessage());
         }
 
-        log.info("Enqueuing Zevent to upgrade agent " + aid.getID() + " to bundle " + bundleFileName);
+        log.info("Enqueuing Zevent to upgrade agent " + aid.getID() + " to bundle " +
+                 bundleFileName);
 
         ZeventManager.getInstance().enqueueEvent(new UpgradeAgentZevent(bundleFileName, aid));
     }
@@ -640,8 +650,8 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      *         retrieved.
      */
     public void upgradeAgent(AuthzSubject subject, AppdefEntityID aid, String bundleFileName)
-        throws PermissionException, AgentNotFoundException, AgentConnectionException, AgentRemoteException,
-        FileNotFoundException, ConfigPropertyException, IOException {
+        throws PermissionException, AgentNotFoundException, AgentConnectionException,
+        AgentRemoteException, FileNotFoundException, ConfigPropertyException, IOException {
 
         log.info("Upgrading agent " + aid.getID() + " to bundle ");
 
@@ -673,8 +683,9 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      *         retrieved.
      * @throws InterruptedException if enqueuing the Zevent is interrupted.
      */
-    public void transferAgentBundleAsync(AuthzSubject subject, AppdefEntityID aid, String bundleFileName)
-        throws PermissionException, AgentNotFoundException, FileNotFoundException, ConfigPropertyException,
+    public void transferAgentBundleAsync(AuthzSubject subject, AppdefEntityID aid,
+                                         String bundleFileName) throws PermissionException,
+        AgentNotFoundException, FileNotFoundException, ConfigPropertyException,
         InterruptedException {
 
         // check permissions
@@ -684,15 +695,21 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         getAgent(aid);
 
         // check bundle file existence
-        File src = resolveAgentBundleFile(bundleFileName);
-
-        if (!src.exists()) {
-            throw new FileNotFoundException("file does not exist: " + src);
+        File src;
+        try {
+            src = resolveAgentBundleFile(bundleFileName);
+            if (!src.exists()) {
+                throw new FileNotFoundException("file does not exist: " + src);
+            }
+        } catch (IOException e) {
+            throw new FileNotFoundException("Error loading agent bundle file: " + e.getMessage());
         }
 
-        log.info("Enqueuing Zevent to transfer agent bundle from " + src + " to agent " + aid.getID());
+        log.info("Enqueuing Zevent to transfer agent bundle from " + src + " to agent " +
+                 aid.getID());
 
-        ZeventManager.getInstance().enqueueEvent(new TransferAgentBundleZevent(bundleFileName, aid));
+        ZeventManager.getInstance()
+            .enqueueEvent(new TransferAgentBundleZevent(bundleFileName, aid));
 
     }
 
@@ -717,8 +734,8 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      *         retrieved.
      */
     public void transferAgentBundle(AuthzSubject subject, AppdefEntityID aid, String bundleFileName)
-        throws PermissionException, AgentNotFoundException, AgentConnectionException, AgentRemoteException,
-        FileNotFoundException, IOException, ConfigPropertyException {
+        throws PermissionException, AgentNotFoundException, AgentConnectionException,
+        AgentRemoteException, FileNotFoundException, IOException, ConfigPropertyException {
 
         log.info("Transferring agent bundle  " + bundleFileName + " to agent " + aid.getID());
 
@@ -736,8 +753,8 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
 
         int[] modes = { FileData.WRITETYPE_CREATEOROVERWRITE };
 
-        log.info("Transferring agent bundle from local repository at " + files[0][0] + " to agent " + aid.getID() +
-                 " at " + files[0][1]);
+        log.info("Transferring agent bundle from local repository at " + files[0][0] +
+                 " to agent " + aid.getID() + " at " + files[0][1]);
 
         agentSendFileData(subject, aid, files, modes);
     }
@@ -761,8 +778,8 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      *         id.
      */
     public void transferAgentPlugin(AuthzSubject subject, AppdefEntityID aid, String plugin)
-        throws PermissionException, AgentConnectionException, AgentNotFoundException, AgentRemoteException,
-        FileNotFoundException, IOException, ConfigPropertyException {
+        throws PermissionException, AgentConnectionException, AgentNotFoundException,
+        AgentRemoteException, FileNotFoundException, IOException, ConfigPropertyException {
 
         log.info("Transferring server plugin  " + plugin + " to agent " + aid.getID());
 
@@ -770,7 +787,8 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
 
         String[][] files = new String[1][2];
 
-        File src = new File(hqApp.getWebAccessibleDir() + "/WEB-INF" + HQ_PLUGINS_DIR, plugin);
+        File src = new File(applicationContext.getResource("WEB-INF" + HQ_PLUGINS_DIR).getFile(),
+            plugin);
         if (!src.exists()) {
             throw new FileNotFoundException("Plugin " + plugin + " could not be found");
         }
@@ -789,8 +807,8 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
 
         int[] modes = { FileData.WRITETYPE_CREATEOROVERWRITE };
 
-        log.info("Transferring agent bundle from local repository at " + files[0][0] + " to agent " + aid.getID() +
-                 " at " + files[0][1]);
+        log.info("Transferring agent bundle from local repository at " + files[0][0] +
+                 " to agent " + aid.getID() + " at " + files[0][1]);
 
         agentSendFileData(subject, aid, files, modes);
     }
@@ -812,7 +830,8 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      * @throws InterruptedException if enqueuing the Zevent is interrupted.
      */
     public void transferAgentPluginAsync(AuthzSubject subject, AppdefEntityID aid, String plugin)
-        throws PermissionException, FileNotFoundException, AgentNotFoundException, InterruptedException {
+        throws PermissionException, FileNotFoundException, AgentNotFoundException,
+        InterruptedException {
 
         // check permissions
         permissionManager.checkCreatePlatformPermission(subject);
@@ -821,12 +840,15 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         getAgent(aid);
 
         // perform some basic error checking before enqueueing.
-        File src = new File(hqApp.getWebAccessibleDir() + "/WEB-INF" + HQ_PLUGINS_DIR, plugin);
-        if (!src.exists()) {
+
+        Resource pluginFile = applicationContext.getResource("WEB-INF" + HQ_PLUGINS_DIR + "/" +
+                                                             plugin);
+        if (!pluginFile.exists()) {
             throw new FileNotFoundException("Plugin " + plugin + " could not be found");
         }
 
-        log.info("Enqueuing Zevent to transfer server plugin " + plugin + " to agent " + aid.getID());
+        log.info("Enqueuing Zevent to transfer server plugin " + plugin + " to agent " +
+                 aid.getID());
 
         ZeventManager.getInstance().enqueueEvent(new TransferAgentPluginZevent(plugin, aid));
     }
@@ -852,8 +874,8 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      *         retrieved.
      */
     public void upgradeAgentBundle(AuthzSubject subject, AppdefEntityID aid, String bundleFileName)
-        throws PermissionException, AgentNotFoundException, AgentConnectionException, AgentRemoteException,
-        FileNotFoundException, IOException, ConfigPropertyException {
+        throws PermissionException, AgentNotFoundException, AgentConnectionException,
+        AgentRemoteException, FileNotFoundException, IOException, ConfigPropertyException {
 
         log.info("Upgrading to agent bundle  " + bundleFileName + " on agent " + aid.getID());
 
@@ -898,8 +920,8 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      *         retrieved.
      */
     public void restartAgent(AuthzSubject subject, AppdefEntityID aid) throws PermissionException,
-        AgentNotFoundException, AgentConnectionException, AgentRemoteException, FileNotFoundException, IOException,
-        ConfigPropertyException {
+        AgentNotFoundException, AgentConnectionException, AgentRemoteException,
+        FileNotFoundException, IOException, ConfigPropertyException {
 
         log.info("Restarting agent " + aid.getID());
 
@@ -914,8 +936,9 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      * @see org.hyperic.hq.appdef.server.session.AgentManagerImpl#pingAgent(org.hyperic.hq.authz.server.session.AuthzSubject,
      *      org.hyperic.hq.appdef.Agent)
      */
-    public long pingAgent(AuthzSubject subject, AppdefEntityID id) throws AgentNotFoundException, PermissionException,
-        AgentConnectionException, IOException, ConfigPropertyException, AgentRemoteException {
+    public long pingAgent(AuthzSubject subject, AppdefEntityID id) throws AgentNotFoundException,
+        PermissionException, AgentConnectionException, IOException, ConfigPropertyException,
+        AgentRemoteException {
         Agent a = getAgent(id);
         return pingAgent(subject, a);
     }
@@ -941,8 +964,9 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      * @throws ConfigPropertyException if the server configuration cannot be
      *         retrieved.
      */
-    public long pingAgent(AuthzSubject subject, Agent agent) throws PermissionException, AgentNotFoundException,
-        AgentConnectionException, AgentRemoteException, IOException, ConfigPropertyException {
+    public long pingAgent(AuthzSubject subject, Agent agent) throws PermissionException,
+        AgentNotFoundException, AgentConnectionException, AgentRemoteException, IOException,
+        ConfigPropertyException {
         log.info("Pinging agent " + agent.getAddress());
 
         permissionManager.checkCreatePlatformPermission(subject);
@@ -964,8 +988,8 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
                                     + "From there select the appropriate agent in the \"Agent Connection\" "
                                     + "drop down.";
         if (unidirectional && containsAgentsOfType(agents, CAM_AGENT_TYPE)) {
-            String msg = "A unidirectional agent was added and may conflict with an " + "existing agent.  " +
-                         instructions;
+            String msg = "A unidirectional agent was added and may conflict with an " +
+                         "existing agent.  " + instructions;
             log.warn(msg);
         } else if (!unidirectional && containsAgentsOfType(agents, HQ_AGENT_REMOTING_TYPE)) {
             String msg = "A bidirectional agent was added and may conflict with " +
@@ -986,8 +1010,10 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     /**
      * Resolve the agent bundle file based on the file name and the configured
      * agent bundle repository on the HQ server.
+     * @throws IOException
      */
-    private File resolveAgentBundleFile(String bundleFileName) throws ConfigPropertyException {
+    private File resolveAgentBundleFile(String bundleFileName) throws ConfigPropertyException,
+        IOException {
 
         Properties config = serverConfigManager.getConfig();
 
@@ -999,7 +1025,8 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         // An absolute repository dir is allowed in case the bundle repository
         // resides outside of the HQ server install.
         if (!repository.isAbsolute()) {
-            repository = new File(hqApp.getWebAccessibleDir() + "/WEB-INF", repository.getPath());
+            repository = new File(applicationContext.getResource("WEB-INF").getFile(), repository
+                .getPath());
         }
 
         return new File(repository, bundleFileName);
@@ -1008,9 +1035,10 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     /**
      * Send file data to an agent
      */
-    private FileDataResult[] agentSendFileData(AuthzSubject subject, AppdefEntityID id, String[][] files, int[] modes)
-        throws AgentNotFoundException, AgentConnectionException, AgentRemoteException, PermissionException,
-        FileNotFoundException, IOException {
+    private FileDataResult[] agentSendFileData(AuthzSubject subject, AppdefEntityID id,
+                                               String[][] files, int[] modes)
+        throws AgentNotFoundException, AgentConnectionException, AgentRemoteException,
+        PermissionException, FileNotFoundException, IOException {
         permissionManager.checkCreatePlatformPermission(subject);
 
         AgentCommandsClient client = agentCommandsClientFactory.getClient(getAgent(id));

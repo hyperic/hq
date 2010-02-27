@@ -158,6 +158,4 @@ public interface ApplicationManager {
     public ResourceTree getResourceTree(AuthzSubject subject, AppdefEntityID[] resources, int traversal)
         throws AppdefEntityNotFoundException, PermissionException;
 
-    public void startup();
-
 }

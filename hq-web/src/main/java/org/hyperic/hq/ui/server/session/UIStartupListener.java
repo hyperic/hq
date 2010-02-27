@@ -25,6 +25,7 @@
 package org.hyperic.hq.ui.server.session;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -41,23 +42,30 @@ import org.hyperic.hq.product.server.session.ProductPluginDeployer;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.file.DirWatcher;
 import org.hyperic.util.file.DirWatcher.DirWatcherCallback;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UIStartupListener implements StartupListener {
+public class UIStartupListener implements StartupListener, ApplicationContextAware {
     private final Log log = LogFactory.getLog(UIStartupListener.class);
 
     private ZeventEnqueuer zeventManager;
     private RenditServer renditServer;
     private ResourceDeleteWatcher resourceDeleteWatcher;
     private HQApp hqApp;
-    //TODO this is only injected to ensure that PPD.start() is called first to unpack ui plugins from product plugins.  Make this cleaner
+    // TODO this is only injected to ensure that PPD.start() is called first to
+    // unpack ui plugins from product plugins. Make this cleaner
     private ProductPluginDeployer productPluginDeployer;
+    private File pluginDir;
+   
 
     @Autowired
     public UIStartupListener(ZeventEnqueuer zeventManager, RenditServer renditServer,
-                             ResourceDeleteWatcher resourceDeleteWatcher, HQApp hqApp, ProductPluginDeployer productPluginDeployer) {
+                             ResourceDeleteWatcher resourceDeleteWatcher, HQApp hqApp,
+                             ProductPluginDeployer productPluginDeployer) {
         this.zeventManager = zeventManager;
         this.renditServer = renditServer;
         this.resourceDeleteWatcher = resourceDeleteWatcher;
@@ -74,10 +82,11 @@ public class UIStartupListener implements StartupListener {
     }
 
     private void initPlugins() {
+        if(this.pluginDir == null) {
+            return;
+        }
         long start = System.currentTimeMillis();
         log.info("Starting init Plugins: " + new Date());
-        File warDir = hqApp.getWebAccessibleDir();
-        File pluginDir = new File(warDir, "hqu");
 
         log.info("Watching for HQU plugins in [" + pluginDir.getAbsolutePath() + "]");
 
@@ -119,6 +128,15 @@ public class UIStartupListener implements StartupListener {
         _watcherThread.setDaemon(true);
         _watcherThread.start();
         long end = System.currentTimeMillis();
-        log.info("End init Plugins: " + new Date() + " - change in millis: " + (end-start));
+        log.info("End init Plugins: " + new Date() + " - change in millis: " + (end - start));
     }
+
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        try {
+            this.pluginDir = applicationContext.getResource("hqu").getFile();
+        } catch (IOException e) {
+            log.info("HQU directory not found");
+        }
+    }
+
 }

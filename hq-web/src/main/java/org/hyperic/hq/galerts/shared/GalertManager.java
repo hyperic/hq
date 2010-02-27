@@ -40,7 +40,8 @@ public interface GalertManager {
      * Update basic properties of an alert definition If any of the passed
      * params are non-null, they will be updated with the new value
      */
-    public void update(GalertDef def, String name, String desc, AlertSeverity severity, Boolean enabled);
+    public void update(GalertDef def, String name, String desc, AlertSeverity severity,
+                       Boolean enabled);
 
     /**
      * Update the escalation of an alert def
@@ -65,7 +66,8 @@ public interface GalertManager {
      * @param pInfo Paging Must contain a sort field from
      *        {@link GalertDefSortField}
      */
-    public List<GalertDef> findAlertDefs(AuthzSubject subj, AlertSeverity minSeverity, Boolean enabled, PageInfo pInfo);
+    public List<GalertDef> findAlertDefs(AuthzSubject subj, AlertSeverity minSeverity,
+                                         Boolean enabled, PageInfo pInfo);
 
     public Collection<ExecutionStrategyTypeInfo> findAllStrategyTypes();
 
@@ -91,7 +93,8 @@ public interface GalertManager {
      * foreign-key from the auxType tables), we first traverse all the logs and
      * save Then, we perform the same traversal and save the specific
      */
-    public GalertLog createAlertLog(GalertDef def, ExecutionReason reason) throws ResourceDeletedException;
+    public GalertLog createAlertLog(GalertDef def, ExecutionReason reason)
+        throws ResourceDeletedException;
 
     public void createActionLog(GalertLog alert, String detail, Action action, AuthzSubject subject);
 
@@ -110,12 +113,16 @@ public interface GalertManager {
 
     public List<GalertLog> findAlertLogs(ResourceGroup group);
 
-    public PageList<GalertLog> findAlertLogsByTimeWindow(ResourceGroup group, long begin, long end, PageControl pc);
+    public PageList<GalertLog> findAlertLogsByTimeWindow(ResourceGroup group, long begin, long end,
+                                                         PageControl pc);
 
-    public List<GalertLog> findUnfixedAlertLogsByTimeWindow(ResourceGroup group, long begin, long end);
+    public List<GalertLog> findUnfixedAlertLogsByTimeWindow(ResourceGroup group, long begin,
+                                                            long end);
 
-    public List<Escalatable> findEscalatables(AuthzSubject subj, int count, int priority, long timeRange, long endTime,
-                                              List<AppdefEntityID> includes) throws PermissionException;
+    public List<Escalatable> findEscalatables(AuthzSubject subj, int count, int priority,
+                                              long timeRange, long endTime,
+                                              List<AppdefEntityID> includes)
+        throws PermissionException;
 
     /**
      * Find group alerts based on a set of criteria
@@ -129,20 +136,23 @@ public interface GalertManager {
      *        ignore and return
      * @return a list of {@link GalertLog}s
      */
-    public List<GalertLog> findAlerts(AuthzSubject subj, int count, int priority, long timeRange, long endTime,
-                                      List<AppdefEntityID> includes) throws PermissionException;
+    public List<GalertLog> findAlerts(AuthzSubject subj, int count, int priority, long timeRange,
+                                      long endTime, List<AppdefEntityID> includes)
+        throws PermissionException;
 
-    public List<GalertLog> findAlerts(AuthzSubject subj, AlertSeverity severity, long timeRange, long endTime,
-                                      boolean inEsc, boolean notFixed, Integer groupId, PageInfo pInfo);
+    public List<GalertLog> findAlerts(AuthzSubject subj, AlertSeverity severity, long timeRange,
+                                      long endTime, boolean inEsc, boolean notFixed,
+                                      Integer groupId, PageInfo pInfo);
 
-    public List<GalertLog> findAlerts(AuthzSubject subj, AlertSeverity severity, long timeRange, long endTime,
-                                      boolean inEsc, boolean notFixed, Integer groupId, Integer galertDefId,
-                                      PageInfo pInfo);
+    public List<GalertLog> findAlerts(AuthzSubject subj, AlertSeverity severity, long timeRange,
+                                      long endTime, boolean inEsc, boolean notFixed,
+                                      Integer groupId, Integer galertDefId, PageInfo pInfo);
 
     /**
      * Get the number of alerts for the given array of AppdefEntityID's
      */
-    public int[] fillAlertCount(AuthzSubject subj, AppdefEntityID[] ids, int[] counts) throws PermissionException;
+    public int[] fillAlertCount(AuthzSubject subj, AppdefEntityID[] ids, int[] counts)
+        throws PermissionException;
 
     public void deleteAlertLog(GalertLog log);
 
@@ -165,14 +175,15 @@ public interface GalertManager {
      * @param configs A list of {@link ConfigResponse}s, one for each trigger
      *        info
      */
-    public void configureTriggers(GalertDef def, GalertDefPartition partition, List<GtriggerTypeInfo> triggerInfos,
-                                  List<ConfigResponse> configs);
+    public void configureTriggers(GalertDef def, GalertDefPartition partition,
+                                  List<GtriggerTypeInfo> triggerInfos, List<ConfigResponse> configs);
 
     public ExecutionStrategyInfo addPartition(GalertDef def, GalertDefPartition partition,
-                                              ExecutionStrategyTypeInfo stratType, ConfigResponse stratConfig);
+                                              ExecutionStrategyTypeInfo stratType,
+                                              ConfigResponse stratConfig);
 
-    public GalertDef createAlertDef(AuthzSubject subject, String name, String description, AlertSeverity severity,
-                                    boolean enabled, ResourceGroup group);
+    public GalertDef createAlertDef(AuthzSubject subject, String name, String description,
+                                    AlertSeverity severity, boolean enabled, ResourceGroup group);
 
     /**
      * Reload an alert Probably should only be called internally
@@ -204,7 +215,5 @@ public interface GalertManager {
      * Remove all the galert defs associated with this resource
      */
     public void processGroupDeletion(ResourceGroup g);
-
-    public void startup();
 
 }

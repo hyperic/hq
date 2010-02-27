@@ -95,7 +95,7 @@ public class UpdateBossImpl implements UpdateBoss {
         return CHECK_URL;
     }
 
-    private Properties getRequestInfo(UpdateStatus status) {
+    protected Properties getRequestInfo(UpdateStatus status) {
         Properties req = new Properties();
         String guid = serverConfigManager.getGUID();
 
@@ -122,7 +122,6 @@ public class UpdateBossImpl implements UpdateBoss {
         req.putAll(SysStats.getCpuMemStats());
         req.putAll(SysStats.getDBStats());
         req.putAll(getHQUPlugins());
-        BossStartupListener.getUpdateReportAppender().addProps(req);
         return req;
     }
 

@@ -27,6 +27,7 @@ package org.hyperic.hq.product.server.session;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.Connection;
@@ -42,13 +43,11 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 import javax.annotation.PostConstruct;
-import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hibernate.dialect.HQDialect;
-import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.hqu.RenditServer;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
@@ -60,7 +59,10 @@ import org.hyperic.hq.product.shared.ProductManager;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.util.file.FileUtil;
 import org.hyperic.util.jdbc.DBUtil;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedMetric;
 import org.springframework.jmx.export.annotation.ManagedOperation;
@@ -74,7 +76,7 @@ import org.springframework.stereotype.Service;
  */
 @ManagedResource("hyperic.jmx:type=Service,name=ProductPluginDeployer")
 @Service
-public class ProductPluginDeployer implements Comparator<String> {
+public class ProductPluginDeployer implements Comparator<String>, ApplicationContextAware {
 
     private final Log log = LogFactory.getLog(ProductPluginDeployer.class);
 
@@ -84,7 +86,6 @@ public class ProductPluginDeployer implements Comparator<String> {
     private static final String TAB_DATA = MeasurementConstants.TAB_DATA,
         MEAS_VIEW = MeasTabManagerUtil.MEAS_VIEW;
 
-    private HQApp hqApp;
     private DBUtil dbUtil;
     private RenditServer renditServer;
     private ProductManager productManager;
@@ -94,13 +95,13 @@ public class ProductPluginDeployer implements Comparator<String> {
     private ProductPluginManager _ppm;
     private List<String> _plugins = new ArrayList<String>();
 
-    private String _pluginDir;
-    private String _hquDir;
+    private File _pluginDir;
+    private File _hquDir;
+    private File sigarBin;
 
     @Autowired
-    public ProductPluginDeployer(HQApp hqApp, DBUtil dbUtil, RenditServer renditServer,
+    public ProductPluginDeployer(DBUtil dbUtil, RenditServer renditServer,
                                  ProductManager productManager) {
-        this.hqApp = hqApp;
         this.dbUtil = dbUtil;
         this.renditServer = renditServer;
         this.productManager = productManager;
@@ -123,7 +124,7 @@ public class ProductPluginDeployer implements Comparator<String> {
             }
         } catch (SQLException e) {
             log.error("SQLException creating connection: ", e);
-        }  finally {
+        } finally {
             DBUtil.closeConnection(ProductPluginDeployer.class, conn);
         }
     }
@@ -252,7 +253,7 @@ public class ProductPluginDeployer implements Comparator<String> {
      */
     @ManagedAttribute
     public void setPluginDir(String name) {
-        _pluginDir = name;
+        _pluginDir = new File(name);
     }
 
     /**
@@ -260,7 +261,7 @@ public class ProductPluginDeployer implements Comparator<String> {
      */
     @ManagedAttribute
     public String getPluginDir() {
-        return _pluginDir;
+        return _pluginDir.getAbsolutePath();
     }
 
     private Set<String> getPluginNames(String type) throws PluginException {
@@ -395,16 +396,12 @@ public class ProductPluginDeployer implements Comparator<String> {
 
     @PostConstruct
     public void start() throws Exception {
-        File file = hqApp.getWebAccessibleDir();
-        if (file != null) {
-            String war = file.toString();
-            _hquDir = war + "/" + HQU;
-            _pluginDir = war + "/WEB-INF/" + PLUGIN_DIR;
+        if (this.sigarBin != null) {
             // native libraries are deployed into another directory
             // which is not next to sigar.jar, so we drop this hint
             // to find it.
-            System.setProperty("org.hyperic.sigar.path", war + "/WEB-INF/sigar_bin/lib");
-        } 
+            System.setProperty("org.hyperic.sigar.path", sigarBin.getAbsolutePath() + "/lib");
+        }
         File propFile = ProductPluginManager.PLUGIN_PROPERTIES_FILE;
         _ppm = new ProductPluginManager(propFile);
         _ppm.setRegisterTypes(true);
@@ -412,22 +409,22 @@ public class ProductPluginDeployer implements Comparator<String> {
         if (propFile.canRead()) {
             _log.info("Loaded custom properties from: " + propFile);
         }
-        if (file != null) {           
+        if (this.sigarBin != null) {
             try {
                 // hq.war contains sigar_bin/lib with the
                 // native sigar libraries. we set sigar.install.home
                 // here so plugins which use sigar can find it during
                 // Sigar.load()
-
-                String path = file.toString() + "/WEB-INF/sigar_bin";
-                _ppm.setProperty("sigar.install.home", path);
+                _ppm.setProperty("sigar.install.home", sigarBin.getAbsolutePath());
             } catch (Exception e) {
                 _log.error(e);
             }
-            ProductPluginManager.setPdkPluginsDir(file.toString() + "/WEB-INF/hq-plugins");
-        }   
+        }
+        if (this._pluginDir != null) {
+            ProductPluginManager.setPdkPluginsDir(_pluginDir.getAbsolutePath());
+        }
         _ppm.init();
-        if(file != null) {
+        if (this._pluginDir != null) {
             serverStarted();
         }
     }
@@ -497,6 +494,24 @@ public class ProductPluginDeployer implements Comparator<String> {
                 _plugins.add(plugin);
                 deployHqu(plugin, pluginFile.toURI().toURL());
             }
+        }
+    }
+
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        try {
+            this._hquDir = applicationContext.getResource(HQU).getFile();
+        } catch (IOException e) {
+            log.info("HQU directory not found");
+        }
+        try {
+            this._pluginDir = applicationContext.getResource("WEB-INF/" + PLUGIN_DIR).getFile();
+        } catch (IOException e) {
+            log.info("Plugins directory not found");
+        }
+        try {
+            this.sigarBin = applicationContext.getResource("WEB-INF/sigar_bin").getFile();
+        } catch (IOException e) {
+            log.info("sigar_bin directory not found");
         }
     }
 

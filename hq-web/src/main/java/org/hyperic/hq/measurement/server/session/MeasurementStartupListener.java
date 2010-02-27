@@ -26,7 +26,6 @@
 package org.hyperic.hq.measurement.server.session;
 
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
@@ -40,12 +39,9 @@ import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.application.HQApp;
+import org.hyperic.hq.application.Scheduler;
 import org.hyperic.hq.application.StartupListener;
-import org.hyperic.hq.authz.server.session.AuthzStartupListener;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceDeleteCallback;
 import org.hyperic.hq.common.ProductProperties;
-import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.galerts.MetricAuxLogProvider;
@@ -65,8 +61,6 @@ public class MeasurementStartupListener implements StartupListener {
     private static final Object LOCK = new Object();
     private static DataInserter _dataInserter;
     private static DataInserter _availDataInserter;
-    private static DefaultMetricEnableCallback _defEnableCallback;
-    private static MetricDeleteCallback _delCallback;
     private static ScheduledFuture _dataPurgeFuture;
     private static HQApp app;
     private ZeventEnqueuer zEventManager;
@@ -78,6 +72,7 @@ public class MeasurementStartupListener implements StartupListener {
     private SynchronousDataInserter synchronousDataInserter;
     private MeasurementEnabler measurementEnabler;
     private ReportStatsCollector reportStatsCollector;
+    private static Scheduler scheduler;
 
     @Autowired
     public MeasurementStartupListener(ZeventEnqueuer zEventManager, MetricAuxLogManager metricAuxLogManager,
@@ -85,7 +80,7 @@ public class MeasurementStartupListener implements StartupListener {
                                       SRNManager srnManager, HQApp app,
                                       SynchronousAvailDataInserter synchronousAvailDataInserter,
                                       SynchronousDataInserter synchronousDataInserter,
-                                      MeasurementEnabler measurementEnabler, ReportStatsCollector reportStatsCollector, AuthzStartupListener authzStartupListener) {
+                                      MeasurementEnabler measurementEnabler, ReportStatsCollector reportStatsCollector, Scheduler scheduler) {
         this.zEventManager = zEventManager;
         this.metricAuxLogManager = metricAuxLogManager;
         this.measurementManager = measurementManager;
@@ -95,6 +90,7 @@ public class MeasurementStartupListener implements StartupListener {
         this.synchronousDataInserter = synchronousDataInserter;
         this.measurementEnabler = measurementEnabler;
         this.reportStatsCollector = reportStatsCollector;
+        MeasurementStartupListener.scheduler = scheduler;
         MeasurementStartupListener.app = app;
         //TODO injecting AuthzStartupListener so ResourceDeleteCallback handler registered first
     }
@@ -117,26 +113,9 @@ public class MeasurementStartupListener implements StartupListener {
         zEventManager.addBufferedListener(listenEvents, measurementEnabler);
 
         synchronized (LOCK) {
-            _defEnableCallback = (DefaultMetricEnableCallback) app
-                .registerCallbackCaller(DefaultMetricEnableCallback.class);
-            _delCallback = (MetricDeleteCallback) app.registerCallbackCaller(MetricDeleteCallback.class);
             _dataInserter = synchronousDataInserter;
             _availDataInserter = synchronousAvailDataInserter;
         }
-
-        app.registerCallbackListener(MetricDeleteCallback.class, new MetricDeleteCallback() {
-            public void beforeMetricsDelete(Collection<Integer> mids) {
-                metricAuxLogManager.metricsDeleted(mids);
-            }
-        });
-
-        app.registerCallbackListener(ResourceDeleteCallback.class, new ResourceDeleteCallback() {
-
-            public void preResourceDelete(Resource r) throws VetoException {
-                measurementManager.handleResourceDelete(r);
-            }
-
-        });
 
         prefetchEnabledMeasurementsAndTemplates();
         initReportsStats();
@@ -147,7 +126,7 @@ public class MeasurementStartupListener implements StartupListener {
         if (_dataPurgeFuture != null) {
             _log.info("Stopping Data Purge Worker");
             _dataPurgeFuture.cancel(true);
-            app.getScheduler().purgeTasks();
+            scheduler.purgeTasks();
             _dataPurgeFuture = null;
         }
     }
@@ -177,7 +156,7 @@ public class MeasurementStartupListener implements StartupListener {
             _log.fatal("Could not start DataPurgeWorker");
             return;
         }
-        _dataPurgeFuture = app.getScheduler()
+        _dataPurgeFuture = scheduler
             .scheduleAtFixedRate(dataPurgeJob, initialDelay, MeasurementConstants.HOUR);
     }
 
@@ -226,15 +205,5 @@ public class MeasurementStartupListener implements StartupListener {
         }
     }
 
-    static DefaultMetricEnableCallback getDefaultEnableObj() {
-        synchronized (LOCK) {
-            return _defEnableCallback;
-        }
-    }
-
-    static MetricDeleteCallback getMetricDeleteCallbackObj() {
-        synchronized (LOCK) {
-            return _delCallback;
-        }
-    }
+   
 }

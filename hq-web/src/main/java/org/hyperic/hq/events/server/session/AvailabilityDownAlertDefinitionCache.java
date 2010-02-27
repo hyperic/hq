@@ -39,6 +39,7 @@ import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -46,7 +47,7 @@ import org.springframework.stereotype.Repository;
  * definitions exist for a resource
  */
 @Repository
-public class AvailabilityDownAlertDefinitionCache {
+public class AvailabilityDownAlertDefinitionCache implements ApplicationListener<AlertDefinitionApplicationEvent> {
     private Log log = LogFactory.getLog(AvailabilityDownAlertDefinitionCache.class);
 
     public static final String CACHENAME = "AvailabilityDownAlertDefinitionCache";
@@ -119,5 +120,19 @@ public class AvailabilityDownAlertDefinitionCache {
 
         return value;
     }
+    
+    public void onApplicationEvent(AlertDefinitionApplicationEvent event) {
+        removeFromCache(event.getAlertDefinition());
+     }
+     
+     private void removeFromCache(AlertDefinition def) {
+         synchronized (_cacheLock) {
+             remove(def.getAppdefEntityId());
+
+             for (AlertDefinition childDef : def.getChildren()) {
+                 remove(childDef.getAppdefEntityId());
+             }
+         }
+     }
 
 }

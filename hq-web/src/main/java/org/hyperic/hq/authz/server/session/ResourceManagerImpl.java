@@ -72,7 +72,10 @@ import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
 import org.hyperic.util.timer.StopWatch;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -87,7 +90,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional
 @Service
-public class ResourceManagerImpl implements ResourceManager {
+public class ResourceManagerImpl implements ResourceManager, ApplicationContextAware {
 
     private final Log log = LogFactory.getLog(ResourceManagerImpl.class);
     private Pager resourceTypePager = null;
@@ -105,6 +108,7 @@ public class ResourceManagerImpl implements ResourceManager {
     private ApplicationDAO applicationDAO;
     private PermissionManager permissionManager;
     private ResourceAuditFactory resourceAuditFactory;
+    private ApplicationContext applicationContext;
 
     @Autowired
     public ResourceManagerImpl(ResourceEdgeDAO resourceEdgeDAO, PlatformDAO platformDAO,
@@ -539,9 +543,8 @@ public class ResourceManagerImpl implements ResourceManager {
      * 
      */
     public void removeResource(AuthzSubject subject, Resource r) throws VetoException {
-        ResourceDeleteCallback cb = AuthzStartupListener.getResourceDeleteCallback();
-        cb.preResourceDelete(r);
-
+        applicationContext.publishEvent(new ResourceDeleteRequestedEvent(r));
+      
         final long now = System.currentTimeMillis();
         resourceAuditFactory.deleteResource(findResourceById(AuthzConstants.authzHQSystem),
             subject, now, now);
@@ -1044,6 +1047,10 @@ public class ResourceManagerImpl implements ResourceManager {
             return res.getName();
         }
         return appEnt.getAppdefKey();
+    }
+
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+      this.applicationContext = applicationContext;
     }
 
 }

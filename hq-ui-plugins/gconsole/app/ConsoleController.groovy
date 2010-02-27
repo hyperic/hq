@@ -1,3 +1,5 @@
+import org.hyperic.hq.context.Bootstrap;
+
 import java.text.DateFormat
 import org.hyperic.hq.hqu.rendit.BaseController
 import org.hyperic.hq.application.HQApp
@@ -20,7 +22,7 @@ class ConsoleController extends BaseController {
 	}
 	
     private def getTemplateDir() {
-		new File(HQApp.instance.webAccessibleDir, "/WEB-INF/gconsoleTemplates")    
+		Bootstrap.getResource("WEB-INF/gconsoleTemplates").getFile(); 
 	}
 	
 	private def getTemplates() {

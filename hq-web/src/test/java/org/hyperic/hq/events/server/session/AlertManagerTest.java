@@ -46,7 +46,7 @@ import org.springframework.transaction.annotation.Transactional;
  *
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(loader = TestContextLoader.class, locations = { "classpath:META-INF/spring/*-context.xml" })
+@ContextConfiguration(loader = TestContextLoader.class, locations = { "classpath*:META-INF/spring/*-context.xml" })
 @Transactional
 @DirtiesContext
 public class AlertManagerTest {

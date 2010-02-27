@@ -42,15 +42,16 @@ public interface MeasurementManager {
      * @param props Configuration data for the instance
      * @return a List of the associated Measurement objects
      */
-    public List<Measurement> createMeasurements(AppdefEntityID id, Integer[] templates, long[] intervals,
-                                                ConfigResponse props) throws MeasurementCreateException,
-        TemplateNotFoundException;
+    public List<Measurement> createMeasurements(AppdefEntityID id, Integer[] templates,
+                                                long[] intervals, ConfigResponse props)
+        throws MeasurementCreateException, TemplateNotFoundException;
 
     /**
      * Create Measurements and enqueue for scheduling after commit
      */
-    public List<Measurement> createMeasurements(AuthzSubject subject, AppdefEntityID id, Integer[] templates,
-                                                long[] intervals, ConfigResponse props) throws PermissionException,
+    public List<Measurement> createMeasurements(AuthzSubject subject, AppdefEntityID id,
+                                                Integer[] templates, long[] intervals,
+                                                ConfigResponse props) throws PermissionException,
         MeasurementCreateException, TemplateNotFoundException;
 
     /**
@@ -60,9 +61,9 @@ public interface MeasurementManager {
      * @param props Configuration data for the instance
      * @return a List of the associated Measurement objects
      */
-    public List<Measurement> createMeasurements(AuthzSubject subject, AppdefEntityID id, Integer[] templates,
-                                                ConfigResponse props) throws PermissionException,
-        MeasurementCreateException, TemplateNotFoundException;
+    public List<Measurement> createMeasurements(AuthzSubject subject, AppdefEntityID id,
+                                                Integer[] templates, ConfigResponse props)
+        throws PermissionException, MeasurementCreateException, TemplateNotFoundException;
 
     public Measurement findMeasurementById(Integer mid);
 
@@ -76,7 +77,8 @@ public interface MeasurementManager {
      * Look up a Measurement for a Resource and Measurement alias
      * @return a The Measurement for the Resource of the given alias.
      */
-    public Measurement getMeasurement(AuthzSubject s, Resource r, String alias) throws MeasurementNotFoundException;
+    public Measurement getMeasurement(AuthzSubject s, Resource r, String alias)
+        throws MeasurementNotFoundException;
 
     /**
      * Get a Measurement by Id.
@@ -87,8 +89,8 @@ public interface MeasurementManager {
      * Get the live measurement values for a given resource.
      * @param id The id of the resource
      */
-    public void getLiveMeasurementValues(AuthzSubject subject, AppdefEntityID id) throws PermissionException,
-        LiveMeasurementException, MeasurementNotFoundException;
+    public void getLiveMeasurementValues(AuthzSubject subject, AppdefEntityID id)
+        throws PermissionException, LiveMeasurementException, MeasurementNotFoundException;
 
     /**
      * Count of metrics enabled for a particular entity
@@ -96,7 +98,8 @@ public interface MeasurementManager {
      */
     public int getEnabledMetricsCount(AuthzSubject subject, AppdefEntityID id);
 
-    public Map<Resource, List<Measurement>> findMeasurements(AuthzSubject subject,
+    public Map<Resource, List<Measurement>> findMeasurements(
+                                                             AuthzSubject subject,
                                                              Map<Integer, List<Integer>> resIdsToTemplIds)
         throws PermissionException;
 
@@ -121,14 +124,15 @@ public interface MeasurementManager {
      *        stale copies, potentially always forcing a sync with the database.
      * @return The Measurement
      */
-    public Measurement findMeasurement(AuthzSubject subject, Integer tid, Integer iid, boolean allowStale)
-        throws MeasurementNotFoundException;
+    public Measurement findMeasurement(AuthzSubject subject, Integer tid, Integer iid,
+                                       boolean allowStale) throws MeasurementNotFoundException;
 
     /**
      * Look up a list of Measurements for a template and instances
      * @return a list of Measurement's
      */
-    public List<Measurement> findMeasurements(AuthzSubject subject, Integer tid, AppdefEntityID[] aeids);
+    public List<Measurement> findMeasurements(AuthzSubject subject, Integer tid,
+                                              AppdefEntityID[] aeids);
 
     /**
      * Look up a list of Measurements for a template and instances
@@ -142,13 +146,15 @@ public interface MeasurementManager {
      * null??
      * @return a List of Measurement objects.
      */
-    public List<Measurement> findMeasurements(AuthzSubject subject, AppdefEntityID id, String cat, PageControl pc);
+    public List<Measurement> findMeasurements(AuthzSubject subject, AppdefEntityID id, String cat,
+                                              PageControl pc);
 
     /**
      * Look up a list of enabled Measurements for a category
      * @return a list of {@link Measurement}
      */
-    public List<Measurement> findEnabledMeasurements(AuthzSubject subject, AppdefEntityID id, String cat);
+    public List<Measurement> findEnabledMeasurements(AuthzSubject subject, AppdefEntityID id,
+                                                     String cat);
 
     /**
      * Look up a List of designated Measurements for an entity
@@ -160,13 +166,15 @@ public interface MeasurementManager {
      * Look up a list of designated Measurements for an entity for a category
      * @return A List of Measurements
      */
-    public List<Measurement> findDesignatedMeasurements(AuthzSubject subject, AppdefEntityID id, String cat);
+    public List<Measurement> findDesignatedMeasurements(AuthzSubject subject, AppdefEntityID id,
+                                                        String cat);
 
     /**
      * Look up a list of designated Measurements for an group for a category
      * @return A List of Measurements
      */
-    public List<Measurement> findDesignatedMeasurements(AuthzSubject subject, ResourceGroup g, String cat);
+    public List<Measurement> findDesignatedMeasurements(AuthzSubject subject, ResourceGroup g,
+                                                        String cat);
 
     /**
      * Get an Availabilty Measurement by AppdefEntityId
@@ -190,8 +198,10 @@ public interface MeasurementManager {
      * though HQ supports multiple designates per category.
      * @return A List of designated Measurements keyed by AppdefEntityID
      */
-    public Map<AppdefEntityID, Measurement> findDesignatedMeasurements(AuthzSubject subject, AppdefEntityID[] ids,
-                                                                       String cat) throws MeasurementNotFoundException;
+    public Map<AppdefEntityID, Measurement> findDesignatedMeasurements(AuthzSubject subject,
+                                                                       AppdefEntityID[] ids,
+                                                                       String cat)
+        throws MeasurementNotFoundException;
 
     /**
      * TODO: scottmf, need to do some more work to handle other authz resource
@@ -209,7 +219,8 @@ public interface MeasurementManager {
      *         entities, and the intervals differ or some enabled/not enabled,
      *         then the value will be "0" to denote varying intervals.
      */
-    public Map<Integer, Long> findMetricIntervals(AuthzSubject subject, AppdefEntityID[] aeids, Integer[] tids);
+    public Map<Integer, Long> findMetricIntervals(AuthzSubject subject, AppdefEntityID[] aeids,
+                                                  Integer[] tids);
 
     public List<Object[]> findAllEnabledMeasurementsAndTemplates();
 
@@ -217,8 +228,9 @@ public interface MeasurementManager {
      * Set the interval of Measurements based their template ID's Enable
      * Measurements and enqueue for scheduling after commit
      */
-    public void enableMeasurements(AuthzSubject subject, AppdefEntityID[] aeids, Integer[] mtids, long interval)
-        throws MeasurementNotFoundException, MeasurementCreateException, TemplateNotFoundException, PermissionException;
+    public void enableMeasurements(AuthzSubject subject, AppdefEntityID[] aeids, Integer[] mtids,
+                                   long interval) throws MeasurementNotFoundException,
+        MeasurementCreateException, TemplateNotFoundException, PermissionException;
 
     /**
      * Enable a collection of metrics, enqueue for scheduling after commit
@@ -228,7 +240,8 @@ public interface MeasurementManager {
     /**
      * Enable the Measurement and enqueue for scheduling after commit
      */
-    public void enableMeasurement(AuthzSubject subject, Integer mId, long interval) throws PermissionException;
+    public void enableMeasurement(AuthzSubject subject, Integer mId, long interval)
+        throws PermissionException;
 
     /**
      * Enable the default on metrics for a given resource, enqueue for
@@ -251,23 +264,25 @@ public interface MeasurementManager {
      *        permission on the {@link AppdefEntityID} associated with the mid
      * @param mids {@link Integer} array of mids representing a MeasurementId
      */
-    public void disableMeasurements(AuthzSubject subject, Integer[] mids) throws PermissionException,
-        MeasurementUnscheduleException;
+    public void disableMeasurements(AuthzSubject subject, Integer[] mids)
+        throws PermissionException, MeasurementUnscheduleException;
 
-    public void updateMeasurementInterval(AuthzSubject subject, Integer mId, long interval) throws PermissionException;
+    public void updateMeasurementInterval(AuthzSubject subject, Integer mId, long interval)
+        throws PermissionException;
 
     /**
      * Disable all measurements for the given resources.
      * @param agentId The entity id to use to look up the agent connection
      * @param ids The list of entitys to unschedule
      */
-    public void disableMeasurements(AuthzSubject subject, AppdefEntityID agentId, AppdefEntityID[] ids)
-        throws PermissionException;
+    public void disableMeasurements(AuthzSubject subject, AppdefEntityID agentId,
+                                    AppdefEntityID[] ids) throws PermissionException;
 
     /**
      * Disable all Measurements for a resource
      */
-    public void disableMeasurements(AuthzSubject subject, AppdefEntityID id) throws PermissionException;
+    public void disableMeasurements(AuthzSubject subject, AppdefEntityID id)
+        throws PermissionException;
 
     /**
      * Disable all Measurements for a resource
@@ -284,7 +299,8 @@ public interface MeasurementManager {
      * Disable measurements for an instance Enqueues reschedule events after
      * commit
      */
-    public void disableMeasurements(AuthzSubject subject, AppdefEntityID id, Integer[] tids) throws PermissionException;
+    public void disableMeasurements(AuthzSubject subject, AppdefEntityID id, Integer[] tids)
+        throws PermissionException;
 
     public void syncPluginMetrics(String plugin);
 
@@ -322,15 +338,11 @@ public interface MeasurementManager {
      * @param entity Entity to check the configuration for
      * @param config Configuration to check
      */
-    public void checkConfiguration(AuthzSubject subject, AppdefEntityID entity, ConfigResponse config)
-        throws PermissionException, InvalidConfigException, AppdefEntityNotFoundException;
+    public void checkConfiguration(AuthzSubject subject, AppdefEntityID entity,
+                                   ConfigResponse config) throws PermissionException,
+        InvalidConfigException, AppdefEntityNotFoundException;
 
     public List<Measurement> getMeasurements(Integer[] tids, Integer[] aeids);
-
-    /**
-     * Resource to be deleted, dissociate metrics from resource
-     */
-    public void handleResourceDelete(Resource r);
 
     /**
      * Initializes the units and resource properties of a measurement event

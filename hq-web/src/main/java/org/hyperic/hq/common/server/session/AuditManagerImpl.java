@@ -34,8 +34,12 @@ import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.TransactionListener;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceDeleteRequestedEvent;
+import org.hyperic.hq.authz.server.session.SubjectDeleteRequestedEvent;
 import org.hyperic.hq.common.shared.AuditManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,7 +48,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-public class AuditManagerImpl implements AuditManager {
+public class AuditManagerImpl implements AuditManager, ApplicationListener<ApplicationEvent> {
     private final Log log = LogFactory.getLog(AuditManagerImpl.class);
     private static final ThreadLocal<Audit> CONTAINERS = new ThreadLocal<Audit>();
 
@@ -207,17 +211,22 @@ public class AuditManagerImpl implements AuditManager {
         return auditDao.find(pInfo, me, startTime, endTime, minImportance, purpose, target, klazz);
     }
 
-    /**
-     * 
-     */
-    public void handleResourceDelete(Resource r) {
+    private void handleResourceDelete(Resource r) {
         auditDao.handleResourceDelete(r);
     }
 
-    /**
-     * 
-     */
-    public void handleSubjectDelete(AuthzSubject s) {
+   
+    private void handleSubjectDelete(AuthzSubject s) {
         auditDao.handleSubjectDelete(s);
     }
+
+    public void onApplicationEvent(ApplicationEvent event) {
+       if(event instanceof ResourceDeleteRequestedEvent) {
+           handleResourceDelete(((ResourceDeleteRequestedEvent)event).getResource());
+       }else if(event instanceof SubjectDeleteRequestedEvent) {
+           handleSubjectDelete(((SubjectDeleteRequestedEvent)event).getSubject());
+       }
+    }
+    
+    
 }

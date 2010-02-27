@@ -5,13 +5,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.application.HQApp;
-import org.hyperic.hq.application.ShutdownCallback;
 import org.hyperic.hq.events.AlertConditionEvaluatorStateRepository;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -27,7 +24,8 @@ import org.springframework.stereotype.Repository;
  * 
  */
 @Repository
-public class AlertConditionEvaluatorRepositoryImpl implements AlertConditionEvaluatorRepository, ShutdownCallback {
+public class AlertConditionEvaluatorRepositoryImpl implements AlertConditionEvaluatorRepository,
+    DisposableBean {
     private static final Log log = LogFactory.getLog(AlertConditionEvaluatorRepositoryImpl.class);
     private AlertConditionEvaluatorStateRepository alertConditionEvaluatorStateRepository;
     private Map<Integer, AlertConditionEvaluator> alertConditionEvaluators = new HashMap<Integer, AlertConditionEvaluator>();
@@ -44,14 +42,10 @@ public class AlertConditionEvaluatorRepositoryImpl implements AlertConditionEval
         this.alertConditionEvaluatorStateRepository = alertConditionEvaluatorStateRepository;
     }
 
-    @PostConstruct
-    public void afterPropertiesSet() {
-        HQApp.getInstance().registerCallbackListener(ShutdownCallback.class, this);
-    }
-
     public void addAlertConditionEvaluator(AlertConditionEvaluator alertConditionEvaluator) {
         synchronized (alertConditionEvaluators) {
-            alertConditionEvaluators.put(alertConditionEvaluator.getAlertDefinitionId(), alertConditionEvaluator);
+            alertConditionEvaluators.put(alertConditionEvaluator.getAlertDefinitionId(),
+                alertConditionEvaluator);
         }
     }
 
@@ -86,17 +80,24 @@ public class AlertConditionEvaluatorRepositoryImpl implements AlertConditionEval
                 alertConditionEvaluatorStates.put(alertConditionEvaluator.getAlertDefinitionId(),
                     alertConditionEvaluatorState);
             }
-            Serializable executionStrategyState = alertConditionEvaluator.getExecutionStrategy().getState();
+            Serializable executionStrategyState = alertConditionEvaluator.getExecutionStrategy()
+                .getState();
             if (executionStrategyState != null) {
-                executionStrategyStates.put(alertConditionEvaluator.getAlertDefinitionId(), executionStrategyState);
+                executionStrategyStates.put(alertConditionEvaluator.getAlertDefinitionId(),
+                    executionStrategyState);
             }
         }
         if (!alertConditionEvaluatorStates.isEmpty()) {
-            alertConditionEvaluatorStateRepository.saveAlertConditionEvaluatorStates(alertConditionEvaluatorStates);
+            alertConditionEvaluatorStateRepository
+                .saveAlertConditionEvaluatorStates(alertConditionEvaluatorStates);
         }
         if (!executionStrategyStates.isEmpty()) {
-            alertConditionEvaluatorStateRepository.saveExecutionStrategyStates(executionStrategyStates);
+            alertConditionEvaluatorStateRepository
+                .saveExecutionStrategyStates(executionStrategyStates);
         }
     }
 
+    public void destroy() throws Exception {
+        shutdown();
+    }
 }

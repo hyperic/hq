@@ -28,7 +28,6 @@ package org.hyperic.hq.ui.server.session;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.security.auth.login.LoginException;
@@ -36,16 +35,16 @@ import javax.security.auth.login.LoginException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.authz.server.session.AuthzApplicationEvent;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Role;
-import org.hyperic.hq.authz.server.session.RoleCreateCallback;
-import org.hyperic.hq.authz.server.session.RoleRemoveCallback;
-import org.hyperic.hq.authz.server.session.RoleRemoveFromSubjectCallback;
-import org.hyperic.hq.authz.server.session.SubjectRemoveCallback;
+import org.hyperic.hq.authz.server.session.RoleCreatedEvent;
+import org.hyperic.hq.authz.server.session.RoleDeleteRequestedEvent;
+import org.hyperic.hq.authz.server.session.RoleRemoveFromSubjectRequestedEvent;
+import org.hyperic.hq.authz.server.session.SubjectDeleteRequestedEvent;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -55,7 +54,6 @@ import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.common.server.session.Crispo;
 import org.hyperic.hq.common.server.session.CrispoOption;
 import org.hyperic.hq.common.shared.CrispoManager;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Dashboard;
 import org.hyperic.hq.ui.WebUser;
@@ -63,6 +61,7 @@ import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -70,7 +69,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-public class DashboardManagerImpl implements DashboardManager {
+public class DashboardManagerImpl implements DashboardManager, ApplicationListener<AuthzApplicationEvent> {
 
     private Log log = LogFactory.getLog(DashboardManagerImpl.class);
 
@@ -79,15 +78,14 @@ public class DashboardManagerImpl implements DashboardManager {
     private DashboardConfigDAO dashDao;
     private CrispoManager crispoManager;
     private AuthzSubjectManager authzSubjectManager;
-    private HQApp hqApp;
+   
 
     @Autowired
     public DashboardManagerImpl(DashboardConfigDAO dashDao, CrispoManager crispoManager,
-                                AuthzSubjectManager authzSubjectManager, HQApp hqApp) {
+                                AuthzSubjectManager authzSubjectManager) {
         this.dashDao = dashDao;
         this.crispoManager = crispoManager;
         this.authzSubjectManager = authzSubjectManager;
-        this.hqApp = hqApp;
     }
 
     /**
@@ -250,64 +248,51 @@ public class DashboardManagerImpl implements DashboardManager {
         val = StringUtil.replace(val, Constants.EMPTY_DELIMITER, Constants.DASHBOARD_DELIMITER);
         return val;
     }
+    
+    public void onApplicationEvent(AuthzApplicationEvent event) {
+        if(event instanceof SubjectDeleteRequestedEvent) {
+            dashDao.handleSubjectRemoval(((SubjectDeleteRequestedEvent)event).getSubject());
+        }else if(event instanceof RoleDeleteRequestedEvent) {
+            roleRemoved(((RoleDeleteRequestedEvent)event).getRole());
+        }else if(event instanceof RoleCreatedEvent) {
+            roleCreated(((RoleCreatedEvent)event).getRole());
+        }else if(event instanceof RoleRemoveFromSubjectRequestedEvent) {
+            roleRemovedFromSubject(((RoleRemoveFromSubjectRequestedEvent)event).getRole(), ((RoleRemoveFromSubjectRequestedEvent)event).getSubject());
+        }
+    }
 
-    /**
-     */
-    public void startup() {
-        log.info("Dashboard Manager starting up");
-
-        // Register callback for subject removal
-        hqApp.registerCallbackListener(SubjectRemoveCallback.class, new SubjectRemoveCallback() {
-            public void subjectRemoved(AuthzSubject toDelete) {
-                dashDao.handleSubjectRemoval(toDelete);
+    private void roleRemoved(Role role) {
+        RoleDashboardConfig cfg = dashDao.findDashboard(role);
+        if (cfg == null) {
+            return;
+        }
+        List<CrispoOption> opts = crispoManager.findOptionByKey(Constants.DEFAULT_DASHBOARD_ID);
+        for (CrispoOption opt : opts) {
+            if (Integer.valueOf(opt.getValue()).equals(cfg.getId())) {
+                crispoManager.updateOption(opt, null);
             }
-        });
-
-        // Register callback for role removal
-        hqApp.registerCallbackListener(RoleRemoveCallback.class, new RoleRemoveCallback() {
-            public void roleRemoved(Role r) {
-                RoleDashboardConfig cfg = dashDao.findDashboard(r);
-
-                if (cfg == null)
-                    return;
-
-                List<CrispoOption> opts = crispoManager.findOptionByKey(Constants.DEFAULT_DASHBOARD_ID);
-
-                for (CrispoOption opt : opts) {
-                    if (Integer.valueOf(opt.getValue()).equals(cfg.getId())) {
-                        crispoManager.updateOption(opt, null);
-                    }
-                }
-
-                dashDao.handleRoleRemoval(r);
-            }
-        });
-
-        // Register callback for role creation
-        hqApp.registerCallbackListener(RoleCreateCallback.class, new RoleCreateCallback() {
-            public void roleCreated(Role r) {
-                Crispo cfg = crispoManager.create(getDefaultConfig());
-                RoleDashboardConfig dash = new RoleDashboardConfig(r, r.getName() + " Role Dashboard", cfg);
-                dashDao.save(dash);
-            }
-        });
-
-        // Register callback for subject removed from role
-        hqApp.registerCallbackListener(RoleRemoveFromSubjectCallback.class, new RoleRemoveFromSubjectCallback() {
-            public void roleRemovedFromSubject(Role r, AuthzSubject from) {
-                RoleDashboardConfig cfg = dashDao.findDashboard(r);
-                Crispo c = from.getPrefs();
-                if (c != null) {
-                    for (CrispoOption opt : c.getOptions()) {
-                        if (opt.getKey().equals(Constants.DEFAULT_DASHBOARD_ID) &&
-                            Integer.valueOf(opt.getValue()).equals(cfg.getId())) {
-                            crispoManager.updateOption(opt, null);
-                            break;
-                        }
-                    }
+        }
+        dashDao.handleRoleRemoval(role);
+    }
+    
+    private void roleCreated(Role role) {
+        Crispo cfg = crispoManager.create(getDefaultConfig());
+        RoleDashboardConfig dash = new RoleDashboardConfig(role, role.getName() + " Role Dashboard", cfg);
+        dashDao.save(dash);
+    }
+    
+    private void roleRemovedFromSubject(Role r, AuthzSubject from) {
+        RoleDashboardConfig cfg = dashDao.findDashboard(r);
+        Crispo c = from.getPrefs();
+        if (c != null) {
+            for (CrispoOption opt : c.getOptions()) {
+                if (opt.getKey().equals(Constants.DEFAULT_DASHBOARD_ID) &&
+                    Integer.valueOf(opt.getValue()).equals(cfg.getId())) {
+                    crispoManager.updateOption(opt, null);
+                    break;
                 }
             }
-        });
+        }
     }
 
     @Transactional(readOnly = true)

@@ -61,7 +61,10 @@ import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
 import org.hyperic.util.timer.StopWatch;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -74,7 +77,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
+public class AlertDefinitionManagerImpl implements AlertDefinitionManager, ApplicationContextAware {
     private Log log = LogFactory.getLog(AlertDefinitionManagerImpl.class);
 
     private AlertPermissionManager alertPermissionManager;
@@ -100,6 +103,8 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
     private EscalationManager escalationManager;
 
     private AlertAuditFactory alertAuditFactory;
+    
+    private ApplicationContext applicationContext;
 
     @Autowired
     public AlertDefinitionManagerImpl(AlertPermissionManager alertPermissionManager, AlertDefinitionDAO alertDefDao,
@@ -134,7 +139,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
         }
         watch.markTimeEnd("endEscalation");
 
-        EventsStartupListener.getAlertDefinitionChangeCallback().postDelete(alertdef);
+        applicationContext.publishEvent(new AlertDefinitionDeletedEvent(alertdef));
 
         if (log.isDebugEnabled()) {
             log.debug("deleteAlertDefinitionStuff: " + watch);
@@ -304,7 +309,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
         // we must explicitly save them
         alertDefDao.save(res);
 
-        EventsStartupListener.getAlertDefinitionChangeCallback().postCreate(res);
+        applicationContext.publishEvent(new AlertDefinitionCreatedEvent(res));
 
         return res.getAlertDefinitionValue();
     }
@@ -335,7 +340,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
             }
             child.setMtime(System.currentTimeMillis());
 
-            EventsStartupListener.getAlertDefinitionChangeCallback().postUpdate(child);
+            applicationContext.publishEvent(new AlertDefinitionChangedEvent(child));
         }
     }
 
@@ -462,7 +467,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
         // we must explicitly save them
         alertDefDao.save(aldef);
 
-        EventsStartupListener.getAlertDefinitionChangeCallback().postUpdate(aldef);
+        applicationContext.publishEvent(new AlertDefinitionChangedEvent(aldef));
 
         return aldef.getAlertDefinitionValue();
     }
@@ -501,7 +506,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
 
         alertDefDao.setChildrenActive(def, activate);
 
-        EventsStartupListener.getAlertDefinitionChangeCallback().postUpdate(def);
+        applicationContext.publishEvent(new AlertDefinitionChangedEvent(def));
     }
 
     /**
@@ -1001,5 +1006,9 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
     @Transactional(readOnly=true)
     public int getActiveCount() {
         return alertDefDao.getNumActiveDefs();
+    }
+
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+       this.applicationContext = applicationContext;
     }
 }

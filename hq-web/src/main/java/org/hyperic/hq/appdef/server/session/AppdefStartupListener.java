@@ -34,10 +34,6 @@ import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.StartupListener;
-import org.hyperic.hq.authz.server.session.AuthzStartupListener;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceDeleteCallback;
-import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -46,7 +42,7 @@ import org.springframework.stereotype.Service;
 public class AppdefStartupListener implements StartupListener {
     private static final Object LOCK = new Object();
 
-    private static AgentCreateCallback _agentCreateCallback;
+  
 
     private HQApp app;
     private PlatformManager platformManager;
@@ -61,7 +57,7 @@ public class AppdefStartupListener implements StartupListener {
     @Autowired
     public AppdefStartupListener(HQApp app, PlatformManager platformManager, ServerManager serverManager,
                                  ServiceManager serviceManager, ApplicationManager applicationManager,
-                                 ZeventEnqueuer zEventManager, AuthzStartupListener authzStartupListener,
+                                 ZeventEnqueuer zEventManager, 
                                  TransferAgentBundleZeventListener transferAgentBundleZeventListener,
                                  TransferAgentPluginZeventListener transferAgentPluginZeventListener,
                                  UpgradeAgentZeventListener upgradeAgentZeventListener) {
@@ -84,31 +80,14 @@ public class AppdefStartupListener implements StartupListener {
         // Make sure we have the aux-log provider loaded
         ResourceAuxLogProvider.class.toString();
 
-        synchronized (LOCK) {
-            _agentCreateCallback = (AgentCreateCallback) app.registerCallbackCaller(AgentCreateCallback.class);
-            app.registerCallbackListener(ResourceDeleteCallback.class, new ResourceDeleteCallback() {
-
-                public void preResourceDelete(Resource r) throws VetoException {
-                    // Go ahead and let every appdef type handle a resource
-                    // delete
-                    platformManager.handleResourceDelete(r);
-                    serverManager.handleResourceDelete(r);
-                    serviceManager.handleResourceDelete(r);
-                    applicationManager.handleResourceDelete(r);
-                }
-            });
-        }
+       
 
         registerTransferAgentBundleZeventListener();
         registerTransferAgentPluginZeventListener();
         registerUpgradeAgentZeventListener();
     }
 
-    static AgentCreateCallback getAgentCreateCallback() {
-        synchronized (LOCK) {
-            return _agentCreateCallback;
-        }
-    }
+   
 
     private void registerTransferAgentBundleZeventListener() {
         zEventManager.addBufferedListener(TransferAgentBundleZevent.class, transferAgentBundleZeventListener);

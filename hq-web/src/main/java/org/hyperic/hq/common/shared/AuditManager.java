@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.AuditImportance;
 import org.hyperic.hq.common.server.session.AuditPurpose;
@@ -49,9 +48,5 @@ public interface AuditManager {
 
     public List<Audit> find(AuthzSubject me, PageInfo pInfo, long startTime, long endTime,
                             AuditImportance minImportance, AuditPurpose purpose, AuthzSubject target, String klazz);
-
-    public void handleResourceDelete(Resource r);
-
-    public void handleSubjectDelete(AuthzSubject s);
 
 }

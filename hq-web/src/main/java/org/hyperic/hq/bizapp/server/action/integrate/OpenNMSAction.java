@@ -180,11 +180,11 @@ public class OpenNMSAction implements ActionInterface {
     public void setImplementor(String implementor) {}
 
     private String renderTemplate(String filename, Map params) {
-        File templateDir = new File(HQApp.getInstance().getWebAccessibleDir(),
-                                    "WEB-INF/alertTemplates");
-        File templateFile = new File(templateDir, filename);
+       
         StringWriter output = new StringWriter();
         try {
+            File templateDir = Bootstrap.getResource("WEB-INF/alertTemplates").getFile();
+            File templateFile = new File(templateDir, filename);
             Bootstrap.getBean(RenditServer.class).renderTemplate(templateFile, params, 
                                                       output);
             
