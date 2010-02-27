@@ -792,10 +792,13 @@ public class AlertDefinitionManagerEJBImpl
     }
     
     /**
+     * Prefetches all collections associated with each alertDef that is deleted and has a
+     * null resourceId into ehcache.
+     * @return {@link List} of {@link Integer} of {@link AlertDefintion} ids
      * @ejb:interface-method
      */
     public List getAllDeletedAlertDefs() {
-        return getAlertDefDAO().findAllDeletedResources();
+        return getAlertDefDAO().findAndPrefetchAllDeletedAlertDefs();
     }
 
     /**
@@ -811,11 +814,14 @@ public class AlertDefinitionManagerEJBImpl
         final AlertDAO dao = getAlertDAO();
         final AlertDefinitionDAO aDao = getAlertDefDAO();
         final ActionDAO actionDAO = getActionDAO();
+        int i=0;
         try {
             final List alertDefs = new ArrayList(alertDefIds.size());
-            for (final Iterator i = alertDefIds.iterator(); i.hasNext();) {
-                final Integer alertdefId = (Integer) i.next();
+            for (final Iterator it = alertDefIds.iterator(); it.hasNext();) {
+                final Integer alertdefId = (Integer) it.next();
+                if (debug) watch.markTimeBegin("findById");
                 final AlertDefinition alertdef = aDao.findById(alertdefId);
+                if (debug) watch.markTimeEnd("findById");
                 alertDefs.add(alertdef);
             }
             // Delete the alerts
@@ -823,8 +829,9 @@ public class AlertDefinitionManagerEJBImpl
             dao.deleteByAlertDefinitions(alertDefs);
             if (debug) watch.markTimeEnd("deleteByAlertDefinition");
 
-            for (final Iterator i = alertDefs.iterator(); i.hasNext();) {
-                final AlertDefinition alertdef = (AlertDefinition) i.next();
+            if (debug) watch.markTimeBegin("loop");
+            for (final Iterator it = alertDefs.iterator(); it.hasNext();) {
+                final AlertDefinition alertdef = (AlertDefinition) it.next();
 
                 // Remove the conditions
                 if (debug) watch.markTimeBegin("remove conditions and triggers");
@@ -847,10 +854,12 @@ public class AlertDefinitionManagerEJBImpl
                 if (debug) watch.markTimeBegin("remove");
                 aDao.remove(alertdef);
                 if (debug) watch.markTimeEnd("remove");
+                i++;
             }
+            if (debug) watch.markTimeEnd("loop");
 
         } finally {
-            if (debug) log.debug("deleted " + alertDefIds.size() + " alertDefs: " + watch);
+            if (debug) log.debug("deleted " + i + " alertDefs: " + watch);
         }
     }
 

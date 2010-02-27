@@ -49,7 +49,6 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
-import org.hyperic.hq.appdef.server.session.ResourceZevent;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -73,7 +72,6 @@ import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
-import org.hyperic.hq.bizapp.server.trigger.conditional.ConditionalTriggerInterface;
 import org.hyperic.hq.bizapp.shared.EventsBossLocal;
 import org.hyperic.hq.bizapp.shared.EventsBossUtil;
 import org.hyperic.hq.common.ApplicationException;
@@ -109,7 +107,6 @@ import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
 import org.hyperic.hq.events.server.session.AlertManagerEJBImpl;
 import org.hyperic.hq.events.server.session.AlertSortField;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
-import org.hyperic.hq.events.server.session.EventsStartupListener;
 import org.hyperic.hq.events.server.session.RegisteredTriggerManagerEJBImpl;
 import org.hyperic.hq.events.server.session.TriggersCreatedZevent;
 import org.hyperic.hq.events.shared.ActionManagerLocal;
@@ -120,7 +117,6 @@ import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
 import org.hyperic.hq.events.shared.MaintenanceEventManagerInterface;
 import org.hyperic.hq.events.shared.RegisteredTriggerManagerLocal;
-import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.galerts.server.session.GalertEscalationAlertType;
 import org.hyperic.hq.galerts.server.session.GalertLogSortField;
@@ -1835,26 +1831,40 @@ public class EventsBossEJBImpl
         inst.addBufferedListener(
             events, new ZeventListener() {
                 public void processEvents(List events) {
-                    final StopWatch watch = new StopWatch();
-                    final Log log = LogFactory.getLog(this.getClass().getName());
-                    final boolean debug = log.isDebugEnabled();
-                    final AlertDefinitionManagerLocal adm = getADM();
-                    final List alertDefs = getADM().getAllDeletedAlertDefs();
                     final int batchSize = 500;
-                    for (int i=0; i<alertDefs.size(); i+=batchSize) {
-                        final int end = Math.min(i+batchSize, alertDefs.size());
-                        final List sublist = alertDefs.subList(i, end);
-                        // can't pass in pojos since the session changes
-                        final List ids = new ArrayList(sublist.size());
-                        for (final Iterator it=sublist.iterator(); it.hasNext(); ) {
-                            final AlertDefinition def = (AlertDefinition) it.next();
-                            ids.add(def.getId());
+                    final List alertDefs = getADM().getAllDeletedAlertDefs();
+                    try {
+                        final int size = alertDefs.size();
+                        for (int ii=0; ii<size; ii+=batchSize) {
+                            final int end = Math.min(size, ii+batchSize);
+                            final List list = alertDefs.subList(ii, end);
+                            org.hyperic.hq.hibernate.SessionManager.runInSession(
+                                new org.hyperic.hq.hibernate.SessionManager.SessionRunner() {
+                                    public void run() {
+                                        deleteAlertDefs(list);
+                                    }
+                                    public String getName() {
+                                        return "CleanupAlertDefRunner";
+                                    }
+                                }
+                            );
                         }
-                        if (debug) watch.markTimeBegin("cleanupAlertDefs");
-                        adm.cleanupAlertDefs(ids);
-                        if (debug) watch.markTimeEnd("cleanupAlertDefs");
+                    } catch (Exception e) {
+                        _log.error(e,e);
                     }
-                    if (debug) log.debug(watch);
+                }
+                
+                private void deleteAlertDefs(List defIds) {
+                    final StopWatch watch = new StopWatch();
+                    final boolean debug = _log.isDebugEnabled();
+                    final AlertDefinitionManagerLocal adm = getADM();
+                    if (defIds.size() == 0) {
+                        return;
+                    }
+                    if (debug) watch.markTimeBegin("cleanupAlertDefs");
+                    adm.cleanupAlertDefs(defIds);
+                    if (debug) watch.markTimeEnd("cleanupAlertDefs");
+                    if (debug) _log.debug(watch);
                 }
 
                 public String toString() {
