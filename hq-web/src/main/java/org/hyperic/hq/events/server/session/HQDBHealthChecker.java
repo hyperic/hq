@@ -44,9 +44,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.dialect.Dialect;
 import org.hyperic.hibernate.dialect.HQDialectUtil;
-import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.Scheduler;
-import org.hyperic.hq.application.StartupListener;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.bizapp.server.action.email.EmailRecipient;
 import org.hyperic.hq.bizapp.shared.EmailManager;
@@ -56,10 +54,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * The startup listener that schedules the HQ DB Health task
+ * Schedules the HQ DB Health task
  */
 @Service
-public class HQDBHealthStartupListener implements StartupListener {
+public class HQDBHealthChecker {
 
     private static final String BUNDLE = "org.hyperic.hq.events.Resources";
     private static final Object HEALTH_CHECK_LOCK = new Object();
@@ -67,34 +65,28 @@ public class HQDBHealthStartupListener implements StartupListener {
     private static final int FAILURE_CHECK_PERIOD_MILLIS = 1000;
     private static final int MAX_NUM_OF_FAILURE_CHECKS = 10;
 
-    private final Log log = LogFactory.getLog(HQDBHealthStartupListener.class);
-    private HQApp hqApp;
+    private final Log log = LogFactory.getLog(HQDBHealthChecker.class);
     private DBUtil dbUtil;
     private EmailManager emailManager;
     private Scheduler scheduler;
 
     @Autowired
-    public HQDBHealthStartupListener(HQApp hqApp, DBUtil dbUtil, EmailManager emailManager, Scheduler scheduler) {
-        this.hqApp = hqApp;
+    public HQDBHealthChecker(DBUtil dbUtil, EmailManager emailManager, Scheduler scheduler) {
         this.dbUtil = dbUtil;
         this.emailManager = emailManager;
         this.scheduler = scheduler;
     }
 
-    /**
-     * @see org.hyperic.hq.application.StartupListener#hqStarted()
-     */
     @PostConstruct
-    public void hqStarted() {
+    public void scheduler() {
         // We want to start the health check only after all plugins
         // have been deployed since this is when the server starts accepting
         // metrics from agents.
-        log.info("Scheduling HQ DB Health to perform a health check every " + (HEALTH_CHECK_PERIOD_MILLIS / 1000) +
-                 " sec");
+        log.info("Scheduling HQ DB Health to perform a health check every " +
+                 (HEALTH_CHECK_PERIOD_MILLIS / 1000) + " sec");
 
-      
-
-        scheduler.scheduleAtFixedRate(new HQDBHealthTask(), Scheduler.NO_INITIAL_DELAY, HEALTH_CHECK_PERIOD_MILLIS);
+        scheduler.scheduleAtFixedRate(new HQDBHealthTask(), Scheduler.NO_INITIAL_DELAY,
+            HEALTH_CHECK_PERIOD_MILLIS);
     }
 
     private class HQDBHealthTask implements Runnable {
@@ -179,7 +171,8 @@ public class HQDBHealthStartupListener implements StartupListener {
         /**
          * Get database timestamp to check overall database health
          */
-        private long pingDatabase(Connection conn, Statement stmt, ResultSet rs) throws SQLException {
+        private long pingDatabase(Connection conn, Statement stmt, ResultSet rs)
+            throws SQLException {
 
             Dialect dialect = HQDialectUtil.getDialect(conn);
             rs = stmt.executeQuery(dialect.getCurrentTimestampSelectString());
@@ -220,7 +213,8 @@ public class HQDBHealthStartupListener implements StartupListener {
                                 ". Last successful check at " + new Date(lastHealthOkTime);
 
                 if (numOfHealthCheckFailures < MAX_NUM_OF_FAILURE_CHECKS) {
-                    _log.error(status + ". Checking again in " + (FAILURE_CHECK_PERIOD_MILLIS / 1000) + " sec.", t);
+                    _log.error(status + ". Checking again in " +
+                               (FAILURE_CHECK_PERIOD_MILLIS / 1000) + " sec.", t);
                 } else {
                     _log.error(status + ". Shutting down HQ.", t);
                 }
@@ -245,7 +239,8 @@ public class HQDBHealthStartupListener implements StartupListener {
                 StringBuffer sb = new StringBuffer();
                 MessageFormat messageFormat = new MessageFormat((ResourceBundle.getBundle(BUNDLE)
                     .getString("event.hqdbhealth.email.message")));
-                messageFormat.format(new String[] { new Date().toString(), sw.toString() }, sb, null);
+                messageFormat.format(new String[] { new Date().toString(), sw.toString() }, sb,
+                    null);
 
                 Arrays.fill(body, sb.toString());
 

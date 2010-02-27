@@ -29,6 +29,7 @@ import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
+import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -44,11 +45,18 @@ public class UpgradeAgentZeventListener implements ZeventListener<UpgradeAgentZe
     private AgentManager agentManager;
 
     private AuthzSubjectManager authzSubjectManager;
+    
+    private ZeventEnqueuer zEventManager;
 
     @Autowired
-    public UpgradeAgentZeventListener(AgentManager agentManager, AuthzSubjectManager authzSubjectManager) {
+    public UpgradeAgentZeventListener(AgentManager agentManager, AuthzSubjectManager authzSubjectManager, ZeventEnqueuer zEventManager) {
         this.agentManager = agentManager;
         this.authzSubjectManager = authzSubjectManager;
+        this.zEventManager = zEventManager;
+    }
+    
+    public void subscribe() {
+        zEventManager.addBufferedListener(UpgradeAgentZevent.class, this);
     }
 
     /**

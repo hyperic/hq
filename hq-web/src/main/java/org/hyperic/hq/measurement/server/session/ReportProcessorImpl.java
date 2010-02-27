@@ -75,12 +75,13 @@ public class ReportProcessorImpl implements ReportProcessor {
     private ServiceManager serviceManager;
     private SRNManager srnManager;
     private ReportStatsCollector reportStatsCollector;
+    private MeasurementInserterHolder measurementInserterManager;
 
     @Autowired
     public ReportProcessorImpl(MeasurementManager measurementManager, MeasurementProcessor measurementProcessor,
                                PlatformManager platformManager, ServerManager serverManager,
                                ServiceManager serviceManager, SRNManager srnManager,
-                               ReportStatsCollector reportStatsCollector) {
+                               ReportStatsCollector reportStatsCollector, MeasurementInserterHolder measurementInserterManager) {
         this.measurementManager = measurementManager;
         this.measurementProcessor = measurementProcessor;
         this.platformManager = platformManager;
@@ -88,6 +89,7 @@ public class ReportProcessorImpl implements ReportProcessor {
         this.serviceManager = serviceManager;
         this.srnManager = srnManager;
         this.reportStatsCollector = reportStatsCollector;
+        this.measurementInserterManager = measurementInserterManager;
     }
 
     private void addPoint(List<DataPoint> points, List<DataPoint> priorityPts, Measurement m, MetricValue[] vals) {
@@ -199,9 +201,9 @@ public class ReportProcessorImpl implements ReportProcessor {
             }
         }
 
-        DataInserter d = MeasurementStartupListener.getDataInserter();
+        DataInserter d = measurementInserterManager.getDataInserter();
         sendMetricDataToDB(d, dataPoints, false);
-        DataInserter a = MeasurementStartupListener.getAvailDataInserter();
+        DataInserter a = measurementInserterManager.getAvailDataInserter();
         sendMetricDataToDB(a, availPoints, false);
         sendMetricDataToDB(a, priorityAvailPts, true);
 

@@ -31,19 +31,16 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.Scheduler;
-import org.hyperic.hq.application.StartupListener;
 import org.hyperic.hq.events.shared.HeartBeatService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * The startup listener that schedules the Heart Beat Service to dispatch heart
- * beats at a fixed rate.
+ * Schedules the Heart Beat Service to dispatch heart beats at a fixed rate.
  */
 @Service
-public class HeartBeatServiceStartupListener implements StartupListener {
+public class HeartBeatDispatcher {
 
     /**
      * The period (in msec) at which heart beats are dispatched by the Heart
@@ -51,33 +48,28 @@ public class HeartBeatServiceStartupListener implements StartupListener {
      */
     public static final int HEART_BEAT_PERIOD_MILLIS = 30 * 1000;
 
-    private final Log log = LogFactory.getLog(HeartBeatServiceStartupListener.class);
+    private final Log log = LogFactory.getLog(HeartBeatDispatcher.class);
 
-    private HQApp hqApp;
     private HeartBeatService heartBeatService;
     private Scheduler scheduler;
 
     @Autowired
-    public HeartBeatServiceStartupListener(HQApp hqApp, HeartBeatService heartBeatService, Scheduler scheduler) {
-        this.hqApp = hqApp;
+    public HeartBeatDispatcher(HeartBeatService heartBeatService, Scheduler scheduler) {
         this.heartBeatService = heartBeatService;
         this.scheduler = scheduler;
     }
 
-    /**
-     * @see org.hyperic.hq.application.StartupListener#hqStarted()
-     */
+   
     @PostConstruct
-    public void hqStarted() {
+    public void schedule() {
         // We want to start dispatching heart beats only after all plugins
         // have been deployed since this is when the server starts accepting
         // metrics from agents.
-        log.info("Scheduling Heart Beat Service to dispatch heart beats every " + (HEART_BEAT_PERIOD_MILLIS / 1000) +
-                 " sec");
+        log.info("Scheduling Heart Beat Service to dispatch heart beats every " +
+                 (HEART_BEAT_PERIOD_MILLIS / 1000) + " sec");
 
-      
-
-        scheduler.scheduleAtFixedRate(new HeartBeatServiceTask(), Scheduler.NO_INITIAL_DELAY, HEART_BEAT_PERIOD_MILLIS);
+        scheduler.scheduleAtFixedRate(new HeartBeatServiceTask(), Scheduler.NO_INITIAL_DELAY,
+            HEART_BEAT_PERIOD_MILLIS);
     }
 
     private class HeartBeatServiceTask implements Runnable {

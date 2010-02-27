@@ -127,8 +127,6 @@
 		<constructor-arg value="4"/>
 	</bean>
 
-	<bean class="org.hyperic.hq.events.server.session.TriggersCreatedListener" />
-
 	<!--
 		This bean refers to various classes that should be loaded at startup.
 		Its only interest is loading the classes listed to have static blocks

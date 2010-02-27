@@ -26,9 +26,15 @@ package org.hyperic.hq.measurement.server.session;
 
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.Properties;
 
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.common.DiagnosticObject;
 import org.hyperic.hq.common.DiagnosticsLogger;
+import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.util.PrintfFormat;
 import org.hyperic.util.stats.StatsCollector;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,11 +43,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class ReportStatsCollector {
 
-    private final Object lock = new Object();
     private StatsCollector stats;
+    private ServerConfigManager serverConfigManager;
+    private static final String PROP_REPSTATS_SIZE = "REPORT_STATS_SIZE";
+    private final Log log = LogFactory.getLog(ReportStatsCollector.class);
 
     @Autowired
-    public ReportStatsCollector(DiagnosticsLogger diagnosticsLogger) {
+    public ReportStatsCollector(DiagnosticsLogger diagnosticsLogger,
+                                ServerConfigManager serverConfigManager) {
         diagnosticsLogger.addDiagnosticObject(new DiagnosticObject() {
             public String getName() {
                 return "Metric Reports Stats";
@@ -62,24 +71,32 @@ public class ReportStatsCollector {
                 long now = System.currentTimeMillis();
                 double nMetrics = getCollector().valPerTimestamp(now) * 60;
                 PrintfFormat pfmt = new PrintfFormat("%.3f");
-                return "Metric Report Data\n" + "    Start:     " + fmt.format(new Date(start)) + "\n" +
-                       "    End:       " + fmt.format(new Date(end)) + "\n" + "    Samples:   " +
-                       getCollector().getSize() + "\n" + "    Rate:      " + pfmt.sprintf(nMetrics) + " kMetrics / min";
+                return "Metric Report Data\n" + "    Start:     " + fmt.format(new Date(start)) +
+                       "\n" + "    End:       " + fmt.format(new Date(end)) + "\n" +
+                       "    Samples:   " + getCollector().getSize() + "\n" + "    Rate:      " +
+                       pfmt.sprintf(nMetrics) + " kMetrics / min";
             }
         });
-        initialize(2);
+        this.serverConfigManager = serverConfigManager;
     }
 
-    public void initialize(int numEnts) {
-        synchronized (lock) {
-            stats = new StatsCollector(numEnts);
+    @PostConstruct
+    public void initialize() {
+        Properties cfg = new Properties();
+
+        try {
+            cfg = serverConfigManager.getConfig();
+        } catch (Exception e) {
+            log.warn("Error getting server config", e);
         }
+
+        int repSize = Integer.parseInt(cfg.getProperty(PROP_REPSTATS_SIZE, "1000"));
+
+        stats = new StatsCollector(repSize);
     }
 
     public StatsCollector getCollector() {
-        synchronized (lock) {
-            return stats;
-        }
+        return stats;
     }
 
     public String toString() {

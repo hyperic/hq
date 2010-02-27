@@ -25,25 +25,38 @@
 
 package org.hyperic.hq.ui.server.session;
 
+import java.util.HashSet;
 import java.util.List;
+
+import javax.annotation.PostConstruct;
 
 import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.ui.shared.DashboardManager;
+import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 @Service
 public class ResourceDeleteWatcher implements ZeventListener<ResourceDeletedZevent> {
 
-   private DashboardManager dashboardManager;
-   
-   
-   @Autowired
-    public ResourceDeleteWatcher(DashboardManager dashboardManager) {
-    
-    this.dashboardManager = dashboardManager;
-}
+    private DashboardManager dashboardManager;
+
+    private ZeventEnqueuer zEventManager;
+
+    @Autowired
+    public ResourceDeleteWatcher(DashboardManager dashboardManager, ZeventEnqueuer zEventManager) {
+        this.dashboardManager = dashboardManager;
+        this.zEventManager = zEventManager;
+    }
+
+    @PostConstruct
+    public void subscribe() {
+        HashSet<Class<ResourceDeletedZevent>> events = new HashSet<Class<ResourceDeletedZevent>>();
+        events.add(ResourceDeletedZevent.class);
+        zEventManager.addBufferedListener(events, this);
+    }
 
     public void processEvents(List<ResourceDeletedZevent> events) {
         AppdefEntityID[] ids = new AppdefEntityID[events.size()];
@@ -54,7 +67,7 @@ public class ResourceDeleteWatcher implements ZeventListener<ResourceDeletedZeve
 
         dashboardManager.handleResourceDelete(ids);
     }
-    
+
     public String toString() {
         return "ResourceDeleteWatcher";
     }

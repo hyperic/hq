@@ -28,18 +28,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashSet;
 
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
-import org.hyperic.hq.application.HQApp;
-import org.hyperic.hq.application.StartupListener;
 import org.hyperic.hq.hqu.RenditServer;
 import org.hyperic.hq.product.server.session.ProductPluginDeployer;
-import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.file.DirWatcher;
 import org.hyperic.util.file.DirWatcher.DirWatcherCallback;
 import org.springframework.beans.BeansException;
@@ -49,40 +44,25 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UIStartupListener implements StartupListener, ApplicationContextAware {
-    private final Log log = LogFactory.getLog(UIStartupListener.class);
+public class UIPluginDeployer implements ApplicationContextAware {
+    private final Log log = LogFactory.getLog(UIPluginDeployer.class);
 
-    private ZeventEnqueuer zeventManager;
+  
     private RenditServer renditServer;
-    private ResourceDeleteWatcher resourceDeleteWatcher;
-    private HQApp hqApp;
     // TODO this is only injected to ensure that PPD.start() is called first to
     // unpack ui plugins from product plugins. Make this cleaner
     private ProductPluginDeployer productPluginDeployer;
     private File pluginDir;
-   
 
     @Autowired
-    public UIStartupListener(ZeventEnqueuer zeventManager, RenditServer renditServer,
-                             ResourceDeleteWatcher resourceDeleteWatcher, HQApp hqApp,
-                             ProductPluginDeployer productPluginDeployer) {
-        this.zeventManager = zeventManager;
+    public UIPluginDeployer(RenditServer renditServer, ProductPluginDeployer productPluginDeployer) {
         this.renditServer = renditServer;
-        this.resourceDeleteWatcher = resourceDeleteWatcher;
-        this.hqApp = hqApp;
         this.productPluginDeployer = productPluginDeployer;
     }
 
     @PostConstruct
-    public void hqStarted() {
-        HashSet<Class<ResourceDeletedZevent>> events = new HashSet<Class<ResourceDeletedZevent>>();
-        events.add(ResourceDeletedZevent.class);
-        zeventManager.addBufferedListener(events, resourceDeleteWatcher);
-        initPlugins();
-    }
-
-    private void initPlugins() {
-        if(this.pluginDir == null) {
+    public void initPlugins() {
+        if (this.pluginDir == null) {
             return;
         }
         long start = System.currentTimeMillis();

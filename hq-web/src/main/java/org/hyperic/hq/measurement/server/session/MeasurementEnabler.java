@@ -25,11 +25,19 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
+import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
+import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
+import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -39,10 +47,25 @@ public class MeasurementEnabler
 {
     private final Log log = LogFactory.getLog(MeasurementEnabler.class.getName());
     private MeasurementManager measurementManager;
+    private ZeventEnqueuer zEventManager;
     
     @Autowired
-    public MeasurementEnabler(MeasurementManager measurementManager) {
+    public MeasurementEnabler(MeasurementManager measurementManager, ZeventEnqueuer zEventManager) {
         this.measurementManager = measurementManager;
+        this.zEventManager = zEventManager;
+    }
+    
+    @PostConstruct
+    public void subscribe() {
+        /**
+         * Add measurement enabler listener to enable metrics for newly created
+         * resources or to reschedule when resources are updated.
+         */
+        Set<Class<?>> listenEvents = new HashSet<Class<?>>();
+        listenEvents.add(ResourceCreatedZevent.class);
+        listenEvents.add(ResourceUpdatedZevent.class);
+        listenEvents.add(ResourceRefreshZevent.class);
+        zEventManager.addBufferedListener(listenEvents, this);
     }
 
     public void processEvents(List e) {
