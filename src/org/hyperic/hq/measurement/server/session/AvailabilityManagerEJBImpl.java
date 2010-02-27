@@ -46,6 +46,7 @@ import javax.ejb.SessionContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
@@ -586,6 +587,15 @@ public class AvailabilityManagerEJBImpl
                 resource = resMan.findResourceById((Integer) o);
             }
             List measIds = null;
+            try {
+                if (resource == null || resource.isInAsyncDeleteState()) {
+                    continue;
+                }
+            } catch (ObjectNotFoundException e) {
+                // resource is in async delete state, ignore
+                _log.debug("resource not found from object=" + o ,e);
+                continue;
+            }
             if (measCache != null) {
                 measIds = (List)measCache.get(resource.getId());
             }
