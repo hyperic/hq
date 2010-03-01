@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2010], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -27,6 +27,7 @@ package org.hyperic.hq.events.server.session;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
 import org.hyperic.hq.events.shared.AlertValue;
@@ -53,7 +54,13 @@ public class PagerProcessor_events implements PagerProcessor {
                         alert.getId(), alert.getAlertDefinition()));
                 return aval; 
             } else if (o instanceof AlertDefinition) {
-                return ((AlertDefinition) o).getAlertDefinitionValue();
+                AlertDefinition def = (AlertDefinition) o;
+                Resource r = def.getResource();
+                if (r == null || r.isInAsyncDeleteState()) {
+                    return null;
+                } else {
+                    return def.getAlertDefinitionValue();
+                }
             }
         } catch (Exception e) {
             throw new SystemException("Error converting " + o +
