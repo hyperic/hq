@@ -33,10 +33,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
-import org.hyperic.hq.application.HQApp;
-import org.hyperic.hq.application.TransactionListener;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.common.util.MessagePublisher;
@@ -51,20 +48,17 @@ import org.hyperic.hq.events.shared.AlertConditionLogValue;
 import org.hyperic.hq.events.shared.AlertManager;
 import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEvent;
 import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEventPayload;
-
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
- * This class has the knowledge to create an {@link Escalatable} object
- * based on a {@link TriggerFiredEvent} if the escalation subsytem deems
- * it necessary.
+ * This class has the knowledge to create an {@link Escalatable} object based on
+ * a {@link TriggerFiredEvent} if the escalation subsytem deems it necessary.
  */
-public class ClassicEscalatableCreator
-    implements EscalatableCreator
-{
-    private static final Log _log =
-        LogFactory.getLog(ClassicEscalatableCreator.class);
+public class ClassicEscalatableCreator implements EscalatableCreator {
+    private static final Log _log = LogFactory.getLog(ClassicEscalatableCreator.class);
 
-    private final AlertDefinition   _def;
+    private final AlertDefinition _def;
     private final AlertConditionsSatisfiedZEvent _event;
 
     private final MessagePublisher messagePublisher;
@@ -72,14 +66,16 @@ public class ClassicEscalatableCreator
 
     /**
      * Creates an instance.
-     *
+     * 
      * @param def The alert definition.
      * @param event The event that triggered the escalation.
-     * @param messagePublisher The messenger to use for publishing AlertFiredEvents
+     * @param messagePublisher The messenger to use for publishing
+     *        AlertFiredEvents
      * @param alertMan The alert manager to use
      */
-    public ClassicEscalatableCreator(AlertDefinition def, AlertConditionsSatisfiedZEvent event, MessagePublisher messagePublisher, AlertManager alertMan) {
-        _def   = def;
+    public ClassicEscalatableCreator(AlertDefinition def, AlertConditionsSatisfiedZEvent event,
+                                     MessagePublisher messagePublisher, AlertManager alertMan) {
+        _def = def;
         _event = event;
         this.messagePublisher = messagePublisher;
         this.alertMan = alertMan;
@@ -87,23 +83,24 @@ public class ClassicEscalatableCreator
 
     /**
      * In the classic escalatable architecture, we still need to support the
-     * execution of the actions defined for the regular alert defintion
-     * (in addition to executing the actions specified by the escalation).
-     *
-     * Here, we generate the alert and also execute the old-skool actions.
-     * May or may not be the right place to do that.
+     * execution of the actions defined for the regular alert defintion (in
+     * addition to executing the actions specified by the escalation).
+     * 
+     * Here, we generate the alert and also execute the old-skool actions. May
+     * or may not be the right place to do that.
      */
     public Escalatable createEscalatable() throws ResourceDeletedException {
         Escalatable escalatable = createEscalatableNoNotify();
-        registerAlertFiredEvent(escalatable.getAlertInfo().getId(), (AlertConditionsSatisfiedZEventPayload)_event.getPayload());
+        registerAlertFiredEvent(escalatable.getAlertInfo().getId(),
+            (AlertConditionsSatisfiedZEventPayload) _event.getPayload());
         return escalatable;
     }
 
     Escalatable createEscalatableNoNotify() throws ResourceDeletedException {
         final Alert alert = createAlert();
-        createConditionLogs(alert,(AlertConditionsSatisfiedZEventPayload)_event.getPayload());
+        createConditionLogs(alert, (AlertConditionsSatisfiedZEventPayload) _event.getPayload());
         String shortReason = alertMan.getShortReason(alert);
-        String longReason  = alertMan.getLongReason(alert);
+        String longReason = alertMan.getLongReason(alert);
         executeActions(alert, shortReason, longReason);
         return createEscalatable(alert, shortReason, longReason);
     }
@@ -113,11 +110,14 @@ public class ClassicEscalatableCreator
         if (r == null || r.isInAsyncDeleteState()) {
             throw ResourceDeletedException.newInstance(r);
         }
-        return alertMan.createAlert(_def, ((AlertConditionsSatisfiedZEventPayload)_event.getPayload()).getTimestamp());
+        return alertMan.createAlert(_def, ((AlertConditionsSatisfiedZEventPayload) _event
+            .getPayload()).getTimestamp());
     }
 
-    private void createConditionLogs(final Alert alert, final AlertConditionsSatisfiedZEventPayload payload) {
-        // Create a alert condition logs for every condition that triggered the alert
+    private void createConditionLogs(final Alert alert,
+                                     final AlertConditionsSatisfiedZEventPayload payload) {
+        // Create a alert condition logs for every condition that triggered the
+        // alert
 
         // Create the trigger event map
         Map trigMap = new HashMap();
@@ -145,39 +145,62 @@ public class ClassicEscalatableCreator
     private void executeActions(Alert alert, String shortReason, String longReason) {
         Collection actions = _def.getActions();
         // Iterate through the actions
-        for (Iterator i = actions.iterator(); i.hasNext(); ) {
+        for (Iterator i = actions.iterator(); i.hasNext();) {
             Action act = (Action) i.next();
 
             try {
-                ActionExecutionInfo execInfo =
-                    new ActionExecutionInfo(shortReason, longReason,
-                                            Collections.EMPTY_LIST);
+                ActionExecutionInfo execInfo = new ActionExecutionInfo(shortReason, longReason,
+                    Collections.EMPTY_LIST);
 
                 String detail = act.executeAction(alert, execInfo);
 
                 alertMan.logActionDetail(alert, act, detail, null);
-            } catch(Exception e) {
-                // For any exception, just log it.  We can't afford not
+            } catch (Exception e) {
+                // For any exception, just log it. We can't afford not
                 // letting the other actions go un-processed.
                 _log.warn("Error executing action [" + act + "]", e);
             }
         }
     }
 
-    private void registerAlertFiredEvent(final Integer alertId, final AlertConditionsSatisfiedZEventPayload payload) {
+    private void registerAlertFiredEvent(final Integer alertId,
+                                         final AlertConditionsSatisfiedZEventPayload payload) {
         try {
-            HQApp.getInstance().addTransactionListener(new TransactionListener() {
-                public void afterCommit(boolean success) {
-                    if(success) {
-                        messagePublisher.publishMessage(EventConstants.EVENTS_TOPIC,new AlertFiredEvent(alertId, _def.getId(), AppdefUtil.newAppdefEntityId(_def.getResource()),_def.getName(),payload.getTimestamp(),
-                                                                     payload.getMessage()));
+            TransactionSynchronizationManager
+                .registerSynchronization(new TransactionSynchronization() {
+                    public void suspend() {
                     }
-                }
-                public void beforeCommit() {
-                }
-            });
+
+                    public void resume() {
+                    }
+
+                    public void flush() {
+                    }
+
+                    public void beforeCompletion() {
+                    }
+
+                    public void beforeCommit(boolean readOnly) {
+                    }
+
+                    public void afterCompletion(int status) {
+                    }
+
+                    public void afterCommit() {
+                        // TODO HE-565 Possibly have MessagePublisher always
+                        // wait until successful tx commit before publishing
+                        // messages
+                        messagePublisher.publishMessage(EventConstants.EVENTS_TOPIC,
+                            new AlertFiredEvent(alertId, _def.getId(), AppdefUtil
+                                .newAppdefEntityId(_def.getResource()), _def.getName(), payload
+                                .getTimestamp(), payload.getMessage()));
+                    }
+                });
         } catch (Throwable t) {
-            _log.error("Error registering to send an AlertFiredEvent on transaction commit.  The alert will be fired, but the event will not be sent.  This could cause a future recovery alert not to fire.", t);
+            _log
+                .error(
+                    "Error registering to send an AlertFiredEvent on transaction commit.  The alert will be fired, but the event will not be sent.  This could cause a future recovery alert not to fire.",
+                    t);
         }
     }
 
@@ -185,12 +208,9 @@ public class ClassicEscalatableCreator
         return _def;
     }
 
-    public static Escalatable createEscalatable(Alert alert, String shortReason,
-                                                String longReason)
-    {
+    public static Escalatable createEscalatable(Alert alert, String shortReason, String longReason) {
         return new ClassicEscalatable(alert, shortReason, longReason);
     }
-
 
     private boolean shouldCreateConditionLogFor(AlertCondition cond, Map triggerMap) {
         if (cond.getType() == EventConstants.TYPE_ALERT) {

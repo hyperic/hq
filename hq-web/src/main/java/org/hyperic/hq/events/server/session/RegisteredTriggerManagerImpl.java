@@ -24,8 +24,6 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.application.HQApp;
-import org.hyperic.hq.application.TransactionListener;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.server.trigger.conditional.ConditionalTriggerInterface;
 import org.hyperic.hq.events.InvalidTriggerDataException;
@@ -44,6 +42,8 @@ import org.hyperic.util.config.InvalidOptionValueException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * The trigger manager.
@@ -224,18 +224,31 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
     private void addPostCommitSetEnabledListener(final Integer alertDefId, final Collection<Integer> triggerIds,
                                                  final boolean enabled) {
         try {
-            HQApp.getInstance().addTransactionListener(new TransactionListener() {
-                public void afterCommit(boolean success) {
-                    if (success) {
-                        try {
-                            setTriggersEnabled(alertDefId, triggerIds, enabled);
-                        } catch (Exception e) {
-                            log.error("Error setting triggers enabled to " + enabled, e);
-                        }
-                    }
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                public void suspend() {
                 }
-
-                public void beforeCommit() {
+                
+                public void resume() {
+                }
+                
+                public void flush() {
+                }
+                
+                public void beforeCompletion() {
+                }
+                
+                public void beforeCommit(boolean readOnly) {
+                }
+                
+                public void afterCompletion(int status) {
+                }
+                
+                public void afterCommit() {
+                    try {
+                        setTriggersEnabled(alertDefId, triggerIds, enabled);
+                    } catch (Exception e) {
+                        log.error("Error setting triggers enabled to " + enabled, e);
+                    }
                 }
             });
         } catch (Throwable t) {
@@ -373,27 +386,40 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
 
     private void addCommitListener(final Collection<RegisteredTrigger> triggers) {
         try {
-            HQApp.getInstance().addTransactionListener(new TransactionListener() {
-                public void afterCommit(boolean success) {
-                    if (success) {
-                        try {
-                            // We need to process this in a new transaction,
-                            // AlertDef ID should be set now that original tx is
-                            // committed
-                            if (!(triggers.isEmpty())) {
-                                AlertDefinition alertDefinition = getDefinitionFromTrigger((RegisteredTrigger) triggers
-                                    .iterator().next());
-                                if (alertDefinition != null) {
-                                    zeventEnqueuer.enqueueEvent(new TriggersCreatedZevent(alertDefinition.getId()));
-                                }
-                            }
-                        } catch (Exception e) {
-                            log.error("Error creating triggers for alert definition.", e);
-                        }
-                    }
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {           
+                public void suspend() {
                 }
-
-                public void beforeCommit() {
+                
+                public void resume() {
+                }
+                
+                public void flush() {
+                }
+                
+                public void beforeCompletion() {
+                }
+                
+                public void beforeCommit(boolean readOnly) {
+                }
+                
+                public void afterCompletion(int status) {
+                }
+                
+                public void afterCommit() {
+                    try {
+                        // We need to process this in a new transaction,
+                        // AlertDef ID should be set now that original tx is
+                        // committed
+                        if (!(triggers.isEmpty())) {
+                            AlertDefinition alertDefinition = getDefinitionFromTrigger((RegisteredTrigger) triggers
+                                .iterator().next());
+                            if (alertDefinition != null) {
+                                zeventEnqueuer.enqueueEvent(new TriggersCreatedZevent(alertDefinition.getId()));
+                            }
+                        }
+                    } catch (Exception e) {
+                        log.error("Error creating triggers for alert definition.", e);
+                    }
                 }
             });
         } catch (Throwable t) {

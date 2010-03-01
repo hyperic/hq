@@ -35,8 +35,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.application.HQApp;
-import org.hyperic.hq.application.TransactionListener;
 import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.galerts.server.session.GalertDefDAO;
 import org.hyperic.hq.hibernate.SessionManager;
@@ -47,6 +45,8 @@ import org.hyperic.hq.zevents.ZeventSourceId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 
 /**
@@ -233,21 +233,34 @@ public class GalertProcessorImpl implements GalertProcessor {
      */
     public void alertDefUpdated(GalertDef def, final String newName) {
         final Integer defId = def.getId();
-        
-        HQApp.getInstance().addTransactionListener(new TransactionListener() {
-            public void afterCommit(boolean success) {
-                if (success) {
-                    synchronized (cfgLock) {
-                        MemGalertDef memDef = (MemGalertDef)
-                            _alertDefs.get(defId);
-                        
-                        if (memDef != null)
-                            memDef.setName(newName);
-                    }
-                }
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            
+            public void suspend() {
             }
-
-            public void beforeCommit() { 
+            
+            public void resume() {
+            }
+            
+            public void flush() {
+            }
+            
+            public void beforeCompletion() {
+            }
+            
+            public void beforeCommit(boolean readOnly) {
+            }
+            
+            public void afterCompletion(int status) {
+            }
+            
+            public void afterCommit() {
+                synchronized (cfgLock) {
+                    MemGalertDef memDef = (MemGalertDef)
+                        _alertDefs.get(defId);
+                    
+                    if (memDef != null)
+                        memDef.setName(newName);
+                }
             }
         });
     }
@@ -272,19 +285,32 @@ public class GalertProcessorImpl implements GalertProcessor {
         } else {
             memDef = new MemGalertDef(def);
         }
-        
-        HQApp.getInstance().addTransactionListener(new TransactionListener() {
-            public void afterCommit(boolean success) {
-                if (success) {
-                    if (isUnload) {
-                        handleUnload(defId);
-                    } else {
-                        handleUpdate(memDef);
-                    }
-                }
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            
+            public void suspend() {
             }
-
-            public void beforeCommit() {
+            
+            public void resume() {
+            }
+            
+            public void flush() {
+            }
+            
+            public void beforeCompletion() {
+            }
+            
+            public void beforeCommit(boolean readOnly) {
+            }
+            
+            public void afterCompletion(int status) {
+            }
+            
+            public void afterCommit() {
+                if (isUnload) {
+                    handleUnload(defId);
+                } else {
+                    handleUpdate(memDef);
+                }
             }
         });
     }
@@ -294,14 +320,28 @@ public class GalertProcessorImpl implements GalertProcessor {
      * successfully committed, it will be removed from the processor.
      */
     public void alertDefDeleted(final Integer defId) {
-        HQApp.getInstance().addTransactionListener(new TransactionListener() {
-            public void afterCommit(boolean success) {
-                if (success) {
-                    handleUnload(defId);
-                }
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            
+            public void suspend() {
             }
-
-            public void beforeCommit() {
+            
+            public void resume() {
+            }
+            
+            public void flush() {
+            }
+            
+            public void beforeCompletion() {
+            }
+            
+            public void beforeCommit(boolean readOnly) {
+            }
+            
+            public void afterCompletion(int status) {
+            }
+            
+            public void afterCommit() {
+                handleUnload(defId);
             }
         });
     }
