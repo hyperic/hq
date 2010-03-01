@@ -228,6 +228,7 @@ public class SybaseServerDetector
             }
             catch (SQLException e) {
                 String msg = "Error querying for services: "+e.getMessage();
+                throw new PluginException(msg, e);
             }
             finally {
                 DBUtil.closeJDBCObjects(log, conn, stmt, rs);
