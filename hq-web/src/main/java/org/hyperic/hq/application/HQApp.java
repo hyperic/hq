@@ -28,22 +28,15 @@ package org.hyperic.hq.application;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Properties;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
-import javax.transaction.Status;
-import javax.transaction.Synchronization;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.Transaction;
 import org.hyperic.hibernate.HibernateInterceptorChain;
 import org.hyperic.hibernate.HypericInterceptor;
-import org.hyperic.hibernate.Util;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.util.thread.ThreadWatchdog;
 import org.springframework.stereotype.Component;
@@ -55,9 +48,9 @@ import org.springframework.web.context.ServletContextAware;
  */
 @Component("hqApp")
 public class HQApp implements ServletContextAware {
-    private static final Log _log = LogFactory.getLog(HQApp.class);
+ 
 
-    private ThreadLocal _txListeners = new ThreadLocal();
+   
 
     private File _restartStorage;
 
@@ -133,94 +126,7 @@ public class HQApp implements ServletContextAware {
         return res;
     }
 
-    private void scheduleCommitCallback() {
-        Transaction t = Util.getSessionFactory().getCurrentSession().getTransaction();
-
-        final boolean debug = _log.isDebugEnabled();
-
-        if (debug) {
-            _log.debug("Scheduling commit callback ");
-        }
-        t.registerSynchronization(new Synchronization() {
-            public void afterCompletion(int status) {
-                if (debug) {
-                    _log.debug("Running post-commit");
-                }
-                runPostCommitListeners(status == Status.STATUS_COMMITTED);
-            }
-
-            public void beforeCompletion() {
-                if (debug) {
-                    _log.debug("Running pre-commit");
-                }
-                runPreCommitListeners();
-            }
-        });
-    }
-
-    /**
-     * Register a listener to be called after a tx has been committed.
-     */
-    public void addTransactionListener(TransactionListener listener) {
-        List listeners = (List) _txListeners.get();
-
-        if (listeners == null) {
-            listeners = new ArrayList(1);
-            _txListeners.set(listeners);
-            scheduleCommitCallback();
-        }
-
-        listeners.add(listener);
-
-        // Unfortunately, it seems that the Tx synchronization will get called
-        // before Hibernate does its flush. This wasn't the behaviour before,
-        // and looks like it will be fixed up again in 3.3.. :-(
-        Util.getSessionFactory().getCurrentSession().flush();
-    }
-
-    /**
-     * Execute all the pre-commit listeners registered with the current thread.
-     */
-    private void runPreCommitListeners() {
-        List list = (List) _txListeners.get();
-
-        if (list == null)
-            return;
-
-        for (Iterator i = list.iterator(); i.hasNext();) {
-            TransactionListener l = (TransactionListener) i.next();
-
-            try {
-                l.beforeCommit();
-            } catch (Exception e) {
-                _log.warn("Error running pre-commit listener [" + l + "]", e);
-            }
-        }
-    }
-
-    /**
-     * Execute all the post-commit listeners registered with the current thread
-     */
-    private void runPostCommitListeners(boolean success) {
-        List list = (List) _txListeners.get();
-
-        if (list == null)
-            return;
-
-        try {
-            for (Iterator i = list.iterator(); i.hasNext();) {
-                TransactionListener l = (TransactionListener) i.next();
-
-                try {
-                    l.afterCommit(success);
-                } catch (Exception e) {
-                    _log.warn("Error running post-commit listener [" + l + "]", e);
-                }
-            }
-        } finally {
-            _txListeners.set(null);
-        }
-    }
+  
 
     public void setServletContext(ServletContext servletContext) {
         this.servletContext = servletContext;

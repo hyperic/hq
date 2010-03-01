@@ -30,8 +30,6 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.PageInfo;
-import org.hyperic.hq.application.HQApp;
-import org.hyperic.hq.application.TransactionListener;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceDeleteRequestedEvent;
@@ -42,6 +40,8 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  *
@@ -93,7 +93,7 @@ public class AuditManagerImpl implements AuditManager, ApplicationListener<Appli
      * 
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public Audit getCurrentAudit() {
         return CONTAINERS.get();
     }
@@ -130,7 +130,8 @@ public class AuditManagerImpl implements AuditManager, ApplicationListener<Appli
             }
 
             if (a != null) {
-                log.warn("Unpopped audit container: " + a.getMessage() + ":  This should be closed manually!");
+                log.warn("Unpopped audit container: " + a.getMessage() +
+                         ":  This should be closed manually!");
                 if (a.getEndTime() != 0) {
                     a.setEndTime(now);
                 }
@@ -188,14 +189,30 @@ public class AuditManagerImpl implements AuditManager, ApplicationListener<Appli
 
         newContainer.setStartTime(System.currentTimeMillis());
         if (currentContainer == null) {
-            HQApp.getInstance().addTransactionListener(new TransactionListener() {
-                public void beforeCommit() {
-                    popAll();
-                }
+            TransactionSynchronizationManager
+                .registerSynchronization(new TransactionSynchronization() {
+                    public void suspend() {
+                    }
 
-                public void afterCommit(boolean success) {
-                }
-            });
+                    public void resume() {
+                    }
+
+                    public void flush() {
+                    }
+
+                    public void beforeCompletion() {
+                    }
+
+                    public void beforeCommit(boolean readOnly) {
+                        popAll();
+                    }
+
+                    public void afterCompletion(int status) {
+                    }
+
+                    public void afterCommit() {
+                    }
+                });
         } else {
             currentContainer.addChild(newContainer);
         }
@@ -205,9 +222,10 @@ public class AuditManagerImpl implements AuditManager, ApplicationListener<Appli
     /**
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public List<Audit> find(AuthzSubject me, PageInfo pInfo, long startTime, long endTime,
-                            AuditImportance minImportance, AuditPurpose purpose, AuthzSubject target, String klazz) {
+                            AuditImportance minImportance, AuditPurpose purpose,
+                            AuthzSubject target, String klazz) {
         return auditDao.find(pInfo, me, startTime, endTime, minImportance, purpose, target, klazz);
     }
 
@@ -215,18 +233,16 @@ public class AuditManagerImpl implements AuditManager, ApplicationListener<Appli
         auditDao.handleResourceDelete(r);
     }
 
-   
     private void handleSubjectDelete(AuthzSubject s) {
         auditDao.handleSubjectDelete(s);
     }
 
     public void onApplicationEvent(ApplicationEvent event) {
-       if(event instanceof ResourceDeleteRequestedEvent) {
-           handleResourceDelete(((ResourceDeleteRequestedEvent)event).getResource());
-       }else if(event instanceof SubjectDeleteRequestedEvent) {
-           handleSubjectDelete(((SubjectDeleteRequestedEvent)event).getSubject());
-       }
+        if (event instanceof ResourceDeleteRequestedEvent) {
+            handleResourceDelete(((ResourceDeleteRequestedEvent) event).getResource());
+        } else if (event instanceof SubjectDeleteRequestedEvent) {
+            handleSubjectDelete(((SubjectDeleteRequestedEvent) event).getSubject());
+        }
     }
-    
-    
+
 }
