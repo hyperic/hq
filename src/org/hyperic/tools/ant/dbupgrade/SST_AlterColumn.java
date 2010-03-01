@@ -265,7 +265,7 @@ public class SST_AlterColumn extends SchemaSpecTask {
             }
             throw new SQLException();
         } catch (SQLException e) {
-            throw new BuildException("Error retrieving pg columntype from " +
+            throw new BuildException("Error retrieving mysql columntype from " +
                 "table, " + _table + " column, " + _column);
         } finally {
             DBUtil.closeJDBCObjects(getClass().getName(), null, stmt, rs);
