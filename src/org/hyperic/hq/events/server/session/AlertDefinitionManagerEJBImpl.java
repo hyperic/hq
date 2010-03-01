@@ -1255,18 +1255,22 @@ public class AlertDefinitionManagerEJBImpl
                         AvailabilityDownAlertDefinitionCache.getInstance();
 
                 synchronized (cache) {
-                    cache.remove(def.getAppdefEntityId());
+                    if (isOkToRemove(def)) {
+                        cache.remove(def.getAppdefEntityId());
+                    }
 
-                    AlertDefinition childDef = null;
                     for (Iterator it=def.getChildren().iterator(); it.hasNext(); ) {
-                        childDef = (AlertDefinition) it.next();
-                        Resource r = childDef.getResource();
-                        if (r == null || r.isInAsyncDeleteState()) {
-                            continue;
+                        AlertDefinition childDef = (AlertDefinition) it.next();
+                        if (isOkToRemove(childDef)) {
+                            cache.remove(childDef.getAppdefEntityId());
                         }
-                        cache.remove(childDef.getAppdefEntityId());
                     }
                 }
+            }
+            
+            private boolean isOkToRemove(AlertDefinition def) {
+                Resource r = def.getResource();
+                return (r != null && !r.isInAsyncDeleteState());
             }
         });
     }
