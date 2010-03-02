@@ -99,15 +99,13 @@ class SNMPSession_v3
 
         if (val.equals("DES")) {
             return PrivDES.ID;
-        } else if (val.equals("3DES")) // "Triple DES" privacy (encryption) mode
-                                       // has been added in HQ v4.3
-        {
+        } else if (val.equals("3DES")) {
             return Priv3DES.ID;
-        } else if ((val.equals("AES128")) || (val.equals("AES"))) {
+        } else if (val.equals("AES128") || val.equals("AES-128") || val.equals("AES")) {
             return PrivAES128.ID;
-        } else if (val.equals("AES192")) {
+        } else if (val.equals("AES192") || val.equals("AES-192")) {
             return PrivAES192.ID;
-        } else if (val.equals("AES256")) {
+        } else if (val.equals("AES256") || val.equals("AES-256")) {
             return PrivAES256.ID;
         } else {
             throw new SNMPException("Privacy protocol " + val + " not supported");
