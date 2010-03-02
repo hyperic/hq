@@ -40,7 +40,6 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServiceManager;
-import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -51,6 +50,7 @@ import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.hqu.server.session.UIPlugin;
 import org.hyperic.hq.hqu.shared.UIPluginManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,7 +60,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class UpdateBossImpl implements UpdateBoss {
     private static final Log log = LogFactory.getLog(UpdateBossImpl.class.getName());
-    private static final String CHECK_URL = "http://updates.hyperic.com/hq-updates";
 
     private ServerConfigManager serverConfigManager;
     private PlatformManager platformManager;
@@ -69,11 +68,18 @@ public class UpdateBossImpl implements UpdateBoss {
     private UIPluginManager uiPluginManager;
     private UpdateStatusDAO updateDAO;
     private ServerConfigAuditFactory serverConfigAuditFactory;
+    private String updateNotifyUrl;
 
     @Autowired
-    public UpdateBossImpl(UpdateStatusDAO updateDAO, ServerConfigManager serverConfigManager,
-                          PlatformManager platformManager, ServerManager serverManager, ServiceManager serviceManager,
-                          UIPluginManager uiPluginManager, ServerConfigAuditFactory serverConfigAuditFactory) {
+    public UpdateBossImpl(
+                          UpdateStatusDAO updateDAO,
+                          ServerConfigManager serverConfigManager,
+                          PlatformManager platformManager,
+                          ServerManager serverManager,
+                          ServiceManager serviceManager,
+                          UIPluginManager uiPluginManager,
+                          ServerConfigAuditFactory serverConfigAuditFactory,
+                          @Value("#{tweakProperties['hq.updateNotify.url'] }") String updateNotifyUrl) {
         this.updateDAO = updateDAO;
         this.serverConfigManager = serverConfigManager;
         this.platformManager = platformManager;
@@ -81,18 +87,7 @@ public class UpdateBossImpl implements UpdateBoss {
         this.serviceManager = serviceManager;
         this.uiPluginManager = uiPluginManager;
         this.serverConfigAuditFactory = serverConfigAuditFactory;
-    }
-
-    private String getCheckURL() {
-        try {
-            Properties p = HQApp.getInstance().getTweakProperties();
-            String res = p.getProperty("hq.updateNotify.url");
-            if (res != null)
-                return res;
-        } catch (Exception e) {
-            log.warn("Unable to get notification url", e);
-        }
-        return CHECK_URL;
+        this.updateNotifyUrl = updateNotifyUrl;
     }
 
     protected Properties getRequestInfo(UpdateStatus status) {
@@ -173,7 +168,7 @@ public class UpdateBossImpl implements UpdateBoss {
 
         log.debug("Generated report.  Size=" + reqBytes.length + " report:\n" + req);
 
-        PostMethod post = new PostMethod(getCheckURL());
+        PostMethod post = new PostMethod(this.updateNotifyUrl);
         post.addRequestHeader("x-hq-guid", req.getProperty("hq.guid"));
         HttpClient c = new HttpClient();
         c.setTimeout(5 * 60 * 1000);
@@ -231,7 +226,7 @@ public class UpdateBossImpl implements UpdateBoss {
      * 
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public String getUpdateReport() {
         UpdateStatus status = getOrCreateStatus();
 
@@ -267,7 +262,7 @@ public class UpdateBossImpl implements UpdateBoss {
     /**
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public UpdateStatusMode getUpdateMode() {
         return getOrCreateStatus().getMode();
     }
