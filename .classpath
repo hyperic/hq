@@ -234,7 +234,7 @@
 	<classpathentry kind="lib" path="thirdparty/lib/com.springsource.com.sun.xml.bind-2.1.7.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/com.springsource.javax.xml.bind-2.1.7.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/com.springsource.javax.xml.stream-1.0.1.jar"/>
-	<classpathentry kind="lib" path="thirdparty/lib/snmp4j-1.10.2.jar"/>
+	<classpathentry kind="lib" path="thirdparty/lib/snmp4j-1.11.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/commons-logging-1.0.4.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>
