@@ -38,11 +38,12 @@ import org.hibernate.type.Type;
 import org.hyperic.hibernate.DefaultInterceptorChain;
 import org.hyperic.hibernate.HibernateInterceptorChain;
 import org.hyperic.util.Runnee;
-
+import org.springframework.stereotype.Component;
+@Component
 class HQHibernateLogger 
     implements HibernateInterceptorChain, HibernateLogManager
 {
-    private static final Log _log = LogFactory.getLog(HQHibernateLogger.class);
+    private final Log _log = LogFactory.getLog(HQHibernateLogger.class);
     private final HibernateInterceptorChain _defaultChain;
     
     private ThreadLocal _listeners = new ThreadLocal(); 

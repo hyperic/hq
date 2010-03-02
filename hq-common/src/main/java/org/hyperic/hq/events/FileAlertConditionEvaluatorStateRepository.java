@@ -5,6 +5,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -15,6 +16,12 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.stereotype.Repository;
 
 /**
  * Implementation of {@link AlertConditionEvaluatorStateRepository} that stores
@@ -22,10 +29,10 @@ import org.apache.commons.logging.LogFactory;
  * @author jhickey
  * 
  */
-
+@Repository
 public class FileAlertConditionEvaluatorStateRepository implements
-    AlertConditionEvaluatorStateRepository {
-    private final File storageDirectory;
+    AlertConditionEvaluatorStateRepository, ApplicationContextAware {
+    private File storageDirectory;
     public static final String EVALUATOR_STATE_FILE_NAME = "AlertConditionEvaluatorStates.dat";
     public static final String EXECUTION_STRATEGY_FILE_NAME = "ExecutionStrategyStates.dat";
     private final Log log = LogFactory.getLog(FileAlertConditionEvaluatorStateRepository.class);
@@ -37,6 +44,10 @@ public class FileAlertConditionEvaluatorStateRepository implements
      */
     public FileAlertConditionEvaluatorStateRepository(File storageDirectory) {
         this.storageDirectory = storageDirectory;
+    }
+
+    public FileAlertConditionEvaluatorStateRepository() {
+
     }
 
     private void closeStream(InputStream inputStream) {
@@ -130,6 +141,16 @@ public class FileAlertConditionEvaluatorStateRepository implements
     public void saveExecutionStrategyStates(Map<Integer, Serializable> executionStrategyStates) {
         persistStates(executionStrategyStates, new File(storageDirectory,
             EXECUTION_STRATEGY_FILE_NAME));
+    }
+
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        try {
+            this.storageDirectory = new File(new File(applicationContext.getResource("/").getFile()
+                .getParent()).getParent());
+        } catch (IOException e) {
+            throw new BeanCreationException("Error setting storage directory", e);
+
+        }
     }
 
 }

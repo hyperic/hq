@@ -45,7 +45,6 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.common.DiagnosticObject;
 import org.hyperic.hq.common.DiagnosticsLogger;
 import org.hyperic.hq.context.Bootstrap;
@@ -56,6 +55,7 @@ import org.hyperic.util.thread.ThreadGroupFactory;
 import org.hyperic.util.thread.ThreadWatchdog;
 import org.hyperic.util.thread.ThreadWatchdog.InterruptToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -104,12 +104,27 @@ public class ZeventManager implements ZeventEnqueuer {
 
     private BlockingQueue _eventQueue;
     private DiagnosticsLogger diagnosticsLogger;
+    private ThreadWatchdog threadWatchdog;
+    private long maxQueue;
+    private long batchSize;
 
     @Autowired
-    public ZeventManager(DiagnosticsLogger diagnosticsLogger) {
+    public ZeventManager(DiagnosticsLogger diagnosticsLogger, ThreadWatchdog threadWatchdog,
+                         @Value("#{tweakProperties['hq.zevent.maxQueueEnts'] }") Long maxQueue,
+                         @Value("#{tweakProperties['hq.zevent.batchSize'] }") Long batchSize,
+                         @Value("#{tweakProperties['hq.zevent.warnInterval'] }") Long warnInterval,  
+                         @Value("#{tweakProperties['hq.zevent.warnSize'] }") Long warnSize,
+                         @Value("#{tweakProperties['hq.zevent.listenerTimeout'] }") Long listenerTimeout) {
         this._threadGroup = new LoggingThreadGroup("ZEventProcessor");
         this._threadGroup.setDaemon(true);
         this.diagnosticsLogger = diagnosticsLogger;
+        this.threadWatchdog = threadWatchdog;
+        this.maxQueue = maxQueue;
+        this.batchSize = batchSize;
+        this._warnInterval = warnInterval;
+        this._warnSize = warnSize;
+        this._listenerTimeout = listenerTimeout;
+        
     }
 
     private long getProp(Properties p, String propName, long defaultVal) {
@@ -136,31 +151,6 @@ public class ZeventManager implements ZeventEnqueuer {
 
     @PostConstruct
     private void initialize() {
-        Properties props = new Properties();
-        try {
-            props = HQApp.getInstance().getTweakProperties();
-        } catch (Exception e) {
-            _log.warn("Unable to get tweak properties", e);
-        }
-
-        // Maximum number of entries the queue can support
-        long maxQueue = getProp(props, "hq.zevent.maxQueueEnts", 100 * 1000);
-
-        // Amount of time to warn between full zevent queue
-        // (shouldn't need to change this)
-        _warnInterval = getProp(props, "hq.zevent.warnInterval", 5 * 60 * 1000);
-
-        // How many zevents are processed and dispatched at once?
-        // (also dictates the maximum # of events a listener may receive in a
-        // single batch)
-        long batchSize = getProp(props, "hq.zevent.batchSize", 100);
-
-        // The # of entries needed in the queue in order to warn that it's
-        // getting full.
-        _warnSize = getProp(props, "hq.zevent.warnSize", maxQueue * 90 / 100);
-
-        _listenerTimeout = getProp(props, "hq.zevent.listenerTimeout", 60);
-
         _eventQueue = new LinkedBlockingQueue((int) maxQueue);
 
         QueueProcessor p = new QueueProcessor(this, _eventQueue, (int) batchSize);
@@ -548,7 +538,6 @@ public class ZeventManager implements ZeventEnqueuer {
             }
         }
 
-        ThreadWatchdog dog = HQApp.getInstance().getWatchdog();
         long timeout = getListenerTimeout();
         for (Iterator i = listenerBatches.entrySet().iterator(); i.hasNext();) {
             Map.Entry ent = (Map.Entry) i.next();
@@ -558,13 +547,14 @@ public class ZeventManager implements ZeventEnqueuer {
             synchronized (_listenerLock) {
                 InterruptToken t = null;
                 try {
-                    t = dog.interruptMeIn(timeout, TimeUnit.SECONDS, "Processing listener events");
+                    t = threadWatchdog.interruptMeIn(timeout, TimeUnit.SECONDS,
+                        "Processing listener events");
                     listener.processEvents(Collections.unmodifiableList(batch));
                 } catch (RuntimeException e) {
                     _log.warn("Exception while invoking listener [" + listener + "]", e);
                 } finally {
                     if (t != null)
-                        dog.cancelInterrupt(t);
+                        threadWatchdog.cancelInterrupt(t);
                 }
             }
         }
@@ -625,9 +615,9 @@ public class ZeventManager implements ZeventEnqueuer {
                         .sprintf(new Object[] { targ.toString(), new Integer(q.size()), }));
 
                     res.append(timingFmt.sprintf(new Object[] { "", // Target
-                                                                    // already
-                                                                    // printed
-                                                                    // above
+                                                               // already
+                                                               // printed
+                                                               // above
                                                                new Double(targ.getMaxTime()),
                                                                new Double(targ.getAverageTime()),
                                                                new Long(targ.getNumEvents()), }));

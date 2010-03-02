@@ -33,7 +33,8 @@ import org.hibernate.EmptyInterceptor;
 import org.hibernate.EntityMode;
 import org.hibernate.Transaction;
 import org.hibernate.type.Type;
-import org.hyperic.hq.application.HQApp;
+
+import org.hyperic.hq.context.Bootstrap;
 
 /**
  * This interceptor delegates to others in the chain.  Most of the meat
@@ -43,7 +44,7 @@ public class HypericInterceptor
     extends EmptyInterceptor
 {
     private final HibernateInterceptorChain _chainer = 
-        HQApp.getInstance().getHibernateInterceptor(); 
+        Bootstrap.getBean(HibernateInterceptorChain.class);
         
     private final HypericInterceptorTarget _target = 
         new HypericInterceptorTarget();

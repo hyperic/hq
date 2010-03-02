@@ -2,7 +2,6 @@ import org.hyperic.hq.context.Bootstrap;
 
 import java.text.DateFormat
 import org.hyperic.hq.hqu.rendit.BaseController
-import org.hyperic.hq.application.HQApp
 import org.hyperic.hq.product.GenericPlugin
 import org.hyperic.util.Runnee
 
@@ -86,7 +85,7 @@ class ConsoleController extends BaseController {
 			def runnee = [run: {res = eng.run(script, new Binding())}] as Runnee
 			if (debug) {
 			    def logger = new LoggingChainer()
-                HQApp.instance.getHibernateLogManager().log(logger, runnee)
+                Bootstrap.getBean(HibernateLogManager.class).log(logger, runnee)
                 hiberStats = createHtmlFromLog(logger)
 			} else {
 			    runnee.run()
