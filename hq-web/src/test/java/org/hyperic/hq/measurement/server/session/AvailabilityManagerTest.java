@@ -188,6 +188,7 @@ public class AvailabilityManagerTest {
 
     private void backfill(long baseTime) {
         availabilityCheckService.backfill(baseTime);
+        dao.getSession().flush();
         dao.getSession().clear();
     }
 
@@ -212,6 +213,7 @@ public class AvailabilityManagerTest {
         if (avails.size() != 2) {
             dumpAvailsToLogger(avails);
         }
+        
         Assert.assertTrue(avails.size() == 2);
         // all points should be green in db after this
         for (int i = 0; i < 10; i++) {
@@ -485,6 +487,7 @@ public class AvailabilityManagerTest {
         for (AvailabilityDataRLE avail : avails) {
             dao.remove(avail);
         }
+        dao.getSession().flush();
         log.info("deleted " + avails.size() + " rows from " + AVAIL_TAB +
                   " with measurement Id = " + PLAT_MEAS_ID);
     }
@@ -501,6 +504,7 @@ public class AvailabilityManagerTest {
         for (AvailabilityDataRLE avail : avails) {
             dao.remove(avail);
         }
+        dao.getSession().flush();
         log.info("deleted " + avails.size() + " rows from " + AVAIL_TAB +
                   " with measurement Id = " + PLAT_MEAS_ID);
     }
@@ -545,6 +549,7 @@ public class AvailabilityManagerTest {
         list.clear();
         list.addAll(vals);
         aMan.addData(list);
+        dao.getSession().flush();
         dao.getSession().clear();
     }
 
@@ -554,6 +559,7 @@ public class AvailabilityManagerTest {
         DataPoint pt = new DataPoint(measId, mVal);
         list.add(pt);
         aMan.addData(list);
+        dao.getSession().flush();
         dao.getSession().clear();
         return pt;
     }
