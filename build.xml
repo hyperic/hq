@@ -615,7 +615,7 @@
 		<antcall target="pack-bootstrap"/>
 
 		<!-- Unpack and cleanup ant -->
-		<!--><antcall target="unpack-ant" />-->
+		<antcall target="unpack-ant" />
 
 		<!-- Copy ant binaries and database setup utilities -->
 		<copy todir="${installer.dir}/bin" flatten="true">
