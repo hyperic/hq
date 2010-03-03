@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration PUBLIC "-//LOGGER" "log4j.dtd">
+
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+	<!-- ============================== -->
+	<!-- Appenders -->
+	<!-- ============================== -->
+
+	<!-- Provides Console Logging -->
+	<appender name="CONSOLE" class="org.apache.log4j.ConsoleAppender">
+		<param name="Target" value="System.out" />
+
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d{ABSOLUTE} %-5p [%c{1}] %m%n" />
+		</layout>
+	</appender>
+
+
+	<!--  Provides File Logging  -->
+	<appender name="FILE" class="org.apache.log4j.DailyRollingFileAppender">
+		<param name="File" value="${hq.server.home}/logs/server.log" />
+		<param name="Append" value="true" />
+		<param name="DatePattern" value="'.'yyyy-MM-dd" />
+
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d %-5p [%t] [%c@%L] %m%n" />
+		</layout>
+	</appender>
+
+	
+
+	<!-- ============================== -->
+	<!-- 3rd party loggers -->
+	<!-- ============================== -->
+
+	<logger name="org.springframework">
+		<level value="warn" />
+	</logger>
+
+	<logger name="org.springframework.core">
+		<level value="info" />
+	</logger>
+
+	<logger name="org.springframework.beans">
+		<level value="info" />
+	</logger>
+
+	<logger name="org.springframework.context">
+		<level value="info" />
+	</logger>
+
+	
+
+	<!-- ======================= -->
+	<!-- Setup the Root logger -->
+	<!-- ======================= -->
+
+	<root>
+		<level value="DEBUG" />
+		<appender-ref ref="CONSOLE" />
+	</root>
+
+</log4j:configuration>
+
+
