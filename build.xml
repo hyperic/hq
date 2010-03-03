@@ -747,7 +747,8 @@
 			</fileset>
 			<fileset dir="${thirdparty.lib}/spring" includes="*.jar" />
 			<fileset dir="${thirdparty.lib}/activemq" includes="*.jar" />
-
+			<fileset dir="${thirdparty.lib}/tomcat-jdbc" includes="*.jar" />
+			
 			<fileset dir="${sigar.lib}">
 				<include name="sigar.jar" />
 			</fileset>
