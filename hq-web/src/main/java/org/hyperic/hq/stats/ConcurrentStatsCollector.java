@@ -59,7 +59,6 @@ import net.sf.ehcache.CacheManager;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.sigar.Sigar;
@@ -73,7 +72,7 @@ public final class ConcurrentStatsCollector {
     private static final String BASE_FILENAME = "hqstats";
     private String _currFilename;
     private FileWriter _file;
-    private final String _baseDir;
+    private String _baseDir;
     private final ConcurrentLinkedQueue<StatsObject> _queue = new ConcurrentLinkedQueue<StatsObject>();
     private final ScheduledThreadPoolExecutor _executor = new ScheduledThreadPoolExecutor(1);
     private static boolean enabled = true;
@@ -104,24 +103,32 @@ public final class ConcurrentStatsCollector {
     private final Map<String, StatCollector> _statKeys = new TreeMap<String, StatCollector>();
     private AtomicBoolean _hasStarted = new AtomicBoolean(false);
     private final MBeanServer _mbeanServer;
-   
 
     private ConcurrentStatsCollector() {
         final char fs = File.separatorChar;
         if (ConcurrentStatsCollector.enabled) {
-            final String d = HQApp.getInstance().getRestartStorageDir().getAbsolutePath();
-            final String logDir = "logs";
-            final File logDirectory = new File(d + fs + logDir);
-            if (!(logDirectory.exists())) {
-                logDirectory.mkdir();
+            try {
+                //Start 2 levels up from where the webapp is deployed (engine home)
+                String restartStorageDir = new File(new File(Bootstrap.getResource("/").getFile()
+                    .getParent()).getParent()).getAbsolutePath();
+                final String logDir = "logs";
+                final File logDirectory = new File(restartStorageDir + fs + logDir);
+                if (!(logDirectory.exists())) {
+                    logDirectory.mkdir();
+                }
+                final String logSuffix = logDir + fs + "hqstats" + fs;
+                _baseDir = restartStorageDir + fs + logSuffix;
+                _log.info("using hqstats baseDir " + _baseDir);
+                final File dir = new File(_baseDir);
+                if (!dir.exists()) {
+                    dir.mkdir();
+                }
+            } catch (IOException e) {
+                _log
+                    .warn("Error setting up stats directory for logging.  Stats will not be logged.  Cause: " +
+                          e.getMessage());
             }
-            final String logSuffix = logDir + fs + "hqstats" + fs;
-            _baseDir = d + fs + logSuffix;
-            _log.info("using hqstats baseDir " + _baseDir);
-            final File dir = new File(_baseDir);
-            if (!dir.exists()) {
-                dir.mkdir();
-            }
+
             _mbeanServer = Bootstrap.getBean(MBeanServer.class);
             registerInternalStats();
         } else {
@@ -252,7 +259,7 @@ public final class ConcurrentStatsCollector {
     }
 
     public static synchronized final ConcurrentStatsCollector getInstance() {
-        if(_instance == null) {
+        if (_instance == null) {
             _instance = new ConcurrentStatsCollector();
         }
         return _instance;

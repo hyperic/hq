@@ -20,8 +20,6 @@ import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServiceManager;
-import org.hyperic.hq.application.HQApp;
-import org.hyperic.hq.application.TransactionListener;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.autoinventory.server.session.RuntimeReportProcessor.ServiceMergeInfo;
 import org.hyperic.hq.common.ApplicationException;
@@ -29,6 +27,8 @@ import org.hyperic.hq.zevents.ZeventManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * Merges in services which have been discovered via runtime AI.
@@ -191,15 +191,27 @@ public class ServiceMergerImpl implements ServiceMerger {
     }
 
     public void scheduleServiceMerges(final String agentToken, final List<ServiceMergeInfo> serviceMerges) {
-        HQApp.getInstance().addTransactionListener(new TransactionListener() {
-            public void afterCommit(boolean success) {
-                if (!success)
-                    return;
-
-                incrementWorkingCache(agentToken, serviceMerges.size());
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {   
+            public void suspend() {
             }
-
-            public void beforeCommit() {
+            
+            public void resume() {
+            }
+            
+            public void flush() {
+            }
+            
+            public void beforeCompletion() {
+            }
+            
+            public void beforeCommit(boolean readOnly) {
+            }
+            
+            public void afterCompletion(int status) {
+            }
+            
+            public void afterCommit() {
+                incrementWorkingCache(agentToken, serviceMerges.size());
             }
         });
 

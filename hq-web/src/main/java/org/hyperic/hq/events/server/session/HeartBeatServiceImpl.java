@@ -42,7 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
  * The service that dispatches heart beats.
  */
 @Service
-@Transactional
+//@Transactional
 public class HeartBeatServiceImpl implements HeartBeatService {
     private final Log log = LogFactory.getLog(HeartBeatServiceImpl.class);
     private String topicName = EventConstants.EVENTS_TOPIC;
@@ -59,7 +59,7 @@ public class HeartBeatServiceImpl implements HeartBeatService {
      * 
      * @param beatTime The heart beat time.
      */
-    @Transactional
+    //@Transactional
     public void dispatchHeartBeat(Date beatTime) {
         log.debug("Heart Beat Service started dispatching a heart beat: " + beatTime + ", timestamp=" +
                   beatTime.getTime());

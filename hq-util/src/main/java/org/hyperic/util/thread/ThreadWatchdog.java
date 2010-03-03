@@ -30,22 +30,26 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.stereotype.Component;
 
 /**
  * This class is able to interrupt threads after a certain interval -- useful
  * when threads need to have a bounded runtime.  
  */
+@Component
 public class ThreadWatchdog {
     private final Log _log = LogFactory.getLog(ThreadWatchdog.class);
     private ScheduledThreadPoolExecutor _executor; 
     private ThreadFactory _tFact;
     
-    public ThreadWatchdog(final String threadName) {
+    public ThreadWatchdog() {
         _tFact = new ThreadFactory() {
             public Thread newThread(Runnable r) {
-                return new Thread(r, threadName);
+                return new Thread(r, "ThreadWatchdog");
             }
         };
     }
@@ -53,6 +57,7 @@ public class ThreadWatchdog {
     /**
      * Must be called prior to any other use of this object.
      */
+    @PostConstruct
     public void initialize() {
         _executor = new ScheduledThreadPoolExecutor(1, _tFact);
     }

@@ -34,8 +34,6 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.application.HQApp;
-import org.hyperic.hq.application.TransactionListener;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.common.SystemException;
@@ -45,6 +43,8 @@ import org.hyperic.hq.hqu.server.session.UIPlugin;
 import org.hyperic.hq.hqu.shared.UIPluginManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @Service
 public class RenditServerImpl implements RenditServer {
@@ -175,17 +175,30 @@ public class RenditServerImpl implements RenditServer {
         	
             UIPlugin p = uiPluginManager.createOrUpdate(pluginName, pluginVer);
             plugin.deploy(p);
-            HQApp.getInstance().addTransactionListener(
-            new TransactionListener() {
-                public void afterCommit(boolean success) {
-                    if (success) {
-                        synchronized (cfgLock) {
-                            plugins.put(path.getName(), plugin);
-                        }
-                    }
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                
+                public void suspend() {
                 }
-    
-                public void beforeCommit() {
+                
+                public void resume() {
+                }
+                
+                public void flush() {
+                }
+                
+                public void beforeCompletion() {
+                }
+                
+                public void beforeCommit(boolean readOnly) {
+                }
+                
+                public void afterCompletion(int status) {
+                }
+                
+                public void afterCommit() {
+                    synchronized (cfgLock) {
+                        plugins.put(path.getName(), plugin);
+                    }
                 }
             });
         } catch(Exception e) {

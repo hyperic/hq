@@ -4,8 +4,7 @@
 
 	<!-- Common targets for rolling release archives -->
 	<target name="roll-nojre-archives">
-		<property name="archive-dir" location="${archive.build.dir}/${archive.basename}" />
-
+		<property name="archive-dir" location="${archive.build.dir}/${archive.basename}-installer" />
 		<antcall target="roll-agent-bundle">
 			<param name="archive-suffix" value="noJRE" />
 			<param name="compress-mode" value="zip" />
@@ -27,6 +26,7 @@
 	</target>
 
 	<target name="roll-archives" depends="roll-nojre-archives">
+		<property name="archive-dir" location="${archive.build.dir}/${archive.basename}-installer" />
 		<!-- Roll platform specific tarballs -->
 		<antcall target="roll-platform-specific-archive">
 			<param name="jre-file" value="amd64-linux-jre-1_*.tar.gz" />

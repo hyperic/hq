@@ -36,8 +36,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.application.HQApp;
-import org.hyperic.hq.application.TransactionListener;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.events.ActionExecutionInfo;
@@ -45,6 +43,8 @@ import org.hyperic.hq.events.server.session.Action;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import EDU.oswego.cs.dl.util.concurrent.ClockDaemon;
 import EDU.oswego.cs.dl.util.concurrent.Executor;
@@ -89,7 +89,8 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
     private final Log log = LogFactory.getLog(EscalationRuntime.class);
 
     @Autowired
-    public EscalationRuntimeImpl(EscalationStateDAO escalationStateDao, AuthzSubjectManager authzSubjectManager) {
+    public EscalationRuntimeImpl(EscalationStateDAO escalationStateDao,
+                                 AuthzSubjectManager authzSubjectManager) {
         this.escalationStateDao = escalationStateDao;
         this.authzSubjectManager = authzSubjectManager;
         _executor = new PooledExecutor(new LinkedQueue());
@@ -125,15 +126,26 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
      */
     public void unscheduleEscalation(EscalationState state) {
         final Integer stateId = state.getId();
-
-        HQApp.getInstance().addTransactionListener(new TransactionListener() {
-            public void afterCommit(boolean success) {
-                if (success) {
-                    unscheduleEscalation_(stateId);
-                }
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            public void suspend() {
             }
-
-            public void beforeCommit() {
+            
+            public void resume() {
+            }
+            
+            public void flush() {
+            }
+            
+            public void beforeCompletion() {
+            }
+            
+            public void beforeCommit(boolean readOnly) {
+            }
+            
+            public void afterCompletion(int status) {
+            }
+            public void afterCommit() {
+                unscheduleEscalation_(stateId);
             }
         });
     }
@@ -150,7 +162,7 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
         if (batchTxnListener == null) {
             batchTxnListener = new BatchUnscheduleEscalationsTransactionListener();
             _batchUnscheduleTxnListeners.set(batchTxnListener);
-            HQApp.getInstance().addTransactionListener(batchTxnListener);
+            TransactionSynchronizationManager.registerSynchronization(batchTxnListener);
         }
 
         batchTxnListener.unscheduleAllEscalationsFor(def);
@@ -161,11 +173,27 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
      * thread safe. We assume that this txn listener is called back by the same
      * thread originally unscheduling the escalations.
      */
-    private class BatchUnscheduleEscalationsTransactionListener implements TransactionListener {
+    private class BatchUnscheduleEscalationsTransactionListener implements
+        TransactionSynchronization {
         private final Set _escalationsToUnschedule;
 
         public BatchUnscheduleEscalationsTransactionListener() {
             _escalationsToUnschedule = new HashSet();
+        }
+
+        public void afterCompletion(int status) {
+        }
+
+        public void beforeCompletion() {
+        }
+
+        public void flush() {
+        }
+
+        public void resume() {
+        }
+
+        public void suspend() {
         }
 
         /**
@@ -177,19 +205,17 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
             _escalationsToUnschedule.add(new EscalatingEntityIdentifier(def));
         }
 
-        public void afterCommit(boolean success) {
+        public void afterCommit() {
             try {
-                _log.debug("Transaction committed:  success=" + success);
-                if (success) {
-                    unscheduleAllEscalations_((EscalatingEntityIdentifier[]) _escalationsToUnschedule
-                        .toArray(new EscalatingEntityIdentifier[_escalationsToUnschedule.size()]));
-                }
+                unscheduleAllEscalations_((EscalatingEntityIdentifier[]) _escalationsToUnschedule
+                    .toArray(new EscalatingEntityIdentifier[_escalationsToUnschedule.size()]));
+
             } finally {
                 _batchUnscheduleTxnListeners.set(null);
             }
         }
 
-        public void beforeCommit() {
+        public void beforeCommit(boolean readOnly) {
             deleteAllEscalations_((EscalatingEntityIdentifier[]) _escalationsToUnschedule
                 .toArray(new EscalatingEntityIdentifier[_escalationsToUnschedule.size()]));
         }
@@ -210,7 +236,8 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
 
             }
         }
-        escalationStateDao.removeAllEscalationStates((Integer[]) stateIds.toArray(new Integer[stateIds.size()]));
+        escalationStateDao.removeAllEscalationStates((Integer[]) stateIds
+            .toArray(new Integer[stateIds.size()]));
     }
 
     private void unscheduleEscalation_(Integer stateId) {
@@ -280,20 +307,34 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
      * @param postTxnCommit <code>true</code> to remove post txn commit;
      *        <code>false</code> to remove immediately.
      */
-    public void removeFromUncommittedEscalationStateCache(final PerformsEscalations def, boolean postTxnCommit) {
+    public void removeFromUncommittedEscalationStateCache(final PerformsEscalations def,
+                                                          boolean postTxnCommit) {
         if (postTxnCommit) {
             boolean addedTxnListener = false;
-
             try {
-                HQApp.getInstance().addTransactionListener(new TransactionListener() {
-
-                    public void afterCommit(boolean success) {
+                TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                    
+                    public void suspend() {
+                    }
+                    
+                    public void resume() {
+                    }
+                    
+                    public void flush() {
+                    }
+                    
+                    public void beforeCompletion() {
+                    }
+                    
+                    public void beforeCommit(boolean readOnly) {
+                    }
+                    
+                    public void afterCompletion(int status) {
+                    }
+                    
+                    public void afterCommit() {
                         removeFromUncommittedEscalationStateCache(def, false);
                     }
-
-                    public void beforeCommit() {
-                    }
-
                 });
 
                 addedTxnListener = true;
@@ -317,17 +358,27 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
      */
     public void scheduleEscalation(final EscalationState state) {
         final long schedTime = state.getNextActionTime();
-
-        HQApp.getInstance().addTransactionListener(new TransactionListener() {
-            public void afterCommit(boolean success) {
-                _log.debug("Transaction committed:  success=" + success);
-
-                if (success) {
-                    scheduleEscalation_(state, schedTime);
-                }
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            public void suspend() {
             }
-
-            public void beforeCommit() {
+            
+            public void resume() {
+            }
+            
+            public void flush() {
+            }
+            
+            public void beforeCompletion() {
+            }
+            
+            public void beforeCommit(boolean readOnly) {
+            }
+            
+            public void afterCompletion(int status) {
+            }
+            
+            public void afterCommit() {
+                scheduleEscalation_(state, schedTime);
             }
         });
     }
@@ -336,7 +387,8 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
         Integer stateId = state.getId();
 
         if (stateId == null) {
-            throw new IllegalStateException("Cannot schedule a " + "transient escalation state (stateId=null).");
+            throw new IllegalStateException("Cannot schedule a "
+                                            + "transient escalation state (stateId=null).");
         }
 
         synchronized (_stateIdsToTasks) {
@@ -350,7 +402,8 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
                 _log.debug("Scheduling state[" + stateId + "]");
             }
 
-            task = _schedule.executeAt(new Date(schedTime), new ScheduleWatcher(stateId, _executor));
+            task = _schedule
+                .executeAt(new Date(schedTime), new ScheduleWatcher(stateId, _executor));
 
             _stateIdsToTasks.put(stateId, task);
             _esclEntityIdsToStateIds.put(new EscalatingEntityIdentifier(state), stateId);
@@ -418,7 +471,8 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
             if (escalation.isRepeat() && escalation.getActions().size() > 0) {
                 actionIdx = 0; // Loop back
             } else {
-                log.debug("Reached the end of the escalation state[" + escalationState.getId() + "].  Ending it");
+                log.debug("Reached the end of the escalation state[" + escalationState.getId() +
+                          "].  Ending it");
 
                 endEscalation(escalationState);
 
@@ -426,7 +480,8 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
             }
         }
 
-        EscalationAction escalationAction = (EscalationAction) escalation.getActions().get(actionIdx);
+        EscalationAction escalationAction = (EscalationAction) escalation.getActions().get(
+            actionIdx);
         Action action = escalationAction.getAction();
         Escalatable alert = getEscalatable(escalationState);
 
@@ -441,9 +496,11 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
         // escalation so we don't loop fo-eva
         Random random = new Random();
         long offset = 65000 + random.nextInt(25000);
-        long nextTime = System.currentTimeMillis() + Math.max(offset, escalationAction.getWaitTime());
+        long nextTime = System.currentTimeMillis() +
+                        Math.max(offset, escalationAction.getWaitTime());
 
-        log.debug("Moving onto next state of escalation, but waiting for " + escalationAction.getWaitTime() + " ms");
+        log.debug("Moving onto next state of escalation, but waiting for " +
+                  escalationAction.getWaitTime() + " ms");
 
         escalationState.setNextAction(actionIdx + 1);
         escalationState.setNextActionTime(nextTime);
@@ -453,21 +510,23 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
         try {
             EscalationAlertType type = escalationState.getAlertType();
             AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
-            ActionExecutionInfo execInfo = new ActionExecutionInfo(alert.getShortReason(), alert.getLongReason(), alert
-                .getAuxLogs());
+            ActionExecutionInfo execInfo = new ActionExecutionInfo(alert.getShortReason(), alert
+                .getLongReason(), alert.getAuxLogs());
             String detail = action.executeAction(alert.getAlertInfo(), execInfo);
 
             type.changeAlertState(alert, overlord, EscalationStateChange.ESCALATED);
             type.logActionDetails(alert, action, detail, null);
         } catch (Exception e) {
-            log.error("Unable to execute action [" + action.getClassName() + "] for escalation definition [" +
-                      escalationState.getEscalation().getName() + "]", e);
+            log.error("Unable to execute action [" + action.getClassName() +
+                      "] for escalation definition [" + escalationState.getEscalation().getName() +
+                      "]", e);
         }
     }
 
     @Transactional(readOnly = true)
     public Escalatable getEscalatable(EscalationState escalationState) {
-        return escalationState.getAlertType().findEscalatable(new Integer(escalationState.getAlertId()));
+        return escalationState.getAlertType().findEscalatable(
+            new Integer(escalationState.getAlertId()));
     }
 
 }

@@ -500,10 +500,13 @@
 		<copy todir="${archive-dir}/server-${version}/bin" file="${launcher.dir}/hq-server.exe" />
 		
 		<!-- Pack server lib for bootstrap-->
-		<antcall target="compile-bootstrap"/>
-		<antcall target="pack-bootstrap"/>
 		<copy todir="${archive-dir}/server-${version}/lib">
 			<fileset dir="${build.dir}" includes="hq-bootstrap.jar"/>
+			<fileset dir="${thirdparty.lib}/spring">
+				<include name="*core-*.jar"/>
+				<include name="*beans-*.jar"/>
+				<include name="*context-*.jar"/>
+			</fileset>
 		</copy>		
 
 		<!-- Copy WAR -->
@@ -606,6 +609,10 @@
 				<include name="hq-installer.jar" />
 			</fileset>
 		</copy>
+		
+		<!-- Compile and pack server bootstrap jar so it will be available to be copied by pack-installer-archive in hq and ee-->
+		<antcall target="compile-bootstrap"/>
+		<antcall target="pack-bootstrap"/>
 
 		<!-- Unpack and cleanup ant -->
 		<antcall target="unpack-ant" />
@@ -657,6 +664,8 @@
 		<antcall target="chmod-exec">
 			<param name="chmod.dir" value="${installer.dir}" />
 		</antcall>
+		
+		
 	</target>
 
 

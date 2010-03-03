@@ -45,25 +45,26 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.application.HQApp;
-import org.hyperic.hq.application.TransactionListener;
 import org.hyperic.hq.common.DiagnosticObject;
 import org.hyperic.hq.common.DiagnosticsLogger;
 import org.hyperic.hq.context.Bootstrap;
-import org.hyperic.util.PrintfFormat;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
+import org.hyperic.util.PrintfFormat;
 import org.hyperic.util.thread.LoggingThreadGroup;
 import org.hyperic.util.thread.ThreadGroupFactory;
 import org.hyperic.util.thread.ThreadWatchdog;
 import org.hyperic.util.thread.ThreadWatchdog.InterruptToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * The Zevent subsystem is an event system for fast, non-reliable transmission
- * of events.  Important data should not be transmitted on this bus, since
- * it is not persisted, and there is never any guarantee of receipt.
-
+ * of events. Important data should not be transmitted on this bus, since it is
+ * not persisted, and there is never any guarantee of receipt.
+ * 
  * This manager provides no transactional guarantees, so the caller must
  * rollback additions of listeners if the transaction fails.
  */
@@ -72,7 +73,6 @@ public class ZeventManager implements ZeventEnqueuer {
     private static final Log _log = LogFactory.getLog(ZeventManager.class);
 
     private static final Object INIT_LOCK = new Object();
-   
 
     // The thread group that the {@link EventQueueProcessor} comes from
     private final LoggingThreadGroup _threadGroup;
@@ -85,8 +85,10 @@ public class ZeventManager implements ZeventEnqueuer {
     /* Set of {@link ZeventListener}s listening to events of all types */
     private final Set _globalListeners = new HashSet();
 
-    /* Map of {@link Class}es subclassing {@link ZEvent} onto lists of
-     * {@link ZeventListener}s */
+    /*
+     * Map of {@link Class}es subclassing {@link ZEvent} onto lists of {@link
+     * ZeventListener}s
+     */
     private final Map _listeners = new HashMap();
 
     /* Map of {@link Queue} onto the target listeners using them. */
@@ -100,14 +102,29 @@ public class ZeventManager implements ZeventEnqueuer {
     private long _maxTimeInQueue;
     private long _numEvents;
 
-    private BlockingQueue  _eventQueue;
+    private BlockingQueue _eventQueue;
     private DiagnosticsLogger diagnosticsLogger;
+    private ThreadWatchdog threadWatchdog;
+    private long maxQueue;
+    private long batchSize;
 
     @Autowired
-    public ZeventManager(DiagnosticsLogger diagnosticsLogger) {
+    public ZeventManager(DiagnosticsLogger diagnosticsLogger, ThreadWatchdog threadWatchdog,
+                         @Value("#{tweakProperties['hq.zevent.maxQueueEnts'] }") Long maxQueue,
+                         @Value("#{tweakProperties['hq.zevent.batchSize'] }") Long batchSize,
+                         @Value("#{tweakProperties['hq.zevent.warnInterval'] }") Long warnInterval,  
+                         @Value("#{tweakProperties['hq.zevent.warnSize'] }") Long warnSize,
+                         @Value("#{tweakProperties['hq.zevent.listenerTimeout'] }") Long listenerTimeout) {
         this._threadGroup = new LoggingThreadGroup("ZEventProcessor");
         this._threadGroup.setDaemon(true);
         this.diagnosticsLogger = diagnosticsLogger;
+        this.threadWatchdog = threadWatchdog;
+        this.maxQueue = maxQueue;
+        this.batchSize = batchSize;
+        this._warnInterval = warnInterval;
+        this._warnSize = warnSize;
+        this._listenerTimeout = listenerTimeout;
+        
     }
 
     private long getProp(Properties p, String propName, long defaultVal) {
@@ -115,16 +132,15 @@ public class ZeventManager implements ZeventEnqueuer {
         long res;
 
         if (val == null) {
-            _log.debug("tweak.properties:[" + propName + "] not set.  Using " +
-                       defaultVal);
+            _log.debug("tweak.properties:[" + propName + "] not set.  Using " + defaultVal);
             res = defaultVal;
         } else {
             val = val.trim();
             try {
                 res = Long.parseLong(val);
-            } catch(NumberFormatException e) {
-                _log.warn("tweak.properties:[" + propName + "] not a number.  "+
-                          "( was " + val + ")  Using " + defaultVal);
+            } catch (NumberFormatException e) {
+                _log.warn("tweak.properties:[" + propName + "] not a number.  " + "( was " + val +
+                          ")  Using " + defaultVal);
                 res = defaultVal;
             }
         }
@@ -135,36 +151,9 @@ public class ZeventManager implements ZeventEnqueuer {
 
     @PostConstruct
     private void initialize() {
-        Properties props = new Properties();
-        try {
-            props = HQApp.getInstance().getTweakProperties();
-        } catch(Exception e) {
-            _log.warn("Unable to get tweak properties", e);
-        }
+        _eventQueue = new LinkedBlockingQueue((int) maxQueue);
 
-        // Maximum number of entries the queue can support
-        long maxQueue  = getProp(props, "hq.zevent.maxQueueEnts", 100 * 1000);
-
-        // Amount of time to warn between full zevent queue
-        // (shouldn't need to change this)
-        _warnInterval = getProp(props, "hq.zevent.warnInterval", 5 * 60 * 1000);
-
-        // How many zevents are processed and dispatched at once?
-        // (also dictates the maximum # of events a listener may receive in a
-        // single batch)
-        long batchSize = getProp(props, "hq.zevent.batchSize", 100);
-
-        // The # of entries needed in the queue in order to warn that it's
-        // getting full.
-        _warnSize = getProp(props, "hq.zevent.warnSize", maxQueue * 90 / 100);
-
-        _listenerTimeout = getProp(props, "hq.zevent.listenerTimeout", 60);
-
-        _eventQueue = new LinkedBlockingQueue((int)maxQueue);
-
-
-        QueueProcessor p = new QueueProcessor(this, _eventQueue,
-                                              (int)batchSize);
+        QueueProcessor p = new QueueProcessor(this, _eventQueue, (int) batchSize);
 
         _processorThread = new Thread(_threadGroup, p, "ZeventProcessor");
         _processorThread.setDaemon(true);
@@ -236,15 +225,14 @@ public class ZeventManager implements ZeventEnqueuer {
 
     private void assertClassIsZevent(Class c) {
         if (!Zevent.class.isAssignableFrom(c)) {
-            throw new IllegalArgumentException("[" + c.getName() +
-                                               "] does not subclass [" +
+            throw new IllegalArgumentException("[" + c.getName() + "] does not subclass [" +
                                                Zevent.class.getName() + "]");
         }
     }
 
     /**
-     * Registers a buffer with the internal list, so data about its contents
-     * can be printed by the diagnostic thread.
+     * Registers a buffer with the internal list, so data about its contents can
+     * be printed by the diagnostic thread.
      */
     public void registerBuffer(Queue q, ZeventListener e) {
         synchronized (_registeredBuffers) {
@@ -253,9 +241,9 @@ public class ZeventManager implements ZeventEnqueuer {
     }
 
     /**
-     * Register an event class.  These classes must be registered prior to
+     * Register an event class. These classes must be registered prior to
      * attempting to listen to individual event types.
-     *
+     * 
      * @param eventClass a subclass of {@link Zevent}
      * @return false if the eventClass was already registered
      */
@@ -278,7 +266,7 @@ public class ZeventManager implements ZeventEnqueuer {
 
     /**
      * Unregister an event class
-     *
+     * 
      * @param eventClass subclass of {@link Zevent}
      * @return false if the eventClass was not registered
      */
@@ -291,9 +279,9 @@ public class ZeventManager implements ZeventEnqueuer {
     }
 
     /**
-     * Add an event listener which is called for every event type which
-     * comes through the queue.
-     *
+     * Add an event listener which is called for every event type which comes
+     * through the queue.
+     * 
      * @return false if the listener was already listening
      */
     public boolean addGlobalListener(ZeventListener listener) {
@@ -303,8 +291,7 @@ public class ZeventManager implements ZeventEnqueuer {
     }
 
     public boolean addBufferedGlobalListener(ZeventListener listener) {
-        ThreadGroupFactory threadFact =
-            new ThreadGroupFactory(_threadGroup, listener.toString());
+        ThreadGroupFactory threadFact = new ThreadGroupFactory(_threadGroup, listener.toString());
 
         listener = new TimingListenerWrapper(listener);
         BufferedListener bListen = new BufferedListener(listener, threadFact);
@@ -315,7 +302,7 @@ public class ZeventManager implements ZeventEnqueuer {
 
     /**
      * Remove a global event listener
-     *
+     * 
      * @return false if the listener was not listening
      */
     public boolean removeGlobalListener(ZeventListener listener) {
@@ -326,7 +313,7 @@ public class ZeventManager implements ZeventEnqueuer {
 
     private List getEventTypeListeners(Class eventClass) {
         synchronized (_listenerLock) {
-            List res = (List)_listeners.get(eventClass);
+            List res = (List) _listeners.get(eventClass);
 
             if (res == null) {
                 // Register it
@@ -339,44 +326,38 @@ public class ZeventManager implements ZeventEnqueuer {
     }
 
     /**
-     * Add a buffered listener for event types.  A buffered listener is one
-     * which implements its own private queue and thread for processing
-     * entries.  If the actions performed by your listener take a while to
-     * complete, then a buffered listener is a good candidate for use, since it
-     * means that it will not be holding up the regular Zevent queue processor.
-     *
-     * @param eventClasses  {@link Class}es which subclass {@link Zevent} to
-     *                      listen for
-     * @param listener      Listener to invoke with events
-     *
-     * @return the buffered listener.  This return value must be used when
-     *         trying to remove the listener later on.
+     * Add a buffered listener for event types. A buffered listener is one which
+     * implements its own private queue and thread for processing entries. If
+     * the actions performed by your listener take a while to complete, then a
+     * buffered listener is a good candidate for use, since it means that it
+     * will not be holding up the regular Zevent queue processor.
+     * 
+     * @param eventClasses {@link Class}es which subclass {@link Zevent} to
+     *        listen for
+     * @param listener Listener to invoke with events
+     * 
+     * @return the buffered listener. This return value must be used when trying
+     *         to remove the listener later on.
      */
-    public ZeventListener addBufferedListener(Set eventClasses,
-                                              ZeventListener listener)
-    {
-        ThreadGroupFactory threadFact =
-            new ThreadGroupFactory(_threadGroup, listener.toString());
+    public ZeventListener addBufferedListener(Set eventClasses, ZeventListener listener) {
+        ThreadGroupFactory threadFact = new ThreadGroupFactory(_threadGroup, listener.toString());
 
         listener = new TimingListenerWrapper(listener);
         BufferedListener bListen = new BufferedListener(listener, threadFact);
 
-        for (Iterator i=eventClasses.iterator(); i.hasNext(); ) {
-            addListener((Class)i.next(), bListen);
+        for (Iterator i = eventClasses.iterator(); i.hasNext();) {
+            addListener((Class) i.next(), bListen);
         }
         return bListen;
     }
 
-    public ZeventListener addBufferedListener(Class eventClass,
-                                              ZeventListener listener)
-    {
-        return addBufferedListener(Collections.singleton(eventClass),
-                                   listener);
+    public ZeventListener addBufferedListener(Class eventClass, ZeventListener listener) {
+        return addBufferedListener(Collections.singleton(eventClass), listener);
     }
 
     /**
      * Add a listener for a specific type of event.
-     *
+     * 
      * @param eventClass A subclass of {@link Zevent}
      * @return false if the listener was already registered
      */
@@ -408,29 +389,29 @@ public class ZeventManager implements ZeventEnqueuer {
     }
 
     /**
-     * Enqueue events onto the event queue.  This method will block if the
-     * thread is full.
-     *
+     * Enqueue events onto the event queue. This method will block if the thread
+     * is full.
+     * 
      * @param events List of {@link Zevent}s
      * @throws InterruptedException if the queue was full and the thread was
-     *                              interrupted
+     *         interrupted
      */
     public void enqueueEvents(List events) throws InterruptedException {
         if (_eventQueue.size() > getWarnSize() &&
-            (System.currentTimeMillis() - _lastWarnTime) > getWarnInterval())
-        {
+            (System.currentTimeMillis() - _lastWarnTime) > getWarnInterval()) {
             _lastWarnTime = System.currentTimeMillis();
-            _log.warn("Your event queue is having a hard time keeping up.  " +
-                      "Get a faster CPU, or reduce the amount of events!");
+            _log.warn("Your event queue is having a hard time keeping up.  "
+                      + "Get a faster CPU, or reduce the amount of events!");
         }
 
-        for (Iterator i=events.iterator(); i.hasNext(); ) {
-            Zevent e = (Zevent)i.next();
+        for (Iterator i = events.iterator(); i.hasNext();) {
+            Zevent e = (Zevent) i.next();
 
             e.enterQueue();
             _eventQueue.offer(e, 1, TimeUnit.SECONDS);
         }
-        ConcurrentStatsCollector.getInstance().addStat(_eventQueue.size(), ConcurrentStatsCollector.ZEVENT_QUEUE_SIZE);
+        ConcurrentStatsCollector.getInstance().addStat(_eventQueue.size(),
+            ConcurrentStatsCollector.ZEVENT_QUEUE_SIZE);
     }
 
     public void enqueueEventAfterCommit(Zevent event) {
@@ -443,31 +424,41 @@ public class ZeventManager implements ZeventEnqueuer {
      */
     public void enqueueEventsAfterCommit(List inEvents) {
         final List events = new ArrayList(inEvents);
-        TransactionListener txListener = new TransactionListener() {
-            public void afterCommit(boolean success) {
+        TransactionSynchronization txListener = new TransactionSynchronization() {
+            public void afterCommit() {
                 try {
                     if (_log.isDebugEnabled()) {
-                        _log.debug("Listener[" + this + "] after tx " +
-                                   "enqueueing=" + success);
+                        _log.debug("Listener[" + this + "] after tx " + "enqueueing");
                     }
-
-                    if (success) {
-                        enqueueEvents(events);
-                    }
-                } catch(InterruptedException e) {
+                    enqueueEvents(events);
+                } catch (InterruptedException e) {
                     _log.warn("Interrupted while enqueueing events");
                 }
             }
 
-            public void beforeCommit() {
+            public void afterCompletion(int status) {
+            }
+
+            public void beforeCommit(boolean readOnly) {
+            }
+
+            public void beforeCompletion() {
+            }
+
+            public void flush() {
+            }
+
+            public void resume() {
+            }
+
+            public void suspend() {
             }
         };
 
         if (_log.isDebugEnabled()) {
-            _log.debug("Listener[" + txListener + "] Enqueueing events: " +
-                       inEvents);
+            _log.debug("Listener[" + txListener + "] Enqueueing events: " + inEvents);
         }
-        HQApp.getInstance().addTransactionListener(txListener);
+        TransactionSynchronizationManager.registerSynchronization(txListener);
     }
 
     public void enqueueEvent(Zevent event) throws InterruptedException {
@@ -475,7 +466,7 @@ public class ZeventManager implements ZeventEnqueuer {
     }
 
     /**
-     * Wait until the queue is empty.  This is a non-performant function, so
+     * Wait until the queue is empty. This is a non-performant function, so
      * please only use it in test suites.
      */
     public void waitUntilNoEvents() throws InterruptedException {
@@ -485,29 +476,27 @@ public class ZeventManager implements ZeventEnqueuer {
 
     /**
      * Returns the listeners which have specifically registered for the
-     * specified event type.  This method does not return global event listeners.
-     *
+     * specified event type. This method does not return global event listeners.
+     * 
      * If the event type was never registered, null will be returned, otherwise
      * a list of {@link ZeventListener}s (of potentially size=0)
      */
     private List getTypeListeners(Zevent z) {
         synchronized (_listenerLock) {
-            return (List)_listeners.get(z.getClass());
+            return (List) _listeners.get(z.getClass());
         }
     }
 
     /**
-     * Internal method to dispatch events.  Called by the
-     * {@link QueueProcessor}.
-     *
-     * The strategy used in this method creates mini-batches of events
-     * to send to each listener.  There is no defined order for listener
-     * execution.
+     * Internal method to dispatch events. Called by the {@link QueueProcessor}.
+     * 
+     * The strategy used in this method creates mini-batches of events to send
+     * to each listener. There is no defined order for listener execution.
      */
     void dispatchEvents(List events) {
         synchronized (INIT_LOCK) {
-            for (Iterator i=events.iterator(); i.hasNext(); ) {
-                Zevent z = (Zevent)i.next();
+            for (Iterator i = events.iterator(); i.hasNext();) {
+                Zevent z = (Zevent) i.next();
 
                 long timeInQueue = z.getQueueExitTime() - z.getQueueEntryTime();
                 if (timeInQueue > _maxTimeInQueue)
@@ -520,20 +509,20 @@ public class ZeventManager implements ZeventEnqueuer {
         Map listenerBatches;
         synchronized (_listenerLock) {
             listenerBatches = new HashMap(_globalListeners.size());
-            for (Iterator i=events.iterator(); i.hasNext(); ) {
-                Zevent z = (Zevent)i.next();
+            for (Iterator i = events.iterator(); i.hasNext();) {
+                Zevent z = (Zevent) i.next();
                 List typeListeners = getTypeListeners(z);
 
                 if (typeListeners == null) {
-                    _log.warn("Unable to dispatch event of type [" +
-                              z.getClass().getName() + "]:  Not registered");
+                    _log.warn("Unable to dispatch event of type [" + z.getClass().getName() +
+                              "]:  Not registered");
                     continue;
                 }
                 validEvents.add(z);
 
-                for (Iterator j=typeListeners.iterator(); j.hasNext(); ) {
-                    ZeventListener listener = (ZeventListener)j.next();
-                    List batch = (List)listenerBatches.get(listener);
+                for (Iterator j = typeListeners.iterator(); j.hasNext();) {
+                    ZeventListener listener = (ZeventListener) j.next();
+                    List batch = (List) listenerBatches.get(listener);
 
                     if (batch == null) {
                         batch = new ArrayList();
@@ -543,31 +532,29 @@ public class ZeventManager implements ZeventEnqueuer {
                 }
             }
 
-            for (Iterator i=_globalListeners.iterator(); i.hasNext(); ) {
-                ZeventListener listener = (ZeventListener)i.next();
+            for (Iterator i = _globalListeners.iterator(); i.hasNext();) {
+                ZeventListener listener = (ZeventListener) i.next();
                 listenerBatches.put(listener, validEvents);
             }
         }
 
-        ThreadWatchdog dog = HQApp.getInstance().getWatchdog();
         long timeout = getListenerTimeout();
-        for (Iterator i=listenerBatches.entrySet().iterator(); i.hasNext(); ) {
-            Map.Entry ent = (Map.Entry)i.next();
-            ZeventListener listener = (ZeventListener)ent.getKey();
-            List batch = (List)ent.getValue();
+        for (Iterator i = listenerBatches.entrySet().iterator(); i.hasNext();) {
+            Map.Entry ent = (Map.Entry) i.next();
+            ZeventListener listener = (ZeventListener) ent.getKey();
+            List batch = (List) ent.getValue();
 
             synchronized (_listenerLock) {
                 InterruptToken t = null;
                 try {
-                    t = dog.interruptMeIn(timeout, TimeUnit.SECONDS,
-                                          "Processing listener events");
+                    t = threadWatchdog.interruptMeIn(timeout, TimeUnit.SECONDS,
+                        "Processing listener events");
                     listener.processEvents(Collections.unmodifiableList(batch));
-                } catch(RuntimeException e) {
-                    _log.warn("Exception while invoking listener [" +
-                              listener + "]", e);
+                } catch (RuntimeException e) {
+                    _log.warn("Exception while invoking listener [" + listener + "]", e);
                 } finally {
                     if (t != null)
-                        dog.cancelInterrupt(t);
+                        threadWatchdog.cancelInterrupt(t);
                 }
             }
         }
@@ -577,31 +564,26 @@ public class ZeventManager implements ZeventEnqueuer {
         synchronized (INIT_LOCK) {
             StringBuffer res = new StringBuffer();
 
-            res.append("ZEvent Manager Diagnostics:\n")
-               .append("    Queue Size:        " + _eventQueue.size() + "\n")
-               .append("    Events Handled:    " + _numEvents + "\n")
-               .append("    Max Time In Queue: " + _maxTimeInQueue + "ms\n\n")
-               .append("ZEvent Listener Diagnostics:\n");
-            PrintfFormat timingFmt =
-                new PrintfFormat("        %-30s max=%-7.2f avg=%-5.2f " +
-                                 "num=%-5d\n");
+            res.append("ZEvent Manager Diagnostics:\n").append(
+                "    Queue Size:        " + _eventQueue.size() + "\n").append(
+                "    Events Handled:    " + _numEvents + "\n").append(
+                "    Max Time In Queue: " + _maxTimeInQueue + "ms\n\n").append(
+                "ZEvent Listener Diagnostics:\n");
+            PrintfFormat timingFmt = new PrintfFormat("        %-30s max=%-7.2f avg=%-5.2f "
+                                                      + "num=%-5d\n");
             synchronized (_listenerLock) {
 
-                for (Iterator i=_listeners.entrySet().iterator(); i.hasNext();){
-                    Map.Entry ent = (Map.Entry)i.next();
-                    Collection listeners = (Collection)ent.getValue();
+                for (Iterator i = _listeners.entrySet().iterator(); i.hasNext();) {
+                    Map.Entry ent = (Map.Entry) i.next();
+                    Collection listeners = (Collection) ent.getValue();
 
-                    res.append("    EventClass: " +
-                               ent.getKey() + "\n");
-                    for (Iterator j=listeners.iterator(); j.hasNext(); ) {
-                        TimingListenerWrapper l =
-                            (TimingListenerWrapper)j.next();
-                        Object[] args = new Object[] {
-                            l.toString(),
-                            new Double(l.getMaxTime()),
-                            new Double(l.getAverageTime()),
-                            new Long(l.getNumEvents())
-                        };
+                    res.append("    EventClass: " + ent.getKey() + "\n");
+                    for (Iterator j = listeners.iterator(); j.hasNext();) {
+                        TimingListenerWrapper l = (TimingListenerWrapper) j.next();
+                        Object[] args = new Object[] { l.toString(),
+                                                      new Double(l.getMaxTime()),
+                                                      new Double(l.getAverageTime()),
+                                                      new Long(l.getNumEvents()) };
 
                         res.append(timingFmt.sprintf(args));
                     }
@@ -609,14 +591,12 @@ public class ZeventManager implements ZeventEnqueuer {
                 }
 
                 res.append("    Global Listeners:\n");
-                for (Iterator i=_globalListeners.iterator(); i.hasNext(); ) {
-                    TimingListenerWrapper l = (TimingListenerWrapper)i.next();
-                    Object[] args = new Object[] {
-                        l.toString(),
-                        new Double(l.getMaxTime()),
-                        new Double(l.getAverageTime()),
-                        new Long(l.getNumEvents()),
-                    };
+                for (Iterator i = _globalListeners.iterator(); i.hasNext();) {
+                    TimingListenerWrapper l = (TimingListenerWrapper) i.next();
+                    Object[] args = new Object[] { l.toString(),
+                                                  new Double(l.getMaxTime()),
+                                                  new Double(l.getAverageTime()),
+                                                  new Long(l.getNumEvents()), };
 
                     res.append(timingFmt.sprintf(args));
                 }
@@ -626,25 +606,21 @@ public class ZeventManager implements ZeventEnqueuer {
                 PrintfFormat fmt = new PrintfFormat("    %-30s size=%d\n");
 
                 res.append("\nZevent Registered Buffers:\n");
-                for (Iterator i=_registeredBuffers.entrySet().iterator();
-                     i.hasNext(); )
-                {
-                    Map.Entry ent = (Map.Entry)i.next();
-                    Queue q = (Queue)ent.getKey();
-                    TimingListenerWrapper targ =
-                        (TimingListenerWrapper)ent.getValue();
+                for (Iterator i = _registeredBuffers.entrySet().iterator(); i.hasNext();) {
+                    Map.Entry ent = (Map.Entry) i.next();
+                    Queue q = (Queue) ent.getKey();
+                    TimingListenerWrapper targ = (TimingListenerWrapper) ent.getValue();
 
-                    res.append(fmt.sprintf(new Object[] {
-                        targ.toString(),
-                        new Integer(q.size()),
-                    }));
+                    res.append(fmt
+                        .sprintf(new Object[] { targ.toString(), new Integer(q.size()), }));
 
-                    res.append(timingFmt.sprintf(new Object[] {
-                        "", // Target already printed above
-                        new Double(targ.getMaxTime()),
-                        new Double(targ.getAverageTime()),
-                        new Long(targ.getNumEvents()),
-                    }));
+                    res.append(timingFmt.sprintf(new Object[] { "", // Target
+                                                               // already
+                                                               // printed
+                                                               // above
+                                                               new Double(targ.getMaxTime()),
+                                                               new Double(targ.getAverageTime()),
+                                                               new Long(targ.getNumEvents()), }));
                 }
             }
 
@@ -653,6 +629,6 @@ public class ZeventManager implements ZeventEnqueuer {
     }
 
     public static ZeventEnqueuer getInstance() {
-       return Bootstrap.getBean(ZeventEnqueuer.class);
+        return Bootstrap.getBean(ZeventEnqueuer.class);
     }
 }

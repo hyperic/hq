@@ -108,9 +108,9 @@
 
 	<bean class="org.hyperic.hq.appdef.server.session.ResourceTreeGenerator" />
 	
-	<bean class="org.hyperic.hq.events.FileAlertConditionEvaluatorStateRepository">
-		<constructor-arg value="#{hqApp.restartStorageDir}"/>
-	</bean>
+	
+	<bean id="tweakProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean" p:location="classpath:/tweak.properties"/>
+ 
 
 	<context:mbean-export />
 	<context:mbean-server />
