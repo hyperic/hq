@@ -10888,10 +10888,10 @@ has already been defined.
   <schemaSpec version="3.195"> 
   	<schema-directSQL>  
         <statement desc="Adding create group permission...">
-            INSERT INTO EAM_OPERATION(ID,VERSION_COL,NAME,RESOURCE_TYPE_ID) VALUES (29,0,'createResourceGroup',3);
+            INSERT INTO EAM_OPERATION(ID,VERSION_COL,NAME,RESOURCE_TYPE_ID) VALUES (29,0,'createResourceGroup',3)
         </statement>   
         <statement desc="Adding view escalation permission...">
-            INSERT INTO EAM_OPERATION(ID,VERSION_COL,NAME,RESOURCE_TYPE_ID) VALUES (415,0,'viewEscalation',0);
+            INSERT INTO EAM_OPERATION(ID,VERSION_COL,NAME,RESOURCE_TYPE_ID) VALUES (415,0,'viewEscalation',0)
         </statement>   
   		<statement desc="Adding create group permission to any role that has delete group permission...">
   			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
@@ -10899,7 +10899,7 @@ has already been defined.
   				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
   				WHERE m.operation_id = 31 
   				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
-  			         WHERE rm.role_id = r.id AND rm.operation_id = 29) = 0;
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 29) = 0
   		</statement>
   		<statement desc="Adding delete group permission to any role that has create group permission...">
   			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
@@ -10907,7 +10907,7 @@ has already been defined.
   				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
   				WHERE m.operation_id = 29 
   				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
-  			         WHERE rm.role_id = r.id AND rm.operation_id = 31) = 0;
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 31) = 0
   		</statement>
   		<statement desc="Adding update group permission to any role that has create or delete group permission...">
   			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
@@ -10915,7 +10915,7 @@ has already been defined.
   				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
   				WHERE (m.operation_id = 29 or m.operation_id = 31)
   				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
-  			         WHERE rm.role_id = r.id AND rm.operation_id = 24) = 0;
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 24) = 0
   		</statement>
   		<statement desc="Adding read group permission to any role that has create, update or delete group permission...">
   			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
@@ -10923,7 +10923,7 @@ has already been defined.
   				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
   				WHERE (m.operation_id = 29 or m.operation_id = 31 or m.operation_id = 24)
   				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
-  			         WHERE rm.role_id = r.id AND rm.operation_id = 28) = 0;
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 28) = 0
   		</statement>
   		<statement desc="Adding create platform permission to any role that has delete platform permission...">
   			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
@@ -10931,7 +10931,7 @@ has already been defined.
   				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
   				WHERE m.operation_id = 302 
   				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
-  			         WHERE rm.role_id = r.id AND rm.operation_id = 320) = 0;
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 320) = 0
   		</statement>
   		<statement desc="Adding delete platform permission to any role that has create platform permission...">
   			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
@@ -10939,7 +10939,7 @@ has already been defined.
   				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
   				WHERE m.operation_id = 320 
   				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
-  			         WHERE rm.role_id = r.id AND rm.operation_id = 302) = 0;
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 302) = 0
   		</statement>
   		<statement desc="Adding update platform permission to any role that has create or delete platform permission...">
   			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
@@ -10947,7 +10947,7 @@ has already been defined.
   				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
   				WHERE (m.operation_id = 320 or m.operation_id = 302)
   				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
-  			         WHERE rm.role_id = r.id AND rm.operation_id = 301) = 0;
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 301) = 0
   		</statement>
   		<statement desc="Adding read platform permission to any role that has create, update or delete platform permission...">
   			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
@@ -10955,7 +10955,7 @@ has already been defined.
   				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
   				WHERE (m.operation_id = 320 or m.operation_id = 302 or m.operation_id = 301)
   				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
-  			         WHERE rm.role_id = r.id AND rm.operation_id = 305) = 0;
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 305) = 0
   		</statement>
   		<statement desc="Adding create server permission to any role that has delete server permission...">
   			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
@@ -10963,7 +10963,7 @@ has already been defined.
   				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
   				WHERE m.operation_id = 304 
   				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
-  			         WHERE rm.role_id = r.id AND rm.operation_id = 306) = 0;
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 306) = 0
   		</statement>
   		<statement desc="Adding delete server permission to any role that has create server permission...">
   			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
@@ -10971,7 +10971,7 @@ has already been defined.
   				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
   				WHERE m.operation_id = 306 
   				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
-  			         WHERE rm.role_id = r.id AND rm.operation_id = 304) = 0;
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 304) = 0
   		</statement>
   		<statement desc="Adding update server permission to any role that has create or delete server permission...">
   			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
@@ -10979,7 +10979,7 @@ has already been defined.
   				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
   				WHERE (m.operation_id = 304 or m.operation_id = 306)
   				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
-  			         WHERE rm.role_id = r.id AND rm.operation_id = 307) = 0;
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 307) = 0
   		</statement>
   		<statement desc="Adding read server permission to any role that has create, update or delete server permission...">
   			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
@@ -10987,7 +10987,7 @@ has already been defined.
   				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
   				WHERE (m.operation_id = 304 or m.operation_id = 306 or m.operation_id = 307)
   				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
-  			         WHERE rm.role_id = r.id AND rm.operation_id = 311) = 0;
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 311) = 0
   		</statement>
   		<statement desc="Adding create service permission to any role that has delete service permission...">
   			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
@@ -10995,7 +10995,7 @@ has already been defined.
   				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
   				WHERE m.operation_id = 314 
   				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
-  			         WHERE rm.role_id = r.id AND rm.operation_id = 312) = 0;
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 312) = 0
   		</statement>
   		<statement desc="Adding delete service permission to any role that has create service permission...">
   			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
@@ -11003,7 +11003,7 @@ has already been defined.
   				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
   				WHERE m.operation_id = 312
   				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
-  			         WHERE rm.role_id = r.id AND rm.operation_id = 314) = 0;
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 314) = 0
   		</statement>
   		<statement desc="Adding update service permission to any role that has create or delete service permission...">
   			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
@@ -11011,7 +11011,7 @@ has already been defined.
   				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
   				WHERE (m.operation_id = 312 or m.operation_id = 314)
   				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
-  			         WHERE rm.role_id = r.id AND rm.operation_id = 313) = 0;
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 313) = 0
   		</statement>
   		<statement desc="Adding read service permission to any role that has create, update or delete service permission...">
   			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
@@ -11019,7 +11019,7 @@ has already been defined.
   				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
   				WHERE (m.operation_id = 312 or m.operation_id = 314 or m.operation_id = 313)
   				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
-  			         WHERE rm.role_id = r.id AND rm.operation_id = 315) = 0;
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 315) = 0
   		</statement>
   		<statement desc="Adding create application permission to any role that has delete application permission...">
   			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
@@ -11027,7 +11027,7 @@ has already been defined.
   				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
   				WHERE m.operation_id = 318 
   				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
-  			         WHERE rm.role_id = r.id AND rm.operation_id = 316) = 0;
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 316) = 0
   		</statement>
   		<statement desc="Adding delete application permission to any role that has create application permission...">
   			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
@@ -11035,7 +11035,7 @@ has already been defined.
   				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
   				WHERE m.operation_id = 316
   				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
-  			         WHERE rm.role_id = r.id AND rm.operation_id = 318) = 0;
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 318) = 0
   		</statement>
   		<statement desc="Adding update application permission to any role that has create or delete application permission...">
   			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
@@ -11043,7 +11043,7 @@ has already been defined.
   				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
   				WHERE (m.operation_id = 316 or m.operation_id = 318)
   				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
-  			         WHERE rm.role_id = r.id AND rm.operation_id = 317) = 0;
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 317) = 0
   		</statement>
   		<statement desc="Adding read application permission to any role that has create, update or delete application permission...">
   			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
@@ -11051,7 +11051,7 @@ has already been defined.
   				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
   				WHERE (m.operation_id = 316 or m.operation_id = 318 or m.operation_id = 317)
   				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
-  			         WHERE rm.role_id = r.id AND rm.operation_id = 319) = 0;
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 319) = 0
   		</statement>
   		<statement desc="Adding create user permission to any role that has delete user permission...">
   			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
@@ -11059,7 +11059,7 @@ has already been defined.
   				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
   				WHERE m.operation_id = 7 
   				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
-  			         WHERE rm.role_id = r.id AND rm.operation_id = 10) = 0;
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 10) = 0
   		</statement>
   		<statement desc="Adding delete user permission to any role that has create user permission...">
   			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
@@ -11067,7 +11067,7 @@ has already been defined.
   				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
   				WHERE m.operation_id = 10
   				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
-  			         WHERE rm.role_id = r.id AND rm.operation_id = 7) = 0;
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 7) = 0
   		</statement>
   		<statement desc="Adding update user permission to any role that has create or delete user permission...">
   			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
@@ -11075,7 +11075,7 @@ has already been defined.
   				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
   				WHERE (m.operation_id = 7 or m.operation_id = 10)
   				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
-  			         WHERE rm.role_id = r.id AND rm.operation_id = 6) = 0;
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 6) = 0
   		</statement>
   		<statement desc="Adding read user permission to any role that has create, update or delete user permission...">
   			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
@@ -11083,7 +11083,7 @@ has already been defined.
   				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
   				WHERE (m.operation_id = 7 or m.operation_id = 10 or m.operation_id = 6)
   				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
-  			         WHERE rm.role_id = r.id AND rm.operation_id = 8) = 0;
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 8) = 0
   		</statement>
   		<statement desc="Adding create role permission to any role that has delete role permission...">
   			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
@@ -11091,7 +11091,7 @@ has already been defined.
   				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
   				WHERE m.operation_id = 30 
   				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
-  			         WHERE rm.role_id = r.id AND rm.operation_id = 12) = 0;
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 12) = 0
   		</statement>
   		<statement desc="Adding delete role permission to any role that has create role permission...">
   			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
@@ -11099,7 +11099,7 @@ has already been defined.
   				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
   				WHERE m.operation_id = 12
   				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
-  			         WHERE rm.role_id = r.id AND rm.operation_id = 30) = 0;
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 30) = 0
   		</statement>
   		<statement desc="Adding update role permission to any role that has create or delete role permission...">
   			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
@@ -11107,7 +11107,7 @@ has already been defined.
   				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
   				WHERE (m.operation_id = 12 or m.operation_id = 30)
   				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
-  			         WHERE rm.role_id = r.id AND rm.operation_id = 11) = 0;
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 11) = 0
   		</statement>
   		<statement desc="Adding read role permission to any role that has create, update or delete role permission...">
   			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
@@ -11115,7 +11115,7 @@ has already been defined.
   				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
   				WHERE (m.operation_id = 12 or m.operation_id = 30 or m.operation_id = 11)
   				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
-  			         WHERE rm.role_id = r.id AND rm.operation_id = 16) = 0;
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 16) = 0
   		</statement>
   		<statement desc="Adding create escalation permission to any role that has delete escalation permission...">
   			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
@@ -11123,7 +11123,7 @@ has already been defined.
   				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
   				WHERE m.operation_id = 414 
   				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
-  			         WHERE rm.role_id = r.id AND rm.operation_id = 412) = 0;
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 412) = 0
   		</statement>
   		<statement desc="Adding delete escalation permission to any role that has create escalation permission...">
   			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
@@ -11131,7 +11131,7 @@ has already been defined.
   				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
   				WHERE m.operation_id = 412
   				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
-  			         WHERE rm.role_id = r.id AND rm.operation_id = 414) = 0;
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 414) = 0
   		</statement>
   		<statement desc="Adding update escalation permission to any role that has create or delete escalation permission...">
   			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
@@ -11139,7 +11139,7 @@ has already been defined.
   				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
   				WHERE (m.operation_id = 412 or m.operation_id = 414)
   				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
-  			         WHERE rm.role_id = r.id AND rm.operation_id = 413) = 0;
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 413) = 0
   		</statement>
   		<statement desc="Adding read escalation permission to any role that has create, update or delete escalation permission...">
   			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
@@ -11147,7 +11147,7 @@ has already been defined.
   				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
   				WHERE (m.operation_id = 412 or m.operation_id = 414 or m.operation_id = 413)
   				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
-  			         WHERE rm.role_id = r.id AND rm.operation_id = 415) = 0;
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 415) = 0
   		</statement>
     </schema-directSQL>
   </schemaSpec>
