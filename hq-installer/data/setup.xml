@@ -453,10 +453,7 @@ ${errMsg}
 
     <!-- Copy server control file to server's data dir -->
     <mkdir dir="${server.product.dir}/data"/>
-    <echo>^^^DEBUG: Copying server control file...</echo>
-    <copy todir="${server.product.dir}/data"
-          file="${install.dir}/data/server.xml"/>
-
+  
     <!-- Copy common utils to server's bin dir -->
     <echo>^^^DEBUG: Copying server binaries...</echo>
     <copy todir="${server.product.dir}/bin">

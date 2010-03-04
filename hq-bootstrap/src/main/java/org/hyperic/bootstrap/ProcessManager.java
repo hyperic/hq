@@ -1,101 +1,66 @@
 package org.hyperic.bootstrap;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
-import org.hyperic.sigar.SigarFileNotFoundException;
-import org.hyperic.sigar.ptql.ProcessFinder;
-import org.hyperic.util.exec.Execute;
-import org.hyperic.util.exec.ExecuteWatchdog;
-import org.hyperic.util.exec.PumpStreamHandler;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-@Component
-public class ProcessManager {
-    private Sigar sigar;
-    private static final int PROCESS_TIMEOUT = 60000;
-    private final Log log = LogFactory.getLog(ProcessManager.class);
-    
-    
-    @Autowired
-    public ProcessManager(Sigar sigar) {
-        this.sigar = sigar;
-    }
 
-    public long getPidFromPidFile(String pidFile) throws SigarException {
-        long[] pids = ProcessFinder.find(sigar, "Pid.PidFile.eq=" + pidFile);
-        if (pids.length > 0) {
-            return pids[0];
-        }
-        return -1;
-    }
-    
-    public void kill(long pid) throws SigarException {
-        int signum = Sigar.getSigNum("TERM");
-        sigar.kill(pid, signum);
-    }
-    public int executeProcess(String[] commandLine, String workingDir) {
-        return executeProcess(commandLine, workingDir, null);
-    }
-    
-    public int executeProcess(String[] commandLine, String workingDir, String[] envVariables) {
-        ExecuteWatchdog watchdog = new ExecuteWatchdog(ProcessManager.PROCESS_TIMEOUT);
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
+/**
+ * Platform-independent component responsible for process execution and
+ * obtaining process status
+ * @author jhickey
+ * 
+ */
+public interface ProcessManager {
 
-        Execute ex = new Execute(new PumpStreamHandler(output), watchdog);
-        ex.setWorkingDirectory(new File(workingDir));
-        ex.setCommandline(commandLine);
-        if(envVariables != null) {
-            ex.setEnvironment(envVariables);
-        }
-        int exitCode = 0;
-        try {
-            exitCode = ex.execute();
-        } catch (Exception e) {
-            exitCode = 1;
-            log.error(e.getMessage(), e);
-        }
-        String message = output.toString();
+    /**
+     * 
+     * @param pidFile The pidfile of the process to lookup
+     * @return the PID of the process from the file ONLY if the process is
+     *         running and the file is found. Else returns -1.
+     * @throws SigarException If an error occurs querying for the process
+     */
+    long getPidFromPidFile(String pidFile) throws SigarException;
 
-        if (message.length() > 0 && exitCode != 0) {
-            log.error(message);
-        } else if (message.length() > 0) {
-            log.info(message);
-        }
+    /**
+     * Performs a process kill(TERM)
+     * @param pid The PID of the process to kill
+     * @throws SigarException
+     */
+    void kill(long pid) throws SigarException;
 
-        if (watchdog.killedProcess()) {
-            String err = "Command did not complete within timeout of " + ProcessManager.PROCESS_TIMEOUT /
-                         1000 + " seconds";
-            log.error(err);
-        }
-        return exitCode;
-    }
-    
-    public boolean isPortInUse(long port, int maxTries) {
-        log.debug("waitForPort " + port + ", entering wait loop: MAXTRIES=" + maxTries);
-        for (int i = 0; i < maxTries; i++) {
-            log.debug("checking port: " + port + "...");
-            try {
-                if (sigar.getNetListenAddress(port) != null) {
-                    // we were able to find something
-                    return true;
-                }
-            } catch (SigarFileNotFoundException e) {
-                // means port is not bound
-            } catch (Exception e) {
-                log.error("Error checking if port " + port + " is in use", e);
-            }
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                // ignore
-            }
-        }
-        log.debug("Num tries for port check exhausted");
-        return false;
-    }
+    /**
+     * Executes a process, blocking until process execution completes or a
+     * timeout is reached.
+     * @param commandLine The command line of the process to execute
+     * @param workingDir The working dir from which to execute the process
+     * @param suppressOutput If true, process out and process err will not be
+     *        printed. If false, process out will print to log.info and process
+     *        error will print to log.err
+     * @return The exit code of the process
+     */
+    int executeProcess(String[] commandLine, String workingDir, boolean suppressOutput);
+
+    /**
+     * Executes a process, blocking until process execution completes or a
+     * timeout is reached.
+     * @param commandLine The command line of the process to execute
+     * @param workingDir The working dir from which to execute the process
+     * @param envVariables The process environment
+     * @param suppressOutput If true, process out and process err will not be
+     *        printed. If false, process out will print to log.info and process
+     *        error will print to log.err
+     * @return The exit code of the process
+     */
+    int executeProcess(String[] commandLine, String workingDir, String[] envVariables,
+                       boolean suppressOutput);
+
+    /**
+     * Checks if a port is bound. Will sleep 2 seconds and continue trying until
+     * port is bound or maxTries has been reached
+     * @param port The port to check
+     * @param maxTries The number of times to check if the port is not bound
+     * @return true if port is bound sometime w/in maxTries * 2 seconds, false
+     *         if not bound
+     * @throws Exception
+     */
+    boolean isPortInUse(long port, int maxTries) throws Exception;
+
 }

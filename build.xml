@@ -178,6 +178,11 @@
 		<path location="${hq.lather}/target/classes" />
 		<path location="${hq.pdk.shared}/target/classes" />
 	</path>
+	
+	<path id="bootstrap.compile.classpath">
+		<path refid="shared.compile.classpath"/>
+		<path location="${hq.bootstrap}/target/classes" />
+	</path>
 
 	<!-- Source common targets -->
 	<import file="${hq.home}/build_util/util-build.xml" />
@@ -497,7 +502,6 @@
 		<copy todir="${archive-dir}/server-${version}/bin">
 			<fileset dir="${hq.bootstrap}/bin" includes="**" />
 		</copy>
-		<copy todir="${archive-dir}/server-${version}/bin" file="${launcher.dir}/hq-server.exe" />
 		
 		<!-- Pack server lib for bootstrap-->
 		<copy todir="${archive-dir}/server-${version}/lib">
@@ -505,8 +509,10 @@
 			<fileset dir="${thirdparty.lib}/spring">
 				<include name="*core-*.jar"/>
 				<include name="*beans-*.jar"/>
-				<include name="*context-*.jar"/>
+				<include name="*springframework.context-*.jar"/>
 			</fileset>
+			<fileset dir="${sigar.lib}" includes="*"/>
+			<fileset dir="${thirdparty.lib}" includes="commons-logging*.jar"/>
 		</copy>		
 
 		<!-- Copy WAR -->
@@ -1252,6 +1258,7 @@
 		<delete dir="${hq.pdk.agent}/target" />
 		<delete dir="${hq.agent}/target" />
 		<delete dir="${hq.web}/target" />
+		<delete dir="${hq.bootstrap}/target" />
 		<delete dir="${hq.installer}/target" />
 		<delete dir="${rendit_sys.dir}/target" />
 		<delete includeemptydirs="true">
@@ -1322,6 +1329,7 @@
 <test-compile module.dir="${hq.lather}" compile.classpath.id="shared.compile.classpath" />
 <test-compile module.dir="${hq.pdk.shared}" compile.classpath.id="shared.compile.classpath" />
 <test-compile module.dir="${hq.web}" compile.classpath.id="web.compile.classpath" />
+<test-compile module.dir="${hq.bootstrap}" compile.classpath.id="bootstrap.compile.classpath" />
 </target>
 
 <target name="run-tests" depends="init-taskdefs,init-tests">
@@ -1338,6 +1346,7 @@
 <test-run module.dir="${hq.lather}" classpath.id="shared.compile.classpath" />
 <test-run module.dir="${hq.pdk.shared}" classpath.id="shared.compile.classpath" />
 <test-run module.dir="${hq.web}" classpath.id="web.compile.classpath" />
+<test-run module.dir="${hq.bootstrap}" classpath.id="bootstrap.compile.classpath" />
 </target>
 
 
@@ -1352,6 +1361,8 @@
 <delete dir="${hq.pdk.shared}/target/clover" quiet="true" />
 <instrument-module input.dir="${hq.web}/src/test/java" staging.dir="${hq.web}/target/clover/staging/src/test/java" resource.dir="${hq.web}/src/test/resources" output.dir="${hq.web}/target/test-classes" classpath.id="web.compile.classpath" />
 <delete dir="${hq.web}/target/clover" quiet="true" />
+<instrument-module input.dir="${hq.bootstrap}/src/test/java" staging.dir="${hq.bootstrap}/target/clover/staging/src/test/java" resource.dir="${hq.bootstrap}/src/test/resources" output.dir="${hq.bootstrap}/target/test-classes" classpath.id="bootstrap.compile.classpath" />
+<delete dir="${hq.bootstrap}/target/clover" quiet="true" />
 <instrument-module classpath.id="agent.pdk.compile.classpath" input.dir="${hq.pdk.agent}/src/test/java" resource.dir="${hq.pdk.agent}/src/test/resources" output.dir="${hq.pdk.agent}/target/test-classes" staging.dir="${hq.pdk.agent}/target/clover/staging/src/test/java" />
 <delete dir="${hq.pdk.agent}/target/clover" quiet="true" />
 <instrument-module classpath.id="agent.compile.classpath" input.dir="${hq.agent}/src/test/java" resource.dir="${hq.agent}/src/test/resources" output.dir="${hq.agent}/target/test-classes" staging.dir="${hq.agent}/target/clover/staging/src/test/java" />
