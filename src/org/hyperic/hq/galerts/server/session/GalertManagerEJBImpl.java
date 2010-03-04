@@ -447,23 +447,22 @@ public class GalertManagerEJBImpl
                            long timeRange, long endTime, List includes) 
         throws PermissionException 
     {
-        List alerts;
-            
+        PageInfo pInfo = PageInfo.create(0, count, GalertLogSortField.DATE, false);
+        
         if (priority == EventConstants.PRIORITY_ALL) {
-            alerts = _logDAO.findByCreateTime(endTime- timeRange, endTime, 
-                                              count);
-        } else {
-            PageInfo pInfo = PageInfo.create(0, count, GalertLogSortField.DATE,
-                                             false);
-            AlertSeverity s = AlertSeverity.findByCode(priority);
-            alerts = _logDAO.findByCreateTimeAndPriority(subj.getId(),
+            // if priority is "all" set the severity code as low
+            // this is essentially "all"
+            priority = AlertSeverity.LOW.getCode();
+        }
+        
+        AlertSeverity s = AlertSeverity.findByCode(priority);
+        List alerts = _logDAO.findByCreateTimeAndPriority(subj.getId(),
                                                          endTime - timeRange,
                                                          endTime, s, false,
                                                          false, null, null,
                                                          pInfo);
-        }
-            
         List result = new ArrayList();
+
         for (Iterator i=alerts.iterator(); i.hasNext(); ) {
             GalertLog l = (GalertLog)i.next();
             GalertDef def = l.getAlertDef();

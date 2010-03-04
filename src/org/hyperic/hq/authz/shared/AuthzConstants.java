@@ -194,7 +194,7 @@ public final class AuthzConstants {
     public static final String ResourceEdgeNetworkRelation = "network";
     
     // List of alert operations
-    public static final String[] MANAGE_ALERTS_OPS = 
+    public static final String[] VIEW_ALERTS_OPS = 
         new String[] {
             platformOpViewPlatform,
             serverOpViewServer,

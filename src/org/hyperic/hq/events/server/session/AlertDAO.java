@@ -146,7 +146,7 @@ public class AlertDAO extends HibernateDAO {
 
         if (sql.indexOf("subj") > 0) {
             q.setInteger("subj", subj.intValue())
-             .setParameterList("ops", AuthzConstants.MANAGE_ALERTS_OPS);
+             .setParameterList("ops", AuthzConstants.VIEW_ALERTS_OPS);
         }
 
         return pageInfo.pageResults(q).list();
@@ -167,7 +167,7 @@ public class AlertDAO extends HibernateDAO {
     
         if (sql.indexOf("subj") > 0) {
             q.setInteger("subj", subj.intValue())
-             .setParameterList("ops", AuthzConstants.MANAGE_ALERTS_OPS);
+             .setParameterList("ops", AuthzConstants.VIEW_ALERTS_OPS);
         }
     
         return (Integer) q.uniqueResult();
@@ -315,7 +315,7 @@ public class AlertDAO extends HibernateDAO {
         
         List alerts = wherePermCheck
                         .addQueryParameters(q, subject, r, 0, 
-                                Arrays.asList(AuthzConstants.MANAGE_ALERTS_OPS))
+                                Arrays.asList(AuthzConstants.VIEW_ALERTS_OPS))
                         .list();
                 
         Map lastAlerts = new HashMap(alerts.size());
