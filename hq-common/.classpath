@@ -121,5 +121,7 @@
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.web-3.0.1.RELEASE-A.jar" sourcepath="thirdparty/lib-src/org.springframework.web-sources-3.0.1.RELEASE-A.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.web.servlet-3.0.1.RELEASE-A.jar" sourcepath="thirdparty/lib-src/org.springframework.web.servlet-sources-3.0.1.RELEASE-A.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.web.struts-3.0.1.RELEASE-A.jar" sourcepath="thirdparty/lib-src/org.springframework.web.struts-sources-3.0.1.RELEASE-A.jar"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/tomcat-jdbc/tomcat-jdbc-1.0.8.5.jar" sourcepath="thirdparty/lib-src/tomcat-jdbc-1.0.8.5-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/tomcat-jdbc/tomcat-juli.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
