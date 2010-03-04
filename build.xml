@@ -112,6 +112,7 @@
 		<path location="${thirdparty.lib}/strutstest-2.1.3.jar" />
 		<fileset dir="${thirdparty.lib}" includes="*.jar" excludes="ant*.jar strutstest-*.jar,cactus*.jar,mockejb.jar,mockrunner-ejb.jar,dbunit*.jar,jaas.jar" />
 		<path location="${thirdparty.lib}/dbunit-2.2.jar" />
+		<fileset dir="${thirdparty.lib}/tomcat-jdbc" includes="*.jar" />
 	</path>
 
 	<path id="pdkjars">
