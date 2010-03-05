@@ -530,7 +530,6 @@ ${errMsg}
     <condition property="server.isInstalled">
       <or>
         <available file="${server.installdir}/server-${version}"/>
-        <available file="${server.installdir}/data/server.xml"/>
         <available file="${server.installdir}/conf/hq-server.conf"/>
       </or>
     </condition>

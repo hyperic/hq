@@ -524,11 +524,12 @@
 		<copy todir="${archive-dir}/server-${version}/lib">
 			<fileset dir="${build.dir}" includes="hq-bootstrap.jar"/>
 			<fileset dir="${thirdparty.lib}/spring">
-				<include name="*core-*.jar"/>
+				<include name="*springframework.core-*.jar"/>
 				<include name="*beans-*.jar"/>
+				<include name="*asm-*.jar"/>
+				<include name="*expression-*.jar"/>
 				<include name="*springframework.context-*.jar"/>
 			</fileset>
-			<fileset dir="${sigar.lib}" includes="*"/>
 			<fileset dir="${thirdparty.lib}" includes="commons-logging*.jar"/>
 		</copy>		
 
