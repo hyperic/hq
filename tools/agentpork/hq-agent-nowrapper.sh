@@ -123,3 +123,4 @@ else
     echo "Syntax: $0 "'<start | stop | ping | setup>'
     exit 1
 fi
+ 
