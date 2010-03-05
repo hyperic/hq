@@ -21,7 +21,7 @@
 	<!--  Provides File Logging  -->
 	<appender name="FILE" class="org.apache.log4j.DailyRollingFileAppender">
 		<param name="Threshold" value="INFO"/> 
-		<param name="File" value="${hq.server.home}/logs/hq-install.log" />
+		<param name="File" value="${server.home}/logs/hq-install.log" />
 		<param name="Append" value="true" />
 		<param name="DatePattern" value="'.'yyyy-MM-dd" />
 
@@ -32,7 +32,7 @@
 	
 	<appender name="VERBOSE_FILE" class="org.apache.log4j.DailyRollingFileAppender">
 		<param name="Threshold" value="DEBUG"/> 
-		<param name="File" value="${hq.server.home}/logs/hq-install.log.verbose" />
+		<param name="File" value="${server.home}/logs/hq-install.log.verbose" />
 		<param name="Append" value="true" />
 		<param name="DatePattern" value="'.'yyyy-MM-dd" />
 

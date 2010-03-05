@@ -1,13 +1,13 @@
 package org.hyperic.bootstrap;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.hyperic.sigar.OperatingSystem;
 import org.hyperic.sigar.SigarException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,23 +25,20 @@ public class HQServer {
 
     private final Log log = LogFactory.getLog(HQServer.class);
     private String serverHome;
-    private String serverPidFile;
     private ProcessManager processManager;
     private EmbeddedDatabaseController embeddedDatabaseController;
     private ServerConfigurator serverConfigurator;
     private EngineController engineController;
     private OperatingSystem osInfo;
-    int serverStopCheckRetries = 60;
+    static final int DB_UPGRADE_PROCESS_TIMEOUT = 60 * 1000;
 
     @Autowired
     public HQServer(@Value("#{ systemProperties['server.home'] }") String serverHome,
-                    @Value("#{ systemProperties['server.pidfile'] }") String serverPidFile,
                     ProcessManager processManager,
                     EmbeddedDatabaseController embeddedDatabaseController,
                     ServerConfigurator serverConfigurator, EngineController engineController,
                     OperatingSystem osInfo) {
         this.serverHome = serverHome;
-        this.serverPidFile = serverPidFile;
         this.processManager = processManager;
         this.embeddedDatabaseController = embeddedDatabaseController;
         this.serverConfigurator = serverConfigurator;
@@ -49,15 +46,16 @@ public class HQServer {
         this.osInfo = osInfo;
     }
 
-    public int start() {
+    public void start() {
         log.info("Starting HQ server...");
         try {
-            if (isServerAlreadyRunning()) {
-                return 0;
+            if (engineController.isEngineRunning()) {
+                return;
             }
         } catch (SigarException e) {
-            log.error("Unable to determine if HQ server is already running.  Cause: " + e.getMessage());
-            return 1;
+            log.error("Unable to determine if HQ server is already running.  Cause: " +
+                      e.getMessage());
+            return;
         }
         try {
             serverConfigurator.configure();
@@ -70,11 +68,11 @@ public class HQServer {
                 if (!embeddedDatabaseController.startBuiltInDB()) {
                     // We couldn't start DB and not already running. Time to
                     // bail.
-                    return 1;
+                    return;
                 }
             } catch (Exception e) {
                 log.error("Error starting built-in database: " + e.getMessage());
-                return 1;
+                return;
             }
             log.debug("startBuiltinDB completed");
         }
@@ -82,92 +80,25 @@ public class HQServer {
         List<String> javaOpts = getJavaOpts();
         log.info("Booting the HQ server...");
         engineController.start(javaOpts);
-        log.debug("Waiting for webapp port to come up...");
-        long webAppPort = Long.valueOf(serverConfigurator.getServerProps().getProperty(
-            "server.webapp.port"));
-        try {
-            if (!processManager.isPortInUse(webAppPort, 90)) {
-                log.error("HQ failed to start");
-                return 1;
-            }
-        } catch (Exception e) {
-            log.error("Unable to determine if HQ server started: " + e.getMessage());
-            return 1;
-        }
-        log.info("HQ server booted.");
-        log.info("Login to HQ at: http://127.0.0.1:" + webAppPort + "/");
-        return 0;
     }
 
-    public int stop() {
+    public void stop() {
         log.info("Stopping HQ server...");
         try {
             engineController.stop();
-        } catch (SigarException e) {
-            log.error("Error stopping HQ server: " + e.getMessage());
-            return 1;
-        }
-        try {
-            if (!isServerStopped(serverStopCheckRetries)) {
-                // we asked nicely, now use force
-                engineController.halt();
-                if (!isServerStopped(1)) {
-                    // the server really doesn't want to stop
-                    return 1;
-                }
-            }
         } catch (Exception e) {
-            log.error("Unable to determine if server is stopped: " + e.getMessage());
-            return 1;
+            log.error("Error stopping HQ server: " + e.getMessage());
+            return;
         }
-
         if (embeddedDatabaseController.shouldUse()) {
             try {
                 embeddedDatabaseController.stopBuiltInDB();
             } catch (Exception e) {
                 log.error("Error stopping built-in database: " + e.getMessage());
-                return 1;
+                return;
             }
         }
-        return 0;
-    }
-
-    boolean isServerAlreadyRunning() throws SigarException {
-        log.debug("Checking if server is already running using pidfile: " + serverPidFile);
-        long pid = processManager.getPidFromPidFile(serverPidFile);
-        if (pid != -1) {
-            log.info("HQ server is already running");
-            return true;
-        }
-        // remove old pid file if exists
-        boolean pidFileRemoved = new File(serverPidFile).delete();
-        if (pidFileRemoved) {
-            log.info("Removed stale pid file " + serverPidFile);
-        }
-        return false;
-    }
-
-    boolean isServerStopped(int maxTries) throws Exception {
-        long pid = -1;
-        for (int i = 0; i < maxTries; i++) {
-            log.debug("waitForPid: waiting for " + serverPidFile);
-            pid = processManager.getPidFromPidFile(serverPidFile);
-            if (pid == -1) {
-                log.info("HQ server exited");
-                // remove old pid file if exists
-                new File(serverPidFile).delete();
-                return true;
-            }
-            log.debug("waitForPid: PID " + pid + " still alive");
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                // ignore
-            }
-        }
-        log.debug("Num tries for server PID check exhausted");
-        log.info("HQ server PID " + pid + " did not exit.");
-        return false;
+        return;
     }
 
     List<String> getJavaOpts() {
@@ -185,16 +116,20 @@ public class HQServer {
     int upgradeDB() {
         log.info("Verifying HQ database schema...");
         return processManager.executeProcess(
-            new String[] { serverHome + "/bin/ant",
-                          "--noconfig",
-                          "-q",
+            new String[] { "java",
+                          "-cp",
+                          serverHome + "/lib/ant-launcher.jar",
                           "-Dserver.home=" + serverHome,
+                          "-Dant.home=" + serverHome,
+                          "org.apache.tools.ant.launch.Launcher",
+                          "-q",
+                          "-lib",
+                          serverHome + "/lib",
                           "-logger",
                           "org.hyperic.tools.ant.installer.InstallerLogger",
-                          "-f",
+                          "-buildfile",
                           serverHome + "/data/db-upgrade.xml",
-                          "upgrade" }, serverHome, true);
-
+                          "upgrade" }, serverHome, true, HQServer.DB_UPGRADE_PROCESS_TIMEOUT);
     }
 
     public static void main(String[] args) {
@@ -204,18 +139,15 @@ public class HQServer {
                 new String[] { "classpath*:/META-INF/spring/bootstrap-context.xml" });
         } catch (Exception e) {
             System.err.println("Error initializing bootstrap class: " + e.getMessage());
-            System.exit(1);
+            return;
         }
         HQServer server = appContext.getBean(HQServer.class);
         if ("start".equals(args[0])) {
-            int exitCode = server.start();
-            System.exit(exitCode);
+            server.start();
+        } else if ("stop".equals(args[0])) {
+            server.stop();
+        } else {
+            System.err.println("Usage: HQServer {start|stop}");
         }
-        if ("stop".equals(args[0])) {
-            int exitCode = server.stop();
-            System.exit(exitCode);
-        }
-        System.err.println("Usage: HQServer {start|stop}");
-        System.exit(1);
     }
 }

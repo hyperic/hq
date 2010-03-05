@@ -14,15 +14,15 @@ import org.hyperic.util.exec.ExecuteWatchdog;
 import org.hyperic.util.exec.PumpStreamHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 /**
  * Default implementation of {@link ProcessManager}
  * @author jhickey
- *
+ * 
  */
 @Component
-public class ProcessManagerImpl implements ProcessManager  {
+public class ProcessManagerImpl implements ProcessManager {
     private Sigar sigar;
-    private static final int PROCESS_TIMEOUT = 60 * 1000;
     private final Log log = LogFactory.getLog(ProcessManagerImpl.class);
 
     @Autowired
@@ -31,7 +31,11 @@ public class ProcessManagerImpl implements ProcessManager  {
     }
 
     public long getPidFromPidFile(String pidFile) throws SigarException {
-        long[] pids = ProcessFinder.find(sigar, "Pid.PidFile.eq=" + pidFile);
+        return getPidFromProcQuery("Pid.PidFile.eq=" + pidFile);
+    }
+
+    public long getPidFromProcQuery(String ptql) throws SigarException {
+        long[] pids = ProcessFinder.find(sigar, ptql);
         if (pids.length > 0) {
             return pids[0];
         }
@@ -43,13 +47,23 @@ public class ProcessManagerImpl implements ProcessManager  {
         sigar.kill(pid, signum);
     }
 
-    public int executeProcess(String[] commandLine, String workingDir, boolean suppressOutput) {
-        return executeProcess(commandLine, workingDir, null, suppressOutput);
+    public void forceKill(long pid) throws SigarException {
+        int signum = Sigar.getSigNum("KILL");
+        sigar.kill(pid, signum);
+    }
+
+    public int executeProcess(String[] commandLine, String workingDir, boolean suppressOutput,
+                              int timeout) {
+        return executeProcess(commandLine, workingDir, null, suppressOutput, timeout);
     }
 
     public int executeProcess(String[] commandLine, String workingDir, String[] envVariables,
-                              boolean suppressOutput) {
-        ExecuteWatchdog watchdog = new ExecuteWatchdog(ProcessManagerImpl.PROCESS_TIMEOUT);
+                              boolean suppressOutput, int timeout) {
+
+        ExecuteWatchdog watchdog = null;
+        if (timeout != -1) {
+            watchdog = new ExecuteWatchdog(timeout);
+        }
         ByteArrayOutputStream output = new ByteArrayOutputStream();
 
         Execute ex = new Execute(new PumpStreamHandler(output), watchdog);
@@ -65,19 +79,17 @@ public class ProcessManagerImpl implements ProcessManager  {
             exitCode = 1;
             log.error(e.getMessage(), e);
         }
-        if (!suppressOutput) {
-            String message = output.toString();
-
-            if (message.length() > 0 && exitCode != 0) {
-                log.error(message);
-            } else if (message.length() > 0) {
-                log.info(message);
-            }
+        String message = output.toString();
+        // Don't log error messages if exit code is 143 - will happen if process
+        // is terminated by kill
+        if (message.length() > 0 && exitCode != 0 && exitCode != 143) {
+            log.error(message);
+        } else if (message.length() > 0 && !(suppressOutput)) {
+            log.info(message);
         }
-
-        if (watchdog.killedProcess()) {
+        if (watchdog != null && watchdog.killedProcess()) {
             String err = "Command did not complete within timeout of " +
-                         ProcessManagerImpl.PROCESS_TIMEOUT / 1000 + " seconds";
+                         timeout + " seconds";
             log.error(err);
         }
         return exitCode;
@@ -94,7 +106,7 @@ public class ProcessManagerImpl implements ProcessManager  {
                 }
             } catch (SigarFileNotFoundException e) {
                 // means port is not bound
-            } 
+            }
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
@@ -102,6 +114,26 @@ public class ProcessManagerImpl implements ProcessManager  {
             }
         }
         log.debug("Num tries for port check exhausted");
+        return false;
+    }
+
+    public boolean waitForProcessDeath(int maxTries, long pid) throws Exception {
+        for (int i = 0; i < maxTries; i++) {
+            log.debug("waitForPid: waiting");
+            pid = getPidFromProcQuery("Pid.Pid.eq=" + pid);
+            if (pid == -1) {
+                log.info("HQ server exited");
+                return true;
+            }
+            log.debug("waitForPid: PID " + pid + " still alive");
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                // ignore
+            }
+        }
+        log.debug("Num tries for server PID check exhausted");
+        log.info("HQ server PID " + pid + " did not exit.");
         return false;
     }
 }

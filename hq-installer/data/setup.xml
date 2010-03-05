@@ -453,16 +453,6 @@ ${errMsg}
 
     <!-- Copy server control file to server's data dir -->
     <mkdir dir="${server.product.dir}/data"/>
-  
-    <!-- Copy common utils to server's bin dir -->
-    <echo>^^^DEBUG: Copying server binaries...</echo>
-    <copy todir="${server.product.dir}/bin">
-      <fileset dir="${install.dir}/bin">
-        <include name="server*${script-ext}"/>
-        <include name="ant*"/>
-        <include name="lcp${script-ext}"/>
-      </fileset>
-    </copy>
 
     <echo>^^^DEBUG: Copying server db-upgrade files...</echo>
     <copy todir="${server.product.dir}/data">

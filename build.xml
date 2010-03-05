@@ -208,7 +208,7 @@
 	<!-- ==================== Compile java sources ==================== -->
 
 
-	<target name="compile" depends="compile-shared,compile-web,compile-installer" />
+	<target name="compile" depends="compile-shared,compile-bootstrap,compile-web,compile-installer" />
 	
 	<target name="compile-bootstrap">
 		<compile-sources classpath.id="shared.compile.classpath" src.dir="${hq.bootstrap}/src/main/java" resource.dir="${hq.bootstrap}/src/main/resources" output.dir="${hq.bootstrap}/target/classes" />
@@ -477,7 +477,18 @@
 		<mkdir dir="${archive-dir}/server-${version}/conf" />
 		<mkdir dir="${archive-dir}/server-${version}/logs" />
 		<mkdir dir="${archive-dir}/server-${version}/lib"/>
+		<mkdir dir="${archive-dir}/server-${version}/wrapper" />
+		<mkdir dir="${archive-dir}/server-${version}/wrapper/lib" />
+		<mkdir dir="${archive-dir}/server-${version}/wrapper/sbin" />
+		
+		<!-- Copy wrapper binaries -->
+		<copy todir="${archive-dir}/server-${version}/wrapper/sbin">
+			<fileset dir="${wrapper.bin}" includes="*" />
+		</copy>
 
+		<copy todir="${archive-dir}/server-${version}/wrapper/lib">
+			<fileset dir="${wrapper.lib}" includes="*" />
+		</copy>
 
 		<!-- Copy Tomcat -->
 		<copy toDir="${archive-dir}/server-${version}/hq-engine/hq-server">
@@ -503,6 +514,11 @@
 			<fileset dir="${hq.bootstrap}/bin" includes="**" />
 		</copy>
 		
+		<!-- Copy server startup conf -->
+		<copy todir="${archive-dir}/server-${version}/conf">
+			<fileset dir="${hq.bootstrap}/conf" includes="**" />
+		</copy>
+			
 		<!-- Pack server lib for bootstrap-->
 		<copy todir="${archive-dir}/server-${version}/lib">
 			<fileset dir="${build.dir}" includes="hq-bootstrap.jar"/>
@@ -1218,11 +1234,6 @@
 		<copy file="${hq.agent}/bin/background.bat" tofile="${agent.dir}/bundles/${agent.bundle.dir}/background.bat" />
 		<copy file="${hq.agent}/src/main/resources/agent.jaas.config" tofile="${agent.dir}/bundles/${agent.bundle.dir}/jaas.config" />
 		<copy file="${hq.agent}/bin/agent.rc" tofile="${agent.dir}/bundles/${agent.bundle.dir}/rcfiles/agent.rc" />
-
-		<!-- DEPRECATED: replaced hq-agent.exe with Java Service Wrapper
-    <copy file="${launcher.dir}/hq-agent.exe"
-        tofile="${agent.dir}/bundles/${agent.bundle.dir}/hq-agent.exe" />
-    -->
 		<copy file="${hq.agent}/bin/hq-agent-master.sh" tofile="${agent.dir}/bin/hq-agent.sh" />
 		<copy file="${hq.agent}/bin/hq-agent-master.bat" tofile="${agent.dir}/bin/hq-agent.bat" />
 

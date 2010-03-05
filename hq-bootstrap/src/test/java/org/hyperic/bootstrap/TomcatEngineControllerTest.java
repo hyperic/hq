@@ -9,17 +9,21 @@ import org.hyperic.sigar.SigarException;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
+
 /**
  * Unit test of the {@link TomcatEngineController}
  * @author jhickey
- *
+ * 
  */
 public class TomcatEngineControllerTest {
 
     private ProcessManager processManager;
     private String serverHome = "/Applications/Evolution/server-5.0.0-EE";
     private String engineHome = "/Applications/Evolution/server-5.0.0-EE/hq-engine";
-    private String serverPidFile = "/Applications/Evolution/server-5.0.0-EE/logs/hq-server.pid";
+    private String catalinaHome = engineHome + "/hq-server";
+    private String catalinaBase = catalinaHome;
     private OperatingSystem osInfo;
     private TomcatEngineController tomcatEngineController;
 
@@ -28,7 +32,7 @@ public class TomcatEngineControllerTest {
         this.processManager = EasyMock.createMock(ProcessManager.class);
         this.osInfo = org.easymock.classextension.EasyMock.createMock(OperatingSystem.class);
         this.tomcatEngineController = new TomcatEngineController(processManager, engineHome,
-            serverHome, serverPidFile, osInfo);
+            serverHome, osInfo);
     }
 
     @Test
@@ -40,69 +44,131 @@ public class TomcatEngineControllerTest {
         expectedOpts.add("-XX:+HeapDumpOnOutOfMemoryError");
         expectedOpts.add("-Dserver.home=" + serverHome);
         EasyMock.expect(osInfo.getName()).andReturn("Mac OS X");
+
         EasyMock
             .expect(
                 processManager
                     .executeProcess(
-                        EasyMock.aryEq(new String[] { engineHome + "/hq-server/bin/startup.sh" }),
-                        EasyMock.eq(serverHome),
-                        EasyMock.aryEq(new String[] { "JAVA_OPTS=",
-                                      "CATALINA_OPTS=-XX:MaxPermSize=192m -Xmx512m -Xms512m -XX:+HeapDumpOnOutOfMemoryError -Dserver.home=" +
-                                          serverHome +
-                                          " -Dcatalina.config=file://" +
-                                          engineHome +
-                                          "/hq-server/conf/hq-catalina.properties -Dcom.sun.management.jmxremote",
-                                      "CATALINA_PID=" + serverPidFile }), EasyMock.eq(true))).andReturn(0);
+                        EasyMock
+                            .aryEq(new String[] { "java",
+                                                 "-cp",
+                                                 catalinaHome + "/bin/bootstrap.jar",
+                                                 "-XX:MaxPermSize=192m",
+                                                 "-Xmx512m",
+                                                 "-Xms512m",
+                                                 "-XX:+HeapDumpOnOutOfMemoryError",
+                                                 "-Dserver.home=" + serverHome,
+                                                 "-Dcatalina.config=file://" + catalinaBase +
+                                                     "/conf/hq-catalina.properties",
+                                                 "-Dcom.sun.management.jmxremote",
+                                                 "-Djava.endorsed.dirs" + catalinaHome +
+                                                     "/endorsed",
+                                                 "-Dcatalina.base=" + catalinaBase,
+                                                 "-Dcatalina.home=" + catalinaHome,
+                                                 "-Djava.io.tmpdir=" + catalinaBase + "/temp",
+                                                 "-Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager",
+                                                 "-Djava.util.logging.config.file=" + catalinaBase +
+                                                     "/conf/logging.properties","org.apache.catalina.startup.Bootstrap","start" }), EasyMock
+                            .eq(serverHome), EasyMock.eq(true), EasyMock.eq(-1))).andReturn(0);
         replay();
         int exitCode = tomcatEngineController.start(expectedOpts);
         verify();
-        assertEquals(0,exitCode);
+        assertEquals(0, exitCode);
     }
-    
-    @Test(expected=UnsupportedOperationException.class)
+
+    @Test(expected = UnsupportedOperationException.class)
     public void testStartOnWindows() {
         EasyMock.expect(osInfo.getName()).andReturn("Win32");
         replay();
         tomcatEngineController.start(new ArrayList<String>());
         verify();
     }
-    
+
     @Test
-    public void testStop() throws SigarException {
-        EasyMock.expect(processManager.getPidFromPidFile(serverPidFile)).andReturn(123l);
+    public void testStop() throws Exception {
+        EasyMock.expect(
+            processManager.getPidFromProcQuery("State.Name.sw=java,Args.*.eq=-Dcatalina.base=" +
+                                               catalinaBase)).andReturn(123l);
         processManager.kill(123l);
+        EasyMock.expect(processManager.waitForProcessDeath(60, 123l)).andReturn(true);
         replay();
-        int exitCode = tomcatEngineController.stop();
+        boolean stopped = tomcatEngineController.stop();
         verify();
-        assertEquals(0,exitCode);
+        assertTrue(stopped);
     }
     
     @Test
-    public void testStopNotRunning() throws SigarException {
-        EasyMock.expect(processManager.getPidFromPidFile(serverPidFile)).andReturn(-1l);
+    public void testStopHaveToHalt() throws Exception {
+        EasyMock.expect(
+            processManager.getPidFromProcQuery("State.Name.sw=java,Args.*.eq=-Dcatalina.base=" +
+                                               catalinaBase)).andReturn(123l);
+        processManager.kill(123l);
+        EasyMock.expect(processManager.waitForProcessDeath(60, 123l)).andReturn(false);
+        processManager.forceKill(123l);
+        EasyMock.expect(processManager.waitForProcessDeath(1, 123l)).andReturn(true);
         replay();
-        int exitCode = tomcatEngineController.stop();
+        boolean stopped = tomcatEngineController.stop();
         verify();
-        assertEquals(0,exitCode);
+        assertTrue(stopped);
     }
     
+    @Test
+    public void testStopEventHaltDoesntWork() throws Exception {
+        EasyMock.expect(
+            processManager.getPidFromProcQuery("State.Name.sw=java,Args.*.eq=-Dcatalina.base=" +
+                                               catalinaBase)).andReturn(123l);
+        processManager.kill(123l);
+        EasyMock.expect(processManager.waitForProcessDeath(60, 123l)).andReturn(false);
+        processManager.forceKill(123l);
+        EasyMock.expect(processManager.waitForProcessDeath(1, 123l)).andReturn(false);
+        replay();
+        boolean stopped = tomcatEngineController.stop();
+        verify();
+        assertFalse(stopped);
+    }
+
+    @Test
+    public void testStopNotRunning() throws Exception {
+        EasyMock.expect(
+            processManager.getPidFromProcQuery("State.Name.sw=java,Args.*.eq=-Dcatalina.base=" +
+                                               catalinaBase)).andReturn(-1l);
+        replay();
+        boolean stopped = tomcatEngineController.stop();
+        verify();
+        assertTrue(stopped);
+    }
+
     @Test
     public void testHalt() throws SigarException {
-        EasyMock.expect(osInfo.getName()).andReturn("Mac OS X");
-        EasyMock.expect( processManager.executeProcess(EasyMock.aryEq(new String[] { engineHome + "/hq-server/bin/shutdown.sh",
-                                                        "-force" }), EasyMock.eq(serverHome),
-                EasyMock.aryEq(new String[] { "CATALINA_PID=" + serverPidFile }), EasyMock.eq(true))).andReturn(0);
+        EasyMock.expect(
+            processManager.getPidFromProcQuery("State.Name.sw=java,Args.*.eq=-Dcatalina.base=" +
+                                               catalinaBase)).andReturn(123l);
+        processManager.forceKill(123l);
         replay();
         tomcatEngineController.halt();
         verify();
     }
     
-    @Test(expected=UnsupportedOperationException.class)
-    public void testHaltOnWindows() throws SigarException {
-        EasyMock.expect(osInfo.getName()).andReturn("Win32");
+    @Test
+    public void testIsEngineRunning() throws SigarException {
+        EasyMock.expect(
+            processManager.getPidFromProcQuery("State.Name.sw=java,Args.*.eq=-Dcatalina.base=" +
+                                               catalinaBase)).andReturn(123l);
         replay();
-        tomcatEngineController.halt();
+        boolean running = tomcatEngineController.isEngineRunning();
         verify();
+        assertTrue(running);
+    }
+    
+    @Test
+    public void testIsEngineRunningNotRunning() throws SigarException {
+        EasyMock.expect(
+            processManager.getPidFromProcQuery("State.Name.sw=java,Args.*.eq=-Dcatalina.base=" +
+                                               catalinaBase)).andReturn(-1l);
+        replay();
+        boolean running = tomcatEngineController.isEngineRunning();
+        verify();
+        assertFalse(running);
     }
 
     private void replay() {

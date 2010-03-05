@@ -19,11 +19,11 @@ public interface EngineController {
 
     /**
      * Stop the engine
-     * @return exitCode 0 if success
+     * 
      * @throws SigarException If error finding process to stop or executing the
      *         stop behavior
      */
-    int stop() throws SigarException;
+    boolean stop() throws Exception;
 
     /**
      * Forcibly halt the engine
@@ -31,4 +31,11 @@ public interface EngineController {
      *         stop behavior
      */
     void halt() throws SigarException;
+    
+    /**
+     * 
+     * @return true if the engine is currently running
+     * @throws SigarException
+     */
+    boolean isEngineRunning() throws SigarException;
 }

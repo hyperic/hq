@@ -22,7 +22,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class PostgresEmbeddedDatabaseController implements EmbeddedDatabaseController {
 
-    private static final long DEFAUT_DB_PORT = 5432;
+    static final long DEFAUT_DB_PORT = 5432;
+    static final int DB_PROCESS_TIMEOUT = 60 * 1000;
     private String serverHome;
     private ProcessManager processManager;
     private OperatingSystem osInfo;
@@ -60,7 +61,7 @@ public class PostgresEmbeddedDatabaseController implements EmbeddedDatabaseContr
             throw new UnsupportedOperationException();
         }
         processManager.executeProcess(new String[] { serverHome + "/bin/db-start.sh" }, serverHome,
-            false);
+            false, PostgresEmbeddedDatabaseController.DB_PROCESS_TIMEOUT);
         try {
             if (!processManager.isPortInUse(getDBPort(), 10)) {
                 log.error("HQ built-in database failed to start");
@@ -90,7 +91,7 @@ public class PostgresEmbeddedDatabaseController implements EmbeddedDatabaseContr
             throw new UnsupportedOperationException();
         }
         processManager.executeProcess(new String[] { serverHome + "/bin/db-stop.sh" }, serverHome,
-            false);
+            false, PostgresEmbeddedDatabaseController.DB_PROCESS_TIMEOUT);
         try {
             if (!isDBStopped(dbPortStopCheckTries)) {
                 log.error("HQ built-in database failed to stop");
