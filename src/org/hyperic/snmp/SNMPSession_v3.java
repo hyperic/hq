@@ -1,18 +1,25 @@
 /*
- * 'SNMPSession_v3.java' NOTE: This copyright does *not* cover user programs
- * that use HQ program services by normal system calls through the application
- * program interfaces provided as part of the Hyperic Plug-in Development Kit or
- * the Hyperic Client Development Kit - this is merely considered normal use of
- * the program, and does *not* fall under the heading of "derived work".
- * Copyright (C) [2004, 2005, 2006, 2007, 2008, 2009], Hyperic, Inc. This file
- * is part of HQ. HQ is free software; you can redistribute it and/or modify it
- * under the terms version 2 of the GNU General Public License as published by
- * the Free Software Foundation. This program is distributed in the hope that it
- * will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
- * Public License for more details. You should have received a copy of the GNU
- * General Public License along with this program; if not, write to the Free
- * Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ * NOTE: This copyright does *not* cover user programs that use HQ
+ * program services by normal system calls through the application
+ * program interfaces provided as part of the Hyperic Plug-in Development
+ * Kit or the Hyperic Client Development Kit - this is merely considered
+ * normal use of the program, and does *not* fall under the heading of
+ * "derived work".
+ * 
+ * Copyright (C) [2004-2010], Hyperic, Inc.
+ * This file is part of HQ.
+ * 
+ * HQ is free software; you can redistribute it and/or modify
+ * it under the terms version 2 of the GNU General Public License as
+ * published by the Free Software Foundation. This program is distributed
+ * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
 
@@ -41,6 +48,7 @@ import org.snmp4j.security.USM;
 import org.snmp4j.security.UsmUser;
 import org.snmp4j.smi.OID;
 import org.snmp4j.smi.OctetString;
+import org.snmp4j.smi.VariableBinding;
 
 /**
  * Implements the SNMPSession interface for SNMPv3 sessions by extending the
@@ -69,18 +77,8 @@ class SNMPSession_v3
 
         return pdu;
     }
-
-    private OctetString getAuthPassphrase(String val) {
-        if (val == null || val.length() == 0) {
-            return null;
-        }
-
-        return new OctetString(val);        
-    }
     
-    private OctetString getPrivPassphrase(String defVal) {
-        String val = System.getProperty("snmpPrivacyPassPhrase", defVal);
-
+    private OctetString createOctetString(String val) {
         if (val == null || val.length() == 0) {
             return null;
         }
@@ -134,9 +132,9 @@ class SNMPSession_v3
         OID authProtocol = getAuthProtocol(authType);
         OID privProtocol = getPrivProtocol(privType);
 
-        OctetString securityName = new OctetString(user);
-        OctetString authPassphrase = getAuthPassphrase(authPassword);
-        OctetString privPassphrase = getPrivPassphrase(privPassword);
+        OctetString securityName = createOctetString(user);
+        OctetString authPassphrase = createOctetString(authPassword);
+        OctetString privPassphrase = createOctetString(privPassword);
 
         UserTarget target = new UserTarget();
 
@@ -155,13 +153,73 @@ class SNMPSession_v3
         this.target = target;
 
         initSession(host, port, transport);
+        
+        UsmUser usmUser = new UsmUser(securityName, 
+                                      authProtocol, authPassphrase, 
+                                      privProtocol, privPassphrase);
+
+        // Need to add user by engineID.
+        byte[] engineID = this.session.discoverAuthoritativeEngineID(
+                                    this.target.getAddress(), 
+                                    this.target.getTimeout());
 
         USM usm = this.session.getUSM();
 
-        if (usm.getUserTable().getUser(securityName) != null) {
-            return;
+        // Need to call addUser each time, even if user name exists,
+        // in case the user credentials change.
+        usm.addUser(securityName,
+                    (engineID == null) ? null : new OctetString(engineID),
+                    usmUser);
+    }
+    
+    /**
+     * Remote SNMPv3 engines will send back a Report PDU
+     * if there is a problem with the request.
+     */
+    protected void validateResponsePDU(String name, PDU response)
+        throws SNMPException {
+
+        super.validateResponsePDU(name, response);
+        
+        if (response.getType() == PDU.REPORT) {
+            processReport(response);
+        }
+    }
+    
+    private void processReport(PDU report) 
+        throws SNMPException {
+        
+        if (report.size() < 1) {
+            throw new SNMPException("REPORT PDU does not contain a variable binding.");
         }
 
-        usm.addUser(securityName, new UsmUser(securityName, authProtocol, authPassphrase, privProtocol, privPassphrase));
+        VariableBinding vb = report.get(0);
+        OID oid = vb.getOid();
+
+        if (SnmpConstants.usmStatsUnsupportedSecLevels.equals(oid)) {
+            throw new SNMPException("Unsupported Security Level.");
+        } else if (SnmpConstants.usmStatsNotInTimeWindows.equals(oid)) {
+            throw new SNMPException("Message not within time window.");
+        } else if (SnmpConstants.usmStatsUnknownUserNames.equals(oid)) {
+            throw new SNMPException("Unknown user name.");
+        } else if (SnmpConstants.usmStatsUnknownEngineIDs.equals(oid)) {
+            throw new SNMPException("Unknown engine id.");
+        } else if (SnmpConstants.usmStatsWrongDigests.equals(oid)) {
+            throw new SNMPException("Invalid authentication digest.");
+        } else if (SnmpConstants.usmStatsDecryptionErrors.equals(oid)) {
+            throw new SNMPException("Decryption error.");
+        } else if (SnmpConstants.snmpUnknownSecurityModels.equals(oid)) {
+            throw new SNMPException("Unknown security model.");
+        } else if (SnmpConstants.snmpInvalidMsgs.equals(oid)) {
+            throw new SNMPException("Invalid message.");
+        } else if (SnmpConstants.snmpUnknownPDUHandlers.equals(oid)) {
+            throw new SNMPException("Unknown PDU handler.");
+        } else if (SnmpConstants.snmpUnavailableContexts.equals(oid)) {
+            throw new SNMPException("Unavailable context.");
+        } else if (SnmpConstants.snmpUnknownContexts.equals(oid)) {
+            throw new SNMPException("Unknown context.");
+        } else {
+            throw new SNMPException("REPORT PDU contains unknown OID (" + oid + ").");
+        }
     }
 }

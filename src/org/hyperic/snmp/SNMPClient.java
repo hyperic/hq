@@ -1,18 +1,25 @@
 /*
- * 'SNMPClient.java' NOTE: This copyright does *not* cover user programs that
- * use HQ program services by normal system calls through the application
- * program interfaces provided as part of the Hyperic Plug-in Development Kit or
- * the Hyperic Client Development Kit - this is merely considered normal use of
- * the program, and does *not* fall under the heading of "derived work".
- * Copyright (C) [2004, 2005, 2006, 2007, 2008, 2009], Hyperic, Inc. This file
- * is part of HQ. HQ is free software; you can redistribute it and/or modify it
- * under the terms version 2 of the GNU General Public License as published by
- * the Free Software Foundation. This program is distributed in the hope that it
- * will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
- * Public License for more details. You should have received a copy of the GNU
- * General Public License along with this program; if not, write to the Free
- * Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ * NOTE: This copyright does *not* cover user programs that use HQ
+ * program services by normal system calls through the application
+ * program interfaces provided as part of the Hyperic Plug-in Development
+ * Kit or the Hyperic Client Development Kit - this is merely considered
+ * normal use of the program, and does *not* fall under the heading of
+ * "derived work".
+ * 
+ * Copyright (C) [2004-2010], Hyperic, Inc.
+ * This file is part of HQ.
+ * 
+ * HQ is free software; you can redistribute it and/or modify
+ * it under the terms version 2 of the GNU General Public License as
+ * published by the Free Software Foundation. This program is distributed
+ * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
 
@@ -43,14 +50,14 @@ public class SNMPClient {
 
     public static final String DEFAULT_TRANSPORT = "udp";
     public static final String DEFAULT_USERNAME = "username";
-    public static final String DEFAULT_PASSWORD = "password";
+    public static final String DEFAULT_PASSWORD = "";
+    public static final String DEFAULT_AUTHTYPE = "none";
+    public static final String DEFAULT_PRIV_TYPE = "none";
 
     public static final String DEFAULT_PORT_STRING = String.valueOf(DEFAULT_PORT);
     public static final String DEFAULT_COMMUNITY = System.getProperty("snmp.defaultCommunity", "public");
 
     public static final String[] VALID_VERSIONS = { "v1", "v2c", "v3" };
-
-    public static final String[] VALID_AUTHTYPES = { "md5", "sha" };
 
     public static final String PROP_IP = "snmpIp";
     public static final String PROP_PORT = "snmpPort";
@@ -199,11 +206,19 @@ public class SNMPClient {
         String version = props.getProperty(PROP_VERSION, VALID_VERSIONS[1]);
         String community = props.getProperty(PROP_COMMUNITY, DEFAULT_COMMUNITY);
         String transport = props.getProperty(PROP_TRANSPORT, DEFAULT_TRANSPORT);
+        String user = props.getProperty(PROP_USER, DEFAULT_USERNAME);
+        String authtype = props.getProperty(PROP_AUTHTYPE, DEFAULT_AUTHTYPE);
+        String authpass = props.getProperty(PROP_PASSWORD, DEFAULT_PASSWORD);
+        String privtype = props.getProperty(PROP_PRIV_TYPE, DEFAULT_PRIV_TYPE);
+        String privpass = props.getProperty(PROP_PRIV_PASSPHRASE, DEFAULT_PASSWORD);
 
         SNMPSession session = null;
 
-        int id = address.hashCode() ^ port.hashCode() ^ version.hashCode() ^ community.hashCode() ^
-                 transport.hashCode();
+        int id = address.hashCode() ^ port.hashCode() ^ 
+                 version.hashCode() ^ community.hashCode() ^
+                 transport.hashCode() ^ user.hashCode() ^
+                 authtype.hashCode() ^ authpass.hashCode() ^
+                 privtype.hashCode() ^ privpass.hashCode();
 
         synchronized (sessionCache) {
             session = (SNMPSession) sessionCache.get(id);
@@ -229,14 +244,8 @@ public class SNMPClient {
 
             case SNMPClient.VERSION_3:
 
-                String user = props.getProperty(PROP_USER, DEFAULT_USERNAME);
-                String pass = props.getProperty(PROP_PASSWORD);
-                String authtype = props.getProperty(PROP_AUTHTYPE);
-                String privtype = props.getProperty(PROP_PRIV_TYPE);
-                String privpass = props.getProperty(PROP_PRIV_PASSPHRASE);
-
                 ((SNMPSession_v3) session).init(address, port, transport, user, 
-                                                authtype, pass, privtype, privpass);
+                                                authtype, authpass, privtype, privpass);
 
                 break;
 
