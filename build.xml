@@ -1390,7 +1390,7 @@
 </target>
 
 
-<target name="build-instrumented-war" depends="instrument-war,compile-rendit,compile-plugins,pack-rendit,pack-plugins,pack-war">
+<target name="build-instrumented-war" depends="instrument-war,instrument-bootstrap,compile-rendit,compile-plugins,pack-rendit,pack-plugins,pack-war">
 <copy todir="${war.dir}/WEB-INF/lib/">
 	<fileset dir="${thirdparty.lib}">
 		<include name="com.springsource.com.cenqua.clover-2.4.2.jar" />
@@ -1413,6 +1413,11 @@
 <instrument-module input.dir="${hq.web}/src/main/java" staging.dir="${hq.web}/target/clover/staging/src/main/java" resource.dir="${hq.web}/src/main/resources" output.dir="${hq.web}/target/classes" classpath.id="web.compile.classpath" />
 <delete dir="${hq.web}/target/clover" quiet="true" />
 <antcall target="compile-installer" />
+</target>
+
+<target name="instrument-bootstrap" depends="instrument-common">
+	<instrument-module input.dir="${hq.bootstrap}/src/main/java" staging.dir="${hq.bootstrap}/target/clover/staging/src/main/java" resource.dir="${hq.bootstrap}/src/main/resources" output.dir="${hq.bootstrap}/target/classes" classpath.id="bootstrap.compile.classpath" />
+	<delete dir="${hq.bootstrap}/target/clover" quiet="true" />
 </target>
 
 <target name="build-instrumented-agent" depends="instrument-agent,compile-plugins,pack-pdk,pack-agent">
