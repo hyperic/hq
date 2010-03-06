@@ -620,7 +620,7 @@ public class ServerConfig
                 .append(nl)
                 .append("  ")
                 .append(startup)
-                .append(" -i")
+                .append(" install")
                 .append(nl)
                 .append(nl)
                 .append(
