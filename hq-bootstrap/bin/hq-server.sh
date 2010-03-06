@@ -150,10 +150,6 @@ elif [ "x$JAVA_HOME" = "x" ] ; then
     esac
 fi
 
-# export environment variables to be picked up by the Java Service Wrapper process
-export JAVA_HOME
-export SERVER_INSTALL_HOME
-
 HQ_JAVA="${JAVA_HOME}/bin/java"
 # verify that the java command actually exists
 if [ ! -f "$HQ_JAVA" ]
@@ -535,7 +531,7 @@ start() {
     if [ "X$pid" = "X" ]
     then
         # The string passed to eval must handles spaces in paths correctly.
-        COMMAND_LINE="$CMDNICE \"$WRAPPER_CMD\" \"$WRAPPER_CONF\" wrapper.syslog.ident=\"$APP_NAME\" wrapper.pidfile=\"$PIDFILE\" wrapper.name=\"$APP_NAME\" wrapper.displayname=\"$APP_LONG_NAME\" wrapper.daemonize=TRUE $ANCHORPROP $IGNOREPROP $STATUSPROP $LOCKPROP"
+        COMMAND_LINE="$CMDNICE \"$WRAPPER_CMD\" \"$WRAPPER_CONF\" \"set.SERVER_INSTALL_HOME=$SERVER_INSTALL_HOME\" \"set.JAVA_HOME=$JAVA_HOME\" wrapper.syslog.ident=\"$APP_NAME\" wrapper.pidfile=\"$PIDFILE\" wrapper.name=\"$APP_NAME\" wrapper.displayname=\"$APP_LONG_NAME\" wrapper.daemonize=TRUE $ANCHORPROP $IGNOREPROP $STATUSPROP $LOCKPROP"
         eval $COMMAND_LINE
     else
         echo "$APP_LONG_NAME is already running."
