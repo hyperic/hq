@@ -209,7 +209,7 @@
 	<!-- ==================== Compile java sources ==================== -->
 
 
-	<target name="compile" depends="compile-shared,compile-bootstrap,compile-web,compile-installer" />
+	<target name="compile-server" depends="compile-shared,compile-bootstrap,compile-web,compile-installer" />
 	
 	<target name="compile-bootstrap">
 		<compile-sources classpath.id="shared.compile.classpath" src.dir="${hq.bootstrap}/src/main/java" resource.dir="${hq.bootstrap}/src/main/resources" output.dir="${hq.bootstrap}/target/classes" />
@@ -694,7 +694,7 @@
 
 
 
-	<target name="build-war" description="Build and create the war" depends="compile,compile-rendit,compile-plugins,pack-rendit,pack-plugins,pack-war" />
+	<target name="build-war" description="Build and create the war" depends="compile-server,compile-rendit,compile-plugins,pack-rendit,pack-plugins,pack-war" />
 
 	<target name="pack-war" description="Create the war directory structure ( use if you modify .jsp or other web files, but no sources )">
 		<mkdir dir="${war.dir}" />
