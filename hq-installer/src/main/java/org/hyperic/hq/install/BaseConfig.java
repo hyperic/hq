@@ -222,7 +222,7 @@ public abstract class BaseConfig implements InstallerConfigSchemaProvider {
 
     protected String getExtension() {
         if (JDK.IS_WIN32) {
-            return ".exe";
+            return ".bat";
         }
         else {
             return ".sh";

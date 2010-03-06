@@ -12,7 +12,7 @@ when starting the server.
 ----------------------------------------------------------------
 To start the Hyperic HQ Server from the Windows Service Manager:
 
-1. Start the services application from the Windows Administrive Tools menu or
+1. Start the services application from the Windows Administrative Tools menu or
    Windows Control Panel depending on the version of Windows you're running.
    
 2. Select the Hyperic HQ Server service.
@@ -23,7 +23,7 @@ To start the Hyperic HQ Server from the Windows Service Manager:
 ----------------------------------------------------------------
 To stop the Hyperic HQ Server from the Windows Service Manager:
 
-1. Start the services application from the Windows Administrive Tools menu or
+1. Start the services application from the Windows Administrative Tools menu or
    Windows Control Panel depending on the version of Windows you're running.
    
 2. Select the Hyperic HQ Server service.
@@ -37,7 +37,7 @@ To start the Hyperic HQ Server from the Windows Command Prompt:
 1. Open a Windows Command Prompt Window
 
 2. Execute the following command:
-	 bin\hq-server.exe start
+	 bin\hq-server.bat start
 
 Note: Logging out of the Windows user session will shutdown the Hyperic HQ
       Server. You should start the Hyperic HQ Server from the Windows Service
@@ -51,7 +51,7 @@ To stop the Hyperic HQ Server from the Windows Command Prompt:
 1. Open a Windows Command Prompt Window
 
 2. Execute the following command:
-	 bin\hq-server.exe stop
+	 bin\hq-server.bat stop
 
 
 ================================================================================

@@ -16,7 +16,7 @@ when starting the server.
 ----------------------------------------------------------------
 To start the Hyperic HQ Agent from the Windows Service Manager:
 
-1. Start the services application from the Windows Administrive Tools menu or
+1. Start the services application from the Windows Administrative Tools menu or
    Windows Control Panel depending on the version of Windows you're running.
    
 2. Select the Hyperic HQ Agent service.
@@ -27,12 +27,12 @@ To start the Hyperic HQ Agent from the Windows Service Manager:
 ----------------------------------------------------------------
 To stop the Hyperic HQ Agent from the Windows Service Manager:
 
-1. Start the services application from the Windows Administrive Tools menu or
+1. Start the services application from the Windows Administrative Tools menu or
    Windows Control Panel depending on the version of Windows you're running.
    
 2. Select the Hyperic HQ Agent service.
 
-3. Click the stopt icon or click the stop link.
+3. Click the stop icon or click the stop link.
 
 
 ----------------------------------------------------------------

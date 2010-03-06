@@ -1,16 +1,18 @@
 package org.hyperic.bootstrap;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.io.File;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.easymock.EasyMock;
-import org.hyperic.sigar.OperatingSystem;
 import org.hyperic.sigar.SigarException;
 import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
 
 /**
  * Unit test of the {@link TomcatEngineController}
@@ -24,26 +26,23 @@ public class TomcatEngineControllerTest {
     private String engineHome = "/Applications/Evolution/server-5.0.0-EE/hq-engine";
     private String catalinaHome = engineHome + "/hq-server";
     private String catalinaBase = catalinaHome;
-    private OperatingSystem osInfo;
     private TomcatEngineController tomcatEngineController;
 
     @Before
     public void setUp() {
         this.processManager = EasyMock.createMock(ProcessManager.class);
-        this.osInfo = org.easymock.classextension.EasyMock.createMock(OperatingSystem.class);
         this.tomcatEngineController = new TomcatEngineController(processManager, engineHome,
-            serverHome, osInfo);
+            serverHome);
     }
 
     @Test
-    public void testStart() {
+    public void testStart() throws MalformedURLException {
         final List<String> expectedOpts = new ArrayList<String>();
         expectedOpts.add("-XX:MaxPermSize=192m");
         expectedOpts.add("-Xmx512m");
         expectedOpts.add("-Xms512m");
         expectedOpts.add("-XX:+HeapDumpOnOutOfMemoryError");
         expectedOpts.add("-Dserver.home=" + serverHome);
-        EasyMock.expect(osInfo.getName()).andReturn("Mac OS X");
 
         EasyMock
             .expect(
@@ -58,8 +57,8 @@ public class TomcatEngineControllerTest {
                                                  "-Xms512m",
                                                  "-XX:+HeapDumpOnOutOfMemoryError",
                                                  "-Dserver.home=" + serverHome,
-                                                 "-Dcatalina.config=file://" + catalinaBase +
-                                                     "/conf/hq-catalina.properties",
+                                                 "-Dcatalina.config=" + new File(catalinaBase +
+                                                 "/conf/hq-catalina.properties").toURI().toURL().toString(),
                                                  "-Dcom.sun.management.jmxremote",
                                                  "-Djava.endorsed.dirs" + catalinaHome +
                                                      "/endorsed",
@@ -68,20 +67,14 @@ public class TomcatEngineControllerTest {
                                                  "-Djava.io.tmpdir=" + catalinaBase + "/temp",
                                                  "-Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager",
                                                  "-Djava.util.logging.config.file=" + catalinaBase +
-                                                     "/conf/logging.properties","org.apache.catalina.startup.Bootstrap","start" }), EasyMock
-                            .eq(serverHome), EasyMock.eq(true), EasyMock.eq(-1))).andReturn(0);
+                                                     "/conf/logging.properties",
+                                                 "org.apache.catalina.startup.Bootstrap",
+                                                 "start" }), EasyMock.eq(serverHome), EasyMock
+                            .eq(true), EasyMock.eq(-1))).andReturn(0);
         replay();
         int exitCode = tomcatEngineController.start(expectedOpts);
         verify();
         assertEquals(0, exitCode);
-    }
-
-    @Test(expected = UnsupportedOperationException.class)
-    public void testStartOnWindows() {
-        EasyMock.expect(osInfo.getName()).andReturn("Win32");
-        replay();
-        tomcatEngineController.start(new ArrayList<String>());
-        verify();
     }
 
     @Test
@@ -96,7 +89,7 @@ public class TomcatEngineControllerTest {
         verify();
         assertTrue(stopped);
     }
-    
+
     @Test
     public void testStopHaveToHalt() throws Exception {
         EasyMock.expect(
@@ -111,7 +104,7 @@ public class TomcatEngineControllerTest {
         verify();
         assertTrue(stopped);
     }
-    
+
     @Test
     public void testStopEventHaltDoesntWork() throws Exception {
         EasyMock.expect(
@@ -148,7 +141,7 @@ public class TomcatEngineControllerTest {
         tomcatEngineController.halt();
         verify();
     }
-    
+
     @Test
     public void testIsEngineRunning() throws SigarException {
         EasyMock.expect(
@@ -159,7 +152,7 @@ public class TomcatEngineControllerTest {
         verify();
         assertTrue(running);
     }
-    
+
     @Test
     public void testIsEngineRunningNotRunning() throws SigarException {
         EasyMock.expect(
@@ -173,11 +166,9 @@ public class TomcatEngineControllerTest {
 
     private void replay() {
         EasyMock.replay(processManager);
-        org.easymock.classextension.EasyMock.replay(osInfo);
     }
 
     private void verify() {
         EasyMock.verify(processManager);
-        org.easymock.classextension.EasyMock.verify(osInfo);
     }
 }

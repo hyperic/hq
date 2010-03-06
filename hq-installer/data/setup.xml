@@ -475,12 +475,8 @@ ${errMsg}
     	<include name="hq-util.jar"/>
       	<include name="hq-common.jar"/>
         <include name="oro-2.0.8.jar"/>
-        <include name="sigar-x86-winnt.dll"/>
-        <include name="libsigar-hppa2.0-hp-hpux-11.x.sl"/>
-        <include name="libsigar-powerpc-ibm-aix-4.3.x.so"/>
-        <include name="libsigar-sparc-sun-solaris-2.x.so"/>
-        <include name="libsigar-x86-linux.so"/>
-        <include name="libsigar-x86-sun-solaris-2.x.so"/>
+        <include name="sigar-*.dll"/>
+        <include name="libsigar-*"/>
         <include name="libreadline-java.jar"/>
         <include name="optional.jar"/>
         <include name="sigar.jar"/>
