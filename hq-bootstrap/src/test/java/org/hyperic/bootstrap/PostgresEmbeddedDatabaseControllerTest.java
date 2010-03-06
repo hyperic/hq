@@ -57,14 +57,21 @@ public class PostgresEmbeddedDatabaseControllerTest {
         assertTrue(dbStarted);
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void testStartOnWindows() throws SigarException, IOException {
+    @Test
+    public void testStartOnWindows() throws Exception {
         EasyMock.expect(processManager.getPidFromPidFile(serverHome + "/hqdb/data/postmaster.pid"))
             .andReturn(-1l);
         EasyMock.expect(osInfo.getName()).andReturn("Win32");
+        EasyMock.expect(
+            processManager.executeProcess(EasyMock.aryEq(new String[] { serverHome +
+                                                                        "/bin/db-start.bat" }),
+                EasyMock.eq(serverHome), EasyMock.eq(false), EasyMock
+                    .eq(PostgresEmbeddedDatabaseController.DB_PROCESS_TIMEOUT))).andReturn(0);
+        EasyMock.expect(processManager.isPortInUse(5432l, 10)).andReturn(true);
         replay();
-        embeddedDBController.startBuiltInDB();
+        boolean dbStarted = embeddedDBController.startBuiltInDB();
         verify();
+        assertTrue(dbStarted);
     }
 
     @Test
@@ -128,14 +135,21 @@ public class PostgresEmbeddedDatabaseControllerTest {
         assertTrue(dbStopped);
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void testStopOnWindows() throws SigarException, IOException {
+    @Test
+    public void testStopOnWindows() throws Exception {
         EasyMock.expect(processManager.getPidFromPidFile(serverHome + "/hqdb/data/postmaster.pid"))
             .andReturn(1l);
         EasyMock.expect(osInfo.getName()).andReturn("Win32");
+        EasyMock.expect(
+            processManager.executeProcess(EasyMock.aryEq(new String[] { serverHome +
+                                                                        "/bin/db-stop.bat" }),
+                EasyMock.eq(serverHome), EasyMock.eq(false), EasyMock
+                    .eq(PostgresEmbeddedDatabaseController.DB_PROCESS_TIMEOUT))).andReturn(0);
+        EasyMock.expect(processManager.isPortInUse(5432l, 1)).andReturn(false);
         replay();
-        embeddedDBController.stopBuiltInDB();
+        boolean dbStopped = embeddedDBController.stopBuiltInDB();
         verify();
+        assertTrue(dbStopped);
     }
 
     @Test

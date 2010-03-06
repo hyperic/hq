@@ -57,11 +57,12 @@ public class PostgresEmbeddedDatabaseController implements EmbeddedDatabaseContr
         }
         log.info("Starting HQ built-in database...");
         if (OperatingSystem.isWin32(osInfo.getName())) {
-            // TODO Windows
-            throw new UnsupportedOperationException();
-        }
-        processManager.executeProcess(new String[] { serverHome + "/bin/db-start.sh" }, serverHome,
+            processManager.executeProcess(new String[] { serverHome + "/bin/db-start.bat" }, serverHome,
+                false, PostgresEmbeddedDatabaseController.DB_PROCESS_TIMEOUT);  
+        } else {
+            processManager.executeProcess(new String[] { serverHome + "/bin/db-start.sh" }, serverHome,
             false, PostgresEmbeddedDatabaseController.DB_PROCESS_TIMEOUT);
+        }
         try {
             if (!processManager.isPortInUse(getDBPort(), 10)) {
                 log.error("HQ built-in database failed to start");
@@ -87,11 +88,12 @@ public class PostgresEmbeddedDatabaseController implements EmbeddedDatabaseContr
         }
         log.info("Stopping HQ built-in database...");
         if (OperatingSystem.isWin32(osInfo.getName())) {
-            // TODO
-            throw new UnsupportedOperationException();
+            processManager.executeProcess(new String[] { serverHome + "/bin/db-stop.bat" }, serverHome,
+                false, PostgresEmbeddedDatabaseController.DB_PROCESS_TIMEOUT);
+        } else {
+            processManager.executeProcess(new String[] { serverHome + "/bin/db-stop.sh" }, serverHome,
+                false, PostgresEmbeddedDatabaseController.DB_PROCESS_TIMEOUT);
         }
-        processManager.executeProcess(new String[] { serverHome + "/bin/db-stop.sh" }, serverHome,
-            false, PostgresEmbeddedDatabaseController.DB_PROCESS_TIMEOUT);
         try {
             if (!isDBStopped(dbPortStopCheckTries)) {
                 log.error("HQ built-in database failed to stop");
