@@ -86,33 +86,15 @@ public class GalertProcessor {
      * Entry point to the processor from the {@link EventListener}
      *
      * @param events  A list of {@link Zevent}s to process
-     * 
-     * TODO:  This needs to be optimized so that the EventListener buffers
-     *        up many events and calls this method.  The overhead of creating
-     *        and checking session existance is too high on a per-event
-     *        basis.
      */
     void processEvents(final List events) {
-        try {
-            SessionManager.runInSession(new SessionRunner() {
-                public String getName() {
-                    return "Event Processor";
-                }
-
-                public void run() throws Exception {
-                    for (Iterator i=events.iterator(); i.hasNext(); ) {
-                        Zevent z = (Zevent)i.next();
-                    
-                        processEvent(z);
-                    }
-                }
-            });
-        } catch(Exception e) {
-            _log.warn("Error processing events", e);
+        for (Iterator i=events.iterator(); i.hasNext(); ) {
+            Zevent z = (Zevent)i.next();
+            processEvent(z);
         }
     }
     
-    private void processEvent(Zevent event) {
+    private void processEvent(final Zevent event) {
         ZeventSourceId source = event.getSourceId();
         Set listenerDupe;
 
@@ -126,12 +108,23 @@ public class GalertProcessor {
         }
         
         for (Iterator i=listenerDupe.iterator(); i.hasNext(); ) {
-            Gtrigger t = (Gtrigger)i.next();
+            final Gtrigger t = (Gtrigger)i.next();
             
             // Synchronize around all event processing for a trigger, since
             // they keep state and will need to be flushed
             synchronized(t) {
-                t.processEvent(event);
+                try {
+                    SessionManager.runInSession(new SessionRunner() {
+                        public String getName() {
+                            return "Event Processor";
+                        }
+                        public void run() throws Exception {
+                            t.processEvent(event);
+                        }
+                    });
+                } catch (Exception e) {
+                    _log.warn("Error processing events", e);
+                }
             }
         }
     }
