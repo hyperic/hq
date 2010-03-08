@@ -665,6 +665,13 @@
 				<include name="groovy-all-1.6.jar" />
 				<include name="json.jar" />
 			</fileset>
+			<fileset dir="${thirdparty.lib}/spring">
+				<include name="*springframework.core-*.jar"/>
+				<include name="*beans-*.jar"/>
+				<include name="*transaction-*.jar"/>
+				<include name="*springframework.context-*.jar"/>
+			</fileset>
+				
 		</copy>
 
 		<!-- Copy dbsetup files -->
