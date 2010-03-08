@@ -572,7 +572,7 @@ public class ConfigManagerEJBImpl
                             Server s = (Server)i.next();
                             events.add(new ResourceUpdatedZevent(subject, s.getEntityId()));
                             for (Iterator it = s.getServices().iterator(); it.hasNext();) {
-                                Service svc = (Service)i.next();
+                                Service svc = (Service)it.next();
                                 events.add(new ResourceUpdatedZevent(subject, svc.getEntityId()));
                             }
                         }
