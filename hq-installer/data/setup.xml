@@ -453,19 +453,6 @@ ${errMsg}
 
     <!-- Copy server control file to server's data dir -->
     <mkdir dir="${server.product.dir}/data"/>
-    <echo>^^^DEBUG: Copying server control file...</echo>
-    <copy todir="${server.product.dir}/data"
-          file="${install.dir}/data/server.xml"/>
-
-    <!-- Copy common utils to server's bin dir -->
-    <echo>^^^DEBUG: Copying server binaries...</echo>
-    <copy todir="${server.product.dir}/bin">
-      <fileset dir="${install.dir}/bin">
-        <include name="server*${script-ext}"/>
-        <include name="ant*"/>
-        <include name="lcp${script-ext}"/>
-      </fileset>
-    </copy>
 
     <echo>^^^DEBUG: Copying server db-upgrade files...</echo>
     <copy todir="${server.product.dir}/data">
@@ -488,12 +475,8 @@ ${errMsg}
     	<include name="hq-util.jar"/>
       	<include name="hq-common.jar"/>
         <include name="oro-2.0.8.jar"/>
-        <include name="sigar-x86-winnt.dll"/>
-        <include name="libsigar-hppa2.0-hp-hpux-11.x.sl"/>
-        <include name="libsigar-powerpc-ibm-aix-4.3.x.so"/>
-        <include name="libsigar-sparc-sun-solaris-2.x.so"/>
-        <include name="libsigar-x86-linux.so"/>
-        <include name="libsigar-x86-sun-solaris-2.x.so"/>
+        <include name="sigar-*.dll"/>
+        <include name="libsigar-*"/>
         <include name="libreadline-java.jar"/>
         <include name="optional.jar"/>
         <include name="sigar.jar"/>
@@ -543,7 +526,6 @@ ${errMsg}
     <condition property="server.isInstalled">
       <or>
         <available file="${server.installdir}/server-${version}"/>
-        <available file="${server.installdir}/data/server.xml"/>
         <available file="${server.installdir}/conf/hq-server.conf"/>
       </or>
     </condition>

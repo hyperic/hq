@@ -100,6 +100,7 @@
 		<fileset dir="${thirdparty.lib}/spring" includes="*.jar" />
 		<fileset dir="${thirdparty.lib}/activemq" includes="*.jar" />
 		<fileset dir="${thirdparty.lib}/tapestry" includes="*.jar" />
+		<fileset dir="${thirdparty.lib}/tomcat-jdbc" includes="*.jar" />
 		<fileset dir="${wrapper.lib}" includes="*.jar" />
 		<fileset dir="${hibernate.lib}" includes="*.jar" />
 		<fileset dir="${hq.plugins}" includes="**/build-lib/*.jar" />
@@ -179,6 +180,11 @@
 		<path location="${hq.lather}/target/classes" />
 		<path location="${hq.pdk.shared}/target/classes" />
 	</path>
+	
+	<path id="bootstrap.compile.classpath">
+		<path refid="shared.compile.classpath"/>
+		<path location="${hq.bootstrap}/target/classes" />
+	</path>
 
 	<!-- Source common targets -->
 	<import file="${hq.home}/build_util/util-build.xml" />
@@ -204,7 +210,7 @@
 	<!-- ==================== Compile java sources ==================== -->
 
 
-	<target name="compile" depends="compile-shared,compile-web,compile-installer" />
+	<target name="compile-server" depends="compile-shared,compile-bootstrap,compile-web,compile-installer" />
 	
 	<target name="compile-bootstrap">
 		<compile-sources classpath.id="shared.compile.classpath" src.dir="${hq.bootstrap}/src/main/java" resource.dir="${hq.bootstrap}/src/main/resources" output.dir="${hq.bootstrap}/target/classes" />
@@ -473,7 +479,18 @@
 		<mkdir dir="${archive-dir}/server-${version}/conf" />
 		<mkdir dir="${archive-dir}/server-${version}/logs" />
 		<mkdir dir="${archive-dir}/server-${version}/lib"/>
+		<mkdir dir="${archive-dir}/server-${version}/wrapper" />
+		<mkdir dir="${archive-dir}/server-${version}/wrapper/lib" />
+		<mkdir dir="${archive-dir}/server-${version}/wrapper/sbin" />
+		
+		<!-- Copy wrapper binaries -->
+		<copy todir="${archive-dir}/server-${version}/wrapper/sbin">
+			<fileset dir="${wrapper.bin}" includes="*" />
+		</copy>
 
+		<copy todir="${archive-dir}/server-${version}/wrapper/lib">
+			<fileset dir="${wrapper.lib}" includes="*" />
+		</copy>
 
 		<!-- Copy Tomcat -->
 		<copy toDir="${archive-dir}/server-${version}/hq-engine/hq-server">
@@ -498,16 +515,23 @@
 		<copy todir="${archive-dir}/server-${version}/bin">
 			<fileset dir="${hq.bootstrap}/bin" includes="**" />
 		</copy>
-		<copy todir="${archive-dir}/server-${version}/bin" file="${launcher.dir}/hq-server.exe" />
 		
+		<!-- Copy server startup conf -->
+		<copy todir="${archive-dir}/server-${version}/conf">
+			<fileset dir="${hq.bootstrap}/conf" includes="**" />
+		</copy>
+			
 		<!-- Pack server lib for bootstrap-->
 		<copy todir="${archive-dir}/server-${version}/lib">
 			<fileset dir="${build.dir}" includes="hq-bootstrap.jar"/>
 			<fileset dir="${thirdparty.lib}/spring">
-				<include name="*core-*.jar"/>
+				<include name="*springframework.core-*.jar"/>
 				<include name="*beans-*.jar"/>
-				<include name="*context-*.jar"/>
+				<include name="*asm-*.jar"/>
+				<include name="*expression-*.jar"/>
+				<include name="*springframework.context-*.jar"/>
 			</fileset>
+			<fileset dir="${thirdparty.lib}" includes="commons-logging*.jar"/>
 		</copy>		
 
 		<!-- Copy WAR -->
@@ -671,7 +695,7 @@
 
 
 
-	<target name="build-war" description="Build and create the war" depends="compile,compile-rendit,compile-plugins,pack-rendit,pack-plugins,pack-war" />
+	<target name="build-war" description="Build and create the war" depends="compile-server,compile-rendit,compile-plugins,pack-rendit,pack-plugins,pack-war" />
 
 	<target name="pack-war" description="Create the war directory structure ( use if you modify .jsp or other web files, but no sources )">
 		<mkdir dir="${war.dir}" />
@@ -1213,11 +1237,6 @@
 		<copy file="${hq.agent}/bin/background.bat" tofile="${agent.dir}/bundles/${agent.bundle.dir}/background.bat" />
 		<copy file="${hq.agent}/src/main/resources/agent.jaas.config" tofile="${agent.dir}/bundles/${agent.bundle.dir}/jaas.config" />
 		<copy file="${hq.agent}/bin/agent.rc" tofile="${agent.dir}/bundles/${agent.bundle.dir}/rcfiles/agent.rc" />
-
-		<!-- DEPRECATED: replaced hq-agent.exe with Java Service Wrapper
-    <copy file="${launcher.dir}/hq-agent.exe"
-        tofile="${agent.dir}/bundles/${agent.bundle.dir}/hq-agent.exe" />
-    -->
 		<copy file="${hq.agent}/bin/hq-agent-master.sh" tofile="${agent.dir}/bin/hq-agent.sh" />
 		<copy file="${hq.agent}/bin/hq-agent-master.bat" tofile="${agent.dir}/bin/hq-agent.bat" />
 
@@ -1254,6 +1273,7 @@
 		<delete dir="${hq.pdk.agent}/target" />
 		<delete dir="${hq.agent}/target" />
 		<delete dir="${hq.web}/target" />
+		<delete dir="${hq.bootstrap}/target" />
 		<delete dir="${hq.installer}/target" />
 		<delete dir="${rendit_sys.dir}/target" />
 		<delete includeemptydirs="true">
@@ -1324,6 +1344,7 @@
 <test-compile module.dir="${hq.lather}" compile.classpath.id="shared.compile.classpath" />
 <test-compile module.dir="${hq.pdk.shared}" compile.classpath.id="shared.compile.classpath" />
 <test-compile module.dir="${hq.web}" compile.classpath.id="web.compile.classpath" />
+<test-compile module.dir="${hq.bootstrap}" compile.classpath.id="bootstrap.compile.classpath" />
 </target>
 
 <target name="run-tests" depends="init-taskdefs,init-tests">
@@ -1340,6 +1361,7 @@
 <test-run module.dir="${hq.lather}" classpath.id="shared.compile.classpath" />
 <test-run module.dir="${hq.pdk.shared}" classpath.id="shared.compile.classpath" />
 <test-run module.dir="${hq.web}" classpath.id="web.compile.classpath" />
+<test-run module.dir="${hq.bootstrap}" classpath.id="bootstrap.compile.classpath" />
 </target>
 
 
@@ -1354,6 +1376,8 @@
 <delete dir="${hq.pdk.shared}/target/clover" quiet="true" />
 <instrument-module input.dir="${hq.web}/src/test/java" staging.dir="${hq.web}/target/clover/staging/src/test/java" resource.dir="${hq.web}/src/test/resources" output.dir="${hq.web}/target/test-classes" classpath.id="web.compile.classpath" />
 <delete dir="${hq.web}/target/clover" quiet="true" />
+<instrument-module input.dir="${hq.bootstrap}/src/test/java" staging.dir="${hq.bootstrap}/target/clover/staging/src/test/java" resource.dir="${hq.bootstrap}/src/test/resources" output.dir="${hq.bootstrap}/target/test-classes" classpath.id="bootstrap.compile.classpath" />
+<delete dir="${hq.bootstrap}/target/clover" quiet="true" />
 <instrument-module classpath.id="agent.pdk.compile.classpath" input.dir="${hq.pdk.agent}/src/test/java" resource.dir="${hq.pdk.agent}/src/test/resources" output.dir="${hq.pdk.agent}/target/test-classes" staging.dir="${hq.pdk.agent}/target/clover/staging/src/test/java" />
 <delete dir="${hq.pdk.agent}/target/clover" quiet="true" />
 <instrument-module classpath.id="agent.compile.classpath" input.dir="${hq.agent}/src/test/java" resource.dir="${hq.agent}/src/test/resources" output.dir="${hq.agent}/target/test-classes" staging.dir="${hq.agent}/target/clover/staging/src/test/java" />
@@ -1367,7 +1391,7 @@
 </target>
 
 
-<target name="build-instrumented-war" depends="instrument-war,compile-rendit,compile-plugins,pack-rendit,pack-plugins,pack-war">
+<target name="build-instrumented-war" depends="instrument-war,instrument-bootstrap,compile-rendit,compile-plugins,pack-rendit,pack-plugins,pack-war">
 <copy todir="${war.dir}/WEB-INF/lib/">
 	<fileset dir="${thirdparty.lib}">
 		<include name="com.springsource.com.cenqua.clover-2.4.2.jar" />
@@ -1390,6 +1414,11 @@
 <instrument-module input.dir="${hq.web}/src/main/java" staging.dir="${hq.web}/target/clover/staging/src/main/java" resource.dir="${hq.web}/src/main/resources" output.dir="${hq.web}/target/classes" classpath.id="web.compile.classpath" />
 <delete dir="${hq.web}/target/clover" quiet="true" />
 <antcall target="compile-installer" />
+</target>
+
+<target name="instrument-bootstrap" depends="instrument-common">
+	<instrument-module input.dir="${hq.bootstrap}/src/main/java" staging.dir="${hq.bootstrap}/target/clover/staging/src/main/java" resource.dir="${hq.bootstrap}/src/main/resources" output.dir="${hq.bootstrap}/target/classes" classpath.id="bootstrap.compile.classpath" />
+	<delete dir="${hq.bootstrap}/target/clover" quiet="true" />
 </target>
 
 <target name="build-instrumented-agent" depends="instrument-agent,compile-plugins,pack-pdk,pack-agent">

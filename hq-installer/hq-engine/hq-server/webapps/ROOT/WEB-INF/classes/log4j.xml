@@ -19,7 +19,7 @@
 
 	<!--  Provides File Logging  -->
 	<appender name="FILE" class="org.apache.log4j.DailyRollingFileAppender">
-		<param name="File" value="${hq.server.home}/logs/server.log" />
+		<param name="File" value="${server.home}/logs/server.log" />
 		<param name="Append" value="true" />
 		<param name="DatePattern" value="'.'yyyy-MM-dd" />
 

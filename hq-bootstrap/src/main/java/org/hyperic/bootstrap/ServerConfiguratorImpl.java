@@ -23,7 +23,7 @@
  * USA.
  */
 
-package org.hyperic;
+package org.hyperic.bootstrap;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,6 +32,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Properties;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 /**
  * Sets up Tomcat config by:
@@ -44,7 +48,8 @@ import java.util.Properties;
  * <li>Copying the license file to its proper place.
  * </ol>
  */
-public class ServerInitializer {
+@Component
+public class ServerConfiguratorImpl implements ServerConfigurator {
 
     // An array of server config properties for backwards compatibility. On
     // an upgrade scenario these properties will not be present in the
@@ -60,13 +65,14 @@ public class ServerInitializer {
     private String engineHome;
     private Properties serverProps;
 
-    public ServerInitializer(String serverHome, String engineHome) {
+    @Autowired
+    public ServerConfiguratorImpl(@Value("#{ systemProperties['server.home'] }") String serverHome,
+                                  @Value("#{ systemProperties['engine.home'] }") String engineHome) {
         this.serverHome = serverHome;
         this.engineHome = engineHome;
     }
 
-    public void initialize() throws Exception {
-        intializeServerProps();
+    public void configure() throws Exception {
         loadServerProps();
         loadCatalinaProps();
         exportEngineProps();
@@ -74,14 +80,19 @@ public class ServerInitializer {
         copyLicenseFile();
     }
 
-    private void intializeServerProps() {
-        serverProps = new Properties();
+    public Properties getServerProps() {
+        return this.serverProps;
+    }
+
+    private void initializeServerProps() {
+        this.serverProps = new Properties();
         for (int i = 0; i < COMPAT_PROPS.length; i++) {
             serverProps.put(COMPAT_PROPS[i][0], COMPAT_PROPS[i][1]);
         }
     }
 
     private void loadServerProps() throws IOException {
+        initializeServerProps();
         FileInputStream fi = null;
         File confFile = new File(serverHome + File.separator + "conf" + File.separator +
                                  "hq-server.conf");
@@ -143,10 +154,11 @@ public class ServerInitializer {
         FileOutputStream fo = null;
         try {
             String targetLicenseDir = engineHome + File.separator + "hq-server" + File.separator +
-                                "webapps" + File.separator + "ROOT" + File.separator + "license";
+                                      "webapps" + File.separator + "ROOT" + File.separator +
+                                      "license";
             new File(targetLicenseDir).mkdir();
             fi = new FileInputStream(licenseFile);
-            fo = new FileOutputStream(targetLicenseDir +File.separator + "license.xml");
+            fo = new FileOutputStream(targetLicenseDir + File.separator + "license.xml");
             copyStream(fi, fo);
         } finally {
             if (fi != null)

@@ -1,331 +1,143 @@
-#!/bin/sh
-#
-# Start/Stop the HQ server.
-#
-
-debugOut () {
-  if [ "x${DEBUG}" = "x" ] ; then return; fi
-  echo "DEBUG: $@"
-}
-infoOut () {
-  echo "${@}"
-}
+#! /bin/sh
 
 #
-# Load JAVA_OPTS.  Changes to this file will be lost on server upgrades.  To set this
-# value permanently, set server.java.opts in conf/hq-server.conf
+# Copyright (c) 1999, 2006 Tanuki Software Inc.
 #
-loadJavaOpts () {
-  server_java_opts=`grep '^[ \t]*server\.java\.opts' ${SERVER_HOME}/conf/hq-server.conf | sed 's/[ \t]*server\.java\.opts=//'`
-  if [ -z "${server_java_opts}" ]; then
-  echo "-XX:MaxPermSize=192m -Xmx512m -Xms512m"
-  fi
-  echo "${server_java_opts}"
-}
+# Java Service Wrapper sh script.  Suitable for starting and stopping
+#  wrapped Java applications on UNIX platforms.
+#
 
-loadWebappPort () {
-  TMPPROPFILE="${SERVER_HOME}/logs/.hq-server.conf.tmp"
-  cat ${SERVER_HOME}/conf/hq-server.conf | grep server\.webapp\.port | tr -d ' \t' | grep -v "^#" | sed 's/\./_/g' > ${TMPPROPFILE}
-  . ${TMPPROPFILE} 2> /dev/null
-  rm -f ${TMPPROPFILE}
-  if [ "x${server_webapp_port}" = "x" ] ; then
-    exit 127
-  fi
-  echo "${server_webapp_port}"
-}
+#-----------------------------------------------------------------------------
+# These settings can be modified to fit the needs of your application
 
-loadDBPort () {
-  TMPPROPFILE="${SERVER_HOME}/hqdb/data/.postgresql.conf.tmp"
-  DBCONF="${SERVER_HOME}/hqdb/data/postgresql.conf"
-  cat ${DBCONF} | grep port | tr -d ' \t' | grep -v '^#' | sed 's/#.*//g' > ${TMPPROPFILE}
-  . ${TMPPROPFILE}
-  rm -f ${TMPPROPFILE}
-  if [ "x${port}" = "x" ] ; then
-    # they must have commented it out or removed the line, so assume it's on the default port.
-    echo "5432"
-  fi
-  echo "${port}"
-}
+# Application
+APP_NAME="hq-server"
+APP_LONG_NAME="HQ Server"
 
-checkPort () {
-  PORTNUM=${1}
-  if [ "x${PORTNUM}" = "x" ] ; then
-    infoOut "No port specified to checkPort function."
-    exit 127
-  fi
+# Wrapper
+WRAPPER_CMD="../../wrapper/sbin/wrapper"
+WRAPPER_CMD_PS="sbin/wrapper"
+WRAPPER_CONF="../../conf/wrapper.conf"
 
-  THISOS=`uname -s`
-  ISLISTENING=0
-  case "x${THISOS}" in
-    xLinux)
-      ISLISTENING=`netstat -nlp 2> /dev/null | grep ":${PORTNUM}" | wc -l | tr -d ' '`
-      ;;
+# Priority at which to run the wrapper.  See "man nice" for valid priorities.
+#  nice is only used if a priority is specified.
+PRIORITY=
+
+# Location of the pid file.
+PIDDIR="../../wrapper"
+
+# If uncommented, causes the Wrapper to be shutdown using an anchor file.
+#  When launched with the 'start' command, it will also ignore all INT and
+#  TERM signals.
+#IGNORE_SIGNALS=true
+
+# Wrapper will start the JVM asynchronously. Your application may have some
+#  initialization tasks and it may be desirable to wait a few seconds
+#  before returning.  For example, to delay the invocation of following
+#  startup scripts.  Setting WAIT_AFTER_STARTUP to a positive number will
+#  cause the start command to delay for the indicated period of time 
+#  (in seconds).
+# 
+WAIT_AFTER_STARTUP=0
+
+# If set, the status, start_msg and stop_msg commands will print out detailed
+#   state information on the Wrapper and Java processes.
+#DETAIL_STATUS=true
+
+# If specified, the Wrapper will be run as the specified user.
+# IMPORTANT - Make sure that the user has the required privileges to write
+#  the PID file and wrapper.log files.  Failure to be able to write the log
+#  file will cause the Wrapper to exit without any way to write out an error
+#  message.
+# NOTE - This will set the user which is used to run the Wrapper as well as
+#  the JVM and is not useful in situations where a privileged resource or
+#  port needs to be allocated prior to the user being changed.
+#RUN_AS_USER=
+
+# The following two lines are used by the chkconfig command. Change as is
+#  appropriate for your application.  They should remain commented.
+# chkconfig: 2345 20 80
+# description: @app.long.name@
+ 
+# Initialization block for the install_initd and remove_initd scripts used by
+#  SUSE linux distributions.
+### BEGIN INIT INFO
+# Provides: @app.name@
+# Required-Start: $local_fs $network $syslog
+# Should-Start: 
+# Required-Stop:
+# Default-Start: 2 3 4 5
+# Default-Stop: 0 1 6
+# Short-Description: @app.long.name@
+# Description: @app.description@
+### END INIT INFO
+
+# Do not modify anything beyond this point
+#-----------------------------------------------------------------------------
+
+# Get the fully qualified path to the script
+case $0 in
+    /*)
+        SCRIPT="$0"
+        ;;
     *)
-      # Works on Solaris, HP-UX, Darwin and FreeBSD, possibly AIX
-      ISLISTENING=`netstat -an 2> /dev/null | grep "\.${PORTNUM}" | head -n 1 | wc -l | tr -d ' '`
-      ;;
-  esac
-  debugOut "checkPort: ISLISTENING=${ISLISTENING}"
-  if [ ${ISLISTENING} -gt 0 ] ; then return 1; fi
-  if [ ${ISLISTENING} -eq 0 ] ; then return 0; fi
-  infoOut "Error checking for process listening on port ${PORTNUM}"
-  exit 4
-}
+        PWD=`pwd`
+        SCRIPT="$PWD/$0"
+        ;;
+esac
 
-waitForPid () {
-  HQPID=${1}
-  MAXTRIES=${2}
+# Resolve the true real path without any sym links.
+CHANGED=true
+while [ "X$CHANGED" != "X" ]
+do
+    # Change spaces to ":" so the tokens can be parsed.
+    SAFESCRIPT=`echo $SCRIPT | sed -e 's; ;:;g'`
+    # Get the real path to this script, resolving any symbolic links
+    TOKENS=`echo $SAFESCRIPT | sed -e 's;/; ;g'`
+    REALPATH=
+    for C in $TOKENS; do
+        # Change any ":" in the token back to a space.
+        C=`echo $C | sed -e 's;:; ;g'`
+        REALPATH="$REALPATH/$C"
+        # If REALPATH is a sym link, resolve it.  Loop for nested links.
+        while [ -h "$REALPATH" ] ; do
+            LS="`ls -ld "$REALPATH"`"
+            LINK="`expr "$LS" : '.*-> \(.*\)$'`"
+            if expr "$LINK" : '/.*' > /dev/null; then
+                # LINK is absolute.
+                REALPATH="$LINK"
+            else
+                # LINK is relative.
+                REALPATH="`dirname "$REALPATH"`""/$LINK"
+            fi
+        done
+    done
 
-  TRIES=0
-  debugOut "waitForPid: waiting for ${HQPID}"
-  while [ 1 -eq 1 ]; do
-    PIDCHECK=`kill -0 ${HQPID} 2> /dev/null`
-    if [ $? -eq 1 ]; then
-      infoOut "HQ server PID ${HQPID} exited"
-      return 1
-    fi
- 
-    debugOut "waitForPid: PID ${HQPID} still alive" 
-    sleep 2
-    TRIES=`expr ${TRIES} + 1`
-    if [ ${TRIES} -ge ${MAXTRIES} ] ; then
-       debugOut "num TRIES exhausted: ${TRIES} -ge ${MAXTRIES}"
-       break
-    fi
-  done
-
-  infoOut "HQ server PID ${HQPID} did not exit."
-  return 0;
-}
-
-waitForPort () {
-
-  PORTNUM=${1}
-  MAXTRIES=${2}
-  if [ "x${PORTNUM}" = "x" ] ; then
-    infoOut "No port specified to waitForPort function."
-    exit 127
-  fi
-  if [ "x${MAXTRIES}" = "x" ] ; then
-    MAXTRIES=10
-  fi
-  ERRMSG=${3}
-  ERRFILE=${4}
-  if [ "x${ERRFILE}" = "x" ] ; then
-    ERRFILE=""
-  fi
-  EXPECTEDUP=${5}
-  if [ "x${EXPECTEDUP}" = "x" ] ; then
-    EXPECTEDUP=1
-  fi
-  ACTION="start"
-  if [ ${EXPECTEDUP} -eq 0 ] ; then
-    ACTION="stop"
-  fi
-
-  WASSTARTED=0
-  TRIES=0
-  debugOut "waitForPort ${PORTNUM}/${EXPECTEDUP}, entering wait loop: TRIES=${TRIES}, MAXTRIES=${MAXTRIES}"
-  while [ 1 -eq 1 ] ; do
-    debugOut "checking port: ${PORTNUM}/${EXPECTEDUP}..."
-    checkPort ${PORTNUM} 
-    WASSTARTED=$?
-    debugOut "status of ${PORTNUM}/${EXPECTEDUP} == ${WASSTARTED}"
-    
-    if [ ${WASSTARTED} -eq ${EXPECTEDUP} ] ; then
-      debugOut "port was as expected: wasStarted=${WASSTARTED} -eq expectedUp=${EXPECTEDUP}"
-      return 1
-    fi
-    sleep 2
-    TRIES=`expr ${TRIES} + 1`
-    if [ ${TRIES} -ge ${MAXTRIES} ] ; then
-       debugOut "num TRIES exhausted: ${TRIES} -ge ${MAXTRIES}"
-       break
-    fi
-  done
-  if [ ${WASSTARTED} -ne ${EXPECTEDUP} ] ; then
-    if [ "x${ERRMSG}" = "x" ] ; then
-      infoOut "Error: Process did not ${ACTION} listening on port ${PORTNUM}"
-    else 
-      infoOut "${ERRMSG}"
-    fi
-    if [ "x${ERRFILE}" = "x" ] ; then
-      infoOut "" # "No further error information available."
+    if [ "$REALPATH" = "$SCRIPT" ]
+    then
+        CHANGED=""
     else
-      ERRFILE_EX=`eval "echo ${ERRFILE}"`
-      infoOut "The log file ${ERRFILE_EX} may contain further details on why it failed to ${ACTION}."
+        SCRIPT="$REALPATH"
     fi
-    return 0
-  fi
-}
+done
 
-startBuiltinDB () {
-  DBPIDFILE="${SERVER_HOME}/hqdb/data/postmaster.pid"
-  debugOut "Checking existence of pidfile: ${DBPIDFILE}"
-  if [ -f "${DBPIDFILE}" ] ; then
-    DBPID=`head -n 1 ${DBPIDFILE}`
-    if [ ! "x${DBPID}" = "x" ]; then
-      # First check for stale pid file
-      DBPIDCHECK=`kill -0 ${DBPID} 2> /dev/null`
-      if [ $? -eq 1 ]; then
-        infoOut "Removing stale pid file ${DBPIDFILE}"
-        rm -f ${DBPIDFILE}
-      else
-        infoOut "HQ built-in database already running (pid file found: ${DBPIDFILE}), not starting it again." 
-      fi
-    fi
-  fi 
+# resolve the current HQ Server home
+cd "`dirname "$REALPATH"`/.."
 
-  if [ ! -f "${DBPIDFILE}" ] ; then
-    infoOut "Starting HQ built-in database..."
-    ${SERVER_HOME}/bin/db-start.sh
+SERVER_INSTALL_HOME=`pwd`
+# invoke the Java Service Wrapper from the wrapper sbin
+# directory for compatibility with Windows
+cd wrapper/sbin
+REALDIR=`pwd`
 
-    debugOut "loading dbport..."
-    DBPORT=`loadDBPort`
-    debugOut "loaded dbport=${DBPORT}"
-    waitForPort ${DBPORT} 10 'HQ built-in database failed to start:' '${SERVER_HOME}/hqdb/data/hqdb.log' 1
-    if [ $? -eq 0 ] ; then
-      exit 1
-    fi
-    infoOut "HQ built-in database started."
-  fi
-}
-
-doStart () {
- 
-# Is the server already running?
-debugOut "checking pidfile exists: ${SERVER_PID}"
-if [ -f "${SERVER_PID}" ] ; then
-  HQPID=`cat ${SERVER_PID} | tr -d ' '`
-  if [ ! "x${HQPID}" = "x" ] ; then
-    PIDCHECK=`kill -0 ${HQPID} 2> /dev/null`
-    if [ $? -eq 1 ]; then
-      infoOut "Removing stale pid file ${SERVER_PID}"
-      rm -f ${SERVER_PID}
-    else 
-      infoOut "HQ server is already running (pid ${HQPID})."
-      exit 0
-    fi
-  fi
-fi
-
-# Setup the config based on conf/hq-server.conf
-infoOut "Initializing HQ server configuration..."
-ANT_OPTS="$ANT_OPTS -Djava.net.preferIPv4Stack=true" ANT_ARGS="" JAVA_HOME=${JAVA_HOME} ${ANT_HOME}/bin/ant --noconfig -q \
-  -Dserver.home=${SERVER_HOME} \
-  -Dengine.home=${ENGINE_HOME} \
-  -logger org.hyperic.tools.ant.installer.InstallerLogger \
-  -f ${SERVER_HOME}/data/server.xml sh-setup | grep -v "Unable to locate tools.jar"
-
-# Start the database if we have a hqdb dir, and if it's not running
-if [ -d "${SERVER_HOME}/hqdb" ] ; then
-  debugOut "Calling startBuiltinDB"
-  startBuiltinDB
-  debugOut "startBuiltinDB completed"
-fi
-
-infoOut "Verify HQ database schema..."
-ANT_OPTS="$ANT_OPTS -Djava.net.preferIPv4Stack=true" ANT_ARGS="" JAVA_HOME=${JAVA_HOME} ${ANT_HOME}/bin/ant --noconfig -q \
-  -Dserver.home=${SERVER_HOME} \
-  -logger org.hyperic.tools.ant.installer.InstallerLogger \
-  -f ${SERVER_HOME}/data/db-upgrade.xml upgrade
-
-# Setup HQ_JAVA_OPTS from hq-server.conf
-HQ_JAVA_OPTS=`loadJavaOpts`
-
-# Enable the 64-bit JRE on Solaris 64-bit OS
-THISOS=`uname -s`
-
-if [ $THISOS = "SunOS" ] ; then
-	ARCH=`isainfo -kv`
-	
-	case $ARCH in
-		*64-bit*)
-		  echo "Setting -d64 JAVA OPTION to enable SunOS 64-bit JRE"
-			HQ_JAVA_OPTS="${HQ_JAVA_OPTS} -d64"
-			;;
-	esac
-fi
-
-  # Start the server
-  infoOut "Booting the HQ server (Using JAVA_OPTS=${HQ_JAVA_OPTS})..."
-  HQ_JAVA_OPTS="${HQ_JAVA_OPTS}" \
-  SERVER_HOME="${SERVER_HOME}" \
-  ENGINE_HOME="${ENGINE_HOME}" \
-  SERVER_PID="${SERVER_PID}" \
-  ${SERVER_HOME}/bin/hq-engine.sh start
-
-
-  # Wait for the webapp to come up
-  debugOut "Waiting for webapp port to come up..."
-  WEBAPP_PORT=`loadWebappPort`
-  debugOut "Loaded WEBAPP_PORT=${WEBAPP_PORT}"
-  waitForPort ${WEBAPP_PORT}  90 'HQ failed to start' '${SERVER_LOG}' 1
-  if [ $? -eq 0 ] ; then
-    exit 1
-  fi
-}
-
-doStop () { 
- #Stop the server 
- if [ "x${1}" = "x" ]; then 
-    ENGINE_HOME="${ENGINE_HOME}" \
-    SERVER_PID="${SERVER_PID}" \
-    ${SERVER_HOME}/bin/hq-engine.sh stop
- else
-    ENGINE_HOME="${ENGINE_HOME}" \
-    SERVER_PID="${SERVER_PID}" \
-    ${SERVER_HOME}/bin/hq-engine.sh halt
-  fi
-  
-  #Double check that server is actually stopped
-  if [ -f "${SERVER_PID}" ] ; then
-	HQPID=`cat ${SERVER_PID} | tr -d ' '`
-   	waitForPid ${HQPID} 60
-	if [ $? -eq 0 ] ; then
-	    exit 1
-	fi
-	rm -f ${SERVER_PID}
-  fi
-  
-  
-  # Stop builtin db if there is one
-  debugOut "checking hqdb dir exists: ${SERVER_HOME}/hqdb"
-  if [ -d ${SERVER_HOME}/hqdb ] ; then
-    DBPIDFILE="${SERVER_HOME}/hqdb/data/postmaster.pid"
-    debugOut "checking db pidfile exists: ${DBPIDFILE}"
-    if [ -f ${DBPIDFILE} ] ; then
-      debugOut "db pidfile exists ${DBPIDFILE}"
-      infoOut "Stopping HQ built-in database..."
-      ${SERVER_HOME}/bin/db-stop.sh
-      DBPORT=`loadDBPort`
-      waitForPort ${DBPORT} 30 'HQ built-in database failed to stop:' '${SERVER_HOME}/logs/hqdb.log' 0
-      if [ $? -eq 0 ] ; then
-        exit 1
-      fi
-    else
-      infoOut "HQ built-in database not running (no pid file found: ${DBPIDFILE})"
-    fi
-  fi
-}
-
-
-
-doHalt () {
-  doStop "FORCE"
-}
-
-cd `dirname $0`/..
-SERVER_HOME=`pwd`
-ENGINE_HOME="${SERVER_HOME}/hq-engine"
-SERVER_LOG="${SERVER_HOME}/logs/server.out"
-SERVER_PID_DIR="${SERVER_HOME}/logs"
-SERVER_PID="${SERVER_PID_DIR}/hq-server.pid"
+# ------------- 
+# Begin HQ Server specific logic
+# ------------- 
 
 if [ "x${HQ_JAVA_HOME}" != "x" ] ; then
     JAVA_HOME=${HQ_JAVA_HOME}
-elif [ -d ${SERVER_HOME}/jre ]; then
-    JAVA_HOME=${SERVER_HOME}/jre
+elif [ -d ${SERVER_INSTALL_HOME}/jre ]; then
+    JAVA_HOME=${SERVER_INSTALL_HOME}/jre
 elif [ "x$JAVA_HOME" = "x" ] ; then
     case "`uname`" in
     Darwin)
@@ -338,41 +150,597 @@ elif [ "x$JAVA_HOME" = "x" ] ; then
     esac
 fi
 
-JAVA="${JAVA_HOME}/bin/java"
-if [ ! -x "${JAVA}" ] ; then
-    echo "${JAVA} does not exist or is not executable."
-    exit 1
+HQ_JAVA="${JAVA_HOME}/bin/java"
+# verify that the java command actually exists
+if [ ! -f "$HQ_JAVA" ]
+then
+        echo Invalid Java Home detected at ${JAVA_HOME}
+        exit 1
 fi
 
-ANT_HOME=${SERVER_HOME}
-export ANT_HOME
-action=
-if [ "x${2}" = "x-debug" ] ; then
-  DEBUG=1
+# ------------- 
+# End HQ specific logic
+# ------------- 
+
+# If the PIDDIR is relative, set its value relative to the full REALPATH to avoid problems if
+#  the working directory is later changed.
+FIRST_CHAR=`echo $PIDDIR | cut -c1,1`
+if [ "$FIRST_CHAR" != "/" ]
+then
+    PIDDIR=$REALDIR/$PIDDIR
 fi
+# Same test for WRAPPER_CMD
+FIRST_CHAR=`echo $WRAPPER_CMD | cut -c1,1`
+if [ "$FIRST_CHAR" != "/" ]
+then
+    WRAPPER_CMD=$REALDIR/$WRAPPER_CMD
+fi
+# Same test for WRAPPER_CONF
+FIRST_CHAR=`echo $WRAPPER_CONF | cut -c1,1`
+if [ "$FIRST_CHAR" != "/" ]
+then
+    WRAPPER_CONF=$REALDIR/$WRAPPER_CONF
+fi
+
+# Process ID
+ANCHORFILE="$PIDDIR/$APP_NAME.anchor"
+STATUSFILE="$PIDDIR/$APP_NAME.status"
+JAVASTATUSFILE="$PIDDIR/$APP_NAME.java.status"
+PIDFILE="$PIDDIR/$APP_NAME.pid"
+LOCKDIR="/var/lock/subsys"
+LOCKFILE="$LOCKDIR/$APP_NAME"
+pid=""
+
+# Resolve the location of the 'ps' command
+PSEXE="/usr/bin/ps"
+if [ ! -x "$PSEXE" ]
+then
+    PSEXE="/bin/ps"
+    if [ ! -x "$PSEXE" ]
+    then
+        echo "Unable to locate 'ps'."
+        echo "Please report this message along with the location of the command on your system."
+        exit 1
+    fi
+fi
+
+# Resolve the os
+DIST_OS=`uname -s | tr [:upper:] [:lower:] | tr -d [:blank:]`
+DIST_BITS="32"
+case "$DIST_OS" in
+    'sunos')
+        DIST_OS="solaris"
+        ;;
+    'hp-ux')
+        # HP-UX needs the XPG4 version of ps (for -o args)
+        DIST_OS="hpux"
+        UNIX95=""
+        export UNIX95
+        ;;
+    'hp-ux64')
+        # HP-UX needs the XPG4 version of ps (for -o args)
+        DIST_OS="hpux"
+        UNIX95=""
+        export UNIX95
+        DIST_BITS="64"
+        ;;
+    'darwin')
+        DIST_OS="macosx"
+        ;;
+    'unix_sv')
+        DIST_OS="unixware"
+        ;;
+esac
+
+# Resolve the architecture
+if [ "$DIST_OS" = "macosx" ]
+then
+    DIST_ARCH="universal"
+else
+    DIST_ARCH=
+    DIST_ARCH=`uname -p 2>/dev/null | tr [:upper:] [:lower:] | tr -d [:blank:]`
+    if [ "X$DIST_ARCH" = "X" ]
+    then
+        DIST_ARCH="unknown"
+    fi
+    if [ "$DIST_ARCH" = "unknown" ]
+    then
+        DIST_ARCH=`uname -m 2>/dev/null | tr [:upper:] [:lower:] | tr -d [:blank:]`
+    fi
+
+    case "$DIST_ARCH" in
+        'athlon' | 'i386' | 'i486' | 'i586' | 'i686')
+            DIST_ARCH="x86"
+            ;;
+        'amd64' | 'x86_64')
+            DIST_ARCH="x86"
+            DIST_BITS="64"
+            ;;            
+        'ia32')
+            DIST_ARCH="ia"
+            ;;
+        'ia64' | 'ia64n' | 'ia64w')
+            DIST_ARCH="ia"
+            DIST_BITS="64"
+            ;;            
+        'ip27')
+            DIST_ARCH="mips"
+            ;;
+        'power' | 'powerpc' | 'power_pc' | 'ppc64')
+            DIST_ARCH="ppc"
+            ;;
+        'pa_risc' | 'pa-risc')
+            DIST_ARCH="parisc"
+            ;;
+        'sun4u' | 'sparcv9')
+            DIST_ARCH="sparc"
+            ;;
+        '9000/800')
+            DIST_ARCH="parisc"
+            ;;
+    esac
+fi
+
+outputFile() {
+    if [ -f "$1" ]
+    then
+        echo "  $1 (Found but not executable.)";
+    else
+        echo "  $1"
+    fi
+}
+
+# Decide on the wrapper binary to use.
+# First, try out the detected bit version
+# If not available, try 32 bits followed by 64 bits.
+if [ -x "$WRAPPER_CMD-$DIST_OS-$DIST_ARCH-$DIST_BITS" ]
+then
+  WRAPPER_CMD="$WRAPPER_CMD-$DIST_OS-$DIST_ARCH-$DIST_BITS"
+elif [ -x "$WRAPPER_CMD-$DIST_OS-$DIST_ARCH-32" ]
+then
+  WRAPPER_CMD="$WRAPPER_CMD-$DIST_OS-$DIST_ARCH-32"
+elif [ -x "$WRAPPER_CMD-$DIST_OS-$DIST_ARCH-64" ]
+then
+  WRAPPER_CMD="$WRAPPER_CMD-$DIST_OS-$DIST_ARCH-64"
+else
+  if [ ! -x "$WRAPPER_CMD" ]
+    then
+      echo "Unable to locate any of the following binaries:"
+      outputFile "$WRAPPER_CMD-$DIST_OS-$DIST_ARCH-32"
+      outputFile "$WRAPPER_CMD-$DIST_OS-$DIST_ARCH-64"
+      outputFile "$WRAPPER_CMD"
+      exit 1
+  fi
+fi
+
+# Build the nice clause
+if [ "X$PRIORITY" = "X" ]
+then
+    CMDNICE=""
+else
+    CMDNICE="nice -$PRIORITY"
+fi
+
+# Build the anchor file clause.
+if [ "X$IGNORE_SIGNALS" = "X" ]
+then
+   ANCHORPROP=
+   IGNOREPROP=
+else
+   ANCHORPROP=wrapper.anchorfile=\"$ANCHORFILE\"
+   IGNOREPROP=wrapper.ignore_signals=TRUE
+fi
+
+# Build the status file clause.
+if [ "X$DETAIL_STATUS" = "X" ]
+then
+   STATUSPROP=
+else
+   STATUSPROP="wrapper.statusfile=\"$STATUSFILE\" wrapper.java.statusfile=\"$JAVASTATUSFILE\""
+fi
+
+# Build the lock file clause.  Only create a lock file if the lock directory exists on this platform.
+LOCKPROP=
+if [ -d $LOCKDIR ]
+then
+    if [ -w $LOCKDIR ]
+    then
+        LOCKPROP=wrapper.lockfile=\"$LOCKFILE\"
+    fi
+fi
+
+checkUser() {
+    # $1 touchLock flag
+    # $2 command
+
+    # Check the configured user.  If necessary rerun this script as the desired user.
+    if [ "X$RUN_AS_USER" != "X" ]
+    then
+        # Resolve the location of the 'id' command
+        IDEXE="/usr/xpg4/bin/id"
+        if [ ! -x "$IDEXE" ]
+        then
+            IDEXE="/usr/bin/id"
+            if [ ! -x "$IDEXE" ]
+            then
+                echo "Unable to locate 'id'."
+                echo "Please report this message along with the location of the command on your system."
+                exit 1
+            fi
+        fi
+    
+        if [ "`$IDEXE -u -n`" = "$RUN_AS_USER" ]
+        then
+            # Already running as the configured user.  Avoid password prompts by not calling su.
+            RUN_AS_USER=""
+        fi
+    fi
+    if [ "X$RUN_AS_USER" != "X" ]
+    then
+        # If LOCKPROP and $RUN_AS_USER are defined then the new user will most likely not be
+        # able to create the lock file.  The Wrapper will be able to update this file once it
+        # is created but will not be able to delete it on shutdown.  If $2 is defined then
+        # the lock file should be created for the current command
+        if [ "X$LOCKPROP" != "X" ]
+        then
+            if [ "X$1" != "X" ]
+            then
+                # Resolve the primary group 
+                RUN_AS_GROUP=`groups $RUN_AS_USER | awk '{print $3}' | tail -1`
+                if [ "X$RUN_AS_GROUP" = "X" ]
+                then
+                    RUN_AS_GROUP=$RUN_AS_USER
+                fi
+                touch $LOCKFILE
+                chown $RUN_AS_USER:$RUN_AS_GROUP $LOCKFILE
+            fi
+        fi
+
+        # Still want to change users, recurse.  This means that the user will only be
+        #  prompted for a password once. Variables shifted by 1
+        # 
+        # Use "runuser" if this exists.  runuser should be used on RedHat in preference to su.
+        #
+        if test -f "/sbin/runuser"
+        then
+            /sbin/runuser - $RUN_AS_USER -c "\"$REALPATH\" $2"
+        else
+            su - $RUN_AS_USER -c "\"$REALPATH\" $2"
+        fi
+
+        # Now that we are the original user again, we may need to clean up the lock file.
+        if [ "X$LOCKPROP" != "X" ]
+        then
+            getpid
+            if [ "X$pid" = "X" ]
+            then
+                # Wrapper is not running so make sure the lock file is deleted.
+                if [ -f "$LOCKFILE" ]
+                then
+                    rm "$LOCKFILE"
+                fi
+            fi
+        fi
+
+        exit 0
+    fi
+}
+
+getpid() {
+    pid=""
+    if [ -f "$PIDFILE" ]
+    then
+        if [ -r "$PIDFILE" ]
+        then
+            pid=`cat "$PIDFILE"`
+            if [ "X$pid" != "X" ]
+            then
+                # It is possible that 'a' process with the pid exists but that it is not the
+                #  correct process.  This can happen in a number of cases, but the most
+                #  common is during system startup after an unclean shutdown.
+                # The ps statement below looks for the specific wrapper command running as
+                #  the pid.  If it is not found then the pid file is considered to be stale.
+                case "$DIST_OS" in
+                    'macosx')
+                        pidtest=`$PSEXE -ww -p $pid -o command | grep "$WRAPPER_CMD_PS" | tail -1`
+                        ;;
+                    'solaris')
+                        PSEXE="/usr/ucb/ps" 
+                        pidtest=`$PSEXE ww $pid | grep "$WRAPPER_CMD" | tail -1` 
+                        ;;
+                    'hpux')
+                        pidtest=`$PSEXE -p $pid -x -o args | grep "$WRAPPER_CMD_PS" | tail -1`
+                        ;;
+                    *)
+                        pidtest=`$PSEXE -p $pid -o args | grep "$WRAPPER_CMD_PS" | tail -1`
+                        ;;
+                esac
+
+                if [ "X$pidtest" = "X" ]
+                then
+                    # This is a stale pid file.
+                    rm -f "$PIDFILE"
+                    echo "Removed stale pid file: $PIDFILE"
+                    pid=""
+                fi
+            fi
+        else
+            echo "Cannot read $PIDFILE."
+            exit 1
+        fi
+    fi
+}
+
+getstatus() {
+    STATUS=
+    if [ -f "$STATUSFILE" ]
+    then
+        if [ -r "$STATUSFILE" ]
+        then
+            STATUS=`cat "$STATUSFILE"`
+        fi
+    fi
+    if [ "X$STATUS" = "X" ]
+    then
+        STATUS="Unknown"
+    fi
+    
+    JAVASTATUS=
+    if [ -f "$JAVASTATUSFILE" ]
+    then
+        if [ -r "$JAVASTATUSFILE" ]
+        then
+            JAVASTATUS=`cat "$JAVASTATUSFILE"`
+        fi
+    fi
+    if [ "X$JAVASTATUS" = "X" ]
+    then
+        JAVASTATUS="Unknown"
+    fi
+}
+
+testpid() {
+    # It is possible that 'a' process with the pid exists but that it is not the
+    # correct process. This can happen in a number of cases, but the most
+    # common is during system startup after an unclean shutdown.
+    # The ps statement below looks for the specific wrapper command running as
+    # the pid. If it is not found then the pid file is considered to be stale.
+    case "$DIST_OS" in
+        'macosx')
+            pid=`$PSEXE -ww $pid | grep $pid | grep -v grep | awk '{print $1}' | tail -1`
+            ;;
+        'solaris')
+            PSEXE="/usr/ucb/ps"
+            pid=`$PSEXE ww $pid | grep $pid | grep -v grep | awk '{print $1}' | tail -1`
+            ;;
+        *)
+            pid=`$PSEXE -p $pid | grep $pid | grep -v grep | awk '{print $1}' | tail -1`
+            ;;
+    esac
+    if [ "X$pid" = "X" ]
+    then
+        # Process is gone so remove the pid file.
+        rm -f "$PIDFILE"
+        pid=""
+    fi
+} 
+ 
+start() {
+    echo -n "Starting $APP_LONG_NAME..."
+    getpid
+    if [ "X$pid" = "X" ]
+    then
+        # The string passed to eval must handles spaces in paths correctly.
+        COMMAND_LINE="$CMDNICE \"$WRAPPER_CMD\" \"$WRAPPER_CONF\" \"set.SERVER_INSTALL_HOME=$SERVER_INSTALL_HOME\" \"set.JAVA_HOME=$JAVA_HOME\" wrapper.syslog.ident=\"$APP_NAME\" wrapper.pidfile=\"$PIDFILE\" wrapper.name=\"$APP_NAME\" wrapper.displayname=\"$APP_LONG_NAME\" wrapper.daemonize=TRUE $ANCHORPROP $IGNOREPROP $STATUSPROP $LOCKPROP"
+        eval $COMMAND_LINE
+    else
+        echo "$APP_LONG_NAME is already running."
+        exit 1
+    fi
+
+    # Sleep for a few seconds to allow for intialization if required 
+    #  then test to make sure we're still running.
+    #
+    i=0
+    while [ $i -lt $WAIT_AFTER_STARTUP ]
+    do
+        sleep 1
+        echo -n "."
+        i=`expr $i + 1`
+    done
+    if [ $WAIT_AFTER_STARTUP -gt 0 ]
+    then
+        getpid
+        if [ "X$pid" = "X" ]
+        then
+            echo " WARNING: $APP_LONG_NAME may have failed to start."
+            exit 1
+        else
+            echo " running ($pid)."
+        fi
+    else 
+        echo ""
+    fi
+}
+ 
+stopit() {
+    echo "Stopping $APP_LONG_NAME..."
+    getpid
+    if [ "X$pid" = "X" ]
+    then
+        echo "$APP_LONG_NAME was not running."
+    else
+        if [ "X$IGNORE_SIGNALS" = "X" ]
+        then
+            # Running so try to stop it.
+            kill $pid
+            if [ $? -ne 0 ]
+            then
+                # An explanation for the failure should have been given
+                echo "Unable to stop $APP_LONG_NAME."
+                exit 1
+            fi
+        else
+            rm -f "$ANCHORFILE"
+            if [ -f "$ANCHORFILE" ]
+            then
+                # An explanation for the failure should have been given
+                echo "Unable to stop $APP_LONG_NAME."
+                exit 1
+            fi
+        fi
+
+        # We can not predict how long it will take for the wrapper to
+        #  actually stop as it depends on settings in wrapper.conf.
+        #  Loop until it does.
+        savepid=$pid
+        CNT=0
+        TOTCNT=0
+        while [ "X$pid" != "X" ]
+        do
+            # Show a waiting message every 5 seconds.
+            if [ "$CNT" -lt "5" ]
+            then
+                CNT=`expr $CNT + 1`
+            else
+                echo "Waiting for $APP_LONG_NAME to exit..."
+                CNT=0
+            fi
+            TOTCNT=`expr $TOTCNT + 1`
+
+            sleep 1
+
+            testpid
+        done
+
+        pid=$savepid
+        testpid
+        if [ "X$pid" != "X" ]
+        then
+            echo "Failed to stop $APP_LONG_NAME."
+            exit 1
+        else
+            echo "Stopped $APP_LONG_NAME."
+        fi
+    fi
+}
+
+status() {
+    getpid
+    if [ "X$pid" = "X" ]
+    then
+        echo "$APP_LONG_NAME is not running."
+        exit 1
+    else
+        if [ "X$DETAIL_STATUS" = "X" ]
+        then
+            echo "$APP_LONG_NAME is running (PID:$pid)."
+            ${STATUS_CMD}
+        else
+            getstatus
+            echo "$APP_LONG_NAME is running (PID:$pid, Wrapper:$STATUS, Java:$JAVASTATUS)"
+            ${STATUS_CMD}
+        fi
+        exit 0
+    fi
+}
+
+dump() {
+    echo "Dumping $APP_LONG_NAME..."
+    getpid
+    if [ "X$pid" = "X" ]
+    then
+        echo "$APP_LONG_NAME was not running."
+    else
+        kill -3 $pid
+
+        if [ $? -ne 0 ]
+        then
+            echo "Failed to dump $APP_LONG_NAME."
+            exit 1
+        else
+            echo "Dumped $APP_LONG_NAME."
+        fi
+    fi
+}
+
+# Used by HP-UX init scripts.
+startmsg() {
+    getpid
+    if [ "X$pid" = "X" ]
+    then
+        echo "Starting $APP_LONG_NAME... (Wrapper:Stopped)"
+    else
+        if [ "X$DETAIL_STATUS" = "X" ]
+        then
+            echo "Starting $APP_LONG_NAME... (Wrapper:Running)"
+        else
+            getstatus
+            echo "Starting $APP_LONG_NAME... (Wrapper:$STATUS, Java:$JAVASTATUS)"
+        fi
+    fi
+}
+
+# Used by HP-UX init scripts.
+stopmsg() {
+    getpid
+    if [ "X$pid" = "X" ]
+    then
+        echo "Stopping $APP_LONG_NAME... (Wrapper:Stopped)"
+    else
+        if [ "X$DETAIL_STATUS" = "X" ]
+        then
+            echo "Stopping $APP_LONG_NAME... (Wrapper:Running)"
+        else
+            getstatus
+            echo "Stopping $APP_LONG_NAME... (Wrapper:$STATUS, Java:$JAVASTATUS)"
+        fi
+    fi
+}
+
 
 case "$1" in
-  start)
-    echo "Starting HQ server..."
-    doStart
-    echo "HQ server booted."
-    echo "Login to HQ at: http://127.0.0.1:${WEBAPP_PORT}/"
-    ;;
-  stop)
-    echo "Stopping HQ server..."
-    doStop
-    echo "HQ server is stopped."
-    ;;
-  halt)
-    echo "Halting HQ server..."
-    doHalt
-    echo "HQ server is halted."
-    ;;
-  *)
-    # Print help, don't advertise halt, it's nasty
-    echo "Usage: $0 {start|stop}" 1>&2
-    exit 1
-    ;;
+
+    'start')
+        checkUser touchlock $1
+        start
+        ;;
+
+    'stop')
+        checkUser "" $1
+        stopit
+        ;;
+
+    'restart')
+        checkUser touchlock $1
+        stopit
+        start
+        ;;
+
+    'status')
+        checkUser "" $1
+        status
+        ;;
+
+    'dump')
+        checkUser "" $1
+        dump
+        ;;
+
+    'start_msg')
+        checkUser "" $1
+        startmsg
+        ;;
+
+    'stop_msg')
+        checkUser "" $1
+        stopmsg
+        ;;
+
+    *)
+        echo "Usage: $0 { start | stop | restart | status | dump }"
+        exit 1
+        ;;
 esac
 
 exit 0

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<project name="server" default="sh-setup" basedir=".">
+<project name="server" basedir=".">
 
   <property environment="ENV"/>
 
@@ -68,15 +68,9 @@
     <property file="${server.home}/conf/hq-server.conf"/>
     <property name="load-conf-props.done" value="true"/>
   </target>
-  <target name="setup-conf" depends="load-conf-props" unless="setup-conf.done">
-    <taskdef name="init-hq" classname="org.hyperic.InitializeHQServer"
-             classpathref="serverjars"/>
-    <init-hq serverHome="${server.home}" engineHome="${engine.home}"/>
-    <property name="setup-conf.done" value="true"/>
-  </target>
 
-  <target name="sh-setup"
-          depends="setup-conf"/>
+
+ 
 
   <target name="check-pgsql-already-running" if="pqsql.already.running">
     <echo>^^^INFO: Built-in database is already running</echo>

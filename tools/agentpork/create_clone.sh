@@ -27,3 +27,4 @@ cat etc/agent.properties | \
 cd clones/clone_$1
 nohup ./hq-agent-nowrapper.sh start 2>&1 > console.out & 
 echo $! > nowrapper.pid
+ 

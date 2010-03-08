@@ -186,16 +186,16 @@
   </target>
 
   <target name="start-pg" if="server.pgsql.available">
-    <ant antfile="${server.home}/data/server.xml"
+    <ant antfile="${install.dir}/data/server.xml"
          target="start-postgresql"/>
   </target>
   <target name="wait-pg" if="server.pgsql.available">
-    <ant antfile="${server.home}/data/server.xml"
+    <ant antfile="${install.dir}/data/server.xml"
          target="wait-postgresql"/>
   </target>
 
   <target name="stop-pg" if="server.pgsql.available">
-    <ant antfile="${server.home}/data/server.xml"
+    <ant antfile="${install.dir}/data/server.xml"
          target="stop-postgresql"/>
   </target>
 
