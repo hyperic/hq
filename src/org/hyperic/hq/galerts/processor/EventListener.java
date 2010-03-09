@@ -27,19 +27,26 @@ package org.hyperic.hq.galerts.processor;
 
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.zevents.ZeventListener;
 
 class EventListener 
     implements ZeventListener
 {
     private final GalertProcessor _aProc;
+    private final Log _log = LogFactory.getLog(EventListener.class);
     
     EventListener(GalertProcessor aProc) {
         _aProc = aProc;
     }
     
     public void processEvents(List events) {
-        _aProc.processEvents(events);
+        try {
+            _aProc.processEvents(events);
+        } catch (Throwable e) {
+            _log.error(e,e);
+        }
     }
     
     public String toString() {

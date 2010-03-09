@@ -35,6 +35,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hibernate.Util;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.TransactionListener;
 import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
@@ -104,7 +105,22 @@ class EscalationRuntime {
         }
 
         public void run() {
-            runEscalation(_stateId);
+            int maxRetries = 3;
+            for (int i=0; i<maxRetries; i++) {
+                try {
+                    runEscalation(_stateId);
+                    break;
+                } catch (Throwable e) {
+                    if ((i+1) < maxRetries && Util.tranRolledBack(e)) {
+                        String times = (maxRetries - i == 1) ? "time" : "times";
+                        _log.warn("Warning, exception occurred while running escalation.  will retry "
+                                  + (maxRetries - (i+1)) + " more " + times + ".  errorMsg: " + e);
+                        continue;
+                    } else {
+                        _log.error("Exception occurred, runEscalation() will not be retried",e);
+                    }
+                }
+            }
         }
     }
     

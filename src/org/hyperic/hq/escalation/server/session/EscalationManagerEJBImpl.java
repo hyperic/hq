@@ -545,19 +545,14 @@ public class EscalationManagerEJBImpl
 
         try {
             EscalationAlertType type = s.getAlertType();
-            
             // Escalation state change
-            AuthzSubject overlord =
-                AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
-            type.changeAlertState(esc, overlord,
-                                  EscalationStateChange.ESCALATED);
-
-            ActionExecutionInfo execInfo = 
-                new ActionExecutionInfo(esc.getShortReason(),
-                                        esc.getLongReason(),
-                                        esc.getAuxLogs());
-            
+            // HHQ-3784 to avoid deadlocks use the this table order when updating/inserting:
+            // 1) EAM_ESCALATION_STATE, 2) EAM_ALERT, 3) EAM_ALERT_ACTION_LOG
+            AuthzSubject overlord = AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
+            ActionExecutionInfo execInfo =  new ActionExecutionInfo(
+                esc.getShortReason(), esc.getLongReason(), esc.getAuxLogs());
             String detail = action.executeAction(esc.getAlertInfo(), execInfo);            
+            type.changeAlertState(esc, overlord, EscalationStateChange.ESCALATED);
             type.logActionDetails(esc, action, detail, null);
         } catch(Exception exc) {
             log.error("Unable to execute action [" + 
@@ -800,6 +795,7 @@ public class EscalationManagerEJBImpl
                              boolean suppressNotification)
         throws PermissionException
     {        
+        final boolean debug = log.isDebugEnabled();
         Integer alertId = esc.getAlertInfo().getId();
         boolean acknowledged = !fixed;
         
@@ -820,22 +816,24 @@ public class EscalationManagerEJBImpl
 
         // HQ-1295: Does user have sufficient permissions?
         // ...check if user can fix/acknowledge this alert...
+        // HHQ-3784 to avoid deadlocks use the this table order when updating/inserting:
+        // 1) EAM_ESCALATION_STATE, 2) EAM_ALERT, 3) EAM_ALERT_ACTION_LOG
         SessionBase.canFixAcknowledgeAlerts(subject, esc.getDefinition().getDefinitionInfo());
 
         if (fixed) {  
-            if (moreInfo == null || moreInfo.trim().length() == 0)
+            if (moreInfo == null || moreInfo.trim().length() == 0) {
                 moreInfo = "(Fixed by " + subject.getFullName() + ")";
-            
-            log.debug(subject.getFullName() + " has fixed alertId=" + alertId);
+            }
+            if (debug) log.debug(subject.getFullName() + " has fixed alertId=" + alertId);
+            if (state != null) {
+                endEscalation(state);
+            }
             type.changeAlertState(esc, subject, EscalationStateChange.FIXED);
             type.logActionDetails(esc, null, moreInfo, subject);
-            if (state != null)
-                endEscalation(state);
         } else {
             if (moreInfo == null || moreInfo.trim().length() == 0) {
                 moreInfo = "";
             }
-            
             if (state.getAcknowledgedBy() != null) {
                 log.warn(subject.getFullName() + " attempted to acknowledge "+
                           type + " alert=" + alertId + " but it was already "+
@@ -843,19 +841,14 @@ public class EscalationManagerEJBImpl
                           state.getAcknowledgedBy().getFullName());
                 return;
             }
-            log.debug(subject.getFullName() + " has acknowledged alertId=" + 
-                       alertId);
-            type.changeAlertState(esc, subject,
-                                  EscalationStateChange.ACKNOWLEDGED);
-            type.logActionDetails(esc, null, 
-                                  subject.getFullName() + " acknowledged " +
-                                  "the alert" + moreInfo, subject);
-                                  
+            if (debug) log.debug(subject.getFullName() + " has acknowledged alertId=" +  alertId);
             state.setAcknowledgedBy(subject);
+            type.changeAlertState(esc, subject, EscalationStateChange.ACKNOWLEDGED);
+            String msg = subject.getFullName() + " acknowledged " + "the alert" + moreInfo;
+            type.logActionDetails(esc, null, msg, subject);
         }
 
-        if (!suppressNotification
-                && AlertRegulator.getInstance().alertNotificationsAllowed()) {
+        if (!suppressNotification && AlertRegulator.getInstance().alertNotificationsAllowed()) {
             if (state != null) {
                 sendNotifications(state, esc, subject, 
                                   state.getEscalation().isNotifyAll(), fixed,

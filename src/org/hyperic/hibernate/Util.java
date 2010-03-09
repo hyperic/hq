@@ -42,6 +42,7 @@ import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import javax.transaction.RollbackException;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
@@ -52,6 +53,7 @@ import org.hibernate.EmptyInterceptor;
 import org.hibernate.Hibernate;
 import org.hibernate.Interceptor;
 import org.hibernate.SessionFactory;
+import org.hibernate.StaleStateException;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
 import org.hibernate.dialect.Dialect;
@@ -410,5 +412,19 @@ public class Util {
             healths.add(health);
         }
         return healths;
+    }
+    
+    public static boolean tranRolledBack(Throwable t) {
+        if (t == null) {
+            return false;
+        }
+        Throwable tmp = t;
+        do {
+            if (tmp instanceof StaleStateException ||
+                tmp instanceof RollbackException) {
+                return true;
+            }
+        } while ((tmp = tmp.getCause()) != null);
+        return false;
     }
 }

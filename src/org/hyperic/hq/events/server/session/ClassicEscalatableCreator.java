@@ -33,6 +33,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hibernate.Util;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.TransactionListener;
@@ -156,6 +157,10 @@ public class ClassicEscalatableCreator
 
                 alertMan.logActionDetail(alert, act, detail, null);
             } catch(Exception e) {
+                // HQ-1905 want to recover cleanly from a rollback at the top level
+                if (Util.tranRolledBack(e)) {
+                    throw new RuntimeException(e);
+                }
                 // For any exception, just log it.  We can't afford not
                 // letting the other actions go un-processed.
                 _log.warn("Error executing action [" + act + "]", e);
@@ -163,20 +168,29 @@ public class ClassicEscalatableCreator
         }
     }
 
-    private void registerAlertFiredEvent(final Integer alertId, final AlertConditionsSatisfiedZEventPayload payload) {
+    private void registerAlertFiredEvent(final Integer alertId,
+                                         final AlertConditionsSatisfiedZEventPayload payload) {
         try {
             HQApp.getInstance().addTransactionListener(new TransactionListener() {
                 public void afterCommit(boolean success) {
                     if(success) {
-                        messenger.publishMessage(EventConstants.EVENTS_TOPIC,new AlertFiredEvent(alertId, _def.getId(), new AppdefEntityID(_def.getResource()),_def.getName(),payload.getTimestamp(),
-                                                                     payload.getMessage()));
+                        messenger.publishMessage(
+                            EventConstants.EVENTS_TOPIC,
+                            new AlertFiredEvent(alertId, _def.getId(), new AppdefEntityID(_def.getResource()),
+                                _def.getName(),payload.getTimestamp(), payload.getMessage()));
                     }
                 }
                 public void beforeCommit() {
                 }
             });
         } catch (Throwable t) {
-            _log.error("Error registering to send an AlertFiredEvent on transaction commit.  The alert will be fired, but the event will not be sent.  This could cause a future recovery alert not to fire.", t);
+            // HQ-1905 want to recover cleanly from a rollback at the top level
+            if (Util.tranRolledBack(t)) {
+                throw new RuntimeException(t);
+            }
+            _log.error("Error registering to send an AlertFiredEvent on transaction commit.  " +
+                       "The alert will be fired, but the event will not be sent.  " +
+                       "This could cause a future recovery alert not to fire.", t);
         }
     }
 

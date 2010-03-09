@@ -26,6 +26,7 @@
 package org.hyperic.hq.zevents;
 
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -65,7 +66,15 @@ class BufferedListener
     }
 
     public void processEvents(List events) {
-        execute(new BufferedEventRunnable(events, _target));
+        try {
+            execute(new BufferedEventRunnable(events, _target));
+        } catch (Throwable e) {
+            _log.error(e,e);
+        }
+        int size = getQueue().size();
+        if (_log.isDebugEnabled() && size != 0 && (size % 100) == 0) {
+            _log.debug("obj=" + this.toString() + ", queue size=" + size);
+        }
     }
 
     public boolean equals(Object obj) {
