@@ -101,10 +101,14 @@
 				<c:if test="${guestEnabled}">
 					dojo.connect(dojo.byId("guestLoginLink"), "onclick", function() {
 						var username = dojo.byId("usernameInput");
-	
+						var password = dojo.byId("passwordInput");
+
 						username.value = "<c:out value="${guestUsername}" />";
-	
+						
 						document.forms["loginForm"]["submit"].click();
+						
+						username.disabled = true;
+						password.disabled = true;
 					});
 				</c:if>
 			});
