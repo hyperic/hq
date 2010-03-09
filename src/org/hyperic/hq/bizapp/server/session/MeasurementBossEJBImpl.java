@@ -2963,6 +2963,9 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     public double getAvailability(AuthzSubject subj, AppdefEntityID id)
         throws AppdefEntityNotFoundException,
                PermissionException {
+        if (id == null) {
+            return MeasurementConstants.AVAIL_UNKNOWN;
+        }
         final Map measCache =
             getMetricManager().getAvailMeasurements(Collections.singleton(id));
         Map availCache = null;
