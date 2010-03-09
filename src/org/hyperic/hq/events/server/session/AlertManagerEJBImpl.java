@@ -661,8 +661,11 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      */
     public String getShortReason(Alert alert) {
         AlertDefinition def = alert.getAlertDefinition();
-        AppdefEntityID aeid =
-            new AppdefEntityID(def.getResource());
+        Resource r = def.getResource();
+        if (r == null || r.isInAsyncDeleteState()) {
+            return "alertid=" + alert.getId() + " is associated with an invalid or deleted resource";
+        }
+        AppdefEntityID aeid = new AppdefEntityID(r);
         AppdefEntityValue aev = new AppdefEntityValue(
             aeid, AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo());
 
