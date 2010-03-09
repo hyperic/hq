@@ -247,9 +247,9 @@
               value="var/activemq.log"/>
 
     <property name="VERSION_FILE"
-              value="lib/activemq-core-4.*.jar"/>
+              value="**/lib/.*activemq-core-4.\d*.*.jar"/>
 
-    <config include="jmx">
+    <config>
       <option name="process.query"
               description="Process Query"/>
     </config>
@@ -362,24 +362,44 @@
   <server name="ActiveMQ"
           version="5.0"
           include="4.0">
-
-    <property name="VERSION_FILE"
-              value="lib/activemq-core-5.0.*.jar"/>
-  </server>
+      <property name="VERSION_FILE"
+              value="**/.*activemq-core-(5.\d*).*.jar"/>
+</server>
 
   <server name="ActiveMQ"
           version="5.1"
           include="5.0">
-
-    <property name="VERSION_FILE"
-              value="lib/activemq-core-5.1.*.jar"/>
   </server>
 
   <server name="ActiveMQ"
           version="5.2"
           include="5.1">
-
-    <property name="VERSION_FILE"
-              value="lib/activemq-core-5.2.*.jar"/>
   </server>
+
+  <server name="ActiveMQ"
+          version="5.3"
+          include="5.2">
+  </server>
+
+  <server name="ActiveMQ Embeeded"
+          version="5.0"
+          include="ActiveMQ 5.0">
+    <property name="PROC_HOME_PROPERTY"
+              value="catalina.base"/>
+  </server>
+  <server name="ActiveMQ Embeeded"
+          version="5.1"
+          include="ActiveMQ 5.1">
+    <property name="PROC_HOME_PROPERTY"
+              value="catalina.base"/>
+  </server>
+  <server name="ActiveMQ Embeeded"
+          version="5.2"
+          include="5.1">
+  </server>
+  <server name="ActiveMQ Embeeded"
+          version="5.3"
+          include="5.2">
+  </server>
+
 </plugin>

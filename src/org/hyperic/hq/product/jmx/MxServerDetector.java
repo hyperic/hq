@@ -254,7 +254,7 @@ public class MxServerDetector
         List procs = new ArrayList();
         long[] pids = getPids(getProcQuery());
         log.debug(getProcQuery() + " matched " + pids.length + " processes");
-
+ 
         String homeProp = getProcHomeProperty();
         final boolean isMatch = isMatch(homeProp);
         if (isMatch) {
