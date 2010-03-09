@@ -124,12 +124,8 @@ public class AuthzSubjectManagerEJBImpl
                               String phone, String sms, Boolean useHtml)
         throws PermissionException 
     {
-        PermissionManager pm = PermissionManagerFactory.getInstance(); 
-
         if(!whoami.getId().equals(target.getId())) {
-            pm.check(whoami.getId(), getRootResourceType().getId(),
-                     AuthzConstants.rootResourceId,
-                     AuthzConstants.perm_viewSubject);
+            checkModifyUsers(whoami);
         }
         
         if (active != null && target.getActive() != active.booleanValue()) {
@@ -204,6 +200,20 @@ public class AuthzSubjectManagerEJBImpl
                  getRootResourceType(),
                  AuthzConstants.rootResourceId,
                  AuthzConstants.subjectOpModifySubject);
+    }
+
+    /**
+     * Check if a subject can modify users  
+     * @ejb:interface-method
+     */
+    public void checkCreateUsers(AuthzSubject caller)
+        throws PermissionException 
+    {
+        PermissionManager pm = PermissionManagerFactory.getInstance();
+        pm.check(caller.getId(),
+                 getRootResourceType(),
+                 AuthzConstants.rootResourceId,
+                 AuthzConstants.subjectOpCreateSubject);
     }
 
     /** 
