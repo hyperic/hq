@@ -10,7 +10,7 @@
 		<amq:systemUsage>
 			<amq:systemUsage>
 				<amq:memoryUsage>
-					<amq:memoryUsage limit="${server.jms.maxmemory}" />
+					<amq:memoryUsage limit="${server.jms.maxmemory} mb" />
 				</amq:memoryUsage>
 			</amq:systemUsage>
 		</amq:systemUsage>
