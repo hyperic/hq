@@ -332,7 +332,7 @@ public class ResourceGroupDAO extends HibernateDAO
     public Collection findByRoleIdAndSystem_orderName(Integer roleId,
                                                       boolean system,
                                                       boolean asc) {            
-        String sql = "select g from ResourceGroup g join fetch g.roles r " +
+        String sql = "select g from ResourceGroup g join g.roles r " +
                      "where r.id = ? and g.system = ? " +
                      "order by g.resource.sortName " + (asc ? "asc" : "desc");
         return getSession().createQuery(sql)
