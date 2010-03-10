@@ -24,14 +24,13 @@ rem Detect HQ_JAVA_HOME or JAVA_HOME
 rem
 cd %_REALPATH%
 
-rem Look for HQ_JAVA_HOME, then JAVA_HOME, and lastly built-in JRE.  If this should need to change, remove and re-install the service to update
+rem Look for HQ_JAVA_HOME, then built-in JRE, then lastly JAVA_HOME.  If this should need to change, remove and re-install the service to update
 if not "%HQ_JAVA_HOME%"=="" goto gothqjava
-if not "%JAVA_HOME%"=="" goto gotjava
-
 if EXIST "%SERVER_INSTALL_HOME%\jre" (
     set JAVA_HOME=%SERVER_INSTALL_HOME%\jre
     goto gotjava
 )
+if not "%JAVA_HOME%"=="" goto gotjava
 
 :nojava
   echo JAVA_HOME or HQ_JAVA_HOME must be set when invoking the server
