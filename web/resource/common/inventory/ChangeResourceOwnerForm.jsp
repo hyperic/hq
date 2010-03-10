@@ -4,6 +4,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
 
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
