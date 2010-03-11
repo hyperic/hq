@@ -135,6 +135,7 @@ public class AlertManagerTest {
         String agentToken = "agentToken123";
         agentManager.createLegacyAgent("127.0.0.1", 2144, "authToken", agentToken, "5.0");
         String platformType = "Linux";
+        platformManager.createPlatformType(platformType, "Test Plugin");
         Platform testPlatform = createPlatform(agentToken, platformType, "leela.local");
         // For this test, we really don't need a server and service. Could just
         // alert against the platform. Creating these here to provide an example
