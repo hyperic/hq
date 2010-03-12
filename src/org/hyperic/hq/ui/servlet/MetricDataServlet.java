@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2009], Hyperic, Inc.
+ * Copyright (C) [2004-2010], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -47,6 +47,7 @@ import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
+import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
@@ -186,14 +187,21 @@ public class MetricDataServlet extends HttpServlet {
         for (int i = 0; i < resources.size(); i++) {
             AppdefResourceValue rValue = (AppdefResourceValue) resources.get(i);
             try {
-                Measurement m = _mboss.findMeasurement(sessionId, templ.getId(),
+                List<HighLowMetricValue> list = null;
+                try {
+                    Measurement m = _mboss.findMeasurement(sessionId, templ.getId(),
                                                        rValue.getEntityId());
-                List<HighLowMetricValue> list =
-                    _mboss.findMeasurementData(sessionId,
+                    list = _mboss.findMeasurementData(
+                                               sessionId,
                                                m,
                                                begin.longValue(),
                                                end.longValue(),
                                                PageControl.PAGE_ALL);
+                } catch (MeasurementNotFoundException mnfe) {
+                    _log.debug(mnfe.getMessage());
+                    // HHQ-3611: Measurement not found, so set data to an empty list
+                    list = new ArrayList<HighLowMetricValue>(0);
+                }
                 List<RowData> hold = new ArrayList<RowData>();
                 for (int j = 0; j < list.size(); j++) {
                     HighLowMetricValue metric = list.get(j);
