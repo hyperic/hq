@@ -212,7 +212,7 @@
 
     <git command="add version.properties" dir="${hq.home}"/>
     <git command="commit -m 'Release ${version} build #${build}'" dir="${hq.home}"/>
-    <git command="push" dir="${hq.home}"/>
+    <git command="push git@git.springsource.org:hq/hq.git" dir="${hq.home}"/>
 
     <!-- Copy to release dir -->
     <copy todir="${release.dir}">
