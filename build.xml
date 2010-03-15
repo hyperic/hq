@@ -425,22 +425,6 @@
 
 	<!-- Bring in tasks for rolling the archives -->
 	<import file="${hq.home}/build_util/archive-build.xml" />
-
-	<target name="check-release">
-		<available property="jre.dir.available" file="${jre.dir}" />
-		<fail unless="jre.dir.available">
-		        JRES not found at ${jre.dir}.  Either change this property in
-		        your ~/.hq/build.properties to point to a working copy of the
-		        jres project or checkout a copy to ${jre.dir}
-		    </fail>
-
-		<available property="pgsql.dir.available" file="${pgsql.dir}" />
-		<fail unless="pgsql.dir.available">
-        PostgreSQL binaries not found at ${pgsql.dir}.  Either change
-        this property in your ~/.hq/build.properties to point to a working
-        copy of the pgsql project or checkout a copy to ${pgsql.dir}
-    </fail>
-	</target>
 	
 	<target name="pack-bootstrap">
 		<jar basedir="${hq.bootstrap}/target/classes" jarfile="${build.dir}/hq-bootstrap.jar"/>
