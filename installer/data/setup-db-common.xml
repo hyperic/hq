@@ -6,6 +6,8 @@
 
 <project name="setup-db-common" default="direct-error" basedir=".">
 
+  <property name="data.dir" value="${install.dir}/data/tmp"/>
+
   &hibernate-build;
 
   <target name="direct-error">
@@ -13,6 +15,16 @@
       This buildfile is used as a utility for other setup files.
       Do not invoke it directly.
     </fail>
+  </target>
+
+  <target name="check.data.dir">
+    <available property="has.data.dir" file="${data.dir}"/>
+    <antcall target="create.datatmp"/>
+  </target>
+
+  <target name="create.datatmp" unless="${data.dir}">
+    <mkdir dir="${install.dir}/data/tmp"/>
+    <property name="data.dir" value="${install.dir}/data/tmp"/>
   </target>
 
   <target name="dbsetup-process-file">
@@ -64,6 +76,7 @@
   </target>
 
   <target name="dbsetup" depends="hibernate-setup">
+    <antcall target="check.data.dir"/>
     <antcall target="dbsetup-process-file">
       <param name="dbsetupfile" value="${data.dir}/data.xml"/>
       <param name="data"        value="true"/>
@@ -124,6 +137,7 @@
   </target>
 
   <target name="replace-dbservice-values">
+    <antcall target="check.data.dir"/>
     <echo>using url: ${server.database-url} </echo>
     <property name="server.deploy"
               value="${server.installdir}/server-${version}/hq-engine/server/default/deploy"/>
