@@ -10959,17 +10959,17 @@ has already been defined.
   		</statement>
   		<statement desc="Adding create server permission to any role that has delete server permission...">
   			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
-  				SELECT m.role_id, 306 FROM EAM_ROLE r 
+  				SELECT m.role_id, 303 FROM EAM_ROLE r 
   				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
   				WHERE m.operation_id = 304 
   				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
-  			         WHERE rm.role_id = r.id AND rm.operation_id = 306) = 0
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 303) = 0
   		</statement>
   		<statement desc="Adding delete server permission to any role that has create server permission...">
   			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
   				SELECT m.role_id, 304 FROM EAM_ROLE r 
   				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
-  				WHERE m.operation_id = 306 
+  				WHERE m.operation_id = 303 
   				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
   			         WHERE rm.role_id = r.id AND rm.operation_id = 304) = 0
   		</statement>
@@ -10977,7 +10977,7 @@ has already been defined.
   			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
   				SELECT distinct m.role_id, 307 FROM EAM_ROLE r 
   				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
-  				WHERE (m.operation_id = 304 or m.operation_id = 306)
+  				WHERE (m.operation_id = 304 or m.operation_id = 303)
   				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
   			         WHERE rm.role_id = r.id AND rm.operation_id = 307) = 0
   		</statement>
@@ -10985,23 +10985,23 @@ has already been defined.
   			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
   				SELECT distinct m.role_id, 311 FROM EAM_ROLE r 
   				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
-  				WHERE (m.operation_id = 304 or m.operation_id = 306 or m.operation_id = 307)
+  				WHERE (m.operation_id = 304 or m.operation_id = 303 or m.operation_id = 307)
   				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
   			         WHERE rm.role_id = r.id AND rm.operation_id = 311) = 0
   		</statement>
   		<statement desc="Adding create service permission to any role that has delete service permission...">
   			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
-  				SELECT m.role_id, 312 FROM EAM_ROLE r 
+  				SELECT m.role_id, 309 FROM EAM_ROLE r 
   				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
   				WHERE m.operation_id = 314 
   				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
-  			         WHERE rm.role_id = r.id AND rm.operation_id = 312) = 0
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 309) = 0
   		</statement>
   		<statement desc="Adding delete service permission to any role that has create service permission...">
   			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
   				SELECT m.role_id, 314 FROM EAM_ROLE r 
   				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
-  				WHERE m.operation_id = 312
+  				WHERE m.operation_id = 309
   				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
   			         WHERE rm.role_id = r.id AND rm.operation_id = 314) = 0
   		</statement>
@@ -11009,7 +11009,7 @@ has already been defined.
   			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
   				SELECT distinct m.role_id, 313 FROM EAM_ROLE r 
   				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
-  				WHERE (m.operation_id = 312 or m.operation_id = 314)
+  				WHERE (m.operation_id = 309 or m.operation_id = 314)
   				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
   			         WHERE rm.role_id = r.id AND rm.operation_id = 313) = 0
   		</statement>
@@ -11017,7 +11017,7 @@ has already been defined.
   			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
   				SELECT distinct m.role_id, 315 FROM EAM_ROLE r 
   				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
-  				WHERE (m.operation_id = 312 or m.operation_id = 314 or m.operation_id = 313)
+  				WHERE (m.operation_id = 309 or m.operation_id = 314 or m.operation_id = 313)
   				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
   			         WHERE rm.role_id = r.id AND rm.operation_id = 315) = 0
   		</statement>
