@@ -183,9 +183,9 @@
 </javadoc>
 </target>
 
-<target name="archive-prep" depends="build-agent,build-war,pdk-javadoc,unpack-tomcat,pack-installer,pack-installer-archive" />
+<target name="archive-prep" depends="pdk-javadoc,unpack-tomcat,pack-installer,pack-installer-archive" />
 
-<target name="archive-full" depends="pre-build,check-release,archive-prep">
+<target name="archive-full" depends="pre-build, archive-prep">
 <antcall target="roll-archives" />
 <antcall target="post-build" />
 </target>
