@@ -22,9 +22,8 @@
     <antcall target="create.datatmp"/>
   </target>
 
-  <target name="create.datatmp" unless="${data.dir}">
+  <target name="create.datatmp" unless="${has.data.dir}">
     <mkdir dir="${install.dir}/data/tmp"/>
-    <property name="data.dir" value="${install.dir}/data/tmp"/>
   </target>
 
   <target name="dbsetup-process-file">
