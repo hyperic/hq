@@ -77,6 +77,7 @@ public class ServerConfiguratorImpl implements ServerConfigurator {
         loadCatalinaProps();
         exportEngineProps();
         copyServerConf();
+        copyLoggingConf();
         copyLicenseFile();
     }
 
@@ -188,6 +189,26 @@ public class ServerConfiguratorImpl implements ServerConfigurator {
         }
     }
 
+    private void copyLoggingConf() throws IOException {
+        File confFile = new File(serverHome + File.separator + "conf" + File.separator +
+                                 "log4j.xml");
+        FileInputStream fi = null;
+        FileOutputStream fo = null;
+        try {
+            fi = new FileInputStream(confFile);
+            fo = new FileOutputStream(engineHome + File.separator + "hq-server" + File.separator +
+                                      "webapps" + File.separator + "ROOT" + File.separator +
+                                      "WEB-INF" + File.separator + "classes" + File.separator +
+                                      "log4j.xml");
+            copyStream(fi, fo);
+        } finally {
+            if (fi != null)
+                fi.close();
+            if (fo != null)
+                fo.close();
+        }
+    }
+    
     private void copyStream(InputStream is, OutputStream os) throws IOException {
 
         byte[] buf = new byte[2048];

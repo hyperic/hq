@@ -1,5 +1,7 @@
 package org.hyperic.bootstrap;
 
+import java.io.File;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -113,18 +115,28 @@ public class HQServer {
 
     int upgradeDB() {
         log.info("Verifying HQ database schema...");
+        String logConfigFileUrl;
+        try {
+            logConfigFileUrl = new File(serverHome +
+                             "/conf/log4j.xml").toURI().toURL().toString();
+        } catch (MalformedURLException e) {
+            log.error("Unable to determine URL for logging config file " + serverHome +
+                             "/conf/log4j.xml.  Cause: " + e.getMessage());
+            return 1;
+        }
         return processManager.executeProcess(
             new String[] { "java",
                           "-cp",
                           serverHome + "/lib/ant-launcher.jar",
                           "-Dserver.home=" + serverHome,
                           "-Dant.home=" + serverHome,
+                          "-Dlog4j.configuration=" + logConfigFileUrl,
                           "org.apache.tools.ant.launch.Launcher",
                           "-q",
                           "-lib",
                           serverHome + "/lib",
-                          "-logger",
-                          "org.hyperic.tools.ant.installer.InstallerLogger",
+                          "-listener",
+                          "org.apache.tools.ant.listener.Log4jListener",
                           "-buildfile",
                           serverHome + "/data/db-upgrade.xml",
                           "upgrade" }, serverHome, true, HQServer.DB_UPGRADE_PROCESS_TIMEOUT);
