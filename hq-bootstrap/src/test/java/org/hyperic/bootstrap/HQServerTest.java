@@ -2,6 +2,7 @@ package org.hyperic.bootstrap;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -73,12 +74,14 @@ public class HQServerTest {
                                      serverHome + "/lib/ant-launcher.jar",
                                      "-Dserver.home=" + serverHome,
                                      "-Dant.home=" + serverHome,
+                                     "-Dlog4j.configuration=" + new File(serverHome +
+                                     "/conf/log4j.xml").toURI().toURL().toString(),
                                      "org.apache.tools.ant.launch.Launcher",
                                      "-q",
                                      "-lib",
                                      serverHome + "/lib",
-                                     "-logger",
-                                     "org.hyperic.tools.ant.installer.InstallerLogger",
+                                     "-listener",
+                                     "org.apache.tools.ant.listener.Log4jListener",
                                      "-buildfile",
                                      serverHome + "/data/db-upgrade.xml",
                                      "upgrade" }), EasyMock.eq(serverHome), EasyMock.eq(true),
@@ -130,12 +133,14 @@ public class HQServerTest {
                                      serverHome + "/lib/ant-launcher.jar",
                                      "-Dserver.home=" + serverHome,
                                      "-Dant.home=" + serverHome,
+                                     "-Dlog4j.configuration=" + new File(serverHome +
+                                     "/conf/log4j.xml").toURI().toURL().toString(),
                                      "org.apache.tools.ant.launch.Launcher",
                                      "-q",
                                      "-lib",
                                      serverHome + "/lib",
-                                     "-logger",
-                                     "org.hyperic.tools.ant.installer.InstallerLogger",
+                                     "-listener",
+                                     "org.apache.tools.ant.listener.Log4jListener",
                                      "-buildfile",
                                      serverHome + "/data/db-upgrade.xml",
                                      "upgrade" }), EasyMock.eq(serverHome), EasyMock.eq(true),
