@@ -17,7 +17,6 @@ import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerManager;
@@ -279,21 +278,7 @@ public class AlertManagerTest {
         assertNull(alertManager.getById(testServiceAlert.getId()));
     }
 
-    /*@Test
-    public void testDeleteAppDefAlerts() throws PermissionException {
-        AppdefEntityID platEntityId = testPlatformAlert.getAlertDefinition().getAppdefEntityId();
-        AppdefEntityID serverEntityId = testServerAlert.getAlertDefinition().getAppdefEntityId();
-        AppdefEntityID serviceEntityId = testServiceAlert.getAlertDefinition().getAppdefEntityId();
-        alertManager.deleteAlerts(authzSubjectManager.getOverlordPojo(), platEntityId);
-        alertManager.deleteAlerts(authzSubjectManager.getOverlordPojo(), serverEntityId);
-        alertManager.deleteAlerts(authzSubjectManager.getOverlordPojo(), serviceEntityId);
-        sessionFactory.getCurrentSession().clear();
-        // Verify Alerts not present
-        assertNull(alertManager.getById(testPlatformAlert.getId()));
-        assertNull(alertManager.getById(testServerAlert.getId()));
-        assertNull(alertManager.getById(testServiceAlert.getId()));
-    }*/
-
+   
     @Test
     public void testDeleteAlertDefAlerts() throws PermissionException {
         alertManager.deleteAlerts(authzSubjectManager.getOverlordPojo(), testPlatformAlertDef);

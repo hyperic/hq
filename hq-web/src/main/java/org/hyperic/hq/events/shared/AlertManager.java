@@ -44,18 +44,10 @@ public interface AlertManager {
     public void deleteAlerts(java.lang.Integer[] ids);
 
     /**
-     * Remove alerts for an appdef entity
-     * @throws PermissionException
-     */
-    public int deleteAlerts(AuthzSubject subj, AppdefEntityID id)
-        throws PermissionException;
-
-    /**
      * Remove alerts for an alert definition
      * @throws PermissionException
      */
-    public int deleteAlerts(AuthzSubject subj, AlertDefinition ad) throws 
-        PermissionException;
+    public int deleteAlerts(AuthzSubject subj, AlertDefinition ad) throws PermissionException;
 
     /**
      * Remove alerts for a range of time
@@ -112,23 +104,23 @@ public interface AlertManager {
      * Get a collection of alerts for an AppdefEntityID and time range
      * @throws PermissionException
      */
-    public PageList<Alert> findAlerts(AuthzSubject subj, AppdefEntityID id, long begin, long end, PageControl pc)
-        throws PermissionException;
+    public PageList<Alert> findAlerts(AuthzSubject subj, AppdefEntityID id, long begin, long end,
+                                      PageControl pc) throws PermissionException;
 
     /**
      * A more optimized look up which includes the permission checking
      */
-    public List<Alert> findAlerts(Integer subj, int priority, long timeRange, long endTime, boolean inEsc,
-                                  boolean notFixed, Integer groupId, PageInfo pageInfo)
-        throws PermissionException;
+    public List<Alert> findAlerts(Integer subj, int priority, long timeRange, long endTime,
+                                  boolean inEsc, boolean notFixed, Integer groupId,
+                                  PageInfo pageInfo) throws PermissionException;
 
     /**
      * A more optimized look up which includes the permission checking
      * @return {@link List} of {@link Alert}s
      */
-    public List<Alert> findAlerts(Integer subj, int priority, long timeRange, long endTime, boolean inEsc,
-                                  boolean notFixed, Integer groupId, Integer alertDefId, PageInfo pageInfo)
-        throws PermissionException;
+    public List<Alert> findAlerts(Integer subj, int priority, long timeRange, long endTime,
+                                  boolean inEsc, boolean notFixed, Integer groupId,
+                                  Integer alertDefId, PageInfo pageInfo) throws PermissionException;
 
     /**
      * Search alerts given a set of criteria
@@ -139,14 +131,16 @@ public interface AlertManager {
      * @param includes {@link List} of {@link AppdefEntityID}s to filter, may be
      *        null for all.
      */
-    public List<Alert> findAlerts(AuthzSubject subj, int count, int priority, long timeRange, long endTime,
-                                  List<AppdefEntityID> includes) throws PermissionException;
+    public List<Alert> findAlerts(AuthzSubject subj, int count, int priority, long timeRange,
+                                  long endTime, List<AppdefEntityID> includes)
+        throws PermissionException;
 
     /**
      * Find escalatables for a resource in a given time range.
      * @see findAlerts(AuthzSubject, int, int, long, long, List)
      */
-    public List<Escalatable> findEscalatables(AuthzSubject subj, int count, int priority, long timeRange, long endTime,
+    public List<Escalatable> findEscalatables(AuthzSubject subj, int count, int priority,
+                                              long timeRange, long endTime,
                                               List<AppdefEntityID> includes)
         throws PermissionException;
 

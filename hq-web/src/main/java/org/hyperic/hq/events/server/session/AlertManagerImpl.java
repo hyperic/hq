@@ -203,16 +203,6 @@ public class AlertManagerImpl implements AlertManager {
     }
 
     /**
-     * Remove alerts for an appdef entity
-     * @throws PermissionException
-     * 
-     */
-    public int deleteAlerts(AuthzSubject subj, AppdefEntityID id) throws PermissionException {
-        alertPermissionManager.canManageAlerts(subj, id);
-        return alertDAO.deleteByResource(resourceManager.findResource(id));
-    }
-
-    /**
      * Remove alerts for an alert definition
      * @throws PermissionException
      * 
