@@ -190,75 +190,7 @@
 <antcall target="post-build" />
 </target>
 
-<target name="post-build">
 
-    <property name="release.dir" value="/raid/release/candidates/hq"/>
-
-    <property name="versionfile" value="${version.properties}"/>
-
-    <!-- Increment build # -->
-    <propertyfile file="${versionfile}">
-      <entry key="build" type="int" default="0" operation="+" pattern="0000"/>
-    </propertyfile>
-
-    <property name="release.comment" value="Release Build"/>
-    <property name="hq.isDev" value="false"/>
-    <property file="${versionfile}" />
-    
-    <checksum forceOverwrite="yes" fileext=".md5">
-        <fileset dir="${hq.home}/build" includes="hyperic-*.tgz"/>
-        <fileset dir="${hq.home}/build" includes="hyperic-*.zip"/>
-    </checksum>
-
-    <git command="add version.properties" dir="${hq.home}"/>
-    <git command="commit -m 'Release ${version} build #${build}'" dir="${hq.home}"/>
-    <git command="push git@git.springsource.org:hq/hq.git" dir="${hq.home}"/>
-
-    <!-- Copy to release dir -->
-    <copy todir="${release.dir}">
-      <fileset dir="${hq.home}/build" includes="hyperic-*.tgz"/>
-      <fileset dir="${hq.home}/build" includes="hyperic-*.zip"/>
-      <fileset dir="${hq.home}/build" includes="*.md5"/>
-    </copy>
-
-
-    <!-- Send email -->
-    <mail subject="HQ Daily Build: ${version} build #${build}"
-          mailhost="localhost"
-          mailport="25">
-      <from address="${mail.from}"/>
-      <to address="${mail.to}"/>
-      <message>
-        The autobuild has completed successfully.
-
-        This build is available for download from:
-          http://${build.server}${release.dir}/hyperic-hq-installer-${version}-${build}-sparc-solaris.tgz
-          http://${build.server}${release.dir}/hyperic-hq-installer-${version}-${build}-x86-linux.tgz
-          http://${build.server}${release.dir}/hyperic-hq-installer-${version}-${build}-win32.zip
-          http://${build.server}${release.dir}/hyperic-hq-installer-${version}-${build}-x86_64-linux.tgz
-          http://${build.server}${release.dir}/hyperic-hq-installer-${version}-${build}-apple-osx.tgz
-          http://${build.server}${release.dir}/hyperic-hq-installer-${version}-${build}-noJRE.tgz
-          http://${build.server}${release.dir}/hyperic-hq-installer-${version}-${build}-noJRE.zip
-
-        Agent bundles are available for download from:
-          http://${build.server}${release.dir}/hyperic-hq-agent-${version}-${build}-hpux-11.tgz
-          http://${build.server}${release.dir}/hyperic-hq-agent-${version}-${build}-sparc-solaris.tgz
-          http://${build.server}${release.dir}/hyperic-hq-agent-${version}-${build}-x86-linux.tgz
-          http://${build.server}${release.dir}/hyperic-hq-agent-${version}-${build}-win32.zip
-          http://${build.server}${release.dir}/hyperic-hq-agent-${version}-${build}-x86_64-linux.tgz
-          http://${build.server}${release.dir}/hyperic-hq-agent-${version}-${build}-apple-osx.tgz
-          http://${build.server}${release.dir}/hyperic-hq-agent-${version}-${build}-ppc-aix.tgz
-          http://${build.server}${release.dir}/hyperic-hq-agent-${version}-${build}-noJRE.tgz
-          http://${build.server}${release.dir}/hyperic-hq-agent-${version}-${build}-noJRE.zip
-
-        Source bundles are available for download from:
-
-          ${release.dir}/hyperic-hq-src-${version}-${build}.zip
-          ${release.dir}/hyperic-hq-src-${version}-${build}.tgz
-
-      </message>
-    </mail>
-</target>
 
 <target name="pre-build">
     <available type="dir" file="jre.dir" property="jre.available" />
