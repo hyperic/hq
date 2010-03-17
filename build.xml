@@ -519,6 +519,7 @@
 				<include name="ant-apache-log4j.jar"/>
 				<include name="log4j-*.jar"/>
 			</fileset>
+			<fileset dir="${thirdparty.lib}/tomcat-jdbc" includes="*"/>
 		</copy>		
 
 		<!-- Copy WAR -->
