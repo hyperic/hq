@@ -1493,11 +1493,11 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             resGroupMan.removeGroupsCompatibleWith(proto);
         
             // Remove all services
-            for (Iterator svcIt = serviceType.getServices().iterator();
-                 svcIt.hasNext(); ) {
-                Service svcLocal = (Service) svcIt.next();
-                removeService(overlord, svcLocal);
-            }           
+            Service[] services = (Service[])
+                    serviceType.getServices().toArray(new Service[serviceType.getServices().size()]);
+            for (int i = 0; i < services.length; i++) {
+                removeService(overlord, services[i]);
+            }
         } catch (PermissionException e) {
             assert false :
                 "Overlord should not run into PermissionException";
@@ -1525,6 +1525,9 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         if (server != null) {
             server.getServices().remove(service);
         }
+
+        // Remove from ServiceType collection
+        service.getServiceType().getServices().remove(service);
 
         final ConfigResponseDB config = service.getConfigResponse();
 
