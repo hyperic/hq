@@ -44,6 +44,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
 import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
@@ -79,8 +80,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * The DataManagerImpl can be used to
- * retrieve measurement data points
+ * The DataManagerImpl can be used to retrieve measurement data points
  * 
  */
 @Service
@@ -145,8 +145,10 @@ public class DataManagerImpl implements DataManager {
     private RegisteredTriggers registeredTriggers;
 
     @Autowired
-    public DataManagerImpl(DBUtil dbUtil, MeasurementDAO measurementDAO, MeasurementManager measurementManager,
-                           ServerConfigManager serverConfigManager, AvailabilityManager availabilityManager,
+    public DataManagerImpl(DBUtil dbUtil, MeasurementDAO measurementDAO,
+                           MeasurementManager measurementManager,
+                           ServerConfigManager serverConfigManager,
+                           AvailabilityManager availabilityManager,
                            MetricDataCache metricDataCache, ZeventEnqueuer zeventManager,
                            MessagePublisher messagePublisher, RegisteredTriggers registeredTriggers) {
         this.dbUtil = dbUtil;
@@ -155,9 +157,15 @@ public class DataManagerImpl implements DataManager {
         this.serverConfigManager = serverConfigManager;
         this.availabilityManager = availabilityManager;
         this.metricDataCache = metricDataCache;
-        this.zeventManager = zeventManager;        
+        this.zeventManager = zeventManager;
         this.messagePublisher = messagePublisher;
         this.registeredTriggers = registeredTriggers;
+    }
+
+    @PostConstruct
+    public void initStatsCollector() {
+        ConcurrentStatsCollector.getInstance().register(
+            ConcurrentStatsCollector.DATA_MANAGER_INSERT_TIME);
     }
 
     private double getValue(ResultSet rs) throws SQLException {
@@ -197,7 +205,8 @@ public class DataManagerImpl implements DataManager {
     }
 
     // Returns the next index to be used
-    private int setStatementArguments(PreparedStatement stmt, int start, Integer[] ids) throws SQLException {
+    private int setStatementArguments(PreparedStatement stmt, int start, Integer[] ids)
+        throws SQLException {
         // Set ID's
         int i = start;
         for (int ind = 0; ind < ids.length; ind++) {
@@ -207,7 +216,8 @@ public class DataManagerImpl implements DataManager {
         return i;
     }
 
-    private void checkTimeArguments(long begin, long end, long interval) throws IllegalArgumentException {
+    private void checkTimeArguments(long begin, long end, long interval)
+        throws IllegalArgumentException {
 
         checkTimeArguments(begin, end);
 
@@ -278,17 +288,20 @@ public class DataManagerImpl implements DataManager {
                         log.debug("Inserting data in a single transaction " + "succeeded");
                         log.debug("Data Insertion process took " + (end - start) + " ms");
                     }
-                    ConcurrentStatsCollector.getInstance().addStat(end - start, DATA_MANAGER_INSERT_TIME);
+                    ConcurrentStatsCollector.getInstance().addStat(end - start,
+                        DATA_MANAGER_INSERT_TIME);
                     sendMetricEvents(data);
                 } else {
                     if (debug) {
-                        log.debug("Inserting data in a single transaction failed." + "  Rolling back transaction.");
+                        log.debug("Inserting data in a single transaction failed."
+                                  + "  Rolling back transaction.");
                     }
                     conn.rollback();
                     conn.setAutoCommit(true);
                     List<DataPoint> processed = addDataWithCommits(data, true, conn);
                     final long end = System.currentTimeMillis();
-                    ConcurrentStatsCollector.getInstance().addStat(end - start, DATA_MANAGER_INSERT_TIME);
+                    ConcurrentStatsCollector.getInstance().addStat(end - start,
+                        DATA_MANAGER_INSERT_TIME);
                     sendMetricEvents(processed);
                     if (debug) {
                         log.debug("Data Insertion process took " + (end - start) + " ms");
@@ -361,14 +374,15 @@ public class DataManagerImpl implements DataManager {
                 conn.setAutoCommit(autocommit);
             }
         } catch (SQLException e) {
-            log.debug(
-                "Inserting/Updating data outside a transaction failed " + "because autocommit management failed.", e);
+            log.debug("Inserting/Updating data outside a transaction failed "
+                      + "because autocommit management failed.", e);
         } finally {
             DBUtil.closeConnection(LOG_CTX, conn);
         }
     }
 
-    private List<DataPoint> addDataWithCommits(List<DataPoint> data, boolean overwrite, Connection conn) {
+    private List<DataPoint> addDataWithCommits(List<DataPoint> data, boolean overwrite,
+                                               Connection conn) {
         Set<DataPoint> failedToSaveMetrics = new HashSet<DataPoint>();
         List<DataPoint> left = data;
         while (!left.isEmpty()) {
@@ -441,7 +455,8 @@ public class DataManagerImpl implements DataManager {
         return Collections.unmodifiableList(aList);
     }
 
-    private List<DataPoint> removeMetricsFromList(List<DataPoint> data, Set<DataPoint> metricsToRemove) {
+    private List<DataPoint> removeMetricsFromList(List<DataPoint> data,
+                                                  Set<DataPoint> metricsToRemove) {
         if (metricsToRemove.isEmpty()) {
             return data;
         }
@@ -555,8 +570,8 @@ public class DataManagerImpl implements DataManager {
         }
 
         if (log.isDebugEnabled()) {
-            log.debug("Need to deal with " + res.size() + " unhandled " + "data points (out of " + execInfo.length +
-                      ")");
+            log.debug("Need to deal with " + res.size() + " unhandled " + "data points (out of " +
+                      execInfo.length + ")");
         }
         return res;
     }
@@ -575,8 +590,8 @@ public class DataManagerImpl implements DataManager {
         }
 
         if (log.isDebugEnabled()) {
-            log.debug("Need to deal with " + res.size() + " unhandled " + "data points (out of " + counts.length +
-                      ").  " + "datasize=" + data.size());
+            log.debug("Need to deal with " + res.size() + " unhandled " + "data points (out of " +
+                      counts.length + ").  " + "datasize=" + data.size());
         }
 
         // It's also possible that counts[] is not as long as the list
@@ -601,7 +616,8 @@ public class DataManagerImpl implements DataManager {
         Map<String, List<DataPoint>> buckets = MeasRangeObj.getInstance().bucketData(data);
 
         try {
-            for (Iterator<Map.Entry<String, List<DataPoint>>> it = buckets.entrySet().iterator(); it.hasNext();) {
+            for (Iterator<Map.Entry<String, List<DataPoint>>> it = buckets.entrySet().iterator(); it
+                .hasNext();) {
                 Map.Entry<String, List<DataPoint>> entry = it.next();
                 String table = entry.getKey();
                 List<DataPoint> dpts = entry.getValue();
@@ -615,15 +631,17 @@ public class DataManagerImpl implements DataManager {
                     BigDecimal bigDec;
                     bigDec = new BigDecimal(val.getValue());
                     rowsToUpdate++;
-                    values.append("(").append(val.getTimestamp()).append(", ").append(metricId.intValue()).append(", ")
-                        .append(getDecimalInRange(bigDec, metricId)).append("),");
+                    values.append("(").append(val.getTimestamp()).append(", ").append(
+                        metricId.intValue()).append(", ").append(
+                        getDecimalInRange(bigDec, metricId)).append("),");
                 }
-                String sql = "insert into " + table + " (timestamp, measurement_id, " + "value) values " +
-                             values.substring(0, values.length() - 1);
+                String sql = "insert into " + table + " (timestamp, measurement_id, " +
+                             "value) values " + values.substring(0, values.length() - 1);
                 stmt = conn.createStatement();
                 int rows = stmt.executeUpdate(sql);
                 if (log.isDebugEnabled()) {
-                    log.debug("Inserted " + rows + " rows into " + table + " (attempted " + rowsToUpdate + " rows)");
+                    log.debug("Inserted " + rows + " rows into " + table + " (attempted " +
+                              rowsToUpdate + " rows)");
                 }
                 if (rows < rowsToUpdate)
                     return false;
@@ -632,7 +650,8 @@ public class DataManagerImpl implements DataManager {
             // If there is a SQLException, then none of the data points
             // should be inserted. Roll back the txn.
             if (log.isDebugEnabled()) {
-                log.debug("Error inserting data with one insert stmt: " + e.getMessage() + " (this is ok)");
+                log.debug("Error inserting data with one insert stmt: " + e.getMessage() +
+                          " (this is ok)");
             }
             return false;
         } finally {
@@ -693,7 +712,7 @@ public class DataManagerImpl implements DataManager {
             // XXX scottmf, may not make a difference transactionally since
             // we use ConnectionReleaseMode.AFTER_STATEMENT
             conn = dbUtil.getConnection();
-        }  catch (SQLException e) {
+        } catch (SQLException e) {
             log.error("Failed to retrieve connection from data source", e);
         }
 
@@ -715,20 +734,22 @@ public class DataManagerImpl implements DataManager {
      *         point batch inserts and <code>continueOnSQLException</code> is
      *         set to <code>false</code>.
      */
-    private List<DataPoint> insertData(Connection conn, List<DataPoint> data, boolean continueOnSQLException)
-        throws SQLException {
+    private List<DataPoint> insertData(Connection conn, List<DataPoint> data,
+                                       boolean continueOnSQLException) throws SQLException {
         PreparedStatement stmt = null;
         final List<DataPoint> left = new ArrayList<DataPoint>();
         final Map<String, List<DataPoint>> buckets = MeasRangeObj.getInstance().bucketData(data);
         final HQDialect dialect = Util.getHQDialect();
         final boolean supportsDupInsStmt = dialect.supportsDuplicateInsertStmt();
         final boolean supportsPLSQL = dialect.supportsPLSQL();
-        final String plSQL = "BEGIN " + "INSERT INTO :table (measurement_id, timestamp, value) " + "VALUES(?, ?, ?); "
-                             + "EXCEPTION WHEN DUP_VAL_ON_INDEX THEN " + "UPDATE :table SET VALUE = ? "
+        final String plSQL = "BEGIN " + "INSERT INTO :table (measurement_id, timestamp, value) "
+                             + "VALUES(?, ?, ?); " + "EXCEPTION WHEN DUP_VAL_ON_INDEX THEN "
+                             + "UPDATE :table SET VALUE = ? "
                              + "WHERE timestamp = ? and measurement_id = ?; " + "END; ";
 
         final StringBuilder buf = new StringBuilder();
-        for (Iterator<Map.Entry<String, List<DataPoint>>> it = buckets.entrySet().iterator(); it.hasNext();) {
+        for (Iterator<Map.Entry<String, List<DataPoint>>> it = buckets.entrySet().iterator(); it
+            .hasNext();) {
             buf.setLength(0);
             Map.Entry<String, List<DataPoint>> entry = it.next();
             final String table = entry.getKey();
@@ -787,8 +808,9 @@ public class DataManagerImpl implements DataManager {
                 left.addAll(dpts);
 
                 if (log.isDebugEnabled()) {
-                    log.debug("A general SQLException occurred during the insert. " + "Assuming that none of the " +
-                              dpts.size() + " data points were inserted.", e);
+                    log.debug("A general SQLException occurred during the insert. " +
+                              "Assuming that none of the " + dpts.size() +
+                              " data points were inserted.", e);
                 }
             } finally {
                 DBUtil.closeStatement(LOG_CTX, stmt);
@@ -809,14 +831,16 @@ public class DataManagerImpl implements DataManager {
         List<DataPoint> left = new ArrayList<DataPoint>();
         Map<String, List<DataPoint>> buckets = MeasRangeObj.getInstance().bucketData(data);
 
-        for (Iterator<Map.Entry<String, List<DataPoint>>> it = buckets.entrySet().iterator(); it.hasNext();) {
+        for (Iterator<Map.Entry<String, List<DataPoint>>> it = buckets.entrySet().iterator(); it
+            .hasNext();) {
             Map.Entry<String, List<DataPoint>> entry = it.next();
             String table = entry.getKey();
             List<DataPoint> dpts = entry.getValue();
 
             try {
-                stmt = conn.prepareStatement("UPDATE " + table +
-                                             " SET value = ? WHERE timestamp = ? AND measurement_id = ?");
+                stmt = conn
+                    .prepareStatement("UPDATE " + table +
+                                      " SET value = ? WHERE timestamp = ? AND measurement_id = ?");
 
                 for (Iterator<DataPoint> i = dpts.iterator(); i.hasNext();) {
                     DataPoint pt = i.next();
@@ -841,8 +865,9 @@ public class DataManagerImpl implements DataManager {
                 left.addAll(dpts);
 
                 if (log.isDebugEnabled()) {
-                    log.debug("A general SQLException occurred during the update. " + "Assuming that none of the " +
-                              dpts.size() + " data points were updated.", e);
+                    log.debug("A general SQLException occurred during the update. " +
+                              "Assuming that none of the " + dpts.size() +
+                              " data points were updated.", e);
                 }
             } finally {
                 DBUtil.closeStatement(LOG_CTX, stmt);
@@ -946,11 +971,13 @@ public class DataManagerImpl implements DataManager {
      * @return the list of data points
      * 
      */
-    @Transactional(readOnly=true)
-    public PageList<HighLowMetricValue> getHistoricalData(Measurement m, long begin, long end, PageControl pc,
+    @Transactional(readOnly = true)
+    public PageList<HighLowMetricValue> getHistoricalData(Measurement m, long begin, long end,
+                                                          PageControl pc,
                                                           boolean prependAvailUnknowns) {
         if (m.getTemplate().isAvailability()) {
-            return availabilityManager.getHistoricalAvailData(m, begin, end, pc, prependAvailUnknowns);
+            return availabilityManager.getHistoricalAvailData(m, begin, end, pc,
+                prependAvailUnknowns);
         } else {
             return getHistData(m, begin, end, pc);
         }
@@ -967,12 +994,14 @@ public class DataManagerImpl implements DataManager {
      * @return the list of data points
      * 
      */
-    @Transactional(readOnly=true)
-    public PageList<HighLowMetricValue> getHistoricalData(Measurement m, long begin, long end, PageControl pc) {
+    @Transactional(readOnly = true)
+    public PageList<HighLowMetricValue> getHistoricalData(Measurement m, long begin, long end,
+                                                          PageControl pc) {
         return getHistoricalData(m, begin, end, pc, false);
     }
 
-    private PageList<HighLowMetricValue> getHistData(final Measurement m, long begin, long end, final PageControl pc) {
+    private PageList<HighLowMetricValue> getHistData(final Measurement m, long begin, long end,
+                                                     final PageControl pc) {
         checkTimeArguments(begin, end);
         begin = TimingVoodoo.roundDownTime(begin, MINUTE);
         end = TimingVoodoo.roundDownTime(end, MINUTE);
@@ -988,10 +1017,10 @@ public class DataManagerImpl implements DataManager {
             stmt = conn.createStatement();
             try {
                 final boolean sizeLimit = (pc.getPagesize() != PageControl.SIZE_UNLIMITED);
-                final StringBuilder sqlBuf = new StringBuilder().append("SELECT :fields FROM ").append(table).append(
-                    " WHERE timestamp BETWEEN ").append(begin).append(" AND ").append(end).append(
-                    " AND measurement_id=").append(m.getId()).append(" ORDER BY timestamp ").append(
-                    pc.isAscending() ? "ASC" : "DESC");
+                final StringBuilder sqlBuf = new StringBuilder().append("SELECT :fields FROM ")
+                    .append(table).append(" WHERE timestamp BETWEEN ").append(begin)
+                    .append(" AND ").append(end).append(" AND measurement_id=").append(m.getId())
+                    .append(" ORDER BY timestamp ").append(pc.isAscending() ? "ASC" : "DESC");
                 Integer total = null;
                 if (sizeLimit) {
                     // need to get the total count if there is a limit on the
@@ -1004,14 +1033,15 @@ public class DataManagerImpl implements DataManager {
                         return new PageList<HighLowMetricValue>();
                     }
                     if (log.isDebugEnabled()) {
-                        log.debug("paging: offset= " + pc.getPageEntityIndex() + ", pagesize=" + pc.getPagesize());
+                        log.debug("paging: offset= " + pc.getPageEntityIndex() + ", pagesize=" +
+                                  pc.getPagesize());
                     }
                 }
                 final HQDialect dialect = Util.getHQDialect();
                 final int offset = pc.getPageEntityIndex();
                 final int limit = pc.getPagesize();
-                final String sql = (sizeLimit) ? dialect.getLimitBuf(sqlBuf.toString(), offset, limit) : sqlBuf
-                    .toString();
+                final String sql = (sizeLimit) ? dialect.getLimitBuf(sqlBuf.toString(), offset,
+                    limit) : sqlBuf.toString();
                 if (log.isDebugEnabled()) {
                     log.debug(sql);
                 }
@@ -1028,7 +1058,7 @@ public class DataManagerImpl implements DataManager {
             } catch (SQLException e) {
                 throw new SystemException("Can't lookup historical data for " + m, e);
             }
-        }  catch (SQLException e) {
+        } catch (SQLException e) {
             throw new SystemException("Can't open connection", e);
         } finally {
             DBUtil.closeJDBCObjects(LOG_CTX, conn, stmt, rs);
@@ -1039,16 +1069,19 @@ public class DataManagerImpl implements DataManager {
         switch (type) {
             case MeasurementConstants.COLL_TYPE_DYNAMIC:
                 if (usesMetricUnion(begin))
-                    return "AVG(value) AS value, MAX(value) AS peak, " + "MIN(value) AS low, count(*) as points";
+                    return "AVG(value) AS value, MAX(value) AS peak, "
+                           + "MIN(value) AS low, count(*) as points";
                 else
-                    return "AVG(value) AS value, MAX(maxvalue) AS peak, " + "MIN(minvalue) AS low, count(*) as points";
+                    return "AVG(value) AS value, MAX(maxvalue) AS peak, "
+                           + "MIN(minvalue) AS low, count(*) as points";
             case MeasurementConstants.COLL_TYPE_TRENDSUP:
             case MeasurementConstants.COLL_TYPE_STATIC:
                 return "MAX(value) AS value, count(*) as points";
             case MeasurementConstants.COLL_TYPE_TRENDSDOWN:
                 return "MIN(value) AS value, count(*) as points";
             default:
-                throw new IllegalArgumentException("No collection type specified in historical metric query.");
+                throw new IllegalArgumentException(
+                    "No collection type specified in historical metric query.");
         }
     }
 
@@ -1071,8 +1104,9 @@ public class DataManagerImpl implements DataManager {
      * @return the An array of aggregate values
      * 
      */
-    @Transactional(readOnly=true)
-    public double[] getAggregateData(final List<Measurement> measurements, final long begin, final long end) {
+    @Transactional(readOnly = true)
+    public double[] getAggregateData(final List<Measurement> measurements, final long begin,
+                                     final long end) {
         checkTimeArguments(begin, end);
         long interval = end - begin;
         interval = (interval == 0) ? 1 : interval;
@@ -1102,9 +1136,9 @@ public class DataManagerImpl implements DataManager {
      *         represents templateId to data points
      * 
      */
-    @Transactional(readOnly=true)
-    public Map<Integer, double[]> getAggregateDataByTemplate(final List<Measurement> measurements, final long begin,
-                                                             final long end) {
+    @Transactional(readOnly = true)
+    public Map<Integer, double[]> getAggregateDataByTemplate(final List<Measurement> measurements,
+                                                             final long begin, final long end) {
         // the idea here is to try and match the exact query executed by
         // getHistoricalData() when viewing the metric indicators page.
         // By issuing the same query we are hoping that the db's query
@@ -1115,15 +1149,19 @@ public class DataManagerImpl implements DataManager {
         final Map<Integer, List<Measurement>> measIdsByTempl = new HashMap<Integer, List<Measurement>>();
         setMeasurementObjects(measurements, availIds, measIdsByTempl);
         final Integer[] avIds = (Integer[]) availIds.toArray(new Integer[0]);
-        final Map<Integer, double[]> rtn = availabilityManager.getAggregateDataByTemplate(avIds, begin, end);
+        final Map<Integer, double[]> rtn = availabilityManager.getAggregateDataByTemplate(avIds,
+            begin, end);
         rtn.putAll(getAggDataByTempl(measIdsByTempl, begin, end, interval));
         return rtn;
     }
 
-    private final Map<Integer, double[]> getAggDataByTempl(final Map<Integer, List<Measurement>> measIdsByTempl,
-                                                           final long begin, final long end, final long interval) {
+    private final Map<Integer, double[]> getAggDataByTempl(
+                                                           final Map<Integer, List<Measurement>> measIdsByTempl,
+                                                           final long begin, final long end,
+                                                           final long interval) {
         final HashMap<Integer, double[]> rtn = new HashMap<Integer, double[]>(measIdsByTempl.size());
-        for (Iterator<Map.Entry<Integer, List<Measurement>>> it = measIdsByTempl.entrySet().iterator(); it.hasNext();) {
+        for (Iterator<Map.Entry<Integer, List<Measurement>>> it = measIdsByTempl.entrySet()
+            .iterator(); it.hasNext();) {
             final Map.Entry<Integer, List<Measurement>> entry = it.next();
             final Integer tid = entry.getKey();
             final List<Measurement> meas = entry.getValue();
@@ -1138,7 +1176,8 @@ public class DataManagerImpl implements DataManager {
         return rtn;
     }
 
-    private final void setMeasurementObjects(final List<Measurement> measurements, final List<Integer> availIds,
+    private final void setMeasurementObjects(final List<Measurement> measurements,
+                                             final List<Integer> availIds,
                                              final Map<Integer, List<Measurement>> measIdsByTempl) {
         for (Measurement m : measurements) {
 
@@ -1202,9 +1241,10 @@ public class DataManagerImpl implements DataManager {
      * @return the list of data points
      * 
      */
-    @Transactional(readOnly=true)
-    public PageList<HighLowMetricValue> getHistoricalData(List<Measurement> measurements, long begin, long end,
-                                                          long interval, int type, boolean returnMetricNulls,
+    @Transactional(readOnly = true)
+    public PageList<HighLowMetricValue> getHistoricalData(List<Measurement> measurements,
+                                                          long begin, long end, long interval,
+                                                          int type, boolean returnMetricNulls,
                                                           PageControl pc) {
         final List<Integer> availIds = new ArrayList<Integer>();
         final List<Integer> measIds = new ArrayList<Integer>();
@@ -1223,16 +1263,17 @@ public class DataManagerImpl implements DataManager {
             }
         }
         final Integer[] avIds = (Integer[]) availIds.toArray(new Integer[0]);
-        final PageList<HighLowMetricValue> rtn = availabilityManager.getHistoricalAvailData(avIds, begin, end,
-            interval, pc, true);
+        final PageList<HighLowMetricValue> rtn = availabilityManager.getHistoricalAvailData(avIds,
+            begin, end, interval, pc, true);
         final HQDialect dialect = Util.getHQDialect();
-        final int maxExprs = (dialect.getMaxExpressions() == -1) ? Integer.MAX_VALUE : dialect.getMaxExpressions();
+        final int maxExprs = (dialect.getMaxExpressions() == -1) ? Integer.MAX_VALUE : dialect
+            .getMaxExpressions();
         for (int i = 0; i < measIds.size(); i += maxExprs) {
             final int last = Math.min(i + maxExprs, measIds.size());
             final List<Integer> sublist = measIds.subList(i, last);
             final Integer[] mids = (Integer[]) sublist.toArray(new Integer[0]);
-            final PageList<HighLowMetricValue> pList = getHistData(mids, begin, end, interval, type, returnMetricNulls,
-                pc);
+            final PageList<HighLowMetricValue> pList = getHistData(mids, begin, end, interval,
+                type, returnMetricNulls, pc);
             merge(rtn, pList);
         }
         return rtn;
@@ -1252,7 +1293,8 @@ public class DataManagerImpl implements DataManager {
             final int mcount = mval.getCount();
             final int count = val.getCount();
             final int tot = count + mcount;
-            final double high = ((val.getHighValue() * count) + (mval.getHighValue() * mcount)) / tot;
+            final double high = ((val.getHighValue() * count) + (mval.getHighValue() * mcount)) /
+                                tot;
             val.setHighValue(high);
             final double low = ((val.getLowValue() * count) + (mval.getLowValue() * mcount)) / tot;
             val.setLowValue(low);
@@ -1261,8 +1303,9 @@ public class DataManagerImpl implements DataManager {
         }
     }
 
-    private PageList<HighLowMetricValue> getHistData(Integer[] ids, long start, long finish, long interval, int type,
-                                                     boolean returnNulls, PageControl pc) {
+    private PageList<HighLowMetricValue> getHistData(Integer[] ids, long start, long finish,
+                                                     long interval, int type, boolean returnNulls,
+                                                     PageControl pc) {
         if (ids == null || ids.length < 1) {
             return new PageList<HighLowMetricValue>();
         }
@@ -1292,8 +1335,8 @@ public class DataManagerImpl implements DataManager {
                 beginWnd = begin + (pc.getPagenum() * intervalWnd);
                 endWnd = Math.min(end, beginWnd + intervalWnd);
             }
-            final String sql = getHistoricalSQL(selectType, begin, end, interval, beginWnd, endWnd, ids, pc
-                .isDescending());
+            final String sql = getHistoricalSQL(selectType, begin, end, interval, beginWnd, endWnd,
+                ids, pc.isDescending());
             if (debug) {
                 watch.markTimeBegin("getHistoricalSQL");
             }
@@ -1316,8 +1359,8 @@ public class DataManagerImpl implements DataManager {
     }
 
     private PageList<HighLowMetricValue> getPageList(long begin, long end, long interval,
-                                                     List<HighLowMetricValue> points, boolean returnNulls,
-                                                     PageControl pc) {
+                                                     List<HighLowMetricValue> points,
+                                                     boolean returnNulls, PageControl pc) {
         List<HighLowMetricValue> rtn = new ArrayList<HighLowMetricValue>();
         Iterator<HighLowMetricValue> it = points.iterator();
         HighLowMetricValue curr = null;
@@ -1376,18 +1419,21 @@ public class DataManagerImpl implements DataManager {
         return rtn;
     }
 
-    private String getHistoricalSQL(String selectType, long begin, long end, long interval, long beginWnd, long endWnd,
-                                    Integer[] measids, boolean descending) {
-        final long wndSize = (interval > 0) ? ((endWnd - beginWnd) / interval) : (endWnd - beginWnd);
+    private String getHistoricalSQL(String selectType, long begin, long end, long interval,
+                                    long beginWnd, long endWnd, Integer[] measids,
+                                    boolean descending) {
+        final long wndSize = (interval > 0) ? ((endWnd - beginWnd) / interval)
+                                           : (endWnd - beginWnd);
         final String metricUnion = getDataTable(begin, end, measids);
         // measInStmt is not needed for the dynamic EAM_MEASUREMENT_DATA view,
         // but is needed for the rollup tables
-        final String measInStmt = (metricUnion.endsWith(TAB_DATA)) ? "" : MeasTabManagerUtil.getMeasInStmt(measids,
-            true);
-        final StringBuilder sqlbuf = new StringBuilder().append("SELECT begin AS timestamp, ").append(selectType)
-            .append(" FROM ").append("(SELECT ").append(beginWnd).append(" + (").append(interval).append(
-                " * i) AS begin FROM ").append(TAB_NUMS).append(" WHERE i < ").append(wndSize).append(") n, ").append(
-                metricUnion).append(" WHERE timestamp BETWEEN begin AND begin + ").append(interval - 1).append(" ")
+        final String measInStmt = (metricUnion.endsWith(TAB_DATA)) ? "" : MeasTabManagerUtil
+            .getMeasInStmt(measids, true);
+        final StringBuilder sqlbuf = new StringBuilder().append("SELECT begin AS timestamp, ")
+            .append(selectType).append(" FROM ").append("(SELECT ").append(beginWnd).append(" + (")
+            .append(interval).append(" * i) AS begin FROM ").append(TAB_NUMS).append(" WHERE i < ")
+            .append(wndSize).append(") n, ").append(metricUnion).append(
+                " WHERE timestamp BETWEEN begin AND begin + ").append(interval - 1).append(" ")
             .append(measInStmt).append(" GROUP BY begin ORDER BY begin");
         if (descending) {
             sqlbuf.append(" DESC");
@@ -1410,7 +1456,7 @@ public class DataManagerImpl implements DataManager {
      * @return The MetricValue or null if one does not exist.
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public MetricValue getLastHistoricalData(Measurement m) {
         if (m.getTemplate().isAvailability()) {
             return availabilityManager.getLastAvail(m);
@@ -1434,10 +1480,12 @@ public class DataManagerImpl implements DataManager {
         try {
             conn = dbUtil.getConnection();
 
-            final String metricUnion = MeasurementUnionStatementBuilder.getUnionStatement(8 * HOUR, m.getId().intValue());
-            StringBuilder sqlBuf = new StringBuilder().append("SELECT timestamp, value FROM ").append(metricUnion)
-                .append(", (SELECT MAX(timestamp) AS maxt").append(" FROM ").append(metricUnion).append(") mt ")
-                .append("WHERE measurement_id = ").append(m.getId()).append(" AND timestamp = maxt");
+            final String metricUnion = MeasurementUnionStatementBuilder.getUnionStatement(8 * HOUR,
+                m.getId().intValue());
+            StringBuilder sqlBuf = new StringBuilder().append("SELECT timestamp, value FROM ")
+                .append(metricUnion).append(", (SELECT MAX(timestamp) AS maxt").append(" FROM ")
+                .append(metricUnion).append(") mt ").append("WHERE measurement_id = ").append(
+                    m.getId()).append(" AND timestamp = maxt");
 
             stmt = conn.createStatement();
 
@@ -1455,7 +1503,7 @@ public class DataManagerImpl implements DataManager {
                 // No cached value, nothing in the database
                 return null;
             }
-        }  catch (SQLException e) {
+        } catch (SQLException e) {
             log.error("Unable to look up historical data for " + m, e);
             throw new SystemException(e);
         } finally {
@@ -1475,8 +1523,9 @@ public class DataManagerImpl implements DataManager {
      *         used by the Metric viewer and Availabilty Summary portlets.
      * 
      */
-    @Transactional(readOnly=true)
-    public Map<Integer, MetricValue> getLastDataPoints(List<Measurement> measurements, long timestamp) {
+    @Transactional(readOnly = true)
+    public Map<Integer, MetricValue> getLastDataPoints(List<Measurement> measurements,
+                                                       long timestamp) {
         List<Integer> availIds = new ArrayList<Integer>();
         List<Integer> measurementIds = new ArrayList<Integer>();
 
@@ -1543,10 +1592,11 @@ public class DataManagerImpl implements DataManager {
             }
         } catch (SQLException e) {
             throw new SystemException("Cannot get last values", e);
-        }  finally {
+        } finally {
             DBUtil.closeJDBCObjects(LOG_CTX, conn, stmt, null);
             if (log.isDebugEnabled()) {
-                log.debug("getLastDataPoints(): Statement query elapsed " + "time: " + timer.getElapsed());
+                log.debug("getLastDataPoints(): Statement query elapsed " + "time: " +
+                          timer.getElapsed());
             }
         }
         List<DataPoint> dataPoints = convertMetricId2MetricValueMapToDataPoints(data);
@@ -1559,8 +1609,9 @@ public class DataManagerImpl implements DataManager {
      * 
      * 
      */
-    @Transactional(readOnly=true)
-    public ArrayList<Integer> getCachedDataPoints(Integer[] ids, Map<Integer, MetricValue> data, long timestamp) {
+    @Transactional(readOnly = true)
+    public ArrayList<Integer> getCachedDataPoints(Integer[] ids, Map<Integer, MetricValue> data,
+                                                  long timestamp) {
 
         ArrayList<Integer> nodata = new ArrayList<Integer>();
         for (int i = 0; i < ids.length; i++) {
@@ -1578,8 +1629,8 @@ public class DataManagerImpl implements DataManager {
         return nodata;
     }
 
-    private void setDataPoints(Map<Integer, MetricValue> data, long timestamp, Integer[] measIds, Statement stmt)
-        throws SQLException {
+    private void setDataPoints(Map<Integer, MetricValue> data, long timestamp, Integer[] measIds,
+                               Statement stmt) throws SQLException {
         ResultSet rs = null;
         try {
             StringBuilder sqlBuf = getLastDataPointsSQL(timestamp, measIds);
@@ -1594,7 +1645,7 @@ public class DataManagerImpl implements DataManager {
                     MetricValue mval = getMetricValue(rs);
                     data.put(mid, mval);
                     metricDataCache.add(mid, mval); // Add to cache to avoid
-                                                    // lookup
+                    // lookup
                 }
             }
         } finally {
@@ -1603,20 +1654,28 @@ public class DataManagerImpl implements DataManager {
     }
 
     private StringBuilder getLastDataPointsSQL(long timestamp, Integer[] measIds) {
-        String tables = (timestamp != MeasurementConstants.TIMERANGE_UNLIMITED) ? MeasurementUnionStatementBuilder.getUnionStatement(
-            timestamp, System.currentTimeMillis(), measIds) : MeasurementUnionStatementBuilder.getUnionStatement(getPurgeRaw(),
-            measIds);
+        String tables = (timestamp != MeasurementConstants.TIMERANGE_UNLIMITED) ? MeasurementUnionStatementBuilder
+                                                                                   .getUnionStatement(
+                                                                                       timestamp,
+                                                                                       System
+                                                                                           .currentTimeMillis(),
+                                                                                       measIds)
+                                                                               : MeasurementUnionStatementBuilder
+                                                                                   .getUnionStatement(
+                                                                                       getPurgeRaw(),
+                                                                                       measIds);
 
-        StringBuilder sqlBuf = new StringBuilder("SELECT measurement_id, value, timestamp" + " FROM " + tables + ", " +
-                                                 "(SELECT measurement_id AS id, MAX(timestamp) AS maxt" + " FROM " +
-                                                 tables + " WHERE ").append(MeasTabManagerUtil.getMeasInStmt(measIds,
-            false));
+        StringBuilder sqlBuf = new StringBuilder(
+            "SELECT measurement_id, value, timestamp" + " FROM " + tables + ", " +
+                "(SELECT measurement_id AS id, MAX(timestamp) AS maxt" + " FROM " + tables +
+                " WHERE ").append(MeasTabManagerUtil.getMeasInStmt(measIds, false));
 
         if (timestamp != MeasurementConstants.TIMERANGE_UNLIMITED)
             ;
         sqlBuf.append(" AND timestamp >= ").append(timestamp);
 
-        sqlBuf.append(" GROUP BY measurement_id) mt").append(" WHERE timestamp = maxt AND measurement_id = id");
+        sqlBuf.append(" GROUP BY measurement_id) mt").append(
+            " WHERE timestamp = maxt AND measurement_id = id");
         return sqlBuf;
     }
 
@@ -1626,11 +1685,13 @@ public class DataManagerImpl implements DataManager {
      * @param metricId2MetricValueMap The map to convert.
      * @return The list of DataPoints.
      */
-    private List<DataPoint> convertMetricId2MetricValueMapToDataPoints(Map<Integer, MetricValue> metricId2MetricValueMap) {
+    private List<DataPoint> convertMetricId2MetricValueMapToDataPoints(
+                                                                       Map<Integer, MetricValue> metricId2MetricValueMap) {
 
         List<DataPoint> dataPoints = new ArrayList<DataPoint>(metricId2MetricValueMap.size());
 
-        for (Iterator<Map.Entry<Integer, MetricValue>> i = metricId2MetricValueMap.entrySet().iterator(); i.hasNext();) {
+        for (Iterator<Map.Entry<Integer, MetricValue>> i = metricId2MetricValueMap.entrySet()
+            .iterator(); i.hasNext();) {
             Map.Entry<Integer, MetricValue> entry = i.next();
             Integer mid = entry.getKey();
             MetricValue mval = entry.getValue();
@@ -1645,7 +1706,7 @@ public class DataManagerImpl implements DataManager {
      * 
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public double[] getBaselineData(Measurement meas, long begin, long end) {
         if (meas.getTemplate().getAlias().equalsIgnoreCase("availability")) {
             Integer[] mids = new Integer[1];
@@ -1671,9 +1732,10 @@ public class DataManagerImpl implements DataManager {
         try {
             conn = dbUtil.getConnection();
 
-            StringBuilder sqlBuf = new StringBuilder("SELECT MIN(value), AVG(value), MAX(value) FROM ").append(table)
-                .append(" WHERE timestamp BETWEEN ").append(begin).append(" AND ").append(end).append(
-                    " AND measurement_id = ").append(id.intValue());
+            StringBuilder sqlBuf = new StringBuilder(
+                "SELECT MIN(value), AVG(value), MAX(value) FROM ").append(table).append(
+                " WHERE timestamp BETWEEN ").append(begin).append(" AND ").append(end).append(
+                " AND measurement_id = ").append(id.intValue());
 
             stmt = conn.createStatement();
             rs = stmt.executeQuery(sqlBuf.toString());
@@ -1706,8 +1768,9 @@ public class DataManagerImpl implements DataManager {
      * @return the Map of data points
      * 
      */
-    @Transactional(readOnly=true)
-    public Map<Integer, double[]> getAggregateDataByMetric(Integer[] tids, Integer[] iids, long begin, long end,
+    @Transactional(readOnly = true)
+    public Map<Integer, double[]> getAggregateDataByMetric(Integer[] tids, Integer[] iids,
+                                                           long begin, long end,
                                                            boolean useAggressiveRollup) {
         checkTimeArguments(begin, end);
         Map<Integer, double[]> rtn = getAggDataByMetric(tids, iids, begin, end, useAggressiveRollup);
@@ -1724,8 +1787,8 @@ public class DataManagerImpl implements DataManager {
         return rtn;
     }
 
-    private Map<Integer, double[]> getAggDataByMetric(Integer[] tids, Integer[] iids, long begin, long end,
-                                                      boolean useAggressiveRollup) {
+    private Map<Integer, double[]> getAggDataByMetric(Integer[] tids, Integer[] iids, long begin,
+                                                      long end, boolean useAggressiveRollup) {
         // Check the begin and end times
         this.checkTimeArguments(begin, end);
         begin = TimingVoodoo.roundDownTime(begin, MINUTE);
@@ -1743,16 +1806,19 @@ public class DataManagerImpl implements DataManager {
         ResultSet rs = null;
         StopWatch timer = new StopWatch();
 
-        StringBuffer iconj = new StringBuffer(DBUtil.composeConjunctions("instance_id", iids.length));
+        StringBuffer iconj = new StringBuffer(DBUtil
+            .composeConjunctions("instance_id", iids.length));
 
         DBUtil.replacePlaceHolders(iconj, iids);
-        StringBuilder tconj = new StringBuilder(DBUtil.composeConjunctions("template_id", tids.length));
+        StringBuilder tconj = new StringBuilder(DBUtil.composeConjunctions("template_id",
+            tids.length));
 
         try {
             conn = dbUtil.getConnection();
             // The table to query from
             List<Integer> measids = MeasTabManagerUtil.getMeasIds(conn, tids, iids);
-            String table = getDataTable(begin, end, (Integer[]) measids.toArray(new Integer[0]), useAggressiveRollup);
+            String table = getDataTable(begin, end, (Integer[]) measids.toArray(new Integer[0]),
+                useAggressiveRollup);
             // Use the already calculated min, max and average on
             // compressed tables.
             String minMax;
@@ -1761,9 +1827,14 @@ public class DataManagerImpl implements DataManager {
             } else {
                 minMax = " MIN(minvalue), AVG(value), MAX(maxvalue) ";
             }
-            final String aggregateSQL = "SELECT id, " + minMax + " FROM " + table + "," + TAB_MEAS +
-                                        " WHERE timestamp BETWEEN ? AND ? AND measurement_id = id " + " AND " + iconj +
-                                        " AND " + tconj + " GROUP BY id";
+            final String aggregateSQL = "SELECT id, " +
+                                        minMax +
+                                        " FROM " +
+                                        table +
+                                        "," +
+                                        TAB_MEAS +
+                                        " WHERE timestamp BETWEEN ? AND ? AND measurement_id = id " +
+                                        " AND " + iconj + " AND " + tconj + " GROUP BY id";
             if (log.isTraceEnabled()) {
                 log.trace("getAggregateDataByMetric(): " + aggregateSQL);
             }
@@ -1792,13 +1863,14 @@ public class DataManagerImpl implements DataManager {
                 DBUtil.closeResultSet(LOG_CTX, rs);
             }
             if (log.isTraceEnabled()) {
-                log.trace("getAggregateDataByMetric(): Statement query elapsed " + "time: " + timer.getElapsed());
+                log.trace("getAggregateDataByMetric(): Statement query elapsed " + "time: " +
+                          timer.getElapsed());
             }
             return resMap;
         } catch (SQLException e) {
             log.debug("getAggregateDataByMetric()", e);
             throw new SystemException(e);
-        }  finally {
+        } finally {
             DBUtil.closeJDBCObjects(LOG_CTX, conn, stmt, null);
         }
     }
@@ -1816,8 +1888,9 @@ public class DataManagerImpl implements DataManager {
      * @return the map of data points
      * 
      */
-    @Transactional(readOnly=true)
-    public Map<Integer, double[]> getAggregateDataByMetric(List<Measurement> measurements, long begin, long end,
+    @Transactional(readOnly = true)
+    public Map<Integer, double[]> getAggregateDataByMetric(List<Measurement> measurements,
+                                                           long begin, long end,
                                                            boolean useAggressiveRollup) {
         checkTimeArguments(begin, end);
         List<Integer> avids = new ArrayList<Integer>();
@@ -1831,13 +1904,15 @@ public class DataManagerImpl implements DataManager {
                 mids.add(meas.getId());
             }
         }
-        Map<Integer, double[]> rtn = getAggDataByMetric((Integer[]) mids.toArray(new Integer[0]), begin, end,
-            useAggressiveRollup);
-        rtn.putAll(availabilityManager.getAggregateData((Integer[]) avids.toArray(new Integer[0]), begin, end));
+        Map<Integer, double[]> rtn = getAggDataByMetric((Integer[]) mids.toArray(new Integer[0]),
+            begin, end, useAggressiveRollup);
+        rtn.putAll(availabilityManager.getAggregateData((Integer[]) avids.toArray(new Integer[0]),
+            begin, end));
         return rtn;
     }
 
-    private Map<Integer, double[]> getAggDataByMetric(Integer[] mids, long begin, long end, boolean useAggressiveRollup) {
+    private Map<Integer, double[]> getAggDataByMetric(Integer[] mids, long begin, long end,
+                                                      boolean useAggressiveRollup) {
         // Check the begin and end times
         this.checkTimeArguments(begin, end);
         begin = TimingVoodoo.roundDownTime(begin, MINUTE);
@@ -1857,7 +1932,8 @@ public class DataManagerImpl implements DataManager {
         ResultSet rs = null;
         StopWatch timer = new StopWatch();
 
-        StringBuffer mconj = new StringBuffer(DBUtil.composeConjunctions("measurement_id", mids.length));
+        StringBuffer mconj = new StringBuffer(DBUtil.composeConjunctions("measurement_id",
+            mids.length));
         DBUtil.replacePlaceHolders(mconj, mids);
 
         // Use the already calculated min, max and average on
@@ -1869,8 +1945,9 @@ public class DataManagerImpl implements DataManager {
             minMax = " MIN(minvalue), AVG(value), MAX(maxvalue), ";
         }
 
-        final String aggregateSQL = "SELECT measurement_id, " + minMax + " count(*) " + " FROM " + table +
-                                    " WHERE timestamp BETWEEN ? AND ? AND " + mconj + " GROUP BY measurement_id";
+        final String aggregateSQL = "SELECT measurement_id, " + minMax + " count(*) " + " FROM " +
+                                    table + " WHERE timestamp BETWEEN ? AND ? AND " + mconj +
+                                    " GROUP BY measurement_id";
 
         try {
             conn = dbUtil.getConnection();
@@ -1903,19 +1980,20 @@ public class DataManagerImpl implements DataManager {
             }
 
             if (log.isTraceEnabled())
-                log.trace("getAggregateDataByMetric(): Statement query elapsed " + "time: " + timer.getElapsed());
+                log.trace("getAggregateDataByMetric(): Statement query elapsed " + "time: " +
+                          timer.getElapsed());
 
             return resMap;
         } catch (SQLException e) {
             log.debug("getAggregateDataByMetric()", e);
             throw new SystemException(e);
-        }  finally {
+        } finally {
             DBUtil.closeJDBCObjects(LOG_CTX, conn, stmt, null);
         }
     }
 
     // TODO remove after HE-54 allows injection
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public Analyzer getAnalyzer() {
         boolean analyze = true;
         try {
@@ -1927,7 +2005,8 @@ public class DataManagerImpl implements DataManager {
             log.debug("Error looking up server configs", e);
         } finally {
             if (analyze) {
-                return (Analyzer) ProductProperties.getPropertyInstance("hyperic.hq.measurement.analyzer");
+                return (Analyzer) ProductProperties
+                    .getPropertyInstance("hyperic.hq.measurement.analyzer");
             }
         }
         return null;

@@ -138,6 +138,7 @@ public class AlertManagerImpl implements AlertManager {
 
         // ...and start using the POJOs instead
         pojoPager = Pager.getDefaultPager();
+        ConcurrentStatsCollector.getInstance().register(ConcurrentStatsCollector.FIRE_ALERT_TIME);
     }
 
     /**

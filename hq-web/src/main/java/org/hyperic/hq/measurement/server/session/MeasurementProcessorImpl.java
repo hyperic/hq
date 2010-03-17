@@ -30,6 +30,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
@@ -83,6 +85,11 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
         this.srnManager = srnManager;
         this.agentMonitor = agentMonitor;
         this.measurementCommandsClientFactory = measurementCommandsClientFactory;
+    }
+    
+    @PostConstruct
+    public void initStatsCollector() {
+        ConcurrentStatsCollector.getInstance().register(ConcurrentStatsCollector.MEASUREMENT_SCHEDULE_TIME);
     }
 
     /**

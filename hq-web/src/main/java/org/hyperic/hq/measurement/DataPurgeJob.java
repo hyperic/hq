@@ -29,6 +29,7 @@ import java.beans.Introspector;
 import java.sql.SQLException;
 import java.util.Properties;
 
+import javax.annotation.PostConstruct;
 import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
@@ -70,6 +71,14 @@ public class DataPurgeJob implements Runnable {
         this.measurementManager = measurementManager;
         this.eventLogManager = eventLogManager;
         this.dataCompress = dataCompress;
+    }
+    
+    @PostConstruct
+    public void initStatsCollector() {
+        ConcurrentStatsCollector.getInstance().register(ConcurrentStatsCollector.METRIC_DATA_COMPRESS_TIME);
+        ConcurrentStatsCollector.getInstance().register(ConcurrentStatsCollector.DB_ANALYZE_TIME);
+        ConcurrentStatsCollector.getInstance().register(ConcurrentStatsCollector.PURGE_EVENT_LOGS_TIME);
+        ConcurrentStatsCollector.getInstance().register(ConcurrentStatsCollector.PURGE_MEASUREMENTS_TIME);
     }
 
     public synchronized void run() {
