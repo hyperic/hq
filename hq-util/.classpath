@@ -26,5 +26,7 @@
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
 	<classpathentry kind="lib" path="/hq-common/thirdparty/lib/spring/org.springframework.beans-3.0.1.RELEASE-A.jar"/>
 	<classpathentry kind="lib" path="/hq-common/thirdparty/lib/spring/org.springframework.context-3.0.1.RELEASE-A.jar"/>
+	<classpathentry kind="lib" path="/hq-common/thirdparty/lib/spring/org.springframework.roo.file.monitor-1.0.2.RELEASE.jar"/>
+	<classpathentry kind="lib" path="/hq-common/thirdparty/lib/spring/org.springframework.roo.file.monitor.polling-1.0.2.RELEASE.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

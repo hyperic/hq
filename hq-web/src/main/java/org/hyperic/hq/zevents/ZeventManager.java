@@ -178,6 +178,7 @@ public class ZeventManager implements ZeventEnqueuer {
         };
 
         diagnosticsLogger.addDiagnosticObject(myDiag);
+        ConcurrentStatsCollector.getInstance().register(ConcurrentStatsCollector.ZEVENT_QUEUE_SIZE);
     }
 
     public long getQueueSize() {

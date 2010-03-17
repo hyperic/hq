@@ -41,6 +41,8 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
@@ -127,6 +129,11 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         this.availabilityCache = availabilityCache;
     }
 
+    @PostConstruct
+    public void initStatsCollector() {
+        ConcurrentStatsCollector.getInstance().register(ConcurrentStatsCollector.AVAIL_MANAGER_METRICS_INSERTED);
+    }
+    
     // To break AvailabilityManager - MeasurementManager circular dependency
     // TODO: Check why we need this when we have
     // MeasurementManagerImpl.setCircularDependencies()?

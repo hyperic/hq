@@ -19,6 +19,7 @@ package org.hyperic.hq.bizapp.server.mdb;
 
 import java.util.Collection;
 
+import javax.annotation.PostConstruct;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
@@ -55,6 +56,11 @@ public class RegisteredDispatcherImpl implements MessageListener {
     @Autowired
     public RegisteredDispatcherImpl(RegisteredTriggers registeredTriggers) {
         this.registeredTriggers = registeredTriggers;
+    }
+    
+    @PostConstruct
+    public void initStatsCollector() {
+        ConcurrentStatsCollector.getInstance().register(ConcurrentStatsCollector.EVENT_PROCESSING_TIME);
     }
 
     /**

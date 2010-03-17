@@ -33,6 +33,7 @@ public class MergePlatformAndServersEventListener implements ZeventListener<Merg
 
     @PostConstruct
     public void subscribeForEvents() {
+        _stats.register(ConcurrentStatsCollector.RUNTIME_PLATFORM_AND_SERVER_MERGER);
         Set<Class<?>>events = new HashSet<Class<?>>();
         events.add(MergePlatformAndServersZevent.class);
         zeventManager.addBufferedListener(events, this);

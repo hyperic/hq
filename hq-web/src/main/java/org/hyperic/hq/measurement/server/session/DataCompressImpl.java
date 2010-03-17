@@ -30,8 +30,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Properties;
 
+import javax.annotation.PostConstruct;
 import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
@@ -46,6 +48,7 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.shared.DataCompress;
 import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
+import org.hyperic.hq.product.server.session.ProductPluginDeployer;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.TimeUtil;
 import org.hyperic.util.jdbc.DBUtil;
@@ -66,6 +69,7 @@ public class DataCompressImpl implements DataCompress {
     private final Log log = LogFactory.getLog(LOG_CTX);
 
     // Data tables
+    private static final String MEAS_VIEW = MeasTabManagerUtil.MEAS_VIEW;
     private static final String TAB_DATA = MeasurementConstants.TAB_DATA;
     private static final String TAB_DATA_1H = MeasurementConstants.TAB_DATA_1H;
     private static final String TAB_DATA_6H = MeasurementConstants.TAB_DATA_6H;
@@ -91,6 +95,81 @@ public class DataCompressImpl implements DataCompress {
         this.serverConfigManager = serverConfigManager;
         this.alertManager = alertManager;
     }
+    
+    @PostConstruct
+    public void initDatabase() {
+        Connection conn = null;
+
+        try {
+
+            conn = dbUtil.getConnection();
+
+            DatabaseRoutines[] dbrs = getDBRoutines(conn);
+
+            for (int i = 0; i < dbrs.length; i++) {
+                dbrs[i].runRoutines(conn);
+            }
+        } catch (SQLException e) {
+            log.error("SQLException creating connection: ", e);
+        } finally {
+            DBUtil.closeConnection(ProductPluginDeployer.class, conn);
+        }
+    }
+
+    interface DatabaseRoutines {
+        public void runRoutines(Connection conn) throws SQLException;
+    }
+
+    private DatabaseRoutines[] getDBRoutines(Connection conn) throws SQLException {
+        ArrayList<CommonRoutines> routines = new ArrayList<CommonRoutines>(2);
+
+        routines.add(new CommonRoutines());
+
+        return (DatabaseRoutines[]) routines.toArray(new DatabaseRoutines[0]);
+    }
+
+    class CommonRoutines implements DatabaseRoutines {
+        public void runRoutines(Connection conn) throws SQLException {
+            final String UNION_BODY = "SELECT * FROM HQ_METRIC_DATA_0D_0S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_0D_1S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_1D_0S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_1D_1S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_2D_0S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_2D_1S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_3D_0S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_3D_1S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_4D_0S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_4D_1S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_5D_0S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_5D_1S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_6D_0S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_6D_1S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_7D_0S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_7D_1S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_8D_0S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_8D_1S";
+
+            final String HQ_METRIC_DATA_VIEW = "CREATE VIEW " + MEAS_VIEW + " AS " + UNION_BODY;
+
+            final String EAM_METRIC_DATA_VIEW = "CREATE VIEW " + TAB_DATA + " AS " + UNION_BODY +
+                                                " UNION ALL SELECT * FROM HQ_METRIC_DATA_COMPAT";
+
+            Statement stmt = null;
+            try {
+                HQDialect dialect = Util.getHQDialect();
+                stmt = conn.createStatement();
+                if (!dialect.viewExists(stmt, TAB_DATA))
+                    stmt.execute(EAM_METRIC_DATA_VIEW);
+                if (!dialect.viewExists(stmt, MEAS_VIEW))
+                    stmt.execute(HQ_METRIC_DATA_VIEW);
+            } catch (SQLException e) {
+                log.debug("Error Creating Metric Data Views", e);
+            } finally {
+                DBUtil.closeStatement(ProductPluginDeployer.class, stmt);
+            }
+        }
+    }
+
 
     /**
      * Get the server purge configuration, loaded on startup.
