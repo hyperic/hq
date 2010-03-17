@@ -4,7 +4,6 @@
 		<wb-resource deploy-path="/" source-path="/src/main/webapp"/>
 		<wb-resource deploy-path="/WEB-INF/hq-plugins" source-path="/target/war-expanded/WEB-INF/hq-plugins"/>
 		<wb-resource deploy-path="/hqu" source-path="/target/war-expanded/hqu"/>
-		<wb-resource deploy-path="/WEB-INF/sigar_bin" source-path="/target/war-expanded/WEB-INF/sigar_bin"/>
 		<wb-resource deploy-path="/WEB-INF/lib" source-path="/target/war-expanded/WEB-INF/lib"/>
 		<wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
 		<wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/>
