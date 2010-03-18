@@ -23,17 +23,17 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.hyperic.hq.product.PluginException;
+import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.Win32ControlPlugin;
 import org.hyperic.hq.product.jmx.MxServerDetector;
 import org.hyperic.hq.product.jmx.MxUtil;
 import org.hyperic.hq.product.jmx.MxServerDetector.MxProcess;
-import org.hyperic.hq.product.pluginxml.PluginData;
+import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.config.ConfigSchema;
 
 import org.hyperic.sigar.win32.RegistryKey;
 import org.hyperic.sigar.win32.Win32Exception;
@@ -168,31 +168,17 @@ public class TomcatServerDetector
         if (!correctVersion) {
             return false;
         }
-
-        Iterator keys = PluginData.getGlobalProperties().keySet().iterator();
-        String extend_server = null;
-        while (keys.hasNext()) {
-            String key = (String) keys.next();
-            if (key.toUpperCase().endsWith(".EXTENDS")) {
-                String val = (String) PluginData.getGlobalProperties().get(key);
-                Pattern p = Pattern.compile(val);
-                Matcher m = p.matcher(getTypeInfo().getName());
-                boolean find = m.find();
-                getLog().debug("[isInstallTypeVersion] " + key + "=" + val + " (" + getTypeInfo().getName() + ") m.find()=" + find);
-                if (find) {
-                    extend_server = key.substring(0, key.lastIndexOf("."));
-                    final String tcServerVersionFile = getTypeProperty(extend_server, "VERSION_FILE");
-                    if (tcServerVersionFile != null) {
-                        File file = new File(catalinaHome, tcServerVersionFile);
-                        if (file.exists()) {
-                            getLog().debug("[isInstallTypeVersion] '" + getTypeInfo().getName() + " [" + process.getInstallPath() + "]' is a '" + extend_server + "'");
-                            return false;
-                        } else {
-                            getLog().debug("[isInstallTypeVersion] '" + getTypeInfo().getName() + " [" + process.getInstallPath() + "]' is not a '" + extend_server + "'");
-                        }
-                    }
-                }
-            }
+        // catalina-ha.jar will be in both tc Server 6.0 and Apache Tomcat 6.0.
+        // We need
+        // to further distinguish....
+        final String tcServerVersionFile = getTypeProperty("SpringSource tc Server 6.0", "VERSION_FILE");
+        if (tcServerVersionFile == null) {
+            // tc Server plugin is not installed
+            return true;
+        }
+        File file = new File(catalinaHome, tcServerVersionFile);
+        if (file.exists()) {
+            return false;
         }
         return true;
     }
