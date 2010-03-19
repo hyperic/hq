@@ -108,7 +108,7 @@
             collectionType="trendsup"/>
   </metrics>
 
-  <metrics name="WebSphere Admin 6.0">
+  <metrics name="WebSphere Admin 6.0" include="jvm">
     <metric name="Availability"
             template="${domain}:Module=adminModule:${alias}"
             category="AVAILABILITY"
@@ -404,10 +404,6 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
             description="SOAP Connector Host"
             default="localhost"/>
 
-    <option name="server.node"
-            description="App Server Node"
-            default="hostname"/>
-
     <option name="username"
             description="Username for Authentication"
             optional="true"/>
@@ -426,19 +422,20 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
           description="Admin Server">
 
     <property name="UNIQUE_FILE"
-              value="../../properties/version/WAS.product"/>
+              value="properties/version/WAS.product"/>
 
     <plugin type="measurement"
             class="WebsphereAdminMeasurementPlugin"/>
 
     <plugin type="collector"
-            class="WebsphereAdminServerCollector"/>
+            class="WebsphereServerCollector"/>
+        <!--class="WebsphereAdminServerCollector"/-->
 
     <plugin type="control"
             class="WebsphereControlPlugin"/>
 
     <plugin type="autoinventory"
-            class="WebsphereDetector"/>
+            class="WebsphereAdminDetector"/>
 
     <scan registry="${websphere.regkey}">
       <include name="InstallLocation"/>
@@ -456,6 +453,9 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
           version="6.0"
           description="Application Server">
 
+    <property name="UNIQUE_FILE"
+              value="properties/version/WAS.product"/>
+
     <plugin type="measurement"
             class="WebsphereJmxMeasurementPlugin"/>
 
@@ -468,14 +468,11 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
     <plugin type="log_track"
             class="WebsphereTraceLogFileTrackPlugin"/>
 
-    <config include="connector">
-      <option name="server.name"
-              description="App Server Name"
-              default="server1"/>
-      <option name="server.port"
-              description="App Server Port"
-              default="9080"/>
-    </config>
+    <plugin type="autoinventory"
+            class="WebsphereDetector"/>
+
+
+    <config include="connector"/>
 
     <properties>
       <property name="javaVendor"

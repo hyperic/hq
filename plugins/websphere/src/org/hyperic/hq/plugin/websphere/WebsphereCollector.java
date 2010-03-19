@@ -84,7 +84,8 @@ public abstract class WebsphereCollector extends Collector {
 
     protected void init() throws PluginException {
         AdminClient mServer = getMBeanServer();
-
+        if(mServer==null) return;
+        
         try {
             this.domain = mServer.getDomainName();
         } catch (ConnectorException e) {
@@ -121,7 +122,8 @@ public abstract class WebsphereCollector extends Collector {
         } catch (MetricUnreachableException e) {
             setAvailability(false);
             setErrorMessage(e.getMessage());
-            log.error(e.getMessage(), e);
+            if(log.isDebugEnabled())
+                log.error(e.getMessage(), e);
             return null;
         }
 
@@ -129,8 +131,13 @@ public abstract class WebsphereCollector extends Collector {
 
     protected ObjectName resolve(AdminClient mServer, ObjectName name)
         throws PluginException {
-
-        return WebsphereUtil.resolve(mServer, name);
+        try{
+            return WebsphereUtil.resolve(mServer, name);
+        }catch(PluginException e){
+            if(log.isDebugEnabled())
+                log.error(e.getMessage(), e);
+            throw e;
+        }
     }
 
     protected Object getAttribute(AdminClient mServer,
@@ -152,8 +159,10 @@ public abstract class WebsphereCollector extends Collector {
             }
             return o;
         } catch (Exception e) {
-            log.error("getAttribute(" + name + ", " + attr +
-                      "): " + e.getMessage(), e);
+            if (log.isDebugEnabled()) {
+               log.debug("getAttribute(" + name + ", " + attr +
+                          "): " + e.getMessage(), e);
+            }
             return null;
         }
     }

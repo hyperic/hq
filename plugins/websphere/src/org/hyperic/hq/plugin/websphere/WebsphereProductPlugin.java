@@ -78,6 +78,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
     public static final String PROP_SERVER_NODE    = "server.node";
     public static final String PROP_SERVER_NAME    = "server.name";
     public static final String PROP_SERVER_PORT    = "server.port";
+    public static final String PROP_SERVER_CELL    = "server.cell";
 
     public static final String PROP_THRPOOL_NAME   = "thrpool";
     public static final String PROP_CONNPOOL_NAME  = "connpool";
@@ -627,11 +628,10 @@ public class WebsphereProductPlugin extends ProductPlugin {
         List servers = getServerProcessList();
         if (servers.size() != 0) {
             for (Iterator it = servers.iterator(); it.hasNext(); ) {
-                WebsphereDetector.Process process =
-                    (WebsphereDetector.Process) it.next();
+                WebSphereProcess process = (WebSphereProcess) it.next();
 
-                if (process.serverRoot != null) {
-                    File candidate = new File(process.serverRoot, lookFor);
+                if (process.getServerRoot() != null) {
+                    File candidate = new File(process.getServerRoot(), lookFor);
                     if (candidate.exists()) {
                         log.debug("Getting WAS properties from profile under server.root: " +
                                   candidate);

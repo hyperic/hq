@@ -31,8 +31,8 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.text.MessageFormat;
 
-import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -71,124 +71,89 @@ public class WebsphereDetector
         "State.Name.eq=java,Args.*.eq=com.ibm.ws.runtime.WsServer";
 
     private static final String SOAP_PORT_EXPR =
-        "//specialEndpoints[@endPointName=\"SOAP_CONNECTOR_ADDRESS\"]//@port";
+        "//serverEntries[@serverName=\"{0}\"]//specialEndpoints[@endPointName=\"SOAP_CONNECTOR_ADDRESS\"]//@port";
 
-    private WebsphereRuntimeDiscoverer discoverer = null;
+    private static final String SOAP_HOST_EXPR =
+        "//serverEntries[@serverName=\"{0}\"]//specialEndpoints[@endPointName=\"SOAP_CONNECTOR_ADDRESS\"]//@host";
+
+    protected WebsphereRuntimeDiscoverer discoverer = null;
     private String node = null;
-    private String port = null;
-    private String installpath;
 
-    protected List discoverServers(ConfigResponse config)
-        throws PluginException {
-
+    protected List discoverServices(ConfigResponse config) throws PluginException {
         if (this.discoverer == null) {
             String version = getTypeInfo().getVersion();
-            this.discoverer = new WebsphereRuntimeDiscoverer(version,this);
+            this.discoverer = new WebsphereRuntimeDiscoverer(version, this);
         }
-
-        //for use w/ -jar hq-product.jar or agent.properties
-        Properties props = getManager().getProperties();
-        String[] credProps = {
-            WebsphereProductPlugin.PROP_USERNAME,
-            WebsphereProductPlugin.PROP_PASSWORD,
-            WebsphereProductPlugin.PROP_SERVER_NODE
-        };
-        for (int i=0; i<credProps.length; i++) {
-            String name = credProps[i];
-            String value =
-                props.getProperty(name, config.getValue(name));
-            if (value == null) {
-                //prevent NPE since user/pass is not required
-                value = "";
-            }
-            config.setValue(name, value);
-        }
-
-        return this.discoverer.discoverServers(config);
+        return this.discoverer.discoverServices(config);
     }
 
     protected String getProcessQuery() {
         return PTQL_QUERY;
     }
 
-    protected String getAdminHost() {
-        return getManager().getProperty(WebsphereProductPlugin.PROP_ADMIN_HOST,
-                                        "localhost");
+    public String getAdminHost(WebSphereProcess proc) {
+        return getAdminHost(findServerIndex(proc), proc.getServer());
     }
 
-    private File findServerIndex() {
-        log.debug("[findServerIndex] installpath='"+this.installpath+"'");
 
-        //any serverindex.xml will do.
-        File[] cells =
-            new File(this.installpath + "/config/cells").listFiles();
-
-        if (cells == null) {
-            return null;
-        }
-
-        log.debug("[findServerIndex] cells="+Arrays.asList(cells));
-
-        for (int i=0; i<cells.length; i++) {
-            File[] nodes =
-                new File(cells[i], "nodes").listFiles();
-
-            if (nodes == null) {
-                continue;
-            }
-
-            for (int j=0; j<nodes.length; j++) {
-                File index = new File(nodes[j], "serverindex.xml");
-                if (index.exists() && index.canRead()) {
-                    log.debug("[findServerIndex] index='"+index.getAbsolutePath()+"'");
-                    return index;
-                }
-            }
-        }
-
-        return null;
-    }
-
-    protected String getAdminPort() {
-        if (this.port != null) {
-            return this.port;
-        }
-        final String prop =
-            WebsphereProductPlugin.PROP_ADMIN_PORT;
-
-        File index = findServerIndex();
-
+    public String getAdminHost(File index, String serverName) {
+        String host = null;
+        final String prop = WebsphereProductPlugin.PROP_ADMIN_HOST;
+        Object[] servers = {serverName};
         if (index != null) {
-            this.port =
-                getXPathValue(index, SOAP_PORT_EXPR);
-            getLog().debug("Configuring " + prop + "=" + this.port +
-                           " from: " + index);
+            host = getXPathValue(index, MessageFormat.format(SOAP_HOST_EXPR, servers));
+            getLog().debug("Configuring " + prop + "=" + host + " from: " + index);
+        }
+        if (host == null) {
+            host = getManager().getProperty(prop, "localhost");
         }
 
-        if (this.port == null) {
-            this.port =
-                getManager().getProperty(prop, "8880");
+        if(host.equals("*")){
+            host="localhost";
         }
+        return host;
+    }
 
-        return this.port;
+    private File findServerIndex(WebSphereProcess proc) {
+        if(proc==null) return null;
+        File index = new File(proc.getServerRoot()+"/config/cells/"+proc.getCell()+"/nodes/"+proc.getNode()+"/serverindex.xml");
+        if(!index.exists()){
+            index=null;
+        }
+        return index;
+    }
+
+    public String getAdminPort(WebSphereProcess proc) {
+        return getAdminPort(findServerIndex(proc), proc.getServer());
+    }
+
+    public String getAdminPort(File index, String serverName) {
+        String port = null;
+        final String prop = WebsphereProductPlugin.PROP_ADMIN_PORT;
+
+        Object[] servers = {serverName};
+        if (index != null) {
+            String query=MessageFormat.format(SOAP_PORT_EXPR, servers);
+            port = getXPathValue(index, query);
+            getLog().debug("Configuring " + prop + "=" + port + " from: " + index);
+        }
+        return port;
     }
 
     protected String getNodeName() {
         return this.node;
     }
 
-    protected String getStartupScript() {
+    protected static String getStartupScript() {
         if (isWin32()) {
-            return "bin\\startNode.bat";
+            return "bin\\startServer.bat";
         }
         else {
-            return "bin/startNode.sh";
+            return "bin/startServer.sh";
         }
     }
 
     protected void initDetector(File root) {
-        this.installpath = root.getAbsolutePath();
-
         //sadly, the setupCmdLine script is the
         //best way to determine the node name
         final String NODE_PROP = "WAS_NODE=";
@@ -262,24 +227,20 @@ public class WebsphereDetector
         return fqdn;
     }
 
-    protected Properties getProductConfig(File path) {
+    protected Properties getProductConfig(WebSphereProcess proc) {
         Properties productProps = new Properties();
 
         productProps.setProperty(WebsphereProductPlugin.PROP_ADMIN_HOST,
-                                 getAdminHost());
+                                 getAdminHost(proc));
 
         productProps.setProperty(WebsphereProductPlugin.PROP_ADMIN_PORT,
-                                 getAdminPort());
+                                 getAdminPort(proc));
 
-        String node = getNodeName();
-        if (node == null) {
-            // Use next-to-last argument in the command line as the default
-            
-            Process p = (Process) getServerProcessList().get(0);
-            node = p.defaultNode;
-        }
-        productProps.setProperty(WebsphereProductPlugin.PROP_SERVER_NODE,
-                                 node);
+        productProps.setProperty(WebsphereProductPlugin.PROP_SERVER_NODE, proc.getNode());
+
+        productProps.setProperty(WebsphereProductPlugin.PROP_SERVER_CELL, proc.getCell());
+
+        productProps.setProperty(WebsphereProductPlugin.PROP_SERVER_NAME, proc.getServer());
 
         return productProps;
     }
@@ -288,32 +249,6 @@ public class WebsphereDetector
         return isWin32();
     }
 
-    static class Process {
-        String installRoot; // /opt/WebSphere/AppServer
-        String serverRoot; // /opt/WebSphere/AppServer/profiles/default
-        String defaultNode; // node name, next-to-last arg
-
-        boolean isConfigured() {
-            return
-                (this.installRoot != null) &&
-                (this.serverRoot  != null) &&
-                (this.defaultNode != null);
-        }
-        
-        boolean isPropsConfigured() {
-            return
-            (this.installRoot != null) &&
-            (this.serverRoot  != null);
-        }
-
-        public String toString() {
-            return
-                "was.install.root=" + this.installRoot +
-                ", server.root=" + this.serverRoot +
-                ", server.node=" + this.defaultNode;
-        }
-    }
-    
     protected static List getServerProcessList(String query) {
         final String wasProp  = "-Dwas.install.root=";
         final String rootProp = "-Dserver.root="; //5.x, optional in 6.1
@@ -324,30 +259,33 @@ public class WebsphereDetector
 
         for (int i=0; i<pids.length; i++) {
             String[] args = getProcArgs(pids[i]);
-            Process process = new Process();
+            WebSphereProcess process = new WebSphereProcess();
+
+            // next-to-last arg should be node name
+            int ai=args.length;
+            if(args[ai - 1].trim().equals("")) ai--; // some times the las arg is a " "
+            if (args.length > 3) {
+                process.setServer(args[ai - 1]);
+                process.setNode(args[ai - 2]);
+                process.setCell(args[ai - 3]);
+            }
 
             for (int j=0; j<args.length; j++) {
                 String arg = args[j];
 
                 if (arg.startsWith(wasProp)) {
-                    process.installRoot =
-                        arg.substring(wasProp.length(), arg.length());
+                    process.setInstallRoot(arg.substring(wasProp.length(), arg.length()));
                 }
                 else if (arg.startsWith(rootProp)) {
-                    process.serverRoot =
-                        arg.substring(rootProp.length(), arg.length());
+                    process.setServerRoot(arg.substring(rootProp.length(), arg.length()));
                 }
 
                 if (process.isPropsConfigured()) {
-                    servers.add(process);
-                    break;
+                   log.debug("[getServerProcessList] process=" + process);
+                   servers.add(process);
+                   break;
                 }
-            }
-            
-            // next-to-last arg should be node name
-            if (args.length > 2) {
-                process.defaultNode = args[args.length - 2];
-            }
+            }            
         }
 
         return servers;
@@ -360,7 +298,7 @@ public class WebsphereDetector
             return null;
         }
 
-        return ((Process)servers.get(0)).installRoot;
+        return ((WebSphereProcess) servers.get(0)).getInstallRoot();
     }
 
     //used for 6.0 and 6.1
@@ -401,26 +339,16 @@ public class WebsphereDetector
 
     protected boolean isComponentVersion(File file) {
         String version = getComponentVersion(file);
-        log.debug("version= '"+version+"' type='"+getTypeInfo().getVersion()+"'");
-        return version.startsWith(getTypeInfo().getVersion());
+        boolean res=version.startsWith(getTypeInfo().getVersion());
+        log.debug("version= '"+version+"' type='"+getTypeInfo().getVersion()+"' res="+res);
+        return res;
     }
 
-    protected List getServerList(File serverDir, String version)
+    protected List getServerList(File serverDir, String version,WebSphereProcess proc)
         throws PluginException {
 
-        log.debug("[getServerList] ("+version+") "+serverDir);
-
-        File controlScript = null;
-
-        if (!isServiceControl()) {
-            controlScript =
-                new File(serverDir, getStartupScript());
-
-            if (!controlScript.exists()) {
-                this.log.debug(controlScript + " Not found");
-                return null;
-            }
-        }
+        log.debug("[getServerList] ("+version+") "+proc.getInstallRoot());
+        List servers = new ArrayList();
 
         //make sure detector version is that of was version
         //else the 5.0 detector will report 6.0 servers
@@ -438,7 +366,7 @@ public class WebsphereDetector
             getTypeProperty("UNIQUE_FILE");
 
         if (uniqueFile != null) {
-            File file = new File(serverDir, uniqueFile);
+            File file = new File(proc.getInstallRoot(), uniqueFile);
             boolean exists = file.exists();
 
             log.debug(getTypeInfo().getName() + " '" +
@@ -453,8 +381,6 @@ public class WebsphereDetector
                 }
             }
         }
-        
-        List servers = new ArrayList();
 
         initDetector(serverDir);
 
@@ -471,11 +397,14 @@ public class WebsphereDetector
                 type = type.substring(0, type.length()-3) + version;
             }
         }
-        server.setName(getPlatformName() + " " + type);
+
+        server.setIdentifier(proc.getIdentifier());
+        server.setName(getPlatformName() + " " + type + " " + proc.getServerName());
 
         ConfigResponse controlConfig = null;
 
         if (!isServiceControl()) {
+            File controlScript = new File( proc.getServerRoot(), getStartupScript());
             Properties controlProps = new Properties();
             controlProps.setProperty(ServerControlPlugin.PROP_PROGRAM,
                                      controlScript.getAbsolutePath());
@@ -484,7 +413,7 @@ public class WebsphereDetector
         }
 
         ConfigResponse productConfig =
-            new ConfigResponse(getProductConfig(serverDir));
+            new ConfigResponse(getProductConfig(proc));
 
         if (WebsphereProductPlugin.isOSGi()) {
             String prop = WebsphereProductPlugin.PROP_INSTALL_ROOT;
@@ -509,7 +438,6 @@ public class WebsphereDetector
 
         this.log.debug("Detected " + server.getName() +
                        " in " + serverDir);
-
         return servers;
     }
 
@@ -526,21 +454,25 @@ public class WebsphereDetector
             version = version.trim().substring(0, 3);
         }
 
-        return getServerList(new File(path), version);
+        return getServerList(new File(path), version,null);
     }
 
     public List getServerResources(ConfigResponse platformConfig) throws PluginException {
         List servers = new ArrayList();
         List processes = getServerProcessList(getProcessQuery());
 
-        for (int i=0; i<processes.size(); i++) {
-            Process process = (Process)processes.get(i);
-            List found = getServerList(new File(process.serverRoot), null);
-            if (found != null) {
-                servers.addAll(found);
+        for (int i = 0; i < processes.size(); i++) {
+            WebSphereProcess p = (WebSphereProcess) processes.get(i);
+            if (!p.getServer().equals("nodeagent")) {
+                String nodeAgentPort = getAdminPort(findServerIndex(p), "nodeagent"); // skip if has nodeagent?
+                if (nodeAgentPort == null) {
+                    List found = getServerList(new File(p.getServerRoot()), null, p);
+                    if (found != null) {
+                        servers.addAll(found);
+                    }
+                }
             }
         }
-
         return servers;
     }
 
@@ -554,6 +486,6 @@ public class WebsphereDetector
         //loose lib/foo.jar defined in etc/cam-server-sigs.properties
         File serverDir = jar.getParentFile().getParentFile();
 
-        return getServerList(serverDir, null);
+        return getServerList(serverDir, null,null);
     }
 }
