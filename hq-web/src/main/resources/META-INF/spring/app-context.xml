@@ -18,7 +18,7 @@
 	-->
 	<bean
 		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"
-		p:ignoreResourceNotFound="true">
+		p:ignoreResourceNotFound="true" p:systemPropertiesModeName="SYSTEM_PROPERTIES_MODE_OVERRIDE">
 		<property name="locations">
 			<list>
 				<value>classpath:/spring-jdbc.properties</value>
