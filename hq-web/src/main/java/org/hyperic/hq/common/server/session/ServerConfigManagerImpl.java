@@ -60,7 +60,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * This class is responsible for setting/getting the server configuration
  */
-@Service
+@Service("serverConfigManager")
 @Transactional
 public class ServerConfigManagerImpl implements ServerConfigManager {
 
