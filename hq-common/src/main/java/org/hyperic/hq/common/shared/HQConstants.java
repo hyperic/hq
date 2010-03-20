@@ -42,12 +42,12 @@ public class HQConstants {
 
     public static final String SchemaVersion = "CAM_SCHEMA_VERSION";
 
+    public static final String AUTHENTICATION_TYPE="CAM_JAAS_PROVIDER";
 
-
+    public static final String JDBC_AUTHENTICATION_TYPE="JDBC";
+    
     /** Application realm. Used to authenticate users **/
     public static final String ApplicationName = "CAM";
-
-   
 
     /** Base URL for the application **/
     public static final String BaseURL = "CAM_BASE_URL";
