@@ -755,27 +755,17 @@ public class AvailabilityManagerEJBImpl
         _createMap = new HashMap();
         _removeMap = new HashMap();
         final boolean debug = _log.isDebugEnabled();
-        long begin = -1;
         Map state = null;
         synchronized (cache) {
             try {
                 cache.beginTran();
-                begin = getDebugTime(debug);
                 updateCache(availPoints, updateList, outOfOrderAvail);
-                debugTimes(begin, "updateCache", availPoints.size());
-                begin = getDebugTime(debug);
                 setCurrAvails(outOfOrderAvail, updateList);
-                debugTimes(begin, "setCurrAvails",
-                           outOfOrderAvail.size() + updateList.size());
                 state = captureCurrAvailState();
-                begin = getDebugTime(debug);
                 updateStates(updateList);
-                debugTimes(begin, "updateStates", updateList.size());
-                begin = getDebugTime(debug);
                 updateOutOfOrderState(outOfOrderAvail);
                 flushCreateAndRemoves();
                 logErrorInfo(state, availPoints);
-                debugTimes(begin, "updateOutOfOrderState", outOfOrderAvail.size());
                 cache.commitTran();
             } catch (Throwable e) {
                 logErrorInfo(state, availPoints);
@@ -791,13 +781,15 @@ public class AvailabilityManagerEJBImpl
         ConcurrentStatsCollector.getInstance().addStat(
             availPoints.size(), AVAIL_MANAGER_METRICS_INSERTED);
         if (sendData) {
-            begin = getDebugTime(debug);
             sendDataToEventHandlers(availPoints);
-            debugTimes(begin, "sendDataToEventHandlers", availPoints.size());
         }
     }
 
     private void flushCreateAndRemoves() {
+        final StopWatch watch = new StopWatch();
+        final boolean debug = _log.isDebugEnabled();
+        
+        if (debug) watch.markTimeBegin("remove");
         for (Iterator it=_removeMap.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry entry = (Map.Entry)it.next();
             AvailabilityDataRLE rle = (AvailabilityDataRLE)entry.getValue();
@@ -810,12 +802,23 @@ public class AvailabilityManagerEJBImpl
                 _dao.remove(rle);
             }
         }
+        if (debug) {
+            watch.markTimeEnd("remove");
+            watch.markTimeBegin("flush");
+        }
+        
         // addData() could be overwriting RLE data points (i.e. from 0.0 to 1.0)
         // with the same ID.  If this is the scenario, then we must run
         // flush() in order to ensure that these old objects are not in the
         // session when the equivalent create() on the same ID is run,
         // thus avoiding NonUniqueObjectExceptions
         _dao.getSession().flush();
+        
+        if (debug) {
+            watch.markTimeEnd("flush");
+            watch.markTimeBegin("create");
+        }
+        
         for (Iterator it=_createMap.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry entry = (Map.Entry)it.next();
             AvailabilityDataRLE rle = (AvailabilityDataRLE)entry.getValue();
@@ -825,21 +828,13 @@ public class AvailabilityManagerEJBImpl
             _dao.create(rle.getMeasurement(), rle.getStartime(),
                         rle.getEndtime(), rle.getAvailVal());
         }
-    }
-
-    private long getDebugTime(final boolean debug) {
+        
         if (debug) {
-            return System.currentTimeMillis();
-        }
-        return -1;
-    }
-
-    private void debugTimes(final long begin, final String name,
-                            final int points) {
-        if (_log.isDebugEnabled()) {
-            long time = System.currentTimeMillis() - begin;
-            _log.debug("AvailabilityInserter time to " + name + " -> "
-                + time + " ms, points: " + points);
+            watch.markTimeEnd("create");
+            _log.debug("AvailabilityInserter flushCreateAndRemoves: " + watch
+                            + ", points {remove=" + _removeMap.size()
+                            + ", create=" + _createMap.size()
+                            + "}");
         }
     }
 
@@ -860,20 +855,29 @@ public class AvailabilityManagerEJBImpl
 
     private void setCurrAvails(final List outOfOrderAvail,
                                final List updateList) {
-        if (outOfOrderAvail.size() == 0 && updateList.size() == 0) {
-            _currAvails = Collections.EMPTY_MAP;
-            return;
+        
+        final StopWatch watch = new StopWatch();
+        try {
+            if (outOfOrderAvail.size() == 0 && updateList.size() == 0) {
+                _currAvails = Collections.EMPTY_MAP;
+                return;
+            }
+            long now = TimingVoodoo.roundDownTime(System.currentTimeMillis(), 60000);
+            HashSet mids = getMidsWithinAllowedDataWindow(updateList, now);
+            mids.addAll(getMidsWithinAllowedDataWindow(outOfOrderAvail, now));
+            if (mids.size() <= 0) {
+                _currAvails = Collections.EMPTY_MAP;
+                return;
+            }
+            Integer[] mIds = (Integer[])mids.toArray(new Integer[0]);
+            _currAvails = _dao.getHistoricalAvailMap(
+                mIds, now-MAX_DATA_BACKLOG_TIME, false);            
+        } finally {
+            if (_log.isDebugEnabled()) {
+                _log.debug("AvailabilityInserter setCurrAvails: " + watch
+                                + ", size=" + _currAvails.size());
+            }
         }
-        long now = TimingVoodoo.roundDownTime(System.currentTimeMillis(), 60000);
-        HashSet mids = getMidsWithinAllowedDataWindow(updateList, now);
-        mids.addAll(getMidsWithinAllowedDataWindow(outOfOrderAvail, now));
-        if (mids.size() <= 0) {
-            _currAvails = Collections.EMPTY_MAP;
-            return;
-        }
-        Integer[] mIds = (Integer[])mids.toArray(new Integer[0]);
-        _currAvails = _dao.getHistoricalAvailMap(
-            mIds, now-MAX_DATA_BACKLOG_TIME, false);
     }
 
     private HashSet getMidsWithinAllowedDataWindow(final List states,
@@ -1247,7 +1251,9 @@ public class AvailabilityManagerEJBImpl
         }
         // as a performance optimization, fetch all the last avails
         // at once, rather than one at a time in updateState()
+        final StopWatch watch = new StopWatch();
         final boolean debug = _log.isDebugEnabled();
+        int numUpdates = 0;
         for (Iterator i=states.iterator(); i.hasNext(); ) {
             DataPoint state = (DataPoint)i.next();
             try {
@@ -1265,10 +1271,17 @@ public class AvailabilityManagerEJBImpl
                 }
                 if (updateCache) {
                     cache.put(state.getMetricId(), state);
+                    numUpdates++;
                 }
             } catch (BadAvailStateException e) {
                 _log.warn(e.getMessage());
             }
+        }
+        if (debug) {
+            _log.debug("AvailabilityInserter updateStates: " + watch
+                            + ", points {total=" + states.size()
+                            + ", updateCache=" + numUpdates
+                            + "}");
         }
     }
 
@@ -1276,14 +1289,26 @@ public class AvailabilityManagerEJBImpl
         if (outOfOrderAvail.size() == 0) {
             return;
         }
+        
+        final StopWatch watch = new StopWatch();
+        int numBadAvailState = 0;
+        
         for (Iterator i=outOfOrderAvail.iterator(); i.hasNext(); ) {
             try {
             	DataPoint state = (DataPoint)i.next();
             	// do not update the cache here, the timestamp is out of order
                 merge(state);
             } catch (BadAvailStateException e) {
+                numBadAvailState++;
                 _log.warn(e.getMessage());
             }
+        }
+        
+        if (_log.isDebugEnabled()) {
+            _log.debug("AvailabilityInserter updateOutOfOrderState: " + watch
+                            + ", points {total=" + outOfOrderAvail.size()
+                            + ", badAvailState=" + numBadAvailState
+                            + "}");
         }
     }
 
@@ -1294,6 +1319,7 @@ public class AvailabilityManagerEJBImpl
             return;
         }
         AvailabilityCache cache = AvailabilityCache.getInstance();
+        final StopWatch watch = new StopWatch();
         final boolean debug = _log.isDebugEnabled();
         for (Iterator i=availPoints.iterator(); i.hasNext(); ) {
             DataPoint pt = (DataPoint)i.next();
@@ -1313,19 +1339,30 @@ public class AvailabilityManagerEJBImpl
                     oldState.getValue() != val) {
                 updateList.add(newState);
                 if (debug) {
-                    String msg = "value of state " + newState +
-                                 " differs from" + " current value" +
+                    String msg = "value of state[" + newState +
+                                 "] differs from current value[" +
                                  ((oldState != null) ? oldState.toString() :
-                                     " old state does not exist");
+                                     "old state does not exist") + "]";
                     _log.debug(msg);
                 }
             } else {
                 cache.put(new Integer(id), newState);
 	        }
         }
+        if (debug) {
+            _log.debug("AvailabilityInserter updateCache: " + watch
+                            + ", points {total=" + availPoints.size()
+                            + ", outOfOrder=" + outOfOrderAvail.size()
+                            + ", updateToDb=" + updateList.size()
+                            + ", updateCacheTimestamp="
+                            + (availPoints.size() - outOfOrderAvail.size() - updateList.size())
+                            + "}");
+        }
     }
 
     private void sendDataToEventHandlers(List data) {
+        final StopWatch watch = new StopWatch();
+        final boolean debug = _log.isDebugEnabled();
         int maxCapacity = data.size();
         ArrayList events  = new ArrayList(maxCapacity);
         Map downEvents  = new HashMap(maxCapacity);
@@ -1335,8 +1372,7 @@ public class AvailabilityManagerEJBImpl
         final boolean allEventsInteresting =
             Boolean.getBoolean(ALL_EVENTS_INTERESTING_PROP);
 
-        final StopWatch watch = new StopWatch();
-        final boolean debug = _log.isDebugEnabled();
+        if (debug) watch.markTimeBegin("isTriggerInterested");
         for (Iterator i = data.iterator(); i.hasNext();) {
             DataPoint dp = (DataPoint) i.next();
             Integer metricId = dp.getMetricId();
@@ -1344,10 +1380,8 @@ public class AvailabilityManagerEJBImpl
 
             MeasurementEvent event = new MeasurementEvent(metricId, val);
 
-            if (debug) watch.markTimeBegin("isTriggerInterested");
             boolean isEventInteresting =
                 allEventsInteresting || RegisteredTriggers.isTriggerInterested(event);
-            if (debug) watch.markTimeEnd("isTriggerInterested");
             if (isEventInteresting) {
                 measMan.buildMeasurementEvent(event);
                 if (event.getValue().getValue() == AVAIL_DOWN) {
@@ -1362,13 +1396,16 @@ public class AvailabilityManagerEJBImpl
 
             zevents.add(new MeasurementZevent(metricId.intValue(), val));
         }
+        if (debug) watch.markTimeEnd("isTriggerInterested");
 
         if (!downEvents.isEmpty()) {
+            if (debug) watch.markTimeBegin("suppressMeasurementEvents");
             // Determine whether the measurement events can
             // be suppressed as part of hierarchical alerting
             PermissionManagerFactory.getInstance()
                 .getHierarchicalAlertingManager()
                     .suppressMeasurementEvents(downEvents, true);
+            if (debug) watch.markTimeEnd("suppressMeasurementEvents");
 
             if (!downEvents.isEmpty()) {
                 events.addAll(downEvents.values());
@@ -1382,6 +1419,15 @@ public class AvailabilityManagerEJBImpl
 
         if (!zevents.isEmpty()) {
             ZeventManager.getInstance().enqueueEventsAfterCommit(zevents);
+        }
+        
+        if (debug) {
+            _log.debug("AvailabilityInserter sendDataToEventHandlers: " + watch
+                            + ", points {total=" + maxCapacity
+                            + ", downEvents=" + downEvents.size()
+                            + ", eventsToPublish=" + events.size()
+                            + ", zeventsToEnqueue=" + zevents.size()
+                            + "}");
         }
     }
 

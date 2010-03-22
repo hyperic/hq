@@ -179,11 +179,10 @@ public class ReportProcessorEJBImpl
         final MeasurementManagerLocal mMan = MeasurementManagerEJBImpl.getOne();
         final boolean debug = _log.isDebugEnabled();
         final StopWatch watch = new StopWatch();
+        if (debug) watch.markTimeBegin("verifyAndAddData");
         for (int i = 0; i < dsnLists.length; i++) {
             Integer dmId = new Integer(dsnLists[i].getClientId());
-            if (debug) watch.markTimeBegin("getMeasurement");
             Measurement m = mMan.getMeasurement(dmId);
-            if (debug) watch.markTimeEnd("getMeasurement");
             
             // Can't do much if we can't look up the derived measurement
             // If the measurement is enabled, we just throw away their data
@@ -192,12 +191,19 @@ public class ReportProcessorEJBImpl
             // points for.  This is still a problem for people who change their
             // collection period, but the instances should be low.
             if (m == null || !m.isEnabled()) {
+                if (debug) {
+                    if (m == null) {
+                        _log.debug("dropping metricId=" + dmId
+                                    + " because measurement is null");
+                    } else {
+                        _log.debug("dropping metricId=" + dmId
+                                    + " because measurement is disabled");
+                    }
+                }
                 continue;
             }
             // Need to check if resource was asynchronously deleted (type == null)
-            if (debug) watch.markTimeBegin("getResource");
             final Resource res = m.getResource();
-            if (debug) watch.markTimeEnd("getResource");
             if (res == null || res.isInAsyncDeleteState()) {
                 if (debug) {
                     _log.debug("dropping metricId=" + m.getId() +
@@ -205,20 +211,16 @@ public class ReportProcessorEJBImpl
                 }
                 continue;
             }
-            if (debug) watch.markTimeBegin("resMatchesAgent");
             if (!resourceMatchesAgent(res, agentToken)) {
                 _log.warn("measurement (id=" + m.getId() + ") was sent to the " +
                     "HQ server from agent (agentToken=" + agentToken + ")" +
                     " but resource (id=" + res.getId() + ") is not associated " +
                     " with that agent.  Dropping measurement.");
-                if (debug) watch.markTimeEnd("resMatchesAgent");
                 continue;
             }
-            if (debug) watch.markTimeEnd("resMatchesAgent");
 
             final boolean isAvail = m.getTemplate().isAvailability();
             final ValueList[] valLists = dsnLists[i].getDsns();
-            if (debug) watch.markTimeBegin("addData");
             for (int j = 0; j < valLists.length; j++) {
                 final MetricValue[] vals = valLists[j].getValues();
                 if (isAvail) {
@@ -227,9 +229,18 @@ public class ReportProcessorEJBImpl
                     addData(dataPoints, null, m, vals);
                 }
             }
-            if (debug) watch.markTimeEnd("addData");
         }
-        if (debug) _log.debug(watch);
+        if (debug) {
+            watch.markTimeEnd("verifyAndAddData");
+            _log.debug("received "
+                        + dsnLists.length 
+                        + " metrics, processing "
+                        + dataPoints.size() + " data points, "
+                        + availPoints.size() + " avail points, " 
+                        + priorityAvailPts.size() 
+                        + " priority avail points from agent with token " 
+                        + agentToken);
+        }
 
         DataInserter d = MeasurementStartupListener.getDataInserter();
         if (debug) watch.markTimeBegin("sendMetricDataToDB");
@@ -261,6 +272,7 @@ public class ReportProcessorEJBImpl
                           StringUtil.arrayToString(entIds));
             }
         }
+        if (debug) _log.debug("handleMeasurementReport: " + watch);
     }
 
     /**
