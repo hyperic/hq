@@ -95,8 +95,8 @@ public class EmailAction extends EmailActionConfig
     // stats on a deployment's activity
     private static final long EVALUATION_PERIOD =
         ConcurrentStatsCollector.WRITE_PERIOD*1000;
-    private static final String EMAIL_ACTIONS =
-        ConcurrentStatsCollector.EMAIL_ACTIONS;
+    private static final String SEND_ALERT_TIME =
+        ConcurrentStatsCollector.SEND_ALERT_TIME;
     // evaluation window to continue and block notifications or
     // toggle back to regular operation
     private static final int THRESHOLD_WINDOW = 10*60*1000;
@@ -394,7 +394,7 @@ public class EmailAction extends EmailActionConfig
                            EmailRecipient[] to, String subject, String[] body,
                            String[] htmlBody, int priority,
                            boolean notifyFiltered) {
-        ConcurrentStatsCollector.getInstance().addStat(1, EMAIL_ACTIONS);
+        final long start = System.currentTimeMillis();
         if (_alertThreshold <= 0) {
             final boolean debug = _log.isDebugEnabled();
             if (debug) {
@@ -411,6 +411,8 @@ public class EmailAction extends EmailActionConfig
                 _emails.add(obj);
             }
         }
+        ConcurrentStatsCollector.getInstance().addStat(
+            System.currentTimeMillis()-start, SEND_ALERT_TIME);
     }
 
     private static final EmailManagerLocal getEmailMan() {

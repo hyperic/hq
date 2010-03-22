@@ -276,11 +276,12 @@ public class ProductPluginDeployer
             c.register(ConcurrentStatsCollector.PURGE_EVENT_LOGS_TIME);
             c.register(ConcurrentStatsCollector.PURGE_MEASUREMENTS_TIME);
             c.register(ConcurrentStatsCollector.MEASUREMENT_SCHEDULE_TIME);
-            c.register(ConcurrentStatsCollector.EMAIL_ACTIONS);
+            c.register(ConcurrentStatsCollector.SEND_ALERT_TIME);
             c.register(ConcurrentStatsCollector.ZEVENT_QUEUE_SIZE);
             c.register(ConcurrentStatsCollector.FIRE_ALERT_TIME);
             c.register(ConcurrentStatsCollector.EVENT_PROCESSING_TIME);
             c.register(ConcurrentStatsCollector.TRIGGER_INIT_TIME);
+            c.register(ConcurrentStatsCollector.FIRED_ALERT_TIME);
             c.startCollector();
         } catch (Exception e) {
             _log.error("Could not start Concurrent Stats Collector", e);
