@@ -31,15 +31,24 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
 import org.hyperic.hq.events.shared.AlertValue;
-import org.hyperic.util.pager.PagerProcessor;
+import org.hyperic.util.pager.PagerEventHandler;
+import org.hyperic.util.pager.PagerProcessorExt;
 
-public class PagerProcessor_events implements PagerProcessor {
+public class PagerProcessor_events implements PagerProcessorExt {
     private static final Log log =
         LogFactory.getLog(PagerProcessor_events.class);
 
-    public PagerProcessor_events () {}
+    public PagerProcessor_events() {}
 
-    public Object processElement (Object o) {
+    public PagerEventHandler getEventHandler() { 
+        return null;
+    }
+
+    public boolean skipNulls() { 
+        return true;
+    }
+    
+    public Object processElement(Object o) {
 
         if (o == null) {
             return null;
@@ -68,5 +77,9 @@ public class PagerProcessor_events implements PagerProcessor {
         }
 
         return o;
+    }
+    
+    public Object processElement(Object o1, Object o2) {
+        return processElement(o1);
     }
 }
