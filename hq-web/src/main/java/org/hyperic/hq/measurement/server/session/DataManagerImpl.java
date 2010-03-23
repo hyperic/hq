@@ -45,7 +45,6 @@ import java.util.Properties;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
-import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

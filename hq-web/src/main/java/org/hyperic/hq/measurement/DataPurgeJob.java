@@ -30,7 +30,6 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 import javax.annotation.PostConstruct;
-import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -105,7 +104,7 @@ public class DataPurgeJob implements Runnable {
     /**
      * Entry point into compression routine
      */
-    public void compressData() throws NamingException {
+    public void compressData()  {
 
         // First check if we are already running
         synchronized (compressRunningLock) {
@@ -219,7 +218,7 @@ public class DataPurgeJob implements Runnable {
         }
     }
 
-    protected void purge(Properties conf, long now) throws NamingException {
+    protected void purge(Properties conf, long now)  {
         ConcurrentStatsCollector stats = ConcurrentStatsCollector.getInstance();
         long start = now();
         purgeEventLogs(conf, now);
@@ -248,7 +247,7 @@ public class DataPurgeJob implements Runnable {
     /**
      * Purge Event Log data
      */
-    private void purgeEventLogs(Properties conf, long now) throws NamingException {
+    private void purgeEventLogs(Properties conf, long now)  {
         String purgeEventString = conf.getProperty(HQConstants.EventLogPurge);
         long purgeEventLog = Long.parseLong(purgeEventString);
 

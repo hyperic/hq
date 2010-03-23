@@ -28,8 +28,6 @@ package org.hyperic.hq.autoinventory.server.session;
 import java.io.IOException;
 import java.util.Date;
 
-import javax.naming.NamingException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
@@ -95,8 +93,6 @@ public abstract class AIJob
             errorMsg = "Agent error: " + e.getMessage();
         } catch (SystemException e) {
             errorMsg = "System error";
-        } catch (NamingException e) {
-            errorMsg = "System error";
         } finally {
 
             if (errorMsg != null) {
@@ -123,7 +119,7 @@ public abstract class AIJob
         return commandHistory.getId();
     }
 
-    protected void removeHistory(AIHistory history) throws NamingException {
+    protected void removeHistory(AIHistory history)  {
         AutoinventoryManager alocal = getAutoInventoryManager();
         alocal.removeHistory(history);
     }
@@ -132,15 +128,14 @@ public abstract class AIJob
                                       String subjectName, ScanConfigurationCore config,
                                       String scanName, String scanDesc, Boolean scheduled,
                                       long startTime, long stopTime, long scheduleTime,
-                                      String status, String errorMessage) throws NamingException,
-        AutoinventoryException {
+                                      String status, String errorMessage)
+        throws AutoinventoryException {
         AutoinventoryManager alocal = getAutoInventoryManager();
         return alocal.createAIHistory(id, groupId, batchId, subjectName, config, scanName,
             scanDesc, scheduled, startTime, stopTime, scheduleTime, status, errorMessage);
     }
 
-    protected void updateHistory(Integer jobId, long endTime, String status, String message)
-        throws NamingException {
+    protected void updateHistory(Integer jobId, long endTime, String status, String message) {
         AutoinventoryManager alocal = getAutoInventoryManager();
         alocal.updateAIHistory(jobId, endTime, status, message);
     }
