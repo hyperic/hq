@@ -38,7 +38,6 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import javax.annotation.PostConstruct;
-import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -479,7 +478,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
      * @param whoami The current running user.
      * @param role This role.
      * 
-     * @throws NamingException
+     *
      * @throws PermissionException whoami is not allowed to perform modifyRole
      *         on this role.
      * 

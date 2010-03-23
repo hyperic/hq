@@ -36,7 +36,7 @@ $Header: /var/cvsroot/hyperic_hq/web/admin/sql.jsp,v 1.3 2005/04/21 20:38:26 dou
 <%@ page import="java.util.StringTokenizer" %>
 <%@ page import="javax.naming.Context" %>
 <%@ page import="javax.naming.InitialContext" %>
-<%@ page import="javax.naming.NamingException" %>
+
 <%@ page import="javax.servlet.ServletRequest" %>
 <%@ page import="org.hyperic.util.StringUtil" %>
 <%@ page import="org.hyperic.util.jdbc.DBUtil" %>
@@ -48,10 +48,7 @@ $Header: /var/cvsroot/hyperic_hq/web/admin/sql.jsp,v 1.3 2005/04/21 20:38:26 dou
 
 <%!public static final SimpleDateFormat DBDATEFORMAT = new SimpleDateFormat("dd-MMM-yyyy");
 public static final SimpleDateFormat DBDATETIMEFORMAT = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss");
-private static Context ctx = null;
-private synchronized static void initCtx () throws NamingException {
-    if (ctx == null) ctx = new InitialContext();
-}
+
 public static final String NULL = "<em>null</em>";
 
 private String stripSQLComments ( String sql ) {
@@ -265,7 +262,6 @@ boolean isAdmin = true;
 
 try {
     // Before doing anything, check for admin permissions
-    if (ctx == null) initCtx();
     AuthzBoss authzBoss = (AuthzBoss)Bootstrap.getBean(AuthzBoss.class);
     if (!authzBoss.hasAdminPermission(SessionUtils.getWebUser(session).getSessionId().intValue())) {
         isAdmin = false;
@@ -287,7 +283,7 @@ try {
     }
         }
 
-        conn = ((DBUtil)Bootstrap.getBean(DBUtil.class)).getConnByContext(ctx, HQConstants.DATASOURCE);
+        conn = ((DBUtil)Bootstrap.getBean(DBUtil.class)).getConnection();
 
         int numStatements = sqlList.size();
         for ( int i=0; i<numStatements; i++ ) {

@@ -30,21 +30,19 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import javax.naming.NamingException;
-
 import org.hyperic.util.ConfigPropertyException;
 
 public class IDGenerator {
 
-    private int       itsDBType = DBUtil.DATABASE_UNKNOWN;
-    private String    itsSequenceName;
-    private int       itsSequenceInterval;
-    private String    itsTableName = null;
+    private int itsDBType = DBUtil.DATABASE_UNKNOWN;
+    private String itsSequenceName;
+    private int itsSequenceInterval;
+    private String itsTableName = null;
 
-    private String    itsAlterSQL  = null;
-    private String    itsSelectSQL = null;
-    private long      itsLastKey   = 1;
-    private long      itsMaxKey    = 1;
+    private String itsAlterSQL = null;
+    private String itsSelectSQL = null;
+    private long itsLastKey = 1;
+    private long itsMaxKey = 1;
 
     // logging context
     private String ctx = null;
@@ -55,50 +53,50 @@ public class IDGenerator {
 
     /**
      * This constructor is for use inside an entity bean.
-     *
+     * 
      * @param ctx The logging context to use
      * @param theSequenceName name of the database sequence
-     * @param theSequenceInterval how many values we should grab at a time from the db
+     * @param theSequenceInterval how many values we should grab at a time from
+     *        the db
      * @param theDSName the name of the data source used to connect to the db
      */
-    public IDGenerator ( String ctx,
-                         String theSequenceName,
-                         int    theSequenceInterval,
-                         DBUtil dbUtil ) {
-        this.ctx            = ctx;
-        itsSequenceName     = theSequenceName;
+    public IDGenerator(String ctx, String theSequenceName, int theSequenceInterval, DBUtil dbUtil) {
+        this.ctx = ctx;
+        itsSequenceName = theSequenceName;
         itsSequenceInterval = theSequenceInterval;
-        itsTableName        = getTableName(itsSequenceName);
-        isInitialized       = false;
+        itsTableName = getTableName(itsSequenceName);
+        isInitialized = false;
         this.dbUtil = dbUtil;
     }
 
-    public synchronized long getNewID ()
-        throws ConfigPropertyException, NamingException, SequenceRetrievalException, SQLException {
+    public synchronized long getNewID() throws ConfigPropertyException, SequenceRetrievalException,
+        SQLException {
 
-        if ( !isInitialized ) init();
-        if (itsLastKey >= itsMaxKey) getBatch();
+        if (!isInitialized)
+            init();
+        if (itsLastKey >= itsMaxKey)
+            getBatch();
         return ++itsLastKey;
     }
 
-    private synchronized void getBatch ()
-        throws SequenceRetrievalException, NamingException, SQLException {
+    private synchronized void getBatch() throws SequenceRetrievalException, SQLException {
 
         // Go to database and set new values for itsLastKey and itsMaxKey
-        Connection        conn     = null;
+        Connection conn = null;
         PreparedStatement selectPS = null;
-        ResultSet         rs       = null;
+        ResultSet rs = null;
 
         try {
             conn = getConnection();
             selectPS = conn.prepareStatement(itsSelectSQL);
 
             rs = selectPS.executeQuery();
-            if ( rs != null && rs.next() ) {
+            if (rs != null && rs.next()) {
                 itsLastKey = rs.getLong(1) - 1;
                 itsMaxKey = itsLastKey + itsSequenceInterval;
             } else {
-                throw new SequenceRetrievalException("IDGenerator.getBatch: sequence failed to return a value: " + itsSequenceName);
+                throw new SequenceRetrievalException(
+                    "IDGenerator.getBatch: sequence failed to return a value: " + itsSequenceName);
             }
             doAlterSequence(conn);
 
@@ -107,26 +105,25 @@ public class IDGenerator {
         }
     }
 
-    private void doAlterSequence ( Connection conn ) throws SQLException {
+    private void doAlterSequence(Connection conn) throws SQLException {
 
         PreparedStatement alterPS = null;
         ResultSet rs = null;
         try {
             switch (itsDBType) {
-            case DBUtil.DATABASE_POSTGRESQL_7:
-            case DBUtil.DATABASE_POSTGRESQL_8:
-                itsAlterSQL
-                    = "SELECT setval ('" + itsSequenceName + "', " + itsMaxKey + ")";
-                alterPS  = conn.prepareStatement(itsAlterSQL);
-                rs = alterPS.executeQuery();
-                break;
+                case DBUtil.DATABASE_POSTGRESQL_7:
+                case DBUtil.DATABASE_POSTGRESQL_8:
+                    itsAlterSQL = "SELECT setval ('" + itsSequenceName + "', " + itsMaxKey + ")";
+                    alterPS = conn.prepareStatement(itsAlterSQL);
+                    rs = alterPS.executeQuery();
+                    break;
 
-            case DBUtil.DATABASE_ORACLE_8:
-            case DBUtil.DATABASE_ORACLE_9:
-            case DBUtil.DATABASE_ORACLE_10:
-                alterPS  = conn.prepareStatement(itsAlterSQL);
-                alterPS.executeUpdate();
-                break;
+                case DBUtil.DATABASE_ORACLE_8:
+                case DBUtil.DATABASE_ORACLE_9:
+                case DBUtil.DATABASE_ORACLE_10:
+                    alterPS = conn.prepareStatement(itsAlterSQL);
+                    alterPS.executeUpdate();
+                    break;
 
             }
         } finally {
@@ -135,17 +132,13 @@ public class IDGenerator {
         }
     }
 
-  
+    private synchronized void init() throws ConfigPropertyException, SQLException {
 
-    private synchronized void init ()
-        throws ConfigPropertyException, NamingException, SQLException {
-
-        if ( isInitialized ) {
+        if (isInitialized) {
             return;
         }
         isInitialized = true;
 
-       
         Connection conn = null;
         try {
             conn = getConnection();
@@ -155,53 +148,46 @@ public class IDGenerator {
         }
 
         switch (itsDBType) {
-        case DBUtil.DATABASE_POSTGRESQL_7:
-        case DBUtil.DATABASE_POSTGRESQL_8:
-            itsAlterSQL
-                = "SELECT setval ('" + itsSequenceName + "', " + itsMaxKey + ")";
-            itsSelectSQL
-                = "SELECT nextval('" + itsSequenceName + "'::text)";
+            case DBUtil.DATABASE_POSTGRESQL_7:
+            case DBUtil.DATABASE_POSTGRESQL_8:
+                itsAlterSQL = "SELECT setval ('" + itsSequenceName + "', " + itsMaxKey + ")";
+                itsSelectSQL = "SELECT nextval('" + itsSequenceName + "'::text)";
 
-            break;
+                break;
 
-        case DBUtil.DATABASE_ORACLE_8:
-        case DBUtil.DATABASE_ORACLE_9:
-        case DBUtil.DATABASE_ORACLE_10:
-            itsAlterSQL
-                = "ALTER SEQUENCE " + itsSequenceName
-                + " INCREMENT BY " + itsSequenceInterval;
-            itsSelectSQL
-                = "SELECT " + itsSequenceName + ".nextval from DUAL";
-            break;
+            case DBUtil.DATABASE_ORACLE_8:
+            case DBUtil.DATABASE_ORACLE_9:
+            case DBUtil.DATABASE_ORACLE_10:
+                itsAlterSQL = "ALTER SEQUENCE " + itsSequenceName + " INCREMENT BY " +
+                              itsSequenceInterval;
+                itsSelectSQL = "SELECT " + itsSequenceName + ".nextval from DUAL";
+                break;
 
-        case DBUtil.DATABASE_MYSQL5:
-            itsAlterSQL
-                = "ALTER TABLE " + itsTableName + " AUTO_INCREMENT = " + itsMaxKey;
-            // mysql assumes all columns with autoincrement are name ID
-            itsSelectSQL
-                = "SELECT MAX(ID) + 1 FROM " + itsTableName;
-            break;
+            case DBUtil.DATABASE_MYSQL5:
+                itsAlterSQL = "ALTER TABLE " + itsTableName + " AUTO_INCREMENT = " + itsMaxKey;
+                // mysql assumes all columns with autoincrement are name ID
+                itsSelectSQL = "SELECT MAX(ID) + 1 FROM " + itsTableName;
+                break;
         }
     }
 
     /**
-     * Get the name of the table a sequence refers to
-     * assumes sequence names will follow the pattern
-     * SOME_TABLE_NAME_KEYCOL_SEQ
+     * Get the name of the table a sequence refers to assumes sequence names
+     * will follow the pattern SOME_TABLE_NAME_KEYCOL_SEQ
      * @return SOME_TABLE_NAME
      */
     private static String getTableName(String sequence) {
         String[] tokens = sequence.split("_");
         String sub = new String();
-        int i=0;
-        while(i < (tokens.length - 2)) {
-            sub += tokens[i] + (i != (tokens.length -3) ? "_" : "");
+        int i = 0;
+        while (i < (tokens.length - 2)) {
+            sub += tokens[i] + (i != (tokens.length - 3) ? "_" : "");
             i++;
         }
         return sub;
     }
 
-    private Connection getConnection() throws NamingException, SQLException {
+    private Connection getConnection() throws SQLException {
         return dbUtil.getConnection();
     }
 }

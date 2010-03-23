@@ -7,8 +7,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import javax.naming.NamingException;
-
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.server.session.Role;
@@ -160,7 +158,7 @@ public interface RoleManager {
      * @param whoami The current running user.
      * @param role This role.
      * 
-     * @throws NamingException
+     * 
      * @throws PermissionException whoami is not allowed to perform modifyRole
      *         on this role.
      */

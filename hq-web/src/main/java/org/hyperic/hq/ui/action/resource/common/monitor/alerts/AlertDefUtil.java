@@ -29,10 +29,10 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 
-
-import javax.naming.NamingException;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
@@ -65,9 +65,6 @@ import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.units.FormattedNumber;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * Utility class for dealing with rendering alert definition conditions.
@@ -149,8 +146,10 @@ public class AlertDefUtil {
      * @param acvList the list of alert conditions to convert
      * @return List of AlertConditionBean objects
      */
-    public static List<AlertConditionBean> getAlertConditionBeanList(int sessionID, HttpServletRequest request,
-                                                                     MeasurementBoss mb, AlertConditionValue[] acvList,
+    public static List<AlertConditionBean> getAlertConditionBeanList(int sessionID,
+                                                                     HttpServletRequest request,
+                                                                     MeasurementBoss mb,
+                                                                     AlertConditionValue[] acvList,
                                                                      boolean template) {
         String msgKey;
         ArrayList args;
@@ -176,8 +175,9 @@ public class AlertDefUtil {
                     Measurement m = null;
                     try {
                         if (template) {
-                            List mtvs = mb.findMeasurementTemplates(sessionID, new Integer[] { new Integer(acv
-                                .getMeasurementId()) }, PageControl.PAGE_ALL);
+                            List mtvs = mb.findMeasurementTemplates(sessionID,
+                                new Integer[] { new Integer(acv.getMeasurementId()) },
+                                PageControl.PAGE_ALL);
 
                             if (mtvs.size() > 0)
                                 mt = (MeasurementTemplate) mtvs.get(0);
@@ -216,7 +216,8 @@ public class AlertDefUtil {
 
                 case EventConstants.TYPE_CHANGE:
                 case EventConstants.TYPE_CUST_PROP:
-                    textValue.append(RequestUtils.message(request, "alert.current.list.ValueChanged"));
+                    textValue.append(RequestUtils.message(request,
+                        "alert.current.list.ValueChanged"));
                     break;
 
                 case EventConstants.TYPE_LOG:
@@ -228,7 +229,8 @@ public class AlertDefUtil {
                         args.add(acv.getOption());
                     }
 
-                    textValue = new StringBuffer(RequestUtils.message(request, msgKey, args.toArray()));
+                    textValue = new StringBuffer(RequestUtils.message(request, msgKey, args
+                        .toArray()));
                     break;
                 case EventConstants.TYPE_CFG_CHG:
                     msgKey = "alert.config.props.CB.ConfigCondition";
@@ -238,14 +240,16 @@ public class AlertDefUtil {
                         args.add(acv.getOption());
                     }
 
-                    textValue = new StringBuffer(RequestUtils.message(request, msgKey, args.toArray()));
+                    textValue = new StringBuffer(RequestUtils.message(request, msgKey, args
+                        .toArray()));
                     break;
                 default:
                     // do nothing
                     continue;
             }
 
-            AlertConditionBean acb = new AlertConditionBean(textValue.toString(), acv.getRequired(), (i == 0) /* first */);
+            AlertConditionBean acb = new AlertConditionBean(textValue.toString(),
+                acv.getRequired(), (i == 0) /* first */);
             alertDefConditions.add(acb);
         }
 
@@ -267,7 +271,8 @@ public class AlertDefUtil {
      * @param request the http request
      * @param adv the condition
      */
-    public static void setEnablementRequestAttributes(HttpServletRequest request, AlertDefinitionValue adv) {
+    public static void setEnablementRequestAttributes(HttpServletRequest request,
+                                                      AlertDefinitionValue adv) {
         // enablement
 
         // If we can't cleanly compute the time period, units, etc., we'll
@@ -303,10 +308,12 @@ public class AlertDefUtil {
      * parameter and then get the alert definition from the bizapp and return
      * it.
      */
-    public static AlertDefinitionValue getAlertDefinition(HttpServletRequest request, int sessionID, EventsBoss eb)
-        throws SessionNotFoundException, SessionTimeoutException, NamingException,  SystemException,
-         RemoteException, PermissionException, ParameterNotFoundException {
-        AlertDefinitionValue adv = (AlertDefinitionValue) request.getAttribute(Constants.ALERT_DEFINITION_ATTR);
+    public static AlertDefinitionValue getAlertDefinition(HttpServletRequest request,
+                                                          int sessionID, EventsBoss eb)
+        throws SessionNotFoundException, SessionTimeoutException, SystemException, RemoteException,
+        PermissionException, ParameterNotFoundException {
+        AlertDefinitionValue adv = (AlertDefinitionValue) request
+            .getAttribute(Constants.ALERT_DEFINITION_ATTR);
         if (null == adv) {
             String adS = request.getParameter(Constants.ALERT_DEFINITION_PARAM);
             if (null == adS) {
@@ -379,4 +386,3 @@ public class AlertDefUtil {
         return controlActions;
     }
 }
-

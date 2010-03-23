@@ -25,10 +25,10 @@
 
 package org.hyperic.util.jdbc;
 
-import java.util.HashMap;
-import org.hyperic.util.ConfigPropertyException;
-import javax.naming.NamingException;
 import java.sql.SQLException;
+import java.util.HashMap;
+
+import org.hyperic.util.ConfigPropertyException;
 
 /**
  * This factory is meant to be the central point of access for IDGenerator
@@ -57,7 +57,6 @@ public class IDGeneratorFactory {
                                  String sequenceName, 
                                  DBUtil dbUtil)
         throws ConfigPropertyException, 
-               NamingException, 
                SequenceRetrievalException, 
                SQLException {
         IDGenerator theGenerator = getGenerator(ctx, sequenceName, dbUtil);                   
@@ -67,7 +66,6 @@ public class IDGeneratorFactory {
     private static IDGenerator getGenerator(String ctx, String sequenceName, 
                                              DBUtil dbUtil) 
         throws ConfigPropertyException,
-               NamingException,
                SequenceRetrievalException,
                SQLException {
     	
