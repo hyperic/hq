@@ -2,6 +2,7 @@ package org.hyperic.hq.security;
 
 import java.util.Properties;
 
+import org.springframework.core.Ordered;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 /**
@@ -9,7 +10,7 @@ import org.springframework.security.core.AuthenticationException;
  * @author jhickey
  *
  */
-public interface HQAuthenticationProvider {
+public interface HQAuthenticationProvider extends Ordered {
 
     /**
      * 

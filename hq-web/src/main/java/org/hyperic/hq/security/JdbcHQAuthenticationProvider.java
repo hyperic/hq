@@ -13,6 +13,7 @@ import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.dao.PrincipalDAO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.Ordered;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.encoding.PasswordEncoder;
@@ -20,11 +21,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.GrantedAuthorityImpl;
 import org.springframework.stereotype.Component;
+
 /**
- * Implementation of {@link HQAuthenticationProvider} that authenticates users from HQ's database store
+ * Implementation of {@link HQAuthenticationProvider} that authenticates users
+ * from HQ's database store
  * @author jhickey
  * @author dcrutchfield
- *
+ * 
  */
 @Component
 public class JdbcHQAuthenticationProvider implements HQAuthenticationProvider {
@@ -97,8 +100,12 @@ public class JdbcHQAuthenticationProvider implements HQAuthenticationProvider {
     }
 
     public boolean supports(Properties serverConfigProps) {
-        //We always support authentication through our internal data store
+        // We always support authentication through our internal data store
         return true;
+    }
+
+    public int getOrder() {
+        return Ordered.LOWEST_PRECEDENCE;
     }
 
 }
