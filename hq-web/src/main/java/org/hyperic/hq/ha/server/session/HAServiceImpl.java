@@ -25,56 +25,101 @@
 
 package org.hyperic.hq.ha.server.session;
 
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
+import java.util.concurrent.ScheduledFuture;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.autoinventory.server.session.AgentAIScanService;
+import org.hyperic.hq.events.ext.RegisterableTriggerRepository;
 import org.hyperic.hq.ha.HAService;
-import org.hyperic.hq.ha.HAUtil;
-import org.hyperic.hq.ha.server.mbean.HAMBean;
+import org.hyperic.hq.measurement.server.session.AvailabilityCheckService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.support.MethodInvokingRunnable;
 import org.springframework.stereotype.Service;
 
+/**
+ * Implementation of {@link HAService} that gets started if we are in the .org
+ * HQ (HA not available) or by the master node of an HQ EE cluster
+ * implementation
+ * @author jhickey
+ * 
+ */
 @Service("haService")
-public class HAServiceImpl implements HAService
-{
+public class HAServiceImpl implements HAService {
     private final Log log = LogFactory.getLog(HAServiceImpl.class);
-    private MBeanServer server;
-    private HAMBean haService;
-    
-   
-    
-   @Autowired
-    public HAServiceImpl(MBeanServer server, HAMBean haService) {
-        this.server = server;
-        this.haService = haService;
+    private TaskScheduler scheduler;
+    private AvailabilityCheckService availabilityCheckService;
+    private AgentAIScanService agentAIScanService;
+    private RegisterableTriggerRepository registeredTriggerRepository;
+    private ScheduledFuture<?> backfillTask;
+    private ScheduledFuture<?> notifyAgentsTask;
+    private static boolean isFirstPass = true;
+
+    @Autowired
+    public HAServiceImpl(TaskScheduler scheduler,
+                         AvailabilityCheckService availabilityCheckService,
+                         AgentAIScanService agentAIScanService,
+                         RegisterableTriggerRepository registeredTriggerRepository) {
+        this.scheduler = scheduler;
+        this.availabilityCheckService = availabilityCheckService;
+        this.agentAIScanService = agentAIScanService;
+        this.registeredTriggerRepository = registeredTriggerRepository;
     }
 
+    /**
+     * These services can only run on a master node when HA is used, so they
+     * have to be started programmatically once we know if HA is enabled
+     */
     public void start() {
-        startHAService();
-        //TODO re-enable start/stop of data purge when HA solution is finished
-        //MeasurementSystemInitializer.startDataPurgeWorker();
-        HAUtil.setHAService(this);
+        if (!HAServiceImpl.isFirstPass) {
+            // RegisteredTriggers already does a startup initialization
+            // don't want to reset that.
+            registeredTriggerRepository.init();
+        } else {
+            HAServiceImpl.isFirstPass = false;
+        }
+        // If this node was designated as a slave b/c of connectivity loss (not
+        // server crash), then we don't want to schedule another round of tasks
+        // once it becomes master again
+        if (this.backfillTask == null) {
+            MethodInvokingRunnable backfill = new MethodInvokingRunnable();
+            backfill.setTargetObject(availabilityCheckService);
+            backfill.setTargetMethod("backfill");
+            try {
+                backfill.prepare();
+                this.backfillTask = scheduler.scheduleAtFixedRate(backfill, 120000);
+            } catch (Exception e) {
+                log.error("Unable to schedule availability backfill.", e);
+            }
+        }
+        if (this.notifyAgentsTask == null) {
+            MethodInvokingRunnable notifyAgents = new MethodInvokingRunnable();
+            notifyAgents.setTargetObject(agentAIScanService);
+            notifyAgents.setTargetMethod("notifyAgents");
+            try {
+                notifyAgents.prepare();
+                this.notifyAgentsTask = scheduler.scheduleAtFixedRate(notifyAgents, 300000);
+            } catch (Exception e) {
+                log.error("Unable to schedule agent AI scan.", e);
+            }
+        }
     }
-    
+
     public boolean isMasterNode() {
         // HA not implemented in .org
         return true;
     }
 
-    private void startHAService()
-    {
-        try {
-            ObjectName o =
-                new ObjectName("hyperic.jmx:type=Service,name=HAService");
-            server.registerMBean(haService , o);
-
-            server.invoke(o, "startSingleton", new Object[] {}, new String[] {});
-        } catch (Exception e) {
-            log.info("Unable to start service: "+e);
+    public void stop() {
+        if (backfillTask != null) {
+            backfillTask.cancel(false);
+            this.backfillTask = null;
+        }
+        if (notifyAgentsTask != null) {
+            notifyAgentsTask.cancel(false);
+            this.notifyAgentsTask = null;
         }
     }
 
-    
 }

@@ -36,7 +36,6 @@
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/henplus.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/javax.servlet.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/jdom-1.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="thirdparty/lib/jgroups-all.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/jmock-core-1.2.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/jms-ra.rar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/JMTUnit.jar"/>
