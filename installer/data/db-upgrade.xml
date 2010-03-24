@@ -10874,6 +10874,30 @@ has already been defined.
 	    </schema-directSQL>  
    </schemaSpec>
 
+  <schemaSpec version="3.192.1">
+    <schema-directSQL>
+      <statement desc="Remove tc Server Appmgmt UI attachments">
+        delete from EAM_UI_ATTACHMENT where view_id in (select v.id from EAM_UI_VIEW v, EAM_UI_PLUGIN p where v.ui_plugin_id = p.id and p.name = 'tomcatappmgmt')
+      </statement>
+      <statement desc="Remove tc Server Appmgmgt UI views">
+        delete from EAM_UI_VIEW where ui_plugin_id in (select id from EAM_UI_PLUGIN where name = 'tomcatappmgmt')
+      </statement>
+      <statement desc="Remove tc Server Appmgmt UI plugin">
+        delete from EAM_UI_PLUGIN where name = 'tomcatappmgmt';
+      </statement>
+
+      <statement desc="Remove tc Server Config UI attachments">
+        delete from EAM_UI_ATTACHMENT where view_id in (select v.id from EAM_UI_VIEW v, EAM_UI_PLUGIN p where v.ui_plugin_id = p.id and p.name = 'tomcatserverconfig')
+      </statement>
+      <statement desc="Remove tc Server Config UI views">
+        delete from EAM_UI_VIEW where ui_plugin_id in (select id from EAM_UI_PLUGIN where name = 'tomcatserverconfig')
+      </statement>
+      <statement desc="Remove tc Server Config UI plugin">
+        delete from EAM_UI_PLUGIN where name = 'tomcatserverconfig';
+      </statement>
+    </schema-directSQL>
+  </schemaSpec>
+
 </dbupgrade>
 </target>
 </project>
