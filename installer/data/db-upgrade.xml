@@ -10883,7 +10883,7 @@ has already been defined.
         delete from EAM_UI_VIEW where ui_plugin_id in (select id from EAM_UI_PLUGIN where name = 'tomcatappmgmt')
       </statement>
       <statement desc="Remove tc Server Appmgmt UI plugin">
-        delete from EAM_UI_PLUGIN where name = 'tomcatappmgmt';
+        delete from EAM_UI_PLUGIN where name = 'tomcatappmgmt'
       </statement>
 
       <statement desc="Remove tc Server Config UI attachments">
@@ -10893,7 +10893,7 @@ has already been defined.
         delete from EAM_UI_VIEW where ui_plugin_id in (select id from EAM_UI_PLUGIN where name = 'tomcatserverconfig')
       </statement>
       <statement desc="Remove tc Server Config UI plugin">
-        delete from EAM_UI_PLUGIN where name = 'tomcatserverconfig';
+        delete from EAM_UI_PLUGIN where name = 'tomcatserverconfig'
       </statement>
     </schema-directSQL>
   </schemaSpec>
