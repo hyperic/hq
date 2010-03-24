@@ -605,8 +605,9 @@ public class HQApp {
         }
 
         private boolean methIsReadOnly(String methName) {
-            return // 'create' is part of EJB session bean creation
+            return methName.equals("runReport") || // ReportCenter
                    methName.equals("setUserPrefsAfterCommit") ||
+                   // 'create' is part of EJB session bean creation
                    methName.equals("create") ||
                    methName.equals("disconnectAgent") ||
                    // recent alerts & indicators
@@ -623,7 +624,8 @@ public class HQApp {
                    // masthead
                    methName.equals("resourcesExistOfType") ||
                    methName.equals("search") || 
-                   methName.equals("initializeTriggers") || 
+                   methName.equals("initializeTriggers") ||
+                   methName.startsWith("has") ||
                    methName.startsWith("are") ||
                    methName.startsWith("check") ||
                    methName.startsWith("dispatch") ||
