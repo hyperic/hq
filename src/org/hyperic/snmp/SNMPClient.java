@@ -251,10 +251,10 @@ public class SNMPClient {
 
             default:
 
-                throw new SNMPException("unsupported SNMP version");
+                throw new SNMPException("Unsupported SNMP version: " + snmpVersion);
             }
         } catch (SNMPException e) {
-            String msg = "Failed to initialize snmp session";
+            String msg = "Failed to initialize SNMP session: " + e.getMessage();
 
             throw new SNMPException(msg, e);
         }

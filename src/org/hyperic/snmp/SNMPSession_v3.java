@@ -154,15 +154,21 @@ class SNMPSession_v3
 
         initSession(host, port, transport);
         
-        UsmUser usmUser = new UsmUser(securityName, 
-                                      authProtocol, authPassphrase, 
-                                      privProtocol, privPassphrase);
+        // Need this check for unidirectional agents
+        if (this.target.getAddress() == null) {
+            throw new SNMPException("Invalid SNMP address " 
+                                        + transport + ":" + host + "/" + port);
+        }
 
         // Need to add user by engineID.
         byte[] engineID = this.session.discoverAuthoritativeEngineID(
                                     this.target.getAddress(), 
                                     this.target.getTimeout());
 
+        UsmUser usmUser = new UsmUser(securityName, 
+                                      authProtocol, authPassphrase, 
+                                      privProtocol, privPassphrase);
+        
         USM usm = this.session.getUSM();
 
         // Need to call addUser each time, even if user name exists,
