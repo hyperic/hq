@@ -26,8 +26,20 @@
 				<value>classpath:/quartz.properties</value>
 				<value>classpath:/jms.properties</value>
 				<value>classpath:/hibernate.properties</value>
+				<value>file://#{ systemProperties['user.home'] }/.hq/build.properties</value>
 				<value>classpath:/hq-server.conf</value>
 			</list>
+		</property>
+		<property name="properties">
+			<props>
+				<prop key="ha.partition"></prop>
+				<prop key="ha.node.address"></prop>
+				<prop key="ha.node.mcast_addr">238.1.2.3</prop>
+				<prop key="ha.node.mcast_port">45566</prop>
+				<prop key="ha.node.cacheListener.port">45567</prop>
+				<prop key="ha.node.cacheProvider.port">45568</prop>
+				<prop key="ha.node.ipTTL">64</prop>
+			</props>
 		</property>
 	</bean>
 
@@ -125,10 +137,7 @@
 	<context:mbean-export />
 	<context:mbean-server />
 
-	<!--
-		TODO figure out a way to switch b/w impls of same EE and .org
-		interface when autowiring
-	-->
+
 	<bean class="org.hyperic.hq.bizapp.server.session.LatherBossImpl">
 		<constructor-arg ref="latherDispatcher" />
 	</bean>
@@ -161,18 +170,6 @@
 	</util:list>
 
 	<task:scheduler id="scheduler" />
-
-	<task:scheduled-tasks scheduler="scheduler">
-		<task:scheduled ref="availabilityCheckService" method="backfill"
-			fixed-rate="120000" />
-		<task:scheduled ref="agentAIScanService" method="notifyAgents"
-			fixed-rate="300000" />
-		<!--  This is meant to be disabled by default -->
-		<!--
-			<task:scheduled ref="scheduleVerificationService"
-			method="verifySchedules" fixed-rate="300000"/>
-		-->
-	</task:scheduled-tasks>
 
 	<bean class="org.hyperic.hq.application.Scheduler">
 		<constructor-arg value="10" />
