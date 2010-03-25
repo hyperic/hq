@@ -47,13 +47,15 @@ public class ResourceOperationsHelper {
         operationsList.add(AuthzConstants.platformOpRemovePlatform);
         operationsList.add(AuthzConstants.platformOpManageAlerts);
         operationsList.add(AuthzConstants.platformOpControlPlatform);
-        operationsList.add(AuthzConstants.serverOpCreateServer);
+        // TODO Create server is add server.  This needs to be cleaned up.
+        operationsList.add(AuthzConstants.platformOpAddServer); 
         operationsList.add(AuthzConstants.serverOpViewServer);
         operationsList.add(AuthzConstants.serverOpModifyServer);
         operationsList.add(AuthzConstants.serverOpRemoveServer);
         operationsList.add(AuthzConstants.serverOpManageAlerts);
         operationsList.add(AuthzConstants.serverOpControlServer);
-        operationsList.add(AuthzConstants.serviceOpCreateService);
+        // TODO Create service is add service.  This needs to be cleaned up.
+        operationsList.add(AuthzConstants.serverOpAddService);
         operationsList.add(AuthzConstants.serviceOpViewService);
         operationsList.add(AuthzConstants.serviceOpModifyService);
         operationsList.add(AuthzConstants.serviceOpRemoveService);

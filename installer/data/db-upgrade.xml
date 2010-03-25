@@ -10985,23 +10985,23 @@ has already been defined.
   			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
   				SELECT m.role_id, 303 FROM EAM_ROLE r 
   				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
-  				WHERE m.operation_id = 304 
+  				WHERE m.operation_id = 308 
   				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
   			         WHERE rm.role_id = r.id AND rm.operation_id = 303) = 0
   		</statement>
   		<statement desc="Adding delete server permission to any role that has create server permission...">
   			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
-  				SELECT m.role_id, 304 FROM EAM_ROLE r 
+  				SELECT m.role_id, 308 FROM EAM_ROLE r 
   				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
   				WHERE m.operation_id = 303 
   				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
-  			         WHERE rm.role_id = r.id AND rm.operation_id = 304) = 0
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 308) = 0
   		</statement>
   		<statement desc="Adding update server permission to any role that has create or delete server permission...">
   			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
   				SELECT distinct m.role_id, 307 FROM EAM_ROLE r 
   				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
-  				WHERE (m.operation_id = 304 or m.operation_id = 303)
+  				WHERE (m.operation_id = 308 or m.operation_id = 303)
   				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
   			         WHERE rm.role_id = r.id AND rm.operation_id = 307) = 0
   		</statement>
@@ -11009,7 +11009,7 @@ has already been defined.
   			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
   				SELECT distinct m.role_id, 311 FROM EAM_ROLE r 
   				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
-  				WHERE (m.operation_id = 304 or m.operation_id = 303 or m.operation_id = 307)
+  				WHERE (m.operation_id = 308 or m.operation_id = 303 or m.operation_id = 307)
   				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
   			         WHERE rm.role_id = r.id AND rm.operation_id = 311) = 0
   		</statement>
