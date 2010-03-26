@@ -50,8 +50,8 @@
 				p:driverClassName="${server.database-driver}" p:url="${server.database-url}"
 				p:username="${server.database-user}" p:password="${server.database-password}"
 				p:defaultAutoCommit="false" p:minIdle="${server.database-minpoolsize}"
-				p:maxIdle="${server.database-maxpoolsize}" p:maxWait="${server.database-blockingtimeout}"
-				p:jdbcInterceptors="ConnectionState" />
+				p:maxActive="${server.database-maxpoolsize}" p:maxWait="${server.database-blockingtimeout}"
+				p:jdbcInterceptors="ConnectionState"/>
 		</constructor-arg>
 	</bean>
 
