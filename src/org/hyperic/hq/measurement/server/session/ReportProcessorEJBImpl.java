@@ -55,6 +55,7 @@ import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.data.DSNList;
 import org.hyperic.hq.measurement.data.MeasurementReport;
 import org.hyperic.hq.measurement.data.ValueList;
+import org.hyperic.hq.measurement.monitor.MonitorAgentException;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.ReportProcessorLocal;
 import org.hyperic.hq.measurement.shared.ReportProcessorUtil;
@@ -212,9 +213,23 @@ public class ReportProcessorEJBImpl
                 continue;
             }
             if (!resourceMatchesAgent(res, agentToken)) {
-                _log.warn("measurement (id=" + m.getId() + ") was sent to the " +
-                    "HQ server from agent (agentToken=" + agentToken + ")" +
-                    " but resource (id=" + res.getId() + ") is not associated " +
+                String ipAddr = "<Unknown IP address>";
+                String portString = "<Unknown port>";
+                try {
+                    Agent agt = getAgent(agentToken);
+                    ipAddr = agt.getAddress();
+                    portString = agt.getPort().toString();
+                } catch (MonitorAgentException mae) {
+                    // leave values as default
+                    _log.debug("Error trying to construct string for WARN message below", mae);
+                }
+                
+                _log.warn("measurement (id=" + m.getId() + ", name=" +
+                    m.getTemplate().getName() + ") was sent to the " +
+                    "HQ server from agent (agentToken=" + agentToken + ", name=" +
+                    ipAddr + ", port=" + portString + ")" +
+                    " but resource (id=" + res.getId() + ", name=" +
+                    res.getName() + ") is not associated " +
                     " with that agent.  Dropping measurement.");
                 continue;
             }
