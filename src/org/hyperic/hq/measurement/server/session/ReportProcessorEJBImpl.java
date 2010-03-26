@@ -212,6 +212,10 @@ public class ReportProcessorEJBImpl
                 }
                 continue;
             }
+            
+            // FIXME: reosurceMatchesAgent() and the call to getAgent() can be
+            // consolidated, the agent match can be checked by getting the agent
+            // for the instanceID from the resource
             if (!resourceMatchesAgent(res, agentToken)) {
                 String ipAddr = "<Unknown IP address>";
                 String portString = "<Unknown port>";
