@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2010], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -38,6 +38,7 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.ContextUtils;
@@ -73,20 +74,27 @@ public class RemoveResourceGroupsAction extends BaseAction {
         AppdefEntityID entityId = new AppdefEntityID(resourceType.intValue(), 
                                                      resourceId);
 
-        Integer[] groups = rmForm.getG();
-        if (groups != null) {
-            log.trace("removing groups " + groups +
-                      " for resource [" + resourceId + "]");
-            boss.batchGroupRemove(sessionId.intValue(), entityId,
-                                  groups);
+        try {
+            Integer[] groups = rmForm.getG();
+            if (groups != null) {
+                log.trace("removing groups " + groups +
+                          " for resource [" + resourceId + "]");
+                boss.batchGroupRemove(sessionId.intValue(), entityId,
+                                      groups);
 
-            RequestUtils
-                .setConfirmation(request,
-                                 "resource.common.inventory.confirm.RemoveResourceGroups");
-        }
+                RequestUtils.setConfirmation(request,
+                        "resource.common.inventory.confirm.RemoveResourceGroups");
+            }
 
-        return returnSuccess(request, mapping, forwardParams);
+            return returnSuccess(request, mapping, forwardParams);
         
+        } catch (VetoException ve) {
+            RequestUtils.setErrorObject(request, 
+                    "resource.group.inventory.error.UpdateResourceListVetoed",
+                    ve.getMessage());
+            
+            return returnFailure(request, mapping, forwardParams);
+        }        
     }
 
 }

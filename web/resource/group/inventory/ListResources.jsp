@@ -92,7 +92,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   </c:if>
 </c:url>
 
-<html:form action="/resource/group/inventory/RemoveApp">
+<html:form action="/resource/group/inventory/RemoveGroupResources">
 <html:hidden property="eid" value="${Resource.entityId}"/>
 
 <!--  RESOURCES, COMPATIBLE CONTENTS -->

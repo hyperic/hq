@@ -1603,12 +1603,13 @@
         <forward name="success" path="/resource/group/Inventory.do?mode=view"/>
       </action>
 
-      <action path="/resource/group/inventory/RemoveApp" 
+      <action path="/resource/group/inventory/RemoveGroupResources" 
               name="RemoveGroupResourcesForm"
               type="org.hyperic.hq.ui.action.resource.group.inventory.RemoveAction"
               scope="request" 
               input="/resource/service/Inventory.do?mode=view">
-              <forward name="success" path="/resource/group/Inventory.do?mode=view" redirect="true"/>
+              <forward name="failure" path="/resource/group/Inventory.do?mode=view"/>
+              <forward name="success" path="/resource/group/Inventory.do?mode=view"/>
       </action>
 
       <!-- / -->

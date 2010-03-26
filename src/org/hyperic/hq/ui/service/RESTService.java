@@ -547,9 +547,6 @@ public class RESTService extends BaseService {
                 for (int i=0; i<aeidJArray.length(); i++) {
                     AppdefEntityID aeid = new AppdefEntityID(aeidJArray.getString(i));
                     if (!aeid.isGroup()) {
-                        Resource resource = ResourceManagerEJBImpl.getOne()
-                                                .findResource(aeid);                   
-                    
                         AppdefBossEJBImpl.getOne()
                                  .batchGroupAdd(
                                          user.getSessionId(),
@@ -581,7 +578,7 @@ public class RESTService extends BaseService {
                 }
                 jRes.put("groups", jarr);
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.debug(e.getLocalizedMessage());
             
             try {
@@ -590,7 +587,7 @@ public class RESTService extends BaseService {
             } catch (Exception e2) {}
         }
         
-        return (jRes.length() > 0) ? jRes.toString() : ERROR_GENERIC;        
+        return jRes.toString();        
     }
     
     /**

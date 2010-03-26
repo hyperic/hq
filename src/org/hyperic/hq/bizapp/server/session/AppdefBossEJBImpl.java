@@ -2376,7 +2376,7 @@ public class AppdefBossEJBImpl
      */
     public void removeResourcesFromGroup(int sessionId, ResourceGroup group,
                                          Collection resources)
-        throws SessionException, PermissionException
+        throws SessionException, PermissionException, VetoException
     {
         AuthzSubject subject = manager.getSubject(sessionId);
 
@@ -2643,7 +2643,7 @@ public class AppdefBossEJBImpl
      */
     public void addResourcesToGroup(int sessionID, ResourceGroup group,
                                     List aeids)
-        throws SessionException, PermissionException 
+        throws SessionException, PermissionException, VetoException 
     {
         AuthzSubject subject = manager.getSubject(sessionID);
         ResourceGroupManagerLocal groupMan = 
@@ -3317,12 +3317,15 @@ public class AppdefBossEJBImpl
         ResourceGroupManagerLocal groupMan = getResourceGroupManager();
         ResourceManagerLocal resourceMan = getResourceManager();
         Resource resource = resourceMan.findResource(entityId);
+        List groups = new ArrayList(groupIds.length);
         
         for (int i=0; i < groupIds.length; i++) {
             ResourceGroup group = groupMan.findResourceGroupById(subject, 
                                                                  groupIds[i]);
-            groupMan.addResource(subject, group, resource);
+            groups.add(group);
         }
+        
+        groupMan.addResource(subject, resource, groups);
     }
 
     /**
@@ -3375,13 +3378,15 @@ public class AppdefBossEJBImpl
         ResourceGroupManagerLocal groupMan = getResourceGroupManager();
         ResourceManagerLocal resourceMan = getResourceManager();
         Resource resource = resourceMan.findResource(entityId);
-        
+        List groups = new ArrayList(groupIds.length);
+
         for (int i=0;i<groupIds.length;i++) {
             ResourceGroup group = groupMan.findResourceGroupById(subject, 
                                                                  groupIds[i]);
-            groupMan.removeResources(subject, group, 
-                                     Collections.singleton(resource));
+            groups.add(group);
         }
+        
+        groupMan.removeResource(subject, resource, groups);
     }
 
     /**

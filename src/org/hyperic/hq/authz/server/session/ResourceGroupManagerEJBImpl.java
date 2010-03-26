@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2009], Hyperic, Inc.
+ * Copyright (C) [2004-2010], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.authz.server.session;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -33,6 +34,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -71,6 +73,7 @@ import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.events.server.session.EventLogManagerEJBImpl;
 import org.hyperic.hq.events.shared.EventLogManagerLocal;
 import org.hyperic.hq.grouping.CritterList;
@@ -81,6 +84,7 @@ import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
+import org.quartz.SchedulerException;
 
 /**
  * Use this session bean to manipulate ResourceGroups,
@@ -100,6 +104,7 @@ public class ResourceGroupManagerEJBImpl
     extends AuthzSession 
     implements SessionBean 
 {
+    private final String BUNDLE = "org.hyperic.hq.authz.Resources";
     private Pager _groupPager;
     private Pager _ownedGroupPager;
     private final String GROUP_PAGER = 
@@ -166,6 +171,37 @@ public class ResourceGroupManagerEJBImpl
         pm.check(whoami.getId(), AuthzConstants.authzGroup, group, op);
     }
 
+    /**
+     * Do not allow resources to be added or removed from a group
+     * if the group has a downtime schedule in progress.
+     */
+    private void checkGroupMaintenance(AuthzSubject subj, ResourceGroup group) 
+        throws PermissionException, VetoException {
+    
+        try {
+            MaintenanceEvent event = PermissionManagerFactory.getInstance()
+                                        .getMaintenanceEventManager()
+                                            .getMaintenanceEvent(subj, group.getId());
+
+            if (event != null && MaintenanceEvent.STATE_RUNNING.equals(event.getState())) {
+                String msg = ResourceBundle.getBundle(BUNDLE)
+                                .getString("resourceGroup.update.error.downtime.running");
+                
+                throw new VetoException(
+                            MessageFormat.format(msg, new String[] {group.getName()}));
+            }
+        } catch (SchedulerException se) {
+            // This should not happen. Indicates a serious system error.
+            
+            String msg = ResourceBundle.getBundle(BUNDLE)
+                            .getString("resourceGroup.update.error.downtime.scheduler.failure");
+                        
+            throw new SystemException(
+                        MessageFormat.format(msg, new String[] {group.getName()}),
+                        se); 
+        }
+    }
+    
     /**
      * Find the group that has the given ID.  Does not do any authz checking
      * @ejb:interface-method
@@ -302,14 +338,17 @@ public class ResourceGroupManagerEJBImpl
      */
     public void addResources(AuthzSubject subj, ResourceGroup group,
                              List resources)
-        throws PermissionException
+        throws PermissionException, VetoException
     {
         checkGroupPermission(subj, group.getId(),
                              AuthzConstants.perm_modifyResourceGroup);
+        
+        checkGroupMaintenance(subj, group);
+        
         addResources(group, resources);
     }
 
-    private void addResources(ResourceGroup group, List resources) {
+    private void addResources(ResourceGroup group, Collection resources) {
         getResourceGroupDAO().addMembers(group, resources);
         GroupingStartupListener.getCallbackObj().groupMembersChanged(group);
     }
@@ -320,17 +359,86 @@ public class ResourceGroupManagerEJBImpl
      */
     public ResourceGroup addResource(AuthzSubject whoami, ResourceGroup group, 
                                      Resource resource)
-        throws PermissionException 
+        throws PermissionException, VetoException 
     {
         checkGroupPermission(whoami, group.getId(),
                              AuthzConstants.perm_modifyResourceGroup);
 
-        getResourceGroupDAO().addMembers(group, 
-                                         Collections.singleton(resource));
-        GroupingStartupListener.getCallbackObj().groupMembersChanged(group);
+        checkGroupMaintenance(whoami, group);
+        
+        addResources(group, Collections.singletonList(resource));
+        
         return group;
     }
- 
+
+    /**
+     * Add a resource to a collection of groups
+     * 
+     * @param whoami The current running user.
+     * @param resource The resource
+     * @param groups The groups to add to.
+     * 
+     * @ejb:interface-method
+     */
+    public void addResource(AuthzSubject whoami, 
+                            Resource resource,
+                            Collection groups)
+        throws PermissionException, VetoException
+    {
+        // Do all of the pre-condition checks first before
+        // iterating through addResources() because
+        // ResourceGroupDAO().addMembers() will commit
+        // the changes after each iteration.
+
+        for (Iterator i = groups.iterator(); i.hasNext();) {
+            ResourceGroup g = (ResourceGroup) i.next();
+            
+            checkGroupPermission(whoami, g.getId(),
+                                 AuthzConstants.perm_modifyResourceGroup);
+
+            checkGroupMaintenance(whoami, g);
+        }
+        
+        for (Iterator i = groups.iterator(); i.hasNext();) {
+            ResourceGroup g = (ResourceGroup) i.next();
+            addResources(g, Collections.singletonList(resource));
+        }
+    }
+
+    /**
+     * Remove a resource from a collection of groups
+     * 
+     * @param whoami The current running user.
+     * @param resource The resource
+     * @param groups The groups to remove from.
+     * 
+     * @ejb:interface-method
+     */    
+    public void removeResource(AuthzSubject whoami,
+                               Resource resource,
+                               Collection groups)
+        throws PermissionException, VetoException
+    {
+        // Do all of the pre-condition checks first before
+        // iterating through removeResources() because
+        // ResourceGroupDAO().removeMembers() will commit
+        // the changes after each iteration.
+
+        for (Iterator i = groups.iterator(); i.hasNext();) {
+            ResourceGroup g = (ResourceGroup) i.next();
+            
+            checkGroupPermission(whoami, g.getId(),
+                                 AuthzConstants.perm_modifyResourceGroup);
+
+            checkGroupMaintenance(whoami, g);
+        }
+        
+        for (Iterator i = groups.iterator(); i.hasNext();) {
+            ResourceGroup g = (ResourceGroup) i.next();
+            removeResources(g, Collections.singletonList(resource));
+        }
+    }
+    
     /**
      * RemoveResources from a group.
      * @param whoami The current running user.
@@ -340,16 +448,21 @@ public class ResourceGroupManagerEJBImpl
     public void removeResources(AuthzSubject whoami,
                                 ResourceGroup group,
                                 Collection resources)
-        throws PermissionException 
+        throws PermissionException, VetoException 
     {
         checkGroupPermission(whoami, group.getId(),
                              AuthzConstants.perm_modifyResourceGroup);
-        
-        ResourceGroupDAO grpDao = getResourceGroupDAO();
-        grpDao.removeMembers(group, resources);
-        GroupingStartupListener.getCallbackObj().groupMembersChanged(group);
+
+        checkGroupMaintenance(whoami, group);
+
+        removeResources(group, resources);
     }
 
+    private void removeResources(ResourceGroup group, Collection resources) {
+        getResourceGroupDAO().removeMembers(group, resources);
+        GroupingStartupListener.getCallbackObj().groupMembersChanged(group);
+    }
+    
     /**
      * Sets the criteria list for this group.
      * @param whoami The current running user.
@@ -378,10 +491,12 @@ public class ResourceGroupManagerEJBImpl
      */
     public void setResources(AuthzSubject whoami,
                              ResourceGroup group, Collection resources) 
-        throws PermissionException 
+        throws PermissionException, VetoException 
     {
         checkGroupPermission(whoami, group.getId(),
                              AuthzConstants.perm_modifyResourceGroup);
+
+        checkGroupMaintenance(whoami, group);
 
         getResourceGroupDAO().setMembers(group, resources);
         GroupingStartupListener.getCallbackObj().groupMembersChanged(group);

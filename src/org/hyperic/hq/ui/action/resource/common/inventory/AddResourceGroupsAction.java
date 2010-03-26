@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2010], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -42,6 +42,7 @@ import org.hyperic.hq.appdef.shared.AppSvcClustDuplicateAssignException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.action.BaseValidatorForm;
@@ -140,11 +141,15 @@ public class AddResourceGroupsAction extends BaseAction {
             RequestUtils.setConfirmation(request,
                                          "resource.common.inventory.confirm.AddResourceGroups");
             return returnSuccess(request, mapping, forwardParams);
-        } 
-        catch (AppSvcClustDuplicateAssignException e1) {
-            RequestUtils
-                .setError(request,
-                          "resource.common.inventory.error.DuplicateClusterAssignment");
+        } catch (AppSvcClustDuplicateAssignException e1) {
+            RequestUtils.setError(request,
+                                  "resource.common.inventory.error.DuplicateClusterAssignment");
+            return returnFailure(request, mapping);
+        } catch (VetoException ve) {
+            RequestUtils.setErrorObject(request, 
+                    "resource.group.inventory.error.UpdateResourceListVetoed",
+                    ve.getMessage());
+            
             return returnFailure(request, mapping);
         }
 
