@@ -272,7 +272,11 @@ public class SNMPTrapReceiver implements CommandResponder {
             String msg = getMessage(event);
 
             if (log.isDebugEnabled()) {
-                log.debug("Msg=" + msg);
+                log.debug("plugin=" + plugin.getName()
+                            + ", address=" + address
+                            + ", community=" + community
+                            + ", trapsReceived=" + getTrapsReceived()
+                            + ", msg=" + msg);
             }
 
             plugin.reportEvent(System.currentTimeMillis(), LogTrackPlugin.LOGLEVEL_ERROR, address, msg);
