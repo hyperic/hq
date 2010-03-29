@@ -261,6 +261,44 @@ public class MeasurementDAO extends HibernateDAO {
         return count;
     }
 
+    /**
+     * @param {@link Collection} of {@link Resource}s
+     * @return {@link Map} of {@link Integer} representing resourceId to
+     * {@link List} of {@link Measurement}s
+     */
+    public Map findEnabledByResources(List resources) {
+        if (resources == null || resources.size() == 0) {
+            return Collections.EMPTY_MAP;
+        }
+        final String sql = new StringBuilder(256)
+            .append("select m from Measurement m ")
+            .append("where m.enabled = '1' and ")
+            .append("m.resource in (:rids) ")
+            .toString();
+        final Map rtn = new HashMap();
+        final Query query = getSession().createQuery(sql);
+        final int size = resources.size();
+        for (int i=0; i<size; i+=BATCH_SIZE) {
+            int end = Math.min(size, i+BATCH_SIZE);
+            final List sublist = resources.subList(i, end);
+            final List resultset = query.setParameterList("rids", sublist).list();
+            for (final Iterator it=resultset.iterator(); it.hasNext(); ) {
+                final Measurement m = (Measurement) it.next();
+                final Resource r = m.getResource();
+                if (r == null || r.isInAsyncDeleteState()) {
+                    continue;
+                }
+                List tmp = (List) rtn.get(r.getId());
+                if (tmp == null) {
+                    tmp = new ArrayList();
+                    rtn.put(r.getId(), tmp);
+                }
+                tmp.add(m);
+            }
+        }
+        return rtn;
+    }
+
     public List findEnabledByResource(Resource resource) {
         if (resource == null || resource.isInAsyncDeleteState()) {
             return Collections.EMPTY_LIST;
