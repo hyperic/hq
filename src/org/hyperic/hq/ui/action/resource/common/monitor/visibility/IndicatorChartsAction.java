@@ -178,9 +178,9 @@ public class IndicatorChartsAction extends DispatchAction
             return null;
         }
         
-        double high  = Double.MIN_VALUE,
-               low   = Double.MAX_VALUE,
-               total = 1;
+        double high  = Double.MIN_VALUE;
+        double low   = Double.MAX_VALUE;
+        double total = 0;
         Double lastVal = null;
         int count = 0;
         long last = Long.MIN_VALUE;
@@ -192,8 +192,6 @@ public class IndicatorChartsAction extends DispatchAction
             final double currentValue = mv.getValue();
             final int currentCount = mv.getCount();
             final long currentTimestamp = mv.getTimestamp();
-            
-            if (debug) log.debug("Low: " + currentLowValue + ", High: " + currentHighValue + ", Value: " + currentValue + ", Count: " + currentCount + ", Timestamp: " + currentTimestamp);
             
             if (!Double.isNaN(currentLowValue) && !Double.isInfinite(currentLowValue)) {
                 low = Math.min(mv.getLowValue(), low);
@@ -211,6 +209,20 @@ public class IndicatorChartsAction extends DispatchAction
             
             if (!Double.isNaN(currentValue) && !Double.isInfinite(currentValue)) {
                 total += currentValue * currentCount;
+            }
+            
+            if (debug) {
+                log.debug("Measurement=" + template.getName() 
+                            + ", Current {Low=" + currentLowValue 
+                            + ", High=" + currentHighValue 
+                            + ", Value=" + currentValue 
+                            + ", Count=" + currentCount 
+                            + ", Timestamp=" + currentTimestamp
+                            + "}, Summary {Low=" + low
+                            + ", High=" + high
+                            + ", Total=" + total
+                            + ", Count=" + count
+                            + "}");
             }
         }
         
@@ -251,6 +263,17 @@ public class IndicatorChartsAction extends DispatchAction
         
         if (lastVal != null) {
             data[MeasurementConstants.IND_LAST_TIME] = lastVal;
+        }
+        
+        if (debug) {
+            log.debug("Measurement=" + template.getName() 
+                          + ", Last {Value=" + lastVal
+                          + "}, Summary {Avg=" + avg
+                          + ", Low=" + low
+                          + ", High=" + high
+                          + ", Total=" + total
+                          + ", Count=" + count
+                          + "}");
         }
         
         return data;    
