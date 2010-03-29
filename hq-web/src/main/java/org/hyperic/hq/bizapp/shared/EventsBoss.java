@@ -189,12 +189,6 @@ public interface EventsBoss {
     /**
      * Find all alerts for an appdef resource
      */
-    public PageList<Alert> findAlerts(int sessionID, AppdefEntityID id, PageControl pc)
-        throws SessionNotFoundException, SessionTimeoutException, PermissionException;
-
-    /**
-     * Find all alerts for an appdef resource
-     */
     public PageList<Alert> findAlerts(int sessionID, AppdefEntityID id, long begin, long end,
                                       PageControl pc) throws SessionNotFoundException,
         SessionTimeoutException, PermissionException;

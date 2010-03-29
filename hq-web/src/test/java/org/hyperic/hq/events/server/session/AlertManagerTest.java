@@ -6,12 +6,14 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.hibernate.ObjectNotFoundException;
 import org.hibernate.SessionFactory;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.Server;
@@ -23,7 +25,6 @@ import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerManager;
@@ -52,11 +53,8 @@ import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.AlertManager;
-import org.hyperic.hq.events.shared.AlertValue;
 import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.hq.product.ServiceTypeInfo;
-import org.hyperic.util.pager.PageControl;
-import org.hyperic.util.pager.PageList;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -506,9 +504,24 @@ public class AlertManagerTest {
         // alert is still there. We have to explicitly remove it from cache.
         sessionFactory.getCurrentSession().clear();
         // verify alert cannot be loaded from DB
-        assertNull("Alert is not deleted", alertManager.getById(testPlatformAlert.getId()));
-        assertNull("Alert is not deleted", alertManager.getById(testServerAlert.getId()));
-        assertNull("Alert is not deleted", alertManager.getById(testServiceAlert.getId()));
+        try {
+            alertManager.findAlertById(testPlatformAlert.getId());
+            fail("Alert was not deleted");
+        }catch(ObjectNotFoundException e) {
+            //expected
+        }
+        try {
+            alertManager.findAlertById(testServerAlert.getId());
+            fail("Alert was not deleted");
+        }catch(ObjectNotFoundException e) {
+            //expected
+        }
+        try {
+            alertManager.findAlertById(testServiceAlert.getId());
+            fail("Alert was not deleted");
+        }catch(ObjectNotFoundException e) {
+            //expected
+        }
     }
 
     @Test
@@ -523,9 +536,24 @@ public class AlertManagerTest {
         alertManager.deleteAlerts(authzSubjectManager.getOverlordPojo(), testServiceAlertDef);
         sessionFactory.getCurrentSession().clear();
         // Verify Alerts not present
-        assertNull("Alert is not deleted", alertManager.getById(testPlatformAlert.getId()));
-        assertNull("Alert is not deleted", alertManager.getById(testServerAlert.getId()));
-        assertNull("Alert is not deleted", alertManager.getById(testServiceAlert.getId()));
+        try {
+            alertManager.findAlertById(testPlatformAlert.getId());
+            fail("Alert was not deleted");
+        }catch(ObjectNotFoundException e) {
+            //expected
+        }
+        try {
+            alertManager.findAlertById(testServerAlert.getId());
+            fail("Alert was not deleted");
+        }catch(ObjectNotFoundException e) {
+            //expected
+        }
+        try {
+            alertManager.findAlertById(testServiceAlert.getId());
+            fail("Alert was not deleted");
+        }catch(ObjectNotFoundException e) {
+            //expected
+        }
     }
 
     @Test
@@ -546,11 +574,21 @@ public class AlertManagerTest {
         alertManager.deleteAlerts(time3, time4);
         sessionFactory.getCurrentSession().clear();
         // Verify the alerts are deleted only within the given range
-        assertNotNull("Alert1 shouldn't be deleted", alertManager.getById(alert1.getId()));
-        assertNotNull("Alert2 shouldn't be deleted", alertManager.getById(alert2.getId()));
-        assertNull("Alert3 should have been deleted", alertManager.getById(alert3.getId()));
-        assertNull("Alert4 should have been deleted", alertManager.getById(alert4.getId()));
-        assertNotNull("Alert5 shouldn't be deleted", alertManager.getById(alert5.getId()));
+        assertNotNull("Alert1 shouldn't be deleted", alertManager.findAlertById(alert1.getId()));
+        assertNotNull("Alert2 shouldn't be deleted", alertManager.findAlertById(alert2.getId()));
+        try {
+            alertManager.findAlertById(alert3.getId());
+            fail("Alert was not deleted");
+        }catch(ObjectNotFoundException e) {
+            //expected
+        }
+        try {  
+            alertManager.findAlertById(alert4.getId());
+            fail("Alert was not deleted");
+        }catch(ObjectNotFoundException e) {
+            //expected
+        }
+        assertNotNull("Alert5 shouldn't be deleted", alertManager.findAlertById(alert5.getId()));
     }
 
     /*
@@ -568,16 +606,15 @@ public class AlertManagerTest {
     public void testGetAlertValueById() {
         long ctime = System.currentTimeMillis();
         Alert testPlatformAlert = alertManager.createAlert(this.testPlatformAlertDef, ctime);
-        AlertValue alertVal = alertManager.getById(testPlatformAlert.getId());
+        Alert alertVal = alertManager.findAlertById(testPlatformAlert.getId());
         // Verify org.hyperic.hq.events.server.session.PagerProcessor_events
         // updates on AlertValue & ack flag
 
-        // Verify AlertValue: AlertDefinition Id
-        assertTrue(alertVal.alertDefIdHasBeenSet());
+       
         assertEquals("Alert Value: AlertDefId is incorrect", this.testPlatformAlertDef.getId(),
-            alertVal.getAlertDefId());
+            alertVal.getAlertDefinition().getId());
         // Verify AlertValue: isAck
-        assertFalse("Alert should not be acknowledgeable", alertVal.isAcknowledgeable());
+        assertFalse("Alert should not be acknowledgeable", alertVal.isAckable());
 
     }
 
@@ -663,32 +700,6 @@ public class AlertManagerTest {
                                                  this.testServiceAlertDef.getAppdefEntityId() }));
     }
 
-    @Test
-    public void testfindPageListAlertsByAppDef() throws PermissionException {
-        AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
-        long ctime = System.currentTimeMillis();
-        Alert testPlatformAlert1 = alertManager.createAlert(this.testPlatformAlertDef, ctime);
-        Alert testPlatformAlert2 = alertManager
-            .createAlert(this.testPlatformAlertDef, ctime + 999l);
-        Alert testPlatformAlert3 = alertManager.createAlert(this.testPlatformAlertDef,
-            ctime + 2999l);
-        // TODO: Need to use proper parameterization
-        // Currently the findAlerts() returns AlertValue(the
-        // PagerProcessor_events) instead of Alert.
-        PageList allAlerts = new PageList<Alert>();
-        allAlerts.add(testPlatformAlert1.getAlertValue());
-        allAlerts.add(testPlatformAlert2.getAlertValue());
-        allAlerts.add(testPlatformAlert3.getAlertValue());
-
-        // Fetch PageList<Alert> for a given AppDef
-        PageControl pc = new PageControl();
-        PageList<Alert> pageAlerts = alertManager.findAlerts(overlord, testPlatformAlertDef
-            .getAppdefEntityId(), pc);
-
-        // Verify both the pageList matches
-        assertTrue("PageList doesn't have all alerts", pageAlerts.containsAll(allAlerts));
-        assertTrue("Alerts don't exist in page list", allAlerts.containsAll(pageAlerts));
-    }
 
     @Test
     public void testShortReasonForThresholdType() {

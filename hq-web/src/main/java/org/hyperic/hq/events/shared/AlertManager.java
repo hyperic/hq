@@ -55,11 +55,6 @@ public interface AlertManager {
     public int deleteAlerts(long begin, long end);
 
     /**
-     * Find an alert by ID
-     */
-    public AlertValue getById(Integer id);
-
-    /**
      * Find an alert pojo by ID
      */
     public Alert findAlertById(Integer id);
@@ -92,13 +87,6 @@ public interface AlertManager {
      * should only be called once in one transaction.
      */
     public void fireAlert(AlertConditionsSatisfiedZEvent event);
-
-    /**
-     * Get a collection of alerts for an AppdefEntityID
-     * @throws PermissionException
-     */
-    public PageList<Alert> findAlerts(AuthzSubject subj, AppdefEntityID id, PageControl pc)
-        throws PermissionException;
 
     /**
      * Get a collection of alerts for an AppdefEntityID and time range

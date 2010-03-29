@@ -970,18 +970,6 @@ public class EventsBossImpl implements EventsBoss, ApplicationListener<Applicati
      * 
      */
     @Transactional(readOnly = true)
-    public PageList<Alert> findAlerts(int sessionID, AppdefEntityID id, PageControl pc)
-        throws SessionNotFoundException, SessionTimeoutException, PermissionException {
-        AuthzSubject subject = sessionManager.getSubject(sessionID);
-        return alertManager.findAlerts(subject, id, pc);
-    }
-
-    /**
-     * Find all alerts for an appdef resource
-     * 
-     * 
-     */
-    @Transactional(readOnly = true)
     public PageList<Alert> findAlerts(int sessionID, AppdefEntityID id, long begin, long end,
                                       PageControl pc) throws SessionNotFoundException,
         SessionTimeoutException, PermissionException {
