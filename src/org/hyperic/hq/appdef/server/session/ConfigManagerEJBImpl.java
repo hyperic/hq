@@ -566,45 +566,6 @@ public class ConfigManagerEJBImpl
             wasUpdated = true;
         }
         return wasUpdated;
-
-        if (wasUpdated) {
-            if (sendConfigEvent) {
-                List events = new ArrayList();
-                events.add(new ResourceUpdatedZevent(subject, appdefID));
-
-                if (appdefID.isPlatform()) {
-                    try {
-                        Platform p = getPlatformManagerLocal().findPlatformById(appdefID.getId());
-                        for (Iterator i = p.getServers().iterator(); i.hasNext() ;) {
-                            Server s = (Server)i.next();
-                            events.add(new ResourceUpdatedZevent(subject, s.getEntityId()));
-                            for (Iterator it = s.getServices().iterator(); it.hasNext();) {
-                                Service svc = (Service)it.next();
-                                events.add(new ResourceUpdatedZevent(subject, svc.getEntityId()));
-                            }
-                        }
-                    } catch (org.hyperic.hq.appdef.shared.PlatformNotFoundException e) {
-                        log.warn("Error sending config event for: " + appdefID, e);
-                    }
-                } else if (appdefID.isServer()) {
-                    try {
-                        Server s = getServerManagerLocal().findServerById(appdefID.getId());
-                        for (Iterator i = s.getServices().iterator(); i.hasNext();) {
-                            Service svc = (Service)i.next();
-                            events.add(new ResourceUpdatedZevent(subject, svc.getEntityId()));
-                        }
-                    } catch (org.hyperic.hq.appdef.shared.ServerNotFoundException e) {
-                        log.warn("Error sending config event for: " + appdefID, e);
-                    }
-                }
-
-                ZeventManager.getInstance().enqueueEventsAfterCommit(events);
-            }
-            
-            return appdefID;
-        } else {
-            return null;
-        }
     }
 
     /** Update the appdef entities based on TypeInfo
