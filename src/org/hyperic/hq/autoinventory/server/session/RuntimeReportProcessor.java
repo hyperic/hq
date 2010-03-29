@@ -26,9 +26,13 @@
 package org.hyperic.hq.autoinventory.server.session;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.ejb.CreateException;
@@ -44,6 +48,7 @@ import org.hyperic.hq.appdef.server.session.CPropManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.Service;
@@ -58,6 +63,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
+import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
@@ -66,16 +72,22 @@ import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.CompositeRuntimeResourceReport;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
+import org.hyperic.hq.measurement.server.session.AgentScheduleSyncZevent;
+import org.hyperic.hq.measurement.server.session.MeasurementProcessorEJBImpl;
 import org.hyperic.hq.product.RuntimeResourceReport;
 import org.hyperic.hq.product.ServiceType;
+import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.pager.PageControl;
 
@@ -125,7 +137,7 @@ public class RuntimeReportProcessor {
         try {
             AuditManagerEJBImpl.getOne().pushContainer(audit);
             pushed = true; 
-            _processRuntimeReport(subject, crrr); 
+            _processRuntimeReport(subject, crrr);
         } finally {
             if (pushed) {
                 AuditManagerEJBImpl.getOne().popContainer(false);
@@ -164,7 +176,8 @@ public class RuntimeReportProcessor {
             // Check that reporting server still exists.
             serverId = new Integer(serverReport.getServerId());
             appdefServers[i] = _serverMgr.getServerById(serverId);
-            if (appdefServers[i] == null) {
+
+            if (!isValid(appdefServers[i])) {
                 _log.error("Error finding existing server: " + serverId);
                 turnOffRuntimeDiscovery(subject, serverId);
                 continue;
@@ -179,22 +192,26 @@ public class RuntimeReportProcessor {
                 appdefServers[i] = null;
             }
         }
-
         // Now, for each server report that had a corresponding appdef server,
         // process that report.
-        _log.info("Merging server reports into appdef (server count=" +
-                  appdefServers.length + ")");
+        /*
+         * {@link Map} of {@link String}=fqdn to {@link Set} of {@link Resource}s
+         * Represents the resources not checked in from the agent runtime report
+         */
+        Map platformToServers = new HashMap();
+        _log.info("Merging server reports into appdef (server count=" + appdefServers.length + ")");
         for (int i = 0; i < appdefServers.length; i++) {
-
-            if (appdefServers[i] == null)
+            Server appdefServer = appdefServers[i];
+            if (appdefServer == null) {
                 continue;
+            }
             serverReport = serverReports[i];
             aiplatforms = serverReport.getAIPlatforms();
-            if (aiplatforms == null)
+            if (aiplatforms == null) {
                 continue;
-
+            }
             _log.info("Merging platforms (platform count=" + aiplatforms.length
-                      + ", reported by serverId=" + appdefServers[i].getId() +
+                      + ", reported by serverId=" + appdefServer.getId() +
                       ") into appdef...");
             for (int j=0; j<aiplatforms.length; j++) {
                 if(aiplatforms[j] != null) {
@@ -217,8 +234,12 @@ public class RuntimeReportProcessor {
 
                         aiplatforms[j].setAgentToken(_agentToken);
                     }
-                    mergePlatformIntoInventory(subject, aiplatforms[j],
-                                               appdefServers[i]); 
+                    Set tmp = (Set)platformToServers.get(aiplatforms[j].getFqdn());
+                    if (tmp == null) {
+                        tmp = new HashSet();
+                        platformToServers.put(aiplatforms[j].getFqdn(), tmp);
+                    }
+                    tmp.addAll(mergePlatformIntoInventory(subject, aiplatforms[j], appdefServer));
                     Util.flushCurrentSession();
                 } else {
                     _log.error("Runtime Report from server: " +
@@ -227,12 +248,69 @@ public class RuntimeReportProcessor {
                 }
             }
         }
+        rescheduleNonReportedServers(subject, platformToServers);
         long endTime = System.currentTimeMillis() - startTime;
-        _log.info("Completed processing Runtime AI report in: " + endTime/1000 +
-                  " seconds.");
+        _log.info("Completed processing Runtime AI report in: " + endTime/1000 + " seconds.");
     }
 
-    private void mergePlatformIntoInventory(AuthzSubject subject,
+    private boolean isValid(Server server) {
+        if (server == null) {
+            return false;
+        }
+        Platform p = server.getPlatform();
+        if (p == null) {
+            return false;
+        } else {
+            Resource r = p.getResource();
+            if (r == null || r.isInAsyncDeleteState()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // [HHQ-3814] AGENT BUG: For some reason the agent does not check in its whole inventory when
+    // it sends its runtime report.  Therefore, to be safe, we need to make sure its schedule is
+    // up to date with the resources that are in the inventory but have not checked in
+    private void rescheduleNonReportedServers(AuthzSubject subject, Map platformToServers) {
+        final Set toSchedule = new HashSet();
+        final PlatformManagerLocal pMan = PlatformManagerEJBImpl.getOne();
+        for (final Iterator it=platformToServers.entrySet().iterator(); it.hasNext(); ) {
+            final Map.Entry entry = (Map.Entry) it.next();
+            final String fqdn = (String) entry.getKey();
+            try {
+                Platform p = pMan.findPlatformByFqdn(subject, fqdn);
+                if (p == null) {
+                    continue;
+                }
+                Resource r = p.getResource();
+                if (r == null || r.isInAsyncDeleteState()) {
+                    continue;
+                }
+                toSchedule.add(r);
+            } catch (PlatformNotFoundException e) {
+                _log.warn("could not find platformFqdn=" + fqdn + " to schedule: " + e);
+                continue;
+            } catch (PermissionException e) {
+                _log.warn("could not find platformFqdn=" + fqdn + " to schedule: " + e);
+                continue;
+            }
+            final Collection resources = (Collection) entry.getValue();
+            for (final Iterator xx=resources.iterator(); xx.hasNext(); ) {
+                Resource r = (Resource) xx.next();
+                _log.warn("Runtime inventory report received from " + fqdn +
+                          " didn't include servername=" + r.getName() + 
+                          ".  Rescheduling metrics in hierarchy to ensure they are collected");
+                toSchedule.add(r);
+            }
+        }
+        MeasurementProcessorEJBImpl.getOne().scheduleHierarchyAfterCommit(toSchedule);
+    }
+
+    /**
+     * @return {@link List} of {@link Resource}s not reported from the agents
+     */
+    private List mergePlatformIntoInventory(AuthzSubject subject,
                                             AIPlatformValue aiplatform,
                                             Server reportingServer)
         throws CreateException, PermissionException, ValidationException,
@@ -242,21 +320,25 @@ public class RuntimeReportProcessor {
 
         _log.info("Merging platform into appdef: " + aiplatform.getFqdn());
 
-        Platform appdefPlatform = null;
         // checks if platform exists by fqdn, certdn, then ipaddr(s)
-        appdefPlatform =
-            _platformMgr.getPlatformByAIPlatform(subject, aiplatform);
+        Platform appdefPlatform = _platformMgr.getPlatformByAIPlatform(subject, aiplatform);
 
         if (appdefPlatform == null) {
             // Add the platform
             _log.info("Creating new platform: " + aiplatform);
             appdefPlatform = _platformMgr.createPlatform(subject, aiplatform);
+        } else {
+            // Want to make sure that the Resource gets love after commit
+            ResourceUpdatedZevent event =
+                new ResourceUpdatedZevent(subject, appdefPlatform.getEntityId());
+            ZeventManager.getInstance().enqueueEventAfterCommit(event);
         }
         
         // Else platform already exists, don't update it, only update servers
         // that are within it.
-        if (aiservers == null)
-            return;
+        if (aiservers == null) {
+            return Collections.EMPTY_LIST;
+        }
 
         List appdefServers = new ArrayList(appdefPlatform.getServers());
 
@@ -274,21 +356,28 @@ public class RuntimeReportProcessor {
 
         // any servers that we haven't handled, we should mark them
         // as AI-zombies.
+        List rtn = new ArrayList(appdefServers.size());
         for (Iterator it = appdefServers.iterator(); it.hasNext(); ) {
             Server server = (Server) it.next();
-            if (server.isWasAutodiscovered())
+            if (server.isWasAutodiscovered()) {
                 _serverMgr.setAutodiscoveryZombie(server, true);
+            }
+            Resource r = server.getResource();
+            if (r == null || r.isInAsyncDeleteState()) {
+                continue;
+            }
+            rtn.add(r);
         }
-        
-        _log.info("Completed Merging platform into appdef: " +
-                 aiplatform.getFqdn());
+        _log.info("Completed Merging platform into appdef: " + aiplatform.getFqdn());
+        return rtn;
     }
     
 	private void updateServiceTypes(AIServerExtValue server, Server foundAppdefServer) {
 		final AIServiceTypeValue[] serviceTypes = server.getAiServiceTypes();
 		if (serviceTypes != null) {
 			for (int i = 0; i < serviceTypes.length; i++) {
-				final ServiceType serviceType= serviceTypeFactory.create(serviceTypes[i], foundAppdefServer.getServerType());
+				final ServiceType serviceType =
+				    serviceTypeFactory.create(serviceTypes[i], foundAppdefServer.getServerType());
 				serviceTypeMerges.add(serviceType);
 				Util.flushCurrentSession();
 			}
@@ -315,6 +404,7 @@ public class RuntimeReportProcessor {
         Integer serverTypePK;
 
         // Does this server exist (by autoinventory identifier) ?
+        final Set toSchedule = new HashSet();
         String appdefServerAIID, aiServerAIID;
         aiServerAIID = aiserver.getAutoinventoryIdentifier();
         Integer aiserverId = aiserver.getId();
@@ -422,7 +512,7 @@ public class RuntimeReportProcessor {
             try {
                 // Configure resource, telling the config manager to send
                 // an update event if this resource has been updated.
-                _configMgr.configureResponse(subject,
+                boolean wasUpdated = _configMgr.configureResponse(subject,
                                              server.getConfigResponse(),
                                              server.getEntityId(),
                                              aiserver.getProductConfig(),
@@ -430,11 +520,17 @@ public class RuntimeReportProcessor {
                                              aiserver.getControlConfig(),
                                              null, //RT config
                                              null,
-                                             update,
                                              false);
+                if (update && wasUpdated) {
+                    ResourceManagerLocal rMan = ResourceManagerEJBImpl.getOne();
+                    Resource r = server.getResource();
+                    rMan.resourceHierarchyUpdated(subject, Collections.singletonList(r));
+                } else {
+                    // want to make sure that the server's schedule is correct on the agent
+                    toSchedule.add(server.getEntityId());
+                }
             } catch (Exception e) {
-                _log.error("Error configuring server: " + server.getId() +
-                           ": " + e, e);
+                _log.error("Error configuring server: " + server.getId() + ": " + e, e);
             }
         }
 
@@ -541,6 +637,7 @@ public class RuntimeReportProcessor {
                 Util.flushCurrentSession();
             }
         }
+        ZeventManager.getInstance().enqueueEventAfterCommit(new AgentScheduleSyncZevent(toSchedule));
         _log.info("Completed merging server: " + reportingServer.getName() +
                  " into inventory");
     }

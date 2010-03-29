@@ -3604,14 +3604,20 @@ public class AppdefBossEJBImpl
         try {
             existingConfig = getConfigManager().getConfigResponse(entityId);
             
-            if (getConfigManager().configureResponse(
+            boolean wasUpdated = getConfigManager().configureResponse(
                 subject, existingConfig, entityId,
                 ConfigResponse.safeEncode(allConfigs.getProductConfig()),
                 ConfigResponse.safeEncode(allConfigs.getMetricConfig()),
                 ConfigResponse.safeEncode(allConfigs.getControlConfig()),
                 ConfigResponse.safeEncode(allConfigs.getRtConfig()),
-                Boolean.TRUE, !doValidation, force) != null) {
+                Boolean.TRUE, force);
+            if (wasUpdated) {
                 ids.add(entityId);
+            }
+            if (wasUpdated && !doValidation) {
+                ResourceManagerLocal rMan = ResourceManagerEJBImpl.getOne();
+                Resource r = rMan.findResource(entityId);
+                rMan.resourceHierarchyUpdated(subject, Collections.singletonList(r));
             }
             
             if (doValidation) {

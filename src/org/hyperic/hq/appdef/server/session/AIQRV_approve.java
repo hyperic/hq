@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.appdef.server.session;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -46,7 +47,9 @@ import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.autoinventory.AIIp;
 import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.hq.autoinventory.AIServer;
@@ -135,7 +138,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
                                             aiplatform.getProductConfig(),
                                             aiplatform.getMeasurementConfig(),
                                             aiplatform.getControlConfig(),
-                                            null, null, false, false);
+                                            null, null, false);
             } catch (Exception e) {
                 _log.warn("Error configuring platform: " + e, e);
             }
@@ -168,7 +171,10 @@ public class AIQRV_approve implements AIQResourceVisitor {
                                           aiplatform.getProductConfig(),
                                           aiplatform.getMeasurementConfig(),
                                           aiplatform.getControlConfig(),
-                                          null, null, true, false);
+                                          null, null, false);
+                    ResourceManagerLocal rMan = ResourceManagerEJBImpl.getOne();
+                    rMan.resourceHierarchyUpdated(
+                        subject, Collections.singletonList(existingPlatform.getResource()));
                 } catch (Exception e) {
                     _log.warn("Error configuring platform: " + e, e);
                 }
@@ -352,7 +358,10 @@ public class AIQRV_approve implements AIQResourceVisitor {
                                             aiserver.getProductConfig(),
                                             aiserver.getMeasurementConfig(),
                                             aiserver.getControlConfig(),
-                                            null, null, true, false);
+                                            null, null, false);
+                ResourceManagerLocal rMan = ResourceManagerEJBImpl.getOne();
+                rMan.resourceHierarchyUpdated(
+                    subject, Collections.singletonList(server.getResource()));
             } catch (Exception configE) {
                 _log.warn("Error configuring server: " + configE, configE);
             }
@@ -411,8 +420,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
                                             aiserver.getProductConfig(),
                                             aiserver.getMeasurementConfig(),
                                             aiserver.getControlConfig(),
-                                            null, /* RT config */
-                                            null, false, false);
+                                            null, /* RT config */ null, false);
             } catch (Exception e) {
                 _log.warn("Error configuring server: " + e, e);
             }

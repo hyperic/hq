@@ -44,12 +44,10 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.measurement.MeasurementScheduleException;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
-import org.hyperic.hq.measurement.server.session.AgentScheduleSynchronizer;
-import org.hyperic.hq.measurement.server.session.ScheduleRevNum;
-import org.hyperic.hq.measurement.server.session.SRN;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.SRNManagerLocal;
 import org.hyperic.hq.measurement.shared.SRNManagerUtil;
+import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.pager.PageControl;
 
 /**
@@ -221,13 +219,13 @@ public class SRNManagerEJBImpl extends SessionEJB
         SRNCache cache = SRNCache.getInstance();
         HashSet nonEntities = new HashSet();
         final boolean debug = _log.isDebugEnabled();
+        final List eids = new ArrayList(srns.length);
 
         for (int i = 0; i < srns.length; i++) {
             ScheduleRevNum srn = cache.get(srns[i].getEntity());
 
             if (srn == null) {
-                _log.error("Agent's reporting for non-existing entity: "
-                           + srns[i].getEntity());
+                _log.error("Agent's reporting for non-existing entity: " + srns[i].getEntity());
                 nonEntities.add(srns[i].getEntity());
                 continue;
             }
@@ -257,12 +255,14 @@ public class SRNManagerEJBImpl extends SessionEJB
                                    " but cached is " + srn.getSrn() +
                                    " rescheduling metrics..");
                     }
-                    List eids = new ArrayList();
                     eids.add(srns[i].getEntity());
-                    AgentScheduleSynchronizer.scheduleBuffered(eids);
                 } 
                 srn.setLastReported(current);
             }
+        }
+        if (!eids.isEmpty()) {
+            AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(eids);
+	        ZeventManager.getInstance().enqueueEventAfterCommit(event);
         }
 
         return nonEntities;

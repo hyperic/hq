@@ -377,4 +377,8 @@ public class Server extends ServerBase
     protected String _getAuthzOp(String op) {
         return (String)_authOps.get(op);
     }
+    
+    public String toString() {
+        return (null != getId()) ? getId().toString() : "null";
+    }
 }

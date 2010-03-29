@@ -37,7 +37,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.ejb.CreateException;
-import javax.ejb.FinderException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 
@@ -54,6 +53,7 @@ import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
+import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceZevent;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.Service;
@@ -246,6 +246,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
 
     /**
      * Create Measurements and enqueue for scheduling after commit
+     * @return {@link List} of {@link Measurement}s
      * @ejb:interface-method
      */
     public List createMeasurements(AuthzSubject subject, AppdefEntityID id,
@@ -258,9 +259,6 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         super.checkModifyPermission(subject.getId(), id);        
 
         List dmList = createMeasurements(id, templates, intervals, props);
-        List eids = Collections.singletonList(id);
-        AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(eids);
-        ZeventManager.getInstance().enqueueEventAfterCommit(event);
         return dmList;
     }
 
@@ -271,7 +269,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
      * @param id          instance ID (appdef resource) the templates are for
      * @param props       Configuration data for the instance
      *
-     * @return a List of the associated Measurement objects
+     * @return {@link List} of {@link Measurement}s
      * @ejb:interface-method
      */
     public List createMeasurements(AuthzSubject subject, AppdefEntityID id,
@@ -305,7 +303,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
      * @param mtype       The string name of the plugin type
      * @param props       Configuration data for the instance
      *
-     * @return a List of the associated Measurement objects
+     * @return {@link List} of {@link Measurement}s
      */
     private List createDefaultMeasurements(AuthzSubject subject,
                                            AppdefEntityID id,
@@ -647,6 +645,22 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         }
     
         return meas;
+    }
+
+    /**
+     * @param aeids {@link List} of {@link AppdefEntityID}s
+     * @return {@link Map} of {@link Integer} representing resourceId to
+     * {@link List} of {@link Measurement}s
+     * @ejb:interface-method
+     */
+    public Map findEnabledMeasurements(Collection aeids) {
+        final List resources = new ArrayList(aeids.size());
+        final ResourceManagerLocal rMan = ResourceManagerEJBImpl.getOne();
+        for (final Iterator it=aeids.iterator(); it.hasNext(); ) {
+            AppdefEntityID aeid = (AppdefEntityID) it.next();
+            resources.add(rMan.findResource(aeid));
+        }
+        return getMeasurementDAO().findEnabledByResources(resources);
     }
 
     /**
@@ -997,9 +1011,9 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         }
         
         // Update the agent schedule
-        for (int i = 0; i < aeids.length; i++) {
-            AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(
-                Arrays.asList(aeids));
+        List toSchedule = Arrays.asList(aeids);
+        if (!toSchedule.isEmpty()) {
+            AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(toSchedule);
             ZeventManager.getInstance().enqueueEventAfterCommit(event);
         }
     } 
@@ -1193,12 +1207,8 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         // Unscheduling of all metrics for a resource could indicate that
         // the resource is getting removed.  Send the unschedule synchronously
         // so that all the necessary plumbing is in place.
-        try {          
-            MeasurementProcessorEJBImpl.getOne().unschedule(
-                    agent.getAgentToken(), ids);
-        } catch (MeasurementUnscheduleException e) {
-            log.error("Unable to disable measurements", e);           
-        }
+        ZeventManager.getInstance().enqueueEventAfterCommit(
+            new AgentUnscheduleZevent(Arrays.asList(ids), agent.getAgentToken()));
     }
 
     /**
@@ -1418,7 +1428,8 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         ConfigManagerLocal cm = ConfigManagerEJBImpl.getOne();
         TrackerManagerLocal tm = TrackerManagerEJBImpl.getOne();
         AuthzSubjectManagerLocal aman = AuthzSubjectManagerEJBImpl.getOne();
-        List eids = new ArrayList();
+        List eids = new ArrayList(events.size());
+        final boolean debug = log.isDebugEnabled();
         
         for (Iterator i=events.iterator(); i.hasNext(); ) {
             ResourceZevent z = (ResourceZevent)i.next();
@@ -1428,30 +1439,30 @@ public class MeasurementManagerEJBImpl extends SessionEJB
             if (r == null || r.isInAsyncDeleteState()) {
                 continue;
             }
-            boolean isCreate, isRefresh;
     
-            isCreate = z instanceof ResourceCreatedZevent;
-            isRefresh = z instanceof ResourceRefreshZevent;
+            boolean isCreate = z instanceof ResourceCreatedZevent;
+            boolean isRefresh =
+                z instanceof ResourceRefreshZevent || z instanceof ResourceUpdatedZevent;
     
             try {
                 // Handle reschedules for when agents are updated.
                 if (isRefresh) {
-                    log.info("Refreshing metric schedule for [" + id + "]");
+                    if (debug) log.debug("Refreshing metric schedule for [" + id + "]");
                     eids.add(id);
                     continue;
                 }
     
                 // For either create or update events, schedule the default
                 // metrics
-                ConfigResponse c =
-                    cm.getMergedConfigResponse(subject,
-                                               ProductPlugin.TYPE_MEASUREMENT,
-                                               id, true);
+                ConfigResponse c = cm.getMergedConfigResponse(
+                    subject, ProductPlugin.TYPE_MEASUREMENT, id, true);
                 if (getEnabledMetricsCount(subject, id) == 0) {
-                    log.info("Enabling default metrics for [" + id + "]");
-                    enableDefaultMetrics(subject, id, c, true);
-                }
-                else {
+                    if (debug) log.debug("Enabling default metrics for [" + id + "]");
+                    List metrics = enableDefaultMetrics(subject, id, c, true);
+                    if (!metrics.isEmpty()) {
+                        eids.add(id);
+                    }
+                } else {
                     // Update the configuration
                     updateMeasurements(subject, id, c);
                 }
@@ -1470,7 +1481,10 @@ public class MeasurementManagerEJBImpl extends SessionEJB
                 log.warn("Unable to enable default metrics for [" + id + "]", e);
             }
         }
-        AgentScheduleSynchronizer.scheduleBuffered(eids);
+        if (!eids.isEmpty()) {
+            AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(eids);
+	        ZeventManager.getInstance().enqueueEventAfterCommit(event);
+        }
     }
 
     // XXX scottmf, need to re-evalutate why SAMPLE_SIZE is used
@@ -1594,11 +1608,13 @@ public class MeasurementManagerEJBImpl extends SessionEJB
      * Enable the default metrics for a resource.  This should only
      * be called by the {@link MeasurementEnabler}.  If you want the behavior
      * of this method, use the {@link MeasurementEnabler} 
+     * @return {@link List} of {@link Measurement}s
      */
-    private void enableDefaultMetrics(AuthzSubject subj, AppdefEntityID id,
+    private List enableDefaultMetrics(AuthzSubject subj, AppdefEntityID id,
                                       ConfigResponse config, boolean verify)
         throws AppdefEntityNotFoundException, PermissionException 
     {
+        List rtn = Collections.EMPTY_LIST;
         ConfigManagerLocal cfgMan = ConfigManagerEJBImpl.getOne();
         String mtype;
     
@@ -1610,15 +1626,15 @@ public class MeasurementManagerEJBImpl extends SessionEJB
                 } catch (AppdefEntityNotFoundException e) {
                     // Non existent resource, we'll clean it up in
                     // removeOrphanedMeasurements()
-                    return;
+                    return rtn;
                 }
             }
             else {
-                return;
+                return rtn;
             }
         } catch (Exception e) {
             log.error("Unable to enable default metrics for [" + id + "]", e);
-            return;
+            return rtn;
         }
     
         // Check the configuration
@@ -1629,18 +1645,18 @@ public class MeasurementManagerEJBImpl extends SessionEJB
                 log.warn("Error turning on default metrics, configuration (" +
                           config + ") " + "couldn't be validated", e);
                 cfgMan.setValidationError(subj, id, e.getMessage());
-                return;
+                return rtn;
             } catch (Exception e) {
                 log.warn("Error turning on default metrics, " +
                           "error in validation", e);
                 cfgMan.setValidationError(subj, id, e.getMessage());
-                return;
+                return rtn;
             }
         }
     
         // Enable the metrics
         try {
-            createDefaultMeasurements(subj, id, mtype, config);
+            rtn = createDefaultMeasurements(subj, id, mtype, config);
             cfgMan.clearValidationError(subj, id);
     
             // Execute the callback so other people can do things when the
@@ -1650,6 +1666,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
             log.warn("Unable to enable default metrics for id=" + id +
                       ": " + e.getMessage(), e);
         }
+        return rtn;
     }
    
    /**

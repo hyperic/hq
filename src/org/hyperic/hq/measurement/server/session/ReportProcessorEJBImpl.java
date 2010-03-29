@@ -42,7 +42,6 @@ import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
@@ -50,7 +49,6 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.measurement.MeasurementConstants;
-import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.data.DSNList;
 import org.hyperic.hq.measurement.data.MeasurementReport;
@@ -61,7 +59,7 @@ import org.hyperic.hq.measurement.shared.ReportProcessorLocal;
 import org.hyperic.hq.measurement.shared.ReportProcessorUtil;
 import org.hyperic.hq.measurement.shared.SRNManagerLocal;
 import org.hyperic.hq.product.MetricValue;
-import org.hyperic.util.StringUtil;
+import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.timer.StopWatch;
 
 /**
@@ -277,19 +275,10 @@ public class ReportProcessorEJBImpl
         Collection nonEntities = srnManager.reportAgentSRNs(report.getSRNList());
         if (debug) watch.markTimeEnd("reportAgentSRNs");
         
-        if (report.getAgentToken() != null && nonEntities.size() > 0) {
+        if (report.getAgentToken() != null && !nonEntities.isEmpty()) {
             // Better tell the agent to stop reporting non-existent entities
-            AppdefEntityID[] entIds = (AppdefEntityID[])
-                nonEntities.toArray(new AppdefEntityID[nonEntities.size()]);
-            try {
-                if (debug) watch.markTimeBegin("unschedule");
-                MeasurementProcessorEJBImpl.getOne().unschedule(
-                    report.getAgentToken(), entIds);
-                if (debug) watch.markTimeEnd("unschedule");
-            } catch (MeasurementUnscheduleException e) {
-                _log.error("Cannot unschedule entities: " +
-                          StringUtil.arrayToString(entIds));
-            }
+            ZeventManager.getInstance().enqueueEventAfterCommit(
+                new AgentUnscheduleZevent(nonEntities, agentToken));
         }
         if (debug) _log.debug("handleMeasurementReport: " + watch);
     }

@@ -25,10 +25,6 @@
 
 package org.hyperic.hq.autoinventory.server.session;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -114,6 +110,7 @@ import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.dao.AIHistoryDAO;
+import org.hyperic.hq.measurement.server.session.AgentScheduleSyncZevent;
 import org.hyperic.hq.measurement.server.session.MeasurementProcessorEJBImpl;
 import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
 import org.hyperic.hq.product.AutoinventoryPluginManager;
@@ -126,6 +123,7 @@ import org.hyperic.hq.product.server.session.ProductManagerEJBImpl;
 import org.hyperic.hq.product.shared.ProductManagerLocal;
 import org.hyperic.hq.scheduler.ScheduleValue;
 import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
+import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 
@@ -727,28 +725,6 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         checkAgentAssignment(subject, agentToken, aiPlatform);
     }
 
-    private void serializeObject(ScanStateCore stateCore) {
-        String className = stateCore.getClass().getName();
-        ObjectOutputStream oop = null;
-        OutputStream os = null;
-        try {
-            os = new FileOutputStream("statecore.out");
-            oop = new ObjectOutputStream(os);
-            oop.writeObject(stateCore);
-        } catch (IOException e) {
-            _log.error(e,e);
-        } finally {
-            try {
-                oop.flush();
-                oop.close();
-                os.close();
-            } catch (IOException e) {
-                _log.error(e,e);
-            }
-        }
-        System.out.println("Done serializing: " + className);
-    }
-
     private void addAIServersToAIPlatform(ScanStateCore stateCore,
                                           ScanState state,
                                           AIPlatformValue aiPlatform)
@@ -951,9 +927,15 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         throws PermissionException, ApplicationException {
         final ServerManagerLocal svrMan = ServerManagerEJBImpl.getOne();
         final CPropManagerLocal cpropMan = CPropManagerEJBImpl.getOne();
+        final Set updatedResources = new HashSet();
+        final Set toSchedule = new HashSet();
+        AuthzSubject subj = AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
     
         for (final Iterator i = mergeInfos.iterator(); i.hasNext();) {
             ServiceMergeInfo sInfo = (ServiceMergeInfo) i.next();
+            // this is hacky, but mergeInfos will never be called with multiple subjects
+            // and hence the method probably shouldn't be written the way it is anyway.
+            subj = sInfo.subject;
             AIServiceValue aiservice = sInfo.aiservice;
             Server server = svrMan.getServerById(sInfo.serverId);
             
@@ -996,10 +978,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
                 // if aiid.equals(svcName) this means that the name has
                 // not been manually changed.  Therefore it is ok to change
                 // the current resource name
-                if (aiSvcName != null &&
-                    !aiSvcName.equals(svcName) &&
-                    aiid.equals(svcName))
-                {
+                if (aiSvcName != null && !aiSvcName.equals(svcName) && aiid.equals(svcName)) {
                     service.setName(aiservice.getName().trim());
                     service.getResource().setName(service.getName());
                 }
@@ -1009,16 +988,20 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
                     
             // CONFIGURE SERVICE
             final ConfigManagerLocal cfgMan = ConfigManagerEJBImpl.getOne();
-            cfgMan.configureResponse(sInfo.subject,
+            final boolean wasUpdated = cfgMan.configureResponse(sInfo.subject,
                                          service.getConfigResponse(),
                                          service.getEntityId(),
                                          aiservice.getProductConfig(),
                                          aiservice.getMeasurementConfig(),
                                          aiservice.getControlConfig(),
                                          aiservice.getResponseTimeConfig(),
-                                         null,
-                                         update,
-                                         false);
+                                         null, false);
+            if (update && wasUpdated) {
+                updatedResources.add(service.getResource());
+            } else {
+                // make sure the service's schedule is up to date on the agent side
+                toSchedule.add(new AppdefEntityID(service.getResource()));
+            }
                     
             // SET CUSTOM PROPERTIES FOR SERVICE
             if (aiservice.getCustomProperties() != null) {
@@ -1027,6 +1010,11 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
                                             typeId,
                                             aiservice.getCustomProperties());            
             }
+        }
+        if (!toSchedule.isEmpty()) {
+            ResourceManagerEJBImpl.getOne().resourceHierarchyUpdated(subj, updatedResources);
+        	ZeventManager.getInstance().enqueueEventAfterCommit(
+        	    new AgentScheduleSyncZevent(toSchedule));
         }
     }
     

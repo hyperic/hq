@@ -281,10 +281,14 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
         }
         else {
-            cMan.configureResponse(subject, cr, s.getEntityId(),
-                                   productResponse, measResponse,
-                                   controlResponse, rtResponse,
-                                   null, true, true);
+            boolean wasUpdated = cMan.configureResponse(subject, cr, s.getEntityId(),
+                                                        productResponse, measResponse,
+                                                        controlResponse, rtResponse,
+                                                        null, true);
+            if (wasUpdated) {
+                ResourceManagerLocal rMan = ResourceManagerEJBImpl.getOne();
+            	rMan.resourceHierarchyUpdated(subject, Collections.singletonList(s.getResource()));
+            }
             
             // Scrub the services
             Service[] services =

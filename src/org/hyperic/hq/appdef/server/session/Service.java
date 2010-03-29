@@ -289,4 +289,8 @@ public class Service extends AppdefResource
     public void setAutoinventoryIdentifier(String aiid) {
         _autoinventoryIdentifier = aiid;
     }
+    
+    public String toString() {
+        return (null != getId()) ? getId().toString() : "null";
+    }
 }

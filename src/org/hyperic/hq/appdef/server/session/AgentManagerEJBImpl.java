@@ -31,9 +31,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.Properties;
 
@@ -41,28 +42,31 @@ import javax.ejb.CreateException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hibernate.ObjectNotFoundException;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
-import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.AgentConnectionException;
+import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.AgentUpgradeManager;
 import org.hyperic.hq.agent.FileData;
 import org.hyperic.hq.agent.FileDataResult;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.agent.client.AgentCommandsClientFactory;
 import org.hyperic.hq.agent.commands.AgentUpgrade_result;
+import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.appdef.AgentType;
 import org.hyperic.hq.appdef.server.session.AgentConnections.AgentConnection;
 import org.hyperic.hq.appdef.shared.AgentCreateException;
+import org.hyperic.hq.appdef.shared.AgentManagerLocal;
+import org.hyperic.hq.appdef.shared.AgentManagerUtil;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AgentUnauthorizedException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.appdef.shared.AgentManagerLocal;
-import org.hyperic.hq.appdef.shared.AgentManagerUtil;
 import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
-import org.hyperic.hq.appdef.Agent;
-import org.hyperic.hq.appdef.AgentType;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.autoinventory.server.session.AgentReportStatus;
@@ -76,10 +80,6 @@ import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.security.MD5;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hibernate.ObjectNotFoundException;
 
 /**
  * @ejb:bean name="AgentManager"
@@ -229,6 +229,32 @@ public class AgentManagerEJBImpl
      */
     public int getAgentCountUsed() {
         return getAgentDAO().countUsed();
+    }
+    
+    /**
+     * @param aeids {@link Collection} of {@link AppdefEntityID}s
+     * @return Map of {@link Agent} to {@link Collection} of ${AppdefEntityID}s
+     * @ejb:interface-method
+     */
+    public Map getAgentMap(Collection aeids) {
+        AgentManagerLocal aMan = AgentManagerEJBImpl.getOne();
+        Map rtn = new HashMap(aeids.size());
+        Collection tmp;
+        for (Iterator it=aeids.iterator(); it.hasNext(); ) {
+            AppdefEntityID eid = (AppdefEntityID)it.next();
+            Integer agentId;
+            try {
+                agentId = aMan.getAgent(eid).getId();
+                if (null == (tmp = (Collection)rtn.get(agentId))) {
+                    tmp = new HashSet();
+                    rtn.put(agentId, tmp);
+                }
+                tmp.add(eid);
+            } catch (AgentNotFoundException e) {
+                log.warn(e.getMessage());
+            }
+        }
+        return rtn;
     }
     
     /**

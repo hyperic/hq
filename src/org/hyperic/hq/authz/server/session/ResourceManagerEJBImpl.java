@@ -46,6 +46,7 @@ import org.hyperic.hq.appdef.server.session.ApplicationManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
@@ -72,6 +73,7 @@ import org.hyperic.hq.authz.shared.ResourceManagerUtil;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.ResourceAudit;
+import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -670,7 +672,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
     }
     
     /**
-     * 
+     * @return {@link Collection} of {@link ResourceEdge}s
      * @ejb:interface-method
      */
     public Collection findResourceEdges(ResourceRelation relation,
@@ -919,6 +921,29 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
                  AuthzConstants.platformOpModifyPlatform);
         
         getResourceEdgeDAO().deleteEdges(parent, relation);
+    }
+    
+    /**
+     * @param {@link Collection} of {@link Resource}s
+     * @ejb:interface-method
+     */
+    public void resourceHierarchyUpdated(AuthzSubject subj, Collection resources) {
+        if (resources.size() <= 0) {
+            return;
+        }
+        final List events = new ArrayList();
+        final ResourceEdgeDAO dao = getResourceEdgeDAO();
+        final ResourceRelation relation = getContainmentRelation();
+        for (final Iterator it=resources.iterator(); it.hasNext(); ) {
+            final Resource resource = (Resource)it.next();
+            events.add(new ResourceUpdatedZevent(subj, new AppdefEntityID(resource)));
+            final Collection descendants = dao.findDescendantEdges(resource, relation);
+            for (final Iterator xx=descendants.iterator(); xx.hasNext(); ) {
+                final Resource r = ((ResourceEdge)xx.next()).getTo();
+                events.add(new ResourceUpdatedZevent(subj, new AppdefEntityID(r)));
+            }
+        }
+        ZeventManager.getInstance().enqueueEventsAfterCommit(events);
     }
 
     public static ResourceManagerLocal getOne() {

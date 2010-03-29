@@ -27,8 +27,8 @@ package org.hyperic.hq.appdef.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -50,7 +50,10 @@ import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.autoinventory.AICompare;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
@@ -59,7 +62,6 @@ import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.hq.product.ServiceTypeInfo;
 import org.hyperic.hq.product.TypeInfo;
-import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 
@@ -495,26 +497,30 @@ public class ConfigManagerEJBImpl
         ConfigResponseDAO dao =
             new ConfigResponseDAO(DAOFactory.getDAOFactory());
         ConfigResponseDB existingConfig = getConfigResponse(dao, id);
-        return configureResponse(subject, existingConfig, id,
-                                 productBytes, measurementBytes,
-                                 controlBytes, rtBytes, null,
-                                 sendConfigEvent, false);
+        boolean wasUpdated = configureResponse(
+            subject, existingConfig, id, productBytes, measurementBytes, controlBytes, rtBytes,
+            null, false);
+        if (sendConfigEvent) {
+            ResourceManagerLocal rMan = ResourceManagerEJBImpl.getOne();
+            Resource r = rMan.findResource(id);
+            rMan.resourceHierarchyUpdated(subject, Collections.singletonList(r));
+        }
+        return wasUpdated ? id : null;
     }
         
     /**
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public AppdefEntityID configureResponse(AuthzSubject subject,
-                                            ConfigResponseDB existingConfig,
-                                            AppdefEntityID appdefID,
-                                            byte[] productConfig,
-                                            byte[] measurementConfig,
-                                            byte[] controlConfig,
-                                            byte[] rtConfig,
-                                            Boolean userManaged,
-                                            boolean sendConfigEvent,
-                                            boolean force) {
+    public boolean configureResponse(AuthzSubject subject,
+                                     ConfigResponseDB existingConfig,
+                                     AppdefEntityID appdefID,
+                                     byte[] productConfig,
+                                     byte[] measurementConfig,
+                                     byte[] controlConfig,
+                                     byte[] rtConfig,
+                                     Boolean userManaged,
+                                     boolean force) {
         boolean wasUpdated = false;
         byte[] configBytes;
 
@@ -559,6 +565,7 @@ public class ConfigManagerEJBImpl
             existingConfig.setUserManaged(userManaged.booleanValue());
             wasUpdated = true;
         }
+        return wasUpdated;
 
         if (wasUpdated) {
             if (sendConfigEvent) {
