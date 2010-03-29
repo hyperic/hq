@@ -166,7 +166,7 @@ public abstract class ProductPlugin extends GenericPlugin {
             return loadClass(loader, name);
         } catch (ClassNotFoundException e) {
             //we get here if the server's implementation is a class loaded
-            //from hq-product.jar rather than the plugin's ClassLoader
+            //from hq-pdk-shared.jar rather than the plugin's ClassLoader
             try {
                 _log.debug("Trying data ClassLoader to load: " +
                            name + " for plugin " + pluginName);

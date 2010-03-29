@@ -27,29 +27,22 @@ package org.hyperic.hq.common.shared;
 
 import java.io.IOException;
 import java.io.InputStream;
-
 import java.util.Properties;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-
 public class ProductProperties {
-    private static final String PROP_VERSION    = "version";
-    private static final String PROP_BUILD      = "build.number";
-    private static final String PROP_COMMENT    = "build.comment";
+    private static final String PROP_VERSION = "version";
+    private static final String PROP_BUILD = "build.number";
+    private static final String PROP_COMMENT = "build.comment";
     private static final String PROP_BUILD_DATE = "build.date";
-    private static final String PROP_FLAVOUR    = "hq.flavour";
-    private static final String PROP_ISDEV      = "hq.isDev";
+    private static final String PROP_FLAVOUR = "hq.flavour";
+    private static final String PROP_ISDEV = "hq.isDev";
 
-    private static final Log  _log = 
-        LogFactory.getLog(ProductProperties.class);
+    private static Properties _props;
+    private static final Object _propsLock = new Object();
 
-    private static       Properties _props;
-    private static final Object     _propsLock = new Object();
+    private ProductProperties() {
+    }
 
-    private ProductProperties(){}
- 
     public static String getVersion() {
         return getRequiredProperty(PROP_VERSION);
     }
@@ -75,32 +68,29 @@ public class ProductProperties {
     }
 
     private static void load(String name, boolean required) {
-        InputStream in =
-            ProductProperties.class.getClassLoader().
-                getResourceAsStream(name);
+        InputStream in = ProductProperties.class.getClassLoader().getResourceAsStream(name);
 
         if (in == null) {
             if (required) {
-                throw new IllegalStateException("Package not packed " + 
-                                                "correctly, missing: " + name);
+                throw new IllegalStateException("Package not packed " + "correctly, missing: " +
+                                                name);
             }
             return;
         }
 
         try {
             _props.load(in);
-        } catch(IOException e) {
-            throw new IllegalStateException("Failed to read " + name +
-                                            ": " + e);
-        }    
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to read " + name + ": " + e);
+        }
     }
-    
+
     public static Properties getProperties() {
         synchronized (_propsLock) {
             if (_props == null) {
                 _props = new Properties();
-                
-                load("version.properties", true);
+
+                load("version.properties", false);
                 load("product.properties", false);
             }
         }
@@ -110,15 +100,14 @@ public class ProductProperties {
     public static String getProperty(String key) {
         return getProperties().getProperty(key);
     }
-    
+
     private static String getRequiredProperty(String prop) {
         String res;
 
-        if((res = getProperty(prop)) == null)
+        if ((res = getProperty(prop)) == null)
             throw new IllegalStateException("Failed to find " + prop);
-        
+
         return res;
     }
-    
-   
+
 }
