@@ -40,7 +40,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.bizapp.shared.LatherBoss;
+import org.hyperic.hq.bizapp.server.session.LatherDispatcher;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.lather.LatherContext;
 import org.hyperic.lather.LatherRemoteException;
@@ -70,12 +70,7 @@ public class LatherServlet
 {
     private static final String PROP_PREFIX =
         "org.hyperic.lather.";
-    private static final String PROP_DISPATCHBEAN = 
-        PROP_PREFIX + "dispatchBean";
-    private static final String PROP_DISPATCHMETHOD = 
-        PROP_PREFIX + "dispatchMethod";
-    private static final String PROP_DISPATCHCLASS = 
-        PROP_PREFIX + "dispatchClass";
+  
     private static final String PROP_MAXCONNS =
         PROP_PREFIX + "maxConns";
     private static final String PROP_EXECTIMEOUT =
@@ -85,9 +80,7 @@ public class LatherServlet
 
     private final Log log = 
         LogFactory.getLog(LatherServlet.class.getName());
-    private String       dispatchBean;
-    private String       dispatchMethod;
-    private String       dispatchClass;
+   
     private Random       rand;
     private ConnManager  connMgr;
     private int          execTimeout;
@@ -109,9 +102,6 @@ public class LatherServlet
         int maxConns = Integer.MAX_VALUE;
 
         super.init(cfg); // Call super to ensure the servlet config is saved.
-        this.dispatchBean   = this.getReqCfg(cfg, PROP_DISPATCHBEAN);
-        this.dispatchMethod = this.getReqCfg(cfg, PROP_DISPATCHMETHOD);
-        this.dispatchClass  = this.getReqCfg(cfg, PROP_DISPATCHCLASS);
         this.rand           = new Random();
 
         if((sMaxConns = this.getReqCfg(cfg, PROP_MAXCONNS)) != null){
@@ -269,14 +259,13 @@ public class LatherServlet
         private LatherValue arg;
         private LatherContext ctx;
         private String method;
-        private LatherServlet  servlet;
         private Log                 log;
-        private LatherBoss latherBoss;
+        private LatherDispatcher latherDispatcher;
         
 
         private ServiceCaller(HttpServletResponse resp, 
                           LatherXCoder xcoder, LatherContext ctx, String method, LatherValue arg, 
-                          LatherServlet servlet, Log log, LatherBoss latherBoss)
+                           Log log, LatherDispatcher latherDispatcher)
         {
             this.resp    = resp;
            
@@ -284,9 +273,8 @@ public class LatherServlet
             this.ctx = ctx;
             this.method = method;
             this.arg = arg;
-            this.servlet = servlet;
             this.log     = log;
-            this.latherBoss = latherBoss;
+            this.latherDispatcher = latherDispatcher;
         }
                           
         private void doInvoke()
@@ -295,18 +283,14 @@ public class LatherServlet
             LatherValue res;
 
             try {
-                res = latherBoss.dispatch(ctx, method, arg);
+                res = latherDispatcher.dispatch(ctx, method, arg);
                                                          
                 issueSuccessResponse(this.resp, this.xcoder, res);
             }  catch(IllegalArgumentException exc){
-                this.log.error("IllegalArgumentException when invoking " +
-                               this.servlet.dispatchClass + "." + 
-                               this.servlet.dispatchMethod, exc);
+                this.log.error("IllegalArgumentException when invoking LatherDispatcher." , exc);
                 resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             } catch(RuntimeException exc){
-                this.log.error("RuntimeException when invoking " +
-                               this.servlet.dispatchClass + "." + 
-                               this.servlet.dispatchMethod, exc);
+                this.log.error("RuntimeException when invoking LatherDispatcher." , exc);
                 issueErrorResponse(resp, exc.toString());
             } catch(LatherRemoteException exc){
                 
@@ -333,20 +317,13 @@ public class LatherServlet
     {
        
         ServiceCaller caller;
-        Class realClass;
-        try {
-            realClass = Class.forName(this.dispatchClass);
-        } catch(ClassNotFoundException exc){
-            this.log.error("Class not found, '" + dispatchClass + "'");
-            //TODO this returned something before
-            return;
-        }
+      
 
-        LatherBoss latherBoss = (LatherBoss) Bootstrap.getBean(realClass);
+        LatherDispatcher latherDispatcher = Bootstrap.getBean(LatherDispatcher.class);
 
         caller = new ServiceCaller(resp, xCoder, 
                                ctx, methName, args,
-                               this, this.log, latherBoss);
+                              this.log, latherDispatcher);
         caller.start();
         try {
             caller.join(this.execTimeout);

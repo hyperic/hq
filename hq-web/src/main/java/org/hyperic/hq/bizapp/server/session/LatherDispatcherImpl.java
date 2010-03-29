@@ -31,7 +31,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -116,18 +115,19 @@ import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.security.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
-@org.springframework.stereotype.Service("latherDispatcher")
+@org.springframework.stereotype.Service
+@Transactional
 public class LatherDispatcherImpl implements LatherDispatcher {
-    protected final Log log = LogFactory.getLog(LatherDispatcherImpl.class.getName());
+    private final Log log = LogFactory.getLog(LatherDispatcherImpl.class.getName());
 
-    protected HashSet<String> secureCommands = new HashSet<String>();
-    private Set<String> noTxCommands = new HashSet<String>();
+    private HashSet<String> secureCommands = new HashSet<String>();
 
-    private static final ConcurrentStatsCollector _stats = ConcurrentStatsCollector.getInstance();
+    private final ConcurrentStatsCollector stats = ConcurrentStatsCollector.getInstance();
     private static final String LATHER_NUMBER_OF_CONNECTIONS = ConcurrentStatsCollector.LATHER_NUMBER_OF_CONNECTIONS;
 
-    protected AgentManager agentManager;
+    private AgentManager agentManager;
 
     private AuthManager authManager;
 
@@ -153,11 +153,13 @@ public class LatherDispatcherImpl implements LatherDispatcher {
 
     @Autowired
     public LatherDispatcherImpl(AgentManager agentManager, AuthManager authManager,
-                                AuthzSubjectManager authzSubjectManager, AutoinventoryManager autoinventoryManager,
+                                AuthzSubjectManager authzSubjectManager,
+                                AutoinventoryManager autoinventoryManager,
                                 ConfigManager configManager, ControlManager controlManager,
-                                MeasurementManager measurementManager, PlatformManager platformManager,
-                                ReportProcessor reportProcessor, PermissionManager permissionManager,
-                                ZeventEnqueuer zeventManager, MessagePublisher messagePublisher,
+                                MeasurementManager measurementManager,
+                                PlatformManager platformManager, ReportProcessor reportProcessor,
+                                PermissionManager permissionManager, ZeventEnqueuer zeventManager,
+                                MessagePublisher messagePublisher,
                                 AgentCommandsClientFactory agentCommandsClientFactory) {
         this.agentManager = agentManager;
         this.authManager = authManager;
@@ -174,14 +176,7 @@ public class LatherDispatcherImpl implements LatherDispatcher {
         for (int i = 0; i < CommandInfo.SECURE_COMMANDS.length; i++) {
             secureCommands.add(CommandInfo.SECURE_COMMANDS[i]);
         }
-        for (int i = 0; i < CommandInfo.NOTX_COMMANDS.length; i++) {
-            noTxCommands.add(CommandInfo.NOTX_COMMANDS[i]);
-        }
         this.messagePublisher = messagePublisher;
-    }
-
-    public boolean methIsTransactional(String meth) {
-        return !noTxCommands.contains(meth);
     }
 
     private void sendTopicMessage(String msgTopic, Serializable data) throws LatherRemoteException {
@@ -192,7 +187,8 @@ public class LatherDispatcherImpl implements LatherDispatcher {
         validateAgent(ctx, agentToken, true);
     }
 
-    protected void validateAgent(LatherContext ctx, String agentToken, boolean useCache) throws LatherRemoteException {
+    protected void validateAgent(LatherContext ctx, String agentToken, boolean useCache)
+        throws LatherRemoteException {
         log.debug("Validating agent token");
         try {
             agentManager.checkAgentAuth(agentToken);
@@ -202,36 +198,36 @@ public class LatherDispatcherImpl implements LatherDispatcher {
         }
     }
 
-    private void checkUserCanManageAgent(LatherContext ctx, String user, String pword, String operation)
-        throws PermissionException {
+    private void checkUserCanManageAgent(LatherContext ctx, String user, String pword,
+                                         String operation) throws PermissionException {
         try {
             authManager.authenticate(user, pword);
-            AuthzSubject subject = authzSubjectManager.findSubjectByAuth(user, HQConstants.ApplicationName);
+            AuthzSubject subject = authzSubjectManager.findSubjectByAuth(user,
+                HQConstants.ApplicationName);
             permissionManager.checkCreatePlatformPermission(subject);
         } catch (SecurityException exc) {
-            log.warn("Security exception when '" + user + "' tried to " + operation + " an Agent @ " +
-                     ctx.getCallerIP(), exc);
+            log.warn("Security exception when '" + user + "' tried to " + operation +
+                     " an Agent @ " + ctx.getCallerIP(), exc);
             throw new PermissionException();
         } catch (PermissionException exc) {
-            log
-                .warn("Permission denied when '" + user + "' tried to " + operation + " an Agent @ " +
-                      ctx.getCallerIP());
+            log.warn("Permission denied when '" + user + "' tried to " + operation +
+                     " an Agent @ " + ctx.getCallerIP());
             throw new PermissionException();
         } catch (ApplicationException exc) {
-            log.warn("Application exception when '" + user + "' tried to " + operation + " an Agent @ " +
-                     ctx.getCallerIP(), exc);
+            log.warn("Application exception when '" + user + "' tried to " + operation +
+                     " an Agent @ " + ctx.getCallerIP(), exc);
             throw new PermissionException();
         } catch (SystemException exc) {
-            log.warn("System exception when '" + user + "' tried to " + operation + " an Agent @ " + ctx.getCallerIP(),
-                exc);
+            log.warn("System exception when '" + user + "' tried to " + operation + " an Agent @ " +
+                     ctx.getCallerIP(), exc);
             throw new PermissionException();
         }
     }
 
-    private String testAgentConn(String agentIP, int agentPort, String authToken, boolean isNewTransportAgent,
-                                 boolean unidirectional) {
-        AgentCommandsClient client = agentCommandsClientFactory.getClient(agentIP, agentPort, authToken,
-            isNewTransportAgent, unidirectional);
+    private String testAgentConn(String agentIP, int agentPort, String authToken,
+                                 boolean isNewTransportAgent, boolean unidirectional) {
+        AgentCommandsClient client = agentCommandsClientFactory.getClient(agentIP, agentPort,
+            authToken, isNewTransportAgent, unidirectional);
         try {
             client.ping();
         } catch (AgentConnectionException exc) {
@@ -261,7 +257,8 @@ public class LatherDispatcherImpl implements LatherDispatcher {
         String version = args.getVersion();
         boolean isNewTransportAgent = args.isNewTransportAgent();
         boolean unidirectional = args.isUnidirectional();
-        String errRes = testAgentConn(agentIP, port, args.getAuthToken(), isNewTransportAgent, unidirectional);
+        String errRes = testAgentConn(agentIP, port, args.getAuthToken(), isNewTransportAgent,
+            unidirectional);
         if (errRes != null) {
             return new RegisterAgent_result(errRes);
         }
@@ -294,41 +291,43 @@ public class LatherDispatcherImpl implements LatherDispatcher {
             }
 
             try {
-                ids = platformManager.getPlatformPksByAgentToken(authzSubjectManager.getOverlordPojo(), origAgent
-                    .getAgentToken());
+                ids = platformManager.getPlatformPksByAgentToken(authzSubjectManager
+                    .getOverlordPojo(), origAgent.getAgentToken());
             } catch (Exception e) {
                 // No platforms found, no a big deal
             }
 
-            log.info("Found preexisting agent during agent registration. " + "Updating agent information for " +
-                     agentIP + ":" + port + "; new transport=" + isNewTransportAgent + "; unidirectional=" +
-                     unidirectional);
+            log.info("Found preexisting agent during agent registration. " +
+                     "Updating agent information for " + agentIP + ":" + port + "; new transport=" +
+                     isNewTransportAgent + "; unidirectional=" + unidirectional);
 
             if (isOldAgentToken) {
                 if (isNewTransportAgent) {
-                    agentManager.updateNewTransportAgent(agentToken, agentIP, port, args.getAuthToken(), version,
-                        unidirectional);
+                    agentManager.updateNewTransportAgent(agentToken, agentIP, port, args
+                        .getAuthToken(), version, unidirectional);
                 } else {
-                    agentManager.updateLegacyAgent(agentToken, agentIP, port, args.getAuthToken(), version);
+                    agentManager.updateLegacyAgent(agentToken, agentIP, port, args.getAuthToken(),
+                        version);
                 }
             } else {
                 if (isNewTransportAgent) {
-                    agentManager.updateNewTransportAgent(agentIP, port, args.getAuthToken(), agentToken, version,
-                        unidirectional);
+                    agentManager.updateNewTransportAgent(agentIP, port, args.getAuthToken(),
+                        agentToken, version, unidirectional);
                 } else {
-                    agentManager.updateLegacyAgent(agentIP, port, args.getAuthToken(), agentToken, version);
+                    agentManager.updateLegacyAgent(agentIP, port, args.getAuthToken(), agentToken,
+                        version);
                 }
             }
         } catch (AgentNotFoundException exc) {
-            log.info("Registering agent at " + agentIP + ":" + port + "" + "; new transport=" + isNewTransportAgent +
-                     "; unidirectional=" + unidirectional);
+            log.info("Registering agent at " + agentIP + ":" + port + "" + "; new transport=" +
+                     isNewTransportAgent + "; unidirectional=" + unidirectional);
             try {
                 if (isNewTransportAgent) {
-                    agentManager.createNewTransportAgent(agentIP, new Integer(port), args.getAuthToken(), agentToken,
-                        version, unidirectional);
+                    agentManager.createNewTransportAgent(agentIP, new Integer(port), args
+                        .getAuthToken(), agentToken, version, unidirectional);
                 } else {
-                    agentManager
-                        .createLegacyAgent(agentIP, new Integer(port), args.getAuthToken(), agentToken, version);
+                    agentManager.createLegacyAgent(agentIP, new Integer(port), args.getAuthToken(),
+                        agentToken, version);
                 }
 
             } catch (AgentCreateException oexc) {
@@ -392,7 +391,8 @@ public class LatherDispatcherImpl implements LatherDispatcher {
      * after it has already been setup, the connection information (i.e. address
      * to contact, port, etc.) are updated but the same agent token is kept.
      */
-    private UpdateAgent_result cmdUpdateAgent(LatherContext ctx, UpdateAgent_args args) throws LatherRemoteException {
+    private UpdateAgent_result cmdUpdateAgent(LatherContext ctx, UpdateAgent_args args)
+        throws LatherRemoteException {
         Agent agent;
         String errRes;
 
@@ -412,15 +412,17 @@ public class LatherDispatcherImpl implements LatherDispatcher {
         try {
             agent = agentManager.getAgent(args.getAgentToken());
 
-            if ((errRes = testAgentConn(agentIP, port, agent.getAuthToken(), isNewTransportAgent, unidirectional)) != null) {
+            if ((errRes = testAgentConn(agentIP, port, agent.getAuthToken(), isNewTransportAgent,
+                unidirectional)) != null) {
                 return new UpdateAgent_result(errRes);
             }
 
-            log.info("Updating agent at " + agentIP + ":" + port + "" + "; new transport=" + isNewTransportAgent +
-                     "; unidirectional=" + unidirectional);
+            log.info("Updating agent at " + agentIP + ":" + port + "" + "; new transport=" +
+                     isNewTransportAgent + "; unidirectional=" + unidirectional);
 
             if (isNewTransportAgent) {
-                agentManager.updateNewTransportAgent(args.getAgentToken(), agentIP, port, unidirectional);
+                agentManager.updateNewTransportAgent(args.getAgentToken(), agentIP, port,
+                    unidirectional);
             } else {
                 agentManager.updateLegacyAgent(args.getAgentToken(), agentIP, port);
             }
@@ -490,7 +492,8 @@ public class LatherDispatcherImpl implements LatherDispatcher {
      * Called by agents to report resources detected via runtime autoinventory
      * scans, using the monitoring interfaces to a server.
      */
-    private NullLatherValue cmdAiSendRuntimeReport(AiSendRuntimeReport_args arg) throws LatherRemoteException {
+    private NullLatherValue cmdAiSendRuntimeReport(AiSendRuntimeReport_args arg)
+        throws LatherRemoteException {
 
         try {
             autoinventoryManager.reportAIRuntimeReport(arg.getAgentToken(), arg.getReport());
@@ -508,7 +511,7 @@ public class LatherDispatcherImpl implements LatherDispatcher {
     private MeasurementGetConfigs_result cmdMeasurementGetConfigs(MeasurementGetConfigs_args args)
         throws LatherRemoteException {
 
-        ResourceTree tree; 
+        ResourceTree tree;
 
         AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
         try {
@@ -525,8 +528,10 @@ public class LatherDispatcherImpl implements LatherDispatcher {
             addMeasurementConfig(ents, pNode.getPlatform());
 
             try {
-                AppdefEntityValue aeval = new AppdefEntityValue(pNode.getPlatform().getEntityId(), overlord);
-                List<AppdefResourceValue> services = aeval.getAssociatedServices(PageControl.PAGE_ALL);
+                AppdefEntityValue aeval = new AppdefEntityValue(pNode.getPlatform().getEntityId(),
+                    overlord);
+                List<AppdefResourceValue> services = aeval
+                    .getAssociatedServices(PageControl.PAGE_ALL);
                 for (int i = 0; i < services.size(); i++) {
                     ServiceValue val = (ServiceValue) services.get(i);
 
@@ -536,7 +541,8 @@ public class LatherDispatcherImpl implements LatherDispatcher {
                 }
             } catch (Exception e) {
                 // Shouldn't happen
-                log.error("Encountered exception looking up platform " + "services: " + e.getMessage(), e);
+                log.error("Encountered exception looking up platform " + "services: " +
+                          e.getMessage(), e);
             }
 
             for (Iterator<ServerNode> s = pNode.getServerIterator(); s.hasNext();) {
@@ -553,21 +559,20 @@ public class LatherDispatcherImpl implements LatherDispatcher {
         }
 
         MeasurementConfigList cList = new MeasurementConfigList();
-        cList.setEntities((MeasurementConfigEntity[]) ents.toArray(new MeasurementConfigEntity[ents.size()]));
+        cList.setEntities((MeasurementConfigEntity[]) ents.toArray(new MeasurementConfigEntity[ents
+            .size()]));
         MeasurementGetConfigs_result res = new MeasurementGetConfigs_result();
         res.setConfigs(cList);
         return res;
     }
 
     private void addMeasurementConfig(List<MeasurementConfigEntity> ents, AppdefResource resource) {
-        addMeasurementConfig(ents, resource.getEntityId(), resource.getAppdefResourceType().getName());
+        addMeasurementConfig(ents, resource.getEntityId(), resource.getAppdefResourceType()
+            .getName());
     }
 
-    private void addMeasurementConfig(List<MeasurementConfigEntity> ents, AppdefResourceValue resource) {
-        addMeasurementConfig(ents, resource.getEntityId(), resource.getAppdefResourceTypeValue().getName());
-    }
-
-    private void addMeasurementConfig(List<MeasurementConfigEntity> ents, AppdefEntityID id, String typeName) {
+    private void addMeasurementConfig(List<MeasurementConfigEntity> ents, AppdefEntityID id,
+                                      String typeName) {
         MeasurementConfigEntity ent = new MeasurementConfigEntity();
         ConfigResponse response;
         byte[] config;
@@ -578,7 +583,8 @@ public class LatherDispatcherImpl implements LatherDispatcher {
 
             // Only send the configuration to the agent if log or
             // config file tracking has been enabled.
-            if (ConfigTrackPlugin.isEnabled(response, id.getType()) || LogTrackPlugin.isEnabled(response, id.getType())) {
+            if (ConfigTrackPlugin.isEnabled(response, id.getType()) ||
+                LogTrackPlugin.isEnabled(response, id.getType())) {
 
                 config = response.encode();
 
@@ -627,7 +633,8 @@ public class LatherDispatcherImpl implements LatherDispatcher {
         TrackEvent[] events = report.getEvents();
 
         if (events.length > 0) {
-            ArrayList<ConfigChangedEvent> ccEvents = new ArrayList<ConfigChangedEvent>(events.length);
+            ArrayList<ConfigChangedEvent> ccEvents = new ArrayList<ConfigChangedEvent>(
+                events.length);
 
             for (int i = 0; i < events.length; i++) {
                 // Create a ConfigChangedEvent to send
@@ -645,7 +652,8 @@ public class LatherDispatcherImpl implements LatherDispatcher {
     /**
      * Main dispatch method called from the LatherBoss.
      */
-    public LatherValue dispatch(LatherContext ctx, String method, LatherValue arg) throws LatherRemoteException {
+    public LatherValue dispatch(LatherContext ctx, String method, LatherValue arg)
+        throws LatherRemoteException {
 
         Integer agentId = null;
 
@@ -654,15 +662,16 @@ public class LatherDispatcherImpl implements LatherDispatcher {
         }
 
         if (!HAUtil.isMasterNode()) {
-            log.warn("Non-primary server received communication from an agent.  Request will be denied.");
+            log
+                .warn("Non-primary server received communication from an agent.  Request will be denied.");
             throw new LatherRemoteException(
                 "This server is not the primary node in the HA configuration. Agent request denied.");
         }
 
         if (secureCommands.contains(method)) {
             if (!(arg instanceof SecureAgentLatherValue)) {
-                log.warn("Authenticated call made from " + ctx.getCallerIP() + " which did not subclass " +
-                         "the correct authentication class");
+                log.warn("Authenticated call made from " + ctx.getCallerIP() +
+                         " which did not subclass " + "the correct authentication class");
                 throw new LatherRemoteException("Unauthorized agent denied");
             }
 
@@ -678,8 +687,8 @@ public class LatherDispatcherImpl implements LatherDispatcher {
         AgentConnection conn = null;
         try {
             conn = agentManager.getAgentConnection(method, ctx.getCallerIP(), agentId);
-            LatherValue rtn = _dispatch(ctx, method, arg);
-            _stats.addStat(1, LATHER_NUMBER_OF_CONNECTIONS);
+            LatherValue rtn = runCommand(ctx, method, arg);
+            stats.addStat(1, LATHER_NUMBER_OF_CONNECTIONS);
             return rtn;
         } finally {
             if (conn != null)
@@ -687,7 +696,8 @@ public class LatherDispatcherImpl implements LatherDispatcher {
         }
     }
 
-    private LatherValue _dispatch(LatherContext ctx, String method, LatherValue arg) throws LatherRemoteException {
+    private LatherValue runCommand(LatherContext ctx, String method, LatherValue arg)
+        throws LatherRemoteException {
         if (method.equals(CommandInfo.CMD_PING)) {
             return cmdPing(arg);
         } else if (method.equals(CommandInfo.CMD_USERISVALID)) {
@@ -713,7 +723,8 @@ public class LatherDispatcherImpl implements LatherDispatcher {
         } else if (method.equals(CommandInfo.CMD_CONTROL_SEND_COMMAND_RESULT)) {
             return cmdControlSendCommandResult((ControlSendCommandResult_args) arg);
         } else {
-            log.warn(ctx.getCallerIP() + " attempted to invoke '" + method + "' which could not be found");
+            log.warn(ctx.getCallerIP() + " attempted to invoke '" + method +
+                     "' which could not be found");
             throw new LatherRemoteException("Unknown method, '" + method + "'");
         }
     }
@@ -732,8 +743,8 @@ public class LatherDispatcherImpl implements LatherDispatcher {
             cfg = controlManager.getPluginConfiguration(args.getPluginName(), args.getMerge());
         } catch (PluginException exc) {
             log.warn("Error getting control config for plugin '" + args.getPluginName() + "'", exc);
-            throw new LatherRemoteException("Error getting control config " + "for plugin '" + args.getPluginName() +
-                                            "': " + exc.getMessage());
+            throw new LatherRemoteException("Error getting control config " + "for plugin '" +
+                                            args.getPluginName() + "': " + exc.getMessage());
         }
 
         res = new ControlGetPluginConfig_result();
@@ -745,8 +756,8 @@ public class LatherDispatcherImpl implements LatherDispatcher {
      * Receive status information about a previous control action
      */
     private NullLatherValue cmdControlSendCommandResult(ControlSendCommandResult_args args) {
-        controlManager.sendCommandResult(args.getId(), args.getResult(), args.getStartTime(), args.getEndTime(), args
-            .getMessage());
+        controlManager.sendCommandResult(args.getId(), args.getResult(), args.getStartTime(), args
+            .getEndTime(), args.getMessage());
 
         // Get live measurements on the resource
         String name = args.getName();
@@ -754,7 +765,8 @@ public class LatherDispatcherImpl implements LatherDispatcher {
             log.info("Getting live measurements for " + name);
             AppdefEntityID id = new AppdefEntityID(name);
             try {
-                measurementManager.getLiveMeasurementValues(authzSubjectManager.getOverlordPojo(), id);
+                measurementManager.getLiveMeasurementValues(authzSubjectManager.getOverlordPojo(),
+                    id);
             } catch (Exception e) {
                 log.error("Unable to fetch live measurements: " + e, e);
             }

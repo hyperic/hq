@@ -138,10 +138,6 @@
 	<context:mbean-server />
 
 
-	<bean class="org.hyperic.hq.bizapp.server.session.LatherBossImpl">
-		<constructor-arg ref="latherDispatcher" />
-	</bean>
-
 	<bean class="org.hyperic.hq.transport.ServerTransport">
 		<constructor-arg value="4" />
 	</bean>
