@@ -61,6 +61,9 @@ import org.hyperic.hq.bizapp.client.BizappCallbackClient;
 import org.hyperic.hq.bizapp.client.RegisterAgentResult;
 import org.hyperic.hq.bizapp.client.StaticProviderFetcher;
 import org.hyperic.hq.common.shared.ProductProperties;
+import org.hyperic.sigar.FileInfo;
+import org.hyperic.sigar.FileWatcher;
+import org.hyperic.sigar.FileWatcherThread;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
 import org.hyperic.util.StringUtil;
@@ -1095,8 +1098,8 @@ public class AgentClient {
     private static AgentClient initializeAgent(boolean generateToken){
         SecureAgentConnection conn;
         AgentConfig cfg;
-        String connIp, listenIp, authToken, propFile;
-        propFile =
+        String connIp, listenIp, authToken;
+        final String propFile =
             System.getProperty(AgentConfig.PROP_PROPFILE,
                                AgentConfig.DEFAULT_PROPFILE);
 
@@ -1120,7 +1123,32 @@ public class AgentClient {
             return null;
         }
         PropertyConfigurator.configure(bootProps);
-        
+
+        FileWatcherThread watcherThread = FileWatcherThread.getInstance();
+        FileWatcher loggingWatcher = new FileWatcher(new Sigar()) {
+            {
+                File[] files = AgentConfig.getPropertyFiles(propFile);
+                for (int i = 0; i < files.length; i++) {
+                    try {
+                        add(files[i]);
+                    } catch (SigarException e) {
+                        SYSTEM_ERR.println("Error adding watcher for " + files[i]);
+                    }
+                }
+                setInterval(60000);
+            }
+            public void onChange(FileInfo fileInfo) {
+                try {
+                    SYSTEM_OUT.println("Change detected in " + fileInfo.getName() + ", reloading logging configuration");
+                    PropertyConfigurator.configure(AgentConfig.getProperties(propFile));
+                } catch (AgentConfigException e) {
+                    SYSTEM_ERR.println("Error reloading logging configuration: " + e.getMessage());
+                    e.printStackTrace(SYSTEM_ERR);
+                }
+            }
+        };
+        watcherThread.add(loggingWatcher);
+
         listenIp = cfg.getListenIp();
         try {
             if(listenIp.equals(AgentConfig.IP_GLOBAL)){
