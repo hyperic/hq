@@ -85,7 +85,7 @@ public class WebsphereDetector
             this.discoverer = new WebsphereRuntimeDiscoverer(version,this);
         }
 
-        //for use w/ -jar hq-product.jar or agent.properties
+        //for use w/ -jar hq-pdk-shared.jar or agent.properties
         Properties props = getManager().getProperties();
         String[] credProps = {
             WebsphereProductPlugin.PROP_USERNAME,

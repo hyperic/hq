@@ -1,13 +1,23 @@
 package org.hyperic.bootstrap;
 
+import java.io.File;
+import java.net.MalformedURLException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.sql.DataSource;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.sigar.OperatingSystem;
 import org.hyperic.sigar.SigarException;
+import org.hyperic.util.jdbc.DBUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -28,6 +38,7 @@ public class HQServer {
     private ServerConfigurator serverConfigurator;
     private EngineController engineController;
     private OperatingSystem osInfo;
+    private DataSource dataSource;
     static final int DB_UPGRADE_PROCESS_TIMEOUT = 60 * 1000;
 
     @Autowired
@@ -35,13 +46,14 @@ public class HQServer {
                     ProcessManager processManager,
                     EmbeddedDatabaseController embeddedDatabaseController,
                     ServerConfigurator serverConfigurator, EngineController engineController,
-                    OperatingSystem osInfo) {
+                    OperatingSystem osInfo, DataSource dataSource) {
         this.serverHome = serverHome;
         this.processManager = processManager;
         this.embeddedDatabaseController = embeddedDatabaseController;
         this.serverConfigurator = serverConfigurator;
         this.engineController = engineController;
         this.osInfo = osInfo;
+        this.dataSource = dataSource;
     }
 
     public void start() {
@@ -74,7 +86,12 @@ public class HQServer {
             }
             log.debug("startBuiltinDB completed");
         }
+        log.info("Verifying HQ database schema...");
         upgradeDB();
+        if(!(verifySchema())) {
+            //Schema is not valid.  Something went wrong with the DB upgrade.
+            return;
+        }
         List<String> javaOpts = getJavaOpts();
         log.info("Booting the HQ server...");
         engineController.start(javaOpts);
@@ -110,21 +127,62 @@ public class HQServer {
         }
         return optList;
     }
+    
+  
+    
+    boolean verifySchema() {
+            Statement stmt  = null;
+            ResultSet rs    = null;
+            Connection conn = null;
+            try {
+                conn = dataSource.getConnection();
+                stmt = conn.createStatement();
+                final String sql = "select propvalue from EAM_CONFIG_PROPS " +
+                    "WHERE propkey = '" + HQConstants.SchemaVersion + "'";
+                rs = stmt.executeQuery(sql);
+                if (rs.next()) {
+                    final String currSchema = rs.getString("propvalue");
+                    if (currSchema.contains(HQConstants.SCHEMA_MOD_IN_PROGRESS)) {
+                        log.fatal("HQ DB schema is in a bad state: '" + currSchema +
+                            "'.  This is most likely due to a failed upgrade.  " +
+                            "Please either restore from backups and start your " +
+                            "previous version of HQ or contact HQ support.  " +
+                            "HQ cannot start while the current DB Schema version " +
+                            "is in this state");
+                       return false;
+                    }
+                }
+            } catch (SQLException e) {
+                log.error("Error verifying if HQ schema is valid.  Cause: " + e.getMessage());
+            }  finally {
+                DBUtil.closeJDBCObjects(HQServer.class.getName(), conn, stmt, rs);
+            }
+            return true;
+    }
 
     int upgradeDB() {
-        log.info("Verifying HQ database schema...");
+        String logConfigFileUrl;
+        try {
+            logConfigFileUrl = new File(serverHome +
+                             "/conf/log4j.xml").toURI().toURL().toString();
+        } catch (MalformedURLException e) {
+            log.error("Unable to determine URL for logging config file " + serverHome +
+                             "/conf/log4j.xml.  Cause: " + e.getMessage());
+            return 1;
+        }
         return processManager.executeProcess(
             new String[] { "java",
                           "-cp",
                           serverHome + "/lib/ant-launcher.jar",
                           "-Dserver.home=" + serverHome,
                           "-Dant.home=" + serverHome,
+                          "-Dlog4j.configuration=" + logConfigFileUrl,
                           "org.apache.tools.ant.launch.Launcher",
                           "-q",
                           "-lib",
                           serverHome + "/lib",
-                          "-logger",
-                          "org.hyperic.tools.ant.installer.InstallerLogger",
+                          "-listener",
+                          "org.apache.tools.ant.listener.Log4jListener",
                           "-buildfile",
                           serverHome + "/data/db-upgrade.xml",
                           "upgrade" }, serverHome, true, HQServer.DB_UPGRADE_PROCESS_TIMEOUT);

@@ -131,6 +131,7 @@ public final class ConcurrentStatsCollector {
 
             _mbeanServer = Bootstrap.getBean(MBeanServer.class);
             registerInternalStats();
+            startCollector();
         } else {
             _mbeanServer = null;
             _baseDir = null;

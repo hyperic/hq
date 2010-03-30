@@ -41,9 +41,11 @@ ${HQ_HOME}/hq_bin/citrixmonitor_bin/lib/citrix.jar:\
 ${HQ_HOME}/hq_bin/win32bindings_bin/lib/win32bindings.jar:\
 ${HQ_HOME}/build/lib/jxla.jar:\
 ${AGENT}/lib/AgentServer.jar:\
-${AGENT}/pdk/lib/hyperic-util.jar:\
+${AGENT}/pdk/lib/hq-util.jar:\
 ${AGENT}/pdk/lib/bcel-5.1.jar:\
-${AGENT}/pdk/lib/hq-product.jar
+${AGENT}/pdk/lib/hq-common.jar:\
+${AGENT}/pdk/lib/hq-pdk-shared.jar:\
+${AGENT}/pdk/lib/hq-pdk-agent.jar
 
 cd ${THISDIR}
 

@@ -27,8 +27,6 @@ package org.hyperic.hq.appdef.server.session;
 
 import java.util.List;
 
-import javax.naming.NamingException;
-
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.CloningBoss;
@@ -42,7 +40,6 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.VetoException;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.util.config.EncodingException;
 import org.springframework.stereotype.Service;
@@ -64,8 +61,9 @@ public class CloningBossImpl implements CloningBoss {
      *        resource sortname
      * 
      */
-    @Transactional(readOnly=true)
-    public List<Platform> findPlatformsByTypeAndName(AuthzSubject subj, Integer pType, String nameRegEx) {
+    @Transactional(readOnly = true)
+    public List<Platform> findPlatformsByTypeAndName(AuthzSubject subj, Integer pType,
+                                                     String nameRegEx) {
         throw new UnsupportedOperationException();
     }
 
@@ -77,19 +75,19 @@ public class CloningBossImpl implements CloningBoss {
      * 
      */
     public void clonePlatform(AuthzSubject subj, Integer platformId, List<Integer> cloneTargetIds)
-        throws SessionNotFoundException, SessionTimeoutException, SessionException, PermissionException,
-        PlatformNotFoundException {
+        throws SessionNotFoundException, SessionTimeoutException, SessionException,
+        PermissionException, PlatformNotFoundException {
         throw new UnsupportedOperationException();
     }
 
     /**
      * 
      */
-    public void clonePlatform(AuthzSubject subj, Platform master, Platform clone) throws AppdefEntityNotFoundException,
-        ConfigFetchException, PermissionException,  NamingException,
+    public void clonePlatform(AuthzSubject subj, Platform master, Platform clone)
+        throws AppdefEntityNotFoundException, ConfigFetchException, PermissionException,
         SessionNotFoundException, SessionTimeoutException, SessionException, VetoException,
-        AppdefDuplicateNameException, ValidationException, GroupNotCompatibleException, UpdateException,
-        EncodingException {
+        AppdefDuplicateNameException, ValidationException, GroupNotCompatibleException,
+        UpdateException, EncodingException {
         throw new UnsupportedOperationException();
     }
 }

@@ -133,12 +133,6 @@ public interface EventsBoss {
         throws SessionNotFoundException, SessionTimeoutException, PermissionException;
 
     /**
-     * Delete all alerts for a resource
-     */
-    public int deleteAlerts(int sessionID, AppdefEntityID aeid) throws SessionNotFoundException,
-        SessionTimeoutException, PermissionException;
-
-    /**
      * Delete all alerts for a given period of time
      */
     public int deleteAlerts(int sessionID, long begin, long end) throws SessionNotFoundException,
@@ -191,12 +185,6 @@ public interface EventsBoss {
                                                          Integer parentId)
         throws SessionNotFoundException, SessionTimeoutException, AppdefEntityNotFoundException,
         PermissionException;
-
-    /**
-     * Find all alerts for an appdef resource
-     */
-    public PageList<Alert> findAlerts(int sessionID, AppdefEntityID id, PageControl pc)
-        throws SessionNotFoundException, SessionTimeoutException, PermissionException;
 
     /**
      * Find all alerts for an appdef resource

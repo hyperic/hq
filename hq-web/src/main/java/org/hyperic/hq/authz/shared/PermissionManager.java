@@ -30,15 +30,11 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-
 import org.hibernate.Query;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefResourcePermissions;
-import org.hyperic.hq.appdef.shared.CloningBoss;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Operation;
@@ -46,7 +42,6 @@ import org.hyperic.hq.authz.server.session.OperationDAO;
 import org.hyperic.hq.authz.server.session.PagerProcessor_operation;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceDAO;
-import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.server.session.ResourceTypeDAO;
 import org.hyperic.hq.common.ApplicationException;
@@ -62,14 +57,6 @@ import org.hyperic.util.pager.PageControl;
 public abstract class PermissionManager {
 
     public static final String OPERATION_PAGER = PagerProcessor_operation.class.getName();
-
-    private InitialContext _ic = null;
-
-    protected InitialContext getInitialContext() throws NamingException {
-        if (_ic == null)
-            _ic = new InitialContext();
-        return _ic;
-    }
 
     protected ResourceTypeDAO getResourceTypeDAO() {
         return Bootstrap.getBean(ResourceTypeDAO.class);
@@ -109,8 +96,8 @@ public abstract class PermissionManager {
      * @exception SystemException If the group is empty or is not a group of
      *            platforms.
      */
-    public void checkAIScanPermission(AuthzSubject subject, AppdefEntityID id) throws PermissionException,
-        GroupNotCompatibleException {
+    public void checkAIScanPermission(AuthzSubject subject, AppdefEntityID id)
+        throws PermissionException, GroupNotCompatibleException {
 
         int type = id.getType();
 
@@ -126,7 +113,8 @@ public abstract class PermissionManager {
             // Check permissions for EVERY platform in the group
             List groupMembers;
             try {
-                groupMembers = GroupUtil.getCompatGroupMembers(subject, id, null, PageControl.PAGE_ALL);
+                groupMembers = GroupUtil.getCompatGroupMembers(subject, id, null,
+                    PageControl.PAGE_ALL);
             } catch (AppdefEntityNotFoundException e) {
                 // should never happen
                 throw new SystemException("Error finding group: " + id, e);
@@ -140,8 +128,8 @@ public abstract class PermissionManager {
                 checkAIScanPermissionForPlatform(subject, platformEntityID);
             }
         } else {
-            throw new SystemException("Autoinventory scans may only be " + "performed on platforms and groups "
-                                      + "of platforms");
+            throw new SystemException("Autoinventory scans may only be "
+                                      + "performed on platforms and groups " + "of platforms");
         }
     }
 
@@ -154,12 +142,13 @@ public abstract class PermissionManager {
         throws PermissionException {
 
         AppdefResourcePermissions arp = getResourcePermissions(subject, platformID);
-        
+
         if (arp.canCreateChild() && arp.canModify()) {
             // ok, legal operation
         } else {
             // boom, no permissions
-            throw new PermissionException("User " + subject.getName() + " is not permitted to start an " +
+            throw new PermissionException("User " + subject.getName() +
+                                          " is not permitted to start an " +
                                           "autoinventory scan on platform " + platformID);
         }
     }
@@ -172,14 +161,14 @@ public abstract class PermissionManager {
      * 
      */
     public void checkCreatePlatformPermission(AuthzSubject subject) throws PermissionException {
-            try {
-                checkPermission(subject, getResourceType(AuthzConstants.rootResType), AuthzConstants.rootResourceId,
-                    AuthzConstants.platformOpCreatePlatform);
-            } catch (NotFoundException e) {
-                // seed data error if this is not there
-                throw new SystemException(e);
-            }
-       
+        try {
+            checkPermission(subject, getResourceType(AuthzConstants.rootResType),
+                AuthzConstants.rootResourceId, AuthzConstants.platformOpCreatePlatform);
+        } catch (NotFoundException e) {
+            // seed data error if this is not there
+            throw new SystemException(e);
+        }
+
     }
 
     /**
@@ -187,7 +176,8 @@ public abstract class PermissionManager {
      * 
      * 
      */
-    public void checkControlPermission(AuthzSubject subject, AppdefEntityID id) throws PermissionException {
+    public void checkControlPermission(AuthzSubject subject, AppdefEntityID id)
+        throws PermissionException {
         int type = id.getType();
         String opName;
         switch (type) {
@@ -218,11 +208,11 @@ public abstract class PermissionManager {
      * 
      * 
      * 
-     *                  XXX: DON'T USE THIS!!
+     * XXX: DON'T USE THIS!!
      * @deprecated Use the individual check*Permission methods instead.
      * 
      */
-    public AppdefResourcePermissions getResourcePermissions(AuthzSubject who, AppdefEntityID eid){
+    public AppdefResourcePermissions getResourcePermissions(AuthzSubject who, AppdefEntityID eid) {
         boolean canView = false;
         boolean canModify = false;
         boolean canCreateChild = false;
@@ -269,8 +259,8 @@ public abstract class PermissionManager {
         } catch (InvalidAppdefTypeException e) {
         }
         // finally create the object
-        return new AppdefResourcePermissions(who, eid, canView, canCreateChild, canModify, canRemove, canControl,
-            canMonitor, canAlert);
+        return new AppdefResourcePermissions(who, eid, canView, canCreateChild, canModify,
+            canRemove, canControl, canMonitor, canAlert);
     }
 
     /**
@@ -278,7 +268,8 @@ public abstract class PermissionManager {
      * 
      * 
      */
-    public void checkRemovePermission(AuthzSubject subject, AppdefEntityID id) throws PermissionException {
+    public void checkRemovePermission(AuthzSubject subject, AppdefEntityID id)
+        throws PermissionException {
         int type = id.getType();
         String opName = null;
         switch (type) {
@@ -309,7 +300,8 @@ public abstract class PermissionManager {
      * 
      * 
      */
-    public void checkMonitorPermission(AuthzSubject subject, AppdefEntityID id) throws PermissionException {
+    public void checkMonitorPermission(AuthzSubject subject, AppdefEntityID id)
+        throws PermissionException {
         int type = id.getType();
         String opName;
         switch (type) {
@@ -340,7 +332,8 @@ public abstract class PermissionManager {
      * 
      * 
      */
-    public void checkAlertingPermission(AuthzSubject subject, AppdefEntityID id) throws PermissionException {
+    public void checkAlertingPermission(AuthzSubject subject, AppdefEntityID id)
+        throws PermissionException {
         int type = id.getType();
         String opName;
         switch (type) {
@@ -389,8 +382,8 @@ public abstract class PermissionManager {
                 entityIds.add(AppdefEntityID.newServerID(id));
             }
             // services
-            List serviceIds = findOperationScopeBySubject(subj, AuthzConstants.serviceOpManageAlerts,
-                AuthzConstants.serviceResType);
+            List serviceIds = findOperationScopeBySubject(subj,
+                AuthzConstants.serviceOpManageAlerts, AuthzConstants.serviceResType);
             for (int i = 0; i < serviceIds.size(); i++) {
                 Integer id = (Integer) serviceIds.get(i);
                 entityIds.add(AppdefEntityID.newServiceID(id));
@@ -420,7 +413,8 @@ public abstract class PermissionManager {
      * 
      * 
      */
-    public void checkCreateChildPermission(AuthzSubject subject, AppdefEntityID id) throws PermissionException {
+    public void checkCreateChildPermission(AuthzSubject subject, AppdefEntityID id)
+        throws PermissionException {
         int type = id.getType();
         String opName = null;
         switch (type) {
@@ -444,14 +438,16 @@ public abstract class PermissionManager {
      * @return operationId
      * @throws PermissionException - if the op is not found
      */
-    private Integer getOpIdByResourceType(ResourceType rtV, String opName) throws PermissionException {
+    private Integer getOpIdByResourceType(ResourceType rtV, String opName)
+        throws PermissionException {
         Collection<Operation> ops = rtV.getOperations();
-        for ( Operation op : ops) {
+        for (Operation op : ops) {
             if (op.getName().equals(opName)) {
                 return op.getId();
             }
         }
-        throw new PermissionException("Operation: " + opName + " not valid for ResourceType: " + rtV.getName());
+        throw new PermissionException("Operation: " + opName + " not valid for ResourceType: " +
+                                      rtV.getName());
     }
 
     /**
@@ -459,7 +455,8 @@ public abstract class PermissionManager {
      * 
      * 
      */
-    public void checkModifyPermission(AuthzSubject subject, AppdefEntityID id) throws PermissionException {
+    public void checkModifyPermission(AuthzSubject subject, AppdefEntityID id)
+        throws PermissionException {
         int type = id.getType();
         String opName;
 
@@ -487,7 +484,8 @@ public abstract class PermissionManager {
         checkPermission(subject, id, opName);
     }
 
-    public void checkModifyPermission(Integer subjectId, AppdefEntityID id) throws PermissionException {
+    public void checkModifyPermission(Integer subjectId, AppdefEntityID id)
+        throws PermissionException {
         String opName = null;
 
         switch (id.getType()) {
@@ -513,7 +511,8 @@ public abstract class PermissionManager {
     /**
      * Check a permission
      */
-    public void checkPermission(AuthzSubject subject, AppdefEntityID id, String operation) throws PermissionException {
+    public void checkPermission(AuthzSubject subject, AppdefEntityID id, String operation)
+        throws PermissionException {
         ResourceType rtv = null;
         try {
             // get the resource type
@@ -594,7 +593,7 @@ public abstract class PermissionManager {
      * @param resType - the constant indicating the resource type (from
      *        AuthzConstants)
      */
-    protected ResourceType getResourceType(String resType) throws NotFoundException{
+    protected ResourceType getResourceType(String resType) throws NotFoundException {
         return Bootstrap.getBean(ResourceManager.class).findResourceTypeByName(resType);
     }
 
@@ -603,7 +602,8 @@ public abstract class PermissionManager {
      * 
      * 
      */
-    public void checkViewPermission(AuthzSubject subject, AppdefEntityID id) throws PermissionException {
+    public void checkViewPermission(AuthzSubject subject, AppdefEntityID id)
+        throws PermissionException {
         int type = id.getType();
         String opName = null;
         switch (type) {
@@ -641,8 +641,8 @@ public abstract class PermissionManager {
      *            the given operation on the resource of the given type whose id
      *            is instanceId.
      */
-    public abstract void check(Integer subject, ResourceType type, Integer instanceId, String operation)
-        throws PermissionException;
+    public abstract void check(Integer subject, ResourceType type, Integer instanceId,
+                               String operation) throws PermissionException;
 
     /**
      * Check permission.
@@ -656,8 +656,8 @@ public abstract class PermissionManager {
      *            the given operation on the resource of the given type whose id
      *            is instanceId.
      */
-    public abstract void check(Integer subjectId, Integer typeId, Integer instanceId, Integer operationId)
-        throws PermissionException;
+    public abstract void check(Integer subjectId, Integer typeId, Integer instanceId,
+                               Integer operationId) throws PermissionException;
 
     /**
      * Check permission.
@@ -671,8 +671,8 @@ public abstract class PermissionManager {
      *            the given operation on the resource of the given type whose id
      *            is instanceId.
      */
-    public abstract void check(Integer subjectId, String resType, Integer instanceId, String operation)
-        throws PermissionException;
+    public abstract void check(Integer subjectId, String resType, Integer instanceId,
+                               String operation) throws PermissionException;
 
     /**
      * Check whether a user has permission to access the admin component.
@@ -692,7 +692,8 @@ public abstract class PermissionManager {
      * operation is valid
      * @return List of integer instance ids
      */
-    public abstract List<Integer> findOperationScopeBySubject(AuthzSubject subj, String opName, String resType)
+    public abstract List<Integer> findOperationScopeBySubject(AuthzSubject subj, String opName,
+                                                              String resType)
         throws PermissionException, NotFoundException;
 
     /**
@@ -700,8 +701,8 @@ public abstract class PermissionManager {
      * operation.
      * @return List of integer instance ids
      */
-    public abstract List<Integer> findOperationScopeBySubject(AuthzSubject subj, Integer opId) throws 
-        PermissionException, NotFoundException;
+    public abstract List<Integer> findOperationScopeBySubject(AuthzSubject subj, Integer opId)
+        throws PermissionException, NotFoundException;
 
     /**
      * Find the list of resources for which a given subject id can perform
@@ -716,8 +717,10 @@ public abstract class PermissionManager {
      * @return array of authz Resources
      * @exception ApplicationException
      */
-    public abstract Resource[] findOperationScopeBySubjectBatch(AuthzSubject whoami, ResourceValue[] resArr,
-                                                                String[] opArr) throws ApplicationException;
+    public abstract Resource[] findOperationScopeBySubjectBatch(AuthzSubject whoami,
+                                                                ResourceValue[] resArr,
+                                                                String[] opArr)
+        throws ApplicationException;
 
     /**
      * Get viewable resources of a specific type
@@ -728,14 +731,16 @@ public abstract class PermissionManager {
      * 
      * @return a list of Integers representing instance ids
      */
-    public abstract List<Integer> findViewableResources(AuthzSubject subj, String resType, String resName,
-                                                        String appdefTypeStr, Integer typeId, PageControl pc);
+    public abstract List<Integer> findViewableResources(AuthzSubject subj, String resType,
+                                                        String resName, String appdefTypeStr,
+                                                        Integer typeId, PageControl pc);
 
     /**
      * Search viewable resources of any type
      * @return a list of Integers representing instance ids
      */
-    public abstract List<Integer> findViewableResources(AuthzSubject subj, String searchFor, PageControl pc);
+    public abstract List<Integer> findViewableResources(AuthzSubject subj, String searchFor,
+                                                        PageControl pc);
 
     /**
      * Get a clause that you can append to an existing WHERE clause to make it
@@ -753,13 +758,16 @@ public abstract class PermissionManager {
      * 
      * @return a list of Integers representing instance ids
      */
-    public abstract List<Operation> getAllOperations(AuthzSubject subject, PageControl pc) throws PermissionException;
+    public abstract List<Operation> getAllOperations(AuthzSubject subject, PageControl pc)
+        throws PermissionException;
 
-    public abstract String getResourceTypeSQL(String instanceId, Integer subjectId, String resType, String op);
+    public abstract String getResourceTypeSQL(String instanceId, Integer subjectId, String resType,
+                                              String op);
 
     public abstract String getOperableGroupsHQL(AuthzSubject subject, String alias, String oper);
 
-    public abstract Collection<Resource> getGroupResources(Integer subjectId, Integer groupId, Boolean fsystem);
+    public abstract Collection<Resource> getGroupResources(Integer subjectId, Integer groupId,
+                                                           Boolean fsystem);
 
     public abstract Collection<Resource> findServiceResources(AuthzSubject subj, Boolean fsystem);
 
@@ -769,16 +777,17 @@ public abstract class PermissionManager {
         Query bindParams(Query q, AuthzSubject subject, List operations);
     }
 
-    public abstract RolePermNativeSQL getRolePermissionNativeSQL(String resourceVar, String subjectParam,
+    public abstract RolePermNativeSQL getRolePermissionNativeSQL(String resourceVar,
+                                                                 String subjectParam,
                                                                  String opListParam);
 
-    public abstract String getAlertsHQL(boolean inEscalation, boolean notFixed, Integer groupId, Integer alertDefId,
-                                        boolean count);
+    public abstract String getAlertsHQL(boolean inEscalation, boolean notFixed, Integer groupId,
+                                        Integer alertDefId, boolean count);
 
     public abstract String getAlertDefsHQL();
 
-    public abstract String getGroupAlertsHQL(boolean inEscalation, boolean notFixed, Integer groupId,
-                                             Integer galertDefId);
+    public abstract String getGroupAlertsHQL(boolean inEscalation, boolean notFixed,
+                                             Integer groupId, Integer galertDefId);
 
     public abstract String getGroupAlertDefsHQL();
 
@@ -789,7 +798,8 @@ public abstract class PermissionManager {
      *        query
      */
     public EdgePermCheck makePermCheckSql(String resourceVar, boolean includeDescendants) {
-        return makePermCheckSql("subject", resourceVar, "resource", "distance", "ops", includeDescendants);
+        return makePermCheckSql("subject", resourceVar, "resource", "distance", "ops",
+            includeDescendants);
     }
 
     /**
@@ -799,7 +809,8 @@ public abstract class PermissionManager {
      *        query
      */
     public EdgePermCheck makePermCheckHql(String resourceVar, boolean includeDescendants) {
-        return makePermCheckHql("subject", resourceVar, "resource", "distance", "ops", includeDescendants);
+        return makePermCheckHql("subject", resourceVar, "resource", "distance", "ops",
+            includeDescendants);
     }
 
     /**
@@ -823,8 +834,9 @@ public abstract class PermissionManager {
      * @param includeDescendants - include the resource's descendants in the
      *        query
      */
-    public abstract EdgePermCheck makePermCheckSql(String subjectParam, String resourceVar, String resourceParam,
-                                                   String distanceParam, String opsParam, boolean includeDescendants);
+    public abstract EdgePermCheck makePermCheckSql(String subjectParam, String resourceVar,
+                                                   String resourceParam, String distanceParam,
+                                                   String opsParam, boolean includeDescendants);
 
     /**
      * Generates an object which aids in the creation of hierarchical,
@@ -847,14 +859,14 @@ public abstract class PermissionManager {
      * @param includeDescendants - include the resource's descendants in the
      *        query
      */
-    public abstract EdgePermCheck makePermCheckHql(String subjectParam, String resourceVar, String resourceParam,
-                                                   String distanceParam, String opsParam, boolean includeDescendants);
+    public abstract EdgePermCheck makePermCheckHql(String subjectParam, String resourceVar,
+                                                   String resourceParam, String distanceParam,
+                                                   String opsParam, boolean includeDescendants);
 
     /**
      * Return the MaintenanceEventManager implementation
      */
     public abstract MaintenanceEventManager getMaintenanceEventManager();
-
 
     /**
      * Return the HierarchicalAlertingManager implementation

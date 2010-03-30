@@ -154,8 +154,12 @@
 		<property name="encodeHashAsBase64" value="true" />
 	</bean>
 		
-	<bean id="internalAuthenticationProvider" class="org.hyperic.hq.ui.security.InternalAuthenticationProvider">
-		<property name="passwordEncoder" ref="passwordEncoder" />
+	<bean id="internalAuthenticationProvider" class="org.hyperic.hq.security.InternalAuthenticationProvider">
+		<constructor-arg ref="authzSubjectManager"/>
+		<constructor-arg>
+			<bean class="org.hyperic.hq.security.HQAuthenticationProviderLocator"/>
+		</constructor-arg>
+		<constructor-arg ref="serverConfigManager"/>
 	</bean>
 
 	<bean id="authenticationManager" class="org.springframework.security.authentication.ProviderManager">

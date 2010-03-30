@@ -91,7 +91,7 @@
 
 	<path id="alljars">
 		<path refid="pdknative" />
-		<fileset dir="${thirdparty.lib}" includes="*.jar" excludes="ant*.jar, strutstest-*.jar,cactus*.jar,mockejb.jar,mockrunner-ejb.jar,dbunit*.jar,jaas.jar" />
+		<fileset dir="${thirdparty.lib}" includes="*.jar" excludes="ant*.jar" />
 		<fileset dir="${thirdparty.lib}" includes="*.zip" />
 		<fileset dir="${thirdparty.lib}/oracle_jdbc" includes="*.jar" />
 		<fileset dir="${thirdparty.lib}/postgresql" includes="postgresql-8.2-*.jdbc3.jar" />
@@ -115,6 +115,7 @@
 		<fileset dir="${thirdparty.lib}" includes="*.jar" excludes="ant*.jar strutstest-*.jar,cactus*.jar,mockejb.jar,mockrunner-ejb.jar,dbunit*.jar,jaas.jar" />
 		<path location="${thirdparty.lib}/dbunit-2.2.jar" />
 		<fileset dir="${thirdparty.lib}/tomcat-jdbc" includes="*.jar" />
+	    <fileset dir="${thirdparty.lib}/test" includes="*.jar"/>
 	</path>
 
 	<path id="pdkjars">
@@ -427,22 +428,6 @@
 
 	<!-- Bring in tasks for rolling the archives -->
 	<import file="${hq.home}/build_util/archive-build.xml" />
-
-	<target name="check-release">
-		<available property="jre.dir.available" file="${jre.dir}" />
-		<fail unless="jre.dir.available">
-		        JRES not found at ${jre.dir}.  Either change this property in
-		        your ~/.hq/build.properties to point to a working copy of the
-		        jres project or checkout a copy to ${jre.dir}
-		    </fail>
-
-		<available property="pgsql.dir.available" file="${pgsql.dir}" />
-		<fail unless="pgsql.dir.available">
-        PostgreSQL binaries not found at ${pgsql.dir}.  Either change
-        this property in your ~/.hq/build.properties to point to a working
-        copy of the pgsql project or checkout a copy to ${pgsql.dir}
-    </fail>
-	</target>
 	
 	<target name="pack-bootstrap">
 		<jar basedir="${hq.bootstrap}/target/classes" jarfile="${build.dir}/hq-bootstrap.jar"/>
@@ -532,7 +517,12 @@
 				<include name="*expression-*.jar"/>
 				<include name="*springframework.context-*.jar"/>
 			</fileset>
-			<fileset dir="${thirdparty.lib}" includes="commons-logging*.jar"/>
+			<fileset dir="${thirdparty.lib}">
+				<include name="commons-logging*.jar"/>
+				<include name="ant-apache-log4j.jar"/>
+				<include name="log4j-*.jar"/>
+			</fileset>
+			<fileset dir="${thirdparty.lib}/tomcat-jdbc" includes="*"/>
 		</copy>		
 
 		<!-- Copy WAR -->
@@ -703,9 +693,9 @@
 
 
 
-	<target name="build-war" description="Build and create the war" depends="compile-server,compile-rendit,compile-plugins,pack-rendit,pack-plugins,pack-war" />
+	<target name="build-war" description="Build and create the war" depends="compile-server,compile-rendit,compile-plugins,pack-plugins,pack-war" />
 
-	<target name="pack-war" description="Create the war directory structure ( use if you modify .jsp or other web files, but no sources )">
+	<target name="pack-war" description="Create the war directory structure ( use if you modify .jsp or other web files, but no sources )" depends="pack-rendit">
 		<mkdir dir="${war.dir}" />
 		<mkdir dir="${war.dir}/WEB-INF/lib" />
 		<mkdir dir="${war.dir}/WEB-INF/classes" />
@@ -758,7 +748,6 @@
 				<include name="commons-validator-1.3.1.jar" />
 				<include name="jstl-1.1.2.jar" />
 				<include name="standard-1.1.2.jar" />
-				<include name="spring-struts-2.0.8.jar" />
 				<include name="struts-core-1.3.10.jar" />
 				<include name="struts-extras-1.3.10.jar" />
 				<include name="struts-taglib-1.3.10.jar" />
@@ -786,7 +775,6 @@
 			<fileset dir="${sigar.lib}">
 				<include name="sigar.jar" />
 			</fileset>
-
 
 			<fileset dir="${thirdparty.lib}/mysql_jdbc">
 				<include name="mysql-connector-java-5.0.5-bin.jar" />
@@ -822,11 +810,8 @@
 			</fileset>
 		</copy>
 
-		<mkdir dir="${war.dir}/WEB-INF/sigar_bin/lib" />
-		<copy todir="${war.dir}/WEB-INF/sigar_bin/lib">
-			<fileset dir="${sigar.lib}">
-				<exclude name="sigar.jar" />
-			</fileset>
+		<copy todir="${war.dir}/WEB-INF/lib">
+			<fileset dir="${sigar.lib}" includes="*"/>
 		</copy>
 
 		<mkdir dir="${war.dir}/WEB-INF/gconsoleTemplates" />
@@ -1400,7 +1385,7 @@
 </target>
 
 
-<target name="build-instrumented-war" depends="instrument-war,instrument-bootstrap,compile-rendit,compile-plugins,pack-rendit,pack-plugins,pack-war">
+<target name="build-instrumented-war" depends="instrument-war,instrument-bootstrap,compile-rendit,compile-plugins, pack-plugins,pack-war">
 <copy todir="${war.dir}/WEB-INF/lib/">
 	<fileset dir="${thirdparty.lib}">
 		<include name="com.springsource.com.cenqua.clover-2.4.2.jar" />
@@ -1470,5 +1455,75 @@
 	<delete dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/target/clover" quiet="true" />
 </sequential>
 </macrodef>
+
+<target name="post-build">
+
+    <property name="release.dir" value="/raid/release/candidates/hq"/>
+
+    <property name="versionfile" value="${version.properties}"/>
+
+    <!-- Increment build # -->
+    <propertyfile file="${versionfile}">
+      <entry key="build" type="int" default="0" operation="+" pattern="0000"/>
+    </propertyfile>
+
+    <property name="release.comment" value="Release Build"/>
+    <property name="hq.isDev" value="false"/>
+    <property file="${versionfile}" />
+    
+    <checksum forceOverwrite="yes" fileext=".md5">
+        <fileset dir="${hq.home}/build" includes="hyperic-*.tgz"/>
+        <fileset dir="${hq.home}/build" includes="hyperic-*.zip"/>
+    </checksum>
+
+    <git command="add version.properties" dir="${hq.home}"/>
+    <git command="commit -m 'Release ${version} build #${build}'" dir="${hq.home}"/>
+    <git command="push git@git.springsource.org:hq/hq.git" dir="${hq.home}"/>
+
+    <!-- Copy to release dir -->
+    <copy todir="${release.dir}">
+      <fileset dir="${hq.home}/build" includes="hyperic-*.tgz"/>
+      <fileset dir="${hq.home}/build" includes="hyperic-*.zip"/>
+      <fileset dir="${hq.home}/build" includes="*.md5"/>
+    </copy>
+
+
+    <!-- Send email -->
+    <mail subject="HQ Daily Build: ${version} build #${build}"
+          mailhost="localhost"
+          mailport="25">
+      <from address="${mail.from}"/>
+      <to address="${mail.to}"/>
+      <message>
+        The autobuild has completed successfully.
+
+        This build is available for download from:
+          http://${build.server}${release.dir}/hyperic-hq-installer-${version}-${build}-sparc-solaris.tgz
+          http://${build.server}${release.dir}/hyperic-hq-installer-${version}-${build}-x86-linux.tgz
+          http://${build.server}${release.dir}/hyperic-hq-installer-${version}-${build}-win32.zip
+          http://${build.server}${release.dir}/hyperic-hq-installer-${version}-${build}-x86_64-linux.tgz
+          http://${build.server}${release.dir}/hyperic-hq-installer-${version}-${build}-apple-osx.tgz
+          http://${build.server}${release.dir}/hyperic-hq-installer-${version}-${build}-noJRE.tgz
+          http://${build.server}${release.dir}/hyperic-hq-installer-${version}-${build}-noJRE.zip
+
+        Agent bundles are available for download from:
+          http://${build.server}${release.dir}/hyperic-hq-agent-${version}-${build}-hpux-11.tgz
+          http://${build.server}${release.dir}/hyperic-hq-agent-${version}-${build}-sparc-solaris.tgz
+          http://${build.server}${release.dir}/hyperic-hq-agent-${version}-${build}-x86-linux.tgz
+          http://${build.server}${release.dir}/hyperic-hq-agent-${version}-${build}-win32.zip
+          http://${build.server}${release.dir}/hyperic-hq-agent-${version}-${build}-x86_64-linux.tgz
+          http://${build.server}${release.dir}/hyperic-hq-agent-${version}-${build}-apple-osx.tgz
+          http://${build.server}${release.dir}/hyperic-hq-agent-${version}-${build}-ppc-aix.tgz
+          http://${build.server}${release.dir}/hyperic-hq-agent-${version}-${build}-noJRE.tgz
+          http://${build.server}${release.dir}/hyperic-hq-agent-${version}-${build}-noJRE.zip
+
+        Source bundles are available for download from:
+
+          ${release.dir}/hyperic-hq-src-${version}-${build}.zip
+          ${release.dir}/hyperic-hq-src-${version}-${build}.tgz
+
+      </message>
+    </mail>
+</target>
 
 </project>

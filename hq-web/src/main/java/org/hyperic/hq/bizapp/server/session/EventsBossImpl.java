@@ -846,17 +846,6 @@ public class EventsBossImpl implements EventsBoss, ApplicationListener<Applicati
     }
 
     /**
-     * Delete all alerts for a resource
-     * 
-     * 
-     */
-    public int deleteAlerts(int sessionID, AppdefEntityID aeid) throws SessionNotFoundException,
-        SessionTimeoutException, PermissionException {
-        AuthzSubject subject = sessionManager.getSubject(sessionID);
-        return alertManager.deleteAlerts(subject, aeid);
-    }
-
-    /**
      * Delete all alerts for a given period of time
      * 
      * 
@@ -973,18 +962,6 @@ public class EventsBossImpl implements EventsBoss, ApplicationListener<Applicati
         PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         return alertDefinitionManager.findAlertDefinitionNames(subject, id, parentId);
-    }
-
-    /**
-     * Find all alerts for an appdef resource
-     * 
-     * 
-     */
-    @Transactional(readOnly = true)
-    public PageList<Alert> findAlerts(int sessionID, AppdefEntityID id, PageControl pc)
-        throws SessionNotFoundException, SessionTimeoutException, PermissionException {
-        AuthzSubject subject = sessionManager.getSubject(sessionID);
-        return alertManager.findAlerts(subject, id, pc);
     }
 
     /**

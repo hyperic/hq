@@ -36,12 +36,10 @@ import org.hyperic.hq.events.shared.RegisteredTriggerManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-
-
 /**
  * Repository of in memory triggers for event processing
  * @author jhickey
- *
+ * 
  */
 @Repository
 public class RegisteredTriggers implements RegisterableTriggerRepository {
@@ -53,11 +51,12 @@ public class RegisteredTriggers implements RegisterableTriggerRepository {
     private Map<TriggerEventKey, Map<Integer, RegisterableTriggerInterface>> triggers = new ConcurrentHashMap<TriggerEventKey, Map<Integer, RegisterableTriggerInterface>>();
 
     private RegisteredTriggerManager registeredTriggerManager;
-    
+
     private AlertRegulator alertRegulator;
 
     @Autowired
-    public RegisteredTriggers(RegisteredTriggerManager registeredTriggerManager, AlertRegulator alertRegulator) {
+    public RegisteredTriggers(RegisteredTriggerManager registeredTriggerManager,
+                              AlertRegulator alertRegulator) {
         this.registeredTriggerManager = registeredTriggerManager;
         this.alertRegulator = alertRegulator;
 
@@ -69,17 +68,20 @@ public class RegisteredTriggers implements RegisterableTriggerRepository {
 
     @PostConstruct
     public void init() {
+        this.triggers = new ConcurrentHashMap<TriggerEventKey, Map<Integer, RegisterableTriggerInterface>>();
         registeredTriggerManager.initializeTriggers(this);
     }
 
-    public Collection<RegisterableTriggerInterface> getInterestedTriggers(Class<?> eventClass, Integer instanceId) {
+    public Collection<RegisterableTriggerInterface> getInterestedTriggers(Class<?> eventClass,
+                                                                          Integer instanceId) {
         HashSet<RegisterableTriggerInterface> trigs = new HashSet<RegisterableTriggerInterface>();
         // All alerts are disabled, so no triggers should be processing events
         if (!alertRegulator.alertsAllowed()) {
             return trigs;
         }
         TriggerEventKey key = new TriggerEventKey(eventClass, instanceId.intValue());
-        Map<Integer, RegisterableTriggerInterface> triggersById = (Map<Integer, RegisterableTriggerInterface>) triggers.get(key);
+        Map<Integer, RegisterableTriggerInterface> triggersById = (Map<Integer, RegisterableTriggerInterface>) triggers
+            .get(key);
         if (triggersById != null) {
             trigs.addAll(triggersById.values());
         }
@@ -111,7 +113,8 @@ public class RegisteredTriggers implements RegisterableTriggerRepository {
                 // Despite using ConcurrentHashMaps - need to synchronize
                 // updates due to iteration required by unregisterTrigger
                 synchronized (triggerUpdateLock) {
-                    Map<Integer, RegisterableTriggerInterface> triggersById = (Map<Integer, RegisterableTriggerInterface>) triggers.get(key);
+                    Map<Integer, RegisterableTriggerInterface> triggersById = (Map<Integer, RegisterableTriggerInterface>) triggers
+                        .get(key);
                     if (triggersById == null) {
                         triggersById = new ConcurrentHashMap<Integer, RegisterableTriggerInterface>();
                     }
@@ -128,8 +131,10 @@ public class RegisteredTriggers implements RegisterableTriggerRepository {
 
     public void removeTrigger(Integer triggerId) {
         synchronized (triggerUpdateLock) {
-            for (Iterator<Map<Integer,RegisterableTriggerInterface>> triggerMaps = triggers.values().iterator(); triggerMaps.hasNext();) {
-                Map<Integer,RegisterableTriggerInterface> triggerIdsToTriggers = (Map<Integer,RegisterableTriggerInterface>) triggerMaps.next();
+            for (Iterator<Map<Integer, RegisterableTriggerInterface>> triggerMaps = triggers
+                .values().iterator(); triggerMaps.hasNext();) {
+                Map<Integer, RegisterableTriggerInterface> triggerIdsToTriggers = (Map<Integer, RegisterableTriggerInterface>) triggerMaps
+                    .next();
                 triggerIdsToTriggers.remove(triggerId);
                 if (triggerIdsToTriggers.isEmpty()) {
                     triggerMaps.remove();
@@ -140,8 +145,10 @@ public class RegisteredTriggers implements RegisterableTriggerRepository {
 
     public RegisterableTriggerInterface getTriggerById(Integer triggerId) {
         synchronized (triggerUpdateLock) {
-            for (Map<Integer,RegisterableTriggerInterface> triggerIdsToTriggers : triggers.values()) {
-                RegisterableTriggerInterface trigger = (RegisterableTriggerInterface) triggerIdsToTriggers.get(triggerId);
+            for (Map<Integer, RegisterableTriggerInterface> triggerIdsToTriggers : triggers
+                .values()) {
+                RegisterableTriggerInterface trigger = (RegisterableTriggerInterface) triggerIdsToTriggers
+                    .get(triggerId);
                 if (trigger != null) {
                     return trigger;
                 }
@@ -152,14 +159,15 @@ public class RegisteredTriggers implements RegisterableTriggerRepository {
 
     public void setTriggersEnabled(Collection<Integer> triggerIds, boolean enabled) {
         Set<RegisterableTriggerInterface> triggersToProcess = new HashSet<RegisterableTriggerInterface>();
-        for(Integer triggerId : triggerIds) {
+        for (Integer triggerId : triggerIds) {
             RegisterableTriggerInterface trigger = getTriggerById(triggerId);
-            if(trigger != null) {
+            if (trigger != null) {
                 triggersToProcess.add(trigger);
             }
         }
-        //not concerned with thread-safety of "enabled" boolean - willing to deal with some being read with old value during update
-        for(RegisterableTriggerInterface trigger : triggersToProcess) {
+        // not concerned with thread-safety of "enabled" boolean - willing to
+        // deal with some being read with old value during update
+        for (RegisterableTriggerInterface trigger : triggersToProcess) {
             trigger.setEnabled(enabled);
         }
     }
@@ -187,16 +195,15 @@ public class RegisteredTriggers implements RegisterableTriggerRepository {
         // Can't very well look up a null object
         if (event.getInstanceId() != null) {
             // Get the triggers that are interested in this instance
-            Collection<RegisterableTriggerInterface> trigs = getInterestedTriggers(event.getClass(),
-                                                                                      event.getInstanceId());
+            Collection<RegisterableTriggerInterface> trigs = getInterestedTriggers(
+                event.getClass(), event.getInstanceId());
             if (trigs.size() > 0)
                 return true;
         }
 
         // Check the triggers that are interested in all instances
-        Collection<RegisterableTriggerInterface> trigs = getInterestedTriggers(event.getClass(), KEY_ALL);
+        Collection<RegisterableTriggerInterface> trigs = getInterestedTriggers(event.getClass(),
+            KEY_ALL);
         return (trigs.size() > 0);
     }
-
-   
 }

@@ -359,18 +359,6 @@
         org.hyperic.lather.server.LatherServlet
     </servlet-class>
     <init-param>
-        <param-name>org.hyperic.lather.dispatchBean</param-name>
-        <param-value>LocalLatherBoss</param-value>
-    </init-param>       
-    <init-param>
-        <param-name>org.hyperic.lather.dispatchMethod</param-name>
-        <param-value>dispatch</param-value>
-    </init-param>       
-    <init-param>
-        <param-name>org.hyperic.lather.dispatchClass</param-name>
-        <param-value>org.hyperic.hq.bizapp.shared.LatherBoss</param-value>
-    </init-param>       
-    <init-param>
         <param-name>org.hyperic.lather.maxConns</param-name>
         <param-value>250</param-value>
     </init-param>

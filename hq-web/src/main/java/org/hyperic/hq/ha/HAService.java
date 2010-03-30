@@ -10,4 +10,6 @@ public interface HAService {
     boolean isMasterNode();
     
     void start();
+    
+    void stop();
 }

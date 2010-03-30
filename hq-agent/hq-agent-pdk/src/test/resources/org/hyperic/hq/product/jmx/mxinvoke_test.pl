@@ -134,7 +134,7 @@ close FH;
 my(@cmd) = (
     'java',
     '-Dcontrol.action.validate=false',
-    '-jar', 'pdk/lib/hq-product.jar',
+    '-jar', 'pdk/lib/hq-pdk-shared.jar',
     #'-Dlog=debug',
     '-Dplugins.include=jmx',
     "'-Djmx.url=ptql:State.Name.eq=java,Args.*.ct=MxTestServer,Pid.Pid.ne=\$\$'",

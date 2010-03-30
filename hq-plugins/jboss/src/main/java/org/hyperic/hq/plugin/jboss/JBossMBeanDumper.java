@@ -53,7 +53,7 @@ public class JBossMBeanDumper extends MBeanDumper {
         return (MBeanServerConnection)JBossUtil.getMBeanServer(_config);
     }
 
-    //java -jar pdk/lib/hq-product.jar jboss JBossMBeanDumper
+    //java -jar pdk/lib/hq-pdk-shared.jar jboss JBossMBeanDumper
     public static void main(String[] args) throws Exception {
         new JBossMBeanDumper().dump(args);
     }

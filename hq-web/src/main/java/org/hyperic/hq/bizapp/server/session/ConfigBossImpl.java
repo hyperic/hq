@@ -28,10 +28,7 @@ package org.hyperic.hq.bizapp.server.session;
 import java.util.Properties;
 
 import org.hyperic.hq.auth.shared.SessionManager;
-import org.hyperic.hq.auth.shared.SessionNotFoundException;
-import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.bizapp.shared.ConfigBoss;
 import org.hyperic.hq.common.ApplicationException;
@@ -66,7 +63,7 @@ public class ConfigBossImpl implements ConfigBoss {
      * Get the top-level configuration properties
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public Properties getConfig() throws ConfigPropertyException {
         return serverConfigManager.getConfig();
     }
@@ -75,7 +72,7 @@ public class ConfigBossImpl implements ConfigBoss {
      * Get the configuration properties for a specified prefix
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public Properties getConfig(String prefix) throws ConfigPropertyException {
         return serverConfigManager.getConfig(prefix);
     }
@@ -84,7 +81,8 @@ public class ConfigBossImpl implements ConfigBoss {
      * Set the top-level configuration properties
      * 
      */
-    public void setConfig(int sessId, Properties props) throws ApplicationException, ConfigPropertyException {
+    public void setConfig(int sessId, Properties props) throws ApplicationException,
+        ConfigPropertyException {
         AuthzSubject subject = sessionManager.getSubject(sessId);
         serverConfigManager.setConfig(subject, props);
     }
@@ -99,18 +97,4 @@ public class ConfigBossImpl implements ConfigBoss {
         serverConfigManager.setConfig(subject, prefix, props);
     }
 
-    /**
-     * Perform routine database maintenance. Must have admin permissions.
-     * @return The time it took to vaccum, in milliseconds, or -1 if the
-     *         database is not PostgreSQL.
-     * 
-     */
-    public long vacuum(int sessionId) throws SessionTimeoutException, SessionNotFoundException, PermissionException {
-        AuthzSubject subject = sessionManager.getSubject(sessionId);
-
-        if (!permissionManager.hasAdminPermission(subject.getId())) {
-            throw new PermissionException("Only admins can vacuum the DB");
-        }
-        return serverConfigManager.vacuum();
-    }
 }

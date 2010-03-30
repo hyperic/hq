@@ -12,6 +12,6 @@
 	<classpathentry kind="lib" path="/hq-common/thirdparty/lib/easymock-2.3.jar"/>
 	<classpathentry kind="lib" path="/hq-common/thirdparty/lib/com.springsource.org.junit-4.6.0.jar"/>
 	<classpathentry kind="lib" path="/hq-common/thirdparty/lib/jmock-core-1.2.0.jar"/>
-	<classpathentry kind="lib" path="/hq-common/thirdparty/lib/dbunit-2.2.jar"/>
+	<classpathentry kind="lib" path="/hq-common/thirdparty/lib/test/dbunit-2.2.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
