@@ -30,9 +30,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -46,19 +43,14 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hibernate.Util;
-import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.hqu.RenditServer;
-import org.hyperic.hq.measurement.MeasurementConstants;
-import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginInfo;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ProductPluginManager;
 import org.hyperic.hq.product.shared.ProductManager;
-import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.util.file.FileUtil;
-import org.hyperic.util.jdbc.DBUtil;
+import org.hyperic.util.file.FileWatcher;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -67,6 +59,9 @@ import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedMetric;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
+import org.springframework.roo.file.monitor.event.FileEvent;
+import org.springframework.roo.file.monitor.event.FileEventListener;
+import org.springframework.roo.file.monitor.event.FileOperation;
 import org.springframework.stereotype.Service;
 
 /**
@@ -83,161 +78,34 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
     private static final String PLUGIN_DIR = "hq-plugins";
     private static final String HQU = "hqu";
 
-    private static final String TAB_DATA = MeasurementConstants.TAB_DATA,
-        MEAS_VIEW = MeasTabManagerUtil.MEAS_VIEW;
-
-    private DBUtil dbUtil;
     private RenditServer renditServer;
     private ProductManager productManager;
 
-    private Log _log = LogFactory.getLog(ProductPluginDeployer.class);
+    private ProductPluginManager productPluginManager;
 
-    private ProductPluginManager _ppm;
-    private List<String> _plugins = new ArrayList<String>();
-
-    private File _pluginDir;
-    private File _hquDir;
-    private File sigarBin;
+    private File pluginDir;
+    private File hquDir;
 
     @Autowired
-    public ProductPluginDeployer(DBUtil dbUtil, RenditServer renditServer,
-                                 ProductManager productManager) {
-        this.dbUtil = dbUtil;
+    public ProductPluginDeployer(RenditServer renditServer, ProductManager productManager) {
         this.renditServer = renditServer;
         this.productManager = productManager;
-        // Initialize database
-        initDatabase();
-
     }
 
-    private void initDatabase() {
-        Connection conn = null;
-
+    private void initializePlugins() {
+        List<String> plugins = new ArrayList<String>();
+        // On startup, it's necessary to load all plugins first due to
+        // inter-plugin class dependencies
         try {
-
-            conn = dbUtil.getConnection();
-
-            DatabaseRoutines[] dbrs = getDBRoutines(conn);
-
-            for (int i = 0; i < dbrs.length; i++) {
-                dbrs[i].runRoutines(conn);
-            }
-        } catch (SQLException e) {
-            log.error("SQLException creating connection: ", e);
-        } finally {
-            DBUtil.closeConnection(ProductPluginDeployer.class, conn);
-        }
-    }
-
-    interface DatabaseRoutines {
-        public void runRoutines(Connection conn) throws SQLException;
-    }
-
-    private DatabaseRoutines[] getDBRoutines(Connection conn) throws SQLException {
-        ArrayList<CommonRoutines> routines = new ArrayList<CommonRoutines>(2);
-
-        routines.add(new CommonRoutines());
-
-        return (DatabaseRoutines[]) routines.toArray(new DatabaseRoutines[0]);
-    }
-
-    class CommonRoutines implements DatabaseRoutines {
-        public void runRoutines(Connection conn) throws SQLException {
-            final String UNION_BODY = "SELECT * FROM HQ_METRIC_DATA_0D_0S UNION ALL "
-                                      + "SELECT * FROM HQ_METRIC_DATA_0D_1S UNION ALL "
-                                      + "SELECT * FROM HQ_METRIC_DATA_1D_0S UNION ALL "
-                                      + "SELECT * FROM HQ_METRIC_DATA_1D_1S UNION ALL "
-                                      + "SELECT * FROM HQ_METRIC_DATA_2D_0S UNION ALL "
-                                      + "SELECT * FROM HQ_METRIC_DATA_2D_1S UNION ALL "
-                                      + "SELECT * FROM HQ_METRIC_DATA_3D_0S UNION ALL "
-                                      + "SELECT * FROM HQ_METRIC_DATA_3D_1S UNION ALL "
-                                      + "SELECT * FROM HQ_METRIC_DATA_4D_0S UNION ALL "
-                                      + "SELECT * FROM HQ_METRIC_DATA_4D_1S UNION ALL "
-                                      + "SELECT * FROM HQ_METRIC_DATA_5D_0S UNION ALL "
-                                      + "SELECT * FROM HQ_METRIC_DATA_5D_1S UNION ALL "
-                                      + "SELECT * FROM HQ_METRIC_DATA_6D_0S UNION ALL "
-                                      + "SELECT * FROM HQ_METRIC_DATA_6D_1S UNION ALL "
-                                      + "SELECT * FROM HQ_METRIC_DATA_7D_0S UNION ALL "
-                                      + "SELECT * FROM HQ_METRIC_DATA_7D_1S UNION ALL "
-                                      + "SELECT * FROM HQ_METRIC_DATA_8D_0S UNION ALL "
-                                      + "SELECT * FROM HQ_METRIC_DATA_8D_1S";
-
-            final String HQ_METRIC_DATA_VIEW = "CREATE VIEW " + MEAS_VIEW + " AS " + UNION_BODY;
-
-            final String EAM_METRIC_DATA_VIEW = "CREATE VIEW " + TAB_DATA + " AS " + UNION_BODY +
-                                                " UNION ALL SELECT * FROM HQ_METRIC_DATA_COMPAT";
-
-            Statement stmt = null;
-            try {
-                HQDialect dialect = Util.getHQDialect();
-                stmt = conn.createStatement();
-                if (!dialect.viewExists(stmt, TAB_DATA))
-                    stmt.execute(EAM_METRIC_DATA_VIEW);
-                if (!dialect.viewExists(stmt, MEAS_VIEW))
-                    stmt.execute(HQ_METRIC_DATA_VIEW);
-            } catch (SQLException e) {
-                log.debug("Error Creating Metric Data Views", e);
-            } finally {
-                DBUtil.closeStatement(ProductPluginDeployer.class, stmt);
-            }
-        }
-    }
-
-    /**
-     * This is called when the full server startup has occurred, and you get the
-     * "Started in 30s:935ms" message.
-     * 
-     * We load all startup classes, then initialize the plugins. Currently this
-     * is necesssary, since startup classes need to initialize the application
-     * (creating callbacks, etc.), and plugins can't hit the app until that's
-     * been done. Unfortunately, it also means that any startup listeners that
-     * depend on plugins loaded through the deployer won't work. So far that
-     * doesn't seem to be a problem, but if it ends up being one, we can split
-     * the plugin loading into more stages so that everyone has access to
-     * everyone.
-     * 
-     * 
-     */
-    private void serverStarted() {
-        try {
-            loadPlugins();
+            plugins = loadPlugins();
         } catch (Exception e) {
             log.error("Error loading product plugins", e);
         }
 
-        Collections.sort(_plugins, this);
-
-        for (String pluginName : _plugins) {
+        // Now we can deploy the plugins
+        Collections.sort(plugins, this);
+        for (String pluginName : plugins) {
             deployPlugin(pluginName);
-        }
-
-        _plugins.clear();
-        startConcurrentStatsCollector();
-
-    }
-
-    private void startConcurrentStatsCollector() {
-
-        try {
-            ConcurrentStatsCollector c = ConcurrentStatsCollector.getInstance();
-            c.register(ConcurrentStatsCollector.RUNTIME_PLATFORM_AND_SERVER_MERGER);
-            c.register(ConcurrentStatsCollector.AVAIL_MANAGER_METRICS_INSERTED);
-            c.register(ConcurrentStatsCollector.DATA_MANAGER_INSERT_TIME);
-            c.register(ConcurrentStatsCollector.JMS_TOPIC_PUBLISH_TIME);
-            c.register(ConcurrentStatsCollector.JMS_QUEUE_PUBLISH_TIME);
-            c.register(ConcurrentStatsCollector.METRIC_DATA_COMPRESS_TIME);
-            c.register(ConcurrentStatsCollector.DB_ANALYZE_TIME);
-            c.register(ConcurrentStatsCollector.PURGE_EVENT_LOGS_TIME);
-            c.register(ConcurrentStatsCollector.PURGE_MEASUREMENTS_TIME);
-            c.register(ConcurrentStatsCollector.MEASUREMENT_SCHEDULE_TIME);
-            c.register(ConcurrentStatsCollector.EMAIL_ACTIONS);
-            c.register(ConcurrentStatsCollector.ZEVENT_QUEUE_SIZE);
-            c.register(ConcurrentStatsCollector.FIRE_ALERT_TIME);
-            c.register(ConcurrentStatsCollector.EVENT_PROCESSING_TIME);
-            c.register(ConcurrentStatsCollector.TRIGGER_INIT_TIME);
-            c.startCollector();
-        } catch (Exception e) {
-            _log.error("Could not start Concurrent Stats Collector", e);
         }
     }
 
@@ -245,7 +113,7 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
      * 
      */
     public ProductPluginManager getProductPluginManager() {
-        return _ppm;
+        return productPluginManager;
     }
 
     /**
@@ -253,7 +121,7 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
      */
     @ManagedAttribute
     public void setPluginDir(String name) {
-        _pluginDir = new File(name);
+        pluginDir = new File(name);
     }
 
     /**
@@ -261,11 +129,11 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
      */
     @ManagedAttribute
     public String getPluginDir() {
-        return _pluginDir.getAbsolutePath();
+        return pluginDir.getAbsolutePath();
     }
 
     private Set<String> getPluginNames(String type) throws PluginException {
-        return _ppm.getPluginManager(type).getPlugins().keySet();
+        return productPluginManager.getPluginManager(type).getPlugins().keySet();
     }
 
     /**
@@ -284,7 +152,7 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
      */
     @ManagedAttribute
     public ArrayList<String> getRegisteredPluginNames() throws PluginException {
-        return new ArrayList<String>(_ppm.getPlugins().keySet());
+        return new ArrayList<String>(productPluginManager.getPlugins().keySet());
     }
 
     /**
@@ -292,7 +160,7 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
      */
     @ManagedMetric
     public int getProductPluginCount() throws PluginException {
-        return _ppm.getPlugins().keySet().size();
+        return productPluginManager.getPlugins().keySet().size();
     }
 
     /**
@@ -340,8 +208,8 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
      */
     @ManagedOperation
     public void setProperty(String name, String value) {
-        _ppm.setProperty(name, value);
-        _log.info("setProperty(" + name + ", " + value + ")");
+        productPluginManager.setProperty(name, value);
+        log.info("setProperty(" + name + ", " + value + ")");
     }
 
     /**
@@ -349,7 +217,7 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
      */
     @ManagedOperation
     public String getProperty(String name) {
-        return _ppm.getProperty(name);
+        return productPluginManager.getProperty(name);
     }
 
     /**
@@ -357,7 +225,7 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
      */
     @ManagedOperation
     public PluginInfo getPluginInfo(String name) throws PluginException {
-        PluginInfo info = _ppm.getPluginInfo(name);
+        PluginInfo info = productPluginManager.getPluginInfo(name);
 
         if (info == null) {
             throw new PluginException("No PluginInfo found for: " + name);
@@ -367,21 +235,21 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
     }
 
     public int compare(String s1, String s2) {
-        int order1 = _ppm.getPluginInfo(s1).deploymentOrder;
-        int order2 = _ppm.getPluginInfo(s2).deploymentOrder;
+        int order1 = productPluginManager.getPluginInfo(s1).deploymentOrder;
+        int order2 = productPluginManager.getPluginInfo(s2).deploymentOrder;
 
         return order1 - order2;
     }
 
     private String registerPluginJar(String pluginJar) {
-        if (!_ppm.isLoadablePluginName(pluginJar)) {
+        if (!productPluginManager.isLoadablePluginName(pluginJar)) {
             return null;
         }
         try {
-            String plugin = _ppm.registerPluginJar(pluginJar, null);
+            String plugin = productPluginManager.registerPluginJar(pluginJar, null);
             return plugin;
         } catch (Exception e) {
-            _log.error("Unable to deploy plugin '" + pluginJar + "'", e);
+            log.error("Unable to deploy plugin '" + pluginJar + "'", e);
             return null;
         }
     }
@@ -390,51 +258,31 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
         try {
             productManager.deploymentNotify(plugin);
         } catch (Exception e) {
-            _log.error("Unable to deploy plugin '" + plugin + "'", e);
+            log.error("Unable to deploy plugin '" + plugin + "'", e);
         }
     }
 
     @PostConstruct
     public void start() throws Exception {
-        if (this.sigarBin != null) {
-            // native libraries are deployed into another directory
-            // which is not next to sigar.jar, so we drop this hint
-            // to find it.
-            System.setProperty("org.hyperic.sigar.path", sigarBin.getAbsolutePath() + "/lib");
-        }
         File propFile = ProductPluginManager.PLUGIN_PROPERTIES_FILE;
-        _ppm = new ProductPluginManager(propFile);
-        _ppm.setRegisterTypes(true);
+        productPluginManager = new ProductPluginManager(propFile);
+        productPluginManager.setRegisterTypes(true);
 
         if (propFile.canRead()) {
-            _log.info("Loaded custom properties from: " + propFile);
+            log.info("Loaded custom properties from: " + propFile);
         }
-        if (this.sigarBin != null) {
-            try {
-                // hq.war contains sigar_bin/lib with the
-                // native sigar libraries. we set sigar.install.home
-                // here so plugins which use sigar can find it during
-                // Sigar.load()
-                _ppm.setProperty("sigar.install.home", sigarBin.getAbsolutePath());
-            } catch (Exception e) {
-                _log.error(e);
-            }
+        
+        if (this.pluginDir != null) {
+            ProductPluginManager.setPdkPluginsDir(pluginDir.getAbsolutePath());
         }
-        if (this._pluginDir != null) {
-            ProductPluginManager.setPdkPluginsDir(_pluginDir.getAbsolutePath());
+        productPluginManager.init();
+        if (this.pluginDir != null) {
+            initializePlugins();
+            FileWatcher fileWatcher = new FileWatcher();
+            fileWatcher.addDir(this.pluginDir.toString(), false);
+            fileWatcher.addFileEventListener(new ProductPluginFileEventListener());
+            fileWatcher.start();
         }
-        _ppm.init();
-        if (this._pluginDir != null) {
-            serverStarted();
-        }
-    }
-
-    /**
-     * 
-     */
-    @ManagedOperation
-    public void stop() {
-        _plugins.clear();
     }
 
     private void unpackJar(URL url, File destDir, String prefix) throws Exception {
@@ -470,9 +318,9 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
         if (hqu == null) {
             return;
         }
-        File destDir = new File(_hquDir, plugin);
+        File destDir = new File(hquDir, plugin);
         boolean exists = destDir.exists();
-        _log.info("Deploying " + plugin + " " + HQU + " to: " + destDir);
+        log.info("Deploying " + plugin + " " + HQU + " to: " + destDir);
 
         unpackJar(pluginFile, destDir, prefix);
 
@@ -485,33 +333,71 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
         }
     }
 
-    private void loadPlugins() throws Exception {
+    private List<String> loadPlugins() throws Exception {
         File pluginDir = new File(getPluginDir());
         File[] plugins = pluginDir.listFiles();
+        List<String> pluginNames = new ArrayList<String>();
         for (File pluginFile : plugins) {
-            String plugin = registerPluginJar(pluginFile.toString());
+            String plugin = loadPlugin(pluginFile);
             if (plugin != null) {
-                _plugins.add(plugin);
-                deployHqu(plugin, pluginFile.toURI().toURL());
+                pluginNames.add(plugin);
             }
+        }
+        return pluginNames;
+    }
+
+    private void undeployPlugin(File pluginFile) throws Exception {
+        log.info("Undeploying plugin: " + pluginFile);
+        productPluginManager.removePluginJar(pluginFile.toString());
+    }
+
+    private String loadPlugin(File pluginFile) throws Exception {
+        String plugin = registerPluginJar(pluginFile.toString());
+        if (plugin != null) {
+            deployHqu(plugin, pluginFile.toURI().toURL());
+            return plugin;
+        }
+        return null;
+    }
+
+    private void loadAndDeployPlugin(File pluginFile) throws Exception {
+        String pluginName = loadPlugin(pluginFile);
+        if (pluginName != null) {
+            log.info("Deploying plugin: " + pluginName);
+            deployPlugin(pluginName);
         }
     }
 
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         try {
-            this._hquDir = applicationContext.getResource(HQU).getFile();
+            this.hquDir = applicationContext.getResource(HQU).getFile();
         } catch (IOException e) {
             log.info("HQU directory not found");
         }
         try {
-            this._pluginDir = applicationContext.getResource("WEB-INF/" + PLUGIN_DIR).getFile();
+            this.pluginDir = applicationContext.getResource("WEB-INF/" + PLUGIN_DIR).getFile();
         } catch (IOException e) {
             log.info("Plugins directory not found");
         }
-        try {
-            this.sigarBin = applicationContext.getResource("WEB-INF/sigar_bin").getFile();
-        } catch (IOException e) {
-            log.info("sigar_bin directory not found");
+    }
+
+    private class ProductPluginFileEventListener implements FileEventListener {
+
+        public void onFileEvent(FileEvent fileEvent) {
+            log.debug("Received product plugin file event: " + fileEvent);
+            try {
+                if (FileOperation.CREATED.equals(fileEvent.getOperation())) {
+                    loadAndDeployPlugin(fileEvent.getFileDetails().getFile());
+                } else if (FileOperation.DELETED.equals(fileEvent.getOperation())) {
+                    undeployPlugin(fileEvent.getFileDetails().getFile());
+                } else if (FileOperation.UPDATED.equals(fileEvent.getOperation()) && !(pluginDir.equals(fileEvent.getFileDetails().getFile()))) {
+                    undeployPlugin(fileEvent.getFileDetails().getFile());
+                    loadAndDeployPlugin(fileEvent.getFileDetails().getFile());
+                }
+            } catch (Exception e) {
+                log.error("Error responding to plugin file event " + fileEvent + ".  Cause: " +
+                          e.getMessage());
+            }
         }
     }
 

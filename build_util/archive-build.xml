@@ -183,10 +183,59 @@
 </javadoc>
 </target>
 
-<target name="archive-prep" depends="build-agent,build-war,pdk-javadoc,unpack-tomcat,pack-installer,pack-installer-archive" />
+<target name="archive-prep" depends="pdk-javadoc,unpack-tomcat,pack-installer,pack-installer-archive" />
 
-<target name="archive-full" depends="check-release,archive-prep">
+<target name="archive-full" depends="pre-build, archive-prep">
 <antcall target="roll-archives" />
+<antcall target="post-build" />
 </target>
+
+
+
+<target name="pre-build">
+    <available type="dir" file="jre.dir" property="jre.available" />
+    <available type="dir" file="pgsql.dir" property="pgsql.available" />
+    <antcall target="checkout-pgsql"/>
+    <antcall target="checkout-jre"/>
+    <antcall target="update-pgsql"/>
+    <antcall target="update-jre"/>
+</target>
+
+<target name="checkout-pgsql" unless="${pgsql.available}">
+    <exec executable="svn">
+      <arg line="co http://svn.hyperic.org/projects/pgsql/tags/PGSQL_8_2_5 ${pgsql.dir}"/>
+    </exec>
+</target>
+
+<target name="checkout-jre" unless="${jre.available}">
+    <exec executable="svn">
+      <arg line="co http://svn.hyperic.org/projects/jres/tags/JRES_1_6_0_13_mixed ${jre.dir}"/>
+    </exec>
+</target>
+
+<target name="update-pgsql" if="${pgsql.available}">
+    <exec executable="svn">
+      <arg line="up ${pgsql.dir}"/>
+    </exec>
+</target>
+
+<target name="update-jre" if="${jre.available}">
+    <exec executable="svn">
+      <arg line="up ${jre.dir}"/>
+    </exec>
+</target>
+
+<macrodef name="git">
+    <attribute name="command"/>
+    <attribute name="dir" default=""/>
+    <element name="args" optional="true"/>
+    <sequential>
+        <echo message="git @{command}"/>
+        <exec executable="git" dir="@{dir}">
+            <arg line="@{command}"/>
+            <args/>
+        </exec>
+    </sequential>
+</macrodef>
 
 </project>

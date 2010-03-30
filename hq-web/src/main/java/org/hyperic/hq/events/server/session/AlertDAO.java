@@ -183,12 +183,6 @@ public class AlertDAO
             .setCacheRegion("Alert.findByEntity").list();
     }
 
-    int deleteByResource(Resource res) {
-        String sql = "delete Alert WHERE alertDefinition.resource = :res";
-
-        return getSession().createQuery(sql).setParameter("res", res).executeUpdate();
-    }
-
     public List<Alert> findByResourceSortByAlertDef(Resource res) {
         return findByResource(res, "a.alertDefinition.name DESC");
     }

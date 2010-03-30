@@ -18,7 +18,7 @@
 	-->
 	<bean
 		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"
-		p:ignoreResourceNotFound="true">
+		p:ignoreResourceNotFound="true" p:systemPropertiesModeName="SYSTEM_PROPERTIES_MODE_OVERRIDE">
 		<property name="locations">
 			<list>
 				<value>classpath:/spring-jdbc.properties</value>
@@ -26,8 +26,20 @@
 				<value>classpath:/quartz.properties</value>
 				<value>classpath:/jms.properties</value>
 				<value>classpath:/hibernate.properties</value>
+				<value>file://#{ systemProperties['user.home'] }/.hq/build.properties</value>
 				<value>classpath:/hq-server.conf</value>
 			</list>
+		</property>
+		<property name="properties">
+			<props>
+				<prop key="ha.partition"></prop>
+				<prop key="ha.node.address"></prop>
+				<prop key="ha.node.mcast_addr">238.1.2.3</prop>
+				<prop key="ha.node.mcast_port">45566</prop>
+				<prop key="ha.node.cacheListener.port">45567</prop>
+				<prop key="ha.node.cacheProvider.port">45568</prop>
+				<prop key="ha.node.ipTTL">64</prop>
+			</props>
 		</property>
 	</bean>
 
@@ -38,7 +50,8 @@
 				p:driverClassName="${server.database-driver}" p:url="${server.database-url}"
 				p:username="${server.database-user}" p:password="${server.database-password}"
 				p:defaultAutoCommit="false" p:minIdle="${server.database-minpoolsize}"
-				p:maxIdle="${server.database-maxpoolsize}" p:maxWait="${server.database-blockingtimeout}" />
+				p:maxActive="${server.database-maxpoolsize}" p:maxWait="${server.database-blockingtimeout}"
+				p:jdbcInterceptors="ConnectionState"/>
 		</constructor-arg>
 	</bean>
 
@@ -52,7 +65,9 @@
 		<property name="dataSource" ref="dataSource" />
 		<property name="mappingLocations" value="classpath:/hibernate/**/*.hbm.xml" />
 		<property name="hibernateProperties">
-			<bean class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+			<bean
+				class="org.springframework.beans.factory.config.PropertiesFactoryBean"
+				p:ignoreResourceNotFound="true">
 				<property name="properties">
 					<props>
 						<prop key="hibernate.connection.driver_class">${server.database-driver}</prop>
@@ -62,8 +77,13 @@
 						<prop key="hibernate.dialect">${server.hibernate.dialect}</prop>
 					</props>
 				</property>
-				<property name="location" value="classpath:/hibernate.properties" /> 
-				<property name="localOverride" value="true"/>
+				<property name="locations">
+					<list>
+						<value>classpath:/hibernate.properties</value>
+						<value>classpath:/hq-server.conf</value>
+					</list>
+				</property>
+				<property name="localOverride" value="true" />
 			</bean>
 		</property>
 		<property name="entityInterceptor">
@@ -107,24 +127,19 @@
 		scope="prototype" />
 
 	<bean class="org.hyperic.hq.appdef.server.session.ResourceTreeGenerator" />
-	
-	
-	<bean id="tweakProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean" p:location="classpath:/tweak.properties"/>
- 
+
+
+	<bean id="tweakProperties"
+		class="org.springframework.beans.factory.config.PropertiesFactoryBean"
+		p:location="classpath:/tweak.properties" />
+
 
 	<context:mbean-export />
 	<context:mbean-server />
 
-	<!--
-		TODO figure out a way to switch b/w impls of same EE and .org
-		interface when autowiring
-	-->
-	<bean class="org.hyperic.hq.bizapp.server.session.LatherBossImpl">
-		<constructor-arg ref="latherDispatcher" />
-	</bean>
-	
+
 	<bean class="org.hyperic.hq.transport.ServerTransport">
-		<constructor-arg value="4"/>
+		<constructor-arg value="4" />
 	</bean>
 
 	<!--
@@ -152,21 +167,9 @@
 
 	<task:scheduler id="scheduler" />
 
-	<task:scheduled-tasks scheduler="scheduler">
-		<task:scheduled ref="availabilityCheckService" method="backfill"
-			fixed-rate="120000" />
-		<task:scheduled ref="agentAIScanService" method="notifyAgents"
-			fixed-rate="300000" />
-		<!--  This is meant to be disabled by default -->
-		<!--
-			<task:scheduled ref="scheduleVerificationService"
-			method="verifySchedules" fixed-rate="300000"/>
-		-->
-	</task:scheduled-tasks>
-	
 	<bean class="org.hyperic.hq.application.Scheduler">
-		<constructor-arg value="10"/>
+		<constructor-arg value="10" />
 	</bean>
-	
-	
+
+
 </beans>

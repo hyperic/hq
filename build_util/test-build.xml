@@ -38,8 +38,7 @@
 				<path location="@{module.dir}/target/classes" />
 				<path location="@{module.dir}/target/test-classes" />
 			</path>
-			<junit reloading="no" fork="true" forkmode="once" printsummary="yes" haltOnError="${test.halt}" haltOnFailure="${test.halt}">
-
+			<junit reloading="no" fork="true" forkmode="once" printsummary="yes" haltOnError="${test.halt}" haltOnFailure="${test.halt}" clonevm="true">
 				<jvmarg value="-Dtest.halt=${test.halt}" />
 				<jvmarg value="-Xmx512m" />
 				<classpath refid="test.run.classpath" />

@@ -10,7 +10,6 @@
 	<classpathentry kind="lib" path="/hq-common/thirdparty/hq_bin/sigar_bin/lib/sigar.jar"/>
 	<classpathentry kind="lib" path="/hq-common/thirdparty/lib/ehcache-1.5.0.jar"/>
 	<classpathentry kind="lib" path="/hq-common/thirdparty/lib/commons-httpclient-3.1.jar"/>
-	<classpathentry kind="lib" path="/hq-common/thirdparty/lib/dbunit-2.2.jar"/>
 	<classpathentry kind="lib" path="/hq-common/thirdparty/lib/commons-validator-1.3.1.jar"/>
 	<classpathentry kind="lib" path="/hq-common/thirdparty/lib/javax.servlet.jar"/>
 	<classpathentry kind="lib" path="/hq-common/thirdparty/lib/json.jar"/>

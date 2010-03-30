@@ -92,7 +92,7 @@ public class PluginMain {
                 continue;
             }
             url = URLDecoder.decode(url); //"%20" -> " "
-            //strip lib/hq-product.jar
+            //strip lib/hq-pdk-shared.jar
             return new File(url).getParentFile().getParent();
         }
         return "pdk";
@@ -160,7 +160,7 @@ public class PluginMain {
         plugin = args[0];
         if (plugin.indexOf(".") != -1) {
             //example:
-            //java -jar pdk/lib/hq-product.jar \
+            //java -jar pdk/lib/hq-pdk-shared.jar \
             //org.hyperic.hq.product.URLMetric https://localhost/
             mainClass = plugin;
             plugin = null;
@@ -171,7 +171,7 @@ public class PluginMain {
                 throw new IllegalArgumentException(usage);
             }
             //example:
-            //java -jar pdk/lib/hq-product.jar \
+            //java -jar pdk/lib/hq-pdk-shared.jar \
             //apache ApacheServerDetector
             className = args[1];
             offset = 2;

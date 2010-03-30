@@ -28,7 +28,6 @@ package org.hyperic.hq.ui.util;
 import java.rmi.RemoteException;
 import java.util.List;
 
-import javax.naming.NamingException;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
@@ -44,6 +43,6 @@ public interface UIUtils {
 
     List<AppdefResourceValue> getFavoriteResources(ServletContext ctx, WebUser user);
 
-    List getResourceTypes(ServletContext ctx, Integer sessionId) throws NamingException, PermissionException,
+    List getResourceTypes(ServletContext ctx, Integer sessionId) throws PermissionException,
         SessionTimeoutException, SessionNotFoundException, RemoteException;
 }

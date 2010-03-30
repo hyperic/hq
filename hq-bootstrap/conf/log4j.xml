@@ -83,7 +83,10 @@
 	<logger name="org.springframework.web">
 		<level value="info" />
 	</logger>
-
+	
+	<logger name="org.apache.tools.ant">
+		<level value="error" />
+	</logger>
 
 	<!-- Turn off form validation messages -->
 	<logger name="org.apache.commons.validator.ValidatorResources">

@@ -30,9 +30,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Properties;
 
-import javax.naming.NamingException;
+import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -46,6 +47,7 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.shared.DataCompress;
 import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
+import org.hyperic.hq.product.server.session.ProductPluginDeployer;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.TimeUtil;
 import org.hyperic.util.jdbc.DBUtil;
@@ -55,8 +57,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * The DataCompressImpl handles all compression and purging of
- * measurement data in the HQ system.
+ * The DataCompressImpl handles all compression and purging of measurement data
+ * in the HQ system.
  */
 @Service
 @Transactional
@@ -66,6 +68,7 @@ public class DataCompressImpl implements DataCompress {
     private final Log log = LogFactory.getLog(LOG_CTX);
 
     // Data tables
+    private static final String MEAS_VIEW = MeasTabManagerUtil.MEAS_VIEW;
     private static final String TAB_DATA = MeasurementConstants.TAB_DATA;
     private static final String TAB_DATA_1H = MeasurementConstants.TAB_DATA_1H;
     private static final String TAB_DATA_6H = MeasurementConstants.TAB_DATA_6H;
@@ -86,10 +89,85 @@ public class DataCompressImpl implements DataCompress {
     private AlertManager alertManager;
 
     @Autowired
-    public DataCompressImpl(DBUtil dbUtil, ServerConfigManager serverConfigManager, AlertManager alertManager) {
+    public DataCompressImpl(DBUtil dbUtil, ServerConfigManager serverConfigManager,
+                            AlertManager alertManager) {
         this.dbUtil = dbUtil;
         this.serverConfigManager = serverConfigManager;
         this.alertManager = alertManager;
+    }
+
+    @PostConstruct
+    public void initDatabase() {
+        Connection conn = null;
+
+        try {
+
+            conn = dbUtil.getConnection();
+
+            DatabaseRoutines[] dbrs = getDBRoutines(conn);
+
+            for (int i = 0; i < dbrs.length; i++) {
+                dbrs[i].runRoutines(conn);
+            }
+        } catch (SQLException e) {
+            log.error("SQLException creating connection: ", e);
+        } finally {
+            DBUtil.closeConnection(ProductPluginDeployer.class, conn);
+        }
+    }
+
+    interface DatabaseRoutines {
+        public void runRoutines(Connection conn) throws SQLException;
+    }
+
+    private DatabaseRoutines[] getDBRoutines(Connection conn) throws SQLException {
+        ArrayList<CommonRoutines> routines = new ArrayList<CommonRoutines>(2);
+
+        routines.add(new CommonRoutines());
+
+        return (DatabaseRoutines[]) routines.toArray(new DatabaseRoutines[0]);
+    }
+
+    class CommonRoutines implements DatabaseRoutines {
+        public void runRoutines(Connection conn) throws SQLException {
+            final String UNION_BODY = "SELECT * FROM HQ_METRIC_DATA_0D_0S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_0D_1S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_1D_0S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_1D_1S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_2D_0S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_2D_1S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_3D_0S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_3D_1S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_4D_0S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_4D_1S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_5D_0S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_5D_1S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_6D_0S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_6D_1S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_7D_0S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_7D_1S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_8D_0S UNION ALL "
+                                      + "SELECT * FROM HQ_METRIC_DATA_8D_1S";
+
+            final String HQ_METRIC_DATA_VIEW = "CREATE VIEW " + MEAS_VIEW + " AS " + UNION_BODY;
+
+            final String EAM_METRIC_DATA_VIEW = "CREATE VIEW " + TAB_DATA + " AS " + UNION_BODY +
+                                                " UNION ALL SELECT * FROM HQ_METRIC_DATA_COMPAT";
+
+            Statement stmt = null;
+            try {
+                HQDialect dialect = Util.getHQDialect();
+                stmt = conn.createStatement();
+                if (!dialect.viewExists(stmt, TAB_DATA))
+                    stmt.execute(EAM_METRIC_DATA_VIEW);
+                if (!dialect.viewExists(stmt, MEAS_VIEW))
+                    stmt.execute(HQ_METRIC_DATA_VIEW);
+            } catch (SQLException e) {
+                log.debug("Error Creating Metric Data Views", e);
+            } finally {
+                DBUtil.closeStatement(ProductPluginDeployer.class, stmt);
+            }
+        }
     }
 
     /**
@@ -124,8 +202,7 @@ public class DataCompressImpl implements DataCompress {
         }
     }
 
-    private void truncateMeasurementData(long truncateBefore)
-        throws SQLException, NamingException {
+    private void truncateMeasurementData(long truncateBefore) throws SQLException {
         // we can't get any accurate metric tablenames if truncateBefore
         // is less than the base point in time which is used for the
         // tablename calculations
@@ -142,8 +219,7 @@ public class DataCompressImpl implements DataCompress {
             currTruncTime = MeasTabManagerUtil.getPrevMeasTabTime(currTruncTime);
             delTable = MeasTabManagerUtil.getMeasTabname(currTruncTime);
         }
-        log.info("Purging Raw Measurement Data older than " +
-                 TimeUtil.toString(truncateBefore));
+        log.info("Purging Raw Measurement Data older than " + TimeUtil.toString(truncateBefore));
         Connection conn = null;
         Statement stmt = null;
         try {
@@ -153,11 +229,10 @@ public class DataCompressImpl implements DataCompress {
             conn.setAutoCommit(false);
             stmt = conn.createStatement();
             StopWatch watch = new StopWatch();
-            log.debug("Truncating tables, starting with -> " + delTable +
-                      " (currTable -> " + currTable + ")\n");
+            log.debug("Truncating tables, starting with -> " + delTable + " (currTable -> " +
+                      currTable + ")\n");
             HQDialect dialect = Util.getHQDialect();
-            while (!currTable.equals(delTable) &&
-                   truncateBefore > currTruncTime) {
+            while (!currTable.equals(delTable) && truncateBefore > currTruncTime) {
                 try {
                     log.debug("Truncating table " + delTable);
                     stmt.execute("truncate table " + delTable);
@@ -166,14 +241,13 @@ public class DataCompressImpl implements DataCompress {
                 } catch (SQLException e) {
                     log.error(e.getMessage(), e);
                 } finally {
-                    currTruncTime =
-                                    MeasTabManagerUtil.getPrevMeasTabTime(currTruncTime);
+                    currTruncTime = MeasTabManagerUtil.getPrevMeasTabTime(currTruncTime);
                     delTable = MeasTabManagerUtil.getMeasTabname(currTruncTime);
                 }
             }
             conn.commit();
-            log.info("Done Purging Raw Measurement Data (" +
-                     ((watch.getElapsed()) / 1000) + " seconds)");
+            log.info("Done Purging Raw Measurement Data (" + ((watch.getElapsed()) / 1000) +
+                     " seconds)");
         } finally {
             DBUtil.closeJDBCObjects(LOG_CTX, conn, stmt, null);
         }
@@ -182,8 +256,7 @@ public class DataCompressImpl implements DataCompress {
     /**
      * Entry point for data compression routines
      */
-    public void compressData()
-        throws NamingException, SQLException {
+    public void compressData() throws SQLException {
         // Load defaults if not already loaded
         if (!this.purgeDefaultsLoaded) {
             loadPurgeDefaults();
@@ -200,42 +273,34 @@ public class DataCompressImpl implements DataCompress {
         truncateMeasurementData(Math.min(now - this.purgeRaw, last));
 
         // Purge metric problems as well
-        purgeMeasurements(TAB_PROB,
-                          Math.min(now - this.purgeRaw, last));
+        purgeMeasurements(TAB_PROB, Math.min(now - this.purgeRaw, last));
 
         // Compress 6 hour data
         last = compressData(TAB_DATA_1H, TAB_DATA_6H, SIX_HOUR, now);
         // Purge, ensuring we don't purge data not yet compressed.
-        purgeMeasurements(TAB_DATA_1H,
-                          Math.min(now - this.purge1h, last));
+        purgeMeasurements(TAB_DATA_1H, Math.min(now - this.purge1h, last));
 
         // Compress daily data
         last = compressData(TAB_DATA_6H, TAB_DATA_1D, DAY, now);
         // Purge, ensuring we don't purge data not yet compressed.
-        purgeMeasurements(TAB_DATA_6H,
-                          Math.min(now - this.purge6h, last));
+        purgeMeasurements(TAB_DATA_6H, Math.min(now - this.purge6h, last));
 
         // Purge, we never store more than 1 year of data.
         purgeMeasurements(TAB_DATA_1D, now - this.purge1d);
 
         // Purge alerts
-        log.info("Purging alerts older than " +
-                 TimeUtil.toString(now - this.purgeAlert));
-        int alertsDeleted =
-                            alertManager.deleteAlerts(0, now - this.purgeAlert);
+        log.info("Purging alerts older than " + TimeUtil.toString(now - this.purgeAlert));
+        int alertsDeleted = alertManager.deleteAlerts(0, now - this.purgeAlert);
         log.info("Done (Deleted " + alertsDeleted + " alerts)");
     }
 
     /**
-     * Compress data.
-     * XXX: Perhaps we should put a time limit on this?
-     * (Something like 5 min during business hrs, 45 min
-     * otherwise?)
+     * Compress data. XXX: Perhaps we should put a time limit on this?
+     * (Something like 5 min during business hrs, 45 min otherwise?)
      * @return The last timestamp that was compressed
      */
-    private long compressData(String fromTable, String toTable, long interval,
-                              long now)
-        throws NamingException, SQLException {
+    private long compressData(String fromTable, String toTable, long interval, long now)
+        throws SQLException {
         // First determine the window to operate on. If no previous
         // compression information is found, the last value from the
         // table to compress from is used. (This will only occur on
@@ -266,9 +331,8 @@ public class DataCompressImpl implements DataCompress {
         return compactData(fromTable, toTable, begin, now, interval);
     }
 
-    private long compactData(String fromTable, String toTable,
-                             long begin, long now, long interval)
-        throws SQLException, NamingException {
+    private long compactData(String fromTable, String toTable, long begin, long now, long interval)
+        throws SQLException {
         Connection conn = null;
         PreparedStatement insStmt = null;
 
@@ -285,21 +349,20 @@ public class DataCompressImpl implements DataCompress {
                 minMax = "AVG(value), MIN(minvalue), MAX(maxvalue) ";
             }
 
-            insStmt = conn.prepareStatement(
-                          "INSERT INTO " + toTable +
-                          " (measurement_id, timestamp, value, minvalue, maxvalue)" +
-                          " (SELECT measurement_id, ? AS timestamp, " + minMax +
-                          "FROM " + fromTable +
-                          " WHERE timestamp >= ? AND timestamp < ? " +
-                          "GROUP BY measurement_id)");
+            insStmt = conn
+                .prepareStatement("INSERT INTO " + toTable +
+                                  " (measurement_id, timestamp, value, minvalue, maxvalue)" +
+                                  " (SELECT measurement_id, ? AS timestamp, " + minMax + "FROM " +
+                                  fromTable + " WHERE timestamp >= ? AND timestamp < ? " +
+                                  "GROUP BY measurement_id)");
 
             StopWatch watch = new StopWatch();
             while (begin < now) {
 
                 long end = begin + interval;
 
-                log.info("Compression interval: " + TimeUtil.toString(begin) +
-                         " to " + TimeUtil.toString(end));
+                log.info("Compression interval: " + TimeUtil.toString(begin) + " to " +
+                         TimeUtil.toString(end));
 
                 // Compress.
                 watch.reset();
@@ -312,8 +375,8 @@ public class DataCompressImpl implements DataCompress {
                     insStmt.execute();
                 } catch (SQLException e) {
                     // Just log the error and continue
-                    log.debug("SQL exception when inserting data "
-                              + " at " + TimeUtil.toString(begin), e);
+                    log.debug("SQL exception when inserting data " + " at " +
+                              TimeUtil.toString(begin), e);
                 }
 
                 log.info("Done (" + (watch.getElapsed() / 1000) + " seconds)");
@@ -330,13 +393,11 @@ public class DataCompressImpl implements DataCompress {
     }
 
     /**
-     * Get the oldest timestamp in the database. Getting the minimum time
-     * is expensive, so this is only called once when the compression
-     * routine runs for the first time. After the first call, the range
-     * is cached.
+     * Get the oldest timestamp in the database. Getting the minimum time is
+     * expensive, so this is only called once when the compression routine runs
+     * for the first time. After the first call, the range is cached.
      */
-    private long getMinTimestamp(String dataTable)
-        throws SQLException, NamingException {
+    private long getMinTimestamp(String dataTable) throws SQLException {
         Connection conn = null;
         Statement stmt = null;
         ResultSet rs = null;
@@ -352,8 +413,7 @@ public class DataCompressImpl implements DataCompress {
             if (rs.next()) {
                 return rs.getLong(1);
             } else {
-                throw new SQLException("Unable to determine oldest " +
-                                       "measurement");
+                throw new SQLException("Unable to determine oldest " + "measurement");
             }
         } finally {
             DBUtil.closeJDBCObjects(LOG_CTX, conn, stmt, rs);
@@ -363,8 +423,7 @@ public class DataCompressImpl implements DataCompress {
     /**
      * Get the most recent measurement.
      */
-    private long getMaxTimestamp(String dataTable)
-        throws SQLException, NamingException {
+    private long getMaxTimestamp(String dataTable) throws SQLException {
         Connection conn = null;
         Statement stmt = null;
         ResultSet rs = null;
@@ -375,8 +434,7 @@ public class DataCompressImpl implements DataCompress {
             String sql;
             if (DBUtil.isPostgreSQL(conn)) {
                 // Postgres handles this much better
-                sql = "SELECT timestamp FROM " + dataTable +
-                      " ORDER BY timestamp DESC LIMIT 1";
+                sql = "SELECT timestamp FROM " + dataTable + " ORDER BY timestamp DESC LIMIT 1";
             } else {
                 sql = "SELECT MAX(timestamp) FROM " + dataTable;
             }
@@ -399,8 +457,7 @@ public class DataCompressImpl implements DataCompress {
     /**
      * Purge data older than a given time.
      */
-    private void purgeMeasurements(String tableName, long purgeAfter)
-        throws SQLException, NamingException {
+    private void purgeMeasurements(String tableName, long purgeAfter) throws SQLException {
         Connection conn = null;
         PreparedStatement stmt = null;
         long interval = HOUR;
@@ -411,27 +468,21 @@ public class DataCompressImpl implements DataCompress {
             return;
         }
 
-        log.info("Purging data older than " +
-                 TimeUtil.toString(purgeAfter) + " in " +
-                 tableName);
+        log.info("Purging data older than " + TimeUtil.toString(purgeAfter) + " in " + tableName);
 
         StopWatch watch = new StopWatch();
         try {
-            conn =
-                   dbUtil.getConnection();
+            conn = dbUtil.getConnection();
             conn.setAutoCommit(false);
 
             long endWindow = purgeAfter;
             long startWindow = endWindow - interval;
-            String sql = "DELETE FROM " + tableName +
-                         " WHERE timestamp BETWEEN ? AND ?";
+            String sql = "DELETE FROM " + tableName + " WHERE timestamp BETWEEN ? AND ?";
             stmt = conn.prepareStatement(sql);
 
             while (endWindow > min) {
-                log.debug("Purging data between " +
-                          TimeUtil.toString(startWindow) + " and " +
-                          TimeUtil.toString(endWindow) + " in " +
-                          tableName);
+                log.debug("Purging data between " + TimeUtil.toString(startWindow) + " and " +
+                          TimeUtil.toString(endWindow) + " in " + tableName);
 
                 stmt.setLong(1, startWindow);
                 stmt.setLong(2, endWindow);

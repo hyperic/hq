@@ -35,6 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.encoding.PasswordEncoder;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,7 +43,7 @@ import org.springframework.transaction.annotation.Transactional;
  * The AuthManger
  */
 @Service
-@Transactional
+@Transactional(noRollbackFor=AuthenticationException.class)
 public class AuthManagerImpl implements AuthManager {
 
     private PrincipalDAO principalDao;
@@ -52,7 +53,8 @@ public class AuthManagerImpl implements AuthManager {
 
     @Autowired
     public AuthManagerImpl(PrincipalDAO principalDao, AuthzSubjectManager authzSubjectManager,
-                           PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager) {
+                           PasswordEncoder passwordEncoder,
+                           AuthenticationManager authenticationManager) {
         this.principalDao = principalDao;
         this.authzSubjectManager = authzSubjectManager;
         this.passwordEncoder = passwordEncoder;
@@ -60,7 +62,8 @@ public class AuthManagerImpl implements AuthManager {
     }
 
     public void authenticate(String username, String password) {
-        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(username, password);
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+            username, password);
         authenticationManager.authenticate(authentication);
     }
 
@@ -85,7 +88,8 @@ public class AuthManagerImpl implements AuthManager {
      * @param username The username whose password will be changed.
      * @param password The new password for this user
      */
-    public void changePassword(AuthzSubject subject, String username, String password) throws PermissionException {
+    public void changePassword(AuthzSubject subject, String username, String password)
+        throws PermissionException {
         // AUTHZ check
         if (!subject.getName().equals(username)) {
             // users can change their own passwords... only
@@ -104,7 +108,8 @@ public class AuthManagerImpl implements AuthManager {
      * @param username The username whose password will be changed.
      * @param password The new password for this user
      */
-    public void changePasswordHash(AuthzSubject subject, String username, String hash) throws PermissionException {
+    public void changePasswordHash(AuthzSubject subject, String username, String hash)
+        throws PermissionException {
         // AUTHZ check
         if (!subject.getName().equals(username)) {
             // users can change their own passwords... only
@@ -141,7 +146,7 @@ public class AuthManagerImpl implements AuthManager {
      * @param subject The subject of the currently logged in user
      * @param username The username of the user to get
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public boolean isUser(AuthzSubject subject, String username) {
         return principalDao.findByUsername(username) != null;
     }
@@ -151,7 +156,7 @@ public class AuthManagerImpl implements AuthManager {
      * 
      * @param subject The subject for whom to return the principle
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public Principal getPrincipal(AuthzSubject subject) {
         return principalDao.findByUsername(subject.getName());
     }

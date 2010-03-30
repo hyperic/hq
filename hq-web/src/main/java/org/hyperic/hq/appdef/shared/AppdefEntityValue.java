@@ -703,26 +703,7 @@ public class AppdefEntityValue {
         
         return servEntIds;
     }
-//
-// THIS IS NOT SAFE FOR AUTHZ    
-//    /**
-//     * Get the platform plugin name associated with the given entity,
-//     * used to lookup a plugin via a GenericPluginManager.
-//     * @return The name of the platform plugin name, such as
-//     * "Apache 2.0 Linux", "Apache 2.0 Win32", etc.
-//     */
-//    public String getPlatformPluginName()
-//        throws AppdefEntityNotFoundException, PermissionException,
-//               NamingException
-//    {
-//        //XXX getAssociatedPlatforms does not work with groups.
-//        if (getID().getType() ==
-//            AppdefEntityConstants.APPDEF_TYPE_GROUP) {
-//            return getTypeName();
-//        }
-//        String platform = getBasePlatformName();
-//        return getTypeName() + " " + platform;
-//    }
+
 
     /**
      * Get the platform name associated with the given entity.

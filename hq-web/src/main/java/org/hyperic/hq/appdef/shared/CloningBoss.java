@@ -28,8 +28,6 @@ package org.hyperic.hq.appdef.shared;
 import java.rmi.RemoteException;
 import java.util.List;
 
-import javax.naming.NamingException;
-
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
@@ -52,8 +50,8 @@ public interface CloningBoss {
      * @param nameRegEx regex which matches either the platform fqdn or the
      *        resource sortname
      */
-    public List<Platform> findPlatformsByTypeAndName(AuthzSubject subj, Integer pType, String nameRegEx)
-        throws RemoteException;
+    public List<Platform> findPlatformsByTypeAndName(AuthzSubject subj, Integer pType,
+                                                     String nameRegEx) throws RemoteException;
 
     /**
      * @param subj Method ensures that the master platform has viewable
@@ -62,16 +60,16 @@ public interface CloningBoss {
      * @param cloneTaretIds List<Integer> List of Platform Ids to be cloned
      */
     public void clonePlatform(AuthzSubject subj, Integer platformId, List<Integer> cloneTargetIds)
-        throws SessionNotFoundException, SessionTimeoutException, SessionException, PermissionException,
-        PlatformNotFoundException, RemoteException;
+        throws SessionNotFoundException, SessionTimeoutException, SessionException,
+        PermissionException, PlatformNotFoundException, RemoteException;
 
     /**
      * 
      */
-    public void clonePlatform(AuthzSubject subj, Platform master, Platform clone) throws AppdefEntityNotFoundException,
-        ConfigFetchException, PermissionException,  NamingException,
+    public void clonePlatform(AuthzSubject subj, Platform master, Platform clone)
+        throws AppdefEntityNotFoundException, ConfigFetchException, PermissionException,
         SessionNotFoundException, SessionTimeoutException, SessionException, VetoException,
-        AppdefDuplicateNameException, ValidationException, GroupNotCompatibleException, UpdateException,
-        EncodingException, RemoteException, NotFoundException;
+        AppdefDuplicateNameException, ValidationException, GroupNotCompatibleException,
+        UpdateException, EncodingException, RemoteException, NotFoundException;
 
 }

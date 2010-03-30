@@ -149,24 +149,37 @@ public class HQDBHealthChecker {
 
                     healthOkStartTime = pingDatabase(conn, stmt, rs);
                     recordSuccess();
-                } catch (Throwable t) {
-                    recordFailure(t);
-
-                    if (numOfHealthCheckFailures >= MAX_NUM_OF_FAILURE_CHECKS) {
-                        // shutdown HQ if the database health checks fails
-                        try {
-                            shutdownNotify(t);
-                        } catch (Throwable t2) {
-                            // catch all so that HQ can shutdown
-                        }
-                        System.exit(1);
+                } catch(SQLException e) {
+                    //The DataSource does not throw a unique exception if we timed out waiting for a connection, so this is a temp hack to avoid shutdown
+                    //if a connection can't be obtained
+                    if(e.getMessage() != null && e.getMessage().contains("Pool empty. Unable to fetch a connection")) {
+                        log.warn("No connections available in the connection pool.  " + e.getMessage());
+                    } else {
+                        handleFailure(e);
                     }
+                    
+                } catch (Throwable t) {
+                   handleFailure(t);
                 } finally {
                     DBUtil.closeJDBCObjects(HQDBHealthTask.class, conn, stmt, rs);
                 }
             }
 
         } // end
+        
+        private void handleFailure(Throwable t) {
+            recordFailure(t);
+
+            if (numOfHealthCheckFailures >= MAX_NUM_OF_FAILURE_CHECKS) {
+                // shutdown HQ if the database health checks fails
+                try {
+                    shutdownNotify(t);
+                } catch (Throwable t2) {
+                    // catch all so that HQ can shutdown
+                }
+                System.exit(1);
+            }
+        }
 
         /**
          * Get database timestamp to check overall database health

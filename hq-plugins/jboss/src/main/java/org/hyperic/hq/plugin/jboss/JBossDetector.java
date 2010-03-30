@@ -522,7 +522,7 @@ public class JBossDetector
 
         config.setValue(Context.PROVIDER_URL, jnpUrl);
 
-        //for use w/ -jar hq-product.jar or agent.properties
+        //for use w/ -jar hq-pdk-shared.jar or agent.properties
         Properties props = getManager().getProperties();
         String[] credProps = {
             Context.PROVIDER_URL,

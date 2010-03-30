@@ -76,7 +76,7 @@ public class AgentConfig {
     public static final String PDK_PLUGIN_DIR_KEY = "agent.pdkPluginDir";
     public static final String PDK_WORK_DIR_KEY = "agent.pdkWorkDir";
     public static final String AGENT_BUNDLE_HOME = "agent.bundle.home";
-    public static final String HQ_PRODUCT_JAR_KEY = "agent.hqProductJar";
+  
 
     // The following final objects are the properties which are usable
     // within the configuation object.  The first element in the array

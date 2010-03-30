@@ -29,7 +29,7 @@ import java.beans.Introspector;
 import java.sql.SQLException;
 import java.util.Properties;
 
-import javax.naming.NamingException;
+import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -71,6 +71,14 @@ public class DataPurgeJob implements Runnable {
         this.eventLogManager = eventLogManager;
         this.dataCompress = dataCompress;
     }
+    
+    @PostConstruct
+    public void initStatsCollector() {
+        ConcurrentStatsCollector.getInstance().register(ConcurrentStatsCollector.METRIC_DATA_COMPRESS_TIME);
+        ConcurrentStatsCollector.getInstance().register(ConcurrentStatsCollector.DB_ANALYZE_TIME);
+        ConcurrentStatsCollector.getInstance().register(ConcurrentStatsCollector.PURGE_EVENT_LOGS_TIME);
+        ConcurrentStatsCollector.getInstance().register(ConcurrentStatsCollector.PURGE_MEASUREMENTS_TIME);
+    }
 
     public synchronized void run() {
         try {
@@ -96,7 +104,7 @@ public class DataPurgeJob implements Runnable {
     /**
      * Entry point into compression routine
      */
-    public void compressData() throws NamingException {
+    public void compressData()  {
 
         // First check if we are already running
         synchronized (compressRunningLock) {
@@ -210,7 +218,7 @@ public class DataPurgeJob implements Runnable {
         }
     }
 
-    protected void purge(Properties conf, long now) throws NamingException {
+    protected void purge(Properties conf, long now)  {
         ConcurrentStatsCollector stats = ConcurrentStatsCollector.getInstance();
         long start = now();
         purgeEventLogs(conf, now);
@@ -239,7 +247,7 @@ public class DataPurgeJob implements Runnable {
     /**
      * Purge Event Log data
      */
-    private void purgeEventLogs(Properties conf, long now) throws NamingException {
+    private void purgeEventLogs(Properties conf, long now)  {
         String purgeEventString = conf.getProperty(HQConstants.EventLogPurge);
         long purgeEventLog = Long.parseLong(purgeEventString);
 
