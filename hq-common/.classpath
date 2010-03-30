@@ -147,5 +147,7 @@
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/test/shared-asn1-codec-0.9.15.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/test/shared-cursor-0.9.15.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/test/slf4j-log4j12-1.5.8.jar"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.roo.support-1.0.2.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.roo.file.monitor.polling-1.0.2.RELEASE.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

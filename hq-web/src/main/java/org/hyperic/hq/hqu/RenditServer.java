@@ -10,14 +10,14 @@ import org.hyperic.hq.hqu.server.session.Attachment;
 
 public interface RenditServer {
     void renderTemplate(File template, Map params, Writer output) throws Exception;
+
     void handleRequest(String pluginName, RequestInvocationBindings b) throws Exception;
-    AttachmentDescriptor getAttachmentDescriptor(String pluginName,
-                                                 Attachment a,
-                                                 Resource ent,
+
+    AttachmentDescriptor getAttachmentDescriptor(String pluginName, Attachment a, Resource ent,
                                                  AuthzSubject u);
-    File getSysDir();
+
     void addPluginDir(File path) throws Exception;
+
     void removePluginDir(String pluginName);
-    void setSysDir(File sysDir);
-    
+
 }

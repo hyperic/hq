@@ -79,7 +79,7 @@ public class PluginWrapper {
         return tmpHquDir;
     }
 
-    PluginWrapper(File pluginDir, File sysDir, ClassLoader parentLoader) {
+    PluginWrapper(File pluginDir, ClassLoader parentLoader) {
         GroovyClassLoader groovyLoader = new GroovyClassLoader(parentLoader);
 
         _pluginDir = pluginDir;
