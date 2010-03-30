@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2010], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -1087,6 +1087,25 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         plist.setTotalSize(roles.size());
 
         return plist;
+    }
+    
+    /**
+     * Get the resource groups applicable to a given role.
+     * 
+     * @ejb:interface-method
+     */
+    public Collection getResourceGroupsByRole(AuthzSubject subject,
+                                              Role role)
+        throws PermissionException, FinderException {
+        
+        ResourceGroupDAO dao = getResourceGroupDAO();
+        
+        Collection groups = 
+            dao.findByRoleIdAndSystem_orderName(role.getId(), false, true);
+        
+        // now get viewable group pks
+        return filterViewableGroups(subject, groups);
+
     }
     
     /**
