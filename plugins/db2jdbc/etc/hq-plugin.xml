@@ -6,7 +6,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  Copyright (C) [2004-2010], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -23,7 +23,7 @@
   USA.
  -->
 
-<plugin name="db2-jdbc" >
+<plugin name="db2jdbc" >
     <property name="template-config"
             value="database=%db2.jdbc.database%,jdbcUser=%db2.jdbc.user%,jdbcPassword=%db2.jdbc.password%,jdbcUrl=jdbc:db2://%db2.jdbc.hostname%:%db2.jdbc.port%/%db2.jdbc.database%"/>
 

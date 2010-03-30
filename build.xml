@@ -1078,6 +1078,8 @@
        <fileset dir="${db2monitor.dir}" includes="lib/*"/>
     </hqplugin>
 
+    <hqplugin name="db2jdbc"/>
+  	
     <hqplugin name="postgresql"/>
 
     <hqplugin name="mysql"/>
