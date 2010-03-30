@@ -273,9 +273,10 @@ public class SNMPTrapReceiver implements CommandResponder {
 
             if (log.isDebugEnabled()) {
                 log.debug("plugin=" + plugin.getName()
+                            + ", trapsReceived=" + getTrapsReceived()
+                            + ", pduType=" + event.getPDU().getType()
                             + ", address=" + address
                             + ", community=" + community
-                            + ", trapsReceived=" + getTrapsReceived()
                             + ", msg=" + msg);
             }
 
