@@ -34,8 +34,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.naming.NamingException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.mapping.Table;
@@ -61,7 +59,6 @@ import org.springframework.transaction.annotation.Transactional;
  * This class is responsible for setting/getting the server configuration
  */
 @Service("serverConfigManager")
-@Transactional
 public class ServerConfigManagerImpl implements ServerConfigManager {
 
     private static final String SQL_VACUUM = "VACUUM ANALYZE {0}";
@@ -152,15 +149,18 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
         } else if (key.equals(HQConstants.AlertNotificationsEnabled)) {
             boolean oldEnabled = oldVal.equals("true");
             boolean newEnabled = newVal.equals("true");
-            serverConfigAuditFactory.updateAlertNotificationsEnabled(subject, newEnabled, oldEnabled);
+            serverConfigAuditFactory.updateAlertNotificationsEnabled(subject, newEnabled,
+                oldEnabled);
         } else if (key.equals(HQConstants.HIERARCHICAL_ALERTING_ENABLED)) {
             boolean oldEnabled = oldVal.equals("true");
             boolean newEnabled = newVal.equals("true");
-            serverConfigAuditFactory.updateHierarchicalAlertingEnabled(subject, newEnabled, oldEnabled);
+            serverConfigAuditFactory.updateHierarchicalAlertingEnabled(subject, newEnabled,
+                oldEnabled);
         }
     }
 
-    private void createChangeAudits(AuthzSubject subject, Collection<ConfigProperty> allProps, Properties newProps) {
+    private void createChangeAudits(AuthzSubject subject, Collection<ConfigProperty> allProps,
+                                    Properties newProps) {
         Properties oldProps = new Properties();
 
         for (ConfigProperty prop : allProps) {
@@ -199,6 +199,7 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
      *         that's currently in the database
      * 
      */
+    @Transactional
     public void setConfig(AuthzSubject subject, Properties newProps) throws ApplicationException,
         ConfigPropertyException {
         setConfig(subject, null, newProps);
@@ -213,8 +214,9 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
      *         that's currently in the database
      * 
      */
-    public void setConfig(AuthzSubject subject, String prefix, Properties newProps) throws ApplicationException,
-        ConfigPropertyException {
+    @Transactional
+    public void setConfig(AuthzSubject subject, String prefix, Properties newProps)
+        throws ApplicationException, ConfigPropertyException {
 
         Properties tempProps = new Properties();
         tempProps.putAll(newProps);
@@ -241,7 +243,8 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
                 }
             } else if (prefix == null) {
                 // Bomb out if props are missing for non-prefixed properties
-                throw new ConfigPropertyException("Updated configuration missing required key: " + key);
+                throw new ConfigPropertyException("Updated configuration missing required key: " +
+                                                  key);
             }
         }
 
@@ -267,6 +270,7 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
      * @return The time taken in milliseconds to run the command.
      * 
      */
+    @Transactional
     public long analyzeNonMetricTables() {
 
         HQDialect dialect = Util.getHQDialect();
@@ -305,6 +309,7 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
      * @return The time taken in milliseconds to run the command.
      * 
      */
+    @Transactional
     public long analyzeHqMetricTables(boolean analyzePrevMetricDataTable) {
         long systime = System.currentTimeMillis();
         String currMetricDataTable = MeasTabManagerUtil.getMeasTabname(systime);
@@ -327,7 +332,7 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
         } catch (SQLException e) {
             log.error("Error analyzing metric tables", e);
             throw new SystemException(e);
-        }  finally {
+        } finally {
             DBUtil.closeConnection(LOG_CTX, conn);
         }
         return duration;
@@ -339,6 +344,8 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
      * to vacuum the hq_metric_data tables, only the compressed
      * eam_measurement_xxx tables.
      * 
+     * PostgreSQL does not support running vacuum in a transactional block
+     * 
      * @return The time it took to vaccum, in milliseconds, or -1 if the
      *         database is not PostgreSQL.
      * 
@@ -348,20 +355,32 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
         long duration = 0;
         try {
             conn = dbUtil.getConnection();
-            if (!DBUtil.isPostgreSQL(conn)) {
-                return -1;
-            }
-
-            for (int i = 0; i < DATA_TABLES.length; i++) {
-                duration += doCommand(conn, SQL_VACUUM, DATA_TABLES[i]);
-            }
-
-            duration += vacuumAppdef();
-            return duration;
         } catch (SQLException e) {
             log.error("Error vacuuming database: " + e.getMessage(), e);
             return duration;
-        }  finally {
+        }
+        try {
+            if (!DBUtil.isPostgreSQL(conn)) {
+                return -1;
+            }
+            //autocommit must be set to true or we get an exception from postgres that "VACUUM cannot run inside a transaction block"
+            boolean autocommit = conn.getAutoCommit();
+            conn.setAutoCommit(true);
+            try {
+                log.info("Vacuuming database");
+                for (int i = 0; i < DATA_TABLES.length; i++) {
+                    duration += doCommand(conn, SQL_VACUUM, DATA_TABLES[i]);
+                }
+
+                duration += vacuumAppdef();
+                return duration;
+            } finally {
+                conn.setAutoCommit(autocommit);
+            }
+        } catch (SQLException e) {
+            log.error("Error vacuuming database: " + e.getMessage(), e);
+            return duration;
+        } finally {
             DBUtil.closeConnection(LOG_CTX, conn);
         }
     }
@@ -378,14 +397,25 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
         long duration = 0;
         try {
             conn = dbUtil.getConnection();
+        } catch (SQLException e) {
+            log.error("Error vacuuming database: " + e.getMessage(), e);
+            return duration;
+        }
+        try {
             if (!DBUtil.isPostgreSQL(conn)) {
                 return -1;
             }
-
-            for (int i = 0; i < APPDEF_TABLES.length; i++) {
-                duration += doCommand(conn, SQL_VACUUM, APPDEF_TABLES[i]);
+            boolean autocommit = conn.getAutoCommit();
+            //autocommit must be set to true or we get an exception from postgres that "VACUUM cannot run inside a transaction block"
+            conn.setAutoCommit(true);
+            try {
+                for (int i = 0; i < APPDEF_TABLES.length; i++) {
+                    duration += doCommand(conn, SQL_VACUUM, APPDEF_TABLES[i]);
+                }
+                return duration;
+            } finally {
+                conn.setAutoCommit(autocommit);
             }
-            return duration;
         } catch (SQLException e) {
             log.error("Error vacuuming database: " + e.getMessage(), e);
             return duration;
@@ -421,7 +451,7 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
      * Get all the {@link ConfigProperty}s
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public Collection<ConfigProperty> getConfigProperties() {
 
         return configPropertyDAO.findAll();
@@ -435,7 +465,7 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
      * 
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public String getGUID() {
         Properties p;
 
@@ -460,12 +490,12 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
         return res;
     }
 
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public Properties getConfig() throws ConfigPropertyException {
         return serverConfigCache.getConfig();
     }
 
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public Properties getConfig(String prefix) throws ConfigPropertyException {
         return serverConfigCache.getConfig(prefix);
     }

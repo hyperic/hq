@@ -386,27 +386,12 @@ public class AgentCommandsService implements AgentCommandsClient {
             try {
                 _log.debug("Creating result map");
                 
-                // Grab the version.properties file from the newly extracted hq-product.jar
-                final String relativePathToJarFile = System.getProperty(AgentConfig.HQ_PRODUCT_JAR_KEY, "./pdk/lib/hq-product.jar");
-                final File hqProductJar = new File(bundleDir, relativePathToJarFile);
-                
-                _log.debug("HQ product jar path: " + hqProductJar.getCanonicalPath());
-                
-                URL jarUrl = new URL("jar:" + hqProductJar.toURL() +"!/");
-                
-                _log.debug("HQ product jar url: " + jarUrl.toString());
-                
-                URL fileUrl = new URL(jarUrl, "version.properties");
-
-                _log.debug("version.properties url is: " + fileUrl.toString());
-                
-                JarURLConnection connection = (JarURLConnection) fileUrl.openConnection();
-                
-                connection.connect();
+                // Grab the version.properties file from the new hq bundle
+                final File versionFile = new File(bundleDir,"lib/version.properties");
+                FileInputStream versionInputStream = new FileInputStream(versionFile);
                 
                 Properties newVersionProperties = new Properties();
-                
-                newVersionProperties.load(connection.getInputStream());
+                newVersionProperties.load(versionInputStream);
 
                 // Created return map
                 String version = newVersionProperties.getProperty("version");
