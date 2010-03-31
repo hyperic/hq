@@ -259,6 +259,8 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         super.checkModifyPermission(subject.getId(), id);        
 
         List dmList = createMeasurements(id, templates, intervals, props);
+        ZeventManager.getInstance().enqueueEventAfterCommit(
+            new AgentScheduleSyncZevent(Collections.singletonList(id)));
         return dmList;
     }
 
@@ -1441,11 +1443,15 @@ public class MeasurementManagerEJBImpl extends SessionEJB
             }
     
             boolean isCreate = z instanceof ResourceCreatedZevent;
-            boolean isRefresh =
-                z instanceof ResourceRefreshZevent || z instanceof ResourceUpdatedZevent;
+            boolean isRefresh = z instanceof ResourceRefreshZevent;
+            boolean isUpdate = z instanceof ResourceUpdatedZevent;
     
             try {
                 // Handle reschedules for when agents are updated.
+                if (isUpdate) {
+                    if (debug) log.debug("Refreshing metric schedule for [" + id + "]");
+                    eids.add(id);
+                }
                 if (isRefresh) {
                     if (debug) log.debug("Refreshing metric schedule for [" + id + "]");
                     eids.add(id);
@@ -1476,7 +1482,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
                 }
     
             } catch (ConfigFetchException e) {
-                log.debug("Config not set for [" + id + "]", e);
+                log.warn("Config not set for [" + id + "] (this is usually ok): " + e);
             } catch(Exception e) {
                 log.warn("Unable to enable default metrics for [" + id + "]", e);
             }
