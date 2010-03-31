@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>	
+	<classpathentry kind="src" path=""/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry exported="true" kind="con" path="GROOVY_SUPPORT"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/hq-web"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/hq-rendit"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/hq-common"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/hq-util"/>
+	<classpathentry kind="output" path="target/classes"/>
+</classpath>

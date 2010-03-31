@@ -57,8 +57,7 @@ public class TomcatEngineController implements EngineController {
         catalinaOpts.add("-Dcatalina.home=" + catalinaHome);
         catalinaOpts.add("-Djava.io.tmpdir=" + catalinaBase + "/temp");
         catalinaOpts.add("-Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager");
-        catalinaOpts.add("-Djava.util.logging.config.file=" + catalinaBase +
-                         "/conf/logging.properties");
+       
 
         String[] commandLine = new String[catalinaOpts.size() + 5];
         String classpath = catalinaHome + "/bin/bootstrap.jar";
