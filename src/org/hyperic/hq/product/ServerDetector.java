@@ -84,9 +84,9 @@ public abstract class ServerDetector
 
     private static final String SERVER_SIGS =
         "etc/hq-server-sigs.properties";
-    private static final String VERSION_FILE = "VERSION_FILE";
-    private static final String INSTALLPATH_MATCH = "INSTALLPATH_MATCH";
-    private static final String INSTALLPATH_NOMATCH = "INSTALLPATH_NOMATCH";
+    protected static final String VERSION_FILE = "VERSION_FILE";
+    protected static final String INSTALLPATH_MATCH = "INSTALLPATH_MATCH";
+    protected static final String INSTALLPATH_NOMATCH = "INSTALLPATH_NOMATCH";
     protected static final String INSTALLPATH = "INSTALLPATH";
     protected static final String INVENTORY_ID = "INVENTORY_ID";
     protected static final String AUTOINVENTORY_NAME = "AUTOINVENTORY_NAME";
@@ -479,28 +479,31 @@ public abstract class ServerDetector
         String installPathMatch = getTypeProperty(INSTALLPATH_MATCH);
         String installPathNoMatch = getTypeProperty(INSTALLPATH_NOMATCH);
 
-        if(versionFile.startsWith("**/")){  // recursive & regexpr
-            versionFile=versionFile.substring(3);
-            File f=findVersionFile(new File(installpath),versionFile);
-            if(f==null)
-                return false;
-            getLog().debug(VERSION_FILE + "=" + versionFile + " matches -> " + f);
-            Matcher m = Pattern.compile(versionFile).matcher(f.getAbsolutePath());
-            m.find();
-            if(m.groupCount()!=0){  // have version group
-                if(!getTypeInfo().getVersion().equals(m.group(1))){
-                    getLog().debug(installpath + " not a match for version " + getTypeInfo().getVersion() + ", skipping");
+        if (versionFile != null) {
+            if (versionFile.startsWith("**/")) {  // recursive & regexpr
+                versionFile=versionFile.substring(3);
+                File f=findVersionFile(new File(installpath),versionFile);
+                if (f==null) {
                     return false;
                 }
-            }
-       }else{
-            if (versionFile != null) {
+                
+                getLog().debug(VERSION_FILE + "=" + versionFile + " matches -> " + f);
+                Matcher m = Pattern.compile(versionFile).matcher(f.getAbsolutePath());
+                m.find();
+                if(m.groupCount()!=0){  // have version group
+                    if(!getTypeInfo().getVersion().equals(m.group(1))){
+                        getLog().debug(installpath + " not a match for version " + getTypeInfo().getVersion() + ", skipping");
+                        return false;
+                    }
+                }
+            } else {
                 File instPath = new File(installpath);
                 if (instPath.isFile() && !instPath.isDirectory()) {
                     instPath = instPath.getParentFile();
                 }
-                File file = (instPath != null) ? new File(instPath, versionFile) :
-                    new File(installpath, versionFile);
+                File file = (instPath != null) ?
+                                  new File(instPath, versionFile) :
+                                  new File(versionFile);
                 if (!file.exists()) {
                     String[] expanded = PluginLoader.expand(file);
                     if ((expanded == null) || (expanded.length == 0)) {
