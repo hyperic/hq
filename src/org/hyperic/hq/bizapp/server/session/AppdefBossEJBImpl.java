@@ -1329,8 +1329,11 @@ public class AppdefBossEJBImpl
                     throw new VetoException("Could not remove resource " + aeid +
                                             " because a downtime schedule exists.");
                 }
-            } catch (SchedulerException se) {
-                throw new ApplicationException(se);
+            } catch (Throwable t) {
+                // HHQ-3772: This should not happen. However, if it does,
+                // log the exception as a warning and continue with the delete.
+                log.warn("Failure getting the downtime schedule for group[" + aeid + "]. "
+                            + "Ignoring and continuing with the delete process.", t);
             }
         }
         if (res == null) {
