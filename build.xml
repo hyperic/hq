@@ -575,6 +575,11 @@
 		<copy todir="${tomcat.home}" overwrite="true">
 			<fileset dir="${hq.installer}/hq-engine" includes="**" />
 		</copy>
+		<!-- Delete default logging config and add log4j to lib dir-->
+		<delete file="${tomcat.home}/hq-server/conf/logging.properties"/>
+		<copy todir="${tomcat.home}/hq-server/lib">
+			<fileset dir="${thirdparty.lib}" includes="log4j-*.jar"/>
+		</copy>
 		<!-- Add generated keystore -->
 		<available property="available.keystore" file="${tomcat.home}/conf/hyperic.keystore" />
 		<antcall target="prepare-ssl" />
