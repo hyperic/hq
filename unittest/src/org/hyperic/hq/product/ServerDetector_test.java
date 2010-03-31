@@ -164,6 +164,22 @@ public class ServerDetector_test
         assertTrue(tsd.isInstallTypeVersion(installPath));
     }
     
+    public void testNullVersionFile() throws Exception {
+        assertNotNull(tmpDir);
+        assertNotNull(simpleFile);
+        
+        // substring match
+        Properties props = new Properties();
+        String installPath = simpleFile.getParent();
+        TestServerDetector tsd;
+        
+        props.setProperty(TestServerDetector.getInstallPathNoMatch(), installPath);
+        tsd = new TestServerDetector(props);
+
+        // Should fail, no version file
+        assertFalse(tsd.isInstallTypeVersion(installPath));
+    }
+    
     private static class TestServerDetector extends ServerDetector {
         
         private Properties props;
