@@ -398,22 +398,14 @@
   <help name="Sybase">
     <![CDATA[
     <p>
-    <h3>Configure Sybase ${product.version} for Monitoring</h3>
-    </p>
-    <p>
-      Please run the HQ agent on the local Sybase server as the sybase user.
-      <br>
-      This is neccessary to get the proper ENV vars setup in order to execute
-      <br>
-      the sp_sysmon procedure.
+    	<h3>Configure Sybase ${product.version} for Monitoring</h3>
     </p>
     <p>
       <b>NOTES:</b>
-      <br>
-      The jdbcUrl may not work using localhost.  Please specify the actual hostname.
-      <br>
-      On Windows install <a href="http://www.activestate.com/activeperl">ActivePerl</a>
-      and bind the extension .pl to automatically execute perl when the file type is invoked.
+      <ul>
+      	<li>To configure the jdbcUrl, specifiy the fully qualified domain name or IP address of the host machine. The use of localhost is invalid.</li>
+	      <li>On Windows install <a href="http://www.activestate.com/activeperl">ActivePerl</a> and bind the extension .pl to automatically execute perl when the file type is invoked.</li>
+	   </ul>
     </p>
     ]]>
   </help>
