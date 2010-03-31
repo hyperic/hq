@@ -1,7 +1,28 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * NOTE: This copyright does *not* cover user programs that use HQ
+ * program services by normal system calls through the application
+ * program interfaces provided as part of the Hyperic Plug-in Development
+ * Kit or the Hyperic Client Development Kit - this is merely considered
+ * normal use of the program, and does *not* fall under the heading of
+ * "derived work".
+ * 
+ * Copyright (C) [2004-2010], Hyperic, Inc.
+ * This file is part of HQ.
+ * 
+ * HQ is free software; you can redistribute it and/or modify
+ * it under the terms version 2 of the GNU General Public License as
+ * published by the Free Software Foundation. This program is distributed
+ * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ * USA.
  */
+
 package org.hyperic.hq.plugin.db2jdbc;
 
 import java.io.BufferedReader;
@@ -39,7 +60,11 @@ public abstract class DefaultServerDetector extends ServerDetector implements Au
     private String list_database;
 
     public List getServerResources(ConfigResponse conf) throws PluginException {
-        getLog().debug("[getServerResources] conf=" + conf);
+        boolean debug = getLog().isDebugEnabled();
+        
+        if (debug) {
+            getLog().debug("[getServerResources] conf=" + conf);
+        }
         Pattern regExpVersion = Pattern.compile(getTypeInfo().getVersion().replaceAll("[X|x]", "\\d*"));
         List res = new ArrayList();
 
@@ -54,40 +79,52 @@ public abstract class DefaultServerDetector extends ServerDetector implements Au
                     key = RegistryKey.LocalMachine.openSubKey("SOFTWARE\\IBM\\DB2\\InstalledCopies\\" + instances[n] + "\\CurrentVersion");
                     String version = key.getStringValue("Version") + "." + key.getStringValue("Release") + "." + key.getStringValue("Modification") + "." + key.getStringValue("Fix Level");
                     key.close();
-                    getLog().debug(instances[n] + "-->" + version);
+                    if (debug) {
+                        getLog().debug(instances[n] + "-->" + version);
+                    }
                     if (regExpVersion.matcher(version).find()) {
                         key = RegistryKey.LocalMachine.openSubKey("SOFTWARE\\IBM\\DB2\\InstalledCopies\\" + instances[n]);
                         String path = key.getStringValue("DB2 Path Name");
                         key.close();
                         res.addAll(createServers(path.trim()));
                     } else {
-                        getLog().debug("[getServerResources] bad version: '" + instances[n] + " " + version + "'");
+                        if (debug) {
+                            getLog().debug("[getServerResources] bad version: '" + instances[n] + " " + version + "'");
+                        }
                     }
                 }
             } catch (Win32Exception ex) {
-                Logger.getLogger(DefaultServerDetector.class.getName()).log(Level.SEVERE, null, ex);
+                if (debug) {
+                    getLog().debug("[getServerResources] error: " + ex.getMessage(), ex);
+                }
             }
         } else {
             try {
                 Process cmd = Runtime.getRuntime().exec(db2ls);
                 cmd.waitFor();
                 String sal = inputStreamAsString(cmd.getInputStream());
-                getLog().debug("[getServerResources] sal=" + sal);
+                if (debug) {
+                    getLog().debug("[getServerResources] sal=" + sal);
+                }
                 String[] installs = sal.split("\n");
                 for (int n=0;n<installs.length;n++) {
                     Matcher m = regExpInstall.matcher(installs[n]);
                     if (m.find()) {
                         if (regExpVersion.matcher(m.group(2)).find()) {
-                            getLog().debug("[getServerResources] found: '" + m.group() + "'");
+                            if (debug) {
+                                getLog().debug("[getServerResources] found: '" + m.group() + "'");
+                            }
                             res.addAll(createServers(m.group(1)));
                         } else {
-                            getLog().debug("[getServerResources] bad version: '" + m.group() + "'");
+                            if (debug) {
+                                getLog().debug("[getServerResources] bad version: '" + m.group() + "'");
+                            }
                         }
                     }
                 }
             } catch (Exception ex) {
-                if (getLog().isDebugEnabled()) {
-                    getLog().error(ex.getMessage(), ex);
+                if (debug) {
+                    getLog().debug("[getServerResources] error: " + ex.getMessage(), ex);
                 }
             }
         }
@@ -102,16 +139,20 @@ public abstract class DefaultServerDetector extends ServerDetector implements Au
 
         list_database = manager.getProperties().getProperty("db2.jdbc.list_database");
 
-        getLog().debug("[getServerResources] db2.jdbc.db2ls=" + db2ls);
-        getLog().debug("[getServerResources] db2.jdbc.entry_types=" + entry_types);
-        getLog().debug("[getServerResources] db2.jdbc.list_database=" + list_database);
+        if (getLog().isDebugEnabled()) {
+            getLog().debug("[getServerResources] db2.jdbc.db2ls=" + db2ls);
+            getLog().debug("[getServerResources] db2.jdbc.entry_types=" + entry_types);
+            getLog().debug("[getServerResources] db2.jdbc.list_database=" + list_database);
+        }
 
         super.init(manager);
     }
 
     protected boolean checkEntryTypes(String type) {
         boolean res = entry_types.contains("*") || entry_types.contains(type.toLowerCase());
-        getLog().debug("[checkEntryTypes] type='" + type + "' res='" + res + "'");
+        if (getLog().isDebugEnabled()) {
+            getLog().debug("[checkEntryTypes] type='" + type + "' res='" + res + "'");
+        }
         return res;
     }
 
