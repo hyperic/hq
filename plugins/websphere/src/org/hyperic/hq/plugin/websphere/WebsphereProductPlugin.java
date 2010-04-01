@@ -453,8 +453,10 @@ public class WebsphereProductPlugin extends ProductPlugin {
 
         useJMX = !"false".equals(managerProps.getProperty("websphere.usejmx"));
 
-        useExt = "true".equals(managerProps.getProperty("websphere.useext"));
-        log.debug("useExt=" + useExt);
+        final String propKey = "websphere.useext";
+        String useExtString = managerProps.getProperty(propKey, "false");
+        useExt = new Boolean(useExtString).booleanValue();
+        log.debug(propKey + "=" + useExt);
 
         String installDir =
             managerProps.getProperty(PROP_INSTALLPATH);
