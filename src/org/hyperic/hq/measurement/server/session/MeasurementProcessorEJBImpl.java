@@ -120,8 +120,10 @@ public class MeasurementProcessorEJBImpl
                 aeids.add(new AppdefEntityID(e.getTo()));
             }
         }
-        final AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(aeids);
-        ZeventManager.getInstance().enqueueEventAfterCommit(event);
+        if (!aeids.isEmpty()) {
+            final AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(aeids);
+            ZeventManager.getInstance().enqueueEventAfterCommit(event);
+        }
     }
     
     /**
