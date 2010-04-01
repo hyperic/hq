@@ -551,10 +551,14 @@ public class HQApp {
                                          SessionManager.currentSession());
                 }
 
+                final boolean debug = _log.isDebugEnabled();
                 if (!methIsReadOnly(methName)) {
-                    if (_log.isDebugEnabled()) {
-                        _log.debug("Upgrading session, due to [" + methName + 
-                                   "] on [" + className + "]");
+                    if (SessionManager.isReadWrite()) {
+                        if (debug) _log.debug("Session already upgraded, log is due to [" + methName + 
+                                              "] on [" + className + "]");
+                    } else {
+                        if (debug) _log.debug("Upgrading session, due to [" + methName + 
+                                              "] on [" + className + "]");
                     }
                     readWrite = true;
                     SessionManager.setSessionReadWrite();
@@ -605,15 +609,14 @@ public class HQApp {
         }
 
         private boolean methIsReadOnly(String methName) {
-            return methName.equals("runReport") || // ReportCenter
-                   methName.equals("setUserPrefsAfterCommit") ||
-                   // 'create' is part of EJB session bean creation
+            return // 'create' is part of EJB session bean creation
                    methName.equals("create") ||
                    methName.equals("disconnectAgent") ||
                    // recent alerts & indicators
                    methName.equals("fillAlertCount") ||
                    // gather agent metrics
                    methName.equals("handleMeasurementReport") ||
+                   methName.equals("initializeTriggers") ||
                    // For HQU methods
                    methName.equals("login") ||
                    methName.equals("loginGuest") ||
@@ -621,10 +624,15 @@ public class HQApp {
                    methName.equals("logsExistPerInterval") ||
                    // JMS
                    methName.equals("onMessage") ||
+                   methName.equals("pingAgent") ||
                    // masthead
                    methName.equals("resourcesExistOfType") ||
+                   // ReportCenter
+                   methName.equals("runReport") ||
+                   methName.equals("scheduleEnabled") ||
                    methName.equals("search") || 
-                   methName.equals("initializeTriggers") ||
+                   methName.equals("setUserPrefsAfterCommit") ||
+                   methName.equals("unschedule") ||
                    methName.startsWith("has") ||
                    methName.startsWith("are") ||
                    methName.startsWith("check") ||

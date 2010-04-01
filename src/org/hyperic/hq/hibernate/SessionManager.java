@@ -118,6 +118,14 @@ public class SessionManager {
         INSTANCE.setSessionReadWriteInternal();
     }
     
+    public static boolean isReadWrite() {
+        Session s = (Session)INSTANCE._sessions.get();
+        if (s != null && s.getFlushMode().equals(FlushMode.AUTO)) {
+            return true;
+        }
+        return false;
+    }
+    
     private void setSessionReadWriteInternal() {
         Session s = (Session)_sessions.get();
     
