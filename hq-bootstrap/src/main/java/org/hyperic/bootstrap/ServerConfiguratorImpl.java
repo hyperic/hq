@@ -193,20 +193,40 @@ public class ServerConfiguratorImpl implements ServerConfigurator {
         File confFile = new File(serverHome + File.separator + "conf" + File.separator +
                                  "log4j.xml");
         FileInputStream fi = null;
-        FileOutputStream fo = null;
+        FileOutputStream webAppLoggingConfig = null;
+        
         try {
             fi = new FileInputStream(confFile);
-            fo = new FileOutputStream(engineHome + File.separator + "hq-server" + File.separator +
+            webAppLoggingConfig = new FileOutputStream(engineHome + File.separator + "hq-server" + File.separator +
                                       "webapps" + File.separator + "ROOT" + File.separator +
                                       "WEB-INF" + File.separator + "classes" + File.separator +
                                       "log4j.xml");
-            copyStream(fi, fo);
+            copyStream(fi, webAppLoggingConfig);
         } finally {
-            if (fi != null)
+            if (fi != null) {
                 fi.close();
-            if (fo != null)
-                fo.close();
+            }
+            if (webAppLoggingConfig != null) {
+                webAppLoggingConfig.close();
+            }
         }
+        
+       FileInputStream conf = null;
+       FileOutputStream engineLoggingConfig = null;
+       try {
+           conf= new FileInputStream(confFile);
+           engineLoggingConfig = new FileOutputStream(engineHome +  File.separator + "hq-server" + File.separator + "lib" + File.separator +
+                                     "log4j.xml");
+           copyStream(conf, engineLoggingConfig);
+       } finally {
+           if (conf != null) {
+               conf.close();
+           }
+           if (engineLoggingConfig != null) {
+               engineLoggingConfig.close();
+           }
+       }
+       
     }
     
     private void copyStream(InputStream is, OutputStream os) throws IOException {
