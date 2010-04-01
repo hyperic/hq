@@ -282,6 +282,8 @@ public class ProductPluginDeployer
             c.register(ConcurrentStatsCollector.EVENT_PROCESSING_TIME);
             c.register(ConcurrentStatsCollector.TRIGGER_INIT_TIME);
             c.register(ConcurrentStatsCollector.FIRED_ALERT_TIME);
+            c.register(ConcurrentStatsCollector.SCHEDULE_QUEUE_SIZE);
+            c.register(ConcurrentStatsCollector.UNSCHEDULE_QUEUE_SIZE);
             c.startCollector();
         } catch (Exception e) {
             _log.error("Could not start Concurrent Stats Collector", e);

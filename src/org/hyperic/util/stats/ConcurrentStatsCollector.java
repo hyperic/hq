@@ -109,7 +109,9 @@ public final class ConcurrentStatsCollector {
         SEND_ALERT_TIME              = "SEND_ALERT_TIME",
         ZEVENT_QUEUE_SIZE            = "ZEVENT_QUEUE_SIZE",
         TRIGGER_INIT_TIME            = "TRIGGER_INIT_TIME",
-        FIRED_ALERT_TIME             = "FIRED_ALERT_TIME";
+        FIRED_ALERT_TIME             = "FIRED_ALERT_TIME",
+        SCHEDULE_QUEUE_SIZE          = "SCHEDULE_QUEUE_SIZE",
+        UNSCHEDULE_QUEUE_SIZE        = "UNSCHEDULE_QUEUE_SIZE";
     // using tree due to ordering capabilities
     private final Map _statKeys = new TreeMap();
     private AtomicBoolean _hasStarted = new AtomicBoolean(false);
