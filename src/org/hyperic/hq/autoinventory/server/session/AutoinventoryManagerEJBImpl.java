@@ -698,11 +698,11 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         _log.info("Received auto-inventory report from " + aiPlatform.getFqdn() +
                  "; IPs -> " + getIps(aiPlatform.getAddedAIIpValues()) + 
                  "; CertDN -> " + aiPlatform.getCertdn() +
-                 "; (" + state.getAllServers(_log).size() +  " servers)");
+                 "; (" + state.getAllServers().size() +  " servers)");
         if (debug) {
             _log.debug("AutoinventoryManager.reportAIData called, "
                       + "scan state=" + state);
-            _log.debug("AISERVERS=" + state.getAllServers(_log));
+            _log.debug("AISERVERS=" + state.getAllServers());
         }
         // In the future we may want this method to act as
         // another user besides "admin".  It might make sense to have 
@@ -730,7 +730,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
                                           AIPlatformValue aiPlatform)
     throws AutoinventoryException {
         if (stateCore.getAreServersIncluded()) {
-            Set serverSet = state.getAllServers(_log);
+            Set serverSet = state.getAllServers();
             final ServerManagerLocal svrMan = ServerManagerEJBImpl.getOne();
             for (Iterator it = serverSet.iterator(); it.hasNext();) {
                 AIServerValue aiServer = (AIServerValue)it.next();
