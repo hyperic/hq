@@ -1032,7 +1032,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         Collection dirties = statDAO.findDirtyStatus();
         List res = new ArrayList(dirties.size());
         
-        _log.debug("Found " + dirties.size() + " agents with " +
+        _log.info("Found " + dirties.size() + " agents with " +
                   "serviceDirty = true");
         
         for (Iterator i=dirties.iterator(); i.hasNext(); ) {
