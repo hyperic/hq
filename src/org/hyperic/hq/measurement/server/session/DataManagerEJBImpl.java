@@ -1240,9 +1240,9 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         if (historicalData.size() == 0) {
             return null;
         }
-        double high  = Double.MIN_VALUE,
-               low   = Double.MAX_VALUE,
-               total = 1;
+        double high  = Double.MIN_VALUE;
+        double low   = Double.MAX_VALUE;
+        double total = 0;
         Double lastVal = null;
         int count = 0;
         long last = Long.MIN_VALUE;

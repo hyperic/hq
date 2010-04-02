@@ -171,6 +171,11 @@ public class IndicatorChartsAction extends DispatchAction
         return result;
     }
     
+    /**
+     * TODO: The logic here is similar to DataManagerEJBImpl.getAggData().
+     * Need to consolidate the code.
+     * 
+     */
     private double[] getAggregateData(MeasurementTemplate template, List<HighLowMetricValue> metricData) {
         final boolean debug = log.isDebugEnabled();
         
