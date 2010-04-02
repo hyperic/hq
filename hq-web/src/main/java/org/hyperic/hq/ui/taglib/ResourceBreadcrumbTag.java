@@ -13,6 +13,7 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.TagSupport;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.hyperic.hq.appdef.server.session.ApplicationManagerImpl;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -240,10 +241,10 @@ public class ResourceBreadcrumbTag extends TagSupport {
 
             if (x < (breadcrumbs.size() - 1)) {
                 markup.append("<a href=\"").append(item.getUrl()).append("\">");
-                markup.append(item.getLabel());
+                markup.append(StringEscapeUtils.escapeHtml(item.getLabel()));
                 markup.append("</a>&nbsp;&rsaquo;&nbsp;");
             } else {
-                markup.append(item.getLabel());
+                markup.append(StringEscapeUtils.escapeHtml(item.getLabel()));
             }
 
             markup.append("</li>");
@@ -260,7 +261,7 @@ public class ResourceBreadcrumbTag extends TagSupport {
             String returnTo = RequestUtils.message(request, "breadcrumb.returnTo");
             
             markup.append("<span class=\"returnToLink\"><a href=\"").append(BreadcrumbUtil.createReturnToURL(crumb.getUrl())).append("\">");
-            markup.append(returnTo).append(" ").append(crumb.getLabel());
+            markup.append(returnTo).append(" ").append(StringEscapeUtils.escapeHtml(crumb.getLabel()));
             markup.append("</a></span>");
         }
 
@@ -452,7 +453,7 @@ public class ResourceBreadcrumbTag extends TagSupport {
             setUrl(url);
             setResourceId(resourceId);
             setAutoGroupId(autoGroupId);
-            setLabel(label);
+            setLabel(StringEscapeUtils.escapeHtml(label));
             setAppdefEntityId(appdefEntityId);
         }
 
