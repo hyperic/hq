@@ -453,7 +453,7 @@ public class ResourceBreadcrumbTag extends TagSupport {
             setUrl(url);
             setResourceId(resourceId);
             setAutoGroupId(autoGroupId);
-            setLabel(StringEscapeUtils.escapeHtml(label));
+            setLabel(label);
             setAppdefEntityId(appdefEntityId);
         }
 
