@@ -10800,7 +10800,7 @@ has already been defined.
 
   <schemaSpec version="3.189">
     <schema-directSQL>  
-      <statement targetDB="oracle">
+      <statement targetDB="postgresql">
         ALTER TABLE EAM_AGENT DROP CONSTRAINT eam_agent_address_key
       </statement>
       <statement targetDB="oracle">
