@@ -124,7 +124,7 @@ public class ConfigManagerEJBImpl
 
     private ConfigResponseDB getConfigResponse(ConfigResponseDAO dao,
                                                AppdefEntityID id) {
-        ConfigResponseDB config;
+        ConfigResponseDB config = null;
 
         switch(id.getType()){
         case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
@@ -138,11 +138,18 @@ public class ConfigManagerEJBImpl
             break;
         case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
         default:
-            throw new IllegalArgumentException("The passed entity type " +
-                                               "does not support config " +
+            throw new IllegalArgumentException("The resource[ " + id +
+                                               "] does not support config " +
                                                "responses");
         }
 
+        // Platforms, servers, and services should have a config response record.
+        // A null config response could indicate that the resource has been deleted.
+        if (config == null) {
+            throw new IllegalArgumentException(
+                        "No config response found for resource[" + id + "]");
+        }
+        
         return config;
     }
 

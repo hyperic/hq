@@ -1581,7 +1581,9 @@ public class AppdefBossEJBImpl
                 getMergedConfigResponse(subject,
                                         ProductPlugin.TYPE_MEASUREMENT,
                                         id, true);
-        } catch (Exception e) {
+        } catch (Throwable t) {
+            log.debug("Unable to get config response: " + t.getMessage(), t);
+            
             // If anything goes wrong getting the config, just move
             // along.  The plugins will be removed on the next agent
             // restart.

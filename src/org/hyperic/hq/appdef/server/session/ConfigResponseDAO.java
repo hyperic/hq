@@ -80,20 +80,20 @@ public class ConfigResponseDAO extends HibernateDAO
 
     ConfigResponseDB findByPlatformId(Integer id) {
         PlatformDAO dao = new PlatformDAO(getFactory());
-        Platform plat = dao.findById(id);
-        return plat.getConfigResponse();
+        Platform plat = dao.get(id);
+        return (plat == null ? null : plat.getConfigResponse());
     }
 
     public ConfigResponseDB findByServerId(Integer id) {
         ServerDAO dao = new ServerDAO(getFactory());
-        Server server = dao.findById(id);
-        return server.getConfigResponse();
+        Server server = dao.get(id);
+        return (server == null ? null : server.getConfigResponse());
     }
 
     public ConfigResponseDB findByServiceId(Integer id) {
         ServiceDAO dao = new ServiceDAO(getFactory());
-        Service service = dao.findById(id);
-        return service.getConfigResponse();
+        Service service = dao.get(id);
+        return (service == null ? null : service.getConfigResponse());
     }
     
     /**
