@@ -55,6 +55,7 @@ import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.MeasurementScheduleZevent;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.server.session.MeasurementZevent;
 import org.hyperic.hq.measurement.server.session.TemplateManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.MeasurementScheduleZevent.MeasurementScheduleZeventSource;
@@ -636,7 +637,10 @@ public class MeasurementGtrigger
             setNotFired();
             return;
         }
-        
+
+        TemplateManagerLocal tMan = TemplateManagerEJBImpl.getOne();
+        MeasurementTemplate template = tMan.getTemplate(_templateId);
+
         StringBuffer sr = new StringBuffer();
         StringBuffer lr = new StringBuffer();
             
@@ -648,7 +652,7 @@ public class MeasurementGtrigger
             .append(" ")
             .append(_comparator)
             .append(" ")
-            .append(_metricVal);
+            .append(template.formatValue(_metricVal.doubleValue()));
             
         lr.append(_sizeCompare)
             .append(" ")
@@ -660,7 +664,7 @@ public class MeasurementGtrigger
             .append(" ")
             .append(_comparator)
             .append(" ")
-            .append(_metricVal);
+            .append(template.formatValue(_metricVal.doubleValue()));
         
         long nonReportingResourceFiredTime = getAlertFiredTime(startTime, endTime);
 
@@ -722,7 +726,8 @@ public class MeasurementGtrigger
                 descr = descrNoVal+"Unknown";
                 timestamp = nonReportingResourceFiredTime;
             } else {
-                descr = descrNoVal+val.getValue();
+                String formattedValue = metric.getTemplate().formatValue(val);
+                descr = descrNoVal + formattedValue;
                 timestamp = val.getTimestamp();
             }
             

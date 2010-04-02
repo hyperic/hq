@@ -207,7 +207,14 @@ public class MeasurementTemplate
         if (val == null)
             return "";
         
-        FormattedNumber th = UnitsConvert.convert(val.getValue(), getUnits());
+        return formatValue(val.getValue());
+    }
+
+    /**
+     * Format a metric values, based on the unites specified by this template.
+     */
+    public String formatValue(double val) {
+        FormattedNumber th = UnitsConvert.convert(val, getUnits());
         return th.toString();
     }
 }
