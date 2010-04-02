@@ -10798,6 +10798,20 @@ has already been defined.
                         precision="500" columnType="VARCHAR2" nullable="NOT NULL" />
   </schemaSpec>
 
+  <schemaSpec version="3.189">
+    <schema-directSQL>  
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_AGENT DROP CONSTRAINT eam_agent_address_key
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_AGENT DROP UNIQUE(ADDRESS, PORT)
+      </statement>
+      <statement targetDB="mysql">
+        ALTER TABLE EAM_AGENT DROP INDEX ADDRESS
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
 </dbupgrade>
 </target>
 </project>

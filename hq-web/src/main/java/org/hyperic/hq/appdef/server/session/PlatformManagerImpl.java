@@ -44,6 +44,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.NonUniqueObjectException;
 import org.hibernate.NonUniqueResultException;
 import org.hibernate.ObjectNotFoundException;
+import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.ConfigResponseDB;
@@ -1719,28 +1720,78 @@ public class PlatformManagerImpl implements PlatformManager {
         }
 
         // need to check if IPs have changed, if so update Agent
+        updateAgentIps(subj, aiplatform, platform);
+        
+    }
+    
+    private void updateAgentIps(AuthzSubject subj, AIPlatformValue aiplatform, Platform platform) {
         List<AIIpValue> ips = Arrays.asList(aiplatform.getAIIpValues());
 
-        Agent currAgent = platform.getAgent();
-        boolean removeCurrAgent = false;
+        Agent agent;
+        try {
+            // make sure we have the current agent that exists on the platform
+            // and associate it
+            agent = agentManager.getAgent(aiplatform.getAgentToken());
+            platform.setAgent(agent);
+        } catch (AgentNotFoundException e) {
+            // the agent should exist at this point even if it is a new agent.
+            // something failed at another stage of this process
+            throw new SystemException(e);
+        }
+        boolean changeAgentIp = false;
+        
         for (AIIpValue ip : ips) {
 
-            if (ip.getQueueStatus() == AIQueueConstants.Q_STATUS_ADDED) {
+            if (ip.getQueueStatus() == AIQueueConstants.Q_STATUS_REMOVED && agent.getAddress().equals(ip.getAddress())) {
+               changeAgentIp = true;
+             }
+        }
+        // Keep in mind that a unidirectional agent address
+        // doesn't matter since the communication is always
+        // from agent to server
+        if (changeAgentIp && !agent.isUnidirectional()) {
+            String origIp = agent.getAddress();
+            // In a perfect world this loop would key on platform.getIps() but
+            // then there are other issues with verifying that the agent is up
+            // before approving since platform IPs are updated later in the
+            // code flow.  Since ips contains new and current IP addresses
+            // of the platform it works.
+            for (AIIpValue ip : ips) { 
+                if (ip.getQueueStatus() != AIQueueConstants.Q_STATUS_ADDED &&
+               // Q_STATUS_PLACEHOLDER in this context simply means that
+               // the ip is already associated with the platform and there
+                // is no change.  Therefore it needs to be part of our checks
+                ip.getQueueStatus() != AIQueueConstants.Q_STATUS_PLACEHOLDER) {
+                    continue;
+                }
                 try {
-                    Agent agent = agentManager.getAgent(aiplatform.getAgentToken());
+                    // if ping succeeds then this address is ok to use
+                    // for the agent ip address.
+                    // This logic is based on a conversation that
+                    // scottmf had with chip 9/17/2009.
+                    agent.setAddress(ip.getAddress());
+                    agentManager.pingAgent(subj, agent);
+                    log.info("updating ip for agentId=" + agent.getId() + " and platformid=" + platform.getId() +
+                        " from ip=" + origIp + " to ip=" + ip.getAddress());
                     platform.setAgent(agent);
                     enableMeasurements(subj, platform);
-                } catch (AgentNotFoundException e) {
-                    throw new ApplicationException(e.getMessage(), e);
+                    break;
+                } catch (AgentConnectionException e) {
+                    // if the agent connection fails then continue
+                } catch (Exception e) {
+                    // something is wrong internally, log the error but continue
+                    log.error(e, e);
                 }
-            } else if (ip.getQueueStatus() == AIQueueConstants.Q_STATUS_REMOVED &&
-                       currAgent.getAddress().equals(ip.getAddress())) {
-                removeCurrAgent = true;
+                // make sure address does not change if/when last ping fails
+                 agent.setAddress(origIp);
+           }
+            if (platform.getAgent() == null) {
+               log.warn("Removing agent reference from platformid=" + platform.getId() +
+                                          ".  Server cannot ping the agent from any IP " +
+                                           "associated with the platform");
             }
         }
-        if (removeCurrAgent) {
-            agentManager.removeAgent(currAgent);
-        }
+     
     }
 
     private void enableMeasurements(AuthzSubject subj, Platform platform) {
