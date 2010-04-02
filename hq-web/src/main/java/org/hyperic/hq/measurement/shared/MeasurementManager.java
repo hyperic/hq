@@ -249,24 +249,6 @@ public interface MeasurementManager {
      */
     public void enableDefaultMeasurements(AuthzSubject subj, Resource r) throws PermissionException;
 
-    public void disableMeasurement(AuthzSubject subject, Integer mId) throws PermissionException,
-        MeasurementUnscheduleException;
-
-    /**
-     * Synchronously disables measurements according to the mids array. Removes
-     * measurements from the cache as well. XXX scottmf, may be a good idea to
-     * add a flag that specifies if the measurements should be removed in the
-     * background / foreground and removed from cache. XXX scottmf, probably a
-     * bad idea to throw a MeasurementUnscheduleException if a failure occurs
-     * considering this is done in batch without any error status on what
-     * succeeded and what did not.
-     * @param subject {@link AuthzSubject} checks if subject has modify
-     *        permission on the {@link AppdefEntityID} associated with the mid
-     * @param mids {@link Integer} array of mids representing a MeasurementId
-     */
-    public void disableMeasurements(AuthzSubject subject, Integer[] mids)
-        throws PermissionException, MeasurementUnscheduleException;
-
     public void updateMeasurementInterval(AuthzSubject subject, Integer mId, long interval)
         throws PermissionException;
 
