@@ -165,6 +165,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
             List<AlertDefinition> childBag = new ArrayList<AlertDefinition>(alertdef.getChildrenBag());
             for (AlertDefinition child : childBag) {
                 deleteAlertDefinitionStuff(subj, child, escalationManager);
+                registeredTriggerManager.deleteTriggers(child);
             }
             alertDefDao.deleteByAlertDefinition(alertdef);
             watch.markTimeEnd("delete children");

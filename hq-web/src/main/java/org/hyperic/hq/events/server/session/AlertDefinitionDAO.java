@@ -78,9 +78,7 @@ public class AlertDefinitionDAO
         this.rDao = rDao;
     }
 
-    private static final String[] MANAGE_ALERTS_OPS = new String[] { AuthzConstants.platformOpManageAlerts,
-                                                                    AuthzConstants.serverOpManageAlerts,
-                                                                    AuthzConstants.serviceOpManageAlerts };
+  
 
     public AlertDefinitionDAO(SessionFactory sessionFactory) {
         super(AlertDefinition.class, sessionFactory);
@@ -197,7 +195,7 @@ public class AlertDefinitionDAO
         Query q = createQuery(hql);
 
         return wherePermCheck
-            .addQueryParameters(q, subject, r, 0, Arrays.asList(MANAGE_ALERTS_OPS)).list();
+            .addQueryParameters(q, subject, r, 0, Arrays.asList(AuthzConstants.VIEW_ALERTS_OPS)).list();
     }
 
     public void save(AlertDefinition def) {
@@ -214,7 +212,7 @@ public class AlertDefinitionDAO
     int deleteByAlertDefinition(AlertDefinition def) {
         String sql = "update AlertDefinition "
                      + "set escalation = null, deleted = true, parent = null, "
-                     + "active = false where parent = :def";
+                     + "active = false, enabled = false where parent = :def";
 
         int ret = getSession().createQuery(sql).setParameter("def", def).executeUpdate();
         def.getChildrenBag().clear();
@@ -334,7 +332,7 @@ public class AlertDefinitionDAO
 
         if (sql.indexOf("subj") > 0) {
             q.setInteger("subj", subj.getId().intValue())
-                .setParameterList("ops", MANAGE_ALERTS_OPS);
+                .setParameterList("ops", AuthzConstants.VIEW_ALERTS_OPS);
         }
 
         return pInfo.pageResults(q).list();
