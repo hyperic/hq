@@ -461,6 +461,10 @@ public abstract class GenericPlugin {
         if (this.productPlugin == null) {
             this.productPlugin = getProductPlugin(getName());
         }
+        //XXX seems this is the correct name to use and the above should be removed?
+        if ((this.productPlugin == null) && (getTypeInfo() != null)) {
+            this.productPlugin = getProductPlugin(getTypeInfo().getName());
+        }
         return this.productPlugin;
     }
 
