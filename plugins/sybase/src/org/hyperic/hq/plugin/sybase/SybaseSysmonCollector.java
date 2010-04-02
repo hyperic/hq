@@ -19,7 +19,9 @@ import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.CollectorResult;
 import org.hyperic.hq.product.JDBCMeasurementPlugin;
 import org.hyperic.hq.product.Metric;
+import org.hyperic.hq.product.MetricUnreachableException;
 import org.hyperic.hq.product.MetricValue;
+import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.jdbc.DBUtil;
 
 /**
@@ -32,6 +34,27 @@ public class SybaseSysmonCollector extends Collector {
     static Log log = LogFactory.getLog(SybaseSysmonCollector.class);
     private CallableStatement stmt;
     private Connection conn = null;
+
+    protected void init() throws PluginException {
+        Properties props = getProperties();
+
+        String url = props.getProperty(JDBCMeasurementPlugin.PROP_URL, ""),
+                user = props.getProperty(JDBCMeasurementPlugin.PROP_USER, ""),
+                pass = props.getProperty(JDBCMeasurementPlugin.PROP_PASSWORD, "");
+        
+        try {
+            Connection conn = createConnection(url, user, pass);
+        } catch(SQLException e) {
+            throw new PluginException(new MetricUnreachableException("Could not connect using information provided", e));
+        } finally {
+            if (conn != null) {
+                DBUtil.closeJDBCObjects(log, conn, null, null);
+                conn = null;
+            }
+        }
+        
+        super.init();
+    }
 
     public void collect() {
 
