@@ -327,13 +327,26 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
      */
     public void updateAlertDefinitionBasic(AuthzSubject subj, Integer id, String name, String desc, int priority,
                                            boolean activate) throws PermissionException {
+        final boolean debug = log.isDebugEnabled();
+        StopWatch watch = new StopWatch();
+        
         AlertDefinition def = alertDefDao.findById(id);
         alertPermissionManager.canManageAlerts(subj, def);
-        List<AlertDefinition> alertdefs = new ArrayList<AlertDefinition>(def.getChildren().size() + 1);
+        int initCapacity = def.getChildren().size() + 1;
+        List<AlertDefinition> alertdefs = new ArrayList<AlertDefinition>(initCapacity);
+        List<Integer> defIds = new ArrayList<Integer>(initCapacity);
         alertdefs.add(def);
+        
+        if (debug) watch.markTimeBegin("getChildren");
 
         // If there are any children, add them, too
         alertdefs.addAll(def.getChildren());
+        
+        if (debug) {
+            watch.markTimeEnd("getChildren");
+            watch.markTimeBegin("updateBasic");
+        }
+        
         for (AlertDefinition child : alertdefs) {
             child.setName(name);
             child.setDescription(desc);
@@ -342,11 +355,21 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
             if (child.isActive() != activate || child.isEnabled() != activate) {
                 child.setActiveStatus(activate);
                 alertAuditFactory.enableAlert(child, subj);
-                registeredTriggerManager.setAlertDefinitionTriggersEnabled(child.getId(), activate);
+                defIds.add(def.getId());
             }
             child.setMtime(System.currentTimeMillis());
 
             applicationContext.publishEvent(new AlertDefinitionChangedEvent(child));
+        }
+        if (debug) {
+            watch.markTimeEnd("updateBasic");
+            watch.markTimeBegin("setAlertDefinitionTriggersEnabled");
+        }
+        
+        registeredTriggerManager.setAlertDefinitionTriggersEnabled(defIds, activate);
+        if (debug) {
+            watch.markTimeEnd("setAlertDefinitionTriggersEnabled");
+            log.debug("updateAlertDefinitionBasic[" + initCapacity + "]: " + watch);
         }
     }
 
@@ -500,14 +523,26 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
      */
     public void updateAlertDefinitionActiveStatus(AuthzSubject subj, AlertDefinition def, boolean activate)
         throws PermissionException {
-
+        final boolean debug = log.isDebugEnabled();
+        StopWatch watch = new StopWatch();
         alertPermissionManager.canManageAlerts(subj, def);
 
         if (def.isActive() != activate || def.isEnabled() != activate) {
             def.setActiveStatus(activate);
             def.setMtime(System.currentTimeMillis());
             alertAuditFactory.enableAlert(def, subj);
-            registeredTriggerManager.setAlertDefinitionTriggersEnabled(def.getId(), activate);
+            // process the children
+            if (debug) watch.markTimeBegin("getChildren");
+            Collection<AlertDefinition> children = def.getChildren();
+            if (debug) watch.markTimeEnd("getChildren");
+            List<Integer> defIds = new ArrayList<Integer>(children.size()+1);
+            defIds.add(def.getId());
+            for (AlertDefinition childDef : children) {
+                defIds.add(childDef.getId());
+            }
+            if (debug) watch.markTimeBegin("setAlertDefinitionTriggersEnabled");
+            registeredTriggerManager.setAlertDefinitionTriggersEnabled(defIds, activate);
+            if (debug) watch.markTimeEnd("setAlertDefinitionTriggersEnabled");
         }
 
         alertDefDao.setChildrenActive(def, activate);

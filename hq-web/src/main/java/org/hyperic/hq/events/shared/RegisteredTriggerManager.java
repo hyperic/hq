@@ -4,6 +4,7 @@
 package org.hyperic.hq.events.shared;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.events.TriggerCreateException;
@@ -33,6 +34,8 @@ public interface RegisteredTriggerManager {
      * Enable or disable triggers associated with an alert definition
      */
     public void setAlertDefinitionTriggersEnabled(Integer alertDefId, boolean enabled);
+    
+    void setAlertDefinitionTriggersEnabled(List<Integer> alertDefIds, boolean enabled);
 
     /**
      * Finds a trigger by its ID, assuming existence
