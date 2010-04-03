@@ -886,7 +886,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         // TODO: G
         Map updatedAgentInfo = client.upgrade(bundleFilePath, HQConstants.AgentBundleDropDir);
 
-        if (!updatedAgentInfo.isEmpty()) {
+        if (updatedAgentInfo != null && !updatedAgentInfo.isEmpty()) {
             // If Map is not empty, we'll handle the data otherwise we do
             // nothing
 
