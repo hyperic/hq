@@ -153,18 +153,37 @@ public class TriggerDAO
 
     @SuppressWarnings("unchecked")
     public Set<RegisteredTrigger> findAllEnabledTriggers() {
-        Dialect dialect = Util.getDialect();
-        //For performance optimization, we want to fetch each trigger's alert def as well as the alert def's conditions in a single query (as they will be used to create AlertConditionEvaluators when creating trigger impls).
-        //This query guarantees that when we do trigger.getAlertDefinition().getConditions(), the database is not hit again
-        String hql = new StringBuilder().append("from AlertDefinition ad left join fetch ad.conditionsBag c inner join fetch c.trigger where ad.enabled = ")
-                                        .append(dialect.toBooleanValueString(true))
-                                        .toString();
+        final boolean debug = log.isDebugEnabled();
+        StopWatch watch = new StopWatch();
+       
+        // For performance optimization, we want to fetch each trigger's alert
+        // def as well as the alert def's alert definition state and conditions
+        // in a single query (as they will be used to create
+        // AlertConditionEvaluators when creating trigger impls). This query
+        // guarantees that when we do trigger.getAlertDefinition().getConditions(),
+        // the database is not hit again
+        String hql = new StringBuilder(256)
+                    .append("from AlertDefinition ad ")
+                     .append("join fetch ad.alertDefinitionState ")
+                     .append("join fetch ad.conditionsBag c ")
+                    .append("join fetch c.trigger ")
+                    .append("where ad.enabled = '1'")
+                 .toString();
+        if (debug) watch.markTimeBegin("createQuery.list");
         List<AlertDefinition> alertDefs = getSession().createQuery(hql).list();
+        if (debug) watch.markTimeEnd("createQuery.list");  
+        
         Set<RegisteredTrigger> triggers = new LinkedHashSet<RegisteredTrigger>();
+        if (debug) watch.markTimeBegin("addTriggers");
+        
         for(AlertDefinition definition : alertDefs) {
             for(AlertCondition condition: definition.getConditionsBag()) {
                 triggers.add(condition.getTrigger());
             }
+        }
+        if (debug) {
+            watch.markTimeEnd("addTriggers");
+            log.debug("findAllEnabledTriggers: " + watch);
         }
         return triggers;
     }
