@@ -70,6 +70,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class TemplateManagerImpl implements TemplateManager {
+    private static final int ALIAS_LIMIT = 100;
     private final Log log = LogFactory.getLog(TemplateManagerImpl.class);
     private CategoryDAO categoryDAO;
     private MeasurementDAO measurementDAO;
@@ -509,7 +510,12 @@ public class TemplateManagerImpl implements TemplateManager {
                     stmt = conn.prepareStatement(templatesql);
                     stmt.setInt(col++, rawid.intValue());
                     stmt.setString(col++, info.getName());
-                    stmt.setString(col++, info.getAlias());
+                    String truncatedAlias = info.getAlias().substring(0, ALIAS_LIMIT);
+                    if (truncatedAlias.length() < info.getAlias().length()) {
+                        log.warn("ALIAS field of EAM_MEASUREMENT_TEMPLATE truncated: original value was " +
+                            info.getAlias() + ", truncated value is " + truncatedAlias);
+                    }
+                    stmt.setString(col++, truncatedAlias);
                     stmt.setString(col++, info.getUnits());
                     stmt.setInt(col++, info.getCollectionType());
                     stmt.setBoolean(col++, info.isDefaultOn());

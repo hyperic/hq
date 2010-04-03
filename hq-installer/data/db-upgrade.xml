@@ -9917,6 +9917,8 @@ has already been defined.
   
   <schemaSpec version="3.151">
   	    <export-counters exportDir="${jboss.home}"/>
+  	    <schema-addColumn table="EAM_EVENT_LOG" column="INSTANCE_ID" columnType="INTEGER">               
+ 		</schema-addColumn>
   	    <schema-directSQL>
   	      <statement desc="Convert frequency type of DURATION to frequency type EVERYTIME">
   	        UPDATE EAM_ALERT_DEFINITION SET FREQUENCY_TYPE = 0 WHERE FREQUENCY_TYPE = 1
@@ -10810,6 +10812,10 @@ has already been defined.
         ALTER TABLE EAM_AGENT DROP INDEX ADDRESS
       </statement>
     </schema-directSQL>  
+  </schemaSpec>
+  
+  <schemaSpec version="3.191">
+ 	<schema-alterColumn table="EAM_MEASUREMENT_TEMPL" column="alias"  precision="100" columnType="VARCHAR2" nullable="NOT NULL" />
   </schemaSpec>
 
 </dbupgrade>
