@@ -383,14 +383,15 @@ public class PermissionManagerImpl
         return getResourceDAO().findSvcRes_orderName(fsystem);
     }
 
-    public RolePermNativeSQL getRolePermissionNativeSQL(String resourceVar, String subjectParam,
-                                                        String opListParam) {
+    public RolePermNativeSQL getRolePermissionNativeSQL(String resourceVar, String eventLogVar, String subjectParam,
+                                                        String opListViewResourcesParam,
+                                                        String opListManageAlertsParam) {
         return new RolePermNativeSQL() {
             public String getSQL() {
                 return "";
             }
 
-            public Query bindParams(Query q, AuthzSubject subject, List ops) {
+            public Query bindParams(Query q, AuthzSubject subject, List opsViewResources, List opsManageAlerts) {
                 return q;
             }
         };

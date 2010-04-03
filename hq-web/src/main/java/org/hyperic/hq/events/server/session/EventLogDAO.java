@@ -73,6 +73,13 @@ public class EventLogDAO
                               AuthzConstants.serverOpViewServer,
                               AuthzConstants.serviceOpViewService,
                               AuthzConstants.groupOpViewResourceGroup, });
+    
+    private static final List<String> MANAGE_ALERT_PERMISSIONS = Arrays.asList(new String[] {
+                             AuthzConstants.platformOpManageAlerts,
+                             AuthzConstants.serverOpManageAlerts,
+                             AuthzConstants.serviceOpManageAlerts,
+                             AuthzConstants.groupOpManageAlerts
+    });
 
     @Autowired
     public EventLogDAO(SessionFactory f, PermissionManager permissionManager) {
@@ -141,7 +148,7 @@ public class EventLogDAO
         String groupFilterSql;
 
         RolePermNativeSQL roleSql = PermissionManagerFactory.getInstance()
-            .getRolePermissionNativeSQL("r", "subject", "opList");
+            .getRolePermissionNativeSQL("r", "e", "subject", "opListVR", "opListMA");
 
         if (inGroups == null || inGroups.isEmpty())
             groupFilterSql = "";
@@ -179,7 +186,7 @@ public class EventLogDAO
 
         Query q = getSession().createSQLQuery(sql).addEntity("e", EventLog.class).setLong("begin",
             begin).setLong("end", end).setInteger("maxStatus", maxStatus.getCode());
-        roleSql.bindParams(q, subject, VIEW_PERMISSIONS);
+        roleSql.bindParams(q, subject, VIEW_PERMISSIONS, MANAGE_ALERT_PERMISSIONS);
 
         if (typeClass != null) {
             q.setString("type", typeClass);
