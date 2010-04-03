@@ -463,6 +463,9 @@ public class EventsBossImpl implements EventsBoss, ApplicationListener<Applicati
         adval.setAppdefType(aetid.getType());
         adval.setAppdefId(aetid.getId());
         adval.setParentId(EventConstants.TYPE_ALERT_DEF_ID);
+        
+        // Create a measurement AlertLogAction if necessary
+        setMetricAlertAction(adval);
 
         // Now create the alert definition
         parent = alertDefinitionManager.createAlertDefinition(subject, adval);
@@ -518,14 +521,26 @@ public class EventsBossImpl implements EventsBoss, ApplicationListener<Applicati
             // Make sure the actions have the proper parentId
             cloneParentActions(id, adval, parent.getActions());
 
-            // Create a measurement AlertLogAction if necessary
-            setMetricAlertAction(adval);
-
             // Now create the alert definition
             alertDefinitionManager.createAlertDefinition(subject, adval);
         }
 
         return parent;
+    }
+    
+   /**
+    * Get the MetricAlertAction ActionValue from an
+    * AlertDefinitionValue.  If none exists, return null.
+    */
+    private ActionValue getMetricAlertAction(AlertDefinitionValue adv) {
+        ActionValue[] actions = adv.getActions();
+        for (int i = 0; i < actions.length; ++i) {
+            String actionClass = actions[i].getClassname();
+            if (MetricAlertAction.class.getName().equals(actionClass)) {
+                return actions[i];
+            }
+        }
+        return null;
     }
 
     private void setMetricAlertAction(AlertDefinitionValue adval) {
@@ -534,19 +549,25 @@ public class EventsBossImpl implements EventsBoss, ApplicationListener<Applicati
             if (conds[i].getType() == EventConstants.TYPE_THRESHOLD ||
                 conds[i].getType() == EventConstants.TYPE_BASELINE ||
                 conds[i].getType() == EventConstants.TYPE_CHANGE) {
-                ActionValue action = new ActionValue();
-                action.setClassname(MetricAlertAction.class.getName());
+                ActionValue action = getMetricAlertAction(adval);
+                 
+                // if MetricAlertAction doesn't exist, add one
+                 if (action == null) {
+                     action = new ActionValue();
+                     action.setClassname(MetricAlertAction.class.getName());
 
-                ConfigResponse config = new ConfigResponse();
-                try {
-                    action.setConfig(config.encode());
-                } catch (EncodingException e) {
-                    // This should never happen
-                    log.error("Empty ConfigResponse threw an encoding error", e);
-                }
+                    ConfigResponse config = new ConfigResponse();
+                    try {
+                        action.setConfig(config.encode());
+                    } catch (EncodingException e) {
+                        // This should never happen
+                        log.error("Empty ConfigResponse threw an encoding error", e);
+                    }
 
-                adval.addAction(action);
+                    adval.addAction(action);
+                 }
                 break;
+   
             }
         }
     }
@@ -747,6 +768,8 @@ public class EventsBossImpl implements EventsBoss, ApplicationListener<Applicati
         if (EventConstants.TYPE_ALERT_DEF_ID.equals(adval.getParentId()) ||
             adval.getAppdefType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
             // A little more work to do for group and type alert definition
+            // Create a measurement AlertLogAction if necessary
+            setMetricAlertAction(adval);
             adval = alertDefinitionManager.updateAlertDefinition(adval);
 
             List<AlertDefinitionValue> children = alertDefinitionManager
@@ -792,6 +815,9 @@ public class EventsBossImpl implements EventsBoss, ApplicationListener<Applicati
             // Now create the new triggers
             createTriggers(subject, adval);
             triggers.addAll(Arrays.asList(adval.getTriggers()));
+            
+            // Create a measurement AlertLogAction if necessary
+            setMetricAlertAction(adval);
 
             // Now update the alert definition
             alertDefinitionManager.updateAlertDefinition(adval);
