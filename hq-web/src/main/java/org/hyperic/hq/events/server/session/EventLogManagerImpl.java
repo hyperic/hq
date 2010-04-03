@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,12 +43,14 @@ import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.events.AbstractEvent;
+import org.hyperic.hq.events.AlertFiredEvent;
 import org.hyperic.hq.events.EventLogStatus;
 import org.hyperic.hq.events.ResourceEventInterface;
 import org.hyperic.hq.events.server.session.EventLogDAO.ResourceEventLog;
 import org.hyperic.hq.events.shared.EventLogManager;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.product.TrackEvent;
+import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,6 +69,8 @@ public class EventLogManagerImpl implements EventLogManager {
     private static final int SRCMAX = TrackEvent.SOURCE_MAXLEN;
 
     private final Log log = LogFactory.getLog(EventLogManagerImpl.class.getName());
+    
+    private final Log traceLog = LogFactory.getLog(EventLogManagerImpl.class.getName() + "Trace");
 
     private EventLogDAO eventLogDAO;
 
@@ -111,7 +116,7 @@ public class EventLogManagerImpl implements EventLogManager {
             }
         }
 
-        EventLog e = new EventLog(r, subject, event.getClass().getName(), detail, event.getTimestamp(), status);
+        EventLog e = new EventLog(r, subject, event.getClass().getName(), detail, event.getTimestamp(), status, event.getInstanceId());
         if (save) {
             return eventLogDAO.create(e);
         } else {
@@ -129,6 +134,16 @@ public class EventLogManagerImpl implements EventLogManager {
     public void insertEventLogs(EventLog[] eventLogs) {
         eventLogDAO.insertLogs(eventLogs);
     }
+    
+    /**
+     * Finds a unique log entry with the specified event type, instance ID, and timestamp.  Returns null if no such entry found.  
+     * If multiple entries are found, returns first one found.
+     * 
+     */
+    @Transactional(readOnly=true)
+    public EventLog findLog(String typeClass, int instanceId, long timestamp) {
+        return eventLogDAO.findLog(typeClass, instanceId, timestamp);
+    }
 
     /**
      * Find the last event logs of all the resources of a given prototype. (i.e.
@@ -139,6 +154,38 @@ public class EventLogManagerImpl implements EventLogManager {
     @Transactional(readOnly=true)
     public List<EventLog> findLastLogs(Resource proto) {
         return eventLogDAO.findLastByType(proto);
+    }
+    
+    /**
+     * Find the last unfixed AlertFiredEvents for each alert definition in the list
+     * 
+     * 
+     * @return {@link Map} of alert definition id {@link Integer} to {@link AlertFiredEvent}
+     * 
+     */
+    @Transactional(readOnly=true)
+    public Map<Integer,AlertFiredEvent> findLastUnfixedAlertFiredEvents() {
+        final boolean debug = log.isDebugEnabled();
+        StopWatch watch = new StopWatch();
+        if (debug) watch.markTimeBegin("findUnfixedAlertFiredEventLogs");
+        Map<Integer,AlertFiredEvent> alertFiredMap = eventLogDAO.findUnfixedAlertFiredEventLogs();
+        if (debug) {
+            watch.markTimeEnd("findUnfixedAlertFiredEventLogs");
+            if (traceLog.isDebugEnabled()) {
+                watch.markTimeBegin("get mapping");
+                for (Integer key: alertFiredMap.keySet()) {
+                    AlertFiredEvent val = alertFiredMap.get(key);
+                    traceLog.debug(
+                            "alertFiredMap alertDefId=" + key
+                                + ", alertFiredEvent=" + val
+                                + ", alert id=" + val.getAlertId()
+                                + ", timestamp=" + val.getTimestamp());
+                }
+                watch.markTimeEnd("get mapping");
+            }
+            log.debug("findLastUnfixedAlertFiredEvents[" + alertFiredMap.size() + "]: " + watch);
+        }
+        return alertFiredMap;
     }
 
     /**

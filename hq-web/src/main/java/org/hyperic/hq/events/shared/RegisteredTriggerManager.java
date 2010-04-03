@@ -28,7 +28,7 @@ public interface RegisteredTriggerManager {
      * Initialize the in-memory triggers and update the RegisteredTriggers
      * repository
      */
-    public void initializeTriggers(RegisterableTriggerRepository registeredTriggerRepository);
+    public void initializeTriggers();
 
     /**
      * Enable or disable triggers associated with an alert definition

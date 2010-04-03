@@ -70,6 +70,8 @@ public interface AlertManager {
      * @throws PermissionException
      */
     public Alert findLastFixedByDefinition(AlertDefinition def);
+    
+    Alert findLastByDefinition(Integer id);
 
     /**
      * Get the # of alerts within HQ inventory

@@ -262,6 +262,22 @@ public class AlertManagerImpl implements AlertManager {
             return null;
         }
     }
+    
+    /**
+     * Find the last alert by definition ID
+     * @throws PermissionException
+     *
+     *
+     */
+    @Transactional(readOnly = true)
+    public Alert findLastByDefinition(Integer id) {
+        try {
+            AlertDefinition def = alertDefDao.findById(id);
+            return alertDAO.findLastByDefinition(def);
+        } catch (Exception e) {
+            return null;
+        }
+    }
 
     /**
      * Get the # of alerts within HQ inventory

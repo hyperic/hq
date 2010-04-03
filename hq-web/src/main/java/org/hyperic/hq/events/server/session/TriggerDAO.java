@@ -16,15 +16,23 @@
  */
 package org.hyperic.hq.events.server.session;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 import org.hibernate.dialect.Dialect;
+import org.hibernate.type.IntegerType;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
+import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -33,6 +41,8 @@ import org.springframework.stereotype.Repository;
 public class TriggerDAO
     extends HibernateDAO<RegisteredTrigger> implements TriggerDAOInterface
 {
+    private final Log log = LogFactory.getLog(TriggerDAO.class);
+    
     @Autowired
     public TriggerDAO(SessionFactory sessionFactory) {
         super(RegisteredTrigger.class, sessionFactory);
@@ -90,6 +100,77 @@ public class TriggerDAO
 
         return getSession().createQuery(sql).setParameter("defId", id).list();
     }
+    
+    /**
+     * Find all the registered trigger ids associated with the alert definition ids.
+     *
+     * @param alertDefIds The alert definition ids.
+     * @return {@link Map} of alert definition id {@link Integer} 
+     *          to {@link List} of trigger id {@link Integer}
+     */
+    @SuppressWarnings("unchecked")
+    public Map<Integer,List<Integer>> findTriggerIdsByAlertDefinitionIds(List<Integer> alertDefIds) {
+        if (alertDefIds.isEmpty()) {
+            return new HashMap<Integer,List<Integer>>(0,1);
+        }
+ 
+        final boolean debug = log.isDebugEnabled();
+        StopWatch watch = new StopWatch();
+
+        final String sql = 
+            new StringBuilder()
+                    .append("SELECT T.ALERT_DEFINITION_ID AS ALERT_DEF_ID, ")
+                    .append("T.ID AS TRIGGER_ID ")
+                    .append("FROM EAM_REGISTERED_TRIGGER T ")
+                    .append("WHERE T.ALERT_DEFINITION_ID IN (:alertDefIds) ")
+                    .toString();
+        
+        Query query = getSession().createSQLQuery(sql)
+                            .addScalar("ALERT_DEF_ID", new IntegerType())
+                            .addScalar("TRIGGER_ID", new IntegerType());
+        
+        List<Object[]> triggers = new ArrayList<Object[]>(alertDefIds.size());
+        int batchSize = 1000;
+        
+        if (debug) watch.markTimeBegin("createQuery.list");
+
+        for (int i=0; i<alertDefIds.size(); i+=batchSize) {
+            int end = Math.min(i+batchSize, alertDefIds.size());
+            List<Integer> list = alertDefIds.subList(i, end);
+            query.setParameterList("alertDefIds", list, new IntegerType());
+            triggers.addAll(query.list());
+        }
+
+        if (debug) watch.markTimeEnd("createQuery.list");
+
+        Map<Integer,List<Integer>> alertDefTriggerMap = new HashMap<Integer,List<Integer>>(alertDefIds.size());
+        
+        if (debug) watch.markTimeBegin("buildMap");
+
+        for (Object[] o : triggers) { 
+            Integer alertDefId = (Integer) o[0];
+            Integer triggerId = (Integer) o[1];
+
+            List<Integer> trigList = alertDefTriggerMap.get(alertDefId);
+            
+            if (trigList == null) {
+                trigList = new ArrayList<Integer>();
+                alertDefTriggerMap.put(alertDefId, trigList);
+            }
+            trigList.add(triggerId);
+        }
+        
+        if (debug) {
+            watch.markTimeEnd("buildMap");
+            log.debug("findTriggerIdsByAlertDefinitionIds: " + watch
+                            + ", alert definition ids size=" + alertDefIds.size()
+                            + ", trigger ids size=" + triggers.size()
+                            + ", map size=" + alertDefTriggerMap.size());
+        }
+        
+        return alertDefTriggerMap;
+    }
+
 
 
     @SuppressWarnings("unchecked")

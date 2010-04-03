@@ -30,7 +30,7 @@ import java.util.concurrent.ScheduledFuture;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.autoinventory.server.session.AgentAIScanService;
-import org.hyperic.hq.events.ext.RegisterableTriggerRepository;
+import org.hyperic.hq.events.shared.RegisteredTriggerManager;
 import org.hyperic.hq.ha.HAService;
 import org.hyperic.hq.measurement.server.session.AvailabilityCheckService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,20 +51,20 @@ public class HAServiceImpl implements HAService {
     private TaskScheduler scheduler;
     private AvailabilityCheckService availabilityCheckService;
     private AgentAIScanService agentAIScanService;
-    private RegisterableTriggerRepository registeredTriggerRepository;
     private ScheduledFuture<?> backfillTask;
     private ScheduledFuture<?> notifyAgentsTask;
-    private static boolean isFirstPass = true;
+    private RegisteredTriggerManager registeredTriggerManager;
+   
 
     @Autowired
     public HAServiceImpl(TaskScheduler scheduler,
                          AvailabilityCheckService availabilityCheckService,
                          AgentAIScanService agentAIScanService,
-                         RegisterableTriggerRepository registeredTriggerRepository) {
+                         RegisteredTriggerManager registeredTriggerManager) {
         this.scheduler = scheduler;
         this.availabilityCheckService = availabilityCheckService;
         this.agentAIScanService = agentAIScanService;
-        this.registeredTriggerRepository = registeredTriggerRepository;
+        this.registeredTriggerManager = registeredTriggerManager;
     }
 
     /**
@@ -72,13 +72,7 @@ public class HAServiceImpl implements HAService {
      * have to be started programmatically once we know if HA is enabled
      */
     public void start() {
-        if (!HAServiceImpl.isFirstPass) {
-            // RegisteredTriggers already does a startup initialization
-            // don't want to reset that.
-            registeredTriggerRepository.init();
-        } else {
-            HAServiceImpl.isFirstPass = false;
-        }
+        registeredTriggerManager.initializeTriggers();
         // If this node was designated as a slave b/c of connectivity loss (not
         // server crash), then we don't want to schedule another round of tasks
         // once it becomes master again

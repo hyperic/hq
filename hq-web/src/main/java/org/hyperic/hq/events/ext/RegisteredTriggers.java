@@ -28,11 +28,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.annotation.PostConstruct;
-
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.server.session.AlertRegulator;
-import org.hyperic.hq.events.shared.RegisteredTriggerManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -50,14 +47,10 @@ public class RegisteredTriggers implements RegisterableTriggerRepository {
 
     private Map<TriggerEventKey, Map<Integer, RegisterableTriggerInterface>> triggers = new ConcurrentHashMap<TriggerEventKey, Map<Integer, RegisterableTriggerInterface>>();
 
-    private RegisteredTriggerManager registeredTriggerManager;
-
     private AlertRegulator alertRegulator;
 
     @Autowired
-    public RegisteredTriggers(RegisteredTriggerManager registeredTriggerManager,
-                              AlertRegulator alertRegulator) {
-        this.registeredTriggerManager = registeredTriggerManager;
+    public RegisteredTriggers(AlertRegulator alertRegulator) {
         this.alertRegulator = alertRegulator;
 
     }
@@ -65,11 +58,9 @@ public class RegisteredTriggers implements RegisterableTriggerRepository {
     Map<TriggerEventKey, Map<Integer, RegisterableTriggerInterface>> getTriggers() {
         return this.triggers;
     }
-
-    @PostConstruct
+   
     public void init() {
         this.triggers = new ConcurrentHashMap<TriggerEventKey, Map<Integer, RegisterableTriggerInterface>>();
-        registeredTriggerManager.initializeTriggers(this);
     }
 
     public Collection<RegisterableTriggerInterface> getInterestedTriggers(Class<?> eventClass,

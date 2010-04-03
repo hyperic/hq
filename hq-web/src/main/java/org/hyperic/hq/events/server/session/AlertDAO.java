@@ -210,6 +210,18 @@ public class AlertDAO
             return null;
         }
     }
+    
+    public Alert findLastByDefinition(AlertDefinition def) {
+        try {
+            return (Alert) createCriteria()
+                .add(Restrictions.eq("alertDefinition", def))
+                .addOrder(Order.desc("ctime"))
+                .setMaxResults(1)
+                .uniqueResult();
+        } catch (Exception e) {
+            return null;
+        }
+    }
 
     int deleteByAlertDefinition(AlertDefinition def) {
         String sql = "DELETE FROM Alert WHERE alertDefinition = :alertDef";
