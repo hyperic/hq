@@ -35,6 +35,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.common.DiagnosticObject;
 import org.hyperic.hq.events.server.session.AlertConditionEvaluator;
 import org.hyperic.hq.events.server.session.AlertConditionEvaluatorRepository;
+import org.hyperic.hq.events.server.session.RecoveryConditionEvaluator;
 import org.hyperic.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jmx.export.annotation.ManagedOperation;
@@ -88,6 +89,11 @@ public class AlertConditionEvaluatorDiagnosticService
             val.evaluatorCount++;
             if (alertConditionEvaluator.getState() != null) {
                 val.evaluatorStateCount++;
+            }else if (alertConditionEvaluator instanceof RecoveryConditionEvaluator){
+                RecoveryConditionEvaluator rce = (RecoveryConditionEvaluator) alertConditionEvaluator;
+                if (rce.getLastAlertFired() != null) {
+                    val.evaluatorStateCount++;
+                }
             }
             if (alertConditionEvaluator.getExecutionStrategy().getState() != null) {
                 val.strategyStateCount++;
@@ -163,8 +169,14 @@ public class AlertConditionEvaluatorDiagnosticService
                         
             if (alertConditionEvaluator != null) {
                 evaluatorClassName = alertConditionEvaluator.getClass().getName();
-                alertConditionEvaluatorState = alertConditionEvaluator.getState();
+               
                 executionStrategyState = alertConditionEvaluator.getExecutionStrategy().getState();
+                if (alertConditionEvaluator instanceof RecoveryConditionEvaluator) {
+                    RecoveryConditionEvaluator rce = (RecoveryConditionEvaluator) alertConditionEvaluator;
+                    alertConditionEvaluatorState = rce.getLastAlertFired();                   
+                } else {
+                    alertConditionEvaluatorState = alertConditionEvaluator.getState();
+                }
             }
         
             res.append("<tr><td>" + id + "</td>");

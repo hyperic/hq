@@ -7,7 +7,6 @@ import java.util.Collection;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.events.TriggerCreateException;
-import org.hyperic.hq.events.ext.RegisterableTriggerRepository;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.RegisteredTrigger;
 import org.hyperic.hq.events.server.session.TriggersCreatedZevent;
@@ -57,13 +56,19 @@ public interface RegisteredTriggerManager {
         InvalidOptionException, InvalidOptionValueException;
 
     /**
-     * Delete all triggers for an alert definition.
-     */
-    public void deleteAlertDefinitionTriggers(Integer adId);
-
-    /**
      * Completely deletes all triggers when an alert definition is deleted
      */
     public void deleteTriggers(AlertDefinition alertDef);
+    
+    /**
+     * Delete all triggers for an alert definition.
+     *
+     * @param adId The alert definition id
+     * 
+     * 
+     */
+    public void deleteTriggers(Integer adId);
+    
+    
 
 }
