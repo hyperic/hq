@@ -776,7 +776,7 @@ public class EventsBossImpl implements EventsBoss, ApplicationListener<Applicati
                 child.setControlFiltered(adval.getControlFiltered());
 
                 // Triggers are deleted by the manager
-                registeredTriggerManager.deleteAlertDefinitionTriggers(child.getId());
+                registeredTriggerManager.deleteTriggers(child.getId());
                 child.removeAllTriggers();
                 createTriggers(subject, child);
                 triggers.addAll(Arrays.asList(adval.getTriggers()));
@@ -786,7 +786,7 @@ public class EventsBossImpl implements EventsBoss, ApplicationListener<Applicati
             }
         } else {
             // First, get rid of the current triggers
-            registeredTriggerManager.deleteAlertDefinitionTriggers(adval.getId());
+            registeredTriggerManager.deleteTriggers(adval.getId());
             adval.removeAllTriggers();
 
             // Now create the new triggers
@@ -1501,7 +1501,6 @@ public class EventsBossImpl implements EventsBoss, ApplicationListener<Applicati
         throws SessionNotFoundException, SessionTimeoutException, PermissionException,
         SchedulerException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
-        event.setModifiedBy(subject.getName());
 
         return getMaintenanceEventManager().schedule(subject, event);
     }

@@ -92,8 +92,6 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
 
     private AlertConditionDAO alertConditionDAO;
 
-    private TriggerDAO triggerDAO;
-
     private MeasurementDAO measurementDAO;
 
     private RegisteredTriggerManager registeredTriggerManager;
@@ -108,7 +106,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
 
     @Autowired
     public AlertDefinitionManagerImpl(AlertPermissionManager alertPermissionManager, AlertDefinitionDAO alertDefDao,
-                                      ActionDAO actionDao, AlertConditionDAO alertConditionDAO, TriggerDAO triggerDAO,
+                                      ActionDAO actionDao, AlertConditionDAO alertConditionDAO, 
                                       MeasurementDAO measurementDAO, RegisteredTriggerManager registeredTriggerManager,
                                       ResourceManager resourceManager, EscalationManager escalationManager,
                                       AlertAuditFactory alertAuditFactory) {
@@ -116,7 +114,6 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
         this.alertDefDao = alertDefDao;
         this.actionDao = actionDao;
         this.alertConditionDAO = alertConditionDAO;
-        this.triggerDAO = triggerDAO;
         this.measurementDAO = measurementDAO;
         this.registeredTriggerManager = registeredTriggerManager;
         this.resourceManager = resourceManager;
@@ -154,6 +151,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
      */
     private boolean deleteAlertDefinition(AuthzSubject subj, AlertDefinition alertdef, boolean force)
         throws PermissionException {
+        final boolean debug = log.isDebugEnabled();
         StopWatch watch = new StopWatch();
 
         if (force) { // Used when resources are being deleted
@@ -161,27 +159,33 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
             alertdef.setResource(null);
         } else {
             // If there are any children, delete them, too
-            watch.markTimeBegin("delete children");
+            if(debug){
+                watch.markTimeBegin("delete children");
+            }
             List<AlertDefinition> childBag = new ArrayList<AlertDefinition>(alertdef.getChildrenBag());
             for (AlertDefinition child : childBag) {
                 deleteAlertDefinitionStuff(subj, child, escalationManager);
                 registeredTriggerManager.deleteTriggers(child);
             }
+            if (debug) watch.markTimeBegin("deleteByAlertDefinition");
             alertDefDao.deleteByAlertDefinition(alertdef);
-            watch.markTimeEnd("delete children");
+            if(debug) {
+                watch.markTimeEnd("deleteByAlertDefinition");
+                watch.markTimeEnd("delete children");
+            }
         }
 
         deleteAlertDefinitionStuff(subj, alertdef, escalationManager);
 
-        watch.markTimeBegin("deleteTriggers");
-        triggerDAO.deleteAlertDefinition(alertdef);
-        watch.markTimeBegin("deleteTriggers");
+        if (debug)  watch.markTimeBegin("deleteTriggers");
+        registeredTriggerManager.deleteTriggers(alertdef);
+        if(debug) watch.markTimeBegin("deleteTriggers");
 
-        watch.markTimeBegin("markActionsDeleted");
+        if(debug) watch.markTimeBegin("markActionsDeleted");
         actionDao.deleteAlertDefinition(alertdef);
-        watch.markTimeBegin("markActionsDeleted");
+        if(debug) watch.markTimeBegin("markActionsDeleted");
 
-        watch.markTimeBegin("mark deleted");
+        if(debug) watch.markTimeBegin("mark deleted");
         // Disassociated from escalations
         alertdef.setEscalation(null);
         alertdef.setDeleted(true);
@@ -190,9 +194,10 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
         // This must be at the very end since we use the parent to determine
         // whether or not this is a resource type alert definition.
         alertdef.setParent(null);
-        watch.markTimeEnd("mark deleted");
+        
 
-        if (log.isDebugEnabled()) {
+        if (debug) {
+            watch.markTimeEnd("mark deleted");
             log.debug("deleteAlertDefinition: " + watch);
         }
 

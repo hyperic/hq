@@ -14,8 +14,6 @@ public interface TriggerDAOInterface {
 
     RegisteredTrigger create(RegisteredTriggerValue createInfo);
 
-    void deleteAlertDefinition(AlertDefinition def);
-
     List<RegisteredTrigger> findAll();
 
     List<RegisteredTrigger> findByAlertDefinitionId(Integer id);
@@ -24,7 +22,6 @@ public interface TriggerDAOInterface {
 
     RegisteredTrigger get(Integer id);
 
-    void removeTriggers(AlertDefinition def);
 
     Set<RegisteredTrigger> findAllEnabledTriggers();
     

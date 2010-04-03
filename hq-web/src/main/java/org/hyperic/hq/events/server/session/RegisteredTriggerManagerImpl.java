@@ -727,25 +727,29 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
         return trigger;
     }
 
+ 
     /**
      * Delete all triggers for an alert definition.
+     *
+     * @param adId The alert definition id
      * 
      * 
      */
-    public void deleteAlertDefinitionTriggers(Integer adId) {
-        AlertDefinition def = alertDefinitionDAO.findById(adId);
-        unregisterTriggers(adId, def.getTriggers());
-        triggerDAO.removeTriggers(def);
+    public void deleteTriggers(Integer adId) {
+        AlertDefinition def = alertDefinitionDAO.findById(adId);        
+        deleteTriggers(def);
     }
 
     /**
      * Completely deletes all triggers when an alert definition is deleted
+     *
+     * @param alertDef The alert definition
      * 
      * 
      */
     public void deleteTriggers(AlertDefinition alertDef) {
         unregisterTriggers(alertDef.getId(), alertDef.getTriggers());
-        triggerDAO.deleteAlertDefinition(alertDef);
+        alertDef.clearTriggers();
     }
 
     void setRegisteredTriggerRepository(RegisterableTriggerRepository registeredTriggerRepository) {

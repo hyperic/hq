@@ -446,6 +446,13 @@ public class AlertDefinition
     }
 
     void clearTriggers() {
+        for (Iterator it = _conditions.iterator(); it.hasNext();) {
+            AlertCondition cond = (AlertCondition) it.next();
+            cond.setTrigger(null);
+        }
+        // the triggersBag parent-child relationship is set to
+        // cascade="all-delete-orphan", so clearing the triggers
+        // collection will also delete the triggers from the db
         _triggers.clear();
     }
 
