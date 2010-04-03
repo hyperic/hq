@@ -510,7 +510,9 @@ public class ServerConfig
 
     public static final String[] MARKER_FILES = { "bin/hq-server.sh",
                                                  "bin/hq-server.exe",
-                                                 "bin/hq-server.bat" };
+                                                 "bin/hq-server.bat",
+                                                 "bin/ams-server.sh",
+                                                 "bin/ams-server.exe"};
 
     protected String[] getMarkerFiles() {
         return MARKER_FILES;
