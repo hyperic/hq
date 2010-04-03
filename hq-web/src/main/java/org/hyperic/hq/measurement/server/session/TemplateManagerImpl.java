@@ -510,12 +510,13 @@ public class TemplateManagerImpl implements TemplateManager {
                     stmt = conn.prepareStatement(templatesql);
                     stmt.setInt(col++, rawid.intValue());
                     stmt.setString(col++, info.getName());
-                    String truncatedAlias = info.getAlias().substring(0, ALIAS_LIMIT);
-                    if (truncatedAlias.length() < info.getAlias().length()) {
+                    String alias = info.getAlias();
+                    if (alias.length() > ALIAS_LIMIT) {
+                        alias = alias.substring(0, ALIAS_LIMIT);
                         log.warn("ALIAS field of EAM_MEASUREMENT_TEMPLATE truncated: original value was " +
-                            info.getAlias() + ", truncated value is " + truncatedAlias);
+                            info.getAlias() + ", truncated value is " + alias);
                     }
-                    stmt.setString(col++, truncatedAlias);
+                    stmt.setString(col++, alias);
                     stmt.setString(col++, info.getUnits());
                     stmt.setInt(col++, info.getCollectionType());
                     stmt.setBoolean(col++, info.isDefaultOn());
