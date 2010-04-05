@@ -44,9 +44,6 @@ public class MxNotificationPlugin
 
         super.configure(config);
 
-        //no concept of log levels in JMX notifications
-        setLogLevel(LOGLEVEL_INFO);
-
         this.listener =
             MxNotificationListener.getInstance(this);
 
@@ -88,6 +85,6 @@ public class MxNotificationPlugin
     }
 
     protected boolean supportsLogLevels() {
-        return false;
+        return true;
     }
 }
