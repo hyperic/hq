@@ -43,14 +43,9 @@ public class SybaseSysmonCollector extends Collector {
                 pass = props.getProperty(JDBCMeasurementPlugin.PROP_PASSWORD, "");
         
         try {
-            Connection conn = createConnection(url, user, pass);
+            conn = createConnection(url, user, pass);
         } catch(SQLException e) {
-            throw new PluginException(new MetricUnreachableException("Could not connect using information provided", e));
-        } finally {
-            if (conn != null) {
-                DBUtil.closeJDBCObjects(log, conn, null, null);
-                conn = null;
-            }
+            throw new PluginException("Create connection failed:" + e.getMessage(), e);
         }
         
         super.init();
