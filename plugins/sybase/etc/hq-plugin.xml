@@ -44,9 +44,6 @@
   <property name="template-config"
             value="jdbcUrl=%jdbcUrl%,jdbcUser=%jdbcUser%,jdbcPassword=%jdbcPassword%"/>
 
-  <filter name="sysmon_script"
-          value="pdk/work/scripts/sybase/get_sysmon_stats.pl"/>
-
   <filter name="template"
           value="${domain}:Type=Server:${alias}"/>
   <metrics name="ServerMetrics">
@@ -404,7 +401,6 @@
       <b>NOTES:</b>
       <ul>
       	<li>To configure the jdbcUrl, specifiy the fully qualified domain name or IP address of the host machine. The use of localhost is invalid.</li>
-	      <li>On Windows install <a href="http://www.activestate.com/activeperl">ActivePerl</a> and bind the extension .pl to automatically execute perl when the file type is invoked.</li>
 	   </ul>
     </p>
     ]]>
