@@ -227,7 +227,7 @@
 
     <config type="measurement">
       <option name="jdbcUrl"
-              description="JDBC Url (NOTE: localhost may not work)"
+              description="JDBC Url (NOTE: Use fqdn or IP, localhost is invalid)"
               default="jdbc:sybase:Tds:localhost:4100"/>
       <option name="jdbcUser"
               description="JDBC User"

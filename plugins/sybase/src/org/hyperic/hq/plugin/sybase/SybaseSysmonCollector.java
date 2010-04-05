@@ -19,7 +19,6 @@ import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.CollectorResult;
 import org.hyperic.hq.product.JDBCMeasurementPlugin;
 import org.hyperic.hq.product.Metric;
-import org.hyperic.hq.product.MetricUnreachableException;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.jdbc.DBUtil;
