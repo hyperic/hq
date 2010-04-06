@@ -27,9 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
-import org.hibernate.dialect.Dialect;
 import org.hibernate.type.IntegerType;
-import org.hyperic.hibernate.Util;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.util.timer.StopWatch;
@@ -168,6 +166,7 @@ public class TriggerDAO
                      .append("join fetch ad.conditionsBag c ")
                     .append("join fetch c.trigger ")
                     .append("where ad.enabled = '1'")
+                    .append("and ad.deleted = '0' ")
                  .toString();
         if (debug) watch.markTimeBegin("createQuery.list");
         List<AlertDefinition> alertDefs = getSession().createQuery(hql).list();
