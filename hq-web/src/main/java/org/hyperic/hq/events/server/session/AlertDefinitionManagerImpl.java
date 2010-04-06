@@ -19,6 +19,7 @@ package org.hyperic.hq.events.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -589,10 +590,42 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
     public boolean updateAlertDefinitionInternalEnable(AuthzSubject subj, Integer defId, boolean enable)
         throws PermissionException {
 
-        AlertDefinition def = alertDefDao.get(defId);
-
-        return updateAlertDefinitionInternalEnable(subj, def, enable);
+        return updateAlertDefinitionInternalEnable(subj, Collections.singletonList(defId), enable);
     }
+    
+    /**
+         * Enable/Disable an alert definition. For internal use only where the mtime
+         * does not need to be reset on each update.
+         *
+         * @return <code>true</code> if the enable/disable succeeded.
+         */
+        public boolean updateAlertDefinitionInternalEnable(AuthzSubject subj,
+                                                           List<Integer> ids,
+                                                           boolean enable)
+            throws PermissionException {
+     
+          
+            List<Integer> triggerDefIds = new ArrayList<Integer>(ids.size());
+            
+            for (Integer alertDefId : ids ) {
+                AlertDefinition def = alertDefDao.get(alertDefId);
+                
+                if (def != null && def.isEnabled() != enable) {
+                    alertPermissionManager.canManageAlerts(subj, def.getAppdefEntityId());
+                    def.setEnabledStatus(enable);
+                    triggerDefIds.add(def.getId());
+                }
+            }
+            
+            if (!triggerDefIds.isEmpty()) {
+                // HQ-1799: enable the triggers in batch to improve performance
+                registeredTriggerManager.setAlertDefinitionTriggersEnabled(triggerDefIds, enable);
+                return true;
+            } else {
+                return false;
+            }
+        }    
+
 
     /**
      * Set the escalation on the alert definition
@@ -830,25 +863,6 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
             }
             vals.add(a.getAlertDefinitionValue());
         }
-        return new PageList<AlertDefinitionValue>(vals, vals.size());
-    }
-
-    /**
-     * Get list of all child conditions
-     * 
-     */
-    @Transactional(readOnly=true)
-    public PageList<AlertDefinitionValue> findChildAlertDefinitions(Integer id) {
-        AlertDefinition def = alertDefDao.findById(id);
-        List<AlertDefinitionValue> vals = new ArrayList<AlertDefinitionValue>();
-        Collection<AlertDefinition> ads = def.getChildren();
-        for (AlertDefinition child : ads) {
-            // Don't touch the deleted children
-            if (!child.isDeleted() && child.getResource() != null) {
-                vals.add(child.getAlertDefinitionValue());
-            }
-        }
-
         return new PageList<AlertDefinitionValue>(vals, vals.size());
     }
 

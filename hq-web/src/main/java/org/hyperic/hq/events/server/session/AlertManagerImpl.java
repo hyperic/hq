@@ -28,8 +28,10 @@ package org.hyperic.hq.events.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -67,6 +69,7 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
+import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -233,8 +236,8 @@ public class AlertManagerImpl implements AlertManager {
     }
 
     /**
-     * Find the last alert by definition ID
-     * @throws PermissionException
+     * Find the last unfixed alert by definition ID
+     *
      * 
      * 
      */
@@ -247,6 +250,36 @@ public class AlertManagerImpl implements AlertManager {
             return null;
         }
     }
+    
+    
+        /**
+         * Find the last alerts for the given resource
+         *
+         * 
+         */
+    @Transactional(readOnly=true)
+    public Map<Integer,Alert> findLastByResource(AuthzSubject subj, 
+                                      Resource r,
+                                      boolean includeDescendants,
+                                      boolean fixed) {
+            
+            StopWatch watch = new StopWatch();
+            Map<Integer,Alert> unfixedAlerts = null;
+            try {
+                unfixedAlerts = 
+                    alertDAO.findLastByResource(subj, r, includeDescendants, fixed);
+            } catch (Exception e) {
+                unfixedAlerts = new HashMap<Integer,Alert>(0,1);
+                log.error("Error finding the last alerts for resource id="  + r.getId(), e);
+            } finally {
+                if (log.isDebugEnabled()) {
+                    log.debug("findLastByResource: "  + watch);
+                }
+            }
+            
+            return unfixedAlerts;
+    }
+
 
     /**
      * Find the last alert by definition ID

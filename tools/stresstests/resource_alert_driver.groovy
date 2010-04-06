@@ -218,7 +218,7 @@ private class ResourceAlertEventInserter extends Thread {
     	def alertDefIds = null
     	    
     	if (isResourceType) {
-    	    def resourceAlertDefs = adM.one.findChildAlertDefinitions(alertDefId)
+    	    def resourceAlertDefs = adM.one.findAlertDefinitionChildren(alertDefId)
     	    alertDefIds = resourceAlertDefs.collect {return it.id}
     	} else {
     	    alertDefIds = [alertDefId]
