@@ -26,6 +26,7 @@
 package org.hyperic.hq.measurement.server.session;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -202,15 +203,25 @@ public class AvailabilityDataDAO
     @SuppressWarnings("unchecked")
     List<AvailabilityDataRLE> getHistoricalAvails(Integer[] mids, long start, long end,
                                                   boolean descending) {
-        String sql = new StringBuilder().append("FROM AvailabilityDataRLE rle").append(
+        final List<AvailabilityDataRLE> rtn = new ArrayList<AvailabilityDataRLE>(mids.length);
+        final List<Integer> list = Arrays.asList(mids);
+        final String sql = new StringBuilder().append("FROM AvailabilityDataRLE rle").append(
             " WHERE rle.availabilityDataId.measurement in (:mids)").append(
             " AND rle.endtime > :startime").append(
             " AND rle.availabilityDataId.startime < :endtime").append(
             " ORDER BY rle.availabilityDataId.measurement,").append(
             " rle.availabilityDataId.startime").append(((descending) ? " DESC" : " ASC"))
             .toString();
-        return getSession().createQuery(sql).setLong("startime", start).setLong("endtime", end)
-            .setParameterList("mids", mids, new IntegerType()).list();
+        for (int i=0; i<list.size(); i+=BATCH_SIZE) {
+            final int last = Math.min(i+BATCH_SIZE, list.size());
+            rtn.addAll(getSession().
+                createQuery(sql)
+                .setLong("startime", start)
+                .setLong("endtime", end)
+                .setParameterList("mids", list.subList(i, last), new IntegerType())
+                .list());
+        }
+        return rtn;
     }
 
     /**

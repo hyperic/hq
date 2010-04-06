@@ -378,26 +378,53 @@ public class MeasurementDAO
 
     @SuppressWarnings("unchecked")
     List<Measurement> findMeasurements(Integer[] tids, Integer[] iids) {
+        final IntegerType iType = new IntegerType();
         // sort to take advantage of query cache
-        final List<Integer> iidList = Arrays.asList(iids);
-        final List<Integer> tidList = Arrays.asList(tids);
+        final List<Integer> iidList = new ArrayList<Integer>(Arrays.asList(iids));
+        final List<Integer> tidList = new ArrayList<Integer>(Arrays.asList(tids));
         Collections.sort(tidList);
         Collections.sort(iidList);
-        final String sql = new StringBuilder().append("select m from Measurement m ").append(
+        final String sql = new StringBuilder(256).append("select m from Measurement m ").append(
             "join m.template t ").append("where m.instanceId in (:iids) AND t.id in (:tids)")
             .toString();
-        return getSession().createQuery(sql).setParameterList("iids", iidList, new IntegerType())
-            .setParameterList("tids", tidList, new IntegerType()).setCacheable(true)
-            .setCacheRegion("Measurement.findMeasurements").list();
+        final List<Measurement> rtn = new ArrayList<Measurement>(iidList.size());
+        final int batch = BATCH_SIZE/2;
+        for (int xx=0; xx<iidList.size(); xx+=batch) {
+            final int iidEnd = Math.min(xx+batch, iidList.size());
+            for (int yy=0; yy<tidList.size(); yy+=batch) {
+                final int tidEnd = Math.min(yy+batch, tidList.size());
+                rtn.addAll(getSession().createQuery(sql)
+                    .setParameterList("iids", iidList.subList(xx, iidEnd), iType)
+                    .setParameterList("tids", tidList.subList(yy, tidEnd), iType)
+                    .setCacheable(true)
+                    .setCacheRegion("Measurement.findMeasurements")
+                    .list());
+            }
+        }
+        return rtn;
     }
 
     @SuppressWarnings("unchecked")
     List<Measurement> findAvailMeasurements(Integer[] tids, Integer[] iids) {
-        String sql = new StringBuilder().append("select m from Measurement m ").append(
+        final IntegerType iType = new IntegerType();
+        final List<Integer> iidList = Arrays.asList(iids);
+        final List<Integer> tidList = Arrays.asList(tids);
+        final String sql = new StringBuilder(256)
+            .append("select m from Measurement m ").append(
             "join m.template t ").append("where m.instanceId in (:iids) AND t.id in (:tids) AND ")
             .append(ALIAS_CLAUSE).toString();
-        return getSession().createQuery(sql).setParameterList("iids", iids).setParameterList(
-            "tids", tids).list();
+        final List<Measurement> rtn = new ArrayList<Measurement>(iidList.size());
+        final int batch = BATCH_SIZE/2;
+        for (int xx=0; xx<iidList.size(); xx+=batch) {
+            final int iidEnd = Math.min(xx+batch, iidList.size());
+            for (int yy=0; yy<tidList.size(); yy+=batch) {
+                final int tidEnd = Math.min(yy+batch, tidList.size());
+                rtn.addAll(getSession().createQuery(sql)
+                    .setParameterList("iids", iidList.subList(xx, iidEnd), iType)
+                    .setParameterList("tids", tidList.subList(yy, tidEnd), iType).list());
+            }
+        }
+        return rtn;
     }
 
     /**
