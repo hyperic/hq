@@ -178,6 +178,7 @@ public class Service extends AppdefResource
         _serviceValue.setName(getName());
         _serviceValue.setDescription(getDescription());
         _serviceValue.setId(getId());
+        _serviceValue.setResourceId(getResource() != null ? getResource().getId() : null);
         _serviceValue.setMTime(getMTime());
         _serviceValue.setCTime(getCTime());
         if (getServer() != null) {
