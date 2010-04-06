@@ -32,6 +32,10 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.appdef.server.session.Platform;
+import org.hyperic.hq.appdef.server.session.Server;
+import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
@@ -54,13 +58,13 @@ import org.hyperic.hq.measurement.shared.ReportProcessor;
 import org.hyperic.hq.measurement.shared.SRNManager;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.StringUtil;
+import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  */
-@Service
+@org.springframework.stereotype.Service
 @Transactional
 public class ReportProcessorImpl implements ReportProcessor {
     private final Log log = LogFactory.getLog(ReportProcessorImpl.class);
@@ -94,6 +98,7 @@ public class ReportProcessorImpl implements ReportProcessor {
 
     private void addPoint(List<DataPoint> points, List<DataPoint> priorityPts, Measurement m, MetricValue[] vals) {
         final boolean debug = log.isDebugEnabled();
+        final StopWatch watch = new StopWatch();
         for (MetricValue val : vals) {
             final long now = TimingVoodoo.roundDownTime(System.currentTimeMillis(), MINUTE);
             try {
@@ -106,24 +111,31 @@ public class ReportProcessorImpl implements ReportProcessor {
                 } else {
                     points.add(dataPoint);
                 }
+                if (debug) watch.markTimeBegin("getTemplate");             
                 if (debug && m.getTemplate().isAvailability()) {
                     log.debug("availability -> " + dataPoint);
                 }
+                if (debug) watch.markTimeEnd("getTemplate");
             } catch (NumberFormatException e) {
                 log.warn("Unable to insert: " + e.getMessage() + ", metric id=" + m);
             }
         }
+        if (debug) log.debug(watch);
     }
 
-    private boolean isPriority(long timestamp, long metricTimestamp) {
+    private final boolean isPriority(long timestamp, long metricTimestamp) {
         if (metricTimestamp >= (timestamp - PRIORITY_OFFSET)) {
             return true;
         }
         return false;
     }
 
-    private void addData(List<DataPoint> points, List<DataPoint> priorityPts, Measurement m, MetricValue[] dpts) {
+    private final void addData(List<DataPoint> points, List<DataPoint> priorityPts, Measurement m, MetricValue[] dpts) {
+        final boolean debug = log.isDebugEnabled();
+        StopWatch watch = new StopWatch();
+        if (debug) watch.markTimeBegin("getInterval");
         long interval = m.getInterval();
+        if (debug) watch.markTimeEnd("getInterval");
 
         // Safeguard against an anomaly
         if (interval <= 0) {
@@ -137,14 +149,23 @@ public class ReportProcessorImpl implements ReportProcessor {
 
         for (int i = 0; i < dpts.length; i++) {
             // Save data point to DB.
+            if (debug) watch.markTimeBegin("getTimestamp");
             long retrieval = dpts[i].getTimestamp();
+            if (debug) watch.markTimeEnd("getTimestamp");
+            if (debug) watch.markTimeBegin("roundDownTime");
             long adjust = TimingVoodoo.roundDownTime(retrieval, interval);
+            if (debug) watch.markTimeEnd("roundDownTime");
 
             // Create new Measurement data point with the adjusted time
+            if (debug) watch.markTimeBegin("new MetricValue");
             MetricValue modified = new MetricValue(dpts[i].getValue(), adjust);
+            if (debug) watch.markTimeEnd("new MetricValue");
             passThroughs[i] = modified;
         }
+        if (debug) watch.markTimeBegin("addPoint");
         addPoint(points, priorityPts, m, passThroughs);
+        if (debug) watch.markTimeEnd("addPoint");
+        if (debug) log.debug(watch);
     }
 
     /**
@@ -160,9 +181,12 @@ public class ReportProcessorImpl implements ReportProcessor {
         final List<DataPoint> priorityAvailPts = new ArrayList<DataPoint>(dsnLists.length);
 
         final boolean debug = log.isDebugEnabled();
+        final StopWatch watch = new StopWatch();
         for (DSNList dsnList : dsnLists) {
             Integer dmId = new Integer(dsnList.getClientId());
+            if (debug) watch.markTimeBegin("getMeasurement");
             Measurement m = measurementManager.getMeasurement(dmId);
+            if (debug) watch.markTimeEnd("getMeasurement");
 
             // Can't do much if we can't look up the derived measurement
             // If the measurement is enabled, we just throw away their data
@@ -175,22 +199,29 @@ public class ReportProcessorImpl implements ReportProcessor {
             }
             // Need to check if resource was asynchronously deleted (type ==
             // null)
+            if (debug) watch.markTimeBegin("getResource");
             final Resource res = m.getResource();
+            if (debug) watch.markTimeEnd("getResource");
             if (res == null || res.isInAsyncDeleteState()) {
                 if (debug) {
                     log.debug("dropping metricId=" + m.getId() + " since resource is in async delete state");
                 }
                 continue;
             }
+            
+            if (debug) watch.markTimeBegin("resMatchesAgent");
             if (!resourceMatchesAgent(res, agentToken)) {
                 log.warn("measurement (id=" + m.getId() + ") was sent to the " + "HQ server from agent (agentToken=" +
                          agentToken + ")" + " but resource (id=" + res.getId() + ") is not associated " +
                          " with that agent.  Dropping measurement.");
+                if (debug) watch.markTimeEnd("resMatchesAgent");
                 continue;
             }
-
+            if (debug) watch.markTimeEnd("resMatchesAgent");
+            
             final boolean isAvail = m.getTemplate().isAvailability();
             final ValueList[] valLists = dsnList.getDsns();
+            if (debug) watch.markTimeBegin("addData");
             for (ValueList valList : valLists) {
                 final MetricValue[] vals = valList.getValues();
                 if (isAvail) {
@@ -199,22 +230,32 @@ public class ReportProcessorImpl implements ReportProcessor {
                     addData(dataPoints, null, m, vals);
                 }
             }
+            if (debug) watch.markTimeEnd("addData");
         }
+        if (debug) log.debug(watch);
 
         DataInserter d = measurementInserterManager.getDataInserter();
+        if (debug) watch.markTimeBegin("sendMetricDataToDB");
         sendMetricDataToDB(d, dataPoints, false);
+        if (debug) watch.markTimeEnd("sendMetricDataToDB");
         DataInserter a = measurementInserterManager.getAvailDataInserter();
+        if (debug) watch.markTimeBegin("sendAvailDataToDB");
         sendMetricDataToDB(a, availPoints, false);
         sendMetricDataToDB(a, priorityAvailPts, true);
+        if (debug) watch.markTimeEnd("sendAvailDataToDB");
 
         // Check the SRNs to make sure the agent is up-to-date
+        if (debug) watch.markTimeBegin("reportAgentSRNs");
         Collection<AppdefEntityID> nonEntities = srnManager.reportAgentSRNs(report.getSRNList());
+        if (debug) watch.markTimeEnd("reportAgentSRNs");
 
         if (report.getAgentToken() != null && nonEntities.size() > 0) {
             // Better tell the agent to stop reporting non-existent entities
             AppdefEntityID[] entIds = (AppdefEntityID[]) nonEntities.toArray(new AppdefEntityID[nonEntities.size()]);
             try {
+                if (debug) watch.markTimeBegin("unschedule");
                 measurementProcessor.unschedule(report.getAgentToken(), entIds);
+                if (debug) watch.markTimeEnd("unschedule");
             } catch (MeasurementUnscheduleException e) {
                 log.error("Cannot unschedule entities: " + StringUtil.arrayToString(entIds));
             }
@@ -225,19 +266,69 @@ public class ReportProcessorImpl implements ReportProcessor {
      * checks if the agentToken matches resource's agentToken
      */
     private boolean resourceMatchesAgent(Resource resource, String agentToken) {
+        if (resource == null || resource.isInAsyncDeleteState()) {
+            return false;
+        }
         final Integer resType = resource.getResourceType().getId();
         final Integer aeid = resource.getInstanceId();
         try {
             if (resType.equals(AuthzConstants.authzPlatform)) {
-                String token = platformManager.findPlatformById(aeid).getAgent().getAgentToken();
-                return token.equals(agentToken);
+                Platform p = platformManager.findPlatformById(aeid);
+                Resource r = p.getResource();
+                if (r == null || r.isInAsyncDeleteState()) {
+                    return false;
+                }
+                Agent a = p.getAgent();
+                if (a == null) {
+                    return false;
+                }
+                return a.getAgentToken().equals(agentToken);
             } else if (resType.equals(AuthzConstants.authzServer)) {
-                String token = serverManager.findServerById(aeid).getPlatform().getAgent().getAgentToken();
-                return token.equals(agentToken);
+                Server server = serverManager.findServerById(aeid);
+                Resource r = server.getResource();
+                if (r == null || r.isInAsyncDeleteState()) {
+                    return false;
+                }
+                Platform p = server.getPlatform();
+                if (p == null) {
+                    return false;
+                }
+                r = p.getResource();
+                if (r == null || r.isInAsyncDeleteState()) {
+                    return false;
+                }
+                Agent a = p.getAgent();
+                if (a == null) {
+                    return false;
+                }
+                return a.getAgentToken().equals(agentToken);
             } else if (resType.equals(AuthzConstants.authzService)) {
-                String token = serviceManager.findServiceById(aeid).getServer().getPlatform().getAgent()
-                    .getAgentToken();
-                return token.equals(agentToken);
+               Service service =serviceManager.findServiceById(aeid);
+               Resource r = service.getResource();
+               if (r == null || r.isInAsyncDeleteState()) {
+                   return false;
+               }
+               Server server = service.getServer();
+               if (server == null) {
+                   return false;
+               }
+               r = server.getResource();
+               if (r == null || r.isInAsyncDeleteState()) {
+                   return false;
+               }
+               Platform p = server.getPlatform();
+               if (p == null) {
+                   return false;
+               }
+               r = p.getResource();
+               if (r == null || r.isInAsyncDeleteState()) {
+                   return false;
+               }
+               Agent a = p.getAgent();
+               if (a == null) {
+                   return false;
+               }
+               return a.getAgentToken().equals(agentToken);
             }
         } catch (PlatformNotFoundException e) {
             log.warn("Platform not found Id=" + aeid);
