@@ -25,7 +25,9 @@
 
 package org.hyperic.hq.appdef.server.session;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -47,12 +49,11 @@ import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  */
-@Service
+@org.springframework.stereotype.Service
 public class ConfigManagerImpl implements ConfigManager {
     private static final int MAX_VALIDATION_ERR_LEN = 512;
     protected final Log log = LogFactory.getLog(ConfigManagerImpl.class.getName());
@@ -504,11 +505,34 @@ public class ConfigManagerImpl implements ConfigManager {
         }
 
         if (wasUpdated) {
-            // XXX: Need to cascade and send events for each resource that may
-            // have been affected by this config update.
             if (sendConfigEvent) {
-                ResourceUpdatedZevent event = new ResourceUpdatedZevent(subject, appdefID);
-                zeventManager.enqueueEventAfterCommit(event);
+                List<ResourceUpdatedZevent> events = new ArrayList<ResourceUpdatedZevent>();
+                events.add(new ResourceUpdatedZevent(subject, appdefID));
+                
+                if (appdefID.isPlatform()) {
+                    Platform p = platformDAO.get(appdefID.getId());
+                    if(p!= null) {
+                        for (Server s: p.getServers()) {
+                            events.add(new ResourceUpdatedZevent(subject, s.getEntityId()));
+                            for (Service svc : s.getServices()) {
+                                events.add(new ResourceUpdatedZevent(subject, svc.getEntityId()));
+                            }
+                        }
+                    } else {
+                        log.warn("Error sending config event.  Unable to find platform with id: " + appdefID.getId());
+                    }
+                } else if (appdefID.isServer()) {
+                    Server s = serverDAO.get(appdefID.getId());
+                    if(s != null) {
+                        for (Service svc :  s.getServices()) {
+                            events.add(new ResourceUpdatedZevent(subject, svc.getEntityId()));
+                        }
+                    }
+                    else{
+                        log.warn("Error sending config event.  Unable to find server with id: " + appdefID.getId());
+                    }
+                }
+                zeventManager.enqueueEventsAfterCommit(events);
             }
 
             return appdefID;
