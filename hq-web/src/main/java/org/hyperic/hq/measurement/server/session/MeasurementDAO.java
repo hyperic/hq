@@ -38,7 +38,6 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
-import org.hibernate.dialect.Dialect;
 import org.hibernate.type.IntegerType;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hibernate.dialect.HQDialect;
@@ -71,13 +70,17 @@ public class MeasurementDAO
     }
 
     /**
-     * retrieves List<Object[]> [0] = Measurement [1] = MeasurementTemplate
+     * Used primarily for preloaded 2nd level cache measurement objects
+     * retrieves List<Object[]> 
+     * [0] = Measurement 
+     * [1] = MeasurementTemplate
+     * [2] = Baseline
      */
     @SuppressWarnings("unchecked")
     List<Object[]> findAllEnabledMeasurementsAndTemplates() {
-        Dialect dialect = Util.getDialect();
         String hql = new StringBuilder().append("from Measurement m").append(" join m.template t")
-            .append(" where enabled = ").append(dialect.toBooleanValueString(true)).toString();
+               .append(" join m.baselinesBag b")
+               .append(" where enabled = '1'").toString();
         return getSession().createQuery(hql).list();
     }
 
