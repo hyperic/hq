@@ -328,9 +328,7 @@ public class ServerConfig
                 } else if (dbChoice.equals(DB_MYSQL)) {
                     schema.addOption(new StringConfigOption("server.database-url", StringUtil
                         .replace(Q_JDBC_URL, "%%DBNAME%%", dbChoiceStr),
-                        "jdbc:mysql://localhost:3306/" + PRODUCT +
-                        // HHQ-3236
-                            "?connectTimeout=60000&amp;socketTimeout=60000"));
+                        "jdbc:mysql://localhost:3306/" + PRODUCT ));
                     schema.addOption(new HiddenConfigOption("server.database-driver",
                         "com.mysql.jdbc.Driver"));
                     schema.addOption(new HiddenConfigOption("server.quartzDelegate",
