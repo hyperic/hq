@@ -49,7 +49,7 @@
 onloads.push(showViewEscResponse);
 
 function showViewEscResponse() {
-    var tmp = eval('( <c:out value="${escalationJSON}" escapeXml="false"/> )');
+    var tmp = eval('( <c:out value="${escalationJSON}" escapeXml="false" /> )');
     var notifyAll = tmp.escalation.notifyAll
     var actions = tmp.escalation.actions;
     var allowPause = tmp.escalation.allowPause;
@@ -79,6 +79,7 @@ function showViewEscResponse() {
       var configProduct = actionConfig.product;
       var configSnmpOID = actionConfig.oid;
       var configSnmpIP = actionConfig.address;
+      var configSnmpNotificationMechanism = actionConfig.snmpNotificationMechanism;
       var actionId = actions[i].action.id;
       var actionsClassName = actions[i].action.className;
       var actionsVersion = actions[i].action._version_;
@@ -162,7 +163,7 @@ function showViewEscResponse() {
             usersTextDiv.innerHTML = 'Suppress duplicate alerts for: ' + actionWaitTime;
             waitDiv.innerHTML = "&nbsp;";
             } else if (actionClass[d] == "SnmpAction") {
-            usersTextDiv.innerHTML = '<table cellpadding="0" cellspacing="0" border="0"><tr><td rowSpan="3" vAlign="top" style="padding-right:3px;">Snmp Trap:</td><td style="padding:0px 2px 2px 2px;"><fmt:message key="resource.autodiscovery.server.IPAddressTH"/>: ' + configSnmpIP + '</td></tr><tr><td style="padding:2px;"><fmt:message key="admin.settings.SNMPTrapOID"/> ' + configSnmpOID + '</td></tr></table>'
+            	usersTextDiv.innerHTML = '<table cellpadding="0" cellspacing="0" border="0"><tr><td rowSpan="3" vAlign="top" style="padding-right:3px;">Snmp Trap:</td><td style="padding:0px 2px 2px 2px;"><fmt:message key="resource.autodiscovery.server.IPAddressTH"/>: ' + configSnmpIP + '</td></tr><tr><td style="padding:2px;"><fmt:message key="admin.settings.SNMPTrapOID"/> ' + configSnmpOID + '</td></tr><tr><td style="padding:2px;"><fmt:message key="admin.settings.SNMPNotificationMechanism"/> ' + configSnmpNotificationMechanism + '</td></tr></table>'       
            }
       }
 
@@ -292,7 +293,7 @@ function showViewEscResponse() {
     <c:if test="${chooseScheme}">
     function initEsc () {
         // Set up the escalation dropdown
-        var escJson = eval( '( { "escalations":<c:out value="${escalations}" escapeXml="false"/> })' );
+        var escJson = eval( '( { "escalations":<c:out value="${escalations}" escapeXml="false" /> })' );
         var escalationSel = dojo.byId('escIdSel');
         var schemes = escJson.escalations;
 
@@ -389,7 +390,7 @@ function showViewEscResponse() {
     <tr class="tableRowHeader">
       <th><label for="escIdSel"><fmt:message key="alert.config.escalation.scheme" /></label>
     		<select id="escIdSel" name="escId" onchange="schemeChange(this)" class="selectWid">
-       		<option value=""><fmt:message key="resource.common.inventory.props.SelectOption" /></option>
+       			<option value=""><fmt:message key="resource.common.inventory.props.SelectOption" /></option>
     		</select>
         <span id="noescalations" style="display: none;"><fmt:message key="common.label.None"/></span>
       </th>

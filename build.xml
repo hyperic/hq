@@ -727,7 +727,7 @@
 				<include name="log4j-1.2.14.jar" />
 				<include name="quartz-1.6.5.jar" />
 				<include name="quartz-oracle-1.6.5.jar" />
-				<include name="snmp4j.jar" />
+				<include name="snmp4j*.jar" />
 				<include name="dnsjava-2.0.3.jar" />
 				<include name="ehcache-1.5.0.jar" />
 				<include name="jdom-1.1.jar" />
@@ -877,7 +877,7 @@
 				<include name="log4j-1.2.14.jar" />
 				<include name="oro-2.0.8.jar" />
 				<!-- RT -->
-				<include name="snmp4j.jar" />
+				<include name="snmp4j*.jar" />
 				<!-- All SNMP monitoring -->
 				<include name="ant.jar" />
 				<!-- AI scans + util.TokenReplacer -->
