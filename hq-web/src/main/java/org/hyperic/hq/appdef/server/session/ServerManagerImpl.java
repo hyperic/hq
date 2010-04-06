@@ -585,6 +585,10 @@ public class ServerManagerImpl implements ServerManager {
             if (platform != null) {
                 platform.getServersBag().remove(server);
             }
+            
+            //Remove Server from ServerType.  If not done, results in an ObjectDeletedException
+            //when updating plugin types during plugin deployment
+            server.getServerType().getServers().remove(server);
 
             // Keep config response ID so it can be deleted later.
             final ConfigResponseDB config = server.getConfigResponse();
