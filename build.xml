@@ -12,7 +12,7 @@
 	<property file="build.properties" />
 
 	<!-- Version file -->
-	<property name="version.properties" value="${hq.home}/version.properties" />
+	<property name="version.properties" value="${hq.home}/hq-version.properties" />
 	<property file="${version.properties}" />
 	<property name="release.comment" value="Development Build" />
 	<property name="hq.isDev" value="true" />
@@ -714,7 +714,7 @@
 
 		<!-- Write version file to WEB-INF/classes -->
 		<antcall target="write-version-file">
-			<param name="version-file" value="${war.dir}/WEB-INF/classes/version.properties" />
+			<param name="version-file" value="${war.dir}/WEB-INF/classes/hq-version.properties" />
 		</antcall>
 
 		<copy todir="${war.dir}/WEB-INF/lib/">
@@ -1204,7 +1204,7 @@
 
 		<!-- version.properties to agent lib -->
 		<antcall target="write-version-file">
-			<param name="version-file" value="${agent.dir}/bundles/${agent.bundle.dir}/lib/version.properties" />
+			<param name="version-file" value="${agent.dir}/bundles/${agent.bundle.dir}/lib/hq-version.properties" />
 		</antcall>
 
 		<copy todir="${agent.dir}/wrapper/sbin">
@@ -1471,7 +1471,7 @@
         <fileset dir="${hq.home}/build" includes="hyperic-*.zip"/>
     </checksum>
 
-    <git command="add version.properties" dir="${hq.home}"/>
+    <git command="add hq-version.properties" dir="${hq.home}"/>
     <git command="commit -m 'Release ${version} build #${build}'" dir="${hq.home}"/>
     <git command="push git@git.springsource.org:hq/hq.git" dir="${hq.home}"/>
 

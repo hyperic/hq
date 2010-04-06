@@ -34,7 +34,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -46,6 +45,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.hyperic.hq.agent.AgentConfig;
+import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.product.AutoinventoryPluginManager;
 import org.hyperic.hq.product.CollectorExecutor;
@@ -72,7 +72,6 @@ import org.hyperic.hq.product.ServiceTypeInfo;
 import org.hyperic.hq.product.TrackEvent;
 import org.hyperic.hq.product.TrackEventPluginManager;
 import org.hyperic.hq.product.TypeInfo;
-
 import org.hyperic.sigar.FileWatcherThread;
 import org.hyperic.sigar.OperatingSystem;
 import org.hyperic.util.ArrayUtil;
@@ -262,7 +261,7 @@ public class PluginDumper {
     private void getopt(String[] args) {
         int opt;
         Getopt parser =
-            new Getopt("plugindumper", args, "hp:t:m:a:o:D:");
+            new Getopt("plugindumper", args, "hvp:t:m:a:o:D:");
         parser.setOpterr(false);
         PluginDumperConfig config = this.config;
         
@@ -295,6 +294,9 @@ public class PluginDumper {
                 }
                 config.props.setProperty(key, val);
                 config.defines.setProperty(key, val);
+                break;
+              case 'v':
+                System.out.println(ProductProperties.getVersion() + " (build #" + ProductProperties.getBuild() + ")");
                 break;
               case 'h':
               default:
