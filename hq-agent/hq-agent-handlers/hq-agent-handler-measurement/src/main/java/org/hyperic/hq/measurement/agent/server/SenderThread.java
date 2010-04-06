@@ -379,9 +379,9 @@ public class SenderThread
         {
             try {
                 Record r = SenderThread.decodeRecord((String)it.next());
-                if (!records.contains(r)) {
-                    records.add(r);
-                } else {
+                boolean didNotAlreadyExist = records.add(r); 
+                if (!didNotAlreadyExist) {
+                    // nuke the dup
                     if (debug) log.debug("Dropping duplicate entry for " + r);
                     numUsed--;
                 }
@@ -607,6 +607,10 @@ public class SenderThread
                     return;
                 }
 
+                if (log.isDebugEnabled()) {
+                    log.debug("Woke up, sending batch of metrics.");
+                }
+                
                 lastMetricTime = this.sendBatch();
                 if(lastMetricTime != null){
                     String backlogNum = "";
