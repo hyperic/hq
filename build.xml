@@ -912,6 +912,8 @@
 				<include name="xmlrpc-client-3.1.jar" />
 				<include name="xmlrpc-common-3.1.jar" />
 				<include name="ws-commons-util-1.0.2.jar" />
+				<include name="com.springsource.com.sun.xml.bind-*.jar" />
+				<include name="com.springsource.javax.xml.*.jar" />
 			</fileset>
 			<fileset dir="${tapestry_lib}">
 				<!-- for CollectorThread -->
