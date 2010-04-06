@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -50,7 +50,7 @@ import org.hyperic.sigar.win32.RegistryKey;
 import org.hyperic.sigar.win32.Win32Exception;
 
 public class WebsphereProductPlugin extends ProductPlugin {
-    
+
     public static final String NAME = "websphere";
 
     public static final String SERVER_NAME = "WebSphere";
@@ -78,7 +78,8 @@ public class WebsphereProductPlugin extends ProductPlugin {
     public static final String PROP_SERVER_NODE    = "server.node";
     public static final String PROP_SERVER_NAME    = "server.name";
     public static final String PROP_SERVER_PORT    = "server.port";
-    
+    public static final String PROP_SERVER_CELL    = "server.cell";
+
     public static final String PROP_THRPOOL_NAME   = "thrpool";
     public static final String PROP_CONNPOOL_NAME  = "connpool";
     public static final String PROP_APP_NAME       = "app";
@@ -102,7 +103,8 @@ public class WebsphereProductPlugin extends ProductPlugin {
         "5.1.0.0",
         "5.0.0.0",
         "6.0.0.0",
-        "6.1.0.0"
+        "6.1.0.0",
+        "7.0.0.0"
     };
 
     private static Log log = LogFactory.getLog("WebsphereProductPlugin");
@@ -124,7 +126,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
         }
 
         String javaHome = System.getProperty("java.home");
-        
+
         File dir = new File(javaHome);
 
         //exists in both 4.0 and 5.0
@@ -219,7 +221,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
         }
 
         if (dir == null) {
-            log.debug("Unable to determine " + PROP_INSTALLPATH); 
+            log.debug("Unable to determine " + PROP_INSTALLPATH);
             return null;
         }
         else {
@@ -251,12 +253,12 @@ public class WebsphereProductPlugin extends ProductPlugin {
         for (int j=0; j<jars.length; j++) {
             if (!jars[j].endsWith(".jar")) {
                 continue;
-            }
+                }
 
-            log.debug("Classpath += " + dir + jars[j]);
-            path.add(dir + jars[j]);
+                log.debug("Classpath += " + dir + jars[j]);
+                path.add(dir + jars[j]);
+            }
         }
-    }
 
     //jar names minus version "_6.1.0.jar"
     private void addClassPathOSGi(List path,
@@ -273,10 +275,9 @@ public class WebsphereProductPlugin extends ProductPlugin {
             new File(dir).list(new FilenameFilter() {
                 public boolean accept(File dir, String name) {
                     int ix = name.indexOf('_');
-                    if (ix == -1) {
-                        return false;
+                    if (ix != -1) {
+                        name = name.substring(0, ix);
                     }
-                    name = name.substring(0, ix);
                     return wantedJars.get(name) != null;
                 }
             });
@@ -307,7 +308,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
                     continue;
                 }
                 InputStream entryStream = jar.getInputStream(entry);
-                
+
                 os.putNextEntry(entry);
                 while ((n = entryStream.read(buffer)) != -1) {
                     os.write(buffer, 0, n);
@@ -362,12 +363,12 @@ public class WebsphereProductPlugin extends ProductPlugin {
                 if (jar.isDirectory() || !jars[j].endsWith(".jar")) {
                     continue;
                 }
-                
+
                 if (jars[j].startsWith("com.ibm.ws.webservices.thinclient")) {
                     // skip
                     continue;
                 }
-                
+
                 log.debug("classpath += " + jar);
                 if (jars[j].startsWith("com.ibm.ws.runtime_")) {
                     jar = runtimeJarHack(jar);
@@ -381,17 +382,55 @@ public class WebsphereProductPlugin extends ProductPlugin {
     private String[] getClassPathOSGi(String installDir) {
         ArrayList path = new ArrayList();
 
-        final String[] plugins = {
-            "com.ibm.ws.runtime",
-            "com.ibm.ws.security.crypto",
-            "org.eclipse.osgi",
-        };
-        addClassPathOSGi(path, installDir + "/plugins/", plugins);
+        String v = WebsphereDetector.getComponentVersion(new File(installDir, "properties/version/WAS.product"));
+        if (v.startsWith("6")) {
 
-        final String[] runtimes = {
-            "com.ibm.ws.webservices.thinclient",
-        };
-        addClassPathOSGi(path, installDir + "/runtimes/", runtimes);
+            final String[] lib = {
+                "bootstrap.jar",
+                "j2ee.jar",
+                "launchclient.jar",
+                "mail-impl.jar"
+            };
+            addClassPathOSGi(path, installDir + "/lib/", lib);
+
+            final String[] plugins = {
+                "com.ibm.ws.bootstrap",
+                "com.ibm.ws.emf",
+                "com.ibm.ws.security.crypto",
+                "com.ibm.ws.wccm",
+                "org.eclipse.core.runtime",
+                "org.eclipse.osgi",
+                "com.ibm.ws.runtime",};
+            addClassPathOSGi(path, installDir + "/plugins/", plugins);
+
+            final String[] runtimes = {
+                "com.ibm.ws.admin.client",};
+            addClassPathOSGi(path, installDir + "/runtimes/", runtimes);
+
+        } else if (v.startsWith("7")) {
+            final String[] lib = {
+                "bootstrap.jar",};
+            addClassPathOSGi(path, installDir + "/lib/", lib);
+
+            final String[] plugins = {
+                "com.ibm.ffdc.jar",
+                "com.ibm.ws.security.crypto.jar",
+                "com.ibm.ws.admin.core.jar",
+                "com.ibm.ws.runtime.jar",
+                "com.ibm.ws.emf.jar",
+                "org.eclipse.emf.ecore.jar",
+                "org.eclipse.emf.common.jar",
+                "com.ibm.ws.prereq.soap.jar",
+                "com.ibm.ws.prereq.javamail.jar",
+                "com.ibm.wsfp.main.jar",
+                "javax.j2ee.management.jar",};
+            addClassPathOSGi(path, installDir + "/plugins/", plugins);
+        } else {
+            if (log.isDebugEnabled()) {
+                log.error("Unknown version '" + v + "'");
+            }
+        }
+
         path.add("pdk/lib/mx4j/hq-jmx.jar");
         String[] cp = new String[path.size()];
         path.toArray(cp);
@@ -433,17 +472,17 @@ public class WebsphereProductPlugin extends ProductPlugin {
             installDir + File.separator +
             "properties" + File.separator + "sas.client.props";
 
-        String corbaConfig = 
+        String corbaConfig =
             managerProps.getProperty("websphere.CORBA.ConfigURL",
                                      defaultCorbaConfig);
 
         System.setProperty("com.ibm.CORBA.ConfigURL",
                            "file:" + corbaConfig);
 
-        String defaultSoapProps = 
+        String defaultSoapProps =
             "properties" + File.separator + "soap.client.props";
 
-        File installPropertiesDir = 
+        File installPropertiesDir =
             getInstallPropertiesDir(installDir, defaultSoapProps);
         String soapConfig = null;
         File soapConfigFile = null;
@@ -451,16 +490,16 @@ public class WebsphereProductPlugin extends ProductPlugin {
             String defaultSoapConfig = installPropertiesDir.getPath();
             log.debug("default soap config is " + defaultSoapConfig);
 
-            soapConfig = 
+            soapConfig =
                 managerProps.getProperty("websphere.SOAP.ConfigURL",
                                          defaultSoapConfig);
 
             soapConfigFile = new File(soapConfig);
             hasSoapConfig = soapConfigFile.exists();
         }
-        
+
         if (hasSoapConfig) {
-            log.debug("Using soap properties: " + soapConfig);    
+            log.debug("Using soap properties: " + soapConfig);
             System.setProperty("com.ibm.SOAP.ConfigURL",
                                "file:" + soapConfig);
         }
@@ -479,7 +518,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
                 new File(soapConfigFile.getParent(),
                 "ssl.client.props");
         }
-        
+
         if (sslConfigFile != null && sslConfigFile.exists()) {
             log.debug("Using ssl properties: " + sslConfigFile);
             System.setProperty("com.ibm.SSL.ConfigURL",
@@ -571,29 +610,28 @@ public class WebsphereProductPlugin extends ProductPlugin {
             "pdk/lib/mx4j/hq-jmx.jar"
         };
     }
-    
+
     File getInstallPropertiesDir(String installDir, String lookFor) {
         File result = getInstallPropertiesDirForWAS61(lookFor);
-        
+
         if (result == null) {
             result = getInstallPropertiesDirForWAS60(installDir, lookFor);
         }
-        
+
         return result;
     }
-    
+
     File getInstallPropertiesDirForWAS61(String lookFor) {
-        
+
         File result = null;
-        
+
         List servers = getServerProcessList();
         if (servers.size() != 0) {
             for (Iterator it = servers.iterator(); it.hasNext(); ) {
-                WebsphereDetector.Process process =
-                    (WebsphereDetector.Process) it.next();
+                WebSphereProcess process = (WebSphereProcess) it.next();
 
-                if (process.serverRoot != null) {
-                    File candidate = new File(process.serverRoot, lookFor);
+                if (process.getServerRoot() != null) {
+                    File candidate = new File(process.getServerRoot(), lookFor);
                     if (candidate.exists()) {
                         log.debug("Getting WAS properties from profile under server.root: " +
                                   candidate);
@@ -603,16 +641,16 @@ public class WebsphereProductPlugin extends ProductPlugin {
                 }
             }
         }
-        
+
         return result;
     }
-    
+
     List getServerProcessList() {
         return WebsphereDetector.getServerProcessList();
     }
 
     File getInstallPropertiesDirForWAS60(String installDir, String lookFor) {
-        
+
         File result = null;
 
         File profileDir = new File(installDir + File.separator + "profiles");
@@ -649,7 +687,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
                 }
             }
         }
-        
+
         return result;
     }
 }
