@@ -30,7 +30,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -205,7 +204,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      */
     @Transactional(readOnly = true)
     public List<Agent> getAgents() {
-        return new ArrayList<Agent>(agentDao.findAll());
+        return agentDao.findAll();
     }
 
     /**
