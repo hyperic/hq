@@ -77,7 +77,6 @@ import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.hq.ui.util.ConfigurationProxy;
-import org.hyperic.hq.ui.util.MonitorUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.image.chart.LineChart;
@@ -87,6 +86,7 @@ import org.hyperic.util.TimeUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -123,6 +123,8 @@ public class ViewChartFormPrepareAction
      */
     public ActionForward workflow(ComponentContext cc, ActionMapping mapping, ActionForm form,
                                   HttpServletRequest request, HttpServletResponse response) throws Exception {
+        final boolean debug = log.isDebugEnabled();
+        StopWatch watch = new StopWatch();
         super.workflow(cc, mapping, form, request, response);
 
         ViewChartForm chartForm = (ViewChartForm) form;
@@ -152,18 +154,27 @@ public class ViewChartFormPrepareAction
         setupDateRange(request, chartForm);
         setupMetricIds(request, chartForm);
 
+        if (debug) watch.markTimeBegin("_setupResources");
         AppdefResourceValue[][] resources = setupResources(request, sessionId, chartForm, resource);
+        if (debug) watch.markTimeEnd("_setupResources");
 
         try {
             if (resources.length == 0 || resources[0].length == 0)
                 throw new MeasurementNotFoundException("No resources found for chart");
-
+            if (debug) watch.markTimeBegin("_setupMetricData");
             setupMetricData(request, sessionId, chartForm, resources[1], ctx);
+            if (debug) watch.markTimeEnd("_setupMetricData");
         } catch (MeasurementNotFoundException e) {
             return removeBadDashboardLink(request, ctx);
         }
 
+        if (debug) watch.markTimeBegin("_setupPageData");
         setupPageData(request, sessionId, chartForm, resources[0]);
+        
+        if (debug) {
+          watch.markTimeEnd("_setupPageData");
+          log.debug("workflow: " + watch);
+        }
 
         return null;
     }
@@ -240,14 +251,18 @@ public class ViewChartFormPrepareAction
         SessionException, AppdefEntityNotFoundException, PermissionException, RemoteException,
         MeasurementNotFoundException {
 
+        final boolean debug = log.isDebugEnabled();
+        StopWatch watch = new StopWatch();
         // get list of all child resources
         AppdefResourceValue[] resources = null;
         if (null != chartForm.getCtype() && !chartForm.getCtype().equals(ViewChartForm.NO_CHILD_TYPE)) {
             AppdefEntityID adeId = resource.getEntityId();
 
             AppdefEntityTypeID atid = new AppdefEntityTypeID(chartForm.getCtype());
+            if (debug) watch.markTimeBegin("findChildResources");
             PageList<? extends AppdefResourceValue> children = appdefBoss.findChildResources(sessionId, adeId, atid,
                 PageControl.PAGE_ALL);
+            if (debug) watch.markTimeEnd("findChildResources");
             String[] rids = request.getParameterValues("r");
             Integer[] r = ArrayUtil.stringToInteger(rids);
             // if we've been passed a list of resource ids, we are
@@ -275,14 +290,17 @@ public class ViewChartFormPrepareAction
             AppdefGroupValue grpVal = (AppdefGroupValue) resource;
             AppdefEntityID[] grpMembers = new AppdefEntityID[grpVal.getAppdefGroupEntries().size()];
             grpMembers = (AppdefEntityID[]) grpVal.getAppdefGroupEntries().toArray(grpMembers);
-
+            if (debug) watch.markTimeBegin("findByIds");
             List<AppdefResourceValue> memVals = appdefBoss.findByIds(sessionId, grpMembers, PageControl.PAGE_ALL);
+            if (debug) watch.markTimeEnd("findByIds");
             resources = new AppdefResourceValue[memVals.size()];
             resources = memVals.toArray(resources);
         } else {
             resources = new AppdefResourceValue[] { resource };
         }
+        if (debug) watch.markTimeBegin("pruneResourcesNotCollecting");
         resources = measurementBoss.pruneResourcesNotCollecting(sessionId, resources, chartForm.getM()[0]);
+        if (debug) watch.markTimeEnd("pruneResourcesNotCollecting");
         request.setAttribute("resources", resources);
         request.setAttribute("resourcesSize", new Integer(resources.length));
 
@@ -290,25 +308,27 @@ public class ViewChartFormPrepareAction
         // is the same as resources and chartForm.resourceIds contains
         // all resource ids
         String[] resourceIds = request.getParameterValues("resourceIds");
+        AppdefResourceValue[] checkedResources = null;
+        if (debug) watch.markTimeBegin("checkedResources");
         if (null == resourceIds || resourceIds.length == 0) {
             int maxResources = getMaxResources(request, resources.length);
             log.debug("maxResources=" + maxResources);
-            AppdefResourceValue[] checkedResources = new AppdefResourceValue[maxResources];
+            checkedResources = new AppdefResourceValue[maxResources];
             System.arraycopy(resources, 0, checkedResources, 0, maxResources);
             Integer[] rids = new Integer[checkedResources.length];
             for (int i = 0; i < rids.length; ++i) {
                 rids[i] = checkedResources[i].getId();
             }
             chartForm.setResourceIds(rids);
-            if (log.isDebugEnabled()) {
+            if (debug) {
                 log.debug("no resourceIds specified: " + StringUtil.arrayToString(rids));
             }
             request.setAttribute("checkedResources", checkedResources);
             request.setAttribute("checkedResourcesSize", new Integer(checkedResources.length));
-            return new AppdefResourceValue[][] { resources, checkedResources };
+           
         } else {
             Integer[] rids = chartForm.getResourceIds();
-            AppdefResourceValue[] checkedResources = new AppdefResourceValue[rids.length];
+            checkedResources = new AppdefResourceValue[rids.length];
             for (int i = 0; i < rids.length; ++i) {
                 for (int j = 0; j < resources.length; ++j) {
                     if (resources[j].getId().equals(rids[i])) {
@@ -316,13 +336,18 @@ public class ViewChartFormPrepareAction
                     }
                 }
             }
-            if (log.isDebugEnabled()) {
+            if (debug) {
                 log.debug("resourceIds specified: " + org.hyperic.util.StringUtil.arrayToString(rids));
             }
             request.setAttribute("checkedResources", checkedResources);
             request.setAttribute("checkedResourcesSize", new Integer(checkedResources.length));
-            return new AppdefResourceValue[][] { resources, checkedResources };
+           
         }
+        if (debug) {
+          watch.markTimeEnd("checkedResources");
+           log.debug("_setupResources: " + watch);
+         }
+        return new AppdefResourceValue[][] {resources, checkedResources};
     }
 
     private void setupMetricData(HttpServletRequest request, int sessionId, ViewChartForm chartForm,
@@ -330,6 +355,7 @@ public class ViewChartFormPrepareAction
         SessionTimeoutException, MeasurementNotFoundException, RemoteException, AppdefEntityNotFoundException,
         PermissionException {
 
+        final boolean debug = log.isDebugEnabled();
         List<List<EventLog>> eventPointsList = new ArrayList<List<EventLog>>(resources.length);
 
         // Get data for charts and put it in session. In reality only
@@ -341,7 +367,7 @@ public class ViewChartFormPrepareAction
         // data points for chart
         Integer m[] = chartForm.getM();
         String[] chartDataKeys = new String[m.length];
-        log.trace("number of metrics: " + m.length);
+        if (debug) log.debug("number of metrics: " + m.length);
 
         for (int i = 0; i < m.length; ++i) {
             // Use the current time concatenated with metric
@@ -349,7 +375,7 @@ public class ViewChartFormPrepareAction
             chartDataKeys[i] = String.valueOf(System.currentTimeMillis()) + m[i];
 
             for (int j = 0; j < resources.length; ++j) {
-                if (log.isDebugEnabled()) {
+                if (debug) {
                     log.debug("mtid=" + m[i] + ", rid=" + resources[j].getId());
                     log.debug("startDate=" + chartForm.getStartDate());
                     log.debug("endDate=" + chartForm.getEndDate());
@@ -374,7 +400,7 @@ public class ViewChartFormPrepareAction
                     }
                 }
             }
-            log.debug("Store into session: " + chartDataKeys[i]);
+            if (debug) log.debug("Store into session: " + chartDataKeys[i]);
         }
         request.setAttribute(Constants.CHART_DATA_KEYS_SIZE, new Integer(chartDataKeys.length));
         request.setAttribute("chartLegend", eventPointsList);
@@ -397,19 +423,33 @@ public class ViewChartFormPrepareAction
                                  AppdefResourceValue[] resources) throws SessionTimeoutException,
         SessionNotFoundException, AppdefEntityNotFoundException, PermissionException, AppdefCompatException,
         RemoteException, MeasurementNotFoundException, BaselineCreationException {
+        final boolean debug = log.isDebugEnabled();
+        StopWatch watch = new StopWatch();
         List<Integer> mtids = Arrays.asList(chartForm.getOrigM());
         ArrayList<MetricDisplaySummary> metricSummaries = new ArrayList<MetricDisplaySummary>();
+        if (debug) watch.markTimeBegin("findMetrics");
         for (int i = 0; i < resources.length; ++i) {
             Map<String, Set<MetricDisplaySummary>> metrics = measurementBoss.findMetrics(sessionId, resources[i]
                 .getEntityId(), mtids, chartForm.getStartDate().getTime(), chartForm.getEndDate().getTime());
-            MonitorUtils.formatMetrics(metrics, request.getLocale(), getResources(request));
+           
             for (Iterator<Set<MetricDisplaySummary>> it = metrics.values().iterator(); it.hasNext();) {
                 metricSummaries.addAll(it.next());
             }
+            
+            if (chartForm.getMode().equals(Constants.MODE_MON_CHART_SMMR) && !metricSummaries.isEmpty()) {
+                // HQ-1916: For SMMR charts, get the metric display summary
+                // for only the first resource
+                break;
+             }
         }
         Collections.sort(metricSummaries, comp);
         request.setAttribute("metricSummaries", metricSummaries);
         request.setAttribute("metricSummariesSize", new Integer(metricSummaries.size()));
+        
+        if (debug) {
+          watch.markTimeEnd("findMetrics");
+          watch.markTimeBegin("chartedMetrics");
+        }
 
         // pick out the charted metrics from the metric summaries
         ChartedMetricBean[] chartedMetrics = new ChartedMetricBean[chartForm.getM().length];
@@ -425,9 +465,18 @@ public class ViewChartFormPrepareAction
                 }
             }
         }
+        if (debug) watch.markTimeEnd("chartedMetrics");
         request.setAttribute("chartedMetrics", chartedMetrics);
 
-        setupBaselineExpectedRange(request, sessionId, chartForm, resources, chartedMetrics);
+        if (chartedMetrics.length > 0 && chartedMetrics[0] != null) {
+          watch.markTimeBegin("_setupBaselineExpectedRange");
+          setupBaselineExpectedRange(request, sessionId, chartForm, resources, chartedMetrics);
+          watch.markTimeEnd("_setupBaselineExpectedRange");           
+        }
+        
+        if (debug) {
+            log.debug("_setupPageData: " + watch);
+        }
     }
 
     protected void setupBaselineExpectedRange(HttpServletRequest request, int sessionId, ViewChartForm chartForm,
