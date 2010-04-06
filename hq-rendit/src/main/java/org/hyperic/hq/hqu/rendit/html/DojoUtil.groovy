@@ -443,6 +443,22 @@ class DojoUtil {
             ${tableVar}.store.clearData();
         }
 
+        // Called after refreshTable() to make rows selectable.
+        function ${idVar}_makeSelectable() {
+            dojo11.setSelectable('${id}', true);
+            var rows = dojo11.byId("${id}").rows;
+            for (var x = 0; x < rows.length; x++) {
+                try {
+                    dojo11.setSelectable(rows[x], true); // Override --moz-user-select: none;
+                    for(var y = 0; y < rows[x].cells.length; y++) {
+                        dojo11.setSelectable(rows[x].cells[y], true);  // Override --moz-user-select: none;
+                    }
+                } catch(e) {
+                    console.log(e);
+                }
+            }
+        }
+
         function ${id}_refreshTable(kwArgs) {
             // Don't refresh data for this table if it's hidden.
             var tableWrapper = dojo.byId("${id}_tableWrapper");
@@ -496,6 +512,8 @@ class DojoUtil {
                     } else {
                         dojo.event.topic.publish("XHRComplete", "DATA_RETURNED");
                     }
+
+                    ${idVar}_makeSelectable();
                 }
             });
         }
