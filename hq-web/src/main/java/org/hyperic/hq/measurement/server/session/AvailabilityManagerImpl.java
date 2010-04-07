@@ -557,9 +557,10 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
                     List<Measurement> measids =  measCache.get(m.getResource().getId());
                     if (measids == null) {
                         measids = new ArrayList<Measurement>();
+                        measids.add(m);
+                        measCache.put(m.getResource().getId(), measids);
                     }
-                    measids.add(m);
-                    measCache.put(m.getResource().getId(), measids);
+                   
                 }
                 midsToGet.add(m.getId());
             }
