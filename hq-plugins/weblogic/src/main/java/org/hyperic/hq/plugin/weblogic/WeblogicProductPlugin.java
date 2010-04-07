@@ -44,6 +44,11 @@ public class WeblogicProductPlugin extends ProductPlugin {
     private static boolean useJAAS = true;
     private static boolean autoRT  = false;
 
+    private static boolean ssl2ways = false;
+    private static String ssl2ways_cert;
+    private static String ssl2ways_key;
+    private static String ssl2ways_key_pass;
+
     public static final String NAME = "weblogic";
 
     public static final String SERVER_NAME    = "Weblogic";
@@ -74,6 +79,22 @@ public class WeblogicProductPlugin extends ProductPlugin {
         return useJAAS;
     }
 
+    public static boolean useSSL2Ways() {
+        return ssl2ways;
+    }
+
+    public static String getSSL2WaysKey(){
+        return ssl2ways_key;
+    }
+
+    public static String getSSL2WaysCert(){
+        return ssl2ways_cert;
+    }
+
+    public static String getSSL2WaysKeyPass(){
+        return ssl2ways_key_pass;
+    }
+
     public static boolean autoRT() {
         return autoRT;
     }
@@ -87,6 +108,10 @@ public class WeblogicProductPlugin extends ProductPlugin {
         String auth =
             props.getProperty("weblogic.auth.method", "jaas").toLowerCase();
 
+        // SSL2WAYS CERTs
+        ssl2ways_key=props.getProperty("weblogic.ssl2ways.key");
+        ssl2ways_key_pass=props.getProperty("weblogic.ssl2ways.key.pass","");
+        ssl2ways_cert=props.getProperty("weblogic.ssl2ways.cert");
         //can't do jaas w/o login config
         final String loginConfig =
             "java.security.auth.login.config";
@@ -112,8 +137,10 @@ public class WeblogicProductPlugin extends ProductPlugin {
             System.getProperty(loginConfig) == null)
         {
             useJAAS = false;
-        }
-        else if (! "jaas".equals(auth)) {
+        }else if ("ssl2ways".equals(auth)){
+            useJAAS = false;
+            ssl2ways = true;
+        }else if (! "jaas".equals(auth)) {
             String msg = "Unsupported authentication method: " + auth;
             throw new IllegalArgumentException(msg);
         }
