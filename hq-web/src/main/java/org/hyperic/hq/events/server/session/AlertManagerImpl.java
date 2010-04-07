@@ -218,6 +218,11 @@ public class AlertManagerImpl implements AlertManager {
     public int deleteAlerts(long begin, long end) {
         return alertDAO.deleteByCreateTime(begin, end);
     }
+    
+    @Transactional(readOnly = true)
+    public Alert getAlertById(Integer id) {
+        return alertDAO.get(id);
+    }
 
     /**
      * Find an alert pojo by ID

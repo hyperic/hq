@@ -40,6 +40,8 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.events.ActionExecutionInfo;
 import org.hyperic.hq.events.server.session.Action;
+import org.hyperic.hq.events.server.session.Alert;
+import org.hyperic.hq.events.server.session.AlertDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -86,13 +88,15 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
     private final PooledExecutor _executor;
     private final EscalationStateDAO escalationStateDao;
     private AuthzSubjectManager authzSubjectManager;
+    private AlertDAO alertDAO;
     private final Log log = LogFactory.getLog(EscalationRuntime.class);
 
     @Autowired
     public EscalationRuntimeImpl(EscalationStateDAO escalationStateDao,
-                                 AuthzSubjectManager authzSubjectManager) {
+                                 AuthzSubjectManager authzSubjectManager, AlertDAO alertDAO) {
         this.escalationStateDao = escalationStateDao;
         this.authzSubjectManager = authzSubjectManager;
+        this.alertDAO = alertDAO;
         _executor = new PooledExecutor(new LinkedQueue());
         _executor.setKeepAliveTime(-1); // Threads never die off
         _executor.createThreads(3); // # of threads to service requests
@@ -439,6 +443,11 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
     @Transactional
     public void endEscalation(EscalationState escalationState) {
         if (escalationState != null) {
+            // make sure we have the updated state to avoid StaleStateExceptions
+            escalationState = escalationStateDao.findById(escalationState.getId());
+            if (escalationState == null) {
+                return;
+            }
             escalationStateDao.remove(escalationState);
             unscheduleEscalation(escalationState);
         }
@@ -465,15 +474,17 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
 
         // XXX -- Need to make sure the application is running before
         // we allow this to proceed
-        log.debug("Executing state[" + escalationState.getId() + "]");
+        final boolean debug = _log.isDebugEnabled();
+        if (debug) _log.debug("Executing state[" + escalationState.getId() + "]");
 
         if (actionIdx >= escalation.getActions().size()) {
             if (escalation.isRepeat() && escalation.getActions().size() > 0) {
                 actionIdx = 0; // Loop back
             } else {
-                log.debug("Reached the end of the escalation state[" + escalationState.getId() +
-                          "].  Ending it");
-
+                if(debug) {
+                    log.debug("Reached the end of the escalation state[" + escalationState.getId() +
+                    "].  Ending it");
+                }
                 endEscalation(escalationState);
 
                 return;
@@ -483,10 +494,17 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
         EscalationAction escalationAction = (EscalationAction) escalation.getActions().get(
             actionIdx);
         Action action = escalationAction.getAction();
-        Escalatable alert = getEscalatable(escalationState);
+        Alert alert = alertDAO.get(new Integer(escalationState.getAlertId()));
+        // HHQ-3499, need to make sure that the alertId that is pointed to by
+        // the escalation still exists
+        if (alert == null) {
+            endEscalation(escalationState);
+            return;
+        }
+        Escalatable esc = getEscalatable(escalationState);
 
         // HQ-1348: End escalation if alert is already fixed
-        if (alert.getAlertInfo().isFixed()) {
+        if (esc.getAlertInfo().isFixed()) {
             endEscalation(escalationState);
 
             return;
@@ -499,8 +517,10 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
         long nextTime = System.currentTimeMillis() +
                         Math.max(offset, escalationAction.getWaitTime());
 
-        log.debug("Moving onto next state of escalation, but waiting for " +
-                  escalationAction.getWaitTime() + " ms");
+        if(debug) {
+            log.debug("Moving onto next state of escalation, but waiting for " + escalationAction.getWaitTime() + " ms");
+        }
+                  
 
         escalationState.setNextAction(actionIdx + 1);
         escalationState.setNextActionTime(nextTime);
@@ -510,12 +530,12 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
         try {
             EscalationAlertType type = escalationState.getAlertType();
             AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
-            ActionExecutionInfo execInfo = new ActionExecutionInfo(alert.getShortReason(), alert
-                .getLongReason(), alert.getAuxLogs());
-            String detail = action.executeAction(alert.getAlertInfo(), execInfo);
+            ActionExecutionInfo execInfo = new ActionExecutionInfo(esc.getShortReason(), esc
+                .getLongReason(), esc.getAuxLogs());
+            String detail = action.executeAction(esc.getAlertInfo(), execInfo);
 
-            type.changeAlertState(alert, overlord, EscalationStateChange.ESCALATED);
-            type.logActionDetails(alert, action, detail, null);
+            type.changeAlertState(esc, overlord, EscalationStateChange.ESCALATED);
+            type.logActionDetails(esc, action, detail, null);
         } catch (Exception e) {
             log.error("Unable to execute action [" + action.getClassName() +
                       "] for escalation definition [" + escalationState.getEscalation().getName() +

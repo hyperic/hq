@@ -55,6 +55,8 @@ public interface AlertManager {
      * Remove alerts for a range of time
      */
     public int deleteAlerts(long begin, long end);
+    
+    Alert getAlertById(Integer id);
 
     /**
      * Find an alert pojo by ID
