@@ -26,7 +26,9 @@
 package org.hyperic.hq.product.jmx;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.UndeclaredThrowableException;
 import java.net.MalformedURLException;
 import java.rmi.RemoteException;
 import java.util.HashMap;
@@ -47,10 +49,9 @@ import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import javax.management.j2ee.statistics.CountStatistic;
 import javax.management.j2ee.statistics.RangeStatistic;
-import javax.management.j2ee.statistics.TimeStatistic;
-
 import javax.management.j2ee.statistics.Statistic;
 import javax.management.j2ee.statistics.Stats;
+import javax.management.j2ee.statistics.TimeStatistic;
 import javax.management.openmbean.CompositeData;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
@@ -59,7 +60,6 @@ import javax.naming.Context;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricInvalidException;
 import org.hyperic.hq.product.MetricNotFoundException;
@@ -329,6 +329,16 @@ public class MxUtil {
                                     metric.getAttributeName(), e);
         } catch (InstanceNotFoundException e) {
             throw objectNotFound(objectName, e);
+        } catch (UndeclaredThrowableException e) {
+            Throwable cause1 = e.getCause();
+            if (cause1 instanceof InvocationTargetException) {
+                Throwable cause2 = cause1.getCause();
+                if (cause2 instanceof InstanceNotFoundException) {
+                    throw objectNotFound(objectName, (InstanceNotFoundException) cause2);
+                }
+            }
+            
+            throw e;
         } catch (ReflectionException e) {
             throw error(metric.toString(), e);
 
