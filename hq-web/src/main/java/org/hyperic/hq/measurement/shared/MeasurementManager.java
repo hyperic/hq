@@ -11,6 +11,7 @@ import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.ResourceZevent;
 import org.hyperic.hq.appdef.server.session.Server;
+import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
@@ -258,7 +259,7 @@ public interface MeasurementManager {
      * @param ids The list of entitys to unschedule
      */
     public void disableMeasurements(AuthzSubject subject, AppdefEntityID agentId,
-                                    AppdefEntityID[] ids) throws PermissionException;
+                                    AppdefEntityID[] ids) throws PermissionException, AgentNotFoundException;
 
     /**
      * Disable all Measurements for a resource
@@ -270,6 +271,8 @@ public interface MeasurementManager {
      * Disable all Measurements for a resource
      */
     public void disableMeasurements(AuthzSubject subject, Resource res) throws PermissionException;
+    
+    void disableMeasurements(AuthzSubject subject, Agent agent, AppdefEntityID[] ids, boolean isAsyncDelete) throws PermissionException;
 
     /**
      * XXX: not sure why all the findMeasurements require an authz if they do

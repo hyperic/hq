@@ -339,13 +339,8 @@ public interface AppdefBoss {
      */
     public AppdefEntityID[] removeAppdefEntity(int sessionId, AppdefEntityID aeid) throws SessionNotFoundException,
         SessionTimeoutException, ApplicationException, VetoException;
-
-    /**
-     * Remove all delete resources Method is "NotSupported" since all the
-     * resource deletes may take longer than the transaction timeout. No need
-     * for a transaction in this context.
-     */
-    public void removeDeletedResources() throws ApplicationException, VetoException;
+    
+    void removeDeletedResources(Map<Integer,List<AppdefEntityID>> agentCache) throws ApplicationException, VetoException;
 
     public void _removePlatformInNewTran(AuthzSubject subject, Platform platform) throws ApplicationException,
         VetoException;
