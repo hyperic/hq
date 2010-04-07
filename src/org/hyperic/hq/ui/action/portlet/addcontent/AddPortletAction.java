@@ -26,6 +26,7 @@
 package org.hyperic.hq.ui.action.portlet.addcontent;
 
 import java.text.NumberFormat;
+import java.util.List;
 import java.util.Random;
 
 import javax.servlet.ServletContext;
@@ -77,63 +78,67 @@ public class AddPortletAction extends BaseAction {
         AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
         HttpSession session = request.getSession();
         WebUser user = RequestUtils.getWebUser(request);
-        DashboardConfig dashConfig = DashboardUtils.findDashboard(
-        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, boss);
+        DashboardConfig dashConfig = DashboardUtils.findDashboard((Integer) session.getAttribute(Constants.SELECTED_DASHBOARD_ID), user, boss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         PropertiesForm pForm = (PropertiesForm) form;
-
-        if( pForm.getPortlet() == null || "bad".equals( pForm.getPortlet() ) ) {
+        String portlet = pForm.getPortlet();
+        
+        if (portlet == null || portlet.equals("bad")) {
             return mapping.findForward(Constants.SUCCESS_URL);
         }
         
         String prefKey;
+        List<String> multi;
+        
         if (pForm.isWide()) {
             prefKey = Constants.USER_PORTLETS_SECOND;
-        }                            
-        else{
+            multi = (List<String>) session.getAttribute("multi.wide");
+        } else {
             prefKey = Constants.USER_PORTLETS_FIRST;
+            multi = (List<String>) session.getAttribute("multi.narrow");
         }
 
         String userPrefs = dashPrefs.getValue(prefKey);
         
-        String portlet = pForm.getPortlet();
+        // Check to see if this portlet is permitted to be rendered multiple times
+        if (multi != null && multi.contains(portlet)) {
+            while (userPrefs != null && userPrefs.indexOf(portlet) > -1) {
+                // We need to add a multi portlet
+                StringBuffer portletName = new StringBuffer(pForm.getPortlet());
         
-        while (userPrefs != null && userPrefs.indexOf(portlet) > -1) {
-            // We need to add a multi portlet
-            StringBuffer portletName = new StringBuffer(pForm.getPortlet());
-            // 1. Generate random token
-            NumberFormat nf = NumberFormat.getIntegerInstance();
-            nf.setMinimumIntegerDigits(3);      // Exactly 3 digits
-            nf.setMaximumIntegerDigits(3);
-            portletName.append(DashboardUtils.MULTI_PORTLET_TOKEN)
-                       .append(nf.format(new Random().nextInt(1000)));
-            // 2. Create unique portlet name based on the new random token
-            portlet = portletName.toString();
+                // 1. Generate random token
+                NumberFormat nf = NumberFormat.getIntegerInstance();
+                
+                nf.setMinimumIntegerDigits(3);      // Exactly 3 digits
+                nf.setMaximumIntegerDigits(3);
+                portletName.append(DashboardUtils.MULTI_PORTLET_TOKEN).append(nf.format(new Random().nextInt(1000)));
+                    
+                // 2. Create unique portlet name based on the new random token
+                portlet = portletName.toString();
+            }
         }
-        
-        String preferences = Constants.DASHBOARD_DELIMITER + portlet +
-                             Constants.DASHBOARD_DELIMITER;
-        // Clean up the delimiters
-		preferences = StringUtil.replace(preferences,
-				Constants.EMPTY_DELIMITER, Constants.DASHBOARD_DELIMITER);
-
-		LogFactory.getLog("user.preferences").trace(
-				"Invoking setUserPrefs" + " in AddPortletAction " + " for "
-						+ user.getId() + " at " + System.currentTimeMillis()
-						+ " user.prefs = " + userPrefs);
-		
-		// If there are existing userprefs, prepend it to the string of preferences
-		// otherwise, this is the first preference in the list
-		if (userPrefs != null) {
-			preferences = userPrefs + preferences;
-		}
-		
-		ConfigurationProxy.getInstance().setPreference(session, user, boss,
-				prefKey, preferences);
-        
-
-        session.removeAttribute(Constants.USERS_SES_PORTAL);
+    
+        // if list of active portlets empty or the portlet name is not in the list, add it
+        if (userPrefs == null || userPrefs.indexOf(portlet) == -1) {
+            String preferences = Constants.DASHBOARD_DELIMITER + portlet + Constants.DASHBOARD_DELIMITER;
+    
+            // Clean up the delimiters
+            preferences = StringUtil.replace(preferences, Constants.EMPTY_DELIMITER, Constants.DASHBOARD_DELIMITER);
+    
+            LogFactory.getLog("user.preferences").trace("Invoking setUserPrefs in AddPortletAction for "
+    						+ user.getId() + " at " + System.currentTimeMillis()
+    						+ " user.prefs = " + userPrefs);
+    		
+            // If there are existing userprefs, prepend it to the string of preferences
+            // otherwise, this is the first preference in the list
+    		if (userPrefs != null) {
+                preferences = userPrefs + preferences;
+    		}
+    		
+    		ConfigurationProxy.getInstance().setPreference(session, user, boss, prefKey, preferences);
+            
+    		session.removeAttribute(Constants.USERS_SES_PORTAL);
+        }
 
         return mapping.findForward(Constants.SUCCESS_URL);
     }
