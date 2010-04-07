@@ -49,7 +49,7 @@
 onloads.push(showViewEscResponse);
 
 function showViewEscResponse() {
-    var tmp = eval('( <c:out value="${escalationJSON}" escapeXml="false" /> )');
+	var tmp = <c:out value="${escalationJSON}" escapeXml="false"/> ;
     var notifyAll = tmp.escalation.notifyAll
     var actions = tmp.escalation.actions;
     var allowPause = tmp.escalation.allowPause;
@@ -80,6 +80,7 @@ function showViewEscResponse() {
       var configSnmpOID = actionConfig.oid;
       var configSnmpIP = actionConfig.address;
       var configSnmpNotificationMechanism = actionConfig.snmpNotificationMechanism;
+      var configSnmpVarBinds = eval(actionConfig.variableBindings);
       var actionId = actions[i].action.id;
       var actionsClassName = actions[i].action.className;
       var actionsVersion = actions[i].action._version_;
@@ -163,7 +164,25 @@ function showViewEscResponse() {
             usersTextDiv.innerHTML = 'Suppress duplicate alerts for: ' + actionWaitTime;
             waitDiv.innerHTML = "&nbsp;";
             } else if (actionClass[d] == "SnmpAction") {
-            	usersTextDiv.innerHTML = '<table cellpadding="0" cellspacing="0" border="0"><tr><td rowSpan="3" vAlign="top" style="padding-right:3px;">Snmp Trap:</td><td style="padding:0px 2px 2px 2px;"><fmt:message key="resource.autodiscovery.server.IPAddressTH"/>: ' + configSnmpIP + '</td></tr><tr><td style="padding:2px;"><fmt:message key="admin.settings.SNMPTrapOID"/> ' + configSnmpOID + '</td></tr><tr><td style="padding:2px;"><fmt:message key="admin.settings.SNMPNotificationMechanism"/> ' + configSnmpNotificationMechanism + '</td></tr></table>'       
+            	var snmpInnerHTML = '<table cellpadding="0" cellspacing="0" border="0">'
+             	 	+ '<tr><td rowSpan="4" vAlign="top" style="padding-right:3px;"><fmt:message key="alert.config.escalation.action.snmp.notification"/>:</td>'
+             	  	+ '<td colspan="2" style="padding:2px;"><fmt:message key="resource.autodiscovery.server.IPAddressTH"/>: ' + configSnmpIP + '</td></tr>'
+             	 	+ '<tr><td colspan="2" style="padding:0px 2px 2px 2px;"><fmt:message key="admin.settings.SNMPNotificationMechanism"/> ' + configSnmpNotificationMechanism + '</td></tr>'
+             	 	+ '<tr><td vAlign="top" style="padding:2px;" nowrap="nowrap"><fmt:message key="alert.config.escalation.action.snmp.varbinds"/>: </td>'
+             	 	+ '<td style="padding:2px;"><table>'
+             	 	+ '<tr><td style="padding-right:5px;"><fmt:message key="alert.config.escalation.action.snmp.oid"/>: ' + configSnmpOID + '</td>'
+             	 	+ '<td>Value: {snmp_trap.gsp}</td></tr>';
+             	 	
+             	 	if (typeof configSnmpVarBinds != 'object') {
+             	 		configSnmpVarBinds = [];
+             		}               
+             	 	for (var s = 0; s < configSnmpVarBinds.length; s++) {   
+             	 		snmpInnerHTML += '<tr><td style="padding-right:5px;"><fmt:message key="alert.config.escalation.action.snmp.oid"/>: '
+             	 			+ configSnmpVarBinds[s].oid + '</td>'
+             	 			+ '<td>Value: ' + configSnmpVarBinds[s].value + '</td></tr>';
+             		}
+             	 	snmpInnerHTML += '</table></td></tr></table>';
+             	 	usersTextDiv.innerHTML = snmpInnerHTML;      
            }
       }
 
