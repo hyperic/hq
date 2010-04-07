@@ -32,6 +32,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.Executor;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,12 +46,6 @@ import org.hyperic.hibernate.Util;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.TransactionListener;
 import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
-
-import EDU.oswego.cs.dl.util.concurrent.ClockDaemon;
-import EDU.oswego.cs.dl.util.concurrent.Executor;
-import EDU.oswego.cs.dl.util.concurrent.LinkedQueue;
-import EDU.oswego.cs.dl.util.concurrent.PooledExecutor;
-import EDU.oswego.cs.dl.util.concurrent.Semaphore;
 
 /**
  * This class manages the runtime execution of escalation chains.  The
@@ -74,7 +75,7 @@ class EscalationRuntime {
     
     private final ThreadLocal _batchUnscheduleTxnListeners = new ThreadLocal();
     private final Log _log = LogFactory.getLog(EscalationRuntime.class);
-    private final ClockDaemon _schedule = new ClockDaemon();
+    private final Timer _schedule = new Timer("EscalationRuntime", true);
     private final Map _stateIdsToTasks = new HashMap();
     private final Map _esclEntityIdsToStateIds = new HashMap();
     
@@ -82,14 +83,15 @@ class EscalationRuntime {
     
     private final Set _uncomittedEscalatingEntities = 
                             Collections.synchronizedSet(new HashSet());
-    private final PooledExecutor          _executor;
+    private final ThreadPoolExecutor      _executor;
     private final EscalationManagerLocal  _esclMan;
     
     private EscalationRuntime() {
-        _executor = new PooledExecutor(new LinkedQueue());
-        _executor.setKeepAliveTime(-1);  // Threads never die off
-        _executor.createThreads(3);  // # of threads to service requests
-        
+        // Want threads to never die (XXX, scottmf, keeping current functionality to get rid of
+        //                            backport apis but don't think this is a good idea)
+        // 3 threads to service requests
+        _executor =
+            new ThreadPoolExecutor(3, 3, Long.MAX_VALUE, TimeUnit.DAYS, new LinkedBlockingQueue());
         _esclMan = EscalationManagerEJBImpl.getOne();
     }
 
@@ -128,7 +130,7 @@ class EscalationRuntime {
      * This class is invoked when the clock daemon wakes up and decides that
      * it is time to look at an escalation.
      */
-    private class ScheduleWatcher implements Runnable {
+    private class ScheduleWatcher extends TimerTask {
         private Integer  _stateId;
         private Executor _executor;
         
@@ -140,9 +142,8 @@ class EscalationRuntime {
         public void run() {
             try {
                 _executor.execute(new EscalationRunner(_stateId));
-            } catch(InterruptedException e) {
-                _log.warn("Interrupted while trying to execute state [" + 
-                          _stateId + "]");
+            } catch(Throwable t) {
+                _log.error(t,t);
             }
         }
     }
@@ -210,7 +211,8 @@ class EscalationRuntime {
         
         public void afterCommit(boolean success) {
             try {
-                _log.debug("Transaction committed:  success=" + success);
+                final boolean debug = _log.isDebugEnabled();
+                if (debug) _log.debug("Transaction committed:  success=" + success);
                 if (success) {
                     unscheduleAllEscalations_((EscalatingEntityIdentifier[])
                             _escalationsToUnschedule.toArray(
@@ -270,14 +272,13 @@ class EscalationRuntime {
     
     private void doUnscheduleEscalation_(Integer stateId) {
         if (stateId != null) {
-            Object task = _stateIdsToTasks.remove(stateId);
-            
+            TimerTask task = (TimerTask) _stateIdsToTasks.remove(stateId);
+            final boolean debug = _log.isDebugEnabled();
             if (task != null) {
-                ClockDaemon.cancel(task);
-                _log.debug("Canceled state[" + stateId + "]");
+                task.cancel();
+                if (debug) _log.debug("Canceled state[" + stateId + "]");
             } else {
-                _log.debug("Canceling state[" + stateId + "] but was " + 
-                           "not found");
+                if (debug) _log.debug("Canceling state[" + stateId + "] but was not found");
             }                    
         }
     }
@@ -361,7 +362,8 @@ class EscalationRuntime {
         
         HQApp.getInstance().addTransactionListener(new TransactionListener() {
             public void afterCommit(boolean success) {
-                _log.debug("Transaction committed:  success=" + success);
+                final boolean debug = _log.isDebugEnabled();
+                if (debug) _log.debug("Transaction committed:  success=" + success);
                 
                 if (success) {
                     scheduleEscalation_(state, schedTime);
@@ -382,18 +384,19 @@ class EscalationRuntime {
         }
         
         synchronized (_stateIdsToTasks) {
-            Object task = _stateIdsToTasks.get(stateId);
+            ScheduleWatcher task = (ScheduleWatcher) _stateIdsToTasks.get(stateId);
             
+            final boolean debug = _log.isDebugEnabled();
             if (task != null) {
                 // Previously scheduled.  Unschedule
-                ClockDaemon.cancel(task);
-                _log.debug("Rescheduling state[" + stateId + "]");
+                task.cancel();
+                if (debug) _log.debug("Rescheduling state[" + stateId + "]");
             } else {
-                _log.debug("Scheduling state[" + stateId + "]");
+                if (debug) _log.debug("Scheduling state[" + stateId + "]");
             }
 
-            task = _schedule.executeAt(new Date(schedTime),
-                                       new ScheduleWatcher(stateId, _executor)); 
+            task = new ScheduleWatcher(stateId, _executor);
+            _schedule.schedule(task, new Date(schedTime));
                                                            
             _stateIdsToTasks.put(stateId, task);
             _esclEntityIdsToStateIds.put(new EscalatingEntityIdentifier(state), 
@@ -402,7 +405,8 @@ class EscalationRuntime {
     }
     
     private void runEscalation(Integer stateId) {
-        _log.debug("Running escalation state [" + stateId + "]");
+        final boolean debug = _log.isDebugEnabled();
+        if (debug) _log.debug("Running escalation state [" + stateId + "]");
         _esclMan.executeState(stateId);
     }
     
