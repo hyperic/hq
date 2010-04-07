@@ -31,6 +31,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.hyperic.hq.transport.util.TransportUtils;
+import org.jboss.remoting.InvokerLocator;
+import org.jboss.remoting.transporter.TransporterServer;
 
 
 /**
@@ -41,13 +43,13 @@ public class AgentTransport {
     
     private final Object _lock = new Object();
 
-    private final PollerClient _pollerClient = null;
+    private final PollerClient _pollerClient;
     
-    //private final TransporterServer _server;
+    private final TransporterServer _server;
     
     private final boolean _unidirectional;
     
-    //private final InvokerLocator _remoteEndpointLocator;
+    private final InvokerLocator _remoteEndpointLocator;
     
     private boolean _stopped;
     
@@ -81,38 +83,38 @@ public class AgentTransport {
         _unidirectional = unidirectional;
       //TODO : remoting uncomment
         
-//        InvokerLocator remotingServerInvokerLocator;
-//        
-//        if (_unidirectional) {
-//            _pollerClient = createPollerClient(serverTransportAddr, 
-//                                               path, 
-//                                               encrypted, 
-//                                               pollingFrequency, 
-//                                               agentToken, 
-//                                               asyncThreadPoolSize);
-//            // for a unidirectional agent - we can use a local invoker when registering 
-//            // services - since the poller client is in the agent's vm
-//            remotingServerInvokerLocator = getLocalInvokerLocator();
-//            _remoteEndpointLocator = _pollerClient.getRemoteEndpointLocator();
-//        } else {
+        InvokerLocator remotingServerInvokerLocator;
+        
+        if (_unidirectional) {
+            _pollerClient = createPollerClient(serverTransportAddr, 
+                                               path, 
+                                               encrypted, 
+                                               pollingFrequency, 
+                                               agentToken, 
+                                               asyncThreadPoolSize);
+            // for a unidirectional agent - we can use a local invoker when registering 
+            // services - since the poller client is in the agent's vm
+            remotingServerInvokerLocator = getLocalInvokerLocator();
+            _remoteEndpointLocator = _pollerClient.getRemoteEndpointLocator();
+        } else {
             // TODO - need to specify the invoker locator for bidirectional 
             // (both remoting server invoker locator and remote end point invoker locator)
-           // remotingServerInvokerLocator = null;
-            //_remoteEndpointLocator = null;
-            //throw new UnsupportedOperationException("bidirectional not supported yet");
-        //}
+            remotingServerInvokerLocator = null;
+            _remoteEndpointLocator = null;
+            throw new UnsupportedOperationException("bidirectional not supported yet");
+        }
         
-        //_server = TransporterServer.createTransporterServer(remotingServerInvokerLocator, 
-          //                                                  new BootStrapService());
+        _server = TransporterServer.createTransporterServer(remotingServerInvokerLocator, 
+                                                            new BootStrapService());
     }
     
     /**
      * @return The invoker locator for the remote end point to which this 
      *         transport is connected.
      */
-//    public InvokerLocator getRemoteEndpointLocator() {
-//        return _remoteEndpointLocator;
-//    }
+    public InvokerLocator getRemoteEndpointLocator() {
+        return _remoteEndpointLocator;
+    }
     
     /**
      * Create the poller client. A ClassNotFoundException is thrown if this is 
@@ -168,7 +170,7 @@ public class AgentTransport {
         
         verifyServiceImplementsInterface(serviceInterface, serviceImpl);
         
-       // _server.addHandler(serviceImpl, serviceInterface.getName());
+        _server.addHandler(serviceImpl, serviceInterface.getName());
     }
     
     /**
@@ -195,7 +197,7 @@ public class AgentTransport {
             return;
         }
         
-        //_server.start();
+        _server.start();
         
         if (_unidirectional) {
             _pollerClient.start();            
@@ -210,19 +212,19 @@ public class AgentTransport {
             _pollerClient.stop();
         }  
         
-       // _server.stop();
+        _server.stop();
         setStopped();
     }
     
-//    private InvokerLocator getLocalInvokerLocator() {
-//    	// Suspected bug in JBoss: it looks like the stop() method of TransportServer doesn't
-//    	// internally shut down its Connector in a timely synchronous fashion.  This is mostly
-//    	// harmless, except in unittests, which create and destroy AgentTransports one after
-//    	// another.  Putting in params with a timestamp is a cheesy workaround.
-//    	Map params = new HashMap(1);
-//    	params.put("timestamp", String.valueOf(System.currentTimeMillis()));
-//        return new InvokerLocator("local", "localhost", -1, null, params);
-//    }
+    private InvokerLocator getLocalInvokerLocator() {
+    	// Suspected bug in JBoss: it looks like the stop() method of TransportServer doesn't
+    	// internally shut down its Connector in a timely synchronous fashion.  This is mostly
+    	// harmless, except in unittests, which create and destroy AgentTransports one after
+    	// another.  Putting in params with a timestamp is a cheesy workaround.
+    	Map params = new HashMap(1);
+    	params.put("timestamp", String.valueOf(System.currentTimeMillis()));
+        return new InvokerLocator("local", "localhost", -1, null, params);
+    }
     
     private void verifyServiceImplementsInterface(Class serviceInterface, Object serviceImpl) {
         Class[] interfaces = serviceImpl.getClass().getInterfaces();
