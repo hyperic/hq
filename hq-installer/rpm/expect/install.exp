@@ -4,6 +4,8 @@ set timeout -1
 
 spawn ./setup.sh
 
+expect "accept"
+send "y\r"
 expect "choices"
 send "1\r"
 expect "installation path"
