@@ -2256,19 +2256,21 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
             if (debug) watch.markTimeBegin("findResource size=" + size);
             final Resource res = resourceManager.findResource(id);
             if (debug) watch.markTimeEnd("findResource size=" + size);
-            List<Measurement> list = measCache.get(res.getId());
-            if (null != measCache && null != list) {
-                if (list.size() > 1) {
-                    log.warn("resourceId " + res.getId() +
-                             " has more than one availability measurement " +
-                             " assigned to it");
-                } else if (list.size() <= 0) {
-                    continue;
+            if (null != measCache) {
+                List<Measurement> list = measCache.get(res.getId());
+                if  (null != list) {
+                    if (list.size() > 1) {
+                        log.warn("resourceId " + res.getId() +
+                            " has more than one availability measurement " +
+                            " assigned to it");
+                    } else if (list.size() <= 0) {
+                        continue;
+                    }
+                    final Measurement m = list.get(0);
+                    rtn.put(res.getId(), m);
+                } else {
+                    toGet.add(res);
                 }
-                final Measurement m = list.get(0);
-                rtn.put(res.getId(), m);
-            } else {
-                toGet.add(res);
             }
         }
         if (debug) watch.markTimeBegin("getAvailMeasurements");
