@@ -73,7 +73,7 @@ public abstract class JDBCMeasurementPlugin extends MeasurementPlugin {
     private HashMap _colMap = new HashMap(),
                     _valMap = new HashMap();
 
-    private int _numRows, _updateRows;
+    private int _numRows;
 
     /**
      * Config schema includes jdbc URL, database username and password.
@@ -340,7 +340,6 @@ public abstract class JDBCMeasurementPlugin extends MeasurementPlugin {
     private String getSqlRow(Statement stmt) throws SQLException {
         StringBuffer buf = new StringBuffer();
         do {
-            _updateRows = stmt.getUpdateCount();
             ResultSet rs = stmt.getResultSet();
             if (stmt.getUpdateCount() != -1) {
                 continue;
