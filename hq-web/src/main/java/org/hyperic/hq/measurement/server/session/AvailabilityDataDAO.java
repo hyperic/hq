@@ -39,6 +39,8 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 import org.hibernate.type.IntegerType;
+import org.hyperic.hibernate.Util;
+import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.measurement.MeasurementConstants;
@@ -322,8 +324,22 @@ public class AvailabilityDataDAO
             .append(" GROUP BY m.id, m._version_, m.instanceId,").append(
                 " m.template, m.mtime,m.enabled,").append(" m.interval, m.dsn,m.resource,").append(
                 " rle.endtime").append(" ORDER BY rle.endtime").toString();
-        return getSession().createQuery(sql).setLong("startime", start).setLong("endtime", end)
-            .setParameterList("mids", mids, new IntegerType()).list();
+        final List<Integer> measIds = Arrays.asList(mids);
+        final int size = measIds.size();
+        final HQDialect dialect = Util.getHQDialect();
+        final int batchSize = dialect.getMaxExpressions() < 0 ? Integer.MAX_VALUE : dialect.getMaxExpressions();
+        final List<Object[]> rtn = new ArrayList<Object[]>(size);
+        for (int i=0; i<size; i+=batchSize) {
+            final int last = Math.min(i+batchSize, size);
+            final List sublist = measIds.subList(i, last);
+            rtn.addAll(getSession()
+                        .createQuery(sql)
+                         .setLong("startime", start)
+                       .setLong("endtime", end)
+                         .setParameterList("mids", sublist, new IntegerType())
+                       .list());
+        }
+        return rtn;
     }
 
     /**
