@@ -77,7 +77,7 @@ fi
   </script>
 
   <classpath>
-    <include name="pdk/lib/jdbc/oracle12.jar"/>
+    <include name="pdk/lib/jdbc/ojdbc14.jar"/>
   </classpath>
 
   <!-- we use a dummy jmx object name -->

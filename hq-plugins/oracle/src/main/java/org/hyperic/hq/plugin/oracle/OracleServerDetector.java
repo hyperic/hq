@@ -66,6 +66,8 @@ public class OracleServerDetector
     private static final String PTQL_QUERY = "State.Name.eq=oracle";
 
     private static final String PROP_PROC_PTQL = "process.ptql";
+    
+    private static final String PROP_TNSNAMES = "tnsnames";
 
     private static final String ORATAB = "/etc/oratab";
 
@@ -190,8 +192,12 @@ public class OracleServerDetector
             bin = new File(oracle, "bin");
         }
         if (bin.getName().equals("bin")) {
-            path = oracle.getParent();
+            path = bin.getParent();
         }
+        // in HHQ-3577, changed the default installpath.  Therefore we need to
+        // make sure that a new oracle inst is not detected, rather it should
+        // just modify the existing one.
+        String aiid = oracle.getParent();
 
         // Make sure that oracle exists, and is a normal file
         if (oracle.exists() && bin.isDirectory()) {
@@ -213,6 +219,7 @@ public class OracleServerDetector
         if (found) {
             ConfigResponse productConfig = new ConfigResponse();
             ServerResource server = createServerResource(path);
+            server.setIdentifier(aiid);
 
             // Set custom properties
             ConfigResponse cprop = new ConfigResponse();
@@ -224,6 +231,11 @@ public class OracleServerDetector
             }
             servers.add(server);
         }
+        
+        // HHQ-3577 allow listener names in tnsnames.ora to be used in the url
+        String tnsDir = getTnsNamesDir(path, "network/admin/tnsnames.ora");
+        if (log.isDebugEnabled()) log.debug("using tns dir as " + tnsDir);
+        System.setProperty("oracle.net.tns_admin", tnsDir);
 
         return servers;
     }
@@ -290,6 +302,13 @@ public class OracleServerDetector
     protected List discoverServices(ConfigResponse config)
         throws PluginException
     {
+        // HHQ-3577 allow listener names in tnsnames.ora to be used in the url
+        String tnsDir = getTnsNamesDir(
+            config.getValue(ProductPlugin.PROP_INSTALLPATH),
+            config.getValue(PROP_TNSNAMES));
+        if (log.isDebugEnabled()) log.debug("using tns dir as " + tnsDir);
+        System.setProperty("oracle.net.tns_admin", tnsDir);
+        
         String url = config.getValue(OracleMeasurementPlugin.PROP_URL);
         if (url == null) {
         	log.warn("No value for config property " + OracleMeasurementPlugin.PROP_URL +
@@ -344,7 +363,7 @@ public class OracleServerDetector
             }
             // Otherwise, dump the error.
             throw new PluginException("Error querying for Oracle " +
-                                      "services: " + e.getMessage());
+                                      "services: " + e.getMessage(), e);
         }
         finally {
             DBUtil.closeJDBCObjects(log, conn, stmt, null);
@@ -554,12 +573,25 @@ public class OracleServerDetector
         }
         return rtn;
     }
+    
+    private String getTnsNamesDir(String installpath, String tnsnames) {
+       if (installpath == null || tnsnames == null) {
+           return "";
+        }
+        String fs = File.separator;
+        String[] toks = tnsnames.split(fs);
+        StringBuilder rtn = new StringBuilder();
+        for (int i=0; i<toks.length-1; i++) {
+            rtn.append(toks[i]).append(fs);
+        }
+        return installpath + fs + rtn.toString();
+    }
 
     private List getTnsServices(ConfigResponse config)
     {
         String line;
         BufferedReader reader = null;
-        String tnsnames = config.getValue("tnsnames"),
+        String tnsnames = config.getValue(PROP_TNSNAMES),
                installpath = config.getValue(ProductPlugin.PROP_INSTALLPATH);
         List rtn = new ArrayList();
         try
