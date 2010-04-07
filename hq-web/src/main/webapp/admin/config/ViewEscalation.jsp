@@ -513,7 +513,9 @@ function addRow() {
  	 	+ '<tr><td><table cellpadding="2" cellspacing="0" border="0">'
  	 	+ '<tr><td id=IPText style="display:none"></td></tr>'
  	 	+ '<tr><td id=NotificationMechanismText style="display:none"></td></tr>'
+ 	 	+ '<tr><td id=VBTitle style="display:none"><fmt:message key="alert.config.escalation.action.snmp.varbinds"/>:</td></tr>'
  	 	+ '<tr><td id=OIDText style="display:none"></td></tr>'
+ 	 	+ '<tr><td id=OIDValue style="display:none">Value: {snmp_trap.gsp}</td></tr>'
  	 	+ '<tr><td id=VariableBindingsText style="display:none"></td></tr></table></td></tr>'
  	 	+ '<tr><td id="time" colspan="3" valign="top" style="display:none;"></td></tr>'
  	 	+ '</tbody></table>';
@@ -608,10 +610,14 @@ function addRow() {
  	 	+ '<input type=text name=snmpIP id=snmpIPinput size=30 onMouseOut=copysnmpIP(this);checkIP(this);><br>'
  	 	+ '<fmt:message key="admin.settings.SNMPNotificationMechanism"/><br>'
  	 	+ "<select name='snmpNotificationMechanism' id='snmpNotificationMechanismSelect' onchange='copySnmpNotificationMechanism(this);'><option>v1 Trap</option><option>v2c Trap</option><option>Inform</option></select><br>"
+ 	 	+ '<input type="hidden" name="variableBindings" id="variableBindingsInput"><br/>'
+ 	 	+ '<fmt:message key="alert.config.escalation.action.snmp.varbinds"/>:<br/>'
+ 	 	+ '<hr>'
  	 	+ '<fmt:message key="alert.config.escalation.action.snmp.oid"/> <fmt:message key="inform.config.escalation.scheme.OID"/><br>'
- 	 	+ '<input type=text name=snmpOID id=snmpOIDinput size=30 onMouseOut=copysnmpOID(this);checkOID(this);><br>'
- 	 	+ '<fmt:message key="alert.config.escalation.action.snmp.varbinds"/><br>'
- 	 	+ "<textarea rows='4' cols='25' name='variableBindings' id='variableBindingsTextArea' onchange='copyVariableBindings(this);'></textarea>";
+ 	 	+ '<input type=text name=snmpOID id=snmpOIDinput style="width:250px" onMouseOut=copysnmpOID(this);checkOID(this);><br>'
+  	 	+ 'Value: {snmp_trap.gsp}<br>'
+  	 	+ '<div id="snmpVarbindDiv"></div>'
+  	 	+ '<div style="padding-top:10px;"><a href="javascript:addVariableBinding();"><fmt:message key="alert.config.escalation.action.snmp.varbinds.add"/></a></div>';
 
     td4.appendChild(usersDiv);
     usersDiv.setAttribute('id', 'usersDiv' + liID);
@@ -641,6 +647,35 @@ function addRow() {
 
 }
 
+function addVariableBinding() {
+	var parentDiv = dojo11.byId('snmpVarbindDiv');
+    var vbDiv = document.createElement('div');
+    var vbArray = document.getElementsByName("snmpVarbindOID");
+
+    var vbDivNum = vbArray.length + 1; 
+    vbDiv.id = "snmpVarbindDiv_" + vbDivNum;
+    
+    vbDiv.innerHTML = '<br/>'
+        + '<fmt:message key="alert.config.escalation.action.snmp.oid"/> <fmt:message key="inform.config.escalation.scheme.OID"/><br>'
+		+ '<input type=text name="snmpVarbindOID" style="width:250px" onchange="copyVariableBindings();"><br>'
+    	+ 'Value:<br>'
+    	+ '<input type=text name="snmpVarbindValue" style="width:250px" onchange="copyVariableBindings();"><br>'
+        + '<a href="javascript:removeVariableBinding(' + vbDivNum + ');"><fmt:message key="alert.config.escalation.action.snmp.varbinds.remove"/></a><br/>';        
+
+    parentDiv.appendChild(vbDiv);    
+}
+
+function removeVariableBinding(snmpVarbindIndex) {
+    var vbDiv = dojo11.byId('snmpVarbindDiv_' + snmpVarbindIndex);
+
+    // remove element
+    Element.remove(vbDiv);
+	
+	// update UI
+	copyVariableBindings();
+}
+
+
 function copyOthersEmail(el) {
     var othersDisplay = dojo11.byId('userListDisplay');
     othersDisplay.style.display = "";
@@ -666,16 +701,40 @@ function copyVersion(el) {
 }
 
 function copysnmpOID(el) {
-    var OIDDisplay = dojo11.byId('OIDText');
-    OIDDisplay.style.display = "";
-    OIDDisplay.innerHTML = '<fmt:message key="alert.config.escalation.action.snmp.oid"/>: ' + el.value;
+	var VBTitle = dojo11.byId('VBTitle');
+    var OIDText = dojo11.byId('OIDText');
+    var OIDValue = dojo11.byId('OIDValue');
+    VBTitle.style.display = "";
+    OIDText.style.display = "";
+    OIDValue.style.display = "";
+    OIDText.innerHTML = '<fmt:message key="alert.config.escalation.action.snmp.oid"/>: ' + el.value;
 }
 
-function copyVariableBindings(el) {
-	var display = dojo11.byId('VariableBindingsText');
-	display.style.display = "";
-	display.innerHTML = '<fmt:message key="alert.config.escalation.action.snmp.varbinds"/>: ' + el.value;       
+function copyVariableBindings() {
+	var vbTitle = dojo11.byId('VBTitle');
+    var vbText = dojo11.byId('VariableBindingsText');
+    var vbInput = dojo11.byId('variableBindingsInput');
+    var vbOids = document.getElementsByName("snmpVarbindOID");
+    var vbValues = document.getElementsByName("snmpVarbindValue");
+    
+    vbTitle.style.display = "";
+    vbText.style.display = "";
+
+    var vbsInnerHTML = "";
+    var vbsArray = [];
+    var vbsCount = 0;
+	for (var s = 0; s < vbOids.length; s++) {
+		if (vbOids[s].value.length > 0 && vbValues[s].value.length > 0) {
+			vbsArray[vbsCount++] = {oid: vbOids[s].value, value: vbValues[s].value};
+			vbsInnerHTML += '<fmt:message key="alert.config.escalation.action.snmp.oid"/>: ' 
+    						+ vbOids[s].value + '<br/>'
+				   			+ 'Value: ' + vbValues[s].value + '<br/>';
+		}
+	}
+	vbText.innerHTML = vbsInnerHTML;
+	vbInput.value = vbsArray.toJSON();
 }
+
 
 
 function copySnmpNotificationMechanism(el) {
