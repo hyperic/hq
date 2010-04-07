@@ -68,6 +68,13 @@ public interface AlertManager {
     public Alert findLastUnfixedByDefinition(AuthzSubject subj, Integer id);
     
     /**
+     * Find all last unfixed alerts
+     *
+     * 
+     */
+    public Map<Integer,Alert> findAllLastUnfixed();
+    
+    /**
      * Find the last alerts for the given resource
      *
      * 

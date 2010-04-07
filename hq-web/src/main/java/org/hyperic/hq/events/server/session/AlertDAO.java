@@ -225,6 +225,35 @@ public class AlertDAO
         }
     }
     
+    /**
+     * Return all last unfixed alerts
+     * 
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public Map<Integer,Alert> findAllLastUnfixed() {
+        String hql = 
+            new StringBuilder()
+                    .append("select a ")
+                    .append("from Alert a ")
+                    .append("join a.alertDefinition ad ")
+                    .append("where ad.deleted = false ")
+                    .append("and a.fixed = false ")
+                    .append("order by a.ctime ")
+                    .toString();
+                
+        List<Alert> alerts = createQuery(hql).list();
+                
+        Map<Integer,Alert> lastAlerts = new HashMap<Integer,Alert>(alerts.size());
+        for (Alert a : alerts ) {
+            // since it is ordered by ctime in ascending order, the
+            // last alert will eventually be put into the map
+            lastAlerts.put(a.getAlertDefinition().getId(), a);
+        }
+        
+        return lastAlerts;
+    }
+    
         /**
          * Return all last fixed alerts for the given resource
          * 

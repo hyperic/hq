@@ -251,6 +251,29 @@ public class AlertManagerImpl implements AlertManager {
         }
     }
     
+    /**
+     * Find all last unfixed alerts
+     *
+     * 
+     */
+    @Transactional(readOnly=true)
+    public Map<Integer,Alert> findAllLastUnfixed() {        
+        StopWatch watch = new StopWatch();
+        Map<Integer,Alert> unfixedAlerts = null;
+        try {
+            unfixedAlerts = 
+                alertDAO.findAllLastUnfixed();
+        } catch (Exception e) {
+            unfixedAlerts = new HashMap<Integer,Alert>(0,1);
+            log.error("Error finding all last unfixed alerts", e);
+        } finally {
+            if (log.isDebugEnabled()) {
+                log.debug("findAllLastUnfixed: " + watch);
+            }
+        }
+        return unfixedAlerts;
+    }
+    
     
         /**
          * Find the last alerts for the given resource
