@@ -30,7 +30,6 @@ public class MultiConditionEvaluatorTest
 
     public void setUp() throws Exception {
         super.setUp();
-Thread.sleep(5000);
         this.executionStrategy = EasyMock.createMock(ExecutionStrategy.class);
 
     }
