@@ -2256,21 +2256,19 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
             if (debug) watch.markTimeBegin("findResource size=" + size);
             final Resource res = resourceManager.findResource(id);
             if (debug) watch.markTimeEnd("findResource size=" + size);
-            if (null != measCache) {
-                List<Measurement> list = measCache.get(res.getId());
-                if  (null != list) {
-                    if (list.size() > 1) {
-                        log.warn("resourceId " + res.getId() +
-                            " has more than one availability measurement " +
-                            " assigned to it");
-                    } else if (list.size() <= 0) {
-                        continue;
-                    }
-                    final Measurement m = list.get(0);
-                    rtn.put(res.getId(), m);
-                } else {
-                    toGet.add(res);
+            List<Measurement> list;
+            if (null != measCache && null != (list = measCache.get(res.getId()))) {
+                if (list.size() > 1) {
+                    log.warn("resourceId " + res.getId() +
+                        " has more than one availability measurement " +
+                        " assigned to it");
+                } else if (list.size() <= 0) {
+                    continue;
                 }
+                final Measurement m = list.get(0);
+                rtn.put(res.getId(), m);
+            }else {
+                toGet.add(res);
             }
         }
         if (debug) watch.markTimeBegin("getAvailMeasurements");
@@ -2330,8 +2328,8 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
                 if (r == null || r.isInAsyncDeleteState()) {
                     continue;
                 }
-                Measurement meas = (Measurement)midMap.get(r.getId());
-                if (null == midMap || null == meas) {
+                Measurement meas;
+               if (null == midMap || null == (meas = midMap.get(r.getId()))) {
                     if (debug) watch.markTimeBegin("getAvailabilityMeasurement");
                     meas = measurementManager.getAvailabilityMeasurement(r);
                     if (debug) watch.markTimeEnd("getAvailabilityMeasurement");
