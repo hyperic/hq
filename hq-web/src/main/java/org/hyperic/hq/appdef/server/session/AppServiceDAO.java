@@ -1,12 +1,15 @@
 package org.hyperic.hq.appdef.server.session;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
 import org.hibernate.SessionFactory;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.AppSvcDependency;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupDAO;
 import org.hyperic.hq.authz.shared.AuthzConstants;
@@ -42,8 +45,7 @@ import org.springframework.stereotype.Repository;
 public class AppServiceDAO
     extends HibernateDAO<AppService> {
 
-    private static final String serviceResType = AuthzConstants.serviceResType;
-    private static final String groupResType = AuthzConstants.groupResType;
+   
     private ResourceGroupDAO resourceGroupDAO;
     private ServiceDAO serviceDAO;
     private ServiceTypeDAO serviceTypeDAO;
@@ -147,26 +149,49 @@ public class AppServiceDAO
     }
 
     public List<AppService> findByApplication_orderName(Integer id) {
-        // TODO: fix this query after authz conversion
-        String sql = "select distinct a from " + "AppService a, Resource r, ResourceType t "
-                     + "where a.application.id=:appid and ("
-                     + "r.resourceType.id=t.id AND t.name=:groupType "
-                     + "AND a.resourceGroup.id IN ("
-                     + "SELECT id FROM ResourceGroup g where g.id = r.instanceId)" + " OR "
-                     + "(r.instanceId=a.service.id and "
-                     + "r.resourceType.id=t.id AND t.name=:serviceType))) " + "order by r.name";
-        return getSession().createQuery(sql).setInteger("appid", id.intValue()).setString(
-            "groupType", groupResType).setString("serviceType", serviceResType).list();
+        List<AppService> list = findByApplication(id);
+        Comparator<AppService> c = new Comparator<AppService>() {
+            private String name = null;
+            public int compare(AppService app0, AppService app1) {
+                return getName(app0).compareTo(getName(app1));
+            }
+            private String getName(AppService app) {
+                if (name != null) {
+                    return name;
+                }
+                Resource res = (app.isIsGroup()) ? app.getResourceGroup().getResource() :
+                    app.getService().getResource();
+                name = (res == null || res.isInAsyncDeleteState()) ? "" : res.getName();
+                        return name;
+                }
+        };
+        Collections.sort(list, c);
+        return list;
     }
 
-    public List<AppService> findByApplication_orderType(Integer id, boolean asc) {
-        String sql = "select distinct a from AppService a " + " join fetch a.serviceType st " +
-                     "where a.application.id=? " + "order by st.name " + (asc ? "asc" : "desc");
-        return getSession().createQuery(sql).setInteger(0, id.intValue()).list();
+    public List<AppService> findByApplication_orderType(Integer id, final boolean asc) {
+      List<AppService> list = findByApplication(id);
+      Comparator<AppService> c = new Comparator<AppService>() {
+        private String type = null;
+        public int compare(AppService app0, AppService app1) {
+            return (asc) ? getType(app0).compareTo(getType(app1)) :
+                getType(app1).compareTo(getType(app0));
+        }
+        private String getType(AppService app) {
+            if (type != null) {
+                return type;
+            }
+            type = app.getServiceType().getName();
+            return type;
+        }
+      };
+     Collections.sort(list, c);
+     return list;
     }
 
-    public Collection findByApplication(Integer id) {
-        String sql = "select distinct a from AppService a " + "where a.application.id=?";
+    @SuppressWarnings("unchecked")
+    public List<AppService> findByApplication(Integer id) {
+        String sql="select a from AppService a where a.application.id=?";
         return getSession().createQuery(sql).setInteger(0, id.intValue()).list();
     }
 
