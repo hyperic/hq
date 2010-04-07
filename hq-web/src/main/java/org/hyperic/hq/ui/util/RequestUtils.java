@@ -66,6 +66,22 @@ import org.apache.struts.util.MessageResources;
 public class RequestUtils {
     private static Log log = LogFactory.getLog(RequestUtils.class.getName());
 
+    public static String generateSessionKey(HttpServletRequest request) {
+        String result;
+        AppdefEntityID aeid = getEntityId(request);
+
+        try {
+            // See if there's a ctype
+            AppdefEntityTypeID ctype = getChildResourceTypeId(request);
+            result = aeid.getAppdefKey() + "." + ctype.getAppdefKey();
+        } catch (ParameterNotFoundException e) {
+            // No problem, this is not an autogroup
+            result = aeid.getAppdefKey();
+        }
+        
+        return result + ".view";
+    }
+
     /** Verify if a parameter exists in the request
      * @param name The name of the parameter in the request
      * @return Boolean if the parameter exists in the request

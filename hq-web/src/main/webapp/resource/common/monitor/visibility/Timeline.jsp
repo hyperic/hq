@@ -39,9 +39,12 @@
     <c:forEach var="timeTick" items="${timeIntervals}" varStatus="status">
       <c:set var="count" value="${status.count}"/>
     <td width="9">
-      <div id="timePopup_<c:out value="${count - 1}"/>" onmouseover="overlay.delayTimePopup(<c:out value="${count - 1}"/>)" onmousedown="overlay.moveOverlay(this)" onmouseout="overlay.curTime = null">
-      <html:img page="/images/timeline_off.gif" height="10" width="9" onmouseover="imageSwap(this, imagePath + 'timeline', '_on')" onmouseout="imageSwap(this, imagePath +  'timeline', '_off');" onmousedown="imageSwap(this, imagePath +  'timeline', '_down')"/> 
-      </div>
+     <div id="timePopup_<c:out value="${count - 1}"/>"
+ 	 	onmouseover="this.className = 'timelineOn'; overlay.delayTimePopup(<c:out value="${count - 1}"/>)"
+ 	 	onmousedown="this.className = 'timelineDown'; overlay.moveOverlay(this)"
+ 	 	onmouseout="this.className = 'timelineOff'; overlay.curTime = null"
+ 	 	class="timelineOff">
+     </div>
     </td>
     </c:forEach>
     <td width="100%">

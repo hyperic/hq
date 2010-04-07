@@ -48,6 +48,7 @@ import org.hyperic.image.chart.AvailabilityReportChart;
 import org.hyperic.image.chart.Chart;
 import org.hyperic.image.chart.DataPointCollection;
 import org.hyperic.util.config.InvalidOptionException;
+import org.hyperic.util.timer.StopWatch;
 
 public class AvailabilityStoplightChartServlet extends ChartServlet {
     
@@ -74,6 +75,8 @@ public class AvailabilityStoplightChartServlet extends ChartServlet {
      */
     protected void plotData(HttpServletRequest request, Chart chart, ChartDataBean dataBean)
             throws ServletException {
+        
+        StopWatch watch = new StopWatch();
 
         // the user
         int sessionId = RequestUtils.getSessionId(request).intValue();
@@ -106,7 +109,10 @@ public class AvailabilityStoplightChartServlet extends ChartServlet {
             log.error("failed: ", e);
         } catch (InvalidOptionException e) {
             log.error("failed: ", e);
-        }                 
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("AvailabilityStoplightChartServlet.plotData: " + watch);
+         }
     }
 
 }

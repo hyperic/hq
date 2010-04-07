@@ -78,6 +78,8 @@ public abstract class AvailabilityBaseServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request,
                          HttpServletResponse response)
         throws ServletException, IOException {
+        final boolean debug = log.isDebugEnabled();
+        StopWatch watch = new StopWatch();
         try {
             int sessionId  = RequestUtils.getSessionId(request).intValue();
             AppdefEntityID[] eids = null;
@@ -99,7 +101,7 @@ public abstract class AvailabilityBaseServlet extends HttpServlet {
             // Don't cache availability icons.
             RequestUtils.bustaCache(request, response);
     
-            if (eids != null && log.isDebugEnabled())
+            if (eids != null && debug)
                 log.debug("Getting availability for resources [" +
                           StringUtil.arrayToString(eids) + "]");
 
@@ -114,8 +116,8 @@ public abstract class AvailabilityBaseServlet extends HttpServlet {
                 val = boss.getAGAvailability(sessionId, eids, atid);
             }
 
-            if (log.isTraceEnabled()) {
-                log.trace("Elapsed time: " + timer.getElapsed() + " ms");
+            if (debug) {
+                log.debug("Elapsed time: " + timer.getElapsed() + " ms");
             }
 
             if (val == MeasurementConstants.AVAIL_UNKNOWN) {
@@ -130,11 +132,16 @@ public abstract class AvailabilityBaseServlet extends HttpServlet {
                 sendWarningIcon(request, response);
             }
         } catch (Throwable t) {
-            log.debug("Can't get availability measurement: ", t);
+            if(debug) {
+                log.debug("Can't get availability measurement: ", t);
+            }
             sendErrorIcon(request, response);
             return;
         }
         sendAvailIcon(request, response);
+        if (debug) {
+            log.debug("AvailabilityBaseServlet.doGet: " + watch);
+        }
     }
 
     protected abstract String[] getIconUrls();
