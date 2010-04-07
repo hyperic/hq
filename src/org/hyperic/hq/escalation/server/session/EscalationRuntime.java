@@ -91,7 +91,7 @@ class EscalationRuntime {
         //                            backport apis but don't think this is a good idea)
         // 3 threads to service requests
         _executor =
-            new ThreadPoolExecutor(3, 3, Long.MAX_VALUE, TimeUnit.DAYS, new LinkedBlockingQueue());
+            new ThreadPoolExecutor(3, 3, Long.MAX_VALUE, TimeUnit.SECONDS, new LinkedBlockingQueue());
         _esclMan = EscalationManagerEJBImpl.getOne();
     }
 
