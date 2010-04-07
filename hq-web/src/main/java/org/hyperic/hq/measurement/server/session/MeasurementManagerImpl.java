@@ -72,7 +72,6 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
-import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementCreateException;
@@ -749,29 +748,17 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                                                                        String cat)
         throws MeasurementNotFoundException {
 
-        Map<AppdefEntityID, Measurement> midMap = new HashMap<AppdefEntityID, Measurement>();
         if (ids.length == 0) {
-            return midMap;
+          return new HashMap<AppdefEntityID, Measurement>(0,1);
         }
-
+        Map<AppdefEntityID, Measurement> midMap = new HashMap<AppdefEntityID, Measurement>(ids.length);
+        ArrayList<Resource> resources = new ArrayList<Resource>(ids.length);
         for (AppdefEntityID id : ids) {
-            try {
-                List<Measurement> metrics = measurementDAO.findDesignatedByResourceForCategory(
-                    resourceManager.findResource(id), cat);
-
-                if (metrics.size() == 0) {
-                    throw new NotFoundException("No metrics found");
-                }
-
-                Measurement m = metrics.get(0);
-                midMap.put(id, m);
-            } catch (NotFoundException e) {
-                // Throw an exception if we're only looking for one
-                // measurement
-                if (ids.length == 1) {
-                    throw new MeasurementNotFoundException(cat + " metric for " + id + " not found");
-                }
-            }
+            resources.add(resourceManager.findResource(id));
+        }
+        List<Measurement> list = measurementDAO.findDesignatedByResourcesForCategory(resources, cat);
+        for (Measurement m:list) {
+            midMap.put(AppdefUtil.newAppdefEntityId(m.getResource()), m);
         }
         return midMap;
     }

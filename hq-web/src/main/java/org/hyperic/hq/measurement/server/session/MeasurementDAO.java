@@ -270,16 +270,39 @@ public class MeasurementDAO
             resource).uniqueResult();
     }
 
+    /**
+         * @param resources {@link List} of {@link Resource}s
+         * @return {@link List} of {@link Measurement}s
+    */
     @SuppressWarnings("unchecked")
-    List<Measurement> findDesignatedByResourceForCategory(Resource resource, String cat) {
-        String sql = "select m from Measurement m " + "join m.template t " + "join t.category c "
-                     + "where m.resource = ? and " + "t.designate = true and " + "c.name = ? "
-                     + "order by t.name";
-
-        return getSession().createQuery(sql).setParameter(0, resource).setParameter(1, cat)
-            .setCacheable(true).setCacheRegion("Measurement.findDesignatedByResourceForCategory")
-            .list();
+    List<Measurement> findDesignatedByResourcesForCategory(List<Resource> resources, String cat) {
+            String sql = new StringBuilder(512)
+                .append("select m from Measurement m ")
+                .append("join m.template t ")
+                .append("join t.category c ")
+                .append("where m.resource in (:rids) and ")
+                .append("t.designate = true and ")
+                .append("c.name = :cat")
+                .toString();
+            int size = resources.size();
+            List<Measurement> rtn = new ArrayList<Measurement>(size*5);
+            for (int i=0; i<size; i=BATCH_SIZE) {
+                int end = Math.min(size, i + BATCH_SIZE);
+                rtn.addAll(getSession().createQuery(sql)
+                    .setParameterList("rids", resources.subList(i, end))
+                    .setParameter("cat", cat)
+                    .list());
+            }
+            return rtn;
     }
+    
+    /**
+     * @return {@link List} of {@link Measurement}s
+     */
+    List<Measurement> findDesignatedByResourceForCategory(Resource resource, String cat) {
+        return findDesignatedByResourcesForCategory(Collections.singletonList(resource), cat);
+    }
+
 
     @SuppressWarnings("unchecked")
     List<Measurement> findDesignatedByResource(Resource resource) {

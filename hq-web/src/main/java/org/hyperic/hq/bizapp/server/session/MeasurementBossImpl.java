@@ -1293,6 +1293,8 @@ public class MeasurementBossImpl implements MeasurementBoss
                PermissionException, MeasurementNotFoundException {
             
         final AuthzSubject subject = sessionManager.getSubject(sessionId);
+        final boolean debug = log.isDebugEnabled();
+        final StopWatch watch = new StopWatch();
 
         List<Measurement> measurements;
 
@@ -1303,11 +1305,15 @@ public class MeasurementBossImpl implements MeasurementBoss
             AppdefEntityValue aeval = new AppdefEntityValue(aid, subject);
             
             // Get the flattened list of services
+            if (debug) watch.markTimeBegin("getFlattenedServiceIds");
             AppdefEntityID[] serviceIds = aeval.getFlattenedServiceIds();
             
+            if (debug) watch.markTimeEnd("getFlattenedServiceIds");
+            if (debug) watch.markTimeBegin("findDesignatedMeasurements");
             Map<AppdefEntityID,Measurement> midMap = measurementManager
                 .findDesignatedMeasurements(subject, serviceIds,
                                             MeasurementConstants.CAT_AVAILABILITY);
+            if (debug) watch.markTimeEnd("findDesignatedMeasurements");
             measurements = new ArrayList<Measurement>(midMap.values());
         }
         else {
@@ -1319,9 +1325,12 @@ public class MeasurementBossImpl implements MeasurementBoss
             }
         }
 
-	    return dataManager.getHistoricalData(measurements, begin, end,
-                                              interval, tmpl.getCollectionType(),
-                                              returnNulls, pc);
+        if (debug) watch.markTimeBegin("getHistoricalData");
+        PageList<HighLowMetricValue> rtn = dataManager.getHistoricalData(measurements, begin, end, interval, tmpl.getCollectionType(),
+            returnNulls, pc);
+        if (debug) watch.markTimeEnd("getHistoricalData");
+        if (debug) log.debug(watch);
+        return rtn;
     }
 
     /**
@@ -3338,15 +3347,16 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
     private PageList<ResourceDisplaySummary> getResourcesCurrentHealth(AuthzSubject subject,
                                                PageList resources)
         throws AppdefEntityNotFoundException, PermissionException {
+        final boolean debug = log.isDebugEnabled();
         StopWatch watch = new StopWatch();
         PageList<ResourceDisplaySummary> summaries = new PageList<ResourceDisplaySummary>();
-        watch.markTimeBegin("getAvailMeasurements");
+        if (debug) watch.markTimeBegin("getAvailMeasurements");
         final Map<Integer,List<Measurement>> measCache = measurementManager.getAvailMeasurements(resources);
-        watch.markTimeEnd("getAvailMeasurements");
-        watch.markTimeBegin("getLastAvail");
+        if (debug) watch.markTimeEnd("getAvailMeasurements");
+        if (debug) watch.markTimeBegin("getLastAvail");
         final Map<Integer,MetricValue> availCache = availabilityManager.getLastAvail(
             resources, measCache);
-        watch.markTimeEnd("getLastAvail");
+        if (debug) watch.markTimeEnd("getLastAvail");
         for (Iterator it = resources.iterator(); it.hasNext(); ) {
             try {
                 Object o = it.next();
@@ -3371,34 +3381,28 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
                 HashSet<String> categories = new HashSet<String>(4);
                 switch (aeid.getType()) {
                     case AppdefEntityConstants.APPDEF_TYPE_SERVER :
-                        try {
-                            List<AppdefResourceValue> platforms =
-                                rv.getAssociatedPlatforms(PageControl.PAGE_ALL);
-                            if (platforms != null && platforms.size() > 0) {
-                                parent = (AppdefResourceValue) platforms.get(0);
-                            }
-                        } catch (PermissionException e) {
-                            // Can't get the parent, leave parent = null
-                        }
-                        // Fall through to set the monitorable and metrics
+                        if (debug) watch.markTimeBegin("getPlatform");
+                        Server server = serverManager.findServerById(rv.getID().getId());
+                        parent = server.getPlatform().getAppdefResourceValue();
+                        if (debug) watch.markTimeEnd("getPlatform");
                     case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
                     case AppdefEntityConstants.APPDEF_TYPE_SERVICE :
                         categories.add(MeasurementConstants.CAT_AVAILABILITY);
                         // XXX scottmf need to review this, perf is bad and metric
                         // is not very useful
                         //categories.add(MeasurementConstants.CAT_THROUGHPUT);
-                        watch.markTimeBegin(
+                        if (debug) watch.markTimeBegin(
                             "setResourceDisplaySummaryValueForCategory");
                         setResourceDisplaySummaryValueForCategory(
                             subject, aeid, summary, categories, measCache,
                             availCache);
-                        watch.markTimeEnd("setResourceDisplaySummaryValueForCategory");
+                        if (debug) watch.markTimeEnd("setResourceDisplaySummaryValueForCategory");
                         
                         summary.setMonitorable(Boolean.TRUE);
                         break;
                     case AppdefEntityConstants.APPDEF_TYPE_GROUP:
                     case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-                        watch.markTimeBegin("Group Type");
+                        if (debug) watch.markTimeBegin("Group Type");
                         summary.setMonitorable(Boolean.TRUE);
                         // Set the availability now
                         double avail = getAvailability(
@@ -3412,22 +3416,24 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
                         } catch (MeasurementNotFoundException e) {
                             // No availability metric, don't set it
                         }
-                        watch.markTimeEnd("Group Type");
+                        if (debug) watch.markTimeEnd("Group Type");
                         break;
                     default:
                         throw new InvalidAppdefTypeException(
                             "entity type is not monitorable, id type: " +
                             aeid.getType());
-                }            
+                }
+                if (debug) watch.markTimeBegin("setResourceDisplaySummary");
                 setResourceDisplaySummary(summary, rv, parent);
+                if (debug) watch.markTimeEnd("setResourceDisplaySummary");
                 summaries.add(summary);
             } catch (AppdefEntityNotFoundException e) {
                 log.debug(e.getMessage(), e);
             }
         }
-        if (log.isDebugEnabled()) {
-            log.debug("getResourcesCurrentHealth: " + watch);
-        }
+        
+        if (debug) log.debug("getResourcesCurrentHealth: " + watch);
+       
         summaries.setTotalSize(resources.getTotalSize());
         return summaries;
     }
@@ -3811,7 +3817,13 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
         PageList servers = rv.getAssociatedServers(pc);
         
         // Return a paged list of current health        
-        return getResourcesCurrentHealth(subject, servers);
+        final StopWatch watch = new StopWatch();
+        final boolean debug = log.isDebugEnabled();
+        if (debug) watch.markTimeBegin("getResourcesCurrentHealth");
+        PageList<ResourceDisplaySummary> rtn = getResourcesCurrentHealth(subject, servers);
+        if (debug) watch.markTimeEnd("getResourcesCurrentHealth");
+        if (debug) log.debug(watch);
+        return rtn;
     }
 
     /**
@@ -3910,7 +3922,7 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
                PermissionException {
         StopWatch watch = new StopWatch();
         final boolean debug = log.isDebugEnabled();
-        if (debug) log.debug("BEGIN getAvailability()");
+        if (debug) log.debug("BEGIN getAvailability() id=" + id);
     
         try {
             if (id.isGroup()) {
@@ -3933,7 +3945,7 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
             return getAvailability(
                 subject, ids, getMidMap(ids, measCache), availCache)[0];
         } finally {
-            if (debug) log.debug("END getAvailability() -- " + watch);
+            if (debug) log.debug("END getAvailability() id=" + id + " -- " + watch);
         }
     }
 
