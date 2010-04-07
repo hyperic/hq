@@ -782,11 +782,5 @@ public interface AppdefBoss {
      */
     public Map<String, List<AppdefResourceType>> getUnavailableResourcesCount(AuthzSubject user)
         throws AppdefEntityNotFoundException, PermissionException;
-
-    /**
-     * temporary method for determining whether or not we're running a database
-     * that supports navmap
-     */
-    public boolean isNavMapSupported();
     
 }

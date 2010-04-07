@@ -3358,13 +3358,4 @@ public class AppdefBossImpl implements AppdefBoss {
         }
         return ret;
     }
-
-    /**
-     * temporary method for determining whether or not we're running a database
-     * that supports navmap
-     * 
-     */
-    public boolean isNavMapSupported() {
-        return appdefStatManager.isNavMapSupported();
-    }
 }

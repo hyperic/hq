@@ -514,31 +514,6 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
     }
 
     /**
-     * Method for determining whether or not to show a nav map (this is a
-     * temporary method)
-     * 
-     */
-    public boolean isNavMapSupported() {
-        try {
-            Connection conn = getDBConn();
-            switch (DBUtil.getDBType(conn)) {
-                case DBUtil.DATABASE_ORACLE_8:
-                case DBUtil.DATABASE_ORACLE_9:
-                case DBUtil.DATABASE_ORACLE_10:
-                case DBUtil.DATABASE_POSTGRESQL_7:
-                case DBUtil.DATABASE_POSTGRESQL_8:
-                case DBUtil.DATABASE_MYSQL5:
-                    return true;
-                default:
-                    return false;
-            }
-        } catch (SQLException e) {
-            log.error("Unable to determine navmap capability");
-            return false;
-        } 
-    }
-
-    /**
      * <p>
      * Return directly connected resource tree for node level platform
      * </p>
