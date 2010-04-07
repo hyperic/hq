@@ -5,7 +5,9 @@ import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
+import org.hyperic.hq.escalation.shared.EscalationManager;
 import org.hyperic.hq.events.server.session.Alert
+import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
 import org.hyperic.hq.galerts.server.session.GalertDef
 import org.hyperic.hq.galerts.server.session.GalertLog
 
@@ -41,5 +43,9 @@ class AlertCategory {
             return null
             
        Bootstrap.getBean(AuthzSubjectManager.class).getSubjectById(id.toInteger())
+    }
+    
+    static void fix(Alert a, AuthzSubject subject, String reason) {
+      Bootstrap.getBean(EscalationManager.class).fixAlert(subject, ClassicEscalationAlertType.CLASSIC,a.id,reason)
     }
 }
