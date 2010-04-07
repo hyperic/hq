@@ -357,7 +357,7 @@ public class ApplicationManagerImpl implements ApplicationManager,
      * @param subject - who
      * @param name - name of app
      */
-    private Application findApplicationByName(AuthzSubject subject, String name)
+    public Application findApplicationByName(AuthzSubject subject, String name)
         throws ApplicationNotFoundException, PermissionException {
         Application app = applicationDAO.findByName(name);
         if (app == null) {
@@ -463,6 +463,26 @@ public class ApplicationManagerImpl implements ApplicationManager,
             keyList.add(idList.get(i));
         }
         return keyList;
+    }
+    
+    /**
+     * @return {@link List} of {@link Resource}
+     *
+     */
+    @Transactional(readOnly=true)
+    public List<Resource> getApplicationResources(AuthzSubject subject, Integer appId) 
+        throws ApplicationNotFoundException, PermissionException {
+        List<AppServiceValue> services = getApplicationServices(subject, appId);
+        List<Resource> rtn = new ArrayList<Resource>(services.size());
+        for (AppServiceValue val : services ) {
+            if (val == null || val.getService() == null ||
+                val.getService().getResource() == null ||
+                val.getService().getResource().isInAsyncDeleteState()) {
+                continue;
+            }
+            rtn.add(val.getService().getResource());
+        }
+        return rtn;
     }
 
     /**

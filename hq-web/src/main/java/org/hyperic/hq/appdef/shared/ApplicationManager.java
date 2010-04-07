@@ -93,6 +93,14 @@ public interface ApplicationManager {
      */
     public void setServiceDepsForApp(AuthzSubject subject, DependencyTree depTree) throws ApplicationNotFoundException,
         PermissionException;
+    
+    /**
+     * Find application by name
+     * @param subject - who
+     * @param name - name of app
+     */
+    public Application findApplicationByName(AuthzSubject subject, String name)
+        throws ApplicationNotFoundException, PermissionException;
 
     /**
      * Get application pojo by id.
@@ -110,6 +118,13 @@ public interface ApplicationManager {
      */
     public PageList<ApplicationValue> getAllApplications(AuthzSubject subject, PageControl pc)
         throws PermissionException, NotFoundException;
+    
+    /**
+     * @return {@link List} of {@link Resource}
+     *
+     */
+    List<Resource> getApplicationResources(AuthzSubject subject, Integer appId) 
+    throws ApplicationNotFoundException, PermissionException;
 
     /**
      * Get all the application services for this application

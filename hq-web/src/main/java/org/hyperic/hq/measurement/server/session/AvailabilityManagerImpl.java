@@ -514,7 +514,9 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      *        {@link AppdefEntityId}, {@link AppdefEntityValue},
      *        {@link AppdefResourceValue} or {@link Integer}
      * @param measCache Map<Integer, List> optional arg (may be null) to supply
-     *        measurement id(s) of ResourceIds. Integer => Resource.getId()
+     *       measurement id(s) of ResourceIds. Integer => Resource.getId().  If a
+     *       measurement is not specified in the measCache parameter it will be added
+     *       to the map
      * @return Map<Integer, MetricValue> Integer => Measurement.getId()
      * 
      */
@@ -550,6 +552,15 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
                 continue;
             }
             for (Measurement m : measurements) {
+                // populate the Map if value doesn't exist
+                if (measCache != null) {
+                    List<Measurement> measids =  measCache.get(m.getResource().getId());
+                    if (measids == null) {
+                        measids = new ArrayList<Measurement>();
+                    }
+                    measids.add(m);
+                    measCache.put(m.getResource().getId(), measids);
+                }
                 midsToGet.add(m.getId());
             }
         }
