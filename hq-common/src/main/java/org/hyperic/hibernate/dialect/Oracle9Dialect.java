@@ -150,7 +150,7 @@ public class Oracle9Dialect
     }
 
     public boolean useMetricUnion() {
-        return true;
+        return false;
     }
 
     public String getLimitBuf(String sql, int offset, int limit) {
