@@ -143,14 +143,6 @@
 
 
 
-	<!--
-		Increase the level threshold for the Datasource logger Useful for
-		debugging connection leaks
-	-->
-
-	<!--  <logger name="HypericDS">
-		<level value="DEBUG" />
-	</logger> -->
 
 
 	<!--
@@ -186,8 +178,7 @@
 		Use this logger to log every instance of a group alert firing. Comment
 		out if the log messages become unwieldy.
 	-->
-	<!-- <logger name="
-		org.hyperic.hq.galerts.processor.MemGalertDef.Fired">
+	<!-- <logger name="org.hyperic.hq.galerts.processor.MemGalertDef.Fired">
 		<level value="DEBUG" />
 	</logger>  -->
 
