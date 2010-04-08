@@ -60,72 +60,66 @@
   <tiles:insert beanName="action"/>
 </c:forEach>
 
-<tiles:insert definition=".header.tab">
-  <tiles:put name="tabKey" value="resource.common.alert.action.fix.header"/>
-</tiles:insert>                                                                                                                           
-<table cellpadding="10" cellspacing="0" border="0" width="100%" id="fixedSection">
-<tr>
-<c:choose>
-	<c:when test="${not alert.fixed}">
-		<c:if test="${not empty fixedNote}">
-  			<td class="BlockContent" align="right" valign="top" width="20%">
-    			<div class="BoldText"><fmt:message key="resource.common.alert.previousFix"/></div>
-    		</td>
-    		<td class="BlockContent" colspan="2" width="80%">    		
-       			<c:out value="${fixedNote}"/>
-       		</td>
-       	</tr>
-       	<tr>
-    	</c:if>
-    	
-    		<td class="BlockLabel" align="right" valign="top" width="20%"><fmt:message key="resource.common.alert.fixedNote"/></td>
-    		<td class="BlockContent" colspan="2" width="80%">
-    			 <c:choose>
- 	 				<c:when test="${canTakeAction}">
- 						<html:textarea property="fixedNote" cols="70" rows="5" />
- 	 				</c:when>
- 	 				<c:otherwise>
- 	 					<html:textarea property="fixedNote" cols="70" rows="5" disabled="true" />
- 	 				</c:otherwise>
- 	 			</c:choose>
-  			</td>
-		</tr>
+<c:if test="${canTakeAction}">
+	<tiles:insert definition=".header.tab">
+	  	<tiles:put name="tabKey" value="resource.common.alert.action.fix.header"/>
+	</tiles:insert>                                                                                                                           
+	<table cellpadding="10" cellspacing="0" border="0" width="100%" id="fixedSection">
 		<tr>
-  			<td class="BlockContent" width="20%" align="right">&nbsp;</td>
-  			<td class="BlockContent"<c:if test="${canTakeAction}"> width="5%"</c:if> style="padding-top: 6px; padding-bottom: 6px;">
-	</c:when>
-	<c:when test="${not empty fixedNote}">
-  		<td class="BlockContent" width="20%" align="right">&nbsp;</td>
-  		<td class="BlockContent">
-  			<div style="padding: 4px; 0"><c:out value="${fixedNote}"/></div>
-	</c:when>
-	<c:otherwise>
-		<td class="BlockContent" width="20%" align="right">&nbsp;</td>	
-  		<td class="BlockContent">
-  			<div style="padding: 4px 0;"><fmt:message key="resource.common.alert.beenFixed"/></div>
-	</c:otherwise>
-</c:choose>
-<tiles:insert page="/common/components/ActionButton.jsp">
-  <tiles:put name="labelKey" value="resource.common.alert.action.fixed.label"/>
-  <tiles:put name="buttonClick">dojo.byId('mode').setAttribute('value', '<fmt:message key="resource.common.alert.action.fixed.label"/>'); document.forms[0].submit();</tiles:put>
-  <tiles:put name="icon"><html:img page="/images/icon_fixed.gif" alt="Click to mark as Fixed" align="middle"/></tiles:put>
-  <c:choose>
-  	 <c:when test="${not alert.fixed && canTakeAction}">
-     	<tiles:put name="disabled" value="false"/>
-     </c:when>
-     <c:otherwise>
-        <tiles:put name="hidden" value="true"/>
-     </c:otherwise>
-  </c:choose>
-</tiles:insert>
-    <c:if test="${not alert.fixed && canTakeAction}">
-      <td class="BlockContent">
-        <fmt:message key="resource.common.alert.clickToFix"/>
-      </td>
-    </c:if>
-  </td>
-</tr>
-</table>
+			<c:choose>
+				<c:when test="${not alert.fixed}">
+					<c:if test="${not empty fixedNote}">
+			  			<td class="BlockContent" align="right" valign="top" width="20%">
+			    			<div class="BoldText"><fmt:message key="resource.common.alert.previousFix"/></div>
+			    		</td>
+			    		<td class="BlockContent" colspan="2" width="80%">    		
+			       			<c:out value="${fixedNote}"/>
+			       		</td>
+			       	</tr>
+			       	<tr>
+			    	</c:if>
+		    		<td class="BlockLabel" align="right" valign="top" width="20%"><fmt:message key="resource.common.alert.fixedNote"/></td>
+		    		<td class="BlockContent" colspan="2" width="80%">
+		    			<html:textarea property="fixedNote" cols="70" rows="5" />
+		  			</td>
+				</tr>
+				<tr>
+		  			<td class="BlockContent" width="20%" align="right">&nbsp;</td>
+		  			<td class="BlockContent" width="5%" style="padding-top: 6px; padding-bottom: 6px;">
+				</c:when>
+				<c:when test="${not empty fixedNote}">
+			  		<td class="BlockContent" width="20%" align="right">&nbsp;</td>
+			  		<td class="BlockContent">
+			  			<div style="padding: 4px; 0"><c:out value="${fixedNote}"/></div>
+				</c:when>
+				<c:otherwise>
+					<td class="BlockContent" width="20%" align="right">&nbsp;</td>	
+			  		<td class="BlockContent">
+			  			<div style="padding: 4px 0;"><fmt:message key="resource.common.alert.beenFixed"/></div>
+				</c:otherwise>
+			</c:choose>
+			<tiles:insert page="/common/components/ActionButton.jsp">
+	  			<tiles:put name="labelKey" value="resource.common.alert.action.fixed.label"/>
+	  			<tiles:put name="buttonClick">dojo.byId('mode').setAttribute('value', '<fmt:message key="resource.common.alert.action.fixed.label"/>'); document.forms[0].submit();</tiles:put>
+	  			<tiles:put name="icon"><html:img page="/images/icon_fixed.gif" alt="Click to mark as Fixed" align="middle"/></tiles:put>
+	  			<c:choose>
+	  	 			<c:when test="${not alert.fixed}">
+	     				<tiles:put name="disabled" value="false"/>
+	     			</c:when>
+	     			<c:otherwise>
+	        			<tiles:put name="hidden" value="true"/>
+	     			</c:otherwise>
+	  			</c:choose>
+			</tiles:insert>
+	    	<c:if test="${not alert.fixed}">
+	      		<td class="BlockContent">
+	        		<fmt:message key="resource.common.alert.clickToFix"/>
+	      		</td>
+	    	</c:if>
+	  	</td>
+	</tr>
+	</table>
+</c:if>
 
 <tiles:insert definition=".events.alert.view.nav" flush="true"/>
 

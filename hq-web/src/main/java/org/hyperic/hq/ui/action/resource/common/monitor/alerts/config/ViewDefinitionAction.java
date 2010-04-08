@@ -39,7 +39,6 @@ import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.bizapp.server.action.integrate.OpenNMSAction;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
@@ -66,17 +65,15 @@ public class ViewDefinitionAction
     protected EventsBoss eventsBoss;
     protected MeasurementBoss measurementBoss;
     protected AuthzBoss authzBoss;
-    private PermissionManager permissionManager;
     private AlertPermissionManager alertPermissionManager;
 
     @Autowired
     public ViewDefinitionAction(EventsBoss eventsBoss, MeasurementBoss measurementBoss, AuthzBoss authzBoss, 
-                                PermissionManager permissionManager, AlertPermissionManager alertPermissionManager) {
+                                 AlertPermissionManager alertPermissionManager) {
         super();
         this.eventsBoss = eventsBoss;
         this.measurementBoss = measurementBoss;
         this.authzBoss = authzBoss;
-        this.permissionManager = permissionManager;
         this.alertPermissionManager = alertPermissionManager;
     }
 
@@ -148,7 +145,7 @@ public class ViewDefinitionAction
             try {
                 request.setAttribute(Constants.CAN_VIEW_RESOURCE_TYPE_ALERT_TEMPLATE_ATTR, false);
                 // ...is this alert definition spawned from a resource alert template?..
-                if (adv.getParentId() > 0) {
+                if (adv.getParentId() != null && adv.getParentId() > 0) {
                     // ...if so, check to see if we have permission to view it...
                     alertPermissionManager.canViewResourceTypeAlertDefinitionTemplate(subject);
                     request.setAttribute(Constants.CAN_VIEW_RESOURCE_TYPE_ALERT_TEMPLATE_ATTR, true);
