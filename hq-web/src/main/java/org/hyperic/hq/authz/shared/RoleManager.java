@@ -203,14 +203,15 @@ public interface RoleManager {
     public OwnedRoleValue findOwnedRoleById(AuthzSubject whoami, Integer id) throws PermissionException;
 
     /**
-     * Get role permission Map For a given role id, find the resource types and
+     * Get operations For a given role id, find the resource types and
      * permissions which are supported by it
+     * 
      * @param subject
      * @param roleId
-     * @return map - keys are resource type names, values are lists of operation
-     *         values which are supported on the resouce type.
+     * @return list - values are lists of operation
+     * 
      */
-    public Map<String, List<Operation>> getRoleOperationMap(AuthzSubject subject, Integer roleId)
+    public List<Operation> getRoleOperations(AuthzSubject subject, Integer roleId)
         throws PermissionException;
 
     public Collection<Role> getAllRoles();
