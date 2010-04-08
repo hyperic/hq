@@ -593,7 +593,11 @@ public class AlertManagerImpl implements AlertManager {
     @Transactional(readOnly = true)
     public String getShortReason(Alert alert) {
         AlertDefinition def = alert.getAlertDefinition();
-        AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(def.getResource());
+        Resource r = def.getResource();
+        if (r == null || r.isInAsyncDeleteState()) {
+            return "alertid=" + alert.getId() + " is associated with an invalid or deleted resource";
+        }
+        AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(r);
         AppdefEntityValue aev = new AppdefEntityValue(aeid, authzSubjectManager.getOverlordPojo());
 
         String name = "";
