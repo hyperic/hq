@@ -437,16 +437,17 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
     public List<GalertLog> findAlerts(AuthzSubject subj, int count, int priority, long timeRange,
                                       long endTime, List<AppdefEntityID> includes)
         throws PermissionException {
-        List<GalertLog> alerts;
+        PageInfo pInfo = PageInfo.create(0, count, GalertLogSortField.DATE, false);
 
         if (priority == EventConstants.PRIORITY_ALL) {
-            alerts = _logDAO.findByCreateTime(endTime - timeRange, endTime, count);
-        } else {
-            PageInfo pInfo = PageInfo.create(0, count, GalertLogSortField.DATE, false);
-            AlertSeverity s = AlertSeverity.findByCode(priority);
-            alerts = _logDAO.findByCreateTimeAndPriority(subj.getId(), endTime - timeRange,
-                endTime, s, false, false, null, null, pInfo);
+            // if priority is "all" set the severity code as low
+            // this is essentially "all"
+            priority = AlertSeverity.LOW.getCode();
         }
+        
+        AlertSeverity s = AlertSeverity.findByCode(priority);
+        List<GalertLog> alerts = _logDAO.findByCreateTimeAndPriority(subj.getId(),
+            endTime - timeRange, endTime, s, false, false, null, null, pInfo);
 
         List<GalertLog> result = new ArrayList<GalertLog>();
         for (GalertLog l : alerts) {
