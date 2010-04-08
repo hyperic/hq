@@ -128,16 +128,21 @@ public class AvailabilityDownAlertDefinitionCache implements ApplicationListener
      
      private void removeFromCache(AlertDefinition def) {
          synchronized (_cacheLock) {
-             remove(def.getAppdefEntityId());
+             if (isOkToRemove(def)) {
+                 remove(def.getAppdefEntityId());
+             }
 
              for (AlertDefinition childDef : def.getChildren()) {
-                 Resource r = childDef.getResource();
-                 if (r == null || r.isInAsyncDeleteState()) {
-                     continue;
+                 if (isOkToRemove(childDef)) {
+                     remove(childDef.getAppdefEntityId());
                  }
-                 remove(childDef.getAppdefEntityId());
              }
          }
+     }
+     
+     private boolean isOkToRemove(AlertDefinition def) {
+         Resource r = def.getResource();
+         return (r != null && !r.isInAsyncDeleteState());
      }
 
 }
