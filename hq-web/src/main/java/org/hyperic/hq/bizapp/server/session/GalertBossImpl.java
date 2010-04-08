@@ -29,6 +29,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
@@ -312,8 +313,9 @@ public class GalertBossImpl implements GalertBoss {
         JSONArray jarr = new JSONArray();
 
         try {
+            AppdefEntityID entityId = AppdefUtil.newAppdefEntityId(g.getResource());
             // ...check that user can view alert definitions...
-            alertPermissionManager.canViewAlertDefinition(subj, AppdefUtil.newAppdefEntityId(g.getResource()));
+            alertPermissionManager.canViewAlertDefinition(subj, entityId);
             alertLogs =
                         galertManager.findAlertLogsByTimeWindow(g, begin, end, pc);
 
@@ -329,6 +331,15 @@ public class GalertBossImpl implements GalertBoss {
                 if (esc != null && esc.isPauseAllowed()) {
                     maxPauseTime = esc.getMaxPauseTime();
                 }
+                
+                boolean canTakeAction = false;
+                try {
+                    // ...check that the user can fix/acknowledge...
+                    alertPermissionManager.canFixAcknowledgeAlerts(subj, entityId);
+                    canTakeAction = true;
+                } catch(PermissionException e) {
+                    // ...the user can't fix/acknowledge...
+                }
 
                 jarr.put(new JSONObject()
                                          .put("id", alert.getId())
@@ -340,6 +351,7 @@ public class GalertBossImpl implements GalertBoss {
                                          .put("reason", alert.getShortReason())
                                          .put("fixed", alert.isFixed())
                                          .put("acknowledgeable", alert.isAcknowledgeable())
+                                         .put("canTakeAction", canTakeAction)
                                          .put("maxPauseTime", maxPauseTime));
             }
         } catch (PermissionException e) {

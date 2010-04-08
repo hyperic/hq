@@ -153,8 +153,6 @@ public class ListAlertAction
             // ...the user can't fix/acknowledge...
         }
        
-        request.setAttribute(Constants.CAN_TAKE_ACTION_ON_ALERT_ATTR, canTakeAction);
-
         for (Alert alert : alerts) {
 
             AlertDefinition alertDefinition = alert.getAlertDefinition();
