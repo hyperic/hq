@@ -803,7 +803,11 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             } else {
                 resource = resourceManager.findResourceById((Integer) o);
             }
-            if (resource == null || resource.isInAsyncDeleteState()) {
+            try {
+                if (resource == null || resource.isInAsyncDeleteState()) {
+                    continue;
+                }
+            } catch (ObjectNotFoundException e) {
                 continue;
             }
             final ResourceType type = resource.getResourceType();

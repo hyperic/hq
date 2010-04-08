@@ -45,6 +45,7 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
@@ -544,6 +545,15 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
                 resource = resourceManager.findResourceById((Integer) o);
             }
             List<Measurement> measurements = null;
+            try {
+                if (resource == null || resource.isInAsyncDeleteState()) {
+                    continue;
+                }
+            } catch (ObjectNotFoundException e) {
+                // resource is in async delete state, ignore
+                _log.debug("resource not found from object=" + o ,e);
+                continue;
+            }
             if (measCache != null) {
                 measurements = measCache.get(resource.getId());
             }

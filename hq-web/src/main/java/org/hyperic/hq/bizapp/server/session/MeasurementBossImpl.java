@@ -2264,6 +2264,9 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
             }
             if (debug) watch.markTimeBegin("findResource size=" + size);
             final Resource res = resourceManager.findResource(id);
+            if (res == null || res.isInAsyncDeleteState()) {
+                continue;
+            }
             if (debug) watch.markTimeEnd("findResource size=" + size);
             List<Measurement> list;
             if (null != measCache && null != (list = measCache.get(res.getId()))) {
