@@ -3903,6 +3903,9 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
     public double getAvailability(AuthzSubject subj, AppdefEntityID id)
         throws AppdefEntityNotFoundException,
                PermissionException {
+        if (id == null) {
+            return MeasurementConstants.AVAIL_UNKNOWN;
+        }
         final Map<Integer,List<Measurement>> measCache = measurementManager.getAvailMeasurements(Collections.singleton(id));
         Map<Integer,MetricValue> availCache = null;
         if (id.isApplication()) {
