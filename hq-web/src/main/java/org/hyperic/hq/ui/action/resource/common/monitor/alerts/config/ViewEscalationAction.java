@@ -33,7 +33,6 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
@@ -58,8 +57,8 @@ public class ViewEscalationAction
 
     @Autowired
     public ViewEscalationAction(EventsBoss eventsBoss, MeasurementBoss measurementBoss, AuthzBoss authzBoss, 
-                                PermissionManager permissionManager, AlertPermissionManager alertPermissionManager) {
-        super(eventsBoss, measurementBoss, authzBoss, permissionManager, alertPermissionManager);
+                                AlertPermissionManager alertPermissionManager) {
+        super(eventsBoss, measurementBoss, authzBoss, alertPermissionManager);
       
     }
 
