@@ -26,6 +26,8 @@
 package org.hyperic.hq.measurement.server.session;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,9 +43,13 @@ import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceEdge;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.agent.client.AgentMonitor;
 import org.hyperic.hq.measurement.agent.client.MeasurementCommandsClient;
@@ -53,6 +59,7 @@ import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.MeasurementProcessor;
 import org.hyperic.hq.measurement.shared.SRNManager;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
+import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -72,12 +79,15 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
     private SRNManager srnManager;
     private AgentMonitor agentMonitor;
     private MeasurementCommandsClientFactory measurementCommandsClientFactory;
+    private ResourceManager resourceManager;
+    private ZeventEnqueuer zEventManager;
 
     @Autowired
     public MeasurementProcessorImpl(AgentManager agentManager, MeasurementManager measurementManager,
                                     AuthzSubjectManager authzSubjectManager, SRNManager srnManager,
                                     AgentMonitor agentMonitor,
-                                    MeasurementCommandsClientFactory measurementCommandsClientFactory) {
+                                    MeasurementCommandsClientFactory measurementCommandsClientFactory, ResourceManager resourceManager,
+                                    ZeventEnqueuer zEventManager) {
 
         this.agentManager = agentManager;
         this.measurementManager = measurementManager;
@@ -85,6 +95,8 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
         this.srnManager = srnManager;
         this.agentMonitor = agentMonitor;
         this.measurementCommandsClientFactory = measurementCommandsClientFactory;
+        this.resourceManager = resourceManager;
+        this.zEventManager = zEventManager;
     }
     
     @PostConstruct
@@ -97,6 +109,49 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
      */
     public boolean ping(Agent a) throws PermissionException {
         return agentMonitor.ping(a);
+    }
+    
+    /**
+     * Schedules enabled measurements for the entire ResourceEdge hierarchy
+     * based on the "containment" relationship.  These metrics are scheduled
+     * after the transaction is committed.
+     * 
+     */
+    public void scheduleHierarchyAfterCommit(Collection<Resource> resources) {
+        if (resources.isEmpty()) {
+            return;
+        }
+       
+        final ArrayList<AppdefEntityID> aeids = new ArrayList<AppdefEntityID>(resources.size()+1);
+        for (final Resource resource : resources ) {
+            if (resource == null || resource.isInAsyncDeleteState()) {
+                continue;
+            }
+            final Collection<ResourceEdge> edges = resourceManager.findResourceEdges(resourceManager.getContainmentRelation(), resource);
+            aeids.ensureCapacity(aeids.size()+edges.size()+1);
+            aeids.add(AppdefUtil.newAppdefEntityId(resource));
+            for (final ResourceEdge e : edges ) {
+                final Resource r = e.getTo();
+                if (r == null || r.isInAsyncDeleteState()) {
+                    continue;
+                }
+                aeids.add(AppdefUtil.newAppdefEntityId(e.getTo()));
+            }
+        }
+        if (!aeids.isEmpty()) {
+            final AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(aeids);
+            zEventManager.enqueueEventAfterCommit(event);
+        }
+    }
+    
+    /**
+     * Schedules enabled measurements for the entire ResourceEdge hierarchy
+     * based on the "containment" relationship.  These metrics are scheduled
+     * after the transaction is committed.
+     * 
+     */
+    public void scheduleHierarchyAfterCommit(Resource resource) {
+        scheduleHierarchyAfterCommit(Collections.singletonList(resource));
     }
 
     /**
