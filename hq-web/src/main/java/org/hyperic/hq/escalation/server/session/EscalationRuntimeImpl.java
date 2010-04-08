@@ -37,8 +37,11 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.events.ActionExecutionInfo;
+import org.hyperic.hq.events.AlertDefinitionInterface;
+import org.hyperic.hq.events.AlertInterface;
 import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.AlertDAO;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
@@ -417,6 +420,40 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
             _esclEntityIdsToStateIds.put(new EscalatingEntityIdentifier(state), stateId);
         }
     }
+    
+    private boolean escIsValid(EscalationState s) {
+        final boolean debug = log.isDebugEnabled();
+        EscalationAlertType alertType = s.getAlertType();
+        AlertInterface alert = null;
+        // HHQ-3499, need to make sure that the alertId that is pointed to by
+        // the escalation still exists
+        if (alertType instanceof GalertEscalationAlertType) {
+            alert = galertLogDAO.get(new Integer(s.getAlertId()));
+        } else if (alertType instanceof ClassicEscalationAlertType) {
+            alert = alertDAO.get(new Integer(s.getAlertId()));
+        } 
+        if (alert == null) {
+            if (debug) log.debug("Alert with id[" + s.getAlertId() + 
+                                 " and escalation type [" + s.getAlertType().getClass().getName() + 
+                                 "] was not found.");
+            return false;
+        }
+        AlertDefinitionInterface def = alert.getAlertDefinitionInterface();
+        if (def == null) {
+            if (debug) log.debug("AlertDef from alertid=" + s.getAlertId() + 
+                                 " was not found.");
+            endEscalation(s);
+            return false;
+        }
+        Resource r = def.getResource();
+        if (r == null || r.isInAsyncDeleteState()) {
+            if (debug) log.debug("Resource from alertid=" + s.getAlertId() + 
+                                 " was not found.");
+            endEscalation(s);
+            return false;
+        }
+        return true;
+    }
 
     /**
      * Check if the escalation state or its associated escalating entity has
@@ -448,7 +485,7 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
     public void endEscalation(EscalationState escalationState) {
         if (escalationState != null) {
             // make sure we have the updated state to avoid StaleStateExceptions
-            escalationState = escalationStateDao.findById(escalationState.getId());
+            escalationState = escalationStateDao.get(escalationState.getId());
             if (escalationState == null) {
                 return;
             }
@@ -503,28 +540,8 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
         //      HQ exception and not worry about checking for alert types explicitly
         //      but after talking with folks about it, sounds like it would require
         //      touching a lot more plumbing code...
-        EscalationAlertType alertType = escalationState.getAlertType();
-        boolean isAlertNotFound = true;
-        try {
-            if (alertType instanceof GalertEscalationAlertType) {
-                isAlertNotFound = (galertLogDAO.get(escalationState.getAlertId()) == null);
-            } else if (alertType instanceof ClassicEscalationAlertType) {
-                // HHQ-3499, need to make sure that the alertId that is pointed to by
-                // the escalation still exists
-      
-                isAlertNotFound = (alertDAO.get(new Integer(escalationState.getAlertId())) == null);
-            }
-        } catch(Exception ex) {
-            log.warn("An unexpected error has occurred while checking if alert with id[" + escalationState.getAlertId() + 
-                " and escalation type [" + escalationState.getAlertType().getClass().getName() + "] exists.", ex);
-            // ...could not determine whether or not the alert exists, so we'll assume it doesn't and
-            // end the escalation below...
-        }
-      
-        if (isAlertNotFound) {
-            if (log.isDebugEnabled()) {
-                log.debug("Alert with id[" + escalationState.getAlertId() + " and escalation type [" + escalationState.getAlertType().getClass().getName() + "] was not found. Canceling escalation...");
-            }
+        if (!escIsValid(escalationState)) {
+            if (debug) log.debug("alert cannot be escalated, since it is not valid.");
             endEscalation(escalationState);
             return;
         }
