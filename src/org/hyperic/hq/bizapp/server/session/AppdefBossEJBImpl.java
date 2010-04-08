@@ -118,7 +118,6 @@ import org.hyperic.hq.appdef.shared.pager.AppdefPagerFilterAssignSvc;
 import org.hyperic.hq.appdef.shared.pager.AppdefPagerFilterExclude;
 import org.hyperic.hq.appdef.shared.pager.AppdefPagerFilterGroupEntityResource;
 import org.hyperic.hq.appdef.shared.pager.AppdefPagerFilterGroupMemExclude;
-import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
@@ -139,7 +138,6 @@ import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.ScanConfigurationCore;
-import org.hyperic.hq.bizapp.shared.AIBossLocal;
 import org.hyperic.hq.bizapp.shared.AllConfigResponses;
 import org.hyperic.hq.bizapp.shared.AppdefBossLocal;
 import org.hyperic.hq.bizapp.shared.AppdefBossUtil;
@@ -186,7 +184,6 @@ import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
 import org.hyperic.util.timer.StopWatch;
-
 import org.quartz.SchedulerException;
 
 /**
@@ -3219,16 +3216,16 @@ public class AppdefBossEJBImpl
     public PageList
         findAvailableServicesForApplication(int sessionId, Integer appId,
                                             AppdefEntityID[] pendingEntities,
-                                            String resourceName, PageControl pc)
+                                            String nameFilter, PageControl pc)
         throws AppdefEntityNotFoundException, PermissionException,
                SessionException
     {
-        List toBePaged, filterList, authzResources;
+        final StopWatch watch = new StopWatch();
+        final boolean debug = log.isDebugEnabled();
         AuthzSubject subject = manager.getSubject(sessionId);
 
         // init our (never-null) page and filter lists
-        toBePaged  = new ArrayList();
-        filterList = new ArrayList();
+        List filterList = new ArrayList();
 
         // add a pager filter for removing pending appdef entities
         if (pendingEntities != null) {
@@ -3238,48 +3235,52 @@ public class AppdefBossEJBImpl
         int oriPageSize = pc.getPagesize();
         pc.setPagesize( PageControl.SIZE_UNLIMITED );
 
-        authzResources = getResourceManager()
-            .findViewableSvcResources(subject, resourceName, pc);
+        if (debug) watch.markTimeBegin("findViewableSvcResources");
+        Set authzResources =
+            new TreeSet(getResourceManager().findViewableSvcResources(subject, nameFilter, pc));
+        if (debug) watch.markTimeEnd("findViewableSvcResources");
+
+        int authzResourcesSize = authzResources.size();
 
         pc.setPagesize( oriPageSize );
 
         // Remove existing application assigned inventory
-        List assigned = findServiceInventoryByApplication(sessionId, appId,
-                                                         PageControl.PAGE_ALL);
-        for (int x = 0; x < assigned.size(); x++) {
-            assigned.set(x, ((AppdefResourceValue) assigned.get(x))
-                         .getEntityId());
+        if (debug) watch.markTimeBegin("findServiceInventoryByApplication");
+        List assigned = findServiceInventoryByApplication(sessionId, appId, PageControl.PAGE_ALL);
+        if (debug) watch.markTimeEnd("findServiceInventoryByApplication");
+        if (debug) watch.markTimeBegin("loop1");
+        ResourceManagerLocal rMan = getResourceManager();
+        for (Iterator it=assigned.iterator(); it.hasNext(); ) {
+            AppdefResourceValue val = (AppdefResourceValue) it.next();
+            authzResources.remove(rMan.findResource(val.getEntityId()));
         }
+        if (debug) watch.markTimeEnd("loop1");
         
-        for (Iterator i = authzResources.iterator(); i.hasNext();) {
-            Resource rv = (Resource) i.next();
-            AppdefEntityID id = new AppdefEntityID(rv);
-            if (!assigned.contains(id)) {
-                toBePaged.add(id);
-            }
+        List toBePaged = new ArrayList(authzResources.size());
+        for (Iterator it=authzResources.iterator(); it.hasNext(); ) {
+            Resource r = (Resource) it.next();
+            toBePaged.add(new AppdefEntityID(r));
         }
 
         // Page it, then convert to AppdefResourceValue
-        List finalList = new ArrayList();
+        List finalList = new ArrayList(authzResources.size());
         PageList pl = getPageList (toBePaged, pc, filterList);
-        for (Iterator itr = pl.iterator();itr.hasNext();){
-            AppdefEntityID ent = (AppdefEntityID) itr.next();
+        for (Iterator it=pl.iterator(); it.hasNext();){
+            AppdefEntityID ent = (AppdefEntityID) it.next();
             try {
                 finalList.add( findById(subject,ent) );
             } catch (AppdefEntityNotFoundException e) {
                 // XXX - hack to ignore the error.  This must have occurred when
                 // we created the resource, and rolled back the AppdefEntity
                 // but not the Resource
-                log.error("Invalid entity still in resource table: " + ent);
+                log.error("Invalid entity still in resource table: " + ent, e);
             }
         }
-
-        int pendingSize = 0;
-        if (pendingEntities != null)
-            pendingSize = pendingEntities.length;
-
-        int adjustedSize = authzResources.size() - pendingSize;
-        return new PageList(finalList,adjustedSize);
+        int pendingSize = (pendingEntities != null) ? pendingEntities.length : 0;
+        int adjustedSize = authzResourcesSize - pendingSize;
+        PageList rtn = new PageList(finalList,adjustedSize);
+        if (debug) log.debug(watch);
+        return rtn;
     }
 
     private PageList getPageList (Collection coll, PageControl pc) {

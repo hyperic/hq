@@ -28,6 +28,7 @@ package org.hyperic.hq.authz.server.session;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -56,13 +57,11 @@ import org.hyperic.hq.appdef.shared.ApplicationManagerLocal;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
+import org.hyperic.hq.appdef.shared.ResourcesCleanupZevent;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
@@ -70,11 +69,11 @@ import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceEdgeCreateException;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerUtil;
+import org.hyperic.hq.bizapp.server.session.AppdefBossEJBImpl;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.ResourceAudit;
 import org.hyperic.hq.zevents.ZeventManager;
-import org.hyperic.util.StringUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -625,37 +624,31 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @return PageList of resource values
      * @ejb:interface-method
      */
-    public PageList findViewableSvcResources(AuthzSubject subject,
-                                             String resourceName,
+    public PageList findViewableSvcResources(AuthzSubject subject, String nameFilter,
                                              PageControl pc) {
-        Collection resources;
-
         AuthzSubject subj = getSubjectDAO().findById(subject.getId());
 
         pc = PageControl.initDefaults(pc, SortAttribute.RESOURCE_NAME);
 
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
 
-        // Damn I love this code.  -- JMT
-        switch(pc.getSortattribute()) {
-            case SortAttribute.RESOURCE_NAME:
-            default:
-                resources = pm.findServiceResources(subj, Boolean.FALSE);
-                break;
-        }
+        // returns a sorted Collection by resourceName
+        Collection resources = pm.findServiceResources(subj, Boolean.FALSE);
         
-        // TODO: Move filtering into EJBQL
-        ArrayList ordResources = new ArrayList(resources.size());
-        for (Iterator it = resources.iterator(); it.hasNext();) {
-            Resource res = (Resource) it.next();
-            
-            if (StringUtil.stringDoesNotExist(res.getName(), resourceName))
-                continue;
-            
-            if (pc.isDescending())  // Add to head of array list
-                ordResources.add(0, res);
-            else                    // Add to tail of array list
-                ordResources.add(res);
+        if (nameFilter != null) {
+            for (Iterator it=resources.iterator(); it.hasNext(); ) {
+                Resource r = (Resource) it.next();
+                if (r == null || r.isInAsyncDeleteState() ||
+                        !r.getName().toLowerCase().contains(nameFilter.toLowerCase())) {
+                    it.remove();
+                }
+            }
+        }
+
+        Collection ordResources = resources;
+        if (pc.isDescending()) {
+            ordResources = new ArrayList(resources);
+            Collections.reverse((List)ordResources);
         }
 
         return new PageList(ordResources, ordResources.size());

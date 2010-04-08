@@ -29,6 +29,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.TreeSet;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
@@ -231,48 +232,45 @@ public class ResourceDAO
             .list();
     }
 
-    public Collection findViewableSvcRes_orderName(Integer user,
-                                                   Boolean fSystem)
-    {
-        // we use join here to produce a single
-        // join => the strategy here is to rely on
-        // the database query optimizer to optimize the query
-        // by feeding it a single query.
-        //
-        // The important point is we should first give the
-        // opportunity to the database to do the "query" optimization
-        // before we do anything else.
-        // Note: this should be refactored to use named queries so
-        // that we can perform "fetch" optimization outside of the code
-        String sql =
-            "select r from Resource r join r.resourceType rt " +
-            "where r.system = :system and exists " +
-                 "(select rg from GroupMember g " +
-                 " join g.group rg " +
-                 " join g.resource rs " +
-                 "where ((rg.resource = r and rg.groupType = 15) or " +
-                        "(rt.name = :resSvcType and r = rs)) " +
-                 " and (r.owner.id = :subjId or exists " +
-                      "(select role from rg.roles role " +
-                                   "join role.subjects subj " +
-                                   "join role.operations op " +
-                       "where subj.id = :subjId and " +
-                             "op.name = case rt.name " +
-                                       "when (:resSvcType) then '" +
-                                       AuthzConstants.serviceOpViewService +
-                                       "' " +
-                                       "else '" +
-                                       AuthzConstants.groupOpViewResourceGroup +
-                                       "' end))) " +
-            "order by r.sortName";
+    public Collection findViewableSvcRes_orderName(Integer user, Boolean fSystem) {
+        ResourceTypeDAO rDao = DAOFactory.getDAOFactory().getResourceTypeDAO();
+        ResourceType serviceType = rDao.findByName(AuthzConstants.serviceResType);
+        OperationDAO opDao = getOperationDAO();
+        Operation op = opDao.findByTypeAndName(serviceType, AuthzConstants.serviceOpViewService);
+        final String sql = new StringBuilder(1024)
+            .append("SELECT {res.*} ")
+            .append("FROM EAM_SUBJECT subject ")
+            .append("JOIN EAM_SUBJECT_ROLE_MAP subjrolemap on subject.ID = subjrolemap.SUBJECT_ID ")
+            .append("JOIN EAM_ROLE role on role.ID = subjrolemap.ROLE_ID ")
+            .append("JOIN EAM_ROLE_RESOURCE_GROUP_MAP rolegrpmap on rolegrpmap.ROLE_ID = role.ID ")
+            .append("JOIN EAM_RESOURCE res on res.RESOURCE_TYPE_ID = :resourceTypeId ")
+                .append("AND res.FSYSTEM = :system ")
+            .append("JOIN EAM_RES_GRP_RES_MAP grpmap on grpmap.RESOURCE_ID = res.ID ")
+            .append("JOIN EAM_RESOURCE_GROUP resgrp on resgrp.ID = grpmap.RESOURCE_GROUP_ID ")
+                .append("AND rolegrpmap.RESOURCE_GROUP_ID = resgrp.ID ")
+            .append("JOIN EAM_ROLE_OPERATION_MAP opmap on role.id = opmap.ROLE_ID ")
+                .append("AND opmap.OPERATION_ID = :opId ")
+            .append("WHERE subject.ID = :subjectId ")
+            .append("UNION ALL ")
+            .append("SELECT {res.*} ")
+            .append("FROM EAM_RESOURCE res ")
+            .append("WHERE res.SUBJECT_ID = :subjectId AND res.RESOURCE_TYPE_ID = :resourceTypeId ")
+            .append("AND res.FSYSTEM = :system ")
+            .toString();
         List resources =
-            getSession().createQuery(sql)
+            getSession().createSQLQuery(sql)
+                        .addEntity("res", Resource.class)
                         .setBoolean("system", fSystem.booleanValue())
-                        .setInteger("subjId", user.intValue())
-                        .setString("resSvcType", AuthzConstants.serviceResType)
+                        .setInteger("opId", op.getId().intValue())
+                        .setInteger("subjectId", user.intValue())
+                        .setInteger("resourceTypeId", serviceType.getId().intValue())
                         .list();
+        // use TreeSet to eliminate dups and sort by Resource
+        return new TreeSet(resources);
+    }
 
-        return resources;
+    private OperationDAO getOperationDAO() {
+        return new OperationDAO(DAOFactory.getDAOFactory());
     }
 
     public Collection findSvcRes_orderName(Boolean fSystem)
