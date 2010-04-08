@@ -51,7 +51,8 @@
 				p:username="${server.database-user}" p:password="${server.database-password}"
 				p:defaultAutoCommit="false" p:minIdle="${server.database-minpoolsize}"
 				p:maxActive="${server.database-maxpoolsize}" p:maxWait="${server.database-blockingtimeout}"
-				p:jdbcInterceptors="ConnectionState"/>
+				p:jdbcInterceptors="ConnectionState" p:validationQuery="${server.connection-validation-sql}" 
+				p:validationInterval="30000"/>
 		</constructor-arg>
 	</bean>
 
