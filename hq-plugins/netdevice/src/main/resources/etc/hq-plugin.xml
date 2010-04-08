@@ -44,6 +44,12 @@
             units="jiffys"
             collectionType="static"/>
 
+    <metric name="Engine Uptime"
+            template="${snmp.template}:snmpEngineTime"
+            category="AVAILABILITY"
+            units="sec"
+            collectionType="static"/>
+
     <metric name="Availability"
             template="${snmp.template},Avail=true:ifNumber"
             indicator="true"/>
