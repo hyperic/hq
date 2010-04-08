@@ -27,16 +27,21 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
-<c:set var="location" scope="request"><tiles:getAsString name="location"/></c:set>
-  <c:choose>
-  <c:when test="${location eq 'resources'}">
-      <c:forEach var="attachment" items="${mastheadResourceAttachments}">
-          <li><a href="<html:rewrite page="/mastheadAttach.do?typeId=${attachment.attachment.id}"/>"><c:out value="${attachment.HTML}"/></a></li>
-      </c:forEach>
-  </c:when>
-  <c:when test="${location eq 'tracking'}">
-    <c:forEach var="attachment" items="${mastheadTrackerAttachments}">
-          <li><a href="<html:rewrite page="/mastheadAttach.do?typeId=${attachment.attachment.id}"/>"><c:out value="${attachment.HTML}"/></a></li>
-      </c:forEach>
-  </c:when>
-  </c:choose>
+<c:set var="location" scope="request">
+ 	<tiles:getAsString name="location"/>
+</c:set>
+ <c:choose>
+	<c:when test="${location eq 'resources'}">
+ 	 	<c:set var="attachments" scope="request" value="${mastheadResourceAttachments}" />
+ 	</c:when>
+ 	<c:when test="${location eq 'tracking'}">
+ 	 	<c:set var="attachments" scope="request" value="${mastheadTrackerAttachments}" />
+ 	</c:when>
+</c:choose>
+<c:forEach var="attachment" items="${attachments}">
+	<li>
+ 		<a href="<html:rewrite page="/mastheadAttach.do?typeId=${attachment.attachment.id}"/>">
+ 			<c:out value="${attachment.HTML}"/>
+ 	 	</a>
+ 	</li>
+</c:forEach>
