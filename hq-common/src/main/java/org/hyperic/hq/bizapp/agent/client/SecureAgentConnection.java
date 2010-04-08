@@ -52,7 +52,9 @@ public class SecureAgentConnection
     extends AgentConnection
 {
     private static final String PROP_READ_TIMEOUT = "agent.readTimeOut";
+    private static final String PROP_POST_HANDSHAKE_TIMEOUT = "agent.postHandshakeTimeOut";
     private static final int READ_TIMEOUT = 60000;
+    private static final int POST_HANDSHAKE_TIMEOUT = 60000;
 
     private String agentAddress;
     private int    agentPort;
@@ -70,8 +72,9 @@ public class SecureAgentConnection
     }
 
     private SSLSocket getSSLSocket(SSLSocketFactory factory,
-                                   String host, 
-                                   int port, int timeout)
+                                   String host, int port,
+                                   int readTimeout,
+                                   int postHandshakeTimeout)
         throws IOException {
 
         SSLSocket socket;
@@ -82,19 +85,18 @@ public class SecureAgentConnection
         //XXX we could check if the jre is at the required patch level
         if (!JDK.IS_IBM) {
             socket = (SSLSocket)factory.createSocket();
-            socket.connect(new InetSocketAddress(host, port), timeout);
+            socket.connect(new InetSocketAddress(host, port), readTimeout);
         }
         else {
             socket = (SSLSocket)factory.createSocket(host, port);
         }
 
         // Set the socket timeout during the initial handshake to detect
-        // connection issues with the agent.  The timeout is reset to 0
-        // (unlimited) post handshake, preserving the behavior for 3.1 and
-        // prior.
-        socket.setSoTimeout(timeout);
+        // connection issues with the agent.  
+        socket.setSoTimeout(readTimeout);
         socket.startHandshake();
-        socket.setSoTimeout(0);
+        // [HHQ-3694] The timeout is set to a post handshake value.
+        socket.setSoTimeout(postHandshakeTimeout);
         
         return socket;
     }
@@ -131,17 +133,28 @@ public class SecureAgentConnection
 
         try {
             // Check for configured agent read timeout from System properties
-            int timeout;
-            String readTimeout = System.getProperty(PROP_READ_TIMEOUT);
+            int readTimeout;
+           
             try {
-                timeout = Integer.parseInt(readTimeout);
+                readTimeout = Integer.parseInt(System.getProperty(PROP_READ_TIMEOUT));
             } catch (NumberFormatException e) {
-                timeout = READ_TIMEOUT;
+                readTimeout = READ_TIMEOUT;
             }
+            
+            // Check for configured agent post handshake timeout
+            // from System properties
+            int postHandshakeTimeout;
+            try {
+                postHandshakeTimeout =
+                    Integer.parseInt(System.getProperty(PROP_POST_HANDSHAKE_TIMEOUT));
+            } catch (NumberFormatException e) {
+                postHandshakeTimeout = POST_HANDSHAKE_TIMEOUT;
+            }
+      
 
             factory = context.getSocketFactory();
             sock = getSSLSocket(factory, this.agentAddress,
-                                this.agentPort, timeout);
+                                this.agentPort, readTimeout, postHandshakeTimeout);
         } catch(IOException exc){
             throw new AgentConnectionException("Unable to connect to " +
                                                this.agentAddress + ":" +
