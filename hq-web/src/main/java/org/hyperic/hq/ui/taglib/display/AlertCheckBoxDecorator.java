@@ -27,6 +27,7 @@ package org.hyperic.hq.ui.taglib.display;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.ui.beans.AlertBean;
 
 /**
  * This class is a two in one decorator/tag for use within the display:table
@@ -62,30 +63,36 @@ public class AlertCheckBoxDecorator extends CheckBoxDecorator {
 	}
 
 	public String decorate(Object obj) {
-		Boolean isFixable = getFixable();
-		Boolean isAcknowledgeable = getAcknowledgeable();
-
-		if (isFixable == null) {
-			log.debug("Fixable attribute value set to null");
-
-			return "";
-		}
-
-		if (isAcknowledgeable == null) {
-			log.debug("Acknowledgeable attribute value set to null");
-
-			return "";
-		}
-
-		if (isAcknowledgeable.booleanValue()) {
-			setStyleClass("ackableAlert");
-		} else if (isFixable.booleanValue()) {
-			setStyleClass("fixableAlert");
-		} else {
-			return "";
-		}
-
-		return super.decorate(obj);
+	    AlertBean alert = (AlertBean) getObject();
+        
+        if (alert.isCanTakeAction()) {
+            Boolean isFixable = getFixable();
+            Boolean isAcknowledgeable = getAcknowledgeable();
+    
+            if (isFixable == null) {
+                log.debug("Fixable attribute value set to null");
+    
+                return "";
+            }
+    
+            if (isAcknowledgeable == null) {
+                log.debug("Acknowledgeable attribute value set to null");
+    
+                return "";
+            }
+    
+            if (isAcknowledgeable.booleanValue()) {
+                setStyleClass("ackableAlert");
+            } else if (isFixable.booleanValue()) {
+                setStyleClass("fixableAlert");
+            } else {
+                return "";
+            }
+    
+            return super.decorate(obj);
+        }
+        
+        return "";
 	}
 
 	public void release() {

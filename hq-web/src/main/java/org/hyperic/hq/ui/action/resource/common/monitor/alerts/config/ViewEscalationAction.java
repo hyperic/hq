@@ -33,11 +33,13 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationAlertType;
+import org.hyperic.hq.events.AlertPermissionManager;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
 import org.hyperic.hq.galerts.server.session.GalertEscalationAlertType;
 import org.hyperic.hq.ui.Constants;
@@ -52,12 +54,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class ViewEscalationAction
     extends ViewDefinitionAction {
 
-    private AuthzBoss authzBoss;
+   
 
     @Autowired
-    public ViewEscalationAction(EventsBoss eventsBoss, MeasurementBoss measurementBoss, AuthzBoss authzBoss) {
-        super(eventsBoss, measurementBoss);
-        this.authzBoss = authzBoss;
+    public ViewEscalationAction(EventsBoss eventsBoss, MeasurementBoss measurementBoss, AuthzBoss authzBoss, 
+                                PermissionManager permissionManager, AlertPermissionManager alertPermissionManager) {
+        super(eventsBoss, measurementBoss, authzBoss, permissionManager, alertPermissionManager);
+      
     }
 
     public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,

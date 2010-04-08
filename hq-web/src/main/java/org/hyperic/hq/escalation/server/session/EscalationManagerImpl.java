@@ -96,7 +96,7 @@ public class EscalationManagerImpl implements EscalationManager {
         // that the escalations run
         ClassicEscalationAlertType.class.getClass();
         AlertableRoleCalendarType.class.getClass();
-        ConcurrentStatsCollector.getInstance().register(ConcurrentStatsCollector.EMAIL_ACTIONS);
+        ConcurrentStatsCollector.getInstance().register(ConcurrentStatsCollector.FIRED_ALERT_TIME);
     }
 
     private void assertEscalationNameIsUnique(String name) throws DuplicateObjectException {
@@ -586,7 +586,8 @@ public class EscalationManagerImpl implements EscalationManager {
         }
 
         // HQ-1295: Does user have sufficient permissions?
-        alertPermissionManager.canManageAlerts(subject, alert.getDefinition().getDefinitionInfo());
+        // ...check if user can fix/acknowledge this alert...
+        alertPermissionManager.canFixAcknowledgeAlerts(subject, alert.getDefinition().getDefinitionInfo());
 
         if (fixed) {
             if (moreInfo == null || moreInfo.trim().length() == 0) {

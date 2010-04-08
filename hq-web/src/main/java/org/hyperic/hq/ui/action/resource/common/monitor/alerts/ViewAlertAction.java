@@ -38,11 +38,14 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.escalation.server.session.Escalation;
+import org.hyperic.hq.events.AlertPermissionManager;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertActionLog;
@@ -72,13 +75,15 @@ public class ViewAlertAction
     private EventsBoss eventsBoss;
     private MeasurementBoss measurementBoss;
     private AuthzBoss authzBoss;
+    private AlertPermissionManager alertPermissionManager;
 
     @Autowired
-    public ViewAlertAction(EventsBoss eventsBoss, MeasurementBoss measurementBoss, AuthzBoss authzBoss) {
+    public ViewAlertAction(EventsBoss eventsBoss, MeasurementBoss measurementBoss, AuthzBoss authzBoss, AlertPermissionManager alertPermissionManager) {
         super();
         this.eventsBoss = eventsBoss;
         this.measurementBoss = measurementBoss;
         this.authzBoss = authzBoss;
+        this.alertPermissionManager = alertPermissionManager;
     }
 
     /**
@@ -231,6 +236,16 @@ public class ViewAlertAction
         PageList<AuthzSubjectValue> availableUsers = authzBoss.getAllSubjects(new Integer(sessionID), null,
             PageControl.PAGE_ALL);
         request.setAttribute(Constants.AVAIL_USERS_ATTR, availableUsers);
+        
+        // ...check to see if user has the ability to fix/acknowledge...
+        try {
+            AuthzSubject subject = authzBoss.getCurrentSubject(sessionID);
+            alertPermissionManager.canFixAcknowledgeAlerts(subject, alertDefinition.getAppdefEntityId());
+            request.setAttribute(Constants.CAN_TAKE_ACTION_ON_ALERT_ATTR, true);
+        } catch(PermissionException e) {
+            // We can view it, but can't take action on it
+            request.setAttribute(Constants.CAN_TAKE_ACTION_ON_ALERT_ATTR, false);
+        }
 
         return null;
     }

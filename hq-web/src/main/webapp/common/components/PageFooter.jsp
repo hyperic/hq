@@ -34,15 +34,12 @@
 <tiles:importAttribute name="msgKey" ignore="true"/>
 
 <c:if test="${not empty msgKey}">
-      <table width="100%" cellpadding="0" cellspacing="7" border="0">
-        <tr align=left valign=bottom>
-          <td width="20%">&nbsp;</td>
-          <td width="80%"><i><fmt:message key="${msgKey}"/></i></td>
-        </tr>
-      </table>
+      <div class="footerMessageContainer">
+ 	  <i><fmt:message key="${msgKey}"/></i>
+ 	  </div>
 </c:if>
 
     </td>
-    <td><html:img page="/images/spacer.gif" width="20" height="1" alt="" border="0"/></td>
+    <td>&nbsp;</td>
   </tr>
 </table>

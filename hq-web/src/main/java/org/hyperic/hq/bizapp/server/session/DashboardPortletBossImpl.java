@@ -49,10 +49,10 @@ import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.DashboardPortletBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationState;
 import org.hyperic.hq.escalation.shared.EscalationManager;
+import org.hyperic.hq.events.AlertPermissionManager;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.AlertSortField;
@@ -108,13 +108,16 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss {
     private AlertDefinitionManager alertDefinitionManager;
 
     private EscalationManager escalationManager;
+    
+    private AlertPermissionManager alertPermissionManager;
 
     @Autowired
     public DashboardPortletBossImpl(PermissionManager permissionManager, ResourceManager resourceManager,
                                     MeasurementManager measurementManager, DataManager dataManager,
                                     MeasurementBoss measurementBoss, ResourceGroupManager resourceGroupManager,
                                     GalertManager galertManager, AlertManager alertManager,
-                                    AlertDefinitionManager alertDefinitionManager, EscalationManager escalationManager) {
+                                    AlertDefinitionManager alertDefinitionManager, EscalationManager escalationManager, 
+                                    AlertPermissionManager alertPermissionManager) {
         this.permissionManager = permissionManager;
         this.resourceManager = resourceManager;
         this.measurementManager = measurementManager;
@@ -125,6 +128,7 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss {
         this.alertManager = alertManager;
         this.alertDefinitionManager = alertDefinitionManager;
         this.escalationManager = escalationManager;
+        this.alertPermissionManager = alertPermissionManager;
     }
 
     /**
@@ -261,7 +265,7 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss {
             for (GalertLog galert : galerts) {
 
                 try {
-                    permissionManager.checkAlertingPermission(subj, galert.getAlertDef().getAppdefID());
+                    alertPermissionManager.canViewAlertDefinition(subj, galert.getAlertDef().getAppdefID());
                 } catch (PermissionException pe) {
                     // continue to next group alert
                     continue;

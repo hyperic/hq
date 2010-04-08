@@ -207,7 +207,8 @@ public class AlertManagerImpl implements AlertManager {
      * 
      */
     public int deleteAlerts(AuthzSubject subj, AlertDefinition ad) throws PermissionException {
-        alertPermissionManager.canManageAlerts(subj, ad);
+        // ...check that user has modify permission on alert definition's resource...
+        alertPermissionManager.canModifyAlertDefinition(subj, ad.getAppdefEntityId());
         return alertDAO.deleteByAlertDefinition(ad);
     }
 
@@ -439,7 +440,8 @@ public class AlertManagerImpl implements AlertManager {
     @SuppressWarnings("unchecked")
     public PageList<Alert> findAlerts(AuthzSubject subj, AppdefEntityID id, long begin, long end,
                                       PageControl pc) throws PermissionException {
-        alertPermissionManager.canManageAlerts(subj, id);
+        // ...check that user has view permission on alert definition's resource...
+        alertPermissionManager.canViewAlertDefinition(subj, id);
         List<Alert> alerts = alertDAO.findByAppdefEntityInRange(resourceManager.findResource(id),
             begin, end, pc.getSortattribute() == SortAttribute.NAME, pc.isAscending());
 

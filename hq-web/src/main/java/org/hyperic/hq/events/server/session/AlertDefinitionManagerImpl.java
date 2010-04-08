@@ -211,12 +211,14 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
     public AlertDefinitionValue createAlertDefinition(AuthzSubject subj, AlertDefinitionValue a)
         throws AlertDefinitionCreateException, PermissionException {
         if (EventConstants.TYPE_ALERT_DEF_ID.equals(a.getParentId())) {
-            alertPermissionManager.canManageAlerts(subj, new AppdefEntityTypeID(a.getAppdefType(), a.getAppdefId()));
+            // ...check that user has modify permission on alert definition's resource...
+            alertPermissionManager.canModifyAlertDefinition(subj, new AppdefEntityTypeID(a.getAppdefType(),a.getAppdefId()));
             // Subject permissions should have already been checked when
             // creating
             // the parent (resource type) alert definition.
         } else if (!a.parentIdHasBeenSet()) {
-            alertPermissionManager.canManageAlerts(subj, new AppdefEntityID(a.getAppdefType(), a.getAppdefId()));
+            // ...check that user has modify permission on alert definition's resource...
+           alertPermissionManager.canModifyAlertDefinition(subj, new AppdefEntityID(a.getAppdefType(), a.getAppdefId()));
         }
         return createAlertDefinition(a);
     }
@@ -316,7 +318,8 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
         StopWatch watch = new StopWatch();
         
         AlertDefinition def = alertDefDao.findById(id);
-        alertPermissionManager.canManageAlerts(subj, def);
+        // ...check that user has modify permission on alert definition's resource...
+        alertPermissionManager.canModifyAlertDefinition(subj, def.getAppdefEntityId());
         int initCapacity = def.getChildren().size() + 1;
         List<AlertDefinition> alertdefs = new ArrayList<AlertDefinition>(initCapacity);
         List<Integer> defIds = new ArrayList<Integer>(initCapacity);
@@ -535,7 +538,8 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
         throws PermissionException {
         final boolean debug = log.isDebugEnabled();
         StopWatch watch = new StopWatch();
-        alertPermissionManager.canManageAlerts(subj, def);
+        // ...check that user has modify permission on alert definition's resource...
+        alertPermissionManager.canModifyAlertDefinition(subj, def.getAppdefEntityId());
 
         if (def.isActive() != activate || def.isEnabled() != activate) {
             def.setActiveStatus(activate);
@@ -572,7 +576,8 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
         boolean succeeded = false;
 
         if (def.isEnabled() != enable) {
-            alertPermissionManager.canManageAlerts(subj, def.getAppdefEntityId());
+            // ...check that user has modify permission on alert definition's resource...
+            alertPermissionManager.canModifyAlertDefinition(subj, def.getAppdefEntityId());
             def.setEnabledStatus(enable);
             registeredTriggerManager.setAlertDefinitionTriggersEnabled(def.getId(), enable);
             succeeded = true;
@@ -611,7 +616,8 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
                 AlertDefinition def = alertDefDao.get(alertDefId);
                 
                 if (def != null && def.isEnabled() != enable) {
-                    alertPermissionManager.canManageAlerts(subj, def.getAppdefEntityId());
+                    // ...check that user has modify permission on alert definition's resource...
+                    alertPermissionManager.canModifyAlertDefinition(subj, def.getAppdefEntityId());
                     def.setEnabledStatus(enable);
                     triggerDefIds.add(def.getId());
                 }
@@ -633,7 +639,8 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
      */
     public void setEscalation(AuthzSubject subj, Integer defId, Integer escId) throws PermissionException {
         AlertDefinition def = alertDefDao.findById(defId);
-        alertPermissionManager.canManageAlerts(subj, def);
+        // ...check that user has modify permission on alert definition's resource...
+        alertPermissionManager.canModifyAlertDefinition(subj, def.getAppdefEntityId());
 
         Escalation esc = escalationManager.findById(escId);
 
@@ -671,7 +678,8 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
                 continue;
             }
 
-            alertPermissionManager.canManageAlerts(subj, alertdef);
+            // ...check that user has modify permission on alert definitions...
+            alertPermissionManager.canModifyAlertDefinition(subj, alertdef.getAppdefEntityId());
             alertAuditFactory.deleteAlert(alertdef, subj);
             deleteAlertDefinition(subj, alertdef, false);
         }
@@ -769,7 +777,8 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
             }
 
             if (ad != null) {
-                alertPermissionManager.canManageAlerts(subj, alertPermissionManager.getAppdefEntityID(ad));
+                // ...check that user has view permission on alert definitions...
+                alertPermissionManager.canViewAlertDefinition(subj, ad.getAppdefEntityId());
             }
         }
         return ad;
@@ -857,7 +866,8 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
         for (AlertDefinition a : alertDefDao.findAll()) {
             try {
                 // Only return the alert definitions that user can see
-                alertPermissionManager.canManageAlerts(subj, alertPermissionManager.getAppdefEntityID(a));
+                // ...check that user has view permission on alert definitions...
+                alertPermissionManager.canViewAlertDefinition(subj, a.getAppdefEntityId());
             } catch (PermissionException e) {
                 continue;
             }
@@ -933,9 +943,9 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
     @Transactional(readOnly=true)
     public List<AlertDefinition> findAlertDefinitions(AuthzSubject subject, AppdefEntityID id)
         throws PermissionException {
-        alertPermissionManager.canManageAlerts(subject, id);
-        Resource res = resourceManager.findResource(id);
-        return alertDefDao.findByResource(res);
+        // ...check that user has view permission on alert definitions...
+        alertPermissionManager.canViewAlertDefinition(subject, id);
+        return alertDefDao.findByResource(resourceManager.findResource(id));
     }
 
     /**
@@ -944,7 +954,8 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
     @Transactional(readOnly=true)
     public PageList<AlertDefinitionValue> findAlertDefinitions(AuthzSubject subj, AppdefEntityID id, PageControl pc)
         throws PermissionException {
-        alertPermissionManager.canManageAlerts(subj, id);
+        // ...check that user has view permission on alert definitions...
+        alertPermissionManager.canViewAlertDefinition(subj, id);
         Resource res = resourceManager.findResource(id);
 
         List<AlertDefinition> adefs;
@@ -1019,7 +1030,8 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
     public SortedMap<String, Integer> findAlertDefinitionNames(AuthzSubject subj, AppdefEntityID id, Integer parentId)
         throws PermissionException {
         if (parentId == null) {
-            alertPermissionManager.canManageAlerts(subj, id);
+            // ...check that user has view permission on alert definitions...
+            alertPermissionManager.canViewAlertDefinition(subj, id);
         }
         return findAlertDefinitionNames(id, parentId);
     }

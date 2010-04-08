@@ -26,12 +26,14 @@
 package org.hyperic.hq.ui.action.portlet.criticalalerts;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
@@ -65,6 +67,8 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class RSSAction
     extends BaseRSSAction {
+    
+    private final Log log = LogFactory.getLog(RSSAction.class.getName());
 
     private EventsBoss eventsBoss;
 
@@ -101,7 +105,8 @@ public class RSSAction
 
             list = eventsBoss.findRecentAlerts(user, count, priority, timeRange, null);
         } catch (Exception e) {
-            throw new ServletException("Error finding recent alerts", e);
+            log.warn("Error finding recent alerts", e);
+            list = new ArrayList<Escalatable>();
         }
 
         for (Escalatable alert : list) {

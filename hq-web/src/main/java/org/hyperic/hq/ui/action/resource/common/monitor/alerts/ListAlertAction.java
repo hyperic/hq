@@ -43,10 +43,13 @@ import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.escalation.server.session.Escalation;
+import org.hyperic.hq.events.AlertPermissionManager;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertCondition;
@@ -78,12 +81,17 @@ public class ListAlertAction
     private final Log log = LogFactory.getLog(ListAlertAction.class.getName());
     private EventsBoss eventsBoss;
     private MeasurementBoss measurementBoss;
+    private AuthzBoss authzBoss;
+    private AlertPermissionManager alertPermissionManager;
 
     @Autowired
-    public ListAlertAction(EventsBoss eventsBoss, MeasurementBoss measurementBoss) {
+    public ListAlertAction(EventsBoss eventsBoss, MeasurementBoss measurementBoss, AuthzBoss authzBoss, 
+                           AlertPermissionManager alertPermissionManager) {
         super();
         this.eventsBoss = eventsBoss;
         this.measurementBoss = measurementBoss;
+        this.authzBoss = authzBoss;
+        this.alertPermissionManager = alertPermissionManager;
     }
 
     /**
@@ -134,13 +142,25 @@ public class ListAlertAction
         }
 
         PageList<AlertBean> uiBeans = new PageList<AlertBean>();
+        
+        AuthzSubject subject = authzBoss.getCurrentSubject(sessionId);
+        boolean canTakeAction = false;
+        try {
+            // ...check that the user can fix/acknowledge...
+            alertPermissionManager.canFixAcknowledgeAlerts(subject, appEntId);
+            canTakeAction = true;
+        } catch(PermissionException e) {
+            // ...the user can't fix/acknowledge...
+        }
+       
+        request.setAttribute(Constants.CAN_TAKE_ACTION_ON_ALERT_ATTR, canTakeAction);
 
         for (Alert alert : alerts) {
 
             AlertDefinition alertDefinition = alert.getAlertDefinition();
             AlertBean bean = new AlertBean(alert.getId(), alert.getCtime(), alertDefinition.getId(), alertDefinition
                 .getName(), alertDefinition.getPriority(), appEntId.getId(), new Integer(appEntId.getType()), alert
-                .isFixed(), alert.isAckable());
+                .isFixed(), alert.isAckable(), canTakeAction);
             Escalation escalation = alertDefinition.getEscalation();
 
             if (escalation != null && escalation.isPauseAllowed()) {

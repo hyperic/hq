@@ -42,11 +42,13 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.events.AlertDefinitionInterface;
+import org.hyperic.hq.events.AlertPermissionManager;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
@@ -71,13 +73,15 @@ public class ViewAction
     private AuthzBoss authzBoss;
     private EventsBoss eventsBoss;
     private DashboardManager dashboardManager;
+    private AlertPermissionManager alertPermissionManager;
 
     @Autowired
-    public ViewAction(AuthzBoss authzBoss, EventsBoss eventsBoss, DashboardManager dashboardManager) {
+    public ViewAction(AuthzBoss authzBoss, EventsBoss eventsBoss, DashboardManager dashboardManager, AlertPermissionManager alertPermissionManager) {
         super();
         this.authzBoss = authzBoss;
         this.eventsBoss = eventsBoss;
         this.dashboardManager = dashboardManager;
+        this.alertPermissionManager = alertPermissionManager;
     }
 
     public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
@@ -154,6 +158,14 @@ public class ViewAction
             }
             eid = AppdefUtil.newAppdefEntityId(def.getResource());
             aVal = new AppdefEntityValue(eid, subject);
+            
+            boolean canTakeAction = false;
+            try {
+                alertPermissionManager.canFixAcknowledgeAlerts(subject, eid);
+                canTakeAction = true;
+            } catch(PermissionException e) {
+                // We can view it, but can't take action on it
+            }
 
             JSONObject jAlert = new JSONObject();
             jAlert.put("alertId", alert.getId());
@@ -165,6 +177,7 @@ public class ViewAction
             jAlert.put("acknowledgeable", alert.isAcknowledgeable());
             jAlert.put("alertType", alert.getDefinition().getAlertType().getCode());
             jAlert.put("maxPauseTime", maxPauseTime);
+            jAlert.put("canTakeAction", canTakeAction);
 
             a.add(jAlert);
         }

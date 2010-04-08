@@ -482,6 +482,9 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   <tiles:put name="pageSizeAction" beanName="psAction"/>
   <tiles:put name="pageNumAction" beanName="pnAction"/>  
   <tiles:put name="defaultSortColumn" value="5"/>
+   <c:if test="${not canModify}">
+ 	 <tiles:put name="hideAlertDefinitionActions" value="true" />
+   </c:if>
 </tiles:insert>
 </div>
 <html:hidden property="ff"/>

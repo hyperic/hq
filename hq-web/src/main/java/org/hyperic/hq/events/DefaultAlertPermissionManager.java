@@ -18,6 +18,7 @@ import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
+import org.hyperic.hq.authz.shared.ResourceOperationsHelper;
 import org.hyperic.hq.authz.shared.RoleManager;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,65 +67,102 @@ public class DefaultAlertPermissionManager implements AlertPermissionManager {
         permMgr.check(subjectId, resType.getId(), instId, operation.getId());
         // Permission Check Succesful
     }
+    
+    public void canViewResourceTypeAlertDefinitionTemplate(AuthzSubject user)
+    throws PermissionException {
+        // ...right now, you have to be a member of the super user's role to do anything with
+        // resource type alert templates...
+        // TODO ...if this changes in the future, we can make the change here and the rest should just work...
+        if (!PermissionManagerFactory.getInstance().hasAdminPermission(user.getId())) {
+            throw new PermissionException("User must be in Super User role to manage resource type alert definitions");
+        }
+    }
 
-    public void canManageAlerts(AuthzSubject who, AlertDefinitionInterface adi)  throws PermissionException{
-        if (adi.isDeleted()) // Don't need to check deleted alert defs
+    public void canViewAlertDefinition(AuthzSubject user, AppdefEntityID entityId)
+    throws PermissionException {
+        // ...we need to check the resource associated with the alert definition to determine 
+        // if the user can view the alert definition.  Must have read permission on resource...
+        checkAlertDefinitionPermission(user, entityId, ResourceOperationsHelper.getReadOperation(entityId.getType()));
+    }
+    
+    public void canModifyAlertDefinition(AuthzSubject user, AppdefEntityID entityId)
+    throws PermissionException {
+        // ...we need to check the resource associated with the alert definition to determine 
+        // if the user can modify the alert definition.  Must have modify permission on resource...
+        checkAlertDefinitionPermission(user, entityId, ResourceOperationsHelper.getUpdateOperation(entityId.getType()));
+    }
+    
+    private void checkAlertDefinitionPermission(AuthzSubject user, AppdefEntityID id, String operationName) 
+    throws PermissionException {
+        int resourceType = id.getType();
+        String resourceTypeLabel;
+        
+        switch (resourceType) {
+            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                resourceTypeLabel = AuthzConstants.platformResType;
+
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                resourceTypeLabel = AuthzConstants.serverResType;
+
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                resourceTypeLabel = AuthzConstants.serviceResType;
+
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_GROUP: 
+                resourceTypeLabel = AuthzConstants.groupResType;
+
+                break;
+            default:
+                throw new InvalidAppdefTypeException("Unknown type: " + resourceType);
+        }
+        
+        // ...check based on resource type to see if we have the requested permission...
+        checkPermission(user.getId(), resourceTypeLabel, id.getId(), operationName);
+    }
+    
+    public void canFixAcknowledgeAlerts(AuthzSubject who, AlertDefinitionInterface adi)
+    throws PermissionException {
+        if (adi.isDeleted()) {    // Don't need to check deleted alert defs
             return;
-
+        }
+        
         Integer parentId = null;
+
         if (adi instanceof AlertDefinition) {
             AlertDefinition ad = (AlertDefinition) adi;
             parentId = ad.getParent() != null ? ad.getParent().getId() : null;
         }
-
-        if (!EventConstants.TYPE_ALERT_DEF_ID.equals(parentId))
-            canManageAlerts(who, getAppdefEntityID(adi));
+        
+        if (!EventConstants.TYPE_ALERT_DEF_ID.equals(parentId)) {
+            canFixAcknowledgeAlerts(who, AppdefUtil.newAppdefEntityId(adi.getResource()));
+        }
     }
-
+    
     /**
-     * Check for manage alerts permission for a given resource
+     * Check for manage alerts permission for a given resource 
+     * 
+     * By manage, we mean the ability to fix/acknowledge alerts & pause escalations...
      */
-    public  void canManageAlerts(AuthzSubject who, AppdefEntityID id)  throws PermissionException {
-        if (id instanceof AppdefEntityTypeID) {
-            // Make sure the user is a super user
-            if (roleManager.isRootRoleMember(who))
-                return;
-            throw new PermissionException("User must be in Super User role " + "to manage resource type alert "
-                                          + "definitions");
+    public void canFixAcknowledgeAlerts(AuthzSubject user, AppdefEntityID entityId)
+    throws PermissionException {
+        try {
+            canModifyAlertDefinition(user, entityId);
+        } catch(PermissionException e) {
+            // ...first check that we can view the alert...
+            canViewAlertDefinition(user, entityId);
+    
+            int resourceTypeId = entityId.getType();
+            
+            // ...then check if we have fix/acknowledge permissions on alert...
+            checkPermission(user.getId(), 
+                            ResourceOperationsHelper.getResourceType(resourceTypeId), 
+                            entityId.getId(), 
+                            ResourceOperationsHelper.getManageAlertOperation(resourceTypeId));            
         }
-
-        int type = id.getType();
-        String rtName = null;
-        String opName = null;
-        switch (type) {
-        case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-            rtName = AuthzConstants.platformResType;
-            opName = AuthzConstants.platformOpManageAlerts;
-            break;
-        case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-            rtName = AuthzConstants.serverResType;
-            opName = AuthzConstants.serverOpManageAlerts;
-            break;
-        case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-            rtName = AuthzConstants.serviceResType;
-            opName = AuthzConstants.serviceOpManageAlerts;
-            break;
-        case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-            rtName = AuthzConstants.applicationResType;
-            opName = AuthzConstants.appOpManageAlerts;
-            break;
-        case AppdefEntityConstants.APPDEF_TYPE_GROUP:
-            rtName = AuthzConstants.groupResourceTypeName;
-            opName = AuthzConstants.groupOpManageAlerts;
-            break;
-        default:
-            throw new InvalidAppdefTypeException("Unknown type: " + type);
-        }
-
-        // now check
-        checkPermission(who.getId(), rtName, id.getId(), opName);
     }
-
+    
     public  AppdefEntityID getAppdefEntityID(AlertDefinitionInterface adi) {
         try {
             return AppdefUtil.newAppdefEntityId(adi.getResource());
@@ -154,6 +192,11 @@ public class DefaultAlertPermissionManager implements AlertPermissionManager {
     public  void canCreateEscalation(Integer subjectId)
         throws PermissionException {
         checkEscalation(subjectId, AuthzConstants.escOpCreateEscalation);
+    }
+    
+    public void canViewEscalation(Integer subjectId) 
+    throws PermissionException {
+        checkEscalation(subjectId, AuthzConstants.escOpViewEscalation);
     }
 
     public  void canModifyEscalation(Integer subjectId)

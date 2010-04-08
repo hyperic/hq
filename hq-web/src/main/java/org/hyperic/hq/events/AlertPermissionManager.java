@@ -5,11 +5,15 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 
 public interface AlertPermissionManager {
-
-    void canManageAlerts(AuthzSubject who, AppdefEntityID id) throws PermissionException;
-
-    void canManageAlerts(AuthzSubject who, AlertDefinitionInterface adi) throws PermissionException;
-
+    
+    void canFixAcknowledgeAlerts(AuthzSubject user, AppdefEntityID entityId) throws PermissionException;
+    
+    void canFixAcknowledgeAlerts(AuthzSubject who, AlertDefinitionInterface adi) throws PermissionException;
+    
+    void canViewAlertDefinition(AuthzSubject user, AppdefEntityID entityId) throws PermissionException;
+    
+    void canModifyAlertDefinition(AuthzSubject user, AppdefEntityID entityId) throws PermissionException;
+    
     AppdefEntityID getAppdefEntityID(AlertDefinitionInterface adi);
 
     void canModifyEscalation(Integer subjectId) throws PermissionException;

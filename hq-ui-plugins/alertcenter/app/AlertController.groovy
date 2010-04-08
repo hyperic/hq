@@ -1,7 +1,11 @@
+import org.hyperic.hq.authz.shared.PermissionException
+
 import org.hyperic.hq.hqu.rendit.BaseController
 
 import java.text.DateFormat
 import org.hyperic.hq.common.YesOrNo
+import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.events.AlertPermissionManager;
 import org.hyperic.hq.events.AlertSeverity
 import org.hyperic.hq.events.EventConstants
 import org.hyperic.hq.events.server.session.AlertDefSortField
@@ -55,12 +59,22 @@ class AlertController
         columns: [
             [field:AlertSortField.ACTION_TYPE, width:'3%',
              label:{
-             	 def esc = it.definition.escalation
+				 def canTakeAction
+				
+				 try {
+					Bootstrap.getBean(AlertPermissionManager.class).canFixAcknowledgeAlerts(user, it.alertDefinition.appdefEntityId)
+					
+					canTakeAction = true
+				 } catch (PermissionException e) {
+				    canTakeAction = false
+				 }
+				
+			 	 def esc = it.definition.escalation
              	 def pause = (esc == null ? "0" : (esc.pauseAllowed ? esc.maxPauseTime : "0"))
              	 // checkbox id is in the format: {portalName}|{appdefKey}|{alertId}|{maxPauseTime}
              	 def id = "Alerts|" + it.alertDefinition.appdefEntityId.appdefKey + "|" + it.id + "|" + pause
-             	 def member = (it.ackable ? "ackableAlert" : "fixableAlert")
-             	 def box = (it.fixed ? "" : "<input type='checkbox' name='ealerts' id='" + id + "' class='" + member + "' value='-559038737:" + it.id +"' onclick='MyAlertCenter.toggleAlertButtons(this)' />")}],
+				 def member = (it.ackable ? "ackableAlert" : "fixableAlert")
+             	 def box = ((it.fixed || !canTakeAction) ? "" : "<input type='checkbox' name='ealerts' id='" + id + "' class='" + member + "' value='-559038737:" + it.id +"' onclick='MyAlertCenter.toggleAlertButtons(this)' />")}],
             [field:AlertSortField.DATE, width:'8%',
              label:{df.format(it.timestamp)}],
             [field:AlertSortField.DEFINITION, width:'15%',
@@ -75,12 +89,22 @@ class AlertController
              label:{YesOrNo.valueFor(it.fixed).value.capitalize()}],
             [field:AlertSortField.ACKED_BY, width:'7%',
              label:{
-             	 def esc = it.definition.escalation
+				 def canTakeAction
+				
+				 try {
+				     Bootstrap.getBean(AlertPermissionManager.class).canFixAcknowledgeAlerts(user, it.alertDefinition.appdefEntityId)
+					
+					canTakeAction = true
+				 } catch (PermissionException e) {
+					canTakeAction = false
+				 }
+			
+			     def esc = it.definition.escalation
              	 def pause = (esc == null ? "0" : (esc.pauseAllowed ? esc.maxPauseTime : "0"))
              	 // checkbox id is in the format: {portalName}|{appdefKey}|{alertId}|{maxPauseTime}
              	 def id = "Alerts|" + it.alertDefinition.appdefEntityId.appdefKey + "|" + it.id + "|" + pause
                  def by = it.acknowledgedBy
-                 by == null ? (it.ackable ? "<a href='javascript:MyAlertCenter.acknowledgeAlert(\"" + id + "\")'><img src='/images/icon_ack.gif'></a>" : "") : by.fullName
+                 by == null ? ((it.ackable && canTakeAction) ? "<a href='javascript:MyAlertCenter.acknowledgeAlert(\"" + id + "\")'><img src='/images/icon_ack.gif'></a>" : "") : by.fullName
             }],
             [field:AlertSortField.SEVERITY, width:'6%',
              label:{
@@ -111,12 +135,22 @@ class AlertController
         columns: [
             [field:GalertLogSortField.ACTION_TYPE, width:'3%',
              label:{
-             	 def esc = it.definition.escalation
+				 def canTakeAction
+				
+				 try {
+				     Bootstrap.getBean(AlertPermissionManager.class).canFixAcknowledgeAlerts(user, it.alertDef.appdefID)
+					
+					canTakeAction = true
+				 } catch (PermissionException e) {
+					canTakeAction = false
+				 }
+			
+			     def esc = it.definition.escalation
              	 def pause = (esc == null ? "0" : (esc.pauseAllowed ? esc.maxPauseTime : "0"))
              	 // checkbox id is in the format: {portalName}|{appdefKey}|{alertId}|{maxPauseTime}
              	 def id = "GroupAlerts|" + it.alertDef.appdefID.appdefKey + "|" + it.id + "|" + pause
              	 def member = (it.acknowledgeable ? "ackableAlert" : "fixableAlert")
-             	 def box = (it.fixed ? "" : "<input type='checkbox' name='ealerts' id='" + id + "' class='" + member + "' value='195934910:" + it.id +"' onclick='MyAlertCenter.toggleAlertButtons(this)' />")}],
+             	 def box = ((it.fixed || !canTakeAction) ? "" : "<input type='checkbox' name='ealerts' id='" + id + "' class='" + member + "' value='195934910:" + it.id +"' onclick='MyAlertCenter.toggleAlertButtons(this)' />")}],
             [field:GalertLogSortField.DATE, width:'14%',
              label:{df.format(it.timestamp)}],
             [field:GalertLogSortField.DEFINITION, width:'25%',
@@ -128,12 +162,22 @@ class AlertController
              label:{YesOrNo.valueFor(it.fixed).value.capitalize()}],
             [field:GalertLogSortField.ACKED_BY, width:'10%',
              label:{
-             	 def esc = it.definition.escalation
+				 def canTakeAction
+				
+				 try {
+				     Bootstrap.getBean(AlertPermissionManager.class).canFixAcknowledgeAlerts(user, it.alertDef.appdefID)
+					
+					canTakeAction = true
+				 } catch (PermissionException e) {
+					canTakeAction = false
+				 }
+				
+				 def esc = it.definition.escalation
              	 def pause = (esc == null ? "0" : (esc.pauseAllowed ? esc.maxPauseTime : "0"))
              	 // checkbox id is in the format: {portalName}|{appdefKey}|{alertId}|{maxPauseTime}
              	 def id = "GroupAlerts|" + it.alertDef.appdefID.appdefKey + "|" + it.id + "|" + pause
                  def by = it.acknowledgedBy
-                 by == null ? (it.acknowledgeable ? "<a href='javascript:MyAlertCenter.acknowledgeAlert(\"" + id + "\")'><img src='/images/icon_ack.gif'></a>" : "") : by.fullName }],
+                 by == null ? ((it.acknowledgeable && canTakeAction) ? "<a href='javascript:MyAlertCenter.acknowledgeAlert(\"" + id + "\")'><img src='/images/icon_ack.gif'></a>" : "") : by.fullName }],
             [field:GalertLogSortField.SEVERITY, width:'8%',
              label:{
                  def s = it.alertDef.severity

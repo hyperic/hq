@@ -32,6 +32,7 @@
 
 <html>
 	<head>
+	    <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7" />
 		<tiles:insert attribute="head" />
 		<title>
 			<fmt:message key="${portal.name}">
@@ -92,7 +93,6 @@
 
 		<div id="migContainer">
 			<tiles:insert attribute='body' /> 
-			<img src="/images/spacer.gif" width="1" height="60" alt="" border="0" class="footerSpacer" style="clear: both;" id="footerSpacer" /> 
 			<tiles:insert attribute="footer" />
 		</div>
 	</body>
