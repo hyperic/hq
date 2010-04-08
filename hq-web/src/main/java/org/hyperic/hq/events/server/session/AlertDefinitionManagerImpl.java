@@ -211,14 +211,16 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
     public AlertDefinitionValue createAlertDefinition(AuthzSubject subj, AlertDefinitionValue a)
         throws AlertDefinitionCreateException, PermissionException {
         if (EventConstants.TYPE_ALERT_DEF_ID.equals(a.getParentId())) {
-            // ...check that user has modify permission on alert definition's resource...
-            alertPermissionManager.canModifyAlertDefinition(subj, new AppdefEntityTypeID(a.getAppdefType(),a.getAppdefId()));
+           
+            // ...check that user has access to resource type alert definitions alert definition's resource...
+            alertPermissionManager.canCreateResourceTypeAlertDefinitionTemplate(subj);
             // Subject permissions should have already been checked when
             // creating
             // the parent (resource type) alert definition.
         } else if (!a.parentIdHasBeenSet()) {
-            // ...check that user has modify permission on alert definition's resource...
-           alertPermissionManager.canModifyAlertDefinition(subj, new AppdefEntityID(a.getAppdefType(), a.getAppdefId()));
+            // ...check that user has create permission on alert definition's resource...
+            alertPermissionManager.canCreateAlertDefinition(subj, new AppdefEntityID(a.getAppdefType(),
+                a.getAppdefId()));
         }
         return createAlertDefinition(a);
     }
@@ -678,8 +680,8 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
                 continue;
             }
 
-            // ...check that user has modify permission on alert definitions...
-            alertPermissionManager.canModifyAlertDefinition(subj, alertdef.getAppdefEntityId());
+            // ...check that user has delete permission on alert definitions...
+            alertPermissionManager.canDeleteAlertDefinition(subj, alertdef.getAppdefEntityId());
             alertAuditFactory.deleteAlert(alertdef, subj);
             deleteAlertDefinition(subj, alertdef, false);
         }

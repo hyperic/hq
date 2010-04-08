@@ -207,8 +207,8 @@ public class AlertManagerImpl implements AlertManager {
      * 
      */
     public int deleteAlerts(AuthzSubject subj, AlertDefinition ad) throws PermissionException {
-        // ...check that user has modify permission on alert definition's resource...
-        alertPermissionManager.canModifyAlertDefinition(subj, ad.getAppdefEntityId());
+        // ...check that user has delete permission on alert definition's resource...
+        alertPermissionManager.canDeleteAlertDefinition(subj, ad.getAppdefEntityId());
         return alertDAO.deleteByAlertDefinition(ad);
     }
 

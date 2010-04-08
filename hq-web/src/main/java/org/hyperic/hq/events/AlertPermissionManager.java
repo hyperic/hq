@@ -10,9 +10,17 @@ public interface AlertPermissionManager {
     
     void canFixAcknowledgeAlerts(AuthzSubject who, AlertDefinitionInterface adi) throws PermissionException;
     
+    void canCreateResourceTypeAlertDefinitionTemplate(AuthzSubject user) throws PermissionException;
+    
+    void canViewResourceTypeAlertDefinitionTemplate(AuthzSubject user) throws PermissionException;
+    
+    void canCreateAlertDefinition(AuthzSubject user, AppdefEntityID entityId) throws PermissionException;
+    
     void canViewAlertDefinition(AuthzSubject user, AppdefEntityID entityId) throws PermissionException;
     
     void canModifyAlertDefinition(AuthzSubject user, AppdefEntityID entityId) throws PermissionException;
+    
+    void canDeleteAlertDefinition(AuthzSubject user, AppdefEntityID entityId) throws PermissionException;
     
     AppdefEntityID getAppdefEntityID(AlertDefinitionInterface adi);
 

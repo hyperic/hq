@@ -145,11 +145,18 @@ public class ViewDefinitionAction
         
         try {
             AuthzSubject subject = authzBoss.getCurrentSubject(sessionID);
-            if (permissionManager.hasAdminPermission(subject.getId())) {
-                request.setAttribute(Constants.IS_SUPER_USER, true);
-            } else {
-                request.setAttribute(Constants.IS_SUPER_USER, false);
+            try {
+                request.setAttribute(Constants.CAN_VIEW_RESOURCE_TYPE_ALERT_TEMPLATE_ATTR, false);
+                // ...is this alert definition spawned from a resource alert template?..
+                if (adv.getParentId() > 0) {
+                    // ...if so, check to see if we have permission to view it...
+                    alertPermissionManager.canViewResourceTypeAlertDefinitionTemplate(subject);
+                    request.setAttribute(Constants.CAN_VIEW_RESOURCE_TYPE_ALERT_TEMPLATE_ATTR, true);
+                }
+            } catch(PermissionException pe) {
+                // ...no permission, keep it moving...
             }
+            
             alertPermissionManager.canModifyAlertDefinition(subject, new AppdefEntityID(adv.getAppdefType(), adv.getAppdefId()));
             request.setAttribute(Constants.CAN_MODIFY_ALERT_ATTR, true);
         } catch(PermissionException e) {

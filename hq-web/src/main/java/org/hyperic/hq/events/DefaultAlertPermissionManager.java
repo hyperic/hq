@@ -13,7 +13,6 @@ import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.server.session.OperationDAO;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.server.session.ResourceTypeDAO;
-import org.hyperic.hq.authz.server.session.RoleManagerImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
@@ -52,23 +51,54 @@ public class DefaultAlertPermissionManager implements AlertPermissionManager {
 
     private  void checkPermission(Integer subjectId, String rtName, Integer instId, String opName) throws PermissionException
     {
-        PermissionManager permMgr = PermissionManagerFactory.getInstance();
-
-        if (!resourceTypes.containsKey(rtName)) {
-            resourceTypes.put(rtName, resourceTypeDAO.findByName(rtName));
+        // ...check permission if user is NOT a super user...
+        if (!PermissionManagerFactory.getInstance().hasAdminPermission(subjectId)) {
+            PermissionManager permMgr = PermissionManagerFactory.getInstance();
+            if (!resourceTypes.containsKey(rtName)) {
+                resourceTypes.put(rtName, resourceTypeDAO.findByName(rtName));
+            }
+            ResourceType resType = (ResourceType) resourceTypes.get(rtName);
+            
+            if (!operations.containsKey(opName)) {
+                operations.put(opName,operationDAO.findByTypeAndName(resType, opName));
+            }
+            Operation operation = (Operation) operations.get(opName);
+            permMgr.check(subjectId, resType.getId(), instId, operation.getId());
+            // Permission Check Succesful
         }
-        ResourceType resType = (ResourceType) resourceTypes.get(rtName);
-
-        if (!operations.containsKey(opName)) {
-            operations.put(opName, operationDAO.findByTypeAndName(resType, opName));
-        }
-        Operation operation = (Operation) operations.get(opName);
-
-        permMgr.check(subjectId, resType.getId(), instId, operation.getId());
-        // Permission Check Succesful
     }
     
     public void canViewResourceTypeAlertDefinitionTemplate(AuthzSubject user)
+    throws PermissionException {
+        // ...right now, you have to be a member of the super user's role to do anything with
+        // resource type alert templates...
+        // TODO ...if this changes in the future, we can make the change here and the rest should just work...
+        if (!PermissionManagerFactory.getInstance().hasAdminPermission(user.getId())) {
+            throw new PermissionException("User must be in Super User role to manage resource type alert definitions");
+        }
+    }
+    
+    public void canModifyResourceTypeAlertDefinitionTemplate(AuthzSubject user)
+    throws PermissionException {
+        // ...right now, you have to be a member of the super user's role to do anything with
+        // resource type alert templates...
+        // TODO ...if this changes in the future, we can make the change here and the rest should just work...
+        if (!PermissionManagerFactory.getInstance().hasAdminPermission(user.getId())) {
+            throw new PermissionException("User must be in Super User role to manage resource type alert definitions");
+        }
+    }
+    
+    public void canCreateResourceTypeAlertDefinitionTemplate(AuthzSubject user)
+    throws PermissionException {
+        // ...right now, you have to be a member of the super user's role to do anything with
+        // resource type alert templates...
+        // TODO ...if this changes in the future, we can make the change here and the rest should just work...
+        if (!PermissionManagerFactory.getInstance().hasAdminPermission(user.getId())) {
+            throw new PermissionException("User must be in Super User role to manage resource type alert definitions");
+        }
+    }
+    
+    public void canDeleteResourceTypeAlertDefinitionTemplate(AuthzSubject user)
     throws PermissionException {
         // ...right now, you have to be a member of the super user's role to do anything with
         // resource type alert templates...
@@ -89,6 +119,24 @@ public class DefaultAlertPermissionManager implements AlertPermissionManager {
     throws PermissionException {
         // ...we need to check the resource associated with the alert definition to determine 
         // if the user can modify the alert definition.  Must have modify permission on resource...
+        checkAlertDefinitionPermission(user, entityId, ResourceOperationsHelper.getUpdateOperation(entityId.getType()));
+    }
+    
+    public void canCreateAlertDefinition(AuthzSubject user, AppdefEntityID entityId)
+    throws PermissionException {
+        // ...we need to check the resource associated with the alert definition to determine 
+        // if the user can modify the alert definition.  Must have modify permission on resource...
+        // TODO ...If we introduce finer grained permission for Alert definition, we can make the change here
+        // and the rest should just work...
+        checkAlertDefinitionPermission(user, entityId, ResourceOperationsHelper.getUpdateOperation(entityId.getType()));
+    }
+
+    public void canDeleteAlertDefinition(AuthzSubject user, AppdefEntityID entityId)
+    throws PermissionException {
+        // ...we need to check the resource associated with the alert definition to determine 
+        // if the user can modify the alert definition.  Must have modify permission on resource...
+        // TODO ...If we introduce finer grained permission for Alert definition, we can make the change here
+        // and the rest should just work...
         checkAlertDefinitionPermission(user, entityId, ResourceOperationsHelper.getUpdateOperation(entityId.getType()));
     }
     
