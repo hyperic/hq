@@ -25,33 +25,27 @@
 
 package org.hyperic.hq.plugin.sybase;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
 import org.hyperic.hq.product.AutoServerDetector;
-import org.hyperic.hq.product.FileServerDetector;
 import org.hyperic.hq.product.PluginException;
-import org.hyperic.hq.product.RegistryServerDetector;
 import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.ServiceResource;
-import org.hyperic.sigar.win32.RegistryKey;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.jdbc.DBUtil;
 
 public class SybaseServerDetector
-    extends ServerDetector
-    implements FileServerDetector,
-               RegistryServerDetector,
-               AutoServerDetector {
+        extends ServerDetector
+    implements AutoServerDetector {
     static final String JDBC_DRIVER        = SybasePluginUtil.JDBC_DRIVER,
                         DEFAULT_URL        = SybasePluginUtil.DEFAULT_URL,
                         PROP_ENGINE        = SybasePluginUtil.PROP_ENGINE,
@@ -59,26 +53,23 @@ public class SybaseServerDetector
                         PROP_DATABASE      = SybasePluginUtil.PROP_DATABASE,
                         PROP_SEGMENT       = SybasePluginUtil.PROP_SEGMENT,
                         PROP_CACHE_NAME    = SybasePluginUtil.PROP_CACHE_NAME,
-                        PROP_CONFIG_OPTION = SybasePluginUtil.PROP_CONFIG_OPTION,
-                        TYPE_SP_MONITOR_CONFIG =
-                                SybasePluginUtil.TYPE_SP_MONITOR_CONFIG,
-                        TYPE_SP_SYSMON = SybasePluginUtil.TYPE_SP_SYSMON,
+            PROP_CONFIG_OPTION = SybasePluginUtil.PROP_CONFIG_OPTION,
+            TYPE_SP_MONITOR_CONFIG =
+            SybasePluginUtil.TYPE_SP_MONITOR_CONFIG,
+            TYPE_SP_SYSMON = SybasePluginUtil.TYPE_SP_SYSMON,
                         TYPE_STORAGE  = SybasePluginUtil.TYPE_STORAGE,
                         PROP_TABLE    = SybaseMeasurementPlugin.PROP_TABLE,
                         PROP_URL      = SybaseMeasurementPlugin.PROP_URL,
                         PROP_USER     = SybaseMeasurementPlugin.PROP_USER,
-                        PROP_PASSWORD = SybaseMeasurementPlugin.PROP_PASSWORD;
-
-    private static Log log = LogFactory.getLog("SybaseServerDetector");
-
+            PROP_PASSWORD = SybaseMeasurementPlugin.PROP_PASSWORD;
     private static String PTQL_QUERY;
     static {
         if (isWin32()) {
-            PTQL_QUERY = 
-                "State.Name.re=sqlsrvr,State.Name.Pne=$1,Args.0.re=.*sqlsrvr.exe$";
+            PTQL_QUERY =
+                    "State.Name.re=sqlsrvr,State.Name.Pne=$1,Args.0.re=.*sqlsrvr.exe$";
         } else {
             PTQL_QUERY =
-                "State.Name.re=dataserver,State.Name.Pne=$1,Args.0.re=.*dataserver$";
+                    "State.Name.re=dataserver,State.Name.Pne=$1,Args.0.re=.*dataserver$";
         }
     }
 
@@ -87,7 +78,7 @@ public class SybaseServerDetector
     // Data Cache discovery query
     private static final String CACHE_QUERY =
         "select name from sysconfigures "+
-        "where lower(comment) = lower('User Defined Cache')";
+            "where lower(comment) = lower('User Defined Cache')";
 
     private static final String ENGINE_QUERY = "select engine from sysengines";
 
@@ -99,67 +90,62 @@ public class SybaseServerDetector
                         VERSION_12_5 = "12.5.x",
                         VERSION_12_0 = "12.x";
 
-    private static List getServerProcessList()
+    private Log log=getLog();
+    public List getServerResources(ConfigResponse config) throws PluginException
     {
+        log.debug("[getServerResources] config=" + config);
         List servers = new ArrayList();
-        long[] pids = getPids(PTQL_QUERY);
-        for (int i=0; i<pids.length; i++)
-        {
-            String exe = getProcExe(pids[i]);
-            if (exe == null) {
-                continue;
+        long pids[] = getPids(PTQL_QUERY);
+        for (int i = 0; i < pids.length; i++) {
+            List found = getServerList(pids[i], config);
+            if (!found.isEmpty()) {
+                servers.addAll(found);
             }
-            File binary = new File(exe);
-            if (!binary.isAbsolute()) {
-                continue;
-            }
-            servers.add(binary.getAbsolutePath());
         }
         return servers;
     }
 
-    public List getServerResources(ConfigResponse platformConfig) 
+    public List getServerList(long pid, ConfigResponse config)
         throws PluginException
     {
+        String[] args = getProcArgs(pid);
+        String path = args[0];
+        log.debug("[getServerList] (" + pid + ") args=" + Arrays.asList(args));
+
+        // Only check the binaries if they match the path we expect
         List servers = new ArrayList();
-        List paths = getServerProcessList();
-        for (int i=0; i<paths.size(); i++)
-        {
-            String dir = (String)paths.get(i);
-            List found = getServerList(dir);
-            if (!found.isEmpty())
-                servers.addAll(found);
-        }   
-        return servers;
-    }
 
-    public List getServerResources(ConfigResponse platformConfig, String path)
-        throws PluginException
-    {
-        // Normal file scan
-        return getServerList(path);
-    }
+        String name = null;
+        String installpath = null;
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].equals("-s")) {
+                name = args[i + 1];
+            } else if (args[i].startsWith("-s")) {
+                name = args[i].substring(2);
+            }
+        }
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].startsWith("-d")) {
+                installpath = args[i].substring(2);
+            }
+        }
 
-    public List getServerResources (ConfigResponse platformConfig, 
-                                    String path, RegistryKey current) 
-        throws PluginException
-    {
-        return getServerList(path);
-    }
+        if ((path.indexOf("dataserver") == -1 && path.indexOf("sqlsrvr") == -1) || (name == null)) {
+            return servers;
+        }
+        if (installpath == null) {
+            installpath = path + " -s" + name;
+        }
 
-    public List getServerList(String path) throws PluginException
-    {
+        String installdir = getParentDir(path, 3);
+
         ConfigResponse productConfig = new ConfigResponse();
         productConfig.setValue(PROP_USER, "sa");
         productConfig.setValue(PROP_PASSWORD, "");
+        productConfig.setValue("serverName", name);
 
-        List servers = new ArrayList();
         String version = "";
 
-        // Only check the binaries if they match the path we expect
-        if (path.indexOf("dataserver") == -1 && path.indexOf("sqlsrvr") == -1) {
-            return servers;
-        }
 
         if (path.indexOf("12_0") != -1) {
             version = VERSION_12_0;
@@ -177,85 +163,83 @@ public class SybaseServerDetector
         if (!version.equals(getTypeInfo().getVersion())) {
             return servers;
         }
-        String installdir = getParentDir(path, 3);
-        ServerResource server = createServerResource(installdir);
+        ServerResource server = createServerResource(installpath);
         // Set custom properties
         ConfigResponse cprop = new ConfigResponse();
         cprop.setValue("version", version);
         server.setCustomProperties(cprop);
         setProductConfig(server, productConfig);
         server.setMeasurementConfig();
-        server.setName(getPlatformName() + " " + SERVER_NAME + " " + version);
+        server.setName(getPlatformName() + " " + SERVER_NAME + " " + version + " " + name);
         servers.add(server);
+
+        log.debug("sysbase.aiid.orginal=" + SysbaseProductPlugin.isOriginalAIID());
+        log.debug("installdir=" + installdir);
+        log.debug("installpath=" + installpath);
+        if (SysbaseProductPlugin.isOriginalAIID()) {
+            server.setIdentifier(installdir);
+        } else {
+            server.setIdentifier(installpath);
+        }
 
         return servers;
     }
 
-    protected List discoverServices(ConfigResponse config) 
-        throws PluginException
+    protected List discoverServices(ConfigResponse config)
+            throws PluginException
     {
+        log.debug("[discoverServices] config=" + config);
+        List rtn = new ArrayList();
+
         String url  = config.getValue(PROP_URL);
         String user = config.getValue(PROP_USER);
         String pass = config.getValue(PROP_PASSWORD);
+        String name = config.getValue("serverName");
 
-        pass = (pass == null) ? "" : pass;
-        pass = (pass.matches("^\\s*$")) ? "" : pass;
+        if (url != null) {
+            pass = (pass == null) ? "" : pass;
+            pass = (pass.matches("^\\s*$")) ? "" : pass;
 
-        try {
-            Class.forName(JDBC_DRIVER);
-        }
-        catch (ClassNotFoundException e) {
-            // No driver.  Should not happen.
+            try {
+                Class.forName(JDBC_DRIVER);
+            }
+            catch (ClassNotFoundException e) {
+                // No driver.  Should not happen.
             String msg = "Unable to load JDBC "+"Driver: "+e.getMessage();
             throw new PluginException(msg);
+            }
+            Connection conn = null;
+            Statement stmt = null;
+            ResultSet rs = null;
+            try
+            {
+                java.util.Properties props = new java.util.Properties();
+                props.put("CHARSET_CONVERTER_CLASS",
+                        "com.sybase.jdbc3.utils.TruncationConverter");
+                props.put("user", user);
+                props.put("password", pass);
+                conn = DriverManager.getConnection(url, props);
+                // Discover all Sybase DB tables.
+                stmt = conn.createStatement();
+                setCacheServices(rtn, stmt);
+                setSPMonitorConfigServices(rtn, stmt);
+                setEngineServices(rtn, stmt);
+                setSpaceAvailServices(rtn, stmt);
+            }
+            catch (SQLException e) {
+                String msg = "Error querying for services: "+e.getMessage();
+                throw new PluginException(msg, e);
+            }
+            finally {
+                DBUtil.closeJDBCObjects(log, conn, stmt, rs);
+            }
         }
-        List rtn = new ArrayList();
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-        try
-        {
-            java.util.Properties props = new java.util.Properties();
-            props.put("CHARSET_CONVERTER_CLASS",
-                "com.sybase.jdbc3.utils.TruncationConverter");
-            props.put("user", user);
-            props.put("password", pass);
-            conn = DriverManager.getConnection(url, props);
-            // Discover all Sybase DB tables.
-            stmt = conn.createStatement();
-            setCacheServices(rtn, stmt);
-            setSPMonitorConfigServices(rtn, stmt);
-            setEngineServices(rtn, stmt);
-            setSpaceAvailServices(rtn, stmt);
-            setProcessService(rtn);
-        }
-        catch (SQLException e) {
-            String msg = "Error querying for services: "+e.getMessage();
-            throw new PluginException(msg, e);
-        }
-        finally {
-            DBUtil.closeJDBCObjects(log, conn, stmt, rs);
-        }
+
         return rtn;
     }
 
-    private void setProcessService(List services) {
-        ServiceResource service = new ServiceResource();
-        service.setType(this, "DataServer Process Metrics");
-        service.setServiceName("DataServer Process Metrics");
-        ConfigResponse productConfig = new ConfigResponse();
-        if (isWin32()) {
-            productConfig.setValue("process.query", "State.Name.eq=sqlsrvr");
-        } else {
-            productConfig.setValue("process.query", "State.Name.eq=dataserver");
-        }
-        service.setProductConfig(productConfig);
-        service.setMeasurementConfig();
-        services.add(service);
-    }
-
     private void setSpaceAvailServices(List services, Statement stmt)
-        throws SQLException
+            throws SQLException
     {
         ResultSet rs = null;
         try
@@ -271,22 +255,28 @@ public class SybaseServerDetector
             for (int i=0; i<databases.size(); i++)
             {
                 String database = (String)databases.get(i);
-                stmt.execute("use "+database);
-                stmt.execute("sp_helpsegment");
-                rs = stmt.getResultSet();
-                while (rs.next())
-                {
-                    String segment = rs.getString("name");
-                    ServiceResource service = new ServiceResource();
-                    service.setType(this, TYPE_STORAGE);
-                    service.setServiceName(database+"."+segment);
-                    ConfigResponse productConfig = new ConfigResponse();
-                    productConfig.setValue(PROP_DATABASE, database);
-                    productConfig.setValue(PROP_SEGMENT, segment);
-                    productConfig.setValue(PROP_PAGESIZE, pagesize);
-                    service.setProductConfig(productConfig);
-                    service.setMeasurementConfig();
-                    services.add(service);
+                try {
+                    stmt.execute("use "+database);
+                    stmt.execute("sp_helpsegment");
+                    rs = stmt.getResultSet();
+                    while (rs.next())
+                    {
+                        String segment = rs.getString("name");
+                        ServiceResource service = new ServiceResource();
+                        service.setType(this, TYPE_STORAGE);
+                        service.setServiceName(database + "." + segment);
+                        ConfigResponse productConfig = new ConfigResponse();
+                        productConfig.setValue(PROP_DATABASE, database);
+                        productConfig.setValue(PROP_SEGMENT, segment);
+                        productConfig.setValue(PROP_PAGESIZE, pagesize);
+                        service.setProductConfig(productConfig);
+                        service.setMeasurementConfig();
+                        services.add(service);
+                    }
+                } catch (SQLException e) {
+                    if (log.isDebugEnabled()) {
+                        log.error("[setSpaceAvailServices] database '" + database + "' > " + e.getMessage(), e);
+                    }
                 }
             }
         }
@@ -329,12 +319,13 @@ public class SybaseServerDetector
             while (rs != null && rs.next())
             {
                 String engineNum =
-                    rs.getString(engine_col).trim().replaceAll("\\s+", "_");
+                        rs.getString(engine_col).trim().replaceAll("\\s+", "_");
                 ServiceResource service = new ServiceResource();
                 service.setType(this, TYPE_SP_SYSMON+"Engine");
                 service.setServiceName("engine"+engineNum);
                 ConfigResponse productConfig = new ConfigResponse();
                 productConfig.setValue(PROP_ENGINE, "engine"+engineNum);
+                productConfig.setValue("id", engineNum);
                 service.setProductConfig(productConfig);
                 service.setMeasurementConfig();
                 services.add(service);
