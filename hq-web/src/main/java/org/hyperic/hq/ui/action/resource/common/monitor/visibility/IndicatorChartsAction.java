@@ -56,18 +56,25 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
+import org.hyperic.hq.bizapp.shared.uibeans.MetricDisplayConstants;
 import org.hyperic.hq.bizapp.shared.uibeans.MetricDisplaySummary;
+import org.hyperic.hq.bizapp.shared.uibeans.MetricDisplayValue;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
+import org.hyperic.hq.measurement.shared.HighLowMetricValue;
+import org.hyperic.hq.measurement.shared.TemplateManager;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.MonitorUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.StringUtil;
+import org.hyperic.util.TimeUtil;
 import org.hyperic.util.config.InvalidOptionException;
+import org.hyperic.util.pager.PageControl;
+import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -80,16 +87,18 @@ public class IndicatorChartsAction
 
     private MeasurementBoss measurementBoss;
     private AuthzBoss authzBoss;
+    private TemplateManager templateManager;
 
     private static final String PREF_DELIMITER = Constants.DASHBOARD_DELIMITER;
 
     private static final String DEFAULT_VIEW = "resource.common.monitor.visibility.defaultview";
 
     @Autowired
-    public IndicatorChartsAction(MeasurementBoss measurementBoss, AuthzBoss authzBoss) {
+    public IndicatorChartsAction(MeasurementBoss measurementBoss, AuthzBoss authzBoss, TemplateManager templateManager) {
         super();
         this.measurementBoss = measurementBoss;
         this.authzBoss = authzBoss;
+        this.templateManager = templateManager;
     }
 
     protected ActionForward dispatchMethod(ActionMapping mapping, ActionForm form, HttpServletRequest request,
@@ -102,31 +111,34 @@ public class IndicatorChartsAction
         return super.dispatchMethod(mapping, form, request, response, name);
     }
 
-    private List getMetrics(HttpServletRequest request, AppdefEntityID aeid, AppdefEntityTypeID ctype,
-                            List<Integer> tids) throws ServletException, SessionTimeoutException,
-        SessionNotFoundException, AppdefEntityNotFoundException, PermissionException, AppdefCompatException,
-        RemoteException {
-        ArrayList<MetricDisplaySummary> metrics = new ArrayList<MetricDisplaySummary>();
+    private List<IndicatorDisplaySummary> getMetrics(HttpServletRequest request, AppdefEntityID aeid, AppdefEntityTypeID ctype, List<Integer> tids)
+        throws ServletException, SessionTimeoutException, SessionNotFoundException, AppdefEntityNotFoundException, PermissionException, AppdefCompatException, RemoteException {
+        final boolean debug = log.isDebugEnabled();
+    
+        List<IndicatorDisplaySummary> result = new ArrayList<IndicatorDisplaySummary>();
         int sessionId = RequestUtils.getSessionId(request).intValue();
 
-        // Get metric range defaults
-        WebUser user = RequestUtils.getWebUser(request);
-        Map<String, Object> pref = user.getMetricRangePreference(true);
-        long begin = ((Long) pref.get(MonitorUtils.BEGIN)).longValue();
-        long end = ((Long) pref.get(MonitorUtils.END)).longValue();
 
         // See if there are entities passed in
         AppdefEntityID[] eids = (AppdefEntityID[]) request.getSession().getAttribute(aeid.getAppdefKey() + ".entities");
+        List<AppdefEntityID> entList = null;
+        WebUser user = RequestUtils.getWebUser(request);
+        Map<String, Object> pref = user.getMetricRangePreference(true);
+        long begin = (Long) pref.get(MonitorUtils.BEGIN);
+        long end = (Long) pref.get(MonitorUtils.END);
+        long interval = TimeUtil.getInterval(begin, end, Constants.DEFAULT_CHART_POINTS);
+        PageControl pc = new PageControl(0, Constants.DEFAULT_CHART_POINTS);
 
-        ArrayList<AppdefEntityID> entList = null;
+        
         if (eids != null) {
             entList = new ArrayList<AppdefEntityID>(Arrays.asList(eids));
         }
 
         for (Integer tid : tids) {
-
+            MeasurementTemplate template = templateManager.getTemplate(tid);
+            List<HighLowMetricValue> data = new ArrayList<HighLowMetricValue>();
             try {
-                MetricDisplaySummary mds;
+               
 
                 if (entList != null) {
                     if (ctype == null && !aeid.isGroup()) {
@@ -134,32 +146,198 @@ public class IndicatorChartsAction
                         entList.add(aeid);
                     }
 
-                    mds = measurementBoss.findMetric(sessionId, entList, tid, begin, end);
+                    data = measurementBoss.findMeasurementData(sessionId, tid, entList, begin, end, interval, true, pc);
                 } else {
-                    mds = measurementBoss.findMetric(sessionId, aeid, ctype, tid, begin, end);
+                    if (ctype != null) {
+                       data = measurementBoss.findMeasurementData(sessionId, tid, aeid, ctype, begin, end, interval, true, pc);
+                     } else {
+                       data = measurementBoss.findMeasurementData(sessionId, tid, aeid, begin, end, interval, true, pc);
+                     }
                 }
+                MetricDisplaySummary mds = getSummarizedMetricData(template, getAggregateData(template, data), begin, end, (entList == null) ? 0 : entList.size());
                 if (mds != null) {
                     IndicatorDisplaySummary ids = new IndicatorDisplaySummary(mds);
                     ids.setEntityId(aeid);
                     ids.setChildType(ctype);
-                    metrics.add(ids);
+                    result.add(ids);
                 }
             } catch (MeasurementNotFoundException e) {
                 // Probably deleted, just log it
-                log.debug("Metric (" + tid + ") for " + aeid + " ctype " + ctype + " not found");
+                if (debug) log.debug("Metric (" + tid + ") for " + aeid + " ctype " + ctype + " not found");
             } catch (Exception e) {
                 // No matter what happens, continue
                 log.error("Unknown exception", e);
             }
         }
 
-        return metrics;
+        return result;
+    }
+    
+    /**
+     * TODO: The logic here is similar to DataManagerEJBImpl.getAggData().
+     * Need to consolidate the code.
+     * 
+     */
+    private double[] getAggregateData(MeasurementTemplate template, List<HighLowMetricValue> metricData) {
+        final boolean debug = log.isDebugEnabled();
+        
+        if (metricData.size() == 0) {
+            return null;
+        }
+        
+        double high  = Double.MIN_VALUE;
+        double low   = Double.MAX_VALUE;
+        double total = 0;
+        Double lastVal = null;
+        int count = 0;
+        long last = Long.MIN_VALUE;
+        
+        for (Iterator<HighLowMetricValue> it = metricData.iterator(); it.hasNext();) {
+            final HighLowMetricValue mv = it.next();
+            final double currentLowValue = mv.getLowValue();
+            final double currentHighValue = mv.getHighValue();
+            final double currentValue = mv.getValue();
+            final int currentCount = mv.getCount();
+            final long currentTimestamp = mv.getTimestamp();
+            
+            if (!Double.isNaN(currentLowValue) && !Double.isInfinite(currentLowValue)) {
+                low = Math.min(mv.getLowValue(), low);
+            }
+            
+            if (!Double.isNaN(currentHighValue) && !Double.isInfinite(currentHighValue)) {
+                high = Math.max(mv.getHighValue(), high);
+            }
+            
+            if (mv.getTimestamp() > last && !Double.isNaN(currentValue) && !Double.isInfinite(currentValue)) {
+                lastVal = currentValue;
+            }
+                
+            count += currentCount;
+            
+            if (!Double.isNaN(currentValue) && !Double.isInfinite(currentValue)) {
+                total += currentValue * currentCount;
+            }
+            
+            if (debug) {
+                log.debug("Measurement=" + template.getName() 
+                            + ", Current {Low=" + currentLowValue 
+                            + ", High=" + currentHighValue 
+                            + ", Value=" + currentValue 
+                            + ", Count=" + currentCount 
+                            + ", Timestamp=" + currentTimestamp
+                            + "}, Summary {Low=" + low
+                            + ", High=" + high
+                            + ", Total=" + total
+                            + ", Count=" + count
+                            + "}");
+            }
+        }
+        
+        // This should only happen if every value in the array is NaN/Infinity...
+        // ...if so, set low to zero
+        if (low == Double.MAX_VALUE) {
+            low = 0;
+        }
+
+        if (high == Double.MIN_VALUE) {
+            high = 0;
+        }
+
+        // ...low should never be greater than high...
+        assert(low <= high);
+        
+        double avg = 0.0d;
+        
+        // calculate average if count is more than 0...
+        if (count > 0 && !(low == 0 && high == 0)) {
+            avg = (double)total/count;
+        }
+
+        /* TODO Ensure this is true, have seen some odd cases where the data makes these assertion fail
+        // ...low should never be greater than avg...
+        assert(low <= avg);
+        
+        // ...avg should never be greater than high...
+        assert(avg <= high);
+        */
+        
+        final double[] data = new double[MeasurementConstants.IND_LAST_TIME + 1];
+        
+        data[MeasurementConstants.IND_MIN] = low;
+        data[MeasurementConstants.IND_AVG] = avg;
+        data[MeasurementConstants.IND_MAX] = high;
+        data[MeasurementConstants.IND_CFG_COUNT] = count;
+        
+        if (lastVal != null) {
+            data[MeasurementConstants.IND_LAST_TIME] = lastVal;
+        }
+        
+        if (debug) {
+            log.debug("Measurement=" + template.getName() 
+                          + ", Last {Value=" + lastVal
+                          + "}, Summary {Avg=" + avg
+                          + ", Low=" + low
+                          + ", High=" + high
+                          + ", Total=" + total
+                          + ", Count=" + count
+                          + "}");
+        }
+        
+        return data;    
+    }
+    
+    private MetricDisplaySummary getSummarizedMetricData(MeasurementTemplate template, double[] data, long begin, long end, int totalConfigured) {
+        MetricDisplaySummary summary = new MetricDisplaySummary();
+        
+        // Set the time range
+        summary.setBeginTimeFrame(begin);
+        summary.setEndTimeFrame(end);
+            
+        // Set the template info
+        summary.setLabel(template.getName());
+        summary.setTemplateId(template.getId());
+        summary.setTemplateCat(template.getCategory().getId());
+        summary.setCategory(template.getCategory().getName());
+        summary.setUnits(template.getUnits());
+        summary.setCollectionType(new Integer(template.getCollectionType()));
+        summary.setDesignated(Boolean.valueOf(template.isDesignate()));
+        summary.setMetricSource(template.getMonitorableType().getName());
+        
+        // Not collecting, no interval
+        summary.setCollecting(false);
+        
+        if (data != null) {
+            // Set the data values
+            summary.setMetric(MetricDisplayConstants.MIN_KEY, new MetricDisplayValue(data[MeasurementConstants.IND_MIN]));
+            summary.setMetric(MetricDisplayConstants.AVERAGE_KEY, new MetricDisplayValue(data[MeasurementConstants.IND_AVG]));
+            summary.setMetric(MetricDisplayConstants.MAX_KEY, new MetricDisplayValue(data[MeasurementConstants.IND_MAX]));
+            
+            // Groups get sums, not last value
+            if (totalConfigured == 1 || template.getCollectionType() == MeasurementConstants.COLL_TYPE_STATIC) {
+                summary.setMetric(MetricDisplayConstants.LAST_KEY, new MetricDisplayValue(data[MeasurementConstants.IND_LAST_TIME]));
+            } else {
+                // Availability does not need to be summed
+                if (template.isAvailability()) {
+                    summary.setMetric(MetricDisplayConstants.LAST_KEY, new MetricDisplayValue(data[MeasurementConstants.IND_AVG]));
+                } else {
+                    summary.setMetric(MetricDisplayConstants.LAST_KEY, new MetricDisplayValue(data[MeasurementConstants.IND_AVG] * data[MeasurementConstants.IND_CFG_COUNT]));
+                }
+            }
+
+            // Number configured
+            summary.setAvailUp((int) Math.round(data[MeasurementConstants.IND_CFG_COUNT]));
+            summary.setAvailUnknown(new Integer(totalConfigured));
+        }
+        
+        return summary;
     }
 
-    private List<MetricDisplaySummary> getViewMetrics(HttpServletRequest request, AppdefEntityID aeid,
+
+    private List<IndicatorDisplaySummary> getViewMetrics(HttpServletRequest request, AppdefEntityID aeid,
                                                       AppdefEntityTypeID ctype, String viewName)
         throws SessionTimeoutException, SessionNotFoundException, AppdefEntityNotFoundException, PermissionException,
         AppdefCompatException, RemoteException, ServletException {
+        final boolean debug = log.isDebugEnabled();
         MessageResources res = getResources(request);
         int sessionId = RequestUtils.getSessionId(request).intValue();
 
@@ -172,12 +350,13 @@ public class IndicatorChartsAction
 
             // The metrics have to come from the preferences
             List<String> metrics = StringUtil.explode(metricsStr, PREF_DELIMITER);
+          
 
-            ArrayList<MetricDisplaySummary> summaries = new ArrayList<MetricDisplaySummary>();
+            List<IndicatorDisplaySummary> summaries = new ArrayList<IndicatorDisplaySummary>();
             for (Iterator<String> it = metrics.iterator(); it.hasNext();) {
                 IndicatorDisplaySummary ids = new IndicatorDisplaySummary((String) it.next());
 
-                ArrayList<Integer> tids = new ArrayList<Integer>();
+                List<Integer> tids = new ArrayList<Integer>();
                 tids.add(ids.getTemplateId());
 
                 summaries.addAll(this.getMetrics(request, ids.getEntityId(), ids.getChildType(), tids));
@@ -211,7 +390,7 @@ public class IndicatorChartsAction
                     }
                 } catch (MeasurementNotFoundException me) {
                     // No utilization metric
-                    log.debug("Designated metrics not found for autogroup " + ctype);
+                    if (debug) log.debug("Designated metrics not found for autogroup " + ctype);
                 }
 
                 return this.getMetrics(request, aeid, ctype, tids);
@@ -219,31 +398,22 @@ public class IndicatorChartsAction
         }
 
         // No metrics
-        return new ArrayList<MetricDisplaySummary>();
+        return new ArrayList<IndicatorDisplaySummary>();
     }
 
-    private String generateSessionKey(HttpServletRequest request) {
-        return generateUniqueKey(request) + ".view";
-    }
+    
 
     private String generateUniqueKey(HttpServletRequest request) {
-        AppdefEntityID aeid = RequestUtils.getEntityId(request);
-
-        try {
-            // See if there's a ctype
-            AppdefEntityTypeID ctype = RequestUtils.getChildResourceTypeId(request);
-            return aeid.getAppdefKey() + "." + ctype.getAppdefKey();
-        } catch (ParameterNotFoundException e) {
-            // No problem, this is not an autogroup
-            return aeid.getAppdefKey();
-        }
+        String sessionKey = RequestUtils.generateSessionKey(request);
+        // -5 is the ".view" bit
+        return sessionKey.substring(0, sessionKey.length() - 5);
     }
 
     private String generatePrefsMetricsKey(String key, String view) {
         return key + "." + view;
     }
 
-    private void storeMetrics(HttpServletRequest request, List<MetricDisplaySummary> metrics, IndicatorViewsForm form) {
+    private void storeMetrics(HttpServletRequest request, List<IndicatorDisplaySummary> metrics, IndicatorViewsForm form) {
         request.setAttribute(Constants.CHART_DATA_KEYS, metrics);
 
         String[] tmplIds = new String[metrics.size()];
@@ -255,13 +425,13 @@ public class IndicatorChartsAction
         form.setMetric(tmplIds);
 
         // Set the metrics in the session
-        String key = this.generateSessionKey(request);
+        String key = RequestUtils.generateSessionKey(request);
         request.getSession().setAttribute(key, metrics);
     }
 
     private List retrieveMetrics(HttpServletRequest request, IndicatorViewsForm form) throws SessionNotFoundException,
         SessionTimeoutException, AppdefEntityNotFoundException, PermissionException, RemoteException, ServletException {
-        String key = this.generateSessionKey(request);
+        String key = RequestUtils.generateSessionKey(request);
         return (List) request.getSession().getAttribute(key);
     }
 
@@ -272,13 +442,15 @@ public class IndicatorChartsAction
 
     public ActionForward fresh(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                HttpServletResponse response) throws Exception {
+        final boolean debug = log.isDebugEnabled();
+        StopWatch watch = new StopWatch();
         AppdefEntityID aeid = RequestUtils.getEntityId(request);
 
         IndicatorViewsForm ivf = (IndicatorViewsForm) form;
         String viewName = ivf.getView();
 
         // Look up the metrics based on view name
-        List<MetricDisplaySummary> metrics;
+        List<IndicatorDisplaySummary> metrics;
         try {
             // See if there's a ctype
             AppdefEntityTypeID childTypeId = RequestUtils.getChildResourceTypeId(request);
@@ -289,7 +461,7 @@ public class IndicatorChartsAction
         }
 
         this.storeMetrics(request, metrics, ivf);
-
+        if (debug) log.debug("IndicatorChartsAction.fresh: " + watch);
         return mapping.findForward(Constants.SUCCESS_URL);
     }
 
@@ -589,6 +761,15 @@ public class IndicatorChartsAction
 
         private AppdefEntityID entityId = null;
         private AppdefEntityTypeID childType = null;
+        private List<HighLowMetricValue> highLowMetrics = new ArrayList<HighLowMetricValue>();
+        
+        /** Constructor using a summary with data
+         * @param summary the actual data
+         */
+        public IndicatorDisplaySummary(MetricDisplaySummary summary, List<HighLowMetricValue> data) {
+           this(summary);
+           this.highLowMetrics = data;
+        }
 
         /**
          * Constructor using a summary with data
@@ -622,8 +803,9 @@ public class IndicatorChartsAction
             this.entityId = new AppdefEntityID(st.nextToken());
             this.setTemplateId(new Integer(st.nextToken()));
 
-            if (autogroup)
+            if (autogroup) {
                 this.childType = new AppdefEntityTypeID(st.nextToken());
+            }
         }
 
         public AppdefEntityTypeID getChildType() {
@@ -648,6 +830,10 @@ public class IndicatorChartsAction
 
         public int getUnitScale() {
             return UnitsConvert.getScaleForUnit(getUnits());
+        }
+        
+        public List<HighLowMetricValue> getHighLowMetrics() {
+            return highLowMetrics;
         }
 
         public String toString() {
