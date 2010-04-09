@@ -36,6 +36,8 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.X509TrustManager;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.sigar.NetConnection;
@@ -46,6 +48,8 @@ import org.hyperic.util.security.BogusTrustManager;
 
 public abstract class NetServicesCollector extends Collector {
 
+    private static Log log = LogFactory.getLog(NetServicesCollector.class);
+    
     private int port = -1;
     private int defaultPort, defaultSSLPort;
     private boolean isSSL, enableNetstat;
@@ -124,7 +128,10 @@ public abstract class NetServicesCollector extends Collector {
                 throw new PluginException("Missing " + PROP_USERNAME);
             }
             if (this.pass == null) {
-                throw new PluginException("Missing " + PROP_PASSWORD);
+                if (log.isDebugEnabled()){
+                    log.debug("Password was null, setting to empty string.");
+                }
+                this.pass = "";
             }
         }
         
@@ -189,6 +196,10 @@ public abstract class NetServicesCollector extends Collector {
         return this.user;
     }
 
+    /**
+     * @return The password specified. If no password was specified in the 
+     * properties, an empty string is returned.
+     */
     public String getPassword() {
         return this.pass;
     }
