@@ -36,6 +36,8 @@ import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.Service;
+import org.hyperic.hq.appdef.shared.AgentManager;
+import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
@@ -80,12 +82,14 @@ public class ReportProcessorImpl implements ReportProcessor {
     private SRNManager srnManager;
     private ReportStatsCollector reportStatsCollector;
     private MeasurementInserterHolder measurementInserterManager;
+    private AgentManager agentManager;
 
     @Autowired
     public ReportProcessorImpl(MeasurementManager measurementManager, MeasurementProcessor measurementProcessor,
                                PlatformManager platformManager, ServerManager serverManager,
                                ServiceManager serviceManager, SRNManager srnManager,
-                               ReportStatsCollector reportStatsCollector, MeasurementInserterHolder measurementInserterManager) {
+                               ReportStatsCollector reportStatsCollector, MeasurementInserterHolder measurementInserterManager,
+                               AgentManager agentManager) {
         this.measurementManager = measurementManager;
         this.measurementProcessor = measurementProcessor;
         this.platformManager = platformManager;
@@ -94,6 +98,7 @@ public class ReportProcessorImpl implements ReportProcessor {
         this.srnManager = srnManager;
         this.reportStatsCollector = reportStatsCollector;
         this.measurementInserterManager = measurementInserterManager;
+        this.agentManager = agentManager;
     }
 
     private void addPoint(List<DataPoint> points, List<DataPoint> priorityPts, Measurement m, MetricValue[] vals) {
@@ -210,10 +215,28 @@ public class ReportProcessorImpl implements ReportProcessor {
             }
             
             if (debug) watch.markTimeBegin("resMatchesAgent");
+            // TODO reosurceMatchesAgent() and the call to getAgent() can be
+            // consolidated, the agent match can be checked by getting the agent
+            // for the instanceID from the resource
             if (!resourceMatchesAgent(res, agentToken)) {
-                log.warn("measurement (id=" + m.getId() + ") was sent to the " + "HQ server from agent (agentToken=" +
-                         agentToken + ")" + " but resource (id=" + res.getId() + ") is not associated " +
-                         " with that agent.  Dropping measurement.");
+                String ipAddr = "<Unknown IP address>";
+                String portString = "<Unknown port>";
+                try {
+                    Agent agt = agentManager.getAgent(agentToken);
+                    ipAddr = agt.getAddress();
+                    portString = agt.getPort().toString();
+                } catch (AgentNotFoundException e) {
+                    // leave values as default
+                    log.debug("Error trying to construct string for WARN message below", e);
+                }
+                             
+                log.warn("measurement (id=" + m.getId() + ", name=" +
+                          m.getTemplate().getName() + ") was sent to the " +
+                          "HQ server from agent (agentToken=" + agentToken + ", name=" +
+                          ipAddr + ", port=" + portString + ")" +
+                          " but resource (id=" + res.getId() + ", name=" +
+                          res.getName() + ") is not associated " +
+                          " with that agent.  Dropping measurement.");
                 if (debug) watch.markTimeEnd("resMatchesAgent");
                 continue;
             }
