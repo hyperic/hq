@@ -28,19 +28,20 @@ package org.hyperic.hq.product.ant;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-
-import org.hyperic.hq.product.ProductPluginManager;
-import org.hyperic.hq.product.pluginxml.PluginData;
-import org.hyperic.hq.product.pluginxml.PluginParser;
-import org.hyperic.util.StringUtil;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Date;
 
 import org.apache.tools.ant.BuildException;
-
 import org.apache.tools.ant.taskdefs.Jar;
 import org.apache.tools.ant.taskdefs.Manifest;
 import org.apache.tools.ant.taskdefs.ManifestException;
 import org.apache.tools.ant.taskdefs.Manifest.Attribute;
 import org.apache.tools.ant.types.FileSet;
+import org.hyperic.hq.product.ProductPluginManager;
+import org.hyperic.hq.product.pluginxml.PluginData;
+import org.hyperic.hq.product.pluginxml.PluginParser;
+import org.hyperic.util.StringUtil;
 
 public class PluginJar
     extends Jar {
@@ -190,20 +191,7 @@ public class PluginJar
         classes.setIncludes(classesMatch + "/**/*.class");
         addFileset(classes);
 
-        String mainClass = getMainClass();
-        if (mainClass != null) {
-            if (mainClass.indexOf(".") == -1) {
-                mainClass = packageName + "." + mainClass;
-            }
-            Manifest manifest = new Manifest();
-            try {
-                addConfiguredManifest(manifest);
-                Attribute attr = new Attribute("Main-Class", mainClass);
-                manifest.addConfiguredAttribute(attr);
-            } catch (ManifestException e) {
-                throw new BuildException(e.getMessage(), e);
-            }
-        }
+        createManifest(packageName);
 
         super.execute();
 
@@ -224,5 +212,48 @@ public class PluginJar
             validatePluginXML(pdk, plugin);
         }
 
+    }
+    
+    private void createManifest(String packageName) {
+        Manifest manifest = new Manifest();
+        try {
+            addConfiguredManifest(manifest);
+            manifest.getMainSection().addConfiguredAttribute(new Attribute("Build-Owner", getProperty("user.name",
+                                                                                                   "Unknown")));
+            String hostName = "Unknown";
+            try {
+                hostName = InetAddress.getLocalHost().getHostName();
+            } catch (UnknownHostException e) {
+                //ignore
+            }
+            manifest.getMainSection().addConfiguredAttribute(new Attribute("Build-Host", hostName));
+            
+            if (getProperty("release.comment", null) != null) {
+                manifest.getMainSection()
+                        .addConfiguredAttribute(new Attribute("Build-Type", getProperty("release.comment", "Unknown")));
+            }
+            manifest.getMainSection().addConfiguredAttribute(new Attribute("Build-Date", new Date().toString()));
+            manifest.getMainSection().addConfiguredAttribute(new Attribute("Specification-Title", "HQU Plugin"));
+            manifest.getMainSection().addConfiguredAttribute(new Attribute("Specification-Vendor", "VMware Inc."));
+            manifest.getMainSection().addConfiguredAttribute(new Attribute("Specification-Version",
+                                                                           getProperty("version", "Unknown") + "-" +
+                                                                               getProperty("build", "Unknown")));
+            manifest.getMainSection().addConfiguredAttribute(new Attribute("Implementation-Title", getName()));
+            manifest.getMainSection().addConfiguredAttribute(new Attribute("Implementation-Version",
+                                                                           getProperty("version", "Unknown") + "-" +
+                                                                           getProperty("build", "Unknown")));
+            manifest.getMainSection().addConfiguredAttribute(new Attribute("Implementation-Vendor", "VMware Inc."));
+        
+            String mainClass = getMainClass();
+            if (mainClass != null) {
+                if (mainClass.indexOf(".") == -1) {
+                    mainClass = packageName + "." + mainClass;
+                }
+                Attribute mainClassAttr = new Attribute("Main-Class", mainClass);
+                manifest.addConfiguredAttribute(mainClassAttr);
+            }
+        } catch (ManifestException e) {
+            throw new BuildException(e.getMessage(), e);
+        }
     }
 }
