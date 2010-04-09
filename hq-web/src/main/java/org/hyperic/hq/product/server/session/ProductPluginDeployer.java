@@ -271,7 +271,7 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
         if (propFile.canRead()) {
             log.info("Loaded custom properties from: " + propFile);
         }
-        
+
         if (this.pluginDir != null) {
             ProductPluginManager.setPdkPluginsDir(pluginDir.getAbsolutePath());
         }
@@ -311,7 +311,7 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
         }
     }
 
-    private void deployHqu(String plugin, URL pluginFile) throws Exception {
+    private void deployHqu(String plugin, URL pluginFile, boolean initializing) throws Exception {
         URLClassLoader pluginClassloader = new URLClassLoader(new URL[] { pluginFile });
         final String prefix = HQU + "/";
         URL hqu = pluginClassloader.getResource(prefix);
@@ -324,13 +324,11 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
 
         unpackJar(pluginFile, destDir, prefix);
 
-        if (renditServer.getSysDir() != null) { // rendit.isReady() ?
-            if (exists) {
-                // update ourselves to avoid having to delete,sleep,unpack
-                renditServer.removePluginDir(destDir.getName());
-                renditServer.addPluginDir(destDir);
-            } // else Rendit watcher will deploy the new plugin
-        }
+        if (!(initializing) && exists) {
+            // update ourselves to avoid having to delete,sleep,unpack
+            renditServer.removePluginDir(destDir.getName());
+            renditServer.addPluginDir(destDir);
+        } // else Rendit watcher will deploy the new plugin
     }
 
     private List<String> loadPlugins() throws Exception {
@@ -338,7 +336,7 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
         File[] plugins = pluginDir.listFiles();
         List<String> pluginNames = new ArrayList<String>();
         for (File pluginFile : plugins) {
-            String plugin = loadPlugin(pluginFile);
+            String plugin = loadPlugin(pluginFile, true);
             if (plugin != null) {
                 pluginNames.add(plugin);
             }
@@ -351,17 +349,17 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
         productPluginManager.removePluginJar(pluginFile.toString());
     }
 
-    private String loadPlugin(File pluginFile) throws Exception {
+    private String loadPlugin(File pluginFile, boolean initializing) throws Exception {
         String plugin = registerPluginJar(pluginFile.toString());
         if (plugin != null) {
-            deployHqu(plugin, pluginFile.toURI().toURL());
+            deployHqu(plugin, pluginFile.toURI().toURL(), initializing);
             return plugin;
         }
         return null;
     }
 
     private void loadAndDeployPlugin(File pluginFile) throws Exception {
-        String pluginName = loadPlugin(pluginFile);
+        String pluginName = loadPlugin(pluginFile, false);
         if (pluginName != null) {
             log.info("Deploying plugin: " + pluginName);
             deployPlugin(pluginName);
@@ -390,7 +388,8 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
                     loadAndDeployPlugin(fileEvent.getFileDetails().getFile());
                 } else if (FileOperation.DELETED.equals(fileEvent.getOperation())) {
                     undeployPlugin(fileEvent.getFileDetails().getFile());
-                } else if (FileOperation.UPDATED.equals(fileEvent.getOperation()) && !(pluginDir.equals(fileEvent.getFileDetails().getFile()))) {
+                } else if (FileOperation.UPDATED.equals(fileEvent.getOperation()) &&
+                           !(pluginDir.equals(fileEvent.getFileDetails().getFile()))) {
                     undeployPlugin(fileEvent.getFileDetails().getFile());
                     loadAndDeployPlugin(fileEvent.getFileDetails().getFile());
                 }

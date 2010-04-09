@@ -66,8 +66,6 @@ public class TomcatEngineControllerTest {
                                                  "-Dcatalina.home=" + catalinaHome,
                                                  "-Djava.io.tmpdir=" + catalinaBase + "/temp",
                                                  "-Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager",
-                                                 "-Djava.util.logging.config.file=" + catalinaBase +
-                                                     "/conf/logging.properties",
                                                  "org.apache.catalina.startup.Bootstrap",
                                                  "start" }), EasyMock.eq(serverHome), EasyMock
                             .eq(true), EasyMock.eq(-1))).andReturn(0);

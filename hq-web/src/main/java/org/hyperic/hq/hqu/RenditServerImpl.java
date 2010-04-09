@@ -56,18 +56,13 @@ public class RenditServerImpl implements RenditServer {
     private final Log log = LogFactory.getLog(RenditServerImpl.class);
     private final Object cfgLock = new Object();
     private Map<String, PluginWrapper>  plugins = new HashMap<String, PluginWrapper>();
-    private File sysDir;
     private UIPluginManager uiPluginManager;
    
     private ClassLoader getUseLoader() {
         return RenditServerImpl.class.getClassLoader();
     }
     
-    public File getSysDir() {
-        synchronized (cfgLock) {
-            return sysDir;
-        }
-    }
+   
     
     private PluginWrapper getPlugin(String name) {
         PluginWrapper res;
@@ -82,20 +77,7 @@ public class RenditServerImpl implements RenditServer {
         return res;
     }
     
-    /**
-     * Set the system directory which contains groovy support classes.
-     * Since this object is a singleton, we rely on someone to call this
-     * before they start adding plugins.
-     */
-    public void setSysDir(File sysDir) {
-        synchronized (cfgLock) {
-            if (!plugins.isEmpty()) {
-                throw new IllegalStateException("Unable to set sysdir after " + 
-                                                "plugins have been loaded");
-            }
-            this.sysDir = sysDir;
-        }
-    }
+   
     
     @Transactional
     public void addPluginDir(File path) 
@@ -138,7 +120,7 @@ public class RenditServerImpl implements RenditServer {
     private PluginWrapper loadPluginInternal(final File path)
         throws PluginLoadException
     {
-        final PluginWrapper plugin = new PluginWrapper(path, getSysDir(), 
+        final PluginWrapper plugin = new PluginWrapper(path, 
                                                        getUseLoader());
         
         try {
