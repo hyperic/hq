@@ -29,8 +29,8 @@ import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.config.ConfigResponse;
 
 public class WebSphereProcess {
-    private String installRoot;
-    private String serverRoot;
+    String installRoot;
+    String serverRoot;
     private String node;
     private String server;
     private String cell;
