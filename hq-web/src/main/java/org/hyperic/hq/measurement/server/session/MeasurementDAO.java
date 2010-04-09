@@ -364,14 +364,12 @@ public class MeasurementDAO
             return Collections.emptyList();
         }
         List<Resource> resList = new ArrayList<Resource>(resources);
-        // sort to give the query cache best chance of reuse
-        Collections.sort(resList);
+       
         List<Measurement> rtn = new ArrayList<Measurement>(resList.size());
         final String sql = new StringBuilder().append("select m from Measurement m ").append(
             "join m.template t ").append("where m.resource in (:resources) AND ").append(
             ALIAS_CLAUSE).toString();
-        final Query query = getSession().createQuery(sql).setCacheable(true).setCacheRegion(
-            "Measurement.findAvailMeasurements");
+        final Query query = getSession().createQuery(sql);
 
         // should be a unique result if only one resource is being examined
         if (resources.size() == 1) {
