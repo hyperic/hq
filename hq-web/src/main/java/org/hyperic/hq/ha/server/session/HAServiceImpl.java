@@ -93,7 +93,7 @@ public class HAServiceImpl implements HAService {
             notifyAgents.setTargetMethod("notifyAgents");
             try {
                 notifyAgents.prepare();
-                this.notifyAgentsTask = scheduler.scheduleAtFixedRate(notifyAgents, 300000);
+                this.notifyAgentsTask = scheduler.scheduleAtFixedRate(notifyAgents, 1800000);
             } catch (Exception e) {
                 log.error("Unable to schedule agent AI scan.", e);
             }

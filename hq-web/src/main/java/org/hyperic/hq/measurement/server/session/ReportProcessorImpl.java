@@ -49,17 +49,15 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.measurement.MeasurementConstants;
-import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.data.DSNList;
 import org.hyperic.hq.measurement.data.MeasurementReport;
 import org.hyperic.hq.measurement.data.ValueList;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
-import org.hyperic.hq.measurement.shared.MeasurementProcessor;
 import org.hyperic.hq.measurement.shared.ReportProcessor;
 import org.hyperic.hq.measurement.shared.SRNManager;
 import org.hyperic.hq.product.MetricValue;
-import org.hyperic.util.StringUtil;
+import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -75,7 +73,6 @@ public class ReportProcessorImpl implements ReportProcessor {
     private static final long PRIORITY_OFFSET = MINUTE * 3;
 
     private MeasurementManager measurementManager;
-    private MeasurementProcessor measurementProcessor;
     private PlatformManager platformManager;
     private ServerManager serverManager;
     private ServiceManager serviceManager;
@@ -83,15 +80,15 @@ public class ReportProcessorImpl implements ReportProcessor {
     private ReportStatsCollector reportStatsCollector;
     private MeasurementInserterHolder measurementInserterManager;
     private AgentManager agentManager;
+    private ZeventEnqueuer zEventManager;
 
     @Autowired
-    public ReportProcessorImpl(MeasurementManager measurementManager, MeasurementProcessor measurementProcessor,
+    public ReportProcessorImpl(MeasurementManager measurementManager,
                                PlatformManager platformManager, ServerManager serverManager,
                                ServiceManager serviceManager, SRNManager srnManager,
                                ReportStatsCollector reportStatsCollector, MeasurementInserterHolder measurementInserterManager,
-                               AgentManager agentManager) {
+                               AgentManager agentManager, ZeventEnqueuer zEventManager) {
         this.measurementManager = measurementManager;
-        this.measurementProcessor = measurementProcessor;
         this.platformManager = platformManager;
         this.serverManager = serverManager;
         this.serviceManager = serviceManager;
@@ -99,6 +96,7 @@ public class ReportProcessorImpl implements ReportProcessor {
         this.reportStatsCollector = reportStatsCollector;
         this.measurementInserterManager = measurementInserterManager;
         this.agentManager = agentManager;
+        this.zEventManager = zEventManager;
     }
 
     private void addPoint(List<DataPoint> points, List<DataPoint> priorityPts, Measurement m, MetricValue[] vals) {
@@ -272,16 +270,9 @@ public class ReportProcessorImpl implements ReportProcessor {
         Collection<AppdefEntityID> nonEntities = srnManager.reportAgentSRNs(report.getSRNList());
         if (debug) watch.markTimeEnd("reportAgentSRNs");
 
-        if (report.getAgentToken() != null && nonEntities.size() > 0) {
+        if (report.getAgentToken() != null && !nonEntities.isEmpty()) {
             // Better tell the agent to stop reporting non-existent entities
-            AppdefEntityID[] entIds = (AppdefEntityID[]) nonEntities.toArray(new AppdefEntityID[nonEntities.size()]);
-            try {
-                if (debug) watch.markTimeBegin("unschedule");
-                measurementProcessor.unschedule(report.getAgentToken(), entIds);
-                if (debug) watch.markTimeEnd("unschedule");
-            } catch (MeasurementUnscheduleException e) {
-                log.error("Cannot unschedule entities: " + StringUtil.arrayToString(entIds));
-            }
+            zEventManager.enqueueEventAfterCommit(new AgentUnscheduleZevent(nonEntities, agentToken));
         }
     }
 

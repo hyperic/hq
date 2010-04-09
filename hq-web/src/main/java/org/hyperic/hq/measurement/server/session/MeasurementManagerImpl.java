@@ -47,6 +47,7 @@ import org.hyperic.hq.appdef.server.session.ApplicationDAO;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
+import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceZevent;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.Service;
@@ -299,9 +300,6 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         permissionManager.checkModifyPermission(subject.getId(), id);
 
         List<Measurement> dmList = createMeasurements(id, templates, intervals, props);
-        List<AppdefEntityID> eids = Collections.singletonList(id);
-        AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(eids);
-        ZeventManager.getInstance().enqueueEventAfterCommit(event);
         return dmList;
     }
 
@@ -704,6 +702,20 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                                                         String cat) {
         return measurementDAO.findDesignatedByCategoryForGroup(g, cat);
     }
+    
+    /**
+     * @param aeids {@link List} of {@link AppdefEntityID}s
+     * @return {@link Map} of {@link Integer} representing resourceId to
+     * {@link List} of {@link Measurement}s
+     * 
+     */
+    public Map<Integer,List<Measurement>> findEnabledMeasurements(Collection<AppdefEntityID> aeids) {
+        final List<Resource> resources = new ArrayList<Resource>(aeids.size());
+        for (AppdefEntityID aeid : aeids) {
+            resources.add(resourceManager.findResource(aeid));
+        }
+        return measurementDAO.findEnabledByResources(resources);
+    }
 
     /**
      * Get an Availabilty Measurement by AppdefEntityId
@@ -979,9 +991,9 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         }
 
         // Update the agent schedule
-        // TODO: Really? just publish the same event many times?
-        for (int i = 0; i < aeids.length; i++) {
-            AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(Arrays.asList(aeids));
+        List<AppdefEntityID> toSchedule = Arrays.asList(aeids);
+        if (!toSchedule.isEmpty()) {
+            AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(toSchedule);
             ZeventManager.getInstance().enqueueEventAfterCommit(event);
         }
     }
@@ -1148,11 +1160,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             
             enqueueZeventsForMeasScheduleCollectionDisabled(mids);
         }
-        try {         
-            getMeasurementProcessor().unschedule(agent.getAgentToken(), ids);
-        } catch (MeasurementUnscheduleException e) {
-            log.error("Unable to disable measurements", e);          
-        }
+        ZeventManager.getInstance().enqueueEventAfterCommit(new AgentUnscheduleZevent(Arrays.asList(ids), agent.getAgentToken()));
     }
 
 
@@ -1322,6 +1330,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
     public void handleCreateRefreshEvents(List<ResourceZevent> events) {
 
         List<AppdefEntityID> eids = new ArrayList<AppdefEntityID>();
+        final boolean debug = log.isDebugEnabled();
 
         for (ResourceZevent z : events) {
             AuthzSubject subject = authzSubjectManager.findSubjectById(z.getAuthzSubjectId());
@@ -1330,15 +1339,13 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             if (r == null || r.isInAsyncDeleteState()) {
                 continue;
             }
-            boolean isCreate, isRefresh;
-
-            isCreate = z instanceof ResourceCreatedZevent;
-            isRefresh = z instanceof ResourceRefreshZevent;
+            boolean isCreate = z instanceof ResourceCreatedZevent;
+            boolean isRefresh =  z instanceof ResourceRefreshZevent || z instanceof ResourceUpdatedZevent;
 
             try {
                 // Handle reschedules for when agents are updated.
                 if (isRefresh) {
-                    log.info("Refreshing metric schedule for [" + id + "]");
+                    if(debug) log.debug("Refreshing metric schedule for [" + id + "]");
                     eids.add(id);
                     continue;
                 }
@@ -1348,8 +1355,11 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                 ConfigResponse c = configManager.getMergedConfigResponse(subject,
                     ProductPlugin.TYPE_MEASUREMENT, id, true);
                 if (getEnabledMetricsCount(subject, id) == 0) {
-                    log.info("Enabling default metrics for [" + id + "]");
-                    enableDefaultMetrics(subject, id, c, true);
+                    if (debug) log.debug("Enabling default metrics for [" + id + "]");
+                    List metrics = enableDefaultMetrics(subject, id, c, true);
+                    if (!metrics.isEmpty()) {
+                        eids.add(id);
+                    }
                 } else {
                     // Update the configuration
                     updateMeasurements(subject, id, c);
@@ -1370,7 +1380,10 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                 log.warn("Unable to enable default metrics for [" + id + "]", e);
             }
         }
-        getAgentScheduleSynchronizer().scheduleBuffered(eids);
+        if (!eids.isEmpty()) {
+            AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(eids);
+            ZeventManager.getInstance().enqueueEventAfterCommit(event);
+        }
     }
 
     private String[] getTemplatesToCheck(AuthzSubject s, AppdefEntityID id)
@@ -1473,10 +1486,12 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
      * Enable the default metrics for a resource. This should only be called by
      * the {@link MeasurementEnabler}. If you want the behavior of this method,
      * use the {@link MeasurementEnabler}
+     *  @return {@link List} of {@link Measurement}s
      */
-    private void enableDefaultMetrics(AuthzSubject subj, AppdefEntityID id, ConfigResponse config,
+    private List<Measurement> enableDefaultMetrics(AuthzSubject subj, AppdefEntityID id, ConfigResponse config,
                                       boolean verify) throws AppdefEntityNotFoundException,
         PermissionException {
+        List<Measurement> rtn = new ArrayList<Measurement>(0);
         String mtype;
 
         try {
@@ -1487,14 +1502,14 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                 } catch (AppdefEntityNotFoundException e) {
                     // Non existent resource, we'll clean it up in
                     // removeOrphanedMeasurements()
-                    return;
+                    return rtn;
                 }
             } else {
-                return;
+                return rtn;
             }
         } catch (Exception e) {
             log.error("Unable to enable default metrics for [" + id + "]", e);
-            return;
+            return rtn;
         }
 
         // Check the configuration
@@ -1505,17 +1520,17 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                 log.warn("Error turning on default metrics, configuration (" + config + ") " +
                          "couldn't be validated", e);
                 configManager.setValidationError(subj, id, e.getMessage());
-                return;
+                return rtn;
             } catch (Exception e) {
                 log.warn("Error turning on default metrics, " + "error in validation", e);
                 configManager.setValidationError(subj, id, e.getMessage());
-                return;
+                return rtn;
             }
         }
 
         // Enable the metrics
         try {
-            createDefaultMeasurements(subj, id, mtype, config);
+            rtn = createDefaultMeasurements(subj, id, mtype, config);
             configManager.clearValidationError(subj, id);
 
             // Publish the event so other people can do things when the
@@ -1524,6 +1539,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         } catch (Exception e) {
             log.warn("Unable to enable default metrics for id=" + id + ": " + e.getMessage(), e);
         }
+        return rtn;
     }
 
     /**

@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.agent.AgentConnectionException;
@@ -56,6 +57,13 @@ public interface AgentManager {
      * Get a count of the agents which are actually used (e. have platforms)
      */
     public int getAgentCountUsed();
+    
+    /**
+     * @param aeids {@link Collection} of {@link AppdefEntityID}s
+     * @return Map of {@link Agent} to {@link Collection} of ${AppdefEntityID}s
+     *
+     */
+    public Map<Integer,Collection<AppdefEntityID>> getAgentMap(Collection<AppdefEntityID> aeids);
 
     /**
      * Create a new Agent object. The type of the agent that is created is the

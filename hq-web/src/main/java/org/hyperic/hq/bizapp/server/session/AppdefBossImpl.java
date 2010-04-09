@@ -3086,12 +3086,16 @@ public class AppdefBossImpl implements AppdefBoss {
         Service svc = null;
         try {
             existingConfig = configManager.getConfigResponse(entityId);
-
-            if (configManager.configureResponse(subject, existingConfig, entityId, ConfigResponse.safeEncode(allConfigs
+            boolean wasUpdated = configManager.configureResponse(subject, existingConfig, entityId, ConfigResponse.safeEncode(allConfigs
                 .getProductConfig()), ConfigResponse.safeEncode(allConfigs.getMetricConfig()), ConfigResponse
                 .safeEncode(allConfigs.getControlConfig()), ConfigResponse.safeEncode(allConfigs.getRtConfig()),
-                Boolean.TRUE, !doValidation, force) != null) {
+                Boolean.TRUE, force);
+            if (wasUpdated) {
                 ids.add(entityId);
+            }
+            if (wasUpdated && !doValidation) {
+                Resource r = resourceManager.findResource(entityId);
+                resourceManager.resourceHierarchyUpdated(subject, Collections.singletonList(r));
             }
 
             if (doValidation) {

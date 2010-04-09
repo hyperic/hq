@@ -221,7 +221,45 @@ public class MeasurementDAO
         }
         return count;
     }
-
+    
+    /**
+     * @param {@link Collection} of {@link Resource}s
+     * @return {@link Map} of {@link Integer} representing resourceId to
+     * {@link List} of {@link Measurement}s
+     */
+    @SuppressWarnings("unchecked")
+    public Map<Integer,List<Measurement>> findEnabledByResources(List<Resource> resources) {
+        if (resources == null || resources.size() == 0) {
+            return new HashMap<Integer,List<Measurement>>(0,1);
+        }
+        final String sql = new StringBuilder(256)
+            .append("select m from Measurement m ")
+            .append("where m.enabled = '1' and ")
+            .append("m.resource in (:rids) ")
+            .toString();
+        final Map<Integer,List<Measurement>> rtn = new HashMap<Integer,List<Measurement>>();
+        final Query query = getSession().createQuery(sql);
+        final int size = resources.size();
+        for (int i=0; i<size; i+=BATCH_SIZE) {
+            int end = Math.min(size, i+BATCH_SIZE);
+            final List<Resource> sublist = resources.subList(i, end);
+            final List<Measurement> resultset = query.setParameterList("rids", sublist).list();
+            for (final Measurement m : resultset ) {
+                final Resource r = m.getResource();
+                if (r == null || r.isInAsyncDeleteState()) {
+                    continue;
+                }
+                List<Measurement> tmp = rtn.get(r.getId());
+                if (tmp == null) {
+                    tmp = new ArrayList<Measurement>();
+                    rtn.put(r.getId(), tmp);
+                }
+                tmp.add(m);
+            }
+        }
+        return rtn;
+    }
+ 
     @SuppressWarnings("unchecked")
     public List<Measurement> findEnabledByResource(Resource resource) {
         if (resource == null || resource.isInAsyncDeleteState()) {

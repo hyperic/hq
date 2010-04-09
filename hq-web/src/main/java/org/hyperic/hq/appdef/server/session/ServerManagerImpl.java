@@ -335,8 +335,12 @@ public class ServerManagerImpl implements ServerManager {
             ResourceCreatedZevent zevent = new ResourceCreatedZevent(subject, s.getEntityId());
             zeventManager.enqueueEventAfterCommit(zevent);
         } else {
-            configManager.configureResponse(subject, cr, s.getEntityId(), productResponse, measResponse,
-                controlResponse, rtResponse, null, true, true);
+            boolean wasUpdated = configManager.configureResponse(subject, cr, s.getEntityId(),
+                productResponse, measResponse,controlResponse, rtResponse,
+                null, true);
+            if (wasUpdated) {
+                resourceManager.resourceHierarchyUpdated(subject, Collections.singletonList(s.getResource()));
+            }
 
             // Scrub the services
             Service[] services = (Service[]) s.getServices().toArray(new Service[0]);

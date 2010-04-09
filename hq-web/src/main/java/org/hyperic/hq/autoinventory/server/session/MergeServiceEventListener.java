@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 public class MergeServiceEventListener implements ZeventListener<MergeServiceReportZevent> {
 
     // Number of services which we attempt to merge in a single tx
-    private static final int BATCH_SIZE = 30;
+    private static final int BATCH_SIZE = 1000;
 
     private ZeventEnqueuer zeventManager;
 
@@ -43,25 +43,18 @@ public class MergeServiceEventListener implements ZeventListener<MergeServiceRep
     }
 
     public void processEvents(List<MergeServiceReportZevent> events) {
-        events = new ArrayList<MergeServiceReportZevent>(events); // copy b/c
-                                                                  // transfer
-                                                                  // method will
-                                                                  // remove from
-                                                                  // list
-        List<MergeServiceReportZevent> batch = new ArrayList<MergeServiceReportZevent>(BATCH_SIZE);
-        List<ServiceMergeInfo> sInfos = new ArrayList<ServiceMergeInfo>(BATCH_SIZE);
-
-        while (!events.isEmpty()) {
-            batch.clear();
-            sInfos.clear();
-            CollectionUtil.transfer(events, batch, BATCH_SIZE);
-
-            for (MergeServiceReportZevent zv : batch) {
-                ServiceMergeInfo sInfo = zv.getMergeInfo();
-                sInfos.add(sInfo);
-            }
+        final List<ServiceMergeInfo> sInfos = new ArrayList<ServiceMergeInfo>(BATCH_SIZE);
+        final int size = events.size();
+        for (int i=0; i<size; i+=BATCH_SIZE) {
+            int end = Math.min(size, i+BATCH_SIZE);
+            final List<MergeServiceReportZevent> batch = events.subList(i, end);
 
             try {
+                sInfos.clear();
+                for (MergeServiceReportZevent zv : batch ) {
+                    ServiceMergeInfo sInfo = zv.getMergeInfo();
+                    sInfos.add(sInfo);
+                }
                 serviceMerger.mergeServices(sInfos);
             } catch (Exception e) {
                 log.warn("Error merging services", e);

@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2010], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -27,57 +27,62 @@ package org.hyperic.hq.measurement.server.session;
 
 import java.util.Collection;
 
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.hq.zevents.ZeventPayload;
 import org.hyperic.hq.zevents.ZeventSourceId;
 
-/**
- * This event is used within the measurement subsytem by the 
- * {@link AgentScheduleSynchronizer} to queue syncing agent's schedules.
- */
-public class AgentScheduleSyncZevent extends Zevent {
+public class AgentUnscheduleZevent extends Zevent {
 
     static {
-        ZeventManager.getInstance()
-            .registerEventClass(AgentScheduleSyncZevent.class);
+        ZeventManager.getInstance().registerEventClass(AgentUnscheduleZevent.class);
     }
 
-    private static class AgentScheduleSyncZeventSource
+    private static class AgentUnscheduleZeventSource
         implements ZeventSourceId
     {
         private static final long serialVersionUID = 4776356140503377728L;
 
-        public AgentScheduleSyncZeventSource() {
+        public AgentUnscheduleZeventSource() {
         }
     }
 
-    private static class AgentScheduleSyncZeventPayload
+    private static class AgentUnscheduleZeventPayload
         implements ZeventPayload
     {
         // List<AppdefEntityID>
         private final Collection _entityIDs;
+        private final String _agentToken;
 
-        public AgentScheduleSyncZeventPayload(Collection ids) {
+        public AgentUnscheduleZeventPayload(Collection ids, String agentToken) {
+            _agentToken = agentToken;
             _entityIDs = ids;
         }
 
         public Collection getEntityIds() {
             return _entityIDs;
         }
+
+        public String getAgentToken() {
+            return _agentToken;
+        }
     }
 
-    public Collection<AppdefEntityID> getEntityIds() {
-        return ((AgentScheduleSyncZeventPayload)getPayload()).getEntityIds();
+    public String getAgentToken() {
+        return ((AgentUnscheduleZeventPayload)getPayload()).getAgentToken();
+    }
+
+    public Collection getEntityIds() {
+        return ((AgentUnscheduleZeventPayload)getPayload()).getEntityIds();
     }
 
     /**
      * @param aeids {@link Collection} of {@link AppdefEntityID}
+     * @param schedule or unschedule metrics
      */
-    public AgentScheduleSyncZevent(Collection aeids) {
-        super(new AgentScheduleSyncZeventSource(),
-              new AgentScheduleSyncZeventPayload(aeids));
+    public AgentUnscheduleZevent(Collection aeids, String agentToken) {
+        super(new AgentUnscheduleZeventSource(),
+              new AgentUnscheduleZeventPayload(aeids, agentToken));
     }
 
 }

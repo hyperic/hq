@@ -1,7 +1,9 @@
 package org.hyperic.hq.autoinventory.server.session;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
@@ -16,13 +18,21 @@ import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.AIServiceValue;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServiceManager;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.autoinventory.server.session.RuntimeReportProcessor.ServiceMergeInfo;
 import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.measurement.server.session.AgentScheduleSyncZevent;
+import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -48,6 +58,10 @@ public class ServiceMergerImpl implements ServiceMerger {
     private ServerManager serverManager;
     private ConfigManager configManager;
     private AgentManager agentManager;
+    private ResourceManager resourceManager;
+    private ZeventEnqueuer zEventManager;
+    private AuthzSubjectManager authzSubjectManager;
+    
 
     /**
      * Mapping of (String)agentToken onto (Integer) of # of events in the zevent
@@ -58,19 +72,29 @@ public class ServiceMergerImpl implements ServiceMerger {
     @Autowired
     public ServiceMergerImpl(CPropManager cPropManager, ServiceManager serviceManager,
                              AgentReportStatusDAO agentReportStatusDao, ServerManager serverManager,
-                             ConfigManager configManager, AgentManager agentManager) {
+                             ConfigManager configManager, AgentManager agentManager, ResourceManager resourceManager, 
+                             ZeventEnqueuer zEventManager, AuthzSubjectManager authzSubjectManager) {
         this.cPropManager = cPropManager;
         this.serviceManager = serviceManager;
         this.agentReportStatusDao = agentReportStatusDao;
         this.serverManager = serverManager;
         this.configManager = configManager;
         this.agentManager = agentManager;
+        this.resourceManager = resourceManager;
+        this.zEventManager = zEventManager;
+        this.authzSubjectManager = authzSubjectManager;
     }
 
     @Transactional
     public void mergeServices(List<ServiceMergeInfo> mergeInfos) throws PermissionException, ApplicationException {
         try {
+            final Set<Resource> updatedResources = new HashSet<Resource>();
+            final Set<AppdefEntityID> toSchedule = new HashSet<AppdefEntityID>();
+            AuthzSubject subj = authzSubjectManager.getOverlordPojo();
             for (ServiceMergeInfo sInfo : mergeInfos) {
+                // this is hacky, but mergeInfos will never be called with multiple subjects
+                // and hence the method probably shouldn't be written the way it is anyway.
+                subj = sInfo.subject;
                 AIServiceValue aiservice = sInfo.aiservice;
                 Server server = serverManager.getServerById(sInfo.serverId);
 
@@ -122,15 +146,26 @@ public class ServiceMergerImpl implements ServiceMerger {
                 }
 
                 // CONFIGURE SERVICE
-                configManager.configureResponse(sInfo.subject, service.getConfigResponse(), service.getEntityId(),
+                final boolean wasUpdated = configManager.configureResponse(sInfo.subject, service.getConfigResponse(), service.getEntityId(),
                     aiservice.getProductConfig(), aiservice.getMeasurementConfig(), aiservice.getControlConfig(),
-                    aiservice.getResponseTimeConfig(), null, update, false);
+                    aiservice.getResponseTimeConfig(), null, false);
+                if (update && wasUpdated) {
+                    updatedResources.add(service.getResource());
+                } else {
+                    // make sure the service's schedule is up to date on the agent side
+                    toSchedule.add(AppdefUtil.newAppdefEntityId(service.getResource()));
+                }
 
                 // SET CUSTOM PROPERTIES FOR SERVICE
                 if (aiservice.getCustomProperties() != null) {
                     int typeId = service.getServiceType().getId().intValue();
                     cPropManager.setConfigResponse(service.getEntityId(), typeId, aiservice.getCustomProperties());
                 }
+            }
+            if (!toSchedule.isEmpty()) {
+                resourceManager.resourceHierarchyUpdated(subj, updatedResources);
+                zEventManager.enqueueEventAfterCommit(
+                    new AgentScheduleSyncZevent(toSchedule));
             }
         } finally {
             for (ServiceMergeInfo sInfo : mergeInfos) {

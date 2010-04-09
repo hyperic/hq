@@ -202,4 +202,8 @@ public class Measurement extends PersistedObject
         result = 37*result + (_template != null ? _template.hashCode(): 0);
         return result;
     }
+    
+    public String toString() {
+        return getId().toString();
+    }
 }

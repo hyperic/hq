@@ -19,7 +19,6 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
@@ -28,6 +27,7 @@ import org.hyperic.hq.measurement.ext.MeasurementEvent;
 import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
 import org.hyperic.hq.measurement.server.session.CollectionSummary;
 import org.hyperic.hq.measurement.server.session.Measurement;
+import org.hyperic.hq.measurement.server.session.MeasurementEnabler;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 
@@ -156,6 +156,14 @@ public interface MeasurementManager {
      */
     public List<Measurement> findEnabledMeasurements(AuthzSubject subject, AppdefEntityID id,
                                                      String cat);
+    
+    /**
+     * @param aeids {@link List} of {@link AppdefEntityID}s
+     * @return {@link Map} of {@link Integer} representing resourceId to
+     * {@link List} of {@link Measurement}s
+     * 
+     */
+    public Map<Integer,List<Measurement>> findEnabledMeasurements(Collection<AppdefEntityID> aeids);
 
     /**
      * Look up a List of designated Measurements for an entity

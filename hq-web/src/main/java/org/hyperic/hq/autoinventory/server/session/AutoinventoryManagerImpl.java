@@ -25,10 +25,6 @@
 
 package org.hyperic.hq.autoinventory.server.session;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -662,29 +658,7 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager,
         approvePlatformDevice(subject, aiPlatform);
         checkAgentAssignment(subject, agentToken, aiPlatform);
     }
-    
-    private void serializeObject(ScanStateCore stateCore) {
-      String className = stateCore.getClass().getName();
-      ObjectOutputStream oop = null;
-      OutputStream os = null;
-      try {
-          os = new FileOutputStream("statecore.out");
-          oop = new ObjectOutputStream(os);
-          oop.writeObject(stateCore);
-      } catch (IOException e) {
-          log.error(e,e);
-      } finally {
-          try {
-              oop.flush();
-              oop.close();
-              os.close();
-          } catch (IOException e) {
-              log.error(e,e);
-          }
-      }
-      System.out.println("Done serializing: " + className);
-    }
-    
+       
     private void addAIServersToAIPlatform(ScanStateCore stateCore, ScanState state,AIPlatformValue aiPlatform)
         throws AutoinventoryException {
 
