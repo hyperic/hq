@@ -1440,8 +1440,9 @@ public class ServiceManagerImpl implements ServiceManager {
             resGroupMan.removeGroupsCompatibleWith(proto);
 
             // Remove all services
-            for (Service svcLocal : serviceType.getServices()) {
-                removeService(overlord, svcLocal);
+            Service[] services = serviceType.getServices().toArray(new Service[serviceType.getServices().size()]);
+            for (int i = 0; i < services.length; i++) {
+                removeService(overlord, services[i]);
             }
         } catch (PermissionException e) {
             assert false : "Overlord should not run into PermissionException";
@@ -1510,6 +1511,9 @@ public class ServiceManagerImpl implements ServiceManager {
         if (server != null) {
             server.getServices().remove(service);
         }
+        
+        // Remove from ServiceType collection
+        service.getServiceType().getServices().remove(service);
 
         final ConfigResponseDB config = service.getConfigResponse();
 
