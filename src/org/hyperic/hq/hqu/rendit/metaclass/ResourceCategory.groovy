@@ -215,7 +215,11 @@ class ResourceCategory {
      */
     static void runAction(Resource r, AuthzSubject user, String action,
                           String arguments) {
-         cMan.doAction(user, r.entityId, action, arguments)
+         if (r.entityId.isGroup()) {
+         	cMan.doGroupAction(user, r.entityId, action, arguments, null)
+         } else {
+         	cMan.doAction(user, r.entityId, action, arguments)
+         }
     }
 
     static boolean isGroup(Resource r) {
