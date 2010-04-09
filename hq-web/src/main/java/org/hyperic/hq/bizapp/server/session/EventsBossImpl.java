@@ -104,6 +104,7 @@ import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.AlertSortField;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
+import org.hyperic.hq.events.server.session.TriggersCreatedZevent;
 import org.hyperic.hq.events.shared.ActionManager;
 import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
@@ -450,6 +451,9 @@ public class EventsBossImpl implements EventsBoss, ApplicationListener<Applicati
                                                                   AlertDefinitionValue adval)
         throws AlertDefinitionCreateException, PermissionException, InvalidOptionException,
         InvalidOptionValueException, SessionNotFoundException, SessionTimeoutException {
+        
+        final boolean debug = log.isDebugEnabled();
+        StopWatch watch = new StopWatch();
         AuthzSubject subject = sessionManager.getSubject(sessionID);
 
         // Verify that there are some conditions to evaluate
@@ -468,9 +472,13 @@ public class EventsBossImpl implements EventsBoss, ApplicationListener<Applicati
         setMetricAlertAction(adval);
 
         // Now create the alert definition
+        if (debug) watch.markTimeBegin("createParentAlertDefinition");
         parent = alertDefinitionManager.createAlertDefinition(subject, adval);
+        if (debug) watch.markTimeEnd("createParentAlertDefinition");
 
         adval.setParentId(parent.getId());
+        
+        if (debug) watch.markTimeBegin("lookupResources");
 
         // Lookup resources
         Integer[] entIds;
@@ -489,11 +497,15 @@ public class EventsBossImpl implements EventsBoss, ApplicationListener<Applicati
                                                  aetid.getType());
         }
 
-        ArrayList<RegisteredTriggerValue> triggers = new ArrayList<RegisteredTriggerValue>();
+        if (debug) watch.markTimeEnd("lookupResources");
+        List zevents = new ArrayList(entIds.length);
+        if (debug) watch.markTimeBegin("createChildAlertDefinitions[" + entIds.length + "]");
+         
 
         // Iterate through to create the appropriate triggers and alertdef
 
         for (int ei = 0; ei < entIds.length; ei++) {
+            StopWatch childWatch = new StopWatch();
             AppdefEntityID id = new AppdefEntityID(aetid.getType(), entIds[ei]);
 
             // Reset the value object with this entity ID
@@ -515,14 +527,34 @@ public class EventsBossImpl implements EventsBoss, ApplicationListener<Applicati
             }
 
             // Create the triggers
-            createTriggers(subject, adval);
-            triggers.addAll(Arrays.asList(adval.getTriggers()));
+            if (debug) childWatch.markTimeBegin("createTriggers");
+            // HHQ-3423: Do not add the TriggersCreatedListener here.
+            // Add it at the end after all the triggers are created.
+            registeredTriggerManager.createTriggers(subject, adval, false);
+            if (debug) childWatch.markTimeEnd("createTriggers");
 
             // Make sure the actions have the proper parentId
             cloneParentActions(id, adval, parent.getActions());
 
             // Now create the alert definition
-            alertDefinitionManager.createAlertDefinition(subject, adval);
+            if (debug) childWatch.markTimeBegin("createAlertDefinition");
+            AlertDefinitionValue newAdval = alertDefinitionManager.createAlertDefinition(subject, adval);           
+            if (debug) {
+                childWatch.markTimeEnd("createAlertDefinition");
+                log.debug("createChildAlertDefinition[" + id + "]: time=" + childWatch);
+            }
+            zevents.add(new TriggersCreatedZevent(newAdval.getId()));
+        }
+        
+        if (debug) watch.markTimeEnd("createChildAlertDefinitions[" + entIds.length + "]");
+        // HHQ-3423: Add the TransactionListener after all the triggers are created
+        if (!zevents.isEmpty()) {
+            if (debug) watch.markTimeBegin("addTriggersCreatedTxListener");
+            registeredTriggerManager.addTriggersCreatedTxListener(zevents);
+            if (debug) watch.markTimeEnd("addTriggersCreatedTxListener");
+        }
+        if (debug) {           
+            log.debug("createResourceTypeAlertDefinition: time=" + watch);
         }
 
         return parent;
@@ -757,6 +789,8 @@ public class EventsBossImpl implements EventsBoss, ApplicationListener<Applicati
         throws TriggerCreateException, InvalidOptionException, InvalidOptionValueException,
         AlertConditionCreateException, ActionCreateException, SessionNotFoundException,
         SessionTimeoutException {
+        final boolean debug = log.isDebugEnabled();
+        StopWatch watch = new StopWatch();
         AuthzSubject subject = sessionManager.getSubject(sessionID);
 
         // Verify that there are some conditions to evaluate
@@ -764,19 +798,31 @@ public class EventsBossImpl implements EventsBoss, ApplicationListener<Applicati
             throw new InvalidOptionValueException("Conditions cannot be null or empty");
         }
 
-        ArrayList<RegisteredTriggerValue> triggers = new ArrayList<RegisteredTriggerValue>();
+       
         if (EventConstants.TYPE_ALERT_DEF_ID.equals(adval.getParentId()) ||
             adval.getAppdefType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
             // A little more work to do for group and type alert definition
             // Create a measurement AlertLogAction if necessary
             setMetricAlertAction(adval);
+            if (debug) watch.markTimeBegin("updateParentAlertDefinition");
             adval = alertDefinitionManager.updateAlertDefinition(adval);
+            if (debug) {
+                watch.markTimeEnd("updateParentAlertDefinition");
+                watch.markTimeBegin("findAlertDefinitionChildren");
+            }
 
             List<AlertDefinitionValue> children = alertDefinitionManager
                 .findAlertDefinitionChildren(adval.getId());
+            
+            if (debug) {
+                watch.markTimeEnd("findAlertDefinitionChildren");
+                watch.markTimeBegin("updateChildAlertDefinitions[" + children.size() + "]");
+            }
+           
+            List zevents = new ArrayList(children.size());
 
             for (AlertDefinitionValue child : children) {
-
+                StopWatch childWatch = new StopWatch();
                 AppdefEntityID id = new AppdefEntityID(child.getAppdefType(), child.getAppdefId());
 
                 // Now add parent's conditions, actions, and new triggers
@@ -799,13 +845,31 @@ public class EventsBossImpl implements EventsBoss, ApplicationListener<Applicati
                 child.setControlFiltered(adval.getControlFiltered());
 
                 // Triggers are deleted by the manager
+                if (debug) childWatch.markTimeBegin("deleteAlertDefinitionTriggers");
                 registeredTriggerManager.deleteTriggers(child.getId());
+                if (debug) childWatch.markTimeEnd("deleteAlertDefinitionTriggers");
                 child.removeAllTriggers();
-                createTriggers(subject, child);
-                triggers.addAll(Arrays.asList(adval.getTriggers()));
+                if (debug) childWatch.markTimeBegin("createTriggers");
+                // HHQ-3423: Do not add the TransactionListener here.
+                // Add it at the end after all the triggers are created.
+                registeredTriggerManager.createTriggers(subject, child, false);
+                if (debug) childWatch.markTimeEnd("createTriggers");
 
                 // Now update the alert definition
-                alertDefinitionManager.updateAlertDefinition(child);
+                if (debug) childWatch.markTimeBegin("updateAlertDefinition");
+                AlertDefinitionValue updatedChild = alertDefinitionManager.updateAlertDefinition(child);               
+                if (debug) {
+                        childWatch.markTimeEnd("updateAlertDefinition");
+                        log.debug("updateChildAlertDefinition[" + id + "]: time=" + childWatch);
+                }
+                zevents.add(new TriggersCreatedZevent(updatedChild.getId()));
+            }
+            if (debug) watch.markTimeEnd("updateChildAlertDefinitions[" + children.size() + "]");
+            // HHQ-3423: Add the TransactionListener after all the triggers are created
+            if (!zevents.isEmpty()) {
+                if (debug) watch.markTimeBegin("addTriggersCreatedTxListener");
+                registeredTriggerManager.addTriggersCreatedTxListener(zevents);
+                if (debug) watch.markTimeEnd("addTriggersCreatedTxListener");
             }
         } else {
             // First, get rid of the current triggers
@@ -814,13 +878,16 @@ public class EventsBossImpl implements EventsBoss, ApplicationListener<Applicati
 
             // Now create the new triggers
             createTriggers(subject, adval);
-            triggers.addAll(Arrays.asList(adval.getTriggers()));
+           
             
             // Create a measurement AlertLogAction if necessary
             setMetricAlertAction(adval);
 
             // Now update the alert definition
             alertDefinitionManager.updateAlertDefinition(adval);
+        }
+        if (debug) {           
+            log.debug("updateAlertDefinition: time=" + watch);
         }
     }
 

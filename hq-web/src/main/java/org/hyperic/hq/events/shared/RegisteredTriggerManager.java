@@ -57,6 +57,24 @@ public interface RegisteredTriggerManager {
      */
     public void createTriggers(AuthzSubject subject, AlertDefinitionValue alertdef) throws TriggerCreateException,
         InvalidOptionException, InvalidOptionValueException;
+    
+    /**
+     * Create new triggers
+     *
+     * @param subject The user creating the trigger
+     * @param alertdef The alert definition value object
+     * @param addTxListener Indicates whether a TriggersCreatedListener should be added.
+     *                      The default value is true. HHQ-3423: To improve performance when
+     *                      creating resource type alert definitions, this should be set to false.
+     *                      If false, it is the caller's responsibility to call
+     *                      addTriggersCreatedListener() to ensure triggers are registered.
+     *  
+     * 
+     *
+     * 
+     */
+    void createTriggers(AuthzSubject subject, AlertDefinitionValue alertdef, boolean addTxListener) 
+    throws TriggerCreateException, InvalidOptionException, InvalidOptionValueException;
 
     /**
      * Completely deletes all triggers when an alert definition is deleted
@@ -72,6 +90,6 @@ public interface RegisteredTriggerManager {
      */
     public void deleteTriggers(Integer adId);
     
+    void addTriggersCreatedTxListener(final Collection<RegisteredTrigger> triggers);
     
-
 }

@@ -589,7 +589,7 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
      *                      If false, it is the caller's responsibility to call
      *                      addTriggersCreatedListener() to ensure triggers are registered.
      *  
-     * @return a RegisteredTriggerValue
+     * 
      *
      * 
      */
@@ -634,7 +634,7 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
             addTriggersCreatedTxListener(triggers);
         }
     }
-    private void addTriggersCreatedTxListener(final Collection<RegisteredTrigger> triggers) {
+    public void addTriggersCreatedTxListener(final Collection<RegisteredTrigger> triggers) {
         try {
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {           
                 public void suspend() {
