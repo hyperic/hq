@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2010], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -44,6 +44,10 @@ public class ControlHistoryDAO extends HibernateDAO
         return (ControlHistory)super.findById(id);
     }
 
+    public ControlHistory get(Integer id) {
+        return (ControlHistory)super.get(id);
+    }
+    
     void save(ControlHistory entity) {
         super.save(entity);
     }

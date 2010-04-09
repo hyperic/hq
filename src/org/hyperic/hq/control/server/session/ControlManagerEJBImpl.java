@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2009], Hyperic, Inc.
+ * Copyright (C) [2004-2010], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -552,13 +552,19 @@ public class ControlManagerEJBImpl implements SessionBean {
         }
 
         // Update the control history
-        try {
-            ControlHistoryDAO historyLocalHome = getControlHistoryDAO();
-            Integer pk = new Integer(id);
-            cLocal = historyLocalHome.findById(pk);
-        } catch (ObjectNotFoundException e) {
-            // We know the ID, this won't happen
-            throw new SystemException(e);
+        ControlHistoryDAO historyLocalHome = getControlHistoryDAO();
+        Integer pk = new Integer(id);
+        cLocal = historyLocalHome.get(pk);
+        
+        if (cLocal == null) {
+            // We know the ID, this should not happen
+            throw new SystemException(
+                    "Failure getting control history id=" + id
+                        + ". Could not update history {status=" + status
+                        + ", startTime=" + startTime
+                        + ", endTime=" + endTime
+                        + ", message=" + msg
+                        + "}");
         }
 
         cLocal.setStatus(status);
