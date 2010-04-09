@@ -569,6 +569,7 @@ public class EscalationManagerImpl implements EscalationManager {
                              EscalationAlertType escalationAlertType, boolean fixed,
                              String moreInfo, boolean suppressNotification)
         throws PermissionException {
+        final boolean debug = log.isDebugEnabled();
         Integer alertId = alert.getAlertInfo().getId();
         boolean acknowledged = !fixed;
 
@@ -587,6 +588,8 @@ public class EscalationManagerImpl implements EscalationManager {
 
         // HQ-1295: Does user have sufficient permissions?
         // ...check if user can fix/acknowledge this alert...
+        // HHQ-3784 to avoid deadlocks use the this table order when updating/inserting:
+        // 1) EAM_ESCALATION_STATE, 2) EAM_ALERT, 3) EAM_ALERT_ACTION_LOG
         alertPermissionManager.canFixAcknowledgeAlerts(subject, alert.getDefinition().getDefinitionInfo());
 
         if (fixed) {
@@ -594,14 +597,14 @@ public class EscalationManagerImpl implements EscalationManager {
                 moreInfo = "(Fixed by " + subject.getFullName() + ")";
             }
 
-            log.debug(subject.getFullName() + " has fixed alertId=" + alertId);
+            if(debug) log.debug(subject.getFullName() + " has fixed alertId=" + alertId);
+            if (escalationState != null) {
+               escalationRuntime.endEscalation(escalationState);
+             }
 
             escalationAlertType.changeAlertState(alert, subject, EscalationStateChange.FIXED);
             escalationAlertType.logActionDetails(alert, null, moreInfo, subject);
 
-            if (escalationState != null) {
-                escalationRuntime.endEscalation(escalationState);
-            }
         } else {
             if (moreInfo == null || moreInfo.trim().length() == 0) {
                 moreInfo = "";
@@ -615,14 +618,11 @@ public class EscalationManagerImpl implements EscalationManager {
                 return;
             }
 
-            log.debug(subject.getFullName() + " has acknowledged alertId=" + alertId);
-
-            escalationAlertType
-                .changeAlertState(alert, subject, EscalationStateChange.ACKNOWLEDGED);
-            escalationAlertType.logActionDetails(alert, null, subject.getFullName() +
-                                                              " acknowledged " + "the alert" +
-                                                              moreInfo, subject);
+            if (debug) log.debug(subject.getFullName() + " has acknowledged alertId=" +  alertId);
             escalationState.setAcknowledgedBy(subject);
+            escalationAlertType.changeAlertState(alert, subject, EscalationStateChange.ACKNOWLEDGED);
+            String msg = subject.getFullName() + " acknowledged " + "the alert" + moreInfo;
+            escalationAlertType.logActionDetails(alert, null, msg, subject);
         }
 
         if (!suppressNotification && alertRegulator.alertNotificationsAllowed()) {

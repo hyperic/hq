@@ -573,9 +573,10 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
 
         try {
             EscalationAlertType type = escalationState.getAlertType();
+            // HHQ-3784 to avoid deadlocks use the this table order when updating/inserting:
+            // 1) EAM_ESCALATION_STATE, 2) EAM_ALERT, 3) EAM_ALERT_ACTION_LOG
             AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
-            ActionExecutionInfo execInfo = new ActionExecutionInfo(esc.getShortReason(), esc
-                .getLongReason(), esc.getAuxLogs());
+            ActionExecutionInfo execInfo =  new ActionExecutionInfo(esc.getShortReason(), esc.getLongReason(), esc.getAuxLogs());
             String detail = action.executeAction(esc.getAlertInfo(), execInfo);
 
             type.changeAlertState(esc, overlord, EscalationStateChange.ESCALATED);
