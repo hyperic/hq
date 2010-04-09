@@ -71,6 +71,7 @@ import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -702,27 +703,25 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         Map<DataPoint, AvailabilityDataRLE> createMap = new HashMap<DataPoint, AvailabilityDataRLE>();
         Map<DataPoint, AvailabilityDataRLE> removeMap = new HashMap<DataPoint, AvailabilityDataRLE>();
         final boolean debug = _log.isDebugEnabled();
-        long begin = -1;
+       
         Map<Integer, StringBuilder> state = null;
         Map<Integer, TreeSet<AvailabilityDataRLE>> currAvails = Collections.EMPTY_MAP;
         synchronized (availabilityCache) {
             try {
                 availabilityCache.beginTran();
-                begin = getDebugTime(debug);
+               
                 updateCache(availPoints, updateList, outOfOrderAvail);
-                debugTimes(begin, "updateCache", availPoints.size());
-                begin = getDebugTime(debug);
+               
                 currAvails = createCurrAvails(outOfOrderAvail, updateList);
-                debugTimes(begin, "setCurrAvails", outOfOrderAvail.size() + updateList.size());
+              
                 state = captureCurrAvailState(currAvails);
-                begin = getDebugTime(debug);
+               
                 updateStates(updateList, currAvails, createMap, removeMap);
-                debugTimes(begin, "updateStates", updateList.size());
-                begin = getDebugTime(debug);
+              
                 updateOutOfOrderState(outOfOrderAvail, currAvails, createMap, removeMap);
                 flushCreateAndRemoves(createMap, removeMap);
                 logErrorInfo(state, availPoints, currAvails);
-                debugTimes(begin, "updateOutOfOrderState", outOfOrderAvail.size());
+             
                 availabilityCache.commitTran();
             } catch (Throwable e) {
                 logErrorInfo(state, availPoints, currAvails);
@@ -733,14 +732,16 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         }
         ConcurrentStatsCollector.getInstance().addStat(availPoints.size(), AVAIL_MANAGER_METRICS_INSERTED);
         if (sendData) {
-            begin = getDebugTime(debug);
             sendDataToEventHandlers(availPoints);
-            debugTimes(begin, "sendDataToEventHandlers", availPoints.size());
         }
     }
 
     private void flushCreateAndRemoves(Map<DataPoint, AvailabilityDataRLE> createMap,
                                        Map<DataPoint, AvailabilityDataRLE> removeMap) {
+        final StopWatch watch = new StopWatch();
+        final boolean debug = _log.isDebugEnabled();
+              
+        if (debug) watch.markTimeBegin("remove");
         for (Map.Entry<DataPoint, AvailabilityDataRLE> entry : removeMap.entrySet()) {
             AvailabilityDataRLE rle = (AvailabilityDataRLE) entry.getValue();
             // if we call remove() on an object which is already in the session
@@ -752,12 +753,21 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
                 availabilityDataDAO.remove(rle);
             }
         }
+        if (debug) {
+            watch.markTimeEnd("remove");
+            watch.markTimeBegin("flush");
+        }
         // addData() could be overwriting RLE data points (i.e. from 0.0 to 1.0)
         // with the same ID. If this is the scenario, then we must run
         // flush() in order to ensure that these old objects are not in the
         // session when the equivalent create() on the same ID is run,
         // thus avoiding NonUniqueObjectExceptions
         availabilityDataDAO.getSession().flush();
+        if (debug) {
+            watch.markTimeEnd("flush");
+            watch.markTimeBegin("create");
+        }
+        
         for (Map.Entry<DataPoint, AvailabilityDataRLE> entry : createMap.entrySet()) {
             AvailabilityDataRLE rle = (AvailabilityDataRLE) entry.getValue();
             AvailabilityDataId id = new AvailabilityDataId();
@@ -765,20 +775,13 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             id.setStartime(rle.getStartime());
             availabilityDataDAO.create(rle.getMeasurement(), rle.getStartime(), rle.getEndtime(), rle.getAvailVal());
         }
-    }
-
-    private long getDebugTime(final boolean debug) {
         if (debug) {
-            return System.currentTimeMillis();
-        }
-        return -1;
-    }
-
-    private void debugTimes(final long begin, final String name, final int points) {
-        if (_log.isDebugEnabled()) {
-            long time = System.currentTimeMillis() - begin;
-            _log.debug("AvailabilityInserter time to " + name + " -> " + time + " ms, points: " + points);
-        }
+            watch.markTimeEnd("create");
+            _log.debug("AvailabilityInserter flushCreateAndRemoves: " + watch
+                + ", points {remove=" + removeMap.size()
+                + ", create=" + createMap.size()
+                + "}");
+        }  
     }
 
     private void logErrorInfo(final Map<Integer, StringBuilder> oldState, final List<DataPoint> availPoints,
@@ -1183,7 +1186,9 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         }
         // as a performance optimization, fetch all the last avails
         // at once, rather than one at a time in updateState()
+        final StopWatch watch = new StopWatch();
         final boolean debug = _log.isDebugEnabled();
+        int numUpdates = 0;
         for (DataPoint state : states) {
             try {
                 // need to check again since there could be multiple
@@ -1198,10 +1203,17 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
                 }
                 if (updateCache) {
                     availabilityCache.put(state.getMetricId(), state);
+                    numUpdates++;
                 }
             } catch (BadAvailStateException e) {
                 _log.warn(e.getMessage());
             }
+        }
+        if (debug) {
+            _log.debug("AvailabilityInserter updateStates: " + watch
+                + ", points {total=" + states.size()
+                + ", updateCache=" + numUpdates
+                + "}");
         }
     }
 
@@ -1212,13 +1224,22 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         if (outOfOrderAvail.size() == 0) {
             return;
         }
+        final StopWatch watch = new StopWatch();
+        int numBadAvailState = 0;
         for (DataPoint state : outOfOrderAvail) {
             try {
                 // do not update the cache here, the timestamp is out of order
                 merge(state, currAvails, createMap, removeMap);
             } catch (BadAvailStateException e) {
+                numBadAvailState++;
                 _log.warn(e.getMessage());
             }
+        }
+        if (_log.isDebugEnabled()) {
+            _log.debug("AvailabilityInserter updateOutOfOrderState: " + watch
+                + ", points {total=" + outOfOrderAvail.size()
+                + ", badAvailState=" + numBadAvailState
+                + "}");
         }
     }
 
@@ -1227,6 +1248,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             return;
         }
       
+        final StopWatch watch = new StopWatch();
         final boolean debug = _log.isDebugEnabled();
         for (DataPoint pt : availPoints) {
             int id = pt.getMetricId().intValue();
@@ -1244,22 +1266,34 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             } else if (oldState == null || oldState.getValue() == AVAIL_NULL || oldState.getValue() != val) {
                 updateList.add(newState);
                 if (debug) {
-                    String msg = "value of state " + newState + " differs from" + " current value" +
-                                 ((oldState != null) ? oldState.toString() : " old state does not exist");
+                    String msg = "value of state[" + newState + "] differs from" + " current value[" +
+                                 ((oldState != null) ? oldState.toString() : "old state does not exist") + "]";
                     _log.debug(msg);
                 }
             } else {
                 availabilityCache.put(new Integer(id), newState);
             }
         }
+        if (debug) {
+            _log.debug("AvailabilityInserter updateCache: " + watch
+                + ", points {total=" + availPoints.size()
+                + ", outOfOrder=" + outOfOrderAvail.size()
+                + ", updateToDb=" + updateList.size()
+                + ", updateCacheTimestamp="
+                + (availPoints.size() - outOfOrderAvail.size() - updateList.size())
+                + "}");
+        }
     }
 
     private void sendDataToEventHandlers(List<DataPoint> data) {
+        final StopWatch watch = new StopWatch();
+        final boolean debug = _log.isDebugEnabled();
         int maxCapacity = data.size();
         ArrayList<MeasurementEvent> events = new ArrayList<MeasurementEvent>(maxCapacity);
         Map<Integer, MeasurementEvent> downEvents = new HashMap<Integer, MeasurementEvent>(maxCapacity);
         List<MeasurementZevent> zevents = new ArrayList<MeasurementZevent>(maxCapacity);
         boolean allEventsInteresting = Boolean.getBoolean(ALL_EVENTS_INTERESTING_PROP);
+        if (debug) watch.markTimeBegin("isTriggerInterested");
         for (DataPoint dp : data) {
             Integer metricId = dp.getMetricId();
             MetricValue val = dp.getMetricValue();
@@ -1277,11 +1311,14 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             }
             zevents.add(new MeasurementZevent(metricId.intValue(), val));
         }
+        if (debug) watch.markTimeEnd("isTriggerInterested");
         if (!downEvents.isEmpty()) {
+            if (debug) watch.markTimeBegin("suppressMeasurementEvents");
             // Determine whether the measurement events can
             // be suppressed as part of hierarchical alerting
             PermissionManagerFactory.getInstance().getHierarchicalAlertingManager().suppressMeasurementEvents(
                 downEvents, true);
+            if (debug) watch.markTimeEnd("suppressMeasurementEvents");
             if (!downEvents.isEmpty()) {
                 events.addAll(downEvents.values());
             }
@@ -1293,6 +1330,14 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
 
         if (!zevents.isEmpty()) {
             ZeventManager.getInstance().enqueueEventsAfterCommit(zevents);
+        }
+        if (debug) {
+            _log.debug("AvailabilityInserter sendDataToEventHandlers: " + watch
+                + ", points {total=" + maxCapacity
+                + ", downEvents=" + downEvents.size()
+                + ", eventsToPublish=" + events.size()
+                + ", zeventsToEnqueue=" + zevents.size()
+                + "}");
         }
     }
 
