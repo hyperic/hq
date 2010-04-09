@@ -481,7 +481,7 @@ public interface AppdefBoss {
      * Remove resources from the group's contents.
      */
     public void removeResourcesFromGroup(int sessionId, ResourceGroup group, Collection<Resource> resources)
-        throws SessionException, PermissionException;
+        throws SessionException, PermissionException, VetoException;
 
     public ResourceGroup findGroupById(int sessionId, Integer groupId) throws PermissionException, SessionException;
 
@@ -565,7 +565,7 @@ public interface AppdefBoss {
      * Add entities to a resource group
      */
     public void addResourcesToGroup(int sessionID, ResourceGroup group, List<AppdefEntityID> aeids)
-        throws SessionException, PermissionException;
+        throws SessionException, PermissionException, VetoException;
 
     /**
      * Update properties of a group.

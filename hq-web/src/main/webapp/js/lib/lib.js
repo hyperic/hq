@@ -2996,9 +2996,14 @@ hyperic.group_manager = function() {
 					  groupId: "['" + formArray.group.toString().split(",").join("','") + "']"},
             handleAs: 'json',
             load: function(data) {
-			    var successText = "The requested groups have been assigned.";
-			    that.displayConfirmation(that.message_area.AddToExistingGroup, successText);
-	        	setTimeout('MyGroupManager.dialogs.AddToExistingGroup.hide()', 2000);
+				if (data && data.error) {
+					console.debug(data.error_message, data);
+					that.displayError(that.message_area.AddToExistingGroup, data.error_message);
+				} else {
+				    var successText = "The requested groups have been assigned.";
+				    that.displayConfirmation(that.message_area.AddToExistingGroup, successText);
+		        	setTimeout('MyGroupManager.dialogs.AddToExistingGroup.hide()', 2000);
+				}
 			},
             error: function(data) {
 	    		var errorText = "An error occurred processing your request.";

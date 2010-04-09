@@ -2031,7 +2031,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * 
      */
     public void removeResourcesFromGroup(int sessionId, ResourceGroup group, Collection<Resource> resources)
-        throws SessionException, PermissionException {
+        throws SessionException, PermissionException, VetoException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
 
         resourceGroupManager.removeResources(subject, group, resources);
@@ -2260,7 +2260,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * 
      */
     public void addResourcesToGroup(int sessionID, ResourceGroup group, List<AppdefEntityID> aeids)
-        throws SessionException, PermissionException {
+        throws SessionException, PermissionException, VetoException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
 
         for (AppdefEntityID aeid : aeids) {
@@ -2835,11 +2835,12 @@ public class AppdefBossImpl implements AppdefBoss {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
 
         Resource resource = resourceManager.findResource(entityId);
-
+        List<ResourceGroup> groups = new ArrayList<ResourceGroup>(groupIds.length);
         for (int i = 0; i < groupIds.length; i++) {
             ResourceGroup group = resourceGroupManager.findResourceGroupById(subject, groupIds[i]);
-            resourceGroupManager.addResource(subject, group, resource);
+            groups.add(group);
         }
+        resourceGroupManager.addResource(subject, resource, groups);
     }
 
     /**
@@ -2882,11 +2883,13 @@ public class AppdefBossImpl implements AppdefBoss {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
 
         Resource resource = resourceManager.findResource(entityId);
+        List<ResourceGroup> groups = new ArrayList<ResourceGroup>(groupIds.length);
 
         for (int i = 0; i < groupIds.length; i++) {
             ResourceGroup group = resourceGroupManager.findResourceGroupById(subject, groupIds[i]);
-            resourceGroupManager.removeResources(subject, group, Collections.singleton(resource));
+            groups.add(group);
         }
+        resourceGroupManager.removeResource(subject, resource, groups);
     }
 
     /**
