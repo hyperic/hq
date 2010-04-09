@@ -38,15 +38,12 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
 import javax.security.auth.login.LoginException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
-import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
-import org.hyperic.hq.appdef.server.session.ResourceZevent;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -123,8 +120,6 @@ import org.hyperic.hq.measurement.action.MetricAlertAction;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MetricsEnabledEvent;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
-import org.hyperic.hq.zevents.ZeventEnqueuer;
-import org.hyperic.hq.zevents.ZeventListener;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
@@ -189,7 +184,7 @@ public class EventsBossImpl implements EventsBoss, ApplicationListener<Applicati
 
     private AuthzSubjectManager authzSubjectManager;
 
-    private ZeventEnqueuer zEventManager;
+   
 
     @Autowired
     public EventsBossImpl(SessionManager sessionManager, ActionManager actionManager,
@@ -201,7 +196,7 @@ public class EventsBossImpl implements EventsBoss, ApplicationListener<Applicati
                           ResourceManager resourceManager, ServerManager serverManager,
                           ServiceManager serviceManager, PermissionManager permissionManager,
                           GalertManager galertManager, ResourceGroupManager resourceGroupManager,
-                          AuthzSubjectManager authzSubjectManager, ZeventEnqueuer zEventManager) {
+                          AuthzSubjectManager authzSubjectManager) {
         this.sessionManager = sessionManager;
         this.actionManager = actionManager;
         this.alertDefinitionManager = alertDefinitionManager;
@@ -219,7 +214,6 @@ public class EventsBossImpl implements EventsBoss, ApplicationListener<Applicati
         this.galertManager = galertManager;
         this.resourceGroupManager = resourceGroupManager;
         this.authzSubjectManager = authzSubjectManager;
-        this.zEventManager = zEventManager;
     }
 
     /**
@@ -1638,26 +1632,4 @@ public class EventsBossImpl implements EventsBoss, ApplicationListener<Applicati
         alertManager.handleSubjectRemoval(toDelete);
     }
 
-    @PostConstruct
-    public void startup() {
-        log.info("Events Boss starting up!");
-
-        // Add listener to remove alert definition and alerts after resources
-        // are deleted.
-        HashSet<Class<ResourceDeletedZevent>> events = new HashSet<Class<ResourceDeletedZevent>>();
-        events.add(ResourceDeletedZevent.class);
-        zEventManager.addBufferedListener(events, new ZeventListener<ResourceZevent>() {
-            public void processEvents(List<ResourceZevent> events) {
-                for (ResourceZevent z : events) {
-                    if (z instanceof ResourceDeletedZevent) {
-                        alertDefinitionManager.cleanupAlertDefinitions(z.getAppdefEntityID());
-                    }
-                }
-            }
-
-            public String toString() {
-                return "AlertDefCleanupListener";
-            }
-        });
-    }
 }

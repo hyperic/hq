@@ -94,10 +94,44 @@ public class AlertDefinitionDAO
         return createCriteria().add(Restrictions.eq("resource", r)).list();
     }
 
+    /**
+    * Prefetches all collections associated with each alertDef that is deleted and has a
+    * null resourceId into ehcache.
+    * @return {@link List} of {@link Integer} of {@link AlertDefintion} ids
+    */
     @SuppressWarnings("unchecked")
-    public List<AlertDefinition> findAllDeletedResources() {
-        return (List<AlertDefinition>) createCriteria().add(Restrictions.isNull("resource")).add(
-            Restrictions.eq("deleted", Boolean.TRUE)).list();
+    public List<Integer> findAndPrefetchAllDeletedAlertDefs() {
+        // need to pre-fetch one bag at a time due to bug
+        // http://opensource.atlassian.com/projects/hibernate/browse/HHH-2980
+        String hql = new StringBuilder()
+            .append("from AlertDefinition def ")
+            .append("left outer join fetch def.childrenBag cb ")
+            .append("where def.resource is null and def.deleted = '1'")
+            .toString();
+        getSession().createQuery(hql).list();
+        hql = new StringBuilder()
+            .append("from AlertDefinition def ")
+            .append("left outer join fetch def.actionsBag ab ")
+            .append("where def.resource is null and def.deleted = '1'")
+            .toString();
+        getSession().createQuery(hql).list();
+        hql = new StringBuilder()
+            .append("from AlertDefinition def ")
+            .append("left outer join fetch def.conditionsBag condb ")
+            .append("where def.resource is null and def.deleted = '1'")
+            .toString();
+        getSession().createQuery(hql).list();
+        hql = new StringBuilder()
+            .append("from AlertDefinition def ")
+            .append("left outer join fetch def.triggersBag tb ")
+            .append("where def.resource is null and def.deleted = '1'")
+            .toString();
+        getSession().createQuery(hql).list();
+        hql = new StringBuilder()
+            .append("select def.id from AlertDefinition def ")
+            .append("where def.resource is null and def.deleted = '1'")
+            .toString();
+        return getSession().createQuery(hql).list();
     }
 
     /**

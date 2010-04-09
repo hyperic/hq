@@ -94,6 +94,8 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
     private AlertConditionDAO alertConditionDAO;
 
     private MeasurementDAO measurementDAO;
+    
+    private AlertDAO alertDAO;
 
     private RegisteredTriggerManager registeredTriggerManager;
 
@@ -110,7 +112,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
                                       ActionDAO actionDao, AlertConditionDAO alertConditionDAO, 
                                       MeasurementDAO measurementDAO, RegisteredTriggerManager registeredTriggerManager,
                                       ResourceManager resourceManager, EscalationManager escalationManager,
-                                      AlertAuditFactory alertAuditFactory) {
+                                      AlertAuditFactory alertAuditFactory, AlertDAO alertDAO) {
         this.alertPermissionManager = alertPermissionManager;
         this.alertDefDao = alertDefDao;
         this.actionDao = actionDao;
@@ -120,6 +122,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
         this.resourceManager = resourceManager;
         this.escalationManager = escalationManager;
         this.alertAuditFactory = alertAuditFactory;
+        this.alertDAO = alertDAO;
     }
 
     @PostConstruct
@@ -699,49 +702,63 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
         }
         alertDefDao.getSession().flush();
     }
+    
+    @Transactional(readOnly=true)
+    public List<Integer> getAllDeletedAlertDefs() {
+        return alertDefDao.findAndPrefetchAllDeletedAlertDefs();
+    }
 
     /**
      * Clean up alert definitions and alerts for removed resources
      * 
      */
-    public void cleanupAlertDefinitions(AppdefEntityID aeid) {
+    public void cleanupAlertDefs(List<Integer> alertDefIds) {
+        if (alertDefIds.size() <= 0) {
+            return;
+        }
         StopWatch watch = new StopWatch();
-
-        List<AlertDefinition> adefs = alertDefDao.findAllDeletedResources();
-        for (AlertDefinition alertdef : adefs) {
-            // Delete the alerts
-            watch.markTimeBegin("deleteByAlertDefinition");
-            alertDefDao.deleteByAlertDefinition(alertdef);
-            watch.markTimeEnd("deleteByAlertDefinition");
-
-            // Get the alerts deleted
-            alertDefDao.getSession().flush();
-
-            // Remove the conditions
-            watch.markTimeBegin("remove conditions and triggers");
-            alertdef.clearConditions();
-            alertdef.getTriggersBag().clear();
-            watch.markTimeEnd("remove conditions and triggers");
-
-            // Remove the actions
-            watch.markTimeBegin("removeActions");
-            actionDao.removeActions(alertdef);
-            watch.markTimeEnd("removeActions");
-
-            watch.markTimeBegin("remove from parent");
-            if (alertdef.getParent() != null) {
-                alertdef.getParent().getChildrenBag().remove(alertdef);
+        final boolean debug = log.isDebugEnabled();
+        int i=0;
+        try {
+            final List<AlertDefinition> alertDefs = new ArrayList<AlertDefinition>(alertDefIds.size());
+            for (Integer alertdefId : alertDefIds) {
+                if (debug) watch.markTimeBegin("findById");
+                final AlertDefinition alertdef = alertDefDao.findById(alertdefId);
+                if (debug) watch.markTimeEnd("findById");
+                alertDefs.add(alertdef);
             }
-            watch.markTimeBegin("remove from parent");
-
-            // Actually remove the definition
-            watch.markTimeBegin("remove");
-            alertDefDao.remove(alertdef);
-            watch.markTimeBegin("remove");
-
-            if (log.isDebugEnabled()) {
-                log.debug("deleteAlertDefinition: " + watch);
+            if (debug) watch.markTimeBegin("deleteByAlertDefinition");
+            alertDAO.deleteByAlertDefinitions(alertDefs);
+            if(debug) watch.markTimeEnd("deleteByAlertDefinition");
+            
+            if (debug) watch.markTimeBegin("loop");
+            for (AlertDefinition alertdef : alertDefs) {
+                // Remove the conditions
+                if(debug) watch.markTimeBegin("remove conditions and triggers");
+                alertdef.clearConditions();
+                alertdef.getTriggersBag().clear();
+                if(debug) watch.markTimeEnd("remove conditions and triggers");
+    
+                // Remove the actions
+                if (debug) watch.markTimeBegin("removeActions");
+                actionDao.removeActions(alertdef);
+                if(debug) watch.markTimeEnd("removeActions");
+    
+                if(debug) watch.markTimeBegin("remove from parent");
+                if (alertdef.getParent() != null) {
+                    alertdef.getParent().getChildrenBag().remove(alertdef);
+                }
+                if(debug) watch.markTimeBegin("remove from parent");
+    
+                // Actually remove the definition
+                if(debug) watch.markTimeBegin("remove");
+                alertDefDao.remove(alertdef);
+                if(debug) watch.markTimeBegin("remove");
+                i++;
             }
+            if (debug) watch.markTimeEnd("loop");
+        } finally {
+            if (debug) log.debug("deleted " + i + " alertDefs: " + watch);
         }
     }
 

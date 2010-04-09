@@ -114,7 +114,9 @@ public interface AlertDefinitionManager {
     /**
      * Clean up alert definitions and alerts for removed resources
      */
-    public void cleanupAlertDefinitions(AppdefEntityID aeid);
+    public void cleanupAlertDefs(List<Integer> alertDefIds);
+    
+    List<Integer> getAllDeletedAlertDefs();
 
     /**
      * Find an alert definition and return a value object
