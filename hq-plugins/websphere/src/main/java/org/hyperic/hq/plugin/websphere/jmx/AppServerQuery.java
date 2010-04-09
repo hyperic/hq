@@ -36,15 +36,18 @@ import java.util.Properties;
 import javax.management.ObjectName;
 
 import com.ibm.websphere.management.AdminClient;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.hyperic.hq.product.GenericPlugin;
 import org.hyperic.hq.product.LogFileTrackPlugin;
 
 import org.hyperic.hq.plugin.websphere.WebsphereControlPlugin;
 import org.hyperic.hq.plugin.websphere.WebsphereProductPlugin;
+import org.hyperic.hq.plugin.websphere.WebsphereUtil;
 
 public class AppServerQuery extends WebSphereQuery {
-
+    private static final Log log = LogFactory.getLog(AppServerQuery.class.getName());
     public static final String MBEAN_TYPE = "Server";
     private static final String ATTR_VERSION = "version";
     private static final String ATTR_JAVA_VERSION = "javaVersion";
@@ -100,12 +103,15 @@ public class AppServerQuery extends WebSphereQuery {
         final String addr = "<address xmi:id=\"EndPoint_1\"";
         String name = getName();
         String node = getParent().getName();
+        String cell = getParent().getCell();
         File serverXML = new File(
             this.installpath + "/config/cells/" +
-            node + "/nodes/" + node +
+            cell + "/nodes/" + node +
             "/servers/" + name + "/server.xml"
         );
         String port = "9080"; //default
+
+        log.debug("[getMetricProperties] xml="+serverXML);
 
         String line;
         BufferedReader in = null;

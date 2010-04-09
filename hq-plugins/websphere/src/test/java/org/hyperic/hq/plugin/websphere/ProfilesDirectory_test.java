@@ -207,7 +207,7 @@ public class ProfilesDirectory_test extends TestCase {
         
         List servers = new ArrayList();
         
-        WebsphereDetector.Process p1 = new WebsphereDetector.Process();
+        WebSphereProcess p1 = new WebSphereProcess();
         p1.serverRoot = tmpFile.getAbsolutePath() + File.separator +
                         "serverRoot" + File.separator +
                         "wasprofiles" + File.separator +
@@ -216,7 +216,7 @@ public class ProfilesDirectory_test extends TestCase {
                          INSTALL_ROOT;
         servers.add(p1);
         
-        WebsphereDetector.Process p2 = new WebsphereDetector.Process();
+        WebSphereProcess p2 = new WebSphereProcess();
         p2.serverRoot = tmpFile.getAbsolutePath() + File.separator +
                         "serverRoot" + File.separator +
                         "wasprofiles" + File.separator +
@@ -225,7 +225,7 @@ public class ProfilesDirectory_test extends TestCase {
                          INSTALL_ROOT;
         servers.add(p2);
         
-        WebsphereDetector.Process p3 = new WebsphereDetector.Process();
+        WebSphereProcess p3 = new WebSphereProcess();
         p3.serverRoot = tmpFile.getAbsolutePath() + File.separator +
                         "serverRoot" + File.separator +
                         "wasprofiles" + File.separator +
