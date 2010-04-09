@@ -381,23 +381,23 @@
           include="5.2">
   </server>
 
-  <server name="ActiveMQ Embeeded"
+  <server name="ActiveMQ Embedded"
           version="5.0"
           include="ActiveMQ 5.0">
     <property name="PROC_HOME_PROPERTY"
               value="catalina.base"/>
   </server>
-  <server name="ActiveMQ Embeeded"
+  <server name="ActiveMQ Embedded"
           version="5.1"
           include="ActiveMQ 5.1">
     <property name="PROC_HOME_PROPERTY"
               value="catalina.base"/>
   </server>
-  <server name="ActiveMQ Embeeded"
+  <server name="ActiveMQ Embedded"
           version="5.2"
           include="5.1">
   </server>
-  <server name="ActiveMQ Embeeded"
+  <server name="ActiveMQ Embedded"
           version="5.3"
           include="5.2">
   </server>
