@@ -8,6 +8,7 @@ import javax.annotation.PostConstruct;
 
 import org.hyperic.hq.events.shared.AlertManager;
 import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEvent;
+import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,12 +37,17 @@ public class AlertConditionsSatisfiedListener implements ZeventListener<AlertCon
         Set<Class<?>> alertEvents = new HashSet<Class<?>>();
         alertEvents.add(AlertConditionsSatisfiedZEvent.class);
         zEventManager.addBufferedListener(alertEvents, this);
+        ConcurrentStatsCollector.getInstance().register(ConcurrentStatsCollector.FIRED_ALERT_TIME);
     }
 
     public void processEvents(List<AlertConditionsSatisfiedZEvent> events) {
+        final long start = System.currentTimeMillis();
         for (AlertConditionsSatisfiedZEvent z : events) {
             alertManager.fireAlert(z);
         }
+       
+        ConcurrentStatsCollector.getInstance().addStat(
+            System.currentTimeMillis()-start, ConcurrentStatsCollector.FIRED_ALERT_TIME);
     }
 
 }

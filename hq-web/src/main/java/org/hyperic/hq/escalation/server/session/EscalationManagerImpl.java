@@ -51,7 +51,6 @@ import org.hyperic.hq.events.server.session.AlertRegulator;
 import org.hyperic.hq.events.server.session.AlertableRoleCalendarType;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
 import org.hyperic.hq.events.shared.ActionManager;
-import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.util.units.FormattedNumber;
 import org.hyperic.util.units.UnitNumber;
 import org.hyperic.util.units.UnitsConstants;
@@ -96,7 +95,6 @@ public class EscalationManagerImpl implements EscalationManager {
         // that the escalations run
         ClassicEscalationAlertType.class.getClass();
         AlertableRoleCalendarType.class.getClass();
-        ConcurrentStatsCollector.getInstance().register(ConcurrentStatsCollector.FIRED_ALERT_TIME);
     }
 
     private void assertEscalationNameIsUnique(String name) throws DuplicateObjectException {
