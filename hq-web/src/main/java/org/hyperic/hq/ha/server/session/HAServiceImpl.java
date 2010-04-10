@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.ha.server.session;
 
+import java.util.Date;
 import java.util.concurrent.ScheduledFuture;
 
 import org.apache.commons.logging.Log;
@@ -72,7 +73,7 @@ public class HAServiceImpl implements HAService {
      * have to be started programmatically once we know if HA is enabled
      */
     public void start() {
-        registeredTriggerManager.initializeTriggers();
+        initializeTriggers();
         // If this node was designated as a slave b/c of connectivity loss (not
         // server crash), then we don't want to schedule another round of tasks
         // once it becomes master again
@@ -98,6 +99,19 @@ public class HAServiceImpl implements HAService {
                 log.error("Unable to schedule agent AI scan.", e);
             }
         }
+    }
+    
+    private void initializeTriggers() {
+        //Asynchronously initialize triggers once (as this may be an expensive operation)
+        MethodInvokingRunnable initTriggers = new MethodInvokingRunnable();
+        initTriggers.setTargetObject(registeredTriggerManager);
+        initTriggers.setTargetMethod("initializeTriggers");
+        try {
+            initTriggers.prepare();
+            scheduler.schedule(initTriggers, new Date(System.currentTimeMillis() + 1000));
+        } catch (Exception e) {
+                log.error("Unable to intialize triggers", e);
+         }
     }
 
     public boolean isMasterNode() {
