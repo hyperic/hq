@@ -284,6 +284,8 @@
 		<compile-plugin name="oc4j" />
 
 		<compile-plugin name="db2" />
+		
+		<compile-plugin name="db2jdbc" />
 
 		<compile-plugin name="postgresql" />
 
@@ -960,6 +962,8 @@
 		<hqplugin name="db2">
 			<fileset dir="${db2monitor.dir}" includes="lib/*" />
 		</hqplugin>
+		
+		<hqplugin name="db2jdbc" />
 
 		<hqplugin name="postgresql" />
 
