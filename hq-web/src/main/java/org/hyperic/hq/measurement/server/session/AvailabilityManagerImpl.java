@@ -702,7 +702,6 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
        
         Map<DataPoint, AvailabilityDataRLE> createMap = new HashMap<DataPoint, AvailabilityDataRLE>();
         Map<DataPoint, AvailabilityDataRLE> removeMap = new HashMap<DataPoint, AvailabilityDataRLE>();
-        final boolean debug = _log.isDebugEnabled();
        
         Map<Integer, StringBuilder> state = null;
         Map<Integer, TreeSet<AvailabilityDataRLE>> currAvails = Collections.EMPTY_MAP;
@@ -803,18 +802,28 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     @SuppressWarnings("unchecked")
     private Map<Integer, TreeSet<AvailabilityDataRLE>> createCurrAvails(final List<DataPoint> outOfOrderAvail,
                                                                         final List<DataPoint> updateList) {
-        if (outOfOrderAvail.size() == 0 && updateList.size() == 0) {
-            return Collections.EMPTY_MAP;
+        Map<Integer, TreeSet<AvailabilityDataRLE>> currAvails =  null;
+        final StopWatch watch = new StopWatch();
+        try {
+            if (outOfOrderAvail.size() == 0 && updateList.size() == 0) {
+                currAvails = Collections.EMPTY_MAP;
+            }
+            long now = TimingVoodoo.roundDownTime(System.currentTimeMillis(), 60000);
+            HashSet<Integer> mids = getMidsWithinAllowedDataWindow(updateList, now);
+            mids.addAll(getMidsWithinAllowedDataWindow(outOfOrderAvail, now));
+            if (mids.size() <= 0) {
+                currAvails = Collections.EMPTY_MAP;
+    
+            }
+            Integer[] mIds = (Integer[]) mids.toArray(new Integer[0]);
+            currAvails = availabilityDataDAO.getHistoricalAvailMap(mIds, now - MAX_DATA_BACKLOG_TIME, false);
+            return currAvails;
+        } finally {
+            if (_log.isDebugEnabled()) {
+                _log.debug("AvailabilityInserter setCurrAvails: " + watch
+                    + ", size=" + currAvails.size());
+            }
         }
-        long now = TimingVoodoo.roundDownTime(System.currentTimeMillis(), 60000);
-        HashSet<Integer> mids = getMidsWithinAllowedDataWindow(updateList, now);
-        mids.addAll(getMidsWithinAllowedDataWindow(outOfOrderAvail, now));
-        if (mids.size() <= 0) {
-            return Collections.EMPTY_MAP;
-
-        }
-        Integer[] mIds = (Integer[]) mids.toArray(new Integer[0]);
-        return availabilityDataDAO.getHistoricalAvailMap(mIds, now - MAX_DATA_BACKLOG_TIME, false);
     }
 
     private HashSet<Integer> getMidsWithinAllowedDataWindow(final List<DataPoint> states, final long now) {
