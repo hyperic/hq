@@ -21,6 +21,7 @@ import org.hyperic.hq.events.ext.RegisterableTriggerRepository;
 import org.hyperic.hq.events.shared.EventLogManager;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
+import org.hyperic.util.jdbc.DBUtil;
 
 /**
  * Unit test of the {@link RegisteredTriggerManagerImpl}
@@ -43,13 +44,14 @@ public class RegisteredTriggerManagerImplTest
     private EventLogManager eventLogManager;
     private AlertConditionEvaluatorStateRepository alertConditionEvaluatorStateRepository;
     private ExecutionStrategy executionStrategy;
+    private DBUtil dbUtil;
 
     private void replay() {
         EasyMock.replay(alertConditionEvaluatorFactory,
                         alertConditionEvaluator,
                         triggerDAO,
                         registeredTriggerRepository, zEventEnqueuer, alertConditionEvaluatorRepository, alertDefinitionDAO, eventLogManager, alertConditionEvaluatorStateRepository, executionStrategy);
-        org.easymock.classextension.EasyMock.replay(alertDAO);
+        org.easymock.classextension.EasyMock.replay(alertDAO, dbUtil);
     }
 
     public void setUp() throws Exception {
@@ -62,10 +64,12 @@ public class RegisteredTriggerManagerImplTest
         this.alertConditionEvaluatorRepository = EasyMock.createMock(AlertConditionEvaluatorRepository.class);
         this.alertDefinitionDAO = EasyMock.createMock(AlertDefinitionDAOInterface.class);
         this.alertDAO = org.easymock.classextension.EasyMock.createMock(AlertDAO.class);
+        this.dbUtil = org.easymock.classextension.EasyMock.createMock(DBUtil.class);
         this.eventLogManager = EasyMock.createMock(EventLogManager.class);
         this.alertConditionEvaluatorStateRepository = EasyMock.createMock(AlertConditionEvaluatorStateRepository.class);
         this.executionStrategy = EasyMock.createMock(ExecutionStrategy.class);
-        this.registeredTriggerManager = new RegisteredTriggerManagerImpl(alertConditionEvaluatorFactory,triggerDAO,zEventEnqueuer,alertConditionEvaluatorRepository,alertDefinitionDAO, registeredTriggerRepository, alertDAO, eventLogManager);
+        this.registeredTriggerManager = new RegisteredTriggerManagerImpl(alertConditionEvaluatorFactory,triggerDAO,zEventEnqueuer,
+            alertConditionEvaluatorRepository,alertDefinitionDAO, registeredTriggerRepository, alertDAO, eventLogManager, dbUtil);
         MockTrigger.initialized = false;
         MockTrigger.enabled = false;
     }
@@ -630,6 +634,6 @@ public class RegisteredTriggerManagerImplTest
                         triggerDAO,
                         registeredTriggerRepository, zEventEnqueuer, alertConditionEvaluatorRepository, alertDefinitionDAO, 
                         eventLogManager, alertConditionEvaluatorStateRepository, executionStrategy);
-        org.easymock.classextension.EasyMock.verify(alertDAO);
+        org.easymock.classextension.EasyMock.verify(alertDAO, dbUtil);
     }
 }

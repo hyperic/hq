@@ -18,6 +18,9 @@
 package org.hyperic.hq.events.server.session;
 
 import java.io.Serializable;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -25,6 +28,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -48,6 +53,7 @@ import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.config.InvalidOptionValueException;
+import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -82,13 +88,15 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
     private AlertDAO alertDAO;
     
     private EventLogManager eventLogManager;
+    
+    private DBUtil dbUtil;
 
     @Autowired
     public RegisteredTriggerManagerImpl(AlertConditionEvaluatorFactory alertConditionEvaluatorFactory,
                                         TriggerDAOInterface triggerDAO, ZeventEnqueuer zeventEnqueuer,
                                         AlertConditionEvaluatorRepository alertConditionEvaluatorRepository,
                                         AlertDefinitionDAOInterface alertDefinitionDAO, RegisterableTriggerRepository registerableTriggerRepository, 
-                                        AlertDAO alertDAO, EventLogManager eventLogManager) {
+                                        AlertDAO alertDAO, EventLogManager eventLogManager, DBUtil dbUtil) {
         this.alertConditionEvaluatorFactory = alertConditionEvaluatorFactory;
         this.triggerDAO = triggerDAO;
         this.zeventEnqueuer = zeventEnqueuer;
@@ -97,6 +105,65 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
         this.registeredTriggerRepository = registerableTriggerRepository;
         this.alertDAO = alertDAO;
         this.eventLogManager = eventLogManager;
+        this.dbUtil = dbUtil;
+    }
+    
+    @PostConstruct
+    public void cleanupRegisteredTriggers() {
+        Connection conn = null;
+        Statement stmt = null;
+        Boolean autocommit = null;
+        boolean commit = false;
+        try {
+            conn = dbUtil.getConnection();
+            autocommit = Boolean.valueOf(conn.getAutoCommit());
+            conn.setAutoCommit(false);
+            stmt = conn.createStatement();
+            stmt.addBatch(
+                "update EAM_ALERT_CONDITION set trigger_id = null " +
+                "WHERE exists (" +
+                    "select 1 from EAM_ALERT_DEFINITION WHERE deleted = '1' " +
+                    "AND EAM_ALERT_CONDITION.alert_definition_id = id" +
+                ")");
+            stmt.addBatch(
+                "delete from EAM_REGISTERED_TRIGGER WHERE exists (" +
+                    "select 1 from EAM_ALERT_DEFINITION WHERE deleted = '1' " +
+                    "AND EAM_REGISTERED_TRIGGER.alert_definition_id = id" +
+                ")");
+            int[] rows = stmt.executeBatch();
+            conn.commit();
+            commit = true;
+            log.info("disassociated " + rows[0] + " triggers in EAM_ALERT_CONDITION" +
+                " from their deleted alert definitions");
+            log.info("deleted " + rows[1] + " rows from EAM_REGISTERED_TRIGGER");
+        } catch (SQLException e) {
+            log.error(e, e);
+        }  finally {
+            resetAutocommit(conn, autocommit);
+            if (!commit) rollback(conn);
+            DBUtil.closeJDBCObjects(
+                RegisteredTriggerManagerImpl.class.getName(), conn, stmt, null);
+        }
+    }
+    
+    private void rollback(Connection conn) {
+        try {
+            if (conn != null) {
+                conn.rollback();
+            }
+        } catch (SQLException e) {
+            log.error(e, e);
+        }
+    }
+
+    private void resetAutocommit(Connection conn, Boolean autocommit) {
+        try {
+            if (autocommit != null) {
+                conn.setAutoCommit(autocommit.booleanValue());
+            }
+        } catch (SQLException e) {
+            log.error(e, e);
+        }
     }
 
     /**
