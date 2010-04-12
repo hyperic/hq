@@ -302,7 +302,12 @@ public class MySqlServerDetector
     {
         List servers = new ArrayList();
         String installdir = getParentDir(path, 2);
-        String version = getVersion(path);
+        String version = getVersion(path, "--help");
+        
+        if (version == null) {
+            version = getVersion(path, "--version");
+        }
+        
         // ensure this instance of ServerDetector is associated with the
         // correct version
         if (!getTypeInfo().getVersion().equals(version)) {
@@ -338,12 +343,11 @@ public class MySqlServerDetector
         return rtn.toString();
     }
     
-    private String getVersion(String executable) {
+    private String getVersion(String executable, String arg) {
         try {
             ByteArrayOutputStream output = new ByteArrayOutputStream();
             Execute exec = new Execute(new PumpStreamHandler(output));
-            exec.setCommandline(
-                new String[] {executable, "--help"});
+            exec.setCommandline(new String[] {executable, arg});
             int res = exec.execute();
             if (res != 0) {
                 return null;
