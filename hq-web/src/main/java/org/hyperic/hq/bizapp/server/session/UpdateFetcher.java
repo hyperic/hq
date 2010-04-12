@@ -1,8 +1,11 @@
 package org.hyperic.hq.bizapp.server.session;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.bizapp.shared.UpdateBoss;
+import org.hyperic.util.thread.LoggingThreadGroup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -18,7 +21,14 @@ public class UpdateFetcher implements Runnable {
     public UpdateFetcher(UpdateBoss updateBoss, @Value("#{tweakProperties['hq.updateNotify.interval'] }")Long checkInterval) {
         this.updateBoss = updateBoss;
         this.checkInterval = checkInterval;
-    } 
+    }
+    
+    @PostConstruct
+    public void init() {
+        LoggingThreadGroup grp = new LoggingThreadGroup("Update Notifier");
+        Thread t = new Thread(grp, this, "Update Notifier");
+        t.start();
+    }
 
     public void run() {
         while (true) {
