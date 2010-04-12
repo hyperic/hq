@@ -156,7 +156,7 @@ public class IndicatorChartsAction
                 }
                 MetricDisplaySummary mds = getSummarizedMetricData(template, getAggregateData(template, data), begin, end, (entList == null) ? 0 : entList.size());
                 if (mds != null) {
-                    IndicatorDisplaySummary ids = new IndicatorDisplaySummary(mds);
+                    IndicatorDisplaySummary ids = new IndicatorDisplaySummary(mds, data);
                     ids.setEntityId(aeid);
                     ids.setChildType(ctype);
                     result.add(ids);
