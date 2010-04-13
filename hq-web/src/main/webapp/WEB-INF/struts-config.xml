@@ -1261,13 +1261,12 @@
         <forward name="failure" path="/resource/service/Inventory.do?mode=edit"/>
       </action>
 
-      <action path="/resource/service/inventory/RemoveGroupResources" 
+      <action path="/resource/service/inventory/RemoveApp" 
               name="RemoveResourceForm"
               type="org.springframework.web.struts.DelegatingActionProxy"
               scope="request" 
                           input="/resource/service/inventory/ViewService.jsp">
-              <forward name="failure" path="/resource/group/Inventory.do?mode=view"/>
- 	 	 	  <forward name="success" path="/resource/group/Inventory.do?mode=view"/>
+              <forward name="success" path="/resource/service/Inventory.do?mode=view" redirect="true"/>
       </action>
           
       <action path="/resource/service/inventory/EditConfigProperties"
@@ -1580,12 +1579,13 @@
         <forward name="success" path="/resource/group/Inventory.do?mode=view"/>
       </action>
 
-      <action path="/resource/group/inventory/RemoveApp" 
+      <action path="/resource/group/inventory/RemoveGroupResources" 
               name="RemoveGroupResourcesForm"
               type="org.springframework.web.struts.DelegatingActionProxy"
               scope="request" 
               input="/resource/service/Inventory.do?mode=view">
-              <forward name="success" path="/resource/group/Inventory.do?mode=view" redirect="true"/>
+              <forward name="failure" path="/resource/group/Inventory.do?mode=view"/>
+ 	 		  <forward name="success" path="/resource/group/Inventory.do?mode=view"/>
       </action>
 
       <!-- / -->
