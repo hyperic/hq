@@ -90,6 +90,6 @@ public interface RegisteredTriggerManager {
      */
     public void deleteTriggers(Integer adId);
     
-    void addTriggersCreatedTxListener(final Collection<RegisteredTrigger> triggers);
+    void addTriggersCreatedTxListener(final List triggersOrEvents);
     
 }

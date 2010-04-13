@@ -48,6 +48,7 @@ import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.EventLogManager;
 import org.hyperic.hq.events.shared.RegisteredTriggerManager;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
+import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
@@ -701,7 +702,7 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
             addTriggersCreatedTxListener(triggers);
         }
     }
-    public void addTriggersCreatedTxListener(final Collection<RegisteredTrigger> triggers) {
+    public void addTriggersCreatedTxListener(final List list) {
         try {
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {           
                 public void suspend() {
@@ -729,16 +730,24 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
                         // We need to process this in a new transaction,
                         // AlertDef ID should be set now that original tx is
                         // committed
-                        if(! triggers.isEmpty()) {
-                            AlertDefinition alertDefinition =  getDefinitionFromTrigger(triggers.iterator().next());
-                            if (alertDefinition != null) {
-                                if (debug) {
-                                    watch.markTimeBegin("enqueueEvent");
+                        if (!list.isEmpty()) {
+                            Object object = list.get(0);
+                            if (object instanceof Zevent) {
+                                if (debug) watch.markTimeBegin(
+                                    "enqueueEvents[" + list.size() + "]");
+                                zeventEnqueuer.enqueueEvents(list);                             
+                                if (debug) watch.markTimeEnd(
+                                    "enqueueEvents[" + list.size() + "]");                                
+                            } else if (object instanceof RegisteredTrigger) {
+                                RegisteredTrigger trigger = (RegisteredTrigger) object;
+                                AlertDefinition alertDefinition =
+                                    getDefinitionFromTrigger(trigger);
+                                if (alertDefinition != null) {
+                                    if (debug) watch.markTimeBegin("enqueueEvent");
+                                    zeventEnqueuer.enqueueEvent(
+                                        new TriggersCreatedZevent(alertDefinition.getId()));                             
+                                    if (debug) watch.markTimeEnd("enqueueEvent");
                                 }
-                                zeventEnqueuer.enqueueEvent(new TriggersCreatedZevent(alertDefinition.getId()));                             
-                                    if (debug) {
-                                        watch.markTimeEnd("enqueueEvent");
-                                    }
                             }
                         }
                     } catch (Exception e) {
