@@ -29,19 +29,9 @@ import java.util.Date;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.agent.AgentConnectionException;
-import org.hyperic.hq.agent.AgentRemoteException;
-import org.hyperic.hq.appdef.server.session.PlatformManagerImpl;
-import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.context.Bootstrap;
-import org.hyperic.hq.control.agent.client.ControlCommandsClient;
-import org.hyperic.hq.control.agent.client.ControlCommandsClientFactory;
-import org.hyperic.hq.control.shared.ControlConstants;
 import org.hyperic.hq.control.shared.ControlScheduleManager;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.scheduler.server.session.BaseJob;
@@ -75,79 +65,7 @@ public abstract class ControlJob extends BaseJob {
                                             String args)
         throws PluginException
     {
-        long startTime = System.currentTimeMillis();
-        ControlHistory commandHistory = null;
-        String errorMsg = null;
-        Integer groupId = (gid != null) ? gid.getId() : null;
-        
-        try {
-            ControlCommandsClient client =
-               Bootstrap.getBean(ControlCommandsClientFactory.class).getClient(id);
-            String pluginName  = id.toString();
-            String productName = Bootstrap.getBean(PlatformManager.class)
-                .getPlatformPluginName(id);
-
-            ControlScheduleManager cLocal =
-                Bootstrap.getBean(ControlScheduleManager.class);
-
-            // Regular command
-
-            commandHistory = 
-                cLocal.createHistory(id, groupId, batchId,
-                                     subject.getName(), action, args,
-                                     scheduled, startTime, startTime, 
-                                     dateScheduled.getTime(),
-                                     ControlConstants.STATUS_INPROGRESS, 
-                                     description, null);
-
-            client.controlPluginCommand(pluginName, 
-                                        productName,
-                                        commandHistory.getId(),
-                                        action, args);
-
-        } catch (AgentNotFoundException e) {
-            errorMsg = "Agent not found: " + e.getMessage();
-        } catch (AgentConnectionException e) {
-            errorMsg = "Error getting agent connection: " + e.getMessage();
-        } catch (AgentRemoteException e) {
-            errorMsg = "Agent error: " + e.getMessage();
-        } catch (SystemException e) {
-            errorMsg = "System error";
-        } catch (AppdefEntityNotFoundException e) {
-            errorMsg = "System error";
-        } finally {
-        
-            if (errorMsg != null) {
-                this.log.error("Unable to execute command: " + errorMsg);
-            
-                // Add the failed job to the history
-                try {
-                    AppdefEntityID aid = (gid != null) ? gid : id;
-
-                    ControlScheduleManager cLocal =
-                        Bootstrap.getBean(ControlScheduleManager.class);
-
-                    // Remove the old history
-                    if (commandHistory != null)
-                        cLocal.removeHistory(commandHistory.getId());
-
-                    // Add the new one
-                    cLocal.createHistory(aid, groupId, batchId,
-                                         subject.getName(), action, args,
-                                         scheduled, startTime, 
-                                         System.currentTimeMillis(),
-                                         dateScheduled.getTime(),
-                                         ControlConstants.STATUS_FAILED,
-                                         description, errorMsg);
-                } catch (Exception exc) {
-                    this.log.error("Unable to create history entry for " +
-                                   "failed control action");
-                }
-
-                throw new PluginException(errorMsg);
-            }
-        }
-
-        return commandHistory.getId();
+        return Bootstrap.getBean(ControlScheduleManager.class).doAgentControlCommand(id, gid, batchId,
+            subject, dateScheduled, scheduled, description,action, args);
     }
 }
