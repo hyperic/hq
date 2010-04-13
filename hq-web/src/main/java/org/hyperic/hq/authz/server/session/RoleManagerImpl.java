@@ -1045,6 +1045,21 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
 
         return plist;
     }
+    
+    /**
+     * Get the resource groups applicable to a given role.
+     * @throws NotFoundException 
+     *
+    */
+    @Transactional(readOnly=true)
+    public Collection<ResourceGroup> getResourceGroupsByRole(AuthzSubject subject,Role role)
+        throws PermissionException, NotFoundException {
+           Collection<ResourceGroup> groups =
+                   resourceGroupDAO.findByRoleIdAndSystem_orderName(role.getId(), false, true);
+            
+           // now get viewable group pks
+           return filterViewableGroups(subject, groups);
+    }
 
     /**
      * Get the resource groups applicable to a given role
