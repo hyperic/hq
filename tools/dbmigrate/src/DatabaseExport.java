@@ -40,14 +40,13 @@ public class DatabaseExport {
     private static String _targetUser;
     private static String _sourcePass;
     private static String _sourceUser;
-    private static final String _pgUser = "hqadmin";
     private static final String _logCtx = DatabaseExport.class.getName();
 
     public static void main(String[] args) throws Exception {
         final long start = System.currentTimeMillis();
         getArgs(args);
         Connection connExp = getConnectionExport();
-        _tables = Collections.unmodifiableList(getTables(connExp, _pgUser));
+        _tables = Collections.unmodifiableList(getTables(connExp, _sourceUser));
         exportDataSetPerTable(connExp);
         Connection connImp = getConnectionImport();
         importDataSetPerTable(connImp);
@@ -450,7 +449,15 @@ public class DatabaseExport {
         private final String getTable() {
             return _table;
         }
-        public boolean equals(BigTable rhs) {
+        public boolean equals(Object rhs) {
+            if (this == rhs) {
+                return true;
+            } else if (rhs instanceof BigTable) {
+                return equals((BigTable)rhs);
+            }
+            return false;
+        }
+        private boolean equals(BigTable rhs) {
             return _table.equals(rhs._table);
         }
         public int hashCode() {
