@@ -26,7 +26,6 @@
 package org.hyperic.hq.measurement.server.mbean;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -94,6 +93,10 @@ public class AvailabilityCheckService
      * @jmx:managed-operation
      */
     public void hit(Date lDate) {
+        if (!new NotReadyManager().isReady()) {
+            _log.info("availability check service not starting until server is ready.");
+            return;
+        }
         Date date = new Date(System.currentTimeMillis());
         super.hit(date);
     }
