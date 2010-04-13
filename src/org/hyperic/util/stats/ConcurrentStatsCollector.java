@@ -111,7 +111,8 @@ public final class ConcurrentStatsCollector {
         TRIGGER_INIT_TIME            = "TRIGGER_INIT_TIME",
         FIRED_ALERT_TIME             = "FIRED_ALERT_TIME",
         SCHEDULE_QUEUE_SIZE          = "SCHEDULE_QUEUE_SIZE",
-        UNSCHEDULE_QUEUE_SIZE        = "UNSCHEDULE_QUEUE_SIZE";
+        UNSCHEDULE_QUEUE_SIZE        = "UNSCHEDULE_QUEUE_SIZE",
+        ESCALATION_EXECUTE_STATE_TIME = "ESCALATION_EXECUTE_STATE_TIME";
     // using tree due to ordering capabilities
     private final Map _statKeys = new TreeMap();
     private AtomicBoolean _hasStarted = new AtomicBoolean(false);

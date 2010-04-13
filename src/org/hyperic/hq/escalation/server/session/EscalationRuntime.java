@@ -46,6 +46,7 @@ import org.hyperic.hibernate.Util;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.TransactionListener;
 import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
+import org.hyperic.util.stats.ConcurrentStatsCollector;
 
 /**
  * This class manages the runtime execution of escalation chains.  The
@@ -407,7 +408,11 @@ class EscalationRuntime {
     private void runEscalation(Integer stateId) {
         final boolean debug = _log.isDebugEnabled();
         if (debug) _log.debug("Running escalation state [" + stateId + "]");
+        final long start = System.currentTimeMillis();
         _esclMan.executeState(stateId);
+        final long end = System.currentTimeMillis();
+        ConcurrentStatsCollector.getInstance().addStat(
+            (end-start), ConcurrentStatsCollector.ESCALATION_EXECUTE_STATE_TIME);
     }
     
     public static EscalationRuntime getInstance() {
