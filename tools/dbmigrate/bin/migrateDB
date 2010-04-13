@@ -8,7 +8,7 @@ my ($sourceUser, $sourcePass, $targetUser, $targetPass);
 my ($sourceUrl, $targetUrl, $debug);
 
 my $BASEDIR = dirname($0);
-my $LIBS = "-cp ../lib/dbunit-2.2.jar:../lib/mysql-connector-java-5.0.5-bin.jar:../lib/postgresql-8.1-407.jdbc3.jar:../lib/dbmigrate.jar";
+my $LIBS = "-cp $BASEDIR/../lib/dbunit-2.2.jar:$BASEDIR/../lib/mysql-connector-java-5.0.5-bin.jar:$BASEDIR/../lib/postgresql-8.1-407.jdbc3.jar:$BASEDIR/../lib/dbmigrate.jar";
 my $ARGS = "-Xms1536m -Xmx1536m";
 
 sub main() {
@@ -47,7 +47,7 @@ sub getArgs() {
                "vmargs=s" => \$ARGS,
                "d" => \$debug,
                "debug" => \$debug) || printUsage() && exit(1);
-    if ($count == 0) {
+    if ($count == 0 || ($count == 1 && $debug)) {
         printUsage();
         exit(0);
     }
@@ -99,5 +99,6 @@ sub printUsage() {
     print "$sp -g, --targeturl  => target mysql url (e.g. jdbc:mysql://localhost:3306/hqdb)\n";
     print "$sp -d, --debug      => prints debugging statetments to STDOUT\n";
     print "$sp --vmargs         => java vm args, default = \"$ARGS\"\n";
+    print "$sp ARGS             => $LIBS\n" if ($debug);
 }
 
