@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.hibernate.ObjectNotFoundException;
 import org.hibernate.SessionFactory;
+import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.ServerType;
@@ -49,12 +50,24 @@ import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.context.TestContextLoader;
+import org.hyperic.hq.escalation.server.session.Escalatable;
+import org.hyperic.hq.events.AlertFiredEvent;
 import org.hyperic.hq.events.EventConstants;
+import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.AlertManager;
+import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEvent;
+import org.hyperic.hq.measurement.server.session.Category;
+import org.hyperic.hq.measurement.server.session.Measurement;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
+import org.hyperic.hq.measurement.server.session.MonitorableType;
+import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.hq.product.ServiceTypeInfo;
+import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.pager.PageControl;
+import org.hyperic.util.pager.PageList;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -63,6 +76,8 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * Integration test of the {@link AlertManagerImpl}
@@ -108,6 +123,9 @@ public class AlertManagerTest {
     @Autowired
     private ServiceManager serviceManager;
 
+    @Autowired
+    private MeasurementManager measurementManager;
+
     private AlertDefinition testPlatformAlertDef;
 
     private AlertDefinition testServerAlertDef;
@@ -119,6 +137,8 @@ public class AlertManagerTest {
     private Server testServer;
 
     private Service testService;
+
+    private ResourceGroup resGrp;
 
     // private Alert testPlatformAlert;
 
@@ -349,15 +369,18 @@ public class AlertManagerTest {
         // Create Platform Alert Definition
         this.testPlatformAlertDef = createAlertDefinition(testPlatform.getId(),
             AppdefEntityConstants.APPDEF_TYPE_PLATFORM, "Platform Down");
+        this.testPlatformAlertDef.setPriority(3);
         // Create Server Alert Definition
         Server testServer = testPlatform.getServers().iterator().next();
         Integer serverAppDefId = testServer.getId();
         this.testServerAlertDef = createAlertDefinition(serverAppDefId,
             AppdefEntityConstants.APPDEF_TYPE_SERVER, "Server Down");
+        this.testServerAlertDef.setPriority(2);
         // Create Service Alert Definition
         Integer serviceAppDefId = testServer.getServices().iterator().next().getId();
         this.testServiceAlertDef = createAlertDefinition(serviceAppDefId,
             AppdefEntityConstants.APPDEF_TYPE_SERVICE, "Service Down");
+        this.testServiceAlertDef.setPriority(1);
     }
 
     /*
@@ -387,7 +410,7 @@ public class AlertManagerTest {
         String agentToken = "agentToken123";
         agentManager.createLegacyAgent("127.0.0.1", 2144, "authToken", agentToken, "5.0");
         Platform testPlatform = createResources(agentToken);
-        ResourceGroup resGrp = createResourceGroup(testPlatform);
+        this.resGrp = createResourceGroup(testPlatform);
         createRoles(new Integer[] { resGrp.getId() });
         createResourceAlertDefs(testPlatform);
         // createResourceAlerts();
@@ -507,20 +530,20 @@ public class AlertManagerTest {
         try {
             alertManager.findAlertById(testPlatformAlert.getId());
             fail("Alert was not deleted");
-        }catch(ObjectNotFoundException e) {
-            //expected
+        } catch (ObjectNotFoundException e) {
+            // expected
         }
         try {
             alertManager.findAlertById(testServerAlert.getId());
             fail("Alert was not deleted");
-        }catch(ObjectNotFoundException e) {
-            //expected
+        } catch (ObjectNotFoundException e) {
+            // expected
         }
         try {
             alertManager.findAlertById(testServiceAlert.getId());
             fail("Alert was not deleted");
-        }catch(ObjectNotFoundException e) {
-            //expected
+        } catch (ObjectNotFoundException e) {
+            // expected
         }
     }
 
@@ -539,20 +562,20 @@ public class AlertManagerTest {
         try {
             alertManager.findAlertById(testPlatformAlert.getId());
             fail("Alert was not deleted");
-        }catch(ObjectNotFoundException e) {
-            //expected
+        } catch (ObjectNotFoundException e) {
+            // expected
         }
         try {
             alertManager.findAlertById(testServerAlert.getId());
             fail("Alert was not deleted");
-        }catch(ObjectNotFoundException e) {
-            //expected
+        } catch (ObjectNotFoundException e) {
+            // expected
         }
         try {
             alertManager.findAlertById(testServiceAlert.getId());
             fail("Alert was not deleted");
-        }catch(ObjectNotFoundException e) {
-            //expected
+        } catch (ObjectNotFoundException e) {
+            // expected
         }
     }
 
@@ -579,14 +602,14 @@ public class AlertManagerTest {
         try {
             alertManager.findAlertById(alert3.getId());
             fail("Alert was not deleted");
-        }catch(ObjectNotFoundException e) {
-            //expected
+        } catch (ObjectNotFoundException e) {
+            // expected
         }
-        try {  
+        try {
             alertManager.findAlertById(alert4.getId());
             fail("Alert was not deleted");
-        }catch(ObjectNotFoundException e) {
-            //expected
+        } catch (ObjectNotFoundException e) {
+            // expected
         }
         assertNotNull("Alert5 shouldn't be deleted", alertManager.findAlertById(alert5.getId()));
     }
@@ -610,7 +633,6 @@ public class AlertManagerTest {
         // Verify org.hyperic.hq.events.server.session.PagerProcessor_events
         // updates on AlertValue & ack flag
 
-       
         assertEquals("Alert Value: AlertDefId is incorrect", this.testPlatformAlertDef.getId(),
             alertVal.getAlertDefinition().getId());
         // Verify AlertValue: isAck
@@ -700,6 +722,205 @@ public class AlertManagerTest {
                                                  this.testServiceAlertDef.getAppdefEntityId() }));
     }
 
+    @Test
+    public void testFireAlert() {
+        testPlatformAlertDef.setEnabled(true);
+        AlertFiredEvent event = new AlertFiredEvent(123, testPlatformAlertDef.getId(),
+            testPlatformAlertDef.getAppdefEntityId(), "Platform Down", System.currentTimeMillis(),
+            "Firing Alert-123");
+        TriggerFiredEvent triggerFired = new TriggerFiredEvent(15, event);
+        AlertConditionsSatisfiedZEvent alertZEvent = new AlertConditionsSatisfiedZEvent(
+            testPlatformAlertDef.getId(), new TriggerFiredEvent[] { triggerFired });
+        alertManager.fireAlert(alertZEvent);
+        List<TransactionSynchronization> synchs = TransactionSynchronizationManager
+            .getSynchronizations();
+        for (TransactionSynchronization sync : synchs) {
+            String enclosingMethod = sync.getClass().getEnclosingMethod().getName();
+            if (enclosingMethod.equalsIgnoreCase("registerAlertFiredEvent")) {
+                Class<ClassicEscalatableCreator> c = (Class<ClassicEscalatableCreator>) sync
+                    .getClass().getEnclosingClass();
+                assertEquals("Enclosing class is not ClassicEscalatableCreator", c
+                    .getCanonicalName(),
+                    "org.hyperic.hq.events.server.session.ClassicEscalatableCreator");
+                return;
+            }
+        }
+        fail("Alert Fired Event didn't take place");
+    }
+
+    @Test
+    public void testFindAlertsPageList() throws PermissionException {
+        AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
+        long time1 = System.currentTimeMillis();
+        long time2 = time1 - 2 * 60000l;
+        long time3 = time1 - 4 * 60000l;
+        long time4 = time1 - 6 * 60000l;
+        long time5 = time1 - 8 * 60000l;
+        Alert alert1 = alertManager.createAlert(this.testPlatformAlertDef, time1);
+        Alert alert2 = alertManager.createAlert(this.testPlatformAlertDef, time2);
+        Alert alert3 = alertManager.createAlert(this.testPlatformAlertDef, time3);
+        Alert alert4 = alertManager.createAlert(this.testPlatformAlertDef, time4);
+        Alert alert5 = alertManager.createAlert(this.testPlatformAlertDef, time5);
+        PageList<Alert> actualAlerts = new PageList<Alert>();
+        actualAlerts.add(0, alert1);
+        actualAlerts.add(1, alert2);
+        actualAlerts.add(2, alert3);
+        PageList<Alert> alerts = alertManager.findAlerts(overlord, testPlatformAlertDef
+            .getAppdefEntityId(), time3 - 60000l, time1 + 2 * 6000l, new PageControl());
+        assertEquals("PageList is incorrect", actualAlerts, alerts);
+    }
+
+    @Test
+    public void testFindAlertsByCriteriaWithoutAlertDef() throws PermissionException {
+        AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
+        PageControl pc = new PageControl();
+        PageInfo pi = PageInfo.create(pc, AlertSortField.SEVERITY);
+        long time1 = System.currentTimeMillis();
+        long time2 = time1 - 2 * 60000l;
+        long time3 = time1 - 3 * 60000l;
+        long time4 = time1 - 4 * 60000l;
+        long time5 = time1 - 5 * 60000l;
+        long time6 = time1 - 6 * 60000l;
+        Alert alert1 = alertManager.createAlert(this.testPlatformAlertDef, time1);
+        Alert alert2 = alertManager.createAlert(this.testServerAlertDef, time2);
+        Alert alert3 = alertManager.createAlert(this.testServiceAlertDef, time3);
+        Alert alert4 = alertManager.createAlert(this.testPlatformAlertDef, time4);
+        Alert alert5 = alertManager.createAlert(this.testServerAlertDef, time5);
+        Alert alert6 = alertManager.createAlert(this.testServiceAlertDef, time6);
+        alertManager.setAlertFixed(alert3);
+        alertManager.setAlertFixed(alert4);
+        sessionFactory.getCurrentSession().flush();
+        // Following query should fetch only the platform alert which has
+        // priority 3 & unfixed
+        List<Alert> alerts = alertManager.findAlerts(overlord.getId(), 3, 10 * 60000l,
+            time1 + 2 * 60000l, false, true, resGrp.getId(), pi);
+        assertEquals("Fetched alert Id is wrong", alert1.getId(), alerts.get(0).getId());
+        // For the alerts having priority 3 and without considering fixed flag
+        List<Alert> alerts1 = alertManager.findAlerts(overlord.getId(), 3, 10 * 60000l,
+            time1 + 2 * 60000l, false, false, resGrp.getId(), pi);
+        assertEquals("Wrong alerts count", 2, alerts1.size());
+        // For the alerts that have priority 2 and above and considering fixed
+        // flag
+        List<Alert> alerts2 = alertManager.findAlerts(overlord.getId(), 2, 10 * 60000l,
+            time1 + 2 * 60000l, false, true, resGrp.getId(), pi);
+        assertEquals("Fetched alerts count is wrong", 3, alerts2.size());
+    }
+
+    @Test
+    public void testFindAlertsByCriteriaWithAlertDef() throws PermissionException {
+        AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
+        PageControl pc = new PageControl();
+        PageInfo pi = PageInfo.create(pc, AlertSortField.SEVERITY);
+        long time1 = System.currentTimeMillis();
+        long time2 = time1 - 2 * 60000l;
+        long time3 = time1 - 3 * 60000l;
+        long time4 = time1 - 4 * 60000l;
+        long time5 = time1 - 5 * 60000l;
+        long time6 = time1 - 6 * 60000l;
+        Alert alert1 = alertManager.createAlert(this.testPlatformAlertDef, time1);
+        Alert alert2 = alertManager.createAlert(this.testServerAlertDef, time2);
+        Alert alert3 = alertManager.createAlert(this.testServiceAlertDef, time3);
+        Alert alert4 = alertManager.createAlert(this.testPlatformAlertDef, time4);
+        Alert alert5 = alertManager.createAlert(this.testServerAlertDef, time5);
+        Alert alert6 = alertManager.createAlert(this.testServiceAlertDef, time6);
+        alertManager.setAlertFixed(alert4);
+        alertManager.setAlertFixed(alert5);
+        sessionFactory.getCurrentSession().flush();
+        // Following query should fetch only the platform alerts & unfixed
+        List<Alert> alerts = alertManager.findAlerts(overlord.getId(), 3, 10 * 60000l,
+            time1 + 2 * 60000l, false, true, resGrp.getId(), this.testPlatformAlertDef.getId(), pi);
+        assertEquals("Fetched alert Id is wrong", alert1.getId(), alerts.get(0).getId());
+        // Fetch Server alerts & unfixed
+        List<Alert> alerts1 = alertManager.findAlerts(overlord.getId(), 2, 10 * 60000l,
+            time1 + 2 * 60000l, false, true, resGrp.getId(), this.testServerAlertDef.getId(), pi);
+        assertEquals("Wrong Fetched alerts count", alert2.getId(), alerts1.get(0).getId());
+        // Fetch Service alerts & unfixed
+        List<Alert> alerts2 = alertManager.findAlerts(overlord.getId(), 1, 10 * 60000l,
+            time1 + 2 * 60000l, false, false, resGrp.getId(), this.testServerAlertDef.getId(), pi);
+        assertEquals("Fetched alerts count is wrong", 2, alerts2.size());
+    }
+
+    @Test
+    public void testFindAlertsByCriteriaWithAppDefs() throws PermissionException {
+        AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
+        PageControl pc = new PageControl();
+        PageInfo pi = PageInfo.create(pc, AlertSortField.SEVERITY);
+        long time1 = System.currentTimeMillis();
+        long time2 = time1 - 2 * 60000l;
+        long time3 = time1 - 3 * 60000l;
+        long time4 = time1 - 4 * 60000l;
+        long time5 = time1 - 5 * 60000l;
+        long time6 = time1 - 6 * 60000l;
+        Alert alert1 = alertManager.createAlert(this.testPlatformAlertDef, time1);
+        Alert alert2 = alertManager.createAlert(this.testServerAlertDef, time2);
+        Alert alert3 = alertManager.createAlert(this.testServiceAlertDef, time3);
+        List<Alert> recent3Alerts = new ArrayList<Alert>();
+        recent3Alerts.add(0, alert1);
+        recent3Alerts.add(1, alert2);
+        recent3Alerts.add(2, alert3);
+        Alert alert4 = alertManager.createAlert(this.testPlatformAlertDef, time4);
+        Alert alert5 = alertManager.createAlert(this.testServerAlertDef, time5);
+        Alert alert6 = alertManager.createAlert(this.testServiceAlertDef, time6);
+        List<AppdefEntityID> all = new ArrayList<AppdefEntityID>();
+        all.add(this.testPlatformAlertDef.getAppdefEntityId());
+        all.add(this.testServerAlertDef.getAppdefEntityId());
+        all.add(this.testServiceAlertDef.getAppdefEntityId());
+        // Verify Only 3 *recent* alerts are retrieved; Set count to 3
+        List<Alert> alerts = alertManager.findAlerts(overlord, 3, 1, 10 * 60000l,
+            time1 + 2 * 60000l, all);
+        assertEquals("Recent alerts aren't fetched", recent3Alerts, alerts);
+        // Verify All alerts are retrieved for the list of appDefs
+        List<Alert> alerts1 = alertManager.findAlerts(overlord, 10, 1, 10 * 60000l,
+            time1 + 2 * 60000l, all);
+        assertEquals("All alerts aren't fetched", 6, alerts1.size());
+        all.remove(this.testPlatformAlertDef.getAppdefEntityId());
+        List<Alert> alerts2 = alertManager.findAlerts(overlord, 10, 1, 10 * 60000l,
+            time1 + 2 * 60000l, all);
+        assertEquals("Alerts aren't fetched correctly", 4, alerts2.size());
+    }
+
+    @Test
+    public void testFindEscalatable() throws PermissionException {
+        AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
+        long time1 = System.currentTimeMillis();
+        testPlatformAlertDef.setEnabled(true);
+        List<AppdefEntityID> platformAppDef = new ArrayList<AppdefEntityID>();
+        platformAppDef.add(this.testPlatformAlertDef.getAppdefEntityId());
+        AlertFiredEvent event = new AlertFiredEvent(123, testPlatformAlertDef.getId(),
+            testPlatformAlertDef.getAppdefEntityId(), "Platform Down", time1, "Firing Alert-123");
+        TriggerFiredEvent triggerFired = new TriggerFiredEvent(15, event);
+        AlertConditionsSatisfiedZEvent alertZEvent = new AlertConditionsSatisfiedZEvent(
+            testPlatformAlertDef.getId(), new TriggerFiredEvent[] { triggerFired });
+        alertManager.fireAlert(alertZEvent);
+        List<Escalatable> escList = alertManager.findEscalatables(overlord, 1, 3, 5 * 60000l,
+            time1 + 2 * 60000l, platformAppDef);
+        assertNotNull(escList);
+        assertEquals("Wrong Short Reason", escList.get(0).getShortReason(),
+            "Platform Down leela.local ");
+    }
+
+    @Test
+    public void testGetUnfixedCount() throws PermissionException {
+        AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
+        long time1 = System.currentTimeMillis();
+        long time2 = time1 - 2 * 60000l;
+        long time3 = time1 - 3 * 60000l;
+        long time4 = time1 - 4 * 60000l;
+        long time5 = time1 - 5 * 60000l;
+        long time6 = time1 - 6 * 60000l;
+        Alert alert1 = alertManager.createAlert(this.testPlatformAlertDef, time1);
+        Alert alert2 = alertManager.createAlert(this.testServerAlertDef, time2);
+        Alert alert3 = alertManager.createAlert(this.testServiceAlertDef, time3);
+        Alert alert4 = alertManager.createAlert(this.testPlatformAlertDef, time4);
+        Alert alert5 = alertManager.createAlert(this.testServerAlertDef, time5);
+        Alert alert6 = alertManager.createAlert(this.testServiceAlertDef, time6);
+        alertManager.setAlertFixed(alert3);
+        alertManager.setAlertFixed(alert4);
+        sessionFactory.getCurrentSession().flush();
+        int unfixedCounts = alertManager.getUnfixedCount(overlord.getId(), 10 * 60000l,
+            time1 + 60000l, resGrp.getId());
+        assertEquals("Unfixed alerts count is incorrect", 4, unfixedCounts);
+    }
 
     @Test
     public void testShortReasonForThresholdType() {
@@ -730,7 +951,7 @@ public class AlertManagerTest {
             "Platform Down leela.local Baseline (baseline threshold) ", alertManager
                 .getShortReason(testPlatformAlert));
     }
-    
+
     @Test
     public void testShortReasonForControlType() {
         long ctime = System.currentTimeMillis();
@@ -741,11 +962,10 @@ public class AlertManagerTest {
         testPlatformAlert.createConditionLog("controlValue", cond);
         // Short reason text is:
         // "<AlertDefName> <AppDefEntityName> <conditionName>"
-        assertEquals("Incorrect Short Reason",
-            "Platform Down leela.local Control", alertManager
-                .getShortReason(testPlatformAlert));
+        assertEquals("Incorrect Short Reason", "Platform Down leela.local Control", alertManager
+            .getShortReason(testPlatformAlert));
     }
-    
+
     @Test
     public void testShortReasonForChangeType() {
         long ctime = System.currentTimeMillis();
@@ -756,11 +976,10 @@ public class AlertManagerTest {
         testPlatformAlert.createConditionLog("changeValue", cond);
         // Short reason text is:
         // "<AlertDefName> <AppDefEntityName> <conditionName> (<conditionValue>) "
-        assertEquals("Incorrect Short Reason",
-            "Platform Down leela.local Change (changeValue) ", alertManager
-                .getShortReason(testPlatformAlert));
+        assertEquals("Incorrect Short Reason", "Platform Down leela.local Change (changeValue) ",
+            alertManager.getShortReason(testPlatformAlert));
     }
-    
+
     @Test
     public void testShortReasonForCustPropertyType() {
         long ctime = System.currentTimeMillis();
@@ -775,7 +994,7 @@ public class AlertManagerTest {
             "Platform Down leela.local CustomProperty (customPropertyValue) ", alertManager
                 .getShortReason(testPlatformAlert));
     }
-    
+
     @Test
     public void testShortReasonForLogType() {
         long ctime = System.currentTimeMillis();
@@ -786,11 +1005,10 @@ public class AlertManagerTest {
         testPlatformAlert.createConditionLog("logValue", cond);
         // Short reason text is:
         // "<AlertDefName> <AppDefEntityName> Log (<conditionValue>) "
-        assertEquals("Incorrect Short Reason",
-            "Platform Down leela.local Log (logValue) ", alertManager
-                .getShortReason(testPlatformAlert));
+        assertEquals("Incorrect Short Reason", "Platform Down leela.local Log (logValue) ",
+            alertManager.getShortReason(testPlatformAlert));
     }
-    
+
     @Test
     public void testShortReasonForConfigChangeType() {
         long ctime = System.currentTimeMillis();
@@ -805,4 +1023,229 @@ public class AlertManagerTest {
             "Platform Down leela.local Config changed (configValue) ", alertManager
                 .getShortReason(testPlatformAlert));
     }
+
+    @Test
+    public void testLongReasonForThresholdType() throws ApplicationException {
+        long ctime = System.currentTimeMillis();
+        Alert testPlatformAlert = alertManager.createAlert(this.testPlatformAlertDef, ctime);
+        AlertCondition cond = new AlertCondition();
+        cond.setName("AvailabilityName");
+        cond.setType(EventConstants.TYPE_THRESHOLD);
+        cond.setComparator("<");
+        cond.setThreshold(1);
+        int appDefType = testPlatform.getResource().getResourceType().getAppdefType();
+        MonitorableType monitor_Type = new MonitorableType("Platform monitor", appDefType, "test");
+        Category cate = new Category("Test Category");
+        sessionFactory.getCurrentSession().save(monitor_Type);
+        sessionFactory.getCurrentSession().save(cate);
+        MeasurementTemplate testTempl = new MeasurementTemplate("AvailabilityTemplate", "avail",
+            "percentage", 1, true, 60000l, true, "Availability:avail", monitor_Type, cate, "test");
+        sessionFactory.getCurrentSession().save(testTempl);
+        List<Measurement> meas = measurementManager.createMeasurements(this.testPlatform
+            .getEntityId(), new Integer[] { testTempl.getId() }, new long[] { 60000l },
+            new ConfigResponse());
+        cond.setMeasurementId(meas.get(0).getId());
+        testPlatformAlert.createConditionLog("50", cond);
+        // Long reason text is: //
+        // "    If <AlertConditionName>  <Threshold with unit> (actual value = <actual value>)"
+        String longReason = alertManager.getLongReason(testPlatformAlert);
+        assertEquals("Incorrect Long Reason",
+            "\n    If AvailabilityName < 100.0% (actual value = 50)", longReason);
+    }
+
+    @Test
+    public void testLongReasonForBaselineType() throws ApplicationException {
+        long ctime = System.currentTimeMillis();
+        Alert testPlatformAlert = alertManager.createAlert(this.testPlatformAlertDef, ctime);
+        AlertCondition cond = new AlertCondition();
+        cond.setName("Heap Memory");
+        cond.setType(EventConstants.TYPE_BASELINE);
+        cond.setComparator("<");
+        cond.setThreshold(75);
+        int appDefType = testPlatform.getResource().getResourceType().getAppdefType();
+        MonitorableType monitor_Type = new MonitorableType("Platform monitor", appDefType, "test");
+        Category cate = new Category("Test Category");
+        sessionFactory.getCurrentSession().save(monitor_Type);
+        sessionFactory.getCurrentSession().save(cate);
+        MeasurementTemplate testTempl = new MeasurementTemplate("HeapMemoryTemplate", "avail",
+            "percentage", 1, true, 60000l, true, "Availability:avail", monitor_Type, cate, "test");
+        sessionFactory.getCurrentSession().save(testTempl);
+        List<Measurement> meas = measurementManager.createMeasurements(this.testPlatform
+            .getEntityId(), new Integer[] { testTempl.getId() }, new long[] { 60000l },
+            new ConfigResponse());
+        cond.setMeasurementId(meas.get(0).getId());
+        testPlatformAlert.createConditionLog("50", cond);
+        // Long reason text is: //
+        // "    If <AlertConditionName>  <Threshold with unit> (actual value = <actual value>)"
+        String longReason = alertManager.getLongReason(testPlatformAlert);
+        assertEquals("Incorrect Long Reason",
+            "\n    If Heap Memory < 75.0% of Baseline (actual value = 50)", longReason);
+    }
+
+    @Test
+    public void testLongReasonForControlType() throws ApplicationException {
+        long ctime = System.currentTimeMillis();
+        Alert testPlatformAlert = alertManager.createAlert(this.testPlatformAlertDef, ctime);
+        AlertCondition cond = new AlertCondition();
+        cond.setName("Control Type Reason");
+        cond.setType(EventConstants.TYPE_CONTROL);
+        int appDefType = testPlatform.getResource().getResourceType().getAppdefType();
+        MonitorableType monitor_Type = new MonitorableType("Platform monitor", appDefType, "test");
+        Category cate = new Category("Test Category");
+        sessionFactory.getCurrentSession().save(monitor_Type);
+        sessionFactory.getCurrentSession().save(cate);
+        MeasurementTemplate testTempl = new MeasurementTemplate("ControlTemplate", "avail",
+            "percentage", 1, true, 60000l, true, "Availability:avail", monitor_Type, cate, "test");
+        sessionFactory.getCurrentSession().save(testTempl);
+        List<Measurement> meas = measurementManager.createMeasurements(this.testPlatform
+            .getEntityId(), new Integer[] { testTempl.getId() }, new long[] { 60000l },
+            new ConfigResponse());
+        cond.setMeasurementId(meas.get(0).getId());
+        testPlatformAlert.createConditionLog("50", cond);
+        // Long reason text is: //
+        // "    If <AlertConditionName>)"
+        String longReason = alertManager.getLongReason(testPlatformAlert);
+        assertEquals("Incorrect Long Reason", "\n    If Control Type Reason", longReason);
+    }
+
+    @Test
+    public void testLongReasonForChangeType() throws ApplicationException {
+        long ctime = System.currentTimeMillis();
+        Alert testPlatformAlert = alertManager.createAlert(this.testPlatformAlertDef, ctime);
+        AlertCondition cond = new AlertCondition();
+        cond.setName("Change Config");
+        cond.setType(EventConstants.TYPE_CHANGE);
+        int appDefType = testPlatform.getResource().getResourceType().getAppdefType();
+        MonitorableType monitor_Type = new MonitorableType("Platform monitor", appDefType, "test");
+        Category cate = new Category("Test Category");
+        sessionFactory.getCurrentSession().save(monitor_Type);
+        sessionFactory.getCurrentSession().save(cate);
+        MeasurementTemplate testTempl = new MeasurementTemplate("ChangeConfigemplate", "avail",
+            "percentage", 1, true, 60000l, true, "Availability:avail", monitor_Type, cate, "test");
+        sessionFactory.getCurrentSession().save(testTempl);
+        List<Measurement> meas = measurementManager.createMeasurements(this.testPlatform
+            .getEntityId(), new Integer[] { testTempl.getId() }, new long[] { 60000l },
+            new ConfigResponse());
+        cond.setMeasurementId(meas.get(0).getId());
+        testPlatformAlert.createConditionLog("50", cond);
+        // Long reason text is: //
+        // "    If <AlertConditionName>  value changed (New value: <actual value>)"
+        String longReason = alertManager.getLongReason(testPlatformAlert);
+        assertEquals("Incorrect Long Reason",
+            "\n    If Change Config value changed (New value: 50)", longReason);
+    }
+
+    @Test
+    public void testLongReasonForCustPropertyType() throws ApplicationException {
+        long ctime = System.currentTimeMillis();
+        Alert testPlatformAlert = alertManager.createAlert(this.testPlatformAlertDef, ctime);
+        AlertCondition cond = new AlertCondition();
+        cond.setName("Custom Property");
+        cond.setType(EventConstants.TYPE_CUST_PROP);
+        int appDefType = testPlatform.getResource().getResourceType().getAppdefType();
+        MonitorableType monitor_Type = new MonitorableType("Platform monitor", appDefType, "test");
+        Category cate = new Category("Test Category");
+        sessionFactory.getCurrentSession().save(monitor_Type);
+        sessionFactory.getCurrentSession().save(cate);
+        MeasurementTemplate testTempl = new MeasurementTemplate("CustomPropertyTemplate", "avail",
+            "percentage", 1, true, 60000l, true, "Availability:avail", monitor_Type, cate, "test");
+        sessionFactory.getCurrentSession().save(testTempl);
+        List<Measurement> meas = measurementManager.createMeasurements(this.testPlatform
+            .getEntityId(), new Integer[] { testTempl.getId() }, new long[] { 60000l },
+            new ConfigResponse());
+        cond.setMeasurementId(meas.get(0).getId());
+        testPlatformAlert.createConditionLog("50", cond);
+        // Long reason text is: //
+        // "    If <AlertConditionName> value changed \n    <actual value>"
+        String longReason = alertManager.getLongReason(testPlatformAlert);
+        assertEquals("Incorrect Long Reason", "\n    If Custom Property value changed\n    50",
+            longReason);
+    }
+
+    @Test
+    public void testLongReasonForLogType() throws ApplicationException {
+        long ctime = System.currentTimeMillis();
+        Alert testPlatformAlert = alertManager.createAlert(this.testPlatformAlertDef, ctime);
+        AlertCondition cond = new AlertCondition();
+        // Set INFO level string
+        cond.setName("6");
+        cond.setType(EventConstants.TYPE_LOG);
+        // Set matching substring
+        cond.setOptionStatus("server startup");
+        int appDefType = testPlatform.getResource().getResourceType().getAppdefType();
+        MonitorableType monitor_Type = new MonitorableType("Platform monitor", appDefType, "test");
+        Category cate = new Category("Test Category");
+        sessionFactory.getCurrentSession().save(monitor_Type);
+        sessionFactory.getCurrentSession().save(cate);
+        MeasurementTemplate testTempl = new MeasurementTemplate("LogTemplate", "avail",
+            "percentage", 1, true, 60000l, true, "Availability:avail", monitor_Type, cate, "test");
+        sessionFactory.getCurrentSession().save(testTempl);
+        List<Measurement> meas = measurementManager.createMeasurements(this.testPlatform
+            .getEntityId(), new Integer[] { testTempl.getId() }, new long[] { 60000l },
+            new ConfigResponse());
+        cond.setMeasurementId(meas.get(0).getId());
+        testPlatformAlert.createConditionLog("log value", cond);
+        // Long reason text is: //
+        // "    If Event/Log Level(<LogLevel>) and matching substring "<OptionStatus>"\n    Log: <value>"
+        String longReason = alertManager.getLongReason(testPlatformAlert);
+        assertEquals(
+            "Incorrect Long Reason",
+            "\n    If Event/Log Level(INF) and matching substring \"server startup\"\n    Log: log value",
+            longReason);
+    }
+
+    @Test
+    public void testLongReasonForConfigChangeType() throws ApplicationException {
+        long ctime = System.currentTimeMillis();
+        Alert testPlatformAlert = alertManager.createAlert(this.testPlatformAlertDef, ctime);
+        AlertCondition cond = new AlertCondition();
+        cond.setName("Config Change");
+        cond.setType(EventConstants.TYPE_CFG_CHG);
+        cond.setOptionStatus("platform.properties");
+        int appDefType = testPlatform.getResource().getResourceType().getAppdefType();
+        MonitorableType monitor_Type = new MonitorableType("Platform monitor", appDefType, "test");
+        Category cate = new Category("Test Category");
+        sessionFactory.getCurrentSession().save(monitor_Type);
+        sessionFactory.getCurrentSession().save(cate);
+        MeasurementTemplate testTempl = new MeasurementTemplate("LogTemplate", "avail",
+            "percentage", 1, true, 60000l, true, "Availability:avail", monitor_Type, cate, "test");
+        sessionFactory.getCurrentSession().save(testTempl);
+        List<Measurement> meas = measurementManager.createMeasurements(this.testPlatform
+            .getEntityId(), new Integer[] { testTempl.getId() }, new long[] { 60000l },
+            new ConfigResponse());
+        cond.setMeasurementId(meas.get(0).getId());
+        testPlatformAlert.createConditionLog("config change value", cond);
+        // Long reason text is: //
+        // "    If Config changed: <OptionStatus>\n    Details: <value>"
+        String longReason = alertManager.getLongReason(testPlatformAlert);
+        assertEquals("Incorrect Long Reason",
+            "\n    If Config changed: platform.properties\n    Details: config change value",
+            longReason);
+    }
+
+    /*@Test
+    public void testHandleSubjectRemoval() {
+        AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
+        Action alertAction = Action.newNoOpAction();
+        // Save transient instance of Action before flushing
+        sessionFactory.getCurrentSession().save(alertAction);
+        long ctime = System.currentTimeMillis();
+        Alert testPlatformAlert = alertManager.createAlert(this.testPlatformAlertDef, ctime);
+        testPlatformAlert.createActionLog("Notified users:", alertAction, overlord); // Flush
+                                                                                     // the
+                                                                                     // changes
+        sessionFactory.getCurrentSession().flush();
+        Collection<AlertActionLog> alertActionLogs = testPlatformAlert.getActionLog();
+        for (AlertActionLog actionLog : alertActionLogs) {
+            assertNotNull(actionLog.getSubject());
+        }
+        alertManager.handleSubjectRemoval(overlord);
+        sessionFactory.getCurrentSession().flush();
+        // Now retrieve the alertaction log bag again
+        alertActionLogs = testPlatformAlert.getActionLog();
+        for (AlertActionLog actionLog : alertActionLogs) {
+        TODO://The test fails here:Need to look into it
+            assertNull(actionLog.getSubject());
+        }
+    }*/
 }

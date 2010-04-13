@@ -37,7 +37,7 @@ public class MonitorableType
     protected MonitorableType() {
     }
     
-    MonitorableType(String name, int appdefType, String plugin) {
+    public MonitorableType(String name, int appdefType, String plugin) {
         _name       = name;
         _appdefType = appdefType;
         _plugin     = plugin;
