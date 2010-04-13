@@ -1,5 +1,7 @@
 package org.hyperic.hq.security;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
@@ -10,8 +12,11 @@ import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.util.ConfigPropertyException;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.GrantedAuthorityImpl;
 
 /**
  * This class is responsible for authenticating a user using HQ's internal user
@@ -67,7 +72,12 @@ public class InternalAuthenticationProvider implements AuthenticationProvider {
                 throw lastException;
             }
         }
-        return null;
+       //Return a token for guest user
+        List<GrantedAuthority> grantedAuthorities = new ArrayList<GrantedAuthority>();
+        // ...TODO right now, every user is given the "ROLE USER" grant authority, once we fully integrate with
+        // spring security this should be updated with a better approach...
+        grantedAuthorities.add(new GrantedAuthorityImpl("ROLE_USER"));
+        return new UsernamePasswordAuthenticationToken(username, password, grantedAuthorities);
     }
 
     public boolean supports(Class<? extends Object> authentication) {
