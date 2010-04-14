@@ -582,7 +582,7 @@
     <property name="generate-manifest.notrequired" value="true" />
   </target>
 
-  <target name="pack-test">
+  <target name="pack-test" depends="pack-war">
     <mkdir dir="${war.dir}" />
     <mkdir dir="${war.dir}/WEB-INF/lib" />
 
@@ -668,7 +668,7 @@
  
   
   <target name="pack-war" description="Create the war directory structure ( use if you modify .jsp or other web files, but no sources )"
-          depends="pack-ear,pack-test">
+          depends="pack-ear">
     <mkdir dir="${war.dir}" />
     <mkdir dir="${war.dir}/WEB-INF/lib" />
     
@@ -765,7 +765,7 @@
       <include name="org/apache/taglibs/display/**" />
     </jar>
 
-    <!-- Pack ROOT.war used for startup progress -->
+  	<!-- Pack ROOT.war used for startup progress -->
     <mkdir dir="${ROOT.war}" />
     <mkdir dir="${ROOT.war}/WEB-INF" />
     <mkdir dir="${ROOT.war}/WEB-INF/lib" />
