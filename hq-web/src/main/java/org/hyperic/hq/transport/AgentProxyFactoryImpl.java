@@ -29,10 +29,9 @@ import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.transport.util.AsynchronousInvoker;
 import org.jboss.remoting.transporter.TransporterClient;
 
-
 /**
- * The factory class for creating proxies to agent services. Note that proxy 
- * invocations are not thread-safe and must be synchronized externally if 
+ * The factory class for creating proxies to agent services. Note that proxy
+ * invocations are not thread-safe and must be synchronized externally if
  * multiple threads are making invocations on the same proxy.
  * 
  * The unidirectional transport is not supported for a .ORG instance.
@@ -40,66 +39,64 @@ import org.jboss.remoting.transporter.TransporterClient;
 public class AgentProxyFactoryImpl implements AgentProxyFactory {
 
     private final AsynchronousInvoker _invoker;
-    
+
     /**
      * Create an instance.
      * 
-     * @param invoker The asynchronous invoker that will be used for any 
-     *                async service calls.
-     * @throws NullPointerException if the asynchronous invoker is <code>null</code>.               
+     * @param invoker The asynchronous invoker that will be used for any async
+     *        service calls.
+     * @throws NullPointerException if the asynchronous invoker is
+     *         <code>null</code>.
      */
     public AgentProxyFactoryImpl(AsynchronousInvoker invoker) {
         if (invoker == null) {
             throw new NullPointerException("async invoker is null");
         }
-        
+
         _invoker = invoker;
     }
-    
+
     /**
-     * @return The asynchronous invoker that will be used for any async 
-     *         service calls.
+     * @return The asynchronous invoker that will be used for any async service
+     *         calls.
      */
     protected final AsynchronousInvoker getAsynchronousInvoker() {
         return _invoker;
     }
-    
+
     /**
-     * @see org.hyperic.hq.transport.AgentProxyFactory#createSyncService(Agent, java.lang.Class)
+     * @see org.hyperic.hq.transport.AgentProxyFactory#createSyncService(Agent,
+     *      java.lang.Class)
      */
     public Object createSyncService(Agent agent, Class serviceInterface) throws Exception {
-        
+
         if (agent.isUnidirectional()) {
-            throw new UnsupportedOperationException(
-                    ".ORG instance does not support the unidirectional transport.");
+            throw new UnsupportedOperationException(".ORG instance does not support the unidirectional transport.");
         } else {
             // TODO need to implement bidirectional
             throw new UnsupportedOperationException("bidirectional not supported yet");
         }
     }
-    
+
     /**
-     * @see org.hyperic.hq.transport.AgentProxyFactory#createAsyncService(Agent, java.lang.Class, boolean)
+     * @see org.hyperic.hq.transport.AgentProxyFactory#createAsyncService(Agent,
+     *      java.lang.Class, boolean)
      */
-    public Object createAsyncService(Agent agent, 
-                                     Class serviceInterface,
-                                     boolean guaranteed) throws Exception {
+    public Object createAsyncService(Agent agent, Class serviceInterface, boolean guaranteed) throws Exception {
         if (agent.isUnidirectional()) {
-            throw new UnsupportedOperationException(
-                ".ORG instance does not support the unidirectional transport.");
+            throw new UnsupportedOperationException(".ORG instance does not support the unidirectional transport.");
         } else {
             // TODO need to implement bidirectional
             throw new UnsupportedOperationException("bidirectional not supported yet");
-        }        
+        }
     }
-    
+
     /**
      * @see org.hyperic.hq.transport.AgentProxyFactory#destroyService(java.lang.Object)
      */
     public void destroyService(Object proxy) {
-      //TODO : remoting uncomment
         if (proxy != null) {
-            TransporterClient.destroyTransporterClient(proxy);            
+            TransporterClient.destroyTransporterClient(proxy);
         }
     }
 

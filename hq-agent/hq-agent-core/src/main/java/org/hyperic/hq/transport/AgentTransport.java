@@ -81,7 +81,6 @@ public class AgentTransport {
                           int asyncThreadPoolSize) throws Exception {
         
         _unidirectional = unidirectional;
-      //TODO : remoting uncomment
         
         InvokerLocator remotingServerInvokerLocator;
         

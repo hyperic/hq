@@ -49,7 +49,7 @@ public final class AgentTransportLifecycleImpl implements AgentTransportLifecycl
     
     private static final Log _log = LogFactory.getLog(AgentTransportLifecycleImpl.class);
     
-    private static final String REMOTE_TRANSPORT_LOCATOR_PATH = "transport/ServerInvokerServlet";
+    private static final String REMOTE_TRANSPORT_LOCATOR_PATH = "ServerInvokerServlet";
     
     private final Object _lock = new Object();
     private final AgentDaemon _agent;
@@ -193,7 +193,6 @@ public final class AgentTransportLifecycleImpl implements AgentTransportLifecycl
         
         if (_agentTransport != null) {
             synchronized (_lock) {
-              //TODO : remoting uncomment
                 _remoteTransportLocator = _agentTransport.getRemoteEndpointLocator();
             }
             
@@ -224,7 +223,6 @@ public final class AgentTransportLifecycleImpl implements AgentTransportLifecycl
             _agentTransport = null;
             
             synchronized (_lock) {
-              //TODO : remoting uncomment
                _remoteTransportLocator = null;
             }
         }

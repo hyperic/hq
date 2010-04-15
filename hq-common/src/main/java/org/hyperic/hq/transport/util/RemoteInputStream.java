@@ -47,7 +47,6 @@ import org.jboss.remoting.transporter.TransporterClient;
 public class RemoteInputStream 
     extends InputStream implements Externalizable {
     
-  //TODO : remoting uncomment
     private InvokerLocator _sourceInvokerLocator;
     
     private String _streamId;
@@ -187,8 +186,7 @@ public class RemoteInputStream
             _closed = true;
 
             if (_streamService != null) {
-              //TODO : remoting uncomment
-                //TransporterClient.destroyTransporterClient(_streamService);
+                TransporterClient.destroyTransporterClient(_streamService);
                 _streamService = null;
             }
             
@@ -237,7 +235,6 @@ public class RemoteInputStream
         }
 
         return _streamService;
-       // return null;
     }
 
 }

@@ -88,7 +88,6 @@ public class AgentCommandsService implements AgentCommandsClient {
         }
         
         RemoteInputStream inStream = (RemoteInputStream)streams[0];
-      //TODO : remoting uncomment
         
         try {
             inStream.setRemoteSourceInvokerLocator(

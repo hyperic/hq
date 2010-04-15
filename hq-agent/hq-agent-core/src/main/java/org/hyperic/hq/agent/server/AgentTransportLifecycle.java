@@ -65,7 +65,6 @@ public interface AgentTransportLifecycle extends AgentNotificationHandler {
      * @return The invoker locator to the remote (server-side) transport or 
      *         <code>null</code> if the agent transport has not been started.
      */
-    //TODO : remoting uncomment
     InvokerLocator getRemoteTransportLocator();
 
 }

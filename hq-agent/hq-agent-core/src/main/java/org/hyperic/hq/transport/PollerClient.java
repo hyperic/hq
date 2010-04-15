@@ -58,7 +58,6 @@ public interface PollerClient {
      * @return The invoker locator for the remote end point to which this poller 
      *         client is connected (the Poller Service end point).
      */
-    //TODO : remoting uncomment
     InvokerLocator getRemoteEndpointLocator();
 
 }

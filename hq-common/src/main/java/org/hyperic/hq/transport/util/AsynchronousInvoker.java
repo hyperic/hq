@@ -63,7 +63,7 @@ public class AsynchronousInvoker {
                                             poolSize, 
                                             Long.MAX_VALUE, 
                                             TimeUnit.NANOSECONDS, 
-                                            new LinkedBlockingQueue(), 
+                                            new LinkedBlockingQueue<Runnable>(), 
                                             tFactory,
                                             new ThreadPoolExecutor.AbortPolicy());
     }

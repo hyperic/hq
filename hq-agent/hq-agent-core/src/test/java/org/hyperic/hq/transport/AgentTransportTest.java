@@ -49,7 +49,6 @@ public class AgentTransportTest extends TestCase {
      * This is the .ORG instance so we expect a ClassNotFoundException.
      */
     public void testUseUnidirectionalTransport() throws Exception {
-        //TODO : remoting uncomment
         try {
             InetSocketAddress addr = new InetSocketAddress("localhost", 6066);
             new AgentTransport(addr, null, false, "token", true, 10, 2);
