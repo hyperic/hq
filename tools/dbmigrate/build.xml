@@ -23,7 +23,7 @@
   </path>
 
   <target name="compile" depends="init" description="compile the source">
-    <javac srcdir="${src}" destdir="${classes}">
+    <javac srcdir="${src}" destdir="${classes}" debug="yes">
       <classpath refid='my.class.path' />
     </javac>
   </target>

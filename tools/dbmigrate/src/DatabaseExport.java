@@ -1,5 +1,7 @@
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.PreparedStatement;
@@ -40,23 +42,99 @@ public class DatabaseExport {
     private static String _targetUser;
     private static String _sourcePass;
     private static String _sourceUser;
+    private static PrintStream _out;
     private static final String _logCtx = DatabaseExport.class.getName();
+    private static final String LOG_FILE = "dbmigration.log";
 
     public static void main(String[] args) throws Exception {
         final long start = System.currentTimeMillis();
         getArgs(args);
+        String fs = File.separator;
+        String logFile = _workingDir + fs + LOG_FILE;
+        _out = new PrintStream(logFile);
         Connection connExp = getConnectionExport();
-        _tables = Collections.unmodifiableList(getTables(connExp, _sourceUser));
-        exportDataSetPerTable(connExp);
         Connection connImp = getConnectionImport();
-        importDataSetPerTable(connImp);
-        importBigTables(connExp, connImp);
-        importSequences(connImp);
-        connImp.commit();
-        connExp.close();
-        connImp.close();
-        System.out.println("process took " +
-            (System.currentTimeMillis()-start)/1000/60/60 + " hours");
+        try {
+            checkSchemaSpecVersions(connExp, connImp);
+            System.out.println("Starting dbmigration.  To monitor progress tail file: " + logFile);
+            _tables = Collections.unmodifiableList(getTables(connExp, _sourceUser));
+            exportDataSetPerTable(connExp);
+            importDataSetPerTable(connImp);
+            importBigTables(connExp, connImp);
+            importSequences(connImp);
+            connImp.commit();
+            validateTransfer(connExp, connImp);
+            final long end = System.currentTimeMillis();
+            System.out.println("migration successful, process took " + (end-start)/1000/60/60 +
+                               " hours");
+        } finally {
+            connExp.close();
+            connImp.close();
+            _out.close();
+        }
+    }
+
+    private static void validateTransfer(Connection connExp, Connection connImp) throws Exception {
+        for (final String table : _tables) {
+            _out.println("validating table=" + table);
+            int rowsExp = getNumRows(connExp, table);
+            int rowsImp = getNumRows(connImp, table);
+            if (rowsExp != rowsImp) {
+                throw new Exception("ERROR: validation failed for table=" + table +
+                                    ", has " + rowsExp + " rows in source vs " + rowsImp + 
+                                    " rows in target");
+            }
+        }
+        _out.println("validation successful");
+    }
+
+    private static int getNumRows(Connection conn, String table) throws SQLException {
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = conn.createStatement();
+            String sql = "select count(*) from " + table;
+            rs = stmt.executeQuery(sql);
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+            return 0;
+        } finally {
+            DBUtil.close(_logCtx, null, stmt, rs);
+        }
+    }
+
+    private static void checkSchemaSpecVersions(Connection connExp, Connection connImp)
+    throws Exception {
+        String schemaSpecExp = getSchemaSpec(connExp);
+        String schemaSpecImp = getSchemaSpec(connImp);
+        if (schemaSpecExp == null) {
+            throw new Exception("ERROR: HQ schema version not found in source database");
+        } else if (schemaSpecImp == null) {
+            throw new Exception("ERROR: HQ schema version not found in target database");
+        } else if (!schemaSpecExp.equals(schemaSpecImp)) {
+            throw new Exception("ERROR: schema spec versions of the source and target databases " +
+                                "do not match.  Make sure both databases are running the same " +
+                                "version of HQ.  Most likely solution is to upgrade the source " +
+                                "database.  sourceSpec=" + schemaSpecExp + 
+                                ", targetSpec=" + schemaSpecImp);
+        }
+    }
+
+    private static String getSchemaSpec(Connection conn) throws SQLException {
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = conn.createStatement();
+            String sql = "select PROPVALUE from EAM_CONFIG_PROPS where propkey = 'CAM_SCHEMA_VERSION'";
+            rs = stmt.executeQuery(sql);
+            if (rs.next()) {
+                return rs.getString(1);
+            }
+            return null;
+        } finally {
+            DBUtil.close(_logCtx, null, stmt, rs);
+        }
     }
 
     private static void getArgs(String[] args) {
@@ -88,7 +166,7 @@ public class DatabaseExport {
     private static void exportDataSetPerTable(Connection conn) throws Exception {
         IDatabaseConnection connection = new DatabaseConnection(conn);
         // partial database export
-        System.out.print("dumping partial db...");
+        _out.print("dumping partial db...");
         for (final String table : _tables) {
             setSeqVal(table, conn);
             QueryDataSet dataSet = new QueryDataSet(connection);
@@ -96,16 +174,16 @@ public class DatabaseExport {
             String file = _workingDir+table+".xml.gz";
             GZIPOutputStream gstream = new GZIPOutputStream(new FileOutputStream(file));
             long start = now();
-            if (_debug) System.out.print("writing "+file+"...");
+            _out.print("writing "+file+"...");
             FlatXmlDataSet.write(dataSet, gstream);
             gstream.finish();
-            if (_debug) System.out.println("done "+(System.currentTimeMillis()-start)+" ms");
+            _out.println("done "+(System.currentTimeMillis()-start)+" ms");
         }
-        System.out.println("done");
+        _out.println("done");
         for (final Map.Entry<String, Long> entry : _seqMap.entrySet()) {
             final String seqName = entry.getKey();
             final Long seq = entry.getValue();
-            if (_debug) System.out.println(seqName+": "+seq);
+            _out.println(seqName+": "+seq);
         }
     }
 
@@ -136,18 +214,18 @@ public class DatabaseExport {
         IDatabaseConnection connection = new DatabaseConnection(conn);
         conn.setAutoCommit(false);
         long begin = now();
-        System.out.print("restoring db...");
+        _out.println("restoring db...");
         for (String table : _tables) {
-            if (_debug) System.out.print("restoring " + table + "...");
+            _out.print("restoring " + table + "...");
             long start = now();
             String file = _workingDir+table+".xml.gz";
             GZIPInputStream gstream = new GZIPInputStream(new FileInputStream(file));
             IDataSet dataset = new FlatXmlDataSet(gstream);
             DatabaseOperation.CLEAN_INSERT.execute(connection, dataset);
-            if (_debug) System.out.println("done " + (now()-start) + " ms");
+            _out.println("done " + (now()-start) + " ms");
         }
         conn.commit();
-        System.out.println("done restoring db in " + (now()-begin) + " ms");
+        _out.println("done restoring db in " + (now()-begin) + " ms");
     }
 
     private static final long now() {
@@ -155,11 +233,11 @@ public class DatabaseExport {
     }
 
     private static void importSequences(Connection conn) throws Exception {
-        if (isPG()) {
+        if (isPG(conn)) {
             importPGSequences(conn);
-        } else if (isOra()) {
+        } else if (isOra(conn)) {
             importOraSequences(conn);
-        } else if (isMySQL()) {
+        } else if (isMySQL(conn)) {
             importMySQLSequences(conn);
         }
     }
@@ -183,7 +261,7 @@ public class DatabaseExport {
                 pstmt.setString(1, seqName);
                 pstmt.setLong(2, (val/100)+1);
                 int rows = pstmt.executeUpdate();
-                if (_debug) System.out.println(seqName + ": " + val + ", " + rows);
+                _out.println(seqName + ": " + val + ", " + rows);
             }
         } finally {
             DBUtil.close(_logCtx, null, pstmt, null);
@@ -257,10 +335,9 @@ public class DatabaseExport {
             } catch (Exception e) {
                 // ignore, sequence just doesn't exist
             }
-            System.out.print(
-                "transferring large table " + table.getTable() + "...");
+            _out.print("transferring large table " + table.getTable() + "...");
             transferTable(table, connExport, connImport);
-            System.out.println("done " + (now() - start) + " ms");
+            _out.println("done " + (now() - start) + " ms");
         }
     }
 
@@ -287,7 +364,7 @@ public class DatabaseExport {
                 exportPstmt.setInt(1, selectBatchSize);
                 exportPstmt.setInt(2, (offset++ * selectBatchSize));
                 rs = exportPstmt.executeQuery();
-                if (_debug) System.out.println("row " + ((offset-1) * selectBatchSize));
+                _out.println("row " + ((offset-1) * selectBatchSize));
                 boolean hasNext = false;
                 if (pstmt != null) {
                     pstmt.clearBatch();
@@ -305,7 +382,7 @@ public class DatabaseExport {
                     pstmt.addBatch();
                     batch++;
                     if ((batch % insertBatchSize) == 0) {
-                        if (_debug) System.out.print('.');
+                        _out.print('.');
                         pstmt.executeBatch();
                         pstmt.clearBatch();
                     }
@@ -313,7 +390,7 @@ public class DatabaseExport {
                 if (pstmt != null && (batch % insertBatchSize) != 0) {
                     pstmt.executeBatch();
                 }
-                if (_debug) System.out.println();
+                _out.println();
                 rs.close();
                 if (!hasNext) {
                     break;
@@ -347,24 +424,31 @@ public class DatabaseExport {
             }
             vals.append("?");
             String sBuf = buf.toString() + ")" + vals.toString() + ")";
-            if (_debug) System.out.println(sBuf);
         }
         buf.append(')');
         String sBuf = buf.toString() + vals.toString() + ")";
-        if (_debug) System.out.println(sBuf);
+        if (_debug) _out.println(sBuf);
         return conn.prepareStatement(sBuf);
     }
 
     private static List<String> getTables(Connection conn, String tableOwner)
     throws Exception {
-        if (isPG()) {
-            return getPGTables(conn, tableOwner);
-        } else if (isOra()) {
-            return getOraTables(conn);
-        } else if (isMySQL()) {
-            return getMySQLTables(conn);
+        List<String> rtn = null;
+        if (isPG(conn)) {
+            rtn = getPGTables(conn, tableOwner);
+        } else if (isOra(conn)) {
+            rtn = getOraTables(conn);
+        } else if (isMySQL(conn)) {
+            rtn = getMySQLTables(conn);
         }
-        return new ArrayList<String>();
+        if (rtn == null) {
+            throw new Exception("ERROR: cannot determine what type of database is being used " +
+                                "for connectionUrl=" + conn.getMetaData().getURL());
+        } else if (rtn.isEmpty()) {
+            throw new Exception("ERROR: query to determine HQ tables had no results.  Make sure " +
+                                "the sourceuser owns the HQ tables.");
+        }
+        return rtn;
     }
 
     private static List<String> getOraTables(Connection conn) throws Exception {
@@ -396,6 +480,7 @@ public class DatabaseExport {
                          " ORDER BY tablename";
             sql = sql.replace(":owner", tableOwner);
             sql = sql.replace(":vals", notIn);
+            System.out.println(sql);
             rs = stmt.executeQuery(sql);
             int table_col = rs.findColumn("tablename");
             while (rs.next()) {
@@ -411,22 +496,22 @@ public class DatabaseExport {
         }
     }
 
-    private static boolean isPG() {
-        if (-1 == _url.toLowerCase().indexOf("postgresql")) {
+    private static boolean isPG(Connection conn) throws Exception {
+        if (-1 == conn.getMetaData().getURL().toLowerCase().indexOf("postgresql")) {
             return false;
         }
         return true;
     }
 
-    private static boolean isOra() {
-        if (-1 == _url.toLowerCase().indexOf("oracle")) {
+    private static boolean isOra(Connection conn) throws Exception {
+        if (-1 == conn.getMetaData().getURL().toLowerCase().indexOf("oracle")) {
             return false;
         }
         return true;
     }
 
-    private static boolean isMySQL() {
-        if (-1 == _url.toLowerCase().indexOf("mysql")) {
+    private static boolean isMySQL(Connection conn) throws Exception {
+        if (-1 == conn.getMetaData().getURL().toLowerCase().indexOf("mysql")) {
             return false;
         }
         return true;
