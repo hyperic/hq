@@ -273,6 +273,9 @@
 	</macrodef>
 
 	<target name="compile-plugins" depends="compile-agent">
+		
+		<compile-plugin name="activemq" />
+		
 		<compile-plugin name="apache" />
 
 		<compile-plugin name="tomcat" />
@@ -944,11 +947,12 @@
 			</fileset>
 			<fileset dir="${hq.plugins}/jvm/src/main/resources" includes="*.xml" />
 		</copy>
-
+     
+        <hqplugin name="activemq" />
 
 		<hqplugin name="apache" />
 
-
+    
 		<hqplugin name="tomcat" />
 
 		<hqplugin name="iplanet" />
@@ -1076,8 +1080,6 @@
 			<fileset dir="hq-plugins/examples/src/main/resources" includes="*.xml" />
 		</plugincopy>
 
-
-		<plugincopy todir="${pdk.plugins}" file="hq-plugins/activemq/src/main/resources/activemq-plugin.xml" />
 		<plugincopy todir="${pdk.plugins}" file="hq-plugins/geronimo/src/main/resources/geronimo-plugin.xml" />
 		<plugincopy todir="${pdk.plugins}" file="hq-plugins/glassfish/src/main/resources/glassfish-plugin.xml" />
 		<plugincopy todir="${pdk.plugins}" file="hq-plugins/hq-internal/src/main/resources/hq-internal-plugin.xml" />
@@ -1122,7 +1124,7 @@
 			</fileset>
 		</copy>
 
-		<plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/activemq/src/main/resources/activemq-plugin.xml" />
+	
 		<plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/geronimo/src/main/resources/geronimo-plugin.xml" />
 		<plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/glassfish/src/main/resources/glassfish-plugin.xml" />
 		<plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/hq-internal/src/main/resources/hq-internal-plugin.xml" />

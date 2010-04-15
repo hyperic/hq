@@ -452,18 +452,23 @@ public abstract class ServerDetector
         }
     }
 
-    private File findVersionFile(File dir, String verFile) {
-        File res = null;
-        File[] files = dir.listFiles(new RegExprFilenameFilter(verFile));
-        if (files.length == 0) {
-            File[] dirs = dir.listFiles(new DirFilter());
-            for (int i = 0; ((i < dirs.length) && (res==null)); i++) {
-                res = findVersionFile(dirs[i], verFile);
-            }
-        } else {
-            res = files[0];
+    protected File findVersionFile(File dir, Pattern pattern) {
+        File[] files = dir.listFiles();
+        Set<File> subDirs = new HashSet<File>();
+        for(File file: files) {
+           if(file.isDirectory()) {
+               subDirs.add(file);
+           }else if( pattern.matcher(file.getAbsolutePath()).find()) {
+               return file; 
+           }
         }
-        return res;
+        for(File subDir : subDirs) {
+            File versionFile = findVersionFile(subDir,pattern);
+            if(versionFile != null) {
+                return versionFile;
+            }
+        }
+        return null;
     }
 
     /**
@@ -481,11 +486,12 @@ public abstract class ServerDetector
 
         if(versionFile.startsWith("**/")){  // recursive & regexpr
             versionFile=versionFile.substring(3);
-            File f=findVersionFile(new File(installpath),versionFile);
+            Pattern pattern=Pattern.compile(versionFile);
+            File f=findVersionFile(new File(installpath),pattern);
             if(f==null)
                 return false;
             getLog().debug(VERSION_FILE + "=" + versionFile + " matches -> " + f);
-            Matcher m = Pattern.compile(versionFile).matcher(f.getAbsolutePath());
+            Matcher m = pattern.matcher(f.getAbsolutePath());
             m.find();
             if(m.groupCount()!=0){  // have version group
                 if(!getTypeInfo().getVersion().equals(m.group(1))){
@@ -1093,24 +1099,5 @@ public abstract class ServerDetector
     public List getServiceConfigs(String type) {
         return ((AutoinventoryPluginManager)getManager()).
             getServiceConfigs(type);
-    }
-
-    private class DirFilter implements FileFilter{
-        public boolean accept(File file) {
-            return file.isDirectory();
-        }
-
-    }
-
-    private class RegExprFilenameFilter implements FileFilter{
-        Pattern pattern;
-        public RegExprFilenameFilter(String regexp){
-            pattern=Pattern.compile(regexp);
-        }
-
-        public boolean accept(File file) {
-            return pattern.matcher(file.getAbsolutePath()).find();
-        }
-
     }
 }
