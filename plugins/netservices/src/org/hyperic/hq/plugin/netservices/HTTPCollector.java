@@ -88,9 +88,11 @@ public class HTTPCollector extends SocketChecker {
         this.url = 
             protocol + "://" + getHostname() + ":" + getPort() + getPath();
 
-        this.useragent = 
-            System.getProperty("httpclient.useragent",
-                               "Hyperic-HQ-Agent/" + ProductProperties.getVersion());
+        this.useragent = getPlugin().getManagerProperty("http.useragent");
+        
+        if (this.useragent == null || this.useragent.trim().length() == 0) {
+            this.useragent = "Hyperic-HQ-Agent/" + ProductProperties.getVersion();
+        }
         
         //for log_track
         setSource(this.url);
