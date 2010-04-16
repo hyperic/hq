@@ -92,7 +92,7 @@ public final class ConcurrentStatsCollector {
         DATA_MANAGER_INSERT_TIME = "DATA_MANAGER_INSERT_TIME",
         SIGAR_PROC_RES_MEM = "SIGAR_PROC_RES_MEM", SIGAR_TCP_INERRS = "SIGAR_TCP_INERRS",
         SIGAR_TCP_RETRANS = "SIGAR_TCP_RETRANS", SIGAR_PAGEOUT = "SIGAR_PAGEOUT",
-        SIGAR_PAGEIN = "SIGAR_PAGEIN", JMS_QUEUE_PUBLISH_TIME = "JMS_QUEUE_PUBLISH_TIME",
+        SIGAR_PAGEIN = "SIGAR_PAGEIN",
         JMS_TOPIC_PUBLISH_TIME = "JMS_TOPIC_PUBLISH_TIME",
         METRIC_DATA_COMPRESS_TIME = "METRIC_DATA_COMPRESS_TIME",
         DB_ANALYZE_TIME = "DB_ANALYZE_TIME", PURGE_EVENT_LOGS_TIME = "PURGE_EVENT_LOGS_TIME",
@@ -579,6 +579,10 @@ public final class ConcurrentStatsCollector {
 
         register(new MBeanCollector("PLATFORM_COUNT", "hyperic.jmx:name=HQInternal",
             "PlatformCount", false));
+        
+        register(new MBeanCollector("JMS_EVENT_TOPIC",
+            "org.apache.activemq:BrokerName=localhost,Type=Topic,Destination=topic/eventsTopic",
+            "QueueSize", false));
 
         register(new MBeanCollector("EDEN_MEMORY_USED", "java.lang:type=MemoryPool,name=",
             new String[] { "Par Eden Space", "PS Eden Space", "Eden Space" }, "Usage", "used"));
