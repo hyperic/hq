@@ -83,7 +83,7 @@ public final class ConcurrentStatsCollector {
     public static final String JVM_TOTAL_MEMORY = "JVM_TOTAL_MEMORY",
         JVM_FREE_MEMORY = "JVM_FREE_MEMORY", JVM_MAX_MEMORY = "JVM_MAX_MEMORY",
         FIRE_ALERT_TIME = "FIRE_ALERT_TIME", EVENT_PROCESSING_TIME = "EVENT_PROCESSING_TIME",
-        GALERT_FIRED_EVENT = "GALERT_FIRED_EVENT", EHCACHE_TOTAL_OBJECTS = "EHCACHE_TOTAL_OBJECTS",
+        EHCACHE_TOTAL_OBJECTS = "EHCACHE_TOTAL_OBJECTS",
         CONCURRENT_STATS_COLLECTOR = "CONCURRENT_STATS_COLLECTOR",
         LATHER_NUMBER_OF_CONNECTIONS = "LATHER_NUMBER_OF_CONNECTIONS",
         RUNTIME_PLATFORM_AND_SERVER_MERGER = "RUNTIME_PLATFORM_AND_SERVER_MERGER",
@@ -599,8 +599,6 @@ public final class ConcurrentStatsCollector {
         register(new MBeanCollector("JVM_COPY_GC", "java.lang:type=GarbageCollector,name=",
             new String[] { "Copy", "ParNew", "PS Scavenge" }, "CollectionTime", true));
 
-        register(LATHER_NUMBER_OF_CONNECTIONS);
-        register(GALERT_FIRED_EVENT);
         register(CONCURRENT_STATS_COLLECTOR);
     }
 

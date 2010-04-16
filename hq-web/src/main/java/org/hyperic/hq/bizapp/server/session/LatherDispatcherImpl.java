@@ -32,6 +32,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
@@ -177,6 +179,11 @@ public class LatherDispatcherImpl implements LatherDispatcher {
             secureCommands.add(CommandInfo.SECURE_COMMANDS[i]);
         }
         this.messagePublisher = messagePublisher;
+    }
+    
+    @PostConstruct
+    public void initStatsCollector() {
+        stats.register(LATHER_NUMBER_OF_CONNECTIONS);
     }
 
     private void sendTopicMessage(String msgTopic, Serializable data) throws LatherRemoteException {
