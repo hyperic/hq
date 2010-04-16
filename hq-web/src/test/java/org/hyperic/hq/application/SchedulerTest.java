@@ -71,7 +71,7 @@ public class SchedulerTest extends TestCase {
         assertFalse(future.isDone());
         assertFalse(future.isCancelled());
         
-        assertEquals(3, counter.numRuns());
+        assertTrue(counter.numRuns() >= 2);
         
         scheduler.shutdown();
     }
@@ -90,7 +90,7 @@ public class SchedulerTest extends TestCase {
         assertFalse(future.isDone());
         assertFalse(future.isCancelled());
         
-        assertEquals(2, counter.numRuns());
+        assertTrue(counter.numRuns() >= 2);
         
         scheduler.shutdown();        
     }
@@ -115,7 +115,7 @@ public class SchedulerTest extends TestCase {
         
         Thread.sleep(100);
         
-        assertEquals(3, counter.numRuns());
+        assertTrue(counter.numRuns() >= 3);
         
         scheduler.shutdown();
     }
@@ -133,7 +133,7 @@ public class SchedulerTest extends TestCase {
         assertFalse(future.isDone());
         assertFalse(future.isCancelled());
         
-        assertEquals(2, counter.numRuns());
+        assertTrue(counter.numRuns() >= 2);
         
         scheduler.shutdown();        
     }
@@ -151,7 +151,7 @@ public class SchedulerTest extends TestCase {
         assertFalse(future.isDone());
         assertFalse(future.isCancelled());
         
-        assertEquals(2, counter.numRuns());
+        assertTrue(counter.numRuns() >= 2);
         
         scheduler.shutdown();        
     }
@@ -183,9 +183,9 @@ public class SchedulerTest extends TestCase {
         assertFalse(future2.isDone());
         assertFalse(future2.isCancelled());
         
-        assertEquals(5, counter1.numRuns());
+        assertTrue(counter1.numRuns() >= 5);
 
-        assertEquals(4, counter2.numRuns());
+        assertTrue(counter2.numRuns() >= 4);
         
         scheduler.shutdown();               
     }
