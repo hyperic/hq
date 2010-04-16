@@ -31,7 +31,6 @@ import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.agent.client.SecureAgentConnection;
 import org.hyperic.hq.transport.AgentProxyFactory;
-import org.hyperic.hq.transport.ServerTransport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -42,14 +41,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class AICommandsClientFactory {
 
-    private AgentManager agentManager;
+    private final AgentManager agentManager;
     
-    private ServerTransport serverTransport;
+    private final AgentProxyFactory agentProxyFactory;
 
     @Autowired 
-    public AICommandsClientFactory(AgentManager agentManager, ServerTransport serverTransport) {
+    public AICommandsClientFactory(AgentManager agentManager, AgentProxyFactory agentProxyFactory) {
         this.agentManager = agentManager;
-        this.serverTransport = serverTransport;
+        this.agentProxyFactory = agentProxyFactory;
     }
 
     public AICommandsClient getClient(AppdefEntityID aid) throws AgentNotFoundException {
@@ -68,9 +67,8 @@ public class AICommandsClientFactory {
 
     private AICommandsClient getClient(Agent agent) {
         if (agent.isNewTransportAgent()) {
-            AgentProxyFactory factory = serverTransport.getAgentProxyFactory();
 
-            return new AICommandsClientImpl(agent, factory);
+            return new AICommandsClientImpl(agent, agentProxyFactory);
         } else {
             return new LegacyAICommandsClientImpl(new SecureAgentConnection(agent.getAddress(), agent.getPort(), agent
                 .getAuthToken()));

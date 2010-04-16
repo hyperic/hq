@@ -743,6 +743,7 @@
 				<include name="snmp4j*.jar" />
 				<include name="dnsjava-2.0.3.jar" />
 				<include name="ehcache-1.5.0.jar" />
+				<include name="jboss-remoting.jar" />
 				<include name="jdom-1.1.jar" />
 				<include name="jsr107cache-1.0.jar" />
 				<!-- EHCache 1.5 dep -->
@@ -1168,11 +1169,16 @@
 		<touch file="${agent.dir}/log/agent.log" />
 		<touch file="${agent.dir}/bundles/${agent.bundle.dir}/tmp/empty" />
 
-		<copy todir="${agent.dir}/bundles/${agent.bundle.dir}/lib" file="${build.dir}/hq-lather.jar" />
-
-		<copy todir="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/lib">
+		<copy todir="${agent.dir}/bundles/${agent.bundle.dir}/lib">
+			<fileset dir="${build.dir}" includes="hq-lather.jar" />
+			<fileset dir="${thirdparty.lib}" includes="jboss-remoting.jar" />
+			<fileset dir="${thirdparty.lib}" includes="jboss-common.jar" />
 			<fileset dir="${thirdparty.lib}/hibernate" includes="concurrent*.jar" />
 		</copy>
+		<!-- Is this needed? -->
+		<!-- copy todir="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/lib">
+			<fileset dir="${thirdparty.lib}/hibernate" includes="concurrent*.jar" />
+		</copy -->
 
 		<jar basedir="${hq.agent.handlers}/hq-agent-handler-autoinventory/target/classes" jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/hq-agent-handler-autoinventory.jar">
 			<manifest>

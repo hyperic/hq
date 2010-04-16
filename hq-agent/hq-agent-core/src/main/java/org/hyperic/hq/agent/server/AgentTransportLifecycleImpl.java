@@ -40,6 +40,7 @@ import org.hyperic.hq.bizapp.agent.client.AgentClient;
 import org.hyperic.hq.bizapp.client.AgentCallbackClient;
 import org.hyperic.hq.common.YesOrNo;
 import org.hyperic.hq.transport.AgentTransport;
+import org.jboss.remoting.InvokerLocator;
 
 /**
  * The class that manages the agent transport lifecycle.
@@ -48,7 +49,7 @@ public final class AgentTransportLifecycleImpl implements AgentTransportLifecycl
     
     private static final Log _log = LogFactory.getLog(AgentTransportLifecycleImpl.class);
     
-    private static final String REMOTE_TRANSPORT_LOCATOR_PATH = "transport/ServerInvokerServlet";
+    private static final String REMOTE_TRANSPORT_LOCATOR_PATH = "ServerInvokerServlet";
     
     private final Object _lock = new Object();
     private final AgentDaemon _agent;
@@ -57,7 +58,7 @@ public final class AgentTransportLifecycleImpl implements AgentTransportLifecycl
     private final Map _serviceInterfaceName2ServiceInterface;
     private final Map _serviceInterface2ServiceImpl;
     private AgentTransport _agentTransport;
-    //private InvokerLocator _remoteTransportLocator;
+    private InvokerLocator _remoteTransportLocator;
     
     public AgentTransportLifecycleImpl(AgentDaemon agent,
                                        AgentConfig bootConfig, 
@@ -192,8 +193,7 @@ public final class AgentTransportLifecycleImpl implements AgentTransportLifecycl
         
         if (_agentTransport != null) {
             synchronized (_lock) {
-              //TODO : remoting uncomment
-                //_remoteTransportLocator = _agentTransport.getRemoteEndpointLocator();
+                _remoteTransportLocator = _agentTransport.getRemoteEndpointLocator();
             }
             
             // register the services and start the server            
@@ -223,8 +223,7 @@ public final class AgentTransportLifecycleImpl implements AgentTransportLifecycl
             _agentTransport = null;
             
             synchronized (_lock) {
-              //TODO : remoting uncomment
-               // _remoteTransportLocator = null;
+               _remoteTransportLocator = null;
             }
         }
     }
@@ -296,12 +295,12 @@ public final class AgentTransportLifecycleImpl implements AgentTransportLifecycl
     /**
      * @see org.hyperic.hq.agent.server.AgentTransportLifecycle#getRemoteTransportLocator()
      */
-//    public InvokerLocator getRemoteTransportLocator() {
-//        synchronized (_lock) {
-//            return _remoteTransportLocator;
-//        }
-//    }    
-//    
+    public InvokerLocator getRemoteTransportLocator() {
+        synchronized (_lock) {
+            return _remoteTransportLocator;
+        }
+    }    
+    
     private boolean isNewTransport(Properties bootProperties, ProviderInfo provider) {
         boolean isNewTransport = false;
         

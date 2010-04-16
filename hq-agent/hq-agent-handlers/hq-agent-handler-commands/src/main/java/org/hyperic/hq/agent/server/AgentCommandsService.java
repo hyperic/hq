@@ -88,14 +88,13 @@ public class AgentCommandsService implements AgentCommandsClient {
         }
         
         RemoteInputStream inStream = (RemoteInputStream)streams[0];
-      //TODO : remoting uncomment
         
-//        try {
-//            inStream.setRemoteSourceInvokerLocator(
-//                    _agentTransportLifecycle.getRemoteTransportLocator());
-//        } catch (Exception e) {
-//            throw new AgentRemoteException("failed to set the remote source invoker locator", e);
-//        }
+        try {
+            inStream.setRemoteSourceInvokerLocator(
+                    _agentTransportLifecycle.getRemoteTransportLocator());
+        } catch (Exception e) {
+            throw new AgentRemoteException("failed to set the remote source invoker locator", e);
+        }
         
         readFilesFromStream(destFiles, inStream);
 
