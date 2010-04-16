@@ -56,17 +56,22 @@ public class ThreadPoolCollector extends WebsphereCollector {
         if (mServer == null) {
             return;
         }
-        Stats stats = getStats(mServer, this.name);
-        if (stats == null) {
-            //XXX certain threadpools have no stats, why?
-            Object o = getAttribute(mServer, this.name, "name");
-            if (o != null) {
-                setAvailability(true);
+        try {
+            Stats stats = getStats(mServer, this.name);
+            if (stats == null) {
+                //XXX certain threadpools have no stats, why?
+                Object o = getAttribute(mServer, this.name, "name");
+                if (o != null) {
+                    setAvailability(true);
+                }
             }
-        }
-        else {
-            setAvailability(true);
-            collectStatCount(stats, ATTRS);
+            else {
+                setAvailability(true);
+                collectStatCount(stats, ATTRS);
+            }
+        } catch (PluginException e) {
+            setAvailability(false);
+            setMessage(e.getMessage());
         }
     }
 }

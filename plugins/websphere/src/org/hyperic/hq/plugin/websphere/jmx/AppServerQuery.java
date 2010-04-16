@@ -81,25 +81,7 @@ public class AppServerQuery extends WebSphereQuery {
         return WebsphereProductPlugin.PROP_SERVER_NAME;
     }
 
-    public Properties getProperties() {
-        Properties props = getParent().getProperties();
-        configure(props);
-
-        String controlScript =
-            this.installpath +
-            File.separator + "bin" +
-            File.separator + "startServer" +
-            GenericPlugin.getScriptExtension();
-
-        props.setProperty(WebsphereControlPlugin.PROP_PROGRAM,
-                          controlScript);
-
-        return props;
-    }
-
     public Properties getMetricProperties() {
-        //cant fucking believe this is not available via jmx
-        //parse app server port out of server.xml
         final String addr = "<address xmi:id=\"EndPoint_1\"";
         String name = getName();
         String node = getParent().getName();

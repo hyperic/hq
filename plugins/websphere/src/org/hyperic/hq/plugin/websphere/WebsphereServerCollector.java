@@ -87,6 +87,10 @@ public class WebsphereServerCollector extends WebsphereCollector {
                 this.name = null;
             }
         }
+
+        // check server properties.
+        Stats stats =(Stats) getStats(mServer, this.name);
+
     }
 
     public void collect() {
@@ -101,23 +105,28 @@ public class WebsphereServerCollector extends WebsphereCollector {
 
         setAvailability(true);
 
-        if (this.name != null) {
-            Stats stats =(Stats) getStats(mServer, this.name);
+        try {
+            if (this.name != null) {
+                Stats stats =(Stats) getStats(mServer, this.name);
 
-            if (stats != null) {
-                if (isJVM) {
-                    double total = getStatCount(stats, "HeapSize");
-                    double used  = getStatCount(stats, "UsedMemory");
-                    setValue("totalMemory", total);
-                    setValue("usedMemory", used);
-                    setValue("freeMemory", total-used);
+                if (stats != null) {
+                    if (isJVM) {
+                        double total = getStatCount(stats, "HeapSize");
+                        double used  = getStatCount(stats, "UsedMemory");
+                        setValue("totalMemory", total);
+                        setValue("usedMemory", used);
+                        setValue("freeMemory", total-used);
+                    }
+                    else {
+                        collectStatCount(stats, this.attrs);
+                    }
+                }else{
+                    log.debug("no Stats");
                 }
-                else {
-                    collectStatCount(stats, this.attrs);
-                }
-            }else{
-                log.debug("no Stats");
             }
+        } catch (PluginException e) {
+            setAvailability(false);
+            setMessage(e.getMessage());
         }
     }
 }

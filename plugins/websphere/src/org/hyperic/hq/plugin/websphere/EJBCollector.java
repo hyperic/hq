@@ -52,14 +52,19 @@ public class EJBCollector extends WebsphereCollector {
     }
 
     public void collect() {
-        Object ejbs =
-            getAttribute(getMBeanServer(), this.name, "ejbs");
+        try {
+            Object ejbs =
+                    getAttribute(getMBeanServer(), this.name, "ejbs");
 
-        if (ejbs == null) {
+            if (ejbs == null) {
+                setAvailability(false);
+            }
+            else {
+                setAvailability(true);
+            }
+        } catch (PluginException e) {
             setAvailability(false);
-        }
-        else {
-            setAvailability(true);
+            setMessage(e.getMessage());
         }
     }
 }

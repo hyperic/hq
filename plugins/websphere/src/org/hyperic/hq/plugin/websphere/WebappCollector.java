@@ -52,14 +52,19 @@ public class WebappCollector extends WebsphereCollector {
     }
 
     public void collect() {
-        Object servlets =
-            getAttribute(getMBeanServer(), this.name, "servlets");
+        try{
+            Object servlets =
+                getAttribute(getMBeanServer(), this.name, "servlets");
 
-        if (servlets == null) {
+            if (servlets == null) {
+                setAvailability(false);
+            }
+            else {
+                setAvailability(true);
+            }
+        } catch (PluginException e) {
             setAvailability(false);
-        }
-        else {
-            setAvailability(true);
+            setMessage(e.getMessage());
         }
     }
 }

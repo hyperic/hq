@@ -61,16 +61,19 @@ public class ApplicationCollector extends WebsphereCollector {
             setAvailability(true);
             return;
         }
-        Object state =
-            getAttribute(getMBeanServer(), this.name, "state");
+        try{
+            Object state =
+                getAttribute(getMBeanServer(), this.name, "state");
 
-        log.debug("[collect] name='"+name.getKeyProperty("name")+"' state='"+state+"("+state.getClass()+")'");
-
-        if ((state == null) || (!(state instanceof Integer))) {
+            if ((state == null) || (!(state instanceof Integer))) {
+                setAvailability(false);
+            }
+            else {
+                setAvailability(((Integer)state).intValue()==1);
+            }
+        }catch(PluginException e){
             setAvailability(false);
-        }
-        else {
-            setAvailability(((Integer)state).intValue()==1);
+            setMessage(e.getMessage());
         }
     }
 }

@@ -83,6 +83,10 @@ public abstract class WebsphereCollector extends Collector {
     }
 
     protected void init() throws PluginException {
+        if(log.isDebugEnabled()){
+            log.debug("[init] ("+getClass().getName()+") props="+getProperties());
+        }
+
         AdminClient mServer = getMBeanServer();
         if(mServer==null) return;
         
@@ -142,7 +146,8 @@ public abstract class WebsphereCollector extends Collector {
 
     protected Object getAttribute(AdminClient mServer,
                                   ObjectName name,
-                                  String attr) {
+                                  String attr)
+        throws PluginException{
 
         try {
             WebsphereStopWatch timer = new WebsphereStopWatch();
@@ -163,11 +168,11 @@ public abstract class WebsphereCollector extends Collector {
                log.debug("getAttribute(" + name + ", " + attr +
                           "): " + e.getMessage(), e);
             }
-            return null;
+            throw new PluginException(e.getMessage());
         }
     }
 
-    protected Stats getStats(AdminClient mServer, ObjectName name) {
+    protected Stats getStats(AdminClient mServer, ObjectName name) throws PluginException {
         return (Stats)getAttribute(mServer, name, "stats");
     }
 
@@ -222,7 +227,7 @@ public abstract class WebsphereCollector extends Collector {
         return super.getValue(metric, result);
     }
 
-    protected boolean collectStats(ObjectName name) {
+    protected boolean collectStats(ObjectName name) throws PluginException {
         AdminClient mServer = getMBeanServer();
         if (mServer == null) {
             return false;
@@ -230,7 +235,7 @@ public abstract class WebsphereCollector extends Collector {
         return collectStats(mServer, name);
     }
 
-    protected boolean collectStats(AdminClient mServer, ObjectName oname) {
+    protected boolean collectStats(AdminClient mServer, ObjectName oname) throws PluginException {
         Stats stats = getStats(mServer, oname);
         if (stats == null) {
             setAvailability(false);

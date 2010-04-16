@@ -108,14 +108,19 @@ public class ConnectionPoolCollector extends WebsphereCollector {
         if (mServer == null) {
             return;
         }
-        JDBCStats stats = (JDBCStats)getStats(mServer, this.name);
-        if (stats == null) {
-            return;
-        }
-        setAvailability(true);
-        Stats[] pools = stats.getConnectionPools();
-        for (int i=0; i<pools.length; i++) {
-            collectStatCount(pools[i], ATTRS);
+        try {
+            JDBCStats stats = (JDBCStats)getStats(mServer, this.name);
+            if (stats == null) {
+                return;
+            }
+            setAvailability(true);
+            Stats[] pools = stats.getConnectionPools();
+            for (int i=0; i<pools.length; i++) {
+                collectStatCount(pools[i], ATTRS);
+            }
+        } catch (PluginException e) {
+            setAvailability(false);
+            setMessage(e.getMessage());
         }
     }
 }

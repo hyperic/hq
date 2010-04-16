@@ -414,6 +414,20 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
             type="secret"/>
   </config>
 
+  <config name="control">
+    <option name="program.start"
+            optional="true"
+            description="Start Script"
+            default="bin/startServer.sh"/>
+
+    <option name="program.stop"
+            optional="true"
+            description="Stop Script"
+            default="bin/stopServer.sh"/>
+  </config>
+
+
+
   <property name="websphere.regkey"
             value="SOFTWARE\IBM\WebSphere Application Server"/>
 
@@ -446,6 +460,7 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
     </scan>
 
     <config include="connector"/>
+    <config include="control" type="control"/>
 
   </server>
 
@@ -473,6 +488,7 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
 
 
     <config include="connector"/>
+    <config include="control" type="control"/>
 
     <properties>
       <property name="javaVendor"
