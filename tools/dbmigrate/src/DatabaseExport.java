@@ -32,7 +32,6 @@ import org.dbunit.operation.DatabaseOperation;
 
 public class DatabaseExport {
     private static Map<String, Long> _seqMap = new HashMap<String, Long>();
-    private static String _url;
     private static List<String> _tables;
     private static String _workingDir;
     private static boolean _debug;
@@ -273,21 +272,25 @@ public class DatabaseExport {
     }
 
     private static Connection getConnectionExport() throws Exception {
-        _url = _sourceUrl + "?protocolVersion=2";
+        String url = (_sourceUrl.contains("?")) ?
+            _sourceUrl + "&protocolVersion=2" :
+            _sourceUrl + "?protocolVersion=2";
         Driver driver = (Driver)Class.forName("org.postgresql.Driver").newInstance();
         Properties props = new Properties();
         props.setProperty("user",_sourceUser);
         props.setProperty("password",_sourcePass);
-        return driver.connect(_url, props);
+        return driver.connect(url, props);
     }
 
     private static Connection getConnectionImport() throws Exception {
-        _url = _targetUrl + "?rewriteBatchedStatements=true&sessionVariables=FOREIGN_KEY_CHECKS=0";
+        String url = (_targetUrl.contains("?")) ?
+            _targetUrl + "&rewriteBatchedStatements=true&sessionVariables=FOREIGN_KEY_CHECKS=0" :
+            _targetUrl + "?rewriteBatchedStatements=true&sessionVariables=FOREIGN_KEY_CHECKS=0";
         Driver driver = (Driver)Class.forName("com.mysql.jdbc.Driver").newInstance();
         Properties props = new Properties();
         props.setProperty("user",_targetUser);
         props.setProperty("password",_targetPass);
-        return driver.connect(_url, props);
+        return driver.connect(url, props);
     }
 
     private static Collection<BigTable> getBigTables()
