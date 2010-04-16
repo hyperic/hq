@@ -138,7 +138,7 @@
 	<context:mbean-server />
 
 
-	<bean class="org.hyperic.hq.transport.ServerTransport">
+	<bean class="org.hyperic.hq.transport.util.AsynchronousInvoker">
 		<constructor-arg value="4" />
 	</bean>
 

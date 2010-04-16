@@ -26,8 +26,8 @@
 package org.hyperic.hq.transport;
 
 import org.hyperic.hq.appdef.Agent;
-import org.hyperic.hq.transport.util.AsynchronousInvoker;
 import org.jboss.remoting.transporter.TransporterClient;
+import org.springframework.stereotype.Component;
 
 /**
  * The factory class for creating proxies to agent services. Note that proxy
@@ -36,33 +36,8 @@ import org.jboss.remoting.transporter.TransporterClient;
  * 
  * The unidirectional transport is not supported for a .ORG instance.
  */
+@Component
 public class AgentProxyFactoryImpl implements AgentProxyFactory {
-
-    private final AsynchronousInvoker _invoker;
-
-    /**
-     * Create an instance.
-     * 
-     * @param invoker The asynchronous invoker that will be used for any async
-     *        service calls.
-     * @throws NullPointerException if the asynchronous invoker is
-     *         <code>null</code>.
-     */
-    public AgentProxyFactoryImpl(AsynchronousInvoker invoker) {
-        if (invoker == null) {
-            throw new NullPointerException("async invoker is null");
-        }
-
-        _invoker = invoker;
-    }
-
-    /**
-     * @return The asynchronous invoker that will be used for any async service
-     *         calls.
-     */
-    protected final AsynchronousInvoker getAsynchronousInvoker() {
-        return _invoker;
-    }
 
     /**
      * @see org.hyperic.hq.transport.AgentProxyFactory#createSyncService(Agent,
