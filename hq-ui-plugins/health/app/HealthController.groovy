@@ -211,7 +211,7 @@ class HealthController
     }
     
     private getCacheData(pageInfo) {
-        def res = Util.cacheHealths
+        def res = Bootstrap.getBean(ProductBoss.class).cacheHealths
         
         def d = pageInfo.sort.description
         res = res.sort {a, b ->
