@@ -82,6 +82,7 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
+import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -1129,6 +1130,9 @@ public class ServiceManagerImpl implements ServiceManager {
         ServiceNotFoundException, PermissionException {
         if (typeId == null)
             typeId = APPDEF_RES_TYPE_UNDEFINED;
+        
+        final StopWatch watch = new StopWatch();
+        final boolean debug = log.isDebugEnabled();
 
         Application appLocal;
         try {
@@ -1137,18 +1141,26 @@ public class ServiceManagerImpl implements ServiceManager {
             throw new ApplicationNotFoundException(appId, e);
         }
 
-        Collection svcCollection = new ArrayList();
+        Collection<Service> svcCollection = new ArrayList<Service>();
+        if (debug) watch.markTimeBegin("getAppServices");
         Collection<AppService> appSvcCollection = appLocal.getAppServices();
+        if (debug) watch.markTimeEnd("getAppServices");
 
         for (AppService appService : appSvcCollection) {
 
             if (appService.isIsGroup()) {
-                svcCollection.addAll(getServiceCluster(appService.getResourceGroup()).getServices());
+                if (debug) watch.markTimeBegin("getServiceCluster");
+                ServiceCluster cluster = getServiceCluster(appService.getResourceGroup());
+                if (debug) watch.markTimeEnd("getServiceCluster");
+                if (debug) watch.markTimeBegin("getServices");
+                svcCollection.addAll(cluster.getServices());
+                if (debug) watch.markTimeEnd("getServices");
             } else {
                 svcCollection.add(appService.getService());
             }
         }
 
+        if (debug) log.debug(watch);
         return filterAndPage(svcCollection, subject, typeId, pc);
     }
 
@@ -1185,7 +1197,12 @@ public class ServiceManagerImpl implements ServiceManager {
     public Integer[] getFlattenedServiceIdsByApplication(AuthzSubject subject, Integer appId)
         throws ServiceNotFoundException, PermissionException, ApplicationNotFoundException {
 
-        List serviceInventory = getUnflattenedServiceInventoryByApplication(subject, appId, PageControl.PAGE_ALL);
+        final boolean debug = log.isDebugEnabled();
+        final StopWatch watch = new StopWatch();
+        if (debug) watch.markTimeBegin("getUnflattenedServiceInventoryByApplication");
+        List serviceInventory = getUnflattenedServiceInventoryByApplication(
+            subject, appId, PageControl.PAGE_ALL);
+        if (debug) watch.markTimeEnd("getUnflattenedServiceInventoryByApplication");
 
         List<Integer> servicePKs = new ArrayList<Integer>();
         // flattening: open up all of the groups (if any) and get their services
@@ -1206,8 +1223,10 @@ public class ServiceManagerImpl implements ServiceManager {
                     // any authz resource filtering on the group members happens
                     // inside the group subsystem
                     try {
+                        if (debug) watch.markTimeBegin("getCompatGroupMembers");
                         List<AppdefEntityID> memberIds = GroupUtil.getCompatGroupMembers(subject, groupId, null,
                             PageControl.PAGE_ALL);
+                        if (debug) watch.markTimeEnd("getCompatGroupMembers");
                         for (AppdefEntityID memberEntId : memberIds) {
 
                             servicePKs.add(memberEntId.getId());
@@ -1223,33 +1242,39 @@ public class ServiceManagerImpl implements ServiceManager {
         } catch (AppdefEntityNotFoundException e) {
             throw new ServiceNotFoundException("could not return all services", e);
         }
-
+        if (debug) log.debug(watch);
         return (Integer[]) servicePKs.toArray(new Integer[servicePKs.size()]);
     }
 
     private List getUnflattenedServiceInventoryByApplication(AuthzSubject subject, Integer appId, PageControl pc)
         throws ApplicationNotFoundException, ServiceNotFoundException {
-
-        List<AppService> appServiceCollection;
+        final boolean debug = log.isDebugEnabled();
+        final StopWatch watch = new StopWatch();
+        
 
         try {
             applicationDAO.findById(appId);
         } catch (ObjectNotFoundException e) {
             throw new ApplicationNotFoundException(appId, e);
         }
-        // appServiceCollection = appLocal.getAppServices();
+     
 
         pc = PageControl.initDefaults(pc, SortAttribute.SERVICE_NAME);
 
+        Collection<AppService> appServices = null;
         switch (pc.getSortattribute()) {
             case SortAttribute.SERVICE_NAME:
             case SortAttribute.RESOURCE_NAME:
             case SortAttribute.NAME:
                 // TODO: Not actually sorting
-                appServiceCollection = appServiceDAO.findByApplication_orderName(appId);
+                if (debug) watch.markTimeBegin("findByApplication_orderName");
+                appServices = appServiceDAO.findByApplication_orderName(appId);
+                if (debug) watch.markTimeEnd("findByApplication_orderName");
                 break;
             case SortAttribute.SERVICE_TYPE:
-                appServiceCollection = appServiceDAO.findByApplication_orderType(appId, pc.isAscending());
+                if (debug) watch.markTimeBegin("findByApplication_orderType");
+                appServices = appServiceDAO.findByApplication_orderType(appId, pc.isAscending());
+                if (debug) watch.markTimeEnd("findByApplication_orderType");
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported sort attribute [" + pc.getSortattribute() +
@@ -1262,15 +1287,19 @@ public class ServiceManagerImpl implements ServiceManager {
         // to authz in batches to find out which ones we are
         // allowed to return.
 
-        List services = new ArrayList();
-        for (AppService appService : appServiceCollection) {
-
+        List services = new ArrayList(appServices.size());
+        for ( AppService appService : appServices ) {
             if (appService.isIsGroup()) {
+                if (debug) watch.markTimeBegin("appService.getResourceGroup");
                 services.add(appService.getResourceGroup());
+                if (debug) watch.markTimeEnd("appService.getResourceGroup");
             } else {
+                if (debug) watch.markTimeBegin("appService.getService");
                 services.add(appService.getService());
+                if (debug) watch.markTimeEnd("appService.getService");
             }
         }
+        if (debug) log.debug(watch);
         return services;
     }
 
@@ -1411,8 +1440,9 @@ public class ServiceManagerImpl implements ServiceManager {
             resGroupMan.removeGroupsCompatibleWith(proto);
 
             // Remove all services
-            for (Service svcLocal : serviceType.getServices()) {
-                removeService(overlord, svcLocal);
+            Service[] services = serviceType.getServices().toArray(new Service[serviceType.getServices().size()]);
+            for (int i = 0; i < services.length; i++) {
+                removeService(overlord, services[i]);
             }
         } catch (PermissionException e) {
             assert false : "Overlord should not run into PermissionException";
@@ -1481,6 +1511,9 @@ public class ServiceManagerImpl implements ServiceManager {
         if (server != null) {
             server.getServices().remove(service);
         }
+        
+        // Remove from ServiceType collection
+        service.getServiceType().getServices().remove(service);
 
         final ConfigResponseDB config = service.getConfigResponse();
 

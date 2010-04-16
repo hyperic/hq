@@ -162,7 +162,7 @@ public class IisMetaBase {
             DocumentBuilderFactory.newInstance();
         DocumentBuilder db = dbf.newDocumentBuilder();
         Document config =
-            db.parse(new ByteArrayInputStream(output.toByteArray()));
+            db.parse(new ByteArrayInputStream(output.toString().getBytes("UTF-8")));
 
         NodeList sites =
             XPathAPI.selectNodeList(config, "//sites/site");

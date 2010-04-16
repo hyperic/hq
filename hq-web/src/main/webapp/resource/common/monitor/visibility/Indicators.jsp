@@ -28,8 +28,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
-
-
+ 
 <tiles:importAttribute name="tabListName" ignore="true" />
 <tiles:importAttribute name="entityType" ignore="true" />
 
@@ -154,25 +153,25 @@
 							</td>
 							<c:forEach var="avail" items="${availabilityMetrics}" varStatus="status">
 								<td width="9">
-									<div onmousedown="overlay.moveOverlay(this);overlay.showTimePopupTopMetricChart(<c:out value="${status.count - 1}"/>, event)">
 										<c:choose>
 											<c:when test="${avail.value == 1}">
-												<html:img page="/images/timeline_green.gif" height="10" width="9" border="0" />
+												<c:set var="timelineIndicatorColor" value="timelineGreen" />
 											</c:when>
 											<c:when test="${avail.value == -0.01}">
-												<html:img page="/images/timeline_orange.gif" height="10" width="9" border="0" />
+												<c:set var="timelineIndicatorColor" value="timelineOrange" />
 											</c:when>
 											<c:when test="${avail.value <= 0}">
-												<html:img page="/images/timeline_red.gif" height="10" width="9" border="0" />
+												<c:set var="timelineIndicatorColor" value="timelineRed" />
 											</c:when>
 											<c:when test="${avail.value > 0 && avail.value < 1}">
-												<html:img page="/images/timeline_yellow.gif" height="10" width="9" border="0" />
+												<c:set var="timelineIndicatorColor" value="timelineYellow" />
 											</c:when>
 											<c:otherwise>
-												<html:img page="/images/timeline_unknown.gif" height="10" width="9" border="0" />
+												<c:set var="timelineIndicatorColor" value="timelineUnknown" />
 											</c:otherwise>
 										</c:choose>
-									</div>
+									<div class="<c:out value="${timelineIndicatorColor}" />"
+									     onmousedown="overlay.moveOverlay(this);overlay.showTimePopupTopMetricChart(<c:out value="${status.count - 1}"/>, event)" />
 								</td>
 							</c:forEach>
 							<td width="10" align="left">

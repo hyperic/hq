@@ -51,7 +51,6 @@ import org.hyperic.hq.events.server.session.AlertRegulator;
 import org.hyperic.hq.events.server.session.AlertableRoleCalendarType;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
 import org.hyperic.hq.events.shared.ActionManager;
-import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.util.units.FormattedNumber;
 import org.hyperic.util.units.UnitNumber;
 import org.hyperic.util.units.UnitsConstants;
@@ -96,7 +95,6 @@ public class EscalationManagerImpl implements EscalationManager {
         // that the escalations run
         ClassicEscalationAlertType.class.getClass();
         AlertableRoleCalendarType.class.getClass();
-        ConcurrentStatsCollector.getInstance().register(ConcurrentStatsCollector.EMAIL_ACTIONS);
     }
 
     private void assertEscalationNameIsUnique(String name) throws DuplicateObjectException {
@@ -569,6 +567,7 @@ public class EscalationManagerImpl implements EscalationManager {
                              EscalationAlertType escalationAlertType, boolean fixed,
                              String moreInfo, boolean suppressNotification)
         throws PermissionException {
+        final boolean debug = log.isDebugEnabled();
         Integer alertId = alert.getAlertInfo().getId();
         boolean acknowledged = !fixed;
 
@@ -586,21 +585,24 @@ public class EscalationManagerImpl implements EscalationManager {
         }
 
         // HQ-1295: Does user have sufficient permissions?
-        alertPermissionManager.canManageAlerts(subject, alert.getDefinition().getDefinitionInfo());
+        // ...check if user can fix/acknowledge this alert...
+        // HHQ-3784 to avoid deadlocks use the this table order when updating/inserting:
+        // 1) EAM_ESCALATION_STATE, 2) EAM_ALERT, 3) EAM_ALERT_ACTION_LOG
+        alertPermissionManager.canFixAcknowledgeAlerts(subject, alert.getDefinition().getDefinitionInfo());
 
         if (fixed) {
             if (moreInfo == null || moreInfo.trim().length() == 0) {
                 moreInfo = "(Fixed by " + subject.getFullName() + ")";
             }
 
-            log.debug(subject.getFullName() + " has fixed alertId=" + alertId);
+            if(debug) log.debug(subject.getFullName() + " has fixed alertId=" + alertId);
+            if (escalationState != null) {
+               escalationRuntime.endEscalation(escalationState);
+             }
 
             escalationAlertType.changeAlertState(alert, subject, EscalationStateChange.FIXED);
             escalationAlertType.logActionDetails(alert, null, moreInfo, subject);
 
-            if (escalationState != null) {
-                escalationRuntime.endEscalation(escalationState);
-            }
         } else {
             if (moreInfo == null || moreInfo.trim().length() == 0) {
                 moreInfo = "";
@@ -614,14 +616,11 @@ public class EscalationManagerImpl implements EscalationManager {
                 return;
             }
 
-            log.debug(subject.getFullName() + " has acknowledged alertId=" + alertId);
-
-            escalationAlertType
-                .changeAlertState(alert, subject, EscalationStateChange.ACKNOWLEDGED);
-            escalationAlertType.logActionDetails(alert, null, subject.getFullName() +
-                                                              " acknowledged " + "the alert" +
-                                                              moreInfo, subject);
+            if (debug) log.debug(subject.getFullName() + " has acknowledged alertId=" +  alertId);
             escalationState.setAcknowledgedBy(subject);
+            escalationAlertType.changeAlertState(alert, subject, EscalationStateChange.ACKNOWLEDGED);
+            String msg = subject.getFullName() + " acknowledged " + "the alert" + moreInfo;
+            escalationAlertType.logActionDetails(alert, null, msg, subject);
         }
 
         if (!suppressNotification && alertRegulator.alertNotificationsAllowed()) {

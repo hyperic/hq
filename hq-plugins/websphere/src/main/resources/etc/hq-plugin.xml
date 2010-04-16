@@ -1,5 +1,4 @@
-<?xml version="1.0"?> 
-
+<?xml version="1.0"?>
 
 <!--
   NOTE: This copyright does *not* cover user programs that use HQ
@@ -8,10 +7,10 @@
   Kit or the Hyperic Client Development Kit - this is merely considered
   normal use of the program, and does *not* fall under the heading of
   "derived work".
-  
+
   Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
   This file is part of HQ.
-  
+
   HQ is free software; you can redistribute it and/or modify
   it under the terms version 2 of the GNU General Public License as
   published by the Free Software Foundation. This program is distributed
@@ -19,40 +18,28 @@
   even the implied warranty of MERCHANTABILITY or FITNESS FOR A
   PARTICULAR PURPOSE. See the GNU General Public License for more
   details.
-  
+
   You should have received a copy of the GNU General Public License
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  -->
 
-<plugin name="websphere" class="WebsphereProductPlugin"> 
+<plugin name="websphere" class="WebsphereProductPlugin">
   <filter name="domain"
           value="%server.node%/%server.name%"/>
   <filter name="auth"
           value="username=%username%,password=%password%"/>
-	<filter name="template"
-		value="${OBJECT_NAME},cell=%cellName%,node=%server.node%,process=%server.name%:${alias}" />
-		
-	<property name="template"
-		value="${OBJECT_NAME}:${alias}" />
-	
-	<property name="measurement-class"
-		value="org.hyperic.hq.plugin.websphere.WebsphereServiceMeasurementPlugin" />
-	<property name="control-class"
-		value="org.hyperic.hq.plugin.websphere.WebsphereServiceControlPlugin" />
-	
-	 <property name="template-config"
+  <property name="template-config"
             value="admin.host=%admin.host%,admin.port=%admin.port%,${auth}"/>
 
-  <filter name="template"
-          value="${domain}:Module=jvmRuntimeModule:${alias}"/>
+    <filter name="template"
+            value="${domain}:Module=jvmRuntimeModule:${alias}"/>
 
   <metrics name="jvm">
     <metric name="Availability"
             category="AVAILABILITY"
             indicator="true"/>
-
     <metric name="JVM Total Memory"
             alias="totalMemory"
             units="KB"/>
@@ -65,71 +52,8 @@
             units="KB"/>
   </metrics>
 
-  <filter name="template"
-          value="${domain}:Module=connectionPoolModule:${alias}"/>
-
-  <metrics name="connection">
-    <!-- XXX connectionPoolModule avgWaitTime,percentUsed,percentMaxed -->
-    <metric name="JDBC Pool Number of Creates"
-            alias="numCreates"
-            collectionType="trendsup"/>
-    <metric name="JDBC Pool Number of Destroys"
-            alias="numDestroys"
-            collectionType="trendsup"/>
-    <metric name="JDBC Pool Number of Allocates"
-            alias="numAllocates"
-            collectionType="trendsup"/>
-    <metric name="JDBC Pool Number of Returns"
-            alias="numReturns"
-            collectionType="trendsup"/>
-    <metric name="JDBC Pool Size"
-            alias="poolSize"/>
-    <metric name="JDBC Pool Concurrent Waiters"
-            alias="concurrentWaiters"/>
-    <metric name="JDBC Pool Number of Faults"
-            alias="faults"
-            collectionType="trendsup"/>
-    <metric name="JDBC Pool Prepared Statement Cache Discards"
-            alias="prepStmtCacheDiscards"
-            collectionType="trendsup"/>
-  </metrics>
-
-  <filter name="template"
-          value="${domain}:Module=servletSessionsModule:${alias}"/>
-
-  <metrics name="servlet">
-    <!-- XXX servletSessionsModule sessionLifeTime -->
-    <metric name="Servlet Sessions Created"
-            alias="createdSessions"
-            collectionType="trendsup"/>
-    <metric name="Servlet Sessions Invalidated"
-            alias="invalidatedSessions"
-            collectionType="trendsup"/>
-    <metric name="Servlet Sessions Active"
-            alias="activeSessions"/>
-    <metric name="Servlet Sessions Live"
-            alias="liveSessions"/>
-  </metrics>
-
-  <filter name="template"
-          value="${domain}:Module=threadPoolModule:${alias}"/>
-
-  <metrics name="threadpool">
-    <!-- XXX threadPoolModule percentMaxed -->
-    <metric name="Thread Pool Creates"
-            alias="threadCreates"
-            collectionType="trendsup"/>
-    <metric name="Thread Pool Destroys"
-            alias="threadDestroys"
-            collectionType="trendsup"/>
-    <metric name="Thread Pool Active Threads"
-            alias="activeThreads"/>
-    <metric name="Thread Pool Size"
-            alias="poolSize"/>
-  </metrics>
-
-  <filter name="template"
-          value="${domain}:Module=transactionModule:${alias}"/>
+    <filter name="template"
+            value="${domain}:Module=transactionModule:${alias}"/>
 
   <metrics name="tx">
     <!-- XXX transactionModule - globalTranDuration,
@@ -184,24 +108,103 @@
             collectionType="trendsup"/>
   </metrics>
 
-  <filter name="template"
-          value="${domain}:Module=webAppModule:${alias}"/>
+  <metrics name="WebSphere Admin 6.0" include="jvm">
+    <metric name="Availability"
+            template="${domain}:Module=adminModule:${alias}"
+            category="AVAILABILITY"
+            indicator="true"/>
 
-  <metrics name="webapp">
-    <metric name="Webapp Number of Loaded Servlets"
-            alias="numLoadedServlets"/>
-    <metric name="Webapp Number of Servlet Reloads"
-            alias="numReloads"
-            collectionType="trendsup"/>
-    <!-- XXX beanModule avgMethodRt, avgCreateTime,
-             avgRemoveTime, avgDrainSize -->
+    <metric name="Number of JVMs"
+            alias="NumJVMs"
+            template="${domain}:Module=adminModule:${alias}"
+            indicator="true"/>
   </metrics>
 
-  <filter name="template"
-          value="${domain}:Module=beanModule:${alias}"/>
+  <metrics name="WebSphere 6.0"
+           include="jvm,tx"/>
 
-  <metrics name="bean">
-    <metric name="EJB Creates"
+  <metrics name="WebSphere 6.0 Application">
+    <metric name="Availability"
+            template="${domain}/applicationModule:Module=%app%:Availability"
+            category="AVAILABILITY"
+            indicator="true"/>
+  </metrics>
+
+    <filter name="template"
+            value="${domain}/threadPoolModule:Module=%thrpool%:${alias}"/>
+  <metrics name="WebSphere 6.0 Thread Pool">
+    <metric name="Availability"
+            category="AVAILABILITY"
+            indicator="true"/>
+    <!-- XXX percentMaxed -->
+    <metric name="Thread Pool Creates"
+            alias="threadCreates"
+            collectionType="trendsup"/>
+    <metric name="Thread Pool Destroys"
+            alias="threadDestroys"
+            collectionType="trendsup"/>
+    <metric name="Thread Pool Active Threads"
+            alias="activeThreads"/>
+    <metric name="Thread Pool Size"
+            alias="poolSize"
+            indicator="true"/>
+  </metrics>
+
+    <filter name="template"
+            value="${domain}/connectionPoolModule:Module=%connpool%:${alias}"/>
+  <metrics name="WebSphere 6.0 Connection Pool">
+    <metric name="Availability"
+            category="AVAILABILITY"
+            indicator="true"/>
+    <!-- XXX connectionPoolModule avgWaitTime,percentUsed,percentMaxed -->
+    <metric name="JDBC Pool Number of Creates"
+            alias="numCreates"
+            collectionType="trendsup"/>
+    <metric name="JDBC Pool Number of Destroys"
+            alias="numDestroys"
+            collectionType="trendsup"/>
+    <metric name="JDBC Pool Number of Allocates"
+            alias="numAllocates"
+            collectionType="trendsup"/>
+    <metric name="JDBC Pool Number of Returns"
+            alias="numReturns"
+            collectionType="trendsup"/>
+    <metric name="JDBC Pool Size"
+            alias="poolSize"
+            indicator="true"/>
+    <metric name="JDBC Pool Concurrent Waiters"
+            alias="concurrentWaiters"
+            indicator="true"/>
+    <metric name="JDBC Pool Number of Faults"
+            alias="faults"
+            collectionType="trendsup"/>
+    <metric name="JDBC Pool Prepared Statement Cache Discards"
+            alias="prepStmtCacheDiscards"
+            collectionType="trendsup"/>
+  </metrics>
+
+    <filter name="template"
+            value="${domain}/webAppModule:Module=%app%#%webapp%:${alias}"/>
+  <metrics name="WebSphere 6.0 Webapp">
+    <metric name="Availability"
+            category="AVAILABILITY"
+            indicator="true"/>
+      <!--metric name="Webapp Number of Loaded Servlets"
+            alias="numLoadedServlets"/>
+      <metric name="Webapp Number of Servlet Reloads"
+            alias="numReloads"
+            collectionType="trendsup"/-->
+  </metrics>
+
+    <filter name="template"
+            value="${domain}/beanModule:Module=%app%#%ejb%:${alias}"/>
+  <metrics name="WebSphere 6.0 EJB">
+    <metric name="Availability"
+            category="AVAILABILITY"
+            indicator="true"/>
+    <!-- XXX beanModule avgMethodRt, avgCreateTime,
+             avgRemoveTime, avgDrainSize -->
+    <!--metric name="EJB Creates"
             alias="creates"
             collectionType="trendsup"/>
     <metric name="EJB Removes"
@@ -248,7 +251,7 @@
             alias="drainsFromPool"
             collectionType="trendsup"/>
     <metric name="EJB Pool Size"
-            alias="poolSize"/>
+            alias="poolSize"/-->
   </metrics>
 
   <help name="enable-pmi-6">
@@ -278,7 +281,7 @@
     <p>
     <h4>The HQ Agent must be run using the IBM JDK to monitor WebSphere:</h4>
     </p>
-    
+
     <pre>
     ${CMD.prompt} ${CMD.env.set} HQ_JAVA_HOME=${was.install.root}${FILE.sep}java
     ${CMD.prompt} hq-agent.${CMD.ext} start
@@ -292,7 +295,7 @@
     <p>
     <h4>Global Security Configuration</h4>
     If Global Security is enabled,
-    check that the user running the agent has read access to 
+    check that the user running the agent has read access to
     <i>${installpath}${FILE.sep}properties${FILE.sep}ssl.client.props</i>
     and that the following properties are correct:
     </p>
@@ -306,40 +309,16 @@
   ]]>
   </help>
 
-  <!-- same as above with ssl.client.props -->
-  <help name="config-auth-6-1">
-  <![CDATA[
-    <p>
-    <h4>Global Security Configuration</h4>
-    If Global Security is enabled,
-    check that the user running the agent has read access to 
-    <i>${installpath}${FILE.sep}properties${FILE.sep}ssl.client.props</i>
-    and that the following properties are correct:
-    </p>
-
-    <pre>
-    javax.net.ssl.keyStore=...
-    javax.net.ssl.keyStorePassword=...
-    javax.net.ssl.trustStore=...
-    javax.net.ssl.trustStorePassword=...
-    </pre>
-    
-    <p>
-    <h4>Common Default Values For the Above Properties</h4>
-    WebSphere 6.1 typically has dummy kestore and truststore files installed under
-    <pre>
-    profile/AppSrv01/etc/DummyClientKeyFile.jks    (use as value for javax.net.ssl.keyStore)
-    profile/AppSrv01/etc/DummyClientTrustFile.jks  (use as value for javax.net.ssl.trustStore)
-    </pre>
-    Use "WebAS" for both <pre>javax.net.ssl.keyStorePassword</pre> and
-    <pre>javax.net.ssl.trustStorePassword</pre> when using the above dummy files.
-  ]]>
-  </help>
+  <help name="WebSphere Admin 6.0"
+        include="agent-setup-6,enable-pmi-6,config-auth-6"/>
 
   <help name="WebSphere Admin 6.1"
-        include="agent-setup-6,enable-pmi-6,config-auth-6-1"/>
+        include="agent-setup-6,enable-pmi-6,config-auth-6"/>
 
-  <help name="WebSphere Admin 6.1 Win32,config-auth-6-1"
+  <help name="WebSphere Admin 6.0 Win32,config-auth-6"
+        include="enable-pmi-6"/>
+
+  <help name="WebSphere Admin 6.1 Win32,config-auth-6"
         include="enable-pmi-6"/>
 
   <help name="websphere-server">
@@ -354,6 +333,14 @@
   </p>
   ]]>
   </help>
+
+  <help name="WebSphere 6.0" include="websphere-server"/>
+
+  <property name="websphere5-webinf"
+            value="${installpath}${FILE.sep}config${FILE.sep}cells${FILE.sep}${server.node}${FILE.sep}applications${FILE.sep}${app}.ear${FILE.sep}deployments${FILE.sep}${app}${FILE.sep}${webapp}${FILE.sep}WEB-INF${FILE.sep}"/>
+
+  <property name="websphere5-webinf-lib"
+            value="${installpath}${FILE.sep}installedApps${FILE.sep}${server.node}${FILE.sep}${app}.ear${FILE.sep}${webapp}${FILE.sep}WEB-INF${FILE.sep}lib"/>
 
   <help name="websphere-rt-postamble">
   <![CDATA[
@@ -396,6 +383,18 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
   ]]>
   </help>
 
+  <help name="WebSphere 6.0 Webapp" append="websphere-rt-postamble">
+  <![CDATA[
+    <p>
+    <h4>Enable Webapp Response Time</h4>
+    </p>
+
+    <ul>
+    <li>Edit ${websphere5-webinf}web.xml</li>
+    </ul>
+  ]]>
+  </help>
+
   <config name="connector">
     <option name="admin.port"
             description="SOAP Connector Port"
@@ -404,14 +403,6 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
     <option name="admin.host"
             description="SOAP Connector Host"
             default="localhost"/>
-
-    <option name="server.node"
-            description="App Server Node"
-            default="hostname"/>
-
-    <option name="server.name"
-            description="App Server Node"
-            default="server1"/>
 
     <option name="username"
             description="Username for Authentication"
@@ -437,13 +428,14 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
             class="WebsphereAdminMeasurementPlugin"/>
 
     <plugin type="collector"
-            class="WebsphereAdminServerCollector"/>
+            class="WebsphereServerCollector"/>
+        <!--class="WebsphereAdminServerCollector"/-->
 
     <plugin type="control"
             class="WebsphereControlPlugin"/>
 
     <plugin type="autoinventory"
-            class="WebsphereDetector"/>
+            class="WebsphereAdminDetector"/>
 
     <scan registry="${websphere.regkey}">
       <include name="InstallLocation"/>
@@ -461,6 +453,9 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
           version="6.0"
           description="Application Server">
 
+    <property name="UNIQUE_FILE"
+              value="properties/version/WAS.product"/>
+
     <plugin type="measurement"
             class="WebsphereJmxMeasurementPlugin"/>
 
@@ -473,14 +468,11 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
     <plugin type="log_track"
             class="WebsphereTraceLogFileTrackPlugin"/>
 
-    <config include="connector">
-      <option name="server.name"
-              description="App Server Name"
-              default="server1"/>
-      <option name="server.port"
-              description="App Server Port"
-              default="9080"/>
-    </config>
+    <plugin type="autoinventory"
+            class="WebsphereDetector"/>
+
+
+    <config include="connector"/>
 
     <properties>
       <property name="javaVendor"
@@ -607,4 +599,13 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
               default="${was.install.root}"/>
     </config>
   </server>
+
+  <server name="WebSphere"
+          version="7.0"
+          include="6.1"/>
+
+  <server name="WebSphere Admin"
+          version="7.0"
+          include="6.1">
+   </server>
 </plugin>

@@ -29,6 +29,7 @@ import java.util.List;
 
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Order;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.AgentType;
@@ -49,6 +50,12 @@ public class AgentDAO
         Agent ag = new Agent(type, address, port, unidirectional, authToken, agentToken, version);
         save(ag);
         return ag;
+    }
+    
+    @SuppressWarnings("unchecked")
+    public List<Agent> findAll() {
+        return getSession().createCriteria(Agent.class).addOrder(Order.asc("address")).addOrder(Order.asc("port"))
+        .list();
     }
 
     @SuppressWarnings("unchecked")

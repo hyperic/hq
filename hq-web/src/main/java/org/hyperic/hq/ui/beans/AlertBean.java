@@ -48,6 +48,7 @@ public class AlertBean implements Serializable {
     private boolean _fixed;
     private boolean _acknowledgeable;
     private boolean viewable;
+    private boolean canTakeAction;
     
     // escalation fields
     private long _maxPauseTime;
@@ -62,6 +63,13 @@ public class AlertBean implements Serializable {
                      Integer alertDefId, String name, int priority,
                      Integer rid, Integer type, boolean fixed,
                      boolean acknowledgeable) {
+        this(id, ctime, alertDefId, name, priority, rid, type, fixed, acknowledgeable, false);
+    }
+    
+    public AlertBean(Integer id, long ctime,
+                     Integer alertDefId, String name, int priority,
+                     Integer rid, Integer type, boolean fixed,
+                     boolean acknowledgeable, boolean canTakeAction) {
         _id = id;
         _ctime = ctime;
         _alertDefId = alertDefId;
@@ -71,6 +79,7 @@ public class AlertBean implements Serializable {
         _type = type;
         _fixed = fixed;
         _acknowledgeable = acknowledgeable;
+        this.canTakeAction = canTakeAction;
     }
 
     public Integer getId() {
@@ -190,6 +199,10 @@ public class AlertBean implements Serializable {
         _fixed = fixed;
     }
 
+    public boolean isAcknowledgeableAndCanTakeAction() {
+        return isAcknowledgeable() && isCanTakeAction();
+    }
+    
     public boolean isAcknowledgeable() {
         return _acknowledgeable;
     }
@@ -212,6 +225,14 @@ public class AlertBean implements Serializable {
 
     public void setViewable(boolean viewable) {
         this.viewable = viewable;
+    }
+
+    public boolean isCanTakeAction() {
+        return canTakeAction;
+    }
+
+    public void setCanTakeAction(boolean canTakeAction) {
+        this.canTakeAction = canTakeAction;
     }
 
     public String toString() {

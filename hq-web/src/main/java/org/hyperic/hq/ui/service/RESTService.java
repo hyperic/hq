@@ -17,7 +17,6 @@ import org.apache.tapestry.engine.ILink;
 import org.apache.tapestry.services.ServiceConstants;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.server.session.Platform;
-import org.hyperic.hq.appdef.server.session.PlatformManagerImpl;
 import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -29,14 +28,10 @@ import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
-import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
-import org.hyperic.hq.bizapp.server.session.AppdefBossImpl;
-import org.hyperic.hq.bizapp.server.session.DashboardPortletBossImpl;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.DashboardPortletBoss;
@@ -549,8 +544,7 @@ public class RESTService extends BaseService {
                 for (int i=0; i<aeidJArray.length(); i++) {
                     AppdefEntityID aeid = new AppdefEntityID(aeidJArray.getString(i));
                     if (!aeid.isGroup()) {
-                        Resource resource = Bootstrap.getBean(ResourceManager.class)
-                                                .findResource(aeid);                   
+                                        
                     
                         Bootstrap.getBean(AppdefBoss.class)
                                  .batchGroupAdd(
@@ -583,7 +577,7 @@ public class RESTService extends BaseService {
                 }
                 jRes.put("groups", jarr);
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.debug(e.getLocalizedMessage());
             
             try {
@@ -592,7 +586,7 @@ public class RESTService extends BaseService {
             } catch (Exception e2) {}
         }
         
-        return (jRes.length() > 0) ? jRes.toString() : ERROR_GENERIC;        
+        return jRes.toString();      
     }
     
     /**

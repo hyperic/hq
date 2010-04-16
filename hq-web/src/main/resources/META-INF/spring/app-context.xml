@@ -50,8 +50,11 @@
 				p:driverClassName="${server.database-driver}" p:url="${server.database-url}"
 				p:username="${server.database-user}" p:password="${server.database-password}"
 				p:defaultAutoCommit="false" p:minIdle="${server.database-minpoolsize}"
-				p:maxActive="${server.database-maxpoolsize}" p:maxWait="${server.database-blockingtimeout}"
-				p:jdbcInterceptors="ConnectionState"/>
+				p:maxActive="${server.database-maxpoolsize}" p:maxIdle="${server.database-maxpoolsize}" 
+				p:initialSize="${server.database-minpoolsize}"
+				p:maxWait="${server.database-blockingtimeout}" p:jdbcInterceptors="ConnectionState;StatementFinalizer"
+				p:validationQuery="${server.connection-validation-sql}"
+				p:validationInterval="30000" p:logAbandoned="true" p:testOnBorrow="true" />
 		</constructor-arg>
 	</bean>
 

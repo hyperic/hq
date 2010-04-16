@@ -308,7 +308,7 @@ a:visited,a:hover,a {
 }
 .mainMenu a, .mainMenu a:visited {
     font-family: Helvetica, sans-serif;
-    font-size: 1em;
+    font-size: 12px;
 	text-decoration: none;
 	color: #333;
 	padding: .6em 1em;

@@ -50,7 +50,6 @@
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/oro-2.0.8.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/quartz-1.6.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/quartz-oracle-1.6.5.jar"/>
-	<classpathentry exported="true" kind="lib" path="thirdparty/lib/snmp4j.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/standard-1.1.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/struts-core-1.3.10.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/struts-el-1.3.10.jar"/>
@@ -91,7 +90,6 @@
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/spring-security-taglibs-3.0.0.RELEASE.jar" sourcepath="thirdparty/lib-src/spring-security-taglibs-3.0.0.RELEASE-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/spring-security-web-3.0.0.RELEASE.jar" sourcepath="thirdparty/lib-src/spring-security-web-3.0.0.RELEASE-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/hibernate/dom4j-1.6.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="thirdparty/lib/mysql_jdbc/mysql-connector-java-5.0.5-bin.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/hibernate/antlr-2.7.6.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/hibernate/cglib-2.1.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/hibernate/asm.jar"/>
@@ -149,5 +147,7 @@
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/test/slf4j-log4j12-1.5.8.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.roo.support-1.0.2.RELEASE.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.roo.file.monitor.polling-1.0.2.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/snmp4j-1.11.jar"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/mysql_jdbc/mysql-connector-java-5.1.10-bin.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

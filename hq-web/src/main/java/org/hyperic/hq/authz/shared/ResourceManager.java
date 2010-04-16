@@ -44,6 +44,12 @@ public interface ResourceManager {
      * Check if there are any resources of a given type
      */
     public boolean resourcesExistOfType(String typeName);
+    
+    /**
+     * @param {@link Collection} of {@link Resource}s
+     * 
+     */
+    public void resourceHierarchyUpdated(AuthzSubject subj, Collection<Resource> resources);
 
     /**
      * Create a resource.

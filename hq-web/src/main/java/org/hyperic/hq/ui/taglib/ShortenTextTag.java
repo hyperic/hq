@@ -29,6 +29,8 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspTagException;
 import javax.servlet.jsp.tagext.TagSupport;
 
+import org.apache.commons.lang.StringEscapeUtils;
+
 public class ShortenTextTag extends TagSupport {
 	private static final long serialVersionUID = 1L;
 
@@ -66,18 +68,18 @@ public class ShortenTextTag extends TagSupport {
 					StringBuffer text = new StringBuffer("<abbr");
 
 					text.append(" class=\"").append(styleClass).append("\"")
-							.append(" title=\"").append(value).append("\">");
+							.append(" title=\"").append(StringEscapeUtils.escapeHtml(value)).append("\">");
 
 					if (LEFT_POSITION.equalsIgnoreCase(getPosition())) {
-						text.append("...").append(
-								value.substring(value.length() - maxlength));
+						text.append("...").append(StringEscapeUtils.escapeHtml(
+								value.substring(value.length() - maxlength)));
 					} else if (MIDDLE_POSITION.equalsIgnoreCase(getPosition())) {
-						text.append(value.substring(0, maxlength / 2)).append(
+						text.append(StringEscapeUtils.escapeHtml(value.substring(0, maxlength / 2))).append(
 								"...").append(
-								value.substring(value.length()
-										- ((maxlength + 1) / 2)));
+								    StringEscapeUtils.escapeHtml(value.substring(value.length()
+										- ((maxlength + 1) / 2))));
 					} else {
-						text.append(value.substring(0, maxlength))
+						text.append(StringEscapeUtils.escapeHtml(value.substring(0, maxlength)))
 								.append("...");
 					}
 
@@ -85,7 +87,7 @@ public class ShortenTextTag extends TagSupport {
 
 					pageContext.getOut().println(text.toString());
 				} else {
-					pageContext.getOut().println(value);
+					pageContext.getOut().println(StringEscapeUtils.escapeHtml(value));
 				}
 			}
 		} catch (java.io.IOException e) {

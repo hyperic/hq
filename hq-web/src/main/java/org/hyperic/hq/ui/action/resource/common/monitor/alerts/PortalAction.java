@@ -39,6 +39,8 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.util.MessageResources;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.ControlBoss;
@@ -46,6 +48,7 @@ import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.GalertBoss;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.events.AlertNotFoundException;
+import org.hyperic.hq.events.AlertPermissionManager;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
@@ -69,13 +72,15 @@ public class PortalAction
     private final Log log = LogFactory.getLog(PortalAction.class.getName());
     private GalertBoss galertBoss;
     private EventsBoss eventsBoss;
+    private AlertPermissionManager alertPermissionManager;
 
     @Autowired
     public PortalAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss, GalertBoss galertBoss,
-                        EventsBoss eventsBoss) {
+                        EventsBoss eventsBoss, AlertPermissionManager alertPermissionManager) {
         super(appdefBoss, authzBoss, controlBoss);
         this.galertBoss = galertBoss;
         this.eventsBoss = eventsBoss;
+        this.alertPermissionManager = alertPermissionManager;
     }
 
     protected Properties getKeyMethodMap() {
@@ -124,6 +129,19 @@ public class PortalAction
 
         Portal portal = Portal.createPortal();
         AppdefEntityID aeid = RequestUtils.getEntityId(request);
+        boolean canTakeAction = false;
+        try {
+            int sessionId = RequestUtils.getSessionId(request).intValue();
+       
+            AuthzSubject subject = authzBoss.getCurrentSubject(sessionId);
+            // ...check that the user can fix/acknowledge...
+            alertPermissionManager.canFixAcknowledgeAlerts(subject, aeid);
+            canTakeAction = true;
+        } catch(PermissionException e) {
+            // ...the user can't fix/acknowledge...
+        }
+        
+        request.setAttribute(Constants.CAN_TAKE_ACTION_ON_ALERT_ATTR, canTakeAction);
         setTitle(aeid, portal, "alerts.alert.platform.AlertList.Title");
         portal.setDialog(false);
         if (aeid.isGroup()) {

@@ -27,9 +27,14 @@ package org.hyperic.hq.events.server.session;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hibernate.CacheMode;
 import org.hibernate.FlushMode;
 import org.hibernate.Query;
@@ -38,6 +43,8 @@ import org.hibernate.SessionFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hibernate.dialect.HQDialect;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
@@ -47,6 +54,7 @@ import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.PermissionManager.RolePermNativeSQL;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.events.AlertFiredEvent;
 import org.hyperic.hq.events.EventLogStatus;
 import org.hyperic.hq.measurement.server.session.Number;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,12 +66,20 @@ public class EventLogDAO
     private final String TABLE_EVENT_LOG = "EAM_EVENT_LOG";
     private final String TABLE_EAM_NUMBERS = "EAM_NUMBERS";
     private PermissionManager permissionManager;
+    private final Log log = LogFactory.getLog(EventLogDAO.class.getName());
 
     private static final List<String> VIEW_PERMISSIONS = Arrays
         .asList(new String[] { AuthzConstants.platformOpViewPlatform,
                               AuthzConstants.serverOpViewServer,
                               AuthzConstants.serviceOpViewService,
                               AuthzConstants.groupOpViewResourceGroup, });
+    
+    private static final List<String> MANAGE_ALERT_PERMISSIONS = Arrays.asList(new String[] {
+                             AuthzConstants.platformOpManageAlerts,
+                             AuthzConstants.serverOpManageAlerts,
+                             AuthzConstants.serviceOpManageAlerts,
+                             AuthzConstants.groupOpManageAlerts
+    });
 
     @Autowired
     public EventLogDAO(SessionFactory f, PermissionManager permissionManager) {
@@ -94,6 +110,26 @@ public class EventLogDAO
             return _e;
         }
     }
+    
+    EventLog findLog(String typeClass, int instanceId, long timestamp) {
+        String hql = "select l from EventLog l where l.timestamp = :ts " +
+                     "and l.instanceId = :instId and l.type = :type";
+        Query q = createQuery(hql)
+        .setLong("ts", timestamp)
+        .setInteger("instId", instanceId)
+        .setString("type",typeClass);
+        
+        List<EventLog> events = q.list();
+        if(events.isEmpty()) {
+            return null;
+        }
+        if(events.size() > 1) {
+            log.warn("Found multiple log entries matching the specified " +
+                     "criteria (typeClass=" + typeClass +", instanceId=" + instanceId + 
+                     ", timestamp=" + timestamp + "). Returning the first one.");
+        }
+        return (EventLog) events.iterator().next();
+    }
 
     /**
      * Gets a list of {@link ResourceEventLog}s. Most arguments are required.
@@ -112,7 +148,7 @@ public class EventLogDAO
         String groupFilterSql;
 
         RolePermNativeSQL roleSql = PermissionManagerFactory.getInstance()
-            .getRolePermissionNativeSQL("r", "subject", "opList");
+            .getRolePermissionNativeSQL("r", "e", "subject", "opListVR", "opListMA");
 
         if (inGroups == null || inGroups.isEmpty())
             groupFilterSql = "";
@@ -150,7 +186,7 @@ public class EventLogDAO
 
         Query q = getSession().createSQLQuery(sql).addEntity("e", EventLog.class).setLong("begin",
             begin).setLong("end", end).setInteger("maxStatus", maxStatus.getCode());
-        roleSql.bindParams(q, subject, VIEW_PERMISSIONS);
+        roleSql.bindParams(q, subject, VIEW_PERMISSIONS, MANAGE_ALERT_PERMISSIONS);
 
         if (typeClass != null) {
             q.setString("type", typeClass);
@@ -170,6 +206,141 @@ public class EventLogDAO
             res.add(new ResourceEventLog(e.getResource(), e));
         }
         return res;
+    }
+    
+    /**
+     * @return 0 if there are no unfixed alerts
+     */
+    private final long getOldestUnfixedAlertTime() {
+        Object o = getSession()
+            .createQuery("select min(ctime) from Alert where fixed = '0'")
+            .uniqueResult();
+        if (o == null) {
+            return 0;
+        }
+        return ((Long)o).longValue();
+    }
+    
+    /**
+     * @return {@link Map} of {@link Integer} = AlertDefitionId to
+     *  {@link Map} of <br>
+     *   key {@link AlertInfo} <br>
+     *   value {@link Integer} AlertId
+     */
+    @SuppressWarnings("unchecked")
+    private final Map<Integer,Map<AlertInfo,Integer>> getUnfixedAlertInfoAfter(long ctime) {
+        final String hql = new StringBuilder(128)
+            .append("SELECT alertDefinition.id, id, ctime ")
+            .append("FROM Alert WHERE ctime >= :ctime and fixed = '0' ")
+            .append("ORDER BY ctime")
+            .toString();
+        final List<Object[]> list = getSession()
+            .createQuery(hql)
+            .setLong("ctime", ctime)
+            .list();
+        final Map<Integer,Map<AlertInfo,Integer>> alerts = new HashMap<Integer,Map<AlertInfo,Integer>>(list.size());
+        for (Object[] obj : list) {
+            Map<AlertInfo,Integer> tmp = alerts.get(obj[0]);
+            if (tmp == null) {
+                tmp = new HashMap<AlertInfo,Integer>();
+                alerts.put((Integer)obj[0], tmp);
+            }
+            final AlertInfo ai = new AlertInfo((Integer)obj[0], (Long)obj[2]);
+            tmp.put(ai, (Integer)obj[1]);
+        }
+        return alerts;
+    }
+    
+    private class AlertInfo {
+        private final Integer _alertDefId;
+        private final Long _ctime;
+        AlertInfo(Integer alertDefId, Long ctime) {
+            _alertDefId = alertDefId;
+            _ctime = ctime;
+        }
+        AlertInfo(Integer alertDefId, long ctime) {
+            _alertDefId = alertDefId;
+            _ctime = new Long(ctime);
+        }
+        Integer getAlertDefId() {
+            return _alertDefId;
+        }
+        Long getCtime() {
+            return _ctime;
+        }
+        public boolean equals(Object rhs) {
+            if (rhs == this) {
+                return true;
+            }
+            if (rhs instanceof AlertInfo) {
+                AlertInfo obj = (AlertInfo)rhs;
+                return obj.getCtime().equals(_ctime) &&
+                       obj.getAlertDefId().equals(_alertDefId);
+            }
+            return false;
+        }
+        public int hashCode() {
+            return 17*_alertDefId.hashCode() + _ctime.hashCode();
+        }
+    }
+    
+    /**
+     * Find unfixed AlertFiredEvent event logs for each alert definition in the list
+     * 
+     * @param alertDefinitionIds The list of alert definition ids
+     * 
+     * @return {@link Map} of {@link Integer} = AlertDefinitionId to
+     *  {@link AlertFiredEvent}
+     */
+    @SuppressWarnings("unchecked")
+    Map<Integer,AlertFiredEvent> findUnfixedAlertFiredEventLogs() {        
+        final Map<Integer,AlertFiredEvent> rtn = new HashMap<Integer,AlertFiredEvent>();
+        final long ctime = getOldestUnfixedAlertTime();
+        if (ctime == 0) {
+            return new HashMap<Integer,AlertFiredEvent>(0,1);
+        }
+        final Map<Integer,Map<AlertInfo,Integer>> alerts = getUnfixedAlertInfoAfter(ctime);
+        final String hql = new StringBuilder(256)
+            .append("FROM EventLog ")
+            .append("WHERE timestamp >= :ctime AND type = :type ")
+            .append("AND instanceId is not null")
+            .toString();
+        final List<EventLog> list = getSession()
+            .createQuery(hql)
+            .setString("type", AlertFiredEvent.class.getName())
+            .setLong("ctime", ctime)
+            .list();
+        for (EventLog log  : list ) {
+            if (log == null || log.getInstanceId() == null) {
+                continue;
+            }
+            final Map<AlertInfo,Integer> objs = alerts.get(log.getInstanceId());
+            if (objs == null) {
+                continue;
+            }
+            final Integer alertDefId = log.getInstanceId();
+            final long timestamp     = log.getTimestamp();
+            final Integer alertId =
+                objs.get(new AlertInfo(alertDefId, timestamp));
+            if (alertId == null) {
+                continue;
+            }
+            if (log.getResource().isInAsyncDeleteState()) {
+                continue;
+            }
+            AlertFiredEvent alertFired = 
+                createAlertFiredEvent(alertDefId, alertId, log);
+            rtn.put(alertDefId, alertFired);
+        }
+        return rtn;
+    }
+    
+    private final AlertFiredEvent createAlertFiredEvent(Integer alertDefId,
+                                                        Integer alertId,
+                                                        EventLog eventLog) {
+        return new AlertFiredEvent(alertId, alertDefId, 
+            AppdefUtil.newAppdefEntityId(eventLog.getResource()), eventLog.getSubject(),
+            eventLog.getTimestamp(), eventLog.getDetail());
     }
 
     List<EventLog> findByEntityAndStatus(Resource r, AuthzSubject user, long begin, long end,

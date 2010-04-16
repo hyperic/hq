@@ -12,7 +12,7 @@
 	<property file="build.properties" />
 
 	<!-- Version file -->
-	<property name="version.properties" value="${hq.home}/version.properties" />
+	<property name="version.properties" value="${hq.home}/hq-version.properties" />
 	<property file="${version.properties}" />
 	<property name="release.comment" value="Development Build" />
 	<property name="hq.isDev" value="true" />
@@ -281,6 +281,9 @@
 	</macrodef>
 
 	<target name="compile-plugins" depends="compile-agent">
+		
+		<compile-plugin name="activemq" />
+		
 		<compile-plugin name="apache" />
 
 		<compile-plugin name="tomcat" />
@@ -292,6 +295,8 @@
 		<compile-plugin name="oc4j" />
 
 		<compile-plugin name="db2" />
+		
+		<compile-plugin name="db2jdbc" />
 
 		<compile-plugin name="postgresql" />
 
@@ -722,7 +727,7 @@
 
 		<!-- Write version file to WEB-INF/classes -->
 		<antcall target="write-version-file">
-			<param name="version-file" value="${war.dir}/WEB-INF/classes/version.properties" />
+			<param name="version-file" value="${war.dir}/WEB-INF/classes/hq-version.properties" />
 		</antcall>
 
 		<copy todir="${war.dir}/WEB-INF/lib/">
@@ -735,7 +740,7 @@
 				<include name="log4j-1.2.14.jar" />
 				<include name="quartz-1.6.5.jar" />
 				<include name="quartz-oracle-1.6.5.jar" />
-				<include name="snmp4j.jar" />
+				<include name="snmp4j*.jar" />
 				<include name="dnsjava-2.0.3.jar" />
 				<include name="ehcache-1.5.0.jar" />
 				<include name="jdom-1.1.jar" />
@@ -777,10 +782,8 @@
 			<fileset dir="${thirdparty.lib}/spring" includes="*.jar" />
 			<fileset dir="${thirdparty.lib}/activemq" includes="*.jar" />
 			<fileset dir="${thirdparty.lib}/tomcat-jdbc" includes="*.jar" />
-			<fileset dir="${thirdparty.lib}/mysql_jdbc">
-				<include name="mysql-connector-java-5.0.5-bin.jar" />
-			</fileset>
-
+			<fileset dir="${thirdparty.lib}/mysql_jdbc" includes="mysql*.jar"/>
+			
 			<fileset dir="${thirdparty.lib}/postgresql" includes="postgresql-8.2-*.jdbc3.jar" />
 
 
@@ -885,7 +888,7 @@
 				<include name="log4j-1.2.14.jar" />
 				<include name="oro-2.0.8.jar" />
 				<!-- RT -->
-				<include name="snmp4j.jar" />
+				<include name="snmp4j*.jar" />
 				<!-- All SNMP monitoring -->
 				<include name="ant.jar" />
 				<!-- AI scans + util.TokenReplacer -->
@@ -920,6 +923,8 @@
 				<include name="xmlrpc-client-3.1.jar" />
 				<include name="xmlrpc-common-3.1.jar" />
 				<include name="ws-commons-util-1.0.2.jar" />
+				<include name="com.springsource.com.sun.xml.bind-*.jar" />
+				<include name="com.springsource.javax.xml.*.jar" />
 			</fileset>
 			<fileset dir="${tapestry_lib}">
 				<!-- for CollectorThread -->
@@ -950,11 +955,12 @@
 			</fileset>
 			<fileset dir="${hq.plugins}/jvm/src/main/resources" includes="*.xml" />
 		</copy>
-
+     
+        <hqplugin name="activemq" />
 
 		<hqplugin name="apache" />
 
-
+    
 		<hqplugin name="tomcat" />
 
 		<hqplugin name="iplanet" />
@@ -966,6 +972,8 @@
 		<hqplugin name="db2">
 			<fileset dir="${db2monitor.dir}" includes="lib/*" />
 		</hqplugin>
+		
+		<hqplugin name="db2jdbc" />
 
 		<hqplugin name="postgresql" />
 
@@ -1080,8 +1088,6 @@
 			<fileset dir="hq-plugins/examples/src/main/resources" includes="*.xml" />
 		</plugincopy>
 
-
-		<plugincopy todir="${pdk.plugins}" file="hq-plugins/activemq/src/main/resources/activemq-plugin.xml" />
 		<plugincopy todir="${pdk.plugins}" file="hq-plugins/geronimo/src/main/resources/geronimo-plugin.xml" />
 		<plugincopy todir="${pdk.plugins}" file="hq-plugins/glassfish/src/main/resources/glassfish-plugin.xml" />
 		<plugincopy todir="${pdk.plugins}" file="hq-plugins/hq-internal/src/main/resources/hq-internal-plugin.xml" />
@@ -1126,7 +1132,7 @@
 			</fileset>
 		</copy>
 
-		<plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/activemq/src/main/resources/activemq-plugin.xml" />
+	
 		<plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/geronimo/src/main/resources/geronimo-plugin.xml" />
 		<plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/glassfish/src/main/resources/glassfish-plugin.xml" />
 		<plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/hq-internal/src/main/resources/hq-internal-plugin.xml" />
@@ -1210,7 +1216,7 @@
 
 		<!-- version.properties to agent lib -->
 		<antcall target="write-version-file">
-			<param name="version-file" value="${agent.dir}/bundles/${agent.bundle.dir}/lib/version.properties" />
+			<param name="version-file" value="${agent.dir}/bundles/${agent.bundle.dir}/lib/hq-version.properties" />
 		</antcall>
 
 		<copy todir="${agent.dir}/wrapper/sbin">
@@ -1477,7 +1483,7 @@
         <fileset dir="${hq.home}/build" includes="hyperic-*.zip"/>
     </checksum>
 
-    <git command="add version.properties" dir="${hq.home}"/>
+    <git command="add hq-version.properties" dir="${hq.home}"/>
     <git command="commit -m 'Release ${version} build #${build}'" dir="${hq.home}"/>
     <git command="push git@git.springsource.org:hq/hq.git" dir="${hq.home}"/>
 

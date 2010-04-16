@@ -41,6 +41,7 @@ import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.agent.client.AgentCommandsClientFactory;
+import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
@@ -103,7 +104,6 @@ public class AIQueueManagerImpl implements AIQueueManager {
     private CPropManager cPropManager;
     private PlatformDAO platformDAO;
     private PlatformManager platformManager;
-    private ServerManager serverManager;
     private PermissionManager permissionManager;
     private AuditManager auditManager;
     private AuthzSubjectManager authzSubjectManager;
@@ -112,17 +112,18 @@ public class AIQueueManagerImpl implements AIQueueManager {
     private AIAuditFactory aiAuditFactory;
     private AIQResourceVisitorFactory aiqResourceVisitorFactory;
     protected final Log log = LogFactory.getLog(AIQueueManagerImpl.class.getName());
+    private AgentDAO agentDAO;
 
     @Autowired
     public AIQueueManagerImpl(AIServerDAO aIServerDAO, AIIpDAO aiIpDAO,
                               AIPlatformDAO aiPlatformDAO, ConfigManager configManager,
                               CPropManager cPropManager, PlatformDAO platformDAO,
-                              PlatformManager platformManager, ServerManager serverManager,
+                              PlatformManager platformManager, 
                               PermissionManager permissionManager, AuditManager auditManager,
                               AuthzSubjectManager authzSubjectManager,
                               AgentCommandsClientFactory agentCommandsClientFactory,
                               AgentManager agentManager, AIAuditFactory aiAuditFactory,
-                              AIQResourceVisitorFactory aiqResourceVisitorFactory) {
+                              AIQResourceVisitorFactory aiqResourceVisitorFactory, AgentDAO agentDAO) {
 
         this.aIServerDAO = aIServerDAO;
         this.aiIpDAO = aiIpDAO;
@@ -131,7 +132,6 @@ public class AIQueueManagerImpl implements AIQueueManager {
         this.cPropManager = cPropManager;
         this.platformDAO = platformDAO;
         this.platformManager = platformManager;
-        this.serverManager = serverManager;
         this.permissionManager = permissionManager;
         this.auditManager = auditManager;
         this.authzSubjectManager = authzSubjectManager;
@@ -139,6 +139,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
         this.agentManager = agentManager;
         this.aiAuditFactory = aiAuditFactory;
         this.aiqResourceVisitorFactory = aiqResourceVisitorFactory;
+        this.agentDAO = agentDAO;
     }
 
     /**
@@ -639,21 +640,16 @@ public class AIQueueManagerImpl implements AIQueueManager {
         if (AIQueueConstants.Q_STATUS_CHANGED != aiplatform.getQueueStatus()) {
             return false;
         }
-
-        boolean added = false;
-        boolean removed = false;
-        for (Integer id : ipList) {
-
-            final AIIp aiip = aiIpDAO.get(id);
-            if (AIQueueConstants.Q_STATUS_REMOVED == aiip.getQueueStatus()) {
-                removed = true;
-            }
-            if (AIQueueConstants.Q_STATUS_ADDED == aiip.getQueueStatus()) {
-                added = true;
-            }
+        final Agent agent = agentDAO.findByAgentToken(aiplatform.getAgentToken());
+        if (agent == null) {
+            return false;
         }
-        if (added && removed) {
-            return true;
+
+        for (Integer id : ipList) {
+            final AIIp aiip = aiIpDAO.get(id);
+            if (AIQueueConstants.Q_STATUS_REMOVED == aiip.getQueueStatus() && aiip.getAddress().equals(agent.getAddress())) {
+                return true;
+            }
         }
         return false;
     }

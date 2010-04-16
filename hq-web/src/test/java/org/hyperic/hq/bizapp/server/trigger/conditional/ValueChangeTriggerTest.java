@@ -1,10 +1,5 @@
 package org.hyperic.hq.bizapp.server.trigger.conditional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import junit.framework.TestCase;
 
 import org.easymock.EasyMock;
@@ -15,7 +10,6 @@ import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.TriggerNotFiredEvent;
 import org.hyperic.hq.events.server.session.AlertConditionEvaluator;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
-import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.ext.MeasurementEvent;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.shared.DataManager;
@@ -40,7 +34,7 @@ public class ValueChangeTriggerTest
 
     private static final Integer MEASUREMENT_ID = Integer.valueOf(45);
 
-    private List<Measurement> measurements = new ArrayList<Measurement>();
+    private Measurement measurement = new Measurement();
 
     private MeasurementManager measurementManager;
 
@@ -65,7 +59,6 @@ public class ValueChangeTriggerTest
         this.measurementManager = EasyMock.createMock(MeasurementManager.class);
         this.dataManager = EasyMock.createMock(DataManager.class);
         this.trigger = new ValueChangeTrigger(measurementManager,dataManager);
-        measurements.add(new Measurement());
     }
 
 
@@ -90,9 +83,9 @@ public class ValueChangeTriggerTest
      * @throws InvalidTriggerDataException
      */
     public void testInitializeNoLastValue() throws EncodingException, InvalidTriggerDataException {
-        EasyMock.expect(measurementManager.getMeasurement(MEASUREMENT_ID)).andReturn(new Measurement());
-        EasyMock.expect(dataManager.getLastDataPoints(measurements, MeasurementConstants.TIMERANGE_UNLIMITED))
-            .andReturn(new HashMap());
+        EasyMock.expect(measurementManager.getMeasurement(MEASUREMENT_ID)).andReturn(measurement);
+        EasyMock.expect(dataManager.getLastHistoricalData(measurement))
+            .andReturn(null);
         replay();
         initTrigger();
         verify();
@@ -135,11 +128,9 @@ public class ValueChangeTriggerTest
         MetricValue metricValue = new MetricValue(10d, System.currentTimeMillis() - (5 * 60 * 1000l));
         MeasurementEvent event = new MeasurementEvent(3, metricValue);
 
-        EasyMock.expect(measurementManager.getMeasurement(MEASUREMENT_ID)).andReturn(new Measurement());
-        Map initialValues = new HashMap();
-        initialValues.put(MEASUREMENT_ID, new MetricValue(2));
-        EasyMock.expect(dataManager.getLastDataPoints(measurements, MeasurementConstants.TIMERANGE_UNLIMITED))
-            .andReturn(initialValues);
+        EasyMock.expect(measurementManager.getMeasurement(MEASUREMENT_ID)).andReturn(measurement);
+        MetricValue lastValue = new MetricValue(2);
+        EasyMock.expect(dataManager.getLastHistoricalData(measurement)).andReturn(lastValue);
         replay();
         initTrigger();
         try {
@@ -158,11 +149,10 @@ public class ValueChangeTriggerTest
      * @throws EncodingException
      */
     public void testProcessEventWrongType() throws EncodingException, InvalidTriggerDataException {
-        EasyMock.expect(measurementManager.getMeasurement(MEASUREMENT_ID)).andReturn(new Measurement());
-        Map initialValues = new HashMap();
-        initialValues.put(MEASUREMENT_ID, new MetricValue(2));
-        EasyMock.expect(dataManager.getLastDataPoints(measurements, MeasurementConstants.TIMERANGE_UNLIMITED))
-            .andReturn(initialValues);
+        EasyMock.expect(measurementManager.getMeasurement(MEASUREMENT_ID)).andReturn(measurement);
+        MetricValue lastValue = new MetricValue(2);
+        EasyMock.expect(dataManager.getLastHistoricalData(measurement))
+            .andReturn(lastValue);
         replay();
         initTrigger();
         try {
@@ -182,12 +172,12 @@ public class ValueChangeTriggerTest
      */
     public void testProcessOlderValueChange() throws EventTypeException, EncodingException, InvalidTriggerDataException {
         // initial measurement read 10 minutes ago
-        EasyMock.expect(measurementManager.getMeasurement(MEASUREMENT_ID)).andReturn(new Measurement());
-        Map initialValues = new HashMap();
+        EasyMock.expect(measurementManager.getMeasurement(MEASUREMENT_ID)).andReturn(measurement);
+       
         MetricValue initialValue = new MetricValue(2d, System.currentTimeMillis() - (10 * 60 * 1000l));
-        initialValues.put(MEASUREMENT_ID, initialValue);
-        EasyMock.expect(dataManager.getLastDataPoints(measurements, MeasurementConstants.TIMERANGE_UNLIMITED))
-            .andReturn(initialValues);
+       
+        EasyMock.expect(dataManager.getLastHistoricalData(measurement))
+            .andReturn(initialValue);
 
         // occurred 5 minutes ago
         MetricValue metricValue = new MetricValue(10d, System.currentTimeMillis() - (5 * 60 * 1000l));
@@ -223,12 +213,12 @@ public class ValueChangeTriggerTest
      */
     public void testProcessValueChanged() throws EventTypeException, EncodingException, InvalidTriggerDataException {
         // initial measurement read 10 minutes ago
-        EasyMock.expect(measurementManager.getMeasurement(MEASUREMENT_ID)).andReturn(new Measurement());
-        Map initialValues = new HashMap();
+        EasyMock.expect(measurementManager.getMeasurement(MEASUREMENT_ID)).andReturn(measurement);
+       
         MetricValue initialValue = new MetricValue(2d, System.currentTimeMillis() - (10 * 60 * 1000l));
-        initialValues.put(MEASUREMENT_ID, initialValue);
-        EasyMock.expect(dataManager.getLastDataPoints(measurements, MeasurementConstants.TIMERANGE_UNLIMITED))
-            .andReturn(initialValues);
+       
+        EasyMock.expect(dataManager.getLastHistoricalData(measurement))
+            .andReturn(initialValue);
 
         // occurred 5 minutes ago
         MetricValue metricValue = new MetricValue(10d, System.currentTimeMillis() - (5 * 60 * 1000l));
@@ -265,12 +255,12 @@ public class ValueChangeTriggerTest
     public void testProcessValueChangedFromInitial() throws EventTypeException, EncodingException,
         InvalidTriggerDataException {
         // initial value - measurement read 10 minutes ago
-        EasyMock.expect(measurementManager.getMeasurement(MEASUREMENT_ID)).andReturn(new Measurement());
-        Map initialValues = new HashMap();
+        EasyMock.expect(measurementManager.getMeasurement(MEASUREMENT_ID)).andReturn(measurement);
+     
         MetricValue initialValue = new MetricValue(2d, System.currentTimeMillis() - (10 * 60 * 1000l));
-        initialValues.put(MEASUREMENT_ID, initialValue);
-        EasyMock.expect(dataManager.getLastDataPoints(measurements, MeasurementConstants.TIMERANGE_UNLIMITED))
-            .andReturn(initialValues);
+       
+        EasyMock.expect(dataManager.getLastHistoricalData(measurement))
+            .andReturn(initialValue);
 
         // event occurred 5 minutes ago
         MetricValue metricValue = new MetricValue(10d, System.currentTimeMillis() - (5 * 60 * 1000l));
@@ -296,12 +286,12 @@ public class ValueChangeTriggerTest
      */
     public void testProcessValueSame() throws EventTypeException, EncodingException, InvalidTriggerDataException {
         // initial measurement read 10 minutes ago
-        EasyMock.expect(measurementManager.getMeasurement(MEASUREMENT_ID)).andReturn(new Measurement());
-        Map initialValues = new HashMap();
+        EasyMock.expect(measurementManager.getMeasurement(MEASUREMENT_ID)).andReturn(measurement);
+        
         MetricValue initialValue = new MetricValue(10d, System.currentTimeMillis() - (10 * 60 * 1000l));
-        initialValues.put(MEASUREMENT_ID, initialValue);
-        EasyMock.expect(dataManager.getLastDataPoints(measurements, MeasurementConstants.TIMERANGE_UNLIMITED))
-            .andReturn(initialValues);
+       
+        EasyMock.expect(dataManager.getLastHistoricalData(measurement))
+            .andReturn(initialValue);
 
         // occurred 5 minutes ago
         MetricValue metricValue = new MetricValue(10d, System.currentTimeMillis() - (5 * 60 * 1000l));

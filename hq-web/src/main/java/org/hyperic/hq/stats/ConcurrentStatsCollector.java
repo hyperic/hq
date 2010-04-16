@@ -97,8 +97,9 @@ public final class ConcurrentStatsCollector {
         METRIC_DATA_COMPRESS_TIME = "METRIC_DATA_COMPRESS_TIME",
         DB_ANALYZE_TIME = "DB_ANALYZE_TIME", PURGE_EVENT_LOGS_TIME = "PURGE_EVENT_LOGS_TIME",
         PURGE_MEASUREMENTS_TIME = "PURGE_MEASUREMENTS_TIME",
-        MEASUREMENT_SCHEDULE_TIME = "MEASUREMENT_SCHEDULE_TIME", EMAIL_ACTIONS = "EMAIL_ACTIONS",
-        ZEVENT_QUEUE_SIZE = "ZEVENT_QUEUE_SIZE", TRIGGER_INIT_TIME = "TRIGGER_INIT_TIME";
+        MEASUREMENT_SCHEDULE_TIME = "MEASUREMENT_SCHEDULE_TIME", SEND_ALERT_TIME = "SEND_ALERT_TIME",
+        ZEVENT_QUEUE_SIZE = "ZEVENT_QUEUE_SIZE", TRIGGER_INIT_TIME = "TRIGGER_INIT_TIME",
+        FIRED_ALERT_TIME = "FIRED_ALERT_TIME";
     // using tree due to ordering capabilities
     private final Map<String, StatCollector> _statKeys = new TreeMap<String, StatCollector>();
     private AtomicBoolean _hasStarted = new AtomicBoolean(false);

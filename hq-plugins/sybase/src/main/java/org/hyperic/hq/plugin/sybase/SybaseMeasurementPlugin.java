@@ -34,14 +34,14 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.ResultSetMetaData;
 
+import java.util.Properties;
+import org.apache.commons.logging.Log;
+import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.JDBCMeasurementPlugin;
 import org.hyperic.hq.product.Metric;
-import org.hyperic.hq.product.TypeInfo;
 
+import org.hyperic.hq.product.PluginManager;
 import org.hyperic.util.StringUtil;
-import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.config.ConfigSchema;
-import org.hyperic.util.config.SchemaBuilder;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.hq.product.MetricUnreachableException;
 import org.hyperic.hq.product.MetricInvalidException;
@@ -49,17 +49,15 @@ import org.hyperic.hq.product.MetricNotFoundException;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 public class SybaseMeasurementPlugin 
     extends JDBCMeasurementPlugin
 {
+    private final Log _log = getLog();
     private static final String JDBC_DRIVER = 
         "com.sybase.jdbc3.jdbc.SybDriver";
 
     private static final String DEFAULT_URL = SybasePluginUtil.DEFAULT_URL;
-    private static Log log = LogFactory.getLog(SybaseMeasurementPlugin.class.getName());
 
     private static final String PROP_INSTANCE = "instance",
                                 TYPE_SP_MONITOR_CONFIG =
@@ -78,6 +76,14 @@ public class SybaseMeasurementPlugin
     private static HashMap syb12Queries    = null;  // Sybase 12.5 only
     private static HashMap genericQueries  = null;  // Any
     private static HashMap connectionCache = new HashMap();
+
+    public void init(PluginManager manager) throws PluginException {
+        super.init(manager);
+        if (!manager.isRegistered("sbSysmon")) {
+            manager.registerPlugin("sbSysmon", new SybaseSysmonPlugin());
+        }
+
+    }
 
     protected void getDriver()
         throws ClassNotFoundException {
@@ -233,23 +239,6 @@ public class SybaseMeasurementPlugin
                            genericQueries.get("NumServers"));
     }
 
-    /**
-     * Override the JDBCMeasurementPlugin getConfigSchema so that we only
-     * generate config schema questions for the server types.  The service
-     * types will use server config
-     */
-    public ConfigSchema getConfigSchema(TypeInfo info, ConfigResponse config)
-    {
-        if (info.getType() == TypeInfo.TYPE_SERVICE) {
-            SchemaBuilder builder = new SchemaBuilder(config);
-            // User instances require an additional user argument
-            builder.add(PROP_INSTANCE, "Database instance to monitor", "");
-            return builder.getSchema();
-        }
-
-        return new ConfigSchema();
-    }
-
     protected String getQuery(Metric metric)
     {
         String queryVal = metric.getAttributeName();
@@ -273,9 +262,9 @@ public class SybaseMeasurementPlugin
     }
 
     public MetricValue getValue(Metric metric)
-        throws PluginException,
-               MetricUnreachableException,
-               MetricInvalidException,
+            throws PluginException,
+            MetricUnreachableException,
+            MetricInvalidException,
                MetricNotFoundException
     {
         initQueries();
@@ -287,83 +276,110 @@ public class SybaseMeasurementPlugin
             return super.getValue(metric);
         }
 
-        try
-        {
+        Properties props = metric.getProperties();
+        String url = props.getProperty(PROP_URL);
+        String user = props.getProperty(PROP_USER);
+        String pass = props.getProperty(PROP_PASSWORD);
+        if (url == null) {
+            throw new MetricUnreachableException("URL = null");
+        }
+
+        MetricValue res = null;
+        Connection conn = null;
+        try {
             // do not close cached connection
-            Connection conn = getCachedConnection(metric);
+            conn = getCachedConnection(url, user, pass);
             if (objectName.indexOf(TYPE_SP_MONITOR_CONFIG) != -1) {
-                return getSP_MonitorConfigValue(metric, alias, conn);
+                res = getSP_MonitorConfigValue(metric, alias, conn);
             } else if (objectName.indexOf(TYPE_STORAGE) != -1) {
-                return getStorageValue(metric, alias, conn);
+                res = getStorageValue(metric, alias, conn);
             } else if (metric.isAvail()) {
-                return getAvailability(conn);
+                res = getAvailability(conn);
             }
+        } catch (SQLException e) {
+            removeCachedConnection(url, user, pass);
+            DBUtil.closeConnection(null, conn);
+            String msg = "Query failed for " + alias + ": " + e.getMessage();
+            if (metric.isAvail()) {
+                res = new MetricValue(Metric.AVAIL_DOWN);
+            } else {
+                throw new MetricNotFoundException(msg, e);
+            }
+        }
+        if (res == null) {
             throw new MetricNotFoundException("cannot find metric " + metric);
         }
-        catch (SQLException e) {
-            String msg = "Query failed for "+alias+": "+e.getMessage();
-            throw new MetricNotFoundException(msg, e);
-        }
+        _log.debug("[getValue] alias='"+alias+"' res='"+res+"'");
+        return res;
     }
 
     private MetricValue getAvailability(Connection conn)
-        throws MetricUnreachableException
     {
         Statement stmt = null;
         ResultSet rs = null;
+        double res=Metric.AVAIL_DOWN;
         try
         {
             stmt = conn.createStatement();
             String sql = (String)genericQueries.get("NumServers");
             rs = stmt.executeQuery(sql);
-            return new MetricValue(Metric.AVAIL_UP, System.currentTimeMillis());
+            res=Metric.AVAIL_UP;
         }
         catch (SQLException e) {
-            String msg = "Query failed for Availability "+e.getMessage();
-            throw new MetricUnreachableException(msg, e);
+            _log.debug("Query failed for Availability "+e.getMessage(),e);
         }
         finally {
-            DBUtil.closeJDBCObjects(log, null, stmt, rs);
+            DBUtil.closeJDBCObjects(_log, null, stmt, rs);
         }
+        return new MetricValue(res, System.currentTimeMillis());
     }
 
     private MetricValue getStorageValue(Metric metric,
                                         String attr,
                                         Connection conn)
-        throws SQLException
+        throws SQLException, MetricNotFoundException
     {
         String database = metric.getObjectProperty(PROP_DATABASE),
-               segment = metric.getObjectProperty(PROP_SEGMENT);
+                segment = metric.getObjectProperty(PROP_SEGMENT);
         int pagesize = Integer.parseInt(metric.getObjectProperty(PROP_PAGESIZE));
         Statement stmt = null;
         ResultSet rs = null;
-        try
-        {
+        MetricValue res = null;
+        try {
             stmt = conn.createStatement();
-            stmt.execute("use "+database);
-            stmt.execute("sp_helpsegment '"+segment+"'");
+            stmt.execute("use " + database);
+            stmt.execute("sp_helpsegment '" + segment + "'");
             rs = getResultSet(stmt, "total_pages");
-            rs.next();
-            long total_pages = rs.getLong("total_pages"),
-                 free_pages = rs.getLong("free_pages"),
-                 used_pages = rs.getLong("used_pages");
-            if (attr.equals("PercentUsed"))
-            {
-                float percent_used = (getSegmentSize(used_pages, pagesize)
-                                     / getSegmentSize(total_pages, pagesize));
-                return new MetricValue(percent_used, System.currentTimeMillis());
+            if (rs.next()) {
+                long total_pages = rs.getLong("total_pages"),
+                        free_pages = rs.getLong("free_pages"),
+                        used_pages = rs.getLong("used_pages");
+                if (attr.equals("PercentUsed")) {
+                    float percent_used = (getSegmentSize(used_pages, pagesize) / getSegmentSize(total_pages, pagesize));
+                    res = new MetricValue(percent_used, System.currentTimeMillis());
+                } else if (attr.equals("StorageUsed")) {
+                    float storage_used = getSegmentSize(used_pages, pagesize);
+                    res = new MetricValue(storage_used, System.currentTimeMillis());
+                } else if (metric.isAvail()) {
+                    res = new MetricValue(Metric.AVAIL_UP, System.currentTimeMillis());
+                } else {
+                    throw new MetricNotFoundException("[getStorageValue] Metric => '" + attr + "'");
+                }
+            } else {
+                res = new MetricValue(Metric.AVAIL_DOWN, System.currentTimeMillis());
             }
-            else //attr.equals("StorageUsed")
-            {
-                float storage_used = getSegmentSize(used_pages, pagesize);
-                return new MetricValue(storage_used, System.currentTimeMillis());
+        } catch (SQLException e) {
+            if (metric.isAvail()) {
+                res = new MetricValue(Metric.AVAIL_DOWN, System.currentTimeMillis());
+            } else {
+                throw e;
             }
+        } finally {
+            if(stmt!=null)
+                stmt.execute("use master"); // XXX why?
+            DBUtil.closeJDBCObjects(_log, null, stmt, rs);
         }
-        finally
-        {
-            stmt.execute("use master");
-            DBUtil.closeJDBCObjects(log, null, stmt, rs);
-        }
+        return res;
     }
 
     private ResultSet getResultSet(Statement stmt, String col) throws SQLException
@@ -403,7 +419,7 @@ public class SybaseMeasurementPlugin
     private MetricValue getSP_MonitorConfigValue(Metric metric,
                                                  String alias,
                                                  Connection conn)
-        throws SQLException
+        throws SQLException, MetricNotFoundException, MetricUnreachableException
     {
         String configOpt = metric.getObjectProperty(PROP_CONFIG_OPTION);
         float value = -1;
@@ -415,45 +431,44 @@ public class SybaseMeasurementPlugin
             value = getNumFree(conn, configOpt);
         else if (alias.equalsIgnoreCase(NUM_ACTIVE))
             value = getNumActive(conn, configOpt);
-        else //if (alias.equalsIgnoreCase(PERCENT_ACTIVE))
+        else if (alias.equalsIgnoreCase(PERCENT_ACTIVE))
             value = getPercentActive(conn, configOpt);
+        else if (metric.isAvail())
+            value = (float) getAvail(conn, configOpt);
+        else
+            throw new MetricNotFoundException(alias);
+
         return new MetricValue(value, System.currentTimeMillis());
     }
 
-    private float getNumActive(Connection conn, String configOpt)
-        throws SQLException
+    private float getNumActive(Connection conn, String configOpt)throws MetricUnreachableException, MetricNotFoundException
     {
+        return getMonitorConfigValue(conn,configOpt,"Num_active");
+    }
+
+    private double getAvail(Connection conn, String configOpt) {
+        double res = Metric.AVAIL_DOWN;
         Statement stmt = null;
         ResultSet rs = null;
         try
         {
             stmt = conn.createStatement();
-            rs = stmt.executeQuery("sp_monitorconfig '"+configOpt+"'");
-            if (rs.next())
-                return rs.getFloat("Num_active");
+            rs = stmt.executeQuery("sp_monitorconfig '" + configOpt + "'");
+            if (rs.next()) {
+                res = Metric.AVAIL_UP;
+            }
+        } catch (SQLException e) {
+            _log.debug("[getAvail] configOpt='" + configOpt + "' -> " + e.getMessage());
+        } finally {
+            DBUtil.closeJDBCObjects(_log, null, stmt, rs);
         }
-        finally {
-            DBUtil.closeJDBCObjects(log, null, stmt, rs);
-        }
-        throw new SQLException();
+        return res;
     }
 
     private float getNumFree(Connection conn, String configOpt)
-        throws SQLException
+        throws MetricUnreachableException, MetricNotFoundException
     {
-        Statement stmt = null;
-        ResultSet rs = null;
-        try
-        {
-            stmt = conn.createStatement();
-            rs = stmt.executeQuery("sp_monitorconfig '"+configOpt+"'");
-            if (rs.next())
-                return rs.getFloat("Num_free");
-        }
-        finally {
-            DBUtil.closeJDBCObjects(log, null, stmt, rs);
-        }
-        throw new SQLException();
+        return getMonitorConfigValue(conn,configOpt,"Num_free");
     }
 
     private float getNumReuse(Connection conn, String configOpt)
@@ -480,44 +495,38 @@ public class SybaseMeasurementPlugin
             }
         }
         finally {
-            DBUtil.closeJDBCObjects(log, null, stmt, rs);
+            DBUtil.closeJDBCObjects(_log, null, stmt, rs);
         }
         throw new SQLException();
     }
 
     private float getMaxUsed(Connection conn, String configOpt)
-        throws SQLException
+        throws MetricUnreachableException, MetricNotFoundException
     {
-        Statement stmt = null;
-        ResultSet rs = null;
-        try
-        {
-            stmt = conn.createStatement();
-            rs = stmt.executeQuery("sp_monitorconfig '"+configOpt+"'");
-            if (rs.next())
-                return rs.getFloat("Max_Used");
-        }
-        finally {
-            DBUtil.closeJDBCObjects(log, null, stmt, rs);
-        }
-        throw new SQLException();
+        return getMonitorConfigValue(conn,configOpt,"Max_Used");
     }
 
     private float getPercentActive(Connection conn, String configOpt)
-        throws SQLException
+        throws MetricUnreachableException, MetricNotFoundException
     {
+        return getMonitorConfigValue(conn,configOpt,"Pct_act");
+    }
+
+    private float getMonitorConfigValue(Connection conn, String configOpt, String prop) throws MetricUnreachableException, MetricNotFoundException {
         Statement stmt = null;
         ResultSet rs = null;
-        try
-        {
+        try {
             stmt = conn.createStatement();
-            rs = stmt.executeQuery("sp_monitorconfig '"+configOpt+"'");
-            if (rs.next())
-                return rs.getFloat("Pct_act");
+            rs = stmt.executeQuery("sp_monitorconfig '" + configOpt + "'");
+            if (rs.next()) {
+                return rs.getFloat(prop);
+            }else{
+                throw new MetricNotFoundException(prop);
+            }
+        } catch (SQLException e) {
+            throw new MetricUnreachableException(e.getMessage(), e);
+        } finally {
+            DBUtil.closeJDBCObjects(_log, null, stmt, rs);
         }
-        finally {
-            DBUtil.closeJDBCObjects(log, null, stmt, rs);
-        }
-        throw new SQLException();
     }
 }

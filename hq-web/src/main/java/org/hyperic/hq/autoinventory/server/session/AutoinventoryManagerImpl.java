@@ -27,6 +27,7 @@ package org.hyperic.hq.autoinventory.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +42,7 @@ import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AgentCreatedEvent;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
+import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceZevent;
 import org.hyperic.hq.appdef.server.session.Server;
@@ -50,12 +52,14 @@ import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AIQueueManager;
 import org.hyperic.hq.appdef.shared.AIServerValue;
+import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManager;
+import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerManager;
@@ -87,6 +91,7 @@ import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.dao.AIHistoryDAO;
 import org.hyperic.hq.dao.AIPlatformDAO;
+import org.hyperic.hq.measurement.shared.MeasurementProcessor;
 import org.hyperic.hq.product.AutoinventoryPluginManager;
 import org.hyperic.hq.product.GenericPlugin;
 import org.hyperic.hq.product.PluginException;
@@ -129,6 +134,9 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager,
     private AICommandsClientFactory aiCommandsClientFactory;
     private ServiceMerger serviceMerger;
     private RuntimePlatformAndServerMerger runtimePlatformAndServerMerger;
+    private PlatformManager platformManager;
+    private MeasurementProcessor measurementProcessor;
+    private AgentManager agentManager;
 
     @Autowired
     public AutoinventoryManagerImpl(AgentReportStatusDAO agentReportStatusDao,
@@ -141,7 +149,8 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager,
                                     PermissionManager permissionManager,
                                     AICommandsClientFactory aiCommandsClientFactory,
                                     ServiceMerger serviceMerger,
-                                    RuntimePlatformAndServerMerger runtimePlatformAndServerMerger) {
+                                    RuntimePlatformAndServerMerger runtimePlatformAndServerMerger, PlatformManager platformManager, 
+                                    MeasurementProcessor measurementProcessor, AgentManager agentManager) {
         this.agentReportStatusDao = agentReportStatusDao;
         this.aiHistoryDao = aiHistoryDao;
         this.aiPlatformDao = aiPlatformDao;
@@ -156,6 +165,9 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager,
         this.aiCommandsClientFactory = aiCommandsClientFactory;
         this.serviceMerger = serviceMerger;
         this.runtimePlatformAndServerMerger = runtimePlatformAndServerMerger;
+        this.platformManager = platformManager;
+        this.measurementProcessor = measurementProcessor;
+        this.agentManager = agentManager;
     }
 
     /**
@@ -601,6 +613,7 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager,
     public void reportAIData(String agentToken, ScanStateCore stateCore)
         throws AutoinventoryException {
 
+        final boolean debug = log.isDebugEnabled();
         ScanState state = new ScanState(stateCore);
 
         AIPlatformValue aiPlatform = state.getPlatform();
@@ -617,7 +630,7 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager,
                  getIps(aiPlatform.getAddedAIIpValues()) + "; CertDN -> " + aiPlatform.getCertdn() +
                  "; (" + state.getAllServers(log).size() + " servers)");
 
-        if (log.isDebugEnabled()) {
+        if (debug) {
             log.debug("AutoinventoryManager.reportAIData called, " + "scan state=" + state);
             log.debug("AISERVERS=" + state.getAllServers(log));
         }
@@ -633,9 +646,21 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager,
 
         aiPlatform.setAgentToken(agentToken);
 
-        if (log.isDebugEnabled()) {
+        if (debug) {
             log.debug("AImgr.reportAIData: state.getPlatform()=" + aiPlatform);
         }
+        
+        addAIServersToAIPlatform(stateCore, state, aiPlatform);
+        
+        aiPlatform = aiQueueManager.queue(subject, aiPlatform,
+            stateCore.getAreServersIncluded(),
+            false, true);
+        approvePlatformDevice(subject, aiPlatform);
+        checkAgentAssignment(subject, agentToken, aiPlatform);
+    }
+       
+    private void addAIServersToAIPlatform(ScanStateCore stateCore, ScanState state,AIPlatformValue aiPlatform)
+        throws AutoinventoryException {
 
         if (stateCore.getAreServersIncluded()) {
             // TODO: G
@@ -655,32 +680,52 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager,
             }
         }
 
-        try {
-            aiPlatform = aiQueueManager.queue(subject, aiPlatform, stateCore
-                .getAreServersIncluded(), false, true);
-        } catch (SystemException cse) {
-            throw cse;
-        } catch (Exception e) {
-            throw new SystemException(e);
-        }
-
+    }
+    private void approvePlatformDevice(AuthzSubject subject, AIPlatformValue aiPlatform) {
         if (aiPlatform.isPlatformDevice()) {
             log.info("Auto-approving inventory for " + aiPlatform.getFqdn());
-            List<Integer> platforms = new ArrayList<Integer>();
-            platforms.add(aiPlatform.getId());
+            
             List<Integer> ips = buildAIResourceIds(aiPlatform.getAIIpValues());
             List<Integer> servers = buildAIResourceIds(aiPlatform.getAIServerValues());
+            List<Integer> platforms = Collections.singletonList(aiPlatform.getId());
 
             try {
-                aiQueueManager.processQueue(subject, platforms, servers, ips,
-                    AIQueueConstants.Q_DECISION_APPROVE);
-            } catch (SystemException cse) {
-                throw cse;
+                aiQueueManager.processQueue(subject, platforms, servers,
+                    ips, AIQueueConstants.Q_DECISION_APPROVE);
             } catch (Exception e) {
                 throw new SystemException(e);
             }
         }
     }
+    
+    private void checkAgentAssignment(AuthzSubject subj, String agentToken,
+                                      AIPlatformValue aiPlatform) {
+        try {
+            Platform platform = platformManager.getPlatformByAIPlatform(subj, aiPlatform);
+            if (platform != null) {
+                Agent agent = platform.getAgent();
+                if (agent == null || !agent.getAgentToken().equals(agentToken)) {
+                    Agent newAgent = agentManager.getAgent(agentToken);
+                    String fqdn = platform.getFqdn();
+                    Integer pid = platform.getId();
+                    log.info("reassigning platform agent (fqdn=" + fqdn +
+                              ",id=" + pid + ") from=" + agent +
+                              " to=" + newAgent);
+                    platform.setAgent(newAgent);
+                   
+                    measurementProcessor.scheduleHierarchyAfterCommit(platform.getResource());
+                }
+            }
+        } catch (PermissionException e) {
+            // using admin, this should not happen
+            log.error(e,e);
+        } catch (AgentNotFoundException e) {
+            // this is a problem since the agent should already exist in our
+            // inventory before it gets here.
+            log.error(e,e);
+        }
+    }
+
 
     /**
      * Called by agents to report resources detected at runtime via

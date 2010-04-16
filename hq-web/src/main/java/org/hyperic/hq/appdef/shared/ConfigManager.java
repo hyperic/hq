@@ -79,10 +79,10 @@ public interface ConfigManager {
                                             String type, boolean sendConfigEvent) throws ConfigFetchException,
         AppdefEntityNotFoundException, PermissionException, EncodingException;
 
-    public AppdefEntityID configureResponse(AuthzSubject subject, ConfigResponseDB existingConfig,
-                                            AppdefEntityID appdefID, byte[] productConfig, byte[] measurementConfig,
-                                            byte[] controlConfig, byte[] rtConfig, Boolean userManaged,
-                                            boolean sendConfigEvent, boolean force);
+    public boolean configureResponse(AuthzSubject subject, ConfigResponseDB existingConfig,
+                                     AppdefEntityID appdefID, byte[] productConfig, byte[] measurementConfig,
+                                     byte[] controlConfig, byte[] rtConfig, Boolean userManaged,
+                                     boolean force);
 
 
 }

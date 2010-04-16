@@ -50,9 +50,17 @@ public class AlertConditionEvaluatorRepositoryImpl implements AlertConditionEval
     }
 
     public AlertConditionEvaluator getAlertConditionEvaluatorById(Integer alertDefinitionId) {
-        return (AlertConditionEvaluator) alertConditionEvaluators.get(alertDefinitionId);
+        synchronized(alertConditionEvaluators) {
+            return (AlertConditionEvaluator) alertConditionEvaluators.get(alertDefinitionId);
+        }
     }
 
+    /**
+    * ConcurrentModificationException may occur to callers of this method
+    * when iterating through the map. However, since the
+    * AlertConditionEvaluatorDiagnosticService MBean is the only client,
+    * it is not a big issue for now.
+    */
     public Map<Integer, AlertConditionEvaluator> getAlertConditionEvaluators() {
         return Collections.unmodifiableMap(alertConditionEvaluators);
     }

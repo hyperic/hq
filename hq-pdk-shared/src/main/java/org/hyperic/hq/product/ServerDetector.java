@@ -26,7 +26,9 @@
 package org.hyperic.hq.product;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -40,6 +42,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -68,6 +72,7 @@ import org.hyperic.sigar.SigarProxyCache;
 import org.hyperic.sigar.ptql.ProcessFinder;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import sun.security.krb5.internal.ccache.FileCCacheConstants;
 
 /**
  * Encapsulate the know-how to determine all kinds of 
@@ -447,6 +452,25 @@ public abstract class ServerDetector
         }
     }
 
+    protected File findVersionFile(File dir, Pattern pattern) {
+        File[] files = dir.listFiles();
+        Set<File> subDirs = new HashSet<File>();
+        for(File file: files) {
+           if(file.isDirectory()) {
+               subDirs.add(file);
+           }else if( pattern.matcher(file.getAbsolutePath()).find()) {
+               return file; 
+           }
+        }
+        for(File subDir : subDirs) {
+            File versionFile = findVersionFile(subDir,pattern);
+            if(versionFile != null) {
+                return versionFile;
+            }
+        }
+        return null;
+    }
+
     /**
      * Test if server type version filters apply:
      * VERSION_FILE - Return true if given file exists within installpath
@@ -460,22 +484,39 @@ public abstract class ServerDetector
         String installPathMatch = getTypeProperty(INSTALLPATH_MATCH);
         String installPathNoMatch = getTypeProperty(INSTALLPATH_NOMATCH);
 
-        if (versionFile != null) {
-            File instPath = new File(installpath);
-            if (instPath.isFile() && !instPath.isDirectory()) {
-                instPath = instPath.getParentFile();
-            }
-            File file = (instPath != null) ? new File(instPath, versionFile) :
-                new File(installpath, versionFile);
-            if (!file.exists()) {
-                String[] expanded = PluginLoader.expand(file);
-                if ((expanded == null) || (expanded.length == 0)) {
-                    getLog().debug(file + " does not exist, skipping");
+        if(versionFile.startsWith("**/")){  // recursive & regexpr
+            versionFile=versionFile.substring(3);
+            Pattern pattern=Pattern.compile(versionFile);
+            File f=findVersionFile(new File(installpath),pattern);
+            if(f==null)
+                return false;
+            getLog().debug(VERSION_FILE + "=" + versionFile + " matches -> " + f);
+            Matcher m = pattern.matcher(f.getAbsolutePath());
+            m.find();
+            if(m.groupCount()!=0){  // have version group
+                if(!getTypeInfo().getVersion().equals(m.group(1))){
+                    getLog().debug(installpath + " not a match for version " + getTypeInfo().getVersion() + ", skipping");
                     return false;
                 }
-                else {
-                    getLog().debug(VERSION_FILE + "=" + versionFile +
-                                   " matches -> " + expanded[0]);
+            }
+       }else{
+            if (versionFile != null) {
+                File instPath = new File(installpath);
+                if (instPath.isFile() && !instPath.isDirectory()) {
+                    instPath = instPath.getParentFile();
+                }
+                File file = (instPath != null) ? new File(instPath, versionFile) :
+                    new File(installpath, versionFile);
+                if (!file.exists()) {
+                    String[] expanded = PluginLoader.expand(file);
+                    if ((expanded == null) || (expanded.length == 0)) {
+                        getLog().debug(file + " does not exist, skipping");
+                        return false;
+                    }
+                    else {
+                        getLog().debug(VERSION_FILE + "=" + versionFile +
+                                       " matches -> " + expanded[0]);
+                    }
                 }
             }
         }

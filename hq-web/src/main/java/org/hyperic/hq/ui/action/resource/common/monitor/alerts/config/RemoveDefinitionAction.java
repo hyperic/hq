@@ -111,7 +111,9 @@ public class RemoveDefinitionAction
 
         if (rdForm.isDeleteClicked()) {
             if (rdForm.getAetid() != null) {
-                eventsBoss.deleteAlertDefinitions(sessionId.intValue(), defs);
+                for(Integer def: defs) {
+                    eventsBoss.deleteAlertDefinitions(sessionId.intValue(), new Integer[] {def});
+                }
                 params.put(Constants.APPDEF_RES_TYPE_ID, rdForm.getAetid());
             } else {
                 if (adeId.isGroup()) {

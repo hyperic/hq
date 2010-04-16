@@ -29,12 +29,14 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
@@ -177,8 +179,8 @@ public class GalertBossImpl implements GalertBoss {
         ResourceGroup g = resourceGroupManager.findResourceGroupById(subj, gid);
         PageList<GalertDef> defList = null;
         try {
-            alertPermissionManager.canManageAlerts(subj,
-                AppdefUtil.newAppdefEntityId(g.getResource()));
+            // ...check that user can view alert definitions...
+            alertPermissionManager.canViewAlertDefinition(subj, AppdefUtil.newAppdefEntityId(g.getResource()));
             defList = galertManager.findAlertDefs(g, pc);
         } catch (PermissionException e) {
             // user does not have sufficient permissions, so display no
@@ -224,10 +226,11 @@ public class GalertBossImpl implements GalertBoss {
         throws SessionException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         Escalatable esc = galertManager.findEscalatableAlert(id);
+        Resource resource = esc.getDefinition().getDefinitionInfo().getResource();
 
         // HQ-1295: Does user have sufficient permissions?
-        alertPermissionManager.canManageAlerts(subject,
-                                               esc.getDefinition().getDefinitionInfo());
+        // ...check that users can view alerts...
+        alertPermissionManager.canViewAlertDefinition(subject, AppdefUtil.newAppdefEntityId(resource));
 
         return esc;
     }
@@ -273,8 +276,8 @@ public class GalertBossImpl implements GalertBoss {
         try {
             AuthzSubject subj = sessionManager.getSubject(sessionId);
             ResourceGroup g = resourceGroupManager.findResourceGroupById(subj, gid);
-            alertPermissionManager.canManageAlerts(subj,
-                AppdefUtil.newAppdefEntityId(g.getResource()));
+            // ...check that user can view alert definitions...
+            alertPermissionManager.canViewAlertDefinition(subj, AppdefUtil.newAppdefEntityId(g.getResource()));
 
             // Don't need to have any results
             PageControl pc = new PageControl();
@@ -310,8 +313,9 @@ public class GalertBossImpl implements GalertBoss {
         JSONArray jarr = new JSONArray();
 
         try {
-            alertPermissionManager.canManageAlerts(subj,
-                AppdefUtil.newAppdefEntityId(g.getResource()));
+            AppdefEntityID entityId = AppdefUtil.newAppdefEntityId(g.getResource());
+            // ...check that user can view alert definitions...
+            alertPermissionManager.canViewAlertDefinition(subj, entityId);
             alertLogs =
                         galertManager.findAlertLogsByTimeWindow(g, begin, end, pc);
 
@@ -327,6 +331,15 @@ public class GalertBossImpl implements GalertBoss {
                 if (esc != null && esc.isPauseAllowed()) {
                     maxPauseTime = esc.getMaxPauseTime();
                 }
+                
+                boolean canTakeAction = false;
+                try {
+                    // ...check that the user can fix/acknowledge...
+                    alertPermissionManager.canFixAcknowledgeAlerts(subj, entityId);
+                    canTakeAction = true;
+                } catch(PermissionException e) {
+                    // ...the user can't fix/acknowledge...
+                }
 
                 jarr.put(new JSONObject()
                                          .put("id", alert.getId())
@@ -338,6 +351,7 @@ public class GalertBossImpl implements GalertBoss {
                                          .put("reason", alert.getShortReason())
                                          .put("fixed", alert.isFixed())
                                          .put("acknowledgeable", alert.isAcknowledgeable())
+                                         .put("canTakeAction", canTakeAction)
                                          .put("maxPauseTime", maxPauseTime));
             }
         } catch (PermissionException e) {

@@ -30,6 +30,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
@@ -42,6 +44,7 @@ import org.hyperic.hq.ui.beans.TimelineBean;
 import org.hyperic.hq.ui.util.MonitorUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.TimeUtil;
+import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -52,6 +55,8 @@ public class TimelineAction
     extends TilesAction {
 
     private EventLogBoss eventLogBoss;
+    
+    private final Log log = LogFactory.getLog(TimelineAction.class.getName());
 
     @Autowired
     public TimelineAction(EventLogBoss eventLogBoss) {
@@ -69,6 +74,7 @@ public class TimelineAction
      */
     public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                  HttpServletResponse response) throws Exception {
+        StopWatch watch = new StopWatch();
         WebUser user = RequestUtils.getWebUser(request);
         Map<String, Object> range = user.getMetricRangePreference();
         long begin = ((Long) range.get(MonitorUtils.BEGIN)).longValue();
@@ -90,6 +96,10 @@ public class TimelineAction
         }
 
         request.setAttribute(Constants.TIME_INTERVALS_ATTR, beans);
+        
+        if (log.isDebugEnabled()) {
+            log.debug("TimelineAction.execute: " + watch);
+        }
 
         return null;
     }

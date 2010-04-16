@@ -32,28 +32,38 @@
 
 
 <tiles:insert definition=".events.config.view.conditions">
-  <tiles:put name="showValues" value="false"/>
+  	<tiles:put name="showValues" value="false"/>
 </tiles:insert>
 
 <c:if test="${not canEditConditions}">
-<table width="100%" cellpadding="5" cellspacing="0" border="0" class="ErrorField">
-  <tr>
-    <td><fmt:message key="alert.config.props.CB.CanNotEditConditions"/></td>
-  </tr>
-</table>
+	<table width="100%" cellpadding="5" cellspacing="0" border="0" class="ErrorField">
+  		<tr>
+    		<td><fmt:message key="alert.config.props.CB.CanNotEditConditions"/></td>
+  		</tr>
+	</table>
 </c:if>
-<c:if test="${canEditConditions && not alertDef.deleted}">
-  <c:if test="${not empty Resource || not empty ResourceType}">
-  <tiles:insert definition=".toolbar.edit">
-  <c:choose>
-    <c:when test="${not empty Resource}">
-    <tiles:put name="editUrl">/alerts/Config.do?mode=editConditions&eid=<c:out value="${Resource.entityId.appdefKey}"/>&ad=<c:out value="${alertDef.id}"/></tiles:put>
-    </c:when>
-    <c:otherwise>
-    <tiles:put name="editUrl">/alerts/Config.do?mode=editConditions&aetid=<c:out value="${ResourceType.appdefTypeKey}"/>&ad=<c:out value="${alertDef.id}"/></tiles:put>
-    </c:otherwise>
-  </c:choose>
-  </tiles:insert>
+
+<c:if test="${canModify && canEditConditions && not alertDef.deleted}">
+	<c:if test="${not empty Resource || not empty ResourceType}">
+		<c:choose>
+  			<c:when test="${not empty Resource}">
+    			<c:url var="editUrl" value="/alerts/Config.do">
+    				<c:param name="mode" value="editConditions" />
+			    	<c:param name="eid" value="${Resource.entityId.appdefKey}" />
+			    	<c:param name="ad" value="${alertDef.id}" />
+			    </c:url>
+			</c:when>
+			<c:otherwise>
+			  	<c:url var="editUrl" value="/alerts/Config.do">
+			    	<c:param name="mode" value="editConditions" />
+			    	<c:param name="aetid" value="${ResourceType.appdefTypeKey}" />
+			    	<c:param name="ad" value="${alertDef.id}" />
+			    </c:url>
+			</c:otherwise>
+		</c:choose>
+		<tiles:insert definition=".toolbar.edit">
+			<tiles:put name="editUrl" beanName="editUrl" />
+		</tiles:insert>
+	</c:if>
 </c:if>
-</c:if>
-<br>
+<br/>

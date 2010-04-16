@@ -32,6 +32,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.annotation.PostConstruct;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
@@ -47,7 +48,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
@@ -59,6 +59,7 @@ import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.EventConstants;
+import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.collection.IntHashMap;
 import org.quartz.JobDetail;
@@ -94,6 +95,11 @@ public class EmailManagerImpl implements EmailManager {
         this.authzSubjectManager = authzSubjectManager;
         this.platformManager = platformManager;
         this.resourceManager = resourceManager;
+    }
+    
+    @PostConstruct
+    public void initStats() {
+        ConcurrentStatsCollector.getInstance().register(ConcurrentStatsCollector.SEND_ALERT_TIME);
     }
 
     public void sendEmail(EmailRecipient[] addresses, String subject, String[] body, String[] htmlBody, Integer priority) {

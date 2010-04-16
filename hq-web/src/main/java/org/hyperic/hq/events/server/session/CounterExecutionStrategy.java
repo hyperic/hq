@@ -92,6 +92,9 @@ public class CounterExecutionStrategy implements ExecutionStrategy {
     }
 
     public void initialize(Serializable initialState) {
+        if(initialState == null) {
+            return;
+        }
         if (!(initialState instanceof List)) {
             log.warn("Received persisted state that was not an instance of list.  Count will be reset to 0.");
             return;

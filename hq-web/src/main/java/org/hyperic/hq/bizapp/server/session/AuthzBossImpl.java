@@ -68,6 +68,7 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -463,11 +464,17 @@ public class AuthzBossImpl implements AuthzBoss {
 
     /**
      * Set the UserPreferences
-     * 
+     * HHQ-3676 Creating a new transaction here to avoid upgrading the hibernate session during user navigation
+     * TODO investigate asynchronously setting prefs instead
      */
+    @Transactional(propagation=Propagation.REQUIRES_NEW)
     public void setUserPrefs(Integer sessionId, Integer subjectId, ConfigResponse prefs) throws ApplicationException,
         SessionTimeoutException, SessionNotFoundException {
-        AuthzSubject who = sessionManager.getSubject(sessionId);
+        if (log.isDebugEnabled()) {
+            log.debug("setting preferences for sessionid=" + sessionId +
+                ", subjId=" + subjectId);
+        }
+        AuthzSubject who = sessionManager.getSubject(sessionId);       
         authzSubjectManager.setUserPrefs(who, subjectId, prefs);
         getUserPrefs(sessionId, subjectId);
     }

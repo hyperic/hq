@@ -57,6 +57,7 @@ import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.TimeUtil;
 import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.pager.PageControl;
+import org.hyperic.util.timer.StopWatch;
 import org.hyperic.util.units.UnitNumber;
 import org.hyperic.util.units.UnitsConstants;
 import org.hyperic.util.units.UnitsFormat;
@@ -84,6 +85,8 @@ public class CurrentHealthAction
 
     public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
                                  HttpServletRequest request, HttpServletResponse response) throws Exception {
+        final boolean debug = log.isDebugEnabled();
+        StopWatch watch = new StopWatch();
         AppdefResourceValue resource = RequestUtils.getResource(request);
 
         if (resource == null) {
@@ -132,9 +135,14 @@ public class CurrentHealthAction
             request.setAttribute(Constants.AVAIL_METRICS_ATTR, getFormattedAvailability(data));
         } catch (MeasurementNotFoundException e) {
             // No utilization metric
-            log.debug(MeasurementConstants.CAT_AVAILABILITY + " not found for " + aeid);
+            if(debug) {
+                log.debug(MeasurementConstants.CAT_AVAILABILITY + " not found for " + aeid);
+            }
         }
 
+        if (debug) {
+            log.debug("CurrentHealthAction.execute: " + watch);
+        }
         return null;
     }
 

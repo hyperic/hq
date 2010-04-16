@@ -61,7 +61,7 @@
         <column name="SERVER_ID" not-null="false" index="EAM_SERVICE_AIID_IDX"/>
       </many-to-one>
       <property name="autoinventoryIdentifier" type="string">
-        <column name="AUTOINVENTORYIDENTIFIER" not-null="false" length="250" index="EAM_SERVICE_AIID_IDX"/>
+        <column name="AUTOINVENTORYIDENTIFIER" not-null="false" length="500" index="EAM_SERVICE_AIID_IDX"/>
       </property>
     </properties>
 

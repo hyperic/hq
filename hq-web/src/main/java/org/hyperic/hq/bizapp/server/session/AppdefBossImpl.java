@@ -28,6 +28,7 @@ package org.hyperic.hq.bizapp.server.session;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -1241,15 +1242,19 @@ public class AppdefBossImpl implements AppdefBoss {
             return new AppdefEntityID[0];
         }
         AppdefEntityID[] removed = resourceManager.removeResourcePerms(subject, res, false);
-
+        Map<Integer,List<AppdefEntityID>> agentCache = null;
+       
         final Integer id = aeid.getId();
         switch (aeid.getType()) {
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-
-                serverManager.removeServer(subject, serverManager.findServerById(id));
+                Server server = serverManager.findServerById(id);
+                agentCache = buildAsyncDeleteAgentCache(server);
+                removeServer(subject, server);
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                removePlatform(subject, platformManager.findPlatformById(id));
+                Platform platform = platformManager.findPlatformById(id);
+                agentCache = buildAsyncDeleteAgentCache(platform);
+                removePlatform(subject, platform);
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
 
@@ -1264,16 +1269,16 @@ public class AppdefBossImpl implements AppdefBoss {
             default:
                 break;
         }
-
+        
         if (log.isDebugEnabled()) {
             log.debug("removeAppdefEntity() for " + aeid + " executed in " + timer.getElapsed());
         }
 
-        zEventManager.enqueueEventAfterCommit(new ResourcesCleanupZevent());
+        zEventManager.enqueueEventAfterCommit(new ResourcesCleanupZevent(agentCache));
 
         return removed;
     }
-
+    
     // TODO modify javadoc comment below regarding NotSupported
     /**
      * Remove all delete resources Method was "NotSupported" since all the
@@ -1281,39 +1286,26 @@ public class AppdefBossImpl implements AppdefBoss {
      * need for a transaction in this context.
      * 
      */
-    public void removeDeletedResources() throws ApplicationException, VetoException {
+    public void removeDeletedResources(Map<Integer,List<AppdefEntityID>> agentCache) throws ApplicationException, VetoException {
         final StopWatch watch = new StopWatch();
         final AuthzSubject subject = authzSubjectManager.findSubjectById(AuthzConstants.overlordId);
-
+        watch.markTimeBegin("unscheduleMeasurementsForAsyncDelete");
+        unscheduleMeasurementsForAsyncDelete(agentCache);
+        watch.markTimeEnd("unscheduleMeasurementsForAsyncDelete");
+        
+        // Look through services, servers, platforms, applications, and groups
         watch.markTimeBegin("removeApplications");
         Collection<Application> applications = applicationManager.findDeletedApplications();
-        for (Application application : applications) {
-            try {
-                _removeApplicationInNewTran(subject, application);
-            } catch (Exception e) {
-                log.error("Unable to remove application: " + e, e);
-            }
-        }
+        removeApplications(subject, applications);
         watch.markTimeEnd("removeApplications");
-        if (log.isDebugEnabled()) {
-            log.debug("Removed " + applications.size() + " applications");
-        }
+       
 
         watch.markTimeBegin("removeResourceGroups");
         Collection<ResourceGroup> groups = resourceGroupManager.findDeletedGroups();
-        for (ResourceGroup group : groups) {
-            try {
-                _removeGroupInNewTran(subject, group);
-            } catch (Exception e) {
-                log.error("Unable to remove group: " + e, e);
-            }
-        }
+        removeResourceGroups(subject, groups);
+        
         watch.markTimeEnd("removeResourceGroups");
-        if (log.isDebugEnabled()) {
-            log.debug("Removed " + groups.size() + " resource groups");
-        }
-
-        // Look through services, servers, platforms, applications, and groups
+      
         Collection<Service> services = serviceManager.findDeletedServices();
         removeServices(subject, services);
 
@@ -1332,10 +1324,71 @@ public class AppdefBossImpl implements AppdefBoss {
         }
         watch.markTimeEnd("removePlatforms");
         if (log.isDebugEnabled()) {
-            log.debug("Removed " + platforms.size() + " platforms");
-            log.debug("removeDeletedResources() timing: " + watch);
+            log.debug("removeDeletedResources: " + watch);
         }
     }
+    
+        /**
+         * Disable measurements and unschedule from the agent in bulk
+         * with the agent cache info because the resources have been
+         * de-referenced from the agent
+         * 
+         * @param agentCache {@link Map} of {@link Integer} of agentIds 
+         * to {@link List} of {@link AppdefEntityID}s
+         */
+        private void unscheduleMeasurementsForAsyncDelete(Map<Integer,List<AppdefEntityID>> agentCache) {
+            if (agentCache == null) {
+                return;
+            }
+            
+            try {
+                AuthzSubject subject =
+                    authzSubjectManager.findSubjectById(AuthzConstants.overlordId);
+    
+                for (Integer agentId : agentCache.keySet() ) {
+                    
+                    Agent agent = agentManager.getAgent(agentId);
+                    List<AppdefEntityID> resources = agentCache.get(agentId);
+                    
+                    measurementManager.disableMeasurements(
+                            subject, 
+                            agent,
+                            (AppdefEntityID[]) resources.toArray(new AppdefEntityID[0]), 
+                            true);
+                 }
+            } catch (Exception e) {
+                log.error("Error unscheduling measurements during async delete", e);
+             }
+         }
+         
+        private final void removeApplications(AuthzSubject subject, Collection<Application> applications) {
+            for (Application application: applications ) {
+                try {
+                    _removeApplicationInNewTran(
+                        subject, application);
+                } catch (Exception e) {
+                    log.error("Unable to remove application: "  + e, e);
+                }
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("Removed "  + applications.size() +  " applications");
+            }
+        }
+        
+        private final void removeResourceGroups(AuthzSubject subject, Collection<ResourceGroup> groups) {
+            for (ResourceGroup group: groups ) {
+                try {
+                    _removeGroupInNewTran(subject, group);
+                } catch (Exception e) {
+                    log.error("Unable to remove group: "  + e, e);
+                }
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("Removed " +  groups.size()  + " resource groups");
+            }
+        }
+        
+
 
     private final void removeServers(AuthzSubject subject, Collection<Server> servers) {
         final StopWatch watch = new StopWatch();
@@ -1468,8 +1521,12 @@ public class AppdefBossImpl implements AppdefBoss {
                     false);
             } catch (ResourceDeletedException e) {
                 log.debug(e);
+            } catch (AutoinventoryException e) {
+                log.warn("Exception while turning off RuntimeScan for: " +
+                    server + " (handled gracefully).  " + e);
             } catch (Exception e) {
-                log.error("Error turning off RuntimeScan for: " + server, e);
+                log.error("Unexpected error turning off RuntimeScan for: " +
+                    server + " (handled gracefully).", e);
             }
             // finally, remove the server
             serverManager.removeServer(subject, server);
@@ -1480,6 +1537,66 @@ public class AppdefBossImpl implements AppdefBoss {
             throw (PermissionException) e;
         }
     }
+    
+    /**
+     * @param server The server being deleted
+     * 
+     * @return {@link Map} of {@link Integer} of agentIds 
+     * to {@link List} of {@link AppdefEntityID}s
+     */
+    private Map<Integer,List<AppdefEntityID>> buildAsyncDeleteAgentCache(Server server) {        
+        Map<Integer,List<AppdefEntityID>> cache = new HashMap<Integer,List<AppdefEntityID>>();
+        
+        try {
+            Agent agent = findResourceAgent(server.getEntityId());
+            List<AppdefEntityID> resources = new ArrayList<AppdefEntityID>();
+            
+            for (Service s : server.getServices() ) {
+                resources.add(s.getEntityId());
+            }
+            cache.put(agent.getId(), resources);
+        } catch (Exception e) {
+            log.warn("Unable to build AsyncDeleteAgentCache for server[id=" 
+                            + server.getId()
+                            + ", name=" + server.getName() + "]: "
+                            + e.getMessage());
+        }
+        
+        return cache;
+    }
+
+    /**
+     * @param platform The platform being deleted
+     * 
+     * @return {@link Map} of {@link Integer} of agentIds 
+     * to {@link List} of {@link AppdefEntityID}s
+     */
+    private Map<Integer,List<AppdefEntityID>> buildAsyncDeleteAgentCache(Platform platform) {
+        Map<Integer,List<AppdefEntityID>> cache = new HashMap<Integer,List<AppdefEntityID>>();
+
+        try {
+            Agent agent = platform.getAgent();
+            List<AppdefEntityID> resources = new ArrayList<AppdefEntityID>();
+            
+            for (Server s: platform.getServers() ) {
+                if (!s.getServerType().isVirtual()) {
+                    resources.add(s.getEntityId());
+                }
+                List<AppdefEntityID> services =  buildAsyncDeleteAgentCache(s).get(agent.getId());
+                resources.addAll(services);
+            }
+            cache.put(agent.getId(), resources);
+        } catch (Exception e) {
+            log.warn("Unable to build AsyncDeleteAgentCache for platform[id=" 
+                        + platform.getId()
+                        + ", name=" + platform.getName() + "]: "
+                        + e.getMessage());
+        }
+        
+        return cache;
+    }
+
+    
 
     /**
      * 
@@ -1914,7 +2031,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * 
      */
     public void removeResourcesFromGroup(int sessionId, ResourceGroup group, Collection<Resource> resources)
-        throws SessionException, PermissionException {
+        throws SessionException, PermissionException, VetoException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
 
         resourceGroupManager.removeResources(subject, group, resources);
@@ -2143,7 +2260,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * 
      */
     public void addResourcesToGroup(int sessionID, ResourceGroup group, List<AppdefEntityID> aeids)
-        throws SessionException, PermissionException {
+        throws SessionException, PermissionException, VetoException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
 
         for (AppdefEntityID aeid : aeids) {
@@ -2718,11 +2835,12 @@ public class AppdefBossImpl implements AppdefBoss {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
 
         Resource resource = resourceManager.findResource(entityId);
-
+        List<ResourceGroup> groups = new ArrayList<ResourceGroup>(groupIds.length);
         for (int i = 0; i < groupIds.length; i++) {
             ResourceGroup group = resourceGroupManager.findResourceGroupById(subject, groupIds[i]);
-            resourceGroupManager.addResource(subject, group, resource);
+            groups.add(group);
         }
+        resourceGroupManager.addResource(subject, resource, groups);
     }
 
     /**
@@ -2765,11 +2883,13 @@ public class AppdefBossImpl implements AppdefBoss {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
 
         Resource resource = resourceManager.findResource(entityId);
+        List<ResourceGroup> groups = new ArrayList<ResourceGroup>(groupIds.length);
 
         for (int i = 0; i < groupIds.length; i++) {
             ResourceGroup group = resourceGroupManager.findResourceGroupById(subject, groupIds[i]);
-            resourceGroupManager.removeResources(subject, group, Collections.singleton(resource));
+            groups.add(group);
         }
+        resourceGroupManager.removeResource(subject, resource, groups);
     }
 
     /**
@@ -2966,12 +3086,16 @@ public class AppdefBossImpl implements AppdefBoss {
         Service svc = null;
         try {
             existingConfig = configManager.getConfigResponse(entityId);
-
-            if (configManager.configureResponse(subject, existingConfig, entityId, ConfigResponse.safeEncode(allConfigs
+            boolean wasUpdated = configManager.configureResponse(subject, existingConfig, entityId, ConfigResponse.safeEncode(allConfigs
                 .getProductConfig()), ConfigResponse.safeEncode(allConfigs.getMetricConfig()), ConfigResponse
                 .safeEncode(allConfigs.getControlConfig()), ConfigResponse.safeEncode(allConfigs.getRtConfig()),
-                Boolean.TRUE, !doValidation, force) != null) {
+                Boolean.TRUE, force);
+            if (wasUpdated) {
                 ids.add(entityId);
+            }
+            if (wasUpdated && !doValidation) {
+                Resource r = resourceManager.findResource(entityId);
+                resourceManager.resourceHierarchyUpdated(subject, Collections.singletonList(r));
             }
 
             if (doValidation) {
@@ -3240,14 +3364,5 @@ public class AppdefBossImpl implements AppdefBoss {
             Collections.sort(list);
         }
         return ret;
-    }
-
-    /**
-     * temporary method for determining whether or not we're running a database
-     * that supports navmap
-     * 
-     */
-    public boolean isNavMapSupported() {
-        return appdefStatManager.isNavMapSupported();
     }
 }

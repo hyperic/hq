@@ -16,15 +16,21 @@
  */
 package org.hyperic.hq.events.server.session;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hibernate.Query;
 import org.hibernate.SessionFactory;
-import org.hibernate.dialect.Dialect;
-import org.hyperic.hibernate.Util;
+import org.hibernate.type.IntegerType;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
+import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -33,6 +39,8 @@ import org.springframework.stereotype.Repository;
 public class TriggerDAO
     extends HibernateDAO<RegisteredTrigger> implements TriggerDAOInterface
 {
+    private final Log log = LogFactory.getLog(TriggerDAO.class);
+    
     @Autowired
     public TriggerDAO(SessionFactory sessionFactory) {
         super(RegisteredTrigger.class, sessionFactory);
@@ -46,28 +54,6 @@ public class TriggerDAO
         createInfo.setId(res.getId());
 
         return res;
-    }
-
-    public void removeTriggers(AlertDefinition def) {
-
-        String sql = "update AlertCondition set trigger = null " + "where alertDefinition = :def";
-
-        getSession().createQuery(sql).setParameter("def", def).executeUpdate();
-
-        def.clearTriggers();
-    }
-
-    public void deleteAlertDefinition(AlertDefinition def) {
-        String sql = "update AlertCondition c set trigger = null " + "where alertDefinition = :def or "
-                     + "exists (select d.id from AlertDefinition d where "
-                     + "d.parent = :def and c.alertDefinition = d)";
-
-        getSession().createQuery(sql).setParameter("def", def).executeUpdate();
-
-        sql = "delete from RegisteredTrigger r " + "where alertDefinition = :def or "
-              + "exists (select d.id from AlertDefinition d where " + "d.parent = :def and r.alertDefinition = d)";
-
-        getSession().createQuery(sql).setParameter("def", def).executeUpdate();
     }
 
     public RegisteredTrigger findById(Integer id) {
@@ -90,22 +76,113 @@ public class TriggerDAO
 
         return getSession().createQuery(sql).setParameter("defId", id).list();
     }
+    
+    /**
+     * Find all the registered trigger ids associated with the alert definition ids.
+     *
+     * @param alertDefIds The alert definition ids.
+     * @return {@link Map} of alert definition id {@link Integer} 
+     *          to {@link List} of trigger id {@link Integer}
+     */
+    @SuppressWarnings("unchecked")
+    public Map<Integer,List<Integer>> findTriggerIdsByAlertDefinitionIds(List<Integer> alertDefIds) {
+        if (alertDefIds.isEmpty()) {
+            return new HashMap<Integer,List<Integer>>(0,1);
+        }
+ 
+        final boolean debug = log.isDebugEnabled();
+        StopWatch watch = new StopWatch();
+
+        final String sql = 
+            new StringBuilder()
+                    .append("SELECT T.ALERT_DEFINITION_ID AS ALERT_DEF_ID, ")
+                    .append("T.ID AS TRIGGER_ID ")
+                    .append("FROM EAM_REGISTERED_TRIGGER T ")
+                    .append("WHERE T.ALERT_DEFINITION_ID IN (:alertDefIds) ")
+                    .toString();
+        
+        Query query = getSession().createSQLQuery(sql)
+                            .addScalar("ALERT_DEF_ID", new IntegerType())
+                            .addScalar("TRIGGER_ID", new IntegerType());
+        
+        List<Object[]> triggers = new ArrayList<Object[]>(alertDefIds.size());
+        int batchSize = 1000;
+        
+        if (debug) watch.markTimeBegin("createQuery.list");
+
+        for (int i=0; i<alertDefIds.size(); i+=batchSize) {
+            int end = Math.min(i+batchSize, alertDefIds.size());
+            List<Integer> list = alertDefIds.subList(i, end);
+            query.setParameterList("alertDefIds", list, new IntegerType());
+            triggers.addAll(query.list());
+        }
+
+        if (debug) watch.markTimeEnd("createQuery.list");
+
+        Map<Integer,List<Integer>> alertDefTriggerMap = new HashMap<Integer,List<Integer>>(alertDefIds.size());
+        
+        if (debug) watch.markTimeBegin("buildMap");
+
+        for (Object[] o : triggers) { 
+            Integer alertDefId = (Integer) o[0];
+            Integer triggerId = (Integer) o[1];
+
+            List<Integer> trigList = alertDefTriggerMap.get(alertDefId);
+            
+            if (trigList == null) {
+                trigList = new ArrayList<Integer>();
+                alertDefTriggerMap.put(alertDefId, trigList);
+            }
+            trigList.add(triggerId);
+        }
+        
+        if (debug) {
+            watch.markTimeEnd("buildMap");
+            log.debug("findTriggerIdsByAlertDefinitionIds: " + watch
+                            + ", alert definition ids size=" + alertDefIds.size()
+                            + ", trigger ids size=" + triggers.size()
+                            + ", map size=" + alertDefTriggerMap.size());
+        }
+        
+        return alertDefTriggerMap;
+    }
+
 
 
     @SuppressWarnings("unchecked")
     public Set<RegisteredTrigger> findAllEnabledTriggers() {
-        Dialect dialect = Util.getDialect();
-        //For performance optimization, we want to fetch each trigger's alert def as well as the alert def's conditions in a single query (as they will be used to create AlertConditionEvaluators when creating trigger impls).
-        //This query guarantees that when we do trigger.getAlertDefinition().getConditions(), the database is not hit again
-        String hql = new StringBuilder().append("from AlertDefinition ad left join fetch ad.conditionsBag c inner join fetch c.trigger where ad.enabled = ")
-                                        .append(dialect.toBooleanValueString(true))
-                                        .toString();
+        final boolean debug = log.isDebugEnabled();
+        StopWatch watch = new StopWatch();
+       
+        // For performance optimization, we want to fetch each trigger's alert
+        // def as well as the alert def's alert definition state and conditions
+        // in a single query (as they will be used to create
+        // AlertConditionEvaluators when creating trigger impls). This query
+        // guarantees that when we do trigger.getAlertDefinition().getConditions(),
+        // the database is not hit again
+        String hql = new StringBuilder(256)
+                    .append("from AlertDefinition ad ")
+                     .append("join fetch ad.alertDefinitionState ")
+                     .append("join fetch ad.conditionsBag c ")
+                    .append("join fetch c.trigger ")
+                    .append("where ad.enabled = '1'")
+                    .append("and ad.deleted = '0' ")
+                 .toString();
+        if (debug) watch.markTimeBegin("createQuery.list");
         List<AlertDefinition> alertDefs = getSession().createQuery(hql).list();
+        if (debug) watch.markTimeEnd("createQuery.list");  
+        
         Set<RegisteredTrigger> triggers = new LinkedHashSet<RegisteredTrigger>();
+        if (debug) watch.markTimeBegin("addTriggers");
+        
         for(AlertDefinition definition : alertDefs) {
             for(AlertCondition condition: definition.getConditionsBag()) {
                 triggers.add(condition.getTrigger());
             }
+        }
+        if (debug) {
+            watch.markTimeEnd("addTriggers");
+            log.debug("findAllEnabledTriggers: " + watch);
         }
         return triggers;
     }

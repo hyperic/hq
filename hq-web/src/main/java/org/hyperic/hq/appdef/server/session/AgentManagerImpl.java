@@ -30,8 +30,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -205,7 +206,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      */
     @Transactional(readOnly = true)
     public List<Agent> getAgents() {
-        return new ArrayList<Agent>(agentDao.findAll());
+        return agentDao.findAll();
     }
 
     /**
@@ -222,6 +223,31 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     @Transactional(readOnly = true)
     public int getAgentCountUsed() {
         return agentDao.countUsed();
+    }
+    
+    /**
+     * @param aeids {@link Collection} of {@link AppdefEntityID}s
+     * @return Map of {@link Agent} to {@link Collection} of ${AppdefEntityID}s
+     *
+     */
+    @Transactional(readOnly = true)
+    public Map<Integer,Collection<AppdefEntityID>> getAgentMap(Collection<AppdefEntityID> aeids) {
+        Map<Integer,Collection<AppdefEntityID>> rtn = new HashMap<Integer,Collection<AppdefEntityID>>(aeids.size());
+        Collection<AppdefEntityID> tmp;
+        for (AppdefEntityID eid : aeids ) {
+            Integer agentId;
+            try {
+                agentId = getAgent(eid).getId();
+                if (null == (tmp = rtn.get(agentId))) {
+                    tmp = new HashSet<AppdefEntityID>();
+                    rtn.put(agentId, tmp);
+                }
+                tmp.add(eid);
+            } catch (AgentNotFoundException e) {
+                log.warn(e.getMessage());
+            }
+        }
+        return rtn;
     }
 
     /**
@@ -886,7 +912,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         // TODO: G
         Map updatedAgentInfo = client.upgrade(bundleFilePath, HQConstants.AgentBundleDropDir);
 
-        if (!updatedAgentInfo.isEmpty()) {
+        if (updatedAgentInfo != null && !updatedAgentInfo.isEmpty()) {
             // If Map is not empty, we'll handle the data otherwise we do
             // nothing
 

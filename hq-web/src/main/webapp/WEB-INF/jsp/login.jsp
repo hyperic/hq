@@ -68,7 +68,7 @@
 			</form>
 		</div>
 	</div>
-	<script src="<html:rewrite page="/js/dojo/1.1/dojo/dojo.js" />" type="text/javascript"></script>
+	<script src="<html:rewrite page="/js/dojo/1.1.2/dojo/dojo.js" />" type="text/javascript"></script>
 		<script>
 			dojo.addOnLoad(function() {
 				var username = dojo.byId("usernameInput");
@@ -101,10 +101,13 @@
 				<c:if test="${guestEnabled}">
 					dojo.connect(dojo.byId("guestLoginLink"), "onclick", function() {
 						var username = dojo.byId("usernameInput");
-	
+						var password = dojo.byId("passwordInput");
 						username.value = "<c:out value="${guestUsername}" />";
 	
 						document.forms["loginForm"]["submit"].click();
+
+						username.disabled = true;
+						password.disabled = true;
 					});
 				</c:if>
 			});

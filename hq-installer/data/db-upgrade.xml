@@ -9748,22 +9748,22 @@ has already been defined.
 
   <schemaSpec version="3.142.1">
     <schema-directSQL>
-        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ALERT" targetDB="postgresql">
+        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ALERT" targetDB="postgresql" fail="false">
            alter table EAM_ALERT_ACTION_LOG drop constraint FK423FA3CC1AA4E259
         </statement>
-        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ACTION" targetDB="postgresql">
+        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ACTION" targetDB="postgresql" fail="false">
            alter table EAM_ALERT_ACTION_LOG drop constraint FK423FA3CC9C76C3BB
         </statement>
-        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ALERT" targetDB="oracle">
+        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ALERT" targetDB="oracle" fail="false">
            alter table EAM_ALERT_ACTION_LOG drop constraint FK423FA3CC1AA4E259
         </statement>
-        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ACTION" targetDB="oracle">
+        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ACTION" targetDB="oracle" fail="false">
            alter table EAM_ALERT_ACTION_LOG drop constraint FK423FA3CC9C76C3BB
         </statement>
-        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ALERT" targetDB="mysql">
+        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ALERT" targetDB="mysql" fail="false">
            alter table EAM_ALERT_ACTION_LOG drop foreign key FK423FA3CC1AA4E259
         </statement>
-        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ACTION" targetDB="mysql">
+        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ACTION" targetDB="mysql" fail="false">
            alter table EAM_ALERT_ACTION_LOG drop foreign key FK423FA3CC9C76C3BB
         </statement>
     </schema-directSQL>
@@ -9914,52 +9914,50 @@ has already been defined.
                        value="FALSE" />
   </schemaSpec>
 
-  
   <schemaSpec version="3.151">
-  	    <export-counters exportDir="${jboss.home}"/>
-  	    <schema-directSQL>
-  	      <statement desc="Convert frequency type of DURATION to frequency type EVERYTIME">
-  	        UPDATE EAM_ALERT_DEFINITION SET FREQUENCY_TYPE = 0 WHERE FREQUENCY_TYPE = 1
-  	      </statement>
-  	      <statement desc="Convert frequency type of NO_DUP to frequency type EVERYTIME">
-  	        UPDATE EAM_ALERT_DEFINITION SET FREQUENCY_TYPE = 0 WHERE FREQUENCY_TYPE = 3
-  	      </statement>
-  	      <statement desc="Drop Index ACT_ON_TRIGGER_ID_IDX" targetDB='oracle'>
-  	        DROP INDEX ACT_ON_TRIGGER_ID_IDX
-  	      </statement>
-  	      <statement desc="Drop Index ACT_ON_TRIGGER_ID_IDX" targetDB='postgresql'>
-  	        DROP INDEX ACT_ON_TRIGGER_ID_IDX
-  	      </statement>
-  	      <statement desc="Drop Foreign Key Constraint on ACT_ON_TRIGGER_ID" targetDB='mysql'>
-  	        ALTER TABLE EAM_ALERT_DEFINITION DROP FOREIGN KEY FK975407845BC79AEA
-  	      </statement>
-  	      <statement desc="Drop Index ACT_ON_TRIGGER_ID_IDX" targetDB='mysql'>
-  	        ALTER TABLE EAM_ALERT_DEFINITION DROP INDEX ACT_ON_TRIGGER_ID_IDX
-  	      </statement>
-  	      <statement desc="Drop unused EAM_ALERT_DEFINITION column ACT_ON_TRIGGER_ID">
-  	        ALTER TABLE EAM_ALERT_DEFINITION DROP COLUMN ACT_ON_TRIGGER_ID
-  	      </statement>
-  	      <statement desc="Delete MultiConditionTrigger from EAM_REGISTERED_TRIGGER">
-  	        DELETE FROM EAM_REGISTERED_TRIGGER WHERE CLASSNAME = 'org.hyperic.hq.bizapp.server.trigger.conditional.MultiConditionTrigger'
-  	      </statement>
-  	      <statement desc="Delete AvertTrigger from EAM_REGISTERED_TRIGGER">
-  	        DELETE FROM EAM_REGISTERED_TRIGGER WHERE CLASSNAME = 'org.hyperic.hq.bizapp.server.trigger.frequency.AvertTrigger'
-  	      </statement>
-  	      <statement desc="Delete CounterTrigger from EAM_REGISTERED_TRIGGER">
-  	        DELETE FROM EAM_REGISTERED_TRIGGER WHERE CLASSNAME = 'org.hyperic.hq.bizapp.server.trigger.frequency.CounterTrigger'
-  	      </statement>
-  	      <statement desc="Delete DurationTrigger from EAM_REGISTERED_TRIGGER">
-  	        DELETE FROM EAM_REGISTERED_TRIGGER WHERE CLASSNAME = 'org.hyperic.hq.bizapp.server.trigger.frequency.DurationTrigger'
-  	      </statement>
-  	      <statement desc="Drop table EAM_TRIGGER_EVENT">
-  	        DROP TABLE EAM_TRIGGER_EVENT
-  	      </statement>
-  	      <statement desc="Drop table EAM_FIRED_TRIGGER">
-  	        DROP TABLE EAM_FIRED_TRIGGER
-  	      </statement>
-  	    </schema-directSQL>  
-  	</schemaSpec>
-
+    <export-counters exportDir="${jboss.home}"/>
+    <schema-directSQL>
+      <statement desc="Convert frequency type of DURATION to frequency type EVERYTIME">
+        UPDATE EAM_ALERT_DEFINITION SET FREQUENCY_TYPE = 0 WHERE FREQUENCY_TYPE = 1
+      </statement>
+      <statement desc="Convert frequency type of NO_DUP to frequency type EVERYTIME">
+        UPDATE EAM_ALERT_DEFINITION SET FREQUENCY_TYPE = 0 WHERE FREQUENCY_TYPE = 3
+      </statement>
+      <statement desc="Drop Index ACT_ON_TRIGGER_ID_IDX" targetDB='oracle'>
+        DROP INDEX ACT_ON_TRIGGER_ID_IDX
+      </statement>
+      <statement desc="Drop Index ACT_ON_TRIGGER_ID_IDX" targetDB='postgresql'>
+        DROP INDEX ACT_ON_TRIGGER_ID_IDX
+      </statement>
+      <statement desc="Drop Foreign Key Constraint on ACT_ON_TRIGGER_ID" targetDB='mysql'>
+        ALTER TABLE EAM_ALERT_DEFINITION DROP FOREIGN KEY FK975407845BC79AEA
+      </statement>
+      <statement desc="Drop Index ACT_ON_TRIGGER_ID_IDX" targetDB='mysql'>
+        ALTER TABLE EAM_ALERT_DEFINITION DROP INDEX ACT_ON_TRIGGER_ID_IDX
+      </statement>
+      <statement desc="Drop unused EAM_ALERT_DEFINITION column ACT_ON_TRIGGER_ID">
+        ALTER TABLE EAM_ALERT_DEFINITION DROP COLUMN ACT_ON_TRIGGER_ID
+      </statement>
+      <statement desc="Delete MultiConditionTrigger from EAM_REGISTERED_TRIGGER">
+        DELETE FROM EAM_REGISTERED_TRIGGER WHERE CLASSNAME = 'org.hyperic.hq.bizapp.server.trigger.conditional.MultiConditionTrigger'
+      </statement>
+      <statement desc="Delete AvertTrigger from EAM_REGISTERED_TRIGGER">
+        DELETE FROM EAM_REGISTERED_TRIGGER WHERE CLASSNAME = 'org.hyperic.hq.bizapp.server.trigger.frequency.AvertTrigger'
+      </statement>
+      <statement desc="Delete CounterTrigger from EAM_REGISTERED_TRIGGER">
+        DELETE FROM EAM_REGISTERED_TRIGGER WHERE CLASSNAME = 'org.hyperic.hq.bizapp.server.trigger.frequency.CounterTrigger'
+      </statement>
+      <statement desc="Delete DurationTrigger from EAM_REGISTERED_TRIGGER">
+        DELETE FROM EAM_REGISTERED_TRIGGER WHERE CLASSNAME = 'org.hyperic.hq.bizapp.server.trigger.frequency.DurationTrigger'
+      </statement>
+      <statement desc="Drop table EAM_TRIGGER_EVENT">
+        DROP TABLE EAM_TRIGGER_EVENT
+      </statement>
+      <statement desc="Drop table EAM_FIRED_TRIGGER">
+        DROP TABLE EAM_FIRED_TRIGGER
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
 
   <!-- Fixes upgrade inconsistencies on EAM_ESCALATION_STATE table -->
   <!-- need fail="false" for these.  This is due to the inconsistent
@@ -10106,6 +10104,12 @@ has already been defined.
        entry points of deployments-->
   <schemaSpec version="3.158">
     <schema-directSQL>
+      <statement>
+        delete from EAM_ALERT_ACTION_LOG where alert_id not in (select id from EAM_ALERT)
+      </statement>
+      <statement>
+        delete from EAM_ALERT_ACTION_LOG where action_id not in (select id from EAM_ACTION)
+      </statement>
       <statement targetDB="mysql" fail="false">
          ALTER TABLE EAM_ALERT_ACTION_LOG ADD CONSTRAINT FK423FA3CC1AA4E259
          FOREIGN KEY (ALERT_ID) REFERENCES EAM_ALERT (ID) ON DELETE CASCADE
@@ -10798,6 +10802,671 @@ has already been defined.
                         precision="500" columnType="VARCHAR2" nullable="NOT NULL" />
   </schemaSpec>
 
+  <schemaSpec version="3.189">
+    <schema-directSQL>  
+      <statement targetDB="postgresql">
+        ALTER TABLE EAM_AGENT DROP CONSTRAINT eam_agent_address_key
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_AGENT DROP UNIQUE(ADDRESS, PORT)
+      </statement>
+      <statement targetDB="mysql">
+        ALTER TABLE EAM_AGENT DROP INDEX ADDRESS
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <schemaSpec version="3.190">
+    <schema-addColumn table="EAM_EVENT_LOG" column="INSTANCE_ID" columnType="INTEGER"/>	          
+    <schema-directSQL>  
+      <statement desc="Updating alert events" targetDB="postgresql">
+        UPDATE EAM_EVENT_LOG el
+        SET INSTANCE_ID=ad.ID
+        FROM EAM_ALERT_DEFINITION ad, EAM_ALERT al
+        WHERE TYPE='org.hyperic.hq.events.AlertFiredEvent' AND
+        el.SUBJECT=ad.NAME AND ad.RESOURCE_ID=el.RESOURCE_ID
+        AND al.ALERT_DEFINITION_ID=ad.ID AND el.TIMESTAMP=al.CTIME
+      </statement>
+      <statement desc="Updating alert events" targetDB="mysql">
+        UPDATE EAM_EVENT_LOG el, EAM_ALERT_DEFINITION ad,
+        EAM_ALERT al set el.INSTANCE_ID=ad.ID
+        WHERE TYPE='org.hyperic.hq.events.AlertFiredEvent' AND
+        el.SUBJECT=ad.NAME AND ad.RESOURCE_ID=el.RESOURCE_ID
+        AND al.ALERT_DEFINITION_ID=ad.ID AND el.TIMESTAMP=al.CTIME
+      </statement>
+      <statement desc="Updating alert events" targetDB="oracle">
+        UPDATE EAM_EVENT_LOG el
+        SET el.INSTANCE_ID = (
+            SELECT distinct ad.id
+            FROM EAM_ALERT_DEFINITION ad
+            JOIN EAM_ALERT al ON al.ALERT_DEFINITION_ID=ad.ID
+            WHERE TYPE='org.hyperic.hq.events.AlertFiredEvent'
+            AND el.SUBJECT=ad.NAME AND ad.RESOURCE_ID=el.RESOURCE_ID
+            AND el.TIMESTAMP=al.CTIME
+        )
+        where exists (
+            SELECT distinct ad.id
+            FROM EAM_ALERT_DEFINITION ad
+            JOIN EAM_ALERT al ON al.ALERT_DEFINITION_ID=ad.ID
+            WHERE TYPE='org.hyperic.hq.events.AlertFiredEvent'
+            AND el.SUBJECT=ad.NAME AND ad.RESOURCE_ID=el.RESOURCE_ID
+            AND el.TIMESTAMP=al.CTIME
+        )
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <schemaSpec version="3.191">
+    <schema-alterColumn table="EAM_MEASUREMENT_TEMPL"
+                        column="alias"
+                        precision="100"
+                        columnType="VARCHAR2"
+                        nullable="NOT NULL" />
+  </schemaSpec>
+	
+   <schemaSpec version="3.192">         
+	    <schema-directSQL>  
+	      <statement desc="Updating HQ Health Plugin">
+	        UPDATE EAM_UI_VIEW
+	        SET DESCRIPTION='HQ Health'
+	        WHERE DESCRIPTION='AMS Health'
+	      </statement>   
+	    </schema-directSQL>  
+   </schemaSpec>
+
+  <schemaSpec version="3.192.1">
+    <schema-directSQL>
+      <statement desc="Remove tc Server Appmgmt UI attachments">
+        delete from EAM_UI_ATTACHMENT where view_id in (select v.id from EAM_UI_VIEW v, EAM_UI_PLUGIN p where v.ui_plugin_id = p.id and p.name = 'tomcatappmgmt')
+      </statement>
+      <statement desc="Remove tc Server Appmgmgt UI views">
+        delete from EAM_UI_VIEW where ui_plugin_id in (select id from EAM_UI_PLUGIN where name = 'tomcatappmgmt')
+      </statement>
+      <statement desc="Remove tc Server Appmgmt UI plugin">
+        delete from EAM_UI_PLUGIN where name = 'tomcatappmgmt'
+      </statement>
+
+      <statement desc="Remove tc Server Config UI attachments">
+        delete from EAM_UI_ATTACHMENT where view_id in (select v.id from EAM_UI_VIEW v, EAM_UI_PLUGIN p where v.ui_plugin_id = p.id and p.name = 'tomcatserverconfig')
+      </statement>
+      <statement desc="Remove tc Server Config UI views">
+        delete from EAM_UI_VIEW where ui_plugin_id in (select id from EAM_UI_PLUGIN where name = 'tomcatserverconfig')
+      </statement>
+      <statement desc="Remove tc Server Config UI plugin">
+        delete from EAM_UI_PLUGIN where name = 'tomcatserverconfig'
+      </statement>
+    </schema-directSQL>
+  </schemaSpec>
+
+  <schemaSpec version="3.193">
+    <schema-alterColumn table="EAM_MEASUREMENT_TEMPL" column="template"
+                        precision="2048" columnType="VARCHAR2" nullable="NOT NULL" />
+  </schemaSpec>
+
+  <!-- Increase autoinventoryidentifier to limit of 500 (per name in EAM_RESOURCE) -->
+  <schemaSpec version="3.194"> 
+    <schema-alterColumn table="EAM_SERVICE" column="autoinventoryidentifier"
+       	                 precision="500" columnType="VARCHAR2" />
+  </schemaSpec>
+
+  <schemaSpec version="3.195"> 
+  	<schema-directSQL>  
+      <statement desc="Removing manage application alert permission...">
+          DELETE FROM EAM_ROLE_OPERATION_MAP WHERE OPERATION_ID=403
+      </statement>   
+      <statement desc="Removing control application permission...">
+          DELETE FROM EAM_ROLE_OPERATION_MAP WHERE OPERATION_ID=328
+      </statement>   
+      <statement desc="Adding create group permission...">
+          INSERT INTO EAM_OPERATION(ID,VERSION_COL,NAME,RESOURCE_TYPE_ID) 
+      	 SELECT 29,0,'createResourceGroup',3 FROM EAM_OPERATION
+      	 WHERE ID=29
+      	 HAVING COUNT(*) = 0
+      </statement>   
+      <statement desc="Adding view escalation permission...">
+          INSERT INTO EAM_OPERATION(ID,VERSION_COL,NAME,RESOURCE_TYPE_ID)
+     	    SELECT 415,0,'viewEscalation',0 FROM EAM_OPERATION
+     	    WHERE ID=415
+     	    HAVING COUNT(*) = 0
+      </statement>   
+  		<statement desc="Adding create group permission to any role that has delete group permission...">
+  			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+  				SELECT m.role_id, 29 FROM EAM_ROLE r 
+  				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+  				WHERE m.operation_id = 31 
+  				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 29) = 0
+  		</statement>
+  		<statement desc="Adding delete group permission to any role that has create group permission...">
+  			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+  				SELECT m.role_id, 31 FROM EAM_ROLE r 
+  				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+  				WHERE m.operation_id = 29 
+  				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 31) = 0
+  		</statement>
+  		<statement desc="Adding update group permission to any role that has create or delete group permission...">
+  			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+  				SELECT distinct m.role_id, 24 FROM EAM_ROLE r 
+  				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+  				WHERE (m.operation_id = 29 or m.operation_id = 31)
+  				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 24) = 0
+  		</statement>
+  		<statement desc="Adding read group permission to any role that has create, update or delete group permission...">
+  			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+  				SELECT distinct m.role_id, 28 FROM EAM_ROLE r 
+  				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+  				WHERE (m.operation_id = 29 or m.operation_id = 31 or m.operation_id = 24)
+  				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 28) = 0
+  		</statement>
+  		<statement desc="Adding alert group permission to any role that has create, update or delete group permission...">
+  			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+  				SELECT distinct m.role_id, 404 FROM EAM_ROLE r 
+  				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+  				WHERE (m.operation_id = 29 or m.operation_id = 31 or m.operation_id = 24)
+  				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 404) = 0
+  		</statement>
+  		<statement desc="Adding create platform permission to any role that has delete platform permission...">
+  			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+  				SELECT m.role_id, 320 FROM EAM_ROLE r 
+  				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+  				WHERE m.operation_id = 302 
+  				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 320) = 0
+  		</statement>
+  		<statement desc="Adding delete platform permission to any role that has create platform permission...">
+  			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+  				SELECT m.role_id, 302 FROM EAM_ROLE r 
+  				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+  				WHERE m.operation_id = 320 
+  				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 302) = 0
+  		</statement>
+  		<statement desc="Adding update platform permission to any role that has create or delete platform permission...">
+  			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+  				SELECT distinct m.role_id, 301 FROM EAM_ROLE r 
+  				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+  				WHERE (m.operation_id = 320 or m.operation_id = 302)
+  				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 301) = 0
+  		</statement>
+  		<statement desc="Adding read platform permission to any role that has create, update or delete platform permission...">
+  			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+  				SELECT distinct m.role_id, 305 FROM EAM_ROLE r 
+  				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+  				WHERE (m.operation_id = 320 or m.operation_id = 302 or m.operation_id = 301)
+  				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 305) = 0
+  		</statement>
+  		<statement desc="Adding alert platform permission to any role that has create, update or delete platform permission...">
+  			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+  				SELECT distinct m.role_id, 400 FROM EAM_ROLE r 
+  				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+  				WHERE (m.operation_id = 320 or m.operation_id = 302 or m.operation_id = 301)
+  				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 400) = 0
+  		</statement>
+  		<statement desc="Adding control platform permission to any role that has create, update or delete platform permission...">
+  			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+  				SELECT distinct m.role_id, 325 FROM EAM_ROLE r 
+  				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+  				WHERE (m.operation_id = 320 or m.operation_id = 302 or m.operation_id = 301)
+  				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 325) = 0
+  		</statement>
+  		<statement desc="Adding create server permission to any role that has delete server permission...">
+  			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+  				SELECT m.role_id, 303 FROM EAM_ROLE r 
+  				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+  				WHERE m.operation_id = 308 
+  				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 303) = 0
+  		</statement>
+  		<statement desc="Adding delete server permission to any role that has create server permission...">
+  			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+  				SELECT m.role_id, 308 FROM EAM_ROLE r 
+  				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+  				WHERE m.operation_id = 303 
+  				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 308) = 0
+  		</statement>
+  		<statement desc="Adding update server permission to any role that has create or delete server permission...">
+  			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+  				SELECT distinct m.role_id, 307 FROM EAM_ROLE r 
+  				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+  				WHERE (m.operation_id = 308 or m.operation_id = 303)
+  				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 307) = 0
+  		</statement>
+  		<statement desc="Adding read server permission to any role that has create, update or delete server permission...">
+  			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+  				SELECT distinct m.role_id, 311 FROM EAM_ROLE r 
+  				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+  				WHERE (m.operation_id = 308 or m.operation_id = 303 or m.operation_id = 307)
+  				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 311) = 0
+  		</statement>
+  		<statement desc="Adding alert server permission to any role that has create, update or delete server permission...">
+  			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+  				SELECT distinct m.role_id, 401 FROM EAM_ROLE r 
+  				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+  				WHERE (m.operation_id = 308 or m.operation_id = 303 or m.operation_id = 307)
+  				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 401) = 0
+  		</statement>
+  		<statement desc="Adding control server permission to any role that has create, update or delete server permission...">
+  			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+  				SELECT distinct m.role_id, 326 FROM EAM_ROLE r 
+  				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+  				WHERE (m.operation_id = 308 or m.operation_id = 303 or m.operation_id = 307)
+  				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 326) = 0
+  		</statement>
+  		<statement desc="Adding create service permission to any role that has delete service permission...">
+  			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+  				SELECT m.role_id, 309 FROM EAM_ROLE r 
+  				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+  				WHERE m.operation_id = 314 
+  				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 309) = 0
+  		</statement>
+  		<statement desc="Adding delete service permission to any role that has create service permission...">
+  			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+  				SELECT m.role_id, 314 FROM EAM_ROLE r 
+  				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+  				WHERE m.operation_id = 309
+  				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 314) = 0
+  		</statement>
+  		<statement desc="Adding update service permission to any role that has create or delete service permission...">
+  			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+  				SELECT distinct m.role_id, 313 FROM EAM_ROLE r 
+  				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+  				WHERE (m.operation_id = 309 or m.operation_id = 314)
+  				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 313) = 0
+  		</statement>
+  		<statement desc="Adding read service permission to any role that has create, update or delete service permission...">
+  			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+  				SELECT distinct m.role_id, 315 FROM EAM_ROLE r 
+  				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+  				WHERE (m.operation_id = 309 or m.operation_id = 314 or m.operation_id = 313)
+  				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 315) = 0
+  		</statement>
+  		<statement desc="Adding alert service permission to any role that has create, update or delete service permission...">
+  			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+  				SELECT distinct m.role_id, 402 FROM EAM_ROLE r 
+  				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+  				WHERE (m.operation_id = 309 or m.operation_id = 314 or m.operation_id = 313)
+  				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 402) = 0
+  		</statement>
+  		<statement desc="Adding control service permission to any role that has create, update or delete service permission...">
+  			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+  				SELECT distinct m.role_id, 327 FROM EAM_ROLE r 
+  				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+  				WHERE (m.operation_id = 309 or m.operation_id = 314 or m.operation_id = 313)
+  				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 327) = 0
+  		</statement>
+  		<statement desc="Adding create application permission to any role that has delete application permission...">
+  			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+  				SELECT m.role_id, 316 FROM EAM_ROLE r 
+  				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+  				WHERE m.operation_id = 318 
+  				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 316) = 0
+  		</statement>
+  		<statement desc="Adding delete application permission to any role that has create application permission...">
+  			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+  				SELECT m.role_id, 318 FROM EAM_ROLE r 
+  				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+  				WHERE m.operation_id = 316
+  				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 318) = 0
+  		</statement>
+  		<statement desc="Adding update application permission to any role that has create or delete application permission...">
+  			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+  				SELECT distinct m.role_id, 317 FROM EAM_ROLE r 
+  				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+  				WHERE (m.operation_id = 316 or m.operation_id = 318)
+  				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 317) = 0
+  		</statement>
+  		<statement desc="Adding read application permission to any role that has create, update or delete application permission...">
+  			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+  				SELECT distinct m.role_id, 319 FROM EAM_ROLE r 
+  				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+  				WHERE (m.operation_id = 316 or m.operation_id = 318 or m.operation_id = 317)
+  				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 319) = 0
+  		</statement>
+  		<statement desc="Adding create user permission to any role that has delete user permission...">
+  			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+  				SELECT m.role_id, 10 FROM EAM_ROLE r 
+  				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+  				WHERE m.operation_id = 7 
+  				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 10) = 0
+  		</statement>
+  		<statement desc="Adding delete user permission to any role that has create user permission...">
+  			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+  				SELECT m.role_id, 7 FROM EAM_ROLE r 
+  				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+  				WHERE m.operation_id = 10
+  				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 7) = 0
+  		</statement>
+  		<statement desc="Adding update user permission to any role that has create or delete user permission...">
+  			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+  				SELECT distinct m.role_id, 6 FROM EAM_ROLE r 
+  				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+  				WHERE (m.operation_id = 7 or m.operation_id = 10)
+  				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 6) = 0
+  		</statement>
+  		<statement desc="Adding read user permission to any role that has create, update or delete user permission...">
+  			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+  				SELECT distinct m.role_id, 8 FROM EAM_ROLE r 
+  				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+  				WHERE (m.operation_id = 7 or m.operation_id = 10 or m.operation_id = 6)
+  				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 8) = 0
+  		</statement>
+  		<statement desc="Adding create role permission to any role that has delete role permission...">
+  			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+  				SELECT m.role_id, 12 FROM EAM_ROLE r 
+  				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+  				WHERE m.operation_id = 30 
+  				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 12) = 0
+  		</statement>
+  		<statement desc="Adding delete role permission to any role that has create role permission...">
+  			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+  				SELECT m.role_id, 30 FROM EAM_ROLE r 
+  				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+  				WHERE m.operation_id = 12
+  				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 30) = 0
+  		</statement>
+  		<statement desc="Adding update role permission to any role that has create or delete role permission...">
+  			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+  				SELECT distinct m.role_id, 11 FROM EAM_ROLE r 
+  				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+  				WHERE (m.operation_id = 12 or m.operation_id = 30)
+  				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 11) = 0
+  		</statement>
+  		<statement desc="Adding read role permission to any role that has create, update or delete role permission...">
+  			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+  				SELECT distinct m.role_id, 16 FROM EAM_ROLE r 
+  				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+  				WHERE (m.operation_id = 12 or m.operation_id = 30 or m.operation_id = 11)
+  				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 16) = 0
+  		</statement>
+  		<statement desc="Adding create escalation permission to any role that has delete escalation permission...">
+  			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+  				SELECT m.role_id, 412 FROM EAM_ROLE r 
+  				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+  				WHERE m.operation_id = 414 
+  				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 412) = 0
+  		</statement>
+  		<statement desc="Adding delete escalation permission to any role that has create escalation permission...">
+  			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+  				SELECT m.role_id, 414 FROM EAM_ROLE r 
+  				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+  				WHERE m.operation_id = 412
+  				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 414) = 0
+  		</statement>
+  		<statement desc="Adding update escalation permission to any role that has create or delete escalation permission...">
+  			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+  				SELECT distinct m.role_id, 413 FROM EAM_ROLE r 
+  				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+  				WHERE (m.operation_id = 412 or m.operation_id = 414)
+  				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 413) = 0
+  		</statement>
+  		<statement desc="Adding read escalation permission to any role that has create, update or delete escalation permission...">
+  			INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+  				SELECT distinct m.role_id, 415 FROM EAM_ROLE r 
+  				INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+  				WHERE (m.operation_id = 412 or m.operation_id = 414 or m.operation_id = 413)
+  				AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+  			         WHERE rm.role_id = r.id AND rm.operation_id = 415) = 0
+  		</statement>
+   	<statement desc="Adding create server permission, if platform permissions have create or delete (i.e. full permission) and create server permission does not exist...">
+   		INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+	   		SELECT distinct m.role_id, 303 FROM EAM_ROLE r 
+	   		INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+	   		WHERE (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+	   		     WHERE rm.role_id = r.id AND (rm.operation_id = 320 or rm.operation_id = 302)) = 2 and
+	   		      (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+	   		     WHERE rm.role_id = r.id AND rm.operation_id = 303) = 0
+      </statement>
+		<statement desc="Adding delete server permission, if platform permissions have create or delete (i.e. full permission) and delete server permission does not exist...">
+   		INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+	   		SELECT distinct m.role_id, 308 FROM EAM_ROLE r 
+	   		INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+	   		WHERE (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+	   		     WHERE rm.role_id = r.id AND (rm.operation_id = 320 or rm.operation_id = 302)) = 2 and
+	   		      (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+	   		     WHERE rm.role_id = r.id AND rm.operation_id = 308) = 0
+      </statement>   
+   	<statement desc="Adding modify server permission, if platform permissions have create or delete (i.e. full permission) and modify server permission does not exist...">
+   		INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+	   		SELECT distinct m.role_id, 307 FROM EAM_ROLE r 
+	   		INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+	   		WHERE (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+	   		     WHERE rm.role_id = r.id AND (rm.operation_id = 320 or rm.operation_id = 302)) = 2 and
+	   		      (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+	   		     WHERE rm.role_id = r.id AND rm.operation_id = 307) = 0
+      </statement>   
+   	<statement desc="Adding view server permission, if platform permissions have create or delete (i.e. full permission) and view server permission does not exist...">
+   		INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+	   		SELECT distinct m.role_id, 311 FROM EAM_ROLE r 
+	   		INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+	   		WHERE (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+	   		     WHERE rm.role_id = r.id AND (rm.operation_id = 320 or rm.operation_id = 302)) = 2 and
+	   		      (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+	   		     WHERE rm.role_id = r.id AND rm.operation_id = 311) = 0
+      </statement>   
+   	<statement desc="Adding view server permission, if platform permissions have create or delete (i.e. full permission) and manage alert server permission does not exist...">
+   		INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+	   		SELECT distinct m.role_id, 401 FROM EAM_ROLE r 
+	   		INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+	   		WHERE (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+	   		     WHERE rm.role_id = r.id AND (rm.operation_id = 320 or rm.operation_id = 302)) = 2 and
+	   		      (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+	   		     WHERE rm.role_id = r.id AND rm.operation_id = 401) = 0
+      </statement>   
+   	<statement desc="Adding view server permission, if platform permissions have create or delete (i.e. full permission) and control server permission does not exist...">
+   		INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+	   		SELECT distinct m.role_id, 326 FROM EAM_ROLE r 
+	   		INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+	   		WHERE (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+	   		     WHERE rm.role_id = r.id AND (rm.operation_id = 320 or rm.operation_id = 302)) = 2 and
+	   		      (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+	   		     WHERE rm.role_id = r.id AND rm.operation_id = 326) = 0
+      </statement>   
+  		<statement desc="Adding create service permission, if server permissions have create or delete (i.e. full permission) and create service permission does not exist...">
+   		INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+	   		SELECT distinct m.role_id, 309 FROM EAM_ROLE r 
+	   		INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+	   		WHERE (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+	   		     WHERE rm.role_id = r.id AND (rm.operation_id = 303 or rm.operation_id = 308)) = 2 and
+	   		      (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+	   		     WHERE rm.role_id = r.id AND rm.operation_id = 309) = 0
+      </statement>   
+   	<statement desc="Adding delete service permission, if server permissions have create or delete (i.e. full permission) and delete service permission does not exist...">
+   		INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+	   		SELECT distinct m.role_id, 314 FROM EAM_ROLE r 
+	   		INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+	   		WHERE (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+	   		     WHERE rm.role_id = r.id AND (rm.operation_id = 303 or rm.operation_id = 308)) = 2 and
+	   		      (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+	   		     WHERE rm.role_id = r.id AND rm.operation_id = 314) = 0
+      </statement>   
+   	<statement desc="Adding modify service permission, if server permissions have create or delete (i.e. full permission) and modify service permission does not exist...">
+   		INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+	   		SELECT distinct m.role_id, 313 FROM EAM_ROLE r 
+	   		INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+	   		WHERE (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+	   		     WHERE rm.role_id = r.id AND (rm.operation_id = 303 or rm.operation_id = 308)) = 2 and
+	   		      (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+	   		     WHERE rm.role_id = r.id AND rm.operation_id = 313) = 0
+      </statement>   
+   	<statement desc="Adding view service permission, if server permissions have create or delete (i.e. full permission) and view service permission does not exist...">
+   		INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+	   		SELECT distinct m.role_id, 315 FROM EAM_ROLE r 
+	   		INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+	   		WHERE (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+	   		     WHERE rm.role_id = r.id AND (rm.operation_id = 303 or rm.operation_id = 308)) = 2 and
+	   		      (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+	   		     WHERE rm.role_id = r.id AND rm.operation_id = 315) = 0
+      </statement>   
+   	<statement desc="Adding view service permission, if server permissions have create or delete (i.e. full permission) and manage alerts service permission does not exist...">
+   		INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+	   		SELECT distinct m.role_id, 402 FROM EAM_ROLE r 
+	   		INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+	   		WHERE (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+	   		     WHERE rm.role_id = r.id AND (rm.operation_id = 303 or rm.operation_id = 308)) = 2 and
+	   		      (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+	   		     WHERE rm.role_id = r.id AND rm.operation_id = 402) = 0
+      </statement>   
+      	<statement desc="Adding view service permission, if server permissions have create or delete (i.e. full permission) and control service permission does not exist...">
+      		INSERT INTO EAM_ROLE_OPERATION_MAP(ROLE_ID, OPERATION_ID)
+   	   		SELECT distinct m.role_id, 327 FROM EAM_ROLE r 
+   	   		INNER JOIN EAM_ROLE_OPERATION_MAP m on r.id = m.role_id
+   	   		WHERE (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+   	   		     WHERE rm.role_id = r.id AND (rm.operation_id = 303 or rm.operation_id = 308)) = 2 and
+   	   		      (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+   	   		     WHERE rm.role_id = r.id AND rm.operation_id = 327) = 0
+         </statement>   
+	 </schema-directSQL>
+	 <groovy>
+	    <![CDATA[
+				  println("Removing alert and control mappings where the group, platform, server and service doesnt have any permissions")
+		        def stmt = """SELECT distinct role_id FROM EAM_ROLE_OPERATION_MAP m
+			                   WHERE (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+				                       WHERE rm.role_id = m.role_id 
+			  	                       AND (rm.operation_id = 320 or rm.operation_id = 302 or rm.operation_id = 301 or rm.operation_id = 305)) = 0 
+			                   AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+			                        WHERE rm.role_id = m.role_id 
+			  	                     AND (rm.operation_id = 400 or rm.operation_id = 325)) > 0"""
+		        def sql = []
+		        SQL.eachRow(stmt, {
+		            sql << "DELETE FROM EAM_ROLE_OPERATION_MAP WHERE role_id = ${it.role_id} and (operation_id = 400 or operation_id = 325)"
+		        } )
+			     stmt = """SELECT distinct role_id FROM EAM_ROLE_OPERATION_MAP m
+                        WHERE (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+                               WHERE rm.role_id = m.role_id 
+                               AND (rm.operation_id = 308 or rm.operation_id = 303 or rm.operation_id = 307 or rm.operation_id = 311)) = 0 
+                        AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+                             WHERE rm.role_id = m.role_id 
+                             AND (rm.operation_id = 401 or rm.operation_id = 326)) > 0"""
+		        SQL.eachRow(stmt, {
+		            sql << "DELETE FROM EAM_ROLE_OPERATION_MAP WHERE role_id = ${it.role_id} and (operation_id = 401 or operation_id = 326)"
+		        } )
+			     stmt = """SELECT distinct role_id FROM EAM_ROLE_OPERATION_MAP m
+                        WHERE (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+                               WHERE rm.role_id = m.role_id 
+                               AND (rm.operation_id = 309 or rm.operation_id = 314 or rm.operation_id = 313 or rm.operation_id = 315)) = 0 
+                        AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+                             WHERE rm.role_id = m.role_id 
+                             AND (rm.operation_id = 402 or rm.operation_id = 327)) > 0"""
+		        SQL.eachRow(stmt, {
+		            sql << "DELETE FROM EAM_ROLE_OPERATION_MAP WHERE role_id = ${it.role_id} and (operation_id = 402 or operation_id = 327)"
+		        } )
+			     stmt = """SELECT distinct role_id FROM EAM_ROLE_OPERATION_MAP m
+                        WHERE (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+                               WHERE rm.role_id = m.role_id 
+                               AND (m.operation_id = 29 or m.operation_id = 31 or m.operation_id = 24 or rm.operation_id = 28)) = 0 
+                        AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+                             WHERE rm.role_id = m.role_id 
+                             AND rm.operation_id = 404) > 0"""
+		        SQL.eachRow(stmt, {
+		            sql << "DELETE FROM EAM_ROLE_OPERATION_MAP WHERE role_id = ${it.role_id} and operation_id = 404"
+		        } )
+		        try {
+		            stmt = CONN.createStatement()
+		            for (s in sql) {
+		                println(s)
+		                stmt.execute(s)
+		            }
+		        } finally {
+		             stmt.close()
+		        }
+	 	]]>
+	 </groovy>
+	 <groovy>
+	 	<![CDATA[
+				  println("Searching for mappings where the child has full permissions, but the parent has none.  If found, we correct it by removing full permissions from child")
+		        def stmt = """SELECT distinct role_id FROM EAM_ROLE_OPERATION_MAP m
+			                 WHERE (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+				                     WHERE rm.role_id = m.role_id 
+			  	                     AND (rm.operation_id = 320 or rm.operation_id = 302 or rm.operation_id = 305 or rm.operation_id = 301)) = 0 
+			                 AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+			                      WHERE rm.role_id = m.role_id 
+			  	                   AND (rm.operation_id = 303 or rm.operation_id = 308)) > 0"""
+		        def sql = []
+		        SQL.eachRow(stmt, {
+		            sql << "DELETE FROM EAM_ROLE_OPERATION_MAP WHERE role_id = ${it.role_id} and (operation_id = 303 or operation_id = 308)"
+		        } )
+			     stmt = """SELECT distinct role_id FROM EAM_ROLE_OPERATION_MAP m
+	                WHERE (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+	                       WHERE rm.role_id = m.role_id 
+	                       AND (rm.operation_id = 303 or rm.operation_id = 308 or rm.operation_id = 307 or rm.operation_id = 311)) = 0 
+	                AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+	                     WHERE rm.role_id = m.role_id 
+	                     AND (rm.operation_id = 309 or rm.operation_id = 314)) > 0"""
+		        SQL.eachRow(stmt, {
+		            sql << "DELETE FROM EAM_ROLE_OPERATION_MAP WHERE role_id = ${it.role_id} and (operation_id = 309 or operation_id = 314)"
+		        } )
+			     stmt = """SELECT distinct role_id FROM EAM_ROLE_OPERATION_MAP m
+	                WHERE (((SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+	                         WHERE rm.role_id = m.role_id 
+	                         AND (rm.operation_id = 6 or rm.operation_id = 7 or rm.operation_id = 8 or rm.operation_id = 10)) = 0 AND
+	 	             		  (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+	                        WHERE rm.role_id = m.role_id 
+	                        AND (rm.operation_id = 12 or rm.operation_id = 30)) > 0) OR
+	 	                    ((SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+	 		                   WHERE rm.role_id = m.role_id 
+	 		                   AND (rm.operation_id = 24 or rm.operation_id = 28 or rm.operation_id = 29 or rm.operation_id = 31)) = 0 AND
+	 		 	             		  (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+	 		                        WHERE rm.role_id = m.role_id 
+	 		                        AND (rm.operation_id = 12 or rm.operation_id = 30)) > 0))"""
+		        SQL.eachRow(stmt, {
+		            sql << "DELETE FROM EAM_ROLE_OPERATION_MAP WHERE role_id = ${it.role_id} and (operation_id = 12 or operation_id = 30)"
+		        } )
+			     stmt = """SELECT distinct role_id FROM EAM_ROLE_OPERATION_MAP m
+	                WHERE (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+	                       WHERE rm.role_id = m.role_id 
+	                       AND (rm.operation_id = 11 or rm.operation_id = 12 or rm.operation_id = 16 or rm.operation_id = 30)) = 0 
+	                AND (SELECT count(*) FROM EAM_ROLE_OPERATION_MAP rm 
+	                     WHERE rm.role_id = m.role_id 
+	                     AND (rm.operation_id = 7 or rm.operation_id = 10)) > 0"""
+		        SQL.eachRow(stmt, {
+		            sql << "DELETE FROM EAM_ROLE_OPERATION_MAP WHERE role_id = ${it.role_id} and (operation_id = 7 or operation_id = 10)"
+		        } )
+		        try {
+		            stmt = CONN.createStatement()
+		            for (s in sql) {
+		                println(s)
+		                stmt.execute(s)
+		            }
+		        } finally {
+		             stmt.close()
+		        }
+		]]>
+	 </groovy>
+ </schemaSpec>
 </dbupgrade>
 </target>
 </project>

@@ -49,7 +49,7 @@
 onloads.push(showViewEscResponse);
 
 function showViewEscResponse() {
-    var tmp = eval('( <c:out value="${escalationJSON}" escapeXml="false"/> )');
+    var tmp = <c:out value="${escalationJSON}" escapeXml="false"/> ;
     var notifyAll = tmp.escalation.notifyAll
     var actions = tmp.escalation.actions;
     var allowPause = tmp.escalation.allowPause;
@@ -79,6 +79,8 @@ function showViewEscResponse() {
       var configProduct = actionConfig.product;
       var configSnmpOID = actionConfig.oid;
       var configSnmpIP = actionConfig.address;
+      var configSnmpNotificationMechanism = actionConfig.snmpNotificationMechanism;
+      var configSnmpVarBinds = eval(actionConfig.variableBindings);
       var actionId = actions[i].action.id;
       var actionsClassName = actions[i].action.className;
       var actionsVersion = actions[i].action._version_;
@@ -162,7 +164,26 @@ function showViewEscResponse() {
             usersTextDiv.innerHTML = 'Suppress duplicate alerts for: ' + actionWaitTime;
             waitDiv.innerHTML = "&nbsp;";
             } else if (actionClass[d] == "SnmpAction") {
-            usersTextDiv.innerHTML = '<table cellpadding="0" cellspacing="0" border="0"><tr><td rowSpan="3" vAlign="top" style="padding-right:3px;">Snmp Trap:</td><td style="padding:0px 2px 2px 2px;"><fmt:message key="resource.autodiscovery.server.IPAddressTH"/>: ' + configSnmpIP + '</td></tr><tr><td style="padding:2px;"><fmt:message key="admin.settings.SNMPTrapOID"/> ' + configSnmpOID + '</td></tr></table>'
+            	var snmpInnerHTML =
+                	'<table cellpadding="0" cellspacing="0" border="0">' 
+                	+ '<tr><td rowSpan="4" vAlign="top" style="padding-right:3px;"><fmt:message key="alert.config.escalation.action.snmp.notification"/>:</td>'
+                	+ '<td colspan="2" style="padding:2px;"><fmt:message key="resource.autodiscovery.server.IPAddressTH"/>: ' + configSnmpIP + '</td></tr>'
+                	+ '<tr><td colspan="2" style="padding:0px 2px 2px 2px;"><fmt:message key="admin.settings.SNMPNotificationMechanism"/> ' + configSnmpNotificationMechanism + '</td></tr>'
+                	+ '<tr><td vAlign="top" style="padding:2px;" nowrap="nowrap"><fmt:message key="alert.config.escalation.action.snmp.varbinds"/>: </td>'
+                		+ '<td style="padding:2px;"><table>'
+                		+ '<tr><td style="padding-right:5px;"><fmt:message key="alert.config.escalation.action.snmp.oid"/>: ' + configSnmpOID + '</td>'
+                			+ '<td>Value: {snmp_trap.gsp}</td></tr>';
+
+                if (typeof configSnmpVarBinds != 'object') {
+                	configSnmpVarBinds = [];
+                }            	
+            	for (var s = 0; s < configSnmpVarBinds.length; s++) {	
+            		snmpInnerHTML += '<tr><td style="padding-right:5px;"><fmt:message key="alert.config.escalation.action.snmp.oid"/>: ' 
+                						+ configSnmpVarBinds[s].oid + '</td>'
+            				   			+ '<td>Value: ' + configSnmpVarBinds[s].value + '</td></tr>';
+            	}
+            	snmpInnerHTML += '</table></td></tr></table>';
+        		usersTextDiv.innerHTML = snmpInnerHTML;
            }
       }
 
@@ -290,40 +311,39 @@ function showViewEscResponse() {
     }
    
     <c:if test="${chooseScheme}">
-    function initEsc () {
-        // Set up the escalation dropdown
-        var escJson = eval( '( { "escalations":<c:out value="${escalations}" escapeXml="false"/> })' );
-        var escalationSel = dojo.byId('escIdSel');
-        var schemes = escJson.escalations;
+    	function initEsc () {
+	        // Set up the escalation dropdown
+	        var escJson = eval( '( { "escalations":<c:out value="${escalations}" escapeXml="false" /> })' );
+	        var escalationSel = dojo.byId('escIdSel');
+	        var schemes = escJson.escalations;
+	
+	        if (schemes.length == 0) {
+		        escalationSel.style.display = "none";
+	            dojo.byId('noescalations').style.display = "";;
+	        }
 
-        if (schemes.length == 0) {
-            escalationSel.style.display = "none";
-            dojo.byId('noescalations').style.display = "";;
-        }
+	    	for (var i = 0; i < schemes.length; i++) {
+		        if (schemes[i].name == "")
+		            continue;
 
-        for (var i = 0; i < schemes.length; i++) {
-            if (schemes[i].name == "")
-                continue;
+				addOption(escalationSel , schemes[i].id, schemes[i].name,
+		                  schemes[i].id == document.EscalationSchemeForm.escId.value);
+		    }
+		
+		    <c:if test="${empty gad}">
+		        if (escalationSel.selectedIndex > 0) {
+		            escalationSel.options[0].text = '<fmt:message key="alert.config.escalation.unset"/>';
+		            escalationSel.options[0].value = 0;
+		        }
+		    </c:if>
+   		}
 
-            addOption(escalationSel , schemes[i].id, schemes[i].name,
-                      schemes[i].id == document.EscalationSchemeForm.escId.value);
-        }
+   		onloads.push( initEsc );
 
-        <c:if test="${empty gad}">
-        if (escalationSel.selectedIndex > 0) {
-            escalationSel.options[0].text = '<fmt:message key="alert.config.escalation.unset"/>';
-            escalationSel.options[0].value = 0;
-        }
-        </c:if>
-   }
-
-   onloads.push( initEsc );
-
-    function hideExample() {
+    	function hideExample() {
             dojo.byId('example').style.display= 'none';
-    }
-
-   </c:if>
+    	}
+   	</c:if>
 
     function schemeChange(sel) {
       if (sel.options[sel.selectedIndex].value != "") {
@@ -336,113 +356,120 @@ function showViewEscResponse() {
 </script>
 
 <c:if test="${chooseScheme}">
-<html:form action="/alerts/ConfigEscalation">
-  <input type="hidden" id="ad" name="ad" value='<c:out value="${alertDef.id}"/>' />
-  <c:choose>
-    <c:when test="${gad}">
-      <html:hidden property="mode" value="viewGroupDefinition"/>
-    </c:when>
-    <c:otherwise>
-      <html:hidden property="mode" />
-    </c:otherwise>
-  </c:choose>
-  <c:choose>
-    <c:when test="${not empty Resource}">
-      <html:hidden property="eid" value="${Resource.entityId}" />
-    </c:when>
-    <c:otherwise>
-      <html:hidden property="aetid" value="${ResourceType.appdefTypeKey}" />
-    </c:otherwise>
-  </c:choose>
-  <html:hidden property="escId" />
-</html:form>
-
-<form action='<html:rewrite action="/escalation/saveEscalation"/>'
-  name="EscalationForm" id="EscalationForm" onchange="hideExample();"><input
-  type="hidden" value="0" id="pid"> <input type="hidden" value="0"
-  id="pversion"> <input type="hidden" value="0"
-  id="if the escalation is new or not"> <input type="hidden" value="0"
-  id="theValue"> <c:choose>
-  <c:when test="${not empty Resource}">
-    <html:hidden property="eid" value="${Resource.entityId}" />
-  </c:when>
-  <c:otherwise>
-    <html:hidden property="aetid" value="${ResourceType.appdefTypeKey}" />
-  </c:otherwise>
-</c:choose>
-<input type="hidden" id="ad" name="ad" value='<c:out value="${alertDef.id}"/>' />
-<input type="hidden" id="ffff" name="ggg" value='<c:out value="${escalation.id}"/>' />
-
-<div id="example" style="display:none;">
-<table width="100%" cellpadding="0" cellspacing="0" border="0">
-  <td class="ConfirmationBlock">
-    <html:img page="/images/tt_check.gif" height="9" width="9" border="0" alt=""/>
-  </td>
-  <td class="ConfirmationBlock" width="100%">
-    <div id="escMsg"></div>
-  </td>
-</table>
-</div>
-
-<table width="100%" cellpadding="4" cellspacing="0" border="0">
-  <tbody>
-    <tr class="tableRowHeader">
-      <th><label for="escIdSel"><fmt:message key="alert.config.escalation.scheme" /></label>
-    		<select id="escIdSel" name="escId" onchange="schemeChange(this)" class="selectWid">
-       		<option value=""><fmt:message key="resource.common.inventory.props.SelectOption" /></option>
-    		</select>
-        <span id="noescalations" style="display: none;"><fmt:message key="common.label.None"/></span>
-      </th>
-      <th align="right">
-         <c:url var="adminUrl" value="/admin/config/Config.do?mode=escalate">
-           <c:param name="aname" value="${alertDef.name}"/>
-           <c:choose>
-             <c:when test="${gad}">
-               <c:param name="gad" value="${alertDef.id}"/>
-             </c:when>
-             <c:otherwise>
-               <c:param name="ad" value="${alertDef.id}"/>
-             </c:otherwise>
-           </c:choose>
-         </c:url>
-         <fmt:message key="admin.config.message.to.create">
-           <fmt:param value="${adminUrl}"/>
-         </fmt:message>
-      </th>
-    </tr>
-  </tbody>
-</table>
-
-</form>
+	<html:form action="/alerts/ConfigEscalation">
+  		<input type="hidden" id="ad" name="ad" value='<c:out value="${alertDef.id}"/>' />
+  		<c:choose>
+    		<c:when test="${gad}">
+      			<html:hidden property="mode" value="viewGroupDefinition"/>
+    		</c:when>
+    		<c:otherwise>
+      			<html:hidden property="mode" />
+    		</c:otherwise>
+  		</c:choose>
+  		<c:choose>
+    		<c:when test="${not empty Resource}">
+      			<html:hidden property="eid" value="${Resource.entityId}" />
+    		</c:when>
+    		<c:otherwise>
+      			<html:hidden property="aetid" value="${ResourceType.appdefTypeKey}" />
+    		</c:otherwise>
+  		</c:choose>
+  		<html:hidden property="escId" />
+	</html:form>
+	<form action='<html:rewrite action="/escalation/saveEscalation"/>' name="EscalationForm" id="EscalationForm" onchange="hideExample();">
+		<input type="hidden" value="0" id="pid"> 
+		<input type="hidden" value="0" id="pversion"> 
+		<input type="hidden" value="0" id="if the escalation is new or not"> 
+		<input type="hidden" value="0" id="theValue"> 
+		<c:choose>
+  			<c:when test="${not empty Resource}">
+    			<html:hidden property="eid" value="${Resource.entityId}" />
+  			</c:when>
+  			<c:otherwise>
+    			<html:hidden property="aetid" value="${ResourceType.appdefTypeKey}" />
+  			</c:otherwise>
+		</c:choose>
+		<input type="hidden" id="ad" name="ad" value='<c:out value="${alertDef.id}"/>' />
+		<input type="hidden" id="ffff" name="ggg" value='<c:out value="${escalation.id}"/>' />
+		<div id="example" style="display:none;">
+			<table width="100%" cellpadding="0" cellspacing="0" border="0">
+  				<tr>
+  					<td class="ConfirmationBlock">
+    					<html:img page="/images/tt_check.gif" height="9" width="9" border="0" alt=""/>
+  					</td>
+  					<td class="ConfirmationBlock" width="100%">
+    					<div id="escMsg"></div>
+  					</td>
+				</tr>
+			</table>
+		</div>
+		<table width="100%" cellpadding="4" cellspacing="0" border="0">
+  			<tbody>
+    			<tr class="tableRowHeader">
+      				<th>
+      					<label for="escIdSel"><fmt:message key="alert.config.escalation.scheme" /></label>
+						<c:choose>
+      						<c:when test="${canModify}">
+    							<select id="escIdSel" name="escId" onchange="schemeChange(this)" class="selectWid">
+       								<option value=""><fmt:message key="resource.common.inventory.props.SelectOption" /></option>
+    							</select>
+    						</c:when>
+    						<c:otherwise>
+    							<select id="escIdSel" name="escId" onchange="schemeChange(this)" class="selectWid" disabled="true">
+       								<option value=""><fmt:message key="resource.common.inventory.props.SelectOption" /></option>
+    							</select>
+    						</c:otherwise>
+    					</c:choose>
+        				<span id="noescalations" style="display: none;"><fmt:message key="common.label.None"/></span>
+      				</th>
+      				<th align="right">
+         				<c:url var="adminUrl" value="/admin/config/Config.do?mode=escalate">
+           					<c:param name="aname" value="${alertDef.name}"/>
+           					<c:choose>
+             					<c:when test="${gad}">
+               						<c:param name="gad" value="${alertDef.id}"/>
+             					</c:when>
+             					<c:otherwise>
+               						<c:param name="ad" value="${alertDef.id}"/>
+             					</c:otherwise>
+           					</c:choose>
+         				</c:url>
+         				<fmt:message key="admin.config.message.to.create">
+           					<fmt:param value="${adminUrl}"/>
+         				</fmt:message>
+      				</th>
+    			</tr>
+  			</tbody>
+		</table>
+	</form>
 </c:if>
 
 <table width="100%" cellpadding="0" cellspacing="0" border="0" id="viewEscalation" style="display: none;">
-  <tbody>
-
-    <tr>
-      <td class="BlockLabel" width="20%"nowrap="true"><fmt:message key="alert.config.escalation.acknowledged"/></td>
-      <td id="acknowledged" class="BlockContent"></td>
-    </tr>
-    <tr>
-      <td class="BlockLabel" nowrap="true"><fmt:message key="alert.config.escalation.state.change"/></td>
-      <td id="changed" class="BlockContent"></td>
-    </tr>
-    <tr>
-      <td class="BlockContent" colspan="2">&nbsp;</td>
-    </tr>
-      <td class="BlockLabel" nowrap="true" valign="top"><fmt:message key="common.label.EscalationSchemeActions"/></td>
-      <td class="BlockContent">
-      <ul id="viewEscalationUL">
-        <li style="border: none;"><fmt:message key="common.label.None"/></li>
-      </ul>
-      </td>
-    </tr>
-  <tr>
-    <td colspan="2" class="BlockContent"><span style="height: 1px;"></span></td>
-  </tr>
-  <tr>
-    <td colspan="2" class="BlockBottomLine"><span style="height: 1px;"></span></td>
-  </tr>
-  </tbody>
+	<tbody>
+    	<tr>
+      		<td class="BlockLabel" width="20%"nowrap="true"><fmt:message key="alert.config.escalation.acknowledged"/></td>
+      		<td id="acknowledged" class="BlockContent"></td>
+    	</tr>
+    	<tr>
+      		<td class="BlockLabel" nowrap="true"><fmt:message key="alert.config.escalation.state.change"/></td>
+      		<td id="changed" class="BlockContent"></td>
+    	</tr>
+    	<tr>
+      		<td class="BlockContent" colspan="2">&nbsp;</td>
+    	</tr>
+    	<tr>
+      		<td class="BlockLabel" nowrap="true" valign="top"><fmt:message key="common.label.EscalationSchemeActions"/></td>
+      		<td class="BlockContent">
+      			<ul id="viewEscalationUL">
+        			<li style="border: none;"><fmt:message key="common.label.None"/></li>
+      			</ul>
+      		</td>
+    	</tr>
+  		<tr>
+    		<td colspan="2" class="BlockContent"><span style="height: 1px;"></span></td>
+  		</tr>
+  		<tr>
+    		<td colspan="2" class="BlockBottomLine"><span style="height: 1px;"></span></td>
+  		</tr>
+  	</tbody>
 </table>
-

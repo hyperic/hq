@@ -211,8 +211,10 @@ public class PluginDiscoverer implements ScanListener {
     private ConfigResponse getPlatformConfig() {
         ConfigResponse config = new ConfigResponse();
         String name = this.pd.config.plugin;
+        String configType = this.pd.config.type;
 
         if (name != null) {
+            //for device plugins when given -p name, change the default platform.type
             ProductPlugin plugin = this.pd.ppm.getProductPlugin(name);
             TypeInfo[] types = plugin.getTypes();
             for (int i=0; i<types.length; i++) {
@@ -220,6 +222,9 @@ public class PluginDiscoverer implements ScanListener {
                     PlatformTypeInfo type = (PlatformTypeInfo)types[i];
                     if (!type.isDevice()) {
                         continue;
+                    }
+                    if ((configType != null) && !type.getName().equals(configType)) {
+                        continue; //if given -t type param for another type
                     }
                     config.setValue(ProductPlugin.PROP_PLATFORM_TYPE,
                                     type.getName());

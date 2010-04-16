@@ -11,6 +11,7 @@ import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.ResourceZevent;
 import org.hyperic.hq.appdef.server.session.Server;
+import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
@@ -18,7 +19,6 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
@@ -27,6 +27,7 @@ import org.hyperic.hq.measurement.ext.MeasurementEvent;
 import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
 import org.hyperic.hq.measurement.server.session.CollectionSummary;
 import org.hyperic.hq.measurement.server.session.Measurement;
+import org.hyperic.hq.measurement.server.session.MeasurementEnabler;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 
@@ -155,6 +156,14 @@ public interface MeasurementManager {
      */
     public List<Measurement> findEnabledMeasurements(AuthzSubject subject, AppdefEntityID id,
                                                      String cat);
+    
+    /**
+     * @param aeids {@link List} of {@link AppdefEntityID}s
+     * @return {@link Map} of {@link Integer} representing resourceId to
+     * {@link List} of {@link Measurement}s
+     * 
+     */
+    public Map<Integer,List<Measurement>> findEnabledMeasurements(Collection<AppdefEntityID> aeids);
 
     /**
      * Look up a List of designated Measurements for an entity
@@ -249,24 +258,6 @@ public interface MeasurementManager {
      */
     public void enableDefaultMeasurements(AuthzSubject subj, Resource r) throws PermissionException;
 
-    public void disableMeasurement(AuthzSubject subject, Integer mId) throws PermissionException,
-        MeasurementUnscheduleException;
-
-    /**
-     * Synchronously disables measurements according to the mids array. Removes
-     * measurements from the cache as well. XXX scottmf, may be a good idea to
-     * add a flag that specifies if the measurements should be removed in the
-     * background / foreground and removed from cache. XXX scottmf, probably a
-     * bad idea to throw a MeasurementUnscheduleException if a failure occurs
-     * considering this is done in batch without any error status on what
-     * succeeded and what did not.
-     * @param subject {@link AuthzSubject} checks if subject has modify
-     *        permission on the {@link AppdefEntityID} associated with the mid
-     * @param mids {@link Integer} array of mids representing a MeasurementId
-     */
-    public void disableMeasurements(AuthzSubject subject, Integer[] mids)
-        throws PermissionException, MeasurementUnscheduleException;
-
     public void updateMeasurementInterval(AuthzSubject subject, Integer mId, long interval)
         throws PermissionException;
 
@@ -276,7 +267,7 @@ public interface MeasurementManager {
      * @param ids The list of entitys to unschedule
      */
     public void disableMeasurements(AuthzSubject subject, AppdefEntityID agentId,
-                                    AppdefEntityID[] ids) throws PermissionException;
+                                    AppdefEntityID[] ids) throws PermissionException, AgentNotFoundException;
 
     /**
      * Disable all Measurements for a resource
@@ -288,6 +279,8 @@ public interface MeasurementManager {
      * Disable all Measurements for a resource
      */
     public void disableMeasurements(AuthzSubject subject, Resource res) throws PermissionException;
+    
+    void disableMeasurements(AuthzSubject subject, Agent agent, AppdefEntityID[] ids, boolean isAsyncDelete) throws PermissionException;
 
     /**
      * XXX: not sure why all the findMeasurements require an authz if they do

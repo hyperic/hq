@@ -153,7 +153,7 @@ class MetricCategory {
      * Disable the specified measurement.
      */
     static void disableMeasurement(Measurement m, AuthzSubject user) {
-        measMan.disableMeasurement(user, m.getId())
+        measMan.disableMeasurements(user, m.getEntityId(), [m.getTemplate().getId()] as Integer[])
     }
 
     /**

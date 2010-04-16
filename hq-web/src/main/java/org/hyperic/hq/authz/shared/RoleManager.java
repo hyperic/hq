@@ -5,10 +5,10 @@ package org.hyperic.hq.authz.shared;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Operation;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.authz.server.session.RoleCalendar;
 import org.hyperic.hq.authz.server.session.RoleCalendarType;
@@ -203,14 +203,15 @@ public interface RoleManager {
     public OwnedRoleValue findOwnedRoleById(AuthzSubject whoami, Integer id) throws PermissionException;
 
     /**
-     * Get role permission Map For a given role id, find the resource types and
+     * Get operations For a given role id, find the resource types and
      * permissions which are supported by it
+     * 
      * @param subject
      * @param roleId
-     * @return map - keys are resource type names, values are lists of operation
-     *         values which are supported on the resouce type.
+     * @return list - values are lists of operation
+     * 
      */
-    public Map<String, List<Operation>> getRoleOperationMap(AuthzSubject subject, Integer roleId)
+    public List<Operation> getRoleOperations(AuthzSubject subject, Integer roleId)
         throws PermissionException;
 
     public Collection<Role> getAllRoles();
@@ -354,6 +355,9 @@ public interface RoleManager {
      */
     public PageList<RoleValue> getAvailableGroupRoles(AuthzSubject whoami, Integer groupId,
                                                       java.lang.Integer[] roleIds, PageControl pc)
+        throws PermissionException, NotFoundException;
+    
+    Collection<ResourceGroup> getResourceGroupsByRole(AuthzSubject subject,Role role)
         throws PermissionException, NotFoundException;
 
     /**

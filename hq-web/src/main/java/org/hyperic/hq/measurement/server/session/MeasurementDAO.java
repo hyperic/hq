@@ -38,7 +38,6 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
-import org.hibernate.dialect.Dialect;
 import org.hibernate.type.IntegerType;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hibernate.dialect.HQDialect;
@@ -71,13 +70,16 @@ public class MeasurementDAO
     }
 
     /**
-     * retrieves List<Object[]> [0] = Measurement [1] = MeasurementTemplate
+     * Used primarily for preloaded 2nd level cache measurement objects
+     * retrieves List<Object[]> 
+     * [0] = Measurement 
+     * [1] = MeasurementTemplate
      */
     @SuppressWarnings("unchecked")
     List<Object[]> findAllEnabledMeasurementsAndTemplates() {
-        Dialect dialect = Util.getDialect();
         String hql = new StringBuilder().append("from Measurement m").append(" join m.template t")
-            .append(" where enabled = ").append(dialect.toBooleanValueString(true)).toString();
+               .append(" left outer join fetch m.baselinesBag b")
+               .append(" where enabled = '1'").toString();
         return getSession().createQuery(hql).list();
     }
 
@@ -219,7 +221,45 @@ public class MeasurementDAO
         }
         return count;
     }
-
+    
+    /**
+     * @param {@link Collection} of {@link Resource}s
+     * @return {@link Map} of {@link Integer} representing resourceId to
+     * {@link List} of {@link Measurement}s
+     */
+    @SuppressWarnings("unchecked")
+    public Map<Integer,List<Measurement>> findEnabledByResources(List<Resource> resources) {
+        if (resources == null || resources.size() == 0) {
+            return new HashMap<Integer,List<Measurement>>(0,1);
+        }
+        final String sql = new StringBuilder(256)
+            .append("select m from Measurement m ")
+            .append("where m.enabled = '1' and ")
+            .append("m.resource in (:rids) ")
+            .toString();
+        final Map<Integer,List<Measurement>> rtn = new HashMap<Integer,List<Measurement>>();
+        final Query query = getSession().createQuery(sql);
+        final int size = resources.size();
+        for (int i=0; i<size; i+=BATCH_SIZE) {
+            int end = Math.min(size, i+BATCH_SIZE);
+            final List<Resource> sublist = resources.subList(i, end);
+            final List<Measurement> resultset = query.setParameterList("rids", sublist).list();
+            for (final Measurement m : resultset ) {
+                final Resource r = m.getResource();
+                if (r == null || r.isInAsyncDeleteState()) {
+                    continue;
+                }
+                List<Measurement> tmp = rtn.get(r.getId());
+                if (tmp == null) {
+                    tmp = new ArrayList<Measurement>();
+                    rtn.put(r.getId(), tmp);
+                }
+                tmp.add(m);
+            }
+        }
+        return rtn;
+    }
+ 
     @SuppressWarnings("unchecked")
     public List<Measurement> findEnabledByResource(Resource resource) {
         if (resource == null || resource.isInAsyncDeleteState()) {
@@ -268,16 +308,39 @@ public class MeasurementDAO
             resource).uniqueResult();
     }
 
+    /**
+         * @param resources {@link List} of {@link Resource}s
+         * @return {@link List} of {@link Measurement}s
+    */
     @SuppressWarnings("unchecked")
-    List<Measurement> findDesignatedByResourceForCategory(Resource resource, String cat) {
-        String sql = "select m from Measurement m " + "join m.template t " + "join t.category c "
-                     + "where m.resource = ? and " + "t.designate = true and " + "c.name = ? "
-                     + "order by t.name";
-
-        return getSession().createQuery(sql).setParameter(0, resource).setParameter(1, cat)
-            .setCacheable(true).setCacheRegion("Measurement.findDesignatedByResourceForCategory")
-            .list();
+    List<Measurement> findDesignatedByResourcesForCategory(List<Resource> resources, String cat) {
+            String sql = new StringBuilder(512)
+                .append("select m from Measurement m ")
+                .append("join m.template t ")
+                .append("join t.category c ")
+                .append("where m.resource in (:rids) and ")
+                .append("t.designate = true and ")
+                .append("c.name = :cat")
+                .toString();
+            int size = resources.size();
+            List<Measurement> rtn = new ArrayList<Measurement>(size*5);
+            for (int i=0; i<size; i=BATCH_SIZE) {
+                int end = Math.min(size, i + BATCH_SIZE);
+                rtn.addAll(getSession().createQuery(sql)
+                    .setParameterList("rids", resources.subList(i, end))
+                    .setParameter("cat", cat)
+                    .list());
+            }
+            return rtn;
     }
+    
+    /**
+     * @return {@link List} of {@link Measurement}s
+     */
+    List<Measurement> findDesignatedByResourceForCategory(Resource resource, String cat) {
+        return findDesignatedByResourcesForCategory(Collections.singletonList(resource), cat);
+    }
+
 
     @SuppressWarnings("unchecked")
     List<Measurement> findDesignatedByResource(Resource resource) {
@@ -339,14 +402,12 @@ public class MeasurementDAO
             return Collections.emptyList();
         }
         List<Resource> resList = new ArrayList<Resource>(resources);
-        // sort to give the query cache best chance of reuse
-        Collections.sort(resList);
+       
         List<Measurement> rtn = new ArrayList<Measurement>(resList.size());
         final String sql = new StringBuilder().append("select m from Measurement m ").append(
             "join m.template t ").append("where m.resource in (:resources) AND ").append(
             ALIAS_CLAUSE).toString();
-        final Query query = getSession().createQuery(sql).setCacheable(true).setCacheRegion(
-            "Measurement.findAvailMeasurements");
+        final Query query = getSession().createQuery(sql);
 
         // should be a unique result if only one resource is being examined
         if (resources.size() == 1) {
@@ -376,26 +437,53 @@ public class MeasurementDAO
 
     @SuppressWarnings("unchecked")
     List<Measurement> findMeasurements(Integer[] tids, Integer[] iids) {
+        final IntegerType iType = new IntegerType();
         // sort to take advantage of query cache
-        final List<Integer> iidList = Arrays.asList(iids);
-        final List<Integer> tidList = Arrays.asList(tids);
+        final List<Integer> iidList = new ArrayList<Integer>(Arrays.asList(iids));
+        final List<Integer> tidList = new ArrayList<Integer>(Arrays.asList(tids));
         Collections.sort(tidList);
         Collections.sort(iidList);
-        final String sql = new StringBuilder().append("select m from Measurement m ").append(
+        final String sql = new StringBuilder(256).append("select m from Measurement m ").append(
             "join m.template t ").append("where m.instanceId in (:iids) AND t.id in (:tids)")
             .toString();
-        return getSession().createQuery(sql).setParameterList("iids", iidList, new IntegerType())
-            .setParameterList("tids", tidList, new IntegerType()).setCacheable(true)
-            .setCacheRegion("Measurement.findMeasurements").list();
+        final List<Measurement> rtn = new ArrayList<Measurement>(iidList.size());
+        final int batch = BATCH_SIZE/2;
+        for (int xx=0; xx<iidList.size(); xx+=batch) {
+            final int iidEnd = Math.min(xx+batch, iidList.size());
+            for (int yy=0; yy<tidList.size(); yy+=batch) {
+                final int tidEnd = Math.min(yy+batch, tidList.size());
+                rtn.addAll(getSession().createQuery(sql)
+                    .setParameterList("iids", iidList.subList(xx, iidEnd), iType)
+                    .setParameterList("tids", tidList.subList(yy, tidEnd), iType)
+                    .setCacheable(true)
+                    .setCacheRegion("Measurement.findMeasurements")
+                    .list());
+            }
+        }
+        return rtn;
     }
 
     @SuppressWarnings("unchecked")
     List<Measurement> findAvailMeasurements(Integer[] tids, Integer[] iids) {
-        String sql = new StringBuilder().append("select m from Measurement m ").append(
+        final IntegerType iType = new IntegerType();
+        final List<Integer> iidList = Arrays.asList(iids);
+        final List<Integer> tidList = Arrays.asList(tids);
+        final String sql = new StringBuilder(256)
+            .append("select m from Measurement m ").append(
             "join m.template t ").append("where m.instanceId in (:iids) AND t.id in (:tids) AND ")
             .append(ALIAS_CLAUSE).toString();
-        return getSession().createQuery(sql).setParameterList("iids", iids).setParameterList(
-            "tids", tids).list();
+        final List<Measurement> rtn = new ArrayList<Measurement>(iidList.size());
+        final int batch = BATCH_SIZE/2;
+        for (int xx=0; xx<iidList.size(); xx+=batch) {
+            final int iidEnd = Math.min(xx+batch, iidList.size());
+            for (int yy=0; yy<tidList.size(); yy+=batch) {
+                final int tidEnd = Math.min(yy+batch, tidList.size());
+                rtn.addAll(getSession().createQuery(sql)
+                    .setParameterList("iids", iidList.subList(xx, iidEnd), iType)
+                    .setParameterList("tids", tidList.subList(yy, tidEnd), iType).list());
+            }
+        }
+        return rtn;
     }
 
     /**

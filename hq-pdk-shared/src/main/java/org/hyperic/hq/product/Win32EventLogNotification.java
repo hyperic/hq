@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.product;
 
+import java.util.Properties;
+
 import org.hyperic.sigar.win32.EventLogNotification;
 import org.hyperic.sigar.win32.EventLogRecord;
 import org.hyperic.sigar.win32.EventLog;
@@ -39,12 +41,20 @@ public abstract class Win32EventLogNotification
 {
     public static final String PROP_EVENT_LOGS =
         "platform.log_track.eventlogs";
-
+    private static final String PROP_EVENT_FMT =
+        "platform.log_track.eventfmt";
     private LogTrackPlugin plugin;
+    private String format;
 
     public Win32EventLogNotification(LogTrackPlugin plugin) {
         super();
         this.plugin = plugin;
+        this.format = plugin.getManagerProperty(PROP_EVENT_FMT);
+        if (this.format != null) {
+            //override default message format
+            plugin.getLog().debug("Using " + PROP_EVENT_FMT +
+                                  "='" + this.format + "'");
+        }
     }
 
     public abstract boolean matches(EventLogRecord record);
@@ -59,13 +69,41 @@ public abstract class Win32EventLogNotification
         return name;
      }
 
+    private void setProp(Properties props, String key, String val) {
+        if (val == null) {
+            val = "-";
+        }
+        props.setProperty(key, val);
+    }
+
     public void handleNotification(EventLogRecord record) { 
 
         // Make time in milliseconds
         long generated = record.getTimeGenerated() * 1000;
 
-        // Message will include source name
-        String msg = record.getSource() + ": " + record.getMessage();
+        String msg;
+        if (this.format == null) {
+            //Default - Message will include source name
+            msg = record.getSource() + ": " + record.getMessage();
+        }
+        else {
+            //User defined, example:
+            //platform.log_track.eventfmt=%user%@%computer% %source%:%event%:%message%
+            Properties props = new Properties();
+            setProp(props, "computer", record.getComputerName());
+            setProp(props, "event", String.valueOf(record.getEventId() & 0xFFFF));
+            setProp(props, "type", record.getEventTypeString());
+            setProp(props, "log", record.getLogName());
+            setProp(props, "message", record.getMessage());
+            setProp(props, "source", record.getSource());
+            String user = record.getUser();
+            if (user == null) {
+                user = "N/A";
+            }
+            setProp(props, "user", user);
+            setProp(props, "category", record.getCategoryString());
+            msg = Metric.translate(this.format, props);
+        }
 
         TrackEvent event =
             this.plugin.newTrackEvent(generated,

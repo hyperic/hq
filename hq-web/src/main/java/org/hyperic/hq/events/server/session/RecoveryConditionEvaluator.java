@@ -5,8 +5,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.TriggerNotFiredEvent;
 
@@ -28,9 +27,9 @@ public class RecoveryConditionEvaluator
     private TriggerFiredEvent lastAlertFired;
 
     private final Object monitor = new Object();
-
-    private final Log log = LogFactory.getLog(RecoveryConditionEvaluator.class);
-
+    
+    private final Integer recoveringFromAlertId;
+    
     /**
      * 
      * @param alertDefinitionId The ID of the recovery alert definition
@@ -44,11 +43,13 @@ public class RecoveryConditionEvaluator
      */
     public RecoveryConditionEvaluator(Integer alertDefinitionId,
                                       Integer alertTriggerId,
+                                      Integer recoveringFromAlertDefId,
                                       Collection alertConditions,
                                       ExecutionStrategy executionStrategy)
     {
         super(alertDefinitionId, alertConditions, 0, executionStrategy);
         this.alertTriggerId = alertTriggerId;
+        this.recoveringFromAlertId = recoveringFromAlertDefId;
     }
 
     /**
@@ -65,12 +66,14 @@ public class RecoveryConditionEvaluator
      */
     public RecoveryConditionEvaluator(Integer alertDefinitionId,
                                       Integer alertTriggerId,
+                                      Integer recoveringFromAlertDefId,
                                       Collection alertConditions,
                                       ExecutionStrategy executionStrategy,
                                       Map events)
     {
         super(alertDefinitionId, alertConditions, 0, executionStrategy, events);
         this.alertTriggerId = alertTriggerId;
+        this.recoveringFromAlertId = recoveringFromAlertDefId;
     }
 
     private void evaluateRecoveryConditions(Collection fulfilled) {
@@ -92,17 +95,28 @@ public class RecoveryConditionEvaluator
     Integer getAlertTriggerId() {
         return alertTriggerId;
     }
+    
+    Integer getRecoveringFromAlertDefinitionId() {
+        return recoveringFromAlertId;
+    }
 
+    /**
+     * Anything returned from getState() gets persisted to file on server shutdown,
+     * which we don't want to do anymore for the recovery alerts.
+     */
     public Serializable getState() {
+        return null;
+    }
+    
+    public TriggerFiredEvent getLastAlertFired() {
         return this.lastAlertFired;
     }
 
-    public void initialize(Serializable initialState) {
-        if (!(initialState instanceof TriggerFiredEvent)) {
-            log.warn("Received persisted state that was not an instance of TriggerFiredEvent.  Recovery alerts for alerts that fired before server restart will not be created.");
-            return;
-        }
-        this.lastAlertFired = (TriggerFiredEvent) initialState;
+    public void initialize(Serializable initialState) {        
+        if (initialState != null && initialState instanceof AbstractEvent) {
+            this.lastAlertFired = new TriggerFiredEvent(alertTriggerId, 
+                                                        (AbstractEvent) initialState);
+        }        
     }
 
     public void triggerFired(TriggerFiredEvent event) {

@@ -429,7 +429,7 @@ public class ZeventManager implements ZeventEnqueuer {
             public void afterCommit() {
                 try {
                     if (_log.isDebugEnabled()) {
-                        _log.debug("Listener[" + this + "] after tx " + "enqueueing");
+                        _log.debug("Listener[" + this.toString() + "] after tx.  Enqueueing. ");
                     }
                     enqueueEvents(events);
                 } catch (InterruptedException e) {

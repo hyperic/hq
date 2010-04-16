@@ -57,10 +57,13 @@ import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
+import org.hyperic.hq.events.AlertPermissionManager;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
@@ -107,13 +110,15 @@ public class ResourceHubPortalAction
     private AppdefBoss appdefBoss;
     private AuthzBoss authzBoss;
     private MeasurementBoss measurementBoss;
+    private AlertPermissionManager alertPermissionManager;
 
     @Autowired
-    public ResourceHubPortalAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, MeasurementBoss measurementBoss) {
+    public ResourceHubPortalAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, MeasurementBoss measurementBoss, AlertPermissionManager alertPermissionManager) {
         super();
         this.appdefBoss = appdefBoss;
         this.authzBoss = authzBoss;
         this.measurementBoss = measurementBoss;
+        this.alertPermissionManager = alertPermissionManager;
     }
 
     /**
@@ -309,14 +314,29 @@ public class ResourceHubPortalAction
         watch.markTimeEnd("findCompatInventory");
 
         request.setAttribute(Constants.ALL_RESOURCES_ATTR, resources);
-
+        
+        boolean canModify = false;
         ArrayList<AppdefEntityID> ids = new ArrayList<AppdefEntityID>();
         if (resources != null) {
+            if (resources.size() > 0 && DEFAULT_RESOURCE_TYPE != resourceType && AppdefEntityConstants.APPDEF_TYPE_APPLICATION != resourceType) {
+                // ...use the first element to check permission, since there's not an easy way to this that I know of...
+                try {
+                    AuthzSubject subject = authzBoss.getCurrentSubject(sessionId);
+                    AppdefResourceValue resource = (AppdefResourceValue) resources.get(0);
+                    // ...check to see if user can modify resources of this type...
+                    alertPermissionManager.canModifyAlertDefinition(subject, resource.getEntityId());
+                    canModify = true;
+                } catch(PermissionException e) {
+                    // ...user doesn't have permission to modify this resource type...
+                }   
+            }
             for (AppdefResourceValue rv : resources) {
                 ids.add(rv.getEntityId());
             }
         }
 
+        request.setAttribute(Constants.CAN_MODIFY_ALERT_ATTR, canModify);
+        
         watch.markTimeBegin("batchGetIndicators");
         if (ids.size() > 0) {
             if (prefView.equals(ResourceHubForm.LIST_VIEW) && !isGroupSelected && resourceType != DEFAULT_RESOURCE_TYPE) {

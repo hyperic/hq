@@ -24,7 +24,10 @@
  */
 package org.hyperic.hq.events.server.session;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
@@ -42,16 +45,24 @@ public class ActionDAO
         super(Action.class, f);
     }
 
-    private void removeActionCascade(Action action) {
-        if (action.getParent() != null) {
-            action.getParent().getChildrenBag().remove(action);
-        }
-        remove(action);
-    }
-
+   
     void removeActions(AlertDefinition def) {
+        Map<Action,List<Action>> parentToActions = new HashMap<Action,List<Action>>();
         for (Action action : def.getActions()) {
-            removeActionCascade(action);
+            List<Action> list;
+            if (null == (list = parentToActions.get(action.getParent()))) {
+                list = new ArrayList<Action>();
+                parentToActions.put(action.getParent(), list);
+            }
+            list.add(action);
+        }
+        for (Map.Entry<Action,List<Action>> entry : parentToActions.entrySet() ) {
+            Action parent = entry.getKey();
+            if (parent == null) {
+                continue;
+            }
+            List<Action> actions = entry.getValue();
+            parent.getChildrenBag().removeAll(actions);
         }
         def.clearActions();
     }
@@ -60,7 +71,10 @@ public class ActionDAO
         if (action.getAlertDefinition() != null) {
             action.getAlertDefinition().getActionsBag().remove(action);
         }
-        removeActionCascade(action);
+        if (action.getParent() != null) {
+            action.getParent().getChildrenBag().remove(action);
+        }       
+        remove(action);
     }
 
     @SuppressWarnings("unchecked")

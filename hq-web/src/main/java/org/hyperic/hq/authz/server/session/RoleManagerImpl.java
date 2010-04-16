@@ -29,11 +29,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -590,41 +588,21 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
     }
 
     /**
-     * Get role permission Map For a given role id, find the resource types and
+     * Get operations For a given role id, find the resource types and
      * permissions which are supported by it
      * 
      * @param subject
      * @param roleId
-     * @return map - keys are resource type names, values are lists of operation
-     *         values which are supported on the resouce type.
+     * @return list - values are lists of operation
      * 
      */
     @Transactional(readOnly=true)
-    public Map<String, List<Operation>> getRoleOperationMap(AuthzSubject subject, Integer roleId)
+    public List<Operation> getRoleOperations(AuthzSubject subject, Integer roleId)
         throws PermissionException {
-        Map<String, List<Operation>> theMap = new HashMap<String, List<Operation>>();
+      
         // find the role by id
         Role role = roleDAO.findById(roleId);
-        // now get the operations
-        Collection<Operation> operations = role.getOperations();
-        // now for each operation, get the supported resource type
-
-        for (Operation anOp : operations) {
-            // now get the resource Type for the op
-            ResourceType resType = anOp.getResourceType();
-            // check if there's a key for this entry
-            if (theMap.containsKey(resType.getName())) {
-                // looks like this res type is accounted for
-                // add the operation to the list
-                theMap.get(resType.getName()).add(anOp);
-            } else {
-                // key's not there, add it
-                List<Operation> opList = new ArrayList<Operation>();
-                opList.add(anOp);
-                theMap.put(resType.getName(), opList);
-            }
-        }
-        return theMap;
+        return new ArrayList<Operation>(role.getOperations());
     }
 
     /**
@@ -1066,6 +1044,21 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
         plist.setTotalSize(roles.size());
 
         return plist;
+    }
+    
+    /**
+     * Get the resource groups applicable to a given role.
+     * @throws NotFoundException 
+     *
+    */
+    @Transactional(readOnly=true)
+    public Collection<ResourceGroup> getResourceGroupsByRole(AuthzSubject subject,Role role)
+        throws PermissionException, NotFoundException {
+           Collection<ResourceGroup> groups =
+                   resourceGroupDAO.findByRoleIdAndSystem_orderName(role.getId(), false, true);
+            
+           // now get viewable group pks
+           return filterViewableGroups(subject, groups);
     }
 
     /**

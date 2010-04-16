@@ -4,10 +4,10 @@
 package org.hyperic.hq.events.shared;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.events.TriggerCreateException;
-import org.hyperic.hq.events.ext.RegisterableTriggerRepository;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.RegisteredTrigger;
 import org.hyperic.hq.events.server.session.TriggersCreatedZevent;
@@ -28,12 +28,14 @@ public interface RegisteredTriggerManager {
      * Initialize the in-memory triggers and update the RegisteredTriggers
      * repository
      */
-    public void initializeTriggers(RegisterableTriggerRepository registeredTriggerRepository);
+    public void initializeTriggers();
 
     /**
      * Enable or disable triggers associated with an alert definition
      */
     public void setAlertDefinitionTriggersEnabled(Integer alertDefId, boolean enabled);
+    
+    void setAlertDefinitionTriggersEnabled(List<Integer> alertDefIds, boolean enabled);
 
     /**
      * Finds a trigger by its ID, assuming existence
@@ -55,15 +57,39 @@ public interface RegisteredTriggerManager {
      */
     public void createTriggers(AuthzSubject subject, AlertDefinitionValue alertdef) throws TriggerCreateException,
         InvalidOptionException, InvalidOptionValueException;
-
+    
     /**
-     * Delete all triggers for an alert definition.
+     * Create new triggers
+     *
+     * @param subject The user creating the trigger
+     * @param alertdef The alert definition value object
+     * @param addTxListener Indicates whether a TriggersCreatedListener should be added.
+     *                      The default value is true. HHQ-3423: To improve performance when
+     *                      creating resource type alert definitions, this should be set to false.
+     *                      If false, it is the caller's responsibility to call
+     *                      addTriggersCreatedListener() to ensure triggers are registered.
+     *  
+     * 
+     *
+     * 
      */
-    public void deleteAlertDefinitionTriggers(Integer adId);
+    void createTriggers(AuthzSubject subject, AlertDefinitionValue alertdef, boolean addTxListener) 
+    throws TriggerCreateException, InvalidOptionException, InvalidOptionValueException;
 
     /**
      * Completely deletes all triggers when an alert definition is deleted
      */
     public void deleteTriggers(AlertDefinition alertDef);
-
+    
+    /**
+     * Delete all triggers for an alert definition.
+     *
+     * @param adId The alert definition id
+     * 
+     * 
+     */
+    public void deleteTriggers(Integer adId);
+    
+    void addTriggersCreatedTxListener(final List triggersOrEvents);
+    
 }

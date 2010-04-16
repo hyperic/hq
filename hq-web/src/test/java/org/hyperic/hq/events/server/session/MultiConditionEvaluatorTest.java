@@ -297,13 +297,20 @@ public class MultiConditionEvaluatorTest
         mockEvent2.setTimestamp(System.currentTimeMillis() - (12 * 60 * 1000));
         TriggerFiredEvent triggerFired2 = new TriggerFiredEvent(trigger1Id, mockEvent2);
 
+        MockEvent mockEvent3 = new MockEvent(4l, 5);
+        // trigger fired event occurred 12 minutes ago and is already expired
+        mockEvent2.setTimestamp(System.currentTimeMillis() - (12 * 60 * 1000));
+        TriggerFiredEvent triggerFired3 = new TriggerFiredEvent(trigger1Id, mockEvent3);
+
         EasyMock.replay(executionStrategy);
         evaluator.triggerFired(triggerFired);
+        // this setTimestamp() is signifying that time has passed since the last
+        // trigger fired
+        mockEvent.setTimestamp(System.currentTimeMillis() - (12 * 60 * 1000));
         evaluator.triggerFired(triggerFired2);
         EasyMock.verify(executionStrategy);
 
         Map expectedEvents = new LinkedHashMap();
-        expectedEvents.put(trigger2Id, triggerFired);
         assertEquals(expectedEvents, events);
     }
 

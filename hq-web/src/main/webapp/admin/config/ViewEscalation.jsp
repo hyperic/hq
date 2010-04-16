@@ -14,7 +14,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
 
-  Copyright (C) [2004-2009], Hyperic, Inc.
+  Copyright (C) [2004-2010], Hyperic, Inc.
   This file is part of HQ.
 
   HQ is free software; you can redistribute it and/or modify
@@ -93,10 +93,10 @@ function showViewEscResponse(originalRequest) {
         dojo11.byId('escId').value = id;
         dojo11.byId('id').value = id;
     
-        dojo11.byId('name').innerHTML = '<b>' + escName + '</b>';
+        dojo11.byId('name').innerHTML = '<b>' + escName.escapeHTML() + '</b>';
         dojo11.byId('escName').value = escName;
     
-        dojo11.byId('description').innerHTML = description + "&nbsp;";
+        dojo11.byId('description').innerHTML = description.escapeHTML() + "&nbsp;";
         if (description) {
             dojo11.byId('escDesc').value = description;
         }
@@ -176,6 +176,8 @@ function showViewEscResponse(originalRequest) {
             var configProduct = actionConfig.product;
             var configSnmpOID = actionConfig.oid;
             var configSnmpIP = actionConfig.address;
+            var configSnmpNotificationMechanism = actionConfig.snmpNotificationMechanism;
+            var configSnmpVarBinds = eval(actionConfig.variableBindings);
             var actionId = actions[i].action.id;
             var actionsClassName = actions[i].action.className;
             var actionsVersion = actions[i].action._version_;
@@ -272,7 +274,25 @@ function showViewEscResponse(originalRequest) {
                     usersTextDiv.innerHTML = 'Suppress duplicate alerts for: ' + actionWaitTime;
                     waitDiv.innerHTML = "&nbsp;";
                 } else if (actionClass[d] == "SnmpAction") {
-                    usersTextDiv.innerHTML = '<table cellpadding="0" cellspacing="0" border="0"><tr><td rowSpan="3" vAlign="top" style="padding-right:3px;">Snmp Trap:</td><td style="padding:0px 2px 2px 2px;"><fmt:message key="resource.autodiscovery.server.IPAddressTH"/>: ' + configSnmpIP + '</td></tr><tr><td style="padding:2px;"><fmt:message key="admin.settings.SNMPTrapOID"/> ' + configSnmpOID + '</td></tr></table>'
+                	 var snmpInnerHTML = '<table cellpadding="0" cellspacing="0" border="0">'
+                	 	 	+ '<tr><td rowSpan="4" vAlign="top" style="padding-right:3px;"><fmt:message key="alert.config.escalation.action.snmp.notification"/>:</td>'
+                	 	 	+ '<td colspan="2" style="padding:2px;"><fmt:message key="resource.autodiscovery.server.IPAddressTH"/>: ' + configSnmpIP + '</td></tr>'
+                	 		+ '<tr><td colspan="2" style="padding:0px 2px 2px 2px;"><fmt:message key="admin.settings.SNMPNotificationMechanism"/> ' + configSnmpNotificationMechanism + '</td></tr>'
+                	 	 	+ '<tr><td vAlign="top" style="padding:2px;" nowrap="nowrap"><fmt:message key="alert.config.escalation.action.snmp.varbinds"/>: </td>'
+                	 	 	+ '<td style="padding:2px;"><table>'
+                	 	 	+ '<tr><td style="padding-right:5px;"><fmt:message key="alert.config.escalation.action.snmp.oid"/>: ' + configSnmpOID + '</td>'
+                	 	 	+ '<td>Value: {snmp_trap.gsp}</td></tr>';
+
+                		if (typeof configSnmpVarBinds != 'object') {
+                	 	 	configSnmpVarBinds = [];
+                	 	}
+                	 	for (var s = 0; s < configSnmpVarBinds.length; s++) {       
+                	 		snmpInnerHTML += '<tr><td style="padding-right:5px;"><fmt:message key="alert.config.escalation.action.snmp.oid"/>: '
+                	 	 			+ configSnmpVarBinds[s].oid + '</td>'
+                	 	 			+ '<td>Value: ' + configSnmpVarBinds[s].value + '</td></tr>';
+                		}
+                		snmpInnerHTML += '</table></td></tr></table>';
+                	 	usersTextDiv.innerHTML = snmpInnerHTML;
                 }
             }
     
@@ -482,7 +502,23 @@ function addRow() {
     td5.setAttribute('width', '30%');
     td5.setAttribute('rowSpan', '3');
     td5.setAttribute('id', 'displaySelAction');
-    td5.innerHTML = '<table cellpadding="2" cellspacing="0" border="0" width="100%"><tbody><tr><td class=BlockTitle colSpan=3>Action Details</td></tr><tr><td id="actionName" vAlign="top" width="50%">Action: Email</td></tr><tr><td id="userListDisplay" valign="top" style="display:none;"></td></tr><tr><td><table cellpadding="2" cellspacing="0" border="0"><tr><td id=metaText style="display:none"></td></tr><tr><td id=productText style="display:none"></td></tr><tr><td id=versionText style="display:none"></td></tr></table></td></tr><tr><td><table cellpadding="2" cellspacing="0" border="0"><tr><td id=IPText style="display:none"></td></tr><tr><td id=OIDText style="display:none"></td></tr></table></td></tr><tr><td id="time" colspan="3" valign="top" style="display:none;"></td></tr></tbody></table>';
+    td5.innerHTML = '<table cellpadding="2" cellspacing="0" border="0" width="100%">'
+ 		+ '<tbody><tr><td class=BlockTitle colSpan=3>Action Details</td></tr>'
+ 	 	+ '<tr><td id="actionName" vAlign="top" width="50%">Action: Email</td></tr>'
+ 	 	+ '<tr><td id="userListDisplay" valign="top" style="display:none;"></td></tr>'
+ 	 	+ '<tr><td><table cellpadding="2" cellspacing="0" border="0">'
+ 	 	+ '<tr><td id=metaText style="display:none"></td></tr>'
+ 	 	+ '<tr><td id=productText style="display:none"></td></tr>'
+ 	 	+ '<tr><td id=versionText style="display:none"></td></tr></table></td></tr>'
+ 	 	+ '<tr><td><table cellpadding="2" cellspacing="0" border="0">'
+ 	 	+ '<tr><td id=IPText style="display:none"></td></tr>'
+ 	 	+ '<tr><td id=NotificationMechanismText style="display:none"></td></tr>'
+ 	 	+ '<tr><td id=VBTitle style="display:none"><fmt:message key="alert.config.escalation.action.snmp.varbinds"/>:</td></tr>'
+ 	 	+ '<tr><td id=OIDText style="display:none"></td></tr>'
+ 	 	+ '<tr><td id=OIDValue style="display:none">Value: {snmp_trap.gsp}</td></tr>'
+ 	 	+ '<tr><td id=VariableBindingsText style="display:none"></td></tr></table></td></tr>'
+ 	 	+ '<tr><td id="time" colspan="3" valign="top" style="display:none;"></td></tr>'
+ 	 	+ '</tbody></table>';
 
 
     escTr1.appendChild(td1);
@@ -524,7 +560,7 @@ function addRow() {
     addOption(select2, 'SMS', 'SMS');
     addOption(select2, 'Syslog', 'Sys Log');
 <c:if test="${snmpEnabled}">
-    addOption(select2, 'SNMP', 'SNMP Trap');
+    addOption(select2, 'SNMP', '<fmt:message key="alert.config.escalation.action.snmp.notification"/>');
 </c:if>
     addOption(select2, 'NoOp', 'Suppress Alerts');
 
@@ -570,7 +606,18 @@ function addRow() {
     dojo11.byId('snmpinput').style.display = 'none';
     dojo11.byId('snmpinput').style.textAlign = 'left';
     //sysDiv.setAttribute('width', '40%');
-    snmpDiv.innerHTML = '<fmt:message key="resource.autodiscovery.server.IPAddressTH"/>: <fmt:message key="inform.config.escalation.scheme.IPAddress"/><br> <input type=text name=snmpIP id=snmpIPinput' + " size=30 onMouseOut=copysnmpIP(this);checkIP(this);><br>" + '<fmt:message key="admin.settings.SNMPTrapOID"/> <fmt:message key="inform.config.escalation.scheme.OID"/><br> <input type=text name=snmpOID id=snmpOIDinput' + " size=30 onMouseOut=copysnmpOID(this);checkOID(this);><br>";
+    snmpDiv.innerHTML = '<fmt:message key="resource.autodiscovery.server.IPAddressTH"/>: <fmt:message key="inform.config.escalation.scheme.IPAddress"/><br>'
+ 	 	+ '<input type=text name=snmpIP id=snmpIPinput size=30 onMouseOut=copysnmpIP(this);checkIP(this);><br>'
+ 	 	+ '<fmt:message key="admin.settings.SNMPNotificationMechanism"/><br>'
+ 	 	+ "<select name='snmpNotificationMechanism' id='snmpNotificationMechanismSelect' onchange='copySnmpNotificationMechanism(this);'><option>v1 Trap</option><option>v2c Trap</option><option>Inform</option></select><br>"
+ 	 	+ '<input type="hidden" name="variableBindings" id="variableBindingsInput"><br/>'
+ 	 	+ '<fmt:message key="alert.config.escalation.action.snmp.varbinds"/>:<br/>'
+ 	 	+ '<hr>'
+ 	 	+ '<fmt:message key="alert.config.escalation.action.snmp.oid"/> <fmt:message key="inform.config.escalation.scheme.OID"/><br>'
+ 	 	+ '<input type=text name=snmpOID id=snmpOIDinput style="width:250px" onMouseOut=copysnmpOID(this);checkOID(this);><br>'
+  	 	+ 'Value: {snmp_trap.gsp}<br>'
+  	 	+ '<div id="snmpVarbindDiv"></div>'
+  	 	+ '<div style="padding-top:10px;"><a href="javascript:addVariableBinding();"><fmt:message key="alert.config.escalation.action.snmp.varbinds.add"/></a></div>';
 
     td4.appendChild(usersDiv);
     usersDiv.setAttribute('id', 'usersDiv' + liID);
@@ -600,6 +647,35 @@ function addRow() {
 
 }
 
+function addVariableBinding() {
+	var parentDiv = dojo11.byId('snmpVarbindDiv');
+    var vbDiv = document.createElement('div');
+    var vbArray = document.getElementsByName("snmpVarbindOID");
+
+    var vbDivNum = vbArray.length + 1; 
+    vbDiv.id = "snmpVarbindDiv_" + vbDivNum;
+    
+    vbDiv.innerHTML = '<br/>'
+        + '<fmt:message key="alert.config.escalation.action.snmp.oid"/> <fmt:message key="inform.config.escalation.scheme.OID"/><br>'
+		+ '<input type=text name="snmpVarbindOID" style="width:250px" onchange="copyVariableBindings();"><br>'
+    	+ 'Value:<br>'
+    	+ '<input type=text name="snmpVarbindValue" style="width:250px" onchange="copyVariableBindings();"><br>'
+        + '<a href="javascript:removeVariableBinding(' + vbDivNum + ');"><fmt:message key="alert.config.escalation.action.snmp.varbinds.remove"/></a><br/>';        
+
+    parentDiv.appendChild(vbDiv);    
+}
+
+function removeVariableBinding(snmpVarbindIndex) {
+    var vbDiv = dojo11.byId('snmpVarbindDiv_' + snmpVarbindIndex);
+
+    // remove element
+    Element.remove(vbDiv);
+	
+	// update UI
+	copyVariableBindings();
+}
+
+
 function copyOthersEmail(el) {
     var othersDisplay = dojo11.byId('userListDisplay');
     othersDisplay.style.display = "";
@@ -625,9 +701,46 @@ function copyVersion(el) {
 }
 
 function copysnmpOID(el) {
-    var OIDDisplay = dojo11.byId('OIDText');
-    OIDDisplay.style.display = "";
-    OIDDisplay.innerHTML = '<fmt:message key="admin.settings.SNMPTrapOID"/> ' + el.value;
+	var VBTitle = dojo11.byId('VBTitle');
+    var OIDText = dojo11.byId('OIDText');
+    var OIDValue = dojo11.byId('OIDValue');
+    VBTitle.style.display = "";
+    OIDText.style.display = "";
+    OIDValue.style.display = "";
+    OIDText.innerHTML = '<fmt:message key="alert.config.escalation.action.snmp.oid"/>: ' + el.value;
+}
+
+function copyVariableBindings() {
+	var vbTitle = dojo11.byId('VBTitle');
+    var vbText = dojo11.byId('VariableBindingsText');
+    var vbInput = dojo11.byId('variableBindingsInput');
+    var vbOids = document.getElementsByName("snmpVarbindOID");
+    var vbValues = document.getElementsByName("snmpVarbindValue");
+    
+    vbTitle.style.display = "";
+    vbText.style.display = "";
+
+    var vbsInnerHTML = "";
+    var vbsArray = [];
+    var vbsCount = 0;
+	for (var s = 0; s < vbOids.length; s++) {
+		if (vbOids[s].value.length > 0 && vbValues[s].value.length > 0) {
+			vbsArray[vbsCount++] = {oid: vbOids[s].value, value: vbValues[s].value};
+			vbsInnerHTML += '<fmt:message key="alert.config.escalation.action.snmp.oid"/>: ' 
+    						+ vbOids[s].value + '<br/>'
+				   			+ 'Value: ' + vbValues[s].value + '<br/>';
+		}
+	}
+	vbText.innerHTML = vbsInnerHTML;
+	vbInput.value = vbsArray.toJSON();
+}
+
+
+
+function copySnmpNotificationMechanism(el) {
+	var display = dojo11.byId('NotificationMechanismText');
+	display.style.display = "";
+	display.innerHTML = '<fmt:message key="admin.settings.SNMPNotificationMechanism"/> ' + el.value;
 }
 
 function copysnmpIP(el) {
@@ -644,6 +757,7 @@ function clearDisplay() {
     dojo11.byId('time').innerHTML = "";
     dojo11.byId('IPText').innerHTML = "";
     dojo11.byId('OIDText').innerHTML = "";
+    dojo11.byId('NotificationMechanismText').innerHTML = "";
 }
 
 function clearOthers() {

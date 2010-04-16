@@ -115,7 +115,7 @@ public class GalertLogDAO
                                                 boolean notFixed, Integer groupId,
                                                 Integer galertDefId, PageInfo pageInfo) {
         GalertLogSortField sort = (GalertLogSortField) pageInfo.getSort();
-        String op = AuthzConstants.groupOpManageAlerts;
+        String op = AuthzConstants.groupOpViewResourceGroup;
         String sql = PermissionManagerFactory.getInstance().getGroupAlertsHQL(inEsc, notFixed,
             groupId, galertDefId) +
                      " order by " +

@@ -9,9 +9,9 @@ import java.util.Map;
 import junit.framework.TestCase;
 
 import org.easymock.EasyMock;
+import org.hyperic.hq.events.InvalidTriggerDataException;
 import org.hyperic.hq.events.MockEvent;
 import org.hyperic.hq.events.server.session.AlertRegulator;
-import org.hyperic.hq.events.shared.RegisteredTriggerManager;
 
 /**
  * Unit test of {@link RegisteredTriggers}
@@ -21,14 +21,12 @@ import org.hyperic.hq.events.shared.RegisteredTriggerManager;
 public class RegisteredTriggersTest
     extends TestCase {
 
-    private RegisteredTriggerManager registeredTriggerManager;
-
     private RegisteredTriggers registeredTriggers;
 
     private AlertRegulator alertRegulator;
 
     private void replay() {
-        EasyMock.replay(registeredTriggerManager, alertRegulator);
+        EasyMock.replay(alertRegulator);
     }
 
     /**
@@ -36,9 +34,8 @@ public class RegisteredTriggersTest
      */
     public void setUp() throws Exception {
         super.setUp();
-        this.registeredTriggerManager = EasyMock.createMock(RegisteredTriggerManager.class);
         this.alertRegulator = EasyMock.createMock(AlertRegulator.class);
-        this.registeredTriggers = new RegisteredTriggers(registeredTriggerManager, alertRegulator);
+        this.registeredTriggers = new RegisteredTriggers(alertRegulator);
     }
 
     /**
@@ -101,13 +98,22 @@ public class RegisteredTriggersTest
     }
 
     /**
-     * Verifies that the init method makes the proper call to its RTM
+     * Verifies that the init method properly clears the internal state
      */
     public void testInit() {
-        registeredTriggerManager.initializeTriggers(registeredTriggers);
+        Integer triggerId = Integer.valueOf(987);
+        Integer[] interestedInstances = new Integer[] { 123, 456 };
+        RegisterableTriggerInterface trigger1 = EasyMock.createMock(RegisterableTriggerInterface.class);
+        EasyMock.expect(trigger1.getId()).andReturn(triggerId).times(2);
+        EasyMock.expect(trigger1.getInterestedEventTypes()).andReturn(new Class[] { MockEvent.class });
+        EasyMock.expect(trigger1.getInterestedInstanceIDs(MockEvent.class)).andReturn(interestedInstances);   
+        EasyMock.replay(trigger1);
         replay();
+        registeredTriggers.addTrigger(trigger1);
         registeredTriggers.init();
+        EasyMock.verify(trigger1);
         verify();
+        assertTrue(registeredTriggers.getTriggers().isEmpty());
     }
 
     /**
@@ -286,7 +292,7 @@ public class RegisteredTriggersTest
     }
 
     private void verify() {
-        EasyMock.verify(registeredTriggerManager, alertRegulator);
+        EasyMock.verify(alertRegulator);
     }
 
 }

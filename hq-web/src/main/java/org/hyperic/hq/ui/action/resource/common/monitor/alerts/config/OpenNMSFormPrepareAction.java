@@ -34,7 +34,12 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.actions.TilesAction;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
+import org.hyperic.hq.events.AlertPermissionManager;
 import org.hyperic.hq.events.InvalidActionDataException;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.ui.action.resource.common.monitor.alerts.AlertDefUtil;
@@ -51,11 +56,15 @@ public class OpenNMSFormPrepareAction
 
     private final Log log = LogFactory.getLog(OpenNMSFormPrepareAction.class);
     private EventsBoss eventsBoss;
+    private AuthzBoss authzBoss;
+    private AlertPermissionManager alertPermissionManager;
 
     @Autowired
-    public OpenNMSFormPrepareAction(EventsBoss eventsBoss) {
+    public OpenNMSFormPrepareAction(EventsBoss eventsBoss, AuthzBoss authzBoss, AlertPermissionManager alertPermissionManager) {
         super();
         this.eventsBoss = eventsBoss;
+        this.authzBoss = authzBoss;
+        this.alertPermissionManager = alertPermissionManager;
     }
 
     public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
@@ -71,6 +80,16 @@ public class OpenNMSFormPrepareAction
             log.error("Invalid OpenNMSAction", e);
         } catch (EncodingException e) {
             log.error("Invalid OpenNMSAction", e);
+        }
+        
+        // ...check to see if user has the ability to modify...
+        try {
+            AuthzSubject subject = authzBoss.getCurrentSubject(sessionID);
+            alertPermissionManager.canModifyAlertDefinition(subject, new AppdefEntityID(adv.getAppdefType(), adv.getAppdefId()));
+            oForm.setCanModify(true);
+        } catch(PermissionException e) {
+            // We can view it, but can't modify it
+            oForm.setCanModify(false);
         }
 
         return null;

@@ -110,6 +110,14 @@ public class ServerConfiguratorImpl implements ServerConfigurator {
             if (jdbcUrl.startsWith("jdbc:postgresql:") && !jdbcUrl.endsWith("?protocolVersion=2")) {
                 serverProps.setProperty("server.database-url", jdbcUrl + "?protocolVersion=2");
             }
+            // Database connection validation: "select 1" except in the case of Oracle,
+            // where it's "select 1 from dual"
+            String validationSQL = "select 1";
+            String dbProp = serverProps.getProperty("server.database");
+            if (dbProp != null && dbProp.startsWith("Oracle")) {
+                validationSQL += " from dual";
+            }
+            serverProps.setProperty("server.connection-validation-sql", validationSQL);        
         } finally {
             if (fi != null)
                 fi.close();

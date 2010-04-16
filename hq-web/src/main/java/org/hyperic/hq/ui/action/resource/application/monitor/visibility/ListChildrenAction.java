@@ -30,6 +30,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
@@ -41,6 +43,7 @@ import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.bizapp.shared.uibeans.ResourceTypeDisplaySummary;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -51,6 +54,8 @@ public class ListChildrenAction
     extends TilesAction {
 
     private MeasurementBoss measurementBoss;
+    
+    private final Log log = LogFactory.getLog(ListChildrenAction.class.getName());
 
     @Autowired
     public ListChildrenAction(MeasurementBoss measurementBoss) {
@@ -60,6 +65,7 @@ public class ListChildrenAction
 
     public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
                                  HttpServletRequest request, HttpServletResponse response) throws Exception {
+        StopWatch watch = new StopWatch();
         AppdefResourceValue resource = RequestUtils.getResource(request);
 
         if (resource == null) {
@@ -75,6 +81,10 @@ public class ListChildrenAction
             sessionId, entityId);
 
         context.putAttribute(Constants.CTX_SUMMARIES, internalHealths);
+        
+        if (log.isDebugEnabled()) {
+            log.debug("ListChildrenAction.execute: " + watch);
+        }
 
         return null;
     }

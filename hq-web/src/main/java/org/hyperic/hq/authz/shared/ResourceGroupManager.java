@@ -90,13 +90,25 @@ public interface ResourceGroupManager
     public void removeResourceGroup(AuthzSubject whoami, ResourceGroup group) throws PermissionException, VetoException;
 
     public void addResources(AuthzSubject subj, ResourceGroup group, List<Resource> resources)
-        throws PermissionException;
+        throws PermissionException, VetoException;
 
     /**
      * Add a resource to a group by resource id and resource type
      */
     public ResourceGroup addResource(AuthzSubject whoami, ResourceGroup group, Resource resource)
-        throws PermissionException;
+        throws PermissionException, VetoException;
+    
+    /**
+     * Add a resource to a collection of groups
+     * 
+     * @param whoami The current running user.
+     * @param resource The resource
+     * @param groups The groups to add to.
+     * 
+     *
+     */
+    void addResource(AuthzSubject whoami, Resource resource,Collection<ResourceGroup> groups)
+        throws PermissionException, VetoException;
 
     /**
      * RemoveResources from a group.
@@ -104,7 +116,20 @@ public interface ResourceGroupManager
      * @param group The group .
      */
     public void removeResources(AuthzSubject whoami, ResourceGroup group, Collection<Resource> resources)
-        throws PermissionException;
+        throws PermissionException, VetoException;
+    
+    /**
+     * Remove a resource from a collection of groups
+     * 
+     * @param whoami The current running user.
+     * @param resource The resource
+     * @param groups The groups to remove from.
+     * 
+     * 
+     */    
+    public void removeResource(AuthzSubject whoami,
+                               Resource resource,
+                               Collection<ResourceGroup> groups) throws PermissionException, VetoException;
 
     /**
      * Sets the criteria list for this group.
@@ -123,7 +148,7 @@ public interface ResourceGroupManager
      * @param resources A list of {@link Resource}s to be in the group
      */
     public void setResources(AuthzSubject whoami, ResourceGroup group, Collection<Resource> resources)
-        throws PermissionException;
+        throws PermissionException, VetoException;
 
     /**
      * List the resources in this group that the caller is authorized to see.

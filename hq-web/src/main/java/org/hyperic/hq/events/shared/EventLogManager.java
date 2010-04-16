@@ -5,6 +5,7 @@ package org.hyperic.hq.events.shared;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -13,6 +14,7 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.events.AbstractEvent;
+import org.hyperic.hq.events.AlertFiredEvent;
 import org.hyperic.hq.events.EventLogStatus;
 import org.hyperic.hq.events.server.session.EventLog;
 import org.hyperic.hq.events.server.session.EventLogDAO.ResourceEventLog;
@@ -37,12 +39,28 @@ public interface EventLogManager {
      * @param eventLogs The event logs.
      */
     public void insertEventLogs(org.hyperic.hq.events.server.session.EventLog[] eventLogs);
+    
+    /**
+     * Finds a unique log entry with the specified event type, instance ID, and timestamp.  Returns null if no such entry found.  
+     * If multiple entries are found, returns first one found.
+     * 
+     */
+    public EventLog findLog(String typeClass, int instanceId, long timestamp);
 
     /**
      * Find the last event logs of all the resources of a given prototype. (i.e.
      * 'Linux' or 'FileServer File')
      */
     public List<EventLog> findLastLogs(Resource proto);
+    
+    /**
+     * Find the last unfixed AlertFiredEvents for each alert definition in the list
+     * 
+     * 
+     * @return {@link Map} of alert definition id {@link Integer} to {@link AlertFiredEvent}
+     * 
+     */
+    public Map<Integer,AlertFiredEvent> findLastUnfixedAlertFiredEvents();
 
     /**
      * Get a list of {@link ResourceEventLog}s in a given interval, with the

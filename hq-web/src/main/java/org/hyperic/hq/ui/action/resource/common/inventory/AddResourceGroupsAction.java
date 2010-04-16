@@ -41,6 +41,7 @@ import org.hyperic.hq.appdef.shared.AppSvcClustDuplicateAssignException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.action.BaseValidatorForm;
@@ -128,6 +129,10 @@ public class AddResourceGroupsAction
         } catch (AppSvcClustDuplicateAssignException e1) {
             RequestUtils.setError(request, "resource.common.inventory.error.DuplicateClusterAssignment");
             return returnFailure(request, mapping);
+        } catch (VetoException ve) {
+           RequestUtils.setErrorObject(request,
+               "resource.group.inventory.error.UpdateResourceListVetoed",ve.getMessage());
+           return returnFailure(request, mapping);
         }
 
     }

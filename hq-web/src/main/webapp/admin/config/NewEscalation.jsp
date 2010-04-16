@@ -349,7 +349,7 @@ function editEscalation (row) {
 	addOption(select2, 'SMS', 'SMS');
 	addOption(select2, 'Syslog', 'Sys Log');
 	<c:if test="${snmpEnabled}">
-	addOption(select2, 'SNMP', 'SNMP Trap');
+	addOption(select2, 'SNMP', '<fmt:message key="alert.config.escalation.action.snmp.notification"/>');
 	</c:if>
 	
 	addOption(select2, 'NoOp', 'Suppress Alerts');

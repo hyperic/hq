@@ -35,6 +35,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
@@ -127,12 +128,21 @@ public class AvailabilityDownAlertDefinitionCache implements ApplicationListener
      
      private void removeFromCache(AlertDefinition def) {
          synchronized (_cacheLock) {
-             remove(def.getAppdefEntityId());
+             if (isOkToRemove(def)) {
+                 remove(def.getAppdefEntityId());
+             }
 
              for (AlertDefinition childDef : def.getChildren()) {
-                 remove(childDef.getAppdefEntityId());
+                 if (isOkToRemove(childDef)) {
+                     remove(childDef.getAppdefEntityId());
+                 }
              }
          }
+     }
+     
+     private boolean isOkToRemove(AlertDefinition def) {
+         Resource r = def.getResource();
+         return (r != null && !r.isInAsyncDeleteState());
      }
 
 }

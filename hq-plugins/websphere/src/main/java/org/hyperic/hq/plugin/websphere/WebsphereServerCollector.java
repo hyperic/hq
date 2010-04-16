@@ -35,7 +35,7 @@ import com.ibm.websphere.management.AdminClient;
 
 public class WebsphereServerCollector extends WebsphereCollector {
 
-    private static final Log _log =
+    private static final Log log =
         LogFactory.getLog(WebsphereServerCollector.class.getName());
     private boolean isJVM;
     private String[][] attrs;
@@ -83,36 +83,17 @@ public class WebsphereServerCollector extends WebsphereCollector {
             } catch (PluginException e) {
                 //ok in the case of networkdeployer/nodeagent;
                 //where there is no TransactionService
-                _log.debug(this.name + ": " + e.getMessage());
+                log.debug(this.name + ": " + e.getMessage());
                 this.name = null;
             }
-        }
-        else if (module.equals("servletSessionsModule")) {
-            this.name = null; //XXX
-            setSource(module);
-        }
-        else if (module.equals("webappModule")) {
-            this.name = null; //XXX
-            setSource(module);
-        }
-        else if (module.equals("beanModule")) {
-            this.name = null; //XXX
-            setSource(module);
-        }
-        else if (module.equals("threadPoolModule")) {
-            this.name = null; //XXX
-            setSource(module);
-        }
-        else if (module.equals("connectionPoolModule")) {
-            this.name = null; //XXX
-            setSource(module);
         }
     }
 
     public void collect() {
-        if (this.name == null) {
-            return; //XXX see above
-        }
+        log.debug("[collect] name="+name);
+
+        setAvailability(false);
+
         AdminClient mServer = getMBeanServer();
         if (mServer == null) {
             return;
@@ -120,22 +101,23 @@ public class WebsphereServerCollector extends WebsphereCollector {
 
         setAvailability(true);
 
-        Stats stats =
-            (Stats)getStats(mServer, this.name);
+        if (this.name != null) {
+            Stats stats =(Stats) getStats(mServer, this.name);
 
-        if (stats == null) {
-            return;
-        }
-
-        if (isJVM) {
-            double total = getStatCount(stats, "HeapSize");
-            double used  = getStatCount(stats, "UsedMemory");
-            setValue("totalMemory", total);
-            setValue("usedMemory", used);
-            setValue("freeMemory", total-used);
-        }
-        else {
-            collectStatCount(stats, this.attrs);
+            if (stats != null) {
+                if (isJVM) {
+                    double total = getStatCount(stats, "HeapSize");
+                    double used  = getStatCount(stats, "UsedMemory");
+                    setValue("totalMemory", total);
+                    setValue("usedMemory", used);
+                    setValue("freeMemory", total-used);
+                }
+                else {
+                    collectStatCount(stats, this.attrs);
+                }
+            }else{
+                log.debug("no Stats");
+            }
         }
     }
 }

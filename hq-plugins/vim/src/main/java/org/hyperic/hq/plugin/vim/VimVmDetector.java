@@ -147,6 +147,9 @@ public class VimVmDetector
                     continue;
                 }
                 VirtualMachine vm = (VirtualMachine)vms[i];
+                if (vm.getConfig().isTemplate()) {
+                    continue; //filter out template VMs
+                }
 
                 try {
                     ServerResource server = discoverVM(vim, vm);

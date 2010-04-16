@@ -105,7 +105,7 @@
       </c:choose>
     </td>
     <td class="BlockLabel"><fmt:message key="resource.common.inventory.props.ModByLabel"/></td>
-    <td class="BlockContent"><c:out value="${modifierStr}" /></td>
+    <td class="BlockContent"><c:out value="${modifierStr}" escapeXml="false" /></td>
   </tr>
   <tr>
     <td colspan="4" class="BlockBottomLine"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>

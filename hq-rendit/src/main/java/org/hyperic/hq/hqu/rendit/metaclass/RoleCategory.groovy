@@ -53,4 +53,11 @@ class RoleCategory {
     static void remove(Role role, AuthzSubject user) {
         roleMan.removeRole(user, role.id)
     }
+    
+    /**
+    * Get the Resource Groups for a Role
+    */
+    static Collection getGroups(Role role, AuthzSubject user) {
+        roleMan.getResourceGroupsByRole(user, role)
+    }
 }

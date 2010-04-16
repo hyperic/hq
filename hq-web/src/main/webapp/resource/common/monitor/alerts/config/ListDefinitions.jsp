@@ -268,12 +268,13 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 <!-- only show new alert def link if user can see it -->
 <hq:userResourcePermissions debug="false" resource="${Resource}"/>
 <c:choose>
-        <c:when test="${canAlert}" >
-            <tiles:put name="listNewUrl" beanName="newAction"/> 
-        </c:when>
-        <c:otherwise>
-            <tiles:put name="deleteOnly" value="true"/>
-        </c:otherwise>
+       <c:when test="${canModify}" >
+ 	 		<tiles:put name="listNewUrl" beanName="newAction"/>
+ 	 		<tiles:put name="goButtonLink" value="javascript:setActiveInactive()"/>
+ 	 	</c:when>
+ 	 	<c:otherwise>
+ 	 		<tiles:put name="noButtons" value="true"/>
+ 	 	</c:otherwise>
 </c:choose>
   <tiles:put name="listItems" beanName="Definitions"/>
   <tiles:put name="listSize" beanName="Definitions" beanProperty="totalSize"/>
@@ -281,7 +282,6 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   <tiles:put name="pageSizeAction" beanName="psAction"/>
   <tiles:put name="defaultSortColumn" value="1"/>
   <tiles:put name="widgetInstanceName" beanName="widgetInstanceName"/>
-  <tiles:put name="goButtonLink" value="javascript:setActiveInactive()"/>
 </tiles:insert>
 
 <br>

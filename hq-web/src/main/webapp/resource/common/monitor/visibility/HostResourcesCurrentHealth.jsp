@@ -3,7 +3,6 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
-
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -111,17 +110,15 @@
     		</td>
     	</c:if>
 
-    	<td width="100%" class="ListHeader">
+    	<td class="ListHeader">
     		<fmt:message key="${tabKey}"/>
     	</td>
     
     	<c:if test="${not empty summaries}">
-    		<td width="20%" class="ListHeaderCheckbox">
+    		<td class="ListHeaderCheckbox">
     			<fmt:message key="resource.common.monitor.visibility.AVAILTH"/>
     		</td>
-    		<td class="ListHeaderInactive" width="6%">
-    			<html:img page="/images/spacer.gif" width="1" height="1" border="0"/>
-    		</td>
+    		<td class="ListHeaderInactive" width="6%">&nbsp;</td>
 		</c:if>
   	</tr>
 
@@ -141,10 +138,13 @@
     			</a>
     		</td>
     		<td class="ListCellCheckbox">
-      			<html:img page="/resource/Availability?eid=${summary.resourceTypeId}:${summary.resourceId}" width="12" height="12" alt="" border="0"/>
+    			<tiles:insert page="/resource/common/monitor/visibility/AvailIcon.jsp">
+        			<tiles:put name="availability" beanName="summary" beanProperty="availability" />
+    			</tiles:insert>
     		</td>
-    		<td class="ListCellCheckbox">
-      	    	<html:img page="/images/comment.gif" onmouseover="menuLayers.show('${summary.resourceTypeId}_${summary.resourceId}_menu', event)" onmouseout="menuLayers.hide()" border="0"/>
+    		<td class="ListCellCheckbox resourceCommentIcon"
+    		    onmouseover="menuLayers.show('<c:out value="${summary.resourceTypeId}" />_<c:out value="${summary.resourceId}" />_menu', event)" 
+    		    onmouseout="menuLayers.hide()">&nbsp;
 			</td>
   		</tr>
 	</c:forEach>

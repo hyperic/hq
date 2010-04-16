@@ -313,7 +313,7 @@
 		class="org.hyperic.hq.ui.action.resource.group.inventory.AddGroupResourcesFormPrepareAction" />
 	<bean name="/resource/group/inventory/AddGroupResources"
 		class="org.hyperic.hq.ui.action.resource.group.inventory.AddGroupResourcesAction" />
-	<bean name="/resource/group/inventory/RemoveApp"
+	<bean name="/resource/group/inventory/RemoveGroupResources"
 		class="org.hyperic.hq.ui.action.resource.group.inventory.RemoveAction" />
 	<bean name="/resource/group/monitor/visibility/GroupCurrentHealth"
 		class="org.hyperic.hq.ui.action.resource.common.monitor.visibility.CurrentHealthAction" />

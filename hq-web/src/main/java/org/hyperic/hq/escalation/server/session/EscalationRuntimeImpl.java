@@ -37,9 +37,16 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.events.ActionExecutionInfo;
+import org.hyperic.hq.events.AlertDefinitionInterface;
+import org.hyperic.hq.events.AlertInterface;
 import org.hyperic.hq.events.server.session.Action;
+import org.hyperic.hq.events.server.session.AlertDAO;
+import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
+import org.hyperic.hq.galerts.server.session.GalertEscalationAlertType;
+import org.hyperic.hq.galerts.server.session.GalertLogDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -75,7 +82,7 @@ import EDU.oswego.cs.dl.util.concurrent.Semaphore;
 public class EscalationRuntimeImpl implements EscalationRuntime {
 
     private final ThreadLocal _batchUnscheduleTxnListeners = new ThreadLocal();
-    private final Log _log = LogFactory.getLog(EscalationRuntime.class);
+   
     private final ClockDaemon _schedule = new ClockDaemon();
     private final Map _stateIdsToTasks = new HashMap();
     private final Map _esclEntityIdsToStateIds = new HashMap();
@@ -86,13 +93,17 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
     private final PooledExecutor _executor;
     private final EscalationStateDAO escalationStateDao;
     private AuthzSubjectManager authzSubjectManager;
+    private AlertDAO alertDAO;
     private final Log log = LogFactory.getLog(EscalationRuntime.class);
+    private GalertLogDAO galertLogDAO;
 
     @Autowired
     public EscalationRuntimeImpl(EscalationStateDAO escalationStateDao,
-                                 AuthzSubjectManager authzSubjectManager) {
+                                 AuthzSubjectManager authzSubjectManager, AlertDAO alertDAO, GalertLogDAO galertLogDAO) {
         this.escalationStateDao = escalationStateDao;
         this.authzSubjectManager = authzSubjectManager;
+        this.alertDAO = alertDAO;
+        this.galertLogDAO = galertLogDAO;
         _executor = new PooledExecutor(new LinkedQueue());
         _executor.setKeepAliveTime(-1); // Threads never die off
         _executor.createThreads(3); // # of threads to service requests
@@ -115,7 +126,7 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
             try {
                 _executor.execute(new EscalationRunner(_stateId));
             } catch (InterruptedException e) {
-                _log.warn("Interrupted while trying to execute state [" + _stateId + "]");
+                log.warn("Interrupted while trying to execute state [" + _stateId + "]");
             }
         }
     }
@@ -262,9 +273,9 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
 
             if (task != null) {
                 ClockDaemon.cancel(task);
-                _log.debug("Canceled state[" + stateId + "]");
+                log.debug("Canceled state[" + stateId + "]");
             } else {
-                _log.debug("Canceling state[" + stateId + "] but was " + "not found");
+                log.debug("Canceling state[" + stateId + "] but was " + "not found");
             }
         }
     }
@@ -397,9 +408,9 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
             if (task != null) {
                 // Previously scheduled. Unschedule
                 ClockDaemon.cancel(task);
-                _log.debug("Rescheduling state[" + stateId + "]");
+                log.debug("Rescheduling state[" + stateId + "]");
             } else {
-                _log.debug("Scheduling state[" + stateId + "]");
+                log.debug("Scheduling state[" + stateId + "]");
             }
 
             task = _schedule
@@ -408,6 +419,40 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
             _stateIdsToTasks.put(stateId, task);
             _esclEntityIdsToStateIds.put(new EscalatingEntityIdentifier(state), stateId);
         }
+    }
+    
+    private boolean escIsValid(EscalationState s) {
+        final boolean debug = log.isDebugEnabled();
+        EscalationAlertType alertType = s.getAlertType();
+        AlertInterface alert = null;
+        // HHQ-3499, need to make sure that the alertId that is pointed to by
+        // the escalation still exists
+        if (alertType instanceof GalertEscalationAlertType) {
+            alert = galertLogDAO.get(new Integer(s.getAlertId()));
+        } else if (alertType instanceof ClassicEscalationAlertType) {
+            alert = alertDAO.get(new Integer(s.getAlertId()));
+        } 
+        if (alert == null) {
+            if (debug) log.debug("Alert with id[" + s.getAlertId() + 
+                                 " and escalation type [" + s.getAlertType().getClass().getName() + 
+                                 "] was not found.");
+            return false;
+        }
+        AlertDefinitionInterface def = alert.getAlertDefinitionInterface();
+        if (def == null) {
+            if (debug) log.debug("AlertDef from alertid=" + s.getAlertId() + 
+                                 " was not found.");
+            endEscalation(s);
+            return false;
+        }
+        Resource r = def.getResource();
+        if (r == null || r.isInAsyncDeleteState()) {
+            if (debug) log.debug("Resource from alertid=" + s.getAlertId() + 
+                                 " was not found.");
+            endEscalation(s);
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -439,6 +484,11 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
     @Transactional
     public void endEscalation(EscalationState escalationState) {
         if (escalationState != null) {
+            // make sure we have the updated state to avoid StaleStateExceptions
+            escalationState = escalationStateDao.get(escalationState.getId());
+            if (escalationState == null) {
+                return;
+            }
             escalationStateDao.remove(escalationState);
             unscheduleEscalation(escalationState);
         }
@@ -465,15 +515,17 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
 
         // XXX -- Need to make sure the application is running before
         // we allow this to proceed
-        log.debug("Executing state[" + escalationState.getId() + "]");
+        final boolean debug = log.isDebugEnabled();
+        if (debug) log.debug("Executing state[" + escalationState.getId() + "]");
 
         if (actionIdx >= escalation.getActions().size()) {
             if (escalation.isRepeat() && escalation.getActions().size() > 0) {
                 actionIdx = 0; // Loop back
             } else {
-                log.debug("Reached the end of the escalation state[" + escalationState.getId() +
-                          "].  Ending it");
-
+                if(debug) {
+                    log.debug("Reached the end of the escalation state[" + escalationState.getId() +
+                    "].  Ending it");
+                }
                 endEscalation(escalationState);
 
                 return;
@@ -483,10 +535,20 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
         EscalationAction escalationAction = (EscalationAction) escalation.getActions().get(
             actionIdx);
         Action action = escalationAction.getAction();
-        Escalatable alert = getEscalatable(escalationState);
+        // TODO this needs to be looked at further.  Ideally, I should be able to
+        //      call getEscalatables and do a simple null check or catch an expected
+        //      HQ exception and not worry about checking for alert types explicitly
+        //      but after talking with folks about it, sounds like it would require
+        //      touching a lot more plumbing code...
+        if (!escIsValid(escalationState)) {
+            if (debug) log.debug("alert cannot be escalated, since it is not valid.");
+            endEscalation(escalationState);
+            return;
+        }
+        Escalatable esc = getEscalatable(escalationState);
 
         // HQ-1348: End escalation if alert is already fixed
-        if (alert.getAlertInfo().isFixed()) {
+        if (esc.getAlertInfo().isFixed()) {
             endEscalation(escalationState);
 
             return;
@@ -499,8 +561,10 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
         long nextTime = System.currentTimeMillis() +
                         Math.max(offset, escalationAction.getWaitTime());
 
-        log.debug("Moving onto next state of escalation, but waiting for " +
-                  escalationAction.getWaitTime() + " ms");
+        if(debug) {
+            log.debug("Moving onto next state of escalation, but waiting for " + escalationAction.getWaitTime() + " ms");
+        }
+                  
 
         escalationState.setNextAction(actionIdx + 1);
         escalationState.setNextActionTime(nextTime);
@@ -509,13 +573,14 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
 
         try {
             EscalationAlertType type = escalationState.getAlertType();
+            // HHQ-3784 to avoid deadlocks use the this table order when updating/inserting:
+            // 1) EAM_ESCALATION_STATE, 2) EAM_ALERT, 3) EAM_ALERT_ACTION_LOG
             AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
-            ActionExecutionInfo execInfo = new ActionExecutionInfo(alert.getShortReason(), alert
-                .getLongReason(), alert.getAuxLogs());
-            String detail = action.executeAction(alert.getAlertInfo(), execInfo);
+            ActionExecutionInfo execInfo =  new ActionExecutionInfo(esc.getShortReason(), esc.getLongReason(), esc.getAuxLogs());
+            String detail = action.executeAction(esc.getAlertInfo(), execInfo);
 
-            type.changeAlertState(alert, overlord, EscalationStateChange.ESCALATED);
-            type.logActionDetails(alert, action, detail, null);
+            type.changeAlertState(esc, overlord, EscalationStateChange.ESCALATED);
+            type.logActionDetails(esc, action, detail, null);
         } catch (Exception e) {
             log.error("Unable to execute action [" + action.getClassName() +
                       "] for escalation definition [" + escalationState.getEscalation().getName() +

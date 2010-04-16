@@ -24,7 +24,10 @@
  */
 package org.hyperic.hq.events.server.session;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
@@ -32,8 +35,11 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hyperic.hibernate.PageInfo;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.EdgePermCheck;
+import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,11 +50,13 @@ public class AlertDAO
     extends HibernateDAO<Alert> {
 
     private AlertActionLogDAO alertActionLogDAO;
+    private PermissionManager permissionManager;
 
     @Autowired
-    public AlertDAO(SessionFactory f, AlertActionLogDAO alertActionLogDAO) {
+    public AlertDAO(SessionFactory f, AlertActionLogDAO alertActionLogDAO, PermissionManager permissionManager) {
         super(Alert.class, f);
         this.alertActionLogDAO = alertActionLogDAO;
+        this.permissionManager = permissionManager;
     }
 
     int deleteByIds(Integer[] ids) {
@@ -111,11 +119,9 @@ public class AlertDAO
     List<Alert> findByCreateTimeAndPriority(Integer subj, long begin, long end, int priority,
                                             boolean inEsc, boolean notFixed, Integer groupId,
                                             Integer alertDefId, PageInfo pageInfo) {
-        String[] ops = new String[] { AuthzConstants.platformOpManageAlerts,
-                                     AuthzConstants.serverOpManageAlerts,
-                                     AuthzConstants.serviceOpManageAlerts };
+       
         AlertSortField sort = (AlertSortField) pageInfo.getSort();
-        Query q;
+       
 
         String sql = PermissionManagerFactory.getInstance().getAlertsHQL(inEsc, notFixed, groupId,
             alertDefId, false) +
@@ -129,14 +135,14 @@ public class AlertDAO
             sql += ", " + AlertSortField.DATE.getSortString("a", "d", "r") + " DESC";
         }
 
-        q = getSession().createQuery(sql).setLong("begin", begin).setLong("end", end).setInteger(
+        Query q = getSession().createQuery(sql).setLong("begin", begin).setLong("end", end).setInteger(
             "priority", priority);
         // HHQ-2781: acknowledgeable state is stale from query cache
         // .setCacheable(true)
         // .setCacheRegion("Alert.findByCreateTime");
 
         if (sql.indexOf("subj") > 0) {
-            q.setInteger("subj", subj.intValue()).setParameterList("ops", ops);
+            q.setInteger("subj", subj.intValue()).setParameterList("ops", AuthzConstants.VIEW_ALERTS_OPS);
         }
 
         return pageInfo.pageResults(q).list();
@@ -145,19 +151,15 @@ public class AlertDAO
     Number countByCreateTimeAndPriority(Integer subj, long begin, long end, int priority,
                                          boolean inEsc, boolean notFixed, Integer groupId,
                                          Integer alertDefId) {
-        String[] ops = new String[] { AuthzConstants.platformOpManageAlerts,
-                                     AuthzConstants.serverOpManageAlerts,
-                                     AuthzConstants.serviceOpManageAlerts };
-        Query q;
-
+      
         String sql = PermissionManagerFactory.getInstance().getAlertsHQL(inEsc, notFixed, groupId,
             alertDefId, true);
 
-        q = getSession().createQuery(sql).setLong("begin", begin).setLong("end", end).setInteger(
+        Query q = getSession().createQuery(sql).setLong("begin", begin).setLong("end", end).setInteger(
             "priority", priority);
 
         if (sql.indexOf("subj") > 0) {
-            q.setInteger("subj", subj.intValue()).setParameterList("ops", ops);
+            q.setInteger("subj", subj.intValue()).setParameterList("ops", AuthzConstants.VIEW_ALERTS_OPS);
         }
 
         return (Number) q.uniqueResult();
@@ -210,7 +212,113 @@ public class AlertDAO
             return null;
         }
     }
+    
+    public Alert findLastByDefinition(AlertDefinition def) {
+        try {
+            return (Alert) createCriteria()
+                .add(Restrictions.eq("alertDefinition", def))
+                .addOrder(Order.desc("ctime"))
+                .setMaxResults(1)
+                .uniqueResult();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+    
+    /**
+     * Return all last unfixed alerts
+     * 
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public Map<Integer,Alert> findAllLastUnfixed() {
+        String hql = 
+            new StringBuilder()
+                    .append("select a ")
+                    .append("from Alert a ")
+                    .append("join a.alertDefinition ad ")
+                    .append("where ad.deleted = false ")
+                    .append("and a.fixed = false ")
+                    .append("order by a.ctime ")
+                    .toString();
+                
+        List<Alert> alerts = createQuery(hql).list();
+                
+        Map<Integer,Alert> lastAlerts = new HashMap<Integer,Alert>(alerts.size());
+        for (Alert a : alerts ) {
+            // since it is ordered by ctime in ascending order, the
+            // last alert will eventually be put into the map
+            lastAlerts.put(a.getAlertDefinition().getId(), a);
+        }
+        
+        return lastAlerts;
+    }
+    
+        /**
+         * Return all last fixed alerts for the given resource
+         * 
+         * @param subject The HQ user
+         * @param r The root resource
+         * @param fixed Boolean to indicate whether to get fixed or unfixed alerts
+         * @return
+         */
+        @SuppressWarnings("unchecked")
+        public Map<Integer,Alert> findLastByResource(AuthzSubject subject,
+                                      Resource r,
+                                      boolean includeDescendants,
+                                      boolean fixed) {
+            EdgePermCheck wherePermCheck =
+                permissionManager.makePermCheckHql("rez", includeDescendants);
+                    
+            String hql = 
+                new StringBuilder()
+                        .append("select a ")
+                        .append("from Alert a ")
+                        .append("join a.alertDefinition ad ")
+                        .append("join ad.resource rez ")
+                        .append(wherePermCheck.toString())
+                        .append("and ad.deleted = false ")
+                        .append("and a.fixed = :fixed ")
+                        .append("order by a.ctime ")
+                        .toString();
+            
+            Query q = createQuery(hql).setBoolean("fixed", fixed);
+            
+            List<Alert> alerts = wherePermCheck
+                            .addQueryParameters(q, subject, r, 0, 
+                                    Arrays.asList(AuthzConstants.VIEW_ALERTS_OPS))
+                            .list();
+                    
+            Map<Integer,Alert> lastAlerts = new HashMap<Integer,Alert>(alerts.size());
+            for (Alert a  : alerts ) {
+                // since it is ordered by ctime in ascending order, the
+                // last alert will eventually be put into the map
+                lastAlerts.put(a.getAlertDefinition().getId(), a);
+            }
+     
+            return lastAlerts;
+        }
 
+        
+        /**
+         * @param {@link List} of {@link AlertDefinition}s
+         * Deletes all {@link Alert}s associated with the {@link AlertDefinition}s
+         */
+        int deleteByAlertDefinitions(List<AlertDefinition> alertDefs) {
+            String sql = "DELETE FROM Alert WHERE alertDefinition in (:alertDefs)";
+            int rtn = 0;
+            for (int i=0; i<alertDefs.size(); i+=BATCH_SIZE) {
+                int end = Math.min(i+BATCH_SIZE, alertDefs.size());
+                rtn += getSession().createQuery(sql)
+                    .setParameterList("alertDefs", alertDefs.subList(i, end))
+                   .executeUpdate();
+            }
+            return rtn;
+        }
+         
+        /**
+         * Deletes all {@link Alert}s associated with the {@link AlertDefinition}
+         */
     int deleteByAlertDefinition(AlertDefinition def) {
         String sql = "DELETE FROM Alert WHERE alertDefinition = :alertDef";
 
