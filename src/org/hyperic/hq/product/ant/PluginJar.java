@@ -207,30 +207,44 @@ public class PluginJar extends Jar {
         try {
             addConfiguredManifest(manifest);
             manifest.getMainSection().addConfiguredAttribute(new Attribute("Build-Owner", getProperty("user.name",
-                                                                                                   "Unknown")));
+                                                                                                      "Unknown")));
             String hostName = "Unknown";
             try {
                 hostName = InetAddress.getLocalHost().getHostName();
             } catch (UnknownHostException e) {
-                //ignore
+                // ignore
             }
             manifest.getMainSection().addConfiguredAttribute(new Attribute("Build-Host", hostName));
-            
+
             if (getProperty("release.comment", null) != null) {
                 manifest.getMainSection()
                         .addConfiguredAttribute(new Attribute("Build-Type", getProperty("release.comment", "Unknown")));
             }
             manifest.getMainSection().addConfiguredAttribute(new Attribute("Build-Date", new Date().toString()));
-            manifest.getMainSection().addConfiguredAttribute(new Attribute("Specification-Title", "HQU Plugin"));
-            manifest.getMainSection().addConfiguredAttribute(new Attribute("Specification-Vendor", "VMware Inc."));
-            manifest.getMainSection().addConfiguredAttribute(new Attribute("Specification-Version",
-                                                                           getProperty("version", "Unknown") + "-" +
-                                                                               getProperty("build", "Unknown")));
+            manifest.getMainSection().addConfiguredAttribute(new Attribute("Specification-Title",
+                                                                           getProperty("specification.title",
+                                                                                       "HQ Plugin")));
+            manifest.getMainSection().addConfiguredAttribute(new Attribute("Specification-Vendor",
+                                                                           getProperty("specification.vendor",
+                                                                                       "VMware Inc.")));
+            manifest.getMainSection()
+                    .addConfiguredAttribute(new Attribute("Specification-Version",
+                                                          getProperty("specification.version", getProperty("version",
+                                                                                                           "Unknown") +
+                                                                                               "-" +
+                                                                                               getProperty("build",
+                                                                                                           "Unknown"))));
             manifest.getMainSection().addConfiguredAttribute(new Attribute("Implementation-Title", getName()));
-            manifest.getMainSection().addConfiguredAttribute(new Attribute("Implementation-Version",
-                                                                           getProperty("version", "Unknown") + "-" +
-                                                                           getProperty("build", "Unknown")));
-            manifest.getMainSection().addConfiguredAttribute(new Attribute("Implementation-Vendor", "VMware Inc."));
+            manifest.getMainSection().addConfiguredAttribute(new Attribute("Implementation-Vendor",
+                                                                           getProperty("implementation.vendor",
+                                                                                       "VMware Inc.")));
+            manifest.getMainSection()
+                    .addConfiguredAttribute(new Attribute("Implementation-Version",
+                                                          getProperty("implementation.version", getProperty("version",
+                                                                                                           "Unknown") +
+                                                                                               "-" +
+                                                                                               getProperty("build",
+                                                                                                           "Unknown"))));
 
             String mainClass = getMainClass();
             if (mainClass != null) {

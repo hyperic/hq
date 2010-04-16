@@ -30,6 +30,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.net.JarURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -40,6 +43,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.Set;
+import java.util.jar.Attributes;
 
 import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.common.LicenseManager;
@@ -881,6 +885,29 @@ public class ProductPluginManager extends PluginManager {
             addClassPath(loader, path);
         }
     }
+    
+    private void logPluginManifest(String jarName) {
+        if (log.isDebugEnabled()) {
+            URL url;
+            try {
+                url = new URL("jar", "", "file:" + jarName + "!/");
+                JarURLConnection jarConn = (JarURLConnection) url.openConnection();
+                Map attributeMap = jarConn.getManifest().getMainAttributes();
+                if (!attributeMap.isEmpty()) {
+                    StringBuilder manifestLog = new StringBuilder("\n--- Manifest entries for: " + url.toString() +
+                                                                  " ---\n");
+                    Iterator iter = attributeMap.entrySet().iterator();
+                    while (iter.hasNext()) {
+                        Map.Entry entry = (Map.Entry) iter.next();
+                        manifestLog.append(entry.getKey() + " - " + entry.getValue() + "\n");
+                    }
+                    log.debug(manifestLog.toString());
+                }
+            } catch (Exception e) {
+                log.debug("Manifest retrieval had an exception (continuing): " + e.getMessage());
+            }
+        }
+    }
 
     /**
      * Load a product plugin jar.
@@ -909,7 +936,8 @@ public class ProductPluginManager extends PluginManager {
             PluginLoader loader =
                 PluginLoader.create(jarName,
                                     this.getClass().getClassLoader());
-
+          
+            logPluginManifest(jarName);
             PluginLoader.setClassLoader(loader);
             ClassLoader dataLoader;
             if (resourceLoader != null) {
