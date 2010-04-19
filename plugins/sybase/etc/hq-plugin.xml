@@ -29,31 +29,20 @@
   USA.
  -->
 
-<plugin package="org.hyperic.hq.plugin.sybase" class="SysbaseProductPlugin">
-  <classpath>
+<plugin package="org.hyperic.hq.plugin.sybase" class="SybaseProductPlugin">
+  <!--classpath>
     <include name="pdk/lib/jdbc/jconn3.jar"/>
     <include name="pdk/lib/jdbc/jconn4.jar"/>
     <include name="pdk/lib/jdbc/jTDS3.jar"/>
     <include name="pdk/lib/jdbc/jTDS4.jar"/>
-  </classpath>
+  </classpath-->
 
   <!-- we use a dummy jmx object name -->
   <filter name="domain" value="sybase"/>
 
   <!-- appended to each template by MeasurementInfoXML -->
   <property name="template-config"
-            value="jdbcUrl=%jdbcUrl%,jdbcUser=%jdbcUser%,jdbcPassword=%jdbcPassword%"/>
-
-  <filter name="template"
-          value="${domain}:Type=Server:${alias}"/>
-  <metrics name="ServerMetrics">
-    <metric name="Availability"
-            category="AVAILABILITY"
-            indicator="true"
-            units="percentage"
-            collectionType="dynamic"/>
-
-  </metrics>
+            value="interval=%interval%,jdbcUrl=%jdbcUrl%,jdbcUser=%jdbcUser%,jdbcPassword=%jdbcPassword%"/>
 
   <filter name="template"
           value="${domain}:Type=Service,instance=%instance%:${alias}"/>
@@ -157,9 +146,9 @@
             collectionType="dynamic"/>
   </metrics>
 
-  <filter name="template">
-        sbSysmon:interval=%interval%,jdbcUrl=%jdbcUrl%,jdbcUser=%jdbcUser%,jdbcPassword=%jdbcPassword%:${alias}
-  </filter>
+  <filter name="template"
+          value="${domain}:Type=Server:${alias}"/>
+
   <metrics name="SybaseAvailability">
     <metric name="Availability"
             category="AVAILABILITY"
@@ -168,6 +157,9 @@
             collectionType="dynamic"/>
   </metrics>
 
+  <filter name="template">
+        sbSysmon:interval=%interval%,jdbcUrl=%jdbcUrl%,jdbcUser=%jdbcUser%,jdbcPassword=%jdbcPassword%:${alias}
+  </filter>
   <metrics name="sp_sysmon">
     <metric name="Deadlocks"
             category="THROUGHPUT"
@@ -217,7 +209,6 @@
     <plugin type="autoinventory"
             class="SybaseServerDetector"/>
     <metrics include="SybaseAvailability"/>
-    <metrics include="ServerMetrics"/>
     <metrics include="sp_sysmon"/>
 
     <properties>
@@ -241,9 +232,6 @@
       <option name="interval"
               description="sp_sysmon interval"
               default="00:05:00"/>
-      <option name="timeout"
-              description="Timeout for sp_sysmon, must be greater than the interval"
-              default="3500"/>
     </config>
 
     <service name="sp_sysmonEngine">

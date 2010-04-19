@@ -7,6 +7,7 @@ package org.hyperic.hq.plugin.sybase;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.util.Arrays;
@@ -29,6 +30,7 @@ import org.hyperic.util.jdbc.DBUtil;
  */
 public class SybaseSysmonCollector extends Collector {
 
+    public static final String INTERVAL = "interval";
     static Log trace = LogFactory.getLog("trace." + SybaseSysmonCollector.class);
     static Log log = LogFactory.getLog(SybaseSysmonCollector.class);
     private CallableStatement stmt;
@@ -37,32 +39,49 @@ public class SybaseSysmonCollector extends Collector {
     protected void init() throws PluginException {
         Properties props = getProperties();
 
-        String url = props.getProperty(JDBCMeasurementPlugin.PROP_URL, ""),
-                user = props.getProperty(JDBCMeasurementPlugin.PROP_USER, ""),
-                pass = props.getProperty(JDBCMeasurementPlugin.PROP_PASSWORD, "");
-        
+        Connection c = null;
+        ResultSet rs = null;
+        CallableStatement st = null;
+        String sa_role = SybaseProductPlugin.getSaRole();
+
         try {
-            conn = createConnection(url, user, pass);
-        } catch(SQLException e) {
-            throw new PluginException("Create connection failed:" + e.getMessage(), e);
+            c = createConnection(props);
+            st = c.prepareCall("{call sp_displayroles}");
+            rs = st.executeQuery();
+            boolean roleOK = false;
+            while (rs.next() && !roleOK) {
+                roleOK = rs.getString(1).equals(sa_role);
+            }
+            if (!roleOK) {
+                throw new PluginException("Could not connect using information provided: The user must have System Administrator ('" + sa_role + "') role");
+            }
+        } catch (SQLException e) {
+            throw new PluginException("Could not connect using information provided", e);
+        } finally {
+                DBUtil.closeJDBCObjects(log, c, st, rs);
         }
-        
+
+        String interval = props.getProperty(SybaseSysmonCollector.INTERVAL);
+        Pattern p = Pattern.compile("^\\d\\d:\\d\\d:\\d\\d$");
+        Matcher m = p.matcher(interval);
+        if (!m.matches()) {
+            String msg = "Configuration failed: bad INTERVAL format ##:##:## (" + interval + ")";
+            throw new PluginException(msg);
+        }
+
         super.init();
     }
 
     public void collect() {
-
         Properties props = getProperties();
+        log.debug("[collect] props=" + props);
 
-        String url = props.getProperty(JDBCMeasurementPlugin.PROP_URL, ""),
-                user = props.getProperty(JDBCMeasurementPlugin.PROP_USER, ""),
-                pass = props.getProperty(JDBCMeasurementPlugin.PROP_PASSWORD, "");
         try {
             setAvailability(Metric.AVAIL_DOWN);
             if (conn == null) {
-                conn = createConnection(url, user, pass);
+                conn = createConnection(props);
             }
-            stmt = conn.prepareCall("{call sp_sysmon '" + props.getProperty("interval") + "'}");
+            stmt = conn.prepareCall("{call sp_sysmon '" + props.getProperty(INTERVAL) + "'}");
             stmt.executeUpdate();
 
             StringBuffer response = new StringBuffer();
@@ -79,8 +98,10 @@ public class SybaseSysmonCollector extends Collector {
             Matcher m = pat.matcher(res);
             while (m.find()) {
                 final String cacheName = m.group(1).trim().replaceAll(" ", "_");
-                trace.debug("->'" + cacheName + "'");
-                trace.debug("->" + m.start());
+                if (trace.isDebugEnabled()) {
+                    trace.debug("->'" + cacheName + "'");
+                    trace.debug("->" + m.start());
+                }
                 String sec = res.substring(m.start());
                 setValue(cacheName + ".Availability", Metric.AVAIL_UP);
                 setValue(cacheName + ".CacheHitsRatio", get(sec, "Cache Hits", 5) / 100);
@@ -130,11 +151,13 @@ public class SybaseSysmonCollector extends Collector {
             Matcher lm = pat.matcher(txt);
             if (lm.find()) {
                 String line = lm.group();
-                log.debug(line);
                 line = line.trim().replaceAll(" +", " ");
                 vals = line.split(" ");
-                log.debug(line);
-                log.debug(Arrays.asList(vals));
+                if (trace.isDebugEnabled()) {
+                    trace.debug(line);
+                    trace.debug(line);
+                    trace.debug(Arrays.asList(vals));
+                }
                 if (!vals[index].equals("n/a")) {
                     res = Double.parseDouble(vals[index]);
                 } else {
@@ -143,15 +166,17 @@ public class SybaseSysmonCollector extends Collector {
             }
         } catch (ArrayIndexOutOfBoundsException e) {
             res = Double.NaN;
-            log.debug("vals=> '" + Arrays.asList(vals) + "' pro='" + pro + "' index='" + index + "'");
+            trace.debug("vals=> '" + Arrays.asList(vals) + "' pro='" + pro + "' index='" + index + "'");
         }
         return res;
     }
 
-    protected Connection createConnection(String url, String user, String password) throws SQLException {
-        String pass = (password == null) ? "" : password;
+    protected Connection createConnection(Properties p) throws SQLException {
+        String url = p.getProperty(JDBCMeasurementPlugin.PROP_URL, "");
+        String user = p.getProperty(JDBCMeasurementPlugin.PROP_USER, "");
+        String pass = p.getProperty(JDBCMeasurementPlugin.PROP_PASSWORD, "");
         pass = (pass.matches("^\\s*$")) ? "" : pass;
-        java.util.Properties props = new java.util.Properties();
+        Properties props = new java.util.Properties();
         props.put("CHARSET_CONVERTER_CLASS", "com.sybase.jdbc3.utils.TruncationConverter");
         props.put("user", user);
         props.put("password", pass);

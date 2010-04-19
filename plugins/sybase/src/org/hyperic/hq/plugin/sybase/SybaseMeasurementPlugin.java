@@ -35,8 +35,9 @@ import java.sql.SQLException;
 import java.sql.ResultSetMetaData;
 
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
-import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.JDBCMeasurementPlugin;
 import org.hyperic.hq.product.Metric;
 
@@ -53,7 +54,7 @@ import org.hyperic.hq.product.PluginException;
 public class SybaseMeasurementPlugin 
     extends JDBCMeasurementPlugin
 {
-    private final Log _log = getLog();
+    private final Log log = getLog();
     private static final String JDBC_DRIVER = 
         "com.sybase.jdbc3.jdbc.SybDriver";
 
@@ -289,6 +290,14 @@ public class SybaseMeasurementPlugin
         try {
             // do not close cached connection
             conn = getCachedConnection(url, user, pass);
+        } catch (SQLException e) {
+            removeCachedConnection(url, user, pass);
+            DBUtil.closeConnection("[getValue]", conn);
+            String msg = "Commection failed for '" + alias + "': " + e.getMessage();
+            throw new MetricNotFoundException(msg, e);
+        }
+
+        try {
             if (objectName.indexOf(TYPE_SP_MONITOR_CONFIG) != -1) {
                 res = getSP_MonitorConfigValue(metric, alias, conn);
             } else if (objectName.indexOf(TYPE_STORAGE) != -1) {
@@ -299,7 +308,7 @@ public class SybaseMeasurementPlugin
         } catch (SQLException e) {
             removeCachedConnection(url, user, pass);
             DBUtil.closeConnection(null, conn);
-            String msg = "Query failed for " + alias + ": " + e.getMessage();
+            String msg = "Query failed for '" + alias + "': " + e.getMessage();
             if (metric.isAvail()) {
                 res = new MetricValue(Metric.AVAIL_DOWN);
             } else {
@@ -309,7 +318,9 @@ public class SybaseMeasurementPlugin
         if (res == null) {
             throw new MetricNotFoundException("cannot find metric " + metric);
         }
-        _log.debug("[getValue] alias='"+alias+"' res='"+res+"'");
+        if (log.isDebugEnabled()) {
+            log.debug("[getValue] alias='" + alias + "' res='" + res + "' metric="+metric);
+        }
         return res;
     }
 
@@ -326,10 +337,10 @@ public class SybaseMeasurementPlugin
             res=Metric.AVAIL_UP;
         }
         catch (SQLException e) {
-            _log.debug("Query failed for Availability "+e.getMessage(),e);
+            log.debug("Query failed for Availability "+e.getMessage(),e);
         }
         finally {
-            DBUtil.closeJDBCObjects(_log, null, stmt, rs);
+            DBUtil.closeJDBCObjects(log, null, stmt, rs);
         }
         return new MetricValue(res, System.currentTimeMillis());
     }
@@ -377,7 +388,7 @@ public class SybaseMeasurementPlugin
         } finally {
             if(stmt!=null)
                 stmt.execute("use master"); // XXX why?
-            DBUtil.closeJDBCObjects(_log, null, stmt, rs);
+            DBUtil.closeJDBCObjects(log, null, stmt, rs);
         }
         return res;
     }
@@ -458,9 +469,9 @@ public class SybaseMeasurementPlugin
                 res = Metric.AVAIL_UP;
             }
         } catch (SQLException e) {
-            _log.debug("[getAvail] configOpt='" + configOpt + "' -> " + e.getMessage());
+            log.debug("[getAvail] configOpt='" + configOpt + "' -> " + e.getMessage());
         } finally {
-            DBUtil.closeJDBCObjects(_log, null, stmt, rs);
+            DBUtil.closeJDBCObjects(log, null, stmt, rs);
         }
         return res;
     }
@@ -495,7 +506,7 @@ public class SybaseMeasurementPlugin
             }
         }
         finally {
-            DBUtil.closeJDBCObjects(_log, null, stmt, rs);
+            DBUtil.closeJDBCObjects(log, null, stmt, rs);
         }
         throw new SQLException();
     }
@@ -526,7 +537,7 @@ public class SybaseMeasurementPlugin
         } catch (SQLException e) {
             throw new MetricUnreachableException(e.getMessage(), e);
         } finally {
-            DBUtil.closeJDBCObjects(_log, null, stmt, rs);
+            DBUtil.closeJDBCObjects(log, null, stmt, rs);
         }
     }
 }
