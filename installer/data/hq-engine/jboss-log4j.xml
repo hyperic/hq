@@ -94,6 +94,35 @@
     <priority value="OFF"/>
   </category>
 
+  <!-- Turn off useless error messages, HHQ-3920 -->
+  <category name="org.hibernate.cache.ReadWriteCache">
+    <priority value="OFF"/>
+  </category>
+
+  <!-- To debug availability issues change the following from INFO to DEBUG -->
+  <category name="org.hyperic.hq.measurement.server.mbean.AvailabilityCheckService">
+    <priority value="INFO"/>
+  </category>
+  <category name="org.hyperic.hq.measurement.server.session.ReportProcessorEJBImpl">
+    <priority value="INFO"/>
+  </category>
+
+  <!-- To debug agent scheduling issues change the following from INFO to DEBUG -->
+  <category name="org.hyperic.hq.measurement.server.session.MeasurementProcessorEJBImpl">
+    <priority value="INFO"/>
+  </category>
+  <category name="org.hyperic.hq.measurement.server.session.AgentScheduleSynchronizer">
+    <priority value="INFO"/>
+  </category>
+
+  <!-- To debug autoinventory issues change the following from INFO to DEBUG -->
+  <category name="org.hyperic.hq.autoinventory.server.session.AutoinventoryManagerEJBImpl">
+    <priority value="INFO"/>
+  </category>
+  <category name="org.hyperic.hq.autoinventory.server.session.ServiceMerger">
+    <priority value="INFO"/>
+  </category>
+
   <!-- Subsystem categories. Uncomment individual subsystems to see debug
        messages. -->
   <!--
