@@ -10,7 +10,6 @@ import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import org.hibernate.ObjectNotFoundException;
@@ -19,7 +18,6 @@ import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.ServerType;
-import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AgentManager;
@@ -43,7 +41,6 @@ import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
-import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.authz.shared.RoleManager;
 import org.hyperic.hq.authz.shared.RoleValue;
 import org.hyperic.hq.common.ApplicationException;
@@ -109,9 +106,6 @@ public class AlertManagerTest {
     private ResourceGroupManager resourceGroupManager;
 
     @Autowired
-    private ResourceManager resourceManager;
-
-    @Autowired
     private AgentManager agentManager;
 
     @Autowired
@@ -134,17 +128,7 @@ public class AlertManagerTest {
 
     private Platform testPlatform;
 
-    private Server testServer;
-
-    private Service testService;
-
     private ResourceGroup resGrp;
-
-    // private Alert testPlatformAlert;
-
-    // private Alert testServerAlert;
-
-    // private Alert testServiceAlert;
 
     private List<AuthzSubject> testUsers = new ArrayList<AuthzSubject>();
 
@@ -160,6 +144,7 @@ public class AlertManagerTest {
         return platformManager.createPlatform(authzSubjectManager.getOverlordPojo(), aiPlatform);
     }
 
+ 
     private Server createServer(Platform platform, ServerType serverType)
         throws PlatformNotFoundException, AppdefDuplicateNameException, ValidationException,
         PermissionException, NotFoundException {
@@ -168,6 +153,7 @@ public class AlertManagerTest {
             serverType.getId(), server);
     }
 
+   
     private ServerType createServerType(String serverName, String serverVersion,
                                         String[] validPlatformTypes, String plugin)
         throws NotFoundException {
@@ -180,6 +166,7 @@ public class AlertManagerTest {
         return serverManager.createServerType(serverTypeInfo, plugin);
     }
 
+  
     private ServiceType createServiceType(String serviceTypeName, String plugin,
                                           ServerType serverType) throws NotFoundException {
         ServiceTypeInfo sinfo = new ServiceTypeInfo();
@@ -211,52 +198,15 @@ public class AlertManagerTest {
         ServerType testServerType = createServerType("Tomcat", "6.0", new String[] { "Linux" },
             "Test Server Plugin");
         // Create test server
-        this.testServer = createServer(testPlatform, testServerType);
+        Server testServer = createServer(testPlatform, testServerType);
         // Create ServiceType
         ServiceType serviceType = createServiceType("Spring JDBC Template", "Test Server Plugin",
             testServerType);
         // Create test service
-        this.testService = serviceManager.createService(authzSubjectManager.getOverlordPojo(),
+        serviceManager.createService(authzSubjectManager.getOverlordPojo(),
             testServer.getId(), serviceType.getId(), "leela.local jdbcTemplate",
             "Spring JDBC Template", "my computer");
         return testPlatform;
-    }
-
-    private void createSubjectsAndRoles() throws ApplicationException, PermissionException {
-        AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
-
-        // Full permission includes create, delete, view & modify
-        AuthzSubject platformFull = authzSubjectManager.createSubject(overlord,
-            "platformFullPermission", true, "", "", "test@test.com", "first", "last", "", "", true);
-        AuthzSubject serverFull = authzSubjectManager.createSubject(overlord,
-            "serverFullPermission", true, "", "", "test@test.com", "first", "last", "", "", true);
-        AuthzSubject serviceFull = authzSubjectManager.createSubject(overlord,
-            "serviceFullPermission", true, "", "", "test@test.com", "first", "last", "", "", true);
-
-        // ReadOnly = view only
-        AuthzSubject platformReadOnly = authzSubjectManager.createSubject(overlord,
-            "platformReadOnly", true, "", "", "test@test.com", "first", "last", "", "", true);
-        AuthzSubject serverReadOnly = authzSubjectManager.createSubject(overlord, "serverReadOnly",
-            true, "", "", "test@test.com", "first", "last", "", "", true);
-        AuthzSubject serviceReadOnly = authzSubjectManager.createSubject(overlord,
-            "serviceReadOnly", true, "", "", "test@test.com", "first", "last", "", "", true);
-
-        // ReadWrite is view+modify
-        AuthzSubject platformReadWrite = authzSubjectManager.createSubject(overlord,
-            "platformReadWrite", true, "", "", "test@test.com", "first", "last", "", "", true);
-        AuthzSubject serverReadWrite = authzSubjectManager.createSubject(overlord,
-            "serverReadWrite", true, "", "", "test@test.com", "first", "last", "", "", true);
-        AuthzSubject serviceReadWrite = authzSubjectManager.createSubject(overlord,
-            "serviceReadWrite", true, "", "", "test@test.com", "first", "last", "", "", true);
-
-        // No permission
-        AuthzSubject platformNone = authzSubjectManager.createSubject(overlord,
-            "platformNoPermission", true, "", "", "test@test.com", "first", "last", "", "", true);
-        AuthzSubject serverNone = authzSubjectManager.createSubject(overlord, "serverNoPermission",
-            true, "", "", "test@test.com", "first", "last", "", "", true);
-        AuthzSubject serviceNone = authzSubjectManager.createSubject(overlord,
-            "serviceNoPermission", true, "", "", "test@test.com", "first", "last", "", "", true);
-
     }
 
     private List<Operation> getMappedOperations(String[] operationNames) {
@@ -361,7 +311,7 @@ public class AlertManagerTest {
         ResourceGroupCreateInfo gCInfo = new ResourceGroupCreateInfo("AllResourcesGroup", "",
             AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP, null, "", 0, false, false);
         ResourceGroup resGrp = resourceGroupManager.createResourceGroup(overlord, gCInfo,
-            Collections.EMPTY_LIST, resources);
+           new ArrayList<Role>(0), resources);
         return resGrp;
     }
 
@@ -381,27 +331,6 @@ public class AlertManagerTest {
         this.testServiceAlertDef = createAlertDefinition(serviceAppDefId,
             AppdefEntityConstants.APPDEF_TYPE_SERVICE, "Service Down");
         this.testServiceAlertDef.setPriority(1);
-    }
-
-    /*
-     * private void createResourceAlerts() { this.testPlatformAlert =
-     * alertManager.createAlert(this.testPlatformAlertDef, System
-     * .currentTimeMillis()); this.testServerAlert =
-     * alertManager.createAlert(this.testServerAlertDef, System
-     * .currentTimeMillis()); this.testServiceAlert =
-     * alertManager.createAlert(this.testServiceAlertDef, System
-     * .currentTimeMillis()); }
-     */
-
-    private AuthzSubject getAuthUser(String nameToken) {
-        // Return this if there are no matching
-        AuthzSubject authUser = authzSubjectManager.getOverlordPojo();
-        for (AuthzSubject user : this.testUsers) {
-            if (user.getName().equalsIgnoreCase(nameToken)) {
-                authUser = user;
-            }
-        }
-        return authUser;
     }
 
     @Before
@@ -643,8 +572,8 @@ public class AlertManagerTest {
     @Test
     public void testFindLastUnfixedByDefinition() {
         long ctime = System.currentTimeMillis();
-        Alert testPlatformAlert1 = alertManager.createAlert(this.testPlatformAlertDef, ctime);
-        Alert testPlatformAlert2 = alertManager
+        alertManager.createAlert(this.testPlatformAlertDef, ctime);
+        alertManager
             .createAlert(this.testPlatformAlertDef, ctime + 999l);
         Alert testPlatformAlert3 = alertManager.createAlert(this.testPlatformAlertDef,
             ctime + 2999l);
@@ -722,6 +651,7 @@ public class AlertManagerTest {
                                                  this.testServiceAlertDef.getAppdefEntityId() }));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testFireAlert() {
         testPlatformAlertDef.setEnabled(true);
@@ -759,8 +689,8 @@ public class AlertManagerTest {
         Alert alert1 = alertManager.createAlert(this.testPlatformAlertDef, time1);
         Alert alert2 = alertManager.createAlert(this.testPlatformAlertDef, time2);
         Alert alert3 = alertManager.createAlert(this.testPlatformAlertDef, time3);
-        Alert alert4 = alertManager.createAlert(this.testPlatformAlertDef, time4);
-        Alert alert5 = alertManager.createAlert(this.testPlatformAlertDef, time5);
+        alertManager.createAlert(this.testPlatformAlertDef, time4);
+        alertManager.createAlert(this.testPlatformAlertDef, time5);
         PageList<Alert> actualAlerts = new PageList<Alert>();
         actualAlerts.add(0, alert1);
         actualAlerts.add(1, alert2);
@@ -782,11 +712,11 @@ public class AlertManagerTest {
         long time5 = time1 - 5 * 60000l;
         long time6 = time1 - 6 * 60000l;
         Alert alert1 = alertManager.createAlert(this.testPlatformAlertDef, time1);
-        Alert alert2 = alertManager.createAlert(this.testServerAlertDef, time2);
+        alertManager.createAlert(this.testServerAlertDef, time2);
         Alert alert3 = alertManager.createAlert(this.testServiceAlertDef, time3);
         Alert alert4 = alertManager.createAlert(this.testPlatformAlertDef, time4);
-        Alert alert5 = alertManager.createAlert(this.testServerAlertDef, time5);
-        Alert alert6 = alertManager.createAlert(this.testServiceAlertDef, time6);
+        alertManager.createAlert(this.testServerAlertDef, time5);
+        alertManager.createAlert(this.testServiceAlertDef, time6);
         alertManager.setAlertFixed(alert3);
         alertManager.setAlertFixed(alert4);
         sessionFactory.getCurrentSession().flush();
@@ -819,10 +749,10 @@ public class AlertManagerTest {
         long time6 = time1 - 6 * 60000l;
         Alert alert1 = alertManager.createAlert(this.testPlatformAlertDef, time1);
         Alert alert2 = alertManager.createAlert(this.testServerAlertDef, time2);
-        Alert alert3 = alertManager.createAlert(this.testServiceAlertDef, time3);
+        alertManager.createAlert(this.testServiceAlertDef, time3);
         Alert alert4 = alertManager.createAlert(this.testPlatformAlertDef, time4);
         Alert alert5 = alertManager.createAlert(this.testServerAlertDef, time5);
-        Alert alert6 = alertManager.createAlert(this.testServiceAlertDef, time6);
+        alertManager.createAlert(this.testServiceAlertDef, time6);
         alertManager.setAlertFixed(alert4);
         alertManager.setAlertFixed(alert5);
         sessionFactory.getCurrentSession().flush();
@@ -844,7 +774,7 @@ public class AlertManagerTest {
     public void testFindAlertsByCriteriaWithAppDefs() throws PermissionException {
         AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
         PageControl pc = new PageControl();
-        PageInfo pi = PageInfo.create(pc, AlertSortField.SEVERITY);
+        PageInfo.create(pc, AlertSortField.SEVERITY);
         long time1 = System.currentTimeMillis();
         long time2 = time1 - 2 * 60000l;
         long time3 = time1 - 3 * 60000l;
@@ -858,9 +788,9 @@ public class AlertManagerTest {
         recent3Alerts.add(0, alert1);
         recent3Alerts.add(1, alert2);
         recent3Alerts.add(2, alert3);
-        Alert alert4 = alertManager.createAlert(this.testPlatformAlertDef, time4);
-        Alert alert5 = alertManager.createAlert(this.testServerAlertDef, time5);
-        Alert alert6 = alertManager.createAlert(this.testServiceAlertDef, time6);
+        alertManager.createAlert(this.testPlatformAlertDef, time4);
+        alertManager.createAlert(this.testServerAlertDef, time5);
+        alertManager.createAlert(this.testServiceAlertDef, time6);
         List<AppdefEntityID> all = new ArrayList<AppdefEntityID>();
         all.add(this.testPlatformAlertDef.getAppdefEntityId());
         all.add(this.testServerAlertDef.getAppdefEntityId());
@@ -908,12 +838,12 @@ public class AlertManagerTest {
         long time4 = time1 - 4 * 60000l;
         long time5 = time1 - 5 * 60000l;
         long time6 = time1 - 6 * 60000l;
-        Alert alert1 = alertManager.createAlert(this.testPlatformAlertDef, time1);
-        Alert alert2 = alertManager.createAlert(this.testServerAlertDef, time2);
+        alertManager.createAlert(this.testPlatformAlertDef, time1);
+        alertManager.createAlert(this.testServerAlertDef, time2);
         Alert alert3 = alertManager.createAlert(this.testServiceAlertDef, time3);
         Alert alert4 = alertManager.createAlert(this.testPlatformAlertDef, time4);
-        Alert alert5 = alertManager.createAlert(this.testServerAlertDef, time5);
-        Alert alert6 = alertManager.createAlert(this.testServiceAlertDef, time6);
+         alertManager.createAlert(this.testServerAlertDef, time5);
+        alertManager.createAlert(this.testServiceAlertDef, time6);
         alertManager.setAlertFixed(alert3);
         alertManager.setAlertFixed(alert4);
         sessionFactory.getCurrentSession().flush();
@@ -1223,7 +1153,7 @@ public class AlertManagerTest {
             longReason);
     }
 
-    /*@Test
+    @Test
     public void testHandleSubjectRemoval() {
         AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
         Action alertAction = Action.newNoOpAction();
@@ -1240,12 +1170,15 @@ public class AlertManagerTest {
             assertNotNull(actionLog.getSubject());
         }
         alertManager.handleSubjectRemoval(overlord);
-        sessionFactory.getCurrentSession().flush();
-        // Now retrieve the alertaction log bag again
-        alertActionLogs = testPlatformAlert.getActionLog();
+        // The underlying DAO uses HQL to do bulk update. This will NOT update
+        // the session cache, so a subsequent query will make it seem as though
+        // subject is still there. We have to explicitly remove it from cache.
+        sessionFactory.getCurrentSession().clear();
+        // Now retrieve the alert and action log bag again
+        Alert updatedAlert = alertManager.findAlertById(testPlatformAlert.getId());
+        alertActionLogs = updatedAlert.getActionLog();
         for (AlertActionLog actionLog : alertActionLogs) {
-        TODO://The test fails here:Need to look into it
             assertNull(actionLog.getSubject());
         }
-    }*/
+    }
 }
