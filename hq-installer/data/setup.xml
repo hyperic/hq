@@ -392,19 +392,43 @@ ${errMsg}
     <copy file="${server.upgradedir}/conf/license.xml"
           todir="${server.installdir}/server-${version}/conf"
           failonerror="false"/>
+  	
+  	<!-- Copy log4j.xml from evolution or later -->
+    <copy file="${server.upgradedir}/conf/log4j.xml"
+            todir="${server.installdir}/server-${version}/conf"
+            failonerror="false"/>
+  	
     <echo>^^^INFO: Copying existing HQ server cache information</echo>
+  	<!-- Copy from 4.3 or earlier -->
     <ehcacheUpgrade existing="${server.upgradedir}/hq-engine/server/default/deploy/hq.ear/ehcache.xml"
-                    new="${server.installdir}/server-${version}/hq-engine/server/default/deploy/hq.ear/ehcache.xml"/>
+                    new="${server.installdir}/server-${version}/hq-engine/hq-server/webapps/ROOT/WEB-INF/classes/ehcache.xml"/>
 
+  	<!-- Copy from evolution or later -->
+  	<ehcacheUpgrade existing="${server.upgradedir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/classes/ehcache.xml"
+  	                    new="${server.installdir}/server-${version}/hq-engine/hq-server/webapps/ROOT/WEB-INF/classes/ehcache.xml"/>
+  	
     <echo>^^^INFO: Copying existing HQU plugins</echo>
-    <copy todir="${server.installdir}/server-${version}/hq-engine/server/default/deploy/hq.ear/hq.war/hqu">
+  	<!-- Copy from 4.3 or earlier-->
+    <copy todir="${server.installdir}/server-${version}/hq-engine/hq-server/webapps/ROOT/hqu" failonerror="false">
       <fileset dir="${server.upgradedir}/hq-engine/server/default/deploy/hq.ear/hq.war/hqu"/>
     </copy>
+  	
+  	<!--Copy from evolution or later -->
+  	<copy todir="${server.installdir}/server-${version}/hq-engine/hq-server/webapps/ROOT/hqu" failonerror="false">
+  	      <fileset dir="${server.upgradedir}/hq-engine/hq-server/webapps/ROOT/hqu"/>
+  	</copy>
 
   	<echo>^^^INFO: Copying existing state files</echo>
-  	<copy todir="${server.installdir}/server-${version}/hq-engine">
+  	<!-- Copy from 4.3 or earlier-->
+  	<copy todir="${server.installdir}/server-${version}/hq-engine/hq-server" failonerror="false">
       <fileset dir="${server.upgradedir}/hq-engine/" includes="*.dat"/>
     </copy>
+  	
+  	<!--Copy from evolution or later -->
+	<copy todir="${server.installdir}/server-${version}/hq-engine/hq-server" failonerror="false">
+      <fileset dir="${server.upgradedir}/hq-engine/hq-server" includes="*.dat"/>
+    </copy>	
+  	
 
     <echo>^^^COMPLETION:
       Server successfully upgraded to: ${server.product.dir}
