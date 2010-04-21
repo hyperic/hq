@@ -9915,7 +9915,7 @@ has already been defined.
   </schemaSpec>
 
   <schemaSpec version="3.151">
-    <export-counters exportDir="${jboss.home}"/>
+    <export-counters exportDir="${tomcat.home}"/>
     <schema-directSQL>
       <statement desc="Convert frequency type of DURATION to frequency type EVERYTIME">
         UPDATE EAM_ALERT_DEFINITION SET FREQUENCY_TYPE = 0 WHERE FREQUENCY_TYPE = 1
