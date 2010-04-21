@@ -109,15 +109,12 @@
 
 	<path id="testjars">
 		<path refid="alljars" />
-<<<<<<< HEAD:build.xml
 		<path location="${thirdparty.lib}/cactus-1.7.2.jar" />
 		<path location="${thirdparty.lib}/strutstest-2.1.3.jar" />
 		<fileset dir="${thirdparty.lib}" includes="*.jar" excludes="ant*.jar strutstest-*.jar,cactus*.jar,mockejb.jar,mockrunner-ejb.jar,dbunit*.jar,jaas.jar" />
 		<path location="${thirdparty.lib}/dbunit-2.2.jar" />
 		<fileset dir="${thirdparty.lib}/tomcat-jdbc" includes="*.jar" />
-=======
 	    <fileset dir="${thirdparty.lib}/test" includes="*.jar"/>
->>>>>>> ea2f3bff70d50945aebf18ac6ce023e2cfd6fd6c:build.xml
 	</path>
 
 	<path id="pdkjars">
