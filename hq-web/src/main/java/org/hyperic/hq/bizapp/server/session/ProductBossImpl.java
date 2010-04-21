@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -200,6 +201,23 @@ public class ProductBossImpl implements ProductBoss {
         return res;
     }
     
+    /**
+     * TODO stats could be accessed via MBean or some other centralized mechanism
+     * @return A List of Maps, where each Map contains individual cache stats
+     */
+    public List<Map<String,Object>> getCacheHealths() {
+        List<Cache> caches = getCaches();
+        List<Map<String,Object>> healths = new ArrayList<Map<String,Object>>(caches.size());
+        for (Cache cache : caches ) {
+            Map<String,Object> health = new HashMap<String,Object>();
+            health.put("region", cache.getName());
+            health.put("size", new Integer(cache.getSize()));
+            health.put("hits", new Integer(cache.getHitCount()));
+            health.put("misses", new Integer(cache.getMissCountNotFound()));
+            healths.add(health);
+        }
+        return healths;
+    }
 
     /**
      * Get the merged config responses for group entries. This routine has the

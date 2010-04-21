@@ -31,6 +31,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
@@ -63,8 +64,13 @@ public class Messenger implements MessagePublisher {
 
     /**
      * Send message to a Topic.
+     * TODO make use of future method timing aspect to tie to ConcurrentStatsCollector and remove from code
      */
     public void publishMessage(String name, Serializable sObj) {
+        final long start = System.currentTimeMillis();
         eventsJmsTemplate.convertAndSend(name, sObj);
+        final long end= System.currentTimeMillis();
+        ConcurrentStatsCollector.getInstance().addStat(
+            (end- start), ConcurrentStatsCollector.JMS_TOPIC_PUBLISH_TIME);
     }
 }

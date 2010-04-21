@@ -360,7 +360,7 @@
     </servlet-class>
     <init-param>
         <param-name>org.hyperic.lather.maxConns</param-name>
-        <param-value>250</param-value>
+        <param-value>3000</param-value>
     </init-param>
     <init-param>
         <param-name>org.hyperic.lather.execTimeout</param-name>
