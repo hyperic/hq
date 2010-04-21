@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>Hyperic HQ 4.0 and 4.1 Documentation : ui-Inventory.Service.New</title>
+        <title>Hyperic HQ 4.x Documentation : ui-Inventory.Service.New</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -12,120 +12,205 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            Hyperic HQ 4.0 and 4.1 Documentation : ui-Inventory.Service.New
+                            Hyperic HQ 4.x Documentation : ui-Inventory.Service.New
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Nov 05, 2008 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Apr 18, 2010 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
-				    <h1><a name="ui-Inventory.Service.New-AddingaPlatformServicetotheHQInventory"></a>Adding a Platform Service to the HQ Inventory</h1>
+				    <p><em>Topics marked with</em> <font color="red"><em>&#42;</em></font> <em>relate to HQ Enterprise-only features.</em></p>
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1271611266985 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1271611266985 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1271611266985 li {margin-left: 0px;padding-left: 0px;}
 
-<p><em>Topics marked with</em> <font color="red"><em>&#42;</em></font> <em>relate to HQ Enterprise-only features.</em></p>
-<p>Browse resources and select the platform to which you wish to add a platform service.  Select the New Platform Service option from the Tools Menu.  The New Service page is displayed.</p>
-
-<p>This screen allows users to create a new <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-platformservice">platform service</a> and add it to a <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-platform">platform</a>. (Services can be manually created only within the context of a platform.)</p>
+/*]]>*/</style><div class='rbtoc1271611266985'>
 <ul>
-	<li>An <a href="#ui-Inventory.Service.New-services">explanation of platform services</a> listed on this screen</li>
-	<li><a href="#ui-Inventory.Service.New-Tasks">Tasks</a> available on this screen</li>
+    <li><a href='#ui-Inventory.Service.New-LearnAboutPlatformServices'>Learn About Platform Services</a></li>
+    <li><a href='#ui-Inventory.Service.New-ConfigureaPlatformService'>Configure a Platform Service</a></li>
+    <li><a href='#ui-Inventory.Service.New-PlatformServiceTypes'>Platform Service Types</a></li>
+</ul></div>
+<p><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></p>
+
+<h1><a name="ui-Inventory.Service.New-LearnAboutPlatformServices"></a>Learn About Platform Services</h1>
+
+<p>For information about:</p>
+<ul>
+	<li>What a platform service is, see <a href="http://support.hyperic.com/confluence/display/DOC/HQ+Inventory+Model" title="HQ Inventory Model">HQ Inventory Model</a>.</li>
+	<li>Platform services for monitoring remote services over the network, see <a href="http://support.hyperic.com/confluence/display/DOC/Monitoring+Network+Services" title="Monitoring Network Services">Monitoring Network Services</a>.</li>
 </ul>
 
 
-<p><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></p>
-<p><a name="ui-Inventory.Service.New-services"></a></p>
+<h1><a name="ui-Inventory.Service.New-ConfigureaPlatformService"></a>Configure a Platform Service</h1>
 
-<h3><a name="ui-Inventory.Service.New-PlatformServicesthatCanBeAdded"></a>Platform Services that Can Be Added</h3>
+<p>This page has instructions for configuring a platform service.</p>
+<ol>
+	<li>Browse to the platform.</li>
+	<li>Select <b>New Platform Service</b> from the <b>Tools</b> menu.</li>
+	<li>On the <b>New Service</b> page, enter:
+	<ul>
+		<li>Name - A meaningful name for the service.</li>
+		<li>Description - (optional) A description of the service</li>
+		<li>Service Type - Select the desired service type from the pull-down list.</li>
+	</ul>
+	</li>
+	<li>Click <b>OK</b> to create the new service.
+	<ul>
+		<li>The <b>Inventory</b> tab for the new service appears and prompts: "This resource has not been configured. Please set its Configuration Properties.</li>
+	</ul>
+	</li>
+	<li>Click <b>Configuration Properties</b> in the prompt.</li>
+	<li>On the <b>Configuration Properties</b> page, enter values for the required configuration properties, which are prefixed with a red asterisk, and optional properties as appropriate. For definitions of configuration properties, see the information in the <b>Configuration Requirements</b> column in the <a href="#ui-Inventory.Service.New-PlatformServiceTypes">Platform Service Types</a> table below.</li>
+</ol>
 
-<p>This table explains some of the platform services listed on this screen that users can add to a platform. (listed in alphabetical order)</p>
+
+<h1><a name="ui-Inventory.Service.New-PlatformServiceTypes"></a>Platform Service Types</h1>
+
+<div class='table-wrap'>
 <table class='confluenceTable'><tbody>
 <tr>
 <th class='confluenceTh'> Service </th>
-<th class='confluenceTh'> Description and Uses </th>
+<th class='confluenceTh'> Description </th>
+<th class='confluenceTh'> Configuration Notes </th>
+</tr>
+<tr>
+<td class='confluenceTd'> CPU </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> DHCP <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Use to monitor a remote Dynamic Host Configuration Protocol server. </td>
+<td class='confluenceTd'> <a href="http://support.hyperic.com/confluence/display/DOC/DHCP+Platform+Service" title="DHCP Platform Service">DHCP Platform Service</a> </td>
 </tr>
 <tr>
 <td class='confluenceTd'> DNS </td>
-<td class='confluenceTd'> Protocol check. Add the DNS service when, for example, you are running a DNS server and you want to verify regularly that name entries are accurate. </td>
+<td class='confluenceTd'> Use to monitor a remote Domain Name System server. </td>
+<td class='confluenceTd'> <a href="http://support.hyperic.com/confluence/display/DOC/DNS+Platform+Service" title="DNS Platform Service">DNS Platform Service</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> FileServer Directory <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> FileServer File </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
 </tr>
 <tr>
 <td class='confluenceTd'> FileServer Mount </td>
-<td class='confluenceTd'> HQ's shorthand for "filesystem mount point." Used to monitor disks and raid arrays. Add the FileServer Mount service when, for example, you want to monitor have an important array mounted as /data on your linux machine. By default, local mount points are auto-discovered by the Agent, so you should need to manually add this service only when you want to monitor a remote network file system (NFS). To configure a platform service on a platform that serves as a proxy for the NFS host, you supply the path to the NFS on the configuration properties page when configuring the new platform service. <br clear="all" />
-<b>Note:&nbsp;</b> You can also install an HQ Agent on the system that hosts the NFS, in which case the NFS will be auto-discovered.<br clear="all" /> </td>
+<td class='confluenceTd'> Use to monitor a remote filesystem mount point and associated disks and raid arrays. <br class="atl-forced-newline" />
+<br class="atl-forced-newline" />
+<b>Note:</b> The HQ Agent auto-discovers local mount points. You only need to explicitly configure a FileServer Mount service to monitor a remote network file system (NFS). Alternatively, you can install an HQ Agent on the system that hosts the NFS, in which case the NFS will be auto-discovered. </td>
+<td class='confluenceTd'>&nbsp;</td>
 </tr>
 <tr>
-<td class='confluenceTd'> FileServer Directory Tree </td>
-<td class='confluenceTd'> Used to monitor a directory and the entire tree under that directory. </td>
+<td class='confluenceTd'> FileServer DirectoryTree </td>
+<td class='confluenceTd'> Use to monitor a directory and the entire tree under that directory. </td>
+<td class='confluenceTd'>&nbsp;</td>
 </tr>
 <tr>
 <td class='confluenceTd'> HTTP </td>
-<td class='confluenceTd'> Used to ping a specific URL. Add the HTTP service when you want to collect metrics from a specific URL, for example, the website <tt><a href="http://my.site.com/index.html">http://my.site.com/index.html</a></tt>. Create an HTTP service on this screen and then configure it (on the "<a href="ui-Inventory.Configuration.html" title="ui-Inventory.Configuration">Edit Configuration screen</a>"). For example, the server is <tt>my.site.com</tt> and the path is <tt>/index.html</tt>, and specify whether or not you want the request to be allowed to redirect and if you want http or https. </td>
+<td class='confluenceTd'> Use to monitor a particular URL. </td>
+<td class='confluenceTd'> <a href="http://support.hyperic.com/confluence/display/DOC/HTTP+Platform+Service" title="HTTP Platform Service">HTTP Platform Service</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> FTP <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Use to monitor a remote File Transfer Protocol server. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> <a href="http://support.hyperic.com/confluence/display/DOC/FTP+Platform+Service" title="FTP Platform Service">FTP Platform Service</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> IMAP <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Use to monitor a remote Internet Message Access Protocol server. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> <a href="http://support.hyperic.com/confluence/display/DOC/IMAP+Platform+Service" title="IMAP Platform Service">IMAP Platform Service</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> InetAddress Ping <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Use to ping a remote host for availability. </td>
+<td class='confluenceTd'> <a href="http://support.hyperic.com/confluence/display/DOC/InetAddress+Ping+Platform+Service" title="InetAddress Ping Platform Service">InetAddress Ping Platform Service</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> LDAP <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Use to monitor a remote Lightweight Directory Access Server. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> <a href="http://support.hyperic.com/confluence/display/DOC/LDAP+Platform+Service" title="LDAP Platform Service">LDAP Platform Service</a> </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Multiprocess </td>
-<td class='confluenceTd'> Used to monitor multiple related processes. Add the Multiprocess service when, for example, you want to know how many httpd processes are running on Apache at a particular time and to see the system resource usage of those processes as an aggregate. </td>
+<td class='confluenceTd'> Use to monitor multiple related processes. For example, to monitor the number of httpd processes running on Apache and the system resource they consume in aggregate. </td>
+<td class='confluenceTd'>&nbsp;</td>
 </tr>
 <tr>
 <td class='confluenceTd'> NetworkServer Interface </td>
-<td class='confluenceTd'> Used to monitor a network interface. By default, all network interfaces are auto-discovered by the Agent, so users rarely have to add this service to a platform. </td>
+<td class='confluenceTd'> Use to monitor a network interface. <br class="atl-forced-newline" />
+<br class="atl-forced-newline" />
+<b>Note:</b> Because the HQ Agent auto-discovers network interfaces, manual configuration of a NetworkServer Interface is rare. </td>
+<td class='confluenceTd'>&nbsp;</td>
 </tr>
 <tr>
-<td class='confluenceTd'> <a name="ui-Inventory.Service.New-POP3"></a>POP3 </td>
-<td class='confluenceTd'> Use a platform service of this type in conjunction with an <a href="#ui-Inventory.Service.New-SMTP">SMTP</a> service in order to check the health of an email address. </td>
+<td class='confluenceTd'> NTP <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Use to monitor a remote Network Time Protocol server. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> <a href="http://support.hyperic.com/confluence/display/DOC/NTP+Platform+Service" title="NTP Platform Service">NTP Platform Service</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> POP3 </td>
+<td class='confluenceTd'> Use to monitor a remote Post Office Protocol 3 server.&nbsp; Configure along with an SMTP service&nbsp; to monitor incoming and outgoing email services. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> <a href="http://support.hyperic.com/confluence/display/DOC/POP3+Platform+Service" title="POP3 Platform Service">POP3 Platform Service</a> <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Process <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Use to monitor a process using a Hyperic SIGAR Process Table Query Language (PTQL) query. To configure, you supply the PTQL query in the form: <br class="atl-forced-newline" /> <br class="atl-forced-newline" />
+<tt>Class.Attribute.operator=value</tt> <br class="atl-forced-newline" /> <br class="atl-forced-newline" />
+For example, <br class="atl-forced-newline" /> <br class="atl-forced-newline" /> <tt>Pid.PidFile.eq=/var/run/sshd.pid</tt> </td>
+<td class='confluenceTd'> <a href="http://support.hyperic.com/confluence/display/SIGAR/PTQL" title="PTQL">SIGAR Process Table Query Language documentation</a> </td>
 </tr>
 <tr>
 <td class='confluenceTd'> RPC </td>
-<td class='confluenceTd'> <em>Available only on non-Windows platforms.</em> Protocol check. Add the RPC service when, for example, you are using RPC and you want to verify on a regular basis that service is available. </td>
+<td class='confluenceTd'> Use to monitor a Remote Procedure Call service. <br class="atl-forced-newline" />
+<b>Note:</b> Not available on Windows platforms.&nbsp; <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> <a href="http://support.hyperic.com/confluence/display/DOC/RPC+Platform+Service" title="RPC Platform Service">RPC Platform Service</a><br class="atl-forced-newline" /> </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Script </td>
-<td class='confluenceTd'> Used to make HQ execute a script on a regular basis and monitor its output. Add the Script service when, for example, you have a script that gives some metrics on the environment and you want to run that script at regular intervals to get the output. </td>
+<td class='confluenceTd'> Used to configure HQ to periodically run a script that collects a&nbsp; system or application metric. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'>&nbsp;</td>
 </tr>
 <tr>
-<td class='confluenceTd'> <a name="ui-Inventory.Service.New-SMTP"></a>SMTP </td>
-<td class='confluenceTd'> Use a platform service of this type in conjunction with a <a href="#ui-Inventory.Service.New-POP3">POP3</a> service in order to check the health of an email address. </td>
+<td class='confluenceTd'> SMTP </td>
+<td class='confluenceTd'> Use to monitor a remote Simple Mail Transfer Protocol server.&nbsp; Configure along with a POP3 service to monitor incoming and outgoing email services. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> <a href="http://support.hyperic.com/confluence/display/DOC/SMTP+Platform+Service" title="SMTP Platform Service">SMTP Platform Service</a> </td>
 </tr>
 <tr>
-<td class='confluenceTd'> Windows Service <br clear="all" /> </td>
-<td class='confluenceTd'> Use a platform service of this type to monitor applications that run as a service under Windows.&nbsp; After creating the platform service, configure it on the "<a href="ui-Inventory.Configuration.html" title="ui-Inventory.Configuration">Edit Configuration screen</a>".&nbsp; To configure it, you must supply its Service Name as defined in Windows. To determine the Service Name:
+<td class='confluenceTd'> SNMP <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Use to monitor a remote Simple Network Management Protocol agent. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> <a href="http://support.hyperic.com/confluence/display/DOC/SNMP+Platform+Service+-+HQ+4.2+and+Earlier" title="SNMP Platform Service - HQ 4.2 and Earlier">SNMP Platform Service &#45; HQ 4.2 and Earlier</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> SSH <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Use to monitor a remote SSH service. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> <a href="http://support.hyperic.com/confluence/display/DOC/SSH+Platform+Service" title="SSH Platform Service">SSH Platform Service</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> TCP Socket <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Use to monitor the availability of a remote TCP socket <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> <a href="http://support.hyperic.com/confluence/display/DOC/TCP+Socket+Platform+Service" title="TCP Socket Platform Service">TCP Socket Platform Service</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Windows Service <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Use to monitor an application that runs as a service under Windows. To configure it, you supply its Service Name in Windows. To determine the Service Name:
 <ol>
-	<li>Select Run from the Windows Start menu.</li>
-	<li>Type services.msc in the run dialog and click OK. <br clear="all" /></li>
-	<li>In the list of services displayed, right-click the service you wish to monitor and choose Properties.</li>
-	<li>Locate the Service Name on the General tab.</li>
+	<li>Select <b>Run</b> from the Windows <b>Start</b> menu.</li>
+	<li>Type services.msc in the run dialog and click <b>OK</b>. <br class="atl-forced-newline" /></li>
+	<li>In the list of services displayed, right-click the service you wish to monitor and choose <b>Properties</b>.</li>
+	<li>Locate the Service Name on the <b>General</b> tab.</li>
 </ol>
 </td>
+<td class='confluenceTd'>&nbsp;</td>
 </tr>
 </tbody></table>
-<p>For any added service (or other resource), the HQ Agent on which the service is configured will perform its task (collect metrics, make a request to that URL, run a script, etc.) with the frequency specified in the "Availability" metric collection interval (for example, every 10 minutes). (<a href="http://support.hyperic.com/confluence/display/DOC/Monitoring+Defaults+Configuration" title="Monitoring Defaults Configuration">Instructions</a> for changing metric collection intervals, which are part of the metric template.)</p>
+</div>
 
-<p><a name="ui-Inventory.Service.New-Tasks"></a></p>
-
-<h3><a name="ui-Inventory.Service.New-TasksAvailableonThisScreen"></a>Tasks Available on This Screen</h3>
-
-<p>On this screen users can do one thing: create a new platform service and add it to a platform.</p>
-
-<p><b>To add a new platform service:</b></p>
-<ol>
-	<li>Fill in the following fields:
-	<ul>
-		<li><ins>Name</ins>: The name of the service</li>
-		<li><ins>Description</ins>: (optional) A description of the service</li>
-		<li><ins>Service Type</ins>: (optional) The <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-service">service type</a></li>
-	</ul>
-	</li>
-	<li>Click <img src="download/attachments/59375666/fb_ok.gif" align="absmiddle" border="0"/>.</li>
-</ol>
-
-
-<p>The service's <ins>Owner</ins> defaults to the account that created the service.</p>
-<table class="sectionMacro" border="0" cellpadding="5" cellspacing="0" width="100%"><tbody><tr>
-<div class="panel" style="border-width: 1px;"><div class="panelHeader" style="border-bottom-width: 1px;"><b>Next Steps in UI</b></div><div class="panelContent">
-<p>View the <a href="ui-Inventory.Service.html" title="ui-Inventory.Service">service's inventory</a>.</p>
-</div></div>
-<div class="panel" style="border-width: 1px;"><div class="panelHeader" style="border-bottom-width: 1px;"><b>Related Information</b></div><div class="panelContent">
-<p>An explanation of <a href="http://support.hyperic.com/confluence/display/DOC/HQ+Inventory+and+Access+Model#HQInventoryandAccessModel-service">services</a> as part of the HQ Inventory Model and why platform services might need to be manually added</p>
-</div></div></tr></tbody></table>
-
-<h5><a name="ui-Inventory.Service.New-ReturntotheplatforminventoryuiInventory.Platform"></a>Return to the <a href="ui-Inventory.Platform.html" title="ui-Inventory.Platform">platform inventory</a></h5>
 
 				    					    <br/>
                         <div class="tabletitle">
@@ -134,7 +219,7 @@
 
                         <div class="greybox" align="left">
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="download/attachments/59375666/fb_ok.gif">fb_ok.gif</a> (image/gif)
+                                <a href="attachments/59375666/59539544.gif">fb_ok.gif</a> (image/gif)
                                 <br/>
                                                     </div>
 				    
@@ -146,7 +231,7 @@
 				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 20, 2009 15:33</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Apr 20, 2010 15:01</font></td>
 		    </tr>
 	    </table>
     </body>
