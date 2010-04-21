@@ -535,7 +535,7 @@ public class AvailabilityManagerEJBImpl
 
             // Expect data to be sorted by end time, so that the last value
             // returned is the final count and the last value
-            data[IND_CFG_COUNT] = (objs[4] == null) 
+            data[IND_CFG_COUNT] += (objs[4] == null) 
                                     ? 0 : ((java.lang.Number)objs[4]).doubleValue();
             data[IND_LAST_TIME] = ((Double)objs[2]).doubleValue();
 
