@@ -23,7 +23,7 @@
   USA.
  -->
 
-<plugin name="db2-jdbc" >
+<plugin name="db2jdbc" >
     <property name="template-config"
             value="database=%db2.jdbc.database%,jdbcUser=%db2.jdbc.user%,jdbcPassword=%db2.jdbc.password%,jdbcUrl=jdbc:db2://%db2.jdbc.hostname%:%db2.jdbc.port%/%db2.jdbc.database%"/>
 

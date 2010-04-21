@@ -33,6 +33,7 @@ public class HQServerTest {
     private EngineController engineController;
     private EmbeddedDatabaseController embeddedDatabaseController;
     private String serverHome = "/Applications/HQ5/server-5.0.0";
+    private String engineHome = "/Applications/HQ5/server-5.0.0/hq-engine";
     private OperatingSystem osInfo;
     private DataSource dataSource;
     private Connection connection;
@@ -50,8 +51,8 @@ public class HQServerTest {
         this.statement = EasyMock.createMock(Statement.class);
         this.resultSet = EasyMock.createMock(ResultSet.class);
         this.osInfo = org.easymock.classextension.EasyMock.createMock(OperatingSystem.class);
-        this.server = new HQServer(serverHome, processManager, embeddedDatabaseController,
-            serverConfigurator, engineController, osInfo, dataSource);
+        this.server = new HQServer(serverHome, engineHome, processManager,
+            embeddedDatabaseController, serverConfigurator, engineController, osInfo, dataSource);
     }
 
     @Test
@@ -89,8 +90,10 @@ public class HQServerTest {
                                      serverHome + "/lib/ant-launcher.jar",
                                      "-Dserver.home=" + serverHome,
                                      "-Dant.home=" + serverHome,
-                                     "-Dlog4j.configuration=" + new File(serverHome +
-                                     "/conf/log4j.xml").toURI().toURL().toString(),
+                                     "-Dtomcat.home=" + engineHome + "/hq-server",
+                                     "-Dlog4j.configuration=" +
+                                         new File(serverHome + "/conf/log4j.xml").toURI().toURL()
+                                             .toString(),
                                      "org.apache.tools.ant.launch.Launcher",
                                      "-q",
                                      "-lib",
@@ -103,8 +106,9 @@ public class HQServerTest {
                 EasyMock.eq(HQServer.DB_UPGRADE_PROCESS_TIMEOUT))).andReturn(0);
         EasyMock.expect(dataSource.getConnection()).andReturn(connection);
         EasyMock.expect(connection.createStatement()).andReturn(statement);
-        EasyMock.expect(statement.executeQuery("select propvalue from EAM_CONFIG_PROPS " +
-                    "WHERE propkey = '" + HQConstants.SchemaVersion + "'")).andReturn(resultSet);
+        EasyMock.expect(
+            statement.executeQuery("select propvalue from EAM_CONFIG_PROPS " + "WHERE propkey = '" +
+                                   HQConstants.SchemaVersion + "'")).andReturn(resultSet);
         EasyMock.expect(resultSet.next()).andReturn(true);
         EasyMock.expect(resultSet.getString("propvalue")).andReturn("3.1.88");
         connection.close();
@@ -157,8 +161,10 @@ public class HQServerTest {
                                      serverHome + "/lib/ant-launcher.jar",
                                      "-Dserver.home=" + serverHome,
                                      "-Dant.home=" + serverHome,
-                                     "-Dlog4j.configuration=" + new File(serverHome +
-                                     "/conf/log4j.xml").toURI().toURL().toString(),
+                                     "-Dtomcat.home=" + engineHome + "/hq-server",
+                                     "-Dlog4j.configuration=" +
+                                         new File(serverHome + "/conf/log4j.xml").toURI().toURL()
+                                             .toString(),
                                      "org.apache.tools.ant.launch.Launcher",
                                      "-q",
                                      "-lib",
@@ -171,8 +177,9 @@ public class HQServerTest {
                 EasyMock.eq(HQServer.DB_UPGRADE_PROCESS_TIMEOUT))).andReturn(0);
         EasyMock.expect(dataSource.getConnection()).andReturn(connection);
         EasyMock.expect(connection.createStatement()).andReturn(statement);
-        EasyMock.expect(statement.executeQuery("select propvalue from EAM_CONFIG_PROPS " +
-                    "WHERE propkey = '" + HQConstants.SchemaVersion + "'")).andReturn(resultSet);
+        EasyMock.expect(
+            statement.executeQuery("select propvalue from EAM_CONFIG_PROPS " + "WHERE propkey = '" +
+                                   HQConstants.SchemaVersion + "'")).andReturn(resultSet);
         EasyMock.expect(resultSet.next()).andReturn(true);
         EasyMock.expect(resultSet.getString("propvalue")).andReturn("3.1.88");
         connection.close();
@@ -195,6 +202,7 @@ public class HQServerTest {
         server.start();
         verify();
     }
+
     @Test
     public void testStartErrorVerifyingSchema() throws Exception {
         EasyMock.expect(engineController.isEngineRunning()).andReturn(false);
@@ -208,8 +216,10 @@ public class HQServerTest {
                                      serverHome + "/lib/ant-launcher.jar",
                                      "-Dserver.home=" + serverHome,
                                      "-Dant.home=" + serverHome,
-                                     "-Dlog4j.configuration=" + new File(serverHome +
-                                     "/conf/log4j.xml").toURI().toURL().toString(),
+                                     "-Dtomcat.home=" + engineHome + "/hq-server",
+                                     "-Dlog4j.configuration=" +
+                                         new File(serverHome + "/conf/log4j.xml").toURI().toURL()
+                                             .toString(),
                                      "org.apache.tools.ant.launch.Launcher",
                                      "-q",
                                      "-lib",
@@ -238,7 +248,7 @@ public class HQServerTest {
         server.start();
         verify();
     }
-    
+
     @Test
     public void testStartInvalidDBSchema() throws Exception {
         EasyMock.expect(engineController.isEngineRunning()).andReturn(false);
@@ -252,8 +262,10 @@ public class HQServerTest {
                                      serverHome + "/lib/ant-launcher.jar",
                                      "-Dserver.home=" + serverHome,
                                      "-Dant.home=" + serverHome,
-                                     "-Dlog4j.configuration=" + new File(serverHome +
-                                     "/conf/log4j.xml").toURI().toURL().toString(),
+                                     "-Dtomcat.home=" + engineHome + "/hq-server",
+                                     "-Dlog4j.configuration=" +
+                                         new File(serverHome + "/conf/log4j.xml").toURI().toURL()
+                                             .toString(),
                                      "org.apache.tools.ant.launch.Launcher",
                                      "-q",
                                      "-lib",
@@ -266,10 +278,12 @@ public class HQServerTest {
                 EasyMock.eq(HQServer.DB_UPGRADE_PROCESS_TIMEOUT))).andReturn(0);
         EasyMock.expect(dataSource.getConnection()).andReturn(connection);
         EasyMock.expect(connection.createStatement()).andReturn(statement);
-        EasyMock.expect(statement.executeQuery("select propvalue from EAM_CONFIG_PROPS " +
-                    "WHERE propkey = '" + HQConstants.SchemaVersion + "'")).andReturn(resultSet);
+        EasyMock.expect(
+            statement.executeQuery("select propvalue from EAM_CONFIG_PROPS " + "WHERE propkey = '" +
+                                   HQConstants.SchemaVersion + "'")).andReturn(resultSet);
         EasyMock.expect(resultSet.next()).andReturn(true);
-        EasyMock.expect(resultSet.getString("propvalue")).andReturn(HQConstants.SCHEMA_MOD_IN_PROGRESS);
+        EasyMock.expect(resultSet.getString("propvalue")).andReturn(
+            HQConstants.SCHEMA_MOD_IN_PROGRESS);
         connection.close();
         resultSet.close();
         statement.close();
@@ -277,7 +291,7 @@ public class HQServerTest {
         server.start();
         verify();
     }
-    
+
     @Test
     public void testStartNoDBResultsWithSchemaCheck() throws Exception {
         EasyMock.expect(engineController.isEngineRunning()).andReturn(false);
@@ -291,8 +305,10 @@ public class HQServerTest {
                                      serverHome + "/lib/ant-launcher.jar",
                                      "-Dserver.home=" + serverHome,
                                      "-Dant.home=" + serverHome,
-                                     "-Dlog4j.configuration=" + new File(serverHome +
-                                     "/conf/log4j.xml").toURI().toURL().toString(),
+                                     "-Dtomcat.home=" + engineHome + "/hq-server",
+                                     "-Dlog4j.configuration=" +
+                                         new File(serverHome + "/conf/log4j.xml").toURI().toURL()
+                                             .toString(),
                                      "org.apache.tools.ant.launch.Launcher",
                                      "-q",
                                      "-lib",
@@ -305,8 +321,9 @@ public class HQServerTest {
                 EasyMock.eq(HQServer.DB_UPGRADE_PROCESS_TIMEOUT))).andReturn(0);
         EasyMock.expect(dataSource.getConnection()).andReturn(connection);
         EasyMock.expect(connection.createStatement()).andReturn(statement);
-        EasyMock.expect(statement.executeQuery("select propvalue from EAM_CONFIG_PROPS " +
-                    "WHERE propkey = '" + HQConstants.SchemaVersion + "'")).andReturn(resultSet);
+        EasyMock.expect(
+            statement.executeQuery("select propvalue from EAM_CONFIG_PROPS " + "WHERE propkey = '" +
+                                   HQConstants.SchemaVersion + "'")).andReturn(resultSet);
         EasyMock.expect(resultSet.next()).andReturn(false);
         connection.close();
         resultSet.close();
