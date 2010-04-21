@@ -46,7 +46,7 @@ public abstract class BaseLayout extends BaseComponent {
     /**
      * Dojo Version
      */
-    public static final String DOJO_VERSION = "1.1";
+    public static final String DOJO_VERSION = "1.1.2";
 
     @Asset("context:js/dojo/" + DOJO_VERSION + "/dojo/resources/dojo.css")
     public abstract IAsset getDojoStyleSheet();
