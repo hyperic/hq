@@ -181,6 +181,11 @@
 		<path refid="shared.compile.classpath"/>
 		<path location="${hq.bootstrap}/target/classes" />
 	</path>
+	
+	<path id="installer.compile.classpath">
+		<path refid="web.compile.classpath"/>
+		<path location="${hq.installer}/target/classes" />
+   </path>
 
 	<!-- Source common targets -->
 	<import file="${hq.home}/build_util/util-build.xml" />
@@ -228,15 +233,7 @@
 
 
 	<target name="compile-installer">
-		<path id="compile.classpath">
-			<path refid="alljars" />
-			<path refid="testjars" />
-			<path location="${hq.util}/target/classes" />
-			<path location="${hq.common}/target/classes" />
-			<path location="${hq.pdk.shared}/target/classes" />
-			<path location="${hq.web}/target/classes" />
-		</path>
-		<compile-sources classpath.id="compile.classpath" src.dir="${hq.installer}/src/main/java" resource.dir="${hq.installer}/src/main/resources" output.dir="${hq.installer}/target/classes" />
+		<compile-sources classpath.id="installer.compile.classpath" src.dir="${hq.installer}/src/main/java" resource.dir="${hq.installer}/src/main/resources" output.dir="${hq.installer}/target/classes" />
 	</target>
 
 	<target name="compile-agent" depends="compile-agent-pdk">
@@ -1338,6 +1335,7 @@
 <test-compile module.dir="${hq.pdk.shared}" compile.classpath.id="shared.compile.classpath" />
 <test-compile module.dir="${hq.web}" compile.classpath.id="web.compile.classpath" />
 <test-compile module.dir="${hq.bootstrap}" compile.classpath.id="bootstrap.compile.classpath" />
+<test-compile module.dir="${hq.installer}" compile.classpath.id="installer.compile.classpath" />
 </target>
 
 <target name="run-tests" depends="init-taskdefs,init-tests">
@@ -1355,6 +1353,7 @@
 <test-run module.dir="${hq.pdk.shared}" classpath.id="shared.compile.classpath" />
 <test-run module.dir="${hq.web}" classpath.id="web.compile.classpath" />
 <test-run module.dir="${hq.bootstrap}" classpath.id="bootstrap.compile.classpath" />
+<test-run module.dir="${hq.installer}" classpath.id="installer.compile.classpath" />
 </target>
 
 
@@ -1371,6 +1370,8 @@
 <delete dir="${hq.web}/target/clover" quiet="true" />
 <instrument-module input.dir="${hq.bootstrap}/src/test/java" staging.dir="${hq.bootstrap}/target/clover/staging/src/test/java" resource.dir="${hq.bootstrap}/src/test/resources" output.dir="${hq.bootstrap}/target/test-classes" classpath.id="bootstrap.compile.classpath" />
 <delete dir="${hq.bootstrap}/target/clover" quiet="true" />
+<instrument-module input.dir="${hq.installer}/src/test/java" staging.dir="${hq.installer}/target/clover/staging/src/test/java" resource.dir="${hq.installer}/src/test/resources" output.dir="${hq.installer}/target/test-classes" classpath.id="installer.compile.classpath" />
+<delete dir="${hq.installer}/target/clover" quiet="true" />
 <instrument-module classpath.id="agent.pdk.compile.classpath" input.dir="${hq.pdk.agent}/src/test/java" resource.dir="${hq.pdk.agent}/src/test/resources" output.dir="${hq.pdk.agent}/target/test-classes" staging.dir="${hq.pdk.agent}/target/clover/staging/src/test/java" />
 <delete dir="${hq.pdk.agent}/target/clover" quiet="true" />
 <instrument-module classpath.id="agent.compile.classpath" input.dir="${hq.agent}/src/test/java" resource.dir="${hq.agent}/src/test/resources" output.dir="${hq.agent}/target/test-classes" staging.dir="${hq.agent}/target/clover/staging/src/test/java" />
