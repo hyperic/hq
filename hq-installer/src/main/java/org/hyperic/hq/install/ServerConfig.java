@@ -314,6 +314,7 @@ public class ServerConfig
                         "org.quartz.impl.jdbcjobstore.oracle.OracleDelegate"));
                     schema.addOption(new HiddenConfigOption("server.hibernate.dialect",
                         "org.hyperic.hibernate.dialect.Oracle9Dialect"));
+                    schema.addOption(new HiddenConfigOption("server.connection-validation-sql","select 1 from dual"));
 
                 } else if (dbChoiceStr.startsWith(DBC_PGSQL)) {
                     schema.addOption(new StringConfigOption("server.database-url", StringUtil
@@ -325,6 +326,7 @@ public class ServerConfig
                         "org.quartz.impl.jdbcjobstore.PostgreSQLDelegate"));
                     schema.addOption(new HiddenConfigOption("server.hibernate.dialect",
                         "org.hyperic.hibernate.dialect.PostgreSQLDialect"));
+                    schema.addOption(new HiddenConfigOption("server.connection-validation-sql","select 1"));
                 } else if (dbChoice.equals(DB_MYSQL)) {
                     schema.addOption(new StringConfigOption("server.database-url", StringUtil
                         .replace(Q_JDBC_URL, "%%DBNAME%%", dbChoiceStr),
@@ -335,6 +337,7 @@ public class ServerConfig
                         "org.quartz.impl.jdbcjobstore.StdJDBCDelegate"));
                     schema.addOption(new HiddenConfigOption("server.hibernate.dialect",
                         "org.hyperic.hibernate.dialect.MySQL5InnoDBDialect"));
+                    schema.addOption(new HiddenConfigOption("server.connection-validation-sql","select 1"));
                 } else {
                     if (!installMode.isQuick()) {
                         // In "full" mode, we even let them pick the pgsql port
@@ -350,6 +353,7 @@ public class ServerConfig
                         "org.quartz.impl.jdbcjobstore.PostgreSQLDelegate"));
                     schema.addOption(new HiddenConfigOption("server.hibernate.dialect",
                         "org.hyperic.hibernate.dialect.PostgreSQLDialect"));
+                    schema.addOption(new HiddenConfigOption("server.connection-validation-sql","select 1"));
                 }
 
                 if (dbChoiceStr.equals(DBC_BUILTIN)) {

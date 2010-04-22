@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE server>
+<!-- $Id: jboss-service.xml,v 1.5 2006/03/08 23:27:28 clee Exp $ -->
+
+<server>
+  <!-- ==================================================================== -->
+  <!-- Mail Connection Factory                                              -->
+  <!-- ==================================================================== -->
+
+  <mbean code="org.jboss.mail.MailService"
+         name="jboss:service=SpiderMail">
+    <attribute name="JNDIName">java:/SpiderMail</attribute>
+    <attribute name="User">EAM Application</attribute>
+    <attribute name="Password">password</attribute>
+    <attribute name="Configuration">
+       <!-- Test -->
+       <configuration>
+          <!-- Change to your mail server prototocol -->
+          <property name="mail.store.protocol" value="pop3"/>
+          <property name="mail.transport.protocol" value="smtp"/>
+
+          <!-- Change to the user who will receive mail  -->
+          <property name="mail.user" value="nobody"/>
+
+          <!-- Change to the mail server  -->
+          <property name="mail.pop3.host" value="pop3.nosuchhost.nosuchdomain.com"/>
+
+          <!-- Change to the SMTP gateway server -->
+          <property name="mail.smtp.host" value="@@@server.mail.host@@@"/>
+
+          <!-- Enable debugging output from the javamail classes -->
+          <property name="mail.debug" value="false"/>
+       </configuration>
+    </attribute>
+  </mbean>
+  
+    <!-- This deploys the alert diagnostic service -->
+  <mbean code="org.hyperic.hq.events.server.mbean.AlertConditionEvaluatorDiagnosticService"
+	 name="hyperic.jmx:type=Service,name=AlertConditionEvaluatorDiagnostic">
+  </mbean>
+
+</server>
