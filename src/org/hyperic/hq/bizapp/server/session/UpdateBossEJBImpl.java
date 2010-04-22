@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2010], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -58,7 +58,7 @@ import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.hqu.server.session.UIPlugin;
 import org.hyperic.hq.hqu.server.session.UIPluginManagerEJBImpl;
 import org.hyperic.util.thread.LoggingThreadGroup;
-
+import org.hyperic.util.timer.StopWatch;
 
 /**
  * @ejb:bean name="UpdateBoss"
@@ -75,6 +75,7 @@ public class UpdateBossEJBImpl
     private final UpdateStatusDAO _updateDAO = 
         new UpdateStatusDAO(DAOFactory.getDAOFactory());
     private final String CHECK_URL =  "http://updates.hyperic.com/hq-updates"; 
+    private final int HTTP_TIMEOUT_MILLIS = 30000;
         
     private final Log _log = LogFactory.getLog(UpdateBossEJBImpl.class);
 
@@ -160,6 +161,8 @@ public class UpdateBossEJBImpl
      * @ejb:interface-method
      */
     public void fetchReport() {
+        final boolean debug = _log.isDebugEnabled();
+        final StopWatch watch = new StopWatch();
         UpdateStatus status = getOrCreateStatus();
         Properties req;
         byte[] reqBytes;
@@ -184,29 +187,47 @@ public class UpdateBossEJBImpl
             return;
         }
         
-        _log.debug("Generated report.  Size=" + reqBytes.length + 
-                   " report:\n" + req);
+        if (debug) {
+            _log.debug("Generated report.  Size=" + reqBytes.length + 
+                        " report:\n" + req);
+        }
         
-        PostMethod post = new PostMethod(getCheckURL());
+        String url = getCheckURL();
+        PostMethod post = new PostMethod(url);
         post.addRequestHeader("x-hq-guid", req.getProperty("hq.guid"));
         HttpClient c = new HttpClient();
-        c.setTimeout(5 * 60 * 1000); 
+        c.setConnectionTimeout(HTTP_TIMEOUT_MILLIS);
+        c.setTimeout(HTTP_TIMEOUT_MILLIS);
         
         ByteArrayInputStream bIs = new ByteArrayInputStream(reqBytes);
         
         post.setRequestBody(bIs);
 
-        String response;
-        int statusCode;
+        String response = null;
+        int statusCode = -1;
         try {
+            if (debug) watch.markTimeBegin("post");
             statusCode = c.executeMethod(post);
+            if (debug) watch.markTimeEnd("post");
             
             response = post.getResponseBodyAsString();
         } catch(Exception e) {
-            _log.debug("Unable to get updates", e);
+            if (debug) {
+                _log.debug("Unable to get updates from "
+                            + url, e);
+            }
             return;
         } finally {
             post.releaseConnection();
+            
+            if (debug) {
+                _log.debug("fetchReport: " + watch
+                                + ", currentReport {" + status.getReport()
+                                + "}, latestReport {url=" + url
+                                + ", statusCode=" + statusCode
+                                + ", response=" + response
+                                + "}");
+            }
         }
         
         processReport(statusCode, response);
