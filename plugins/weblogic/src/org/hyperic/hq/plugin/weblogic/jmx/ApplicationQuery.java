@@ -26,24 +26,23 @@
 package org.hyperic.hq.plugin.weblogic.jmx;
 
 import javax.management.MBeanServer;
-import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
+import javax.management.AttributeNotFoundException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.hyperic.hq.plugin.weblogic.WeblogicMetric;
 import org.hyperic.hq.plugin.weblogic.WeblogicProductPlugin;
 
 public class ApplicationQuery extends ServiceQuery {
 
-    public static final String MBEAN_TYPE = "ApplicationRuntime";
+    private static final Log log = LogFactory.getLog("ApplicationQuery");
 
+    public static final String MBEAN_TYPE = "ApplicationRuntime";
     public static final String MBEAN_TYPE_61 = "ApplicationConfig";
 
     private static final String ATTR_EAR = "EAR";
-
-    private static final String[] ATTRS = {
-        "Path", ATTR_NOTES,
-    };
-
     private static final String[] EAR_ATTRS = { ATTR_EAR };
 
     private static final WeblogicQuery[] COMPONENTS = {
@@ -57,7 +56,7 @@ public class ApplicationQuery extends ServiceQuery {
     private String mbeanName;
 
     public String[] getAttributeNames() {
-        return ATTRS;
+        return EAR_ATTRS;
     }
 
     public WeblogicQuery[] getChildQueries() {
@@ -85,9 +84,12 @@ public class ApplicationQuery extends ServiceQuery {
         return WeblogicMetric.PROP_APP;
     }
 
-    public boolean getAttributes(MBeanServer mServer,
-                                 ObjectName name) {
+    public boolean isEAR(){
+        return "true".equalsIgnoreCase(getAttribute(ATTR_EAR));
+    }
 
+    public boolean getAttributes(MBeanServer mServer,
+            ObjectName name) {
         String appName = name.getKeyProperty("Name");
 
         ServerQuery server = (ServerQuery)getParent();
@@ -101,35 +103,13 @@ public class ApplicationQuery extends ServiceQuery {
         }
 
         if (server.getDiscover().isInternalApp(appName)) {
+            log.debug(appName+" is a internal Application");
             return false;
         }
 
-        if (isServer91()) {
-            super.getAttributes(mServer, name, EAR_ATTRS);
-            if ("false".equals(getAttribute(ATTR_EAR))) {
-                //internal stuff and wierdo data source containers
-                return false;
-            }
-        }
-        
         setName(appName);
+        super.getAttributes(mServer, name);
 
-        String appMBeanName =
-            name.getDomain() + ":" + 
-            "Name=" + appName + "," +
-            "Type=Application";
-
-        ObjectName appMBean;
-        try {
-            appMBean = new ObjectName(appMBeanName);
-        } catch (MalformedObjectNameException e) {
-            //notgonnahappen
-            WeblogicDiscover.getLog().error(e.getMessage(), e);
-            return true;
-        }
-
-        super.getAttributes(mServer, appMBean, ATTRS);
-        
         return true;
     }
 }

@@ -191,18 +191,14 @@ public class WeblogicDiscover {
                 WeblogicQuery type = query.cloneInstance();
                 if (type.getAttributes(mServer, obj)) {
                     types.add(type);
-                }
-                else {
-                    continue;
-                }
+                    WeblogicQuery[] childQueries = query.getChildQueries();
 
-                WeblogicQuery[] childQueries = query.getChildQueries();
-
-                for (int i = 0; i < childQueries.length; i++) {
-                    WeblogicQuery childQuery = childQueries[i];
-                    childQuery.setParent(type);
-                    childQuery.setVersion(type.getVersion());
-                    find( mServer, childQuery, types);
+                    for (int i = 0; i < childQueries.length; i++) {
+                        WeblogicQuery childQuery = childQueries[i];
+                        childQuery.setParent(type);
+                        childQuery.setVersion(type.getVersion());
+                        find( mServer, childQuery, types);
+                    }
                 }
             }
         }
