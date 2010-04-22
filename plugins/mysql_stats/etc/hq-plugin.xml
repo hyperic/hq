@@ -2113,10 +2113,18 @@
   monitoring are:
   </p>
   <ul>
-    <li>The configured mysql has the ability to connect to the MySQL server specified by the ${jdbcUrl}</li>
-    <li>The user ${jdbcUser} is able to execute the following statements:
-        'SHOW GLOBAL STATUS', 'SHOW SLAVE STATUS' (minimal privileges needed:
-        SELECT, REPLICATION CLIENT)</li>
+    <li>The configured mysql must have the ability to connect to the MySQL server specified by the ${jdbcUrl}</li>
+    <li>
+        The user ${jdbcUser} is able to execute the following statements:
+        'SHOW GLOBAL STATUS', 'SHOW SLAVE STATUS', 'SHOW DATABASES'
+        (minimal privileges needed: SELECT, REPLICATION CLIENT)
+        <ul>
+        Examples: <br>
+        mysql> create user 'hqagent'@'localhost' identified by 'hqagent'; <br>
+        mysql> grant show databases on *.* to 'hqagent'@'localhost'; <br>
+        mysql> grant select on *.* to 'hqagent'@'localhost'; <br>
+        </ul>
+    </li>
     <li>To enable full process monitoring of the MySQL daemon the agent user must either own the process or have permissions to view all process stats.</li>
   </ul>
   <p>Shared properties (values propagate to child services):</p>
