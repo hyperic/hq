@@ -1,7 +1,7 @@
 %define HQ_Component_Name       hyperic-hq-installer
-%define HQ_Component_Version    4.1.2
+%define HQ_Component_Version    4.2.0.7
 %define HQ_Component_Edition	EE
-%define HQ_Component_Build	1053-x86-linux
+%define HQ_Component_Build	1285-x86-linux
 %define HQ_Component_Release   	EE.1 
 
 %define HQ_User			hyperic
@@ -116,12 +116,13 @@ if [ -d /opt/hyperic/server-current ] && cd /opt/hyperic/server-current; then
 else
 	cd %{prefix}/%{name}
         installer-%{version}-%{HQ_Component_Edition}/data/hqdb/tune-os.sh > /dev/null 2> /dev/null
-        /bin/su hyperic -c "expect/install.exp %{prefix}" 
-        #/bin/su hyperic -c "expect/install.exp %{prefix}" > /dev/null 2> /dev/null
+        /bin/su hyperic -c "expect/install_ee.exp %{prefix}" 
+        #/bin/su hyperic -c "expect/install_ee.exp %{prefix}" > /dev/null 2> /dev/null
         #echo "%{prefix}/server-current/hqdb/bin/postgres -D %{prefix}/server-current/hqdb/data -i" > %{prefix}/server-%{version}-%{HQ_Component_Edition}/hqdb/data/postmaster.opts
         cd $RPM_BUILD_ROOT/%{prefix}
         /bin/su hyperic -c "/bin/ln -snf server-%{version}-%{HQ_Component_Edition} server-current"
 fi
+%{__cp} %{prefix}/%{name}/installer-%{version}-%{HQ_Component_Edition}/logs/hq-install.log %{prefix}/server-%{version}-%{HQ_Component_Edition}/hq-install.log
 %{__rm} -Rf %{prefix}/%{name}
 
 %postun
@@ -163,6 +164,26 @@ exit 0
 %config %{prefix}/hq-plugins
 
 %changelog
+* Thu Apr 22 2010 Hyperic Support <support@hyperic.com> 4.2.0.7
+* Tue Mar  9 2010 Hyperic Support <support@hyperic.com> 4.2.0
+* Tue Jan 26 2010 Hyperic Support <support@hyperic.com> 4.2.0
+* Sat Jan 23 2010 Hyperic Support <support@hyperic.com> 4.2.0.4
+* Fri Jan 15 2010 Hyperic Support <support@hyperic.com> 4.2.0.3
+* Wed Dec 16 2009 Hyperic Support <support@hyperic.com> 4.2.0
+* Tue Dec  8 2009 Hyperic Support <support@hyperic.com> 4.2.0.2
+* Thu Nov 19 2009 Hyperic Support <support@hyperic.com> 4.2.0.1
+* Mon Nov  9 2009 Hyperic Support <support@hyperic.com> 4.2.0
+* Mon Nov  9 2009 Hyperic Support <support@hyperic.com> 4.2.0
+* Thu Nov  5 2009 Hyperic Support <support@hyperic.com> 4.2.0
+* Tue Oct 13 2009 Hyperic Support <support@hyperic.com> 4.1.4
+* Tue Oct 13 2009 Hyperic Support <support@hyperic.com> 4.1.4.1
+* Tue Oct 13 2009 Hyperic Support <support@hyperic.com> 4.1.4
+* Thu Oct  1 2009 Hyperic Support <support@hyperic.com> 4.1.2.1
+* Tue Aug 25 2009 Hyperic Support <support@hyperic.com> 4.1.2
+* Thu Jun 25 2009 Hyperic Support <support@hyperic.com> 4.1.2
+* Thu Jun 11 2009 Hyperic Support <support@hyperic.com> 4.1.3
+* Wed Jun 10 2009 Hyperic Support <support@hyperic.com> 4.1.3
+* Tue Jun  9 2009 Hyperic Support <support@hyperic.com> 4.1.3
 * Thu May  7 2009 Hyperic Support <support@hyperic.com> 4.1.2
 * Fri May  1 2009 Hyperic Support <support@hyperic.com> 4.1.1
 * Mon Apr  6 2009 Hyperic Support <support@hyperic.com> 4.1.1

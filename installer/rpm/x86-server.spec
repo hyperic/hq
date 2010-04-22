@@ -1,6 +1,6 @@
 %define HQ_Component_Name       hyperic-hq-installer
-%define HQ_Component_Version    4.1.2
-%define HQ_Component_Build	1053-x86-linux
+%define HQ_Component_Version    4.2.0.7
+%define HQ_Component_Build	1285-x86-linux
 %define HQ_Component_Release   	1 
 
 %define HQ_User			hyperic
@@ -121,6 +121,7 @@ else
         cd $RPM_BUILD_ROOT/%{prefix}
         /bin/su hyperic -c "/bin/ln -snf server-%{version} server-current"
 fi
+%{__cp} %{prefix}/%{name}/installer-%{version}/logs/hq-install.log %{prefix}/server-%{version}/hq-install.log
 %{__rm} -Rf %{prefix}/%{name}
 
 %postun
@@ -140,14 +141,14 @@ if [ -f /etc/init.d/hyperic-hq-server ] && [ -f /tmp/hyperic-hq-server-was-runni
     %{__rm} -f /tmp/hyperic-hq-server-was-running-%{version}-%{release}
     echo
     echo "The new version of HQ Server has been started using your existing configuration."
-    echo "The installation log can be found in %{prefix}/server-%{version}-%{HQ_Component_Edition}/hq-install.log."
+    echo "The installation log can be found in %{prefix}/server-%{version}/hq-install.log."
     echo "Manually starting the HQ Server should be done using the hyperic user."
     echo
 elif [ -f /etc/init.d/hyperic-hq-server ]; then
     echo
     echo "The HQ Server has successfully been installed, and the service has been"
     echo "configured to start at boot."
-    echo "The installation log can be found in %{prefix}/server-%{version}-%{HQ_Component_Edition}/hq-install.log."
+    echo "The installation log can be found in %{prefix}/server-%{version}/hq-install.log."
     echo "Manually starting the HQ Server should be done using the hyperic user."
     echo
 fi
@@ -162,6 +163,15 @@ exit 0
 %config %{prefix}/hq-plugins
 
 %changelog
+* Thu Apr 22 2010 Hyperic Support <support@hyperic.com> 4.2.0.7
+* Sat Jan 23 2010 Hyperic Support <support@hyperic.com> 4.2.0.4
+* Fri Jan 15 2010 Hyperic Support <support@hyperic.com> 4.2.0.3
+* Tue Dec  8 2009 Hyperic Support <support@hyperic.com> 4.2.0.2
+* Thu Nov  5 2009 Hyperic Support <support@hyperic.com> 4.2.0
+* Thu Jun 25 2009 Hyperic Support <support@hyperic.com> 4.1.2
+* Thu Jun 11 2009 Hyperic Support <support@hyperic.com> 4.1.3
+* Wed Jun 10 2009 Hyperic Support <support@hyperic.com> 4.1.3
+* Tue Jun  9 2009 Hyperic Support <support@hyperic.com> 4.1.3
 * Thu May  7 2009 Hyperic Support <support@hyperic.com> 4.1.2
 * Mon Apr  6 2009 Hyperic Support <support@hyperic.com> 4.1.1
 * Fri Mar  6 2009 Hyperic Support <support@hyperic.com> 4.1.0
