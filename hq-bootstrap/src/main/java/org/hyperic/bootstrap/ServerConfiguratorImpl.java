@@ -54,7 +54,7 @@ public class ServerConfiguratorImpl implements ServerConfigurator {
    
     private String serverHome;
     private String engineHome;
-    private Properties serverProps;
+    private Properties serverProps = new Properties();
 
     @Autowired
     public ServerConfiguratorImpl(@Value("#{ systemProperties['server.home'] }") String serverHome,
