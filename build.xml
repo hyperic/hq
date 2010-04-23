@@ -1062,6 +1062,8 @@
       </fileset>
     </copy>
 
+    <hqplugin name="activemq"/>
+
     <hqplugin name="apache"/>
 
     <hqplugin name="tomcat"/>
