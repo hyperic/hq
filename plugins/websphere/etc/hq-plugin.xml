@@ -258,16 +258,38 @@
   <![CDATA[
     <p><h4>Enable WebSphere PMI</h4></p>
 
-    WebSphere 6.x has PMI enabled at the Basic level by default,
+    WebSphere ${product.version} has PMI enabled at the Basic level by default,
     which is sufficient for HQ to collect the metrics enabled by
     default.  The PMI level may need to be increased to collect
     certain metrics not enabled by default.
 
     <ul>
-      <li>Using a Web browser open http://${admin.host}:9060/admin </li>
+      <li>Using a Web browser open the administration view </li>
       <li><b>Server</b> -> <b>Application Servers</b> ->
-          <b>${server.name}</b> -> <b>Performance Monitoring</b> </li>
+          <b>${server.name}</b> -> <b>Performance Monitoring Infrastructure</b> </li>
       <li>Check the Startup button </li>
+      <li>Set level to Basic or higher </li>
+      <li>Click OK </li>
+      <li>Click Save to apply changes to the master configuration </li>
+      <li>Restart server </li>
+    </ul>
+  ]]>
+  </help>
+  
+  <help name="enable-pmi-7">
+  <![CDATA[
+    <p><h4>Enable WebSphere PMI</h4></p>
+
+    WebSphere ${product.version} has PMI enabled at the Basic level by default,
+    which is sufficient for HQ to collect the metrics enabled by
+    default.  The PMI level may need to be increased to collect
+    certain metrics not enabled by default.
+
+    <ul>
+      <li>Using a Web browser open the administration view </li>
+      <li><b>Server</b> -> <b>Application Servers</b> ->
+          <b>${server.name}</b> -> <b>Performance Monitoring Infrastructure</b> </li>
+      <li>Select the Runtime or Configuration tab </li>
       <li>Set level to Basic or higher </li>
       <li>Click OK </li>
       <li>Click Save to apply changes to the master configuration </li>
@@ -286,6 +308,25 @@
     ${CMD.prompt} ${CMD.env.set} HQ_JAVA_HOME=${was.install.root}${FILE.sep}java
     ${CMD.prompt} hq-agent.${CMD.ext} start
     </pre>
+    
+    <p>
+    <h4>Add the following property definition to the agent.properties file for an an HQ Agent that will manage WebSphere ${product.version}:</h4>
+    </p>
+    
+    <pre>websphere.useext=true</pre>
+  ]]>
+  </help>
+
+  <help name="agent-setup-7">
+  <![CDATA[
+    <p>
+    <h4>The HQ Agent must be run using the IBM JDK to monitor WebSphere:</h4>
+    </p>
+
+    <pre>
+    ${CMD.prompt} ${CMD.env.set} HQ_JAVA_HOME=${was.install.root}${FILE.sep}java
+    ${CMD.prompt} hq-agent.${CMD.ext} start
+    </pre>    
   ]]>
   </help>
 
@@ -309,17 +350,20 @@
   ]]>
   </help>
 
+  <help name="WebSphere Admin 7.0"
+        include="agent-setup-7,enable-pmi-7,config-auth-6"/>
+	
   <help name="WebSphere Admin 6.0"
         include="agent-setup-6,enable-pmi-6,config-auth-6"/>
 
   <help name="WebSphere Admin 6.1"
         include="agent-setup-6,enable-pmi-6,config-auth-6"/>
 
-  <help name="WebSphere Admin 6.0 Win32,config-auth-6"
-        include="enable-pmi-6"/>
+  <help name="WebSphere Admin 6.0 Win32"
+        include="enable-pmi-6,config-auth-6"/>
 
-  <help name="WebSphere Admin 6.1 Win32,config-auth-6"
-        include="enable-pmi-6"/>
+  <help name="WebSphere Admin 6.1 Win32"
+        include="enable-pmi-6,config-auth-6"/>
 
   <help name="websphere-server">
   <![CDATA[
