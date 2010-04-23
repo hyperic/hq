@@ -665,13 +665,20 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
     }
     
     /**
+     * @param parentList {@link List} of {@link Resource}s
      * @return {@link Collection} of {@link ResourceEdge}s
      * @ejb:interface-method
      */
-    public Collection findResourceEdges(ResourceRelation relation,
-                                        Resource parent) {
-        return getResourceEdgeDAO()
-                    .findDescendantEdges(parent, relation);
+    public Collection findResourceEdges(ResourceRelation relation, List parentList) {
+        return getResourceEdgeDAO().findDescendantEdges(parentList, relation);
+    }
+    
+    /**
+     * @return {@link Collection} of {@link ResourceEdge}s
+     * @ejb:interface-method
+     */
+    public Collection findResourceEdges(ResourceRelation relation, Resource parent) {
+        return getResourceEdgeDAO().findDescendantEdges(parent, relation);
     }
     
     /**

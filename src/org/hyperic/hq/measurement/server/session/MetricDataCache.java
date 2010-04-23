@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
@@ -123,6 +124,34 @@ public class MetricDataCache {
         }
 
         return true;            
+    }
+
+    /**
+     * Get {@link MetricValue}s from the cache within the specified time range, from timestamp
+     * to currentTimeMillis.
+     *
+     * @param mids {@link List} of {@link Integer}s representing MeasurementIds.
+     * @param timestamp the start of the time range (inclusive) in millis.
+     * @return {@link Map} of {@link Integer} of measurementIds to {@link MetricValue}
+     * from the cache.  If the mid does not exist or the timestamp of value is out of the
+     * specified window the returned Map will not include any representation of the mid.
+     */
+    public Map getAll(List mids, long timestamp) {
+        final Map rtn = new HashMap(mids.size());
+        synchronized (_cacheLock) {
+            for (final Iterator it=mids.iterator(); it.hasNext(); ) {
+                final Integer mid = (Integer) it.next();
+                final Element elem = _cache.get(mid);
+                if (elem == null) {
+                    continue;
+                }
+                final MetricValue val = (MetricValue) elem.getObjectValue();
+                if (val != null && val.getTimestamp() >= timestamp) {
+                    rtn.put(mid, val);
+                }
+            }
+        }
+        return rtn;
     }
 
     /**

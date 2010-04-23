@@ -27,6 +27,7 @@ package org.hyperic.hq.authz.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -38,7 +39,6 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.dao.HibernateDAO;
 
@@ -88,16 +88,32 @@ public class ResourceEdgeDAO
         return res;
     }
     
-    Collection findDescendantEdges(Resource r, ResourceRelation rel) {
-        String sql = "from ResourceEdge e where e.from = :from " + 
+    /**
+     * @return {@link Collection} of {@link ResourceEdge}s
+     */
+    Collection findDescendantEdges(List resources, ResourceRelation rel) {
+        String sql = "from ResourceEdge e " +
+                     "where e.from in (:resources) " +
                      "and distance > :distance " +
                      "and rel_id = :rel_id ";
+        List rtn = new ArrayList();
+        Query query = getSession().createQuery(sql);
+        int size = resources.size();
+        for (int i=0; i<size; i+=BATCH_SIZE) {
+            int end = Math.min(i+BATCH_SIZE, size);
+            rtn.addAll(query.setParameterList("resources", resources.subList(i, end))
+                            .setInteger("distance", 0)
+                            .setInteger("rel_id", rel.getId().intValue())
+                            .list());
+        }
+        return rtn;
+    }
 
-        return getSession().createQuery(sql)
-                .setParameter("from", r)
-                .setInteger("distance", 0)
-                .setInteger("rel_id", rel.getId().intValue())
-                .list();
+    /**
+     * @return {@link Collection} of {@link ResourceEdge}s
+     */
+    Collection findDescendantEdges(Resource r, ResourceRelation rel) {
+        return findDescendantEdges(Collections.singletonList(r), rel);
     }
     
     List findDescendantEdgesByNetworkRelation(Integer resourceId,
