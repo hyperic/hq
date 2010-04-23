@@ -452,18 +452,26 @@ public abstract class ServerDetector
         }
     }
 
-    private File findVersionFile(File dir, String verFile) {
-        File res = null;
-        File[] files = dir.listFiles(new RegExprFilenameFilter(verFile));
-        if (files.length == 0) {
-            File[] dirs = dir.listFiles(new DirFilter());
-            for (int i = 0; ((i < dirs.length) && (res==null)); i++) {
-                res = findVersionFile(dirs[i], verFile);
+    protected File findVersionFile(File dir, Pattern pattern) { 
+        Iterator files = Arrays.asList(dir.listFiles()).iterator();
+        Set subDirs = new HashSet();
+        while (files.hasNext()) {
+            File file = (File) files.next();
+            if (file.isDirectory()) {
+                subDirs.add(file);
+            } else if (pattern.matcher(file.getAbsolutePath()).find()) {
+                return file;
             }
-        } else {
-            res = files[0];
         }
-        return res;
+        Iterator it=subDirs.iterator();
+        while (it.hasNext()) {
+            File subDir=(File)it.next();
+            File versionFile = findVersionFile(subDir, pattern);
+            if (versionFile != null) {
+                return versionFile;
+            }
+        }
+        return null;
     }
 
     /**
@@ -482,13 +490,14 @@ public abstract class ServerDetector
         if (versionFile != null) {
             if (versionFile.startsWith("**/")) {  // recursive & regexpr
                 versionFile=versionFile.substring(3);
-                File f=findVersionFile(new File(installpath),versionFile);
+                Pattern pattern=Pattern.compile(versionFile);
+                File f=findVersionFile(new File(installpath),pattern);
                 if (f==null) {
                     return false;
                 }
                 
                 getLog().debug(VERSION_FILE + "=" + versionFile + " matches -> " + f);
-                Matcher m = Pattern.compile(versionFile).matcher(f.getAbsolutePath());
+                Matcher m = pattern.matcher(f.getAbsolutePath());
                 m.find();
                 if(m.groupCount()!=0){  // have version group
                     if(!getTypeInfo().getVersion().equals(m.group(1))){
@@ -1096,24 +1105,5 @@ public abstract class ServerDetector
     public List getServiceConfigs(String type) {
         return ((AutoinventoryPluginManager)getManager()).
             getServiceConfigs(type);
-    }
-
-    private class DirFilter implements FileFilter{
-        public boolean accept(File file) {
-            return file.isDirectory();
-        }
-
-    }
-
-    private class RegExprFilenameFilter implements FileFilter{
-        Pattern pattern;
-        public RegExprFilenameFilter(String regexp){
-            pattern=Pattern.compile(regexp);
-        }
-
-        public boolean accept(File file) {
-            return pattern.matcher(file.getAbsolutePath()).find();
-        }
-
     }
 }
