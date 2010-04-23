@@ -112,6 +112,7 @@
       <property name="jdbc.password" value="${server.database-password}"/>
       <property name="typemap.file" value="${install.dir}/data/common-dbsetup-typemap.xml"/>
       <property name="schema.target" value="LATEST"/>
+      <property name="server.upgradedir" value="${server.upgradedir}"/>
     </ant>
     <sql driver="${server.database-driver}"
          url="${server.database-url}"

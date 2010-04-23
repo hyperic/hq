@@ -11467,6 +11467,12 @@ has already been defined.
 		]]>
 	 </groovy>
  </schemaSpec>
+ 
+  <!-- Remove old HQ JBoss 4.x and HQ Tomcat 6.0 servers from server inventory -->
+ <schemaSpec version="3.196">
+ 	<removeOldHQServers upgradeDir="${server.upgradedir}"/>
+ </schemaSpec>
+	
 </dbupgrade>
 </target>
 </project>

@@ -42,7 +42,7 @@ import org.apache.tools.ant.Task;
 public abstract class SchemaSpecTask extends Task {
     protected String _ctx = SchemaSpecTask.class.getName();
 
-    private Connection _conn;
+    protected Connection _conn;
     private DBUpgrader _upgrader;
 
     private static Map SQL_TYPES = new HashMap();
