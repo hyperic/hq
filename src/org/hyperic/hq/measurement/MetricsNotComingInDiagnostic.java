@@ -114,12 +114,12 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
         final Map avails = aMan.getLastAvail(resources, measCache);
         final List children = new ArrayList();
         final Map childrenToPlatform = getChildren(platforms, measCache, avails, children);
-        final List measurements = new ArrayList(mMan.getEnabledMeasurements(children).values());
+        final Collection measurements = mMan.getEnabledMeasurements(children).values();
         final Map values = getLastMetricValues(measurements);
         buf.append(getStatus(measurements, values, avails, childrenToPlatform));
     }
 
-    private StringBuilder getStatus(List measurementLists, Map values, Map avails,
+    private StringBuilder getStatus(Collection measurementLists, Map values, Map avails,
                                     Map childrenToPlatform) {
         final Map platHierarchyNotReporting = new HashMap();
         for (final Iterator it=measurementLists.iterator(); it.hasNext(); ) {
@@ -207,10 +207,10 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
     /**
      * @return {@link Map} of {@link Integer} of measurementIds to {@link MetricValue}
      */
-    private Map getLastMetricValues(List measurements) {
+    private Map getLastMetricValues(Collection measLists) {
         final MetricDataCache cache = MetricDataCache.getInstance();
         final List mids = new ArrayList();
-        for (final Iterator it=measurements.iterator(); it.hasNext(); ) {
+        for (final Iterator it=measLists.iterator(); it.hasNext(); ) {
             final List measList = (List) it.next();
             for (final Iterator mit=measList.iterator(); mit.hasNext(); ) {
                 final Measurement m = (Measurement) mit.next();

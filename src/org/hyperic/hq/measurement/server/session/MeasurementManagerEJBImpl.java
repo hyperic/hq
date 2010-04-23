@@ -650,6 +650,16 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     }
 
     /**
+     * @param aeids {@link List} of {@link Resource}s
+     * @return {@link Map} of {@link Integer} representing resourceId to
+     * {@link List} of {@link Measurement}s
+     * @ejb:interface-method
+     */
+    public Map getEnabledMeasurements(List resources) {
+        return getMeasurementDAO().findEnabledByResources(resources);
+    }
+
+    /**
      * @param aeids {@link List} of {@link AppdefEntityID}s
      * @return {@link Map} of {@link Integer} representing resourceId to
      * {@link List} of {@link Measurement}s
