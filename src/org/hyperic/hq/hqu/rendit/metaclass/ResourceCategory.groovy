@@ -22,6 +22,7 @@ import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl as PlatMan
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl as ServerMan
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl as ServiceMan
 import org.hyperic.hq.bizapp.server.session.AppdefBossEJBImpl as AppdefBoss
+import org.hyperic.hq.bizapp.server.session.MeasurementBossEJBImpl as MeasurementBoss
 import org.hyperic.hq.common.VetoException
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl as DefMan
 import org.hyperic.hq.events.server.session.AlertManagerEJBImpl as AlertMan
@@ -30,8 +31,8 @@ import org.hyperic.hq.livedata.server.session.LiveDataManagerEJBImpl
 import org.hyperic.hq.control.server.session.ControlManagerEJBImpl as CMan
 import org.hyperic.hq.control.server.session.ControlScheduleManagerEJBImpl as CSMan
 import org.hyperic.hq.product.PluginNotFoundException
+import org.hyperic.hq.measurement.MeasurementConstants
 import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl as DMan
-
 import org.hyperic.hibernate.PageInfo
 import org.hyperic.hq.livedata.shared.LiveDataCommand
 import org.hyperic.hq.livedata.shared.LiveDataResult
@@ -149,6 +150,24 @@ class ResourceCategory {
      */
      static Collection getMetrics(Resource r) {
         dman.findMeasurements(null, r)
+    }
+    
+    /**
+     * Get the metrics summary for a resource
+     */
+    static Map getMetricsSummary(Resource r, AuthzSubject user, long begin, long end) {
+        def mgr = SessionManager.instance
+        def sessionId = mgr.put(user)
+        def aeids = [new AppdefEntityID(r)] as AppdefEntityID[]
+        def boss = MeasurementBoss.one
+        
+        return boss.findMetrics(sessionId,
+						 		aeids,
+						 		MeasurementConstants.FILTER_NONE,
+						 		null,
+						 		begin,
+						 		end, 
+						 		false)  	
     }
 
     /**
