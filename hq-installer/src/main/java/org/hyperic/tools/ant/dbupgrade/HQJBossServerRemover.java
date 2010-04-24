@@ -1,18 +1,22 @@
 package org.hyperic.tools.ant.dbupgrade;
 
+import java.io.File;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
 import org.apache.tools.ant.BuildException;
 import org.hyperic.util.jdbc.DBUtil;
+
 /**
- * Removes old self-monitoring resources representing the HQ JBoss server and its embedded Tomcat server.
- * Since it is possible for one HQ server to be monitoring other HQ servers which have not yet been upgraded,
- * we only remove the resources whose installpath matches the server we are upgrading
+ * Removes old self-monitoring resources representing the HQ JBoss server and
+ * its embedded Tomcat server. Since it is possible for one HQ server to be
+ * monitoring other HQ servers which have not yet been upgraded, we only remove
+ * the resources whose installpath matches the server we are upgrading
  * @author jhickey
- *
+ * 
  */
 public class HQJBossServerRemover
     extends SchemaSpecTask {
@@ -34,9 +38,16 @@ public class HQJBossServerRemover
             stmt1 = conn.createStatement();
             stmt2 = conn.createStatement();
             log(SCHEMA_MOD_IN_PROGRESS);
-            removeServer(stmt1, "HQ JBoss 4.x", upgradeDir + "/hq-engine/server/default");
-            removeServer(stmt2, "HQ Tomcat 6.0", upgradeDir +
-                                                 "/hq-engine/server/default/deploy/jboss-web.deployer");
+            removeServer(stmt1, "HQ JBoss 4.x", new File(upgradeDir + File.separator + "hq-engine" +
+                                                         File.separator + "server" +
+                                                         File.separator + "default")
+                .getAbsolutePath());
+            removeServer(stmt2, "HQ Tomcat 6.0", new File(upgradeDir + File.separator +
+                                                          "hq-engine" + File.separator + "server" +
+                                                          File.separator + "default" +
+                                                          File.separator + "deploy" +
+                                                          File.separator + "jboss-web.deployer")
+                .getAbsolutePath());
         } catch (SQLException e) {
             throw new BuildException(HQJBossServerRemover.class + ": " + e.getMessage(), e);
         } finally {
@@ -47,14 +58,17 @@ public class HQJBossServerRemover
 
     private void removeServer(Statement stmt, String autoinventoryidentifier, String installpath)
         throws SQLException {
-        String sql;
         ResultSet rs = null;
         Statement serverUpdateStmt = null;
+        PreparedStatement serverQuery = null;
         try {
-            sql = "SELECT id,resource_id FROM EAM_SERVER WHERE autoinventoryidentifier='" +
-                  autoinventoryidentifier + "' AND installpath='" + installpath + "'";
-            rs = stmt.executeQuery(sql);
-
+            serverQuery = getConnection()
+                .prepareStatement(
+                    "SELECT id,resource_id FROM EAM_SERVER WHERE autoinventoryidentifier=? AND installpath=?");
+            serverQuery.setString(1, autoinventoryidentifier);
+            serverQuery.setString(2, installpath);
+            rs = serverQuery.executeQuery();
+          
             // There should never be more than one server with the same
             // identifier and installpath, but we'll log count just to be sure
             int removedServers = 0;
@@ -97,15 +111,18 @@ public class HQJBossServerRemover
                     configResponseId);
                 removedServers++;
             }
-            log("Removed " + deletedAlertDefinitions + " " + autoinventoryidentifier + " alert definitions");
-            log("Removed " + removedFromGroups + " " +  autoinventoryidentifier + " resources from groups");
-            deletedAlertDefinitions=0;
+            log("Removed " + deletedAlertDefinitions + " " + autoinventoryidentifier +
+                " alert definitions");
+            log("Removed " + removedFromGroups + " " + autoinventoryidentifier +
+                " resources from groups");
+            deletedAlertDefinitions = 0;
             removedFromGroups = 0;
             log("Removed " + removedServers + " " + autoinventoryidentifier + " server" +
                 ((removedServers > 1) ? "s" : ""));
         } finally {
             DBUtil.closeResultSet(HQJBossServerRemover.class, rs);
             DBUtil.closeStatement(HQJBossServerRemover.class, serverUpdateStmt);
+            DBUtil.closeStatement(HQJBossServerRemover.class, serverQuery);
         }
 
     }
@@ -180,12 +197,13 @@ public class HQJBossServerRemover
                            resourceId);
 
         stmt.executeUpdate("DELETE FROM EAM_EVENT_LOG" + " WHERE resource_id =" + resourceId);
-        
-        stmt.executeUpdate("DELETE FROM EAM_ALERT WHERE alert_definition_id in (SELECT id FROM EAM_ALERT_DEFINITION" +
-                                         " WHERE resource_id =" + resourceId + ")");
+
+        stmt
+            .executeUpdate("DELETE FROM EAM_ALERT WHERE alert_definition_id in (SELECT id FROM EAM_ALERT_DEFINITION" +
+                           " WHERE resource_id =" + resourceId + ")");
 
         int defsDeleted = stmt.executeUpdate("DELETE FROM EAM_ALERT_DEFINITION" +
-                                         " WHERE resource_id =" + resourceId);
+                                             " WHERE resource_id =" + resourceId);
         deletedAlertDefinitions += defsDeleted;
 
         stmt.executeUpdate("DELETE from EAM_RESOURCE WHERE id = " + resourceId);
