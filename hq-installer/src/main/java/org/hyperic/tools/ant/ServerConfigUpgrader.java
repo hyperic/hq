@@ -33,7 +33,8 @@ public class ServerConfigUpgrader
     private String upgradeDir;
 
     /**
-     * Mail server config properties to grab from the old jboss-service-events.xml file and add to hq-server.conf
+     * Mail server config properties to grab from the old
+     * jboss-service-events.xml file and add to hq-server.conf
      */
     private static final Set<String> UPGRADE_MAIL_PROPERTIES = new HashSet<String>();
     static {
@@ -46,11 +47,12 @@ public class ServerConfigUpgrader
         UPGRADE_MAIL_PROPERTIES.add("mail.smtp.socketFactory.fallback");
         UPGRADE_MAIL_PROPERTIES.add("mail.smtp.socketFactory.class");
     }
-    
+
     /**
-     * hq-server.conf properties no longer used.  While not harmful to leave them in, we take them out to avoid clutter
+     * hq-server.conf properties no longer used. While not harmful to leave them
+     * in, we take them out to avoid clutter
      */
-    private static final Set<String> UNUSED_PROPS =  new HashSet<String>();
+    private static final Set<String> UNUSED_PROPS = new HashSet<String>();
     static {
         UNUSED_PROPS.add("hq-engine.jnp.port");
         UNUSED_PROPS.add("hq-engine.server.port");
@@ -85,7 +87,8 @@ public class ServerConfigUpgrader
         try {
             mailConfigInputStream = new FileInputStream(mailServiceConfig);
         } catch (FileNotFoundException e) {
-            //if we are upgrading a server after 4.3, the JBoss MailService config will not be present
+            // if we are upgrading a server after 4.3, the JBoss MailService
+            // config will not be present
             return;
         }
         log("Parsing jboss mail service configuration=" + mailServiceConfig.getAbsolutePath());
@@ -169,32 +172,50 @@ public class ServerConfigUpgrader
         addNewProps(serverProps);
         return serverProps;
     }
-    
+
     private void removeOldProps(Properties serverProps) {
-        //remove props no longer needed
-        for(String unusedProp: UNUSED_PROPS) {
-            if(serverProps.containsKey(unusedProp)) {
+        // remove props no longer needed
+        for (String unusedProp : UNUSED_PROPS) {
+            if (serverProps.containsKey(unusedProp)) {
                 serverProps.remove(unusedProp);
             }
         }
     }
-    
+
     private void addNewProps(Properties serverProps) {
-        //Add new properties that we've placed in hq-server.conf
-        // Add protocol version to upgraded servers that use the embedded database
+        // Add new properties that we've placed in hq-server.conf
+        // Add protocol version to upgraded servers that use the embedded
+        // database
         String jdbcUrl = serverProps.getProperty("server.database-url");
         if (jdbcUrl.startsWith("jdbc:postgresql:") && !jdbcUrl.endsWith("?protocolVersion=2")) {
             serverProps.setProperty("server.database-url", jdbcUrl + "?protocolVersion=2");
         }
-        
+
+        String dbProp = serverProps.getProperty("server.database");
+        if (dbProp == null) {
+            // this shouldn't happen, but return to avoid NPEs if it does
+            return;
+        }
         // Add new DB connection validation sql
-        if(serverProps.getProperty("server.connection-validation-sql") == null) {
+        if (serverProps.getProperty("server.connection-validation-sql") == null) {
             String validationSQL = "select 1";
-            String dbProp = serverProps.getProperty("server.database");
-            if (dbProp != null && dbProp.startsWith("Oracle")) {
+            if (dbProp.startsWith("Oracle")) {
                 validationSQL += " from dual";
             }
             serverProps.setProperty("server.connection-validation-sql", validationSQL);
+        }
+        // Add new hibernate dialect property
+        if (serverProps.getProperty("server.hibernate.dialect") == null) {
+            if (dbProp.startsWith("Oracle")) {
+                serverProps.setProperty("server.hibernate.dialect",
+                    "org.hyperic.hibernate.dialect.Oracle9Dialect");
+            } else if (dbProp.equals("MySQL")) {
+                serverProps.setProperty("server.hibernate.dialect",
+                    "org.hyperic.hibernate.dialect.MySQL5InnoDBDialect");
+            } else {
+                serverProps.setProperty("server.hibernate.dialect",
+                    "org.hyperic.hibernate.dialect.PostgreSQLDialect");
+            }
         }
     }
 

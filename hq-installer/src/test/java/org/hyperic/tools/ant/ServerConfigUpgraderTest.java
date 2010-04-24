@@ -8,10 +8,11 @@ import org.apache.tools.ant.BuildException;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+
 /**
  * Unit test of {@link ServerConfigUpgrader}
  * @author jhickey
- *
+ * 
  */
 public class ServerConfigUpgraderTest {
 
@@ -74,6 +75,8 @@ public class ServerConfigUpgraderTest {
         InputStream input = ServerConfigUpgrader.class.getClassLoader().getResourceAsStream(
             "hq-server-to-upgrade.conf");
         expectedConfig.put("server.connection-validation-sql", "select 1");
+        expectedConfig.put("server.hibernate.dialect",
+            "org.hyperic.hibernate.dialect.MySQL5InnoDBDialect");
         Properties serverConfig = upgrader.upgradeServerConfig(input);
         assertEquals(expectedConfig, serverConfig);
     }
@@ -96,6 +99,8 @@ public class ServerConfigUpgraderTest {
         InputStream input = ServerConfigUpgrader.class.getClassLoader().getResourceAsStream(
             "hq-oracle-server-to-upgrade.conf");
         expectedConfig.put("server.connection-validation-sql", "select 1 from dual");
+        expectedConfig.put("server.hibernate.dialect",
+            "org.hyperic.hibernate.dialect.Oracle9Dialect");
         Properties serverConfig = upgrader.upgradeServerConfig(input);
         assertEquals(expectedConfig, serverConfig);
     }
@@ -120,8 +125,9 @@ public class ServerConfigUpgraderTest {
             "hq-embedded-db-server-to-upgrade.conf");
         expectedConfig.put("server.connection-validation-sql", "select 1");
         expectedConfig.put("server.database-url",
-            "jdbc:postgresql://127.0.0.1:9342/hqdb?protocolVersion=2");
-
+            "jdbc:postgresql://127.0.0.1:9432/hqdb?protocolVersion=2");
+        expectedConfig.put("server.hibernate.dialect",
+            "org.hyperic.hibernate.dialect.PostgreSQLDialect");
         Properties serverConfig = upgrader.upgradeServerConfig(input);
         assertEquals(expectedConfig, serverConfig);
     }
