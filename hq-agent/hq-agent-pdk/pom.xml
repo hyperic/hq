@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+	<modelVersion>4.0.0</modelVersion>
+	
+	<parent>
+		<groupId>org.hyperic.hq</groupId>
+		<artifactId>hq-parent</artifactId>
+		<version>4.4.0.BUILD-SNAPSHOT</version>
+	</parent>
+	
+	<groupId>org.hyperic.hq.agent</groupId>
+	<artifactId>hq-agent-pdk</artifactId>
+	<packaging>jar</packaging>
+	<name>Hyperic HQ Agent - PDK</name>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.hyperic.hq</groupId>
+			<artifactId>hq-common</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq</groupId>
+			<artifactId>hq-pdk-shared</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq</groupId>
+			<artifactId>hq-util</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.jcraft</groupId>
+			<artifactId>jsch</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>commons-httpclient</groupId>
+			<artifactId>commons-httpclient</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.ajp</groupId>
+			<artifactId>ajp</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic</groupId>
+			<artifactId>sigar</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.dnsjava</groupId>
+			<artifactId>dnsjava</artifactId>
+		</dependency>
+	</dependencies>
+
+</project>
