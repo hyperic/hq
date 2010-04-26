@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.hyperic.hq</groupId>
+	<artifactId>build-hq</artifactId>
+	<packaging>pom</packaging>
+	<version>4.4.0.BUILD-SNAPSHOT</version>
+	<name>Hyperic HQ - Build</name>
+
+	<modules>
+		<module>hq-parent</module>
+		<module>hq-util</module>
+		<module>hq-common</module>
+		<module>hq-lather</module>
+		<module>hq-pdk-shared</module>
+	</modules>
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<distributionManagement>
+		<repository>
+			<id>hyperic-milestone</id>
+			<name>Hyperic Milestone Repository</name>
+			<url>s3://maven.hyperic.org/milestone</url>
+		</repository>
+		<snapshotRepository>
+			<id>hyperic-snapshot</id>
+			<name>Hyperic Snapshot Repository</name>
+			<url>s3://maven.hyperic.org/snapshot</url>
+		</snapshotRepository>
+	</distributionManagement>
+
+</project>

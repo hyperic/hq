@@ -1,13 +1,11 @@
+target
+.project
+.settings
+.classpath
+.springBeans
+
 build
 junit_results
-hq-ui-plugins/*/target
-**/.DS_Store
-**/target
-hq-plugins/*/target
-hq-agent/**/target
-hq-agent/hq-agent-handlers/**/target
-.DS_Store
-**/activemq-data
 activemq-data
 ExecutionStrategyStates.dat
 
