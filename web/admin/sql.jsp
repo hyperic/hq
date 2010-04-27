@@ -40,11 +40,11 @@ $Header: /var/cvsroot/hyperic_hq/web/admin/sql.jsp,v 1.3 2005/04/21 20:38:26 dou
 <%@ page import="javax.servlet.ServletRequest" %>
 <%@ page import="org.hyperic.util.StringUtil" %>
 <%@ page import="org.hyperic.util.jdbc.DBUtil" %>
-
 <%@ page import="org.hyperic.hq.bizapp.shared.AuthzBoss" %>
 <%@ page import="org.hyperic.hq.bizapp.shared.AuthzBossUtil" %>
 <%@ page import="org.hyperic.hq.common.shared.HQConstants" %>
 <%@ page import="org.hyperic.hq.ui.util.SessionUtils" %>
+<%@ page import="org.apache.commons.lang.StringEscapeUtils"%>
 
 <%!
 public static final SimpleDateFormat DBDATEFORMAT = new SimpleDateFormat("dd-MMM-yyyy");
@@ -53,7 +53,7 @@ private static Context ctx = null;
 private synchronized static void initCtx () throws NamingException {
     if (ctx == null) ctx = new InitialContext();
 }
-public static final String NULL = "<em>null</em>";
+public static final String NULL = "null";
 
 private String stripSQLComments ( String sql ) {
     if ( sql == null ) return null;
@@ -178,8 +178,8 @@ private StringBuffer processSQL ( Connection conn, String sql, int index, int nu
                         } else if ( couldBeTimes[i-1] && isLongField(aValue) ) {
                             aValue = DBDATETIMEFORMAT.format(new Date(Long.parseLong(aValue)));
                         }
-                        rstr.append("<td valign=\"top\"><font face=\"Verdana,Arial,Helvetica\" size=\"-2\">")
-                            .append(aValue).append("</font></td>");
+                        rstr.append("<td valign=\"top\"><font face=\"Verdana,Arial,Helvetica\" size=\"-2\" style=\"font-weight: normal;\">")
+                            .append(StringEscapeUtils.escapeHtml(aValue)).append("</font></td>");
                     }
                     rstr.append("</tr>");
                 }
@@ -311,7 +311,6 @@ try {
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <title>Direct SQL Access</title>
