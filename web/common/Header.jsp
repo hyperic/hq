@@ -35,16 +35,22 @@
 <script type="text/javascript">
     function getUpdateStatus(opt) {
         if (opt == "<fmt:message key="header.Acknowledge"/>") {
-            var pars = "update=true";
+        		var postData = { update: true};
             var updateUrl = 'Dashboard.do?';
-            var url = updateUrl + pars;
-            new Ajax.Request(url, {method: 'post'});
-            dojo.byId('hb').innerHTML = '<html:img page="/images/spacer.gif" width="1" height="1" alt="" border="0"/>'
+
+            dojo11.xhrPost({
+					url: updateUrl,
+					content: postData,
+					load: function(data) {
+						dojo11.style("updateLink", "display", "none");
+            	 	updateDialog.hide();
+            	}
+            });
         }
-        menuLayers.hide();
     }
-    var resourceURL = '/Resource.do';
-    var userURL = '/admin/user/UserAdmin.do';
+
+    var resourceURL = '<html:rewrite action="/Resource" />';
+    var userURL = '<html:rewrite action="/admin/user/UserAdmin" />';
     var searchWidget = new hyperic.widget.search({search:'/search.shtml'}, 3, {keyCode: 83, ctrl: true});
     dojo.require("dojo.lfx.html");
     dojo.event.connect(window, "onload",function(){ 
@@ -88,7 +94,7 @@
       if (refreshCount < 30) {
         setTimeout( "refreshAlerts()", 60*1000 );
       } else if (autoLogout) {
-        top.location.href = "<html:rewrite action="/Logout"/>";
+        top.location.href = "<html:rewrite action="/j_spring_security_logout"/>";
       }
     }
 
@@ -109,7 +115,7 @@
     //-->
       </script>
     <div id="header">
-    <div id="headerLogo" title="Home" onclick="location.href='/Dashboard.do'">&nbsp;</div>
+    <div id="headerLogo" title="Home" onclick="location.href='<html:rewrite action="/Dashboard" />'">&nbsp;</div>
     <div id="navTabContainer">
         <c:set var="pageURL" value="${requestURL}"/>
         <ul class="adxm mainMenu" style="position: absolute; z-index: 10">
@@ -154,7 +160,38 @@
         <div id="recentAlerts"></div>
       </div>
     </div>
-    <div id="headerLinks">
+	<div id="headerLinks">
+
+		<c:if test="${not empty HQUpdateReport}">
+			<div id="update" class="dialog" style="display: none;">
+				<c:out value="${HQUpdateReport}" escapeXml="false"/>
+				
+				<form name="updateForm" action="">
+					<div style="text-align:right;">
+	 					<input type="button" class="button42" value="<fmt:message key="header.Acknowledge"/>" onclick="getUpdateStatus(this.value);">
+	 				</div>
+    			</form>
+			</div>
+			<script type="text/javascript">
+				dojo11.require("dijit.Dialog");
+
+				var updateDialog = null;
+
+				dojo11.addOnLoad(function(){
+					updateDialog = new dijit11.Dialog({
+						id: 'update_popup',
+                	refocus: true,
+                	autofocus: false,
+                	opacity: 0,
+                	title: "<fmt:message key="header.dialog.title.update" />"
+					}, dojo11.byId('update'));
+  				});
+			</script>
+			<a id="updateLink" href="javascript:updateDialog.show()">
+				<img src="<html:rewrite page="/images/transmit2.gif" />" align="absMiddle" border="0" />			
+			</a>
+		</c:if>
+
         <fmt:message key="header.Welcome"/>
          <c:choose>
             <c:when test="${useroperations['viewSubject']}">
@@ -206,13 +243,3 @@
         -->
     </div>     
 </div>
-
-<c:if test="${not empty HQUpdateReport}">
-<div id="update" class="menu" style="z-index:15000000;border:1px solid black;padding-top:15px;padding-bottom:15px;font-weight:bold;font-size:12px;">
-<c:out value="${HQUpdateReport}" escapeXml="false"/>
-    <form name="updateForm" action="">
-        <div style="text-align:center;padding-left:15px;padding-right:15px;"><input type="button" value="<fmt:message key="header.RemindLater"/>" onclick="getUpdateStatus(this.value);"><span style="padding-left:15px;"><input type="button" value="<fmt:message key="header.Acknowledge"/>" onclick="getUpdateStatus(this.value);"></span>
-        </div>
-    </form>
-</div>
-</c:if>
