@@ -18,6 +18,7 @@
 
 
 	<modules>
+		<module>agent</module>
 		<module>hyperic-hq-agent</module>
 	</modules>
 

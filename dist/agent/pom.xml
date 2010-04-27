@@ -12,9 +12,9 @@
 	</parent>
 
 	<groupId>org.hyperic.hq.dist</groupId>
-	<artifactId>hyperic-hq-agent</artifactId>
+	<artifactId>agent</artifactId>
 	<packaging>pom</packaging>
-	<name>Hyperic HQ Distribution - Hyperic HQ Agent</name>
+	<name>Hyperic HQ Distribution - Hyperic HQ Agent Bundle</name>
 
 
 	<build>
@@ -23,14 +23,7 @@
 				<artifactId>maven-assembly-plugin</artifactId>
 				<configuration>
 					<descriptors>
-						<descriptor>src/main/assembly/noJRE.xml</descriptor>
-						<descriptor>src/main/assembly/apple-osx.xml</descriptor>
-						<descriptor>src/main/assembly/hpux-11.xml</descriptor>
-						<descriptor>src/main/assembly/ppc-aix.xml</descriptor>
-						<descriptor>src/main/assembly/sparc-solaris.xml</descriptor>
-						<descriptor>src/main/assembly/win32.xml</descriptor>
-						<descriptor>src/main/assembly/x86-linux.xml</descriptor>
-						<descriptor>src/main/assembly/x86-64-linux.xml</descriptor>
+						<descriptor>src/main/assembly/assembly.xml</descriptor>
 					</descriptors>
 				</configuration>
 				<executions>
@@ -48,9 +41,31 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.hyperic.hq.dist</groupId>
-			<artifactId>agent</artifactId>
+			<groupId>org.hyperic.hq</groupId>
+			<artifactId>hq-util</artifactId>
 			<version>${project.version}</version>
+			<classifier>agent</classifier>
+			<type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq</groupId>
+			<artifactId>hq-common</artifactId>
+			<version>${project.version}</version>
+			<classifier>agent</classifier>
+			<type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq</groupId>
+			<artifactId>hq-lather</artifactId>
+			<version>${project.version}</version>
+			<classifier>agent</classifier>
+			<type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq</groupId>
+			<artifactId>hq-pdk-shared</artifactId>
+			<version>${project.version}</version>
+			<classifier>agent</classifier>
 			<type>zip</type>
 		</dependency>
 	</dependencies>

@@ -1,45 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component>
+
+	<fileSets>
+		<fileSet>
+			<directory>src/main/resources</directory>
+			<outputDirectory>/</outputDirectory>
+			<excludes>
+				<exclude>**/*.sh</exclude>
+				<exclude>**/.gitignore</exclude>
+			</excludes>
+			<filtered>true</filtered>
+			<useDefaultExcludes>false</useDefaultExcludes>
+			<fileMode>0644</fileMode>
+			<directoryMode>0755</directoryMode>
+		</fileSet>
+		<fileSet>
+			<directory>src/main/resources</directory>
+			<outputDirectory>/</outputDirectory>
+			<includes>
+				<include>**/*.sh</include>
+			</includes>
+			<filtered>true</filtered>
+			<useDefaultExcludes>false</useDefaultExcludes>
+			<fileMode>0755</fileMode>
+			<directoryMode>0755</directoryMode>
+		</fileSet>
+	</fileSets>
+
 	<dependencySets>
 		<dependencySet>
 				<useProjectArtifact>false</useProjectArtifact>
-				<outputDirectory>/bundles/agent-NEED-VERSION-HERE/lib</outputDirectory>
-				<includes>
-					<include>org.hyperic.hq:hq-lather</include>
-					<include>org.hyperic.hq.agent:hq-agent-core</include>
-				</includes>
-				<fileMode>0644</fileMode>
-				<directoryMode>0755</directoryMode>
-				<useTransitiveDependencies>true</useTransitiveDependencies>
-				<useTransitiveFiltering>false</useTransitiveFiltering>
-		</dependencySet>
-	   <dependencySet>
-				<useProjectArtifact>false</useProjectArtifact>
-				<outputDirectory>/bundles/agent-NEED-VERSION-HERE/lib/handlers</outputDirectory>
-				<includes>
-					<include>org.hyperic.hq.agent.handler:hq-agent-handler-autoinventory</include>
-					<include>org.hyperic.hq.agent.handler:hq-agent-handler-bizapp</include>
-					<include>org.hyperic.hq.agent.handler:hq-agent-handler-commands</include>
-					<include>org.hyperic.hq.agent.handler:hq-agent-handler-control</include>
-					<include>org.hyperic.hq.agent.handler:hq-agent-handler-livedata</include>
-					<include>org.hyperic.hq.agent.handler:hq-agent-handler-measurement</include>
-				</includes>
+				<useTransitiveDependencies>false</useTransitiveDependencies>
+				<outputDirectory>bundles</outputDirectory>
+				<unpack>true</unpack>
 				<fileMode>0644</fileMode>
 				<directoryMode>0755</directoryMode>
 		</dependencySet>
-			<dependencySet>
-				<useProjectArtifact>false</useProjectArtifact>
-				<outputDirectory>/bundles/agent-NEED-VERSION-HERE/pdk/lib</outputDirectory>
-				<includes>
-						<include>org.hyperic.hq:hq-common</include>
-						<include>org.hyperic.hq:hq-util</include>
-						<include>org.hyperic.hq:hq-pdk-shared</include>
-						<include>org.hyperic.hq.agent:hq-agent-pdk</include>
-				</includes>
-				<fileMode>0644</fileMode>
-				<directoryMode>0755</directoryMode>
-		</dependencySet>
-		
 	</dependencySets>
 	
 </component>
