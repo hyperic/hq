@@ -373,5 +373,11 @@
     <servlet-name>lather</servlet-name>
     <url-pattern>/lather</url-pattern>
   </servlet-mapping>
+
+  <!-- Map new lather servlet to pre-4.4 URLs to support upgrade -->
+  <servlet-mapping>
+    <servlet-name>lather</servlet-name>
+    <url-pattern>/jboss-lather/JBossLather</url-pattern>
+  </servlet-mapping>
 	
 </web-app>
