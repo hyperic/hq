@@ -68,6 +68,62 @@
 			<classifier>agent</classifier>
 			<type>zip</type>
 		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.agent</groupId>
+			<artifactId>hq-agent-core</artifactId>
+			<version>${project.version}</version>
+			<classifier>agent</classifier>
+			<type>zip</type>
+		</dependency>
+		<dependency>
+		   	<groupId>org.hyperic.hq.agent.handler</groupId>
+		    <artifactId>hq-agent-handler-autoinventory</artifactId>
+		    <version>${project.version}</version>
+		    <classifier>agent</classifier>
+			<type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.agent.handler</groupId>
+			<artifactId>hq-agent-handler-bizapp</artifactId>
+			<version>${project.version}</version>
+			<classifier>agent</classifier>
+		    <type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.agent.handler</groupId>
+			<artifactId>hq-agent-handler-commands</artifactId>
+			<version>${project.version}</version>
+			<classifier>agent</classifier>
+		    <type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.agent.handler</groupId>
+			<artifactId>hq-agent-handler-control</artifactId>
+			<version>${project.version}</version>
+			<classifier>agent</classifier>
+		    <type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.agent.handler</groupId>
+			<artifactId>hq-agent-handler-livedata</artifactId>
+			<version>${project.version}</version>
+			<classifier>agent</classifier>
+		    <type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.agent.handler</groupId>
+			<artifactId>hq-agent-handler-measurement</artifactId>
+			<version>${project.version}</version>
+			<classifier>agent</classifier>
+		    <type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.agent</groupId>
+			<artifactId>hq-agent-pdk</artifactId>
+			<version>${project.version}</version>
+			<classifier>agent</classifier>
+		    <type>zip</type>
+		</dependency>
 	</dependencies>
 
 </project>

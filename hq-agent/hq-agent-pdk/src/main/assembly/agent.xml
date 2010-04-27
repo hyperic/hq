@@ -10,7 +10,7 @@
 	<dependencySets>
 		<dependencySet>
 			<useProjectArtifact>true</useProjectArtifact>
-			<outputDirectory>/pdk/lib</outputDirectory>
+			<outputDirectory>pdk/lib</outputDirectory>
 			<excludes>
 				<exclude>org.hyperic.hq:hq-lather</exclude>
 			</excludes>
