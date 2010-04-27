@@ -4,6 +4,34 @@
 		<format>zip</format>
 	</formats>
 
+	<fileSets>
+		<fileSet>
+			<directory>src/main/resources</directory>
+			<outputDirectory>/</outputDirectory>
+			<excludes>
+				<exclude>**/*.sh</exclude>
+				<exclude>**/*.pl</exclude>
+				<exclude>**/.gitignore</exclude>
+			</excludes>
+			<filtered>true</filtered>
+			<useDefaultExcludes>false</useDefaultExcludes>
+			<fileMode>0644</fileMode>
+			<directoryMode>0755</directoryMode>
+		</fileSet>
+		<fileSet>
+			<directory>src/main/resources</directory>
+			<outputDirectory>/</outputDirectory>
+			<includes>
+				<include>**/*.sh</include>
+				<include>**/*.pl</include>
+			</includes>
+			<filtered>true</filtered>
+			<useDefaultExcludes>false</useDefaultExcludes>
+			<fileMode>0755</fileMode>
+			<directoryMode>0755</directoryMode>
+		</fileSet>
+	</fileSets>
+
 	<dependencySets>
 		<dependencySet>
 				<useProjectArtifact>false</useProjectArtifact>

@@ -16,6 +16,11 @@
 	<packaging>pom</packaging>
 	<name>Hyperic HQ Distribution - Hyperic HQ Agent Bundle</name>
 
+	<properties>
+		<maven.build.timestamp.format>MMM dd, yyyy</maven.build.timestamp.format>
+		<build.timestamp>${maven.build.timestamp}</build.timestamp>
+	</properties>
+
 
 	<build>
 		<plugins>
