@@ -20,6 +20,7 @@
 		<dns.version>2.0.6</dns.version>
 		<dbunit.version>2.2</dbunit.version>
 		<getopt.version>1.0.13</getopt.version>
+		<groovy.version>1.7.0</groovy.version>
 		<hibernate.version>3.2.7.ga</hibernate.version>
 		<httpclient.version>3.1</httpclient.version>
 		<j2ee-management.version>1.1</j2ee-management.version>
@@ -191,6 +192,11 @@
 				<groupId>xalan</groupId>
 				<artifactId>xalan</artifactId>
 				<version>${xalan.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.codehaus.groovy</groupId>
+				<artifactId>groovy-all</artifactId>
+				<version>${groovy.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

@@ -16,6 +16,9 @@
 		<module>hq-common</module>
 		<module>hq-lather</module>
 		<module>hq-pdk-shared</module>
+		<module>hq-bootstrap</module>
+		<module>hq-installer</module>
+		<!--><module>hq-rendit</module>-->
 		<module>hq-agent</module>
 		<module>dist</module>
 	</modules>
