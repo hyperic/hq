@@ -29,6 +29,9 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.jboss.remoting.Client;
+import org.jboss.remoting.InvocationRequest;
+
 
 
 /**
@@ -41,39 +44,39 @@ public class TransportUtils {
      */
     private TransportUtils() {}
     
-//    /**
-//     * Determine if the invocation request represents a one-way (asynchronous) 
-//     * invocation.
-//     * 
-//     * @param invocation The invocation request.
-//     * @return <code>true</code> if this is a one-way invocation.
-//     */
-//    public static boolean isOneWayInvocation(InvocationRequest invocation) {
-//        Map requestPayload = invocation.getRequestPayload();
-//        
-//        if (requestPayload != null) {
-//            String value = (String)requestPayload.get(Client.ONEWAY_FLAG);
-//            return Boolean.valueOf(value).booleanValue();
-//        } else {
-//            return false;            
-//        }
-//    }
-//    
-//    /**
-//     * Set the invocation request as one-way (asynchronous).
-//     * 
-//     * @param invocation The invocation request.
-//     */
-//    public static void setOneWayInvocation(InvocationRequest invocation) {
-//        Map requestPayload = invocation.getRequestPayload();
-//        
-//        if (requestPayload == null) {
-//            requestPayload = new HashMap();
-//            invocation.setRequestPayload(requestPayload);
-//        }
-//        
-//        requestPayload.put(Client.ONEWAY_FLAG, Boolean.TRUE.toString());        
-//    }
+    /**
+     * Determine if the invocation request represents a one-way (asynchronous) 
+     * invocation.
+     * 
+     * @param invocation The invocation request.
+     * @return <code>true</code> if this is a one-way invocation.
+     */
+    public static boolean isOneWayInvocation(InvocationRequest invocation) {
+        Map requestPayload = invocation.getRequestPayload();
+        
+        if (requestPayload != null) {
+            String value = (String)requestPayload.get(Client.ONEWAY_FLAG);
+            return Boolean.valueOf(value).booleanValue();
+        } else {
+            return false;            
+        }
+    }
+    
+    /**
+     * Set the invocation request as one-way (asynchronous).
+     * 
+     * @param invocation The invocation request.
+     */
+    public static void setOneWayInvocation(InvocationRequest invocation) {
+        Map requestPayload = invocation.getRequestPayload();
+        
+        if (requestPayload == null) {
+            requestPayload = new HashMap();
+            invocation.setRequestPayload(requestPayload);
+        }
+        
+        requestPayload.put(Client.ONEWAY_FLAG, Boolean.TRUE.toString());        
+    }
     
     /**
      * Return the HTTP transport name.

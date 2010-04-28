@@ -30,12 +30,16 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
 import org.hyperic.util.thread.LoggingThreadGroup;
 import org.hyperic.util.thread.ThreadGroupFactory;
 
 /**
  * A helper class for performing asynchronous invocations within the HQ transport 
  * layer. Asynchronous invocations are performed using a thread pool executor. 
+ * Note: This class is started by the spring context.
  */
 public class AsynchronousInvoker {
 
@@ -63,7 +67,7 @@ public class AsynchronousInvoker {
                                             poolSize, 
                                             Long.MAX_VALUE, 
                                             TimeUnit.NANOSECONDS, 
-                                            new LinkedBlockingQueue(), 
+                                            new LinkedBlockingQueue<Runnable>(), 
                                             tFactory,
                                             new ThreadPoolExecutor.AbortPolicy());
     }
@@ -72,6 +76,7 @@ public class AsynchronousInvoker {
      * Start the asynchronous invoker. This amounts to warming up all the 
      * threads in the thread pool.
      */
+    @PostConstruct
     public void start() {
         _executor.prestartAllCoreThreads();
     }
@@ -83,6 +88,7 @@ public class AsynchronousInvoker {
      * persisting the invocation for later execution, not making the invocation 
      * itself.
      */
+    @PreDestroy
     public void stop() {
         _executor.shutdown();
     }
