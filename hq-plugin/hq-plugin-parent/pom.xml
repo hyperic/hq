@@ -12,13 +12,28 @@
 	</parent>
 
 	<groupId>org.hyperic.hq.plugin</groupId>
-	<artifactId>xml-plugin-parent</artifactId>
+	<artifactId>hq-plugin-parent</artifactId>
 	<packaging>pom</packaging>
-	<name>Hyperic HQ Plugin - XML Plugin Parent</name>
+	<name>Hyperic HQ Plugin - Parent</name>
 
 	<build>
 		<pluginManagement>
 			<plugins>
+				<plugin>
+					<artifactId>maven-jar-plugin</artifactId>
+					<configuration>
+						<archive>
+							<manifest>
+								<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+								<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+							</manifest>
+							<manifestEntries>
+								<Specification-Title>HQU Plugin</Specification-Title>
+								<Build-Date>${build.timestamp}</Build-Date>
+							</manifestEntries>
+						</archive>
+					</configuration>
+				</plugin>
 				<plugin>
 					<artifactId>maven-assembly-plugin</artifactId>
 					<configuration>

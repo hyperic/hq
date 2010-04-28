@@ -7,11 +7,10 @@
 
 	<parent>
 		<groupId>org.hyperic.hq.plugin</groupId>
-		<artifactId>xml-plugin-parent</artifactId>
+		<artifactId>hq-plugin-parent</artifactId>
 		<version>4.4.0.BUILD-SNAPSHOT</version>
 	</parent>
 
-	<groupId>org.hyperic.hq.plugin</groupId>
 	<artifactId>process-plugin</artifactId>
 	<packaging>pom</packaging>
 	<name>Hyperic HQ Plugin - Process Plugin</name>
