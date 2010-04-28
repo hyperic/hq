@@ -21,6 +21,11 @@
 			<artifactId>hq-pdk-shared</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.hyperic</groupId>
+			<artifactId>weblogic-jmx</artifactId>
+			<version>1.0.0</version>
+		</dependency>
 	</dependencies>
 
 </project>
