@@ -31,6 +31,15 @@
 
 	<dependencies>
 		<dependency>
+  			<groupId>mysql</groupId>
+  			<artifactId>mysql-connector-java</artifactId>
+		</dependency>
+		<dependency>
+  			<groupId>postgresql</groupId>
+  			<artifactId>postgresql</artifactId>
+		</dependency>
+
+		<dependency>
 			<groupId>org.hyperic.hq</groupId>
 			<artifactId>hq-util</artifactId>
 			<version>${project.version}</version>
@@ -129,6 +138,51 @@
 		</dependency>
 
 <!-- Plugins -->
+		<!--dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>activemq-plugin</artifactId>
+			<version>${project.version}</version>
+		</dependency-->
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>alfresco-plugin</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>apache-plugin</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>bind-plugin</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>coldfusion-plugin</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<!--dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>db2-plugin</artifactId>
+			<version>${project.version}</version>
+		</dependency-->
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>db2jdbc-plugin</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>dotnet-plugin</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>exchange-plugin</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>geronimo-plugin</artifactId>
@@ -149,6 +203,31 @@
 			<version>${project.version}</version>
 			<classifier>agent</classifier>
 		    <type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>hqagent-plugin</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>iis-plugin</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>informix-plugin</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>iplanet-plugin</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>jboss-plugin</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq.plugin</groupId>
@@ -191,14 +270,6 @@
 			<version>${project.version}</version>
 			<classifier>agent</classifier>
 		    <type>zip</type>
-		</dependency>
-		<dependency>
-  			<groupId>mysql</groupId>
-  			<artifactId>mysql-connector-java</artifactId>
-		</dependency>
-		<dependency>
-  			<groupId>postgresql</groupId>
-  			<artifactId>postgresql</artifactId>
 		</dependency>
 	</dependencies>
 

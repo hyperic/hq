@@ -19,10 +19,26 @@
 	<modules>
 		<module>hq-plugin-parent</module>
 		<module>examples</module>
+
+		<module>netservices-plugin</module>
+		<!--module>activemq-plugin</module-->
 		<module>alfresco-plugin</module>
+		<module>apache-plugin</module>
+		<module>bind-plugin</module>
+		<module>coldfusion-plugin</module>
+		<!--module>db2-plugin</module-->
+		<module>db2jdbc-plugin</module>
+		<module>dotnet-plugin</module>
+		<module>exchange-plugin</module>
 		<module>geronimo-plugin</module>
 		<module>glassfish-plugin</module>
+		<!-- groovy -->
 		<module>hq-internal-plugin</module>
+		<module>hqagent-plugin</module>
+		<module>iis-plugin</module>
+		<module>informix-plugin</module>
+		<module>iplanet-plugin</module>
+		<module>jboss-plugin</module>
 		<module>jetty-plugin</module>
 		<module>jmx-plugin</module>
 		<module>jvm-plugin</module>

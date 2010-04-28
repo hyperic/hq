@@ -11,9 +11,9 @@
 		<version>4.4.0.BUILD-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>alfresco-plugin</artifactId>
+	<artifactId>apache-plugin</artifactId>
 	<packaging>jar</packaging>
-	<name>Hyperic HQ Plugin - Alfresco Plugin</name>
+	<name>Hyperic HQ Plugin - Apache Plugin</name>
 
 	<dependencies>
 		<dependency>
