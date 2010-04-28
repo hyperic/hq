@@ -163,11 +163,11 @@
 			<artifactId>coldfusion-plugin</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<!--dependency>
+		<dependency>
 			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>db2-plugin</artifactId>
 			<version>${project.version}</version>
-		</dependency-->
+		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>db2jdbc-plugin</artifactId>
