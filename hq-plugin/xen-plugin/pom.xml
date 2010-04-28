@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.hyperic.hq.plugin</groupId>
+		<artifactId>hq-plugin-parent</artifactId>
+		<version>4.4.0.BUILD-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>xen-plugin</artifactId>
+	<packaging>jar</packaging>
+	<name>Hyperic HQ Plugin - Xen Plugin</name>
+	
+	<properties>
+		<xmlrpc.version>3.1</xmlrpc.version>
+	</properties>
+		
+
+	<dependencies>
+		<dependency>
+			<groupId>org.hyperic.hq</groupId>
+			<artifactId>hq-pdk-shared</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+  			<groupId>org.apache.xmlrpc</groupId>
+  			<artifactId>xmlrpc-common</artifactId>
+  			<version>${xmlrpc.version}</version>
+		</dependency>
+		<dependency>
+  			<groupId>org.apache.xmlrpc</groupId>
+  			<artifactId>xmlrpc-client</artifactId>
+  			<version>${xmlrpc.version}</version>
+		</dependency>
+	</dependencies>
+
+</project>
