@@ -10,6 +10,11 @@
 	<version>4.4.0.BUILD-SNAPSHOT</version>
 	<name>Hyperic HQ - Parent</name>
 
+	<organization>
+		<name>VMware, Inc.</name>
+		<url>http://www.vmware.com/</url>
+	</organization>
+
 	<properties>
 		<ajp.version>1.3</ajp.version>
 		<ant.version>1.8.0</ant.version>
@@ -39,6 +44,9 @@
 		<wrapper.version>3.2.3</wrapper.version>
 		<xalan.version>2.7.1</xalan.version>
 		<xstream.version>1.3.1</xstream.version>
+
+		<maven.build.timestamp.format>MMM dd, yyyy</maven.build.timestamp.format>
+		<build.timestamp>${maven.build.timestamp}</build.timestamp>
 	</properties>
 
 	<dependencyManagement>

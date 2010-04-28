@@ -17,8 +17,7 @@
 	<name>Hyperic HQ Plugin - Modules</name>
 
 	<modules>
-		<module>xml-plugin-parent</module>
-		<module>java-plugin-parent</module>
+		<module>hq-plugin-parent</module>
 		<module>examples</module>
 		<module>geronimo-plugin</module>
 		<module>glassfish-plugin</module>
