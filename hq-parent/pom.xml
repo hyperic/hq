@@ -229,6 +229,11 @@
 			<name>Hyperic External Dependencies Repository</name>
 			<url>http://maven.hyperic.org/external</url>
 		</repository>
+		<repository>
+			<id>hyperic-jres</id>
+			<name>Hyperic JREs Repository</name>
+			<url>http://maven.hyperic.org/jres</url>
+		</repository>
 	</repositories>
 
 	<distributionManagement>

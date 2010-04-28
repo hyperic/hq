@@ -11,25 +11,18 @@
 		<version>4.4.0.BUILD-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>hq-bootstrap</artifactId>
-	<packaging>jar</packaging>
-	<name>Hyperic HQ - Bootstrap</name>
+	<groupId>org.hyperic.hq.dist</groupId>
+	<artifactId>server</artifactId>
+	<packaging>pom</packaging>
+	<name>Hyperic HQ Distribution - Hyperic HQ Server Bundle</name>
+
+	<properties>
+		<maven.build.timestamp.format>MMM dd, yyyy</maven.build.timestamp.format>
+		<build.timestamp>${maven.build.timestamp}</build.timestamp>
+	</properties>
 
 
-	<dependencies>
-		<dependency>
-			<groupId>org.hyperic.hq</groupId>
-			<artifactId>hq-util</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.hyperic.hq</groupId>
-			<artifactId>hq-common</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-	</dependencies>
-	
-		<build>
+	<build>
 		<plugins>
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
@@ -50,5 +43,14 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.hyperic.hq</groupId>
+			<artifactId>hq-bootstrap</artifactId>
+			<version>${project.version}</version>
+			<type>zip</type>
+		</dependency>
+	</dependencies>
 
 </project>

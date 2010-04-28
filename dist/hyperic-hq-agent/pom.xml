@@ -51,8 +51,44 @@
 			<groupId>org.hyperic.hq.dist</groupId>
 			<artifactId>agent</artifactId>
 			<version>${project.version}</version>
-			<type>zip</type>
+			<type>tar.gz</type>
 		</dependency>
+	<!--	<dependency>
+			<groupId>org.hyperic.jre</groupId>
+			<artifactId>amd64-linux</artifactId>
+			<version>1.5</version>
+			<type>tar.gz</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.jre</groupId>
+			<artifactId>x86-linux</artifactId>
+			<version>1.5</version>
+			<type>tar.gz</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.jre</groupId>
+			<artifactId>sparc-sun-solaris</artifactId>
+			<version>1.5</version>
+			<type>tar.gz</type>
+		</dependency> -->
+		<dependency>
+			<groupId>org.hyperic.jre</groupId>
+			<artifactId>hpux-11</artifactId>
+			<version>1.5</version>
+			<type>tar.gz</type>
+		</dependency>
+	<!--	<dependency>
+			<groupId>org.hyperic.jre</groupId>
+			<artifactId>x86-win32-tar-gz</artifactId>
+			<version>1.5</version>
+			<type>tar.gz</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.jre</groupId>
+			<artifactId>ppc-aix</artifactId>
+			<version>1.5</version>
+			<type>tar.gz</type>
+		</dependency> -->
 	</dependencies>
 
 </project>

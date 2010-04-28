@@ -35,6 +35,9 @@
 				<unpack>true</unpack>
 				<fileMode>0644</fileMode>
 				<directoryMode>0755</directoryMode>
+				<includes>
+					<include>org.hyperic.hq.dist:agent</include>
+				</includes>
 		</dependencySet>
 	</dependencySets>
 	
