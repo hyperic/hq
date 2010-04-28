@@ -11,19 +11,14 @@
 		<version>4.4.0.BUILD-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>apache-plugin</artifactId>
+	<artifactId>activemq-plugin</artifactId>
 	<packaging>jar</packaging>
-	<name>Hyperic HQ Plugin - Apache Plugin</name>
+	<name>Hyperic HQ Plugin - ActiveMQ Plugin</name>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.hyperic.hq</groupId>
 			<artifactId>hq-pdk-shared</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.hyperic.hq.plugin</groupId>
-			<artifactId>netservices-plugin</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>

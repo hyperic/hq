@@ -11,7 +11,7 @@
 		<version>4.4.0.BUILD-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>msssql-plugin</artifactId>
+	<artifactId>mssql-plugin</artifactId>
 	<packaging>jar</packaging>
 	<name>Hyperic HQ Plugin - MS SQL Plugin</name>
 

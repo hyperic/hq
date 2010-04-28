@@ -74,8 +74,20 @@
 			</includes>
 			<excludes>
 				<exclude>org.hyperic.hq.plugin:examples</exclude>
+				<exclude>*:jar</exclude>
 			</excludes>
 			<unpack>true</unpack>
+			<fileMode>0644</fileMode>
+			<directoryMode>0755</directoryMode>
+		</dependencySet>
+		<dependencySet>
+			<useProjectArtifact>false</useProjectArtifact>
+			<useTransitiveDependencies>false</useTransitiveDependencies>
+			<outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+			<outputDirectory>/pdk/plugins</outputDirectory>
+			<includes>
+				<include>org.hyperic.hq.plugin:*:jar</include>
+			</includes>
 			<fileMode>0644</fileMode>
 			<directoryMode>0755</directoryMode>
 		</dependencySet>

@@ -26,6 +26,11 @@
 			<artifactId>hq-agent-pdk</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+
+		<dependency>
+			<groupId>org.hyperic.db2monitor</groupId>
+			<artifactId>db2monitor</artifactId>
+		</dependency>
 	</dependencies>
 
 </project>
