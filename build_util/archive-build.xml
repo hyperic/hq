@@ -172,7 +172,7 @@
     <antcall target="bundle-pgsql"/>
 
     <!-- include the license-info file -->
-    <copy file="${hq.home}/LICENSES.txt" toFile="${archive-dir}/LICENSES.txt"/>
+    <copy file="${hq.home}/open_source_licenses.txt" toFile="${archive-dir}/open_source_licenses.txt"/>
 
     <!-- Packup the whole thing -->
     <antcall target="compress-dir">

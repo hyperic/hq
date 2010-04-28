@@ -2,6 +2,8 @@
 
 <project name="setup" default="all" basedir=".">
 
+  <property name="oss.license.file" value="${install.dir}/../open_source_licenses.txt"/>
+	
   <!-- true for text based installs -->
   <available property="server.pgsql.available"
              file="${install.dir}/data/hqdb/pgsql.tar.gz"/>
@@ -269,6 +271,9 @@ __ll__
     <antcall target="fix-text-files">
       <param name="crlf.dir" value="${agent.installdir}/agent-${version}"/>
     </antcall>
+  	<antcall target="copy-oss-license-file">
+  	  <param name="oss.license.to.dir" value="${agent.installdir}/agent-${version}"/>
+  	</antcall>
     <echo>^^^COMPLETION:
       Agent successfully installed to: ${agent.installdir}/agent-${version}
     </echo>
@@ -433,6 +438,9 @@ ${errMsg}
           description="Install or upgrade the HQ server.">
     <antcall target="server-install"/>
     <antcall target="server-upgrade"/>
+  	<antcall target="copy-oss-license-file">
+  	  <param name="oss.license.to.dir" value="${server.installdir}/server-${version}"/>
+  	</antcall>
   </target>
 
   <target name="server-install" depends="setup-server-init" unless="setup.upgrade">
@@ -629,6 +637,11 @@ ${errMsg}
         includes="**/*.bat **/*.properties **/*.txt **/ReadMe* **/*.conf **/*.xml"/>
   </target>
 
+  <!--- Copy the license file for the open source software to a designated directory -->
+  <target name="copy-oss-license-file">
+	<copy file="${oss.license.file}" todir="${oss.license.to.dir}"/>
+  </target>
+	
   <target name="chmod-exec">
     <chmod perm="a+rx">
       <fileset dir="${chmod.dir}">
