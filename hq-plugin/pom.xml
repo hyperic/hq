@@ -21,7 +21,7 @@
 		<module>examples</module>
 
 		<module>netservices-plugin</module>
-		<!--module>activemq-plugin</module-->
+		<module>activemq-plugin</module>
 		<module>alfresco-plugin</module>
 		<module>apache-plugin</module>
 		<module>bind-plugin</module>

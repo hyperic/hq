@@ -138,11 +138,11 @@
 		</dependency>
 
 <!-- Plugins -->
-		<!--dependency>
+		<dependency>
 			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>activemq-plugin</artifactId>
 			<version>${project.version}</version>
-		</dependency-->
+		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>alfresco-plugin</artifactId>
