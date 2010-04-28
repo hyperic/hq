@@ -16,31 +16,15 @@
 	<packaging>pom</packaging>
 	<name>Hyperic HQ Distribution - Hyperic HQ Agent Bundle</name>
 
-	<properties>
-		<maven.build.timestamp.format>MMM dd, yyyy</maven.build.timestamp.format>
-		<build.timestamp>${maven.build.timestamp}</build.timestamp>
-	</properties>
-
-
 	<build>
 		<plugins>
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
-				<version>2.2-beta-5</version>
 				<configuration>
 					<descriptors>
 						<descriptor>src/main/assembly/assembly.xml</descriptor>
 					</descriptors>
 				</configuration>
-				<executions>
-					<execution>
-						<id>package</id>
-						<phase>package</phase>
-						<goals>
-							<goal>single</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 	</build>
@@ -126,6 +110,78 @@
 		<dependency>
 			<groupId>org.hyperic.hq.agent</groupId>
 			<artifactId>hq-agent-pdk</artifactId>
+			<version>${project.version}</version>
+			<classifier>agent</classifier>
+		    <type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>examples</artifactId>
+			<version>${project.version}</version>
+			<classifier>agent</classifier>
+		    <type>zip</type>
+		</dependency>
+
+<!-- Plugins -->
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>geronimo-plugin</artifactId>
+			<version>${project.version}</version>
+			<classifier>agent</classifier>
+		    <type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>glassfish-plugin</artifactId>
+			<version>${project.version}</version>
+			<classifier>agent</classifier>
+		    <type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>hq-internal-plugin</artifactId>
+			<version>${project.version}</version>
+			<classifier>agent</classifier>
+		    <type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>jetty-plugin</artifactId>
+			<version>${project.version}</version>
+			<classifier>agent</classifier>
+		    <type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>jmx-plugin</artifactId>
+			<version>${project.version}</version>
+			<classifier>agent</classifier>
+		    <type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>jvm-plugin</artifactId>
+			<version>${project.version}</version>
+			<classifier>agent</classifier>
+		    <type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>process-plugin</artifactId>
+			<version>${project.version}</version>
+			<classifier>agent</classifier>
+		    <type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>resin-plugin</artifactId>
+			<version>${project.version}</version>
+			<classifier>agent</classifier>
+		    <type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>sendmail-plugin</artifactId>
 			<version>${project.version}</version>
 			<classifier>agent</classifier>
 		    <type>zip</type>

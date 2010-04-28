@@ -14,7 +14,6 @@
 				<exclude>**/.gitignore</exclude>
 			</excludes>
 			<filtered>true</filtered>
-			<useDefaultExcludes>false</useDefaultExcludes>
 			<fileMode>0644</fileMode>
 			<directoryMode>0755</directoryMode>
 		</fileSet>
@@ -26,7 +25,6 @@
 				<include>**/*.pl</include>
 			</includes>
 			<filtered>true</filtered>
-			<useDefaultExcludes>false</useDefaultExcludes>
 			<fileMode>0755</fileMode>
 			<directoryMode>0755</directoryMode>
 		</fileSet>
@@ -34,15 +32,40 @@
 
 	<dependencySets>
 		<dependencySet>
-				<useProjectArtifact>false</useProjectArtifact>
-				<useTransitiveDependencies>false</useTransitiveDependencies>
-				<unpack>true</unpack>
-				<fileMode>0644</fileMode>
-				<directoryMode>0755</directoryMode>
-				<excludes>
-					<exclude>mysql:mysql-connector-java</exclude>
-					<exclude>postgresql:postgresql</exclude>
-				</excludes>
+			<useProjectArtifact>false</useProjectArtifact>
+			<useTransitiveDependencies>false</useTransitiveDependencies>
+			<excludes>
+				<exclude>org.hyperic.hq.plugin:*</exclude>
+				<exclude>mysql:mysql-connector-java</exclude>
+				<exclude>postgresql:postgresql</exclude>
+			</excludes>
+			<unpack>true</unpack>
+			<fileMode>0644</fileMode>
+			<directoryMode>0755</directoryMode>
+		</dependencySet>
+		<dependencySet>
+			<useProjectArtifact>false</useProjectArtifact>
+			<useTransitiveDependencies>false</useTransitiveDependencies>
+			<includes>
+				<include>org.hyperic.hq.plugin:examples</include>
+			</includes>
+			<unpack>true</unpack>
+			<fileMode>0644</fileMode>
+			<directoryMode>0755</directoryMode>
+		</dependencySet>
+		<dependencySet>
+			<useProjectArtifact>false</useProjectArtifact>
+			<useTransitiveDependencies>false</useTransitiveDependencies>
+			<outputDirectory>pdk/plugins</outputDirectory>
+			<includes>
+				<include>org.hyperic.hq.plugin:*</include>
+			</includes>
+			<excludes>
+				<exclude>org.hyperic.hq.plugin:examples</exclude>
+			</excludes>
+			<unpack>true</unpack>
+			<fileMode>0644</fileMode>
+			<directoryMode>0755</directoryMode>
 		</dependencySet>
 		<dependencySet>
 				<useProjectArtifact>false</useProjectArtifact>

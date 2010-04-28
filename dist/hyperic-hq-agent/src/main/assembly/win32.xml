@@ -17,7 +17,7 @@
 			<fileMode>0644</fileMode>
 			<directoryMode>0755</directoryMode>
 			<includes>
-				<include>org.hyperic.jre:x86-win32-tar-gz</include>
+				<include>org.hyperic.jre:x86-win32</include>
 			</includes>
 		</dependencySet>
 	</dependencySets>
