@@ -28,7 +28,7 @@
 						<descriptor>src/main/assembly/hpux-11.xml</descriptor>
 						<descriptor>src/main/assembly/ppc-aix.xml</descriptor>
 						<descriptor>src/main/assembly/sparc-solaris.xml</descriptor>
-					<!--	<descriptor>src/main/assembly/win32.xml</descriptor> -->
+						<descriptor>src/main/assembly/win32.xml</descriptor>
 						<descriptor>src/main/assembly/x86-linux.xml</descriptor>
 						<descriptor>src/main/assembly/x86-64-linux.xml</descriptor>
 					</descriptors>
@@ -68,12 +68,12 @@
 			<version>1.5</version>
 			<type>tar.gz</type>
 		</dependency>
-<!--	<dependency>
+		<dependency>
 			<groupId>org.hyperic.jre</groupId>
-			<artifactId>x86-win32-tar-gz</artifactId>
+			<artifactId>x86-win32</artifactId>
 			<version>1.5</version>
 			<type>tar.gz</type>
-		</dependency> -->
+		</dependency>
 		<dependency>
 			<groupId>org.hyperic.jre</groupId>
 			<artifactId>ppc-aix</artifactId>
