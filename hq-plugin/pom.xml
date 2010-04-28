@@ -42,9 +42,30 @@
 		<module>jetty-plugin</module>
 		<module>jmx-plugin</module>
 		<module>jvm-plugin</module>
+		<module>memcached-plugin</module>
+		<module>mssql-plugin</module>
+		<module>mysql-plugin</module>
+		<module>mysql_stats-plugin</module>
+		<module>nagios-plugin</module>
+		<module>netapp-plugin</module>
+		<module>netdevice-plugin</module>
+		<module>ntds-plugin</module>
+		<module>ntp-plugin</module>
+		<module>oc4j-plugin</module>
+		<module>openldap-plugin</module>
+		<module>oracle-plugin</module>
+		<module>perlbal-plugin</module>
+		<module>postfix-plugin</module>
+		<module>postgresql-plugin</module>
 		<module>process-plugin</module>
 		<module>resin-plugin</module>
+		<module>samba-plugin</module>
 		<module>sendmail-plugin</module>
+		<module>servlet-plugin</module>
+		<module>spring-plugin</module>
+		<module>sqlquery-plugin</module>
+		<module>sybase-plugin</module>
+		<module>system-plugin</module>
 	</modules>
 
 	<build>
