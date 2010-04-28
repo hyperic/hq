@@ -39,6 +39,21 @@
 				<unpack>true</unpack>
 				<fileMode>0644</fileMode>
 				<directoryMode>0755</directoryMode>
+				<excludes>
+					<exclude>mysql:mysql-connector-java</exclude>
+					<exclude>postgresql:postgresql</exclude>
+				</excludes>
+		</dependencySet>
+		<dependencySet>
+				<useProjectArtifact>false</useProjectArtifact>
+				<useTransitiveDependencies>false</useTransitiveDependencies>
+				<outputDirectory>pdk/lib/jdbc</outputDirectory>
+				<fileMode>0644</fileMode>
+				<directoryMode>0755</directoryMode>
+				<includes>
+					<include>mysql:mysql-connector-java</include>
+					<include>postgresql:postgresql</include>
+				</includes>
 		</dependencySet>
 	</dependencySets>
 

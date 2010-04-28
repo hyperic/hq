@@ -30,7 +30,9 @@
 		<jta.version>1.1</jta.version>
 		<log4j.version>1.2.14</log4j.version>
 		<mail.version>1.4</mail.version>
+		<mysql.connector.version>5.1.10</mysql.connector.version>
 		<oro.version>2.0.8</oro.version>
+		<postgresql.agent.driver.version>7.4.3</postgresql.agent.driver.version>
 		<roo.version>1.0.2.RELEASE</roo.version>
 		<sigar.version>1.6.4</sigar.version>
 		<snmp.version>1.10.1</snmp.version>
@@ -197,6 +199,16 @@
 				<groupId>org.codehaus.groovy</groupId>
 				<artifactId>groovy-all</artifactId>
 				<version>${groovy.version}</version>
+			</dependency>
+			<dependency>
+  				<groupId>mysql</groupId>
+  				<artifactId>mysql-connector-java</artifactId>
+  				<version>${mysql.connector.version}</version>
+			</dependency>
+			<dependency>
+  				<groupId>postgresql</groupId>
+  				<artifactId>postgresql</artifactId>
+  				<version>${postgresql.agent.driver.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
