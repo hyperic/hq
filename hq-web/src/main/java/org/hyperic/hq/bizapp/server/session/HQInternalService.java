@@ -25,8 +25,12 @@
 
 package org.hyperic.hq.bizapp.server.session;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.server.session.AgentConnections;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.PlatformManager;
@@ -42,6 +46,7 @@ import org.springframework.stereotype.Service;
 @ManagedResource("hyperic.jmx:name=HQInternal")
 public class HQInternalService implements HQInternalServiceMBean {
 
+    private Log log = LogFactory.getLog(HQInternalService.class);
     private AgentManager agentManager;
     private MeasurementManager measurementManager;
     private PlatformManager platformManager;
@@ -64,24 +69,64 @@ public class HQInternalService implements HQInternalServiceMBean {
 
         return val * 1000.0 * 60.0;
     }
-
+    
     public int getAgentCount() {
-        return agentManager.getAgentCountUsed();
+        final ClassLoader cl = agentManager.getClass().getClassLoader();
+        final AtomicInteger atInt = new AtomicInteger();
+        final AgentManager aMan = agentManager;
+        final Runnable runner = new Runnable() {
+            @Override
+            public void run() {
+                atInt.set(aMan.getAgentCountUsed());
+            }
+        };
+        runInContext(runner, cl);
+        return atInt.get();
     }
 
     public double getMetricsCollectedPerMinute() {
-        List<CollectionSummary> vals = measurementManager.findMetricCountSummaries();
+        final ClassLoader cl = agentManager.getClass().getClassLoader();
+        final List<CollectionSummary> vals = new ArrayList<CollectionSummary>();
+        final Runnable runner = new Runnable() {
+            @Override
+            public void run() {
+                vals.addAll(measurementManager.findMetricCountSummaries());
+            }
+        };
+        runInContext(runner, cl);
         double total = 0.0;
-
         for (CollectionSummary s : vals) {
             total += (float) s.getTotal() / (float) s.getInterval();
         }
-
         return total;
     }
 
     public int getPlatformCount() {
-        return platformManager.getPlatformCount().intValue();
+        final ClassLoader cl = agentManager.getClass().getClassLoader();
+        final AtomicInteger atInt = new AtomicInteger();
+        final PlatformManager pMan = platformManager;
+        final Runnable runner = new Runnable() {
+            @Override
+            public void run() {
+                atInt.set(pMan.getPlatformCount().intValue());
+            }
+        };
+        runInContext(runner, cl);
+        return atInt.get();
+    }
+    
+    // HE-394, need to run in the context that our web container is bound to
+    // based on http://opensource.atlassian.com/projects/hibernate/browse/HHH-3529
+    // when we upgrade to hibernate 3.5 this may not be necessary
+    private void runInContext(Runnable runner, ClassLoader cl) {
+        Thread thread = new Thread(runner);
+        thread.setContextClassLoader(cl);
+        thread.start();
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            log.error(e,e);
+        }
     }
 
     public long getAgentRequests() {
