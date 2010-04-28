@@ -66,6 +66,13 @@
 		<module>sqlquery-plugin</module>
 		<module>sybase-plugin</module>
 		<module>system-plugin</module>
+		<module>tomcat-plugin</module>
+		<module>vim-plugin</module>
+		<module>vmware-plugin</module>
+		<module>weblogic-plugin</module>
+		<module>websphere-plugin</module>
+		<module>xen-plugin</module>
+		<module>zimbra-plugin</module>
 	</modules>
 
 	<build>

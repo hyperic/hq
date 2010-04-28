@@ -383,6 +383,40 @@
 			<artifactId>system-plugin</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>tomcat-plugin</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>vim-plugin</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>vmware-plugin</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>weblogic-plugin</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>websphere-plugin</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>xen-plugin</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>zimbra-plugin</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 	</dependencies>
-
 </project>
