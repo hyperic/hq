@@ -20,6 +20,7 @@
 	<modules>
 		<module>agent</module>
 		<module>hyperic-hq-agent</module>
+		<module>server</module>
 	</modules>
 
 	<build>

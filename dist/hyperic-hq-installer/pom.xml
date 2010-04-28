@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.hyperic.hq</groupId>
+		<artifactId>hq-parent</artifactId>
+		<version>4.4.0.BUILD-SNAPSHOT</version>
+	</parent>
+
+	<groupId>org.hyperic.hq.dist</groupId>
+	<artifactId>hyperic-hq-installer</artifactId>
+	<packaging>pom</packaging>
+	<name>Hyperic HQ Distribution - Hyperic HQ Installer</name>
+
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<descriptors>
+						<descriptor>src/main/assembly/noJRE.xml</descriptor>
+						<descriptor>src/main/assembly/apple-osx.xml</descriptor>
+						<!--
+						<descriptor>src/main/assembly/sparc-solaris.xml</descriptor>
+						<descriptor>src/main/assembly/win32.xml</descriptor>
+						<descriptor>src/main/assembly/x86-linux.xml</descriptor>
+						<descriptor>src/main/assembly/x86-64-linux.xml</descriptor> -->
+					</descriptors>
+				</configuration>
+				<executions>
+					<execution>
+						<id>package</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.hyperic.hq.dist</groupId>
+			<artifactId>server</artifactId>
+			<version>${project.version}</version>
+			<type>tar.gz</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.dist</groupId>
+			<artifactId>hyperic-hq-agent</artifactId>
+			<version>${project.version}</version>
+			<classifier>apple-osx</classifier>
+			<type>tar.gz</type>
+		</dependency>
+       <dependency>
+			<groupId>org.hyperic.hq.dist</groupId>
+			<artifactId>hyperic-hq-agent</artifactId>
+			<version>${project.version}</version>
+			<classifier>noJRE</classifier>
+			<type>zip</type>
+		</dependency>
+		 <dependency>
+			<groupId>org.hyperic.hq.dist</groupId>
+			<artifactId>hyperic-hq-agent</artifactId>
+			<version>${project.version}</version>
+			<classifier>noJRE</classifier>
+			<type>tar.gz</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq</groupId>
+			<artifactId>hq-installer</artifactId>
+			<version>${project.version}</version>
+			<type>zip</type>
+		</dependency>
+		<!-- TODO these should all be 1.6 distros-->
+	<!--	<dependency>
+			<groupId>org.hyperic.jre</groupId>
+			<artifactId>amd64-linux</artifactId>
+			<version>1.5</version>
+			<type>tar.gz</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.jre</groupId>
+			<artifactId>x86-linux</artifactId>
+			<version>1.5</version>
+			<type>tar.gz</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.jre</groupId>
+			<artifactId>sparc-sun-solaris</artifactId>
+			<version>1.5</version>
+			<type>tar.gz</type>
+		</dependency> -->
+	<!--	<dependency>
+			<groupId>org.hyperic.jre</groupId>
+			<artifactId>x86-win32-tar-gz</artifactId>
+			<version>1.5</version>
+			<type>tar.gz</type>
+		</dependency> -->
+	
+	</dependencies>
+
+</project>

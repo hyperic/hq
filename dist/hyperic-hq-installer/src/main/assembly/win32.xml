@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <assembly>
-	<id>x86-linux</id>
+	<id>win32</id>
 	<formats>
-		<format>tar.gz</format>
+		<format>zip</format>
 	</formats>
 
 	<componentDescriptors>
@@ -18,7 +18,7 @@
 			<!--><fileMode>0644</fileMode>
 			<directoryMode>0755</directoryMode>-->
 			<includes>
-				<include>org.hyperic.jre:x86-linux</include>
+				<include>org.hyperic.jre:x86-win32-tar-gz</include>
 			</includes>
 		</dependencySet>
 	</dependencySets>
