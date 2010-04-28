@@ -33,15 +33,6 @@
 						<descriptor>src/main/assembly/x86-64-linux.xml</descriptor>
 					</descriptors>
 				</configuration>
-				<executions>
-					<execution>
-						<id>package</id>
-						<phase>package</phase>
-						<goals>
-							<goal>single</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 	</build>
