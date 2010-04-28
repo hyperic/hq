@@ -56,7 +56,7 @@ public class SecureAgentConnection
     private static final String PROP_READ_TIMEOUT = "agent.readTimeOut";
     private static final String PROP_POST_HANDSHAKE_TIMEOUT = "agent.postHandshakeTimeOut";
     private static final int READ_TIMEOUT = 60000;
-    private static final int POST_HANDSHAKE_TIMEOUT = 60000;
+    private static final int POST_HANDSHAKE_TIMEOUT = 5 * 60 * 1000;
 
     private String agentAddress;
     private int    agentPort;
