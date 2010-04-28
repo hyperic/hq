@@ -19,6 +19,7 @@
 	<modules>
 		<module>hq-plugin-parent</module>
 		<module>examples</module>
+		<module>alfresco-plugin</module>
 		<module>geronimo-plugin</module>
 		<module>glassfish-plugin</module>
 		<module>hq-internal-plugin</module>
