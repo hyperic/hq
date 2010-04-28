@@ -32,7 +32,7 @@
 		<module>exchange-plugin</module>
 		<module>geronimo-plugin</module>
 		<module>glassfish-plugin</module>
-		<!-- groovy -->
+		<module>groovy-scripting-plugin</module>
 		<module>hq-internal-plugin</module>
 		<module>hqagent-plugin</module>
 		<module>iis-plugin</module>
