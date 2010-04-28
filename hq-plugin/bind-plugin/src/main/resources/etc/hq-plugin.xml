@@ -1,0 +1,194 @@
+<?xml version="1.0"?>
+
+<!--
+  NOTE: This copyright does *not* cover user programs that use HQ
+  program services by normal system calls through the application
+  program interfaces provided as part of the Hyperic Plug-in Development
+  Kit or the Hyperic Client Development Kit - this is merely considered
+  normal use of the program, and does *not* fall under the heading of
+  "derived work".
+  
+  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  This file is part of HQ.
+  
+  HQ is free software; you can redistribute it and/or modify
+  it under the terms version 2 of the GNU General Public License as
+  published by the Free Software Foundation. This program is distributed
+  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+  PARTICULAR PURPOSE. See the GNU General Public License for more
+  details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+  USA.
+ -->
+
+<plugin package="org.hyperic.hq.plugin.bind">
+  <!-- we use a dummy jmx object name -->
+  <filter name="domain" value="bind"/>
+
+  <!-- rndc metrics -->
+  <metrics name="rndc">
+    <metric name="Successful Queries"
+            alias="SuccessfulQueries"
+            template="${domain}:Type=Server:${alias}:rndc=%rndc%,named.stats=%named.stats%"
+            category="THROUGHPUT"
+            indicator="true"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Referral Queries"
+            alias="ReferralQueries"
+            template="${domain}:Type=Server:${alias}:rndc=%rndc%,named.stats=%named.stats%"
+            category="THROUGHPUT"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="No Record Queries"
+            alias="NoRecordQueries"
+            template="${domain}:Type=Server:${alias}:rndc=%rndc%,named.stats=%named.stats%"
+            category="THROUGHPUT"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="No Domain Queries"
+            alias="NoDomainQueries"
+            template="${domain}:Type=Server:${alias}:rndc=%rndc%,named.stats=%named.stats%"
+            category="THROUGHPUT"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Recursive Queries"
+            alias="RecursiveQueries"
+            template="${domain}:Type=Server:${alias}:rndc=%rndc%,named.stats=%named.stats%"
+            category="THROUGHPUT"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Failed Queries"
+            alias="FailedQueries"
+            template="${domain}:Type=Server:${alias}:rndc=%rndc%,named.stats=%named.stats%"
+            category="THROUGHPUT"
+            units="none"
+            collectionType="trendsup"/>
+  </metrics>
+
+  <!-- Process metrics -->
+  <metrics name="process">
+    <metric name="Availability"
+            alias="Availability"
+            template="sigar:Type=ProcState,Arg=%process.query%:State"
+            category="AVAILABILITY"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+
+    <metric name="Virtual Memory Size"
+            alias="VirtualMemSize"
+            template="sigar:Type=ProcMem,Arg=%process.query%:Size"
+            category="UTILIZATION"
+            units="B"
+            collectionType="dynamic"/>
+
+    <metric name="Resident Memory Size"
+            alias="ResidentMemSize"
+            template="sigar:Type=ProcMem,Arg=%process.query%:Resident"
+            category="UTILIZATION"
+            units="B"
+            collectionType="dynamic"/>
+
+    <metric name="Cpu System Time"
+            alias="SystemTime"
+            template="sigar:Type=ProcTime,Arg=%process.query%:Sys"
+            category="UTILIZATION"
+            units="ms"
+            collectionType="trendsup"/>
+
+    <metric name="Cpu User Time"
+            alias="UserTime"
+            template="sigar:Type=ProcTime,Arg=%process.query%:User"
+            category="UTILIZATION"
+            units="ms"
+            collectionType="trendsup"/>
+
+    <metric name="Cpu Total Time"
+            alias="TotalTime"
+            template="sigar:Type=ProcTime,Arg=%process.query%:Total"
+            category="UTILIZATION"
+            units="ms"
+            collectionType="trendsup"/>
+
+    <metric name="Cpu Usage"
+            alias="Usage"
+            template="sigar:Type=ProcCpu,Arg=%process.query%:Percent"
+            category="UTILIZATION"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+
+    <metric name="Open File Descriptors"
+            alias="OpenFd"
+            template="sigar:Type=ProcFd,Arg=%process.query%:Total"
+            category="UTILIZATION"
+            units="none"
+            collectionType="dynamic"/>
+  </metrics>
+
+  <help name="rndc">
+    <![CDATA[
+    <p>
+    <h3>Configure Bind ${product.version} for Monitoring</h3>
+    </p>
+    <p>
+    Monitoring of Bind ${product.version} is done through a utility
+    called 'rndc'.  For monitoring to be configured the user the agent
+    runs as needs to be able to read /etc/rdnc.conf.  This can be done
+    by adding the user the agent runs as to the same group named runs
+    as and ensuring that group has read access.
+    </p>
+    <p>
+    In addition to being able to read /etc/rdnc.conf, the agent needs
+    to be able to read and write the generated named.stats file that
+    is usually located in /var/named/named.stats.  If the agent has
+    been added to the named group this can be achived by creating
+    the /var/named/named.stats file and giving it group write access.
+    </p>
+    <code>
+    touch /var/named/named.stats<br>
+    chown named:named /var/named/named.stats<br>
+    chmod 660 /var/named/named.stats<br>
+    </code>
+    ]]>
+  </help>  
+
+  <server name="Bind" 
+          version="9.x"
+          platforms="Unix">
+
+    <plugin type="measurement"
+            class="BindMeasurementPlugin"/>
+
+    <plugin type="autoinventory"
+            class="BindServerDetector"/>
+
+    <config>
+      <option name="rndc"
+              description="Path to rndc"
+              default="/usr/sbin/rndc"/>
+      <option name="named.stats"
+              description="Path to named.stats"
+              default="/var/named/named.stats"/>
+      <option name="process.query"
+              description="Process query for named"
+              default="State.Name.eq=named"/>
+    </config>
+
+    <metrics include="process,rndc"/>
+
+    <help include="rndc"/>
+
+  </server>
+
+</plugin>

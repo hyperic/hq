@@ -1,0 +1,204 @@
+<!-- XXX we dont specify name="hqagent" here for legacy reasons
+     is defined as "camagent" in AgentProductPlugin.java -->
+<!--
+  NOTE: This copyright does *not* cover user programs that use HQ
+  program services by normal system calls through the application
+  program interfaces provided as part of the Hyperic Plug-in Development
+  Kit or the Hyperic Client Development Kit - this is merely considered
+  normal use of the program, and does *not* fall under the heading of
+  "derived work".
+  
+  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  This file is part of HQ.
+  
+  HQ is free software; you can redistribute it and/or modify
+  it under the terms version 2 of the GNU General Public License as
+  published by the Free Software Foundation. This program is distributed
+  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+  PARTICULAR PURPOSE. See the GNU General Public License for more
+  details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+  USA.
+ -->
+
+<plugin class="org.hyperic.hq.plugin.hqagent.AgentProductPlugin">
+  <metrics name="HQ Agent">
+    <metric name="Availability"
+            alias="Availability"
+            template="camAgent:availability"
+            category="AVAILABILITY"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+    <metric name="Total Memory Used"
+            alias="TotMemUsed"
+            template="sigar:Type=ProcMem,Arg=$$:Size"
+            category="UTILIZATION"
+            units="B"
+            collectionType="dynamic"/>
+    <metric name="Resident Memory Used"
+            alias="ResidentMemUsed"
+            template="sigar:Type=ProcMem,Arg=$$:Resident"
+            category="UTILIZATION"
+            units="B"
+            collectionType="dynamic"/>
+    <metric name="Time Spent in System Mode"
+            alias="SystemTimeUsed"
+            template="sigar:Type=ProcTime,Arg=$$:Sys"
+            category="UTILIZATION"
+            units="ms"
+            collectionType="trendsup"/>
+    <metric name="Time Spent in User Mode"
+            alias="UserTimeUsed"
+            template="sigar:Type=ProcTime,Arg=$$:User"
+            category="UTILIZATION"
+            units="ms"
+            collectionType="trendsup"/>
+    <metric name="Cpu Total Time"
+            alias="CpuTotalTime"
+            template="sigar:Type=ProcTime,Arg=$$:Total"
+            category="UTILIZATION"
+            units="ms"
+            collectionType="trendsup"/>
+    <metric name="Open File Descriptors"
+            alias="OpenFd"
+            template="sigar:Type=ProcFd,Arg=$$:Total"
+            category="UTILIZATION"
+            units="none"
+            collectionType="dynamic"/>
+    <metric name="Start Time"
+            alias="StartTime"
+            template="camAgent:Monitor=agent:StartTime"
+            category="AVAILABILITY"
+            units="epoch-millis"
+            collectionType="static"/>
+    <metric name="Up Time"
+            alias="UpTime"
+            template="camAgent:Monitor=agent:UpTime"
+            category="AVAILABILITY"
+            units="ms"
+            collectionType="static"/>
+    <metric name="JVM Total Memory"
+            alias="TotJVMMem"
+            template="camAgent:Monitor=agent:JVMTotalMemory"
+            indicator="true"
+            category="UTILIZATION"
+            units="B"
+            collectionType="dynamic"/>
+    <metric name="JVM Free Memory"
+            alias="FreeJVMMem"
+            template="camAgent:Monitor=agent:JVMFreeMemory"
+            category="UTILIZATION"
+            indicator="true"
+            units="B"
+            collectionType="dynamic"/>
+    <metric name="Number of Active Threads"
+            alias="NumThreadsActive"
+            template="camAgent:Monitor=agent:NumActiveThreads"
+            category="THROUGHPUT"
+            units="none"
+            collectionType="dynamic"/>
+    <metric name="Number of Requests Served"
+            alias="NumRequestsServed"
+            template="camAgent:Monitor=agent.commandListener:${alias}"
+            category="THROUGHPUT"
+            units="none"
+            collectionType="trendsup"/>
+    <metric name="Number of Connection Failures"
+            alias="NumConnFailures"
+            template="camAgent:Monitor=agent.commandListener:${alias}"
+            category="PERFORMANCE"
+            units="none"
+            collectionType="trendsup"/>
+    <metric name="Total Time Spent Processing Requests"
+            alias="TotalRequestTime"
+            template="camAgent:Monitor=agent.commandListener:${alias}"
+            category="PERFORMANCE"
+            units="ms"
+            collectionType="trendsup"/>
+    <metric name="Maximum Time Spent Processing a Request"
+            alias="MaxRequestTime"
+            template="camAgent:Monitor=agent.commandListener:${alias}"
+            category="PERFORMANCE"
+            units="ms"
+            rate="none"
+            collectionType="trendsup"/>
+    <metric name="Minimum Time Spent Processing a Request"
+            alias="MinRequestTime"
+            template="camAgent:Monitor=agent.commandListener:${alias}"
+            category="PERFORMANCE"
+            units="ms"
+            collectionType="trendsdown"/>
+
+    <metric name="Number of Scheduled Metrics"
+            alias="NumMetricsScheduled"
+            template="camAgent:Monitor=camMetric.schedule:${alias}"
+            category="THROUGHPUT"
+            units="none"
+            collectionType="dynamic"/>
+    <metric name="Number of Metrics Collected"
+            alias="NumMetricsFetched"
+            template="camAgent:Monitor=camMetric.schedule:${alias}"
+            category="THROUGHPUT"
+            indicator="true"
+            units="none"
+            collectionType="trendsup"/>
+    <metric name="Number of Metrics which Failed to be Collected"
+            alias="NumMetricsFailed"
+            template="camAgent:Monitor=camMetric.schedule:${alias}"
+            category="THROUGHPUT"
+            units="none"
+            collectionType="trendsup"/>
+    <metric name="Total Time Spent Fetching Metrics"
+            alias="TotFetchTime"
+            template="camAgent:Monitor=camMetric.schedule:${alias}"
+            category="PERFORMANCE"
+            indicator="true"
+            units="ms"
+            collectionType="trendsup"/>
+    <metric name="Maximum Time Spent Fetching a Metric"
+            alias="MaxFetchTime"
+            template="camAgent:Monitor=camMetric.schedule:${alias}"
+            category="PERFORMANCE"
+            rate="none"
+            units="ms"
+            collectionType="trendsup"/>
+    <metric name="Minimum Time Spent Fetching a Metric"
+            alias="MinFetchTime"
+            template="camAgent:Monitor=camMetric.schedule:${alias}"
+            category="PERFORMANCE"
+            units="ms"
+            collectionType="trendsdown"/>
+    <metric name="Number of Metric Batches Sent to Server"
+            alias="NumBatchesSent"
+            template="camAgent:Monitor=camMetric.sender:${alias}"
+            category="PERFORMANCE"
+            units="none"
+            collectionType="trendsup"/>
+    <metric name="Number of Metrics Sent to Server"
+            alias="TotMetricsSent"
+            template="camAgent:Monitor=camMetric.sender:${alias}"
+            category="PERFORMANCE"
+            indicator="true"
+            units="none"
+            collectionType="trendsup"/>
+    <metric name="Total Time Spent Sending Metrics to Server"
+            alias="TotBatchSendTime"
+            template="camAgent:Monitor=camMetric.sender:${alias}"
+            category="PERFORMANCE"
+            units="ms"
+            collectionType="trendsup"/>
+    <metric name="Server Offset"
+            alias="ServerOffset"
+            template="camAgent:Monitor=camMetric.sender:${alias}"
+            category="PERFORMANCE"
+            indicator="true"
+            units="ms"
+            collectionType="dynamic"/>
+  </metrics>
+
+</plugin>

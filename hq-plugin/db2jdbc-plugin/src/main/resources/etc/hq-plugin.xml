@@ -1,0 +1,292 @@
+<!--
+  NOTE: This copyright does *not* cover user programs that use HQ
+  program services by normal system calls through the application
+  program interfaces provided as part of the Hyperic Plug-in Development
+  Kit or the Hyperic Client Development Kit - this is merely considered
+  normal use of the program, and does *not* fall under the heading of
+  "derived work".
+  
+  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  This file is part of HQ.
+  
+  HQ is free software; you can redistribute it and/or modify
+  it under the terms version 2 of the GNU General Public License as
+  published by the Free Software Foundation. This program is distributed
+  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+  PARTICULAR PURPOSE. See the GNU General Public License for more
+  details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+  USA.
+ -->
+
+<plugin name="db2jdbc" >
+    <property name="template-config"
+            value="database=%db2.jdbc.database%,jdbcUser=%db2.jdbc.user%,jdbcPassword=%db2.jdbc.password%,jdbcUrl=jdbc:db2://%db2.jdbc.hostname%:%db2.jdbc.port%/%db2.jdbc.database%"/>
+
+    <property name="server" value="func=SNAP_GET_DB_V91"/>
+    <metrics name="DB2 JDBC 9.x">
+        <metric name="Availability" alias="Availability" template="db2:${server}:availability" category="AVAILABILITY" indicator="true" units="percentage" collectionType="dynamic"/>
+        <metric name="QueryExecTime" alias="QueryExecTime" template="db2:${server}:${alias}" category="THROUGHPUT" indicator="true" units="ms" collectionType="dynamic"/>
+        <metric name="Current Connection" alias="APPLS_CUR_CONS" template="db2:${server}:${alias}" category="THROUGHPUT" indicator="true" units="none" collectionType="dynamic"/>
+        <metric name="Applications Executing" alias="APPLS_IN_DB2" template="db2:${server}:${alias}" category="THROUGHPUT" indicator="true" units="none" collectionType="dynamic"/>
+        <metric name="Connections Top" alias="CONNECTIONS_TOP" template="db2:${server}:${alias}" category="THROUGHPUT" units="none" collectionType="dynamic"/>
+        <metric name="Connections" alias="TOTAL_CONS" template="db2:${server}:${alias}" category="THROUGHPUT" units="none" collectionType="trendsup"/>
+        <metric name="Deadlocks" alias="DEADLOCKS" template="db2:${server}:${alias}" category="THROUGHPUT" units="none" collectionType="trendsup"/>
+        <metric name="Exclusive Lock Escalations" alias="X_LOCK_ESCALS" template="db2:${server}:${alias}" category="THROUGHPUT" units="none" collectionType="trendsup"/>
+        <metric name="Lock Escallations" alias="LOCK_ESCALS" template="db2:${server}:${alias}" category="THROUGHPUT" units="none" collectionType="dynamic"/>
+        <metric name="Lock List in Use" alias="LOCK_LIST_IN_USE" template="db2:${server}:${alias}" category="THROUGHPUT" indicator="true" units="KB" collectionType="dynamic"/>
+        <metric name="Lock Waits" alias="LOCK_WAITS" template="db2:${server}:${alias}" category="THROUGHPUT" units="none" collectionType="dynamic"/>
+        <metric name="Agents Waiting On Locks" alias="LOCKS_WAITING" template="db2:${server}:${alias}" category="THROUGHPUT" units="none" collectionType="dynamic"/>
+        <metric name="Lock Timeouts" alias="LOCK_TIMEOUTS" template="db2:${server}:${alias}" category="THROUGHPUT" units="none" collectionType="trendsup"/>
+
+        <metric name="Total Sort Heap Allocated" alias="SORT_HEAP_ALLOCATED" template="db2:${server}:${alias}" category="UTILIZATION" units="none"/>
+        <metric name="Sort Share Heap Allocated" alias="SORT_SHRHEAP_ALLOCATED" template="db2:${server}:${alias}" category="UTILIZATION" units="none"/>
+        <metric name="Sort share heap high" alias="SORT_SHRHEAP_TOP" template="db2:${server}:${alias}" category="UTILIZATION" units="none"/>
+
+        <metric name="Sorts" alias="TOTAL_SORTS" template="db2:${server}:${alias}" category="UTILIZATION" units="none" collectionType="trendsup"/>
+        <metric name="Sort Time" alias="TOTAL_SORT_TIME" template="db2:${server}:${alias}" category="UTILIZATION" units="ms" collectionType="trendsup"/>
+        <metric name="Sort Overflows" alias="SORT_OVERFLOWS" template="db2:${server}:${alias}" category="UTILIZATION" units="none" collectionType="trendsup"/>
+
+        <metric name="Internal Rows Inserted" alias="INT_ROWS_INSERTED" template="db2:${server}:${alias}" category="UTILIZATION" units="none" collectionType="trendsup"/>
+        <metric name="Internal Rows Updated" alias="INT_ROWS_UPDATED" template="db2:${server}:${alias}" category="UTILIZATION" units="none" collectionType="trendsup"/>
+
+        <metric name="Associated Agents" alias="NUM_ASSOC_AGENTS" template="db2:${server}:${alias}" category="UTILIZATION" indicator="true" units="none" collectionType="dynamic"/>
+        <metric name="Number of Agents Created" alias="AGENTS_TOP" template="db2:${server}:${alias}" category="UTILIZATION" units="none" collectionType="trendsup"/>
+        <metric name="Maximum Number of Coordinating Agents" alias="COORD_AGENTS_TOP" template="db2:${server}:${alias}" category="UTILIZATION" units="none"/>
+
+        <metric name="Direct Reads" alias="DIRECT_READS" template="db2:${server}:${alias}" category="UTILIZATION"  units="none" collectionType="trendsup"/>
+        <metric name="Direct Reads Requests" alias="DIRECT_READ_REQS" template="db2:${server}:${alias}" category="UTILIZATION" units="none" collectionType="trendsup"/>
+        <metric name="Direct Reads Ratio" alias="DIRECT_READS_RATIO" template="db2:${server}:${alias}" category="UTILIZATION" indicator="true" units="none" collectionType="trendsup"/>
+        <metric name="Direct Read Time" alias="DIRECT_READ_TIME" template="db2:${server}:${alias}" category="UTILIZATION" indicator="true" units="ms" collectionType="dynamic"/>
+        <metric name="Direct Read Time Average" alias="DIRECT_READ_TIME_AVE" template="db2:${server}:${alias}" category="UTILIZATION" indicator="true" units="ms" collectionType="dynamic"/>
+        
+        <metric name="Direct Writes" alias="DIRECT_WRITES" template="db2:${server}:${alias}" category="UTILIZATION" units="none" collectionType="trendsup"/>
+        <metric name="Direct Writes Requests" alias="DIRECT_WRITE_REQS" template="db2:${server}:${alias}" category="UTILIZATION" units="none" collectionType="trendsup"/>
+        <metric name="Direct Writes Ratio" alias="DIRECT_WRITE_RATIO" template="db2:${server}:${alias}" category="UTILIZATION" indicator="true" units="none" collectionType="dynamic"/>
+        <metric name="Direct Write Time" alias="DIRECT_WRITE_TIME" template="db2:${server}:${alias}" category="UTILIZATION" indicator="true" units="ms" collectionType="dynamic"/>
+        <metric name="Direct Write Time Average" alias="DIRECT_WRITE_TIME_AVE" template="db2:${server}:${alias}" category="UTILIZATION" indicator="true" units="ms" collectionType="dynamic"/>
+
+        <metric name="Log Read Time" alias="LOG_READ_TIME_S" template="db2:${server}:${alias}" category="UTILIZATION" indicator="true" units="sec" collectionType="trendsup"/>
+        <metric name="Log Write IO" alias="NUM_LOG_WRITE_IO" template="db2:${server}:${alias}" category="UTILIZATION" indicator="true" units="none" collectionType="trendsup"/>
+        <metric name="Log Read IO" alias="NUM_LOG_READ_IO" template="db2:${server}:${alias}" category="UTILIZATION" indicator="true" units="none" collectionType="trendsup"/>
+        <metric name="Log Write Time" alias="LOG_WRITE_TIME_S" template="db2:${server}:${alias}" category="UTILIZATION" indicator="true" units="sec" collectionType="trendsup"/>
+        <metric name="Log Reads" alias="LOG_READS" template="db2:${server}:${alias}" category="UTILIZATION" indicator="true" units="none" collectionType="trendsup"/>
+        <metric name="Log Writes" alias="LOG_WRITES" template="db2:${server}:${alias}" category="UTILIZATION" indicator="true" units="none" collectionType="trendsup"/>
+
+        <metric name="Total Logical Reads" alias="TOTAL_LOGICAL_READS" template="db2:${server}:${alias}" category="THROUGHPUT" indicator="true" units="none" collectionType="trendsup"/>
+        <metric name="Data Logical Reads" alias="POOL_DATA_L_READS" template="db2:${server}:${alias}" category="THROUGHPUT"  units="none" collectionType="trendsup"/>
+        <metric name="Index Logical Reads" alias="POOL_INDEX_L_READS" template="db2:${server}:${alias}" category="THROUGHPUT"  units="none" collectionType="trendsup"/>
+
+        <metric name="Total Phydical Reads" alias="TOTAL_PHYSICAL_READS" template="db2:${server}:${alias}" category="THROUGHPUT" indicator="true" units="none" collectionType="trendsup"/>
+        <metric name="Data Phydical Reads" alias="POOL_DATA_P_READS" template="db2:${server}:${alias}" category="THROUGHPUT"  units="none" collectionType="trendsup"/>
+        <metric name="Index Phydical Reads" alias="POOL_INDEX_P_READS" template="db2:${server}:${alias}" category="THROUGHPUT"  units="none" collectionType="trendsup"/>
+
+        <metric name="Data Page Hit Ratio" alias="DATA_PAGE_HIT_RATIO" template="db2:${server}:${alias}" category="THROUGHPUT" indicator="true" units="percentage"/>
+        <metric name="Index Page Hit Ratio" alias="INDEX_PAGE_HIT_RATIO" template="db2:${server}:${alias}" category="THROUGHPUT" indicator="true" units="percentage"/>
+
+        <metric name="Pool Physical Read Time" alias="POOL_READ_TIME" template="db2:${server}:${alias}" category="THROUGHPUT" indicator="true" units="ms" collectionType="trendsup"/>
+        <metric name="Pool Physical Write Time" alias="POOL_WRITE_TIME" template="db2:${server}:${alias}" category="THROUGHPUT" indicator="true" units="ms" collectionType="trendsup"/>
+    </metrics>
+
+    <property name="bufferpool" value="func=SNAP_GET_BP,where=BP_NAME='%bufferpool%'"/>
+    <metrics name="DB2 JDBC 9.x Buffer Pool">
+        <metric name="Availability" alias="Availability" template="db2:${bufferpool}:availability" category="AVAILABILITY" indicator="true" units="percentage" collectionType="dynamic"/>
+        <metric name="Total Logical Reads" alias="TOTAL_LOGICAL_READS" template="db2:${bufferpool}:${alias}" category="THROUGHPUT" indicator="true" units="none" collectionType="trendsup"/>
+        <metric name="Data Logical Reads" alias="POOL_DATA_L_READS" template="db2:${bufferpool}:${alias}" category="THROUGHPUT"  units="none" collectionType="trendsup"/>
+        <metric name="Index Logical Reads" alias="POOL_INDEX_L_READS" template="db2:${bufferpool}:${alias}" category="THROUGHPUT"  units="none" collectionType="trendsup"/>
+
+        <metric name="Total Phydical Reads" alias="TOTAL_PHYSICAL_READS" template="db2:${bufferpool}:${alias}" category="THROUGHPUT" indicator="true" units="none" collectionType="trendsup"/>
+        <metric name="Data Phydical Reads" alias="POOL_DATA_P_READS" template="db2:${bufferpool}:${alias}" category="THROUGHPUT"  units="none" collectionType="trendsup"/>
+        <metric name="Index Phydical Reads" alias="POOL_INDEX_P_READS" template="db2:${bufferpool}:${alias}" category="THROUGHPUT"  units="none" collectionType="trendsup"/>
+
+        <metric name="Data Page Hit Ratio" alias="DATA_PAGE_HIT_RATIO" template="db2:${bufferpool}:${alias}" category="THROUGHPUT" indicator="true" units="percentage"/>
+        <metric name="Index Page Hit Ratio" alias="INDEX_PAGE_HIT_RATIO" template="db2:${bufferpool}:${alias}" category="THROUGHPUT" indicator="true" units="percentage"/>
+    </metrics>
+
+    <property name="table_activity" value="func=SNAP_GET_TAB_V91,where=TABNAME='%table%'"/>
+    <property name="table_size" value="sql=select * from SYSIBMADM.ADMINTABINFO where TABNAME='%table%' and TABSCHEMA='%schema%'"/>
+    <metrics name="DB2 JDBC 9.x Table">
+        <metric name="Availability"
+            alias="Availability"
+            template="db2:${table_size}:availability"
+            category="AVAILABILITY"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+        <metric name="Total" alias="TOTAL_SIZE" template="db2:${table_size}:${alias}" category="UTILIZATION" indicator="true" units="KB"/>
+        <metric name="Data" alias="DATA_OBJECT_P_SIZE" template="db2:${table_size}:${alias}" category="UTILIZATION" indicator="true" units="KB"/>
+        <metric name="Dictionary" alias="DICTIONARY_SIZE" template="db2:${table_size}:${alias}" category="UTILIZATION" indicator="true" units="B"/>
+        <metric name="Index" alias="INDEX_OBJECT_P_SIZE" template="db2:${table_size}:${alias}" category="UTILIZATION" indicator="true" units="KB"/>
+        <metric name="LOB Obejcts" alias="LOB_OBJECT_P_SIZE" template="db2:${table_size}:${alias}" category="UTILIZATION" indicator="true" units="KB"/>
+        <metric name="Long Objetcs" alias="LONG_OBJECT_P_SIZE" template="db2:${table_size}:${alias}" category="UTILIZATION" indicator="true" units="KB"/>
+        <metric name="XML" alias="XML_OBJECT_P_SIZE" template="db2:${table_size}:${alias}" category="UTILIZATION" indicator="true" units="KB"/>
+
+        <metric name="Rows Read" alias="ROWS_READ" template="db2:${table_activity}:${alias}" category="THROUGHPUT" units="none" collectionType="trendsup"/>
+        <metric name="Rows Written" alias="ROWS_WRITTEN" template="db2:${table_activity}:${alias}" category="THROUGHPUT" units="none" collectionType="trendsup"/>
+        <metric name="Accesses to Overflowed Records" alias="OVERFLOW_ACCESSES" template="db2:${table_activity}:${alias}" category="THROUGHPUT" units="none" collectionType="trendsup"/>
+        <metric name="Page Reorganizations" alias="PAGE_REORGS" template="db2:${table_activity}:${alias}" category="THROUGHPUT" units="none" collectionType="trendsup"/>
+        <metric name="Data Object Pages" alias="DATA_OBJECT_PAGES" template="db2:${table_activity}:${alias}" category="THROUGHPUT" units="none"/>
+        <metric name="Index Object Pages" alias="INDEX_OBJECT_PAGES" template="db2:${table_activity}:${alias}" category="THROUGHPUT" units="none"/>
+        <metric name="LOB Object Pages" alias="LOB_OBJECT_PAGES" template="db2:${table_activity}:${alias}" category="THROUGHPUT" units="none"/>
+        <metric name="LONG Object Pages" alias="LONG_OBJECT_PAGES" template="db2:${table_activity}:${alias}" category="THROUGHPUT" units="none"/>
+        <metric name="XDA Object Pages" alias="XDA_OBJECT_PAGES" template="db2:${table_activity}:${alias}" category="THROUGHPUT" units="none"/>
+    </metrics>
+
+    <property name="tablespace_io" value="func=SNAP_GET_TBSP_V91,where=TBSP_NAME='%tablespace%'"/>
+    <property name="tablespace" value="sql=select * from SYSIBMADM.TBSP_UTILIZATION where TBSP_NAME='%tablespace%'"/>
+    <property name="tablespace_io_part" value="func=SNAP_GET_TBSP_PART_V91,where=TBSP_NAME='%tablespace%'"/>
+    <property name="tablespace_cont" value="func=SNAP_GET_CONTAINER_V91,where=TBSP_NAME='%tablespace%'"/>
+    <metrics name="DB2 JDBC 9.x Table Space">
+        <metric name="Availability"
+            alias="Availability"
+            template="db2:${tablespace}:availability"
+            category="AVAILABILITY"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+        <metric name="Utilization" alias="TBSP_UTILIZATION_PERCENT" template="db2:${tablespace}:${alias}" category="UTILIZATION" indicator="true" units="percentage"/>
+        <metric name="Page" alias="TBSP_PAGE_SIZE" template="db2:${tablespace}:${alias}" category="UTILIZATION" indicator="true" units="KB"/>
+        <metric name="Prefetch" alias="TBSP_PREFETCH_SIZE" template="db2:${tablespace}:${alias}" category="UTILIZATION" indicator="true" units="KB"/>
+        <metric name="Extent" alias="TBSP_EXTENT_SIZE" template="db2:${tablespace}:${alias}" category="UTILIZATION" indicator="true" units="KB"/>
+        <metric name="Total" alias="TBSP_TOTAL_SIZE_KB" template="db2:${tablespace}:${alias}" category="UTILIZATION" indicator="true" units="KB"/>
+        <metric name="Free" alias="TBSP_FREE_SIZE_KB" template="db2:${tablespace}:${alias}" category="UTILIZATION" indicator="true" units="KB"/>
+        <metric name="Usable" alias="TBSP_USABLE_SIZE_KB" template="db2:${tablespace}:${alias}" category="UTILIZATION" indicator="true" units="KB"/>
+        <metric name="Used" alias="TBSP_USED_SIZE_KB" template="db2:${tablespace}:${alias}" category="UTILIZATION" indicator="true" units="KB"/>
+        <metric name="Number Containers" alias="TBSP_NUM_CONTAINERS" template="db2:${tablespace}:${alias}" category="UTILIZATION" units="KB"/>
+
+        <!-- net 8 metrics see PoolMeasurement.java -->
+        <metric name="Total Logical Reads" alias="TOTAL_LOGICAL_READS" template="db2:${tablespace_io}:${alias}" category="THROUGHPUT" indicator="true" units="none" collectionType="trendsup"/>
+        <metric name="Data Logical Reads" alias="POOL_DATA_L_READS" template="db2:${tablespace_io}:${alias}" category="THROUGHPUT"  units="none" collectionType="trendsup"/>
+        <metric name="Index Logical Reads" alias="POOL_INDEX_L_READS" template="db2:${tablespace_io}:${alias}" category="THROUGHPUT"  units="none" collectionType="trendsup"/>
+
+        <metric name="Total Phydical Reads" alias="TOTAL_PHYSICAL_READS" template="db2:${tablespace_io}:${alias}" category="THROUGHPUT" indicator="true" units="none" collectionType="trendsup"/>
+        <metric name="Data Phydical Reads" alias="POOL_DATA_P_READS" template="db2:${tablespace_io}:${alias}" category="THROUGHPUT"  units="none" collectionType="trendsup"/>
+        <metric name="Index Phydical Reads" alias="POOL_INDEX_P_READS" template="db2:${tablespace_io}:${alias}" category="THROUGHPUT"  units="none" collectionType="trendsup"/>
+
+        <metric name="Data Page Hit Ratio" alias="DATA_PAGE_HIT_RATIO" template="db2:${tablespace_io}:${alias}" category="THROUGHPUT" indicator="true" units="percentage"/>
+        <metric name="Index Page Hit Ratio" alias="INDEX_PAGE_HIT_RATIO" template="db2:${tablespace_io}:${alias}" category="THROUGHPUT" indicator="true" units="percentage"/>
+
+        <metric name="Current size" alias="TBSP_CURRENT_SIZE" template="db2:${tablespace_io_part}:${alias}" category="UTILIZATION" indicator="true" units="b"/>
+        <metric name="Total Pages" alias="TBSP_TOTAL_PAGES" template="db2:${tablespace_io_part}:${alias}" category="UTILIZATION" indicator="true" units="none"/>
+        <metric name="Used Pages" alias="TBSP_USED_PAGES" template="db2:${tablespace_io_part}:${alias}" category="UTILIZATION" indicator="true" units="none"/>
+
+        <metric name="Total Pages in Container" alias="TOTAL_PAGES" template="db2:${tablespace_cont}:${alias}" category="UTILIZATION" indicator="true" units="none"/>
+        <metric name="Usable Pages in Container" alias="USABLE_PAGES" template="db2:${tablespace_cont}:${alias}" category="UTILIZATION" indicator="true" units="none"/>
+        <metric name="Accessibility of Container" alias="ACCESSIBLE" template="db2:${tablespace_cont}:${alias}" category="UTILIZATION" indicator="true" units="percentage"/>
+        <metric name="Total Size of a File System" alias="FS_TOTAL_SIZE" template="db2:${tablespace_cont}:${alias}" category="UTILIZATION" indicator="true" units="b"/>
+        <metric name="Space Used on a File System" alias="FS_USED_SIZE" template="db2:${tablespace_cont}:${alias}" category="UTILIZATION" indicator="true" units="b"/>
+    </metrics>
+
+    <property name="memorypool" value="sql=select * from SYSIBMADM.SNAPDB_MEMORY_POOL where POOL_ID='%pool_id%' and POOL_SECONDARY_ID='%sec_pool_id%'"/>
+    <metrics name="DB2 JDBC 9.x Memory Pool">
+        <metric name="Availability"
+            alias="Availability"
+            template="db2:${memorypool}:availability"
+            category="AVAILABILITY"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+        <metric name="Configured Size" alias="POOL_CONFIG_SIZE" template="db2:${memorypool}:${alias}" category="UTILIZATION"  units="b"/>
+        <metric name="Current Size" alias="POOL_CUR_SIZE" template="db2:${memorypool}:${alias}" category="UTILIZATION" indicator="true" units="b"/>
+        <metric name="Used Size" alias="POOL_CUR_SIZE_USED" template="db2:${memorypool}:${alias}" category="UTILIZATION" indicator="true" units="percentage"/>
+        <metric name="Watermark" alias="POOL_WATERMARK" template="db2:${memorypool}:${alias}" category="UTILIZATION" units="b"/>
+        <metric name="Used Watermark" alias="POOL_WATERMARK_USED" template="db2:${memorypool}:${alias}" category="UTILIZATION" units="percentage"/>
+    </metrics>
+
+    <server name="DB2 JDBC" version="9.x">
+        <plugin type="autoinventory" class="org.hyperic.hq.plugin.db2jdbc.DataBaseServerDetector"/>
+        <plugin type="measurement" class="org.hyperic.hq.plugin.db2jdbc.DataBaseMeasurement"/>
+        <config>
+            <option name="db2.jdbc.database" description="Database being monitored" />
+            <option name="db2.jdbc.port" description="Port number of instance being monitored" default="50000"/>
+            <option name="db2.jdbc.hostname" description="Hostname of instance being monitored" default="localhost" />
+        </config>
+        <config type="measurement">
+            <option name="db2.jdbc.user" description="JDBC User"/>
+            <option name="db2.jdbc.password" description="JDBC Password" type="secret"/>
+        </config>
+        <service name="Buffer Pool">
+            <plugin type="measurement" class="org.hyperic.hq.plugin.db2jdbc.PoolMeasurement"/>
+            <config>
+                <option name="bufferpool" description="Buffer Pool Name" />
+            </config>
+        </service>
+        <service name="Table Space">
+            <plugin type="measurement" class="org.hyperic.hq.plugin.db2jdbc.TableSpaceMeasurement"/>
+            <config>
+                <option name="tablespace" description="Table Space Name" />
+            </config>
+        </service>
+        <service name="Table">
+            <plugin type="measurement" class="org.hyperic.hq.plugin.db2jdbc.TableMeasurement"/>
+            <config>
+                <option name="table" description="Table Name" />
+                <option name="schema" description="Table Schema Name" />
+            </config>
+        </service>
+        <service name="Memory Pool">
+            <plugin type="measurement" class="org.hyperic.hq.plugin.db2jdbc.MemoryPoolMeasurement"/>
+            <config>
+                <option name="pool_id" description="Memory Pool ID" />
+                <option name="sec_pool_id" description="Secondary ID" default=""/>
+            </config>
+        </service>
+    </server>
+
+    <property name="dbmanager" value="func=SNAP_GET_DBM"/>
+    <metrics name="DB2 JDBC Database Manager 9.x">
+        <metric name="Availability"
+            alias="Availability"
+            template="db2:${dbmanager}:availability"
+            category="AVAILABILITY"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+        <metric name="Total Sort Heap Allocated" alias="SORT_HEAP_ALLOCATED" template="db2:${dbmanager}:${alias}" category="UTILIZATION" units="none"/>
+        <metric name="Post Threshold Sorts" alias="POST_THRESHOLD_SORTS" template="db2:${dbmanager}:${alias}" category="UTILIZATION" units="none" collectionType="trendsup"/>
+        <metric name="Piped Sorts Requested" alias="PIPED_SORTS_REQUESTED" template="db2:${dbmanager}:${alias}" category="UTILIZATION" units="none" collectionType="trendsup"/>
+        <metric name="Piped Sorts Accepted" alias="PIPED_SORTS_ACCEPTED" template="db2:${dbmanager}:${alias}" category="UTILIZATION" units="none" collectionType="trendsup"/>
+        <metric name="Remote Connections" alias="REM_CONS_IN" template="db2:${dbmanager}:${alias}" category="UTILIZATION" indicator="true" units="none"/>
+        <metric name="Remote Connections Executing" alias="REM_CONS_IN_EXEC" template="db2:${dbmanager}:${alias}" category="UTILIZATION" indicator="true" units="none"/>
+        <metric name="Local Connections" alias="LOCAL_CONS" template="db2:${dbmanager}:${alias}" category="UTILIZATION" indicator="true" units="none"/>
+        <metric name="Local Connections Executing" alias="LOCAL_CONS_IN_EXEC" template="db2:${dbmanager}:${alias}" category="UTILIZATION" indicator="true" units="none"/>
+        <metric name="Local Databases with Current Connects" alias="CON_LOCAL_DBASES" template="db2:${dbmanager}:${alias}" category="UTILIZATION" units="none"/>
+        <metric name="Agents Registered" alias="AGENTS_REGISTERED" template="db2:${dbmanager}:${alias}" category="UTILIZATION" units="none"/>
+        <metric name="Agents Waiting for a Token" alias="AGENTS_WAITING_ON_TOKEN" template="db2:${dbmanager}:${alias}" category="UTILIZATION" units="none"/>
+        <metric name="Maximum Number of Agents Registered" alias="AGENTS_REGISTERED_TOP" template="db2:${dbmanager}:${alias}" category="UTILIZATION" units="none"/>
+        <metric name="Maximum Number of Agents Waiting" alias="AGENTS_WAITING_TOP" template="db2:${dbmanager}:${alias}" category="UTILIZATION" units="none"/>
+        <metric name="Committed Private Memory" alias="COMM_PRIVATE_MEM" template="db2:${dbmanager}:${alias}" category="UTILIZATION" units="none"/>
+        <metric name="Number of Idle Agents" alias="IDLE_AGENTS" template="db2:${dbmanager}:${alias}" category="UTILIZATION" units="none"/>
+        <metric name="Agents Assigned From Pool" alias="AGENTS_FROM_POOL" template="db2:${dbmanager}:${alias}" category="UTILIZATION" units="none"/>
+        <metric name="Agents Created Due to Empty Agent Pool" alias="AGENTS_CREATED_EMPTY_POOL" template="db2:${dbmanager}:${alias}" category="UTILIZATION" units="none" collectionType="trendsup"/>
+        <metric name="Maximum Number of Coordinating Agents" alias="COORD_AGENTS_TOP" template="db2:${dbmanager}:${alias}" category="UTILIZATION" units="none"/>
+        <metric name="Maximum Agent Overflows" alias="MAX_AGENT_OVERFLOWS" template="db2:${dbmanager}:${alias}" category="UTILIZATION" units="none"/>
+        <metric name="Stolen Agents" alias="AGENTS_STOLEN" template="db2:${dbmanager}:${alias}" category="UTILIZATION" units="none"/>
+        <metric name="Total Number of Attempted Connections" alias="GW_TOTAL_CONS" template="db2:${dbmanager}:${alias}" category="UTILIZATION" indicator="true" units="none" collectionType="trendsup"/>
+        <metric name="Current Number of Connections" alias="GW_CUR_CONS" template="db2:${dbmanager}:${alias}" category="UTILIZATION" indicator="true" units="none"/>
+        <metric name="Connections Waiting for the Host to Reply" alias="GW_CONS_WAIT_HOST" template="db2:${dbmanager}:${alias}" category="UTILIZATION" indicator="true" units="none"/>
+        <metric name="Connections Waiting for the Client" alias="GW_CONS_WAIT_CLIENT" template="db2:${dbmanager}:${alias}" category="UTILIZATION" indicator="true" units="none"/>
+        <metric name="Hash Join Threshold" alias="POST_THRESHOLD_HASH_JOINS" template="db2:${dbmanager}:${alias}" category="UTILIZATION" units="none" collectionType="trendsup"/>
+        <metric name="Connection Switches" alias="NUM_GW_CONN_SWITCHES" template="db2:${dbmanager}:${alias}" category="UTILIZATION" units="none" collectionType="trendsup"/>
+        <metric name="Number of Nodes in Partition" alias="NUM_NODES_IN_DB2_INSTANCE" template="db2:${dbmanager}:${alias}" category="UTILIZATION" units="none"/>
+        <metric name="ort Private Heap High Water Mark" alias="SORT_HEAP_TOP" template="db2:${dbmanager}:${alias}" category="UTILIZATION" units="none"/>
+    </metrics>
+
+    <server name="DB2 JDBC Database Manager" version="9.x">
+        <plugin type="autoinventory" class="org.hyperic.hq.plugin.db2jdbc.DBManagerServerDetector"/>
+        <plugin type="measurement" class="org.hyperic.hq.plugin.db2jdbc.DBManagerMeasurement"/>
+        <config>
+            <option name="db2.jdbc.database" description="Database being monitored" optional="true"/>
+            <option name="db2.jdbc.port" description="Port number of instance being monitored" default="50000"/>
+            <option name="db2.jdbc.hostname" description="Hostname of instance being monitored" default="localhost" />
+        </config>
+        <config type="measurement">
+            <option name="db2.jdbc.user" description="JDBC User"/>
+            <option name="db2.jdbc.password" description="JDBC Password" type="secret"/>
+        </config>
+    </server>
+</plugin>
