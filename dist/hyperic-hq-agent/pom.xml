@@ -23,12 +23,12 @@
 				<artifactId>maven-assembly-plugin</artifactId>
 				<configuration>
 					<descriptors>
-						<descriptor>src/main/assembly/noJRE.xml</descriptor>
+					    <descriptor>src/main/assembly/noJRE.xml</descriptor>
 						<descriptor>src/main/assembly/apple-osx.xml</descriptor>
 						<descriptor>src/main/assembly/hpux-11.xml</descriptor>
 						<descriptor>src/main/assembly/ppc-aix.xml</descriptor>
 						<descriptor>src/main/assembly/sparc-solaris.xml</descriptor>
-						<descriptor>src/main/assembly/win32.xml</descriptor>
+					<!--	<descriptor>src/main/assembly/win32.xml</descriptor> -->
 						<descriptor>src/main/assembly/x86-linux.xml</descriptor>
 						<descriptor>src/main/assembly/x86-64-linux.xml</descriptor>
 					</descriptors>
@@ -53,7 +53,7 @@
 			<version>${project.version}</version>
 			<type>tar.gz</type>
 		</dependency>
-	<!--	<dependency>
+		<dependency>
 			<groupId>org.hyperic.jre</groupId>
 			<artifactId>amd64-linux</artifactId>
 			<version>1.5</version>
@@ -70,25 +70,25 @@
 			<artifactId>sparc-sun-solaris</artifactId>
 			<version>1.5</version>
 			<type>tar.gz</type>
-		</dependency> -->
+		</dependency> 
 		<dependency>
 			<groupId>org.hyperic.jre</groupId>
 			<artifactId>hpux-11</artifactId>
 			<version>1.5</version>
 			<type>tar.gz</type>
 		</dependency>
-	<!--	<dependency>
+<!--	<dependency>
 			<groupId>org.hyperic.jre</groupId>
 			<artifactId>x86-win32-tar-gz</artifactId>
 			<version>1.5</version>
 			<type>tar.gz</type>
-		</dependency>
+		</dependency> -->
 		<dependency>
 			<groupId>org.hyperic.jre</groupId>
 			<artifactId>ppc-aix</artifactId>
 			<version>1.5</version>
 			<type>tar.gz</type>
-		</dependency> -->
+		</dependency> 
 	</dependencies>
 
 </project>

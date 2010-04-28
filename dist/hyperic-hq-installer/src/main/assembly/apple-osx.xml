@@ -15,7 +15,7 @@
 			    <useTransitiveDependencies>false</useTransitiveDependencies>
 				<outputDirectory>/</outputDirectory>
 				<includes>
-					<include>org.hyperic.hq.dist:hyperic-hq-agent</include>
+					<include>org.hyperic.hq.dist:hyperic-hq-agent:classifier:type</include>
 				</includes>
 	   </dependencySet>
    </dependencySets>

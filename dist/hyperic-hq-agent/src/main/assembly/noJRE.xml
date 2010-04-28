@@ -7,6 +7,7 @@
 	</formats>
 
 	<componentDescriptors>
-    	<componentDescriptor>src/main/assembly/component.xml</componentDescriptor>
-    </componentDescriptors>
+		<componentDescriptor>src/main/assembly/component.xml</componentDescriptor>
+	</componentDescriptors>
+
 </assembly>

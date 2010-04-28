@@ -12,11 +12,10 @@
     <dependencySets>
 		<dependencySet>
 			<useProjectArtifact>false</useProjectArtifact>
-			<!--	<useTransitiveDependencies>false</useTransitiveDependencies> -->
-			 <outputDirectory>jres</outputDirectory>
+			<useTransitiveDependencies>false</useTransitiveDependencies>
 			 <unpack>true</unpack>
-			<!--><fileMode>0644</fileMode>
-			<directoryMode>0755</directoryMode>-->
+			<fileMode>0644</fileMode>
+			<directoryMode>0755</directoryMode>
 			<includes>
 				<include>org.hyperic.jre:x86-linux</include>
 			</includes>
