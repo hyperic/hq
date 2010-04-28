@@ -14,7 +14,6 @@
 				<exclude>**/.gitignore</exclude>
 			</excludes>
 			<filtered>true</filtered>
-			<useDefaultExcludes>false</useDefaultExcludes>
 			<fileMode>0644</fileMode>
 			<directoryMode>0755</directoryMode>
 		</fileSet>
@@ -26,7 +25,6 @@
 				<include>**/*.pl</include>
 			</includes>
 			<filtered>true</filtered>
-			<useDefaultExcludes>false</useDefaultExcludes>
 			<fileMode>0755</fileMode>
 			<directoryMode>0755</directoryMode>
 		</fileSet>
