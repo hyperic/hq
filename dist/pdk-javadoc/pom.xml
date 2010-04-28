@@ -43,7 +43,7 @@
 						<id>package</id>
 						<phase>package</phase>
 						<goals>
-							<goal>aggregate</goal>
+							<goal>aggregate-jar</goal>
 						</goals>
 					</execution>
 				</executions>
