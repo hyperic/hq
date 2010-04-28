@@ -115,6 +115,12 @@
 		    <type>zip</type>
 		</dependency>
 		<dependency>
+			<groupId>org.hyperic.hq.dist</groupId>
+			<artifactId>pdk-javadoc</artifactId>
+			<version>${project.version}</version>
+			<classifier>javadoc</classifier>
+		</dependency>
+		<dependency>
 			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>examples</artifactId>
 			<version>${project.version}</version>
