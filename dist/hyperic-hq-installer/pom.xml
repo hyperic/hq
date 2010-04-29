@@ -23,13 +23,13 @@
 				<artifactId>maven-assembly-plugin</artifactId>
 				<configuration>
 					<descriptors>
-						<descriptor>src/main/assembly/noJRE.xml</descriptor>
+						<descriptor>src/main/assembly/noJRE-zip.xml</descriptor>
+						<descriptor>src/main/assembly/noJRE-tar.xml</descriptor>
 						<descriptor>src/main/assembly/apple-osx.xml</descriptor>
-						<!--
 						<descriptor>src/main/assembly/sparc-solaris.xml</descriptor>
 						<descriptor>src/main/assembly/win32.xml</descriptor>
 						<descriptor>src/main/assembly/x86-linux.xml</descriptor>
-						<descriptor>src/main/assembly/x86-64-linux.xml</descriptor> -->
+						<descriptor>src/main/assembly/x86-64-linux.xml</descriptor>
 					</descriptors>
 				</configuration>
 			</plugin>
@@ -47,22 +47,50 @@
 			<groupId>org.hyperic.hq.dist</groupId>
 			<artifactId>hyperic-hq-agent</artifactId>
 			<version>${project.version}</version>
+			<type>tar.gz</type>
 			<classifier>apple-osx</classifier>
-			<type>tar.gz</type>
 		</dependency>
-       <dependency>
+		<dependency>
 			<groupId>org.hyperic.hq.dist</groupId>
 			<artifactId>hyperic-hq-agent</artifactId>
 			<version>${project.version}</version>
+			<type>tar.gz</type>
 			<classifier>noJRE</classifier>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.dist</groupId>
+			<artifactId>hyperic-hq-agent</artifactId>
+			<version>${project.version}</version>
 			<type>zip</type>
+			<classifier>noJRE</classifier>
 		</dependency>
-		 <dependency>
+		<dependency>
 			<groupId>org.hyperic.hq.dist</groupId>
 			<artifactId>hyperic-hq-agent</artifactId>
 			<version>${project.version}</version>
-			<classifier>noJRE</classifier>
 			<type>tar.gz</type>
+			<classifier>sparc-solaris</classifier>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.dist</groupId>
+			<artifactId>hyperic-hq-agent</artifactId>
+			<version>${project.version}</version>
+			<type>zip</type>
+			<classifier>win32</classifier>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.dist</groupId>
+			<artifactId>hyperic-hq-agent</artifactId>
+			<version>${project.version}</version>
+			<type>tar.gz</type>
+			<classifier>x86-64-linux</classifier>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.dist</groupId>
+			<artifactId>hyperic-hq-agent</artifactId>
+			<version>${project.version}</version>
+			<type>tar.gz</type>
+			<classifier>x86-linux</classifier>
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq</groupId>
@@ -70,32 +98,38 @@
 			<version>${project.version}</version>
 			<type>zip</type>
 		</dependency>
-		<!-- TODO these should all be 1.6 distros-->
-	<!--	<dependency>
+		<dependency>
 			<groupId>org.hyperic.jre</groupId>
 			<artifactId>amd64-linux</artifactId>
-			<version>1.5</version>
+			<version>1.6</version>
 			<type>tar.gz</type>
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic.jre</groupId>
 			<artifactId>x86-linux</artifactId>
-			<version>1.5</version>
+			<version>1.6</version>
 			<type>tar.gz</type>
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic.jre</groupId>
 			<artifactId>sparc-sun-solaris</artifactId>
-			<version>1.5</version>
+			<version>1.6</version>
 			<type>tar.gz</type>
-		</dependency> -->
-	<!--	<dependency>
+		</dependency>
+		<dependency>
 			<groupId>org.hyperic.jre</groupId>
-			<artifactId>x86-win32-tar-gz</artifactId>
-			<version>1.5</version>
-			<type>tar.gz</type>
-		</dependency> -->
-	
+			<artifactId>x86-win32</artifactId>
+			<version>1.6</version>
+			<type>exe</type>
+		</dependency>
 	</dependencies>
+	
+	<repositories>
+		<repository>
+			<id>hyperic-jres</id>
+			<name>Hyperic JREs Repository</name>
+			<url>http://maven.hyperic.org/jres</url>
+		</repository>
+	</repositories>
 
 </project>

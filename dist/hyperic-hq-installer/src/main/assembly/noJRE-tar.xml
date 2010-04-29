@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <assembly>
-	<id>apple-osx</id>
+	<id>noJRE</id>
 	<formats>
 		<format>tar.gz</format>
 	</formats>
@@ -10,13 +10,13 @@
     </componentDescriptors>
 
     <dependencySets>
-	   <dependencySet>
+		<dependencySet>
 				<useProjectArtifact>false</useProjectArtifact>
 			    <useTransitiveDependencies>false</useTransitiveDependencies>
 				<outputDirectory>/</outputDirectory>
 				<includes>
-					<include>org.hyperic.hq.dist:hyperic-hq-agent:tar.gz:apple-osx</include>
+					<include>org.hyperic.hq.dist:hyperic-hq-agent:tar.gz:noJRE</include>
 				</includes>
-	   </dependencySet>
-   </dependencySets>
+			</dependencySet>
+	</dependencySets>
 </assembly>
