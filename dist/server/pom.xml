@@ -45,6 +45,13 @@
 			<version>${project.version}</version>
 			<type>zip</type>
 		</dependency>
+		
+		<dependency>
+			<groupId>org.hyperic.hq</groupId>
+			<artifactId>hq-web</artifactId>
+			<version>${project.version}</version>
+			<type>war</type>
+		</dependency>
 
 		<dependency>
 			<groupId>org.hyperic.hq.hqapi</groupId>
@@ -65,7 +72,7 @@
 			<type>zip</type>
 		</dependency>
 
-<!-- UI Plugins -->
+<!-- UI Plugins 
 		<dependency>
 			<groupId>org.hyperic.hq.uiplugin</groupId>
 			<artifactId>alertcenter</artifactId>
@@ -163,7 +170,7 @@
 			<version>${project.version}</version>
 			<classifier>server</classifier>
 			<type>zip</type>
-		</dependency>
+		</dependency>-->
 
 	</dependencies>
 

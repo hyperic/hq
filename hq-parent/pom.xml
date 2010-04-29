@@ -30,7 +30,7 @@
 		<easymock.version>2.4</easymock.version>
 		<ehcache.version>1.5.0</ehcache.version>
 		<getopt.version>1.0.13</getopt.version>
-		<groovy.version>1.7.0</groovy.version>
+		<groovy.version>1.6.7</groovy.version>
 		<hibernate.version>3.2.7.ga</hibernate.version>
 		<httpclient.version>3.1</httpclient.version>
 		<j2ee-management.version>1.1</j2ee-management.version>
@@ -392,6 +392,8 @@
 					<configuration>
 						<source>1.5</source>
 						<target>1.5</target>
+						<maxmem>256m</maxmem>
+						<fork>true</fork>
 					</configuration>
 				</plugin>
 				<plugin>
