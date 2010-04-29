@@ -32,8 +32,9 @@
 			<useProjectArtifact>false</useProjectArtifact>
 			<useTransitiveDependencies>false</useTransitiveDependencies>
 			<outputDirectory>/installer/data/hqdb</outputDirectory>
+			<unpack>true</unpack>
 			<includes>
-				<include>postgresql:postgresql:win32</include>
+				<include>postgresql:postgresql:*:x86-win32</include>
 			</includes>
 		</dependencySet>
 	</dependencySets>

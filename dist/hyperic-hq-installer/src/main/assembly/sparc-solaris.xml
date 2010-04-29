@@ -32,8 +32,9 @@
 			<useProjectArtifact>false</useProjectArtifact>
 			<useTransitiveDependencies>false</useTransitiveDependencies>
 			<outputDirectory>/installer/data/hqdb</outputDirectory>
+			<unpack>true</unpack>
 			<includes>
-				<include>postgresql:postgresql:sparc-sun-solaris</include>
+				<include>postgresql:postgresql:*:sparc-sun-solaris</include>
 			</includes>
 		</dependencySet>
 	</dependencySets>

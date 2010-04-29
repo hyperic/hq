@@ -32,8 +32,9 @@
 			<useProjectArtifact>false</useProjectArtifact>
 			<useTransitiveDependencies>false</useTransitiveDependencies>
 			<outputDirectory>/installer/data/hqdb</outputDirectory>
+			<unpack>true</unpack>
 			<includes>
-				<include>postgresql:postgresql:x86-64-linux</include>
+				<include>postgresql:postgresql:*:x86-64-linux</include>
 			</includes>
 		</dependencySet>
 	</dependencySets>
