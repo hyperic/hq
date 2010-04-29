@@ -51,6 +51,17 @@
 		<dependencySet>
 				<useProjectArtifact>false</useProjectArtifact>
 				<useTransitiveDependencies>false</useTransitiveDependencies>
+				<outputDirectory>installer/lib</outputDirectory>
+				<unpack>true</unpack>
+				<fileMode>0644</fileMode>
+				<directoryMode>0755</directoryMode>
+				<includes>
+					<include>org.hyperic:sigar</include>
+				</includes>
+		</dependencySet>
+		<dependencySet>
+				<useProjectArtifact>false</useProjectArtifact>
+				<useTransitiveDependencies>false</useTransitiveDependencies>
 				<outputDirectory>/</outputDirectory>
 				<includes>
 					<include>org.hyperic.hq.dist:server</include>

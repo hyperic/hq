@@ -46,6 +46,13 @@
   			<artifactId>postgresql</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.hyperic</groupId>
+			<artifactId>sigar</artifactId>
+			<version>${sigar.version}</version>
+			<type>zip</type>
+			<classifier>libs</classifier>
+		</dependency>
+		<dependency>
 			<groupId>org.hyperic.hq.dist</groupId>
 			<artifactId>server</artifactId>
 			<version>${project.version}</version>

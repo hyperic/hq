@@ -39,6 +39,7 @@
 				<exclude>mysql:mysql-connector-java</exclude>
 				<exclude>postgresql:postgresql</exclude>
 				<exclude>org.hyperic.hq.dist:pdk-javadoc</exclude>
+				<exclude>org.hyperic:sigar</exclude>
 			</excludes>
 			<unpack>true</unpack>
 			<fileMode>0644</fileMode>
@@ -100,6 +101,17 @@
 				<includes>
 					<include>mysql:mysql-connector-java</include>
 					<include>postgresql:postgresql</include>
+				</includes>
+		</dependencySet>
+		<dependencySet>
+				<useProjectArtifact>false</useProjectArtifact>
+				<useTransitiveDependencies>false</useTransitiveDependencies>
+				<outputDirectory>pdk/lib</outputDirectory>
+				<unpack>true</unpack>
+				<fileMode>0644</fileMode>
+				<directoryMode>0755</directoryMode>
+				<includes>
+					<include>org.hyperic:sigar</include>
 				</includes>
 		</dependencySet>
 	</dependencySets>
