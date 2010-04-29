@@ -18,5 +18,13 @@
 					<include>org.hyperic.hq.dist:hyperic-hq-agent:tar.gz:apple-osx</include>
 				</includes>
 	   </dependencySet>
+	   <dependencySet>
+				<useProjectArtifact>false</useProjectArtifact>
+			    <useTransitiveDependencies>false</useTransitiveDependencies>
+				<outputDirectory>/installer/data/hqdb</outputDirectory>
+				<includes>
+					<include>postgresql:postgresql:apple-osx</include>
+				</includes>
+	   </dependencySet>
    </dependencySets>
 </assembly>
