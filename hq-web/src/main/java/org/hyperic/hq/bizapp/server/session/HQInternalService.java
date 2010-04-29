@@ -96,7 +96,11 @@ public class HQInternalService implements HQInternalServiceMBean {
         runInContext(runner, cl);
         double total = 0.0;
         for (CollectionSummary s : vals) {
-            total += (float) s.getTotal() / (float) s.getInterval();
+            int interval = s.getInterval();
+            if (interval == 0) {
+                continue;
+            }
+            total += (float) s.getTotal() / (float) interval;
         }
         return total;
     }
