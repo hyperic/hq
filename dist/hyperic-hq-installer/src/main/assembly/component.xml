@@ -29,7 +29,7 @@
 		<dependencySet>
 				<useProjectArtifact>false</useProjectArtifact>
 				<useTransitiveDependencies>false</useTransitiveDependencies>
-				<outputDirectory>installer</outputDirectory>
+				<outputDirectory>/installer</outputDirectory>
 				<unpack>true</unpack>
 				<fileMode>0644</fileMode>
 				<directoryMode>0755</directoryMode>
@@ -43,6 +43,21 @@
 				<outputDirectory>/</outputDirectory>
 				<includes>
 					<include>org.hyperic.hq.dist:server</include>
+				</includes>
+		</dependencySet>
+		<dependencySet>
+				<useProjectArtifact>false</useProjectArtifact>
+				<useTransitiveDependencies>false</useTransitiveDependencies>
+				<outputDirectory>/installer</outputDirectory>
+				<unpack>true</unpack>
+				<unpackOptions>
+					<includes>
+						<include>bin/**</include>
+						<include>lib/*.jar</include>
+					</includes>
+				</unpackOptions>
+				<includes>
+					<include>org.apache.ant:ant</include>
 				</includes>
 		</dependencySet>
 	</dependencySets>
