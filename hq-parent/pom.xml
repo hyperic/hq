@@ -52,6 +52,7 @@
 
 		<maven.build.timestamp.format>MMM dd, yyyy</maven.build.timestamp.format>
 		<build.timestamp>${maven.build.timestamp}</build.timestamp>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
 	<dependencyManagement>
@@ -290,6 +291,24 @@
 			<id>hyperic-external</id>
 			<name>Hyperic External Dependencies Repository</name>
 			<url>http://maven.hyperic.org/external</url>
+		</repository>
+		<repository>
+			<id>hyperic-release</id>
+			<name>Hyperic Release Repository</name>
+			<url>http://maven.hyperic.org/release</url>
+		</repository>
+		<repository>
+			<id>hyperic-milestone</id>
+			<name>Hyperic Milestone Repository</name>
+			<url>http://maven.hyperic.org/milestone</url>
+		</repository>
+		<repository>
+			<id>hyperic-snapshot</id>
+			<name>Hyperic Snapshot Repository</name>
+			<url>http://maven.hyperic.org/snapshot</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
 		</repository>
 	</repositories>
 
