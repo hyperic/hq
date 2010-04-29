@@ -56,11 +56,23 @@
 		<dependencySet>
 			<useProjectArtifact>false</useProjectArtifact>
 			<useTransitiveDependencies>false</useTransitiveDependencies>
-			<outputDirectory>/hq-engine/hq-server/webapps/root/hqu</outputDirectory>
+			<outputDirectory>/hq-engine/hq-server/webapps/ROOT/hqu</outputDirectory>
 			<unpack>true</unpack>
 			<includes>
 				<include>org.hyperic.hq.hqapi:hqapi1-plugin</include>
 			</includes>
+			<fileMode>0644</fileMode>
+			<directoryMode>0755</directoryMode>
+		</dependencySet>
+
+		<dependencySet>
+			<useProjectArtifact>false</useProjectArtifact>
+			<useTransitiveDependencies>false</useTransitiveDependencies>
+			<outputDirectory>/hq-engine/hq-server/webapps/ROOT/hqu</outputDirectory>
+			<includes>
+				<include>org.hyperic.hq.uiplugin:*</include>
+			</includes>
+			<unpack>true</unpack>
 			<fileMode>0644</fileMode>
 			<directoryMode>0755</directoryMode>
 		</dependencySet>

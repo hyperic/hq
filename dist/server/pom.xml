@@ -64,6 +64,107 @@
 			<version>${tomcat.version}</version>
 			<type>zip</type>
 		</dependency>
+
+<!-- UI Plugins -->
+		<dependency>
+			<groupId>org.hyperic.hq.uiplugin</groupId>
+			<artifactId>alertcenter</artifactId>
+			<version>${project.version}</version>
+			<classifier>server</classifier>
+			<type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.uiplugin</groupId>
+			<artifactId>auditcenter</artifactId>
+			<version>${project.version}</version>
+			<classifier>server</classifier>
+			<type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.uiplugin</groupId>
+			<artifactId>eventcenter</artifactId>
+			<version>${project.version}</version>
+			<classifier>server</classifier>
+			<type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.uiplugin</groupId>
+			<artifactId>gconsole</artifactId>
+			<version>${project.version}</version>
+			<classifier>server</classifier>
+			<type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.uiplugin</groupId>
+			<artifactId>health</artifactId>
+			<version>${project.version}</version>
+			<classifier>server</classifier>
+			<type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.uiplugin</groupId>
+			<artifactId>jmx</artifactId>
+			<version>${project.version}</version>
+			<classifier>server</classifier>
+			<type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.uiplugin</groupId>
+			<artifactId>live_exec</artifactId>
+			<version>${project.version}</version>
+			<classifier>server</classifier>
+			<type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.uiplugin</groupId>
+			<artifactId>mass</artifactId>
+			<version>${project.version}</version>
+			<classifier>server</classifier>
+			<type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.uiplugin</groupId>
+			<artifactId>nagiup</artifactId>
+			<version>${project.version}</version>
+			<classifier>server</classifier>
+			<type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.uiplugin</groupId>
+			<artifactId>opennms</artifactId>
+			<version>${project.version}</version>
+			<classifier>server</classifier>
+			<type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.uiplugin</groupId>
+			<artifactId>public</artifactId>
+			<version>${project.version}</version>
+			<classifier>server</classifier>
+			<type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.uiplugin</groupId>
+			<artifactId>saascenter</artifactId>
+			<version>${project.version}</version>
+			<classifier>server</classifier>
+			<type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.uiplugin</groupId>
+			<artifactId>systemsdown</artifactId>
+			<version>${project.version}</version>
+			<classifier>server</classifier>
+			<type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.uiplugin</groupId>
+			<artifactId>tmpl_render</artifactId>
+			<version>${project.version}</version>
+			<classifier>server</classifier>
+			<type>zip</type>
+		</dependency>
+
 	</dependencies>
 
 	<repositories>
