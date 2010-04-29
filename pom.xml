@@ -21,7 +21,9 @@
 		<module>hq-uiplugin</module>
 		<module>hq-bootstrap</module>
 		<module>hq-installer</module>
-		<!--><module>hq-rendit</module>-->
+		<module>hq-rendit</module>
+		<module>hq-server</module>
+		<module>hq-web</module>
 		<module>dist</module>
 	</modules>
 
