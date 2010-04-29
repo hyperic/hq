@@ -2,4 +2,4 @@
 
 SET INSTALLBASE=%~dp0
 cd "%INSTALLBASE%"
-call "%INSTALLBASE%\installer-@@@VERSION@@@\bin\hq-setup.bat" %*
+call "%INSTALLBASE%\installer\bin\hq-setup.bat" %*
