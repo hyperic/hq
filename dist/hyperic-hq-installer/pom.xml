@@ -38,6 +38,14 @@
 
 	<dependencies>
 		<dependency>
+  			<groupId>mysql</groupId>
+  			<artifactId>mysql-connector-java</artifactId>
+		</dependency>
+		<dependency>
+  			<groupId>postgresql</groupId>
+  			<artifactId>postgresql</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.hyperic.hq.dist</groupId>
 			<artifactId>server</artifactId>
 			<version>${project.version}</version>
@@ -136,10 +144,6 @@
 			<name>Hyperic JREs Repository</name>
 			<url>http://maven.hyperic.org/jres</url>
 		</repository>
-	</repositories>
-
-
-	<repositories>
 		<repository>
 			<id>hyperic-ant</id>
 			<name>Hyperic ANT Dependencies Repository</name>
