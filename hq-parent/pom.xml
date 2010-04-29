@@ -25,6 +25,7 @@
 		<dns.version>2.0.6</dns.version>
 		<db2monitor.version>1.0.1</db2monitor.version>
 		<dbunit.version>2.2</dbunit.version>
+		<easymock.version>2.4</easymock.version>
 		<getopt.version>1.0.13</getopt.version>
 		<groovy.version>1.7.0</groovy.version>
 		<hibernate.version>3.2.7.ga</hibernate.version>
@@ -34,6 +35,7 @@
 		<jsch.version>0.1.42</jsch.version>
 		<json.version>20090211</json.version>
 		<jta.version>1.1</jta.version>
+		<junit.version>4.4</junit.version>
 		<log4j.version>1.2.14</log4j.version>
 		<mail.version>1.4</mail.version>
 		<mysql.connector.version>5.1.10</mysql.connector.version>
@@ -215,11 +217,6 @@
 				<version>${xalan.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.codehaus.groovy</groupId>
-				<artifactId>groovy-all</artifactId>
-				<version>${groovy.version}</version>
-			</dependency>
-			<dependency>
   				<groupId>mysql</groupId>
   				<artifactId>mysql-connector-java</artifactId>
   				<version>${mysql.connector.version}</version>
@@ -228,6 +225,24 @@
   				<groupId>postgresql</groupId>
   				<artifactId>postgresql</artifactId>
   				<version>${postgresql.agent.driver.version}</version>
+			</dependency>
+			<dependency>
+  				<groupId>org.easymock</groupId>
+  				<artifactId>easymock</artifactId>
+  				<version>${easymock.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+  				<groupId>org.easymock</groupId>
+  				<artifactId>easymockclassextension</artifactId>
+  				<version>${easymock.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+  				<groupId>junit</groupId>
+  				<artifactId>junit</artifactId>
+  				<version>${junit.version}</version>
+				<scope>test</scope>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
