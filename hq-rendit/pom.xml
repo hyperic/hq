@@ -17,6 +17,19 @@
 	<name>Hyperic HQ - Rendit</name>
 
 	<dependencies>
+		<dependency>
+			<groupId>org.hyperic.hq</groupId>
+			<artifactId>hq-server</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.codehaus.groovy</groupId>
+			<artifactId>groovy-all</artifactId>
+		</dependency>
+		<dependency>
+  			<groupId>commons-fileupload</groupId>
+  			<artifactId>commons-fileupload</artifactId>
+		</dependency>
 	</dependencies>
 	
 	<build>
@@ -28,9 +41,9 @@
 				<executions>
 					<execution>
 						<goals>
-							<goal>generateStubs</goal>
+							<!-- <goal>generateStubs</goal>  -->
 							<goal>compile</goal>
-							<goal>generateTestStubs</goal>
+							<!--  <goal>generateTestStubs</goal> -->
 							<goal>testCompile</goal>
 						</goals>
 					</execution>

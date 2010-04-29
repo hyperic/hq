@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.hyperic.hq</groupId>
+		<artifactId>hq-parent</artifactId>
+		<version>4.4.0.BUILD-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>hq-web</artifactId>
+	<packaging>war</packaging>
+	<name>Hyperic HQ Web Application</name>
+			
+
+	<dependencies>
+		<dependency>
+			<groupId>org.hyperic.hq</groupId>
+			<artifactId>hq-pdk-shared</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq</groupId>
+			<artifactId>hq-server</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+  			<groupId>org.apache.struts</groupId>
+  			<artifactId>struts-core</artifactId>
+		</dependency>
+		<dependency>
+  			<groupId>org.apache.struts</groupId>
+  			<artifactId>struts-taglib</artifactId>
+		</dependency>
+		<dependency>
+  			<groupId>org.apache.struts</groupId>
+  			<artifactId>struts-tiles</artifactId>
+		</dependency>
+		<dependency>
+  			<groupId>org.apache.struts</groupId>
+  			<artifactId>struts-extras</artifactId>
+		</dependency>
+		<dependency>
+  			<groupId>javax.servlet.jsp</groupId>
+  			<artifactId>jsp-api</artifactId>
+		</dependency>
+		<dependency>
+  			<groupId>javax.servlet</groupId>
+  			<artifactId>jstl</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>servlet-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tapestry</groupId>
+			<artifactId>tapestry-framework</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tapestry</groupId>
+			<artifactId>tapestry-annotations</artifactId>
+		</dependency>
+		<dependency>
+  			<groupId>org.springframework.security</groupId>
+  			<artifactId>spring-security-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>taglibs</groupId>
+			<artifactId>standard</artifactId>
+		</dependency>
+		<dependency>
+  			<groupId>junit</groupId>
+  			<artifactId>junit</artifactId>
+		</dependency>
+	</dependencies>
+	
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-war-plugin</artifactId>
+				<configuration>
+					<warName>ROOT</warName>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
