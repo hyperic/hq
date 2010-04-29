@@ -35,8 +35,21 @@
 				<useProjectArtifact>false</useProjectArtifact>
 				<useTransitiveDependencies>false</useTransitiveDependencies>
 				<unpack>true</unpack>
+				<excludes>
+					<exclude>org.apache.tomcat:tomcat</exclude>
+				</excludes>
 				<fileMode>0644</fileMode>
 				<directoryMode>0755</directoryMode>
+		</dependencySet>
+
+		<dependencySet>
+				<useProjectArtifact>false</useProjectArtifact>
+				<useTransitiveDependencies>false</useTransitiveDependencies>
+				<outputDirectory>/hq-engine/hq-server</outputDirectory>
+				<unpack>true</unpack>
+				<includes>
+					<include>org.apache.tomcat:tomcat</include>
+				</includes>
 		</dependencySet>
 	</dependencySets>
 
