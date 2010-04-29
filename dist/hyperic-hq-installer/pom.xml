@@ -136,6 +136,41 @@
 			<version>1.7.1</version>
 			<type>zip</type>
 		</dependency>
+		<dependency>
+			<groupId>postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>8.2.5</version>
+			<classifier>apple-osx</classifier>
+			<type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>8.2.5</version>
+			<classifier>sparc-sun-solaris</classifier>
+			<type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>8.2.5</version>
+			<classifier>x86-win32</classifier>
+			<type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>8.2.5</version>
+			<classifier>x86-linux</classifier>
+			<type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>8.2.5</version>
+			<classifier>x86-64-linux</classifier>
+			<type>zip</type>
+		</dependency>
 	</dependencies>
 	
 	<repositories>
@@ -148,6 +183,11 @@
 			<id>hyperic-ant</id>
 			<name>Hyperic ANT Dependencies Repository</name>
 			<url>http://maven.hyperic.org/ant</url>
+		</repository>
+		<repository>
+			<id>hyperic-postgresql</id>
+			<name>Hyperic Postgresql Dependencies Repository</name>
+			<url>http://maven.hyperic.org/postgresql</url>
 		</repository>
 	</repositories>
 
