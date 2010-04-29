@@ -32,24 +32,40 @@
 
 	<dependencySets>
 		<dependencySet>
-				<useProjectArtifact>false</useProjectArtifact>
-				<useTransitiveDependencies>false</useTransitiveDependencies>
-				<unpack>true</unpack>
-				<excludes>
-					<exclude>org.apache.tomcat:tomcat</exclude>
-				</excludes>
-				<fileMode>0644</fileMode>
-				<directoryMode>0755</directoryMode>
+			<useProjectArtifact>false</useProjectArtifact>
+			<useTransitiveDependencies>false</useTransitiveDependencies>
+			<unpack>true</unpack>
+			<includes>
+				<include>org.hyperic.hq:hq-bootstrap</include>
+			</includes>
+			<fileMode>0644</fileMode>
+			<directoryMode>0755</directoryMode>
 		</dependencySet>
 
 		<dependencySet>
-				<useProjectArtifact>false</useProjectArtifact>
-				<useTransitiveDependencies>false</useTransitiveDependencies>
-				<outputDirectory>/hq-engine/hq-server</outputDirectory>
-				<unpack>true</unpack>
-				<includes>
-					<include>org.apache.tomcat:tomcat</include>
-				</includes>
+			<useProjectArtifact>false</useProjectArtifact>
+			<useTransitiveDependencies>false</useTransitiveDependencies>
+			<outputDirectory>/hq-engine/hq-server/lib</outputDirectory>
+			<includes>
+				<include>log4j:log4j</include>
+			</includes>
+			<fileMode>0644</fileMode>
+			<directoryMode>0755</directoryMode>
+		</dependencySet>
+
+		<dependencySet>
+			<useProjectArtifact>false</useProjectArtifact>
+			<useTransitiveDependencies>false</useTransitiveDependencies>
+			<outputDirectory>/hq-engine/hq-server</outputDirectory>
+			<unpack>true</unpack>
+			<unpackOptions>
+				<excludes>
+					<exclude>conf/logging.properties</exclude>
+				</excludes>
+			</unpackOptions>
+			<includes>
+				<include>org.apache.tomcat:tomcat</include>
+			</includes>
 		</dependencySet>
 	</dependencySets>
 
