@@ -12,7 +12,23 @@
 			<outputDirectory>/scripting</outputDirectory>
 			<fileMode>0644</fileMode>
 			<directoryMode>0755</directoryMode>
+			<!--  We only want to strip version from the plugin jar, not its dependencies -->
+			<outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+			<useTransitiveDependencies>false</useTransitiveDependencies>
+			<includes>
+				<include>org.hyperic.hq.plugin:*</include>
+			</includes>
 		</dependencySet>
+		<dependencySet>
+			<outputDirectory>/scripting</outputDirectory>
+			<fileMode>0644</fileMode>
+			<directoryMode>0755</directoryMode>
+			<useTransitiveDependencies>false</useTransitiveDependencies>
+			<excludes>
+				<exclude>org.hyperic.hq.plugin:*</exclude>
+			</excludes>
+		</dependencySet>
+		
 	</dependencySets>
 
 </assembly>
