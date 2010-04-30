@@ -37,34 +37,6 @@
 			<plugin>
 				<groupId>org.codehaus.groovy.maven</groupId>
 				<artifactId>gmaven-plugin</artifactId>
-				<version>1.0</version>
-				<dependencies> 
-			        <dependency> 
-			          <groupId>org.codehaus.groovy.maven.runtime</groupId> 
-			          <artifactId>gmaven-runtime-1.6</artifactId> 
-			          <version>1.0</version> 
-			        </dependency> 
-			        <dependency> 
-			          <groupId>org.codehaus.groovy</groupId> 
-			          <artifactId>groovy-all</artifactId> 
-			          <version>1.6.7</version> 
-			        </dependency> 
-			   </dependencies> 
-				
-			<!-- 	<configuration>
-					<maxmem>256m</maxmem>
-					<fork>true</fork>
-				</configuration>  -->
-				<executions>
-					<execution>
-						<goals>
-							<!-- <goal>generateStubs</goal>  -->
-							<goal>compile</goal>
-							<!--  <goal>generateTestStubs</goal> -->
-							<goal>testCompile</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 	</build>

@@ -1,8 +1,5 @@
 target
-.project
-.settings
-.classpath
-.springBeans
+MANIFEST.MF
 
 build
 junit_results

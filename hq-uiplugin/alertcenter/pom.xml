@@ -15,10 +15,22 @@
 	<packaging>pom</packaging>
 	<name>Hyperic HQ UI Plugin - Alert Center Plugin</name>
 
+	<dependencies>
+		<dependency>
+			<groupId>org.hyperic.hq</groupId>
+			<artifactId>hq-rendit</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>
+	
 	<build>
 		<plugins>
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.groovy.maven</groupId>
+				<artifactId>gmaven-plugin</artifactId>
 			</plugin>
 		</plugins>
 	</build>
