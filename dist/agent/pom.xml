@@ -130,8 +130,8 @@
 		    <type>zip</type>
 		</dependency>
 		<dependency>
-			<groupId>org.hyperic.hq.dist</groupId>
-			<artifactId>pdk-javadoc</artifactId>
+			<groupId>org.hyperic.hq.pdk</groupId>
+			<artifactId>modules</artifactId>
 			<version>${project.version}</version>
 			<classifier>javadoc</classifier>
 		</dependency>

@@ -18,7 +18,6 @@
 
 	<modules>
 		<module>hq-agent-core</module>
-		<module>hq-agent-pdk</module>
 		<module>hq-agent-handlers</module>
 	</modules>
 

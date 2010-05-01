@@ -4,29 +4,35 @@
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
 	<modelVersion>4.0.0</modelVersion>
-
+	
 	<parent>
 		<groupId>org.hyperic.hq</groupId>
 		<artifactId>hq-parent</artifactId>
 		<version>4.4.0.BUILD-SNAPSHOT</version>
 	</parent>
-
-	<groupId>org.hyperic.hq.dist</groupId>
-	<artifactId>pdk-javadoc</artifactId>
+	
+	<groupId>org.hyperic.hq.pdk</groupId>
+	<artifactId>modules</artifactId>
 	<packaging>pom</packaging>
-	<name>Hyperic HQ Distribution - Hyperic HQ PDK Javadocs</name>
+	<name>Hyperic HQ PDK - Modules</name>
 
 	<modules>
-		<module>../../hq-pdk-shared</module>
-		<module>../../hq-agent/hq-agent-pdk</module>
+		<module>hq-pdk-shared</module>
+		<module>hq-agent-pdk</module>
 	</modules>
-
+	
 	<properties>
 		<pdk.title>Hyperic HQ Plugin API</pdk.title>
 	</properties>
 
 	<build>
 		<plugins>
+			<plugin>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
 			<plugin>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>2.6.1</version>

@@ -38,7 +38,7 @@
 				<exclude>org.hyperic.hq.plugin:*</exclude>
 				<exclude>mysql:mysql-connector-java</exclude>
 				<exclude>postgresql:postgresql</exclude>
-				<exclude>org.hyperic.hq.dist:pdk-javadoc</exclude>
+				<exclude>org.hyperic.hq.pdk:modules</exclude>
 				<exclude>org.hyperic:sigar</exclude>
 			</excludes>
 			<unpack>true</unpack>
@@ -50,7 +50,7 @@
 			<useTransitiveDependencies>false</useTransitiveDependencies>
 			<outputDirectory>/pdk/javadoc</outputDirectory>
 			<includes>
-				<include>org.hyperic.hq.dist:pdk-javadoc</include>
+				<include>org.hyperic.hq.pdk:modules</include>
 			</includes>
 			<unpack>true</unpack>
 			<fileMode>0644</fileMode>

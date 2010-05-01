@@ -18,7 +18,6 @@
 
 
 	<modules>
-		<module>pdk-javadoc</module>
 		<module>agent</module>
 		<module>hyperic-hq-agent</module>
 		<module>server</module>

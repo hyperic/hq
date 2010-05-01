@@ -15,8 +15,8 @@
 		<module>hq-util</module>
 		<module>hq-common</module>
 		<module>hq-lather</module>
-		<module>hq-pdk-shared</module>
 		<module>hq-agent</module>
+		<module>hq-pdk</module>
 		<module>hq-plugin</module>
 		<module>hq-uiplugin</module>
 		<module>hq-bootstrap</module>
