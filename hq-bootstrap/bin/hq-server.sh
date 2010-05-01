@@ -14,6 +14,13 @@
 APP_NAME="hq-server"
 APP_LONG_NAME="HQ Server"
 
+if [ `uname -s` = "SunOS" ]
+then
+  ECHO_NOCR="echo"
+else
+  ECHO_NOCR="echo -e"
+fi
+
 # Wrapper
 WRAPPER_CMD="../../wrapper/sbin/wrapper"
 WRAPPER_CMD_PS="sbin/wrapper"
@@ -526,7 +533,7 @@ testpid() {
 } 
  
 start() {
-    echo -n "Starting $APP_LONG_NAME..."
+    $ECHO_NOCR "Starting $APP_LONG_NAME...\c"
     getpid
     if [ "X$pid" = "X" ]
     then
@@ -545,7 +552,7 @@ start() {
     while [ $i -lt $WAIT_AFTER_STARTUP ]
     do
         sleep 1
-        echo -n "."
+        $ECHO_NOCR ".\c"
         i=`expr $i + 1`
     done
     if [ $WAIT_AFTER_STARTUP -gt 0 ]
