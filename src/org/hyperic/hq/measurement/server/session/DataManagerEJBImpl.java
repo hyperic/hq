@@ -2086,7 +2086,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * @ejb:create-method
      */
     public void ejbCreate() throws CreateException {
-        boolean analyze = true;
+        boolean analyze = false;
         try {
             Properties conf = ServerConfigManagerEJBImpl.getOne().getConfig();
             if (conf.containsKey(HQConstants.OOBEnabled)) {
