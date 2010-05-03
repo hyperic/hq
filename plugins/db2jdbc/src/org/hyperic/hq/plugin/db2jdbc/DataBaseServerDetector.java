@@ -226,7 +226,7 @@ public class DataBaseServerDetector extends DefaultServerDetector {
         PreparedStatement ps = null;
         try {
             getLog().debug("getList props=" + props);
-            conn = getConnection(props);
+            conn = getConnection(props.toProperties());
             ps = conn.prepareStatement(query);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
@@ -234,7 +234,7 @@ public class DataBaseServerDetector extends DefaultServerDetector {
             }
             getLog().debug("getList '" + query + "' => res= " + res);
         } catch (Exception ex) {
-            getLog().debug("getList '" + query + "' => " + ex.getMessage());
+            getLog().debug("getList '" + query + "' => " + ex.getMessage(),ex);
         } finally {
             try {
                 if (ps != null) {

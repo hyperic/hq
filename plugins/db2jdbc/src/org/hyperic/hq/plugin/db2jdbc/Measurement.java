@@ -22,7 +22,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-
 package org.hyperic.hq.plugin.db2jdbc;
 
 import java.sql.Connection;
@@ -33,7 +32,6 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Map;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricNotFoundException;
@@ -47,19 +45,10 @@ public class Measurement extends CachedJDBCMeasurement {
 
     private static final String JDBC_DRIVER = "com.ibm.db2.jcc.DB2Driver";
     private static final String KEY = "key";
-    private static final String EXEC_TIME_ATTR = "QueryExecTime";
-    private static final Hashtable cache = new Hashtable();
 
     protected String getQuery(Metric metric) {
         if (getLog().isDebugEnabled()) {
-            getLog().debug("*******************");
-            getLog().debug("** MT " + metric);
-            getLog().debug("** DN " + metric.getDomainName());
-            getLog().debug("** OP " + metric.getObjectProperties());
-            getLog().debug("** ON " + metric.getObjectName());
-            getLog().debug("** AT " + metric.getAttributeName());
-            getLog().debug("** PR " + metric.getProperties());
-            getLog().debug("*******************");
+            getLog().debug("[getQuery] metric=" + metric);
         }
         String sql = metric.getObjectProperties().getProperty("sql");
         if (sql == null) {
