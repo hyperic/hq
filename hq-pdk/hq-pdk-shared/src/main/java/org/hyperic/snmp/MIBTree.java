@@ -238,6 +238,7 @@ public class MIBTree {
 
             if (!mibs.exists()) {
                 log.debug(mibs + " MIB dir does not exist");
+                return;
             }
             try {
                 parse(mibs);
