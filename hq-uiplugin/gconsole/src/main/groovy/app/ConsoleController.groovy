@@ -1,3 +1,5 @@
+import org.springframework.core.io.Resource;
+
 import org.hyperic.hq.context.Bootstrap;
 
 import java.text.DateFormat
@@ -21,11 +23,18 @@ class ConsoleController extends BaseController {
 	}
 	
     private def getTemplateDir() {
-		Bootstrap.getResource("WEB-INF/gconsoleTemplates").getFile(); 
+		Resource templateResource = Bootstrap.getResource("WEB-INF/gconsoleTemplates");
+		if(! templateResource.exists()) {
+			return null;
+		}
+		return templateResource.getFile(); 
 	}
 	
 	private def getTemplates() {
 	    def res = []
+	    if(templateDir == null) {
+	    	return res;
+	    }
 	    for (f in templateDir.listFiles()) {
 	        if (!f.name.endsWith('.groovy'))
 	            continue
