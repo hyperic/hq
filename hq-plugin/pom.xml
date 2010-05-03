@@ -19,7 +19,6 @@
 	<modules>
 		<module>hq-plugin-parent</module>
 		<module>examples</module>
-
 		<module>netservices-plugin</module>
 		<module>activemq-plugin</module>
 		<module>alfresco-plugin</module>
