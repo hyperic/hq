@@ -8,6 +8,7 @@
 			<excludes>
 				<exclude>**/*.sh</exclude>
 				<exclude>**/.gitignore</exclude>
+				<exclude>wrapper/sbin/*</exclude>
 			</excludes>
 			<filtered>true</filtered>
 			<fileMode>0644</fileMode>
@@ -18,6 +19,7 @@
 			<outputDirectory>/</outputDirectory>
 			<includes>
 				<include>**/*.sh</include>
+				<include>wrapper/sbin/*</include>
 			</includes>
 			<filtered>true</filtered>
 			<fileMode>0755</fileMode>

@@ -25,23 +25,22 @@ if not exist "%JAVA_HOME%\bin\java.exe" goto nojavaExe
 :gotjava
 set JAVA=%JAVA_HOME%\bin\java
 
-set CLIENT_CLASSPATH=%AGENT_LIB%\hq-agent-core.jar
+set CLIENT_CLASSPATH=%AGENT_LIB%\hq-agent-core-${project.version}.jar
 set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%AGENT_LIB%
-set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\hq-common.jar
-set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%AGENT_LIB%\hq-lather.jar
-set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\ant.jar
+set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\hq-common-${project.version}.jar
+set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%AGENT_LIB%\hq-lather-${project.version}.jar
+set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\ant-1.8.0.jar
 set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\commons-logging-1.0.4.jar
 set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\log4j-1.2.14.jar
 set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\jdom-1.1.jar
-set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\hq-util.jar
-set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\sigar.jar
+set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\hq-util-${project.version}.jar
+set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\sigar-${sigar.version}.jar
 set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\bcel-5.1.jar
-set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\hq-pdk-shared.jar
-set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\hq-pdk-agent.jar
-set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\ant.jar
+set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\hq-pdk-shared-${project.version}.jar
+set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\hq-agent-pdk-${project.version}.jar
 set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\jakarta-oro-2.0.7.jar
 set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\commons-httpclient-3.1.jar
-set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\commons-codec-1.3.jar
+set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\commons-codec-1.2.jar
 set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\groovy-all-1.5.jar
 
 set CLIENT_CLASS=org.hyperic.hq.bizapp.agent.client.AgentClient
