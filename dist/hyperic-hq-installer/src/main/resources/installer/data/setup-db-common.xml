@@ -9,6 +9,7 @@
   &hibernate-build;
 
   <property name="data.dir" value="${install.dir}/data/tmp"/>
+  <property name="dbsetup-subsystems" value="appdef,auth,authz,control,events,measurement,bizapp,common,scheduler,agtmgmt,rt,pdk,hqu" />
   
   <target name="direct-error">
     <fail>
@@ -137,8 +138,17 @@
       No server.database-url property specified.
     </fail>
   </target>
+	
+  <target name="dbsetup-combine">
+	<delete file="${data.dir}/data.xml"/>
+	<dbsetup-cat debug="true" destfile="${data.dir}/data.xml" name="data.xml" notice="Copyright (C) 2004-2010, Hyperic, Inc., All Rights Reserved." order="${dbsetup-subsystems}">
+		<fileset dir="${install.dir}/data/sql">
+			<include name="*-data.xml" />
+		</fileset>
+	</dbsetup-cat>
+  </target>
 
-  <target name="replace-dbservice-values">
+  <target name="replace-dbservice-values" depends="dbsetup-combine">
   	<antcall target="check.data.dir"/>
     <echo>using url: ${server.database-url} </echo>
     
@@ -146,9 +156,6 @@
     <crypto value="${server.admin.password}" property="server.admin.password.encrypted"/>
 
     <!-- replace the admin info in dbsetup data file -->
-    <delete file="${data.dir}/data.xml"/>
-    <copy file="${install.dir}/data/data-orig.xml"
-          tofile="${data.dir}/data.xml"/>
     <replace file="${data.dir}/data.xml">
       <replacefilter token="@@@VERSION@@@" value="${hq.version}" />
       <replacefilter token="@@@ADMINUSERNAME@@@" value="${server.admin.username}"/>
