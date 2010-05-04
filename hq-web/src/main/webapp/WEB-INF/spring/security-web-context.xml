@@ -116,10 +116,6 @@
   		<property name="key" value="allyourbasebelongtous!"/>
   		<property name="userAttribute" value="anonymousUser,ROLE_ANONYMOUS"/>
 	</bean>
-
-	<bean id="anonymousAuthenticationProvider" class="org.springframework.security.authentication.AnonymousAuthenticationProvider">
-  		<property name="key" value="allyourbasebelongtous!"/>
-	</bean>
 	
 	<!-- Request cache aware filter, this makes sure the original request is used after authenticating -->
 	<bean id="requestCacheAwareFilter" class="org.springframework.security.web.savedrequest.RequestCacheAwareFilter" />
@@ -149,24 +145,5 @@
 		</property>
 	</bean>
 	
-	<bean id="passwordEncoder" class="org.springframework.security.authentication.encoding.Md5PasswordEncoder">
-		<property name="encodeHashAsBase64" value="true" />
-	</bean>
-		
-	<bean id="internalAuthenticationProvider" class="org.hyperic.hq.security.InternalAuthenticationProvider">
-		<constructor-arg ref="authzSubjectManager"/>
-		<constructor-arg>
-			<bean class="org.hyperic.hq.security.HQAuthenticationProviderLocator"/>
-		</constructor-arg>
-		<constructor-arg ref="serverConfigManager"/>
-	</bean>
-
-	<bean id="authenticationManager" class="org.springframework.security.authentication.ProviderManager">
-     	<property name="providers">
-       		<list> 
-       			<ref local="anonymousAuthenticationProvider" />
-        		<ref local="internalAuthenticationProvider" />
-       		</list> 
-     	</property>
-    </bean>     
+	
 </beans>
