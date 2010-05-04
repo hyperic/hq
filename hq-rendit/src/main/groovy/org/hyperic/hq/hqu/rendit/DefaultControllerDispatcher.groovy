@@ -3,7 +3,7 @@ package org.hyperic.hq.hqu.rendit
 import org.hyperic.hq.hqu.rendit.i18n.BundleMapFacade
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
-import org.hyperic.hq.hqu.RequestInvocationBindings
+import org.hyperic.hq.hqu.rendit.RequestInvocationBindings
 
 /**
  * Called by the dispatcher to execute controller methods.  

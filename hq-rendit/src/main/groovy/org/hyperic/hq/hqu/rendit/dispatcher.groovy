@@ -22,7 +22,7 @@ import org.hyperic.hq.hqu.rendit.metaclass.RoleCategory
 import org.hyperic.hq.hqu.rendit.metaclass.StringCategory
 import org.hyperic.hq.hqu.rendit.metaclass.AgentCategory
 import org.hyperic.hq.hqu.InvokeMethodInvocationBindings
-import org.hyperic.hq.hqu.RequestInvocationBindings
+import org.hyperic.hq.hqu.rendit.RequestInvocationBindings
 import org.codehaus.groovy.runtime.InvokerHelper
 import groovy.lang.Script
 
@@ -94,7 +94,7 @@ class Dispatcher implements IDispatcher {
      *   plugin/controller/action
      * then attempt to locate the controller and associated action.
      */
-    void handleRequest(RequestInvocationBindings invokeArgs) {
+    void handleRequest(Object invokeArgs) {
         def dispatcher = new DefaultControllerDispatcher()
 		
 		use (*CATEGORIES) {

@@ -34,7 +34,6 @@
 			<groupId>org.hyperic.hq</groupId>
 			<artifactId>hq-rendit</artifactId>
 			<version>${project.version}</version>
-			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.struts</groupId>

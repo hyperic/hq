@@ -192,11 +192,11 @@ public class RenditServerImpl implements RenditServer {
     /**
      * Handles regular web requests for a UI plugin. 
      */
-    public void handleRequest(String pluginName, RequestInvocationBindings b)
+    public void handleRequest(String pluginName, Object request)
         throws Exception
     {
         PluginWrapper plugin = getPlugin(pluginName);
-        plugin.handleRequest(b);
+        plugin.handleRequest(request);
     }
 
     public AttachmentDescriptor getAttachmentDescriptor(String pluginName,

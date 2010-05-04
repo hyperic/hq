@@ -11,7 +11,7 @@ import org.hyperic.hq.hqu.server.session.Attachment;
 public interface RenditServer {
     void renderTemplate(File template, Map params, Writer output) throws Exception;
 
-    void handleRequest(String pluginName, RequestInvocationBindings b) throws Exception;
+    void handleRequest(String pluginName, Object request) throws Exception;
 
     AttachmentDescriptor getAttachmentDescriptor(String pluginName, Attachment a, Resource ent,
                                                  AuthzSubject u);

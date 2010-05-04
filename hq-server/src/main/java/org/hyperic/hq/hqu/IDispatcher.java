@@ -49,7 +49,7 @@ public interface IDispatcher {
      */
     void deploy(UIPlugin p);
     
-    void handleRequest(RequestInvocationBindings b);
+    void handleRequest(Object request);
     
     Object invokeMethod(InvokeMethodInvocationBindings invokeArgs);
     

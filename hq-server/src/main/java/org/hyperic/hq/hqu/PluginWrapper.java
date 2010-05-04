@@ -29,10 +29,6 @@ import groovy.lang.GroovyClassLoader;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
@@ -40,8 +36,6 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.hqu.AttachmentDescriptor;
-import org.hyperic.hq.hqu.IDispatcher;
 import org.hyperic.hq.hqu.server.session.Attachment;
 import org.hyperic.hq.hqu.server.session.UIPlugin;
 import org.hyperic.util.Runnee;
@@ -150,11 +144,11 @@ public class PluginWrapper {
         }
     }
 
-    void handleRequest(final RequestInvocationBindings b) {
+    void handleRequest(final Object request) {
         try {
             doInContext(new Runnee() {
                 public Object run() {
-                    _dispatcher.handleRequest(b);
+                    _dispatcher.handleRequest(request);
                     return null;
                 }
             });
