@@ -216,13 +216,13 @@
 			<type>zip</type>
 			<scope>provided</scope>
 		</dependency>
-		<!--  <dependency>
+		<dependency>
 			<groupId>org.hyperic.hq.hqapi</groupId>
 			<artifactId>hqapi1-plugin</artifactId>
 			<version>${hqapi.version}</version>
 			<type>zip</type>
 			<scope>provided</scope>
-		</dependency> -->
+		</dependency>
 		<!-- Plugins -->
 		<dependency>
 			<groupId>org.hyperic.hq.plugin</groupId>
