@@ -11,6 +11,7 @@ public class TestContextLoader
     protected void customizeContext(GenericApplicationContext context) {
         Bootstrap.appContext = context;
         ConcurrentStatsCollector.setEnabled(false);
+        System.setProperty("org.hyperic.sigar.path","/Users/jhickey/Desktop/sigar-1.6.4-libs");
     }
 
 }
