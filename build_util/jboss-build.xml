@@ -7,6 +7,8 @@
   <!-- Server ports -->
   <property name="jboss.server.port" value="9093" />
   <property name="jboss.jnp.port" value="2099" />
+	
+  <property name="ee.thirdparty.lib" value="${basedir}/thirdparty/lib"/>
 
   <target name="jboss-version">
     <basename property="jboss.version" file="${jboss.zip}" suffix=".zip"/>
@@ -245,8 +247,22 @@
     
     <available property="available.keystore"
                file="${jboss.home}/server/default/conf/hyperic.keystore"/>
+  	<antcall target="ee-pre-prepare-jboss"/>
     <antcall target="prepare-ssl"/>
 
+  </target>
+
+  <target name="ee-pre-prepare-jboss" if="hqee.build">
+    <delete>
+    	<fileset dir="${jboss.home}/server/default/lib">
+            <include name="mysql*.jar"/>
+    	</fileset>
+    </delete>
+    <copy toDir="${jboss.home}/server/default/lib" flatten="true">
+        <fileset dir="${ee.thirdparty.lib}/mysql_jdbc">
+          <include name="mysql*.jar"/>
+        </fileset>
+    </copy>
   </target>
 
   <target name="post-prepare-jboss"
