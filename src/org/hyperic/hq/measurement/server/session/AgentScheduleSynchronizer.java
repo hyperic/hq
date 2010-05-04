@@ -172,20 +172,17 @@ public class AgentScheduleSynchronizer {
                     final MeasurementProcessorLocal mProc = MeasurementProcessorEJBImpl.getOne();
                     final AgentManagerLocal aMan = AgentManagerEJBImpl.getOne();
                     final Agent agent = aMan.findAgent(agentId);
-                    final AuthzSubject subj = AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
-                    try {
-                        aMan.pingAgent(subj, agent);
-                    } catch (AgentConnectionException e) {
-                        // this only occurs when ping failed (why isn't there a better exception??)
-                        _log.debug(e,e);
-                    }
                     if (schedule) {
-                        _log.info("scheduling " + aeids.size() + 
-                                  " resources to agentid=" + agent.getId());
+                        if (_log.isDebugEnabled()) {
+                            _log.debug("scheduling " + aeids.size() + 
+                                       " resources to agentid=" + agent.getId());
+                        }
                         mProc.scheduleEnabled(agent, aeids);
                     } else {
-                        _log.info("unscheduling " + aeids.size() + 
-                                  " resources to agentid=" + agent.getId());
+                        if (_log.isDebugEnabled()) {
+                            _log.debug("unscheduling " + aeids.size() + 
+                                       " resources to agentid=" + agent.getId());
+                        }
                         mProc.unschedule(agent.getAgentToken(), aeids);
                     }
                 }
