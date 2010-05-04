@@ -61,9 +61,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.bizapp.server.session.SystemAudit;
+import org.hyperic.hq.common.DiagnosticThread;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.server.session.RegisteredTriggerStartupListener;
 import org.hyperic.hq.hqu.rendit.RenditServer;
+import org.hyperic.hq.measurement.MetricsNotComingInDiagnostic;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginInfo;
 import org.hyperic.hq.product.ProductPlugin;
@@ -229,6 +231,8 @@ public class ProductPluginDeployer
         _plugins.clear();
         waitForTriggerInit();
         startConcurrentStatsCollector();
+        DiagnosticThread.addDiagnosticObject(MetricsNotComingInDiagnostic.getInstance());
+
 
         //generally means we are done deploying plugins at startup.
         //but we are not "done" since a plugin can be dropped into
