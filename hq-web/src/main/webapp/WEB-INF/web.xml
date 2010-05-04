@@ -83,7 +83,7 @@
 	<!-- Hibernate session filter -->
 	<filter>
 		<filter-name>Hibernate-Session-Filter</filter-name>
-		<filter-class>org.hyperic.hibernate.filter.SessionFilter</filter-class>
+		<filter-class>org.springframework.orm.hibernate3.support.OpenSessionInViewFilter</filter-class>
 	</filter>
 
 	<filter>
