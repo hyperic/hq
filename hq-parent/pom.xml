@@ -23,6 +23,7 @@
 		<backport-util-concurrent.version>3.1</backport-util-concurrent.version>
 		<commons-fileupload.version>1.2.1</commons-fileupload.version>
 		<commons-logging.version>1.0.4</commons-logging.version>
+		<commons-pool.version>1.4</commons-pool.version>
 		<commons-validator.version>1.3.1</commons-validator.version>
 		<concurrent.version>1.3.2</concurrent.version>
 		<dns.version>2.0.6</dns.version>
@@ -60,6 +61,7 @@
 		<struts.version>1.3.10</struts.version>
 		<tapestry.version>4.1.5</tapestry.version>
 		<tomcat-jdbc.version>1.0.8.5</tomcat-jdbc.version>
+		<tomcat-juli.version>6.0.20</tomcat-juli.version>
 		<urlrewrite.version>3.1.0</urlrewrite.version>
 		<velocity.version>1.6.3</velocity.version>
 		<wrapper.version>3.2.3</wrapper.version>
@@ -103,6 +105,11 @@
 		  		<groupId>commons-fileupload</groupId>
 		  		<artifactId>commons-fileupload</artifactId>
 		  		<version>${commons-fileupload.version}</version>
+			</dependency>
+			<dependency>
+  				<groupId>commons-pool</groupId>
+  				<artifactId>commons-pool</artifactId>
+  				<version>${commons-pool.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-validator</groupId>
@@ -428,6 +435,11 @@
 			  <groupId>org.apache</groupId>
 			  <artifactId>tomcat-jdbc</artifactId>
 			  <version>${tomcat-jdbc.version}</version>
+			</dependency>
+			<dependency>
+			  <groupId>org.apache</groupId>
+			  <artifactId>tomcat-juli</artifactId>
+			  <version>${tomcat-juli.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
