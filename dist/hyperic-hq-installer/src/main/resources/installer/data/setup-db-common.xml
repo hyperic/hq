@@ -18,17 +18,6 @@
     </fail>
   </target>
 	
-  <target name="check.data.dir">
-	<available property="has.data.dir" file="${data.dir}"/>
-	    <antcall target="create.datatmp"/>
-   </target>
-   
-	<target name="create.datatmp" unless="${data.dir}">
-	  <mkdir dir="${install.dir}/data/tmp"/>
-	  <property name="data.dir" value="${install.dir}/data/tmp"/>
-	</target>
-
-
   <target name="dbsetup-process-file">
     <property name="server.jdbc-url" value="${server.database-url}"/>
 
@@ -78,7 +67,6 @@
   </target>
 
   <target name="dbsetup" depends="hibernate-setup">
-  	<antcall target="check.data.dir"/>
     <antcall target="dbsetup-process-file">
       <param name="dbsetupfile" value="${data.dir}/data.xml"/>
       <param name="data"        value="true"/>
@@ -140,7 +128,7 @@
   </target>
 	
   <target name="dbsetup-combine">
-	<delete file="${data.dir}/data.xml"/>
+  	<mkdir dir="${data.dir}"/>
 	<dbsetup-cat debug="true" destfile="${data.dir}/data.xml" name="data.xml" notice="Copyright (C) 2004-2010, Hyperic, Inc., All Rights Reserved." order="${dbsetup-subsystems}">
 		<fileset dir="${install.dir}/data/sql">
 			<include name="*-data.xml" />
@@ -149,10 +137,8 @@
   </target>
 
   <target name="replace-dbservice-values" depends="dbsetup-combine">
-  	<antcall target="check.data.dir"/>
     <echo>using url: ${server.database-url} </echo>
     
-
     <crypto value="${server.admin.password}" property="server.admin.password.encrypted"/>
 
     <!-- replace the admin info in dbsetup data file -->
