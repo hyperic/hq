@@ -32,7 +32,6 @@
 			<artifactId>hq-util</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-
 		<dependency>
 			<groupId>commons-logging</groupId>
 			<artifactId>commons-logging</artifactId>
@@ -44,6 +43,10 @@
 		<dependency>
 			<groupId>tanukisoft</groupId>
 			<artifactId>wrapper</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
 		</dependency>
 	</dependencies>
 	
