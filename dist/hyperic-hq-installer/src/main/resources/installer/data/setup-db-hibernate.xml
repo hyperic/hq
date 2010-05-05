@@ -80,7 +80,11 @@
 		<propertyref name="hq.schema.export"/>
       </propertyset>
     </echoproperties> 
-
+    
+      <replace file="${install.dir}/data/hibernate.cfg.xml">
+      	<replacefilter token="@@@VERSION@@@" value="${version}" />
+      	<replacefilter token="@@@SERVERDIR@@@" value="${hq-war.dir}/WEB-INF/lib" />
+	 </replace>
   </target>
 
   <target name="hibernate-schema-create-init">
@@ -91,16 +95,12 @@
   <target name="hibernate-schema-create" depends="hibernate-prep,hibernate-schema-create-init">
     <hibernatetool>
       <classpath>
-        <path location="${hq-war.dir}/WEB-INF/classes" />
- 		<path location="${hq-war.dir}/WEB-INF/lib/hq-common.jar" />
-		<path location="${hq-war.dir}/WEB-INF/lib/hq-util.jar" />
+        <path location="${hq-war.dir}/WEB-INF/lib/hq-server-${version}.jar" />
+ 		<path location="${hq-war.dir}/WEB-INF/lib/hq-common-${version}.jar" />
+		<path location="${hq-war.dir}/WEB-INF/lib/hq-util-${version}.jar" />
       </classpath>
-      <configuration propertyFile="${hibernate-properties-gen}">
-        <fileset dir="${hq-war.dir}/WEB-INF/classes/hibernate">
-          <include name="**/*.hbm.xml" />
-        </fileset>
-      </configuration>
-
+      <configuration propertyFile="${hibernate-properties-gen}" configurationfile="${install.dir}/data/hibernate.cfg.xml" />
+  
       <hbm2ddl
           destdir="${build.dir}/sql"
           outputFileName="hibernate.sql"
@@ -122,14 +122,11 @@
     <mkdir dir="${build.dir}/sql" />
     <hibernatetool>
     	  <classpath>
-	        <path location="${hq-war.dir}/WEB-INF/classes" />
-			<path location="${hq-war.dir}/WEB-INF/lib/hq-common.jar" />
-			<path location="${hq-war.dir}/WEB-INF/lib/hq-util.jar" />
+	        <path location="${hq-war.dir}/WEB-INF/lib/hq-server-${version}.jar" />
+			<path location="${hq-war.dir}/WEB-INF/lib/hq-common-${version}.jar" />
+			<path location="${hq-war.dir}/WEB-INF/lib/hq-util-${version}.jar" />
 	      </classpath>
-	      <configuration propertyFile="${hibernate-properties-gen}">
-	        <fileset dir="${hq-war.dir}/WEB-INF/classes/hibernate">
-	          <include name="**/*.hbm.xml" />
-	        </fileset>
+	      <configuration propertyFile="${hibernate-properties-gen}" configurationfile="${install.dir}/data/hibernate.cfg.xml">
       </configuration>
 
       <hbm2ddl
