@@ -32,9 +32,11 @@
 		<dbunit.version>2.2</dbunit.version>
 		<easymock.version>2.4</easymock.version>
 		<ehcache.version>1.5.0</ehcache.version>
+		<freemarker.version>2.3.4</freemarker.version>
 		<getopt.version>1.0.13</getopt.version>
 		<groovy.version>1.6.7</groovy.version>
 		<hibernate.version>3.2.6.ga</hibernate.version>
+		<hibernate-tools.version>3.2.3.GA</hibernate-tools.version>
 		<httpclient.version>3.1</httpclient.version>
 		<j2ee-management.version>1.1</j2ee-management.version>
 		<jdom.version>1.1</jdom.version>
@@ -184,6 +186,11 @@
 				<version>${hibernate.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-tools</artifactId>
+				<version>${hibernate-tools.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.hyperic.db2monitor</groupId>
 				<artifactId>db2monitor</artifactId>
 				<version>${db2monitor.version}</version>
@@ -316,6 +323,7 @@
 			  	<groupId>jmock</groupId>
 			  	<artifactId>jmock</artifactId>
 			  	<version>${jmock.version}</version>
+			  	<scope>test</scope>
 			</dependency>
 			<dependency>
   			 	<groupId>org.quartz-scheduler</groupId>
@@ -453,6 +461,16 @@
 						<groupId>ant</groupId>
 					</exclusion>
 				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.ant</groupId>
+  				<artifactId>ant-apache-log4j</artifactId>
+  				<version>${ant.version}</version>
+			</dependency>
+			<dependency>
+  				<groupId>freemarker</groupId>
+  				<artifactId>freemarker</artifactId>
+  				<version>${freemarker.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

@@ -28,6 +28,21 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.ant</groupId>
+  			<artifactId>ant-apache-log4j</artifactId>
+  			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache</groupId>
+			<artifactId>tomcat-jdbc</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache</groupId>
+			<artifactId>tomcat-juli</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
   			<groupId>org.easymock</groupId>
   			<artifactId>easymock</artifactId>
 		</dependency>
