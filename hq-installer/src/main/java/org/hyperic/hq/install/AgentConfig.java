@@ -34,7 +34,7 @@ import org.hyperic.util.config.EarlyExitException;
 public class AgentConfig extends BaseConfig {
 
     public AgentConfig () {
-        super("agent");
+        super("hyperic-hq-agent");
     }
 
     public String getName () { return PRODUCT + " agent"; }

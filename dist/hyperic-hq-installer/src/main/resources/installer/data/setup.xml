@@ -175,7 +175,7 @@ __ll__
     <if>
       <and>
         <not><isset property="server.installdir"/></not>
-        <not><isset property="agent.installdir"/></not>
+        <not><isset property="hyperic-hq-agent.installdir"/></not>
       </and>
       <then>
         <property name="nothing-to-install" value="true"/>
@@ -210,37 +210,74 @@ __ll__
     </if>
   </target>
 
-  <target name="agent.valid-props" if="agent.installdir">
+  <target name="agent.valid-props" if="hyperic-hq-agent.installdir">
     <echo>^^^DEBUG: Validating agent install configuration...</echo>
   </target>
 
   <target name="validate-os-install">
   </target>
+	
+	<target name="unpack-agent">
+	   <echo>^^^INFO:
+		    Unpacking ${agent.bundle} to: ${hyperic-hq-agent.installdir}/hyperic-hq-agent-${version}...
+	   </echo>
+	   <untar src="${agent.bundle}"
+	           dest="${hyperic-hq-agent.installdir}"
+	           compression="gzip"/>
+		<antcall target="post-agent-unpack">
+				<param name="hyperic-hq-agent-installdir" value="${hyperic-hq-agent-installdir}"/>
+				<param name="version" value="${version}"/>
+		 </antcall>
+	</target>
+	
+	<target name="unzip-agent">
+		 <echo>^^^INFO:
+				    Unpacking ${agent.bundle} to: ${hyperic-hq-agent.installdir}/hyperic-hq-agent-${version}...
+			   </echo>
+		  <unzip src="${agent.bundle}"
+			           dest="${hyperic-hq-agent.installdir}"/>
+		  <antcall target="post-agent-unpack">
+				<param name="hyperic-hq-agent-installdir" value="${hyperic-hq-agent-installdir}"/>
+		  		<param name="version" value="${version}"/>
+		  </antcall>
+	</target>
+	
+  <target name="post-agent-unpack">
+	   <echo>^^^INFO: Setting permissions on agent binaries...</echo>
+	    <antcall target="chmod-exec">
+			<param name="chmod.dir" value="${hyperic-hq-agent.installdir}/hyperic-hq-agent-${version}"/>
+	    </antcall>
+		<echo>^^^INFO: Fixing line endings on text files...</echo>
+		 <antcall target="fix-text-files">
+		     <param name="crlf.dir" value="${hyperic-hq-agent.installdir}/hyperic-hq-agent-${version}"/>
+		 </antcall>
+  </target>
 
   <target name="agent"
           depends="agent.valid-props"
-          if="agent.installdir"
+          if="hyperic-hq-agent.installdir"
           description="Install the HQ agent.">
     <echo>^^^INFO: Installing the agent...</echo>
     <echo>^^^DEBUG: Looking for previous installation</echo>
-    <echo>^^^INFO:
-      Unpacking agent to: ${agent.installdir}/agent-${version}...
-    </echo>
-    <untar src="${base}/agent-${version}.tgz"
-           dest="${agent.installdir}"
-           compression="gzip"/>
-
    
-    <echo>^^^INFO: Setting permissions on agent binaries...</echo>
-    <antcall target="chmod-exec">
-      <param name="chmod.dir" value="${agent.installdir}/agent-${version}"/>
-    </antcall>
-    <echo>^^^INFO: Fixing line endings on text files...</echo>
-    <antcall target="fix-text-files">
-      <param name="crlf.dir" value="${agent.installdir}/agent-${version}"/>
-    </antcall>
+  	<foreach param="agent.bundle" target="unpack-agent">
+  		<param name="hyperic-hq-agent.installdir" value="${hyperic-hq-agent.installdir}"/>
+  		<param name="version" value="${version}"/>
+  		<path>
+  			<fileset dir="${base}" includes="hyperic-hq-agent-${version}-*.tar.gz"/>
+  		</path>
+  	</foreach>
+  	
+  	<foreach param="agent.bundle" target="unzip-agent">
+  	  		<param name="hyperic-hq-agent.installdir" value="${hyperic-hq-agent.installdir}"/>
+  	  		<param name="version" value="${version}"/>
+  	  		<path>
+  	  			<fileset dir="${base}" includes="hyperic-hq-agent-${version}-*.zip"/>
+  	  		</path>
+  	 </foreach>
+  	
     <echo>^^^COMPLETION:
-      Agent successfully installed to: ${agent.installdir}/agent-${version}
+      Agent successfully installed to: ${hyperic-hq-agent.installdir}/hyperic-hq-agent-${version}
     </echo>
     <concatWithPrefix failOnMissing="false" file="${setup}.agent-summary.txt" prefix="^^^INFO:"/>
   </target>
@@ -452,7 +489,7 @@ ${errMsg}
     <echo>
       ^^^INFO: Unpacking server to: ${server.installdir}/server-${version}...
     </echo>
-    <untar src="${base}/${server.vname}.tgz"
+    <untar src="${base}/${server.vname}.tar.gz"
            dest="${server.installdir}"
            compression="gzip"/>
 
