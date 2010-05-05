@@ -32,6 +32,11 @@
 			<artifactId>groovy-all</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>ant-contrib</groupId>
+			<artifactId>ant-contrib</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
   			<groupId>junit</groupId>
   			<artifactId>junit</artifactId>
 		</dependency>
