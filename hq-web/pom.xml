@@ -648,4 +648,30 @@
 		</plugins>
 	</build>
 
+	<profiles>
+		<profile>
+			<id>gConsoleTemplates</id>
+			<activation>
+				<file>
+					<exists>${user.home}/.hq/gconsoleTemplates</exists>
+				</file>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-war-plugin</artifactId>
+						<configuration>
+							<webResources>
+								<resource>
+									<directory>${user.home}/.hq/gconsoleTemplates</directory>
+									<targetPath>WEB-INF/gconsoleTemplates</targetPath>
+								</resource>
+							</webResources>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
 </project>
