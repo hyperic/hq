@@ -45,7 +45,7 @@
 				<directoryMode>0755</directoryMode>
 				<includes>
 					<include>mysql:mysql-connector-java</include>
-					<include>postgresql:postgresql</include>
+					<include>postgresql:postgresql:jar:*</include>
 				</includes>
 		</dependencySet>
 		<dependencySet>
