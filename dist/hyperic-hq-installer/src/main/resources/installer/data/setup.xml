@@ -41,7 +41,7 @@
 
   </target>
 
-  <!-- The server uses a 1.5 JRE. -->
+  <!-- The server uses a 1.6 JRE. -->
   <target name="pick-server-jre" if="use.builtin.jre">
     <condition property="jre.tar.name" value="amd64-linux-jre-1_6.tar.gz">
         <available file="${install.dir}/jres/amd64-linux-jre-1_6.tar.gz"/>
