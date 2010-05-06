@@ -35,7 +35,7 @@
 		<td class="FooterBold" nowrap="nowrap" style="padding-left: 30px;" width="20%"><tiles:insert definition=".footer.current.time" /></td>
 		<td class="FooterRegular" nowrap="nowrap" align="center" width="60%">
 			<div id="aboutAnchor">
-			  <a name="aboutLink" href="javascript:aboutDia.show()"><fmt:message key="footer.HQ" /> <fmt:message key="footer.version" /> <c:out value="${HQVersion}" /></a> <c:out value="${HQBuild}" />
+			  <a name="aboutLink" href="javascript:aboutDia.show()"><fmt:message key="footer.HQ" /> <fmt:message key="footer.version" /> <c:out value="${HQVersion}" /></a>
 			</div>
 		</td>
 		<td class="FooterRegular" nowrap="nowrap" width="10%"><fmt:message key="footer.Copyright" /></td>

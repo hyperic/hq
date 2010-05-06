@@ -134,11 +134,6 @@ public interface ProductBoss {
     public String getVersion();
 
     /**
-     * Gets the build number, date, and type.
-     */
-    public String getBuildNumber();
-
-    /**
      * Preload the 2nd level caches
      */
     public void preload();

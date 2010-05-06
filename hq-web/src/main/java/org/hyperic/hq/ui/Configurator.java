@@ -224,19 +224,10 @@ public class Configurator implements ServletContextListener {
         
         try{
             ctx.setAttribute(Constants.APP_VERSION, ProductProperties.getVersion());            
-            ctx.setAttribute(Constants.APP_BUILD, getBuildNumber());
         } catch(Exception e){
             error("Unable to load product version", e);
         }
     }
     
-   
-        private String getBuildNumber() {
-            String build = ProductProperties.getBuild();
-            String buildDate = ProductProperties.getBuildDate();
-            String comment = ProductProperties.getComment();
-
-            return "(build #" + build + " - " + buildDate + " - " + comment + ")";
-        }
     
 }

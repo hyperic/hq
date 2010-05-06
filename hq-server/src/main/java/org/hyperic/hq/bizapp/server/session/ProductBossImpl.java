@@ -482,17 +482,6 @@ public class ProductBossImpl implements ProductBoss {
         return ProductProperties.getVersion();
     }
 
-    /**
-     * Gets the build number, date, and type.
-     */
-    @Transactional(readOnly=true)
-    public String getBuildNumber() {
-        String build = ProductProperties.getBuild();
-        String buildDate = ProductProperties.getBuildDate();
-        String comment = ProductProperties.getComment();
-
-        return "(build #" + build + " - " + buildDate + " - " + comment + ")";
-    }
 
     /**
      * Preload the 2nd level caches

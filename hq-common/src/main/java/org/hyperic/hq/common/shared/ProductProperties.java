@@ -32,7 +32,6 @@ import java.util.Properties;
 public class ProductProperties {
     private static final String PROP_VERSION = "version";
     private static final String PROP_BUILD = "build.number";
-    private static final String PROP_COMMENT = "build.comment";
     private static final String PROP_BUILD_DATE = "build.date";
     private static final String PROP_FLAVOUR = "hq.flavour";
     private static final String PROP_ISDEV = "hq.isDev";
@@ -49,10 +48,6 @@ public class ProductProperties {
 
     public static String getBuild() {
         return getRequiredProperty(PROP_BUILD);
-    }
-
-    public static String getComment() {
-        return getRequiredProperty(PROP_COMMENT);
     }
 
     public static String getBuildDate() {
