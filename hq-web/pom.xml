@@ -651,6 +651,7 @@
 				<configuration>
 					<warFile>${project.build.directory}/ROOT.war</warFile>
 					<server>local-tomcat</server>
+					<path>/</path>
 				</configuration>
 			</plugin>
 		</plugins>
