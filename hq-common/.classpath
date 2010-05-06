@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src/main/resources"/>
 	<classpathentry kind="src" path="src/main/java"/>
@@ -149,9 +149,11 @@
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.roo.file.monitor.polling-1.0.2.RELEASE.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/snmp4j-1.11.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/mysql_jdbc/mysql-connector-java-5.1.10-bin.jar"/>
-	<classpathentry exported="true" kind="lib" path="thirdparty/lib/jboss-remoting.jar"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/jboss-remoting.jar" sourcepath="/Users/jasonkonicki/Documents/jboss/jboss-remoting-src"/>
 	<classpathentry kind="lib" path="thirdparty/lib/test/tomcat-http11.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/test/tomcat-coyote.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/test/tomcat-util.jar"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/jboss-common.jar"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/jboss-jmx.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

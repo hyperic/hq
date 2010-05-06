@@ -1166,6 +1166,7 @@
 		<copy todir="${agent.dir}/bundles/${agent.bundle.dir}/lib">
 			<fileset dir="${build.dir}" includes="hq-lather.jar" />
 			<fileset dir="${thirdparty.lib}" includes="jboss-remoting.jar" />
+			<fileset dir="${thirdparty.lib}" includes="jboss-jmx.jar" />
 			<fileset dir="${thirdparty.lib}" includes="jboss-common.jar" />
 			<fileset dir="${thirdparty.lib}/hibernate" includes="concurrent*.jar" />
 		</copy>
