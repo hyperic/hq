@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<project name="setup-db-Oracle10g" default="setup" basedir=".">
+<project name="setup-db-mySQL" default="setup" basedir=".">
 
   <target name="validate">
     <ant antfile="setup-db-common.xml" target="external-db-dependencies"/>
@@ -14,6 +14,7 @@
       <then>
         <ant antfile="setup-db-common.xml"
              target="dbsetup"/>
+        <ant antfile="setup-db-common.xml" target="subst-props"/>
       </then>
       <else>
         <echo>^^^INFO: Upgrading database...</echo>

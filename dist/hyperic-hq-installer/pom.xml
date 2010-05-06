@@ -38,21 +38,6 @@
 
 	<dependencies>
 		<dependency>
-  			<groupId>mysql</groupId>
-  			<artifactId>mysql-connector-java</artifactId>
-		</dependency>
-		<dependency>
-  			<groupId>postgresql</groupId>
-  			<artifactId>postgresql</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.hyperic</groupId>
-			<artifactId>sigar</artifactId>
-			<version>${sigar.version}</version>
-			<type>zip</type>
-			<classifier>libs</classifier>
-		</dependency>
-		<dependency>
 			<groupId>org.hyperic.hq.dist</groupId>
 			<artifactId>server</artifactId>
 			<version>${project.version}</version>
@@ -108,10 +93,10 @@
 			<classifier>x86-linux</classifier>
 		</dependency>
 		<dependency>
-			<groupId>org.hyperic.hq</groupId>
-			<artifactId>hq-installer</artifactId>
+			<groupId>org.hyperic.hq.dist</groupId>
+			<artifactId>installer</artifactId>
 			<version>${project.version}</version>
-			<type>zip</type>
+			<type>tar.gz</type>
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic.jre</groupId>
@@ -136,12 +121,6 @@
 			<artifactId>x86-win32</artifactId>
 			<version>1.6</version>
 			<type>exe</type>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.ant</groupId>
-			<artifactId>ant</artifactId>
-			<version>${ant.version}</version>
-			<type>zip</type>
 		</dependency>
 		<dependency>
 			<groupId>postgresql</groupId>

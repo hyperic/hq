@@ -2,9 +2,8 @@
    <!-- Hibernate common targets -->
 
   <property name="build.dir" location="${install.dir}/tmp" />
-  <property name="hq-war.dir" location="${server.installdir}/server-${version}/hq-engine/hq-server/webapps/ROOT" />
   <property name="hibernate-properties-gen" location="${build.dir}/hibernate/hibernate.properties" />
-  <property name="hibernate-jar" location="${hq-war.dir}/WEB-INF/lib/hibernate3.jar" />
+  
   
   <target name="common-taskdefs" unless="init-taskdefs.notrequired">
     <taskdef name="for" classname="net.sf.antcontrib.logic.For">
@@ -82,8 +81,7 @@
     </echoproperties> 
     
       <replace file="${install.dir}/data/hibernate.cfg.xml">
-      	<replacefilter token="@@@VERSION@@@" value="${version}" />
-      	<replacefilter token="@@@SERVERDIR@@@" value="${hq-war.dir}/WEB-INF/lib" />
+      	<replacefilter token="@@@INSTALLDIR@@@" value="${install.dir}" />
 	 </replace>
   </target>
 
@@ -95,9 +93,7 @@
   <target name="hibernate-schema-create" depends="hibernate-prep,hibernate-schema-create-init">
     <hibernatetool>
       <classpath>
-        <path location="${hq-war.dir}/WEB-INF/lib/hq-server-${version}.jar" />
- 		<path location="${hq-war.dir}/WEB-INF/lib/hq-common-${version}.jar" />
-		<path location="${hq-war.dir}/WEB-INF/lib/hq-util-${version}.jar" />
+        <path refid="alljars"/>
       </classpath>
       <configuration propertyFile="${hibernate-properties-gen}" configurationfile="${install.dir}/data/hibernate.cfg.xml" />
   
@@ -122,9 +118,7 @@
     <mkdir dir="${build.dir}/sql" />
     <hibernatetool>
     	  <classpath>
-	        <path location="${hq-war.dir}/WEB-INF/lib/hq-server-${version}.jar" />
-			<path location="${hq-war.dir}/WEB-INF/lib/hq-common-${version}.jar" />
-			<path location="${hq-war.dir}/WEB-INF/lib/hq-util-${version}.jar" />
+			<path refid="alljars"/>
 	      </classpath>
 	      <configuration propertyFile="${hibernate-properties-gen}" configurationfile="${install.dir}/data/hibernate.cfg.xml">
       </configuration>
@@ -143,21 +137,7 @@
     </hibernatetool>
   </target>
 
-  <target name="hibernate-schema-validation" depends="hibernate-prep">
-    <taskdef name="validate-schema"
-             classname="org.hibernate.tool.hbm2ddl.SchemaValidatorTask">
-     		  <classpath>
-		        <path location="${hq-war.dir}/WEB-INF/classes" />
-		      </classpath>
-		</taskdef>
-		  <validate-schema properties="${hibernate-properties-gen}">
-		        <fileset dir="${hq-war.dir}/WEB-INF/classes/hibernate">
-		          <include name="**/*.hbm.xml" />
-		        </fileset>
-    </validate-schema>
-  </target>
-
   <target name="hibernate-setup" depends="hibernate-schema-drop,hibernate-schema-create" />
 
   <target name="hibernate-drop" depends="hibernate-schema-drop" />
-  <target name="hibernate-validate" depends="hibernate-schema-validation" />
+

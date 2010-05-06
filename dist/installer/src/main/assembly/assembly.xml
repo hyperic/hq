@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component>
+<assembly>
+	<formats>
+		<format>tar.gz</format>
+	</formats>
 
 	<fileSets>
 		<fileSet>
@@ -33,17 +36,34 @@
 				<fileMode>0644</fileMode>
 				<directoryMode>0755</directoryMode>
 				<includes>
-					<include>org.hyperic.hq.dist:installer</include>
+					<include>org.hyperic.hq:hq-installer</include>
 				</includes>
 		</dependencySet>
 		<dependencySet>
 				<useProjectArtifact>false</useProjectArtifact>
 				<useTransitiveDependencies>false</useTransitiveDependencies>
-				<outputDirectory>/</outputDirectory>
+				<outputDirectory>/lib</outputDirectory>
+				<unpack>true</unpack>
+				<fileMode>0644</fileMode>
+				<directoryMode>0755</directoryMode>
 				<includes>
-					<include>org.hyperic.hq.dist:server</include>
+					<include>org.hyperic:sigar</include>
+				</includes>
+		</dependencySet>
+		<dependencySet>
+				<useProjectArtifact>false</useProjectArtifact>
+				<useTransitiveDependencies>false</useTransitiveDependencies>
+				<unpack>true</unpack>
+				<unpackOptions>
+					<includes>
+						<include>bin/**</include>
+						<include>lib/*.jar</include>
+					</includes>
+				</unpackOptions>
+				<includes>
+					<include>org.apache.ant:ant</include>
 				</includes>
 		</dependencySet>
 	</dependencySets>
 	
-</component>
+</assembly>

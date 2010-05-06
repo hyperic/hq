@@ -18,6 +18,20 @@
     </fail>
   </target>
 	
+  <path id="alljars">
+	  	<fileset dir="${install.dir}/lib" includes="*.jar"/>
+  </path>	
+
+
+  <target name="init-taskdefs">
+	    <echo>^^^DEBUG: Loading taskdefs...</echo>
+	     <taskdef resource="net/sf/antcontrib/antcontrib.properties"
+	              classpathref="alljars"/>
+	     <taskdef resource="org/hyperic/tools/ant/ant-tools.properties"
+	              classpathref="alljars"/>
+	     <echo>^^^DEBUG: Taskdefs loaded</echo>
+  </target>
+	
   <target name="dbsetup-process-file">
     <property name="server.jdbc-url" value="${server.database-url}"/>
 
@@ -66,7 +80,7 @@
     <substProps src="${conf-dir}/hq-server.conf"/>
   </target>
 
-  <target name="dbsetup" depends="hibernate-setup">
+  <target name="dbsetup" depends="replace-dbservice-values,hibernate-setup">
     <antcall target="dbsetup-process-file">
       <param name="dbsetupfile" value="${data.dir}/data.xml"/>
       <param name="data"        value="true"/>
@@ -74,8 +88,6 @@
     </antcall>
     <!-- Ensure CAM_SCHEMA_VERSION gets set properly --> 
     <antcall target="upgrade-db"/>
-    <!-- TODO: only call this on fresh installs, not upgrades -->
-    <antcall target="subst-props"/>
   </target>
 
   <target name="set-multicast-props" if="server.multicast.addr">
@@ -91,7 +103,7 @@
     </sql>
   </target>
 
-  <target name="upgrade-db" depends="hibernate-prep">
+  <target name="upgrade-db" depends="init-taskdefs,hibernate-prep">
     <ant antfile="${install.dir}/data/db-upgrade.xml"
          target="upgrade"
          inheritAll="true"
@@ -106,13 +118,10 @@
     <sql driver="${server.database-driver}"
          url="${server.database-url}"
          userid="${server.database-user}"
-         password="${server.database-password}">
+         password="${server.database-password}" classpathref="alljars">
       update EAM_CONFIG_PROPS SET PROPVALUE='${version}'
       where PROPKEY='CAM_SERVER_VERSION';
     </sql>
-     
-    <antcall target="set-multicast-props"/>
-
   </target>
 
   <target name="external-db-dependencies">
@@ -127,7 +136,7 @@
     </fail>
   </target>
 	
-  <target name="dbsetup-combine">
+  <target name="dbsetup-combine" depends="init-taskdefs">
   	<mkdir dir="${data.dir}"/>
 	<dbsetup-cat debug="true" destfile="${data.dir}/data.xml" name="data.xml" notice="Copyright (C) 2004-2010, Hyperic, Inc., All Rights Reserved." order="${dbsetup-subsystems}">
 		<fileset dir="${install.dir}/data/sql">

@@ -38,6 +38,7 @@
       <then>
         <ant antfile="setup-db-common.xml"
              target="dbsetup"/>
+      	<ant antfile="setup-db-common.xml" target="subst-props"/>
       </then>
       <else>
         <echo>^^^INFO: Analyzing database...</echo>
@@ -149,6 +150,7 @@
             <else>
               <!-- New install, full dbsetup -->
               <ant antfile="setup-db-common.xml" target="dbsetup"/>
+    		  <ant antfile="setup-db-common.xml" target="subst-props"/>
             </else>
             </if>
           </sequential>

@@ -5,28 +5,29 @@
   <!-- true for text based installs -->
   <available property="server.pgsql.available"
              file="${install.dir}/data/hqdb/pgsql.tar.gz"/>
+	
+   <path id="alljars">
+  	     <fileset dir="${install.dir}/lib" includes="*.jar"/>
+  </path>	
 
-  <target name="load-basics">
+  <target name="init-taskdefs">
+    <echo>^^^DEBUG: Loading taskdefs...</echo>
+     <taskdef resource="net/sf/antcontrib/antcontrib.properties"
+              classpathref="alljars"/>
+     <taskdef resource="org/hyperic/tools/ant/ant-tools.properties"
+              classpathref="alljars"/>
+     <echo>^^^DEBUG: Taskdefs loaded</echo>
+  </target>
+  	
+  <target name="load-basics" depends="init-taskdefs">
     <property file="${install.dir}/data/version.properties"/>
     <echo>^^^INFO: Initializing Hyperic HQ ${version} Installation...</echo>
-
-    <path id="alljars">
-      <fileset dir="${install.dir}/lib" includes="*.jar"/>
-    </path>
 
     <available property="use.builtin.jre" file="${install.dir}/jres"/>
 
     <condition property="isWin32">
       <os family="windows"/>
     </condition>
-
-    <echo>^^^DEBUG: Loading taskdefs...</echo>
-    <taskdef resource="net/sf/antcontrib/antcontrib.properties"
-             classpathref="alljars"/>
-    <taskdef resource="org/hyperic/tools/ant/ant-tools.properties"
-             classpathref="alljars"/>
-    <echo>^^^DEBUG: Taskdefs loaded</echo>
-
 
     <if>
       <equals arg1="${install.mode}" arg2="upgrade"/>
@@ -555,6 +556,8 @@ ${errMsg}
     <!-- Do DB-specific stuff -->
     <echo>^^^INFO: Setting up server database...</echo>
     <ant antfile="setup-db-${server.database}.xml" target="setup"/>
+    	
+    <ant antfile="setup-db-common.xml" target="set-multicast-props"/>	
 
     <antcall target="install-server-jre">
       <param name="destination" value="${server.product.dir}" />
@@ -633,5 +636,7 @@ ${errMsg}
       <property name="tomcat.home" value="${tomcat.home}"/>
     </ant>
   </target>
+	
+	
 
 </project>

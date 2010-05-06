@@ -5,6 +5,6 @@
 
 <hibernate-configuration>
 <session-factory>
-      <mapping jar="@@@SERVERDIR@@@/hq-server-@@@VERSION@@@.jar"/>
+      <mapping jar="@@@INSTALLDIR@@@/lib/hq-server-${project.version}.jar"/>
 </session-factory>
 </hibernate-configuration>
