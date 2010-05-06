@@ -71,7 +71,6 @@ public class AgentServerDetector
         ServerResource res;
         String installPath, agtName;  
         String version = ProductProperties.getVersion();
-        String build = ProductProperties.getBuild();
         agtName = getPlatformName() + " HQ Agent " + version;
         File dir = new File(".").getAbsoluteFile().getParentFile();
         installPath = dir.getPath();
@@ -92,7 +91,6 @@ public class AgentServerDetector
         // Set custom properties
         ConfigResponse cprop = new ConfigResponse();
         cprop.setValue("version", version);
-        cprop.setValue("build", build);
         cprop.setValue("JavaVersion", System.getProperty("java.vm.version"));
         cprop.setValue("JavaVendor", System.getProperty("java.vm.vendor"));
         cprop.setValue("UserHome", System.getProperty("user.home"));

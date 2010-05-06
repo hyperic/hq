@@ -96,7 +96,6 @@ public class UpdateBossImpl implements UpdateBoss {
 
         req.setProperty("hq.updateStatusMode", "" + status.getMode().getCode());
         req.setProperty("hq.version", ProductProperties.getVersion());
-        req.setProperty("hq.build", ProductProperties.getBuild());
         req.setProperty("hq.guid", guid);
         req.setProperty("hq.flavour", ProductProperties.getFlavour());
         req.setProperty("platform.time", "" + System.currentTimeMillis());

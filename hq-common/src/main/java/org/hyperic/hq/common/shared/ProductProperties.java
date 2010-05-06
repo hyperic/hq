@@ -31,10 +31,8 @@ import java.util.Properties;
 
 public class ProductProperties {
     private static final String PROP_VERSION = "version";
-    private static final String PROP_BUILD = "build.number";
     private static final String PROP_BUILD_DATE = "build.date";
     private static final String PROP_FLAVOUR = "hq.flavour";
-    private static final String PROP_ISDEV = "hq.isDev";
 
     private static Properties _props;
     private static final Object _propsLock = new Object();
@@ -46,10 +44,6 @@ public class ProductProperties {
         return getRequiredProperty(PROP_VERSION);
     }
 
-    public static String getBuild() {
-        return getRequiredProperty(PROP_BUILD);
-    }
-
     public static String getBuildDate() {
         return getRequiredProperty(PROP_BUILD_DATE);
     }
@@ -58,9 +52,7 @@ public class ProductProperties {
         return getRequiredProperty(PROP_FLAVOUR);
     }
 
-    public static boolean isDev() {
-        return Boolean.valueOf(getRequiredProperty(PROP_ISDEV)).booleanValue();
-    }
+   
 
     private static void load(String name, boolean required) {
         InputStream in = ProductProperties.class.getClassLoader().getResourceAsStream(name);

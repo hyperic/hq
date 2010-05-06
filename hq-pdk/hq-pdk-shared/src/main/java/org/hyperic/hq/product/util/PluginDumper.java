@@ -296,7 +296,7 @@ public class PluginDumper {
                 config.defines.setProperty(key, val);
                 break;
               case 'v':
-                System.out.println(ProductProperties.getVersion() + " (build #" + ProductProperties.getBuild() + ")");
+                System.out.println(ProductProperties.getVersion());
                 break;
               case 'h':
               default:
