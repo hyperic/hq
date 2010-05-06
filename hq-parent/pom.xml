@@ -164,8 +164,9 @@
 				<artifactId>velocity</artifactId>
 				<version>${velocity.version}</version>
 			</dependency>
+			<!--  We use a version of dbunit that we patched -->
 			<dependency>
-				<groupId>org.dbunit</groupId>
+				<groupId>org.hyperic</groupId>
 				<artifactId>dbunit</artifactId>
 				<version>${dbunit.version}</version>
 				<scope>test</scope>

@@ -48,10 +48,15 @@
 			<groupId>org.apache.velocity</groupId>
 			<artifactId>velocity</artifactId>
 		</dependency>
+		<!--  We use a version of dbunit that we patched -->
 		<dependency>
-			<groupId>org.dbunit</groupId>
+			<groupId>org.hyperic</groupId>
 			<artifactId>dbunit</artifactId>
 		</dependency>
+		<dependency>
+  			<groupId>junit</groupId>
+  			<artifactId>junit</artifactId>
+  		</dependency>
 		<dependency>
 			<groupId>org.hyperic</groupId>
 			<artifactId>sigar</artifactId>

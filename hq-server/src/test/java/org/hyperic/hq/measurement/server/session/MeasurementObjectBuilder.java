@@ -33,7 +33,7 @@ import org.hyperic.hq.authz.server.session.Resource;
  * It is used when the required object has constructors and setter methods
  * with default or protected access.
  */
-public class TestObjectBuilder {
+public class MeasurementObjectBuilder {
     
     public Measurement buildMeasurement(Integer id, 
                                         AppdefEntityID adeId, 

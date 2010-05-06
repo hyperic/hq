@@ -4,7 +4,7 @@ import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.test.context.support.GenericXmlContextLoader;
 
-public class TestContextLoader
+public class IntegrationTestContextLoader
     extends GenericXmlContextLoader {
 
     @Override

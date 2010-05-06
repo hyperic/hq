@@ -160,10 +160,11 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
 		</dependency>
+		<!--  We use a version of dbunit that we patched -->
 		<dependency>
-			<groupId>org.dbunit</groupId>
+			<groupId>org.hyperic</groupId>
 			<artifactId>dbunit</artifactId>
-		</dependency>
+		</dependency> 
 		<dependency>
 			<groupId>org.hyperic.hq</groupId>
 			<artifactId>hq-util</artifactId>

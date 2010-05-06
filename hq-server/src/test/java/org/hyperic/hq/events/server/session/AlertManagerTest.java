@@ -46,7 +46,7 @@ import org.hyperic.hq.authz.shared.RoleValue;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.context.Bootstrap;
-import org.hyperic.hq.context.TestContextLoader;
+import org.hyperic.hq.context.IntegrationTestContextLoader;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.events.AlertFiredEvent;
 import org.hyperic.hq.events.EventConstants;
@@ -82,7 +82,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * 
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(loader = TestContextLoader.class, locations = { "classpath*:META-INF/spring/*-context.xml" })
+@ContextConfiguration(loader = IntegrationTestContextLoader.class, locations = { "classpath*:META-INF/spring/*-context.xml" })
 @Transactional
 @DirtiesContext
 public class AlertManagerTest {

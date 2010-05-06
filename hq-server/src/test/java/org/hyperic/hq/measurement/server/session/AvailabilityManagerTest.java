@@ -36,7 +36,7 @@ import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.context.TestContextLoader;
+import org.hyperic.hq.context.IntegrationTestContextLoader;
 import org.hyperic.hq.db.DatabasePopulator;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
@@ -57,7 +57,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @Transactional
-@ContextConfiguration(loader    = TestContextLoader.class,
+@ContextConfiguration(loader    = IntegrationTestContextLoader.class,
                       locations = { "classpath*:META-INF/spring/*-context.xml",
                                     "AvailabilityManagerTest-context.xml" })
 @DirtiesContext
