@@ -25,7 +25,7 @@
 
 package org.hyperic.util.validator.common;
 
-public class TestBean {
+public class MockBean {
 
     public String fieldStr1 = null;
     public String fieldStr2 = null;

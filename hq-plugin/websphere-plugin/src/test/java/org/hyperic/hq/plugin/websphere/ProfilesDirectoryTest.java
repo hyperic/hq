@@ -41,7 +41,7 @@ import org.hyperic.hq.product.ProductPluginManager;
  * @author trader
  *
  */
-public class ProfilesDirectory_test extends TestCase {
+public class ProfilesDirectoryTest extends TestCase {
 
     private File tmpFile;
 
@@ -55,6 +55,7 @@ public class ProfilesDirectory_test extends TestCase {
     public void setUp() throws Exception {
         super.setUp();
         tmpFile = new File(System.getProperty("java.io.tmpdir"));
+        System.setProperty("org.hyperic.sigar.path","/Users/jhickey/Desktop/sigar-1.6.4-libs");
     }
 
     public void test60Structure() throws Exception {
