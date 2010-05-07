@@ -55,7 +55,8 @@ public class ProfilesDirectoryTest extends TestCase {
     public void setUp() throws Exception {
         super.setUp();
         tmpFile = new File(System.getProperty("java.io.tmpdir"));
-        System.setProperty("org.hyperic.sigar.path","/Users/jhickey/Desktop/sigar-1.6.4-libs");
+        File sigarBin = new File(getClass().getResource("/libsigar-sparc64-solaris.so").getFile()).getParentFile();
+		System.setProperty("org.hyperic.sigar.path",sigarBin.getAbsolutePath());
     }
 
     public void test60Structure() throws Exception {

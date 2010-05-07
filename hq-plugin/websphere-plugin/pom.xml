@@ -35,6 +35,48 @@
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.hyperic</groupId>
+			<artifactId>sigar</artifactId>
+			<version>${sigar.version}</version>
+			<type>zip</type>
+			<classifier>libs</classifier>
+			<scope>provided</scope>
+		</dependency>
 	</dependencies>
+	
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>unpack-sigar</id>
+						<goals>
+							<goal>unpack-dependencies</goal>
+						</goals>
+						<phase>generate-test-resources</phase>
+						<configuration>
+							<outputDirectory>${project.build.directory}/generated-test-resources</outputDirectory>
+							<includeGroupIds>org.hyperic</includeGroupIds>
+							<includeArtifactIds>sigar</includeArtifactIds>
+							<excludeTransitive>true</excludeTransitive>
+							<includeTypes>zip</includeTypes>
+							<stripVersion>true</stripVersion>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>	
+    	<testResources>
+    		<testResource>
+    			<directory>src/test/resources</directory>
+    		</testResource>
+    		<testResource>
+    			<directory>${project.build.directory}/generated-test-resources</directory>
+    		</testResource>
+    	</testResources>
+  </build>
 
 </project>
