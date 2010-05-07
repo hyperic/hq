@@ -80,26 +80,22 @@ public final class ConcurrentStatsCollector {
     public static final int WRITE_PERIOD = 15;
     private final Sigar _sigar = new Sigar();
     private Long _pid;
-    public static final String JVM_TOTAL_MEMORY = "JVM_TOTAL_MEMORY",
-        JVM_FREE_MEMORY = "JVM_FREE_MEMORY", JVM_MAX_MEMORY = "JVM_MAX_MEMORY",
-        FIRE_ALERT_TIME = "FIRE_ALERT_TIME", EVENT_PROCESSING_TIME = "EVENT_PROCESSING_TIME",
-        EHCACHE_TOTAL_OBJECTS = "EHCACHE_TOTAL_OBJECTS",
+    public static final String JVM_TOTAL_MEMORY = "JVM_TOTAL_MEMORY", JVM_FREE_MEMORY = "JVM_FREE_MEMORY",
+        JVM_MAX_MEMORY = "JVM_MAX_MEMORY", FIRE_ALERT_TIME = "FIRE_ALERT_TIME",
+        EVENT_PROCESSING_TIME = "EVENT_PROCESSING_TIME", EHCACHE_TOTAL_OBJECTS = "EHCACHE_TOTAL_OBJECTS",
         CONCURRENT_STATS_COLLECTOR = "CONCURRENT_STATS_COLLECTOR",
         LATHER_NUMBER_OF_CONNECTIONS = "LATHER_NUMBER_OF_CONNECTIONS",
-        RUNTIME_PLATFORM_AND_SERVER_MERGER = "RUNTIME_PLATFORM_AND_SERVER_MERGER",
-        SIGAR_1MLOAD = "SIGAR_1MLOAD", SIGAR_CPU = "SIGAR_CPU",
-        AVAIL_MANAGER_METRICS_INSERTED = "AVAIL_MANAGER_METRICS_INSERTED",
-        DATA_MANAGER_INSERT_TIME = "DATA_MANAGER_INSERT_TIME",
-        SIGAR_PROC_RES_MEM = "SIGAR_PROC_RES_MEM", SIGAR_TCP_INERRS = "SIGAR_TCP_INERRS",
-        SIGAR_TCP_RETRANS = "SIGAR_TCP_RETRANS", SIGAR_PAGEOUT = "SIGAR_PAGEOUT",
-        SIGAR_PAGEIN = "SIGAR_PAGEIN",
-        JMS_TOPIC_PUBLISH_TIME = "JMS_TOPIC_PUBLISH_TIME",
-        METRIC_DATA_COMPRESS_TIME = "METRIC_DATA_COMPRESS_TIME",
+        RUNTIME_PLATFORM_AND_SERVER_MERGER = "RUNTIME_PLATFORM_AND_SERVER_MERGER", SIGAR_1MLOAD = "SIGAR_1MLOAD",
+        SIGAR_CPU = "SIGAR_CPU", AVAIL_MANAGER_METRICS_INSERTED = "AVAIL_MANAGER_METRICS_INSERTED",
+        DATA_MANAGER_INSERT_TIME = "DATA_MANAGER_INSERT_TIME", SIGAR_PROC_RES_MEM = "SIGAR_PROC_RES_MEM",
+        SIGAR_TCP_INERRS = "SIGAR_TCP_INERRS", SIGAR_TCP_RETRANS = "SIGAR_TCP_RETRANS",
+        SIGAR_PAGEOUT = "SIGAR_PAGEOUT", SIGAR_PAGEIN = "SIGAR_PAGEIN",
+        JMS_TOPIC_PUBLISH_TIME = "JMS_TOPIC_PUBLISH_TIME", METRIC_DATA_COMPRESS_TIME = "METRIC_DATA_COMPRESS_TIME",
         DB_ANALYZE_TIME = "DB_ANALYZE_TIME", PURGE_EVENT_LOGS_TIME = "PURGE_EVENT_LOGS_TIME",
-        PURGE_MEASUREMENTS_TIME = "PURGE_MEASUREMENTS_TIME",
-        MEASUREMENT_SCHEDULE_TIME = "MEASUREMENT_SCHEDULE_TIME", SEND_ALERT_TIME = "SEND_ALERT_TIME",
-        ZEVENT_QUEUE_SIZE = "ZEVENT_QUEUE_SIZE", TRIGGER_INIT_TIME = "TRIGGER_INIT_TIME",
-        FIRED_ALERT_TIME = "FIRED_ALERT_TIME";
+        PURGE_MEASUREMENTS_TIME = "PURGE_MEASUREMENTS_TIME", MEASUREMENT_SCHEDULE_TIME = "MEASUREMENT_SCHEDULE_TIME",
+        SEND_ALERT_TIME = "SEND_ALERT_TIME", ZEVENT_QUEUE_SIZE = "ZEVENT_QUEUE_SIZE",
+        TRIGGER_INIT_TIME = "TRIGGER_INIT_TIME", FIRED_ALERT_TIME = "FIRED_ALERT_TIME",
+        JDBC_HQ_DS_MAX_ACTIVE = "JDBC_HQ_DS_MAX_ACTIVE", JDBC_HQ_DS_IN_USE = "JDBC_HQ_DS_IN_USE";
     // using tree due to ordering capabilities
     private final Map<String, StatCollector> _statKeys = new TreeMap<String, StatCollector>();
     private AtomicBoolean _hasStarted = new AtomicBoolean(false);
@@ -109,9 +105,10 @@ public final class ConcurrentStatsCollector {
         final char fs = File.separatorChar;
         if (ConcurrentStatsCollector.enabled) {
             try {
-                //Start 2 levels up from where the webapp is deployed (engine home)
-                String restartStorageDir = new File(new File(Bootstrap.getResource("/").getFile()
-                    .getParent()).getParent()).getAbsolutePath();
+                // Start 2 levels up from where the webapp is deployed (engine
+                // home)
+                String restartStorageDir = new File(new File(Bootstrap.getResource("/").getFile().getParent())
+                    .getParent()).getAbsolutePath();
                 final String logDir = "logs";
                 final File logDirectory = new File(restartStorageDir + fs + logDir);
                 if (!(logDirectory.exists())) {
@@ -125,8 +122,7 @@ public final class ConcurrentStatsCollector {
                     dir.mkdir();
                 }
             } catch (IOException e) {
-                _log
-                    .warn("Error setting up stats directory for logging.  Stats will not be logged.  Cause: " +
+                _log.warn("Error setting up stats directory for logging.  Stats will not be logged.  Cause: " +
                           e.getMessage());
             }
 
@@ -189,8 +185,7 @@ public final class ConcurrentStatsCollector {
             _log.error(e.getMessage(), e);
         }
         printHeader();
-        _executor.scheduleWithFixedDelay(new StatsWriter(), WRITE_PERIOD, WRITE_PERIOD,
-            TimeUnit.SECONDS);
+        _executor.scheduleWithFixedDelay(new StatsWriter(), WRITE_PERIOD, WRITE_PERIOD, TimeUnit.SECONDS);
         _hasStarted.set(true);
         _log.info("ConcurrentStatsCollector has started");
     }
@@ -559,49 +554,51 @@ public final class ConcurrentStatsCollector {
             }
         });
 
-        register(new MBeanCollector("HIBERNATE_2ND_LEVEL_CACHE_HITS",
-            "Hibernate:type=statistics,application=hq", "SecondLevelCacheHitCount", true));
+        register(new MBeanCollector("HIBERNATE_2ND_LEVEL_CACHE_HITS", "Hibernate:type=statistics,application=hq",
+            "SecondLevelCacheHitCount", true));
 
-        register(new MBeanCollector("HIBERNATE_2ND_LEVEL_CACHE_MISSES",
-            "Hibernate:type=statistics,application=hq", "SecondLevelCacheMissCount", true));
+        register(new MBeanCollector("HIBERNATE_2ND_LEVEL_CACHE_MISSES", "Hibernate:type=statistics,application=hq",
+            "SecondLevelCacheMissCount", true));
 
-        register(new MBeanCollector("HIBERNATE_QUERY_CACHE_MISSES",
-            "Hibernate:type=statistics,application=hq", "QueryCacheMissCount", true));
+        register(new MBeanCollector("HIBERNATE_QUERY_CACHE_MISSES", "Hibernate:type=statistics,application=hq",
+            "QueryCacheMissCount", true));
 
-        register(new MBeanCollector("HIBERNATE_QUERY_CACHE_HITS",
-            "Hibernate:type=statistics,application=hq", "QueryCacheHitCount", true));
+        register(new MBeanCollector("HIBERNATE_QUERY_CACHE_HITS", "Hibernate:type=statistics,application=hq",
+            "QueryCacheHitCount", true));
 
-        register(new MBeanCollector("ZEVENTS_PROCESSED", "hyperic.jmx:name=HQInternal",
-            "ZeventsProcessed", true));
+        register(new MBeanCollector("ZEVENTS_PROCESSED", "hyperic.jmx:name=HQInternal", "ZeventsProcessed", true));
 
-        register(new MBeanCollector("ZEVENT_QUEUE_SIZE", "hyperic.jmx:name=HQInternal",
-            "ZeventQueueSize", false));
+        register(new MBeanCollector("ZEVENT_QUEUE_SIZE", "hyperic.jmx:name=HQInternal", "ZeventQueueSize", false));
 
-        register(new MBeanCollector("PLATFORM_COUNT", "hyperic.jmx:name=HQInternal",
-            "PlatformCount", false));
-        
+        register(new MBeanCollector("PLATFORM_COUNT", "hyperic.jmx:name=HQInternal", "PlatformCount", false));
+
         register(new MBeanCollector("JMS_EVENT_TOPIC",
-            "org.apache.activemq:BrokerName=localhost,Type=Topic,Destination=topic/eventsTopic",
-            "QueueSize", false));
+            "org.apache.activemq:BrokerName=localhost,Type=Topic,Destination=topic/eventsTopic", "QueueSize", false));
 
         register(new MBeanCollector("EDEN_MEMORY_USED", "java.lang:type=MemoryPool,name=",
             new String[] { "Par Eden Space", "PS Eden Space", "Eden Space" }, "Usage", "used"));
 
         register(new MBeanCollector("SURVIVOR_MEMORY_USED", "java.lang:type=MemoryPool,name=",
-            new String[] { "Par Survivor Space", "PS Survivor Space", "Survivor Space" }, "Usage",
-            "used"));
+            new String[] { "Par Survivor Space", "PS Survivor Space", "Survivor Space" }, "Usage", "used"));
 
         register(new MBeanCollector("TENURED_MEMORY_USED", "java.lang:type=MemoryPool,name=",
             new String[] { "CMS Old Gen", "PS Old Gen", "Tenured Gen" }, "Usage", "used"));
 
-        register(new MBeanCollector("HEAP_MEMORY_USED", "java.lang:type=Memory",
-            new String[] { "" }, "HeapMemoryUsage", "used"));
+        register(new MBeanCollector("HEAP_MEMORY_USED", "java.lang:type=Memory", new String[] { "" },
+            "HeapMemoryUsage", "used"));
 
         register(new MBeanCollector("JVM_MARKSWEEP_GC", "java.lang:type=GarbageCollector,name=",
             new String[] { "ConcurrentMarkSweep", "PS MarkSweep" }, "CollectionTime", true));
 
         register(new MBeanCollector("JVM_COPY_GC", "java.lang:type=GarbageCollector,name=",
             new String[] { "Copy", "ParNew", "PS Scavenge" }, "CollectionTime", true));
+
+        
+        register(new MBeanCollector(JDBC_HQ_DS_MAX_ACTIVE, "hyperic.jmx:type=DataSource,name=tomcat.jdbc",
+            "MaxActive", false));
+
+        register(new MBeanCollector(JDBC_HQ_DS_IN_USE, "hyperic.jmx:type=DataSource,name=tomcat.jdbc",
+            "Active", false));
 
         register(CONCURRENT_STATS_COLLECTOR);
     }
@@ -686,20 +683,18 @@ public final class ConcurrentStatsCollector {
             throw _ex;
         }
 
-        private final long getComposite(String name) throws StatUnreachableException,
-            AttributeNotFoundException, InstanceNotFoundException, MBeanException,
-            ReflectionException, MalformedObjectNameException, NullPointerException {
+        private final long getComposite(String name) throws StatUnreachableException, AttributeNotFoundException,
+            InstanceNotFoundException, MBeanException, ReflectionException, MalformedObjectNameException,
+            NullPointerException {
             final ObjectName objName = new ObjectName(_objectName + name);
-            final CompositeDataSupport cds = (CompositeDataSupport) _mbeanServer.getAttribute(
-                objName, _attrName);
+            final CompositeDataSupport cds = (CompositeDataSupport) _mbeanServer.getAttribute(objName, _attrName);
             final long val = ((Number) cds.get(_valProp)).longValue();
             failures = 0;
             return val;
         }
 
-        private final long getValue(String name) throws MalformedObjectNameException,
-            NullPointerException, AttributeNotFoundException, InstanceNotFoundException,
-            MBeanException, ReflectionException {
+        private final long getValue(String name) throws MalformedObjectNameException, NullPointerException,
+            AttributeNotFoundException, InstanceNotFoundException, MBeanException, ReflectionException {
             final ObjectName _objName = new ObjectName(_objectName + name);
             long rtn = ((Number) _mbeanServer.getAttribute(_objName, _attrName)).longValue();
             failures = 0;
