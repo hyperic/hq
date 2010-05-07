@@ -173,8 +173,10 @@ public class HQServer {
                              "/conf/log4j.xml.  Cause: " + e.getMessage());
             return 1;
         }
+        
+        String javaHome = System.getProperty("java.home");
         return processManager.executeProcess(
-            new String[] { "java",
+            new String[] { javaHome + "/bin/java",
                           "-cp",
                           serverHome + "/lib/ant-launcher.jar",
                           "-Dserver.home=" + serverHome,
