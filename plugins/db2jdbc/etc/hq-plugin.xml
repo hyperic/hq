@@ -201,9 +201,9 @@
         <plugin type="autoinventory" class="org.hyperic.hq.plugin.db2jdbc.DataBaseServerDetector"/>
         <plugin type="measurement" class="org.hyperic.hq.plugin.db2jdbc.DataBaseMeasurement"/>
         <config>
-            <option name="db2.jdbc.database" description="Database being monitored" />
-            <option name="db2.jdbc.port" description="Port number of instance being monitored" default="50000"/>
-            <option name="db2.jdbc.hostname" description="Hostname of instance being monitored" default="localhost" />
+            <option name="db2.jdbc.database" description="Database being used to get DB2BM metrics"/>
+            <option name="db2.jdbc.port" description="DB2 TCP/IP Port number (SVCENAME)" default="50000"/>
+            <option name="db2.jdbc.hostname" description="DB2 TCP/IP" default="localhost" />
         </config>
         <config type="measurement">
             <option name="db2.jdbc.user" description="JDBC User"/>
@@ -280,9 +280,9 @@
         <plugin type="autoinventory" class="org.hyperic.hq.plugin.db2jdbc.DBManagerServerDetector"/>
         <plugin type="measurement" class="org.hyperic.hq.plugin.db2jdbc.DBManagerMeasurement"/>
         <config>
-            <option name="db2.jdbc.database" description="Database being monitored" optional="true"/>
-            <option name="db2.jdbc.port" description="Port number of instance being monitored" default="50000"/>
-            <option name="db2.jdbc.hostname" description="Hostname of instance being monitored" default="localhost" />
+            <option name="db2.jdbc.database" description="Database being used to get DB2BM metrics"/>
+            <option name="db2.jdbc.port" description="DB2 TCP/IP Port number (SVCENAME)" default="50000"/>
+            <option name="db2.jdbc.hostname" description="DB2 TCP/IP" default="localhost" />
         </config>
         <config type="measurement">
             <option name="db2.jdbc.user" description="JDBC User"/>
