@@ -699,28 +699,20 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         }
         List<DataPoint> updateList = new ArrayList<DataPoint>(availPoints.size());
         List<DataPoint> outOfOrderAvail = new ArrayList<DataPoint>(availPoints.size());
-       
         Map<DataPoint, AvailabilityDataRLE> createMap = new HashMap<DataPoint, AvailabilityDataRLE>();
         Map<DataPoint, AvailabilityDataRLE> removeMap = new HashMap<DataPoint, AvailabilityDataRLE>();
-       
         Map<Integer, StringBuilder> state = null;
-        Map<Integer, TreeSet<AvailabilityDataRLE>> currAvails = Collections.EMPTY_MAP;
+        Map<Integer, TreeSet<AvailabilityDataRLE>> currAvails = Collections.emptyMap();
         synchronized (availabilityCache) {
             try {
                 availabilityCache.beginTran();
-               
                 updateCache(availPoints, updateList, outOfOrderAvail);
-               
                 currAvails = createCurrAvails(outOfOrderAvail, updateList);
-              
                 state = captureCurrAvailState(currAvails);
-               
                 updateStates(updateList, currAvails, createMap, removeMap);
-              
                 updateOutOfOrderState(outOfOrderAvail, currAvails, createMap, removeMap);
                 flushCreateAndRemoves(createMap, removeMap);
                 logErrorInfo(state, availPoints, currAvails);
-             
                 availabilityCache.commitTran();
             } catch (Throwable e) {
                 logErrorInfo(state, availPoints, currAvails);

@@ -33,6 +33,12 @@
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>net.sf.ehcache</groupId>
+					<artifactId>ehcache</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic</groupId>
@@ -45,6 +51,11 @@
 		<dependency>
 			<groupId>oro</groupId>
 			<artifactId>oro</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>jboss</groupId>
+			<artifactId>jboss-remoting</artifactId>
+			<version>2.2.2.SP8</version>
 		</dependency>
 		<dependency>
 			<groupId>tanukisoft</groupId>
@@ -68,5 +79,13 @@
 			</plugin>
 		</plugins>
 	</build>
+	
+	<repositories>
+		<repository>
+			<id>jboss</id>
+			<name>JBoss Repository</name>
+			<url>http://repository.jboss.com/maven2</url>
+		</repository>
+	</repositories>
 
 </project>

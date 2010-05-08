@@ -31,57 +31,50 @@ import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.agent.client.SecureAgentConnection;
 import org.hyperic.hq.transport.AgentProxyFactory;
-import org.hyperic.hq.transport.ServerTransport;
 import org.hyperic.util.i18n.MessageBundle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * A factory for returning Live Data Commands clients depending on if the agent 
+ * A factory for returning Live Data Commands clients depending on if the agent
  * uses the legacy or new transport.
  */
 @Component
 public class LiveDataCommandsClientFactory {
-    
-    public static final MessageBundle BUNDLE =
-        MessageBundle.getBundle("org.hyperic.hq.livedata.Resources");
 
-    private AgentManager agentManager;
-    
-    private ServerTransport serverTransport;
-    
-    
+    public static final MessageBundle BUNDLE = MessageBundle.getBundle("org.hyperic.hq.livedata.Resources");
+
+    private final AgentManager agentManager;
+
+    private final AgentProxyFactory agentProxyFactory;
+
     @Autowired
-    public LiveDataCommandsClientFactory(AgentManager agentManager, ServerTransport serverTransport) {
+    public LiveDataCommandsClientFactory(AgentManager agentManager, AgentProxyFactory agentProxyFactory) {
         this.agentManager = agentManager;
-        this.serverTransport = serverTransport;
+        this.agentProxyFactory = agentProxyFactory;
     }
 
-    public LiveDataCommandsClient getClient(AppdefEntityID aid) 
-        throws AgentNotFoundException {
-        
+    public LiveDataCommandsClient getClient(AppdefEntityID aid) throws AgentNotFoundException {
+
         Agent agent = agentManager.getAgent(aid);
 
         return getClient(agent);
     }
 
-    public LiveDataCommandsClient getClient(String agentToken) 
-        throws AgentNotFoundException {
-        
+    public LiveDataCommandsClient getClient(String agentToken) throws AgentNotFoundException {
+
         Agent agent = agentManager.getAgent(agentToken);
 
         return getClient(agent);
     }
-    
+
     private LiveDataCommandsClient getClient(Agent agent) {
         if (agent.isNewTransportAgent()) {
-            AgentProxyFactory factory = serverTransport.getAgentProxyFactory();
-
-            return new LiveDataCommandsClientImpl(agent, factory);
+            return new LiveDataCommandsClientImpl(agent, agentProxyFactory);
         } else {
-            return new LegacyLiveDataCommandsClientImpl(new SecureAgentConnection(agent.getAddress(),agent.getPort(),agent.getAuthToken()));            
-        }         
+            return new LegacyLiveDataCommandsClientImpl(new SecureAgentConnection(agent.getAddress(), agent.getPort(),
+                agent.getAuthToken()));
+        }
     }
 
 }
-
