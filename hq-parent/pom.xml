@@ -351,8 +351,9 @@
 		  		<artifactId>spring-security-taglibs</artifactId>
 		  		<version>${spring-security.version}</version>
 			</dependency>
+			<!--  We maintain a patched version of ehcache -->
 			<dependency>
-				<groupId>net.sf.ehcache</groupId>
+				<groupId>org.hyperic</groupId>
 				<artifactId>ehcache</artifactId>
 				<version>${ehcache.version}</version>
 			</dependency>

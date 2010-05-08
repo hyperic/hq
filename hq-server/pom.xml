@@ -54,8 +54,9 @@
   			<groupId>org.springframework.security</groupId>
   			<artifactId>spring-security-core</artifactId>
 		</dependency>
+		<!--  We maintain a patched version of ehcache -->
 		<dependency>
-			<groupId>net.sf.ehcache</groupId>
+			<groupId>org.hyperic</groupId>
 			<artifactId>ehcache</artifactId>
 		</dependency>
 		<dependency>
@@ -202,6 +203,16 @@
 							<includeTypes>zip</includeTypes>
 							<stripVersion>true</stripVersion>
 						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+			 	<artifactId>maven-jar-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>test-jar</goal>
+						</goals>
 					</execution>
 				</executions>
 			</plugin>
