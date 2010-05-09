@@ -85,7 +85,7 @@ public class HQServerTest {
         EasyMock.expect(embeddedDatabaseController.startBuiltInDB()).andReturn(true);
         EasyMock.expect(
             processManager.executeProcess(EasyMock
-                .aryEq(new String[] { "java",
+                .aryEq(new String[] { System.getProperty("java.home") + "/bin/java",
                                      "-cp",
                                      serverHome + "/lib/ant-launcher.jar",
                                      "-Dserver.home=" + serverHome,
@@ -156,7 +156,7 @@ public class HQServerTest {
         EasyMock.expect(embeddedDatabaseController.shouldUse()).andReturn(false);
         EasyMock.expect(
             processManager.executeProcess(EasyMock
-                .aryEq(new String[] { "java",
+                .aryEq(new String[] { System.getProperty("java.home") + "/bin/java",
                                      "-cp",
                                      serverHome + "/lib/ant-launcher.jar",
                                      "-Dserver.home=" + serverHome,
@@ -211,7 +211,7 @@ public class HQServerTest {
         EasyMock.expect(embeddedDatabaseController.startBuiltInDB()).andReturn(true);
         EasyMock.expect(
             processManager.executeProcess(EasyMock
-                .aryEq(new String[] { "java",
+                .aryEq(new String[] { System.getProperty("java.home") + "/bin/java",
                                      "-cp",
                                      serverHome + "/lib/ant-launcher.jar",
                                      "-Dserver.home=" + serverHome,
@@ -257,7 +257,7 @@ public class HQServerTest {
         EasyMock.expect(embeddedDatabaseController.startBuiltInDB()).andReturn(true);
         EasyMock.expect(
             processManager.executeProcess(EasyMock
-                .aryEq(new String[] { "java",
+                .aryEq(new String[] { System.getProperty("java.home") + "/bin/java",
                                      "-cp",
                                      serverHome + "/lib/ant-launcher.jar",
                                      "-Dserver.home=" + serverHome,
@@ -300,7 +300,7 @@ public class HQServerTest {
         EasyMock.expect(embeddedDatabaseController.startBuiltInDB()).andReturn(true);
         EasyMock.expect(
             processManager.executeProcess(EasyMock
-                .aryEq(new String[] { "java",
+                .aryEq(new String[] { System.getProperty("java.home") + "/bin/java",
                                      "-cp",
                                      serverHome + "/lib/ant-launcher.jar",
                                      "-Dserver.home=" + serverHome,
