@@ -109,11 +109,6 @@
   </metrics>
 
   <metrics name="WebSphere Admin 6.0" include="jvm">
-    <metric name="Availability"
-            template="${domain}:Module=adminModule:${alias}"
-            category="AVAILABILITY"
-            indicator="true"/>
-
     <metric name="Number of JVMs"
             alias="NumJVMs"
             template="${domain}:Module=adminModule:${alias}"
@@ -483,11 +478,10 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
               value="properties/version/WAS.product"/>
 
     <plugin type="measurement"
-            class="WebsphereAdminMeasurementPlugin"/>
+            class="WebsphereJmxMeasurementPlugin"/>
 
     <plugin type="collector"
             class="WebsphereServerCollector"/>
-        <!--class="WebsphereAdminServerCollector"/-->
 
     <plugin type="control"
             class="WebsphereControlPlugin"/>

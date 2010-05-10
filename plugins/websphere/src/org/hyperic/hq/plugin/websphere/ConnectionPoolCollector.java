@@ -35,8 +35,13 @@ import javax.management.j2ee.statistics.Stats;
 import org.hyperic.hq.product.PluginException;
 
 import com.ibm.websphere.management.AdminClient;
+import java.util.Arrays;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class ConnectionPoolCollector extends WebsphereCollector {
+
+    private static final Log log = LogFactory.getLog(ConnectionPoolCollector.class.getName());
 
     private static final String[][] ATTRS = {
         //basic (default) PMI level
@@ -92,35 +97,25 @@ public class ConnectionPoolCollector extends WebsphereCollector {
     }
 
     protected void init(AdminClient mServer) throws PluginException {
-        super.init(mServer);
-
-        this.name =
-            newObjectNamePattern("type=JDBCProvider," +
-                                 "j2eeType=JDBCResource," +
-                                 "name=" + getModuleName() + "," +
-                                 getProcessAttributes());
-
-        this.name = resolve(mServer, this.name);
+        ObjectName name = newObjectNamePattern("type=JDBCProvider,"
+                + "j2eeType=JDBCResource,"
+                + "name=" + getModuleName() + ","
+                + getProcessAttributes());
+        setObjectName(resolve(mServer, name));
     }
 
-    public void collect() {
-        AdminClient mServer = getMBeanServer();
-        if (mServer == null) {
-            return;
+    public void collect(AdminClient mServer) throws PluginException {
+        JDBCStats stats = (JDBCStats) getStats(mServer, getObjectName());
+
+        if (stats == null) {
+            throw new PluginException("Stats not found");
         }
-        try {
-            JDBCStats stats = (JDBCStats)getStats(mServer, this.name);
-            if (stats == null) {
-                return;
-            }
-            setAvailability(true);
-            Stats[] pools = stats.getConnectionPools();
-            for (int i=0; i<pools.length; i++) {
-                collectStatCount(pools[i], ATTRS);
-            }
-        } catch (PluginException e) {
-            setAvailability(false);
-            setMessage(e.getMessage());
+
+        Stats[] pools = stats.getConnectionPools();
+        if (pools.length != 1) {
+            throw new PluginException("Pool not found (" + pools.length + ")");
         }
+        collectStatCount(pools[0], ATTRS);
+        setAvailability(true);
     }
 }

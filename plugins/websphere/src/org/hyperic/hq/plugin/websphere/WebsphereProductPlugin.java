@@ -444,7 +444,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
         if (testIBMJDK) {
             VALID_JVM = System.getProperty("java.vm.vendor").toUpperCase().indexOf("IBM") != -1;
             if (!VALID_JVM) {
-                log.error("The WebSphere plugin needs a IBM JVM !!! "
+                log.debug("The WebSphere plugin needs a IBM JVM !!! "
                         + "(agent jvm=" + System.getProperty("java.vm.vendor") + ")");
             }
         }

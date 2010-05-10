@@ -29,11 +29,11 @@ import org.hyperic.hq.product.PluginException;
 
 import com.ibm.websphere.management.AdminClient;
 
+import javax.management.ObjectName;
+
 public class EJBCollector extends WebsphereCollector {
 
     protected void init(AdminClient mServer) throws PluginException {
-        super.init(mServer);
-
         String module = getModuleName();
         int ix = module.indexOf('#');
         if (ix == -1) {
@@ -42,29 +42,20 @@ public class EJBCollector extends WebsphereCollector {
         String app = module.substring(0, ix);
         String ejb = module.substring(ix+1);
 
-        this.name =
-            newObjectNamePattern("j2eeType=EJBModule," +
-                                 "J2EEApplication=" + app + "," +
-                                 "name=" + ejb + "," +
-                                 getProcessAttributes());
+        ObjectName name = newObjectNamePattern("j2eeType=EJBModule,"
+                + "J2EEApplication=" + app + ","
+                + "name=" + ejb + ","
+                +        getProcessAttributes());
 
-        this.name = resolve(mServer, this.name);
+        setObjectName(resolve(mServer, name));
     }
 
-    public void collect() {
-        try {
-            Object ejbs =
-                    getAttribute(getMBeanServer(), this.name, "ejbs");
-
-            if (ejbs == null) {
-                setAvailability(false);
-            }
-            else {
-                setAvailability(true);
-            }
-        } catch (PluginException e) {
+    public void collect(AdminClient mServer) throws PluginException {
+        Object ejbs = getAttribute(mServer, getObjectName(), "ejbs");
+        if (ejbs == null) {
             setAvailability(false);
-            setMessage(e.getMessage());
+        } else {
+            setAvailability(true);
         }
     }
 }
