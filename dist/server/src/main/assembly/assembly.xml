@@ -28,20 +28,32 @@
 			<fileMode>0755</fileMode>
 			<directoryMode>0755</directoryMode>
 		</fileSet>
+		<fileSet>
+			<directory>${project.build.directory}/generated-resources/bootstrap-${project.version}</directory>
+			<outputDirectory>/</outputDirectory>
+			<excludes>
+				<exclude>**/*.sh</exclude>
+				<exclude>**/*.pl</exclude>
+				<exclude>**/.gitignore</exclude>
+			</excludes>
+			<filtered>true</filtered>
+			<fileMode>0644</fileMode>
+			<directoryMode>0755</directoryMode>
+		</fileSet>
+		<fileSet>
+			<directory>${project.build.directory}/generated-resources/bootstrap-${project.version}</directory>
+			<outputDirectory>/</outputDirectory>
+			<includes>
+				<include>**/*.sh</include>
+				<include>**/*.pl</include>
+			</includes>
+			<filtered>true</filtered>
+			<fileMode>0755</fileMode>
+			<directoryMode>0755</directoryMode>
+		</fileSet>
 	</fileSets>
 
 	<dependencySets>
-		<dependencySet>
-			<useProjectArtifact>false</useProjectArtifact>
-			<useTransitiveDependencies>false</useTransitiveDependencies>
-			<unpack>true</unpack>
-			<includes>
-				<include>org.hyperic.hq:hq-bootstrap</include>
-			</includes>
-			<fileMode>0644</fileMode>
-			<directoryMode>0755</directoryMode>
-		</dependencySet>
-
 		<dependencySet>
 			<useProjectArtifact>false</useProjectArtifact>
 			<useTransitiveDependencies>false</useTransitiveDependencies>
