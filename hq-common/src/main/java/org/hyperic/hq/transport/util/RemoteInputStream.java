@@ -47,6 +47,8 @@ import org.jboss.remoting.transporter.TransporterClient;
 public class RemoteInputStream 
     extends InputStream implements Externalizable {
     
+    private static final long serialVersionUID = -2359924019799176338L;
+
     private InvokerLocator _sourceInvokerLocator;
     
     private String _streamId;
