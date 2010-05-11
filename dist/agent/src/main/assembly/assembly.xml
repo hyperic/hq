@@ -38,6 +38,7 @@
 				<exclude>org.hyperic.hq.plugin:*</exclude>
 				<exclude>mysql:mysql-connector-java</exclude>
 				<exclude>postgresql:postgresql</exclude>
+				<exclude>mx4j:*</exclude>
 				<exclude>org.hyperic.hq.pdk:modules</exclude>
 				<exclude>org.hyperic:sigar</exclude>
 			</excludes>
@@ -101,6 +102,16 @@
 				<includes>
 					<include>mysql:mysql-connector-java</include>
 					<include>postgresql:postgresql</include>
+				</includes>
+		</dependencySet>
+		<dependencySet>
+				<useProjectArtifact>false</useProjectArtifact>
+				<useTransitiveDependencies>true</useTransitiveDependencies>
+				<outputDirectory>pdk/lib/mx4j</outputDirectory>
+				<fileMode>0644</fileMode>
+				<directoryMode>0755</directoryMode>
+				<includes>
+					<include>mx4j:*</include>
 				</includes>
 		</dependencySet>
 		<dependencySet>

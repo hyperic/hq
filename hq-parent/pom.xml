@@ -51,6 +51,7 @@
 		<junit.version>4.6</junit.version>
 		<log4j.version>1.2.14</log4j.version>
 		<mail.version>1.4</mail.version>
+		<mx4j.version>3.0.1</mx4j.version>
 		<mysql.connector.version>5.1.10</mysql.connector.version>
 		<oro.version>2.0.8</oro.version>
 		<postgresql.agent.driver.version>7.4.3</postgresql.agent.driver.version>
@@ -473,6 +474,26 @@
   				<groupId>freemarker</groupId>
   				<artifactId>freemarker</artifactId>
   				<version>${freemarker.version}</version>
+			</dependency>
+			<dependency>
+    			<groupId>mx4j</groupId>
+    			<artifactId>mx4j</artifactId>
+    			<version>${mx4j.version}</version>
+			</dependency>
+			<dependency>
+    			<groupId>mx4j</groupId>
+    			<artifactId>mx4j-jmx</artifactId>
+    			<version>${mx4j.version}</version>
+			</dependency>
+			<dependency>
+    			<groupId>mx4j</groupId>
+    			<artifactId>mx4j-remote</artifactId>
+    			<version>${mx4j.version}</version>
+			</dependency>
+			<dependency>
+    			<groupId>mx4j</groupId>
+    			<artifactId>mx4j-tools</artifactId>
+    			<version>${mx4j.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

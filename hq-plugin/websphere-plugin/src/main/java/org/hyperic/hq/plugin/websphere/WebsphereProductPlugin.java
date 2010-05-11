@@ -431,7 +431,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
             }
         }
 
-        path.add("pdk/lib/mx4j/hq-jmx.jar");
+     
         String[] cp = new String[path.size()];
         path.toArray(cp);
         return cp;
@@ -464,7 +464,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
         }
 
         if (installDir == null) {
-            return new String[] {"pdk/lib/mx4j/hq-jmx.jar"};
+            return new String[] {};
         }
 
         //required for authentication
@@ -535,7 +535,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
             if (useExt) {
                 try {
                     setExtDirs(installDir);
-                    return new String[] {"pdk/lib/mx4j/hq-jmx.jar"};
+                    return new String[] {};
                 } catch (Exception e) {
                     log.error("setExtDirs: " + e, e);
                 }
@@ -606,8 +606,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
             installDir + "/java/jre/lib/ibmcertpathprovider.jar",
             installDir + "/java/jre/lib/ext/ibmjceprovider.jar",
             installDir + "/java/jre/lib/ext/ibmjcefips.jar",
-            installDir + "/etc/tmx4jTransform.jar",
-            "pdk/lib/mx4j/hq-jmx.jar"
+            installDir + "/etc/tmx4jTransform.jar"
         };
     }
 
