@@ -574,7 +574,7 @@ public class PlatformManagerImpl implements PlatformManager {
         PlatformType platType = platformTypeDAO.findByName(aipValue.getPlatformTypeName());
 
         if (platType == null) {
-            throw new SystemException("Unable to find PlatformType [" + aipValue.getName() + "]");
+            throw new SystemException("Unable to find PlatformType [" + aipValue.getPlatformTypeName() + "]");
         }
 
         Platform checkP = platformDAO.findByName(aipValue.getName());
