@@ -1,6 +1,7 @@
 package org.hyperic.hq.transport.unidirectional;
 
 import java.util.List;
+import java.util.Map;
 
 import org.hyperic.hq.measurement.MeasurementConstants;
 
@@ -25,7 +26,16 @@ public interface PollerService {
      * @return The invocation requests.
      */
     List<InvocationRequest> retrieveRequests(String agentToken);
-    
+
+    /**
+     * Remove aged out requests
+     * 
+     * @param now time the method uses as a marker to age out old requests
+     * @return {@link Map} of {@link String} of agentToken to {@link InvocationRequest}
+     * representing the requests which were removed from the queue.
+     */
+    Map removeAgedOutRequests(long now);
+
     /**
      * Removes the old agent messages
      * @param verifier
