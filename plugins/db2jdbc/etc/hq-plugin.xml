@@ -5,10 +5,10 @@
   Kit or the Hyperic Client Development Kit - this is merely considered
   normal use of the program, and does *not* fall under the heading of
   "derived work".
-  
+
   Copyright (C) [2004-2010], Hyperic, Inc.
   This file is part of HQ.
-  
+
   HQ is free software; you can redistribute it and/or modify
   it under the terms version 2 of the GNU General Public License as
   published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
   even the implied warranty of MERCHANTABILITY or FITNESS FOR A
   PARTICULAR PURPOSE. See the GNU General Public License for more
   details.
-  
+
   You should have received a copy of the GNU General Public License
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -25,7 +25,7 @@
 
 <plugin name="db2jdbc" class="DB2JDBCProductPlugin">
     <property name="template-config"
-            value="database=%db2.jdbc.database%,jdbcUser=%db2.jdbc.user%,jdbcPassword=%db2.jdbc.password%,jdbcUrl=jdbc:db2://%db2.jdbc.hostname%:%db2.jdbc.port%/%db2.jdbc.database%"/>
+              value="database=%db2.jdbc.database%,jdbcUser=%db2.jdbc.user%,jdbcPassword=%db2.jdbc.password%,jdbcUrl=jdbc:db2://%db2.jdbc.hostname%:%db2.jdbc.port%/%db2.jdbc.database%"/>
 
     <property name="server" value="func=SNAP_GET_DB_V91"/>
     <metrics name="DB2 JDBC 9.x">
@@ -63,7 +63,7 @@
         <metric name="Direct Reads Ratio" alias="DIRECT_READS_RATIO" template="db2:${server}:${alias}" category="UTILIZATION" indicator="true" units="none" collectionType="trendsup"/>
         <metric name="Direct Read Time" alias="DIRECT_READ_TIME" template="db2:${server}:${alias}" category="UTILIZATION" indicator="true" units="ms" collectionType="dynamic"/>
         <metric name="Direct Read Time Average" alias="DIRECT_READ_TIME_AVE" template="db2:${server}:${alias}" category="UTILIZATION" indicator="true" units="ms" collectionType="dynamic"/>
-        
+
         <metric name="Direct Writes" alias="DIRECT_WRITES" template="db2:${server}:${alias}" category="UTILIZATION" units="none" collectionType="trendsup"/>
         <metric name="Direct Writes Requests" alias="DIRECT_WRITE_REQS" template="db2:${server}:${alias}" category="UTILIZATION" units="none" collectionType="trendsup"/>
         <metric name="Direct Writes Ratio" alias="DIRECT_WRITE_RATIO" template="db2:${server}:${alias}" category="UTILIZATION" indicator="true" units="none" collectionType="dynamic"/>
@@ -111,12 +111,12 @@
     <property name="table_size" value="sql=select * from SYSIBMADM.ADMINTABINFO where TABNAME='%table%' and TABSCHEMA='%schema%'"/>
     <metrics name="DB2 JDBC 9.x Table">
         <metric name="Availability"
-            alias="Availability"
-            template="db2:${table_size}:availability"
-            category="AVAILABILITY"
-            indicator="true"
-            units="percentage"
-            collectionType="dynamic"/>
+                alias="Availability"
+                template="db2:${table_size}:availability"
+                category="AVAILABILITY"
+                indicator="true"
+                units="percentage"
+                collectionType="dynamic"/>
         <metric name="Total" alias="TOTAL_SIZE" template="db2:${table_size}:${alias}" category="UTILIZATION" indicator="true" units="KB"/>
         <metric name="Data" alias="DATA_OBJECT_P_SIZE" template="db2:${table_size}:${alias}" category="UTILIZATION" indicator="true" units="KB"/>
         <metric name="Dictionary" alias="DICTIONARY_SIZE" template="db2:${table_size}:${alias}" category="UTILIZATION" indicator="true" units="B"/>
@@ -142,12 +142,12 @@
     <property name="tablespace_cont" value="func=SNAP_GET_CONTAINER_V91,where=TBSP_NAME='%tablespace%'"/>
     <metrics name="DB2 JDBC 9.x Table Space">
         <metric name="Availability"
-            alias="Availability"
-            template="db2:${tablespace}:availability"
-            category="AVAILABILITY"
-            indicator="true"
-            units="percentage"
-            collectionType="dynamic"/>
+                alias="Availability"
+                template="db2:${tablespace}:availability"
+                category="AVAILABILITY"
+                indicator="true"
+                units="percentage"
+                collectionType="dynamic"/>
         <metric name="Utilization" alias="TBSP_UTILIZATION_PERCENT" template="db2:${tablespace}:${alias}" category="UTILIZATION" indicator="true" units="percentage"/>
         <metric name="Page" alias="TBSP_PAGE_SIZE" template="db2:${tablespace}:${alias}" category="UTILIZATION" indicator="true" units="KB"/>
         <metric name="Prefetch" alias="TBSP_PREFETCH_SIZE" template="db2:${tablespace}:${alias}" category="UTILIZATION" indicator="true" units="KB"/>
@@ -184,12 +184,12 @@
     <property name="memorypool" value="sql=select * from SYSIBMADM.SNAPDB_MEMORY_POOL where POOL_ID='%pool_id%' and POOL_SECONDARY_ID='%sec_pool_id%'"/>
     <metrics name="DB2 JDBC 9.x Memory Pool">
         <metric name="Availability"
-            alias="Availability"
-            template="db2:${memorypool}:availability"
-            category="AVAILABILITY"
-            indicator="true"
-            units="percentage"
-            collectionType="dynamic"/>
+                alias="Availability"
+                template="db2:${memorypool}:availability"
+                category="AVAILABILITY"
+                indicator="true"
+                units="percentage"
+                collectionType="dynamic"/>
         <metric name="Configured Size" alias="POOL_CONFIG_SIZE" template="db2:${memorypool}:${alias}" category="UTILIZATION"  units="b"/>
         <metric name="Current Size" alias="POOL_CUR_SIZE" template="db2:${memorypool}:${alias}" category="UTILIZATION" indicator="true" units="b"/>
         <metric name="Used Size" alias="POOL_CUR_SIZE_USED" template="db2:${memorypool}:${alias}" category="UTILIZATION" indicator="true" units="percentage"/>
@@ -240,12 +240,12 @@
     <property name="dbmanager" value="func=SNAP_GET_DBM"/>
     <metrics name="DB2 JDBC Database Manager 9.x">
         <metric name="Availability"
-            alias="Availability"
-            template="db2:${dbmanager}:availability"
-            category="AVAILABILITY"
-            indicator="true"
-            units="percentage"
-            collectionType="dynamic"/>
+                alias="Availability"
+                template="db2:${dbmanager}:availability"
+                category="AVAILABILITY"
+                indicator="true"
+                units="percentage"
+                collectionType="dynamic"/>
         <metric name="Total Sort Heap Allocated" alias="SORT_HEAP_ALLOCATED" template="db2:${dbmanager}:${alias}" category="UTILIZATION" units="none"/>
         <metric name="Post Threshold Sorts" alias="POST_THRESHOLD_SORTS" template="db2:${dbmanager}:${alias}" category="UTILIZATION" units="none" collectionType="trendsup"/>
         <metric name="Piped Sorts Requested" alias="PIPED_SORTS_REQUESTED" template="db2:${dbmanager}:${alias}" category="UTILIZATION" units="none" collectionType="trendsup"/>
@@ -289,4 +289,13 @@
             <option name="db2.jdbc.password" description="JDBC Password" type="secret"/>
         </config>
     </server>
+
+    <help name="DB2 JDBC 9.x">
+        <![CDATA[
+        <b>Configure HQ for monitoring DB2</b></br>
+The JDBC User (db2.jdbc.user) need SYSMON authorization<br>
+The HQ Agent must be run using DB2 environment
+  ]]>
+    </help>
+    <help name="DB2 JDBC Database Manager 9.x" include="DB2 JDBC 9.x"/>
 </plugin>
