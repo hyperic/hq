@@ -23,6 +23,8 @@ package org.hyperic.hq.appdef.server.session;
 
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AgentManager;
@@ -55,6 +57,7 @@ public class UpgradeAgentZeventListener implements ZeventListener<UpgradeAgentZe
         this.zEventManager = zEventManager;
     }
     
+    @PostConstruct
     public void subscribe() {
         zEventManager.addBufferedListener(UpgradeAgentZevent.class, this);
     }
