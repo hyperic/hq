@@ -443,16 +443,18 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
     /**
      * @ejb:interface-method
      */
-    public void removeResource(AuthzSubject subject, Resource r)
-        throws VetoException
-    {
-        ResourceDeleteCallback cb =
-            AuthzStartupListener.getResourceDeleteCallback();
+    public void removeResource(AuthzSubject subject, Resource r) throws VetoException {
+        if (r == null) {
+            return;
+        }
+        ResourceDeleteCallback cb = AuthzStartupListener.getResourceDeleteCallback();
         cb.preResourceDelete(r);
-
         final long now = System.currentTimeMillis();
         ResourceAudit.deleteResource(r, subject, now, now);        
-        r.getGroupBag().clear();
+        Collection groupBag = r.getGroupBag();
+        if (groupBag != null) {
+            groupBag.clear();
+        }
         getResourceDAO().remove(r);
     }
     
