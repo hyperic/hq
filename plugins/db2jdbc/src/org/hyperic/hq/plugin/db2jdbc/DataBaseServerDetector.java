@@ -150,9 +150,16 @@ public class DataBaseServerDetector extends DefaultServerDetector {
             String err = inputStreamAsString(cmd.getErrorStream());
             cmd.waitFor();
 
-            getLog().debug("[createDataBases] sal=" + sal);
-            if (sal.length() == 0) {
-                getLog().debug("[createDataBases] (" + cmd.exitValue() + ") err=" + err);
+            if (getLog().isDebugEnabled()) {
+                if (cmd.exitValue() != 0) {
+                    getLog().error("[createDataBases] exit=" + cmd.exitValue());
+                    getLog().error("[createDataBases] sal=" + sal);
+                } else {
+                    getLog().debug("[createDataBases] sal=" + sal);
+                }
+                if (sal.length() == 0) {
+                    getLog().debug("[createDataBases] (" + cmd.exitValue() + ") err=" + err);
+                }
             }
 
             Matcher m = regExpDataBases.matcher(sal);
