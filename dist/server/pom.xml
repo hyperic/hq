@@ -49,6 +49,19 @@
 							<excludeTransitive>true</excludeTransitive>
 						</configuration>
 					</execution>
+					<execution>
+						<id>unpack-tomcat</id>
+						<goals>
+							<goal>unpack-dependencies</goal>
+						</goals>
+						<phase>generate-resources</phase>
+						<configuration>
+							<outputDirectory>${project.build.directory}/generated-resources</outputDirectory>
+							<includeGroupIds>org.apache.tomcat</includeGroupIds>
+							<includeTypes>zip</includeTypes>
+							<excludeTransitive>true</excludeTransitive>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>	
 		</plugins>
