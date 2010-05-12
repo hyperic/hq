@@ -213,7 +213,8 @@ public class ResourceOperationsHelper {
         }
         
         if (resourceTypeCode < 0) {
-            throw new IllegalArgumentException("resourceType must be a platform, server, service or group resource type.");
+            throw new IllegalArgumentException("resourceType must be a platform, server, service or group resource type," +
+                                               " illegal type was " + resourceTypeId);
         }
         
         return getOperationName(resourceTypeCode, operationCode);
