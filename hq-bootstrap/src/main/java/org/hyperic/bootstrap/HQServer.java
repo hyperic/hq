@@ -176,7 +176,7 @@ public class HQServer {
         return processManager.executeProcess(
             new String[] { "java",
                           "-cp",
-                          serverHome + "/lib/ant-launcher.jar",
+                          serverHome + "/lib/ant-launcher-1.7.1.jar",
                           "-Dserver.home=" + serverHome,
                           "-Dant.home=" + serverHome,
                           "-Dtomcat.home="  + engineHome + "/hq-server",
