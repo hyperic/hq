@@ -41,6 +41,17 @@
 			<fileMode>0644</fileMode>
 			<directoryMode>0755</directoryMode>
 		</dependencySet>
+		<dependencySet>
+			<useProjectArtifact>false</useProjectArtifact>
+			<useTransitiveDependencies>false</useTransitiveDependencies>
+			<outputDirectory>/lib</outputDirectory>
+			<unpack>true</unpack>
+			<fileMode>0644</fileMode>
+			<directoryMode>0755</directoryMode>
+			<includes>
+				<include>org.hyperic:sigar</include>
+			</includes>
+		</dependencySet>
 	</dependencySets>
 
 </assembly>

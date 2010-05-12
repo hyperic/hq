@@ -37,7 +37,13 @@
 			<version>${project.version}</version>
 			<type>zip</type>
 		</dependency>
-		
+		<dependency>
+			<groupId>org.hyperic</groupId>
+			<artifactId>sigar</artifactId>
+			<version>${sigar.version}</version>
+			<type>zip</type>
+			<classifier>libs</classifier>
+		</dependency>
 	</dependencies>
 
 	
