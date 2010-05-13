@@ -220,7 +220,7 @@ __ll__
 	
 	<target name="unpack-agent">
 	   <echo>^^^INFO:
-		    Unpacking ${agent.bundle} to: ${hyperic-hq-agent.installdir}/hyperic-hq-agent-${version}...
+		    Unpacking ${agent.bundle} to: ${hyperic-hq-agent.installdir}...
 	   </echo>
 	   <untar src="${agent.bundle}"
 	           dest="${hyperic-hq-agent.installdir}"
@@ -233,7 +233,7 @@ __ll__
 	
 	<target name="unzip-agent">
 		 <echo>^^^INFO:
-				    Unpacking ${agent.bundle} to: ${hyperic-hq-agent.installdir}/hyperic-hq-agent-${version}...
+				    Unpacking ${agent.bundle} to: ${hyperic-hq-agent.installdir}...
 			   </echo>
 		  <unzip src="${agent.bundle}"
 			           dest="${hyperic-hq-agent.installdir}"/>
@@ -245,13 +245,17 @@ __ll__
 	
   <target name="post-agent-unpack">
 	   <echo>^^^INFO: Setting permissions on agent binaries...</echo>
-	    <antcall target="chmod-exec">
-			<param name="chmod.dir" value="${hyperic-hq-agent.installdir}/hyperic-hq-agent-${version}"/>
-	    </antcall>
+  		<foreach param="chmod.dir" target="chmod-exec">
+  	  	  	<path>
+  	  	  		<dirset dir="${hyperic-hq-agent.installdir}" includes="hyperic-hq*-agent-${version}"/>
+  	  	  	</path>
+  	  	</foreach>
 		<echo>^^^INFO: Fixing line endings on text files...</echo>
-		 <antcall target="fix-text-files">
-		     <param name="crlf.dir" value="${hyperic-hq-agent.installdir}/hyperic-hq-agent-${version}"/>
-		 </antcall>
+  		<foreach param="crlf.dir" target="fix-text-files">
+  	  	 	<path>
+  	  	  	  	<dirset dir="${hyperic-hq-agent.installdir}" includes="hyperic-hq*-agent-${version}"/>
+  	  	  	 </path>
+  	  	</foreach>
   </target>
 
   <target name="agent"
@@ -265,7 +269,7 @@ __ll__
   		<param name="hyperic-hq-agent.installdir" value="${hyperic-hq-agent.installdir}"/>
   		<param name="version" value="${version}"/>
   		<path>
-  			<fileset dir="${base}" includes="hyperic-hq-agent-${version}-*.tar.gz"/>
+  			<fileset dir="${base}" includes="hyperic-hq*-agent-${version}-*.tar.gz"/>
   		</path>
   	</foreach>
   	
@@ -273,12 +277,12 @@ __ll__
   	  		<param name="hyperic-hq-agent.installdir" value="${hyperic-hq-agent.installdir}"/>
   	  		<param name="version" value="${version}"/>
   	  		<path>
-  	  			<fileset dir="${base}" includes="hyperic-hq-agent-${version}-*.zip"/>
+  	  			<fileset dir="${base}" includes="hyperic-hq*-agent-${version}-*.zip"/>
   	  		</path>
   	 </foreach>
   	
     <echo>^^^COMPLETION:
-      Agent successfully installed to: ${hyperic-hq-agent.installdir}/hyperic-hq-agent-${version}
+      Agent successfully installed to: ${hyperic-hq-agent.installdir}
     </echo>
     <concatWithPrefix failOnMissing="false" file="${setup}.agent-summary.txt" prefix="^^^INFO:"/>
   </target>
@@ -556,8 +560,6 @@ ${errMsg}
     <!-- Do DB-specific stuff -->
     <echo>^^^INFO: Setting up server database...</echo>
     <ant antfile="setup-db-${server.database}.xml" target="setup"/>
-    	
-    <ant antfile="setup-db-common.xml" target="set-multicast-props"/>	
 
     <antcall target="install-server-jre">
       <param name="destination" value="${server.product.dir}" />

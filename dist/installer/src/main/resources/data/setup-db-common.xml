@@ -122,6 +122,7 @@
       update EAM_CONFIG_PROPS SET PROPVALUE='${version}'
       where PROPKEY='CAM_SERVER_VERSION';
     </sql>
+  	<antcall target="set-multicast-props"/>
   </target>
 
   <target name="external-db-dependencies">

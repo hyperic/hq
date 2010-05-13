@@ -36,7 +36,7 @@ public class AgentConfig extends BaseConfig {
     public AgentConfig () {
         super("hyperic-hq-agent");
     }
-
+    
     public String getName () { return PRODUCT + " agent"; }
 
     protected ConfigSchema getInstallSchema (ConfigResponse previous,
@@ -58,8 +58,13 @@ public class AgentConfig extends BaseConfig {
     public String getCompletionText (ConfigResponse config) {
         StringBuffer s = new StringBuffer();
         String sp = File.separator;
-        String startup = getProductInstallDir(config);
-        startup += "bin" + sp + PRODUCT.toLowerCase() + "-agent" + getScriptExtension();
+        String installDir  = getInstallDir(config);
+        String startup = installDir + "hyperic-hq-agent-" + getProjectProperty("version");
+        if(!(new File(startup).exists())) {
+        	startup = installDir + "hyperic-hqee-agent-" + getProjectProperty("version");
+        }
+        
+        startup += File.separator + "bin" + sp + PRODUCT.toLowerCase() + "-agent" + getScriptExtension();
         char nl = '\n';
         s.append("__ll__")
             .append(nl)
