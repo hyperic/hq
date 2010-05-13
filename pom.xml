@@ -37,6 +37,21 @@
 			</plugin>
 		</plugins>
 	</build>
+	
+	<profiles>
+		<profile>
+			<id>integration-test</id>
+			<activation>
+				<property>
+					<name>ci</name>
+					<value>true</value>
+				</property>
+			</activation>
+			<modules>
+				<module>hq-integration-tests</module>
+			</modules>
+		</profile>
+	</profiles>
 
 	<distributionManagement>
 		<repository>

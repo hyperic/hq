@@ -21,6 +21,7 @@ public class IntegrationTestContextLoader
         try {
         	//Find the sigar libs on the test classpath
 			File sigarBin = new File(context.getResource("/libsigar-sparc64-solaris.so").getFile().getParent());
+			log.info("Setting sigar path to : " + sigarBin.getAbsolutePath());
 			System.setProperty("org.hyperic.sigar.path",sigarBin.getAbsolutePath());
 		} catch (IOException e) {
 			log.error("Unable to initiailize sigar path",e);
