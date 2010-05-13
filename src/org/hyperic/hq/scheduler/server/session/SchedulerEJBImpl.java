@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2010], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -69,6 +69,7 @@ import org.quartz.spi.JobFactory;
  *      view-type       = "local"
  *      type            = "Stateless"
  * @ejb:util generate = "physical"
+ * @ejb:interface local-extends="org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean, javax.ejb.EJBLocalObject"
  * @ejb:transaction type = "Required"
  */
 public class SchedulerEJBImpl
@@ -92,14 +93,20 @@ public class SchedulerEJBImpl
    private SchedulerServiceMBean getSchedulerService()
        throws SchedulerException
    {
-      try {
-          return (SchedulerServiceMBean)
+       try {
+           SchedulerServiceMBean mbean = (SchedulerServiceMBean)
               MBeanProxy.get(SchedulerServiceMBean.class,
                              SCHEDULER_MBEAN_NAME,
                              MBeanServerLocator.locateJBoss());
+           
+           // make sure proxy is valid by making a simple call
+           mbean.isShutdown();
+           
+           return mbean;
+           
       } catch (Exception e) {
          throw new SchedulerException("Failed to get a proxy to the " +
-                                      "scheduler service MBean", e);
+                                      "scheduler service MBean: " + e.getMessage(), e);
       }
    }
 
