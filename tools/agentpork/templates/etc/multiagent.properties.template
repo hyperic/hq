@@ -1,0 +1,40 @@
+# Adjust following variables based on your config
+export AGENT_BUILD_VERSION=5.0.0
+export AGENT_BUILD_NUMBER=1245
+export CLONE_SERVERIP=10.16.17.38
+export CLONE_SERVER_PORT=7080
+export CLONE_LISTEN_STARTPORT=4000
+export NUM_CLONES=@NUM_CLONES@
+export CLONES_PER_GROUP=@CLONES_PER_GROUP@
+export CLONE_JAVA_FLAGS="-XX:MaxPermSize=192m -Xmx1024m -Xms1024m"
+export HQ_USER=hqadmin
+export HQ_PASSWORD=hqadmin
+
+# Do not modify anything below
+export AGENT_BASE_DIR=@BASE_DIR@/agent_builds
+export AGENT_HOME=$AGENT_BASE_DIR/hyperic-hq-agent-$AGENT_BUILD_VERSION-EE
+export AGENT_BUNDLE_HOME=$AGENT_HOME/bundles/agent-$AGENT_BUILD_VERSION-EE-$AGENT_BUILD_NUMBER
+export CLONE_SECURE=no
+export PDK_LIB=$AGENT_BUNDLE_HOME/pdk/lib
+CLONE_CP=$AGENT_BUNDLE_HOME/lib/hq-agent-core.jar
+CLONE_CP=$AGENT_BUNDLE_HOME/lib/hqee-agent-core.jar:$CLONE_CP
+CLONE_CP=$AGENT_BUNDLE_HOME/lib/lather.jar:$CLONE_CP
+CLONE_CP=$CLONE_CP:$PDK_LIB/ant.jar
+CLONE_CP=$CLONE_CP:$PDK_LIB/commons-httpclient-3.1.jar
+CLONE_CP=$CLONE_CP:$PDK_LIB/hq-product.jar
+CLONE_CP=$CLONE_CP:$PDK_LIB/jdom-1.1.jar
+CLONE_CP=$CLONE_CP:$PDK_LIB/sigar.jar
+CLONE_CP=$CLONE_CP:$PDK_LIB/commons-codec-1.3.jar
+CLONE_CP=$CLONE_CP:$PDK_LIB/commons-logging-1.0.4.jar
+CLONE_CP=$CLONE_CP:$PDK_LIB/hq-util.jar
+CLONE_CP=$CLONE_CP:$PDK_LIB/hq-common.jar
+CLONE_CP=$CLONE_CP:$PDK_LIB/hq-pdk-agent.jar
+CLONE_CP=$CLONE_CP:$PDK_LIB/hq-pdk-shared.jar
+CLONE_CP=$CLONE_CP:$PDK_LIB/hqee-common.jar
+CLONE_CP=$CLONE_CP:$PDK_LIB/hqee-pdk-shared.jar
+CLONE_CP=$CLONE_CP:$PDK_LIB/log4j-1.2.14.jar
+CLONE_CP=$CLONE_CP:$PDK_LIB/xstream-1.3.1.jar
+CLONE_CP=$AGENT_HOME/wrapper/lib/wrapper.jar:$CLONE_CP
+CLONE_CP=$AGENT_BUNDLE_HOME/lib:$CLONE_CP
+export CLONE_CP=$CLONE_CP
+export CLONE_FQDN_PREFIX=$HOSTNAME-clone-grp@GRP_ID@-
