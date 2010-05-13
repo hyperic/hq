@@ -259,7 +259,7 @@ public abstract class SessionBase {
 
                 break;
             default:
-                throw new InvalidAppdefTypeException("Unknown type: " + resourceType);
+                throw new PermissionException("Unknown type: " + resourceType);
         }
         
         // ...check based on resource type to see if we have the requested permission...

@@ -208,6 +208,9 @@ public class ResourceOperationsHelper {
             case AppdefEntityConstants.APPDEF_TYPE_GROUP:
                 resourceTypeCode = GROUP;
                 break;
+            case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
+                resourceTypeCode = APPLICATION;
+                break;
             default:
                 resourceTypeCode = -1;
         }
