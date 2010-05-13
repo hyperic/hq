@@ -222,6 +222,12 @@
 			<version>${hqapi.version}</version>
 			<type>zip</type>
 			<scope>provided</scope>
+			<exclusions>
+			    <exclusion>
+			      <artifactId>wadl-core</artifactId>
+			      <groupId>org.jvnet.ws.wadl</groupId>
+			    </exclusion>
+			</exclusions>
 		</dependency>
 		<!-- Plugins -->
 		<dependency>
