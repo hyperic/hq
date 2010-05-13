@@ -25,8 +25,8 @@
 
 package org.hyperic.hq.ha.server.session;
 
-import java.util.Date;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -55,7 +55,17 @@ public class HAServiceImpl implements HAService {
     private ScheduledFuture<?> backfillTask;
     private ScheduledFuture<?> notifyAgentsTask;
     private RegisteredTriggerManager registeredTriggerManager;
-   
+    private final AtomicBoolean triggersHaveInitialized = new AtomicBoolean(false);
+    private final Thread triggerInitThread = new Thread() {
+        public void run() {
+            final long start = System.currentTimeMillis();
+            registeredTriggerManager.initializeTriggers();
+            final long finish = System.currentTimeMillis();
+            triggersHaveInitialized.set(true);
+            float elapsed = (finish-start)/1000/60;
+            log.info("Trigger initialization completed in " + elapsed + " minutes");
+        }
+    };
 
     @Autowired
     public HAServiceImpl(TaskScheduler scheduler,
@@ -72,8 +82,9 @@ public class HAServiceImpl implements HAService {
      * These services can only run on a master node when HA is used, so they
      * have to be started programmatically once we know if HA is enabled
      */
+    @Override
     public void start() {
-        initializeTriggers();
+        triggerInitThread.start();
         // If this node was designated as a slave b/c of connectivity loss (not
         // server crash), then we don't want to schedule another round of tasks
         // once it becomes master again
@@ -101,24 +112,18 @@ public class HAServiceImpl implements HAService {
         }
     }
     
-    private void initializeTriggers() {
-        //Asynchronously initialize triggers once (as this may be an expensive operation)
-        MethodInvokingRunnable initTriggers = new MethodInvokingRunnable();
-        initTriggers.setTargetObject(registeredTriggerManager);
-        initTriggers.setTargetMethod("initializeTriggers");
-        try {
-            initTriggers.prepare();
-            scheduler.schedule(initTriggers, new Date(System.currentTimeMillis() + 1000));
-        } catch (Exception e) {
-                log.error("Unable to intialize triggers", e);
-         }
+    @Override
+    public boolean alertTriggersHaveInitialized() {
+        return triggersHaveInitialized.get();
     }
 
+    @Override
     public boolean isMasterNode() {
         // HA not implemented in .org
         return true;
     }
 
+    @Override
     public void stop() {
         if (backfillTask != null) {
             backfillTask.cancel(false);

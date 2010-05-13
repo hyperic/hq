@@ -12,4 +12,6 @@ public interface HAService {
     void start();
     
     void stop();
+
+    boolean alertTriggersHaveInitialized();
 }
