@@ -9,6 +9,12 @@
 	<packaging>pom</packaging>
 	<version>4.5.0.BUILD-SNAPSHOT</version>
 	<name>Hyperic HQ - Build</name>
+	
+	<parent>
+		<groupId>org.hyperic.hq</groupId>
+		<artifactId>hq-parent</artifactId>
+		<version>4.5.0.BUILD-SNAPSHOT</version>
+	</parent>
 
 	<modules>
 		<module>hq-parent</module>
@@ -24,7 +30,7 @@
 		<module>hq-installer</module>
 		<module>hq-bootstrap</module>
 		<module>hq-web</module>
-		<module>dist</module>
+	    <module>dist</module>
 	</modules>
 
 	<build>
@@ -33,6 +39,14 @@
 				<artifactId>maven-deploy-plugin</artifactId>
 				<configuration>
 					<skip>true</skip>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>com.atlassian.maven.plugins</groupId>
+				<artifactId>maven-clover2-plugin</artifactId>
+				<version>${clover2.version}</version>
+				<configuration>
+					<skip>false</skip>
 				</configuration>
 			</plugin>
 		</plugins>

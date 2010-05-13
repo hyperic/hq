@@ -103,6 +103,12 @@
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 		</dependency>
+		<dependency>
+  			<groupId>com.cenqua.clover</groupId>
+  			<artifactId>clover</artifactId>
+  			<version>${clover2.version}</version>
+			<scope>test</scope>
+		</dependency>
 		<!--  UI Plugins -->
 		<dependency>
 			<groupId>org.hyperic.hq.uiplugin</groupId>
@@ -605,7 +611,7 @@
 							<outputDirectory>${project.build.directory}/generated-resources/WEB-INF/hq-plugins</outputDirectory>
 							<includeGroupIds>org.hyperic.hq.plugin</includeGroupIds>
 							<excludeTransitive>true</excludeTransitive>
-							<excludeTypes>zip</excludeTypes>
+							<includeTypes>jar</includeTypes>
 							<stripVersion>true</stripVersion>
 						</configuration>	
 					</execution>
@@ -660,6 +666,14 @@
 					<path>/</path>
 				</configuration>
 			</plugin>
+				<plugin>
+					<groupId>com.atlassian.maven.plugins</groupId>
+					<artifactId>maven-clover2-plugin</artifactId>
+					<version>${clover2.version}</version>
+					<configuration>
+							<skip>true</skip>
+					</configuration>
+				</plugin>
 		</plugins>
 	</build>
 

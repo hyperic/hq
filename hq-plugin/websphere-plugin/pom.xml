@@ -22,6 +22,12 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
+  			<groupId>com.cenqua.clover</groupId>
+  			<artifactId>clover</artifactId>
+  			<version>${clover2.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.hyperic</groupId>
 			<artifactId>websphere-jmx</artifactId>
 			<version>1.0.0</version>
@@ -67,6 +73,14 @@
 						</configuration>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>com.atlassian.maven.plugins</groupId>
+				<artifactId>maven-clover2-plugin</artifactId>
+				<version>${clover2.version}</version>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
 			</plugin>
 		</plugins>	
     	<testResources>
