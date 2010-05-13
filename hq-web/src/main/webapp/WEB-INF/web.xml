@@ -360,7 +360,7 @@
     </servlet-class>
     <init-param>
         <param-name>org.hyperic.lather.maxConns</param-name>
-        <param-value>250</param-value>
+        <param-value>3000</param-value>
     </init-param>
     <init-param>
         <param-name>org.hyperic.lather.execTimeout</param-name>
@@ -372,6 +372,12 @@
   <servlet-mapping>
     <servlet-name>lather</servlet-name>
     <url-pattern>/lather</url-pattern>
+  </servlet-mapping>
+
+  <!-- Map new lather servlet to pre-4.4 URLs to support upgrade -->
+  <servlet-mapping>
+    <servlet-name>lather</servlet-name>
+    <url-pattern>/jboss-lather/JBossLather</url-pattern>
   </servlet-mapping>
 	
 </web-app>

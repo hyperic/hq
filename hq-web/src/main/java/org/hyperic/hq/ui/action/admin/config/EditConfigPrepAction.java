@@ -40,6 +40,9 @@ import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.bizapp.server.session.UpdateStatusMode;
 import org.hyperic.hq.bizapp.shared.ConfigBoss;
 import org.hyperic.hq.bizapp.shared.UpdateBoss;
+import org.hyperic.hq.ui.Constants;
+import org.snmp4j.mp.MPv3;
+import org.snmp4j.smi.OctetString;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class EditConfigPrepAction
@@ -70,6 +73,10 @@ public class EditConfigPrepAction
         // Set the update mode
         UpdateStatusMode upMode = updateBoss.getUpdateMode();
         cForm.setUpdateMode(upMode.getCode());
+        
+        // Set the HQ SNMP local engine id
+        String localEngineID = "0x" + new OctetString(MPv3.createLocalEngineID());
+        request.setAttribute(Constants.SNMP_LOCAL_ENGINE_ID, localEngineID);
 
         return null;
     }

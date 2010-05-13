@@ -77,6 +77,18 @@ public interface AlertDefinitionManager {
      */
     public boolean updateAlertDefinitionInternalEnable(AuthzSubject subj, java.lang.Integer defId, boolean enable)
         throws PermissionException;
+    
+    
+    /**
+     * Enable/Disable an alert definition. For internal use only where the mtime
+     * does not need to be reset on each update.
+     *
+     * @return <code>true</code> if the enable/disable succeeded.
+     */
+    public boolean updateAlertDefinitionInternalEnable(AuthzSubject subj,
+                                                       List<Integer> ids,
+                                                       boolean enable)
+        throws PermissionException;
 
     /**
      * Set the escalation on the alert definition
@@ -102,7 +114,9 @@ public interface AlertDefinitionManager {
     /**
      * Clean up alert definitions and alerts for removed resources
      */
-    public void cleanupAlertDefinitions(AppdefEntityID aeid);
+    public void cleanupAlertDefs(List<Integer> alertDefIds);
+    
+    List<Integer> getAllDeletedAlertDefs();
 
     /**
      * Find an alert definition and return a value object
@@ -156,11 +170,6 @@ public interface AlertDefinitionManager {
      * @return a PageList of {@link AlertDefinitionValue} objects
      */
     public PageList<AlertDefinitionValue> findAllAlertDefinitions(AuthzSubject subj);
-
-    /**
-     * Get list of all child conditions
-     */
-    public PageList<AlertDefinitionValue> findChildAlertDefinitions(Integer id);
 
     /**
      * Get the resource-specific alert definition ID by parent ID, allowing for

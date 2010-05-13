@@ -339,13 +339,8 @@ public interface AppdefBoss {
      */
     public AppdefEntityID[] removeAppdefEntity(int sessionId, AppdefEntityID aeid) throws SessionNotFoundException,
         SessionTimeoutException, ApplicationException, VetoException;
-
-    /**
-     * Remove all delete resources Method is "NotSupported" since all the
-     * resource deletes may take longer than the transaction timeout. No need
-     * for a transaction in this context.
-     */
-    public void removeDeletedResources() throws ApplicationException, VetoException;
+    
+    void removeDeletedResources(Map<Integer,List<AppdefEntityID>> agentCache) throws ApplicationException, VetoException;
 
     public void _removePlatformInNewTran(AuthzSubject subject, Platform platform) throws ApplicationException,
         VetoException;
@@ -486,7 +481,7 @@ public interface AppdefBoss {
      * Remove resources from the group's contents.
      */
     public void removeResourcesFromGroup(int sessionId, ResourceGroup group, Collection<Resource> resources)
-        throws SessionException, PermissionException;
+        throws SessionException, PermissionException, VetoException;
 
     public ResourceGroup findGroupById(int sessionId, Integer groupId) throws PermissionException, SessionException;
 
@@ -570,7 +565,7 @@ public interface AppdefBoss {
      * Add entities to a resource group
      */
     public void addResourcesToGroup(int sessionID, ResourceGroup group, List<AppdefEntityID> aeids)
-        throws SessionException, PermissionException;
+        throws SessionException, PermissionException, VetoException;
 
     /**
      * Update properties of a group.
@@ -787,11 +782,5 @@ public interface AppdefBoss {
      */
     public Map<String, List<AppdefResourceType>> getUnavailableResourcesCount(AuthzSubject user)
         throws AppdefEntityNotFoundException, PermissionException;
-
-    /**
-     * temporary method for determining whether or not we're running a database
-     * that supports navmap
-     */
-    public boolean isNavMapSupported();
     
 }

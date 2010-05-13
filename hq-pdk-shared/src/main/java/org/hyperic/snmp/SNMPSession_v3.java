@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2010], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -25,6 +25,8 @@
 
 package org.hyperic.snmp;
 
+import java.io.*; // stub
+
 import org.snmp4j.PDU;
 import org.snmp4j.ScopedPDU;
 import org.snmp4j.UserTarget;
@@ -38,6 +40,7 @@ import org.snmp4j.security.PrivAES128;
 import org.snmp4j.security.PrivAES192;
 import org.snmp4j.security.PrivAES256;
 import org.snmp4j.security.PrivDES;
+import org.snmp4j.security.Priv3DES;
 import org.snmp4j.security.SecurityLevel;
 import org.snmp4j.security.SecurityModels;
 import org.snmp4j.security.SecurityProtocols;
@@ -45,20 +48,21 @@ import org.snmp4j.security.USM;
 import org.snmp4j.security.UsmUser;
 import org.snmp4j.smi.OID;
 import org.snmp4j.smi.OctetString;
+import org.snmp4j.smi.VariableBinding;
 
 /**
- * Implements the SNMPSession interface for SNMPv3 sessions by
- * extending the SNMPSession_v2c implementation.  SNMPv3 is
- * only different from v1 or v2c inthe way that a session
- * is initialized.
+ * Implements the SNMPSession interface for SNMPv3 sessions by extending the
+ * SNMPSession_v2c implementation. SNMPv3 is only different from v1 or v2c in
+ * the way that a session is initialized.
  */
-class SNMPSession_v3 extends SNMPSession_v2c {
-
+class SNMPSession_v3
+    extends SNMPSession_v2c
+{
     static {
-        USM usm =
-            new USM(SecurityProtocols.getInstance(),
-                    new OctetString(MPv3.createLocalEngineID()), 0);
+        USM usm = new USM(SecurityProtocols.getInstance(), new OctetString(MPv3.createLocalEngineID()), 0);
+
         SecurityModels.getInstance().addSecurityModel(usm);
+
         if ("true".equals(System.getProperty("snmpLogging"))) {
             LogFactory.setLogFactory(new Log4jLogFactory());
         }
@@ -70,81 +74,158 @@ class SNMPSession_v3 extends SNMPSession_v2c {
 
     protected PDU newPDU() {
         ScopedPDU pdu = new ScopedPDU();
+
         return pdu;
     }
-
-    private OctetString getPrivPassphrase(String defVal) {
-        String val = System.getProperty("snmpPrivPassphrase", defVal);
-        if (val == null) {
+    
+    private OctetString createOctetString(String val) {
+        if (val == null || val.length() == 0) {
             return null;
         }
+
         return new OctetString(val);
     }
 
-    private OID getPrivProtocol(String defVal)
-        throws SNMPException {
+    private OID getPrivProtocol(String defVal) throws SNMPException {
+        String val = System.getProperty("snmpPrivacyType", defVal);
 
-        String val = System.getProperty("snmpPrivProtocol", defVal);
-        if (val == null) {
+        if (val == null
+                || val.equalsIgnoreCase("none")
+                || val.length() == 0) {
             return null;
         }
+
         if (val.equals("DES")) {
             return PrivDES.ID;
-        }
-        else if ((val.equals("AES128")) || (val.equals("AES"))) {
+        } else if (val.equals("3DES")) {
+            return Priv3DES.ID;
+        } else if (val.equals("AES128") || val.equals("AES-128") || val.equals("AES")) {
             return PrivAES128.ID;
-        }
-        else if (val.equals("AES192")) {
+        } else if (val.equals("AES192") || val.equals("AES-192")) {
             return PrivAES192.ID;
-        }
-        else if (val.equals("AES256")) {
+        } else if (val.equals("AES256") || val.equals("AES-256")) {
             return PrivAES256.ID;
-        }
-        else {
+        } else {
             throw new SNMPException("Privacy protocol " + val + " not supported");
         }
     }
 
-    void init(String host,
-              String port,
-              String transport,
-              String user,
-              String password,
-              int authmethod)
-        throws SNMPException {
-
-        OID authProtocol =
-            authmethod == SNMPClient.AUTH_SHA ? AuthSHA.ID : AuthMD5.ID;
-        OctetString securityName = new OctetString(user);
-        OctetString authPassphrase =
-            password == null ? null : new OctetString(password);
-        OctetString privPassphrase = getPrivPassphrase(null); //XXX template option
-        OID privProtocol = getPrivProtocol(null); //XXX template option
-
-        UserTarget target = new UserTarget(); 
-        target.setSecurityName(securityName);
-        if (authPassphrase != null) { 
-            if (privPassphrase != null) { 
-                target.setSecurityLevel(SecurityLevel.AUTH_PRIV); 
-            }
-            else { 
-                target.setSecurityLevel(SecurityLevel.AUTH_NOPRIV); 
-            } 
+    private OID getAuthProtocol(String authMethod) {        
+        if (authMethod == null 
+                || authMethod.equalsIgnoreCase("none")
+                || authMethod.length() == 0) {
+            return null;
+        } else if (authMethod.equalsIgnoreCase("md5")) {
+            return AuthMD5.ID;
+        } else if (authMethod.equalsIgnoreCase("sha")) {
+            return AuthSHA.ID;
+        } else {
+            throw new IllegalArgumentException("unknown authentication protocol: " + authMethod);
         }
-        else { 
-            target.setSecurityLevel(SecurityLevel.NOAUTH_NOPRIV); 
-        } 
+    }
+    
+    void init(String host, String port, String transport, String user, 
+              String authType, String authPassword, 
+              String privType, String privPassword) 
+        throws SNMPException
+    {                        
+        OID authProtocol = getAuthProtocol(authType);
+        OID privProtocol = getPrivProtocol(privType);
+
+        OctetString securityName = createOctetString(user);
+        OctetString authPassphrase = createOctetString(authPassword);
+        OctetString privPassphrase = createOctetString(privPassword);
+
+        UserTarget target = new UserTarget();
+
+        target.setSecurityName(securityName);
+
+        if (authPassphrase != null) {
+            if (privPassphrase != null) {
+                target.setSecurityLevel(SecurityLevel.AUTH_PRIV);
+            } else {
+                target.setSecurityLevel(SecurityLevel.AUTH_NOPRIV);
+            }
+        } else {
+            target.setSecurityLevel(SecurityLevel.NOAUTH_NOPRIV);
+        }
+
         this.target = target;
 
         initSession(host, port, transport);
-        USM usm = this.session.getUSM();
-        if (usm.getUserTable().getUser(securityName) != null) {
-            return;
+        
+        // Need this check for unidirectional agents
+        if (this.target.getAddress() == null) {
+            throw new SNMPException("Invalid SNMP address " 
+                                        + transport + ":" + host + "/" + port);
         }
-        usm.addUser(securityName, new UsmUser(securityName,
-                                              authProtocol,
-                                              authPassphrase,
-                                              privProtocol,
-                                              privPassphrase));
+
+        // Need to add user by engineID.
+        byte[] engineID = this.session.discoverAuthoritativeEngineID(
+                                    this.target.getAddress(), 
+                                    this.target.getTimeout());
+
+        UsmUser usmUser = new UsmUser(securityName, 
+                                      authProtocol, authPassphrase, 
+                                      privProtocol, privPassphrase);
+        
+        USM usm = this.session.getUSM();
+
+        // Need to call addUser each time, even if user name exists,
+        // in case the user credentials change.
+        usm.addUser(securityName,
+                    (engineID == null) ? null : new OctetString(engineID),
+                    usmUser);
+    }
+    
+    /**
+     * Remote SNMPv3 engines will send back a Report PDU
+     * if there is a problem with the request.
+     */
+    protected void validateResponsePDU(String name, PDU response)
+        throws SNMPException {
+
+        super.validateResponsePDU(name, response);
+        
+        if (response.getType() == PDU.REPORT) {
+            processReport(response);
+        }
+    }
+    
+    private void processReport(PDU report) 
+        throws SNMPException {
+        
+        if (report.size() < 1) {
+            throw new SNMPException("REPORT PDU does not contain a variable binding.");
+        }
+
+        VariableBinding vb = report.get(0);
+        OID oid = vb.getOid();
+
+        if (SnmpConstants.usmStatsUnsupportedSecLevels.equals(oid)) {
+            throw new SNMPException("Unsupported Security Level.");
+        } else if (SnmpConstants.usmStatsNotInTimeWindows.equals(oid)) {
+            throw new SNMPException("Message not within time window.");
+        } else if (SnmpConstants.usmStatsUnknownUserNames.equals(oid)) {
+            throw new SNMPException("Unknown user name.");
+        } else if (SnmpConstants.usmStatsUnknownEngineIDs.equals(oid)) {
+            throw new SNMPException("Unknown engine id.");
+        } else if (SnmpConstants.usmStatsWrongDigests.equals(oid)) {
+            throw new SNMPException("Invalid authentication digest.");
+        } else if (SnmpConstants.usmStatsDecryptionErrors.equals(oid)) {
+            throw new SNMPException("Decryption error.");
+        } else if (SnmpConstants.snmpUnknownSecurityModels.equals(oid)) {
+            throw new SNMPException("Unknown security model.");
+        } else if (SnmpConstants.snmpInvalidMsgs.equals(oid)) {
+            throw new SNMPException("Invalid message.");
+        } else if (SnmpConstants.snmpUnknownPDUHandlers.equals(oid)) {
+            throw new SNMPException("Unknown PDU handler.");
+        } else if (SnmpConstants.snmpUnavailableContexts.equals(oid)) {
+            throw new SNMPException("Unavailable context.");
+        } else if (SnmpConstants.snmpUnknownContexts.equals(oid)) {
+            throw new SNMPException("Unknown context.");
+        } else {
+            throw new SNMPException("REPORT PDU contains unknown OID (" + oid + ").");
+        }
     }
 }

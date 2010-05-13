@@ -103,7 +103,7 @@ class SSLConnectionListener
         } catch(TokenNotFoundException exc){
             this.log.error("Rejecting client from " + remoteAddr + 
                            ": Passed an invalid auth token (" +
-                           authToken + ")");
+                           authToken + ")", exc);
             // Due to 20 second expiration, the tokens in the manager
             // may not match what is in the tokendata.
             List l = this.tokenManager.getTokens();

@@ -25,8 +25,9 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import java.util.List;
+import java.util.Collection;
 
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.hq.zevents.ZeventPayload;
@@ -56,26 +57,27 @@ public class AgentScheduleSyncZevent extends Zevent {
         implements ZeventPayload
     {
         // List<AppdefEntityID>
-        private final List _entityIDs;
+        private final Collection _entityIDs;
 
-        public AgentScheduleSyncZeventPayload(List ids) {
+        public AgentScheduleSyncZeventPayload(Collection ids) {
             _entityIDs = ids;
         }
 
-        public List getEntityIds() {
+        public Collection getEntityIds() {
             return _entityIDs;
         }
     }
 
-    public List getEntityIds() {
+    public Collection<AppdefEntityID> getEntityIds() {
         return ((AgentScheduleSyncZeventPayload)getPayload()).getEntityIds();
     }
 
     /**
-     * @param ids List of {@link AppdefEntityID}
+     * @param aeids {@link Collection} of {@link AppdefEntityID}
      */
-    public AgentScheduleSyncZevent(List aeids) {
+    public AgentScheduleSyncZevent(Collection aeids) {
         super(new AgentScheduleSyncZeventSource(),
               new AgentScheduleSyncZeventPayload(aeids));
     }
+
 }

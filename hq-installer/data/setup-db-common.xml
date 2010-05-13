@@ -8,7 +8,7 @@
 
   &hibernate-build;
 
-  <property name="data.dir" value="${install.dir}/data"/>
+  <property name="data.dir" value="${install.dir}/data/tmp"/>
   
   <target name="direct-error">
     <fail>
@@ -16,6 +16,17 @@
       Do not invoke it directly.
     </fail>
   </target>
+	
+  <target name="check.data.dir">
+	<available property="has.data.dir" file="${data.dir}"/>
+	    <antcall target="create.datatmp"/>
+   </target>
+   
+	<target name="create.datatmp" unless="${data.dir}">
+	  <mkdir dir="${install.dir}/data/tmp"/>
+	  <property name="data.dir" value="${install.dir}/data/tmp"/>
+	</target>
+
 
   <target name="dbsetup-process-file">
     <property name="server.jdbc-url" value="${server.database-url}"/>
@@ -66,6 +77,7 @@
   </target>
 
   <target name="dbsetup" depends="hibernate-setup">
+  	<antcall target="check.data.dir"/>
     <antcall target="dbsetup-process-file">
       <param name="dbsetupfile" value="${data.dir}/data.xml"/>
       <param name="data"        value="true"/>
@@ -100,6 +112,7 @@
       <property name="jdbc.password" value="${server.database-password}"/>
       <property name="typemap.file" value="${install.dir}/data/common-dbsetup-typemap.xml"/>
       <property name="schema.target" value="LATEST"/>
+      <property name="server.upgradedir" value="${server.upgradedir}"/>
     </ant>
     <sql driver="${server.database-driver}"
          url="${server.database-url}"
@@ -126,6 +139,7 @@
   </target>
 
   <target name="replace-dbservice-values">
+  	<antcall target="check.data.dir"/>
     <echo>using url: ${server.database-url} </echo>
     
 

@@ -25,12 +25,13 @@
 
 package org.hyperic.hq.ha.server.session;
 
+import java.util.Date;
 import java.util.concurrent.ScheduledFuture;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.autoinventory.server.session.AgentAIScanService;
-import org.hyperic.hq.events.ext.RegisterableTriggerRepository;
+import org.hyperic.hq.events.shared.RegisteredTriggerManager;
 import org.hyperic.hq.ha.HAService;
 import org.hyperic.hq.measurement.server.session.AvailabilityCheckService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,20 +52,20 @@ public class HAServiceImpl implements HAService {
     private TaskScheduler scheduler;
     private AvailabilityCheckService availabilityCheckService;
     private AgentAIScanService agentAIScanService;
-    private RegisterableTriggerRepository registeredTriggerRepository;
     private ScheduledFuture<?> backfillTask;
     private ScheduledFuture<?> notifyAgentsTask;
-    private static boolean isFirstPass = true;
+    private RegisteredTriggerManager registeredTriggerManager;
+   
 
     @Autowired
     public HAServiceImpl(TaskScheduler scheduler,
                          AvailabilityCheckService availabilityCheckService,
                          AgentAIScanService agentAIScanService,
-                         RegisterableTriggerRepository registeredTriggerRepository) {
+                         RegisteredTriggerManager registeredTriggerManager) {
         this.scheduler = scheduler;
         this.availabilityCheckService = availabilityCheckService;
         this.agentAIScanService = agentAIScanService;
-        this.registeredTriggerRepository = registeredTriggerRepository;
+        this.registeredTriggerManager = registeredTriggerManager;
     }
 
     /**
@@ -72,13 +73,7 @@ public class HAServiceImpl implements HAService {
      * have to be started programmatically once we know if HA is enabled
      */
     public void start() {
-        if (!HAServiceImpl.isFirstPass) {
-            // RegisteredTriggers already does a startup initialization
-            // don't want to reset that.
-            registeredTriggerRepository.init();
-        } else {
-            HAServiceImpl.isFirstPass = false;
-        }
+        initializeTriggers();
         // If this node was designated as a slave b/c of connectivity loss (not
         // server crash), then we don't want to schedule another round of tasks
         // once it becomes master again
@@ -99,11 +94,24 @@ public class HAServiceImpl implements HAService {
             notifyAgents.setTargetMethod("notifyAgents");
             try {
                 notifyAgents.prepare();
-                this.notifyAgentsTask = scheduler.scheduleAtFixedRate(notifyAgents, 300000);
+                this.notifyAgentsTask = scheduler.scheduleAtFixedRate(notifyAgents, 1800000);
             } catch (Exception e) {
                 log.error("Unable to schedule agent AI scan.", e);
             }
         }
+    }
+    
+    private void initializeTriggers() {
+        //Asynchronously initialize triggers once (as this may be an expensive operation)
+        MethodInvokingRunnable initTriggers = new MethodInvokingRunnable();
+        initTriggers.setTargetObject(registeredTriggerManager);
+        initTriggers.setTargetMethod("initializeTriggers");
+        try {
+            initTriggers.prepare();
+            scheduler.schedule(initTriggers, new Date(System.currentTimeMillis() + 1000));
+        } catch (Exception e) {
+                log.error("Unable to intialize triggers", e);
+         }
     }
 
     public boolean isMasterNode() {

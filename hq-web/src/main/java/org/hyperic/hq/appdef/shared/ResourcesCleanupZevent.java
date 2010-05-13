@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -25,7 +25,10 @@
 
 package org.hyperic.hq.appdef.shared;
 
+import java.util.Map;
+
 import org.hyperic.hq.zevents.Zevent;
+import org.hyperic.hq.zevents.ZeventPayload;
 
 public class ResourcesCleanupZevent extends Zevent {
 
@@ -33,4 +36,45 @@ public class ResourcesCleanupZevent extends Zevent {
         super(null, null);
     }
 
+    /**
+     * @param agentCache {@link Map} of {@link Integer} of agentIds 
+     * to {@link List} of {@link AppdefEntityID}s
+     */
+    public ResourcesCleanupZevent(Map agentCache) {
+        super(null, new ResourcesCleanupZeventPayload(agentCache));
+    }
+
+    /**
+     * @return {@link Map} of {@link Integer} of agentIds 
+     * to {@link List} of {@link AppdefEntityID}s
+     */
+    public Map getAgents() {
+        Map agents = null;
+        if (getPayload() != null) {
+            agents = ((ResourcesCleanupZeventPayload)getPayload()).getAgents();
+        }
+        return agents;
+    }
+
+    private static class ResourcesCleanupZeventPayload
+        implements ZeventPayload
+    {
+        private Map agentCache;
+
+        /**
+         * @param agentCache {@link Map} of {@link Integer} of agentIds 
+         * to {@link List} of {@link AppdefEntityID}s
+         */
+        public ResourcesCleanupZeventPayload(Map agentCache) {
+            this.agentCache = agentCache;
+        }
+
+        /**
+         * @return {@link Map} of {@link Integer} of agentIds 
+         * to {@link List} of {@link AppdefEntityID}s
+         */
+        public Map getAgents() {
+            return this.agentCache;
+        }
+    }
 }

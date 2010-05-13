@@ -49,16 +49,15 @@ public class AgentTransportTest extends TestCase {
      * This is the .ORG instance so we expect a ClassNotFoundException.
      */
     public void testUseUnidirectionalTransport() throws Exception {
-        //TODO : remoting uncomment
-//        try {
-//            InetSocketAddress addr = new InetSocketAddress("localhost", 6066);
-//            new AgentTransport(addr, null, false, "token", true, 10, 2);
-//            fail("Expected ClassNotFoundException.");
-//        } catch (ClassNotFoundException e) {
-//            // expected outcome
-//        } catch (Exception e) {
-//            fail("Expected ClassNotFoundException instead of: "+e);
-//        }
+        try {
+            InetSocketAddress addr = new InetSocketAddress("localhost", 6066);
+            new AgentTransport(addr, null, false, "token", true, 10, 2);
+            fail("Expected ClassNotFoundException.");
+        } catch (ClassNotFoundException e) {
+            // expected outcome
+        } catch (Exception e) {
+            fail("Expected ClassNotFoundException instead of: "+e);
+        }
     }
     
 }

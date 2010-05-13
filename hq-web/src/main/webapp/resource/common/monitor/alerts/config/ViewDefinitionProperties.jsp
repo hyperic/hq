@@ -33,79 +33,89 @@
 <tiles:importAttribute name="mode" ignore="true"/>
 
 <c:if test="${empty alertDef}">
-  <tiles:importAttribute name="alertDef" ignore="true"/>
+  	<tiles:importAttribute name="alertDef" ignore="true"/>
 </c:if>
 
 <!-- Content Block Title: Properties -->
 <tiles:insert definition=".header.tab">
-  <tiles:put name="tabKey" value="alert.config.props.PropertiesBox"/>
+  	<tiles:put name="tabKey" value="alert.config.props.PropertiesBox"/>
 </tiles:insert>
 
 <!-- Properties Content -->
 <table width="100%" cellpadding="0" cellspacing="0" border="0" class="TableBottomLine">
-  <c:if test="${alertDef.parentId > 0}">
-  <tr>
-    <td colspan="4" class="BlockContent"><span class="red" style="padding-left: 15px;"><fmt:message key="alerts.config.service.DefinitionList.isResourceAlert.false"/></span> <fmt:message key="alert.config.props.PB.IsTypeAlert"/>
-</td>
-  </tr>
-  </c:if>
-  <tr>
-    <td colspan="4" class="BlockContent"><span style="height: 1px;"></span></td>
-  </tr>
-  <tr valign="top">
-    <td width="20%" class="BlockLabel"><fmt:message key="common.label.Name"/></td>
-    <td width="30%" class="BlockContent"><c:out value="${alertDef.name}"/>
-  <c:if test="${alertDef.parentId > 0}">
-    <br/>
-        <html:link page="/alerts/Config.do?mode=viewDefinition&aetid=${Resource.appdefResourceTypeValue.appdefTypeKey}&ad=${alertDef.parentId}">
-          <fmt:message key="alert.config.props.PB.ViewTypeDef"/>
-        </html:link>
-  </c:if>
-    </td>
-    <td width="20%" class="BlockLabel"><fmt:message key="alert.config.props.PB.Priority"/></td>
-    <td width="30%" class="BlockContent">
-      <fmt:message key="${'alert.config.props.PB.Priority.'}${alertDef.priority}"/>
-    </td>
-  </tr>
-  <tr valign="top">
-    <td class="BlockLabel"><fmt:message key="common.label.Description"/></td>
-    <td class="BlockContent"><c:out value="${alertDef.description}"/></td>
-    <td class="BlockLabel"><fmt:message key="alert.config.props.PB.Active"/></td>
-    <tiles:insert page="/resource/common/monitor/alerts/config/AlertDefinitionActive.jsp">
-      <tiles:put name="alertDef" beanName="alertDef"/>
-    </tiles:insert>
-  </tr>
-  <tr valign="top">
-    <td class="BlockLabel" colspan="3"><fmt:message key="alert.config.props.PB.DateCreated"/></td>
-    <td class="BlockContent"><hq:dateFormatter time="false" value="${alertDef.ctime}"/></td>
-  </tr>
-  <c:if test="${not empty alertDef.mtime}">
-  <tr valign="top">
-    <td class="BlockLabel" colspan="3"><fmt:message key="alert.config.props.PB.DateMod"/></td>
-    <td class="BlockContent"><hq:dateFormatter time="false" value="${alertDef.mtime}"/></td>
-  </tr>
-  </c:if>
-  <tr>
-    <td colspan="4" class="BlockContent"><span style="height: 1px;"></span></td>
-  </tr>
+  	<c:if test="${alertDef.parentId > 0}">
+  		<tr>
+    		<td colspan="4" class="BlockContent">
+    			<span class="red" style="padding-left: 15px;"><fmt:message key="alerts.config.service.DefinitionList.isResourceAlert.false"/></span> <fmt:message key="alert.config.props.PB.IsTypeAlert"/>
+			</td>
+		</tr>
+  	</c:if>
+  	<tr>
+    	<td colspan="4" class="BlockContent"><span style="height: 1px;"></span></td>
+  	</tr>
+  	<tr valign="top">
+    	<td width="20%" class="BlockLabel"><fmt:message key="common.label.Name"/></td>
+    	<td width="30%" class="BlockContent"><c:out value="${alertDef.name}"/>
+	    	<c:if test="${canViewResourceTypeAlertTemplate}">
+	    		<br/>
+	        	<html:link page="/alerts/Config.do?mode=viewDefinition&aetid=${Resource.appdefResourceTypeValue.appdefTypeKey}&ad=${alertDef.parentId}">
+	          		<fmt:message key="alert.config.props.PB.ViewTypeDef"/>
+	        	</html:link>
+	  		</c:if>
+	    </td>
+    	<td width="20%" class="BlockLabel"><fmt:message key="alert.config.props.PB.Priority"/></td>
+    	<td width="30%" class="BlockContent">
+      		<fmt:message key="${'alert.config.props.PB.Priority.'}${alertDef.priority}"/>
+    	</td>
+  	</tr>
+  	<tr valign="top">
+    	<td class="BlockLabel"><fmt:message key="common.label.Description"/></td>
+    	<td class="BlockContent"><c:out value="${alertDef.description}"/></td>
+    	<td class="BlockLabel"><fmt:message key="alert.config.props.PB.Active"/></td>
+    	<tiles:insert page="/resource/common/monitor/alerts/config/AlertDefinitionActive.jsp">
+      		<tiles:put name="alertDef" beanName="alertDef"/>
+    	</tiles:insert>
+  	</tr>
+  	<tr valign="top">
+    	<td class="BlockLabel" colspan="3"><fmt:message key="alert.config.props.PB.DateCreated"/></td>
+    	<td class="BlockContent"><hq:dateFormatter time="false" value="${alertDef.ctime}"/></td>
+  	</tr>
+  	<c:if test="${not empty alertDef.mtime}">
+  		<tr valign="top">
+    		<td class="BlockLabel" colspan="3"><fmt:message key="alert.config.props.PB.DateMod"/></td>
+    		<td class="BlockContent"><hq:dateFormatter time="false" value="${alertDef.mtime}"/></td>
+  		</tr>
+  	</c:if>
+  	<tr>
+    	<td colspan="4" class="BlockContent"><span style="height: 1px;"></span></td>
+  	</tr>
 </table>
 
 <c:if test="${empty mode}">
-  <c:set var="mode" value="editProperties"/>
+  	<c:set var="mode" value="editProperties"/>
 </c:if>
 
-<c:if test="${not alertDef.deleted}">
-
-<tiles:insert definition=".toolbar.edit">
-<c:choose>
-  <c:when test="${not empty Resource}">
-    <tiles:put name="editUrl">/alerts/Config.do?mode=<c:out value="${mode}"/>&eid=<c:out value="${Resource.entityId}"/>&ad=<c:out value="${alertDef.id}"/></tiles:put>
-  </c:when>
-  <c:otherwise>
-    <tiles:put name="editUrl">/alerts/Config.do?mode=<c:out value="${mode}"/>&aetid=<c:out value="${ResourceType.appdefTypeKey}"/>&ad=<c:out value="${alertDef.id}"/></tiles:put>
-  </c:otherwise>
-</c:choose>
-</tiles:insert>
-
+<c:if test="${canModify && not alertDef.deleted}">
+	<c:choose>
+  		<c:when test="${not empty Resource}">
+  			<c:url var="editUrl" value="/alerts/Config.do">
+		    	<c:param name="mode" value="${mode}" />
+		    	<c:param name="eid" value="${Resource.entityId}" />
+		    	<c:param name="ad" value="${alertDef.id}" />
+		    </c:url>
+		</c:when>
+		<c:otherwise>
+		  	<c:url var="editUrl" value="/alerts/Config.do">
+		    	<c:param name="mode" value="${mode}" />
+		    	<c:param name="aetid" value="${ResourceType.appdefTypeKey}" />
+		    	<c:param name="ad" value="${alertDef.id}" />
+		    </c:url>
+		</c:otherwise>
+	</c:choose>
+		
+	<tiles:insert definition=".toolbar.edit">
+		<tiles:put name="editUrl" beanName="editUrl" />
+	</tiles:insert>
 </c:if>
-<br>
+
+<br/>

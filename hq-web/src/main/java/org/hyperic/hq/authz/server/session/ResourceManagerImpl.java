@@ -43,6 +43,7 @@ import org.hyperic.hq.appdef.server.session.PlatformDAO;
 import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.server.session.PlatformTypeDAO;
 import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
+import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.ServerDAO;
 import org.hyperic.hq.appdef.server.session.ServiceDAO;
@@ -764,7 +765,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
 
     /**
      *
-     * 
+     * @return {@link Collection} of {@link ResourceEdge}s
      */
     @Transactional(readOnly=true)
     public Collection<ResourceEdge> findResourceEdges(ResourceRelation relation, Resource parent) {
@@ -782,7 +783,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
 
     /**
      *
-     * 
+     * @return {@link Collection} of {@link ResourceEdge}s
      */
     @Transactional(readOnly=true)
     public List<ResourceEdge> findResourceEdges(ResourceRelation relation, Integer resourceId,
@@ -1028,6 +1029,29 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
             AuthzConstants.platformOpModifyPlatform);
 
         resourceEdgeDAO.deleteEdges(parent, relation);
+    }
+    
+    /**
+     * @param {@link Collection} of {@link Resource}s
+     * 
+     */
+    @Transactional(readOnly=true)
+    public void resourceHierarchyUpdated(AuthzSubject subj, Collection<Resource> resources) {
+        if (resources.size() <= 0) {
+            return;
+        }
+        final List<ResourceUpdatedZevent> events = new ArrayList<ResourceUpdatedZevent>();
+        
+        final ResourceRelation relation = getContainmentRelation();
+        for (final Resource resource : resources) {
+            events.add(new ResourceUpdatedZevent(subj, AppdefUtil.newAppdefEntityId(resource)));
+            final Collection<ResourceEdge> descendants = resourceEdgeDAO.findDescendantEdges(resource, relation);
+            for (ResourceEdge edge: descendants ) {
+                final Resource r = edge.getTo();
+                events.add(new ResourceUpdatedZevent(subj, AppdefUtil.newAppdefEntityId(r)));
+            }
+        }
+        zeventManager.enqueueEventsAfterCommit(events);
     }
 
     @Transactional(readOnly=true)

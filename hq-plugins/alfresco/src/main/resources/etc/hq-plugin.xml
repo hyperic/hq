@@ -34,7 +34,7 @@
   <classpath>
     <include name="pdk/lib/jdbc/jconn3.jar"/>
     <include name="pdk/lib/jdbc/oracle12.jar"/>
-    <include name="pdk/lib/jdbc/mysql-connector-java-5.0.5-bin.jar"/>
+    <include name="pdk/lib/jdbc/mysql-connector-java-5.1.10-bin.jar"/>
   </classpath>
 
   <!-- appended to each template by MeasurementInfoXML -->

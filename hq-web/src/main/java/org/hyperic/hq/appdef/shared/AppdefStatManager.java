@@ -77,12 +77,6 @@ public interface AppdefStatManager {
     public Map<Integer, Integer> getGroupCountsMap(AuthzSubject subject);
 
     /**
-     * Method for determining whether or not to show a nav map (this is a
-     * temporary method)
-     */
-    public boolean isNavMapSupported();
-
-    /**
      * <p>
      * Return directly connected resource tree for node level platform
      * </p>

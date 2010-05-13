@@ -31,6 +31,9 @@ import java.io.InputStream;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
+import org.jboss.remoting.InvokerLocator;
+import org.jboss.remoting.transporter.TransporterClient;
+
 
 
 /**
@@ -44,8 +47,9 @@ import java.io.ObjectOutput;
 public class RemoteInputStream 
     extends InputStream implements Externalizable {
     
-  //TODO : remoting uncomment
-    //private InvokerLocator _sourceInvokerLocator;
+    private static final long serialVersionUID = -2359924019799176338L;
+
+    private InvokerLocator _sourceInvokerLocator;
     
     private String _streamId;
     
@@ -86,13 +90,13 @@ public class RemoteInputStream
      * @param invokerLocator The invoker locator to the remote source.
      * @throws NullPointerException if the invoker locator is <code>null</code>.
      */
-//    public void setRemoteSourceInvokerLocator(InvokerLocator invokerLocator) {
-//        if (invokerLocator == null) {
-//            throw new NullPointerException("invoker locator is null");
-//        }
-//        
-//        _sourceInvokerLocator = invokerLocator;
-//    }
+    public void setRemoteSourceInvokerLocator(InvokerLocator invokerLocator) {
+        if (invokerLocator == null) {
+            throw new NullPointerException("invoker locator is null");
+        }
+        
+        _sourceInvokerLocator = invokerLocator;
+    }
     
     /**
      * @see java.io.InputStream#available()
@@ -184,8 +188,7 @@ public class RemoteInputStream
             _closed = true;
 
             if (_streamService != null) {
-              //TODO : remoting uncomment
-                //TransporterClient.destroyTransporterClient(_streamService);
+                TransporterClient.destroyTransporterClient(_streamService);
                 _streamService = null;
             }
             
@@ -209,32 +212,31 @@ public class RemoteInputStream
     }
     
     private InputStreamService getInputStreamService() throws IOException {
-//        if (_streamService == null) {
-//            if (_sourceInvokerLocator == null) {
-//                throw new IOException("remote source invoker locator was not set");
-//            }
-//            
-//            // HQ-1638 (Use the same strategy as HQ-1572)
-//            // InputStreamService and the remoting classes for the unidirectional transport are intentionally
-//            // put into the ServerHandler classloader.  As of this comment, that classloader is a peer
-//            // to the context classloader, so those classes are not visible to the current thread context,
-//            // unless we force the issue.
-//            ClassLoader currentContext = Thread.currentThread().getContextClassLoader();
-//            Thread.currentThread().setContextClassLoader(InputStreamService.class.getClassLoader());
-//
-//            try {
-//                _streamService = (InputStreamService)TransporterClient.
-//                    createTransporterClient(_sourceInvokerLocator, InputStreamService.class);
-//            } catch (Exception e) {
-//                throw new IOException("Failed to connect to input stream " +
-//                		              "service on remote source: "+e);
-//            } finally {
-//                Thread.currentThread().setContextClassLoader(currentContext);
-//            }
-//        }
-//
-//        return _streamService;
-        return null;
+        if (_streamService == null) {
+            if (_sourceInvokerLocator == null) {
+                throw new IOException("remote source invoker locator was not set");
+            }
+            
+            // HQ-1638 (Use the same strategy as HQ-1572)
+            // InputStreamService and the remoting classes for the unidirectional transport are intentionally
+            // put into the ServerHandler classloader.  As of this comment, that classloader is a peer
+            // to the context classloader, so those classes are not visible to the current thread context,
+            // unless we force the issue.
+            ClassLoader currentContext = Thread.currentThread().getContextClassLoader();
+            Thread.currentThread().setContextClassLoader(InputStreamService.class.getClassLoader());
+
+            try {
+                _streamService = (InputStreamService)TransporterClient.
+                    createTransporterClient(_sourceInvokerLocator, InputStreamService.class);
+            } catch (Exception e) {
+                throw new IOException("Failed to connect to input stream " +
+                		              "service on remote source: "+e);
+            } finally {
+                Thread.currentThread().setContextClassLoader(currentContext);
+            }
+        }
+
+        return _streamService;
     }
 
 }

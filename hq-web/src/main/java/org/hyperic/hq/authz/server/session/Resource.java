@@ -210,5 +210,11 @@ public class Resource extends AuthzNamedBean implements Comparable {
 
         return getSortName().compareTo(((Resource) arg0).getSortName());
     }
+    
+    public String toString() {
+        return new StringBuilder()
+            .append(getResourceType().getId()).append(":").append(getId())
+            .toString();
+    }
 
 }

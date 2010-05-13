@@ -51,19 +51,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class ServerConfiguratorImpl implements ServerConfigurator {
 
-    // An array of server config properties for backwards compatibility. On
-    // an upgrade scenario these properties will not be present in the
-    // hq-server.conf, and need to be defined for proper template substitution.
-    private static final String[][] COMPAT_PROPS = { { "server.jms.highmemory", "350" },
-                                                    { "server.jms.maxmemory", "400" },
-                                                    { "server.database-minpoolsize", "5" },
-                                                    { "server.database-maxpoolsize", "90" },
-                                                    { "server.database-blockingtimeout", "10000" },
-                                                    { "server.database-idletimeout", "15" } };
-
+   
     private String serverHome;
     private String engineHome;
-    private Properties serverProps;
+    private Properties serverProps = new Properties();
 
     @Autowired
     public ServerConfiguratorImpl(@Value("#{ systemProperties['server.home'] }") String serverHome,
@@ -85,15 +76,8 @@ public class ServerConfiguratorImpl implements ServerConfigurator {
         return this.serverProps;
     }
 
-    private void initializeServerProps() {
-        this.serverProps = new Properties();
-        for (int i = 0; i < COMPAT_PROPS.length; i++) {
-            serverProps.put(COMPAT_PROPS[i][0], COMPAT_PROPS[i][1]);
-        }
-    }
 
     private void loadServerProps() throws IOException {
-        initializeServerProps();
         FileInputStream fi = null;
         File confFile = new File(serverHome + File.separator + "conf" + File.separator +
                                  "hq-server.conf");
@@ -104,12 +88,6 @@ public class ServerConfiguratorImpl implements ServerConfigurator {
         try {
             fi = new FileInputStream(confFile);
             serverProps.load(fi);
-
-            // XXX: Hack for upgraded servers that use the embedded database
-            String jdbcUrl = serverProps.getProperty("server.database-url");
-            if (jdbcUrl.startsWith("jdbc:postgresql:") && !jdbcUrl.endsWith("?protocolVersion=2")) {
-                serverProps.setProperty("server.database-url", jdbcUrl + "?protocolVersion=2");
-            }
         } finally {
             if (fi != null)
                 fi.close();

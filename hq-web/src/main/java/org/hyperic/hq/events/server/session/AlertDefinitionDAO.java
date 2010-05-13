@@ -78,9 +78,7 @@ public class AlertDefinitionDAO
         this.rDao = rDao;
     }
 
-    private static final String[] MANAGE_ALERTS_OPS = new String[] { AuthzConstants.platformOpManageAlerts,
-                                                                    AuthzConstants.serverOpManageAlerts,
-                                                                    AuthzConstants.serviceOpManageAlerts };
+  
 
     public AlertDefinitionDAO(SessionFactory sessionFactory) {
         super(AlertDefinition.class, sessionFactory);
@@ -96,10 +94,44 @@ public class AlertDefinitionDAO
         return createCriteria().add(Restrictions.eq("resource", r)).list();
     }
 
+    /**
+    * Prefetches all collections associated with each alertDef that is deleted and has a
+    * null resourceId into ehcache.
+    * @return {@link List} of {@link Integer} of {@link AlertDefintion} ids
+    */
     @SuppressWarnings("unchecked")
-    public List<AlertDefinition> findAllDeletedResources() {
-        return (List<AlertDefinition>) createCriteria().add(Restrictions.isNull("resource")).add(
-            Restrictions.eq("deleted", Boolean.TRUE)).list();
+    public List<Integer> findAndPrefetchAllDeletedAlertDefs() {
+        // need to pre-fetch one bag at a time due to bug
+        // http://opensource.atlassian.com/projects/hibernate/browse/HHH-2980
+        String hql = new StringBuilder()
+            .append("from AlertDefinition def ")
+            .append("left outer join fetch def.childrenBag cb ")
+            .append("where def.resource is null and def.deleted = '1'")
+            .toString();
+        getSession().createQuery(hql).list();
+        hql = new StringBuilder()
+            .append("from AlertDefinition def ")
+            .append("left outer join fetch def.actionsBag ab ")
+            .append("where def.resource is null and def.deleted = '1'")
+            .toString();
+        getSession().createQuery(hql).list();
+        hql = new StringBuilder()
+            .append("from AlertDefinition def ")
+            .append("left outer join fetch def.conditionsBag condb ")
+            .append("where def.resource is null and def.deleted = '1'")
+            .toString();
+        getSession().createQuery(hql).list();
+        hql = new StringBuilder()
+            .append("from AlertDefinition def ")
+            .append("left outer join fetch def.triggersBag tb ")
+            .append("where def.resource is null and def.deleted = '1'")
+            .toString();
+        getSession().createQuery(hql).list();
+        hql = new StringBuilder()
+            .append("select def.id from AlertDefinition def ")
+            .append("where def.resource is null and def.deleted = '1'")
+            .toString();
+        return getSession().createQuery(hql).list();
     }
 
     /**
@@ -197,7 +229,7 @@ public class AlertDefinitionDAO
         Query q = createQuery(hql);
 
         return wherePermCheck
-            .addQueryParameters(q, subject, r, 0, Arrays.asList(MANAGE_ALERTS_OPS)).list();
+            .addQueryParameters(q, subject, r, 0, Arrays.asList(AuthzConstants.VIEW_ALERTS_OPS)).list();
     }
 
     public void save(AlertDefinition def) {
@@ -214,7 +246,7 @@ public class AlertDefinitionDAO
     int deleteByAlertDefinition(AlertDefinition def) {
         String sql = "update AlertDefinition "
                      + "set escalation = null, deleted = true, parent = null, "
-                     + "active = false where parent = :def";
+                     + "active = false, enabled = false where parent = :def";
 
         int ret = getSession().createQuery(sql).setParameter("def", def).executeUpdate();
         def.getChildrenBag().clear();
@@ -334,7 +366,7 @@ public class AlertDefinitionDAO
 
         if (sql.indexOf("subj") > 0) {
             q.setInteger("subj", subj.getId().intValue())
-                .setParameterList("ops", MANAGE_ALERTS_OPS);
+                .setParameterList("ops", AuthzConstants.VIEW_ALERTS_OPS);
         }
 
         return pInfo.pageResults(q).list();

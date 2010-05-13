@@ -33,6 +33,7 @@ public class HQServer {
 
     private final Log log = LogFactory.getLog(HQServer.class);
     private String serverHome;
+    private String engineHome;
     private ProcessManager processManager;
     private EmbeddedDatabaseController embeddedDatabaseController;
     private ServerConfigurator serverConfigurator;
@@ -43,11 +44,13 @@ public class HQServer {
 
     @Autowired
     public HQServer(@Value("#{ systemProperties['server.home'] }") String serverHome,
+                    @Value("#{ systemProperties['engine.home'] }") String engineHome,
                     ProcessManager processManager,
                     EmbeddedDatabaseController embeddedDatabaseController,
                     ServerConfigurator serverConfigurator, EngineController engineController,
                     OperatingSystem osInfo, DataSource dataSource) {
         this.serverHome = serverHome;
+        this.engineHome = engineHome;
         this.processManager = processManager;
         this.embeddedDatabaseController = embeddedDatabaseController;
         this.serverConfigurator = serverConfigurator;
@@ -170,12 +173,15 @@ public class HQServer {
                              "/conf/log4j.xml.  Cause: " + e.getMessage());
             return 1;
         }
+        
+        String javaHome = System.getProperty("java.home");
         return processManager.executeProcess(
-            new String[] { "java",
+            new String[] { javaHome + "/bin/java",
                           "-cp",
                           serverHome + "/lib/ant-launcher.jar",
                           "-Dserver.home=" + serverHome,
                           "-Dant.home=" + serverHome,
+                          "-Dtomcat.home="  + engineHome + "/hq-server",
                           "-Dlog4j.configuration=" + logConfigFileUrl,
                           "org.apache.tools.ant.launch.Launcher",
                           "-q",

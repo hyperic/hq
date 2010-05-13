@@ -615,8 +615,7 @@ table border on left side - do not remove */
 
 .bxblueborder {
     border: 1px solid #7BAFFF;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: auto;
     height: 400px;
     width: 100%;
 }

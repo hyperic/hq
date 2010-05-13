@@ -45,6 +45,7 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
@@ -91,6 +92,7 @@ public class RemoveAction
             }
 
             appdefBoss.removeResourcesFromGroup(sessionId.intValue(), group, resources);
+            RequestUtils.setConfirmation(request,"resource.group.inventory.confirm.RemoveResources");
 
             return returnSuccess(request, mapping, forwardParams);
         } catch (ParameterNotFoundException e2) {
@@ -99,6 +101,10 @@ public class RemoveAction
         } catch (AppdefGroupNotFoundException e) {
             RequestUtils.setError(request, "resource.common.inventory.error.ResourceNotFound");
 
+            return returnFailure(request, mapping, forwardParams);
+        } catch (VetoException ve) {
+            RequestUtils.setErrorObject(request,"resource.group.inventory.error.UpdateResourceListVetoed",
+                ve.getMessage());
             return returnFailure(request, mapping, forwardParams);
         }
     }

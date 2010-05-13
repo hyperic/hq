@@ -188,7 +188,7 @@ public class WebsphereControlPlugin
     protected int doCommand(String action, String[] args) {
         String script = this.binDir + File.separator + action + "Server.sh";
 
-        getLog().info("command script=" + script);
+        getLog().debug("command script=" + script);
 
         if ((args == null) || (args.length == 0)) {
             args = this.ctlArgs;

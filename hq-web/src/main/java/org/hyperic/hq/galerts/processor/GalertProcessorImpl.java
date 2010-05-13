@@ -98,26 +98,13 @@ public class GalertProcessorImpl implements GalertProcessor {
      *        basis.
      */
     void processEvents(final List events) {
-        try {
-            SessionManager.runInSession(new SessionRunner() {
-                public String getName() {
-                    return "Event Processor";
-                }
-
-                public void run() throws Exception {
-                    for (Iterator i=events.iterator(); i.hasNext(); ) {
-                        Zevent z = (Zevent)i.next();
-                    
-                        processEvent(z);
-                    }
-                }
-            });
-        } catch(Exception e) {
-            _log.warn("Error processing events", e);
+        for (Iterator i=events.iterator(); i.hasNext(); ) {
+           Zevent z = (Zevent)i.next();
+           processEvent(z);
         }
     }
     
-    private void processEvent(Zevent event) {
+    private void processEvent(final Zevent event) {
         ZeventSourceId source = event.getSourceId();
         Set listenerDupe;
 
@@ -131,12 +118,23 @@ public class GalertProcessorImpl implements GalertProcessor {
         }
         
         for (Iterator i=listenerDupe.iterator(); i.hasNext(); ) {
-            Gtrigger t = (Gtrigger)i.next();
+            final Gtrigger t = (Gtrigger)i.next();
             
             // Synchronize around all event processing for a trigger, since
             // they keep state and will need to be flushed
             synchronized(t) {
-                t.processEvent(event);
+                try {
+                   SessionManager.runInSession(new SessionRunner() {
+                       public String getName() {
+                           return "Event Processor";
+                       }
+                       public void run() throws Exception {
+                           t.processEvent(event);
+                       }
+                   });
+                } catch (Exception e) {
+                    _log.warn("Error processing events", e);
+                }
             }
         }
     }

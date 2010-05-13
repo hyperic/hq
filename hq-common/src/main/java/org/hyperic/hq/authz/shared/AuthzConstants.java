@@ -53,51 +53,51 @@ public final class AuthzConstants {
 
     // Platform Operations
     public static final String platformOpCreatePlatform = "createPlatform";
+    public static final String platformOpViewPlatform = "viewPlatform";
     public static final String platformOpModifyPlatform = "modifyPlatform";
     public static final String platformOpRemovePlatform = "removePlatform";
     public static final String platformOpAddServer = "addServer";
-    public static final String platformOpViewPlatform = "viewPlatform";
     public static final String platformOpMonitorPlatform = "monitorPlatform";
     public static final String platformOpControlPlatform = "controlPlatform";
     public static final String platformOpManageAlerts = "managePlatformAlerts";
 
     // Server Operations
     public static final String serverOpCreateServer = "createServer";
+    public static final String serverOpViewServer = "viewServer";
     public static final String serverOpModifyServer = "modifyServer";
     public static final String serverOpRemoveServer = "removeServer";
     public static final String serverOpAddService = "addService";
-    public static final String serverOpViewServer = "viewServer";
     public static final String serverOpMonitorServer = "monitorServer";
     public static final String serverOpControlServer = "controlServer";
     public static final String serverOpManageAlerts = "manageServerAlerts";
 
     // Service Operations
     public static final String serviceOpCreateService = "createService";
+    public static final String serviceOpViewService = "viewService";
     public static final String serviceOpModifyService = "modifyService";
     public static final String serviceOpRemoveService = "removeService";
-    public static final String serviceOpViewService = "viewService";
     public static final String serviceOpMonitorService = "monitorService";
     public static final String serviceOpControlService = "controlService";
     public static final String serviceOpManageAlerts = "manageServiceAlerts";
 
     // Application Operations
     public static final String appOpCreateApplication = "createApplication";
+    public static final String appOpViewApplication = "viewApplication";
     public static final String appOpModifyApplication = "modifyApplication";
     public static final String appOpRemoveApplication = "removeApplication";
-    public static final String appOpViewApplication = "viewApplication";
     public static final String appOpMonitorApplication = "monitorApplication";
     public static final String appOpControlApplication = "controlApplication";
     public static final String appOpManageAlerts = "manageApplicationAlerts";
 
     // Group Operations
+    public static final String groupOpCreateResourceGroup = "createResourceGroup";
     public static final String groupOpViewResourceGroup = "viewResourceGroup";
-    public static final String groupOpManageAlerts = "manageGroupAlerts";
-    public static final String groupOpModifyResourceGroup =
-        "modifyResourceGroup";
-    public static final String groupOpAddRole = "addRole";
+    public static final String groupOpModifyResourceGroup = "modifyResourceGroup";
     public static final String groupOpRemoveResourceGroup = "removeResourceGroup";
+    public static final String groupOpAddRole = "addRole";
     public static final String groupOpControlResourceGroup = "controlResourceGroup";
     public static final String groupOpMonitorResourceGroup = "monitorResourceGroup";
+    public static final String groupOpManageAlerts = "manageGroupAlerts";
 
     // View permission constants - defined in authz-data.xml
     public static final Integer perm_viewSubject       = new Integer(8);
@@ -163,6 +163,7 @@ public final class AuthzConstants {
     public static final String roleOpViewRole = "viewRole";
 
     public static final String escOpCreateEscalation = "createEscalation";
+    public static final String escOpViewEscalation = "viewEscalation";
     public static final String escOpModifyEscalation = "modifyEscalation";
     public static final String escOpRemoveEscalation = "removeEscalation";
 
@@ -189,6 +190,14 @@ public final class AuthzConstants {
     public static final Integer RELATION_NETWORK_ID = new Integer(2);
     public static final String ResourceEdgeContainmentRelation = "containment";
     public static final String ResourceEdgeNetworkRelation = "network";
+    
+    // List of alert operations
+    public static final String[] VIEW_ALERTS_OPS =
+        new String[] {  platformOpViewPlatform,
+                        serverOpViewServer,
+                        serviceOpViewService,
+                        groupOpViewResourceGroup
+    };
     
     public static boolean isOverlord(Integer subject) {
         return subject.equals(AuthzConstants.overlordId);

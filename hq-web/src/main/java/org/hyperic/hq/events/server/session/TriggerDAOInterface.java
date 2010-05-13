@@ -1,6 +1,7 @@
 package org.hyperic.hq.events.server.session;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
@@ -13,8 +14,6 @@ public interface TriggerDAOInterface {
 
     RegisteredTrigger create(RegisteredTriggerValue createInfo);
 
-    void deleteAlertDefinition(AlertDefinition def);
-
     List<RegisteredTrigger> findAll();
 
     List<RegisteredTrigger> findByAlertDefinitionId(Integer id);
@@ -23,7 +22,8 @@ public interface TriggerDAOInterface {
 
     RegisteredTrigger get(Integer id);
 
-    void removeTriggers(AlertDefinition def);
 
     Set<RegisteredTrigger> findAllEnabledTriggers();
+    
+    Map<Integer,List<Integer>> findTriggerIdsByAlertDefinitionIds(List<Integer> alertDefIds);
 }

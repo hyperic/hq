@@ -12,7 +12,7 @@
 	<property file="build.properties" />
 
 	<!-- Version file -->
-	<property name="version.properties" value="${hq.home}/version.properties" />
+	<property name="version.properties" value="${hq.home}/hq-version.properties" />
 	<property file="${version.properties}" />
 	<property name="release.comment" value="Development Build" />
 	<property name="hq.isDev" value="true" />
@@ -109,6 +109,11 @@
 
 	<path id="testjars">
 		<path refid="alljars" />
+		<path location="${thirdparty.lib}/cactus-1.7.2.jar" />
+		<path location="${thirdparty.lib}/strutstest-2.1.3.jar" />
+		<fileset dir="${thirdparty.lib}" includes="*.jar" excludes="ant*.jar strutstest-*.jar,cactus*.jar,mockejb.jar,mockrunner-ejb.jar,dbunit*.jar,jaas.jar" />
+		<path location="${thirdparty.lib}/dbunit-2.2.jar" />
+		<fileset dir="${thirdparty.lib}/tomcat-jdbc" includes="*.jar" />
 	    <fileset dir="${thirdparty.lib}/test" includes="*.jar"/>
 	</path>
 
@@ -181,6 +186,11 @@
 		<path refid="shared.compile.classpath"/>
 		<path location="${hq.bootstrap}/target/classes" />
 	</path>
+	
+	<path id="installer.compile.classpath">
+		<path refid="web.compile.classpath"/>
+		<path location="${hq.installer}/target/classes" />
+   </path>
 
 	<!-- Source common targets -->
 	<import file="${hq.home}/build_util/util-build.xml" />
@@ -228,15 +238,7 @@
 
 
 	<target name="compile-installer">
-		<path id="compile.classpath">
-			<path refid="alljars" />
-			<path refid="testjars" />
-			<path location="${hq.util}/target/classes" />
-			<path location="${hq.common}/target/classes" />
-			<path location="${hq.pdk.shared}/target/classes" />
-			<path location="${hq.web}/target/classes" />
-		</path>
-		<compile-sources classpath.id="compile.classpath" src.dir="${hq.installer}/src/main/java" resource.dir="${hq.installer}/src/main/resources" output.dir="${hq.installer}/target/classes" />
+		<compile-sources classpath.id="installer.compile.classpath" src.dir="${hq.installer}/src/main/java" resource.dir="${hq.installer}/src/main/resources" output.dir="${hq.installer}/target/classes" />
 	</target>
 
 	<target name="compile-agent" depends="compile-agent-pdk">
@@ -273,6 +275,9 @@
 	</macrodef>
 
 	<target name="compile-plugins" depends="compile-agent">
+		
+		<compile-plugin name="activemq" />
+		
 		<compile-plugin name="apache" />
 
 		<compile-plugin name="tomcat" />
@@ -284,6 +289,8 @@
 		<compile-plugin name="oc4j" />
 
 		<compile-plugin name="db2" />
+		
+		<compile-plugin name="db2jdbc" />
 
 		<compile-plugin name="postgresql" />
 
@@ -714,7 +721,7 @@
 
 		<!-- Write version file to WEB-INF/classes -->
 		<antcall target="write-version-file">
-			<param name="version-file" value="${war.dir}/WEB-INF/classes/version.properties" />
+			<param name="version-file" value="${war.dir}/WEB-INF/classes/hq-version.properties" />
 		</antcall>
 
 		<copy todir="${war.dir}/WEB-INF/lib/">
@@ -727,9 +734,10 @@
 				<include name="log4j-1.2.14.jar" />
 				<include name="quartz-1.6.5.jar" />
 				<include name="quartz-oracle-1.6.5.jar" />
-				<include name="snmp4j.jar" />
+				<include name="snmp4j*.jar" />
 				<include name="dnsjava-2.0.3.jar" />
 				<include name="ehcache-1.5.0.jar" />
+				<include name="jboss-remoting.jar" />
 				<include name="jdom-1.1.jar" />
 				<include name="jsr107cache-1.0.jar" />
 				<!-- EHCache 1.5 dep -->
@@ -769,10 +777,8 @@
 			<fileset dir="${thirdparty.lib}/spring" includes="*.jar" />
 			<fileset dir="${thirdparty.lib}/activemq" includes="*.jar" />
 			<fileset dir="${thirdparty.lib}/tomcat-jdbc" includes="*.jar" />
-			<fileset dir="${thirdparty.lib}/mysql_jdbc">
-				<include name="mysql-connector-java-5.0.5-bin.jar" />
-			</fileset>
-
+			<fileset dir="${thirdparty.lib}/mysql_jdbc" includes="mysql*.jar"/>
+			
 			<fileset dir="${thirdparty.lib}/postgresql" includes="postgresql-8.2-*.jdbc3.jar" />
 
 
@@ -877,7 +883,7 @@
 				<include name="log4j-1.2.14.jar" />
 				<include name="oro-2.0.8.jar" />
 				<!-- RT -->
-				<include name="snmp4j.jar" />
+				<include name="snmp4j*.jar" />
 				<!-- All SNMP monitoring -->
 				<include name="ant.jar" />
 				<!-- AI scans + util.TokenReplacer -->
@@ -912,6 +918,8 @@
 				<include name="xmlrpc-client-3.1.jar" />
 				<include name="xmlrpc-common-3.1.jar" />
 				<include name="ws-commons-util-1.0.2.jar" />
+				<include name="com.springsource.com.sun.xml.bind-*.jar" />
+				<include name="com.springsource.javax.xml.*.jar" />
 			</fileset>
 			<fileset dir="${tapestry_lib}">
 				<!-- for CollectorThread -->
@@ -942,11 +950,12 @@
 			</fileset>
 			<fileset dir="${hq.plugins}/jvm/src/main/resources" includes="*.xml" />
 		</copy>
-
+     
+        <hqplugin name="activemq" />
 
 		<hqplugin name="apache" />
 
-
+    
 		<hqplugin name="tomcat" />
 
 		<hqplugin name="iplanet" />
@@ -958,6 +967,8 @@
 		<hqplugin name="db2">
 			<fileset dir="${db2monitor.dir}" includes="lib/*" />
 		</hqplugin>
+		
+		<hqplugin name="db2jdbc" />
 
 		<hqplugin name="postgresql" />
 
@@ -1072,8 +1083,6 @@
 			<fileset dir="hq-plugins/examples/src/main/resources" includes="*.xml" />
 		</plugincopy>
 
-
-		<plugincopy todir="${pdk.plugins}" file="hq-plugins/activemq/src/main/resources/activemq-plugin.xml" />
 		<plugincopy todir="${pdk.plugins}" file="hq-plugins/geronimo/src/main/resources/geronimo-plugin.xml" />
 		<plugincopy todir="${pdk.plugins}" file="hq-plugins/glassfish/src/main/resources/glassfish-plugin.xml" />
 		<plugincopy todir="${pdk.plugins}" file="hq-plugins/hq-internal/src/main/resources/hq-internal-plugin.xml" />
@@ -1118,7 +1127,7 @@
 			</fileset>
 		</copy>
 
-		<plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/activemq/src/main/resources/activemq-plugin.xml" />
+	
 		<plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/geronimo/src/main/resources/geronimo-plugin.xml" />
 		<plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/glassfish/src/main/resources/glassfish-plugin.xml" />
 		<plugincopy todir="${war.dir}/WEB-INF/hq-plugins" file="hq-plugins/hq-internal/src/main/resources/hq-internal-plugin.xml" />
@@ -1154,11 +1163,17 @@
 		<touch file="${agent.dir}/log/agent.log" />
 		<touch file="${agent.dir}/bundles/${agent.bundle.dir}/tmp/empty" />
 
-		<copy todir="${agent.dir}/bundles/${agent.bundle.dir}/lib" file="${build.dir}/hq-lather.jar" />
-
-		<copy todir="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/lib">
+		<copy todir="${agent.dir}/bundles/${agent.bundle.dir}/lib">
+			<fileset dir="${build.dir}" includes="hq-lather.jar" />
+			<fileset dir="${thirdparty.lib}" includes="jboss-remoting.jar" />
+			<fileset dir="${thirdparty.lib}" includes="jboss-jmx.jar" />
+			<fileset dir="${thirdparty.lib}" includes="jboss-common.jar" />
 			<fileset dir="${thirdparty.lib}/hibernate" includes="concurrent*.jar" />
 		</copy>
+		<!-- Is this needed? -->
+		<!-- copy todir="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/lib">
+			<fileset dir="${thirdparty.lib}/hibernate" includes="concurrent*.jar" />
+		</copy -->
 
 		<jar basedir="${hq.agent.handlers}/hq-agent-handler-autoinventory/target/classes" jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/hq-agent-handler-autoinventory.jar">
 			<manifest>
@@ -1202,7 +1217,7 @@
 
 		<!-- version.properties to agent lib -->
 		<antcall target="write-version-file">
-			<param name="version-file" value="${agent.dir}/bundles/${agent.bundle.dir}/lib/version.properties" />
+			<param name="version-file" value="${agent.dir}/bundles/${agent.bundle.dir}/lib/hq-version.properties" />
 		</antcall>
 
 		<copy todir="${agent.dir}/wrapper/sbin">
@@ -1332,6 +1347,7 @@
 <test-compile module.dir="${hq.pdk.shared}" compile.classpath.id="shared.compile.classpath" />
 <test-compile module.dir="${hq.web}" compile.classpath.id="web.compile.classpath" />
 <test-compile module.dir="${hq.bootstrap}" compile.classpath.id="bootstrap.compile.classpath" />
+<test-compile module.dir="${hq.installer}" compile.classpath.id="installer.compile.classpath" />
 </target>
 
 <target name="run-tests" depends="init-taskdefs,init-tests">
@@ -1349,6 +1365,7 @@
 <test-run module.dir="${hq.pdk.shared}" classpath.id="shared.compile.classpath" />
 <test-run module.dir="${hq.web}" classpath.id="web.compile.classpath" />
 <test-run module.dir="${hq.bootstrap}" classpath.id="bootstrap.compile.classpath" />
+<test-run module.dir="${hq.installer}" classpath.id="installer.compile.classpath" />
 </target>
 
 
@@ -1365,6 +1382,8 @@
 <delete dir="${hq.web}/target/clover" quiet="true" />
 <instrument-module input.dir="${hq.bootstrap}/src/test/java" staging.dir="${hq.bootstrap}/target/clover/staging/src/test/java" resource.dir="${hq.bootstrap}/src/test/resources" output.dir="${hq.bootstrap}/target/test-classes" classpath.id="bootstrap.compile.classpath" />
 <delete dir="${hq.bootstrap}/target/clover" quiet="true" />
+<instrument-module input.dir="${hq.installer}/src/test/java" staging.dir="${hq.installer}/target/clover/staging/src/test/java" resource.dir="${hq.installer}/src/test/resources" output.dir="${hq.installer}/target/test-classes" classpath.id="installer.compile.classpath" />
+<delete dir="${hq.installer}/target/clover" quiet="true" />
 <instrument-module classpath.id="agent.pdk.compile.classpath" input.dir="${hq.pdk.agent}/src/test/java" resource.dir="${hq.pdk.agent}/src/test/resources" output.dir="${hq.pdk.agent}/target/test-classes" staging.dir="${hq.pdk.agent}/target/clover/staging/src/test/java" />
 <delete dir="${hq.pdk.agent}/target/clover" quiet="true" />
 <instrument-module classpath.id="agent.compile.classpath" input.dir="${hq.agent}/src/test/java" resource.dir="${hq.agent}/src/test/resources" output.dir="${hq.agent}/target/test-classes" staging.dir="${hq.agent}/target/clover/staging/src/test/java" />
@@ -1469,7 +1488,7 @@
         <fileset dir="${hq.home}/build" includes="hyperic-*.zip"/>
     </checksum>
 
-    <git command="add version.properties" dir="${hq.home}"/>
+    <git command="add hq-version.properties" dir="${hq.home}"/>
     <git command="commit -m 'Release ${version} build #${build}'" dir="${hq.home}"/>
     <git command="push git@git.springsource.org:hq/hq.git" dir="${hq.home}"/>
 

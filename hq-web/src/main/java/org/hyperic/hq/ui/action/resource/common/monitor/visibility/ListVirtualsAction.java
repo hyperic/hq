@@ -30,6 +30,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
@@ -41,7 +43,9 @@ import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.bizapp.shared.uibeans.ResourceDisplaySummary;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
+
 
 /**
  * 
@@ -51,6 +55,8 @@ public class ListVirtualsAction
     extends TilesAction {
 
     private MeasurementBoss measurementBoss;
+    
+    private final Log log = LogFactory.getLog(ListVirtualsAction.class);
 
     @Autowired
     public ListVirtualsAction(MeasurementBoss measurementBoss) {
@@ -60,6 +66,7 @@ public class ListVirtualsAction
 
     public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
                                  HttpServletRequest request, HttpServletResponse response) throws Exception {
+        StopWatch watch = new StopWatch();
         AppdefResourceValue resource = RequestUtils.getResource(request);
 
         if (resource == null) {
@@ -74,6 +81,10 @@ public class ListVirtualsAction
         List<ResourceDisplaySummary> virtualHealths = measurementBoss.findVirtualsCurrentHealth(sessionId, entityId);
 
         context.putAttribute(Constants.CTX_SUMMARIES, virtualHealths);
+        
+        if (log.isDebugEnabled()) {
+            log.debug("ListVirtualsAction.execute: " + watch);
+        }
 
         return null;
     }

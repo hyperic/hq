@@ -1,5 +1,6 @@
 package org.hyperic.hq.hqu.rendit.metaclass
 
+import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.authz.shared.AuthzConstants
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.appdef.shared.PlatformManager;
@@ -10,6 +11,7 @@ import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.control.shared.ControlScheduleManager;
 import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.authz.server.session.ResourceGroup
+import org.hyperic.hq.authz.server.session.ResourceGroupSortField;
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo
 import org.hyperic.hq.appdef.Agent
 import org.hyperic.hq.appdef.shared.AppdefEntityID
@@ -217,7 +219,11 @@ class ResourceCategory {
 	 */
 	static void runAction(Resource r, AuthzSubject user, String action,
 	String arguments) {
-		cMan.doAction(user, r.entityId, action, arguments)
+	    if (r.entityId.isGroup()) {
+	        cMan.doGroupAction(user, r.entityId, action, arguments, null)
+	    } else {
+	        cMan.doAction(user, r.entityId, action, arguments)
+	    }
 	}
 	
 	static boolean isGroup(Resource r) {
@@ -446,6 +452,16 @@ class ResourceCategory {
 		[]
 	}
 	
+	static List getGroupsContaining(Resource r, AuthzSubject user) {
+	    PageInfo pInfo = PageInfo.create(PageControl.PAGE_ALL,ResourceGroupSortField.NAME)
+	    return groupMan.findGroupsContaining(user, r,Collections.EMPTY_LIST,pInfo)
+	}
+	             
+	static List getGroupsNotContaining(Resource r, AuthzSubject user) {         
+        PageInfo pInfo = PageInfo.create(PageControl.PAGE_ALL,ResourceGroupSortField.NAME)
+	    return groupMan.findGroupsNotContaining(user, r, r.getPrototype(),Collections.EMPTY_LIST, pInfo)
+	}
+	
 	static createInstance(Resource proto, Resource parent, String name,
 	AuthzSubject subject, Map cfg, Agent agent, List ips) {
 		if (!proto.isPlatformPrototype()) {
@@ -504,8 +520,14 @@ class ResourceCategory {
 				def servers = svrMan.getServersByPlatformServiceType(subject,
 						parent.instanceId,
 						proto.instanceId)
-				assert servers.size() == 1, "Unable to find appropriate virtual server for " +
-				proto.name + " parent = " + parent.name
+				assert servers.size() == 1, "Cannot create any platform services of " + proto.name + " for " + parent.name + 
+				                                          ".  This is because the virtual server which relates " +
+		                                                  parent.name + " to the service does not exist in the database." +
+		                                                  "  To find out which virtual server is missing, find the " +
+		                                                  "plugin where the platform service exists and get the server " +
+		                                                  "that it should belong to.  From there either remove the agent's datadir " +
+		                                                  "and re-initialize it or contact support for further options." +
+		                                                  "  (instanceId=" + parent.instanceId + ")"
 				
 				server = svrMan.findServerById(servers[0].id) // value -> pojo
 			} else if (parent.isServer()) {

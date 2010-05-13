@@ -48,6 +48,7 @@ import org.hyperic.hq.events.shared.AlertConditionLogValue;
 import org.hyperic.hq.events.shared.AlertManager;
 import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEvent;
 import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEventPayload;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -155,7 +156,10 @@ public class ClassicEscalatableCreator implements EscalatableCreator {
                 String detail = act.executeAction(alert, execInfo);
 
                 alertMan.logActionDetail(alert, act, detail, null);
-            } catch (Exception e) {
+            }catch(OptimisticLockingFailureException e) {
+                throw e;
+            }
+            catch (Exception e) {
                 // For any exception, just log it. We can't afford not
                 // letting the other actions go un-processed.
                 _log.warn("Error executing action [" + act + "]", e);
@@ -196,6 +200,8 @@ public class ClassicEscalatableCreator implements EscalatableCreator {
                                 .getTimestamp(), payload.getMessage()));
                     }
                 });
+        }catch(OptimisticLockingFailureException e) {
+            throw e;
         } catch (Throwable t) {
             _log
                 .error(

@@ -94,7 +94,13 @@ public class EhCacheUpgrader extends Task {
     public void execute() throws BuildException {
 
         validate();
+        if(!new File(_existingConfigFile).exists()) {
+            //Post 4.3, we moved the location of the ehcache file.  Both locations will be tried.
+            log("Skipping ehcache upgrade.  File: " + _existingConfigFile + " not found.");
+            return;
+        }
         Document existingConfig = loadDocument(_existingConfigFile);
+        
         Document newConfig = loadDocument(_newConfigFile);
 
         Map sizes = loadCacheSizes(existingConfig);

@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
-	xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
-	xmlns:jee="http://www.springframework.org/schema/jee" xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:jee="http://www.springframework.org/schema/jee"
+    xmlns:util="http://www.springframework.org/schema/util"
 	xmlns:task="http://www.springframework.org/schema/task"
-	xsi:schemaLocation="http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-2.0.xsd
+	xsi:schemaLocation=
+	   "http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-2.0.xsd
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
 		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd
@@ -16,9 +20,9 @@
 		installer and should override any properties defined in other files,
 		so it's last on the list
 	-->
-	<bean
-		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"
-		p:ignoreResourceNotFound="true" p:systemPropertiesModeName="SYSTEM_PROPERTIES_MODE_OVERRIDE">
+	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"
+          p:ignoreResourceNotFound="true"
+          p:systemPropertiesModeName="SYSTEM_PROPERTIES_MODE_OVERRIDE">
 		<property name="locations">
 			<list>
 				<value>classpath:/spring-jdbc.properties</value>
@@ -45,14 +49,27 @@
 
 	<bean id="dataSource"
 		class="org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy">
-		<constructor-arg>
-			<bean class="org.apache.tomcat.jdbc.pool.DataSource"
+		<constructor-arg ref="tomcatDataSource"/>
+	</bean>
+	
+	<bean id="tomcatDataSource" class="org.apache.tomcat.jdbc.pool.DataSource"
 				p:driverClassName="${server.database-driver}" p:url="${server.database-url}"
 				p:username="${server.database-user}" p:password="${server.database-password}"
 				p:defaultAutoCommit="false" p:minIdle="${server.database-minpoolsize}"
-				p:maxActive="${server.database-maxpoolsize}" p:maxWait="${server.database-blockingtimeout}"
-				p:jdbcInterceptors="ConnectionState"/>
-		</constructor-arg>
+				p:maxActive="${server.database-maxpoolsize}" p:maxIdle="${server.database-maxpoolsize}" 
+				p:initialSize="${server.database-minpoolsize}"
+				p:maxWait="${server.database-blockingtimeout}" p:jdbcInterceptors="ConnectionState;StatementFinalizer"
+				p:validationQuery="${server.connection-validation-sql}"
+				p:validationInterval="30000" p:logAbandoned="true" p:testOnBorrow="true" />
+	
+	<bean id="exporter" class="org.springframework.jmx.export.MBeanExporter"
+		lazy-init="false">
+		<property name="beans">
+			<map>
+				<entry key="hyperic.jmx:type=DataSource,name=tomcat.jdbc"
+					value-ref="tomcatDataSource" />
+			</map>
+		</property>
 	</bean>
 
 	<context:annotation-config />
@@ -61,7 +78,7 @@
 
 
 	<bean id="sessionFactory"
-		class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+		class="org.hyperic.hibernate.JmxExposingLocalSessionFactoryBean">
 		<property name="dataSource" ref="dataSource" />
 		<property name="mappingLocations" value="classpath:/hibernate/**/*.hbm.xml" />
 		<property name="hibernateProperties">
@@ -138,7 +155,7 @@
 	<context:mbean-server />
 
 
-	<bean class="org.hyperic.hq.transport.ServerTransport">
+	<bean class="org.hyperic.hq.transport.util.AsynchronousInvoker">
 		<constructor-arg value="4" />
 	</bean>
 
@@ -149,20 +166,13 @@
 	-->
 	<util:list id="triggers">
 		<bean class="org.hyperic.hq.bizapp.server.trigger.conditional.AlertTrigger" />
-		<bean
-			class="org.hyperic.hq.bizapp.server.trigger.conditional.ConfigChangedTrigger" />
-		<bean
-			class="org.hyperic.hq.bizapp.server.trigger.conditional.ValueChangeTrigger" />
-		<bean
-			class="org.hyperic.hq.bizapp.server.trigger.conditional.ControlEventTrigger" />
-		<bean
-			class="org.hyperic.hq.bizapp.server.trigger.conditional.CustomPropertyTrigger" />
-		<bean
-			class="org.hyperic.hq.bizapp.server.trigger.conditional.LogEventTrigger" />
-		<bean
-			class="org.hyperic.hq.bizapp.server.trigger.conditional.MeasurementThresholdTrigger" />
-		<bean
-			class="org.hyperic.hq.bizapp.server.trigger.conditional.ValueChangeTrigger" />
+		<bean class="org.hyperic.hq.bizapp.server.trigger.conditional.ConfigChangedTrigger" />
+		<bean class="org.hyperic.hq.bizapp.server.trigger.conditional.ValueChangeTrigger" />
+		<bean class="org.hyperic.hq.bizapp.server.trigger.conditional.ControlEventTrigger" />
+		<bean class="org.hyperic.hq.bizapp.server.trigger.conditional.CustomPropertyTrigger" />
+		<bean class="org.hyperic.hq.bizapp.server.trigger.conditional.LogEventTrigger" />
+		<bean class="org.hyperic.hq.bizapp.server.trigger.conditional.MeasurementThresholdTrigger" />
+		<bean class="org.hyperic.hq.bizapp.server.trigger.conditional.ValueChangeTrigger" />
 	</util:list>
 
 	<task:scheduler id="scheduler" />
@@ -171,5 +181,8 @@
 		<constructor-arg value="10" />
 	</bean>
 
+    <bean class="org.hyperic.hq.common.Log4jWatcher">
+        <constructor-arg value="/log4j.xml"/>
+    </bean>
 
 </beans>

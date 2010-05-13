@@ -31,17 +31,19 @@
 
 
 <c:if test="${CAM_SYSLOG_ACTIONS_ENABLED}">
-<tiles:insert definition=".events.config.view.syslogaction"/>
+	<tiles:insert definition=".events.config.view.syslogaction"/>
 
-<tiles:insert definition=".toolbar.edit">
-  <c:choose>
-    <c:when test="${not empty param.aetid}">
-      <tiles:put name="editUrl"><c:out value="/alerts/Config.do?mode=editSyslogAction&aetid=${param.aetid}&ad=${alertDef.id}"/></tiles:put>
-    </c:when>
-    <c:otherwise>
-      <tiles:put name="editUrl"><c:out value="/alerts/Config.do?mode=editSyslogAction&eid=${Resource.entityId}&ad=${alertDef.id}"/></tiles:put>
-    </c:otherwise>
-  </c:choose>
-</tiles:insert>
-<br>
+	<c:if test="${canModify}">
+		<tiles:insert definition=".toolbar.edit">
+  			<c:choose>
+    			<c:when test="${not empty param.aetid}">
+      				<tiles:put name="editUrl"><c:out value="/alerts/Config.do?mode=editSyslogAction&aetid=${param.aetid}&ad=${alertDef.id}"/></tiles:put>
+    			</c:when>
+    			<c:otherwise>
+      				<tiles:put name="editUrl"><c:out value="/alerts/Config.do?mode=editSyslogAction&eid=${Resource.entityId}&ad=${alertDef.id}"/></tiles:put>
+    			</c:otherwise>
+  			</c:choose>
+		</tiles:insert>
+	</c:if>
+	<br/>
 </c:if>

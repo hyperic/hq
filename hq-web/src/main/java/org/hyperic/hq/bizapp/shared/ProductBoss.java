@@ -4,6 +4,7 @@
 package org.hyperic.hq.bizapp.shared;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import org.hyperic.hq.appdef.ConfigResponseDB;
@@ -146,6 +147,11 @@ public interface ProductBoss {
      * Clear out all the caches
      */
     public void clearCaches(int sessionId);
+    
+    /**
+    * @return A List of Maps, where each Map contains individual cache stats
+    */
+    public List<Map<String,Object>> getCacheHealths();
 
     /**
      * Find {@link AttachmentDescriptor}s attached to the target type

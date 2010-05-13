@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.appdef.server.session;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -44,6 +45,7 @@ import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.autoinventory.AIIp;
 import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.hq.autoinventory.AIServer;
@@ -69,15 +71,17 @@ public class AIQRV_approve implements AIQResourceVisitor {
     private ConfigManager configMgr;
     private CPropManager cpropMgr;
     private ServerManager serverManager;
+    private ResourceManager resourceManager;
 
     
     @Autowired
     public AIQRV_approve(PlatformManager platformManager, ConfigManager configMgr,
-                         CPropManager cpropMgr, ServerManager serverManager) {
+                         CPropManager cpropMgr, ServerManager serverManager, ResourceManager resourceManager) {
         this.platformManager = platformManager;
         this.configMgr = configMgr;
         this.cpropMgr = cpropMgr;
         this.serverManager = serverManager;
+        this.resourceManager = resourceManager;
     }
 
     public void visitPlatform(AIPlatform aiplatform, AuthzSubject subject, List createdResources)
@@ -125,7 +129,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
                 try {
                     configMgr.configureResponse(subject, platform.getConfigResponse(), aid,
                         aiplatform.getProductConfig(), aiplatform.getMeasurementConfig(),
-                        aiplatform.getControlConfig(), null, null, false, false);
+                        aiplatform.getControlConfig(), null, null, false);
                 } catch (Exception e) {
                     log.warn("Error configuring platform: " + e, e);
                 }
@@ -153,7 +157,9 @@ public class AIQRV_approve implements AIQResourceVisitor {
                         configMgr.configureResponse(subject, existingPlatform.getConfigResponse(),
                             existingPlatform.getEntityId(), aiplatform.getProductConfig(),
                             aiplatform.getMeasurementConfig(), aiplatform.getControlConfig(), null,
-                            null, true, false);
+                            null, false);
+                         resourceManager.resourceHierarchyUpdated(
+                             subject, Collections.singletonList(existingPlatform.getResource()));
                     } catch (Exception e) {
                         log.warn("Error configuring platform: " + e, e);
                     }
@@ -306,7 +312,9 @@ public class AIQRV_approve implements AIQResourceVisitor {
             try {
                 configMgr.configureResponse(subject, server.getConfigResponse(), serverValue
                     .getEntityId(), aiserver.getProductConfig(), aiserver.getMeasurementConfig(),
-                    aiserver.getControlConfig(), null, null, true, false);
+                    aiserver.getControlConfig(), null, null, false);
+                resourceManager.resourceHierarchyUpdated(
+                    subject, Collections.singletonList(server.getResource()));
             } catch (Exception configE) {
                 log.warn("Error configuring server: " + configE, configE);
             }
@@ -354,7 +362,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
                 configMgr.configureResponse(subject, server.getConfigResponse(), server
                     .getEntityId(), aiserver.getProductConfig(), aiserver.getMeasurementConfig(),
                     aiserver.getControlConfig(), null, /* RT config */
-                    null, false, false);
+                    null, false);
             } catch (Exception e) {
                 log.warn("Error configuring server: " + e, e);
             }

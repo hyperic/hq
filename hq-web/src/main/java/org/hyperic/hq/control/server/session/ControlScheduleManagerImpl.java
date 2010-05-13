@@ -41,17 +41,21 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hibernate.Util;
+import org.hyperic.hq.agent.AgentConnectionException;
+import org.hyperic.hq.agent.AgentRemoteException;
+import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
-import org.hyperic.hq.appdef.shared.AppdefManager;
+import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.control.agent.client.ControlCommandsClient;
+import org.hyperic.hq.control.agent.client.ControlCommandsClientFactory;
 import org.hyperic.hq.control.shared.ControlConstants;
 import org.hyperic.hq.control.shared.ControlFrequencyValue;
 import org.hyperic.hq.control.shared.ControlScheduleManager;
@@ -103,18 +107,21 @@ public class ControlScheduleManagerImpl
 
     private ControlHistoryDAO controlHistoryDAO;
     private ControlScheduleDAO controlScheduleDAO;
-    private AppdefManager appdefManager;
+    private PlatformManager platformManager;
     private PermissionManager permissionManager;
+    private ControlCommandsClientFactory controlCommandsClientFactory;
 
     @Autowired
     public ControlScheduleManagerImpl(Scheduler scheduler, DBUtil dbUtil, ControlHistoryDAO controlHistoryDAO,
-                                      ControlScheduleDAO controlScheduleDAO, AppdefManager appdefManager,
-                                      PermissionManager permissionManager) {
+                                      ControlScheduleDAO controlScheduleDAO, 
+                                      PermissionManager permissionManager, PlatformManager platformManager, 
+                                      ControlCommandsClientFactory controlCommandsClientFactory) {
         super(scheduler, dbUtil);
         this.controlHistoryDAO = controlHistoryDAO;
         this.controlScheduleDAO = controlScheduleDAO;
-        this.appdefManager = appdefManager;
         this.permissionManager = permissionManager;
+        this.controlCommandsClientFactory = controlCommandsClientFactory;
+        this.platformManager = platformManager;
     }
 
     protected String getHistoryPagerClass() {
@@ -613,6 +620,115 @@ public class ControlScheduleManagerImpl
             controlScheduleDAO.remove(cSched);
         }
     }
+    
+    /**
+    * Do a control command on a single appdef entity
+    *
+    * @return The control history id
+    *
+    */
+    @Transactional
+    public Integer doAgentControlCommand(AppdefEntityID id,
+                                     AppdefEntityID gid,
+                                     Integer batchId,
+                                     AuthzSubject subject,
+                                     Date dateScheduled,
+                                     Boolean scheduled,
+                                     String description,
+                                     String action,
+                                     String args)
+    throws PluginException {
+        final StopWatch watch = new StopWatch();
+        final boolean debug = log.isDebugEnabled();
+       
+        long startTime = System.currentTimeMillis();
+        ControlHistory commandHistory = null;
+        String errorMsg = null;
+        Integer groupId = (gid != null) ? gid.getId() : null;
+        
+        try {
+            ControlCommandsClient client =
+                controlCommandsClientFactory.getClient(id);
+            String pluginName  = id.toString();
+            String productName = platformManager
+                                    .getPlatformPluginName(id);
+        
+            // Regular command
+            
+            if (debug) watch.markTimeBegin("createHistory");
+        
+            commandHistory = 
+                    createHistory(id, groupId, batchId,
+                                  subject.getName(), action, args,
+                                  scheduled, startTime, startTime, 
+                                  dateScheduled.getTime(),
+                                  ControlConstants.STATUS_INPROGRESS, 
+                                  description, null);
+        
+            if (debug) {
+                watch.markTimeEnd("createHistory");
+                watch.markTimeBegin("controlPluginCommand");
+            }
+        
+            client.controlPluginCommand(pluginName, 
+                                        productName,
+                                        commandHistory.getId(),
+                                        action, args);
+            
+            if (debug) watch.markTimeEnd("controlPluginCommand");
+        
+        } catch (AgentNotFoundException e) {
+            errorMsg = "Agent not found: " + e.getMessage();
+        } catch (AgentConnectionException e) {
+            errorMsg = "Error getting agent connection: " + e.getMessage();
+        } catch (AgentRemoteException e) {
+            errorMsg = "Agent error: " + e.getMessage();
+        } catch (SystemException e) {
+            errorMsg = "System error";
+        } catch (AppdefEntityNotFoundException e) {
+            errorMsg = "System error";
+        } finally {
+            if (debug) {
+                log.debug("doAgentControlCommand: " + watch
+                            + " {resource=" + id
+                            + ", action=" + action
+                            + ", dateScheduled=" + dateScheduled
+                            + ", error=" + errorMsg
+                            + "}");
+            }
+            
+            if (errorMsg != null) {
+                this.log.error("Unable to execute command: " + errorMsg);
+            
+                // Add the failed job to the history
+                try {
+                    AppdefEntityID aid = (gid != null) ? gid : id;
+        
+                    // Remove the old history
+                    if (commandHistory != null) {
+                        removeHistory(commandHistory.getId());
+                    }
+        
+                    // Add the new one
+                    createHistory(aid, groupId, batchId,
+                                  subject.getName(), action, args,
+                                  scheduled, startTime, 
+                                  System.currentTimeMillis(),
+                                  dateScheduled.getTime(),
+                                  ControlConstants.STATUS_FAILED,
+                                  description, errorMsg);
+                } catch (Exception exc) {
+                    this.log.error("Unable to create history entry for " +
+                                   "failed control action");
+                }
+        
+                throw new PluginException(errorMsg);
+            }
+        }
+        
+            return commandHistory.getId();
+    }
+
 
     /**
      * Execute a single action on an appdef entity
@@ -621,28 +737,42 @@ public class ControlScheduleManagerImpl
      */
     public void doSingleAction(AppdefEntityID id, AuthzSubject subject, String action, String args, int order[])
         throws PluginException {
-        // Even one time actions go through the scheduler, but there
-        // is no need to keep track of them in the ScheduleEntity
+        final boolean debug = log.isDebugEnabled();
 
-        String jobName = getJobName(subject, id, action);
-
-        // Setup the quartz job class that will handle this control action.
-        Class<?> jobClass = id.isGroup() ? ControlActionGroupJob.class : ControlActionJob.class;
-
-        JobDetail jobDetail = new JobDetail(jobName, GROUP, jobClass);
-        jobDetail.setVolatility(true);
-
-        setupJobData(jobDetail, subject, id, action, args, "Single execution", Boolean.FALSE, null, order);
+        // HQ-2080: Control action for a resource (non-group) intended
+        // for immediate execution no longer use the Quartz scheduler.
+        // However, group control actions still need to go through the
+        // Quartz scheduler because we need to wait for each job to complete.
+        // There is no need to keep track of them in the ScheduleEntity.
+        if (id.isGroup()) {
+            String jobName = getJobName(subject, id, action);
+            JobDetail jobDetail = new JobDetail(jobName, GROUP,ControlActionGroupJob.class);
+            jobDetail.setVolatility(true);
+            setupJobData(jobDetail, subject, id, action, args, "Single execution",Boolean.FALSE, null, order);
+           
 
         // All single actions use cron triggers
-        SimpleTrigger trigger = new SimpleTrigger(getTriggerName(subject, id, action), GROUP);
-        trigger.setVolatility(true);
-
-        try {
-            log.debug("Scheduling job for immediate execution: " + jobDetail);
-            scheduler.scheduleJob(jobDetail, trigger);
-        } catch (SchedulerException e) {
-            log.error("Unable to schedule job: " + e.getMessage(), e);
+            SimpleTrigger trigger = new SimpleTrigger(getTriggerName(subject, id, action), GROUP);
+            trigger.setVolatility(true);
+            try {
+                if (debug) log.debug("Scheduling job for immediate execution: " + jobDetail);
+                scheduler.scheduleJob(jobDetail, trigger);
+            } catch (SchedulerException e) {
+                log.error("Unable to schedule job: " + e.getMessage(), e);
+            }           
+        } else {
+            try {
+                if (debug) {
+                    log.debug("Running control action for immediate execution: "
+                        + " {resource=" + id
+                        + ", action=" + action
+                        + "}");
+                }
+                doAgentControlCommand(id, null, null, subject, new Date(),
+                        Boolean.FALSE, "", action, args);
+            } catch(PluginException e) {
+                log.error("Unable to execute control action: " + e.getMessage(), e);
+            }
         }
     }
 

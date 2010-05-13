@@ -210,7 +210,7 @@ public class MxServerDetector
         return query.toString();
     }
 
-    public class MxProcess {
+    public static class MxProcess {
         long _pid;
         String _installpath;
         String[] _args;
@@ -254,7 +254,7 @@ public class MxServerDetector
         List procs = new ArrayList();
         long[] pids = getPids(getProcQuery());
         log.debug(getProcQuery() + " matched " + pids.length + " processes");
-
+ 
         String homeProp = getProcHomeProperty();
         final boolean isMatch = isMatch(homeProp);
         if (isMatch) {

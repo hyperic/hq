@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.ui.taglib;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
@@ -53,7 +52,7 @@ public class NavMapSupportedTag extends VarSetterBaseTag {
     public final int doStartTag() throws JspException {
     
             HttpServletRequest request = (HttpServletRequest)pageContext.getRequest();
-            ServletContext ctx = pageContext.getServletContext();
+           
             AppdefBoss ab = Bootstrap.getBean(AppdefBoss.class);
 
             boolean navMapSupported = true;
@@ -119,8 +118,7 @@ public class NavMapSupportedTag extends VarSetterBaseTag {
                 }
             }
 
-            // now check to see if the server supports the navigation map
-            navMapSupported = navMapSupported && ab.isNavMapSupported();
+            
             setScopedVariable( new Boolean(navMapSupported) );
         
         return SKIP_BODY;

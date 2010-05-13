@@ -30,8 +30,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
-
 
 import org.hyperic.util.PropertyUtil;
 import org.hyperic.util.file.FileUtil;
@@ -240,52 +241,70 @@ public class AgentConfig {
             }
         }
     }
+    
+    /**
+    * Return an ordered list of property files used to configure the agent.  Only
+    * the default agent.properties is required, all other files will not be added
+    * if they do not exist.
+    *
+    * @param propsFile The default agent.properties
+    * @return The ordered list of Files to read for agent.properties.
+    */
+    public static File[] getPropertyFiles(String propsFile) {
+    
+        List<File> files = new ArrayList<File>();
 
-    public static AgentConfig newInstance(String propsFile)
-        throws IOException, AgentConfigException
-    {
-        // verify that the agent bundle home has been properly defined
-        // before populating the default properties
-        checkAgentBundleHome();
-        
-        Properties useProps = new Properties();
-        File file = new File(propsFile);
-        useProps.putAll(AgentConfig.getDefaultProperties());
-
-        if (!loadProps(useProps, file)) {
-            throw new AgentConfigException("Failed to load: " + propsFile);
+        files.add(new File(propsFile)); // Default agent.properties
+        File bundleFile = new File(BUNDLE_PROPFILE);
+        if (bundleFile.exists()) {
+            files.add(bundleFile); // Bundle agent.properties
         }
 
-        // load bundle-level agent properties
-        file = new File(BUNDLE_PROPFILE);
-        // do nothing if file does not exist
-        loadProps(useProps, file);
-        
+       
         final String home = System.getProperty("user.home");
-        String[] userFiles = {
-            //XXX Backwards compat, remove for 3.1 or 4.0?
-            home + File.separator + ".cam" + File.separator + DEFAULT_AGENT_PROPFILE_NAME,
-            //User overrides
-            home + File.separator + ".hq" + File.separator + DEFAULT_AGENT_PROPFILE_NAME,
-            //XXX considering yet another for windows where only cygwin can 'mkdir .hq'?
-            //"../" + File.separator + "hq-" + DEFAULT_PROPFILE,
-            //Check if the deployer has generated setup properties
-            "deployer.properties"
-        };
-
-        for (int i=0; i<userFiles.length; i++) {
-            file = new File(userFiles[i]);
-            if (loadProps(useProps, file)) {
-                //XXX logging not configured yet
-                //System.out.println("Loaded properties from: " + file);
+        File homeAgentProperties = new File(home + File.separator + ".hq" + File.separator + DEFAULT_AGENT_PROPFILE_NAME);
+        if (homeAgentProperties.exists()) {
+            files.add(homeAgentProperties); // ~/.hq/agent.properties
+        }
+      
+        File deployerProps = new File("deployer.properties");
+        if (deployerProps.exists()) {
+            files.add(deployerProps);
+        }
+        
+        return (File[])files.toArray(new File[files.size()]);
+    }
+    
+    /**
+     * Return a Properties object that is the merged result all possible
+     * locations for agent.properties.
+     * 
+     * @param propsFile The default agent.properties.
+     * @return The merge Properties object.
+     * @see org.hyperic.hq.agent.AgentConfig#getPropertyFiles(String)
+     */
+    public static Properties getProperties(String propsFile) throws AgentConfigException {
+        Properties useProps = new Properties();
+        useProps.putAll(AgentConfig.getDefaultProperties());
+       
+        File[] propFiles = getPropertyFiles(propsFile);
+        for (int i=0; i<propFiles.length; i++) {
+            if (!loadProps(useProps, propFiles[i])) {
+                throw new AgentConfigException("Failed to load: " + propFiles[i]);
             }
         }
         
         PropertyUtil.expandVariables(useProps);
+        return useProps;
+    }
+   
+    public static AgentConfig newInstance(String propsFile)
+        throws IOException, AgentConfigException {
+        // verify that the agent bundle home has been properly defined
+        // before populating the default properties
+        checkAgentBundleHome();
         
-        // More backwards compatibility.  Strip all net.covalent prefixes
-        // from the agent properties.
-        PropertyUtil.stripKeys(useProps, "net.covalent.");
+        Properties useProps = getProperties(propsFile);
         
         return AgentConfig.newInstance(useProps);
     }

@@ -43,13 +43,14 @@ import com.ibm.websphere.management.AdminClient;
 import com.ibm.websphere.management.exception.ConnectorException;
 
 public class WebSphereQuery {
-    protected static final Log log =
+    private static final Log log =
         LogFactory.getLog(WebSphereQuery.class.getName());
     private static final String[] NOOP_ATTRIBUTE_NAMES = new String[0];
     private static final Properties NOOP_PROPERTIES = new Properties();
 
     private WebSphereQuery parent;
     private String name;
+    private String cell;
     private String version;
     protected AdminClient mserver;
     protected ObjectName jmxObjectName;
@@ -155,6 +156,14 @@ public class WebSphereQuery {
 
     public void setName(String value) {
         this.name = value;
+    }
+
+    public String getCell() {
+        return this.cell;
+    }
+
+    public void setCell(String value) {
+        this.cell = value;
     }
 
     public String getVersion() {

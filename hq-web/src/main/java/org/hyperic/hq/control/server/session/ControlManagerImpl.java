@@ -32,7 +32,6 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.ConfigResponseDB;
@@ -58,7 +57,6 @@ import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.MessagePublisher;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.control.ControlEvent;
 import org.hyperic.hq.control.agent.client.ControlCommandsClient;
 import org.hyperic.hq.control.agent.client.ControlCommandsClientFactory;
@@ -462,15 +460,17 @@ public class ControlManagerImpl implements ControlManager {
             msg = message;
         }
 
-        // Update the control history
-        ControlHistory cLocal;
-        try {
-
-            Integer pk = new Integer(id);
-            cLocal = controlHistoryDao.findById(pk);
-        } catch (ObjectNotFoundException e) {
-            // We know the ID, this won't happen
-            throw new SystemException(e);
+        Integer pk = new Integer(id);
+        ControlHistory cLocal = controlHistoryDao.get(pk);
+        if (cLocal == null) {
+            // We know the ID, this should not happen
+            throw new SystemException(
+                "Failure getting control history id=" + id
+                + ". Could not update history {status=" + status
+                + ", startTime=" + startTime
+                + ", endTime=" + endTime
+                + ", message=" + msg
+                + "}");
         }
 
         cLocal.setStatus(status);

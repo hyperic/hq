@@ -28,7 +28,6 @@ package org.hyperic.hq.agent.client;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.bizapp.agent.client.SecureAgentConnection;
 import org.hyperic.hq.transport.AgentProxyFactory;
-import org.hyperic.hq.transport.ServerTransport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -39,18 +38,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class AgentCommandsClientFactory {
 
-    private ServerTransport serverTransport;
+    private final AgentProxyFactory agentProxyFactory;
 
     @Autowired
-    public AgentCommandsClientFactory(ServerTransport serverTransport) {
-        this.serverTransport = serverTransport;
+    public AgentCommandsClientFactory(AgentProxyFactory agentProxyFactory) {
+        this.agentProxyFactory = agentProxyFactory;
     }
 
     public AgentCommandsClient getClient(Agent agent) {
         if (agent.isNewTransportAgent()) {
-            AgentProxyFactory factory = serverTransport.getAgentProxyFactory();
-
-            return new AgentCommandsClientImpl(agent, factory);
+            return new AgentCommandsClientImpl(agent, agentProxyFactory);
         } else {
             return new LegacyAgentCommandsClientImpl(new SecureAgentConnection(agent.getAddress(),
                 agent.getPort(), agent.getAuthToken()));
@@ -60,9 +57,7 @@ public class AgentCommandsClientFactory {
     public AgentCommandsClient getClient(String agentAddress, int agentPort, String authToken,
                                          boolean isNewTransportAgent, boolean unidirectional) {
         if (isNewTransportAgent) {
-            AgentProxyFactory factory = serverTransport.getAgentProxyFactory();
-
-            return new AgentCommandsClientImpl(factory, agentAddress, agentPort, unidirectional);
+            return new AgentCommandsClientImpl(agentProxyFactory, agentAddress, agentPort, unidirectional);
         } else {
             return new LegacyAgentCommandsClientImpl(new SecureAgentConnection(agentAddress,
                 agentPort, authToken));

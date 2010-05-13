@@ -25,16 +25,26 @@
 
 package org.hyperic.hq.events.server.session;
 
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.escalation.shared.EscalationManager;
 import org.hyperic.hq.events.shared.AlertValue;
-import org.hyperic.util.pager.PagerProcessor;
+import org.hyperic.util.pager.PagerEventHandler;
+import org.hyperic.util.pager.PagerProcessorExt;
 
-public class PagerProcessor_events implements PagerProcessor {
+public class PagerProcessor_events implements PagerProcessorExt {
   
 
     public PagerProcessor_events () {}
+    
+    public PagerEventHandler getEventHandler() {
+        return null;
+    }
+   
+    public boolean skipNulls() {
+        return true;
+    }
 
     public Object processElement (Object o) {
 
@@ -51,7 +61,13 @@ public class PagerProcessor_events implements PagerProcessor {
                         alert.getId(), alert.getAlertDefinition()));
                 return aval; 
             } else if (o instanceof AlertDefinition) {
-                return ((AlertDefinition) o).getAlertDefinitionValue();
+                AlertDefinition def = (AlertDefinition) o;
+                Resource r = def.getResource();
+                if (r == null || r.isInAsyncDeleteState()) {
+                    return null;
+                } else {
+                    return def.getAlertDefinitionValue();
+               }
             }
         } catch (Exception e) {
             throw new SystemException("Error converting " + o +
@@ -59,5 +75,9 @@ public class PagerProcessor_events implements PagerProcessor {
         }
 
         return o;
+    }
+    
+    public Object processElement(Object o1, Object o2) {
+        return processElement(o1);
     }
 }

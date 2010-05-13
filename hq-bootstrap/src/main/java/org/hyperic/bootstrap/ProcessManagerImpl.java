@@ -54,6 +54,7 @@ public class ProcessManagerImpl implements ProcessManager {
 
     public int executeProcess(String[] commandLine, String workingDir, boolean suppressOutput,
                               int timeout) {
+        log.debug("Command line: " +commandLine );
         return executeProcess(commandLine, workingDir, null, suppressOutput, timeout);
     }
 

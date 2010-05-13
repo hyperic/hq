@@ -456,6 +456,10 @@ public interface AttrConstants {
     // AppdefResourceTypeValue object
     public static final String RESOURCE_TYPE_ATTR = "ResourceType";
     
+    public static final String CAN_TAKE_ACTION_ON_ALERT_ATTR = "canTakeAction";
+    public static final String CAN_MODIFY_ALERT_ATTR = "canModify";
+    public static final String CAN_VIEW_RESOURCE_TYPE_ALERT_TEMPLATE_ATTR = "canViewResourceTypeAlertTemplate";
+    
     /**
      * The request or session scope attribute under which actions
      * store the <code>Array</code> of requested
@@ -937,5 +941,10 @@ public interface AttrConstants {
      * XLib present
      */
     public static final String XLIB_INSTALLED = "xlib";
+    
+    /**
+    * Attribute name for the SNMP local engine ID
+    */
+    public static final String SNMP_LOCAL_ENGINE_ID = "snmpLocalEngineID";
     
 }

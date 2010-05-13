@@ -120,6 +120,39 @@ public class Metric {
         return '0';
     }
 
+    /**
+     * HHQ-3246: Some characters need to be escaped with a double backlash 
+     * to preserve their value during the decoding process.
+     * 
+     * For example, the equals sign = will normally be encoded
+     * to %3D and decoded back to =
+     * 
+     * However, if %3D is the desired string, it needs
+     * to be escaped with the double backslash \\%3D so that %3D
+     * is the outputted string during the decoding process.
+     */
+    private static String getUnescapedDecoding(String s, int i) {
+        String escapeIndicator = "\\\\";
+        String[] specialVals = new String[] {"%3D", "%3A", "%2C"};
+        String unescapedDecoding = null;
+        
+        try {
+            String encodedString = s.substring(i, i+5);           
+            
+            for (int j=0; j<specialVals.length; j++) {
+                String escapedString = escapeIndicator + specialVals[j];
+                if (escapedString.equals(encodedString)) {
+                    unescapedDecoding = specialVals[j];
+                    break;
+                }
+            }
+        } catch (IndexOutOfBoundsException iob) {
+            //
+        }
+
+        return unescapedDecoding;
+    }
+
     public static void addSecret(String key) {
         secrets.put(key, Boolean.TRUE);
     }
@@ -154,18 +187,30 @@ public class Metric {
 
         for (int i=0; i<len; i++) {
             char c = val.charAt(i);
-
-            if ((c == '%') && ((i+2) < len)) {
-                char dc = getDecoding(val, i);
-
-                if (dc != '0') {
-                    i += 2;
-                    c = dc;
+            
+            if ((c == '\\') && ((i+4) < len)) {
+                String unesc = getUnescapedDecoding(val, i);
+                
+                if (unesc == null) {
+                    buf.append(c);
+                } else {
+                    i += 4;
+                    buf.append(unesc);
                     changed = true;
                 }
-            }
+            } else {
+                if ((c == '%') && ((i+2) < len)) {
+                    char dc = getDecoding(val, i);
 
-            buf.append(c);
+                    if (dc != '0') {
+                        i += 2;
+                        c = dc;
+                        changed = true;
+                    }
+                }
+                
+                buf.append(c);
+            }
         }
 
         return changed ? buf.toString() : val;

@@ -240,25 +240,65 @@ public class Server extends ServerBase
 
     public boolean matchesValueObject(ServerValue obj)
     {
-        boolean matches = true;
-        matches = super.matchesValueObject(obj) &&
-            (getName() != null ? this.getName().equals(obj.getName())
-                : (obj.getName() == null)) &&
-            (getDescription() != null ?
-                this.getDescription().equals(obj.getDescription())
-                : (obj.getDescription() == null)) &&
-            (getLocation() != null ?
-                this.getLocation().equals(obj.getLocation())
-                : (obj.getLocation() == null)) &&
-            (isRuntimeAutodiscovery() == obj.getRuntimeAutodiscovery()) &&
-            (getInstallPath().equals(obj.getInstallPath())) &&
-            (getAutoinventoryIdentifier() != null ?
-                getAutoinventoryIdentifier().equals(
-                    obj.getAutoinventoryIdentifier())
-                : (obj.getAutoinventoryIdentifier() == null));
-
-        return matches;
+        return super.matchesValueObject(obj) &&
+            nameMatches(obj) &&
+            descriptionMatches(obj) &&
+            locationMatches(obj) &&
+            runtimeAutoDiscoveryMatches(obj) &&
+            installPathMatches(obj) &&
+            autoInventoryIdentifierMatches(obj);
     }
+    
+    private boolean nameMatches(ServerValue obj)
+    {
+        if (getName() == null) {
+            return obj.getName() == null;
+        } else {
+            return getName().equals(obj.getName());
+        }
+    }
+    
+    private boolean descriptionMatches(ServerValue obj)
+    {
+        if (getDescription() == null) {
+            return obj.getDescription() == null;
+        } else {
+            return getDescription().equals(obj.getDescription());
+        }
+    }
+    
+    private boolean locationMatches(ServerValue obj)
+    {
+        if (getLocation() == null) {
+            return obj.getLocation() == null;
+        } else {
+            return getLocation().equals(obj.getLocation());
+        }
+    }
+    
+    private boolean runtimeAutoDiscoveryMatches(ServerValue obj)
+    {
+        return isRuntimeAutodiscovery() == obj.getRuntimeAutodiscovery();
+    }
+    
+    private boolean installPathMatches(ServerValue obj)
+    {
+        if (getInstallPath() == null) {
+            return obj.getInstallPath() == null;
+        } else {
+            return getInstallPath().equals(obj.getInstallPath());
+        }
+    }
+    
+    private boolean autoInventoryIdentifierMatches(ServerValue obj)
+    {
+        if (getAutoinventoryIdentifier() == null) {
+            return obj.getAutoinventoryIdentifier() == null;
+        } else {
+            return getAutoinventoryIdentifier().equals(obj.getAutoinventoryIdentifier());
+        }
+    }
+
 
     /**
      * Validate a new service value object to be hosted by this server
@@ -337,5 +377,9 @@ public class Server extends ServerBase
 
     protected String _getAuthzOp(String op) {
         return (String)_authOps.get(op);
+    }
+    
+    public String toString() {
+        return (null != getId()) ? getId().toString() : "null";
     }
 }

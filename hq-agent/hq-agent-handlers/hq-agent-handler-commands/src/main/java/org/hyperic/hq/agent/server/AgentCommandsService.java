@@ -88,14 +88,13 @@ public class AgentCommandsService implements AgentCommandsClient {
         }
         
         RemoteInputStream inStream = (RemoteInputStream)streams[0];
-      //TODO : remoting uncomment
         
-//        try {
-//            inStream.setRemoteSourceInvokerLocator(
-//                    _agentTransportLifecycle.getRemoteTransportLocator());
-//        } catch (Exception e) {
-//            throw new AgentRemoteException("failed to set the remote source invoker locator", e);
-//        }
+        try {
+            inStream.setRemoteSourceInvokerLocator(
+                    _agentTransportLifecycle.getRemoteTransportLocator());
+        } catch (Exception e) {
+            throw new AgentRemoteException("failed to set the remote source invoker locator", e);
+        }
         
         readFilesFromStream(destFiles, inStream);
 
@@ -386,8 +385,8 @@ public class AgentCommandsService implements AgentCommandsClient {
             try {
                 _log.debug("Creating result map");
                 
-                // Grab the version.properties file from the new hq bundle
-                final File versionFile = new File(bundleDir,"lib/version.properties");
+                // Grab the hq-version.properties file from the new hq bundle
+                final File versionFile = new File(bundleDir,"lib/hq-version.properties");
                 FileInputStream versionInputStream = new FileInputStream(versionFile);
                 
                 Properties newVersionProperties = new Properties();
@@ -405,9 +404,9 @@ public class AgentCommandsService implements AgentCommandsClient {
                 result.put(AgentUpgrade_result.BUILD, build);
                 result.put(AgentUpgrade_result.BUNDLE_NAME, bundleHome);
             } catch(MalformedURLException e) {
-                _log.warn("Could not access new version.properties due to a malformed url, version value will not be updated in the database.", e);
+                _log.warn("Could not access new hq-version.properties due to a malformed url, version value will not be updated in the database.", e);
             } catch(IOException e) {
-                _log.warn("Could not read new version.properties file, version value will not be updated in the database.", e);
+                _log.warn("Could not read new hq-version.properties file, version value will not be updated in the database.", e);
             }
         }
         // cleanup work dir files and bundle

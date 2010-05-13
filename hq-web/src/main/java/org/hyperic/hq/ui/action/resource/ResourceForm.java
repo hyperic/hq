@@ -53,10 +53,20 @@ public class ResourceForm
 
     private Integer resourceType;
     private List resourceTypes;
+    
+    private boolean canModify = false;
 
     // -------------------------------------constructors
 
     // -------------------------------------public methods
+    
+    public boolean isCanModify() {
+        return canModify;
+    }
+    
+    public void setCanModify(boolean canModify) {
+        this.canModify = canModify;
+    }
 
     /**
      * Returns the name.
@@ -237,6 +247,7 @@ public class ResourceForm
         rid = null;
         resourceType = null;
         resourceTypes = null;
+        canModify = false;
     }
 
     public ActionErrors validate(ActionMapping mapping, HttpServletRequest request) {

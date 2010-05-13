@@ -35,12 +35,12 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.MeasurementScheduleException;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.SRNManager;
+import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.pager.PageControl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -67,11 +67,6 @@ public class SRNManagerImpl implements SRNManager {
         this.measurementManager = measurementManager;
         this.scheduleRevNumDAO = scheduleRevNumDAO;
         this.srnCache = srnCache;
-    }
-
-    // TODO resolve circular dependency
-    private AgentScheduleSynchronizer getAgentScheduleSynchronizer() {
-        return Bootstrap.getBean(AgentScheduleSynchronizer.class);
     }
 
     /**
@@ -195,6 +190,7 @@ public class SRNManagerImpl implements SRNManager {
     public Collection<AppdefEntityID> reportAgentSRNs(SRN[] srns) {
         HashSet<AppdefEntityID> nonEntities = new HashSet<AppdefEntityID>();
         final boolean debug = log.isDebugEnabled();
+        final List<AppdefEntityID> eids = new ArrayList<AppdefEntityID>(srns.length);
 
         for (int i = 0; i < srns.length; i++) {
             ScheduleRevNum srn = srnCache.get(srns[i].getEntity());
@@ -229,12 +225,16 @@ public class SRNManagerImpl implements SRNManager {
                                   srns[i].getRevisionNumber() + " but cached is " + srn.getSrn() +
                                   " rescheduling metrics..");
                     }
-                    List<AppdefEntityID> eids = new ArrayList<AppdefEntityID>();
+                   
                     eids.add(srns[i].getEntity());
-                    getAgentScheduleSynchronizer().scheduleBuffered(eids);
+                   
                 }
                 srn.setLastReported(current);
             }
+        }
+        if (!eids.isEmpty()) {
+           AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(eids);
+            ZeventManager.getInstance().enqueueEventAfterCommit(event);
         }
         return nonEntities;
     }

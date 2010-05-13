@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.authz.server.session;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -33,6 +34,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 
 import javax.annotation.PostConstruct;
 
@@ -58,6 +60,7 @@ import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.events.shared.EventLogManager;
 import org.hyperic.hq.grouping.CritterList;
 import org.hyperic.hq.grouping.GroupException;
@@ -68,6 +71,7 @@ import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
+import org.quartz.SchedulerException;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -84,6 +88,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @Service
 public class ResourceGroupManagerImpl implements ResourceGroupManager, ApplicationContextAware {
+    private final String BUNDLE = "org.hyperic.hq.authz.Resources";
     private Pager _groupPager;
     private Pager _ownedGroupPager;
     private static final String GROUP_PAGER = PagerProcessor_resourceGroup.class.getName();
@@ -142,6 +147,37 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         resourceEdgeDAO.create(res.getResource(), res.getResource(), 0, getContainmentRelation()); // Self-edge
         applicationContext.publishEvent(new GroupCreatedEvent(res));
         return res;
+    }
+    
+    /**
+     * Do not allow resources to be added or removed from a group
+     * if the group has a downtime schedule in progress.
+     */
+    private void checkGroupMaintenance(AuthzSubject subj, ResourceGroup group) 
+        throws PermissionException, VetoException {
+    
+        try {
+            MaintenanceEvent event = PermissionManagerFactory.getInstance()
+                                        .getMaintenanceEventManager()
+                                            .getMaintenanceEvent(subj, group.getId());
+
+            if (event != null && MaintenanceEvent.STATE_RUNNING.equals(event.getState())) {
+                String msg = ResourceBundle.getBundle(BUNDLE)
+                                .getString("resourceGroup.update.error.downtime.running");
+                
+                throw new VetoException(
+                            MessageFormat.format(msg, new String[] {group.getName()}));
+            }
+        } catch (SchedulerException se) {
+            // This should not happen. Indicates a serious system error.
+            
+            String msg = ResourceBundle.getBundle(BUNDLE)
+                            .getString("resourceGroup.update.error.downtime.scheduler.failure");
+                        
+            throw new SystemException(
+                        MessageFormat.format(msg, new String[] {group.getName()}),
+                        se); 
+        }
     }
 
     /**
@@ -284,12 +320,13 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
      * 
      */
     public void addResources(AuthzSubject subj, ResourceGroup group, List<Resource> resources)
-        throws PermissionException {
+        throws PermissionException, VetoException {
         checkGroupPermission(subj, group.getId(), AuthzConstants.perm_modifyResourceGroup);
+        checkGroupMaintenance(subj, group);
         addResources(group, resources);
     }
 
-    private void addResources(ResourceGroup group, List<Resource> resources) {
+    private void addResources(ResourceGroup group, Collection<Resource> resources) {
         resourceGroupDAO.addMembers(group, resources);
         applicationContext.publishEvent(new GroupMembersChangedEvent(group));
     }
@@ -299,12 +336,56 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
      * 
      */
     public ResourceGroup addResource(AuthzSubject whoami, ResourceGroup group, Resource resource)
-        throws PermissionException {
+        throws PermissionException, VetoException {
         checkGroupPermission(whoami, group.getId(), AuthzConstants.perm_modifyResourceGroup);
 
-        resourceGroupDAO.addMembers(group, Collections.singleton(resource));
-        applicationContext.publishEvent(new GroupMembersChangedEvent(group));
+        checkGroupMaintenance(whoami, group);
+        addResources(group, Collections.singletonList(resource));
         return group;
+    }
+    
+   
+    public void addResource(AuthzSubject whoami, 
+                            Resource resource,
+                            Collection<ResourceGroup> groups)
+        throws PermissionException, VetoException
+    {
+        // Do all of the pre-condition checks first before
+        // iterating through addResources() because
+        // ResourceGroupDAO().addMembers() will commit
+        // the changes after each iteration.
+
+        for (ResourceGroup g : groups) { 
+            checkGroupPermission(whoami, g.getId(),
+                                 AuthzConstants.perm_modifyResourceGroup);
+            checkGroupMaintenance(whoami, g);
+        }
+        
+        for(ResourceGroup g : groups) {
+            addResources(g, Collections.singletonList(resource));
+        }
+    }
+
+   
+    public void removeResource(AuthzSubject whoami,
+                               Resource resource,
+                               Collection<ResourceGroup> groups)
+        throws PermissionException, VetoException
+    {
+        // Do all of the pre-condition checks first before
+        // iterating through removeResources() because
+        // ResourceGroupDAO().removeMembers() will commit
+        // the changes after each iteration.
+
+        for (ResourceGroup g : groups) {
+            checkGroupPermission(whoami, g.getId(),
+                                 AuthzConstants.perm_modifyResourceGroup);
+            checkGroupMaintenance(whoami, g);
+        }
+        
+        for ( ResourceGroup g : groups) {
+            removeResources(g, Collections.singletonList(resource));
+        }
     }
 
     /**
@@ -314,11 +395,15 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
      * 
      */
     public void removeResources(AuthzSubject whoami, ResourceGroup group, Collection<Resource> resources)
-        throws PermissionException {
+        throws PermissionException, VetoException {
         checkGroupPermission(whoami, group.getId(), AuthzConstants.perm_modifyResourceGroup);
-
-        resourceGroupDAO.removeMembers(group, resources);
-        applicationContext.publishEvent(new GroupMembersChangedEvent(group));
+        checkGroupMaintenance(whoami, group);
+        removeResources(group, resources);
+    }
+    
+    private void removeResources(ResourceGroup group, Collection<Resource> resources) {
+       resourceGroupDAO.removeMembers(group, resources);
+       applicationContext.publishEvent(new GroupMembersChangedEvent(group));
     }
 
     /**
@@ -345,9 +430,9 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
      * 
      */
     public void setResources(AuthzSubject whoami, ResourceGroup group, Collection<Resource> resources)
-        throws PermissionException {
+        throws PermissionException, VetoException {
         checkGroupPermission(whoami, group.getId(), AuthzConstants.perm_modifyResourceGroup);
-
+        checkGroupMaintenance(whoami, group);
         resourceGroupDAO.setMembers(group, resources);
         applicationContext.publishEvent(new GroupMembersChangedEvent(group));
     }

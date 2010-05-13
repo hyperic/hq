@@ -117,13 +117,6 @@ class MetricHelper extends BaseHelper {
     /**
      * @deprecated Use MetricCategory
      */
-     def disableMeasurement(Integer mId) {
-        measMan.disableMeasurement(user, mId);
-     }
-
-    /**
-     * @deprecated Use MetricCategory
-     */
      def enableMeasurement(Integer mId, Long interval) {
         measMan.enableMeasurement(user, mId, interval);
      }

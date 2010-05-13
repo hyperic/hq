@@ -153,9 +153,9 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
                               String dept, String email, String firstName, String lastName,
                               String phone, String sms, Boolean useHtml) throws PermissionException {
 
-        if (!whoami.getId().equals(target.getId())) {
-            permissionManager.check(whoami.getId(), resourceTypeDAO.findTypeResourceType().getId(),
-                AuthzConstants.rootResourceId, AuthzConstants.perm_viewSubject);
+        if (!whoami.getId().equals(target.getId())) {   
+            permissionManager.check(whoami.getId(), resourceTypeDAO.findTypeResourceType(),
+                AuthzConstants.rootResourceId, AuthzConstants.subjectOpModifySubject);
         }
 
         if (active != null && target.getActive() != active.booleanValue()) {

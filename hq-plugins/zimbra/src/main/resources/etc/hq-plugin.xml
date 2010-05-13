@@ -335,10 +335,7 @@ USA.
                  default="Pid.PidFile.eq=%installpath%/cyrus-sasl/state/saslauthd.pid"
                  description="PTQL for Zimbra Cyrus SASL"/>
             </config>
-            <metric name="Availability"
-             template="sigar:Type=ProcState,Arg=%process.query%:State"
-             indicator="true"/>
-            &process-metrics;
+            &multi-process-metrics;
         </service>
         
         <service name="Apache Httpd">
@@ -361,10 +358,7 @@ USA.
                  default="Pid.SudoPidFile.eq=%installpath%/log/amavisd.pid"
                  description="PTQL for Zimbra AMaViS"/>
             </config>
-            <metric name="Availability"
-             template="sigar:Type=ProcState,Arg=%process.query%:State"
-             indicator="true"/>
-            &process-metrics;
+            &multi-process-metrics;
         </service>
         
         
@@ -426,6 +420,59 @@ USA.
         </service>
         
     </server>
+
+    <metrics name="multi-process">
+        <metric name="Availability" template="sigar:Type=ProcState,Arg=Pid.SudoPidFile.eq=%process.status%:State" indicator="true"/>
+        <metric name="Number of Processes"
+        alias="NumProcesses"
+        template="sigar:Type=MultiProcCpu,Arg=%process.query%:Processes"
+        category="UTILIZATION"
+        units="none"
+        collectionType="dynamic"/>
+
+        <metric name="Memory Size"
+        alias="MemSize"
+        template="sigar:Type=MultiProcMem,Arg=%process.query%:Size"
+        category="UTILIZATION"
+        units="B"
+        collectionType="dynamic"/>
+
+        <metric name="Resident Memory Size"
+        alias="ResidentMemSize"
+        template="sigar:Type=MultiProcMem,Arg=%process.query%:Resident"
+        category="UTILIZATION"
+        units="B"
+        collectionType="dynamic"/>
+
+        <metric name="Cpu System Time"
+        alias="SystemTime"
+        template="sigar:Type=MultiProcCpu,Arg=%process.query%:Sys"
+        category="UTILIZATION"
+        units="ms"
+        collectionType="trendsup"/>
+
+        <metric name="Cpu User Time"
+        alias="UserTime"
+        template="sigar:Type=MultiProcCpu,Arg=%process.query%:User"
+        category="UTILIZATION"
+        units="ms"
+        collectionType="trendsup"/>
+
+        <metric name="Cpu Total Time"
+        alias="TotalTime"
+        template="sigar:Type=MultiProcCpu,Arg=%process.query%:Total"
+        category="UTILIZATION"
+        units="ms"
+        collectionType="trendsup"/>
+
+        <metric name="Cpu Usage"
+        alias="Usage"
+        template="sigar:Type=MultiProcCpu,Arg=%process.query%:Percent"
+        category="UTILIZATION"
+        indicator="true"
+        units="percentage"
+        collectionType="dynamic"/>
+    </metrics>
 
     <filter name="template_mailboxd" value="zimbra-stats:statsfile=%installpath%/zmstat/mailboxd.csv:${alias}"/>
     <filter name="template_mysql" value="zimbra-stats:statsfile=%installpath%/zmstat/mysql.csv:${alias}"/>
@@ -894,8 +941,9 @@ USA.
         <service name="Cyrus SASL">
             <config>
                 <option name="process.query" description="Sigar PTQL Process Query"/>
+                <option name="process.status" description="Process PID file"/>
             </config>
-            &multi-process-metrics;
+            <metrics include="multi-process"/>
         </service>
         <!-- -->
         
@@ -904,8 +952,9 @@ USA.
             <plugin type="log_track" class="org.hyperic.hq.product.LogFileTailPlugin"/>
             <config>
                 <option name="process.query" description="Sigar PTQL Process Query"/>
+                <option name="process.status" description="Process PID file"/>
             </config>
-            &multi-process-metrics;
+            <metrics include="multi-process"/>
         </service>
         <!-- -->
         
@@ -913,8 +962,9 @@ USA.
         <service name="HTTPD">
             <config>
                 <option name="process.query" description="Sigar PTQL Process Query"/>
+                <option name="process.status" description="Process PID file"/>
             </config>
-            &multi-process-metrics;
+            <metrics include="multi-process"/>
         </service>
         <!-- -->
         
@@ -922,18 +972,20 @@ USA.
         <service name="AMaViS" description="A Mail Virus Scanner">
             <config>
                 <option name="process.query" description="Sigar PTQL Process Query"/>
+                <option name="process.status" description="Process PID file"/>
             </config>
-            &multi-process-metrics;
+            <metrics include="multi-process"/>
         </service>
         <!-- -->
-        
+
         <!--  convertd  -->
         <service name="Convertd">
             <plugin type="log_track" class="org.hyperic.hq.product.Log4JLogTrackPlugin"/>
             <config>
                 <option name="process.query" default="State.Name.eq=java,Args.*.eq=com.zimbra.cs.convertd.TransformationServer" description="Sigar PTQL Process Query"/>
+                <option name="process.status" description="Process PID file"/>
             </config>
-            &multi-process-metrics;
+            <metrics include="multi-process"/>
         </service>
         <!-- -->
         
@@ -979,7 +1031,10 @@ USA.
         </service>
         
     </server>
-    
+
+    <server name="Zimbra" version="6.0.x" include="Zimbra 5.0.x">
+    </server>
+
     <!-- ==================== Plugin Help =========================== -->
     <help name="Zimbra">
         <![CDATA[

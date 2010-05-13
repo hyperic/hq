@@ -31,11 +31,6 @@
 
 
 <tiles:insert definition=".form.buttons"/>
-<table width="100%" border="0" cellspacing="0" cellpadding="0">
-  <tr>
-    <td width="21%">&nbsp;</td>
-    <td width="79%" class="ButtonCaptionText">
-      <i><fmt:message key="alert.config.props.CB.Content.TinyType"/></i>
-    </td>
-  </tr>
-</table>
+<div class="footerMessageContainer">
+	<i><fmt:message key="alert.config.props.CB.Content.TinyType"/></i>
+</div>

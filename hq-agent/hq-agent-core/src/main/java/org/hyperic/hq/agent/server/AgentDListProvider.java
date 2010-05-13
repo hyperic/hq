@@ -51,8 +51,8 @@ public class AgentDListProvider
     implements AgentStorageProvider 
 {
     private static final int RECSIZE  = 1024;
-    private static final long MAXSIZE = 100 * 1024 * 1024; // 100MB
-    private static final long CHKSIZE = 20 * 1024 * 1024;  // 20MB
+    private static final long MAXSIZE = 50 * 1024 * 1024; // 50MB
+    private static final long CHKSIZE = 10 * 1024 * 1024;  // 10MB
     private static final int CHKPERC  = 50; // Only allow < 50% free
 
     private Log      log;        // da logger

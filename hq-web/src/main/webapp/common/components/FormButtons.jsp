@@ -47,41 +47,40 @@
   }
 </script>
 
+<script>
+	dojo11.addOnLoad(function() {
+		<c:if test="${empty cancelOnly}">
+			dojo11.connect(dojo11.byId("okButton"), "onclick", function() {
+				hyperic.form.mockLinkSubmit("ok.x", "1", "formButtonHiddenSubmitArea");
+			});
+			
+			<c:if test="${empty noReset}">
+				dojo11.connect(dojo11.byId("resetButton"), "onclick", function() {
+					hyperic.form.mockLinkSubmit("reset.x", "1", "formButtonHiddenSubmitArea");
+				});
+			</c:if>
+		</c:if>
+		<c:if test="${empty noCancel}">
+			dojo11.connect(dojo11.byId("cancelButton"), "onclick", function() {
+				hyperic.form.mockLinkSubmit("cancel.x", "1", "formButtonHiddenSubmitArea");
+			});
+		</c:if>
+	});
+</script>
+
 <!-- FORM BUTTONS -->
-<table width="100%" cellpadding="0" cellspacing="0" border="0" class="buttonTable">
-  <tr>
-    <td colspan="3"><html:img page="/images/spacer.gif" width="1" height="10" border="0"/></td>
-  </tr>
-  <tr>
-    <td colspan="3" class="ToolbarLine"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
-  </tr>
-  <tr>
-    <td colspan="3"><html:img page="/images/spacer.gif" width="1" height="10" border="0"/></td>
-  </tr>
-  <tr align=left valign=bottom>
-<c:choose>
-  <c:when test="${not empty addToList}">
-    <td width="50%">&nbsp;</td>
-    <td><html:img page="/images/spacer.gif" width="50" height="1" border="0"/></td>
-    <td width="50%">
-  </c:when>
-  <c:otherwise>
-    <td width="20%">&nbsp;</td>
-		<td><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
-    <td width="80%">
-  </c:otherwise>
-</c:choose>
-          <input type="hidden" name="temp" value="temp" id="formButtonHiddenSubmitArea"/>
-<c:if test="${empty cancelOnly}">
-          <a class="buttonGreen" href="javascript:hyperic.form.mockLinkSubmit('ok.x', '1', 'formButtonHiddenSubmitArea');"><span><fmt:message key="button.ok"/></span></a>
-<c:if test="${empty noReset}">
-          <a class="buttonGray" href="javascript:hyperic.form.mockLinkSubmit('reset.x', '1', 'formButtonHiddenSubmitArea');"><span><fmt:message key="button.reset"/></span></a>
-</c:if>          
-</c:if>
-<c:if test="${empty noCancel}">
-          <a class="buttonGray" href="javascript:hyperic.form.mockLinkSubmit('cancel.x', '1', 'formButtonHiddenSubmitArea');"><span><fmt:message key="button.cancel"/></span></a>
-</c:if>
-    </td>
-  </tr>
-</table>
-<!-- /  -->
+<div class="formButtonContainer">
+	<input type="hidden" name="temp" value="temp" id="formButtonHiddenSubmitArea" />
+		
+	<c:if test="${empty cancelOnly}">
+		<input id="okButton" type="button" class="button42" value="<fmt:message key="button.ok" />" />
+			
+		<c:if test="${empty noReset}">
+			<input id="resetButton" type="button" class="button42 reset" value="<fmt:message key="button.reset" />" />
+		</c:if>
+	</c:if>
+		
+	<c:if test="${empty noCancel}">
+		<input id="cancelButton" type="button" class="button42 cancel" value="<fmt:message key="button.cancel" />" />
+	</c:if>
+</div>

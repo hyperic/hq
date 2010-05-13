@@ -133,8 +133,7 @@
 							</tiles:insert>
       &nbsp;<br>
 							<tiles:insert
-								definition=".resource.common.monitor.visibility.charts.metric.partrsrcs">
-								<tiles:put name="multiResource" value="true" />
+								definition=".resource.common.monitor.visibility.charts.metric.partrsrcs.snmr">
 							</tiles:insert>
       &nbsp;<br>
 						</c:when>

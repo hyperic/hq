@@ -162,6 +162,10 @@
   <definition name=".events.config.view.notifications.escalation.details"
         path="/resource/common/monitor/alerts/config/ViewEscalation.jsp"
         controllerUrl="/alerts/ViewEscalation.do"/>
+        
+  <definition name=".events.config.view.notifications.snmp.details"
+        path="/resource/common/monitor/alerts/config/SnmpActionProps.jsp"
+        controllerUrl="/alerts/ViewNotificationsSnmp.do"/>
 
   <definition name=".events.config.view.controlaction"
               path="/resource/common/monitor/alerts/config/ViewDefinitionControlAction.jsp"/>

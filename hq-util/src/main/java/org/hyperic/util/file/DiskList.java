@@ -74,13 +74,14 @@ public class DiskList {
     private static final Log log = LogFactory.getLog(DiskList.class.getName());
 
     private String           fileName;
+    private String           idxFileName;
     private RandomAccessFile indexFile;
-    private RandomAccessFile dataFile;
+    protected RandomAccessFile dataFile;
     private int              recordSize;  // Size of each record
     private long             firstRec;    // IDX of first record
     private long             lastRec;     // IDX of last record
     private byte[]           padBytes;    // Utility array for padding
-    private SortedSet        freeList;    // Set(Long) of free rec idxs
+    protected SortedSet      freeList;    // Set(Long) of free rec idxs
     private int              modNum;      // Modification random number
     private long             checkSize;   // Start to check for unused blocks
                                           // when the datafile reaches this 
@@ -119,10 +120,11 @@ public class DiskList {
                     int checkPerc, long maxLength)
         throws IOException
     {
-        File idxFileName;
+        File idxFile;
 
-        idxFileName      = new File(dataFile + ".idx");
+        idxFile          = new File(dataFile + ".idx");
         this.fileName    = dataFile.getName();
+        this.idxFileName = idxFile.getName();
         this.rand        = new Random();
         this.dataFile    = new RandomAccessFile(dataFile, "rw");
         this.recordSize  = recordSize;
@@ -135,9 +137,9 @@ public class DiskList {
                        " to " + maxLength + " bytes");
         this.maxLength   = maxLength;
 
-        this.genFreeList(idxFileName);
+        this.indexFile = new RandomAccessFile(idxFile, "rw");
+        this.genFreeList(idxFile);
 
-        this.indexFile = new RandomAccessFile(idxFileName, "rw");
         this.closed    = false;
     }
 
@@ -155,16 +157,16 @@ public class DiskList {
     }
 
     /**
-     * Do maintinece on the data and index files.  If the datafile size and 
-     * the free block percentange exceed the defined thresholds, the extra
+     * Do maintenance on the data and index files.  If the datafile size and 
+     * the free block percentage exceed the defined thresholds, the extra
      * free blocks will be removed by truncating the data and index files.
      *
      * Since truncation is used, some times it will be possible that even
-     * though the criteria are met, we won't be albe to delete the free space.
+     * though the criteria are met, we won't be able to delete the free space.
      * This is a recoverable situation though, since new blocks will be
      * inserted at the beginning of the data file.
      */
-    private void doMaintainence()
+    private void doMaintenence()
         throws IOException
     {
         long lastData = this.dataFile.length()/this.recordSize;
@@ -211,7 +213,7 @@ public class DiskList {
      * buffered input stream, which makes our initial startup much
      * faster, if there is a lot of data sitting in the list.
      */
-    private void genFreeList(File idxFileName)
+    private void genFreeList(File idxFile)
         throws IOException
     {
         BufferedInputStream bIs;
@@ -226,12 +228,12 @@ public class DiskList {
         this.freeList = new TreeSet();
         
         try {
-            fIs = new FileInputStream(idxFileName);
+            fIs = new FileInputStream(idxFile);
 
             bIs = new BufferedInputStream(fIs);
             dIs = new DataInputStream(bIs);
 
-            for(int idx=0; ; idx++){
+            for(long idx=0; ; idx++){
                 boolean used;
                 long prev, next;
                 
@@ -388,12 +390,20 @@ public class DiskList {
             try {
                 this.indexFile.setLength(0);
             } catch(IOException exc){
+                this.log.error("IOException while truncating file " + idxFileName);
+                if (this.log.isDebugEnabled()) {
+                    this.log.debug(exc);
+                }
                 sExc = exc;
             }
 
             try {
                 this.dataFile.setLength(0);
             } catch(IOException exc){
+                this.log.error("IOException while truncating file " + fileName);
+                if (this.log.isDebugEnabled()) {
+                    this.log.debug(exc);
+                }
                 if(sExc != null){
                     sExc = exc;
                 }
@@ -469,9 +479,11 @@ public class DiskList {
             this.freeList.add(new Long(recNo));
         }
 
-        if ((this.dataFile.length() > this.checkSize) &&
-            (this.getDataFileFreePercentage() > this.checkPerc)) {
-            this.doMaintainence();
+        long length = this.dataFile.length();
+        long percFree = this.getDataFileFreePercentage();
+        if ((length > this.checkSize) &&
+            (percFree > this.checkPerc)) {
+            this.doMaintenence();
         }
     }
 
@@ -492,13 +504,21 @@ public class DiskList {
 
         try {
             this.dataFile.close();
-        } catch(IOException exc){ 
+        } catch(IOException exc){
+            this.log.error("IOException while closing file " + fileName);
+            if (this.log.isDebugEnabled()) {
+                this.log.debug(exc);
+            }
             sExc = exc; 
         }
 
         try {
             this.indexFile.close();
         } catch(IOException exc){
+            this.log.error("IOException while closing file " + idxFileName);
+            if (this.log.isDebugEnabled()) {
+                this.log.debug(exc);
+            }
             if(sExc == null){
                 sExc = exc;
             }
@@ -550,6 +570,10 @@ public class DiskList {
                 try {
                     rec = this.diskList.readRecord(this.curIdx);
                 } catch(IOException exc){
+                    log.error("IOException while reading record");
+                    if (log.isDebugEnabled()) {
+                        log.debug(exc);
+                    }
                     throw new NoSuchElementException("Error getting next " +
                                                      "element: " +
                                                      exc.getMessage());
@@ -577,6 +601,10 @@ public class DiskList {
                 try {
                     this.diskList.removeRecord(this.curIdx);
                 } catch(IOException exc){
+                    log.error("IOException while removing record");
+                    if (log.isDebugEnabled()) {
+                        log.debug(exc);
+                    }
                     throw new IllegalStateException("Error removing record: " +
                                                     exc.getMessage());
                 }
@@ -597,7 +625,7 @@ public class DiskList {
             return new DiskListIterator(this, this.firstRec, this.modNum);
         }
     }
-
+    
     public static void main(String[] args)
         throws Exception
     {

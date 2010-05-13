@@ -90,7 +90,7 @@ public class ProductProperties {
             if (_props == null) {
                 _props = new Properties();
 
-                load("version.properties", false);
+                load("hq-version.properties", false);
                 load("product.properties", false);
             }
         }

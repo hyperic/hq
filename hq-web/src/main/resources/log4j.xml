@@ -12,7 +12,7 @@
 		<param name="Target" value="System.out" />
 
 		<layout class="org.apache.log4j.PatternLayout">
-			<param name="ConversionPattern" value="%d{ABSOLUTE} %-5p [%c{1}] %m%n" />
+			<param name="ConversionPattern" value="%d %-5p [%t] [%c@%L] %m%n" />
 		</layout>
 	</appender>
 
@@ -144,16 +144,6 @@
 
 
 	<!--
-		Increase the level threshold for the Datasource logger Useful for
-		debugging connection leaks
-	-->
-
-	<!--  <logger name="HypericDS">
-		<level value="DEBUG" />
-	</logger> -->
-
-
-	<!--
 		Use this logger to log every instance of resource counter-type alerts
 		triggering. Comment out if the log messages become unwieldy.
 	-->
@@ -186,8 +176,7 @@
 		Use this logger to log every instance of a group alert firing. Comment
 		out if the log messages become unwieldy.
 	-->
-	<!-- <logger name="
-		org.hyperic.hq.galerts.processor.MemGalertDef.Fired">
+	 <!--  <logger name="org.hyperic.hq.galerts.processor.MemGalertDef.Fired">
 		<level value="DEBUG" />
 	</logger>  -->
 

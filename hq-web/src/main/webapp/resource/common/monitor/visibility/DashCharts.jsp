@@ -50,7 +50,7 @@
 <META Http-Equiv="Pragma" Content="no-cache">
 <META Http-Equiv="Expires" Content="0">
 
-<script src="<html:rewrite page='/js/dojo/1.1/dojo/dojo.js.uncompressed.js'/>" type="text/javascript"></script>
+<script src="<html:rewrite page='/js/dojo/1.1.2/dojo/dojo.js'/>" type="text/javascript"></script>
 <script src="<html:rewrite page="/js/functions.js"/>" type="text/javascript"></script>
 <script src="<html:rewrite page="/js/prototype.js"/>" type="text/javascript"></script>
 <script src="<html:rewrite page="/js/effects.js"/>" type="text/javascript"></script>
@@ -169,11 +169,12 @@
     <c:param name="now" value="${IndicatorViewsForm.timeToken}"/>
     <c:param name="unitUnits" value="${metric.unitUnits}"/>
     <c:param name="unitScale" value="${metric.unitScale}"/>
+    <c:param name="index" value="${status.index}"/>
   </c:url>
 
-  <c:set var="metricInstanceId" value="${metric.entityId.appdefKey},${metric.templateId}" />
   
-  <li id="<c:out value="${metricInstanceId}"/>">
+  
+  <li id="<c:out value="${metric.templateId}"/>">
   <table width="650" border="0" cellpadding="2" bgcolor="#DBE3F5">
   <tr>
     <td>
@@ -184,9 +185,9 @@
             <a href="<c:out value="${chartLink}"/>" target="_top"><c:out value="${metric.label}"/></a>
           </td>
             <td colspan="3" align="right">
-            <a href="javascript:moveMetricUp('<c:out value="${metricInstanceId}"/>')"><html:img page="/images/dash_icon_up.gif" border="0"/></a>
-            <a href="javascript:moveMetricDown('<c:out value="${metricInstanceId}"/>')"><html:img page="/images/dash_icon_down.gif" border="0"/></a>
-            <a href="javascript:removeMetric('<c:out value="${metricInstanceId}"/>')"><html:img page="/images/dash-icon_delete.gif" border="0"/></a>
+            <a href="javascript:moveMetricUp('<c:out value="${metric.templateId}"/>')"><html:img page="/images/dash_icon_up.gif" border="0"/></a>
+            <a href="javascript:moveMetricDown('<c:out value="${metric.templateId}"/>')"><html:img page="/images/dash_icon_down.gif" border="0"/></a>
+            <a href="javascript:removeMetric('<c:out value="${metric.templateId}"/>')"><html:img page="/images/dash-icon_delete.gif" border="0"/></a>
             </td>
         </tr>
         <tr>
@@ -205,7 +206,7 @@
 </table>
    <c:choose>
      <c:when test="${xlib}">
-<html:img src="${chartImg}" border="0"/>
+<img src="<c:out value="${chartImg}" />" border="0" width="647" height="100" />
      </c:when>
      <c:otherwise>
     <table><tr>

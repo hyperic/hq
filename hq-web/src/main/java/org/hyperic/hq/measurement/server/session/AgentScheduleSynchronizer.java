@@ -26,18 +26,22 @@
 package org.hyperic.hq.measurement.server.session;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
-import net.sf.ehcache.Element;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.shared.MeasurementProcessor;
 import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
@@ -58,15 +62,7 @@ public class AgentScheduleSynchronizer {
     private ZeventEnqueuer zEventManager;
     
     private MeasurementProcessor measurementProcessor;
-
-    /**
-     * Cache of {@link AppdefEntityID}s onto themselves, of ents which are
-     * currently in the zevent queue for processing. 
-     */
-    private final Cache inQueueCache = 
-        CacheManager.getInstance().getCache("AgentScheduleInQueue");
-    
-    
+     
    
     @Autowired
     public AgentScheduleSynchronizer(ZeventEnqueuer zEventManager, MeasurementProcessor measurementProcessor) {
@@ -76,67 +72,54 @@ public class AgentScheduleSynchronizer {
 
     @PostConstruct
     void initialize() {
-        ZeventListener l = new ZeventListener() {
-            public void processEvents(List events) {
-               
-                List eids = new ArrayList();
-                for (Iterator i=events.iterator(); i.hasNext(); ) {
-                    AgentScheduleSyncZevent z = 
-                        (AgentScheduleSyncZevent)i.next();
-                    
-                    eids.addAll(z.getEntityIds());
-                    if (!inQueueCache.remove(z.getEntityIds())) {
-                        log.warn("Received eid=[" + z.getEntityIds() + 
-                                  "] but was not found in cache");
+        ZeventListener<Zevent> l = new ZeventListener<Zevent>() {
+            
+            public void processEvents(List<Zevent> events) {
+                final List<AppdefEntityID> toSchedule = new ArrayList<AppdefEntityID>(events.size());
+                final Map<String,Collection<AppdefEntityID>> unscheduleMap = new HashMap<String,Collection<AppdefEntityID>>(events.size());
+                final boolean debug = log.isDebugEnabled();
+                for (final Zevent z : events ) {
+                    if (z instanceof AgentScheduleSyncZevent) {
+                        AgentScheduleSyncZevent event = (AgentScheduleSyncZevent) z;
+                        toSchedule.addAll(event.getEntityIds());
+                        if (debug) log.debug("Schduling eids=[" + event.getEntityIds() + "]");
+                    } else if (z instanceof AgentUnscheduleZevent) {
+                        AgentUnscheduleZevent event = (AgentUnscheduleZevent) z;
+                        String token = event.getAgentToken();
+                        if (token == null) {
+                            continue;
+                        }
+                        Collection<AppdefEntityID> tmp;
+                        if (null == (tmp = unscheduleMap.get(token))) {
+                            tmp = new HashSet<AppdefEntityID>();
+                            unscheduleMap.put(token, tmp);
+                        }
+                        tmp.addAll(event.getEntityIds());
+                        if (debug) log.debug("Unschduling eids=[" + event.getEntityIds() + "]");
                     }
                 }
-                measurementProcessor.scheduleSynchronous(eids);
+                if (!unscheduleMap.isEmpty()) {
+                    for (Map.Entry<String,Collection<AppdefEntityID>> entry : unscheduleMap.entrySet()) {
+                        String token = (String) entry.getKey();
+                        List<AppdefEntityID> list = new ArrayList<AppdefEntityID>(entry.getValue());
+                        try {
+                            measurementProcessor.unschedule(token, list);
+                        } catch (MeasurementUnscheduleException e) {
+                            log.error(e,e);
+                        }
+                    }
+                }
+                if (!toSchedule.isEmpty()) {
+                    measurementProcessor.scheduleSynchronous(toSchedule);
+                }
             }
             public String toString() {
                 return "AgentScheduleSyncListener";
             }
         };
         
-        zEventManager
-            .addBufferedListener(AgentScheduleSyncZevent.class, l);
+        zEventManager.addBufferedListener(AgentScheduleSyncZevent.class, l);
+        zEventManager.addBufferedListener(AgentUnscheduleZevent.class, l);
     }
-
-
-
-    /**
-     * @param eids List<AppdefEntityID>
-     */
-    public void scheduleBuffered(List eids) {
-        /**
-         * The following is done immediately (not in a tx listener), since
-         * otherwise we will need to make sure that the entire thing behaves
-         * transactionally.  The worst case, here (if the tx is rolled back)
-         * is that we have excess things in the queue.
-         */
-        synchronized (inQueueCache) {
-            for (Iterator it=eids.iterator(); it.hasNext(); ) {
-                AppdefEntityID eid = (AppdefEntityID)it.next();
-                if (inQueueCache.get(eid) != null) {
-                    continue;
-                }
-                Element e = new Element(eid, eid);
-                inQueueCache.put(e);
-            }
-        }
-        Zevent z = new AgentScheduleSyncZevent(eids);
-        try {
-            zEventManager.enqueueEvent(z);
-        } catch(InterruptedException e) {
-            synchronized (inQueueCache) {
-                for (Iterator it=eids.iterator(); it.hasNext(); ) {
-                    AppdefEntityID eid = (AppdefEntityID)it.next();
-                    inQueueCache.remove(eid);
-                }
-            }
-            log.warn("Interrupted while trying to enqueue event for eids: ["
-                + eids + "]");
-        }
-    }
-    
   
 }

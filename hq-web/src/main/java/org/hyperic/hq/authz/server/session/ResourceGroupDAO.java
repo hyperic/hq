@@ -298,7 +298,7 @@ public class ResourceGroupDAO
     @SuppressWarnings("unchecked")
     public Collection<ResourceGroup> findByRoleIdAndSystem_orderName(Integer roleId,
                                                                      boolean system, boolean asc) {
-        String sql = "select g from ResourceGroup g join fetch g.roles r " +
+        String sql = "select g from ResourceGroup g join g.roles r " +
                      "where r.id = ? and g.system = ? " + "order by g.resource.sortName " +
                      (asc ? "asc" : "desc");
         return (Collection<ResourceGroup>) getSession().createQuery(sql).setInteger(0,
@@ -384,7 +384,7 @@ public class ResourceGroupDAO
             Integer protoType = prototype.getResourceType().getId();
             if (protoType.equals(AuthzConstants.authzPlatformProto) ||
                 protoType.equals(AuthzConstants.authzServerProto) ||
-                protoType.equals(AuthzConstants.authzService)) {
+                protoType.equals(AuthzConstants.authzServiceProto)) {
                 hql += " or g.groupType = " + AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS;
             } else if (protoType.equals(AuthzConstants.authzApplicationProto)) {
                 hql += " or g.groupType = " + AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP;

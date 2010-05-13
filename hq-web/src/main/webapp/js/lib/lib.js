@@ -2566,11 +2566,18 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
             row.id = 'alertGroup:' + groups[i];
             var data = that.alert_group_status[groups[i]] || ['gray','gray'];
             var name = that.alert_groups.data[groups[i]];
-            if(that.alert_groups.data[groups[i]].length > 20)
-            {
-                name = '<abbr title="' + name + '">' + name.substring(0,20) + '&hellip;</abbr>';
+            var aObj = document.createElement("a");
+     	 	aObj.href = "/Resource.do?eid=5:" + groups[i];
+     	 	
+     	 	if (name.length > 20) {
+     	 		var abbrObj = document.createElement("abbr");
+     	 		abbrObj.title = name;
+     	 		abbrObj.innerHTML = name.substring(0,20).escapeHTML() + "&hellip;";
+     	 		aObj.appendChild(abbrObj);
+     	 	} else {
+     	 		aObj.innerHTML = name.escapeHTML();
             }
-            row.childNodes[0].innerHTML = '<a href="/Resource.do?eid=5:' + groups[i] + '">' + name +'</a>';
+     	 	row.childNodes[0].appendChild(aObj);
             row.childNodes[1].innerHTML = '<img src="/images/4.0/icons/'+data[0]+'.gif" alt="'+ status[data[0]] +'">';
             row.childNodes[2].innerHTML = '<a href="/alerts/Alerts.do?mode=list&eid=5:' + groups[i] + '"><img src="/images/4.0/icons/'+data[1]+'.gif" alt="'+ status[data[1]]+'" border="0"></a>';
             table.appendChild(row);
@@ -2989,9 +2996,14 @@ hyperic.group_manager = function() {
 					  groupId: "['" + formArray.group.toString().split(",").join("','") + "']"},
             handleAs: 'json',
             load: function(data) {
-			    var successText = "The requested groups have been assigned.";
-			    that.displayConfirmation(that.message_area.AddToExistingGroup, successText);
-	        	setTimeout('MyGroupManager.dialogs.AddToExistingGroup.hide()', 2000);
+				if (data && data.error) {
+					console.debug(data.error_message, data);
+					that.displayError(that.message_area.AddToExistingGroup, data.error_message);
+				} else {
+				    var successText = "The requested groups have been assigned.";
+				    that.displayConfirmation(that.message_area.AddToExistingGroup, successText);
+		        	setTimeout('MyGroupManager.dialogs.AddToExistingGroup.hide()', 2000);
+				}
 			},
             error: function(data) {
 	    		var errorText = "An error occurred processing your request.";

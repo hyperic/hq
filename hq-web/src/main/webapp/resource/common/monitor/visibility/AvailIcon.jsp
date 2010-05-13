@@ -32,28 +32,22 @@
 <tiles:importAttribute name="availability" ignore="true"/>
   <c:choose>
     <c:when test="${empty availability}">
-      <html:img page="/images/icon_available_error.gif" border="0"
-                width="12" height="12"/>
+      <c:set var="availabilityClassName" value="availabilityError" />
     </c:when>
     <c:when test="${availability == 0}">
-      <html:img page="/images/icon_available_red.gif" border="0"
-                width="12" height="12"/>
+       <c:set var="availabilityClassName" value="availabilityRed" />
     </c:when>
     <c:when test="${availability == 1}">
-      <html:img page="/images/icon_available_green.gif" border="0"
-                width="12" height="12"/>
+       <c:set var="availabilityClassName" value="availabilityGreen" />
     </c:when>
     <c:when test="${availability == -0.01}">
-      <html:img page="/images/icon_available_orange.gif" border="0"
-                width="12" height="12"/>
+      <c:set var="availabilityClassName" value="availabilityOrange" />
     </c:when>
     <c:when test="${availability < 1 && availability > 0}">
-      <html:img page="/images/icon_available_yellow.gif" border="0"
-                width="12" height="12"/>
+      <c:set var="availabilityClassName" value="availabilityYellow" />
     </c:when>
     <c:otherwise>
-      <html:img page="/images/icon_available_error.gif" border="0"
-                width="12" height="12"/>
+      <c:set var="availabilityClassName" value="availabilityError" />
     </c:otherwise>
   </c:choose>
-
+<div class="<c:out value="${availabilityClassName}" />" />

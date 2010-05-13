@@ -38,6 +38,7 @@ import org.hyperic.hq.ui.util.MonitorUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.InvalidOptionException;
+import org.hyperic.util.timer.StopWatch;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -57,6 +58,7 @@ public class MetricsControlFormPrepareAction
 
     public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                  HttpServletResponse response) throws Exception {
+        StopWatch watch = new StopWatch();
 
         MetricsControlForm controlForm = (MetricsControlForm) form;
 
@@ -70,6 +72,10 @@ public class MetricsControlFormPrepareAction
         controlForm.setType(new Integer(entityId.getType()));
         prepareForm(request, controlForm);
 
+        if (log.isDebugEnabled()) {
+            log.debug("IndicatorChartsAction.fresh: " + watch);
+        }
+        
         return null;
     }
 

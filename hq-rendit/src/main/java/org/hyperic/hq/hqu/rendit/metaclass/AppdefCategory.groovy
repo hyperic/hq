@@ -5,9 +5,11 @@ import org.hyperic.hq.authz.server.session.ResourceManagerImpl
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.appdef.server.session.AppdefResource
 import org.hyperic.hq.appdef.server.session.AppdefResourceType
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory as PermManFactory
 import org.hyperic.hq.authz.shared.PermissionManager
 import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.authz.shared.PermissionException;
 
 class AppdefCategory {
     static Resource getResource(AppdefResource r) {
@@ -48,6 +50,12 @@ class AppdefCategory {
         def operation = r.getAuthzOp(p.operation)
         def user = p.user
         def resource = r.resource
+        
+        // HHQ-3736 - null resource_id in EAM_PLATFORM,EAM_SERVER,EAM_SERVICE.
+        if (resource == null) {
+            throw new PermissionException()
+        }  
+        
         def instanceId = resource.instanceId
         assert instanceId == r.id
 

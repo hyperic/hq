@@ -37,12 +37,23 @@ public class ZimbraCollector extends Collector {
 
     protected void init() {
         BufferedReader buffer = null;
-        log.debug("init() (" + getProperties() + ")");
+        log.debug("init() prop=" + getProperties());
+        log.debug("init() PConfig=" + getPlugin().getConfig());
         try {
             // read 1st line of filename and create a List or String[] of the field names
             assert (getProperties().getProperty(STATSFILE) != null);
 
-            myStatsFile = new File(getProperties().getProperty(STATSFILE));
+            String file = getProperties().getProperty(STATSFILE);
+            if (file == null) {
+                log.error("propertie '" + STATSFILE + "' not found");
+                return;
+            }
+
+            myStatsFile = new File(file);
+            if (!myStatsFile.exists()) {
+                log.error("File '" + myStatsFile + "' no found");
+                return;
+            }
 
             buffer = new BufferedReader(new FileReader(myStatsFile));
             String line = buffer.readLine();
@@ -55,8 +66,8 @@ public class ZimbraCollector extends Collector {
                 myAliasMap.put(new Integer(i), metrics[i].trim().replaceAll(":", "_"));
             }
 
-            // XXX mejorar esto
             // read complete file to found last line
+            //buffer.skip(myStatsFile.length() - 1000);
             while ((line = buffer.readLine()) != null) {
                 lastLine = line;
             }
@@ -107,7 +118,7 @@ public class ZimbraCollector extends Collector {
             log.debug("collect() (" + getProperties() + ")");
         }
         if (log.isTraceEnabled()) {
-            log.trace("myLastLine=" + lastLine);
+            log.trace("[collect] ("+getProperties().getProperty("statsfile")+") myLastLine=" + lastLine);
         }
         try {
             if (lastLine == null) {

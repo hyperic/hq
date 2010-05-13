@@ -114,7 +114,7 @@ public class MultiConditionEvaluator implements AlertConditionEvaluator {
                 // than System.currentTimeMillis
                 Map.Entry entry = (Map.Entry) iter.next();
                 if (isExpired((AbstractEvent) entry.getValue())) {
-                    events.remove(entry.getKey());
+                    iter.remove();
                 }
             }
         }

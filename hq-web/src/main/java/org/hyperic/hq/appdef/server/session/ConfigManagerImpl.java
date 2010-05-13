@@ -26,6 +26,7 @@
 package org.hyperic.hq.appdef.server.session;
 
 import java.util.Collection;
+import java.util.Collections;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -40,36 +41,36 @@ import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.autoinventory.AICompare;
 import org.hyperic.hq.product.ProductPlugin;
-import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  */
-@Service
+@org.springframework.stereotype.Service
 public class ConfigManagerImpl implements ConfigManager {
     private static final int MAX_VALIDATION_ERR_LEN = 512;
     protected final Log log = LogFactory.getLog(ConfigManagerImpl.class.getName());
     private ConfigResponseDAO configResponseDAO;
-    private ZeventEnqueuer zeventManager;
     private ServiceDAO serviceDAO;
     private ServerDAO serverDAO;
     private PlatformDAO platformDAO;
+    private ResourceManager resourceManager;
 
     @Autowired
-    public ConfigManagerImpl(ConfigResponseDAO configResponseDAO, ZeventEnqueuer zeventManager, ServiceDAO serviceDAO,
-                             ServerDAO serverDAO, PlatformDAO platformDAO) {
+    public ConfigManagerImpl(ConfigResponseDAO configResponseDAO, ServiceDAO serviceDAO,
+                             ServerDAO serverDAO, PlatformDAO platformDAO, ResourceManager resourceManager) {
         this.configResponseDAO = configResponseDAO;
-        this.zeventManager = zeventManager;
         this.serviceDAO = serviceDAO;
         this.serverDAO = serverDAO;
         this.platformDAO = platformDAO;
+        this.resourceManager = resourceManager;
     }
 
     /**
@@ -449,8 +450,13 @@ public class ConfigManagerImpl implements ConfigManager {
         }
 
         ConfigResponseDB existingConfig = getConfigResponse(id);
-        return configureResponse(subject, existingConfig, id, productBytes, measurementBytes, controlBytes, rtBytes,
-            null, sendConfigEvent, false);
+        boolean wasUpdated = configureResponse(subject, existingConfig, id, productBytes, measurementBytes, controlBytes, rtBytes,
+            null, false);
+        if (sendConfigEvent) {
+            Resource r = resourceManager.findResource(id);
+            resourceManager.resourceHierarchyUpdated(subject, Collections.singletonList(r));
+        }
+        return wasUpdated ? id : null;
     }
 
     /**
@@ -458,10 +464,10 @@ public class ConfigManagerImpl implements ConfigManager {
      *
      */
     @Transactional
-    public AppdefEntityID configureResponse(AuthzSubject subject, ConfigResponseDB existingConfig,
+    public boolean configureResponse(AuthzSubject subject, ConfigResponseDB existingConfig,
                                             AppdefEntityID appdefID, byte[] productConfig, byte[] measurementConfig,
                                             byte[] controlConfig, byte[] rtConfig, Boolean userManaged,
-                                            boolean sendConfigEvent, boolean force) {
+                                            boolean force) {
         boolean wasUpdated = false;
         byte[] configBytes;
 
@@ -503,18 +509,7 @@ public class ConfigManagerImpl implements ConfigManager {
             wasUpdated = true;
         }
 
-        if (wasUpdated) {
-            // XXX: Need to cascade and send events for each resource that may
-            // have been affected by this config update.
-            if (sendConfigEvent) {
-                ResourceUpdatedZevent event = new ResourceUpdatedZevent(subject, appdefID);
-                zeventManager.enqueueEventAfterCommit(event);
-            }
-
-            return appdefID;
-        } else {
-            return null;
-        }
+        return wasUpdated;
     }
 
     private byte[] getConfigForType(ConfigResponseDB val, String productType, AppdefEntityID id, boolean fail)

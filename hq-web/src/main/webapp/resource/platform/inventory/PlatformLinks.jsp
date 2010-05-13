@@ -72,13 +72,23 @@
             <fmt:message key="resource.platform.inventory.NewDiscoveryLink"/><html:img page="/images/tbb_new_locked.gif" alt="" border="0"/><br>
         </c:otherwise>
     </c:choose>
-    <html:link page="/alerts/EnableAlerts.do?alertState=enabled&eid=${resource.entityId.type}:${resource.id}">
-        <fmt:message key="resource.platform.alerts.EnableAllAlerts"/></html:link>
-        <html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/><br>
-    <html:link page="/alerts/EnableAlerts.do?alertState=disabled&eid=${resource.entityId.type}:${resource.id}">
-        <fmt:message key="resource.platform.alerts.DisableAllAlerts"/></html:link>
-        <html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/><br>
-    <tiles:insert definition=".resource.common.quickFavorites">
+    <c:choose>
+ 	 	<c:when test="${canModify}">
+ 	 	<html:link page="/alerts/EnableAlerts.do?alertState=enabled&eid=${resource.entityId.type}:${resource.id}">
+ 	 	<fmt:message key="resource.platform.alerts.EnableAllAlerts"/>
+ 	 	</html:link>
+ 	 	<html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/><br/>
+ 	 	<html:link page="/alerts/EnableAlerts.do?alertState=disabled&eid=${resource.entityId.type}:${resource.id}">
+ 	 	<fmt:message key="resource.platform.alerts.DisableAllAlerts"/>
+ 	 	</html:link>
+ 	 	<html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/><br/>
+ 	 	</c:when>
+ 	 	<c:otherwise>
+ 	 	<fmt:message key="resource.platform.alerts.EnableAllAlerts"/><html:img page="/images/tbb_new_locked.gif" alt="" border="0"/><br/>
+ 	 	<fmt:message key="resource.platform.alerts.DisableAllAlerts"/><html:img page="/images/tbb_new_locked.gif" alt="" border="0"/><br/>
+ 	 	</c:otherwise>
+ 	 </c:choose>
+ 	  <tiles:insert definition=".resource.common.quickFavorites">
       <tiles:put name="resource" beanName="resource"/>
     </tiles:insert>
 	<br />

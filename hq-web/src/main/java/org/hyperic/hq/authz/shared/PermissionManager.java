@@ -48,6 +48,7 @@ import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.events.AlertPermissionManager;
 import org.hyperic.hq.events.shared.HierarchicalAlertingManager;
 import org.hyperic.hq.events.shared.MaintenanceEventManager;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
@@ -68,6 +69,10 @@ public abstract class PermissionManager {
 
     protected ResourceDAO getResourceDAO() {
         return Bootstrap.getBean(ResourceDAO.class);
+    }
+    
+    protected AlertPermissionManager getAlertPermissionManager() {
+        return Bootstrap.getBean(AlertPermissionManager.class);
     }
 
     /**
@@ -334,29 +339,7 @@ public abstract class PermissionManager {
      */
     public void checkAlertingPermission(AuthzSubject subject, AppdefEntityID id)
         throws PermissionException {
-        int type = id.getType();
-        String opName;
-        switch (type) {
-            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                opName = AuthzConstants.platformOpManageAlerts;
-                break;
-            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                opName = AuthzConstants.serverOpManageAlerts;
-                break;
-            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                opName = AuthzConstants.serviceOpManageAlerts;
-                break;
-            case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-                opName = AuthzConstants.appOpManageAlerts;
-                break;
-            case AppdefEntityConstants.APPDEF_TYPE_GROUP:
-                opName = AuthzConstants.groupOpManageAlerts;
-                break;
-            default:
-                throw new InvalidAppdefTypeException("Unknown type: " + type);
-        }
-        // now check
-        checkPermission(subject, id, opName);
+        getAlertPermissionManager().canFixAcknowledgeAlerts(subject, id);
     }
 
     /**
@@ -366,16 +349,19 @@ public abstract class PermissionManager {
     public List checkAlertingScope(AuthzSubject subj) {
         List entityIds = new ArrayList();
         try {
-
+            // ...this method is used to determine which alerts can viewed by a given user,
+            // within the new scheme this is based on the user's ability to view a resource,
+            // if they can view the resource, they can view the alerts...
+            
             // platforms
-            List platIds = findOperationScopeBySubject(subj, AuthzConstants.platformOpManageAlerts,
+            List platIds = findOperationScopeBySubject(subj, AuthzConstants.platformOpViewPlatform,
                 AuthzConstants.platformResType);
             for (int i = 0; i < platIds.size(); i++) {
                 Integer id = (Integer) platIds.get(i);
                 entityIds.add(AppdefEntityID.newPlatformID(id));
             }
             // servers
-            List serverIds = findOperationScopeBySubject(subj, AuthzConstants.serverOpManageAlerts,
+            List serverIds = findOperationScopeBySubject(subj, AuthzConstants.serverOpViewServer,
                 AuthzConstants.serverResType);
             for (int i = 0; i < serverIds.size(); i++) {
                 Integer id = (Integer) serverIds.get(i);
@@ -383,14 +369,14 @@ public abstract class PermissionManager {
             }
             // services
             List serviceIds = findOperationScopeBySubject(subj,
-                AuthzConstants.serviceOpManageAlerts, AuthzConstants.serviceResType);
+                AuthzConstants.serviceOpViewService, AuthzConstants.serviceResType);
             for (int i = 0; i < serviceIds.size(); i++) {
                 Integer id = (Integer) serviceIds.get(i);
                 entityIds.add(AppdefEntityID.newServiceID(id));
             }
 
             // Groups
-            List groupids = findOperationScopeBySubject(subj, AuthzConstants.groupOpManageAlerts,
+            List groupids = findOperationScopeBySubject(subj, AuthzConstants.groupOpViewResourceGroup,
                 AuthzConstants.groupResType);
             for (int i = 0; i < groupids.size(); i++) {
                 Integer id = (Integer) groupids.get(i);
@@ -774,12 +760,13 @@ public abstract class PermissionManager {
     public interface RolePermNativeSQL {
         String getSQL();
 
-        Query bindParams(Query q, AuthzSubject subject, List operations);
+        Query bindParams(Query q, AuthzSubject subject, List viewResourcesOperations, List manageAlertOperations);
     }
 
-    public abstract RolePermNativeSQL getRolePermissionNativeSQL(String resourceVar,
-                                                                 String subjectParam,
-                                                                 String opListParam);
+    public abstract RolePermNativeSQL  getRolePermissionNativeSQL(String resourceVar, String eventLogVar,
+                                           String subjectParam,
+                                           String opListViewResourcesParam,
+                                           String opListManageAlertsParam); 
 
     public abstract String getAlertsHQL(boolean inEscalation, boolean notFixed, Integer groupId,
                                         Integer alertDefId, boolean count);

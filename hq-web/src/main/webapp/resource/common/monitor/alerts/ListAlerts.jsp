@@ -33,7 +33,6 @@
   USA.
  --%>
 
-
 <hq:constant
     classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
     symbol="APPDEF_TYPE_PLATFORM" var="CONST_PLATFORM" />
@@ -49,7 +48,6 @@
 <hq:constant
     classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
     symbol="APPDEF_TYPE_GROUP" var="CONST_GROUP" />
-
 <hq:constant
     classname="org.hyperic.hq.ui.Constants" 
     symbol="CONTROL_ENABLED_ATTR" var="CONST_CONTROLLABLE" /> 
@@ -58,87 +56,92 @@
 
 <script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
 <script  src="<html:rewrite page="/js/schedule.js"/>" type="text/javascript"></script>
+
 <c:set var="widgetInstanceName" value="listAlerts"/>
+
 <script  type="text/javascript">
-  var jsPath = "<html:rewrite page="/js/"/>";
-  var cssPath = "<html:rewrite page="/css/"/>";
-  var isMonitorSchedule = true;
-  var pageData = new Array();
-  initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-  widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+  	var jsPath = "<html:rewrite page="/js/"/>";
+  	var cssPath = "<html:rewrite page="/css/"/>";
+  	var isMonitorSchedule = true;
+  	var pageData = new Array();
+
+    initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+
+    widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 </script>
 
 <c:set var="entityId" value="${Resource.entityId}"/>
 <c:set var="hyphenStr" value="--"/>
+
 <c:url var="pnAction" value="/alerts/Alerts.do">
-  <c:param name="mode" value="list"/>
-  <c:param name="eid" value="${entityId.type}:${Resource.id}"/>
-  <c:if test="${not empty param.ps}">
-    <c:param name="ps" value="${param.ps}"/>
-  </c:if>
-  <c:if test="${not empty param.so}">
-    <c:param name="so" value="${param.so}"/>
-  </c:if>
-  <c:if test="${not empty param.sc}">
-    <c:param name="sc" value="${param.sc}"/>
-  </c:if>
-  <c:if test="${not empty param.year}">
-    <c:param name="year" value="${param.year}"/>
-  </c:if>
-  <c:if test="${not empty param.month}">
-    <c:param name="month" value="${param.month}"/>
-  </c:if>
-  <c:if test="${not empty param.day}">
-    <c:param name="day" value="${param.day}"/>
-  </c:if>
+  	<c:param name="mode" value="list"/>
+  	<c:param name="eid" value="${entityId.type}:${Resource.id}"/>
+  	<c:if test="${not empty param.ps}">
+    	<c:param name="ps" value="${param.ps}"/>
+  	</c:if>
+  	<c:if test="${not empty param.so}">
+    	<c:param name="so" value="${param.so}"/>
+  	</c:if>
+  	<c:if test="${not empty param.sc}">
+    	<c:param name="sc" value="${param.sc}"/>
+  	</c:if>
+  	<c:if test="${not empty param.year}">
+    	<c:param name="year" value="${param.year}"/>
+  	</c:if>
+  	<c:if test="${not empty param.month}">
+    	<c:param name="month" value="${param.month}"/>
+  	</c:if>
+  	<c:if test="${not empty param.day}">
+    	<c:param name="day" value="${param.day}"/>
+  	</c:if>
 </c:url>
 <c:url var="sortAction" value="/alerts/Alerts.do">
-  <c:param name="mode" value="list"/>
-  <c:param name="eid" value="${entityId.type}:${Resource.id}"/>
-  <c:if test="${not empty param.pn}">
-    <c:param name="pn" value="${param.pn}"/>
-  </c:if>
-  <c:if test="${not empty param.ps}">
-    <c:param name="ps" value="${param.ps}"/>
-  </c:if>
-  <c:if test="${not empty param.year}">
-    <c:param name="year" value="${param.year}"/>
-  </c:if>
-  <c:if test="${not empty param.month}">
-    <c:param name="month" value="${param.month}"/>
-  </c:if>
-  <c:if test="${not empty param.day}">
-    <c:param name="day" value="${param.day}"/>
-  </c:if>
+  	<c:param name="mode" value="list"/>
+  	<c:param name="eid" value="${entityId.type}:${Resource.id}"/>
+  	<c:if test="${not empty param.pn}">
+    	<c:param name="pn" value="${param.pn}"/>
+  	</c:if>
+  	<c:if test="${not empty param.ps}">
+    	<c:param name="ps" value="${param.ps}"/>
+  	</c:if>
+  	<c:if test="${not empty param.year}">
+    	<c:param name="year" value="${param.year}"/>
+  	</c:if>
+  	<c:if test="${not empty param.month}">
+    	<c:param name="month" value="${param.month}"/>
+  	</c:if>
+  	<c:if test="${not empty param.day}">
+    	<c:param name="day" value="${param.day}"/>
+  	</c:if>
 </c:url>
 <c:url var="psAction" value="/alerts/Alerts.do">
-  <c:param name="mode" value="list"/>
-  <c:param name="eid" value="${entityId.type}:${Resource.id}"/>
-  <c:if test="${not empty param.so}">
-    <c:param name="so" value="${param.so}"/>
-  </c:if>
-  <c:if test="${not empty param.sc}">
-    <c:param name="sc" value="${param.sc}"/>
-  </c:if>
-  <c:if test="${not empty param.year}">
-    <c:param name="year" value="${param.year}"/>
-  </c:if>
-  <c:if test="${not empty param.month}">
-    <c:param name="month" value="${param.month}"/>
-  </c:if>
-  <c:if test="${not empty param.day}">
-    <c:param name="day" value="${param.day}"/>
-  </c:if>
+  	<c:param name="mode" value="list"/>
+  	<c:param name="eid" value="${entityId.type}:${Resource.id}"/>
+  	<c:if test="${not empty param.so}">
+    	<c:param name="so" value="${param.so}"/>
+  	</c:if>
+  	<c:if test="${not empty param.sc}">
+	    <c:param name="sc" value="${param.sc}"/>
+  	</c:if>
+  	<c:if test="${not empty param.year}">
+    	<c:param name="year" value="${param.year}"/>
+  	</c:if>
+  	<c:if test="${not empty param.month}">
+    	<c:param name="month" value="${param.month}"/>
+  	</c:if>
+  	<c:if test="${not empty param.day}">
+    	<c:param name="day" value="${param.day}"/>
+  	</c:if>
 </c:url>
 <c:url var="calAction" value="/alerts/Alerts.do">
-  <c:param name="mode" value="list"/>
-  <c:param name="eid" value="${entityId.type}:${Resource.id}"/>
-  <c:if test="${not empty param.pn}">
-    <c:param name="pn" value="${param.pn}"/>
-  </c:if>
-  <c:if test="${not empty param.ps}">
-    <c:param name="ps" value="${param.ps}"/>
-  </c:if>
+  	<c:param name="mode" value="list"/>
+  	<c:param name="eid" value="${entityId.type}:${Resource.id}"/>
+  	<c:if test="${not empty param.pn}">
+	    <c:param name="pn" value="${param.pn}"/>
+  	</c:if>
+  	<c:if test="${not empty param.ps}">
+    	<c:param name="ps" value="${param.ps}"/>
+  	</c:if>
 </c:url>
 
 <c:if test="${ CONST_PLATFORM == entityId.type}">
@@ -164,7 +167,7 @@
         </c:otherwise>
     </c:choose>
 </c:if>
-<c:if test="${ CONST_SERVER == entityId.type}">
+<c:if test="${CONST_SERVER == entityId.type}">
 	<tiles:insert  definition=".page.title.events.list.server">
 	    <tiles:put name="resource" beanName="Resource"/>
 	    <tiles:put name="resourceOwner" beanName="ResourceOwner"/>
@@ -186,7 +189,7 @@
         </c:otherwise>
     </c:choose>
 </c:if>
-<c:if test="${ CONST_SERVICE == entityId.type}">
+<c:if test="${CONST_SERVICE == entityId.type}">
 <tiles:insert  definition=".page.title.events.list.service">
     <tiles:put name="resource" beanName="Resource"/>
     <tiles:put name="resourceOwner" beanName="ResourceOwner"/>
@@ -208,7 +211,7 @@
         </c:otherwise>
     </c:choose>
 </c:if>
-<c:if test="${ CONST_APPLICATION == entityId.type}">
+<c:if test="${CONST_APPLICATION == entityId.type}">
 <tiles:insert  definition=".page.title.events.list.application">
     <tiles:put name="titleName" beanName="Resource" beanProperty="name"/>
     <tiles:put name="resource" beanName="Resource"/>
@@ -220,7 +223,7 @@
         <tiles:put name="resourceType" beanName="entityId" beanProperty="type"/>
 </tiles:insert>
 </c:if>
-<c:if test="${ CONST_GROUP == entityId.type}">
+<c:if test="${CONST_GROUP == entityId.type}">
     <tiles:insert  definition=".page.title.events.list.group">
         <tiles:put name="titleName" beanName="Resource" beanProperty="name"/>
         <tiles:put name="resource" beanName="Resource"/>
@@ -244,126 +247,128 @@
 </c:if>
 
 <script type="text/javascript">
-  function nextDay() {
-    var tomorrow = new Date(<c:out value="${date}"/> + 86400000);
-    var url = '<c:out value="${calAction}" escapeXml="false"/>' +
+  	function nextDay() {
+    	var tomorrow = new Date(<c:out value="${date}"/> + 86400000);
+    	var url = '<c:out value="${calAction}" escapeXml="false"/>' +
               '&year=' + tomorrow.getFullYear() +
               '&month=' + tomorrow.getMonth() +
               '&day=' + tomorrow.getDate();
-    document.location = url;
-  }
+    	document.location = url;
+  	}
 
-  function previousDay() {
-    var yesterday = new Date(<c:out value="${date}"/> - 86400000);
-    var url = '<c:out value="${calAction}" escapeXml="false"/>' +
+  	function previousDay() {
+    	var yesterday = new Date(<c:out value="${date}"/> - 86400000);
+    	var url = '<c:out value="${calAction}" escapeXml="false"/>' +
               '&year=' + yesterday.getFullYear() +
               '&month=' + yesterday.getMonth() +
               '&day=' + yesterday.getDate();
-    document.location = url;
-  }
+    	document.location = url;
+  	}
 
-  function popupCal() {
-    var today = new Date(<c:out value="${date}"/>);
-    writeCal(today.getMonth(), today.getFullYear(),
+  	function popupCal() {
+    	var today = new Date(<c:out value="${date}"/>);
+    	writeCal(today.getMonth(), today.getFullYear(),
              '<c:out value="${calAction}" escapeXml="false"/>');
-  }
+  	}
 </script>
 
 <!-- FORM -->
 <html:form styleId="${widgetInstanceName}_FixForm" method="POST" action="/alerts/RemoveAlerts">
-<html:hidden property="eid" value="${Resource.entityId}"/>
-  <c:if test="${not empty param.year}">
-    <input type="hidden" name="year" value="<c:out value="${param.year}"/>"/>
-  </c:if>
-  <c:if test="${not empty param.month}">
-    <input type="hidden" name="month" value="<c:out value="${param.month}"/>"/>
-  </c:if>
-  <c:if test="${not empty param.day}">
-    <input type="hidden" name="day" value="<c:out value="${param.day}"/>"/>
-  </c:if>
+	<html:hidden property="eid" value="${Resource.entityId}"/>
+  	<c:if test="${not empty param.year}">
+    	<input type="hidden" name="year" value="<c:out value="${param.year}"/>"/>
+  	</c:if>
+  	<c:if test="${not empty param.month}">
+    	<input type="hidden" name="month" value="<c:out value="${param.month}"/>"/>
+  	</c:if>
+  	<c:if test="${not empty param.day}">
+    	<input type="hidden" name="day" value="<c:out value="${param.day}"/>"/>
+  	</c:if>
+	
+	<tiles:insert definition=".portlet.confirm"/>
+	<tiles:insert definition=".portlet.error"/>
 
-
-<tiles:insert definition=".portlet.confirm"/>
-<tiles:insert definition=".portlet.error"/>
-
-<script type="text/javascript">
-	dojo11.require("dijit.dijit");
-	dojo11.require("dijit.Dialog");
-  	dojo11.require("dijit.ProgressBar");
+	<script type="text/javascript">
+		dojo11.require("dijit.dijit");
+		dojo11.require("dijit.Dialog");
+  		dojo11.require("dijit.ProgressBar");
           	
-	var MyAlertCenter = null;
-	dojo11.addOnLoad(function(){
-		MyAlertCenter = new hyperic.alert_center("Alerts");          		
-	});
-</script>
+		var MyAlertCenter = null;
 
-<table width="100%" style="background-color:#fff;border-left:1px solid gray;border-right:1px solid gray"><tr>
-<td><a href="javascript:previousDay()"><html:img page="/images/schedule_left.gif" border="0"/></a></td>
-<td nowrap="true" class="BoldText"><hq:dateFormatter value="${date}" showTime="false"/></td>
-<td><a href="javascript:nextDay()"><html:img page="/images/schedule_right.gif" border="0"/></a></td>
-<td><html:link href="javascript:popupCal()"><html:img page="/images/schedule_iconCal.gif" width="19" height="17" alt="" border="0"/></html:link></td>
-<td class="ButtonCaptionText" width="100%" style="text-align: right; font-style: italic;">
-    <c:url var="path" value="/"/>
-    <fmt:message key="dash.settings.criticalAlerts.ack.instruction">
-      <fmt:param value="${path}"/>
-    </fmt:message>
-</td>
-</tr></table>
+		dojo11.addOnLoad(function(){
+			MyAlertCenter = new hyperic.alert_center("Alerts");          		
+		});
+	</script>
 
-<c:choose>
-  <c:when test="${not empty param.so}">
-    <c:set var="so" value="${param.so}"/>
-  </c:when>
-  <c:otherwise>
-    <c:set var="so" value="dec"/>
-  </c:otherwise>
-</c:choose>
-
-<display:table cellspacing="0" cellpadding="0" width="100%" order="${so}" action="${sortAction}" items="${Alerts}" var="Alert">
-	<display:column width="1%" property="id" 
+	<table width="100%" style="background-color:#fff;border-left:1px solid gray;border-right:1px solid gray">
+		<tr>
+			<td>
+				<a href="javascript:previousDay()"><html:img page="/images/schedule_left.gif" border="0"/></a>
+			</td>
+			<td nowrap="true" class="BoldText"><hq:dateFormatter value="${date}" showTime="false"/></td>
+			<td><a href="javascript:nextDay()"><html:img page="/images/schedule_right.gif" border="0"/></a></td>
+			<td><html:link href="javascript:popupCal()"><html:img page="/images/schedule_iconCal.gif" width="19" height="17" alt="" border="0"/></html:link></td>
+			<td class="ButtonCaptionText" width="100%" style="text-align: right; font-style: italic;">
+    			<c:url var="path" value="/"/>
+    			<fmt:message key="dash.settings.criticalAlerts.ack.instruction">
+      				<fmt:param value="${path}"/>
+    			</fmt:message>
+			</td>
+		</tr>
+	</table>
+	<c:choose>
+  		<c:when test="${not empty param.so}">
+    		<c:set var="so" value="${param.so}"/>
+  		</c:when>
+  		<c:otherwise>
+    		<c:set var="so" value="dec"/>
+  		</c:otherwise>
+	</c:choose>
+	<display:table cellspacing="0" cellpadding="0" width="100%" order="${so}" action="${sortAction}" items="${Alerts}" var="Alert">
+		<display:column width="1%" property="id" 
 	                title="<input type=\"checkbox\" onclick=\"MyAlertCenter.toggleAll(this)\" id=\"${widgetInstanceName}_CheckAllBox\">" 
 	                isLocalizedTitle="false" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderCheckbox">
-		<display:alertcheckboxdecorator name="alerts" onclick="MyAlertCenter.toggleAlertButtons(this)"
+			<display:alertcheckboxdecorator name="alerts" onclick="MyAlertCenter.toggleAlertButtons(this)"
 		                                elementId="${widgetInstanceName}|${Resource.entityId.appdefKey}|${Alert.id}|${Alert.maxPauseTime}"
 										fixable="${!Alert.fixed}" acknowledgeable="${Alert.acknowledgeable}" styleClass="listMember"/> 
-	</display:column>
-	<display:column width="10%" property="priority" title="alerts.alert.AlertList.ListHeader.Priority">
-		<display:prioritydecorator flagKey="alerts.alert.alertlist.listheader.priority"/>
-	</display:column>
-	<display:column width="20%" property="ctime" sort="true" sortAttr="2" defaultSort="true" 
+		</display:column>
+		<display:column width="10%" property="priority" title="alerts.alert.AlertList.ListHeader.Priority">
+			<display:prioritydecorator flagKey="alerts.alert.alertlist.listheader.priority"/>
+		</display:column>
+		<display:column width="20%" property="ctime" sort="true" sortAttr="2" defaultSort="true" 
 	                title="alerts.alert.AlertList.ListHeader.AlertDate" 
 	                href="/alerts/Alerts.do?mode=viewAlert&eid=${Resource.entityId.appdefKey}" 
 	                paramId="a" paramProperty="id" >
-	    <display:datedecorator/>
-	</display:column>
-	<display:column width="20%" property="name" sort="true" sortAttr="1" defaultSort="false" 
+	    	<display:datedecorator/>
+		</display:column>
+		<display:column width="20%" property="name" sort="true" sortAttr="1" defaultSort="false" 
 	                title="alerts.alert.AlertList.ListHeader.AlertDefinition">
-		<display:conditionallinkdecorator test="${Alert.viewable}"
+			<display:conditionallinkdecorator test="${Alert.viewable}"
 					                      href="/alerts/Config.do?mode=viewDefinition&eid=${Resource.entityId.appdefKey}&ad=${Alert.alertDefId}" />
-	</display:column>
-	<display:column width="20%" property="conditionFmt" title="alerts.alert.AlertList.ListHeader.AlertCondition"/>
-	<display:column width="12%" property="value" title="alerts.alert.AlertList.ListHeader.ActualValue" />
-	<display:column width="7%" property="fixed" title="alerts.alert.AlertList.ListHeader.Fixed">
-  		<display:booleandecorator flagKey="yesno"/>
-	</display:column>
-	<display:column width="11%" property="acknowledgeable" title="alerts.alert.AlertList.ListHeader.Acknowledge"
+		</display:column>
+		<display:column width="20%" property="conditionFmt" title="alerts.alert.AlertList.ListHeader.AlertCondition"/>
+		<display:column width="12%" property="value" title="alerts.alert.AlertList.ListHeader.ActualValue" />
+		<display:column width="7%" property="fixed" title="alerts.alert.AlertList.ListHeader.Fixed">
+  			<display:booleandecorator flagKey="yesno"/>
+		</display:column>
+		<display:column width="11%" property="acknowledgeableAndCanTakeAction" title="alerts.alert.AlertList.ListHeader.Acknowledge"
                     href="/alerts/RemoveAlerts.do?eid=${Resource.entityId.appdefKey}&alerts=${Alert.id}&buttonAction=ACKNOWLEDGE">
-  		<display:booleandecorator flagKey="acknowledgeable"/>
-	</display:column>
-</display:table>
+  			<display:booleandecorator flagKey="acknowledgeable"/>
+		</display:column>
+	</display:table>
 
-<tiles:insert definition=".toolbar.list">
-  <tiles:put name="listItems" beanName="Alerts"/>
-  <tiles:put name="noButtons" value="true"/>
-  <tiles:put name="alerts" value="true"/>
-  <tiles:put name="listSize" beanName="listSize"/>
-  <tiles:put name="pageNumAction" beanName="pnAction"/>
-  <tiles:put name="pageSizeAction" beanName="psAction"/>
-  <tiles:put name="defaultSortColumn" value="2"/>
-  <tiles:put name="widgetInstanceName" beanName="widgetInstanceName"/>
-</tiles:insert>
-<div id="HQAlertCenterDialog" style="display:none;"></div>
-<tiles:insert definition=".page.footer">
-</tiles:insert>
+	<c:if test="${canTakeAction}">
+		<tiles:insert definition=".toolbar.list">
+  			<tiles:put name="listItems" beanName="Alerts"/>
+  			<tiles:put name="noButtons" value="true"/>
+	  		<tiles:put name="alerts" value="true"/>
+	  		<tiles:put name="listSize" beanName="listSize"/>
+	  		<tiles:put name="pageNumAction" beanName="pnAction"/>
+	  		<tiles:put name="pageSizeAction" beanName="psAction"/>
+	  		<tiles:put name="defaultSortColumn" value="2"/>
+	  		<tiles:put name="widgetInstanceName" beanName="widgetInstanceName"/>
+		</tiles:insert>
+	</c:if>
+	<div id="HQAlertCenterDialog" style="display:none;"></div>
+	<tiles:insert definition=".page.footer"></tiles:insert>
 </html:form>
-<!-- /  -->

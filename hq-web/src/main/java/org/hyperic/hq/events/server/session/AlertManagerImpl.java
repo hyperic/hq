@@ -28,8 +28,10 @@ package org.hyperic.hq.events.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -67,6 +69,7 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
+import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -204,7 +207,8 @@ public class AlertManagerImpl implements AlertManager {
      * 
      */
     public int deleteAlerts(AuthzSubject subj, AlertDefinition ad) throws PermissionException {
-        alertPermissionManager.canManageAlerts(subj, ad);
+        // ...check that user has delete permission on alert definition's resource...
+        alertPermissionManager.canDeleteAlertDefinition(subj, ad.getAppdefEntityId());
         return alertDAO.deleteByAlertDefinition(ad);
     }
 
@@ -214,6 +218,11 @@ public class AlertManagerImpl implements AlertManager {
      */
     public int deleteAlerts(long begin, long end) {
         return alertDAO.deleteByCreateTime(begin, end);
+    }
+    
+    @Transactional(readOnly = true)
+    public Alert getAlertById(Integer id) {
+        return alertDAO.get(id);
     }
 
     /**
@@ -233,8 +242,8 @@ public class AlertManagerImpl implements AlertManager {
     }
 
     /**
-     * Find the last alert by definition ID
-     * @throws PermissionException
+     * Find the last unfixed alert by definition ID
+     *
      * 
      * 
      */
@@ -247,6 +256,59 @@ public class AlertManagerImpl implements AlertManager {
             return null;
         }
     }
+    
+    /**
+     * Find all last unfixed alerts
+     *
+     * 
+     */
+    @Transactional(readOnly=true)
+    public Map<Integer,Alert> findAllLastUnfixed() {        
+        StopWatch watch = new StopWatch();
+        Map<Integer,Alert> unfixedAlerts = null;
+        try {
+            unfixedAlerts = 
+                alertDAO.findAllLastUnfixed();
+        } catch (Exception e) {
+            unfixedAlerts = new HashMap<Integer,Alert>(0,1);
+            log.error("Error finding all last unfixed alerts", e);
+        } finally {
+            if (log.isDebugEnabled()) {
+                log.debug("findAllLastUnfixed: " + watch);
+            }
+        }
+        return unfixedAlerts;
+    }
+    
+    
+        /**
+         * Find the last alerts for the given resource
+         *
+         * 
+         */
+    @Transactional(readOnly=true)
+    public Map<Integer,Alert> findLastByResource(AuthzSubject subj, 
+                                      Resource r,
+                                      boolean includeDescendants,
+                                      boolean fixed) {
+            
+            StopWatch watch = new StopWatch();
+            Map<Integer,Alert> unfixedAlerts = null;
+            try {
+                unfixedAlerts = 
+                    alertDAO.findLastByResource(subj, r, includeDescendants, fixed);
+            } catch (Exception e) {
+                unfixedAlerts = new HashMap<Integer,Alert>(0,1);
+                log.error("Error finding the last alerts for resource id="  + r.getId(), e);
+            } finally {
+                if (log.isDebugEnabled()) {
+                    log.debug("findLastByResource: "  + watch);
+                }
+            }
+            
+            return unfixedAlerts;
+    }
+
 
     /**
      * Find the last alert by definition ID
@@ -258,6 +320,22 @@ public class AlertManagerImpl implements AlertManager {
     public Alert findLastFixedByDefinition(AlertDefinition def) {
         try {
             return alertDAO.findLastByDefinition(def, true);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+    
+    /**
+     * Find the last alert by definition ID
+     * @throws PermissionException
+     *
+     *
+     */
+    @Transactional(readOnly = true)
+    public Alert findLastByDefinition(Integer id) {
+        try {
+            AlertDefinition def = alertDefDao.findById(id);
+            return alertDAO.findLastByDefinition(def);
         } catch (Exception e) {
             return null;
         }
@@ -362,7 +440,8 @@ public class AlertManagerImpl implements AlertManager {
     @SuppressWarnings("unchecked")
     public PageList<Alert> findAlerts(AuthzSubject subj, AppdefEntityID id, long begin, long end,
                                       PageControl pc) throws PermissionException {
-        alertPermissionManager.canManageAlerts(subj, id);
+        // ...check that user has view permission on alert definition's resource...
+        alertPermissionManager.canViewAlertDefinition(subj, id);
         List<Alert> alerts = alertDAO.findByAppdefEntityInRange(resourceManager.findResource(id),
             begin, end, pc.getSortattribute() == SortAttribute.NAME, pc.isAscending());
 
@@ -514,7 +593,11 @@ public class AlertManagerImpl implements AlertManager {
     @Transactional(readOnly = true)
     public String getShortReason(Alert alert) {
         AlertDefinition def = alert.getAlertDefinition();
-        AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(def.getResource());
+        Resource r = def.getResource();
+        if (r == null || r.isInAsyncDeleteState()) {
+            return "alertid=" + alert.getId() + " is associated with an invalid or deleted resource";
+        }
+        AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(r);
         AppdefEntityValue aev = new AppdefEntityValue(aeid, authzSubjectManager.getOverlordPojo());
 
         String name = "";
