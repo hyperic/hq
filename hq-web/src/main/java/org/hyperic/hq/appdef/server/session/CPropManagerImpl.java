@@ -30,8 +30,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
@@ -100,6 +104,7 @@ public class CPropManagerImpl implements CPropManager {
      * @return a List of CPropKeyValue objects
      */
     @Transactional(readOnly=true)
+    @Override
     public List<CpropKey> getKeys(int appdefType, int appdefTypeId) {
         return cPropKeyDAO.findByAppdefType(appdefType, appdefTypeId);
     }
@@ -132,6 +137,7 @@ public class CPropManagerImpl implements CPropManager {
      * find appdef resource type
      */
     @Transactional(readOnly=true)
+    @Override
     public AppdefResourceType findResourceType(TypeInfo info) {
         int type = info.getType();
 
@@ -145,11 +151,51 @@ public class CPropManagerImpl implements CPropManager {
             throw new IllegalArgumentException("Unrecognized appdef type: " + info);
         }
     }
+    
+    /**
+     * @return {@link Map} of {@link String} to {@link AppdefResourceType}s
+     */
+    @Transactional(readOnly=true)
+    @Override
+    public Map<String, AppdefResourceType> findResourceType(Collection<TypeInfo> typeInfos) {
+        List<String> platformTypeInfos = new ArrayList<String>();
+        List<String> serverTypeInfos = new ArrayList<String>();
+        List<String> serviceTypeInfos = new ArrayList<String>();
+        for (final TypeInfo info : typeInfos) {
+            int type = info.getType();
+            if(type == AppdefEntityConstants.APPDEF_TYPE_PLATFORM){
+                platformTypeInfos.add(info.getName());
+            } else if(type == AppdefEntityConstants.APPDEF_TYPE_SERVER){
+                serverTypeInfos.add(info.getName());
+            } else if(type == AppdefEntityConstants.APPDEF_TYPE_SERVICE){
+                serviceTypeInfos.add(info.getName());
+            } else {
+                throw new IllegalArgumentException("Unrecognized appdef type: " + info);
+            }
+        }
+        List<AppdefResourceType> resTypes = new ArrayList<AppdefResourceType>(typeInfos.size());
+        Map<String, AppdefResourceType> rtn =
+            new HashMap<String, AppdefResourceType>(typeInfos.size());
+        if (platformTypeInfos.size() > 0) {
+            resTypes.addAll(platformTypeDAO.findByName(platformTypeInfos));
+        }
+        if (serverTypeInfos.size() > 0) {
+            resTypes.addAll(serverTypeDAO.findByName(serverTypeInfos));
+        }
+        if (serviceTypeInfos.size() > 0) {
+            resTypes.addAll(serviceTypeDAO.findByName(serviceTypeInfos));
+        }
+        for (AppdefResourceType type : resTypes) {
+            rtn.put(type.getName(), type);
+        }
+        return rtn;
+    }
 
     /**
      * find Cprop by key to a resource type based on a TypeInfo object.
      */
     @Transactional(readOnly=true)
+    @Override
     public CpropKey findByKey(AppdefResourceType appdefType, String key) {
         int type = appdefType.getAppdefType();
         int instanceId = appdefType.getId().intValue();
@@ -334,6 +380,7 @@ public class CPropManagerImpl implements CPropManager {
      * @throw AppdefEntityNotFoundException if the passed entity is not found
      */
     @Transactional(readOnly=true)
+    @Override
     public String getValue(AppdefEntityValue aVal, String key) throws CPropKeyNotFoundException,
         AppdefEntityNotFoundException, PermissionException {
         PreparedStatement stmt = null;
@@ -447,6 +494,7 @@ public class CPropManagerImpl implements CPropManager {
      *         properties defined for the resource
      */
     @Transactional(readOnly=true)
+    @Override
     public Properties getEntries(AppdefEntityID aID) throws PermissionException, AppdefEntityNotFoundException {
         return getEntries(aID, "propkey");
     }
@@ -460,6 +508,7 @@ public class CPropManagerImpl implements CPropManager {
      * @return The properties stored for a specific entity ID
      */
     @Transactional(readOnly=true)
+    @Override
     public Properties getDescEntries(AppdefEntityID aID) throws PermissionException, AppdefEntityNotFoundException {
         return getEntries(aID, "description");
     }
@@ -532,6 +581,7 @@ public class CPropManagerImpl implements CPropManager {
      * Get all Cprops values with specified key name, regardless of type
      */
     @Transactional(readOnly=true)
+    @Override
     public List<Cprop> getCPropValues(AppdefResourceTypeValue appdefType, String key, boolean asc) {
         int type = appdefType.getAppdefType();
         int instanceId = appdefType.getId().intValue();

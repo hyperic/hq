@@ -27,8 +27,10 @@ package org.hyperic.hq.appdef.server.session;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import org.hibernate.SessionFactory;
+import org.hibernate.type.StringType;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -58,6 +60,18 @@ public class ServerTypeDAO
         save(serverType);
         return serverType;
     }
+    
+    /**
+     * @param names {@link Collection} of {@link String}
+     * @return {@link List} of {@link ServerType}
+     */
+    @SuppressWarnings("unchecked")
+    public List<ServerType> findByName(Collection<String> names) {
+        String sql = "from ServerType where name in (:names)";
+        return getSession().createQuery(sql)
+            .setParameterList("names", names, new StringType())
+            .list();
+    }
 
     public ServerType findByName(String name) {
         String sql = "from ServerType where sortName=?";
@@ -71,6 +85,7 @@ public class ServerTypeDAO
             .setString(1, plugin).uniqueResult();
     }
 
+    @SuppressWarnings("unchecked")
     public Collection<ServerType> findByPlugin(String plugin) {
         String sql = "from ServerType where plugin=?";
         return getSession().createQuery(sql).setString(0, plugin).list();

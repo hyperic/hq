@@ -26,10 +26,12 @@
 package org.hyperic.hq.appdef.server.session;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.type.StringType;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -61,6 +63,18 @@ public class ServiceTypeDAO
         save(st);
         return st;
     }
+    
+    /**
+     * @param names {@link Collection} of {@link String}
+     * @return {@link List} of {@link ServiceType}
+     */
+    @SuppressWarnings("unchecked")
+    public List<ServiceType> findByName(Collection<String> names) {
+        String sql = "from ServiceType where name in (:names)";
+        return getSession().createQuery(sql)
+            .setParameterList("names", names, new StringType())
+            .list();
+    }
 
     public ServiceType findByName(String name) {
         String sql = "from ServiceType where sortName=?";
@@ -68,17 +82,20 @@ public class ServiceTypeDAO
             .setCacheable(true).setCacheRegion("ServiceType.findByName").uniqueResult();
     }
 
+    @SuppressWarnings("unchecked")
     public Collection<ServiceType> findByPlugin(String plugin) {
         return createCriteria().add(Restrictions.eq("plugin", plugin)).addOrder(
             Order.asc("sortName")).list();
     }
 
+    @SuppressWarnings("unchecked")
     public Collection<ServiceType> findByServerType_orderName(int serverType, boolean asc) {
         String sql = "from ServiceType where serverType.id=? " + "order by sortName " +
                      (asc ? "asc" : "desc");
         return getSession().createQuery(sql).setInteger(0, serverType).list();
     }
 
+    @SuppressWarnings("unchecked")
     public Collection<ServiceType> findVirtualServiceTypesByPlatform(int platformId) {
         // First get the platform
         Platform platform = platformDAO.findById(new Integer(platformId));

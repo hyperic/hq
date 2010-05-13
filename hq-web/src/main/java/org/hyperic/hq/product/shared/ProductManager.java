@@ -40,4 +40,14 @@ public interface ProductManager {
     public void updateDynamicServiceTypePlugin(String pluginName, Set<ServiceType> serviceTypes)
         throws PluginNotFoundException, VetoException, NotFoundException;
 
+    /**
+     * Preload the 2nd level caches
+     */
+    public void preload();
+
+    /**
+     * Clear out all the caches
+     */
+    public void clearCaches(int sessionId);
+
 }

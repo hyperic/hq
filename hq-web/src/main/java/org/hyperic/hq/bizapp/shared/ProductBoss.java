@@ -137,16 +137,6 @@ public interface ProductBoss {
      * Gets the build number, date, and type.
      */
     public String getBuildNumber();
-
-    /**
-     * Preload the 2nd level caches
-     */
-    public void preload();
-
-    /**
-     * Clear out all the caches
-     */
-    public void clearCaches(int sessionId);
     
     /**
     * @return A List of Maps, where each Map contains individual cache stats

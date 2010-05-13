@@ -25,6 +25,10 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.hibernate.SessionFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,12 +47,22 @@ public class MonitorableTypeDAO
         MonitorableType mt = new MonitorableType(name, appdefType, plugin);
 
         save(mt);
-        getSession().flush();
         return mt;
     }
 
     MonitorableType findByName(String name) {
         String sql = "from MonitorableType where name=?";
         return (MonitorableType) getSession().createQuery(sql).setString(0, name).uniqueResult();
+    }
+
+    @SuppressWarnings("unchecked")
+    Map<String, MonitorableType> findByPluginName(String pluginName) {
+        String sql = "from MonitorableType where plugin=?";
+        List<MonitorableType> list = getSession().createQuery(sql).setString(0, pluginName).list();
+        Map<String, MonitorableType> rtn = new HashMap<String, MonitorableType>(list.size());
+        for (MonitorableType type : list) {
+            rtn.put(type.getName(), type);
+        }
+        return rtn;
     }
 }

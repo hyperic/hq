@@ -397,6 +397,14 @@ public class TemplateManagerImpl implements TemplateManager {
             srnManager.incrementSrn(aeid, (srn == null) ? entry.getValue().longValue() : srn.getMinInterval());
         }
     }
+    
+    @Transactional
+    @Override
+    public MonitorableType createMonitorableType(String pluginName, TypeInfo info) {
+        int e = info.getType();
+        int a = entityInfoTypeToAppdefType(e);
+        return monitorableTypeDAO.create(info.getName(), a, pluginName);
+    }
 
     /**
      * Get the MonitorableType id, creating it if it does not exist.
@@ -414,6 +422,12 @@ public class TemplateManagerImpl implements TemplateManager {
         }
 
         return t;
+    }
+    
+    @Transactional(readOnly=true)
+    @Override
+    public Map<String, MonitorableType> getMonitorableTypesByName(String pluginName) {
+        return monitorableTypeDAO.findByPluginName(pluginName);
     }
 
     private int entityInfoTypeToAppdefType(int entityInfoType) {
@@ -437,18 +451,20 @@ public class TemplateManagerImpl implements TemplateManager {
      *         created.
      */
     public Map<String, MeasurementInfo> updateTemplates(String pluginName, TypeInfo ownerEntity,
-                                                        MonitorableType monitorableType, MeasurementInfo[] tmpls) {
+                                                        MonitorableType monitorableType,
+                                                        MeasurementInfo[] tmpls) {
         // Organize the templates first
         Map<String, MeasurementInfo> tmap = new HashMap<String, MeasurementInfo>();
         for (int i = 0; i < tmpls.length; i++) {
             tmap.put(tmpls[i].getAlias(), tmpls[i]);
         }
 
-        Collection<MeasurementTemplate> mts = measurementTemplateDAO.findRawByMonitorableType(monitorableType);
+        Collection<MeasurementTemplate> mts =
+            measurementTemplateDAO.findRawByMonitorableType(monitorableType);
 
         for (MeasurementTemplate mt : mts) {
             // See if this is in the list
-            MeasurementInfo info = (MeasurementInfo) tmap.remove(mt.getAlias());
+            MeasurementInfo info = tmap.remove(mt.getAlias());
 
             if (info == null) {
                 measurementDAO.remove(mt);
@@ -485,6 +501,7 @@ public class TemplateManagerImpl implements TemplateManager {
                                        + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
             long current = System.currentTimeMillis();
+            stmt = conn.prepareStatement(templatesql);
 
             // can assume this is called in a single thread
             // This is called at hq server startup
@@ -507,7 +524,6 @@ public class TemplateManagerImpl implements TemplateManager {
                     Integer rawid = (Integer) tmplIdGenerator
                         .generate((SessionImpl) session, new MeasurementTemplate());
 
-                    stmt = conn.prepareStatement(templatesql);
                     stmt.setInt(col++, rawid.intValue());
                     stmt.setString(col++, info.getName());
                     String alias = info.getAlias();
@@ -528,10 +544,11 @@ public class TemplateManagerImpl implements TemplateManager {
                     stmt.setString(col++, pluginName);
                     stmt.setLong(col++, current);
                     stmt.setLong(col, current);
-                    stmt.execute();
-                    stmt.close();
+                    stmt.addBatch();
                 }
             }
+            stmt.executeBatch();
+            stmt.close();
         } catch (SQLException e) {
             this.log.error("Unable to add measurements for: " + pluginName, e);
         } finally {

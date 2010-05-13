@@ -120,4 +120,8 @@ public interface TemplateManager {
      */
     public void setDesignatedTemplates(String mType, Integer[] desigIds);
 
+    public MonitorableType createMonitorableType(String pluginName, TypeInfo info);
+
+    public Map<String, MonitorableType> getMonitorableTypesByName(String pluginName);
+
 }
