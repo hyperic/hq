@@ -37,7 +37,6 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.ha.HAService;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
@@ -66,8 +65,7 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
     private AvailabilityManager availabilityManager;
     private PermissionManager permissionManager;
     private AvailabilityCache availabilityCache;
-    @Autowired
-    private HAService haService;
+  
 
     @Autowired
     public AvailabilityCheckServiceImpl(AvailabilityManager availabilityManager,
@@ -162,12 +160,7 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
     }
 
     @Transactional
-    
     public void backfill() {
-        if (!haService.alertTriggersHaveInitialized()) {
-            log.warn("backfiller invoked before triggers have initialized, not starting");
-            return;
-        }
         backfill(System.currentTimeMillis(), false);
     }
 

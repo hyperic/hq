@@ -64,6 +64,18 @@ public class HAServiceImpl implements HAService {
             triggersHaveInitialized.set(true);
             float elapsed = (finish-start)/1000/60;
             log.info("Trigger initialization completed in " + elapsed + " minutes");
+            //Schedule backfill after triggers have been initialized
+            if (backfillTask == null) {
+                MethodInvokingRunnable backfill = new MethodInvokingRunnable();
+                backfill.setTargetObject(availabilityCheckService);
+                backfill.setTargetMethod("backfill");
+                try {
+                    backfill.prepare();
+                    backfillTask = scheduler.scheduleAtFixedRate(backfill, 120000);
+                } catch (Exception e) {
+                    log.error("Unable to schedule availability backfill.", e);
+                }
+            }
         }
     };
 
@@ -88,17 +100,6 @@ public class HAServiceImpl implements HAService {
         // If this node was designated as a slave b/c of connectivity loss (not
         // server crash), then we don't want to schedule another round of tasks
         // once it becomes master again
-        if (this.backfillTask == null) {
-            MethodInvokingRunnable backfill = new MethodInvokingRunnable();
-            backfill.setTargetObject(availabilityCheckService);
-            backfill.setTargetMethod("backfill");
-            try {
-                backfill.prepare();
-                this.backfillTask = scheduler.scheduleAtFixedRate(backfill, 120000);
-            } catch (Exception e) {
-                log.error("Unable to schedule availability backfill.", e);
-            }
-        }
         if (this.notifyAgentsTask == null) {
             MethodInvokingRunnable notifyAgents = new MethodInvokingRunnable();
             notifyAgents.setTargetObject(agentAIScanService);
