@@ -33,23 +33,20 @@ import org.springframework.stereotype.Component;
 
 /**
  * A {@link DataInserter} which immediately calls addData in the data manager
- * and will not return until the data has been written to the DB. 
+ * and will not return until the data has been written to the DB.
  */
 @Component
-public class SynchronousDataInserter 
-    implements DataInserter
-{
+public class SynchronousDataInserter implements DataInserter {
     private final Object lock = new Object();
 
     private final DataManager dataManager;
-    
-    
+
     @Autowired
     public SynchronousDataInserter(DataManager dMan) {
         dataManager = dMan;
     }
 
-    public void insertMetrics(List metricData) throws InterruptedException {
+    public void insertMetrics(List<DataPoint> metricData) throws InterruptedException {
         dataManager.addData(metricData);
     }
 
@@ -57,7 +54,7 @@ public class SynchronousDataInserter
         return lock;
     }
 
-    public void insertMetrics(List metricData, boolean isPriority)
+    public void insertMetrics(List<DataPoint> metricData, boolean isPriority)
         throws InterruptedException, DataInserterException {
         insertMetrics(metricData);
     }

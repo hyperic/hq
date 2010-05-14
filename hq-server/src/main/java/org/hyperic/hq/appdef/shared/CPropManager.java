@@ -3,7 +3,9 @@
  */
 package org.hyperic.hq.appdef.shared;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
@@ -163,4 +165,9 @@ public interface CPropManager {
 	 */
 	public List<Cprop> getCPropValues(AppdefResourceTypeValue appdefType,
 			String key, boolean asc);
+
+    /**
+     * @return {@link Map} of {@link String} to {@link AppdefResourceType}s
+     */
+    public Map<String, AppdefResourceType> findResourceType(Collection<TypeInfo> typeInfos);
 }

@@ -14,7 +14,7 @@ done
 ln -s ../wrapper clones/clone_$1/wrapper
 cp hq-agent-nowrapper.sh  clones/clone_$1/hq-agent-nowrapper.sh
 
-clone_port=$(($CLONE_LISTEN_STARTPORT + $1))
+clone_port=$(($CLONE_LISTEN_STARTPORT + $1 + ( $2 * 200 )))
 
 cat etc/agent.properties | \
 	sed -e s/@CLONE_SERVERIP@/$CLONE_SERVERIP/       | \
@@ -27,4 +27,3 @@ cat etc/agent.properties | \
 cd clones/clone_$1
 nohup ./hq-agent-nowrapper.sh start 2>&1 > console.out & 
 echo $! > nowrapper.pid
- 

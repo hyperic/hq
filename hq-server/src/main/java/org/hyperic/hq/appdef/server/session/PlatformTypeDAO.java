@@ -26,8 +26,10 @@
 package org.hyperic.hq.appdef.server.session;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.hibernate.SessionFactory;
+import org.hibernate.type.StringType;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -45,12 +47,25 @@ public class PlatformTypeDAO
         save(pt);
         return pt;
     }
+    
+    /**
+     * @param names {@link Collection} of {@link String}
+     * @return {@link List} of {@link PlatformType}
+     */
+    @SuppressWarnings("unchecked")
+    public List<AppdefResourceType> findByName(Collection<String> names) {
+        String sql = "from PlatformType where name in (:names)";
+        return getSession().createQuery(sql)
+            .setParameterList("names", names, new StringType())
+            .list();
+    }
 
     public PlatformType findByName(String name) {
         String sql = "from PlatformType where name=?";
         return (PlatformType) getSession().createQuery(sql).setString(0, name).uniqueResult();
     }
 
+    @SuppressWarnings("unchecked")
     public Collection<PlatformType> findByPlugin(String plugin) {
         String sql = "from PlatformType where plugin=?";
         return getSession().createQuery(sql).setString(0, plugin).list();

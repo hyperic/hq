@@ -11,4 +11,3 @@ cd clones/clone_$1
 # This matches the java process and send it sighup, it also kills hq-agent-nowrapiper.sh
 ps -o pid= --ppid `cat nowrapper.pid`|  xargs kill
 rm nowrapper.pid
- 

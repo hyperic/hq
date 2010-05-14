@@ -30,8 +30,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
@@ -99,12 +103,13 @@ public class CPropManagerImpl implements CPropManager {
      * 
      * @return a List of CPropKeyValue objects
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public List<CpropKey> getKeys(int appdefType, int appdefTypeId) {
         return cPropKeyDAO.findByAppdefType(appdefType, appdefTypeId);
     }
 
-    private AppdefResourceType findResourceType(int appdefType, int appdefTypeId) throws AppdefEntityNotFoundException {
+    private AppdefResourceType findResourceType(int appdefType, int appdefTypeId)
+        throws AppdefEntityNotFoundException {
         Integer id = new Integer(appdefTypeId);
 
         if (appdefType == AppdefEntityConstants.APPDEF_TYPE_PLATFORM) {
@@ -131,7 +136,7 @@ public class CPropManagerImpl implements CPropManager {
     /**
      * find appdef resource type
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public AppdefResourceType findResourceType(TypeInfo info) {
         int type = info.getType();
 
@@ -147,9 +152,47 @@ public class CPropManagerImpl implements CPropManager {
     }
 
     /**
+     * @return {@link Map} of {@link String} to {@link AppdefResourceType}s
+     */
+    @Transactional(readOnly = true)
+    public Map<String, AppdefResourceType> findResourceType(Collection<TypeInfo> typeInfos) {
+        List<String> platformTypeInfos = new ArrayList<String>();
+        List<String> serverTypeInfos = new ArrayList<String>();
+        List<String> serviceTypeInfos = new ArrayList<String>();
+        for (final TypeInfo info : typeInfos) {
+            int type = info.getType();
+            if (type == AppdefEntityConstants.APPDEF_TYPE_PLATFORM) {
+                platformTypeInfos.add(info.getName());
+            } else if (type == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
+                serverTypeInfos.add(info.getName());
+            } else if (type == AppdefEntityConstants.APPDEF_TYPE_SERVICE) {
+                serviceTypeInfos.add(info.getName());
+            } else {
+                throw new IllegalArgumentException("Unrecognized appdef type: " + info);
+            }
+        }
+        List<AppdefResourceType> resTypes = new ArrayList<AppdefResourceType>(typeInfos.size());
+        Map<String, AppdefResourceType> rtn = new HashMap<String, AppdefResourceType>(typeInfos
+            .size());
+        if (platformTypeInfos.size() > 0) {
+            resTypes.addAll(platformTypeDAO.findByName(platformTypeInfos));
+        }
+        if (serverTypeInfos.size() > 0) {
+            resTypes.addAll(serverTypeDAO.findByName(serverTypeInfos));
+        }
+        if (serviceTypeInfos.size() > 0) {
+            resTypes.addAll(serviceTypeDAO.findByName(serviceTypeInfos));
+        }
+        for (AppdefResourceType type : resTypes) {
+            rtn.put(type.getName(), type);
+        }
+        return rtn;
+    }
+
+    /**
      * find Cprop by key to a resource type based on a TypeInfo object.
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public CpropKey findByKey(AppdefResourceType appdefType, String key) {
         int type = appdefType.getAppdefType();
         int instanceId = appdefType.getId().intValue();
@@ -184,15 +227,21 @@ public class CPropManagerImpl implements CPropManager {
     public void addKey(CpropKey key) throws AppdefEntityNotFoundException, CPropKeyExistsException {
         // Insure that the resource type exists
         AppdefResourceType recValue = findResourceType(key.getAppdefType(), key.getAppdefTypeId());
-        CpropKey cpKey = cPropKeyDAO.findByKey(key.getAppdefType(), key.getAppdefTypeId(), key.getKey());
+        CpropKey cpKey = cPropKeyDAO.findByKey(key.getAppdefType(), key.getAppdefTypeId(), key
+            .getKey());
 
         if (cpKey != null) {
-            throw new CPropKeyExistsException("Key, '" + key.getKey() + "', " + "already exists for " +
-                                              AppdefEntityConstants.typeToString(recValue.getAppdefType()) +
-                                              " type, '" + recValue.getName() + "'");
+            throw new CPropKeyExistsException("Key, '" +
+                                              key.getKey() +
+                                              "', " +
+                                              "already exists for " +
+                                              AppdefEntityConstants.typeToString(recValue
+                                                  .getAppdefType()) + " type, '" +
+                                              recValue.getName() + "'");
         }
 
-        cPropKeyDAO.create(key.getAppdefType(), key.getAppdefTypeId(), key.getKey(), key.getDescription());
+        cPropKeyDAO.create(key.getAppdefType(), key.getAppdefTypeId(), key.getKey(), key
+            .getDescription());
     }
 
     /**
@@ -204,12 +253,14 @@ public class CPropManagerImpl implements CPropManager {
      * 
      * @throw CPropKeyNotFoundException if the CPropKey could not be found
      */
-    public void deleteKey(int appdefType, int appdefTypeId, String key) throws CPropKeyNotFoundException {
+    public void deleteKey(int appdefType, int appdefTypeId, String key)
+        throws CPropKeyNotFoundException {
         CpropKey cpKey = cPropKeyDAO.findByKey(appdefType, appdefTypeId, key);
 
         if (cpKey == null) {
             throw new CPropKeyNotFoundException("Key, '" + key + "', does not" + " exist for " +
-                                                AppdefEntityConstants.typeToString(appdefType) + " " + appdefTypeId);
+                                                AppdefEntityConstants.typeToString(appdefType) +
+                                                " " + appdefTypeId);
         }
 
         // cascade on delete to remove Cprop as well
@@ -231,8 +282,8 @@ public class CPropManagerImpl implements CPropManager {
      * @throw AppdefEntityNotFoundException if id for 'aVal' specifies a
      *        resource which does not exist
      */
-    public void setValue(AppdefEntityID aID, int typeId, String key, String val) throws CPropKeyNotFoundException,
-        AppdefEntityNotFoundException, PermissionException {
+    public void setValue(AppdefEntityID aID, int typeId, String key, String val)
+        throws CPropKeyNotFoundException, AppdefEntityNotFoundException, PermissionException {
         Statement stmt = null;
         PreparedStatement pstmt = null;
         CpropKey propKey;
@@ -250,8 +301,8 @@ public class CPropManagerImpl implements CPropManager {
             stmt = conn.createStatement();
             // no need to grab the for update since we are in a transaction
             // and therefore automatically get a shared lock
-            sql = new StringBuilder().append("SELECT PROPVALUE FROM ").append(CPROP_TABLE).append(" WHERE KEYID=")
-                .append(keyId).append(" AND APPDEF_ID=").append(aID.getID());
+            sql = new StringBuilder().append("SELECT PROPVALUE FROM ").append(CPROP_TABLE).append(
+                " WHERE KEYID=").append(keyId).append(" AND APPDEF_ID=").append(aID.getID());
             rs = stmt.executeQuery(sql.toString());
 
             String oldval = null;
@@ -267,8 +318,8 @@ public class CPropManagerImpl implements CPropManager {
 
             if (oldval != null) {
                 stmt = conn.createStatement();
-                sql = new StringBuilder().append("DELETE FROM ").append(CPROP_TABLE).append(" WHERE KEYID=").append(
-                    keyId).append(" AND APPDEF_ID=").append(aID.getID());
+                sql = new StringBuilder().append("DELETE FROM ").append(CPROP_TABLE).append(
+                    " WHERE KEYID=").append(keyId).append(" AND APPDEF_ID=").append(aID.getID());
 
                 stmt.executeUpdate(sql.toString());
             }
@@ -281,7 +332,8 @@ public class CPropManagerImpl implements CPropManager {
 
                 Cprop nprop = new Cprop();
 
-                sql.append(" (id,keyid,appdef_id,value_idx,PROPVALUE) VALUES ").append("(?, ?, ?, ?, ?)");
+                sql.append(" (id,keyid,appdef_id,value_idx,PROPVALUE) VALUES ").append(
+                    "(?, ?, ?, ?, ?)");
 
                 pstmt = conn.prepareStatement(sql.toString());
 
@@ -289,7 +341,8 @@ public class CPropManagerImpl implements CPropManager {
                 pstmt.setInt(3, aID.getID());
 
                 for (int i = 0; i < chunks.length; i++) {
-                    int id = Util.generateId("org.hyperic.hq.appdef.server.session.Cprop", nprop).intValue();
+                    int id = Util.generateId("org.hyperic.hq.appdef.server.session.Cprop", nprop)
+                        .intValue();
 
                     pstmt.setInt(1, id);
                     pstmt.setInt(4, i);
@@ -301,7 +354,8 @@ public class CPropManagerImpl implements CPropManager {
             }
 
             if (log.isDebugEnabled()) {
-                log.debug("Entity " + aID.getAppdefKey() + " " + key + " changed from " + oldval + " to " + val);
+                log.debug("Entity " + aID.getAppdefKey() + " " + key + " changed from " + oldval +
+                          " to " + val);
             }
 
             // Send cprop value changed event
@@ -317,7 +371,7 @@ public class CPropManagerImpl implements CPropManager {
             DBUtil.closeResultSet(this, rs);
             DBUtil.closeStatement(this, stmt);
             DBUtil.closeStatement(this, pstmt);
-            
+
         }
     }
 
@@ -333,7 +387,7 @@ public class CPropManagerImpl implements CPropManager {
      *        is not found
      * @throw AppdefEntityNotFoundException if the passed entity is not found
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public String getValue(AppdefEntityValue aVal, String key) throws CPropKeyNotFoundException,
         AppdefEntityNotFoundException, PermissionException {
         PreparedStatement stmt = null;
@@ -351,8 +405,8 @@ public class CPropManagerImpl implements CPropManager {
             boolean didSomething;
 
             conn = Util.getConnection();
-            stmt = conn.prepareStatement("SELECT PROPVALUE FROM " + CPROP_TABLE + " WHERE KEYID=? AND APPDEF_ID=? " +
-                                         "ORDER BY VALUE_IDX");
+            stmt = conn.prepareStatement("SELECT PROPVALUE FROM " + CPROP_TABLE +
+                                         " WHERE KEYID=? AND APPDEF_ID=? " + "ORDER BY VALUE_IDX");
 
             stmt.setInt(1, keyId);
             stmt.setInt(2, aID.getID());
@@ -377,7 +431,7 @@ public class CPropManagerImpl implements CPropManager {
         } finally {
             DBUtil.closeResultSet(this, rs);
             DBUtil.closeStatement(this, stmt);
-            
+
         }
     }
 
@@ -392,8 +446,9 @@ public class CPropManagerImpl implements CPropManager {
             String lastKey;
 
             conn = Util.getConnection();
-            stmt = conn.prepareStatement("SELECT A." + column + ", B.propvalue FROM " + CPROPKEY_TABLE + " A, " +
-                                         CPROP_TABLE + " B WHERE " + "B.keyid=A.id AND A.appdef_type=? " +
+            stmt = conn.prepareStatement("SELECT A." + column + ", B.propvalue FROM " +
+                                         CPROPKEY_TABLE + " A, " + CPROP_TABLE + " B WHERE " +
+                                         "B.keyid=A.id AND A.appdef_type=? " +
                                          "AND B.appdef_id=? " + "ORDER BY B.value_idx");
 
             stmt.setInt(1, aID.getType());
@@ -430,7 +485,7 @@ public class CPropManagerImpl implements CPropManager {
         } finally {
             DBUtil.closeResultSet(this, rs);
             DBUtil.closeStatement(this, stmt);
-         
+
         }
 
         return res;
@@ -446,8 +501,9 @@ public class CPropManagerImpl implements CPropManager {
      *         Properties object will be returned if there are no custom
      *         properties defined for the resource
      */
-    @Transactional(readOnly=true)
-    public Properties getEntries(AppdefEntityID aID) throws PermissionException, AppdefEntityNotFoundException {
+    @Transactional(readOnly = true)
+    public Properties getEntries(AppdefEntityID aID) throws PermissionException,
+        AppdefEntityNotFoundException {
         return getEntries(aID, "propkey");
     }
 
@@ -459,8 +515,9 @@ public class CPropManagerImpl implements CPropManager {
      * 
      * @return The properties stored for a specific entity ID
      */
-    @Transactional(readOnly=true)
-    public Properties getDescEntries(AppdefEntityID aID) throws PermissionException, AppdefEntityNotFoundException {
+    @Transactional(readOnly = true)
+    public Properties getDescEntries(AppdefEntityID aID) throws PermissionException,
+        AppdefEntityNotFoundException {
         return getEntries(aID, "description");
     }
 
@@ -472,8 +529,8 @@ public class CPropManagerImpl implements CPropManager {
      * @param typeId Resource type id
      * @param data Encoded ConfigResponse
      */
-    public void setConfigResponse(AppdefEntityID aID, int typeId, byte[] data) throws PermissionException,
-        AppdefEntityNotFoundException {
+    public void setConfigResponse(AppdefEntityID aID, int typeId, byte[] data)
+        throws PermissionException, AppdefEntityNotFoundException {
         if (data == null) {
             return;
         }
@@ -512,8 +569,9 @@ public class CPropManagerImpl implements CPropManager {
 
         try {
             conn = Util.getConnection();
-            stmt = conn.prepareStatement("DELETE FROM " + CPROP_TABLE + " WHERE keyid IN " + "(SELECT id FROM " +
-                                         CPROPKEY_TABLE + " WHERE appdef_type = ?) " + "AND appdef_id = ?");
+            stmt = conn.prepareStatement("DELETE FROM " + CPROP_TABLE + " WHERE keyid IN " +
+                                         "(SELECT id FROM " + CPROPKEY_TABLE +
+                                         " WHERE appdef_type = ?) " + "AND appdef_id = ?");
 
             stmt.setInt(1, appdefType);
             stmt.setInt(2, id);
@@ -524,14 +582,14 @@ public class CPropManagerImpl implements CPropManager {
             throw new SystemException(exc);
         } finally {
             DBUtil.closeStatement(this, stmt);
-            
+
         }
     }
 
     /**
      * Get all Cprops values with specified key name, regardless of type
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public List<Cprop> getCPropValues(AppdefResourceTypeValue appdefType, String key, boolean asc) {
         int type = appdefType.getAppdefType();
         int instanceId = appdefType.getId().intValue();
@@ -541,12 +599,13 @@ public class CPropManagerImpl implements CPropManager {
         return cPropDAO.findByKeyName(pkey, asc);
     }
 
-    private CpropKey getKey(AppdefEntityID aID, int typeId, String key) throws CPropKeyNotFoundException,
-        AppdefEntityNotFoundException, PermissionException {
+    private CpropKey getKey(AppdefEntityID aID, int typeId, String key)
+        throws CPropKeyNotFoundException, AppdefEntityNotFoundException, PermissionException {
         CpropKey res = cPropKeyDAO.findByKey(aID.getType(), typeId, key);
 
         if (res == null) {
-            String msg = "Key, '" + key + "', does " + "not exist for aID=" + aID + ", typeId=" + typeId;
+            String msg = "Key, '" + key + "', does " + "not exist for aID=" + aID + ", typeId=" +
+                         typeId;
 
             throw new CPropKeyNotFoundException(msg);
         }

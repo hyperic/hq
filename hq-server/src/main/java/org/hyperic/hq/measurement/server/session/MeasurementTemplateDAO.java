@@ -180,9 +180,17 @@ public class MeasurementTemplateDAO
 
     @SuppressWarnings("unchecked")
     List<MeasurementTemplate> findRawByMonitorableType(MonitorableType mt) {
-        String sql = "select t from MeasurementTemplate t " + "where t.monitorableType=?";
-
-        return getSession().createQuery(sql).setParameter(0, mt).list();
+        String sql = "select t.id from MeasurementTemplate t where t.monitorableType=?";
+        List<Integer> tids = getSession().createQuery(sql).setParameter(0, mt).list();
+        List<MeasurementTemplate> rtn = new ArrayList<MeasurementTemplate>(tids.size());
+        for (Integer tid : tids) {
+            MeasurementTemplate templ = get(tid);
+            if (templ == null) {
+                continue;
+            }
+            rtn.add(templ);
+        }
+        return rtn;
     }
 
     @SuppressWarnings("unchecked")

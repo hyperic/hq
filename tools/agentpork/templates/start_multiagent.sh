@@ -9,18 +9,19 @@ CLIENT_CMD="${JAVA_HOME}/bin/java -client \
         -Dagent.mode=thread \
         -Djava.security.auth.login.config=jaas.config \
         -Djava.net.preferIPv4Stack=true \
-	-Dcom.sun.management.jmxremote \
+        -Dcom.sun.management.jmxremote \
         $CLONE_JAVA_FLAGS \
-        -cp $CLONE_CP org.hyperic.util.thread.MultiRunner $1"
+        -cp $CLONE_CP org.hyperic.util.thread.MultiRunner $@"
 
 echo $CLIENT_CMD
 
 echo "***** the start time is "
 echo `date`
 
-$CLIENT_CMD
+nohup $CLIENT_CMD 2>&1 > multiagent.log &
+pid=$!
+echo ${pid} > multiagent.pid
 
 echo "***** the end time is "
 echo `date`
 
- 

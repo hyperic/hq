@@ -16,6 +16,7 @@ import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
@@ -114,8 +115,6 @@ public interface ServiceManager {
 
     public Collection<Service> findDeletedServices();
     
-    ServiceType createServiceType(ServiceTypeInfo sinfo, String plugin, ServerType servType) throws NotFoundException;
-
     public PageList<ServiceTypeValue> getAllServiceTypes(AuthzSubject subject, PageControl pc);
 
     public PageList<ServiceTypeValue> getViewableServiceTypes(AuthzSubject subject, PageControl pc)
@@ -290,5 +289,8 @@ public interface ServiceManager {
     public Number getServiceCount();
 
     ServiceCluster getServiceCluster(ResourceGroup group);
+
+    ServiceType createServiceType(ServiceTypeInfo sinfo, String plugin, ServerType servType)
+    throws NotFoundException;
 
 }

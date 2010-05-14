@@ -197,7 +197,8 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
      * 
      */
     public Resource createResource(AuthzSubject owner, ResourceType rt, Resource prototype,
-                                   Integer instanceId, String name, boolean system, Resource parent) {
+                                   Integer instanceId, String name, boolean system,
+                                   Resource parent) {
         long start = System.currentTimeMillis();
 
         Resource res = resourceDAO.create(rt, prototype, name, owner, instanceId, system);
@@ -206,8 +207,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
 
         resourceEdgeDAO.create(res, res, 0, relation); // Self-edge
         if (parent != null) {
-            Collection<ResourceEdge> ancestors = resourceEdgeDAO
-                .findAncestorEdges(parent, relation);
+            Collection<ResourceEdge> ancestors = resourceEdgeDAO.findAncestorEdges(parent, relation);
             resourceEdgeDAO.create(res, parent, -1, relation);
             resourceEdgeDAO.create(parent, res, 1, relation);
 

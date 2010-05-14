@@ -93,6 +93,7 @@ import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.util.MessagePublisher;
 import org.hyperic.hq.control.shared.ControlManager;
 import org.hyperic.hq.events.EventConstants;
+import org.hyperic.hq.ha.HAService;
 import org.hyperic.hq.ha.HAUtil;
 import org.hyperic.hq.measurement.data.TrackEventReport;
 import org.hyperic.hq.measurement.server.session.DataInserterException;
@@ -153,6 +154,8 @@ public class LatherDispatcherImpl implements LatherDispatcher {
     private MessagePublisher messagePublisher;
     private AgentCommandsClientFactory agentCommandsClientFactory;
 
+    private HAService haService;
+
     @Autowired
     public LatherDispatcherImpl(AgentManager agentManager, AuthManager authManager,
                                 AuthzSubjectManager authzSubjectManager,
@@ -162,7 +165,9 @@ public class LatherDispatcherImpl implements LatherDispatcher {
                                 PlatformManager platformManager, ReportProcessor reportProcessor,
                                 PermissionManager permissionManager, ZeventEnqueuer zeventManager,
                                 MessagePublisher messagePublisher,
-                                AgentCommandsClientFactory agentCommandsClientFactory) {
+                                AgentCommandsClientFactory agentCommandsClientFactory,
+                                HAService haService) {
+        this.haService = haService;
         this.agentManager = agentManager;
         this.authManager = authManager;
         this.authzSubjectManager = authzSubjectManager;
@@ -663,14 +668,20 @@ public class LatherDispatcherImpl implements LatherDispatcher {
         throws LatherRemoteException {
 
         Integer agentId = null;
+        if (!haService.alertTriggersHaveInitialized()) {
+            if (log.isDebugEnabled()) {
+                log.debug("Not ready - received request for " + method +
+                          " from " + ctx.getCallerIP());
+            }
+            throw new LatherRemoteException("Server still initializing");
+        }
 
         if (log.isDebugEnabled()) {
             log.debug("Request for " + method + "() from " + ctx.getCallerIP());
         }
 
         if (!HAUtil.isMasterNode()) {
-            log
-                .warn("Non-primary server received communication from an agent.  Request will be denied.");
+            log.warn("Non-primary server received communication from an agent.  Request will be denied.");
             throw new LatherRemoteException(
                 "This server is not the primary node in the HA configuration. Agent request denied.");
         }
@@ -678,7 +689,7 @@ public class LatherDispatcherImpl implements LatherDispatcher {
         if (secureCommands.contains(method)) {
             if (!(arg instanceof SecureAgentLatherValue)) {
                 log.warn("Authenticated call made from " + ctx.getCallerIP() +
-                         " which did not subclass " + "the correct authentication class");
+                         " which did not subclass the correct authentication class");
                 throw new LatherRemoteException("Unauthorized agent denied");
             }
 

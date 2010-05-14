@@ -7,7 +7,7 @@ do
 	for ((j=0;j<5;j++))
 	do
 		echo "cloning agent ------------> " $i
-		./create_clone.sh $i
+		./create_clone.sh $i $1
 		i=$(($i + 1))
 		sleep 1
 	done
@@ -21,4 +21,3 @@ do
         done
 	sleep 5
 done
- 

@@ -30,21 +30,23 @@ import java.util.List;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 @Component
 public class SynchronousAvailDataInserter implements DataInserter {
-    
+
     private final AvailabilityManager availabilityManager;
-    
+
     private final AvailabilityCache availabilityCache;
 
     @Autowired
-    public SynchronousAvailDataInserter(AvailabilityManager availabilityManager, AvailabilityCache availabilityCache) {
+    public SynchronousAvailDataInserter(AvailabilityManager availabilityManager,
+                                        AvailabilityCache availabilityCache) {
         this.availabilityManager = availabilityManager;
         this.availabilityCache = availabilityCache;
     }
 
-    public void insertMetrics(List availData)
-        throws InterruptedException, DataInserterException {
+    public void insertMetrics(List<DataPoint> availData) throws InterruptedException,
+        DataInserterException {
         availabilityManager.addData(availData);
     }
 
@@ -52,7 +54,7 @@ public class SynchronousAvailDataInserter implements DataInserter {
         return this.availabilityCache;
     }
 
-    public void insertMetrics(List metricData, boolean isPriority)
+    public void insertMetrics(List<DataPoint> metricData, boolean isPriority)
         throws InterruptedException, DataInserterException {
         insertMetrics(metricData);
     }
