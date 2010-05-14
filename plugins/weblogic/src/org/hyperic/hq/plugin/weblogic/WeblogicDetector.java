@@ -66,8 +66,7 @@ public class WeblogicDetector
     private static final String ADMIN_START =
         "startWebLogic" + SCRIPT_EXT;
 
-    private static final String NODE_START =
-        "startManagedWebLogic" + SCRIPT_EXT;
+    public static final String NODE_START = "bin/startManagedWebLogic" + SCRIPT_EXT;
 
     private static final String PROP_MX_SERVER =
         "-Dweblogic.management.server";
@@ -81,28 +80,6 @@ public class WeblogicDetector
 
     public RuntimeDiscoverer getRuntimeDiscoverer() {
         return new WeblogicRuntimeDiscoverer(this);
-    }
-
-    private File getPossibleControlProgram(File dir) {
-        String[] scripts = dir.list(new FilenameFilter() {
-            public boolean accept(File dir, String name) {
-                if (name.startsWith("start") &&
-                    name.endsWith(SCRIPT_EXT) &&
-                    !name.equals(NODE_START) &&
-                    (name.indexOf("PointBase") == -1))
-                {
-                    return true;
-                }
-                return false;
-            }
-         });
-
-        if ((scripts == null) || (scripts.length == 0)) {
-            return null;
-        }
-        else {
-            return new File(dir, scripts[0]);
-        }
     }
 
     //just here to override protected access.
@@ -207,37 +184,27 @@ public class WeblogicDetector
             "logs",  //9.1
         };
         
-        File log = null;
+        File wlsLog = null;
         
         for (int i=0; i<dirs.length; i++) {
-            log =
+            wlsLog =
                 new File(installDir,
                          dirs[i] + File.separator + srvName + ".log");
-            if (log.exists()) {
+            if (wlsLog.exists()) {
                 break;
             }
         }
 
         productConfig.setValue(WeblogicLogFileTrackPlugin.PROP_FILES_SERVER,
-                               log.toString());
+                               wlsLog.toString());
 
         ConfigResponse controlConfig = new ConfigResponse();
-        File script = //9.1
-            getPossibleControlProgram(new File(installDir, "../.."));
-        if ((script == null) || !script.exists()) {
-            script = getPossibleControlProgram(installDir);
-        }
-        if (script == null) {
-            script = new File(installDir, ADMIN_START);
-        }
-
+        File script = new File(installDir,"../../" + ADMIN_START);
         try {
-            controlConfig.setValue(ServerControlPlugin.PROP_PROGRAM,
-                                   getCanonicalPath(script.getPath()));
-        } catch (InvalidOptionException e) {
-            this.log.error(e.getMessage(), e);
-        } catch (InvalidOptionValueException e) {
-            this.log.error(e.getMessage(), e);
+            controlConfig.setValue(ServerControlPlugin.PROP_PROGRAM, script.getCanonicalPath());
+        } catch (IOException ex) {
+            controlConfig.setValue(ServerControlPlugin.PROP_PROGRAM, script.getPath());
+            log.debug(ex);
         }
 
         boolean hasCreds = false;
@@ -279,8 +246,8 @@ public class WeblogicDetector
 
         server.setName(name);
 
-        server.setProductConfig(productConfig);
-        server.setControlConfig(controlConfig);
+        setProductConfig(server,productConfig);
+        setControlConfig(server,controlConfig);
         //force user to configure by not setting measurement config
         //since we dont discover username or password.
         if (hasCreds) {

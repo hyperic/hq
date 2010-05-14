@@ -216,6 +216,7 @@ public class WeblogicRuntimeDiscoverer implements RuntimeDiscoverer, PrivilegedA
 
 			for (int i = 0; i < servers.size(); i++) {
 				serverQuery = (ServerQuery) servers.get(i);
+                if(!serverQuery.isRunning()) continue;
 
 				if (serverQuery.isAdmin()) {
 					adminVersion = serverQuery.getVersion();
