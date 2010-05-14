@@ -22,7 +22,7 @@ Common usages:
       MAVEN_OPTS="-Xmx1024m -XX:MaxPermSize=512m"
 
 Integration testing:
-	The tests in hq-integration-tests require a live database (PostgreSQL or MySQL) with the HQ schema installed.  See the sections below for information on configuring the database.
+	The tests in the hq-integration-tests module require a live database (PostgreSQL or MySQL) with the HQ schema installed.  See the sections below for information on configuring the database.
 	
 
 Setting up a database:
