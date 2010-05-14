@@ -18,6 +18,8 @@
 			<sec:filter-chain pattern="/js/**" filters="none" />
 			<sec:filter-chain pattern="/images/**" filters="none" />
 			<sec:filter-chain pattern="/ui-docs/**" filters="none" />
+			<sec:filter-chain pattern="/ServerInvokerServlet/**" filters="none"/>
+            <sec:filter-chain pattern="/transport/**" filters="none" />
 			<sec:filter-chain pattern="/hqu/hqapi*/**" filters="securityContextPersistenceFilter,
 																basicAuthenticationFilter,
 																basicAuthenticationExceptionTranslationFilter,

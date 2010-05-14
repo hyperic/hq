@@ -49,8 +49,10 @@
 
 	<bean id="dataSource"
 		class="org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy">
-		<constructor-arg>
-			<bean class="org.apache.tomcat.jdbc.pool.DataSource"
+		<constructor-arg ref="tomcatDataSource"/>
+	</bean>
+	
+	<bean id="tomcatDataSource" class="org.apache.tomcat.jdbc.pool.DataSource"
 				p:driverClassName="${server.database-driver}" p:url="${server.database-url}"
 				p:username="${server.database-user}" p:password="${server.database-password}"
 				p:defaultAutoCommit="false" p:minIdle="${server.database-minpoolsize}"
@@ -59,7 +61,15 @@
 				p:maxWait="${server.database-blockingtimeout}" p:jdbcInterceptors="ConnectionState;StatementFinalizer"
 				p:validationQuery="${server.connection-validation-sql}"
 				p:validationInterval="30000" p:logAbandoned="true" p:testOnBorrow="true" />
-		</constructor-arg>
+	
+	<bean id="exporter" class="org.springframework.jmx.export.MBeanExporter"
+		lazy-init="false">
+		<property name="beans">
+			<map>
+				<entry key="hyperic.jmx:type=DataSource,name=tomcat.jdbc"
+					value-ref="tomcatDataSource" />
+			</map>
+		</property>
 	</bean>
 
 	<context:annotation-config />

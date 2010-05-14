@@ -44,6 +44,12 @@ public class EmbeddedActiveMQServerDetector
     protected ServerResource getServerResource(MxProcess process) {
         ServerResource server = super.getServerResource(process);
         String catalinaBase = server.getInstallPath();
+        
+        File hq = findVersionFile(new File(catalinaBase), Pattern.compile("hq-common.jar"));
+        if (hq != null) {
+            server.setName(getPlatformName()+" HQ ActiveMQ Embedded "+getTypeInfo().getVersion());
+        }
+
         server.setIdentifier(catalinaBase + " Embedded ActiveMQ");
         return server;
     }

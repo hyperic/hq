@@ -49,6 +49,8 @@ import org.apache.commons.logging.LogFactory;
 
 public class AgentRemoteValue implements GenericValueMap, Externalizable {
 
+    private static final long serialVersionUID = 644682754857767836L;
+
     private static Log _log = LogFactory.getLog(AgentRemoteValue.class);
 
     private Hashtable vals;

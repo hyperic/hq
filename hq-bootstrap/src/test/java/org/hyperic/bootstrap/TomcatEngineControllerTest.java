@@ -49,7 +49,7 @@ public class TomcatEngineControllerTest {
                 processManager
                     .executeProcess(
                         EasyMock
-                            .aryEq(new String[] { "java",
+                            .aryEq(new String[] { System.getProperty("java.home") + "/bin/java",
                                                  "-cp",
                                                  catalinaHome + "/bin/bootstrap.jar",
                                                  "-XX:MaxPermSize=192m",
