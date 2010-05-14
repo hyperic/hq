@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+	<modelVersion>4.0.0</modelVersion>
+	
+	<parent>
+		<groupId>org.hyperic.hq</groupId>
+		<artifactId>hq-parent</artifactId>
+		<version>4.5.0.BUILD-SNAPSHOT</version>
+	</parent>
+	
+	<groupId>org.hyperic.hq.pdk</groupId>
+	<artifactId>modules</artifactId>
+	<packaging>pom</packaging>
+	<name>Hyperic HQ PDK - Modules</name>
+
+	<modules>
+		<module>hq-pdk-shared</module>
+		<module>hq-agent-pdk</module>
+	</modules>
+	
+	<properties>
+		<pdk.title>Hyperic HQ Plugin API</pdk.title>
+	</properties>
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>com.atlassian.maven.plugins</groupId>
+				<artifactId>maven-clover2-plugin</artifactId>
+				<version>${clover2.version}</version>
+				<configuration>
+					<skip>false</skip>
+				</configuration>
+			</plugin>
+			<!--><plugin>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.6.1</version>
+				<configuration>
+					<show>protected</show>
+					<author>false</author>
+					<doctitle>${pdk.title}</doctitle>
+					<windowtitle>${pdk.title}</windowtitle>
+					<header><![CDATA[<font size="2">${pdk.title} v. ${project.version}</font>]]></header>
+					<bottom><![CDATA[Copyright &#169; 2004-2010 Hyperic, Inc. <a href="mailto:support@hyperic.net">support@hyperic.net</a>, All Rights Reserved.]]></bottom>
+				</configuration>
+				<executions>
+					<execution>
+						<id>package</id>
+						<phase>package</phase>
+						<goals>
+							<goal>aggregate-jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin> -->
+		</plugins>
+	</build>
+
+</project>

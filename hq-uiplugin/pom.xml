@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+	<modelVersion>4.0.0</modelVersion>
+	
+	<parent>
+		<groupId>org.hyperic.hq</groupId>
+		<artifactId>hq-parent</artifactId>
+		<version>4.5.0.BUILD-SNAPSHOT</version>
+	</parent>
+	
+	<groupId>org.hyperic.hq.uiplugin</groupId>
+	<artifactId>modules</artifactId>
+	<packaging>pom</packaging>
+	<name>Hyperic HQ UI Plugin - Modules</name>
+
+	<modules>
+		<module>hq-uiplugin-parent</module>
+
+		<module>alertcenter</module>
+		<module>auditcenter</module>
+		<module>eventcenter</module>
+		<module>gconsole</module>
+		<module>health</module>
+		<module>jmx</module>
+		<module>live_exec</module>
+		<module>mass</module>
+		<module>nagiup</module>
+		<module>opennms</module>
+		<module>public</module>
+		<module>saasCenter</module>
+		<module>systemsdown</module>
+		<module>tmpl_render</module>
+	</modules>
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>com.atlassian.maven.plugins</groupId>
+				<artifactId>maven-clover2-plugin</artifactId>
+				<version>${clover2.version}</version>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

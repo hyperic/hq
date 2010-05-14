@@ -72,7 +72,7 @@ public class CommonValidatorTest extends TestCase {
                 new CommonValidator(this.messages);
             
             String validationMappingRes = "test-form-validation.xml";
-            TestBean bean = new TestBean();
+            MockBean bean = new MockBean();
             
             // Try a good username
             try {

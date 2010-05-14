@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component>
+
+	<fileSets>
+		<fileSet>
+			<directory>src/main/resources</directory>
+			<outputDirectory>/</outputDirectory>
+			<excludes>
+				<exclude>**/*.sh</exclude>
+				<exclude>**/.gitignore</exclude>
+				<exclude>wrapper/sbin/*</exclude>
+			</excludes>
+			<filtered>true</filtered>
+			<fileMode>0644</fileMode>
+			<directoryMode>0755</directoryMode>
+		</fileSet>
+		<fileSet>
+			<directory>src/main/resources</directory>
+			<outputDirectory>/</outputDirectory>
+			<includes>
+				<include>**/*.sh</include>
+				<include>wrapper/sbin/*</include>
+			</includes>
+			<filtered>true</filtered>
+			<fileMode>0755</fileMode>
+			<directoryMode>0755</directoryMode>
+		</fileSet>
+	</fileSets>
+
+	<dependencySets>
+		<dependencySet>
+			<useProjectArtifact>false</useProjectArtifact>
+			<useTransitiveDependencies>false</useTransitiveDependencies>
+			<outputDirectory>bundles</outputDirectory>
+			<unpack>true</unpack>
+			<fileMode>0644</fileMode>
+			<directoryMode>0755</directoryMode>
+			<includes>
+				<include>org.hyperic.hq.dist:agent</include>
+			</includes>
+		</dependencySet>
+	</dependencySets>
+
+</component>

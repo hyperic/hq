@@ -9,7 +9,7 @@
 
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
-		<param-value>/WEB-INF/spring/*-context.xml,/WEB-INF/classes/META-INF/spring/*-context.xml</param-value>
+		<param-value>/WEB-INF/spring/*-context.xml,classpath*:/META-INF/spring/*-context.xml</param-value>
 	</context-param>
 	
 	<listener>
@@ -83,7 +83,7 @@
 	<!-- Hibernate session filter -->
 	<filter>
 		<filter-name>Hibernate-Session-Filter</filter-name>
-		<filter-class>org.hyperic.hibernate.filter.SessionFilter</filter-class>
+		<filter-class>org.springframework.orm.hibernate3.support.OpenSessionInViewFilter</filter-class>
 	</filter>
 
 	<filter>

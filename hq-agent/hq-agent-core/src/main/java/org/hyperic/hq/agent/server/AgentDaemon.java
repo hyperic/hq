@@ -81,7 +81,7 @@ public class AgentDaemon
     public static final String PROP_CERTDN = "agent.certDN";
     public static final String PROP_HOSTNAME = "agent.hostName";
     
-    private static final String AGENT_COMMANDS_SERVER_JAR_NAME = "hq-agent-handler-commands.jar";
+    private static final String AGENT_COMMANDS_SERVER_JAR_NAME = "hq-agent-handler-commands";
 
     private static AgentDaemon mainInstance;
     private static Object      mainInstanceLock = new Object();
@@ -134,12 +134,12 @@ public class AgentDaemon
             public boolean accept(File file) {
                 String name = file.getName();
                 
-                return name.equals(AGENT_COMMANDS_SERVER_JAR_NAME);
+                return name.startsWith(AGENT_COMMANDS_SERVER_JAR_NAME);
             }
         });
 
         if (jars == null || jars.length != 1) {
-            throw new FileNotFoundException(AGENT_COMMANDS_SERVER_JAR_NAME+" is not optional");
+            throw new FileNotFoundException(AGENT_COMMANDS_SERVER_JAR_NAME+" jar is not optional");
         }
         
         return jars[0];
@@ -150,7 +150,7 @@ public class AgentDaemon
                 public boolean accept(File file) {
                     String name = file.getName();
                     
-                    return name.endsWith(".jar") && !name.equals(AGENT_COMMANDS_SERVER_JAR_NAME);
+                    return name.endsWith(".jar") && !name.startsWith(AGENT_COMMANDS_SERVER_JAR_NAME);
                 }
             });
 

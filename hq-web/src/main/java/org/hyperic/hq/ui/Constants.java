@@ -40,7 +40,7 @@ public class Constants
                KeyConstants, StringConstants { 
     
     public static final String APP_VERSION = "HQVersion";
-    public static final String APP_BUILD   = "HQBuild";
+  
 
     public static final String INVENTORY_LOC_TYPE = "Inventory.do";
 

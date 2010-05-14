@@ -35,6 +35,7 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Dashboard;
@@ -46,37 +47,47 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class QuickFavoritesPrepareAction
-    extends WorkflowPrepareAction {
+public class QuickFavoritesPrepareAction extends WorkflowPrepareAction {
 
-    private AuthzBoss authzBoss;
-    private DashboardManager dashboardManager;
+	private AuthzBoss authzBoss;
+	private DashboardManager dashboardManager;
+	private SessionManager sessionManager;
 
-    @Autowired
-    public QuickFavoritesPrepareAction(AuthzBoss authzBoss, DashboardManager dashboardManager) {
-        this.authzBoss = authzBoss;
-        this.dashboardManager = dashboardManager;
-    }
+	@Autowired
+	public QuickFavoritesPrepareAction(AuthzBoss authzBoss,
+			DashboardManager dashboardManager, SessionManager sessionManager) {
+		this.authzBoss = authzBoss;
+		this.dashboardManager = dashboardManager;
+		this.sessionManager = sessionManager;
+	}
 
-    public ActionForward workflow(ComponentContext context, ActionMapping mapping, ActionForm form,
-                                  HttpServletRequest request, HttpServletResponse response) throws Exception {
-        WebUser user = RequestUtils.getWebUser(request);
-        Boolean isFavorite = Boolean.FALSE;
-        AppdefResourceValue arv = (AppdefResourceValue) context.getAttribute("resource");
+	public ActionForward workflow(ComponentContext context,
+			ActionMapping mapping, ActionForm form, HttpServletRequest request,
+			HttpServletResponse response) throws Exception {
+		WebUser user = RequestUtils.getWebUser(request);
+		Boolean isFavorite = Boolean.FALSE;
+		AppdefResourceValue arv = (AppdefResourceValue) context
+				.getAttribute("resource");
 
-        // check our preferences to see if this resource is in there.
+		// check our preferences to see if this resource is in there.
 
-        ConfigResponse dashConfig = DashboardUtils.findUserDashboardConfig(user, authzBoss);
-        isFavorite = QuickFavoritesUtil.isFavorite(dashConfig, arv.getEntityId());
+		ConfigResponse dashConfig = DashboardUtils.findUserDashboardConfig(
+				user, dashboardManager, sessionManager);
+		isFavorite = QuickFavoritesUtil.isFavorite(dashConfig, arv
+				.getEntityId());
 
-        request.setAttribute(Constants.ENTITY_ID_PARAM, arv.getEntityId().getAppdefKey());
-        request.setAttribute(Constants.IS_FAVORITE_PARAM, isFavorite);
+		request.setAttribute(Constants.ENTITY_ID_PARAM, arv.getEntityId()
+				.getAppdefKey());
+		request.setAttribute(Constants.IS_FAVORITE_PARAM, isFavorite);
 
-        List<Dashboard> editableDashboards = dashboardManager.findEditableDashboards(user, authzBoss);
+		List<Dashboard> editableDashboards = dashboardManager
+				.findEditableDashboards(user, authzBoss);
 
-        request.setAttribute(Constants.EDITABLE_DASHBOARDS_PARAM, editableDashboards);
-        request.setAttribute(Constants.HAS_MULTIPLE_DASHBOARDS_PARAM, editableDashboards.size() > 1);
+		request.setAttribute(Constants.EDITABLE_DASHBOARDS_PARAM,
+				editableDashboards);
+		request.setAttribute(Constants.HAS_MULTIPLE_DASHBOARDS_PARAM,
+				editableDashboards.size() > 1);
 
-        return null;
-    }
+		return null;
+	}
 }

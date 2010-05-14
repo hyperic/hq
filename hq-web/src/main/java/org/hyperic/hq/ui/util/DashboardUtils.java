@@ -38,8 +38,10 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
+import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
@@ -47,6 +49,7 @@ import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
+import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.InvalidOptionException;
@@ -355,9 +358,10 @@ public class DashboardUtils {
     /**
      * Find the user's dashboard
      */
-    public static ConfigResponse findUserDashboardConfig(WebUser user, AuthzBoss boss)
+    public static ConfigResponse findUserDashboardConfig(WebUser user, DashboardManager dashboardManager, SessionManager sessionManager)
     throws SessionNotFoundException, SessionTimeoutException, PermissionException, RemoteException 
     {
-        return boss.getUserDashboardConfig(user.getSessionId());
+    	AuthzSubject subj = sessionManager.getSubject(user.getSessionId());
+     	return dashboardManager.getUserDashboard(subj, subj).getConfig();
     }
 }

@@ -1,0 +1,143 @@
+
+   <!-- Hibernate common targets -->
+
+  <property name="build.dir" location="${install.dir}/tmp" />
+  <property name="hibernate-properties-gen" location="${build.dir}/hibernate/hibernate.properties" />
+  
+  
+  <target name="common-taskdefs" unless="init-taskdefs.notrequired">
+    <taskdef name="for" classname="net.sf.antcontrib.logic.For">
+      <classpath>
+        <fileset dir="${install.dir}/lib" includes="*.jar"/>
+      </classpath>
+    </taskdef>
+  </target>
+
+  <target name="hibernate-init-taskdefs" depends="common-taskdefs"
+          unless="hibernate-init-taskdefs.notrequired">
+    <taskdef name="hibernatetool"
+             classname="org.hibernate.tool.ant.HibernateToolTask">
+      <classpath>
+        <fileset dir="${install.dir}/lib" includes="*.jar"/>
+      </classpath>
+    </taskdef>
+    <property name="hibernate-init-taskdefs.notrequired" value="true"/>
+  </target>
+
+  <target name="hibernate-taskdefs" depends="hibernate-init-taskdefs">
+    <switch value="${server.database}">
+      <case value="Oracle8">
+        <property name="hyperic.dialect" value="Oracle" />
+      </case>
+      <case value="Oracle9i">
+        <property name="hyperic.dialect" value="Oracle9" />
+        <property name="hibernate.dialect" value="org.hyperic.hibernate.dialect.${hyperic.dialect}Dialect" />
+      </case>
+      <case value="Oracle10g">
+        <property name="hyperic.dialect" value="Oracle9" />
+        <property name="hibernate.dialect" value="org.hyperic.hibernate.dialect.${hyperic.dialect}Dialect" />
+      </case>
+      <case value="PostgreSQL">
+        <property name="hyperic.dialect" value="PostgreSQL" />
+        <property name="hibernate.dialect" value="org.hyperic.hibernate.dialect.${hyperic.dialect}Dialect" />
+      </case>
+      <case value="MySQL">
+		<property name="include.hq.sequence.table" value="true" />
+        <property name="hyperic.dialect" value="MySQL5InnoDB" />
+        <property name="hibernate.dialect" value="org.hyperic.hibernate.dialect.${hyperic.dialect}Dialect" />
+      </case>
+      <default>
+        <property name="hibernate.dialect" value="org.hibernate.dialect.${hyperic.dialect}Dialect" />
+        <fail>
+        Unrecognized datasource mapping name: ${server.database}
+        </fail>
+      </default>
+    </switch>
+  </target>
+
+  <target name="hibernate-prep" depends="hibernate-taskdefs">
+	<mkdir dir="${build.dir}"/>
+	<mkdir dir="${build.dir}/hibernate"/>
+    <property name="hibernate.connection.url" value="${server.database-url}" />
+    <property name="hibernate.connection.driver_class" value="${server.database-driver}" />
+    <property name="hibernate.connection.username" value="${server.database-user}" />
+    <property name="hibernate.connection.password" value="${server.database-password}" />
+    <property name="hibernate.connection.pool_size" value="0" />
+	<property name="hq.schema.statement.delimiter" value=";"/>
+	<property name="hq.schema.export" value="true"/>
+
+    <echoproperties destfile="${hibernate-properties-gen}" format="text">
+      <propertyset>
+        <propertyref name="hibernate.dialect"/>
+        <propertyref name="hibernate.connection.url"/>
+        <propertyref name="hibernate.connection.driver_class"/>
+        <propertyref name="hibernate.connection.username"/>
+        <propertyref name="hibernate.connection.password"/>
+        <propertyref name="hibernate.connection.password"/>
+        <propertyref name="hibernate.connection.pool_size"/>
+		<propertyref name="hq.schema.statement.delimiter"/>
+		<propertyref name="hq.schema.export"/>
+      </propertyset>
+    </echoproperties> 
+    
+      <replace file="${install.dir}/data/hibernate.cfg.xml">
+      	<replacefilter token="@@@INSTALLDIR@@@" value="${install.dir}" />
+	 </replace>
+  </target>
+
+  <target name="hibernate-schema-create-init">
+    <delete failonerror="false" file="${build.dir}/sql/hibernate.sql" />
+    <mkdir dir="${build.dir}/sql" />
+  </target>
+
+  <target name="hibernate-schema-create" depends="hibernate-prep,hibernate-schema-create-init">
+    <hibernatetool>
+      <classpath>
+        <path refid="alljars"/>
+      </classpath>
+      <configuration propertyFile="${hibernate-properties-gen}" configurationfile="${install.dir}/data/hibernate.cfg.xml" />
+  
+      <hbm2ddl
+          destdir="${build.dir}/sql"
+          outputFileName="hibernate.sql"
+          drop="false"
+          create="true"
+          update="false"
+          format="true"
+          console="false"
+          export="true"
+          delimiter=";"
+          haltonerror="true"
+          />
+    </hibernatetool>
+  </target>
+
+  <target name="hibernate-schema-drop" depends="hibernate-prep">
+
+    <delete failonerror="false" file="${build.dir}/sql/hibernate.sql" />
+    <mkdir dir="${build.dir}/sql" />
+    <hibernatetool>
+    	  <classpath>
+			<path refid="alljars"/>
+	      </classpath>
+	      <configuration propertyFile="${hibernate-properties-gen}" configurationfile="${install.dir}/data/hibernate.cfg.xml">
+      </configuration>
+
+      <hbm2ddl
+          destdir="${build.dir}/sql"
+          outputFileName="hibernate.sql"
+          drop="true"
+          create="false"
+          update="false"
+          format="true"
+          console="false"
+          export="true"
+          delimiter=";"
+          />
+    </hibernatetool>
+  </target>
+
+  <target name="hibernate-setup" depends="hibernate-schema-drop,hibernate-schema-create" />
+
+  <target name="hibernate-drop" depends="hibernate-schema-drop" />
+
