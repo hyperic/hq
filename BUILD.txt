@@ -1,0 +1,77 @@
+-- Building Hyperic HQ --
+
+Requirements:  
+	- Java 1.6
+	- Maven 2.2.1
+	- Ant 1.7.1 (for running DB initialization task only)
+
+HQ follows the normal Maven phases:
+	$ mvn package
+	$ mvn compile
+	$ mvn test
+	$ mvn install
+
+
+Common usages:
+    Build a regular distribution (includes all installer and agent bundles):  			$ mvn package
+    Build modules (excluding installer and agent bundles) and run integration tests:    $ mvn -Pintegration-test package
+    Installation into Maven repo:  $ mvn install
+   
+    Note, you may need to increase the amount of memory available to  
+    Maven.  We use the following settings:
+      MAVEN_OPTS="-Xmx1024m -XX:MaxPermSize=512m"
+
+Integration testing:
+	The tests in hq-integration-tests require a live database (PostgreSQL or MySQL) with the HQ schema installed.  See the sections below for information on configuring the database.
+	
+
+Setting up a database:
+	Add the following properties to ~/.hq/build.properties to connect the hq-web app or integration tests to your DB:
+		server.database-url=jdbc:mysql://localhost:3306/hqdb
+		server.database-driver=com.mysql.jdbc.Driver
+		server.database=MySQL
+		server.database-user=hq
+		server.database-password=hq
+		server.admin.username=hqadmin
+		server.admin.password=hqadmin
+		
+	You will also need to install the schema prior to running the tests or deploying the HQ web app.
+	To install the schema:
+		$ cd dist/installer
+		$ mvn assembly:directory
+		$ ant dbsetup
+		
+  
+Artifacts:
+	- hq-web/target/ROOT.war
+	Deploy this webapp to your Tomcat or tc Server 6.0 container to run HQ server in development.  The web app requires a live database with the HQ schema installed.  See "Setting up a database". It is currently required that HQ be the ROOT webapp.
+	- dist/target/hyperic-hq-agent-${version}-${os}.tgz/.zip
+	Unpack and run this agent on a managed node by invoking bin/hq-agent.sh start
+	- dist/target/hyperic-hq-installer-${version}-${os}.tgz/.zip
+	Unpack and run setup.sh for a full production install of the HQ server and/or agent
+
+ 
+Deploying to Tomcat:
+	You can replace Tomcat's ROOT webapp manually, or use the maven Tomcat plugin to deploy to a running Tomcat or tc Server (uses the Tomcat manager webapp).
+	To deploy:
+	1. Edit the $TOMCAT_HOME/conf/tomcat-users.xml and add a new user with manager permissions.
+		<tomcat-users>
+    		<role rolename="manager"/>
+    		<user username="admin" password="springsource" roles="manager"/>
+		</tomcat-users>
+	2. Add a server configuration called local-tomcat to your ~/.m2/settings.xml file
+		<servers>
+    		<server>
+        		<id>local-tomcat</id>
+        		<username>admin</username>
+        		<password>springsource</password>
+    		</server>
+	   </servers>
+	3. $ cd hq-web
+	   $ mvn tomcat:redeploy (NOTE this will build the webapp before deploying it)
+
+    
+Running / Viewing:
+    After deploying to tomcat and starting it, you should be able to
+    see the HQ dashboard at:  http://localhost:8080
+
