@@ -29,23 +29,29 @@ import java.util.List;
 
 import org.hyperic.hq.measurement.shared.DataManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /**
  * A {@link DataInserter} which immediately calls addData in the data manager
- * and will not return until the data has been written to the DB.
+ * and will not return until the data has been written to the DB. 
  */
 @Component
-public class SynchronousDataInserter implements DataInserter {
+@Scope("prototype")
+public class SynchronousDataInserter 
+    implements DataInserter
+{
     private final Object lock = new Object();
 
     private final DataManager dataManager;
-
+    
+    
     @Autowired
     public SynchronousDataInserter(DataManager dMan) {
         dataManager = dMan;
     }
 
+ 
     public void insertMetrics(List<DataPoint> metricData) throws InterruptedException {
         dataManager.addData(metricData);
     }
@@ -54,6 +60,7 @@ public class SynchronousDataInserter implements DataInserter {
         return lock;
     }
 
+   
     public void insertMetrics(List<DataPoint> metricData, boolean isPriority)
         throws InterruptedException, DataInserterException {
         insertMetrics(metricData);
