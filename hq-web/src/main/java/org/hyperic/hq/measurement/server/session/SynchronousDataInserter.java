@@ -29,6 +29,7 @@ import java.util.List;
 
 import org.hyperic.hq.measurement.shared.DataManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /**
@@ -36,6 +37,7 @@ import org.springframework.stereotype.Component;
  * and will not return until the data has been written to the DB. 
  */
 @Component
+@Scope("prototype")
 public class SynchronousDataInserter 
     implements DataInserter
 {
