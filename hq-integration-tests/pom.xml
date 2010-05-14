@@ -115,6 +115,9 @@
 						</goals>
 					</execution>
 				</executions>
+				<configuration>
+					<argLine>-Xmx512m</argLine>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>com.atlassian.maven.plugins</groupId>
