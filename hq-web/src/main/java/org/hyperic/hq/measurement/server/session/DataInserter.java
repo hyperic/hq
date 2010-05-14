@@ -38,7 +38,7 @@ public interface DataInserter {
      * 
      * @param metricData a list of {@link DataPoint}s
      */
-    public void insertMetrics(List metricData)
+    public void insertMetrics(List<DataPoint> metricData)
         throws InterruptedException, DataInserterException;
 
     /**
@@ -50,7 +50,7 @@ public interface DataInserter {
      * When implemented the DataInserter will give will insert the priority
      * data before the low priority data.
      */
-    public void insertMetrics(List metricData, boolean isPriority)
+    public void insertMetrics(List<DataPoint> metricData, boolean isPriority)
         throws InterruptedException, DataInserterException;
 
     public Object getLock();

@@ -49,7 +49,8 @@ public class SynchronousDataInserter
         dataManager = dMan;
     }
 
-    public void insertMetrics(List metricData) throws InterruptedException {
+    @Override
+    public void insertMetrics(List<DataPoint> metricData) throws InterruptedException {
         dataManager.addData(metricData);
     }
 
@@ -57,7 +58,8 @@ public class SynchronousDataInserter
         return lock;
     }
 
-    public void insertMetrics(List metricData, boolean isPriority)
+    @Override
+    public void insertMetrics(List<DataPoint> metricData, boolean isPriority)
         throws InterruptedException, DataInserterException {
         insertMetrics(metricData);
     }
