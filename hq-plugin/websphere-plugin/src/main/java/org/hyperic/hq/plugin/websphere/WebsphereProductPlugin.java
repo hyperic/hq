@@ -440,10 +440,10 @@ public class WebsphereProductPlugin extends ProductPlugin {
     public String[] getClassPath(ProductPluginManager manager) {
         if (isWin32()) {
             String prop = "websphere.regkey";
-            REG_KEY = getProperties().getProperty(prop);
+            REG_KEY=getPluginProperty(prop);
             if (REG_KEY == null) {
-                throw new IllegalArgumentException(prop +
-                                                   " property undefined");
+                log.error("Prop " + prop + "undefined");
+                return new String[] {};
             }
         }
 
