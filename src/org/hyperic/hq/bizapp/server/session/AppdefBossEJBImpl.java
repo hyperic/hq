@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2009], Hyperic, Inc.
+ * Copyright (C) [2004-2010], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.bizapp.server.session;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -36,6 +37,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.PatternSyntaxException;
@@ -198,6 +200,8 @@ public class AppdefBossEJBImpl
     extends BizappSessionEJB
     implements SessionBean
 {
+    private final String BUNDLE = "org.hyperic.hq.bizapp.Resources";
+
     private final String APPDEF_PAGER_PROCESSOR =
         "org.hyperic.hq.appdef.shared.pager.AppdefPagerProc";
 
@@ -1323,14 +1327,24 @@ public class AppdefBossEJBImpl
                     getEventsBoss().getMaintenanceEvent(sessionId, aeid.getId());
                 
                 if (event != null && event.getStartTime() != 0) {
-                    throw new VetoException("Could not remove resource " + aeid +
-                                            " because a downtime schedule exists.");
+                    String msg = ResourceBundle.getBundle(BUNDLE)
+                                    .getString("resource.groups.remove.error.downtime.exists");
+    
+                     throw new VetoException(
+                             MessageFormat.format(msg, new String[] {res.getName()}));
                 }
-            } catch (Throwable t) {
+            } catch (SchedulerException se) {
                 // HHQ-3772: This should not happen. However, if it does,
-                // log the exception as a warning and continue with the delete.
-                log.warn("Failure getting the downtime schedule for group[" + aeid + "]. "
-                            + "Ignoring and continuing with the delete process.", t);
+                // log the exception as a warning and do not allow to delete
+                // until the scheduler issue is resolved
+                log.warn("Scheduler error getting the downtime schedule for group[" + aeid + "]: "
+                            + se.getMessage(), se);
+
+                String msg = ResourceBundle.getBundle(BUNDLE)
+                                .getString("resource.groups.remove.error.downtime.scheduler.failure");
+
+                throw new VetoException(
+                            MessageFormat.format(msg, new String[] {res.getName()}));
             }
         }
         if (res == null) {

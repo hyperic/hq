@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2010], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -138,7 +138,7 @@ public class RemoveResourceAction extends BaseAction {
             BizappUtils.buildAppdefEntityIds(resourceList);
         if (resourceItems != null && resourceItems.length > 0) {
             Set deleted = new HashSet();
-            int vetoed = 0;
+            String vetoMessage = null;
             // about the exception handling:
             // if someone either deleted the entity out from under our user
             // or the user hit the back button, a derivative of 
@@ -156,15 +156,16 @@ public class RemoveResourceAction extends BaseAction {
                     log.error("Removing resource " + resourceId +
                                "failed.");
                 } catch (VetoException v) {
-                    vetoed++;
-                    log.info(v.getMessage());
+                    vetoMessage = v.getMessage();
+                    log.info(vetoMessage);
                 }
             }
             
-            if (vetoed > 0) {
+            if (vetoMessage != null) {
                 RequestUtils
-                    .setError(request,
-                             "resource.common.inventory.groups.error.RemoveVetoed");
+                    .setErrorObject(request, 
+                                    "resource.common.inventory.groups.error.RemoveVetoed",
+                                    vetoMessage);
             } else if (deleted.size() > 0) {
                 RequestUtils
                     .setConfirmation(request,
