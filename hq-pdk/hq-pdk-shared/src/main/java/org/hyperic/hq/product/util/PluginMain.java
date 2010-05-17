@@ -88,7 +88,7 @@ public class PluginMain {
         URL[] urls = getLoader().getURLs();
         for (int i=0; i<urls.length; i++) {
             String url = urls[i].getFile();
-            if (!url.endsWith(PluginDumper.PRODUCT_JAR)) {
+            if (!url.contains(PluginDumper.PRODUCT_JAR)) {
                 continue;
             }
             url = URLDecoder.decode(url); //"%20" -> " "
