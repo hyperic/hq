@@ -1,6 +1,6 @@
 open_source_licenses.txt
 
-Hyperic HQ 4.3.0 Beta
+Hyperic HQ 4.3.0
 Enterprise and Open Source Editions
 
 ===========================================================================
