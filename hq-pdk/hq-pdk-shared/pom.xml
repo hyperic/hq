@@ -78,6 +78,7 @@
 					<archive>
 						<manifest>
 							<mainClass>org.hyperic.hq.product.util.PluginMain</mainClass>
+							  <addClasspath>true</addClasspath>
 						</manifest>
 					</archive>
 				</configuration>
