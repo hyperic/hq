@@ -16,27 +16,6 @@
 	<packaging>pom</packaging>
 	<name>Hyperic HQ Distribution - Hyperic HQ Agent</name>
 
-
-	<build>
-		<plugins>
-			<plugin>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<configuration>
-					<descriptors>
-					    <descriptor>src/main/assembly/noJRE.xml</descriptor>
-						<descriptor>src/main/assembly/apple-osx.xml</descriptor>
-						<descriptor>src/main/assembly/hpux-11.xml</descriptor>
-						<descriptor>src/main/assembly/ppc-aix.xml</descriptor>
-						<descriptor>src/main/assembly/sparc-solaris.xml</descriptor>
-						<descriptor>src/main/assembly/win32.xml</descriptor>
-						<descriptor>src/main/assembly/x86-linux.xml</descriptor>
-						<descriptor>src/main/assembly/x86-64-linux.xml</descriptor>
-					</descriptors>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
-
 	<dependencies>
 		<dependency>
 			<groupId>org.hyperic.hq.dist</groupId>
@@ -81,6 +60,155 @@
 			<type>tar.gz</type>
 		</dependency> 
 	</dependencies>
+	
+	<profiles>
+		<profile>
+    			<id>default</id>
+				<activation>
+       				<activeByDefault>true</activeByDefault>
+   				</activation>
+    			<build>
+					<plugins>
+						<plugin>
+							<artifactId>maven-assembly-plugin</artifactId>
+							<configuration>
+								<descriptors>
+					    			<descriptor>src/main/assembly/noJRE.xml</descriptor>
+									<descriptor>src/main/assembly/apple-osx.xml</descriptor>
+									<descriptor>src/main/assembly/hpux-11.xml</descriptor>
+									<descriptor>src/main/assembly/ppc-aix.xml</descriptor>
+									<descriptor>src/main/assembly/sparc-solaris.xml</descriptor>
+									<descriptor>src/main/assembly/win32.xml</descriptor>
+									<descriptor>src/main/assembly/x86-linux.xml</descriptor>
+									<descriptor>src/main/assembly/x86-64-linux.xml</descriptor>
+								</descriptors>
+							</configuration>
+						</plugin>
+					</plugins>
+				</build>
+  		</profile>
+		<profile>
+    			<id>noJRE</id>
+    			<build>
+					<plugins>
+						<plugin>
+							<artifactId>maven-assembly-plugin</artifactId>
+							<configuration>
+								<descriptors>
+									<descriptor>src/main/assembly/noJRE.xml</descriptor>
+								</descriptors>
+							</configuration>
+						</plugin>
+					</plugins>
+				</build>
+  		</profile>
+		 <profile>
+    			<id>apple-osx</id>
+    			<build>
+					<plugins>
+						<plugin>
+							<artifactId>maven-assembly-plugin</artifactId>
+							<configuration>
+								<descriptors>
+									<descriptor>src/main/assembly/apple-osx.xml</descriptor>
+								</descriptors>
+							</configuration>
+						</plugin>
+					</plugins>
+				</build>
+  		</profile>
+		<profile>
+    			<id>hpux-11</id>
+    			<build>
+					<plugins>
+						<plugin>
+							<artifactId>maven-assembly-plugin</artifactId>
+							<configuration>
+								<descriptors>
+									<descriptor>src/main/assembly/hpux-11.xml</descriptor>
+								</descriptors>
+							</configuration>
+						</plugin>
+					</plugins>
+				</build>
+  		</profile>
+		<profile>
+    			<id>ppc-aix</id>
+    			<build>
+					<plugins>
+						<plugin>
+							<artifactId>maven-assembly-plugin</artifactId>
+							<configuration>
+								<descriptors>
+									<descriptor>src/main/assembly/ppc-aix.xml</descriptor>
+								</descriptors>
+							</configuration>
+						</plugin>
+					</plugins>
+				</build>
+  		</profile>
+		<profile>
+    			<id>sparc-solaris</id>
+    			<build>
+					<plugins>
+						<plugin>
+							<artifactId>maven-assembly-plugin</artifactId>
+							<configuration>
+								<descriptors>
+									<descriptor>src/main/assembly/sparc-solaris.xml</descriptor>
+								</descriptors>
+							</configuration>
+						</plugin>
+					</plugins>
+				</build>
+  		</profile>
+		<profile>
+    			<id>win32</id>
+    			<build>
+					<plugins>
+						<plugin>
+							<artifactId>maven-assembly-plugin</artifactId>
+							<configuration>
+								<descriptors>
+									<descriptor>src/main/assembly/win32.xml</descriptor>
+								</descriptors>
+							</configuration>
+						</plugin>
+					</plugins>
+				</build>
+  		</profile>
+		<profile>
+    			<id>x86-linux</id>
+    			<build>
+					<plugins>
+						<plugin>
+							<artifactId>maven-assembly-plugin</artifactId>
+							<configuration>
+								<descriptors>
+									<descriptor>src/main/assembly/x86-linux.xml</descriptor>
+								</descriptors>
+							</configuration>
+						</plugin>
+					</plugins>
+				</build>
+  		</profile>
+		<profile>
+    			<id>x86-64-linux</id>
+    			<build>
+					<plugins>
+						<plugin>
+							<artifactId>maven-assembly-plugin</artifactId>
+							<configuration>
+								<descriptors>
+									<descriptor>src/main/assembly/x86-64-linux.xml</descriptor>
+								</descriptors>
+							</configuration>
+						</plugin>
+					</plugins>
+				</build>
+  		</profile>
+	</profiles>
+
 	
 	<repositories>
 		<repository>

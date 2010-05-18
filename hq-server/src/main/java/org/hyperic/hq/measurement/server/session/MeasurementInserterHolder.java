@@ -37,7 +37,7 @@ public class MeasurementInserterHolder implements ApplicationContextAware {
         return dataInserter;
     }
 
-    @Override
+    
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         ctx = applicationContext;
     }

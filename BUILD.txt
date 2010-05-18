@@ -14,6 +14,9 @@ HQ follows the normal Maven phases:
 
 Common usages:
     Build a regular distribution (includes all installer and agent bundles):  			$ mvn package
+	Build modules, excluding installer and agent bundles								$ mvn -Pno-dist package
+	Build a specific agent bundle (from dist/hyperic-hqee-agent)						$ mvn -P[apple-osx|noJRE|hpux-11|ppc-aix|sparc-solaris|win32|x86-linux|x86-64-linux] assembly:directory 
+	Build a specific installer bundle (from dist/hyperic-hqee-installer)			 	$ mvn -P[apple-osx|noJRE|sparc-solaris|win32|x86-linux|x86-64-linux] assembly:directory  
     Build modules (excluding installer and agent bundles) and run integration tests:    $ mvn -Pintegration-test package
     Installation into Maven repo:  $ mvn install
    
