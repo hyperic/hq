@@ -79,6 +79,14 @@ public class PluginMain {
 
         return urls;
     }
+    
+    private static void addVersionFile(String pdkDir) throws Exception {
+        //Add URL for agent lib dir containing hq-version.properties for -v option
+        File versionProperties =
+            new File(pdkDir, "../lib");
+        URL versionProps = versionProperties.toURI().toURL();
+        addURLs(new URL[] {versionProps});
+    }
 
     private static URLClassLoader getLoader() {
         return (URLClassLoader)Thread.currentThread().getContextClassLoader();
@@ -100,6 +108,7 @@ public class PluginMain {
 
     private static void addURLs(URL[] jars) throws Exception {
         URLClassLoader loader = getLoader();
+       
 
         //bypass protected access.
         Method addURL =
@@ -294,6 +303,7 @@ public class PluginMain {
         }
 
         addJarDir(pdkLib);
+        addVersionFile(pdkDir);
 
         System.setProperty("org.hyperic.sigar.path", pdkLib);
         ProductPluginManager.setPdkDir(pdkDir);
