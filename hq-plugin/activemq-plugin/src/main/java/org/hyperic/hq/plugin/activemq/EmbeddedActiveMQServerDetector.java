@@ -45,7 +45,7 @@ public class EmbeddedActiveMQServerDetector
         ServerResource server = super.getServerResource(process);
         String catalinaBase = server.getInstallPath();
         
-        File hq = findVersionFile(new File(catalinaBase), Pattern.compile("hq-common.jar"));
+        File hq = findVersionFile(new File(catalinaBase), Pattern.compile("hq-common.*\\.jar"));
         if (hq != null) {
             server.setName(getPlatformName()+" HQ ActiveMQ Embedded "+getTypeInfo().getVersion());
         }
