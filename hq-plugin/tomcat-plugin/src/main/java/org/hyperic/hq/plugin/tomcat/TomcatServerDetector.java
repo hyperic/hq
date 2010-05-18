@@ -240,4 +240,17 @@ public class TomcatServerDetector
         }
         return null;
     }
+
+    @Override
+    protected ServerResource getServerResource(MxProcess process) {
+        ServerResource server = super.getServerResource(process);
+        String catalinaBase = server.getInstallPath();
+        
+        File hq = findVersionFile(new File(catalinaBase), Pattern.compile("hq-common.*\\.jar"));
+        if (hq != null) {
+            server.setName(getPlatformName()+" HQ Tomcat "+getTypeInfo().getVersion());
+        }
+
+        return server;
+    }
 }
