@@ -67,7 +67,7 @@ public class PluginData {
     public static final String PLUGIN_XML = "etc/hq-plugin.xml";
     public static final String PLUGIN_PROPERTIES = "etc/plugin.properties";
     
-    private static final String PLUGINS_PREFIX = "pdk/plugins/";
+    public static final String PLUGINS_PREFIX = "pdk/plugins/";
     private static final Log log = LogFactory.getLog("PluginData");
     private static final TypeInfo[] NO_TYPES = new TypeInfo[0];
     private static HashMap cache = new HashMap();

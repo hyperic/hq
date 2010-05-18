@@ -14,6 +14,15 @@
 	<artifactId>resin-plugin</artifactId>
 	<packaging>pom</packaging>
 	<name>Hyperic HQ Plugin - Resin Plugin</name>
+	
+	<dependencies>
+		<dependency>
+			<groupId>org.hyperic.hq</groupId>
+			<artifactId>hq-pdk-shared</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
 
 	<build>
 		<plugins>
@@ -23,10 +32,11 @@
 			<plugin>
 				<groupId>com.atlassian.maven.plugins</groupId>
 				<artifactId>maven-clover2-plugin</artifactId>
-				<version>${clover2.version}</version>
-				<configuration>
-					<skip>true</skip>
-				</configuration>
+			</plugin>
+			<!-- The exec-maven-plugin is configured to validate plugin XML.  See hq-plugin-parent pom for details-->
+			<plugin>
+        		<groupId>org.codehaus.mojo</groupId>
+        		<artifactId>exec-maven-plugin</artifactId>
 			</plugin>
 		</plugins>
 	</build>

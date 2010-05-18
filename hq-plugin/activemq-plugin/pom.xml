@@ -27,10 +27,11 @@
 			<plugin>
 				<groupId>com.atlassian.maven.plugins</groupId>
 				<artifactId>maven-clover2-plugin</artifactId>
-				<version>${clover2.version}</version>
-				<configuration>
-					<skip>true</skip>
-				</configuration>
+			</plugin>
+			<!-- The exec-maven-plugin is configured to validate plugin XML.  See hq-plugin-parent pom for details-->
+			<plugin>
+        		<groupId>org.codehaus.mojo</groupId>
+        		<artifactId>exec-maven-plugin</artifactId>
 			</plugin>
 		</plugins>
 	</build>
