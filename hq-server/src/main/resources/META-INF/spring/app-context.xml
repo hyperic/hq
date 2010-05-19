@@ -15,14 +15,26 @@
 		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
+    <bean id="jasyptConfiguration"
+        class="org.jasypt.encryption.pbe.config.EnvironmentStringPBEConfig">
+        <property name="algorithm" value="PBEWithMD5AndTripleDES" />
+        <property name="passwordSysPropertyName" value="jasypt.encryption.password" />
+    </bean>
+    
+    <bean id="propertyPasswordEncryptor"
+        class="org.jasypt.encryption.pbe.StandardPBEStringEncryptor">
+        <property name="config" ref="jasyptConfiguration" />
+    </bean>
+
 	<!--
 		hq-server.conf may be copied to the WEB-INF/classes dir by the
 		installer and should override any properties defined in other files,
 		so it's last on the list
 	-->
-	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"
+	<bean class="org.jasypt.spring.properties.EncryptablePropertyPlaceholderConfigurer"
           p:ignoreResourceNotFound="true"
           p:systemPropertiesModeName="SYSTEM_PROPERTIES_MODE_OVERRIDE">
+        <constructor-arg ref="propertyPasswordEncryptor" />
 		<property name="locations">
 			<list>
 				<value>classpath:/spring-jdbc.properties</value>
