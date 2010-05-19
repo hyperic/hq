@@ -40,6 +40,7 @@
 		<hibernate-tools.version>3.2.3.GA</hibernate-tools.version>
 		<httpclient.version>3.1</httpclient.version>
 		<j2ee-management.version>1.1</j2ee-management.version>
+		<jasypt.version>1.6</jasypt.version>
 		<jdom.version>1.1</jdom.version>
 		<jmock.version>1.2.0</jmock.version>
 		<jms.version>1.1</jms.version>
@@ -202,6 +203,11 @@
 				<groupId>org.hyperic</groupId>
 				<artifactId>sigar</artifactId>
 				<version>${sigar.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jasypt</groupId>
+				<artifactId>jasypt</artifactId>
+				<version>${jasypt.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jdom</groupId>
