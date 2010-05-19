@@ -8,13 +8,15 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import org.apache.tools.ant.BuildException;
+import org.hyperic.sigar.Sigar;
+import org.hyperic.sigar.SigarException;
 import org.hyperic.util.jdbc.DBUtil;
 
 /**
  * Removes old self-monitoring resources representing the HQ JBoss server and
  * its embedded Tomcat server. Since it is possible for one HQ server to be
  * monitoring other HQ servers which have not yet been upgraded, we only remove
- * the resources whose installpath matches the server we are upgrading
+ * the resources whose installpath and platform FQDN matches the server we are upgrading
  * @author jhickey
  * 
  */
@@ -61,16 +63,24 @@ public class HQJBossServerRemover
         ResultSet rs = null;
         Statement serverUpdateStmt = null;
         PreparedStatement serverQuery = null;
+        
         try {
+            String fqdn = "localhost";
+            try {
+                fqdn = new Sigar().getFQDN();
+            } catch (SigarException e) {
+               log("Error obtaining FQDN.  Assuming localhost");
+            }
             serverQuery = getConnection()
                 .prepareStatement(
-                    "SELECT id,resource_id FROM EAM_SERVER WHERE autoinventoryidentifier=? AND installpath=?");
+                    "SELECT id,resource_id FROM EAM_SERVER WHERE autoinventoryidentifier=? AND installpath=? AND platform_id in (SELECT id FROM EAM_PLATFORM where fqdn=?)");
             serverQuery.setString(1, autoinventoryidentifier);
             serverQuery.setString(2, installpath);
+            serverQuery.setString(3, fqdn);
             rs = serverQuery.executeQuery();
           
             // There should never be more than one server with the same
-            // identifier and installpath, but we'll log count just to be sure
+            // platform, identifier and installpath, but we'll log count just to be sure
             int removedServers = 0;
             while (rs.next()) {
                 int serverId = rs.getInt("id");
