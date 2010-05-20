@@ -50,6 +50,9 @@
 
   <filter name="BROKER_OBJECT_NAME"
           value="${domain}:Type=Broker,BrokerName=*"/>
+          
+  <filter name="CONNECTOR_OBJECT_NAME"
+          value="${domain}:Type=Connector,BrokerName=*,ConnectorName=*"/>
 
   <!-- special casing due to 5.1 renaming:
        MemoryPercentageUsed -> MemoryPercentUsage -->
@@ -223,6 +226,115 @@
             units="percent"/>
   </metrics>
 
+<metrics name="ActiveMQ 5.3 Topic">
+    <metric name="Availability"
+            template="${TOPIC_OBJECT_NAME}:${alias}"
+            indicator="true"/>
+
+    <metric name="Enqueue Count"
+            template="${TOPIC_OBJECT_NAME}:${alias}"
+            indicator="true"
+            collectionType="trendsup"/>
+
+    <metric name="Dequeue Count"
+            template="${TOPIC_OBJECT_NAME}:${alias}"
+            indicator="true"
+            collectionType="trendsup"/>
+
+    <metric name="Consumer Count"
+            template="${TOPIC_OBJECT_NAME}:${alias}"/>
+
+    <metric name="Queue Size"
+            template="${TOPIC_OBJECT_NAME}:${alias}"
+            indicator="true"/>
+
+    <metric name="Memory Percent Usage"
+            template="${TOPIC_OBJECT_NAME}:${alias}"
+            units="percent"/>
+  </metrics>
+
+  <metrics name="ActiveMQ 5.3 Queue">
+    <metric name="Availability"
+            template="${QUEUE_OBJECT_NAME}:${alias}"
+            indicator="true"/>
+
+    <metric name="Enqueue Count"
+            template="${QUEUE_OBJECT_NAME}:${alias}"
+            indicator="true"
+            collectionType="trendsup"/>
+
+    <metric name="Dequeue Count"
+            template="${QUEUE_OBJECT_NAME}:${alias}"
+            indicator="true"
+            collectionType="trendsup"/>
+
+    <metric name="Consumer Count"
+            template="${QUEUE_OBJECT_NAME}:${alias}"/>
+
+    <metric name="Queue Size"
+            template="${QUEUE_OBJECT_NAME}:${alias}"
+            indicator="true"/>
+
+    <metric name="Memory Percent Usage"
+            template="${QUEUE_OBJECT_NAME}:${alias}"
+            units="percent"/>
+  </metrics>
+
+  <metrics name="ActiveMQ 5.3 Broker">
+    <metric name="Availability"
+            template="${BROKER_OBJECT_NAME}:${alias}"
+            indicator="true"/>
+
+    <metric name="Total Consumer Count"
+            template="${BROKER_OBJECT_NAME}:${alias}"/>
+
+    <metric name="Total Enqueue Count"
+            template="${BROKER_OBJECT_NAME}:${alias}"
+            indicator="true"
+            collectionType="trendsup"/>
+
+    <metric name="Total Dequeue Count"
+            template="${BROKER_OBJECT_NAME}:${alias}"
+            collectionType="trendsup"/>
+
+    <metric name="Total Message Count"
+            template="${BROKER_OBJECT_NAME}:${alias}"
+            indicator="true"
+            collectionType="trendsup"/>
+
+    <metric name="Memory Limit"
+            template="${BROKER_OBJECT_NAME}:${alias}"
+            units="B"/>
+
+    <metric name="Memory Percent Usage"
+            template="${BROKER_OBJECT_NAME}:${alias}"
+            units="percent"/>
+  </metrics>
+  
+  <metrics name="ActiveMQ 4.0 Connector">
+  
+      <metric name="Availability" 
+   			template="${CONNECTOR_OBJECT_NAME}:${alias}"
+            indicator="true"/>
+              
+  	  <metric name="Enqueue Count"
+  	 		  template="${CONNECTOR_OBJECT_NAME}:${alias}"
+              indicator="true"
+              collectionType="trendsup"/>
+
+      <metric name="Dequeue Count"
+              template="${CONNECTOR_OBJECT_NAME}:${alias}"
+              indicator="true"
+              collectionType="trendsup"/>
+  </metrics>
+  
+   <metrics name="ActiveMQ 5.3 Connector">
+      <metric name="Availability" 
+   			template="${CONNECTOR_OBJECT_NAME}:${alias}"
+            indicator="true"/>
+  </metrics>
+  
+
   <config name="destination">
     <option name="BrokerName"
             description="Broker Name"
@@ -274,7 +386,7 @@
 
     <service name="Connector">
       <property name="OBJECT_NAME"
-                value="${domain}:Type=Connector,BrokerName=*,ConnectorName=*"/>
+                value="${CONNECTOR_OBJECT_NAME}"/>
 
       <config>
         <option name="BrokerName"
@@ -293,16 +405,6 @@
 
       <actions include="start,stop"/>
 
-      <metric name="Availability"
-              indicator="true"/>
-
-      <metric name="Enqueue Count"
-              indicator="true"
-              collectionType="trendsup"/>
-
-      <metric name="Dequeue Count"
-              indicator="true"
-              collectionType="trendsup"/>
     </service>
 
     <service name="Broker">
@@ -376,9 +478,111 @@
           include="5.1">
   </server>
 
-  <server name="ActiveMQ"
-          version="5.3"
-          include="5.2">
+  <server name="ActiveMQ" version="5.3">    
+	 <!-- derive installpath from -Dactivemq.home=... -->
+    <property name="PROC_HOME_PROPERTY"
+              value="activemq.home"/>
+
+    <property name="DEFAULT_CONF"
+              value="conf/activemq.xml"/>
+
+    <property name="DEFAULT_LOG_FILE"
+              value="var/activemq.log"/>
+
+   <property name="VERSION_FILE"
+              value="**/.*activemq-.*-(5.\d*).*.jar"/>
+
+    <config>
+      <option name="process.query"
+              description="Process Query"/>
+    </config>
+
+    <plugin type="autoinventory"
+            class="org.hyperic.hq.product.jmx.MxServerDetector"/>
+
+    <plugin type="measurement"
+            class="org.hyperic.hq.product.jmx.MxMeasurementPlugin"/>
+
+    <plugin type="log_track"
+            class="org.hyperic.hq.product.Log4JLogTrackPlugin"/>
+
+    <plugin type="config_track"
+            class="org.hyperic.hq.product.ConfigFileTrackPlugin"/>
+
+    <metric name="Availability"
+            template="sigar:Type=ProcState,Arg=%process.query%:State"
+            indicator="true"/>
+
+    &process-metrics;
+
+    <service name="Connector">
+      <property name="OBJECT_NAME"
+                value="${CONNECTOR_OBJECT_NAME}"/>
+
+      <config>
+        <option name="BrokerName"
+                description="Broker Name"
+                default=""/>
+
+        <option name="ConnectorName"
+                description="Connector Name"
+                default=""/>
+      </config>
+
+      <plugin type="autoinventory"/>
+
+      <plugin type="control"
+              class="org.hyperic.hq.product.jmx.MxControlPlugin"/>
+
+      <actions include="start,stop"/>
+
+    </service>
+
+    <service name="Broker">
+      <property name="OBJECT_NAME" value="${BROKER_OBJECT_NAME}"/>
+
+      <config>
+        <option name="BrokerName"
+                description="Broker Name"
+                default=""/>
+      </config>
+
+      <plugin type="autoinventory"/>
+
+      <plugin type="control"
+              class="org.hyperic.hq.product.jmx.MxControlPlugin"/>
+
+      <actions include="start,stop,gc,removeTopic,removeQueue"/>
+    </service>
+
+    <service name="Queue">
+      <property name="OBJECT_NAME" value="${QUEUE_OBJECT_NAME}"/>
+
+      <config include="destination"/>
+
+      <plugin type="autoinventory"/>
+
+      <plugin type="control"
+              class="org.hyperic.hq.product.jmx.MxControlPlugin"/>
+
+      <actions include="sendTextMessage"/>
+    </service>
+
+    <!-- same as Queue except for Type=Topic -->
+    <service name="Topic">
+      <property name="OBJECT_NAME" value="${TOPIC_OBJECT_NAME}"/>
+
+      <config include="destination"/>
+
+      <plugin type="autoinventory"/>
+
+      <plugin type="control"
+              class="org.hyperic.hq.product.jmx.MxControlPlugin"/>
+
+      <actions include="sendTextMessage"/>
+    </service>
+
+    <!-- &sun-jvm-service; -->    
   </server>
 
   <server name="ActiveMQ Embedded"
@@ -406,7 +610,11 @@
 
   <server name="ActiveMQ Embedded" 
          version="5.3" 
-         include="5.2">
+         include="ActiveMQ 5.3">
+   <property name="PROC_HOME_PROPERTY"
+              value="catalina.base"/>
+   <plugin type="autoinventory"
+            class="org.hyperic.hq.plugin.activemq.EmbeddedActiveMQServerDetector"/>
   </server>
 
 </plugin>
