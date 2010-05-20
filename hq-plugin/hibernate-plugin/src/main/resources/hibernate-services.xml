@@ -35,10 +35,7 @@
             default="sample"/>
   </config>
 
-  <!-- just tries MBeanServer.getObjectInstance -->
-  <metric name="Availability"
-          template="${OBJECT_NAME}:__INSTANCE__"
-          indicator="true"/>
+  <metric name="Availability" indicator="true"/>
 
   <metric name="Entity Insert Count"
           template="${OBJECT_NAME}:EntityInsertCount"

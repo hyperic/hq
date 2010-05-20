@@ -25,7 +25,7 @@ import org.xml.sax.InputSource;
 public class PluginXmlValidator {
 
     private static final String[] SHARED_XML_LOCATIONS = { "process-plugin/src/main/resources",
-                                                          "jvm-plugin/src/main/resources" };
+                                                          "jvm-plugin/src/main/resources", "hibernate-plugin/src/main/resources" };
 
     private String pluginDir;
 

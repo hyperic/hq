@@ -316,6 +316,14 @@
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>hibernate-plugin</artifactId>
+			<version>${project.version}</version>
+			<classifier>agent</classifier>
+			<scope>provided</scope>
+		    <type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>hq-internal-plugin</artifactId>
 			<version>${project.version}</version>
 			<classifier>agent</classifier>

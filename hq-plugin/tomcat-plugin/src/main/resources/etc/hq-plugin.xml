@@ -3,6 +3,7 @@
 <!DOCTYPE plugin [
   <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
   <!ENTITY internal-service SYSTEM "/etc/hq-internal-service.xml">
+  <!ENTITY hibernate-services SYSTEM "/pdk/plugins/hibernate-services.xml">
 ]>
 
 <!--
@@ -542,6 +543,7 @@
     <plugin type="autoinventory"
             class="org.hyperic.hq.plugin.tomcat.TomcatServerDetector"/>
      &internal-service;
+     &hibernate-services;
   </server>
 
   <!-- ==================== Plugin Help =========================== -->
