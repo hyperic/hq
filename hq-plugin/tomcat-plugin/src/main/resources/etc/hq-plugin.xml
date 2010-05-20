@@ -2,6 +2,7 @@
 
 <!DOCTYPE plugin [
   <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
+  <!ENTITY internal-service SYSTEM "/etc/hq-internal-service.xml">
 ]>
 
 <!--
@@ -35,6 +36,7 @@
     <!-- relative to auto-discovered installpath (see PROC_HOME_PROPERTY) -->
     <include name="server/lib/commons-modeler-*.jar"/>
   </classpath>
+  
 
   <filter name="template"
           value="${OBJECT_NAME}:${alias}"/>
@@ -539,7 +541,7 @@
               value="catalina.base"/>
     <plugin type="autoinventory"
             class="org.hyperic.hq.plugin.tomcat.TomcatServerDetector"/>
-
+     &internal-service;
   </server>
 
   <!-- ==================== Plugin Help =========================== -->
