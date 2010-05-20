@@ -94,11 +94,6 @@ public interface TemplateManager {
     public void setTemplateEnabledByDefault(AuthzSubject subject, Integer[] templIds, boolean on);
 
     /**
-     * Get the MonitorableType id, creating it if it does not exist.
-     */
-    public MonitorableType getMonitorableType(String pluginName, TypeInfo info);
-
-    /**
      * Update measurement templates for a given entity. This still needs some
      * refactoring.
      * @return A map of measurement info's that are new and will need to be

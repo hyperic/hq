@@ -432,7 +432,7 @@ public class ProductManagerImpl implements ProductManager {
         // Keep a list of templates to add
         Map<MonitorableType, Map<?, MeasurementInfo>> toAdd = new HashMap<MonitorableType, Map<?, MeasurementInfo>>();
 
-        Map<String, MonitorableType> types = templateManager.getMonitorableTypesByName(pluginName);
+        Map<String, MonitorableType> types = new HashMap<String,MonitorableType>(templateManager.getMonitorableTypesByName(pluginName));
         if (debug)
             watch.markTimeBegin("loop0");
         for (TypeInfo info : Arrays.asList(entities)) {
@@ -451,6 +451,7 @@ public class ProductManagerImpl implements ProductManager {
                 MonitorableType monitorableType = types.get(info.getName());
                 if (monitorableType == null) {
                     monitorableType = templateManager.createMonitorableType(pluginName, info);
+                    types.put(info.getName(), monitorableType);
                 }
                 if (debug)
                     watch.markTimeEnd("getMonitorableType");

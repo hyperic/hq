@@ -422,24 +422,6 @@ public class TemplateManagerImpl implements TemplateManager {
         return monitorableTypeDAO.create(info.getName(), a, pluginName);
     }
 
-    /**
-     * Get the MonitorableType id, creating it if it does not exist.
-     * 
-     * @todo: This should just return the pojo and be named getMonitorableType.
-     */
-    @Transactional(readOnly = true)
-    public MonitorableType getMonitorableType(String pluginName, TypeInfo info) {
-        MonitorableType t = monitorableTypeDAO.findByName(info.getName());
-
-        if (t == null) {
-            int e = info.getType();
-            int a = entityInfoTypeToAppdefType(e);
-            t = monitorableTypeDAO.create(info.getName(), a, pluginName);
-        }
-
-        return t;
-    }
-
     @Transactional(readOnly = true)
     public Map<String, MonitorableType> getMonitorableTypesByName(String pluginName) {
         return monitorableTypeDAO.findByPluginName(pluginName);
