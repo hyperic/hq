@@ -87,3 +87,22 @@
             
   </service>
 
+	<service name="Hyperic Data Source">
+		<property name="OBJECT_NAME"
+				value="hyperic.jmx:type=DataSource,name=*" />
+		<plugin type="autoinventory" />
+		<metric name="Availability" indicator="true" />
+		<metric name="Active Connections" alias="NumActive"
+				indicator="true" template="${OBJECT_NAME}:${alias}" units="none" />
+		<metric name="Idle Connections" alias="NumIdle"
+				indicator="true" template="${OBJECT_NAME}:${alias}" units="none" />
+		<properties>
+			<property description="Initial Size" name="InitialSize" />
+			<property description="Maximum Active Connections" name="MaxActive" />
+			<property description="Minimum Idle Connections" name="MinIdle" />
+			<property description="Maximum Idle Connections" name="MaxIdle" />
+			<property description="JDBC URL" name="Url" />
+			<property description="Username" name="Username" />
+		</properties>
+	</service>
+
