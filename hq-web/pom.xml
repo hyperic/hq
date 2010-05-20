@@ -698,10 +698,14 @@
 					<plugin>
 						<artifactId>maven-war-plugin</artifactId>
 						<configuration>
+							<warName>ROOT</warName>
 							<webResources>
 								<resource>
 									<directory>${user.home}/.hq/gconsoleTemplates</directory>
 									<targetPath>WEB-INF/gconsoleTemplates</targetPath>
+								</resource>
+								<resource>
+									<directory>${project.build.directory}/generated-resources</directory>
 								</resource>
 							</webResources>
 						</configuration>
