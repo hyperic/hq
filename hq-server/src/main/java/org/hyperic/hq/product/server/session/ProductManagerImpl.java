@@ -163,6 +163,7 @@ public class ProductManagerImpl implements ProductManager {
         }
 
         StopWatch watch = new StopWatch();
+        final boolean debug = log.isDebugEnabled();
         // Update platforms
         if (platforms.size() > 0) {
             this.platformManager.updatePlatformTypes(pluginName, platforms
@@ -171,18 +172,18 @@ public class ProductManagerImpl implements ProductManager {
 
         // Update servers
         if (servers.size() > 0) {
-            watch.markTimeBegin("updateServerTypes");
+            if (debug) watch.markTimeBegin("updateServerTypes");
             serverManager.updateServerTypes(pluginName, servers.toArray(new ServerTypeInfo[0]));
-            watch.markTimeEnd("updateServerTypes");
+            if (debug) watch.markTimeEnd("updateServerTypes");
         }
 
         // Update services
         if (services.size() > 0) {
-            watch.markTimeBegin("updateServiceTypes");
+            if (debug) watch.markTimeBegin("updateServiceTypes");
             serviceManager.updateServiceTypes(pluginName, services.toArray(new ServiceTypeInfo[0]));
-            watch.markTimeEnd("updateServiceTypes");
+            if (debug) watch.markTimeEnd("updateServiceTypes");
         }
-        log.info(watch);
+        if (debug) log.debug(watch);
     }
 
     private ProductPluginManager getProductPluginManager() {
