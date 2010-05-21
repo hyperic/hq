@@ -8,11 +8,9 @@ function sendCode() {
     mimetype: "text/json-comment-filtered",
     content: {
         code:   dojo.byId("code").value,
-        debug:  dojo.byId("hiberDebug").checked
     },
     load: function(type, data, evt) {
       dojo.byId('result').innerHTML = data.result;
-      dojo.byId('hiberStats').innerHTML = data.hiberStats;
       dojo.byId('timeStatus').innerHTML = data.timeStatus;
     },
     error: function(type, data, evt) {
@@ -54,19 +52,12 @@ function chooseTemplate(t) {
     
     <div>
         <a class="buttonGreen" onclick="sendCode()" href="javascript:void(0)"><span>Execute</span></a>
-        <input type="checkbox" id="hiberDebug">Hibernate Debugging</input>
     </div>
     <br/>
     
     <div id='timeStatus'>
       Status:  Idle
     </div>
-    <br/>
-    
-    <label>Hibernate Details</label>
-    <fieldset>
-        <div id='hiberStats'><br/></div>
-    </fieldset>
     <br/>
     
     <label>Result</label>

@@ -62,14 +62,12 @@ class ConsoleController extends BaseController {
         [result: tmplCode]
     }
     
-    def execute(params) {
-        boolean debug = params.getOne('debug')?.toBoolean() == true
-            
+    def execute(params) {            
         log.info "Params is ${params}"
-        executeCode(params.getOne('code'), debug)
+        executeCode(params.getOne('code'))
     }
     
-    private Map executeCode(code, debug) {
+    private Map executeCode(code) {
         log.info "Requested to execute code\n${code}\n"
 		File tmp = File.createTempFile('gcon', null)
         log.info "Writing tmp file: ${tmp.absolutePath}"
@@ -80,7 +78,6 @@ class ConsoleController extends BaseController {
 		def eng = new GroovyScriptEngine('.', 
 		                                 Thread.currentThread().contextClassLoader)
 		def res
-		def hiberStats = ''
 		long start = now()
 		try {
 			def script
@@ -92,13 +89,9 @@ class ConsoleController extends BaseController {
 			}
 			
 			def runnee = [run: {res = eng.run(script, new Binding())}] as Runnee
-			if (debug) {
-			    def logger = new LoggingChainer()
-                Bootstrap.getBean(HibernateLogManager.class).log(logger, runnee)
-                hiberStats = createHtmlFromLog(logger)
-			} else {
-			    runnee.run()
-			}
+			
+			runnee.run()
+
 
 			log.info "Result: [${res}]"
 		} catch(Throwable e) {
@@ -111,18 +104,7 @@ class ConsoleController extends BaseController {
 		}
 		
 		long end = now()
-        [result: "${res}".toHtml(), 
-         hiberStats: hiberStats,
+        [result: "${res}".toHtml(),
          timeStatus: "Executed in ${end - start} ms"]
-    }
-    
-    private String createHtmlFromLog(LoggingChainer logger) {
-        Map stats = logger.getStats()
-        List logs = logger.getLogs()
-        
-        StringWriter sw = new StringWriter()
-        render([action: 'hiberStats', output: sw, 
-                locals: [stats:stats, logs:logs, dateFormat: df]])
-        return sw.toString()
     }
 }
