@@ -12,6 +12,7 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.auth.server.session.UserAuditFactory;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
@@ -41,17 +42,23 @@ public class BaseSessionInitializationStrategy implements SessionAuthenticationS
     private AuthzSubjectManager authzSubjectManager;
     private AuthzBoss authzBoss;
     private AuthBoss authBoss;
+	private UserAuditFactory userAuditFactory;
     
     @Autowired
-    public BaseSessionInitializationStrategy(AuthBoss authBoss, AuthzBoss authzBoss, AuthzSubjectManager authzSubjectManager, SessionManager sessionManager) {
+    public BaseSessionInitializationStrategy(AuthBoss authBoss, AuthzBoss authzBoss,
+    		                                 AuthzSubjectManager authzSubjectManager,
+    		                                 UserAuditFactory userAuditFactory,
+    		                                 SessionManager sessionManager) {
     	this.authBoss = authBoss;
     	this.authzBoss = authzBoss;
     	this.authzSubjectManager = authzSubjectManager;
     	this.sessionManager = sessionManager;    	
+    	this.userAuditFactory = userAuditFactory;
     }
     
-    public void onAuthentication(Authentication authentication, HttpServletRequest request, HttpServletResponse response) throws SessionAuthenticationException
-    {
+    public void onAuthentication(Authentication authentication, HttpServletRequest request,
+    		                     HttpServletResponse response)
+    throws SessionAuthenticationException {
         final boolean debug = log.isDebugEnabled();
 
         if (debug) log.debug("Initializing UI session parameters...");
@@ -65,29 +72,34 @@ public class BaseSessionInitializationStrategy implements SessionAuthenticationS
             ServletContext ctx = session.getServletContext();
             
             // look up the subject record
-            AuthzSubject currentSubject = authzBoss.getCurrentSubject(sessionId);
+            AuthzSubject subj = authzBoss.getCurrentSubject(sessionId);
+            userAuditFactory.loginAudit(subj);
             boolean needsRegistration = false;
             
-            if (currentSubject == null) {
+            if (subj == null) {
                 try {
                     AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
-                    currentSubject = authzSubjectManager.createSubject(overlord, username, true, HQConstants.ApplicationName, "", "", "", "", "", "", false);
+                    subj = authzSubjectManager.createSubject(
+                        overlord, username, true, HQConstants.ApplicationName, "", "", "", "",
+                        "", "", false);
                 } catch (ApplicationException e) {
-                    throw new SessionAuthenticationException("Unable to add user to authorization system");
+                    throw new SessionAuthenticationException(
+                        "Unable to add user to authorization system");
                 }
                 
                 needsRegistration = true;
-                sessionId = sessionManager.put(currentSubject);
+                sessionId = sessionManager.put(subj);
             } else {
-                needsRegistration = currentSubject.getEmailAddress() == null || currentSubject.getEmailAddress().length() == 0;
+                needsRegistration = subj.getEmailAddress() == null ||
+                                    subj.getEmailAddress().length() == 0;
             }
 
-            AuthzSubjectValue subject = currentSubject.getAuthzSubjectValue();
+            AuthzSubjectValue subject = subj.getAuthzSubjectValue();
             
             // figure out if the user has a principal
             boolean hasPrincipal = authBoss.isUser(sessionId, subject.getName());
-            ConfigResponse preferences = needsRegistration ? new ConfigResponse() : 
-                                                             getUserPreferences(ctx, sessionId, subject.getId(), authzBoss);
+            ConfigResponse preferences = needsRegistration ?
+                new ConfigResponse() : getUserPreferences(ctx, sessionId, subject.getId(), authzBoss);
             WebUser webUser = new WebUser(subject, sessionId, preferences, hasPrincipal);
 
             // Add WebUser to Session
@@ -107,19 +119,26 @@ public class BaseSessionInitializationStrategy implements SessionAuthenticationS
 
             if (debug) log.debug("Stashing user operations in the session");
 
-            if (debug && needsRegistration) log.debug("Authentic user but no HQ entity, must have authenticated outside of HQ...needs registration");
+            if (debug && needsRegistration) {
+            	log.debug("Authentic user but no HQ entity, must have authenticated outside of " +
+                          "HQ...needs registration");
+            }
         } catch (SessionException e) {
-            if (debug) log.debug("Authentication of user {" + username + "} failed due to an session error.");
+            if (debug) {
+                log.debug("Authentication of user {" + username + "} failed due to an session error.");
+            }
             
             throw new SessionAuthenticationException("login.error.application");
         } catch (PermissionException e) {
-            if (debug) log.debug("Authentication of user {" + username + "} failed due to an permissions error.");
+            if (debug) {
+                log.debug("Authentication of user {" + username + "} failed due to an permissions error.");
+            }
             
             throw new SessionAuthenticationException("login.error.application");
         }
     }
-    
-    protected static Map<String, Boolean> loadUserPermissions(Integer sessionId, AuthzBoss authzBoss) 
+
+	protected static Map<String, Boolean> loadUserPermissions(Integer sessionId, AuthzBoss authzBoss) 
     throws SessionTimeoutException, SessionNotFoundException, PermissionException {
         // look up the user's permissions
         Map<String, Boolean> userOperationsMap = new HashMap<String, Boolean>();
@@ -134,7 +153,8 @@ public class BaseSessionInitializationStrategy implements SessionAuthenticationS
         return userOperationsMap;
     }   
 
-    protected static ConfigResponse getUserPreferences(ServletContext ctx, Integer sessionId, Integer subjectId, AuthzBoss authzBoss) {
+    protected static ConfigResponse getUserPreferences(ServletContext ctx, Integer sessionId,
+    		                                           Integer subjectId, AuthzBoss authzBoss) {
         // look up the user's preferences
         ConfigResponse defaultPreferences = (ConfigResponse) ctx.getAttribute(Constants.DEF_USER_PREFS);
         ConfigResponse preferences = authzBoss.getUserPrefs(sessionId, subjectId);
