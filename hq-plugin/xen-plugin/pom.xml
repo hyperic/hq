@@ -36,6 +36,12 @@
   			<artifactId>xmlrpc-client</artifactId>
   			<version>${xmlrpc.version}</version>
 		</dependency>
+		<dependency>
+  				<groupId>com.cenqua.clover</groupId>
+  				<artifactId>clover</artifactId>
+  				<version>${clover2.version}</version>
+				<scope>provided</scope>
+		</dependency>
 	</dependencies>
 	
 	<build>

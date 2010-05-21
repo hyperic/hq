@@ -26,10 +26,15 @@
 			<artifactId>hq-agent-pdk</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.hyperic.db2monitor</groupId>
 			<artifactId>db2monitor</artifactId>
+		</dependency>
+		<dependency>
+  				<groupId>com.cenqua.clover</groupId>
+  				<artifactId>clover</artifactId>
+  				<version>${clover2.version}</version>
+				<scope>provided</scope>
 		</dependency>
 	</dependencies>
 	

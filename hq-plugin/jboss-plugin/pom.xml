@@ -26,6 +26,12 @@
   		<artifactId>jbossall-client</artifactId>
   		<version>4.2.3.GA</version>
 	</dependency>
+	<dependency>
+  				<groupId>com.cenqua.clover</groupId>
+  				<artifactId>clover</artifactId>
+  				<version>${clover2.version}</version>
+				<scope>provided</scope>
+		</dependency>
 	</dependencies>
 	
 	<build>

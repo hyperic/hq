@@ -49,6 +49,7 @@
 			<classifier>libs</classifier>
 			<scope>provided</scope>
 		</dependency>
+		
 	</dependencies>
 	
 	<build>
