@@ -107,6 +107,7 @@ set CLIENT_CMD="%HQ_JAVA_HOME%\bin\java" -Djava.net.preferIPv4Stack=true -D%AGEN
 set PING_CMD=%CLIENT_CMD% ping
 set SETUP_CMD=%CLIENT_CMD% setup
 set SETUP_IF_NO_PROVIDER_CMD=%CLIENT_CMD% setup-if-no-provider
+set wrapper_update1=set.HQ_JAVA_HOME=%HQ_JAVA_HOME%
 
 rem
 rem Run the application.
@@ -117,24 +118,24 @@ if errorlevel 1 pause
 goto :eof
 
 :start
-"%_WRAPPER_EXE%" -t %_WRAPPER_CONF%
+"%_WRAPPER_EXE%" -t %_WRAPPER_CONF% "%wrapper_update1%"
 call :setup-if-no-provider
 goto :eof
 
 :stop
-"%_WRAPPER_EXE%" -p %_WRAPPER_CONF%
+"%_WRAPPER_EXE%" -p %_WRAPPER_CONF% "%wrapper_update1%"
 goto :eof
 
 :install
-"%_WRAPPER_EXE%" -i %_WRAPPER_CONF%
+"%_WRAPPER_EXE%" -i %_WRAPPER_CONF% "%wrapper_update1%"
 goto :eof
 
 :remove
-"%_WRAPPER_EXE%" -r %_WRAPPER_CONF%
+"%_WRAPPER_EXE%" -r %_WRAPPER_CONF% "%wrapper_update1%"
 goto :eof
 
 :query
-"%_WRAPPER_EXE%" -q %_WRAPPER_CONF%
+"%_WRAPPER_EXE%" -q %_WRAPPER_CONF% "%wrapper_update1%"
 goto :eof
 
 :restart

@@ -129,7 +129,7 @@ public class MxServerDetector
             return true;
         } catch (Exception e) {
             log.debug("Cannot configure local jmx.url: " +
-                      e.getMessage());
+                      e.getMessage(),e);
             return false;
         }
     }

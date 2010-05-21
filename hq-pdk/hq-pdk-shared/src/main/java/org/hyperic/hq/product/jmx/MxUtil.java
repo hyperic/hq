@@ -393,7 +393,9 @@ public class MxUtil {
                 System.getProperty("java.vm.version");
             throw new IOException(ptql + " " + e.getMessage() +
                                   " not supported by " + jvm);
-        } catch (Exception e) {
+        } catch(InvocationTargetException e) {
+            throw new IOException(ptql + " " + e.getCause());
+        } catch (Exception e) {  
             throw new IOException(ptql + " " + e);
         } finally {
             sigar.close();
