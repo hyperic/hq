@@ -8,7 +8,7 @@
 			<excludes>
 				<exclude>**/*.sh</exclude>
 				<exclude>**/.gitignore</exclude>
-				<exclude>wrapper/*</exclude>
+				<exclude>wrapper/**/*</exclude>
 			</excludes>
 			<filtered>true</filtered>
 			<fileMode>0644</fileMode>
@@ -28,7 +28,7 @@
 			<directory>src/main/resources</directory>
 			<outputDirectory>/</outputDirectory>
 			<includes>
-				<include>wrapper/*</include>
+				<include>wrapper/**/*</include>
 			</includes>
 			<fileMode>0755</fileMode>
 			<directoryMode>0755</directoryMode>
