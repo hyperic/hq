@@ -1322,8 +1322,9 @@ public class ServiceManagerImpl implements ServiceManager {
         return service;
     }
 
-    public void updateServiceTypes(String plugin, ServiceTypeInfo[] infos) throws VetoException,
-        NotFoundException {
+    public void updateServiceTypes(String plugin, ServiceTypeInfo[] infos)
+    throws VetoException, NotFoundException {
+    	final boolean debug = log.isDebugEnabled();
         StopWatch watch = new StopWatch();
         AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
 
@@ -1403,12 +1404,12 @@ public class ServiceManagerImpl implements ServiceManager {
                     continue;
                 }
                 creates.add(sinfo.getName());
-                watch.markTimeBegin("create");
+                if (debug) watch.markTimeBegin("create");
                 createServiceType(sinfo, plugin, servType, rootResource, resType);
-                watch.markTimeEnd("create");
+                if (debug) watch.markTimeEnd("create");
             }
         } finally {
-            log.info(watch);
+            if (debug) log.debug(watch);
         }
     }
 
