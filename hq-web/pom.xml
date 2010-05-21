@@ -106,8 +106,6 @@
 		<dependency>
   			<groupId>com.cenqua.clover</groupId>
   			<artifactId>clover</artifactId>
-  			<version>${clover2.version}</version>
-			<scope>test</scope>
 		</dependency>
 		<!--  UI Plugins -->
 		<dependency>

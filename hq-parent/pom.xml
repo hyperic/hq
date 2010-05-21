@@ -502,6 +502,12 @@
     			<artifactId>mx4j-tools</artifactId>
     			<version>${mx4j.version}</version>
 			</dependency>
+			<dependency>
+  				<groupId>com.cenqua.clover</groupId>
+  				<artifactId>clover</artifactId>
+  				<version>${clover2.version}</version>
+				<scope>test</scope>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
