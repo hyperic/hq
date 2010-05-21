@@ -269,7 +269,7 @@ __ll__
   		<param name="hyperic-hq-agent.installdir" value="${hyperic-hq-agent.installdir}"/>
   		<param name="version" value="${version}"/>
   		<path>
-  			<fileset dir="${base}" includes="hyperic-hq*-agent-${version}-*.tar.gz"/>
+  			<fileset dir="${base}" includes="hyperic-hq*-agent-*.tar.gz"/>
   		</path>
   	</foreach>
   	
@@ -277,7 +277,7 @@ __ll__
   	  		<param name="hyperic-hq-agent.installdir" value="${hyperic-hq-agent.installdir}"/>
   	  		<param name="version" value="${version}"/>
   	  		<path>
-  	  			<fileset dir="${base}" includes="hyperic-hq*-agent-${version}-*.zip"/>
+  	  			<fileset dir="${base}" includes="hyperic-hq*-agent-*.zip"/>
   	  		</path>
   	 </foreach>
   	
@@ -489,14 +489,25 @@ ${errMsg}
     <substProps src="${install.dir}/data/hq-server.conf"
                 dest="${conf-dir}/hq-server.conf"/>
   </target>
+	
+	<target name="unpack-server">
+		<echo> 
+		   	  ^^^INFO: Unpacking server to: ${server.installdir}/server-${version}...
+		</echo>
+		<untar src="${server.bundle}"
+		           dest="${server.installdir}"
+		           compression="gzip"/>
+  </target>
 
   <target name="setup-server">
-    <echo>
-      ^^^INFO: Unpacking server to: ${server.installdir}/server-${version}...
-    </echo>
-    <untar src="${base}/${server.vname}.tar.gz"
-           dest="${server.installdir}"
-           compression="gzip"/>
+  	<!-- The server distro will unzip to a server-${version} dir, but the tar.gz may have build stamp in name -->
+  	<foreach param="server.bundle" target="unpack-server">
+  	  	<param name="server.installdir" value="${server.installdir}"/>
+  		<param name="version" value="${version}"/>
+  	  	<path>
+  	  		<fileset dir="${base}" includes="server-*.tar.gz"/>
+  	  	</path>
+  	 </foreach>
 
     <!-- Setup conf directory -->
     <echo>^^^INFO: Creating server configuration files...</echo>
