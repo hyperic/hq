@@ -37,13 +37,13 @@ machine=`uname -m`
 case "$platform" in
     Linux )
         if [ "${machine}" = "x86_64" ]; then
-            JRE_NAME=amd64-linux-jre-1_6.tar.gz
+            JRE_NAME=amd64-linux-1.6.tar.gz
         else
-            JRE_NAME=x86-linux-glibc2-jre-1_6.tar.gz
+            JRE_NAME=x86-linux-1.6.tar.gz
         fi
         ;;
     SunOS )
-        JRE_NAME=sparc-sun-solaris-jre-1_6.tar.gz
+        JRE_NAME=sparc-sun-solaris-1.6.tar.gz
         ;;
 esac
 
