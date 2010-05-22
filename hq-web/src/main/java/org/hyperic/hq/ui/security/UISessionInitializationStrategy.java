@@ -11,6 +11,7 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.auth.server.session.UserAuditFactory;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
@@ -40,10 +41,14 @@ public class UISessionInitializationStrategy extends BaseSessionInitializationSt
     
     private DashboardManager dashboardManager;
     private AuthzBoss authzBoss;
-    
+
     @Autowired
-    public UISessionInitializationStrategy(AuthBoss authBoss, AuthzBoss authzBoss, AuthzSubjectManager authzSubjectManager, DashboardManager dashboardManager, SessionManager sessionManager) {
-    	super(authBoss, authzBoss, authzSubjectManager, sessionManager);
+    public UISessionInitializationStrategy(AuthBoss authBoss, AuthzBoss authzBoss,
+    		                               AuthzSubjectManager authzSubjectManager,
+    		                               DashboardManager dashboardManager,
+    		                               UserAuditFactory userAuditFactory,
+    		                               SessionManager sessionManager) {
+    	super(authBoss, authzBoss, authzSubjectManager, userAuditFactory, sessionManager);
     	
     	this.authzBoss = authzBoss;
     	this.dashboardManager = dashboardManager;
