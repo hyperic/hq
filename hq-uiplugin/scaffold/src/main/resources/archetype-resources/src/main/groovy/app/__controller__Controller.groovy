@@ -1,6 +1,9 @@
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $symbol_escape = '\' )
 import org.hyperic.hq.hqu.rendit.BaseController
 
-class @CONTROLLER_NAME@Controller 
+class ${controller}Controller 
 	extends BaseController
 {
     protected void init() {
@@ -8,7 +11,7 @@ class @CONTROLLER_NAME@Controller
     }
     
     def index(params) {
-        // By default, this sends views/@CONTROLLER_DIR@/index.gsp to
+        // By default, this sends views/${controllerDir}/index.gsp to
         // the browser, providing 'plugin' and 'userName' locals to it
         //
         // The name of the currently-executed action dictates which .gsp file 

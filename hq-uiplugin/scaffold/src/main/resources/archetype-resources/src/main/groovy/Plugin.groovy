@@ -1,6 +1,9 @@
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $symbol_escape = '\' )
 import org.hyperic.hq.hqu.rendit.HQUPlugin
 
-import @CONTROLLER_NAME@Controller
+import ${controller}Controller
 
 class Plugin extends HQUPlugin {
     void initialize(File pluginDir) {
@@ -17,9 +20,9 @@ class Plugin extends HQUPlugin {
          *               type names to attach to (ex. ['MacOSX', 'Linux'])
          */
         /*
-        addView(description:  'A Groovy HQU-@PLUGIN_NAME@',
+        addView(description:  'A Groovy HQU-${artifactId}',
                 attachType:   'masthead', 
-                controller:   @CONTROLLER_NAME@Controller,
+                controller:   ${controller}Controller,
                 action:       'index', 
                 category:     'tracker')
          */

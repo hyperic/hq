@@ -1,5 +1,8 @@
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $symbol_escape = '\' )
 <p>
-    ${l.Congrats}!  
+    ${symbol_dollar}{l.Congrats}!  
 </p>
 <p>
 <table>
@@ -16,21 +19,21 @@
 </table>
 
 <p>
-    Your username is ${userName}<br/>
+    Your username is ${symbol_dollar}{userName}<br/>
 </p>
 
 <p>
-    The method named 'index' in <b>app/@CONTROLLER_NAME@Controller.groovy</b> 
+    The method named 'index' in <b>app/${controller}Controller.groovy</b> 
     was invoked to render this page.
 </p>
 <p>
-    It then rendered <b>views/@CONTROLLER_DIR@/index.gsp</b> which you are reading.
+    It then rendered <b>views/${controllerDir}/index.gsp</b> which you are reading.
 </p>
 
 <p> 
     You'll also want to change the following files:
     <ul>
-        <li><b>@NEW_PLUGIN_PATH@/etc/@PLUGIN_NAME@_i18n.properties</b> contains 
+        <li><b>${artifactId}/etc/${artifactId}_i18n.properties</b> contains 
                the description (which is currently <i><%= plugin.description %></i>)</li>
     </ul>
 </p>
