@@ -25,6 +25,11 @@
 																basicAuthenticationExceptionTranslationFilter,
 																basicSessionManagementFilter,
 			    	                                     		filterSecurityInterceptor" />
+			<sec:filter-chain pattern="/hqu/health/status/**" filters="securityContextPersistenceFilter,
+																basicAuthenticationFilter,
+																basicAuthenticationExceptionTranslationFilter,
+																basicSessionManagementFilter,
+			    	                                     		filterSecurityInterceptor" />    	                                     		
 			<sec:filter-chain pattern="/**" filters="securityContextPersistenceFilter,
 													 logoutFilter,
 			                                         basicAuthenticationFilter,
