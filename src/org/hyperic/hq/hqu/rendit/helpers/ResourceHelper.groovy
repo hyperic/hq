@@ -267,11 +267,13 @@ class ResourceHelper extends BaseHelper {
      */
     Collection findResourceEdges(String resourceRelation, Resource parent) {
     	def edges = []
+    	             
     	if (resourceRelation.equals(AuthzConstants.ResourceEdgeNetworkRelation)) {
     		edges = rman.findResourceEdges(rman.getNetworkRelation(), parent)
     	} else if (resourceRelation.equals(AuthzConstants.ResourceEdgeContainmentRelation)) {
     		edges = rman.findResourceEdges(rman.getContainmentRelation(), parent)
     	}
+    	
     	return edges
     }
     
@@ -314,7 +316,78 @@ class ResourceHelper extends BaseHelper {
     	}
     	return edges
     }
-            
+    
+    /**
+     * Find the child resources of a resource using the virtual relation
+     * 
+     * @return a List of {@link Resource}s
+     */
+    Collection findChildResourcesByVirtualRelation(Resource resource) {
+        def resourceEdges = rman.findChildResourceEdges(resource, rman.getVirtualRelation())
+        
+        return resourceEdges.collect { edge -> edge.to }
+    }
+    
+    /**
+     * Find all descendant resources of a resource using the virtual relation
+     * 
+     * @return a List of {@link Resource}s
+     */
+    Collection findDescendantResourcesByVirtualRelation(Resource resource) {
+        def resourceEdges = rman.findDescendantResourceEdges(resource, rman.getVirtualRelation())
+        
+        return resourceEdges.collect { edge -> edge.to }
+    }
+
+    /**
+     * Find all ancestors of a resource using the virtual relation
+     * 
+     * @return a List of {@link Resource}s
+     */
+    Collection findAncestorsByVirtualRelation(Resource resource) {
+        def resourceEdges = rman.findAncestorResourceEdges(resource, rman.getVirtualRelation())
+        
+        return resourceEdges.collect { edge -> edge.to }
+    }
+    
+    /**
+     * Find all resources in a virtual relation that contain the supplied name string
+     * 
+     * @return a List of {@link Resource}s
+     */
+    Collection findResourcesByNameAndVirtualRelation(String name) {
+        def resourceEdges = rman.findResourceEdgesByName(name, rman.getVirtualRelation())
+        
+        return resourceEdges.collect { edge -> edge.from }
+    }
+    
+    /**
+     * 
+     */
+    Resource getParentResourceByVirtualRelation(Resource resource) {
+        def resourceEdges = rman.getParentResourceEdge(resource, rman.getVirtualRelation())
+        
+        return resourceEdges?.to
+    }
+    
+    /**
+     * Check whether or not a resource has children using the virtual relation
+     * 
+     * @return boolean
+     */
+    boolean hasChildResourcesByVirtualRelation(Resource resource) {
+        return rman.hasChildResourceEdges(resource, rman.getVirtualRelation())
+    }   
+    
+    /**
+     * Returns the number of descendant resources using the virtual relation
+     * 
+     * @return boolean
+     */
+    int getDescendantResourceCountByVirtualRelation(Resource resource) {
+        return rman.getDescendantResourceEdgeCount(resource, rman.getVirtualRelation())
+    }
+    
     List findParentPlatformsByNetworkRelation(String prototype, String name, Boolean hasChildren) {
     	def platformType = null
     	def platformTypeIds = null

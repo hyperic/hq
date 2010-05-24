@@ -189,6 +189,14 @@ public abstract class AuthzSession {
         return getResourceRelation(AuthzConstants.RELATION_NETWORK_ID);
     }
 
+    /**
+     * 
+     * @ejb:interface-method
+     */
+    public ResourceRelation getVirtualRelation() {
+        return getResourceRelation(AuthzConstants.RELATION_VIRTUAL_ID);
+    }
+
     private ResourceRelation getResourceRelation(Integer relationId) {
         return getResourceRelationDAO().findById(relationId); 
     }

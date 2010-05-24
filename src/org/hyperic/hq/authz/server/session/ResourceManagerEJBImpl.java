@@ -690,7 +690,63 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
     public boolean isResourceChildOf(Resource parent, Resource child) {
         return getResourceEdgeDAO().isResourceChildOf(parent, child);
     }
+
+    /**
+     * 
+     * @ejb:interface-method
+     */
+    public boolean hasChildResourceEdges(Resource resource, ResourceRelation relation) {
+        return getResourceEdgeDAO().hasChildren(resource, relation);
+    }
+
+    /**
+     * 
+     * @ejb:interface-method
+     */
+    public int getDescendantResourceEdgeCount(Resource resource, ResourceRelation relation) {
+        return getResourceEdgeDAO().getDescendantCount(resource, relation);
+    }
+
+    /**
+     * 
+     * @ejb:interface-method
+     */
+    public Collection findChildResourceEdges(Resource resource, ResourceRelation relation) {
+        return getResourceEdgeDAO().findChildEdges(resource, relation);
+    }
+
+    /**
+     * 
+     * @ejb:interface-method
+     */
+    public Collection findDescendantResourceEdges(Resource resource, ResourceRelation relation) {
+        return getResourceEdgeDAO().findDescendantEdges(resource, relation);
+    }
+
+    /**
+     * 
+     * @ejb:interface-method
+     */
+    public Collection findAncestorResourceEdges(Resource resource, ResourceRelation relation) {
+        return getResourceEdgeDAO().findAncestorEdges(resource, relation);
+    }
     
+    /**
+     * 
+     * @ejb:interface-method
+     */
+    public Collection findResourceEdgesByName(String name, ResourceRelation relation) {
+        return getResourceEdgeDAO().findByName(name, relation);
+    }
+    
+    /**
+     * 
+     * @ejb:interface-method
+     */
+    public ResourceEdge getParentResourceEdge(Resource resource, ResourceRelation relation) {
+        return getResourceEdgeDAO().getParentEdge(resource, relation);
+    }
+
     /**
      * 
      * @ejb:interface-method
@@ -947,7 +1003,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
         }
         ZeventManager.getInstance().enqueueEventsAfterCommit(events);
     }
-
+    
     public static ResourceManagerLocal getOne() {
         try {
             return ResourceManagerUtil.getLocalHome().create();

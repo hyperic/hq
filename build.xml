@@ -31,6 +31,7 @@
 
   <!-- Native libs -->
   <property name="hq.bin" location="hq_bin" />
+  <property name="hqapi.lib" location="ui_plugins/hqapi1/lib" />
   <property name="lather.lib" location="${hq.bin}/lather_bin" />
   <property name="sigar.lib" location="${hq.bin}/sigar_bin/lib" />
   <property name="db2monitor.dir" location="${hq.bin}/db2monitor_bin"/>
@@ -258,6 +259,7 @@
             <include name="*/src"/>
             <exclude name="xen/src"/>
             <exclude name="vim/src"/>
+            <exclude name="vsphere/src"/>
 			<exclude name="spring/src"/>
           </dirset>
         </src>
@@ -270,15 +272,20 @@
 			<path refid="alljars" />
 			<path refid="testjars" />
 			<path location="${build.dir}/classes"/>
+	      	<path>
+	      		<fileset dir="${hqapi.lib}" includes="hqapi*.jar" />
+	      	</path>
 		  </classpath>
 	      <src>
 	        <path location="${basedir}/plugins/xen/src" />
 	        <path location="${basedir}/plugins/vim/src" />
+	        <path location="${basedir}/plugins/vsphere/src" />
 			<path location="${basedir}/plugins/spring/src/main/java" />
 	      </src>
 	      <include name="org/hyperic/hq/plugin/xen/**"/>
 	      <include name="com/xensource/**"/>
 	      <include name="org/hyperic/hq/plugin/vim/**"/>
+		  <include name="org/hyperic/hq/plugin/vsphere/**"/>
 	 	  <include name="org/hyperic/hq/plugin/spring/**"/>
 	    </hq-javac>
   </target>
@@ -1021,6 +1028,8 @@
         <!-- for CollectorThread -->
         <include name="backport-util-concurrent-3.1.jar"/>
       </fileset>
+      <!-- for vsphere plugin -->
+      <fileset dir="${hqapi.lib}" includes="hqapi*.jar" />
     </copy>
 
     <!-- product.jmx.* has to be loaded from the plugin ClassLoader -->
@@ -1147,6 +1156,8 @@
     <hqplugin name="vim"/>
 
     <hqplugin name="vmware"/>
+
+    <hqplugin name="vsphere"/>
 
     <hqplugin name="xen">
        <!-- XXX Xen sdk built w/ 1.6 + mods for Xen 4.0 compat -->

@@ -1,0 +1,65 @@
+
+ol li, ul li {
+    line-height: 1.2em;
+}
+
+.scroll-pane
+{
+    height: 550px;
+    overflow: auto;
+}
+
+.icon {
+    background-repeat: no-repeat;
+    background-position: left;
+    padding: 2px 5px 2px 20px;
+}
+
+.icon-hq {
+    background-image: url('/hqu/vsphere/public/images/icons/hq.png');
+}
+
+.icon-host {
+    background-image: url('/hqu/vsphere/public/images/icons/host.png');
+}
+
+.icon-vm {
+    background-image: url('/hqu/vsphere/public/images/icons/virtualMachine.png');
+}
+
+.icon-vmOn {
+    background-image: url('/hqu/vsphere/public/images/icons/virtualMachine-poweredOn.png');
+}
+
+.icon-vmOff {
+    background-image: url('/hqu/vsphere/public/images/icons/virtualMachine-red.png');
+}
+
+.icon-vmSuspended {
+    background-image: url('/hqu/vsphere/public/images/icons/virtualMachine-suspended.png');
+}
+
+.icon-resourcepool {
+    background-image: url('/hqu/vsphere/public/images/icons/resourcePool.png');
+}
+
+table td.bar {
+	width: 100px;
+}
+
+table td.bar span {
+    -moz-background-clip:border;
+    -moz-background-inline-policy:continuous;
+    -moz-background-origin:padding;
+    background: #99ccff repeat-x scroll left center;
+    display:block;
+    float:left;
+    height:12px;
+    padding:0;
+}
+
+input#findResourceInput {
+	border-color:#AAAAAA;
+	margin-bottom:15px;
+	width:100%;
+}
