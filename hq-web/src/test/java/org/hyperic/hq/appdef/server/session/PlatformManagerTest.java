@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.hibernate.NonUniqueObjectException;
@@ -14,14 +15,19 @@ import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateFQDNException;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
+import org.hyperic.hq.appdef.shared.ApplicationManager;
+import org.hyperic.hq.appdef.shared.ApplicationValue;
+import org.hyperic.hq.appdef.shared.IpValue;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceManager;
+import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
@@ -38,6 +44,7 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.context.TestContextLoader;
 import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.hq.product.ServiceTypeInfo;
+import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.junit.Before;
 import org.junit.Test;
@@ -79,6 +86,9 @@ public class PlatformManagerTest {
 
     @Autowired
     ResourceManager resourceManager;
+
+    @Autowired
+    ApplicationManager applicationManager;
 
     private Agent testAgent;
 
@@ -496,57 +506,216 @@ public class PlatformManagerTest {
         platformManager.findPlatformById(12345);
     }
 
-    public void testGetPlatformByAIPlatform() {
-        fail("Not yet implemented");
+    @Test
+    public void testGetPlatformByAIPlatformFQDN() throws ApplicationException {
+        AIPlatformValue aiPlatform = new AIPlatformValue();
+        aiPlatform.setFqdn(testPlatform.getFqdn());
+        // Platform platform =
+        // platformManager.createPlatform(authzSubjectManager.getOverlordPojo(),
+        // aiPlatform);
+        // Following method will fetch the platform based on the FQDN
+        Platform fetchedPlatform = platformManager.getPlatformByAIPlatform(authzSubjectManager
+            .getOverlordPojo(), aiPlatform);
+        assertNotNull(fetchedPlatform);
+        assertEquals(testPlatform, fetchedPlatform);
     }
 
-    public void testGetPhysPlatformByAgentToken() {
-        fail("Not yet implemented");
+    // @Test TODO: Find out why getPhysPlatformByAgentToken() doesn't return a
+    // valid platform by agent token
+    // public void testGetPlatformByAIPlatformAgentToken() throws
+    // ApplicationException {
+    // AIPlatformValue aiPlatform = new AIPlatformValue();
+    // //First set AIPlatformValue to invalid FQDN
+    // aiPlatform.setFqdn("abcd");
+    // aiPlatform.setAgentToken(testPlatform.getAgent().getAgentToken());
+    // //Following method will fetch the platform based on agent token
+    // Platform fetchedPlatform =
+    // platformManager.getPlatformByAIPlatform(authzSubjectManager.getOverlordPojo(),
+    // aiPlatform);
+    // assertNotNull(fetchedPlatform);
+    // assertEquals(testPlatform, fetchedPlatform);
+    // }
+
+    // @Test
+    // public void testGetPlatformByNameAndAuth() throws ApplicationException {
+    // PlatformValue fetchedPlatform =
+    // platformManager.getPlatformByName(authzSubjectManager.getOverlordPojo(),
+    // testPlatform.getName());
+    // assertNotNull(fetchedPlatform);
+    // assertEquals(testPlatform.getPlatformValue(), fetchedPlatform);
+    // }
+
+    @Test
+    public void testGetPlatformByName() {
+        Platform fetchedPlatform = platformManager.getPlatformByName(testPlatform.getName());
+        assertNotNull(fetchedPlatform);
+        assertEquals(testPlatform, fetchedPlatform);
     }
 
-    public void testGetPlatformByNameAuthzSubjectString() {
-        fail("Not yet implemented");
+    @Test
+    public void testFindPlatformByFqdn() throws ApplicationException {
+        Platform fetchedPlatform = platformManager.findPlatformByFqdn(authzSubjectManager
+            .getOverlordPojo(), testPlatform.getFqdn());
+        assertNotNull(fetchedPlatform);
+        assertEquals(testPlatform, fetchedPlatform);
     }
 
-    public void testGetPlatformByNameString() {
-        fail("Not yet implemented");
+    @Test
+    public void testFindPlatformByInvalidFqdn() throws ApplicationException {
+        try {
+            platformManager.findPlatformByFqdn(authzSubjectManager.getOverlordPojo(), "abcd");
+        } catch (PlatformNotFoundException e) {
+            assertEquals(e.getMessage(), "Platform with fqdn abcd not found");
+            return;
+        }
+        fail("PlatformNotFoundException is not thrown for an invalid FQDN");
     }
 
-    public void testFindPlatformByFqdn() {
-        fail("Not yet implemented");
+    @Test
+    public void testGetPlatformByIpAddr() throws ApplicationException {
+        PlatformValue pValue = new PlatformValue();
+        pValue.setCpuCount(2);
+        pValue.setName("Test Platform ByPlatformType");
+        pValue.setFqdn("Test Platform CreationByPlatformType");
+        IpValue ipValue = new IpValue();
+        ipValue.setAddress("127.0.0.1");
+        ipValue.setMACAddress("12:34:G0:93:58:96");
+        ipValue.setNetmask("255:255:255:0");
+        pValue.addIpValue(ipValue);
+        Platform platform = platformManager.createPlatform(authzSubjectManager.getOverlordPojo(),
+            testPlatformType.getId(), pValue, testAgent.getId());
+        Collection<Platform> getPlatforms = platformManager.getPlatformByIpAddr(authzSubjectManager
+            .getOverlordPojo(), "127.0.0.1");
+        assertNotNull(getPlatforms);
+        assertEquals(platform, getPlatforms.iterator().next());
     }
 
-    public void testGetPlatformByIpAddr() {
-        fail("Not yet implemented");
+    @Test
+    public void testGetPlatformPksByAgentToken() throws ApplicationException {
+        List<Integer> platformPKs = (List<Integer>) platformManager.getPlatformPksByAgentToken(
+            authzSubjectManager.getOverlordPojo(), "agentToken123");
+        List<Integer> testPlatformPKs = new ArrayList<Integer>();
+        for (Platform platform : testPlatforms) {
+            testPlatformPKs.add(platform.getId());
+        }
+        assertEquals(testPlatformPKs, platformPKs);
     }
 
-    public void testGetPlatformPksByAgentToken() {
-        fail("Not yet implemented");
+    @Test
+    public void testGetPlatformPksByInvalidAgentToken() throws ApplicationException {
+        try {
+            platformManager.getPlatformPksByAgentToken(authzSubjectManager.getOverlordPojo(),
+                "agentTokenInvalid");
+        } catch (PlatformNotFoundException e) {
+            assertEquals(e.getMessage(), "Platform with agent token agentTokenInvalid not found");
+            return;
+        }
+        fail("PlatformNotFoundException is not thrown for an invalid agent token");
     }
 
-    public void testGetPlatformByService() {
-        fail("Not yet implemented");
+    @Test
+    public void testGetPlatformByService() throws ApplicationException {
+        PlatformValue pValue = platformManager.getPlatformByService(authzSubjectManager
+            .getOverlordPojo(), testService.getId());
+        assertEquals(testPlatform.getPlatformValue(), pValue);
     }
 
-    public void testGetPlatformIdByService() {
-        fail("Not yet implemented");
+    @Test
+    public void testGetPlatformByInvalidService() throws ApplicationException {
+        Integer invalidId = testService.getId() + 12345;
+        try {
+            platformManager.getPlatformByService(authzSubjectManager.getOverlordPojo(), invalidId);
+        } catch (PlatformNotFoundException e) {
+            assertEquals(e.getMessage(), "platform for service " + invalidId + " not found");
+            return;
+        }
+        fail("PlatformNotFoundException is not thrown for invalid service");
     }
 
-    public void testGetPlatformByServer() {
-        fail("Not yet implemented");
+    @Test
+    public void testGetPlatformIdByService() throws ApplicationException {
+        Integer platformId = platformManager.getPlatformIdByService(testService.getId());
+        assertEquals(testPlatform.getId(), platformId);
     }
 
-    public void testGetPlatformIdByServer() {
-        fail("Not yet implemented");
+    @Test
+    public void testGetPlatformIdByInvalidService() throws ApplicationException {
+        Integer invalidId = testService.getId() + 12345;
+        try {
+            platformManager.getPlatformIdByService(invalidId);
+        } catch (PlatformNotFoundException e) {
+            assertEquals(e.getMessage(), "platform for service " + invalidId + " not found");
+            return;
+        }
+        fail("PlatformNotFoundException is not thrown for invalid service");
     }
 
-    public void testGetPlatformsByServers() {
-        fail("Not yet implemented");
+    @Test
+    public void testGetPlatformByServer() throws ApplicationException {
+        PlatformValue pValue = platformManager.getPlatformByServer(authzSubjectManager
+            .getOverlordPojo(), testServer.getId());
+        assertEquals(testPlatform.getPlatformValue(), pValue);
     }
 
-    public void testGetPlatformsByApplication() {
-        fail("Not yet implemented");
+    @Test
+    public void testGetPlatformByInvalidServer() throws ApplicationException {
+        Integer invalidId = testServer.getId() + 12345;
+        try {
+            platformManager.getPlatformByServer(authzSubjectManager.getOverlordPojo(), invalidId);
+        } catch (PlatformNotFoundException e) {
+            assertEquals(e.getMessage(), "platform for server " + invalidId + " not found");
+            return;
+        }
+        fail("PlatformNotFoundException is not thrown for invalid server");
     }
+
+    @Test
+    public void testGetPlatformIdByServer() throws ApplicationException {
+        Integer platformId = platformManager.getPlatformIdByServer(testServer.getId());
+        assertEquals(testPlatform.getId(), platformId);
+    }
+
+    @Test
+    public void testGetPlatformIdByInvalidServer() throws ApplicationException {
+        Integer invalidId = testServer.getId() + 12345;
+        try {
+            platformManager.getPlatformIdByServer(invalidId);
+        } catch (PlatformNotFoundException e) {
+            assertEquals(e.getMessage(), "platform for server " + invalidId + " not found");
+            return;
+        }
+        fail("PlatformNotFoundException is not thrown for invalid server");
+    }
+
+    @Test
+    public void testGetPlatformsByServers() throws ApplicationException {
+        List<AppdefEntityID> serverIds = new ArrayList<AppdefEntityID>();
+        serverIds.add(testServer.getEntityId());
+        PageList<PlatformValue> pValues = platformManager.getPlatformsByServers(authzSubjectManager
+            .getOverlordPojo(), serverIds);
+        assertEquals(testPlatform.getPlatformValue(), pValues.get(0));
+    }
+
+    /*@Test
+    public void testGetPlatformsByApplication() throws ApplicationException, NotFoundException {
+        ServiceValue serviceValue = testService.getServiceValue();
+        List<ServiceValue> services = new ArrayList<ServiceValue>();
+        services.add(serviceValue);
+        ApplicationValue appValue = new ApplicationValue();
+        appValue.setName("Test Application");
+        appValue.setEngContact("Testing");
+        appValue.setBusinessContact("SpringSource");
+        appValue.setOpsContact("TechOps");
+        //Set "Generic Application" type
+        appValue.setApplicationType(applicationManager.findApplicationType(1));
+        //TODO: waiting on addService method fix
+        Application app = applicationManager.createApplication(authzSubjectManager
+            .getOverlordPojo(), appValue, services);
+        PageControl pc = new PageControl();
+        PageList<PlatformValue> pValues = platformManager.getPlatformsByApplication(
+            authzSubjectManager.getOverlordPojo(), app.getId(), pc);
+        assertEquals(testPlatform.getPlatformValue(), pValues.get(0));
+    }*/
 
     public void testGetViewablePlatformPKs() {
         fail("Not yet implemented");
