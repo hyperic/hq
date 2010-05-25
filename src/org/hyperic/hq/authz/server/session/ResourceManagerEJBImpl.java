@@ -1116,6 +1116,16 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
         }
         ZeventManager.getInstance().enqueueEventsAfterCommit(events);
     }
+
+    /**
+     * @return returns the platform count of all distinct authzPlatforms in the
+     * containment relation from the edge table.
+     * @see {@link AuthzConstants.RELATION_CONTAINMENT_ID}
+     * @ejb:interface-method
+     */
+    public int getPlatformCountByContainmentRelation() {
+        return getResourceEdgeDAO().getPlatformCountByContainmentRelation();
+    }
     
     public static ResourceManagerLocal getOne() {
         try {
