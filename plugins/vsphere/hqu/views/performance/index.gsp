@@ -1,6 +1,19 @@
+<div class="panelHeader">
+	<span class="refreshToolbar">
+		<span class="lastUpdated"></span>
+	</span>
+	<span class="navLink">
+		<% if (associatedPlatform) { %>
+			${linkTo(l.getFormattedMessage("link.goto.inventory.page", associatedPlatform.name), [resource:associatedPlatform])}
+		<% } else if (resource) { %>
+			${linkTo(l.getFormattedMessage("link.goto.inventory.page", resource.name), [resource:resource])}
+		<% } %>
+	</span>
+</div>
+
 <% def resourceMetrics = resource.getEnabledMetrics() %>
 
-${l.getFormattedMessage("text.performance.data.for", linkTo(resource.name, [resource:resource]))}
+<span>${l.getFormattedMessage("text.performance.data.for", resource.name)}</span>
 <strong>${l['label.right.axis']}</strong>
 <select id="metricSelection">
   	<option value="0">${l['text.none']}</option>

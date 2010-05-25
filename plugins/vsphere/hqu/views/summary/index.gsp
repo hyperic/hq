@@ -1,91 +1,19 @@
-<style>
-	#summaryPanels > div > table {
-		margin:0;
-		width:100%;
-	}
-	
-	#summaryPanels div table tr td:first-child {
-		width:20%;
-	}
-	
-	#summaryPanels > div {
-		float:left;
-		margin-top:10px;
-		width:49.5%;
-	}
-
-	#summaryPanels > div:first-child {
-		float:none;
-		width:100%;
-	}
-
-	#summaryPanels > div:last-child {
-		float:right;
-	}
-
-	#summaryPanels div:first-child > span {
-		display:inline-block;
-		font-size:1.15em;
-		font-weight:bold;
-		width:100%;
-	}
-	
-	#summaryPanels div > span {
-		font-size:1em;
-		font-weight:normal;
-	}
-	
-	#summaryPanels div > span.collapsed {
-		cursor:pointer;
-		background:url("/${urlFor(asset:'images')}/collapsed-panel.gif") left no-repeat;
-		padding-left:20px;
-	}
-	
-	#summaryPanels div > span.expanded {
-		cursor:pointer;
-		background:url("/${urlFor(asset:'images')}/expanded-panel.gif") left no-repeat;
-		padding-left:20px;
-	}
-	
-	#summaryPanels > div > div {
-		background-color:#EEEEEE;
-		padding:5px;
-	}
-
-	#summaryPanels > div:first-child div {
-		background-color:#EFF1FF;
-	}
-	
-	#summaryPanels > div > div:first-child {
-		-moz-border-radius-topleft:7px;
-		-moz-border-radius-topright:7px;
-		-webkit-border-radius-topleft:7px;
-		-webkit-border-radius-topright:7px;
-	}
-
-	#summaryPanels > div > div:last-child {
-		-moz-border-radius-bottomleft:7px;
-		-moz-border-radius-bottomright:7px;
-		-webkit-border-radius-bottomleft:7px;
-		-webkit-border-radius-bottomright:7px;
-	}
-		
-	#summaryPanels > div > div.collapsed {
-		-moz-border-radius:7px;
-		-webkit-border-radius:7px;
-	}
-</style>
-
-<div style="text-align: right;">
-	<% if (resource) { %>
-		${linkTo(l.getFormattedMessage("link.goto.inventory.page", resource.name), [resource:resource])}
-	<% } else if (vm) { %>
-		${linkTo(l.getFormattedMessage("link.goto.inventory.page", vm.name), [resource:vm])}
-	<% } else { %>
-		${linkTo(l.getFormattedMessage("link.goto.inventory.page", host.name), [resource:host])}
-	<% } %>
+<div class="panelHeader">
+	<span class="refreshToolbar">
+		<span class="lastUpdated"></span>
+	</span>
+	<span class="navLink">
+		<% if (resource) { %>
+			${linkTo(l.getFormattedMessage("link.goto.inventory.page", resource.name), [resource:resource])}
+		<% } else if (associatedPlatform) { %>
+			${linkTo(l.getFormattedMessage("link.goto.inventory.page", associatedPlatform.name), [resource:associatedPlatform])}
+		<% } else if (vm) { %>
+			${linkTo(l.getFormattedMessage("link.goto.inventory.page", vm.name), [resource:vm])}
+		<% } else { %>
+			${linkTo(l.getFormattedMessage("link.goto.inventory.page", host.name), [resource:host])}
+		<% } %>
+	</span>
 </div>
-
 <div id="summaryPanels">
   	<% if (resource) { %>
   		<div id="resourceSection">
@@ -118,8 +46,12 @@
   				<span>${l['label.vm.information']}</span>
   				<table class="tablesorter" border="0" cellpadding="0" cellspacing="1">
   					<tr>
-      				<td>${l['label.hostname']}</td>
-		      		<td>${vm.name}</td>
+     					<td>${l['label.hostname']}</td>
+  						<% if (resource) { %>
+      					<td><a href="javascript:summary_SelectNode(${vm.id});">${vm.name}</a></td>
+      				<% } else { %>
+			      		<td>${vm.name}</td>
+      				<% } %>
    				</tr>
        			<tr>
       				<td>${l['label.guest.os']}</td>
@@ -156,7 +88,7 @@
   				<table class="tablesorter" border="0" cellpadding="0" cellspacing="1">
   					<tr>
       				<td>${l['label.esx.host']}</td>
-		      		<td>${host.name}</td>
+  						<td><a href="javascript:summary_SelectNode(${host.id});">${host.name}</a></td>
    				</tr>
   					<tr>
       				<td>${l['label.resource.pool']}</td>
@@ -176,7 +108,11 @@
   			<table class="tablesorter" border="0" cellpadding="0" cellspacing="1">
   				<tr>
       			<td>${l['label.hostname']}</td>
-	      		<td>${host.name}</td>
+  						<% if (vm) { %>
+      					<td><a href="javascript:summary_SelectNode(${host.id});">${host.name}</a></td>
+      				<% } else { %>
+			      		<td>${host.name}</td>
+      				<% } %>
    			</tr>
   				<tr>
       			<td>${l['label.location']}</td>
@@ -233,8 +169,11 @@
   		</div>
   	</div>
 </div>
-
 <script type="text/javascript">
+	function summary_SelectNode(id) {
+		jQuery("#tree-inventory").trigger("selectNode", id);
+	};
+	
   	jQuery(document).ready(function() {
     	jQuery('#controldialog').dialog({ draggable: false, modal: true, autoOpen: false });
     	

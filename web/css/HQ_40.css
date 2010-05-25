@@ -2448,7 +2448,7 @@ span#browseFilters {
 div#breadcrumbContainer {
 	font-size:1.25em;
 	font-weight:bold;
-	padding:0 1.5em 0.5em;
+	padding:0 25px 10px;
 }
 	
 ul.breadcrumbs {

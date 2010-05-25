@@ -1,41 +1,36 @@
+import java.util.Collection
+import java.util.Iterator
+
+import org.hyperic.hq.authz.server.session.Resource
+import org.hyperic.hq.authz.server.session.ResourceEdge
+import org.hyperic.hq.authz.server.session.ResourceEdgeDAO
+import org.hyperic.hq.authz.server.session.ResourceRelation
+import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl
+import org.hyperic.hq.authz.shared.AuthzConstants
 import org.json.JSONArray
 import org.json.JSONObject
+
 import org.hyperic.hq.hqu.rendit.BaseController
 import org.hyperic.hq.measurement.MeasurementConstants
 
-class VsphereController 
-    extends BaseController
-{
+class VsphereController extends BaseController {
     protected void init() {
         onlyAllowSuperUsers()
     }
 
-    /**
-     * Generate a 'VMware vSphere Host' node.
-     */
-    private getHostNode(host) {
-        getNode(host.id, host.name, "icon icon-host", true, new JSONArray())
-    }
-
-    private getHQNode(resource) {
-        getNode(resource.id, resource.name, "icon icon-hq", null, null)
-    }
-    
     private getNode(id, name, classes, collapsed, children) {
         JSONObject node = new JSONObject();
         
         node.put("id", id)
         node.put("text", name)
         
-        if (classes) {
-            node.put("classes", classes)
-        }
+        classes && node.put("classes", classes)
+        
         
         if (children) {
             node.put("children", children)
-            if (collapsed) {
-                node.put("collapsed", true)
-            }
+            
+            collapsed && node.put("collapsed", true)
         }
         
         node
@@ -43,23 +38,16 @@ class VsphereController
     
     private getAvailability(resource) {
         def availMetric = resource.getAvailabilityMeasurement()
-        def mv = availMetric.getLastDataPoint()
 
-        mv.value
-    }
-
-    private getAssociatedPlatform(vm) {
-        def config = vm.config
-        def mac = config['macAddress']
-        def platform = null
-        
-        if (mac && mac['value']) {
-            platform = VsphereDAO.getPlatformByMAC(mac['value'])
+        if (availMetric) {
+            def mv = availMetric.getLastDataPoint()
+            
+            return mv.value
         }
         
-        platform
+        return 0
     }
-    
+
     /**
      * Generate a 'VMware vSphere VM' node.
      */
@@ -77,80 +65,63 @@ class VsphereController
             icon = "icon icon-vm"
         }
 
-        // Check if this VM has a corresponding platform in HQ and include it
-        // directly.  May want to make this async in the future.
-        def platform = getAssociatedPlatform(vm)
-        def children
-            
-        if (platform && platform.servers && platform.servers.size() > 0) {
+        // Check if this VM has any associated servers.
+        def descendants = resourceHelper.getDescendantResourceCountByVirtualRelation(vm)
+        def children = null
+        
+        if (descendants > 0) { 
             children = new JSONArray()
         }
-
+        
         getNode(vm.id, vm.name, icon, true, children)
     }
     
     private getChildNodes(id) {
-        def nodes = new JSONArray()
-        
+        def results = new JSONArray()
+        def nodes = []
+                     
         if (id) {
-            def node = resourceHelper.findById(id)
-    
-            if (node && node.prototype) {
-                if (node.prototype.name == "VMware vSphere Host") {
-                    def vms = VsphereDAO.getVMsByHost(user, node.name)
-        
-                    for (vm in vms.sort{ a, b -> a.name.toLowerCase() <=> b.name.toLowerCase()}) {
-                        nodes.put(getVMNode(vm))
-                    }
-                } else if (node.prototype.name == "VMware vSphere VM") {
-                    def platform = getAssociatedPlatform(node)
-                    
-                    if (platform && platform.servers) {
-                        for (server in platform.servers.sort{ a, b -> a.resource.name.toLowerCase() <=> b.resource.name.toLowerCase()}) {
-                            if (!server.serverType.virtual) {
-                                def res = server.resource
-                                
-                                nodes.put(getHQNode(res))
-                            }
-                        }
+            def resource = resourceHelper.findById(id)
+
+            if (resource.prototype.name == 'VMware vSphere VM') {
+                def descendants = resourceHelper.findDescendantResourcesByVirtualRelation(resource)
+                
+                descendants.each { res ->
+                    if (res.resourceType.id == AuthzConstants.authzServer) {
+                        nodes << res
                     }
                 }
+            } else {
+                nodes = resourceHelper.findChildResourcesByVirtualRelation(resource)
             }
         } else {
-            def hosts = resourceHelper.find(byPrototype: "VMware vSphere Host")
-            
-            if (hosts) {
-                for (host in hosts.sort { a, b -> a.name <=> b.name}) {
-                    nodes.put(getHostNode(host))
-                }
+            nodes = resourceHelper.find(byPrototype: 'VMware vCenter')
+        }
+        
+        nodes.sort({ a, b -> a.name.toLowerCase() <=> b.name.toLowerCase() }).each { node ->
+            if (node.prototype.name == 'VMware vCenter') {
+                results.put(getNode(node.id, node.name, "icon icon-vcenter", true, new JSONArray()))
+            } else if (node.prototype.name == 'VMware vSphere Host') {
+                results.put(getNode(node.id, node.name, "icon icon-host", true, new JSONArray()))
+            } else if (node.prototype.name == 'VMware vSphere VM') {
+                results.put(getVMNode(node))
+            } else {
+                results.put(getNode(node.id, node.name, "icon icon-hq", null, null))
             }
         }
         
-        nodes
+        results
     }
     
     private getAncestors(id) {
         def resource = resourceHelper.findById(id)
         def openNodes = []
                          
-        if (resource && resource.prototype) {
-            if (resource.prototype.name == "VMware vSphere VM") {
-                def host = VsphereDAO.getHostResourceByVMResource(user, resource)
-                
-                openNodes << host.id
-            } else if (resource.prototype.name != "VMware vSphere Host") {
-                def platform = resource.toServer().platform
-                def vm = VsphereDAO.getVMByPlatform(platform)
-               
-                openNodes << vm.id
-                
-                def host = VsphereDAO.getHostResourceByVMResource(user, vm)
-                
-                openNodes << host.id
-            }
+        if (resource) {
+            openNodes = resourceHelper.findAncestorsByVirtualRelation(resource).collect { res -> res.id }
         }
         
-        return openNodes
+        openNodes
     }
     
     private generateBranch(nodes, openNodes) {
@@ -177,13 +148,13 @@ class VsphereController
         def result = new JSONArray()
         
         if (resourceName) {
-            def platforms = VsphereDAO.getVirtualPlatformsWithNameLike(resourceName)
+            def resources = resourceHelper.findResourcesByNameAndVirtualRelation(resourceName)
 
-            for (platform in platforms.sort{ a, b -> a.resource.name.toLowerCase() <=> b.resource.name.toLowerCase()}) {
+            resources.sort({ a, b -> a.name.toLowerCase() <=> b.name.toLowerCase() }).each { resource ->
                 def listItem = new JSONObject()
                 
-                listItem.put("id", platform.resource.id)
-                listItem.put("value", platform.resource.name)
+                listItem.put("id", resource.id)
+                listItem.put("value", resource.name)
                 
                 result.put(listItem)
             }
@@ -208,9 +179,22 @@ class VsphereController
             }
             
             if (selectedId) {
+                def resource = resourceHelper.findById(selectedId)
+                
+                if (resource.resourceType.id == AuthzConstants.authzPlatform &&
+                    resource.prototype.name != 'VMware vSphere Host' &&
+                    resource.prototype.name != 'VMware vSphere VM') {
+                    // Get the associated/parent vm since we don't show the actual HQ platform in this view
+                    def parent = resourceHelper.getParentResourceByVirtualRelation(resource)
+                    
+                    selectedId = parent.id
+                }
+                 
                 openNodes = (openNodes + getAncestors(selectedId)).unique()
+                
+                result.put("selectedId", selectedId)
             }
-
+           
             nodes = getChildNodes(null)
             
             if (nodes.length() > 0 && openNodes.size() > 0) {
@@ -226,8 +210,20 @@ class VsphereController
     def index(params) {
         def openNodes = []
         def selectedId = params.getOne('sn')?.toInteger()
-        
+        def result = [:]
+                   
         if (selectedId) {
+            def resource = resourceHelper.findById(selectedId)
+            
+            if (resource.resourceType.id == AuthzConstants.authzPlatform &&
+                resource.prototype.name != 'VMware vSphere Host' &&
+                resource.prototype.name != 'VMware vSphere VM') {
+                // Get the associated/parent vm since we don't show the actual HQ platform in this view
+                def parent = resourceHelper.getParentResourceByVirtualRelation(resource)
+                
+                selectedId = parent.id
+            }
+            
             openNodes = getAncestors(selectedId)
         }
         
@@ -237,6 +233,6 @@ class VsphereController
             generateBranch(nodes, openNodes)
         } 
 
-        render(locals:[payload: nodes])
+        render(locals: [payload: nodes, selectedId: selectedId])
     }
 }

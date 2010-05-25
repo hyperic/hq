@@ -99,65 +99,46 @@
 		               baseBrowseUrl="/ResourceHub.do" 
 		               baseResourceUrl="/Resource.do" />
 	</div>
-	<br/>
 </c:if>
 
 <table width="100%" cellspacing="0" cellpadding="0" style="border: 0px;clear:both;">
 	<tr>
     	<td colspan="4">
 			<table width="100%" border="0" cellspacing="0" cellpadding="0" style="border: 0px; margin-bottom: 10px;">
-				<tr class="PageTitleBar">
-					<td width="5">
-						<html:img page="/images/spacer.gif" width="5" height="1" alt="" border="0" />
-					</td>
-					<td width="15">
-						<html:img page="/images/spacer.gif" width="15" height="1" alt="" border="0" />
-					</td>
-					<td colspan="2" nowrap>
-						<c:choose>
-							<c:when test="${not empty titleKey}">
-								<c:set var="escapedTitleName">
-									<c:out value="${titleName}" />
-								</c:set>
-								<c:set var="escapedSubTitleName">
-									<c:out value="${subTitleName}" />
-								</c:set>
-								<fmt:message key="${titleKey}">
-									<fmt:param value="${escapedTitleName}" />
-									<fmt:param value="${escapedSubTitleName}" />
-								</fmt:message>
-							</c:when>
-							<c:otherwise>
-								<c:out value="${titleName}" escapeXml="false" />
-								
-								<c:if test="${not empty subTitleName}">
-									<span class="resourceSubTitle"> 
-										<c:out value="${subTitleName}" /> 
-									</span>
-								</c:if>
-							</c:otherwise>
-						</c:choose>
-					</td>
-					<c:choose>
-						<c:when test="${not empty titleBgStyle && not empty titleImg}">
-							<td width="15%" style="padding-right: 20px;">&nbsp;</td>
-						</c:when>
-						<c:otherwise>
-							<td width="10%" style="padding-right: 20px;">&nbsp;</td>
-						</c:otherwise>
-					</c:choose>
-				</tr>
-				<tr>
-    				<td rowspan="99" class="PageTitle">&nbsp;</td>
-    				<td valign="top" align="left" rowspan="99">&nbsp;</td>
-    				<td colspan="3">&nbsp;</td>
-  				</tr>
-  				
+				<c:if test="${not empty titleName}">
+					<tr class="PageTitleBar">
+						<td colspan="100%" style="padding: 0pt 25px 10px;">
+							<c:choose>
+								<c:when test="${not empty titleKey}">
+									<c:set var="escapedTitleName">
+										<c:out value="${titleName}" />
+									</c:set>
+									<c:set var="escapedSubTitleName">
+										<c:out value="${subTitleName}" />
+									</c:set>
+									<fmt:message key="${titleKey}">
+										<fmt:param value="${escapedTitleName}" />
+										<fmt:param value="${escapedSubTitleName}" />
+									</fmt:message>
+								</c:when>
+								<c:otherwise>
+									<c:out value="${titleName}" escapeXml="false" />
+									
+									<c:if test="${not empty subTitleName}">
+										<span class="resourceSubTitle"> 
+											<c:out value="${subTitleName}" /> 
+										</span>
+									</c:if>
+								</c:otherwise>
+							</c:choose>
+						</td>
+					</tr>
+				</c:if>
 				<c:if test="${not empty resource || not empty linkUrl || not empty showSearch}">
   					<tr valign="top"> 
   						<c:choose>
     						<c:when test="${not empty resource}">
-    							<td colspan="2">
+    							<td colspan="2" style="padding: 5px 25px 0pt;">
       								<table width="100%" border="0" cellspacing="0" cellpadding="0">
         								<tr> 
           									<td class="PageTitleSmallText" valign="top">
@@ -207,9 +188,16 @@
   											</tr>
 											</c:if>
 										</logic:present>
-      									<c:if test="${empty ResourceType}">
+      									<c:if test="${not empty pluginLinkInfo}">
+											<tr>
+												<td colspan="100%" style="padding-top: 10px;">
+													<a href="<html:rewrite page="/mastheadAttach.do?typeId=${pluginLinkInfo.pluginId}&sn=${pluginLinkInfo.selectedId}"/>">See this resource in the vSphere plugin view</a>
+												</td>
+											</tr>
+										</c:if>					
+										<c:if test="${empty ResourceType}">
         									<tr>
-        										<td colspan="3">
+        										<td colspan="3" style="padding-top: 10px;">
         											<tiles:insert definition=".resource.common.navmap">
           												<tiles:put name="resource" beanName="resource"/>
         											</tiles:insert>
@@ -243,7 +231,7 @@
     							</td>
     						</c:when>
     						<c:when test="${showSearch}">
-    							<td style="vertical-align: middle;">
+    							<td style="vertical-align: middle; padding: 0 25px 10px;">
 									<c:choose>
   										<c:when test="${ResourceHubForm.ff == PLATFORM}">
     										<c:set var="allTypesKey" value="resource.hub.filter.AllPlatformTypes"/>

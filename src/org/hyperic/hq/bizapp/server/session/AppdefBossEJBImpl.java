@@ -4167,7 +4167,17 @@ public class AppdefBossEJBImpl
 
         return ret;
     }
-
+    
+    /**
+     * Check whether or not a given resource exists in the virtual hierarchy
+     * @ejb:interface-method
+     */
+    public boolean hasVirtualResourceRelation(Resource resource) {
+        ResourceManagerLocal rMan = ResourceManagerEJBImpl.getOne();
+        
+        return rMan.hasResourceRelation(resource, rMan.getVirtualRelation());
+    }
+    
     /**
      * @ejb:interface-method
      */

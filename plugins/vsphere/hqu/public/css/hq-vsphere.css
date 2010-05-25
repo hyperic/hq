@@ -19,6 +19,10 @@ ol li, ul li {
     background-image: url('/hqu/vsphere/public/images/icons/hq.png');
 }
 
+.icon-vcenter {
+    background-image: url('/hqu/vsphere/public/images/icons/datacenter.png');
+}
+
 .icon-host {
     background-image: url('/hqu/vsphere/public/images/icons/host.png');
 }
@@ -62,4 +66,102 @@ input#findResourceInput {
 	border-color:#AAAAAA;
 	margin-bottom:15px;
 	width:100%;
+	font-style: italic;
+	color: #aaa;
+}
+
+input#findResourceInput.dataentry {
+	font-style: normal;
+	color: #000;
+}
+
+#summaryPanels > div > table {
+	margin:0;
+	width:100%;
+}
+	
+#summaryPanels div table tr td:first-child {
+	width:20%;
+}
+	
+#summaryPanels > div {
+	float:left;
+	margin-top:10px;
+	width:49.5%;
+}
+
+#summaryPanels > div:first-child {
+	float:none;
+	width:100%;
+}
+
+#summaryPanels > div:last-child {
+	float:right;
+}
+
+#summaryPanels div:first-child > span {
+	display:inline-block;
+	font-size:1.15em;
+	font-weight:bold;
+	width:100%;
+}
+	
+#summaryPanels div > span {
+	font-size:1em;
+	font-weight:normal;
+}
+	
+#summaryPanels > div > div {
+	background-color:#EEEEEE;
+	padding:5px;
+}
+
+#summaryPanels > div:first-child div {
+	background-color:#EFF1FF;
+}
+	
+#summaryPanels > div > div:first-child {
+	-moz-border-radius-topleft:7px;
+	-moz-border-radius-topright:7px;
+	-webkit-border-radius-topleft:7px;
+	-webkit-border-radius-topright:7px;
+}
+
+#summaryPanels > div > div:last-child {
+	-moz-border-radius-bottomleft:7px;
+	-moz-border-radius-bottomright:7px;
+	-webkit-border-radius-bottomleft:7px;
+	-webkit-border-radius-bottomright:7px;
+}
+		
+#summaryPanels > div > div.collapsed {
+	-moz-border-radius:7px;
+	-webkit-border-radius:7px;
+}
+
+span.refreshToolbar {
+	background: url('/hqu/public/images/arrow_refresh.gif') no-repeat right;
+	padding-right: 25px;
+	cursor: pointer;
+}
+
+span.lastUpdated {
+	color: #aaa;
+	font-style: italic;
+	font-size: 1em;
+	cursor: default;
+}
+
+div.panelHeader {
+	padding-bottom:15px;	
+}
+
+div.panelHeader span.navLink {
+	float:right;
+}
+
+span.navLink a {
+	font-weight: normal;
+	background: url('/hqu/vsphere/public/images/icons/page_go.png') no-repeat right;
+	padding-right: 20px;
 }

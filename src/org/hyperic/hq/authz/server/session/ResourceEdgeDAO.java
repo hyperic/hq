@@ -238,20 +238,6 @@ public class ResourceEdgeDAO
                            .list();
     }
     
-    // Checks whether or not a given resource has any direct children
-    boolean hasChildren(Resource resource, ResourceRelation relation) {
-        String hql = "select count(re) from ResourceEdge re " +
-                     "where re.from=:from and distance=:distance and relation=:relation";
-
-        int result = ((Integer) getSession().createQuery(hql)
-                                                .setParameter("from", resource)
-                                                .setParameter("relation", relation)
-                                                .setInteger("distance", 1)
-                                                .iterate().next()).intValue();
-        
-        return result > 0;
-    }
-    
     // Returns the number of descendants of a given resource
     int getDescendantCount(Resource resource, ResourceRelation relation) {
         String hql = "select count(re) from ResourceEdge re " +
@@ -261,6 +247,30 @@ public class ResourceEdgeDAO
                                    .setParameter("from", resource)
                                    .setParameter("relation", relation)
                                    .iterate().next()).intValue();
+    }
+    
+    // Checks whether or not a given resource has a relation in the edge table
+    boolean hasResourceRelation(Resource resource, ResourceRelation relation) {
+        return checkEdgeExistence(resource, relation, 0);
+    }
+    
+    // Checks whether or not a given resource has any direct children
+    boolean hasChildren(Resource parent, ResourceRelation relation) {
+        return checkEdgeExistence(parent, relation, 1);
+    }    
+    
+    // Checks whether or not resource(s) in the edge table exist based on relation and distance from the given resource
+    private boolean checkEdgeExistence(Resource resource, ResourceRelation relation, int distance) {
+        String hql = "select count(re) from ResourceEdge re " +
+                     "where re.from=:from and distance=:distance and relation=:relation";
+
+        int result = ((Integer) getSession().createQuery(hql)
+                                                .setParameter("from", resource)
+                                                .setParameter("relation", relation)
+                                                .setInteger("distance", distance)
+                                                .iterate().next()).intValue();
+        
+        return result > 0;
     }
     
     boolean isResourceChildOf(Resource parent, Resource child) {

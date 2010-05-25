@@ -10,16 +10,22 @@
 			var $this = $(this);
 			var savedState = _getState();
 			
-			if (savedState) {
+			if (!$.isEmptyObject(savedState)) {
 				_refreshTree(opts, savedState, $this);
 			} else if (opts.initialDataset) {
 				_render(opts, $this, opts.initialDataset);
 				
-				var state = $.deparam.querystring();
-			
-				if (state) {
-					_makeSelection(state[_CONSTS.selectedNode]);
+				var selectedId = opts.initialSelectId;
+				
+				if (!selectedId) {
+					var state = $.deparam.querystring();
+					
+					if (state) {
+						selectedId = state[_CONSTS.selectedNode];
+					}
 				}
+				
+				_makeSelection(selectedId);
 			} else if (opts.url) {
 				_getChildNodes(opts, $this);
 			}
@@ -155,8 +161,13 @@
 					_render(config, target, data.payload);
 					
 					var savedState = _getState();
+					var selectedId = savedState[_CONSTS.selectedNode];
 					
-					_makeSelection(savedState[_CONSTS.selectedNode]);
+					if (data.selectedId && data.selectedId != selectedId) {
+						selectedId = data.selectedId;
+					}
+					
+					_makeSelection(selectedId);
 			    } 
   			},
   			error: function(xhr, errorText, exception) {

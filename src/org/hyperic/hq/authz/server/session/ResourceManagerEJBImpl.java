@@ -746,6 +746,14 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
     public ResourceEdge getParentResourceEdge(Resource resource, ResourceRelation relation) {
         return getResourceEdgeDAO().getParentEdge(resource, relation);
     }
+    
+    /**
+     * 
+     * @ejb:interface-method
+     */
+    public boolean hasResourceRelation(Resource resource, ResourceRelation relation) {
+        return getResourceEdgeDAO().hasResourceRelation(resource, relation);
+    }
 
     /**
      * 
