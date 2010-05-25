@@ -268,6 +268,14 @@ public class VCenterPlatformDetector {
             if (nics != null) {
                 for (int i=0; i<nics.length; i++) {
                     String mac = nics[i].getMacAddress();
+                    if (mac.equals("00:00:00:00:00:00")) {
+                        log.info("UUID=" + info.getUuid() +
+                                 " and NIC=" + nics[i].getIpAddress() +
+                                 " has macaddr=" + mac + 
+                                 ".  Ignoring entire platform since macaddr is invalid.  " +
+                                 "Platform will be picked up when the macaddr is valid");
+                        return null;
+                    }
                     String[] ips = nics[i].getIpAddress();
                     if ((mac != null) && (ips != null) && (ips.length != 0)) {
                         cprops.setValue("macAddress", mac);
