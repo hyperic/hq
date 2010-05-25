@@ -38,13 +38,19 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.hqapi1.AgentApi;
 import org.hyperic.hq.hqapi1.HQApi;
 import org.hyperic.hq.hqapi1.ResourceApi;
+import org.hyperic.hq.hqapi1.ResourceEdgeApi;
 import org.hyperic.hq.hqapi1.XmlUtil;
 import org.hyperic.hq.hqapi1.types.Agent;
 import org.hyperic.hq.hqapi1.types.AgentResponse;
 import org.hyperic.hq.hqapi1.types.AgentsResponse;
 import org.hyperic.hq.hqapi1.types.Resource;
+import org.hyperic.hq.hqapi1.types.ResourceConfig;
+import org.hyperic.hq.hqapi1.types.ResourceEdge;
+import org.hyperic.hq.hqapi1.types.ResourceFrom;
+import org.hyperic.hq.hqapi1.types.ResourceProperty;
 import org.hyperic.hq.hqapi1.types.ResourcePrototype;
 import org.hyperic.hq.hqapi1.types.ResourcePrototypeResponse;
+import org.hyperic.hq.hqapi1.types.ResourceTo;
 import org.hyperic.hq.hqapi1.types.ResourcesResponse;
 import org.hyperic.hq.hqapi1.types.Response;
 import org.hyperic.hq.hqapi1.types.ResponseStatus;
@@ -88,6 +94,7 @@ public class VCenterPlatformDetector {
     private static final String AGENT_IP = "agent.setup.agentIP";
     private static final String AGENT_PORT = "agent.setup.agentPort";
 
+    private static final String VC_TYPE = "VMware vCenter";
     private static final String VM_TYPE = "VMware vSphere VM";
     private static final String HOST_TYPE = "VMware vSphere Host";
     private static final String POOL_TYPE = "VMware vSphere Resource Pool";
@@ -219,14 +226,16 @@ public class VCenterPlatformDetector {
         return type;
     }
 
-    private VSphereResource discoverVM(VSphereUtil vim,
-                                       VirtualMachine vm)
+    private VSphereResource discoverVM(VirtualMachine vm)
         throws Exception {
-
-        VirtualMachineRuntimeInfo runtime = vm.getRuntime();
 
         VirtualMachineConfigInfo info = vm.getConfig();
 
+        if (info.isTemplate()) {
+            return null; //filter out template VMs
+        }
+
+        VirtualMachineRuntimeInfo runtime = vm.getRuntime();
         GuestInfo guest = vm.getGuest();
         ResourcePool pool = vm.getResourcePool();
 
@@ -321,7 +330,7 @@ public class VCenterPlatformDetector {
                     continue; //filter out template VMs
                 }
                 try {
-                    VSphereResource platform = discoverVM(vim, vm);
+                    VSphereResource platform = discoverVM(vm);
                     if (platform == null) {
                         continue;
                     }
@@ -408,7 +417,7 @@ public class VCenterPlatformDetector {
         return resources;
     }
 
-    private VSphereResource discoverHost(VSphereUtil vim, HostSystem host)
+    private VSphereResource discoverHost(HostSystem host)
         throws Exception {
 
         HostConfigInfo info = host.getConfig();
@@ -491,7 +500,7 @@ public class VCenterPlatformDetector {
         throws IOException, PluginException {
 
         List<Resource> resources = new ArrayList<Resource>();
-        ResourcePrototype type = getResourceType(HOST_TYPE);
+        ResourcePrototype hostType = getResourceType(HOST_TYPE);
 
         try {
             ManagedEntity[] hosts = vim.find(VSphereUtil.HOST_SYSTEM);
@@ -505,13 +514,27 @@ public class VCenterPlatformDetector {
 
                 HostSystem host = (HostSystem)hosts[i];
                 try {
-                    VSphereResource platform = discoverHost(vim, host);
+                    VSphereResource platform = discoverHost(host);
                     if (platform == null) {
                         continue;
                     }
-                    platform.setResourcePrototype(type);
+                    platform.setResourcePrototype(hostType);
                     platform.setAgent(agent);
                     mergeVSphereConfig(platform);
+                    
+                    // TODO: Uncomment and remove discoverVirtualMachines
+                    /*
+                    VirtualMachine[] hostVms = host.getVms();
+                    for (int v=0; v<hostVms.length; v++) {
+                        VSphereResource vm = discoverVM(hostVms[v]);
+                        if (vm != null) {
+                            vm.setResourcePrototype(vmType);
+                            vm.setAgent(agent);
+                            mergeVSphereConfig(vm);
+                            resources.add(vm);
+                        }
+                    */                   
+                    
                     List<Resource> rpools = pools.get(host.getName());
                     if (rpools != null) {
                         platform.getResource().addAll(rpools);
@@ -554,5 +577,124 @@ public class VCenterPlatformDetector {
         } finally {
             VSphereUtil.dispose(vim);
         }
+        
+        if (!isDump) {
+            syncResourceEdges();
+        }
+    }
+    
+    private void syncResourceEdges() 
+        throws IOException, PluginException {
+        ResourceApi rApi = getApi().getResourceApi();
+        ResourceEdgeApi reApi = getApi().getResourceEdgeApi();
+
+        List<ResourceEdge> edges = new ArrayList<ResourceEdge>();
+
+        Resource vCenter = null;
+        ResourcePrototype vcType = getResourceType(VC_TYPE);
+        ResourcesResponse vcResponse = rApi.getResources(vcType, true, false);
+        assertSuccess(vcResponse, "Getting all " + VC_TYPE, false);
+        
+        for (Resource r : vcResponse.getResource()) {
+            for (ResourceConfig c : r.getResourceConfig()) {                
+                if (VSphereUtil.PROP_URL.equals(c.getKey())) {
+                    if (c.getValue().equals(VSphereUtil.getURL(this.props))) {
+                        vCenter = r;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (vCenter == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("No VMware vCenter server found with url=" 
+                            + VSphereUtil.getURL(this.props));
+            }
+            return;
+        }
+        
+        ResourcePrototype hostType = getResourceType(HOST_TYPE);
+        ResourcesResponse hostResponse = rApi.getResources(hostType, true, false);
+        assertSuccess(hostResponse, "Getting all " + HOST_TYPE, false);
+
+        ResourceEdge edge = new ResourceEdge();
+        ResourceFrom from = new ResourceFrom();
+        ResourceTo to = new ResourceTo();
+
+        for (Resource r : hostResponse.getResource()) {            
+            for (ResourceConfig c : r.getResourceConfig()) {                
+                if (VSphereUtil.PROP_URL.equals(c.getKey())) {
+                    if (c.getValue().equals(VSphereUtil.getURL(this.props))) {
+                        to.getResource().add(r);
+                    }
+                }
+            }            
+        }
+        
+        if (log.isDebugEnabled()) {
+            log.debug("vc name=" + vCenter.getName()
+                        + ", resourceId=" + vCenter.getId()
+                        + ", host size=" + to.getResource().size());
+        }
+
+        from.setResource(vCenter);
+        edge.setRelation("virtual");
+        edge.setResourceFrom(from);
+        edge.setResourceTo(to);
+        edges.add(edge);
+
+        StatusResponse syncResponse = reApi.syncResourceEdges(edges);
+        assertSuccess(syncResponse, "Sync vCenter and host edges", false);
+        
+        ResourcePrototype vmType = getResourceType(VM_TYPE);
+        ResourcesResponse vmResponse = rApi.getResources(vmType, true, false);
+        assertSuccess(vmResponse, "Getting all " + VM_TYPE, false);
+        
+        Map<String, List<Resource>> hostVmMap = new HashMap<String, List<Resource>>();
+
+        for (Resource r : vmResponse.getResource()) {
+            String esxHost = null;
+            for (ResourceProperty p : r.getResourceProperty()) {
+                if ("esxHost".equals(p.getKey())) {
+                    esxHost = p.getValue();
+                    break;
+                }
+            }
+            List<Resource> vmResources = hostVmMap.get(esxHost);
+            if (vmResources == null) {
+                vmResources = new ArrayList<Resource>();
+                hostVmMap.put(esxHost, vmResources);
+            }
+            vmResources.add(r);
+        }
+        
+        edges.clear();
+        
+        for (Resource r : hostResponse.getResource()) {            
+            ResourceFrom parent = new ResourceFrom();
+            parent.setResource(r);
+            
+            ResourceTo children = new ResourceTo();
+            List<Resource> vmResources = hostVmMap.get(r.getName());
+            if (vmResources != null) {
+                children.getResource().addAll(vmResources);
+            }
+
+            ResourceEdge rEdge = new ResourceEdge();
+            rEdge.setRelation("virtual");
+            rEdge.setResourceFrom(parent);
+            rEdge.setResourceTo(children);
+            edges.add(rEdge);
+            
+            if (log.isDebugEnabled()) {
+                log.debug("host name=" + r.getName()
+                            + ", resourceId=" + r.getId()
+                            + ", vm size=" + children.getResource().size());
+            }
+        }
+        
+        syncResponse = reApi.syncResourceEdges(edges);
+        assertSuccess(syncResponse, "Sync host and VM edges", false);
     }
 }

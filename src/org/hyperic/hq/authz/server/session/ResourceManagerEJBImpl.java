@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2009], Hyperic, Inc.
+ * Copyright (C) [2004-2010], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -40,6 +40,8 @@ import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 import javax.ejb.SessionBean;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.ConfigResponseDB;
@@ -98,6 +100,7 @@ import org.hyperic.util.timer.StopWatch;
  */
 public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
 {
+    private final Log log = LogFactory.getLog(ResourceManagerEJBImpl.class);
     private Pager resourceTypePager = null;
     
     private ResourceEdgeDAO getResourceEdgeDAO() {
@@ -798,14 +801,116 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
                                     AppdefEntityID[] children,
                                     boolean deleteExisting)
         throws PermissionException, ResourceEdgeCreateException {
-
-        if (relation == null 
-                || !relation.getId().equals(AuthzConstants.RELATION_NETWORK_ID)) {
-            throw new ResourceEdgeCreateException(
-                        "Only " + AuthzConstants.ResourceEdgeNetworkRelation
-                        + " resource relationships are supported.");
+        
+        if (relation == null) {
+            throw new ResourceEdgeCreateException("Resource relation is null");
         }
         
+        if (relation.getId().equals(AuthzConstants.RELATION_NETWORK_ID)) {
+            createNetworkResourceEdges(subject,
+                                       relation,
+                                       parent,
+                                       children,
+                                       deleteExisting);
+        } else if (relation.getId().equals(AuthzConstants.RELATION_VIRTUAL_ID)) {
+            createVirtualResourceEdges(subject,
+                                       relation,
+                                       parent,
+                                       children,
+                                       false);
+        } else {
+            throw new ResourceEdgeCreateException(
+                        "Unsupported resource relation: "
+                        + relation.getName());
+        }
+    }
+
+    private void createVirtualResourceEdges(AuthzSubject subject,
+                                            ResourceRelation relation,
+                                            AppdefEntityID parent,
+                                            AppdefEntityID[] children,
+                                            boolean deleteExisting)
+        throws PermissionException, ResourceEdgeCreateException {
+        
+        //TODO: Add VM/host verification check ???
+        Resource parentResource = findResource(parent);
+        
+        if (parentResource != null 
+                && !parentResource.isInAsyncDeleteState()
+                && children != null
+                && children.length > 0) {
+
+            try {
+                if (deleteExisting) {
+                    removeResourceEdges(subject, relation, parentResource);
+                }
+            
+                ResourceEdgeDAO eDAO = getResourceEdgeDAO();
+                Collection edges = findResourceEdges(relation, parentResource);
+                ResourceEdge existing = null;
+                Resource childResource = null;
+
+                if (edges.isEmpty()) {
+                    // create self-edge for parent of virtual hierarchy
+                    eDAO.create(parentResource, parentResource, 0, relation);
+                }
+                for (int i=0; i< children.length; i++) {
+                    //TODO: Add VM/host verification check ???
+                    childResource = findResource(children[i]);
+                                    
+                    // Check if child resource already exists in VM hierarchy
+                    // TODO: This needs to be optimized
+                    existing = getParentResourceEdge(childResource, relation);
+
+                    if (existing != null) {
+                        Resource existingParent = existing.getFrom();
+                        if (existingParent.getId().equals(parentResource.getId())) {
+                            // already exists with same parent, so skip
+                            log.info("Skipping. Virtual resource edge already exists: from id=" 
+                                        + parentResource.getId()
+                                        + ", to id=" + childResource.getId());
+                            continue;
+                        } else {
+                            // already exists with different parent
+                            // TODO: vMotion occurred
+                            
+                            log.info("Virtual resource edge exists with another resource: from id="
+                                        + existingParent.getId()
+                                        + ", to id=" + childResource.getId()
+                                        + ", target from id=" + parentResource.getId());
+                            continue;
+                        }
+                    }
+                
+                    if (childResource != null && !childResource.isInAsyncDeleteState()) {                    
+                        eDAO.create(parentResource, childResource, 1, relation);
+                        eDAO.create(childResource, parentResource, -1, relation);
+                        
+                        Collection ancestors = eDAO.findAncestorEdges(parentResource, relation);
+
+                        for (Iterator a=ancestors.iterator(); a.hasNext();) {
+                            ResourceEdge ancestorEdge = (ResourceEdge)a.next();
+                            
+                            int distance = ancestorEdge.getDistance() - 1;
+                            
+                            eDAO.create(childResource, ancestorEdge.getTo(), distance, relation);
+                            eDAO.create(ancestorEdge.getTo(), childResource, -distance, relation);
+                        }
+                    }
+                }
+            } catch (Throwable t) {
+                throw new ResourceEdgeCreateException(t);
+            }
+        }        
+    }
+
+    private void createNetworkResourceEdges(AuthzSubject subject,
+                                            ResourceRelation relation,
+                                            AppdefEntityID parent,
+                                            AppdefEntityID[] children,
+                                            boolean deleteExisting)
+        throws PermissionException, ResourceEdgeCreateException {
+                
         if (parent == null || !parent.isPlatform()) {
             throw new ResourceEdgeCreateException("Only platforms are supported.");
         }

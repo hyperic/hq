@@ -18,6 +18,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.ResourceSortField
 import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.authz.server.session.ResourceGroup
+import org.hyperic.hq.authz.server.session.ResourceRelation
 import org.hyperic.hq.bizapp.server.session.AppdefBossEJBImpl as AppdefBoss
 import org.hyperic.util.pager.PageControl
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo
@@ -452,13 +453,17 @@ class ResourceHelper extends BaseHelper {
     }
 
     void createResourceEdges(String resourceRelation, AppdefEntityID parent, AppdefEntityID[] children, boolean deleteExisting) {
-    	if (!resourceRelation.equals(AuthzConstants.ResourceEdgeNetworkRelation)) {
-    		throw new IllegalArgumentException('Only ' 
-    				+ AuthzConstants.ResourceEdgeNetworkRelation
-    				+ ' resource relationships are supported.')
+    	ResourceRelation relation = null;
+    	if (AuthzConstants.ResourceEdgeNetworkRelation.equals(resourceRelation)) {
+    		relation = rman.getNetworkRelation()
+    	} else if (AuthzConstants.ResourceEdgeVirtualRelation.equals(resourceRelation)) {
+    		relation = rman.getVirtualRelation()
+    	} else {
+    		throw new IllegalArgumentException( 
+    				'Unsupported resource relation: ' + resourceRelation)
     	}
     	
-    	rman.createResourceEdges(user, rman.getNetworkRelation(), parent, children, deleteExisting) 
+    	rman.createResourceEdges(user, relation, parent, children, deleteExisting) 
     }
         
     void removeResourceEdges(String resourceRelation, Resource resource) {
