@@ -105,7 +105,7 @@
 	<tr>
     	<td colspan="4">
 			<table width="100%" border="0" cellspacing="0" cellpadding="0" style="border: 0px; margin-bottom: 10px;">
-				<c:if test="${not empty titleName}">
+				<c:if test="${not empty titleName or not empty titleKey}">
 					<tr class="PageTitleBar">
 						<td colspan="100%" style="padding: 0pt 25px 10px;">
 							<c:choose>
