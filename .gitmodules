@@ -4,3 +4,6 @@
 [submodule "hq_bin/sigar_bin"]
 	path = hq_bin/sigar_bin
 	url = git://git.springsource.org/hq/sigar_bin.git
+[submodule "hq_bin/db2monitor_bin"]
+	path = hq_bin/db2monitor_bin
+	url = git://git.springsource.org/hq/db2monitor.git
