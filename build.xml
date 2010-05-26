@@ -535,10 +535,6 @@
        <fileset dir="${basedir}/etc/alertTemplates"/>
     </copy>
 
-    <copy todir="${ear.dir}/gconsoleTemplates">
-       <fileset dir="${basedir}/etc/gconsoleTemplates"/>
-    </copy>
-
     <copy todir="${ear.dir}/gconsoleTemplates" failonerror="false">
        <fileset dir="${user.home}/.hq/gconsoleTemplates"/>
     </copy>
