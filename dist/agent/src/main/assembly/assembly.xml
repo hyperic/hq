@@ -39,24 +39,24 @@
 				<exclude>mysql:mysql-connector-java</exclude>
 				<exclude>postgresql:postgresql</exclude>
 				<exclude>mx4j:*</exclude>
-				<exclude>org.hyperic.hq.pdk:modules</exclude>
+				<exclude>org.hyperic.hq:hq-pdk-shared</exclude>
 				<exclude>org.hyperic:sigar</exclude>
 			</excludes>
 			<unpack>true</unpack>
 			<fileMode>0644</fileMode>
 			<directoryMode>0755</directoryMode>
 		</dependencySet>
-	<!--	<dependencySet>
+	    <dependencySet>
 			<useProjectArtifact>false</useProjectArtifact>
 			<useTransitiveDependencies>false</useTransitiveDependencies>
 			<outputDirectory>/pdk/javadoc</outputDirectory>
 			<includes>
-				<include>org.hyperic.hq.pdk:modules</include>
+				<include>org.hyperic.hq:hq-pdk-shared</include>
 			</includes>
 			<unpack>true</unpack>
 			<fileMode>0644</fileMode>
 			<directoryMode>0755</directoryMode>
-		</dependencySet>-->
+		</dependencySet>
 		<dependencySet>
 			<useProjectArtifact>false</useProjectArtifact>
 			<useTransitiveDependencies>false</useTransitiveDependencies>

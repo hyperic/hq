@@ -150,12 +150,12 @@
 			<classifier>agent</classifier>
 		    <type>zip</type>
 		</dependency>
-		<!--><dependency>
-			<groupId>org.hyperic.hq.pdk</groupId>
-			<artifactId>modules</artifactId>
+		<dependency>
+			<groupId>org.hyperic.hq</groupId>
+			<artifactId>hq-pdk-shared</artifactId>
 			<version>${project.version}</version>
 			<classifier>javadoc</classifier>
-		</dependency>-->
+		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>examples</artifactId>

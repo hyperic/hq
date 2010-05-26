@@ -14,6 +14,10 @@
 	<artifactId>hq-pdk-shared</artifactId>
 	<packaging>jar</packaging>
 	<name>Hyperic HQ - PDK Shared</name>
+	
+	<properties>
+		<pdk.title>Hyperic HQ Plugin API</pdk.title>
+	</properties>
 
 
 	<dependencies>
@@ -90,6 +94,27 @@
 						<descriptor>src/main/assembly/agent.xml</descriptor>
 					</descriptors>
 				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.6.1</version>
+				<configuration>
+					<show>protected</show>
+					<author>false</author>
+					<doctitle>${pdk.title}</doctitle>
+					<windowtitle>${pdk.title}</windowtitle>
+					<header><![CDATA[<font size="2">${pdk.title} v. ${project.version}</font>]]></header>
+					<bottom><![CDATA[Copyright &#169; 2004-2010 Hyperic, Inc. <a href="mailto:support@hyperic.net">support@hyperic.net</a>, All Rights Reserved.]]></bottom>
+				</configuration>
+				<executions>
+					<execution>
+						<id>package</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
