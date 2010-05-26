@@ -457,4 +457,15 @@ public class ResourceDAO
             .setParameter("svcProto", AuthzConstants.authzService)
             .list();
     }
+
+    int getPlatformCountMinusVsphereVmPlatforms() {
+        String sql = "select count(*) from Resource r " +
+                     "where r.resourceType.id = :platProto " +
+                     "and r.prototype.name != :vspherevm";
+        return ((Integer) getSession().createQuery(sql)
+            .setInteger("platProto", AuthzConstants.authzPlatform.intValue())
+            .setString("vspherevm", AuthzConstants.platformPrototypeVmwareVsphereVm)
+            .uniqueResult()).intValue();
+    }
+
 }

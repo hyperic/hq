@@ -295,17 +295,5 @@ public class ResourceEdgeDAO
         
         return results.size() == 1;
     }
-    
-    public int getPlatformCountByContainmentRelation() {
-        String sql = "select count(distinct r.id) from Resource r " +
-        		"JOIN r.resourceType t " +
-        		"JOIN r.fromEdges e " +
-        		"WHERE r.resourceType.id = :authzPlatform " +
-        		"AND e.relation = :relationId";
 
-        return ((Integer) getSession().createQuery(sql)
-            .setInteger("authzPlatform", AuthzConstants.authzPlatform.intValue())
-            .setInteger("relationId", AuthzConstants.RELATION_CONTAINMENT_ID.intValue())
-            .uniqueResult()).intValue();
-    }
 }

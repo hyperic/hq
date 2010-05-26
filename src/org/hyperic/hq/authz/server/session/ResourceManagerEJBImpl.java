@@ -1118,13 +1118,12 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
     }
 
     /**
-     * @return returns the platform count of all distinct authzPlatforms in the
-     * containment relation from the edge table.
-     * @see {@link AuthzConstants.RELATION_CONTAINMENT_ID}
+     * @return the resource count with prototype of {@link AuthzConstants.authzPlatform}
+     * minus resources with the prototype of {@link AuthConstants.platformPrototypeVmwareVsphereVm}
      * @ejb:interface-method
      */
-    public int getPlatformCountByContainmentRelation() {
-        return getResourceEdgeDAO().getPlatformCountByContainmentRelation();
+    public int getPlatformCountMinusVsphereVmPlatforms() {
+        return getResourceDAO().getPlatformCountMinusVsphereVmPlatforms();
     }
     
     public static ResourceManagerLocal getOne() {

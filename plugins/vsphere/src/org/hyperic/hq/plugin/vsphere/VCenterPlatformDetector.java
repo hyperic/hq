@@ -35,6 +35,7 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.hqapi1.AgentApi;
 import org.hyperic.hq.hqapi1.HQApi;
 import org.hyperic.hq.hqapi1.ResourceApi;
@@ -95,7 +96,7 @@ public class VCenterPlatformDetector {
     private static final String AGENT_PORT = "agent.setup.agentPort";
 
     private static final String VC_TYPE = "VMware vCenter";
-    private static final String VM_TYPE = "VMware vSphere VM";
+    private static final String VM_TYPE = AuthzConstants.platformPrototypeVmwareVsphereVm;
     private static final String HOST_TYPE = "VMware vSphere Host";
     private static final String POOL_TYPE = "VMware vSphere Resource Pool";
     private static final String DEFAULT_POOL = "Resources";
