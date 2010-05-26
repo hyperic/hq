@@ -10,3 +10,9 @@
 [submodule "hq_bin/launcher_bin"]
 	path = hq_bin/launcher_bin
 	url = git://git.springsource.org/hq/launcher.git
+[submodule "hq_bin/product_connectors"]
+	path = hq_bin/product_connectors
+	url = git://git.springsource.org/hq/connectors.git
+[submodule "ui_plugins/hqapi1"]
+	path = ui_plugins/hqapi1
+	url = git://git.springsource.org/hq/hqapi1.git
