@@ -1,0 +1,3 @@
+[submodule "hq_bin/lather_bin"]
+	path = hq_bin/lather_bin
+	url = git://git.springsource.org/hq/lather.git
