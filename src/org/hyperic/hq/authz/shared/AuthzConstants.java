@@ -146,6 +146,8 @@ public final class AuthzConstants {
     public static final String serverPrototypeTypeName = "ServerPrototype";
     public static final String servicePrototypeTypeName = "ServicePrototype";
     public static final String appPrototypeTypeName = "ApplicationPrototype";
+    
+    public static final String platformPrototypeVmwareVsphereVm = "VMware vSphere VM";
         
     public static final String rootOpCAMAdmin = "administerCAM";
 
