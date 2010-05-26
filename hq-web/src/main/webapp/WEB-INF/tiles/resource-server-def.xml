@@ -37,9 +37,12 @@
               path="/resource/common/ControlTab.jsp">
      <put name="selectedIndex"  value="0" />
      <putList name="tabList">
-       <item value="Monitor" link="XXX"
-             height="21" width="102"
-             classtype="org.hyperic.hq.ui.util.Tab"/>
+       <bean classtype="org.hyperic.hq.ui.util.Tab">
+         <set-property value="value" property="Monitor"/>
+         <set-property value="link" property="XXX"/>
+         <set-property value="height" property="21"/>
+         <set-property value="width" property="102"/>
+       </bean>
      </putList>
   </definition>
   
@@ -92,45 +95,75 @@
     <put name="selectedIndex" value="0" />
     <put name="resourceType" value="2" />
     <putList name="tabList">
-       <item value="Monitor" mode="currentHealth"
-            link="/resource/server/monitor/Visibility.do"
-            height="21" width="102"
-            classtype="org.hyperic.hq.ui.util.Tab"/>
-      <item value="Inventory" link="/resource/server/Inventory.do"
-            height="21" width="102"
-            classtype="org.hyperic.hq.ui.util.Tab"/>
-      <item value="Alert" mode="list"
-            link="/alerts/Alerts.do"
-            height="21" width="102"
-            classtype="org.hyperic.hq.ui.util.Tab"/>
-      <item value="Control" link="/resource/server/Control.do"
-            height="21" width="102"
-            classtype="org.hyperic.hq.ui.util.Tab"/>
-      <item value="Views" mode="list"
-            link="/TabBodyAttach.do"
-            height="21" width="102"
-            classtype="org.hyperic.hq.ui.util.Tab"/>            
+      <bean classtype="org.hyperic.hq.ui.util.Tab">
+        <set-property property="value" value="Monitor" />
+        <set-property property="link" value="/resource/server/monitor/Visibility.do" />
+        <set-property property="mode" value="currentHealth" />
+        <set-property property="height" value="21" />
+        <set-property property="width" value="102" />
+      </bean> 
+      <bean classtype="org.hyperic.hq.ui.util.Tab">
+        <set-property property="value" value="Inventory" />
+        <set-property property="link" value="/resource/server/Inventory.do" />
+        <set-property property="mode" value="view" />
+        <set-property property="height" value="21" />
+        <set-property property="width" value="102" />
+      </bean>     
+      <bean classtype="org.hyperic.hq.ui.util.Tab">
+        <set-property property="value" value="Alert" />
+        <set-property property="link" value="/alerts/Alerts.do" />
+        <set-property property="mode" value="list" />
+        <set-property property="height" value="21" />
+        <set-property property="width" value="102" />
+      </bean>  
+      <bean classtype="org.hyperic.hq.ui.util.Tab">
+        <set-property property="value" value="Control" />
+        <set-property property="link" value="/resource/server/Control.do" />
+        <set-property property="mode" value="view" />
+        <set-property property="height" value="21" />
+        <set-property property="width" value="102" />
+      </bean>  
+      <bean classtype="org.hyperic.hq.ui.util.Tab">
+        <set-property property="value" value="Views" />
+        <set-property property="link" value="/TabBodyAttach.do" />
+        <set-property property="mode" value="list" />
+        <set-property property="height" value="21" />
+        <set-property property="width" value="102" />
+      </bean>
    </putList>     
   </definition>
 
   <definition name=".tabs.resource.server.nocontrol"
       extends=".tabs.resource">
     <putList name="tabList">
-       <item value="Monitor" mode="currentHealth"
-            link="/resource/server/monitor/Visibility.do"
-            height="21" width="102"
-            classtype="org.hyperic.hq.ui.util.Tab"/>
-      <item value="Inventory" link="/resource/server/Inventory.do"
-            height="21" width="102"
-            classtype="org.hyperic.hq.ui.util.Tab"/>
-      <item value="Alert" mode="list"
-            link="/alerts/Alerts.do"
-            height="21" width="102"
-            classtype="org.hyperic.hq.ui.util.Tab"/>
-      <item value="Views" mode="list"
-            link="/TabBodyAttach.do"
-            height="21" width="102"
-            classtype="org.hyperic.hq.ui.util.Tab"/>
+      <bean classtype="org.hyperic.hq.ui.util.Tab">
+        <set-property property="value" value="Monitor" />
+        <set-property property="link" value="/resource/server/monitor/Visibility.do" />
+        <set-property property="mode" value="currentHealth" />
+        <set-property property="height" value="21" />
+        <set-property property="width" value="102" />
+      </bean> 
+      <bean classtype="org.hyperic.hq.ui.util.Tab">
+        <set-property property="value" value="Inventory" />
+        <set-property property="link" value="/resource/server/Inventory.do" />
+        <set-property property="mode" value="view" />
+        <set-property property="height" value="21" />
+        <set-property property="width" value="102" />
+      </bean>     
+      <bean classtype="org.hyperic.hq.ui.util.Tab">
+        <set-property property="value" value="Alert" />
+        <set-property property="link" value="/alerts/Alerts.do" />
+        <set-property property="mode" value="list" />
+        <set-property property="height" value="21" />
+        <set-property property="width" value="102" />
+      </bean>  
+      <bean classtype="org.hyperic.hq.ui.util.Tab">
+        <set-property property="value" value="Views" />
+        <set-property property="link" value="/TabBodyAttach.do" />
+        <set-property property="mode" value="list" />
+        <set-property property="height" value="21" />
+        <set-property property="width" value="102" />
+      </bean>
    </putList>     
   </definition>    
 
@@ -194,16 +227,24 @@
   <definition name=".tabs.resource.server.control"
               extends=".tabs.resource.server">                                     
    <put name="selectedIndex"  value="3" />
-   <putList name="subTabList">
-      <item value="Current" link="/resource/server/Control.do"
-            height="25" width="104" mode="view"
-            classtype="org.hyperic.hq.ui.util.Tab"/>
-      <item value="History" link="/resource/server/Control.do"
-            height="25" width="104" mode="history"
-            classtype="org.hyperic.hq.ui.util.Tab"/>
-   </putList>
    <put name="subSectionName" value="Control"/>
    <put name="subSelectedIndex" value="1"/>
+   <putList name="subTabList">
+     <bean classtype="org.hyperic.hq.ui.util.Tab">
+	   <set-property property="value" value="Current" />
+	   <set-property property="link" value="/resource/server/Control.do" />
+	   <set-property property="mode" value="view" />
+	   <set-property property="height" value="25" />
+	   <set-property property="width" value="104" />
+	 </bean>    
+	 <bean classtype="org.hyperic.hq.ui.util.Tab">
+	   <set-property property="value" value="History" />
+	   <set-property property="link" value="/resource/server/Control.do" />
+	   <set-property property="mode" value="history" />
+	   <set-property property="height" value="25" />
+	   <set-property property="width" value="104" />
+	 </bean> 
+   </putList>
   </definition>
 
   <definition name=".resource.server.control.list.detail"
@@ -243,14 +284,20 @@
     <put name="selectedIndex"  value="2" />
     <put name="subSectionName" value="Monitor"/>
     <putList name="subTabList">
-      <item value="Alerts" mode="list"
-            link="/alerts/Alerts.do"
-            height="25" width="104"
-            classtype="org.hyperic.hq.ui.util.Tab"/>
-      <item value="Configure" mode="list"
-            link="/alerts/Config.do"
-            height="25" width="104"
-            classtype="org.hyperic.hq.ui.util.Tab"/>
+	  <bean classtype="org.hyperic.hq.ui.util.Tab">
+	    <set-property property="value" value="Alerts" />
+	    <set-property property="link" value="/alerts/Alerts.do" />
+	    <set-property property="mode" value="list" />
+	    <set-property property="height" value="25" />
+	    <set-property property="width" value="104" />
+	  </bean>    
+	  <bean classtype="org.hyperic.hq.ui.util.Tab">
+	    <set-property property="value" value="Configure" />
+	    <set-property property="link" value="/alerts/Config.do" />
+	    <set-property property="mode" value="list" />
+	    <set-property property="height" value="25" />
+	    <set-property property="width" value="104" />
+	  </bean>  
     </putList>
   </definition>  
 
@@ -259,14 +306,20 @@
     <put name="selectedIndex"  value="2" />
     <put name="subSectionName" value="Monitor"/>
     <putList name="subTabList">
-      <item value="Alerts" mode="list"
-            link="/alerts/Alerts.do"
-            height="25" width="104"
-            classtype="org.hyperic.hq.ui.util.Tab"/>
-      <item value="Configure" mode="list"
-            link="/alerts/Config.do"
-            height="25" width="104"
-            classtype="org.hyperic.hq.ui.util.Tab"/>
+	  <bean classtype="org.hyperic.hq.ui.util.Tab">
+	    <set-property property="value" value="Alerts" />
+	    <set-property property="link" value="/alerts/Alerts.do" />
+	    <set-property property="mode" value="list" />
+	    <set-property property="height" value="25" />
+	    <set-property property="width" value="104" />
+	  </bean>    
+	  <bean classtype="org.hyperic.hq.ui.util.Tab">
+	    <set-property property="value" value="Configure" />
+	    <set-property property="link" value="/alerts/Config.do" />
+	    <set-property property="mode" value="list" />
+	    <set-property property="height" value="25" />
+	    <set-property property="width" value="104" />
+	  </bean>   
     </putList>
   </definition>
 

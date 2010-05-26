@@ -28,12 +28,20 @@
    <put name="subSectionName" value="Control"/>
    <put name="subSelectedIndex" value="0"/>
    <putList name="subTabList">
-      <item value="Current" link="/resource/group/Control.do"            
-            height="25" width="104" mode="view"
-            classtype="org.hyperic.hq.ui.util.Tab"/>
-      <item value="History" link="/resource/group/Control.do"
-            height="25" width="104" mode="history"
-            classtype="org.hyperic.hq.ui.util.Tab"/>
+      <bean classtype="org.hyperic.hq.ui.util.Tab">
+        <set-property property="value" value="Current" />
+        <set-property property="link" value="/resource/group/Control.do" />
+        <set-property property="mode" value="view" />
+        <set-property property="height" value="25" />
+        <set-property property="width" value="104" />
+      </bean>    
+      <bean classtype="org.hyperic.hq.ui.util.Tab">
+        <set-property property="value" value="History" />
+        <set-property property="link" value="/resource/group/Control.do" />
+        <set-property property="mode" value="history" />
+        <set-property property="height" value="25" />
+        <set-property property="width" value="104" />
+      </bean>    
    </putList>
   </definition>
   
@@ -41,12 +49,20 @@
   <definition name=".tabs.resource.group.inventoryonly"
         extends=".tabs.resource.inventoryonly">
      <putList name="tabList">
-        <item value="Inventory" link="/resource/group/Inventory.do"
-             height="21" width="102" classtype="org.hyperic.hq.ui.util.Tab"/>
-        <item value="Views" mode="list"
-            link="/TabBodyAttach.do"
-            height="21" width="102"
-            classtype="org.hyperic.hq.ui.util.Tab"/>
+      <bean classtype="org.hyperic.hq.ui.util.Tab">
+        <set-property property="value" value="Inventory" />
+        <set-property property="link" value="/resource/group/Inventory.do" />
+        <set-property property="mode" value="list" />
+        <set-property property="height" value="21" />
+        <set-property property="width" value="102" />
+      </bean>    
+      <bean classtype="org.hyperic.hq.ui.util.Tab">
+        <set-property property="value" value="Views" />
+        <set-property property="link" value="/TabBodyAttach.do" />
+        <set-property property="mode" value="list" />
+        <set-property property="height" value="21" />
+        <set-property property="width" value="102" />
+      </bean>    
      </putList>     
   </definition>
   
@@ -240,12 +256,20 @@
               extends=".tabs.resource.group.control.current">
    <put name="subSelectedIndex" value="1"/>
     <putList name="subTabList">
-      <item value="Current" link="/resource/group/Control.do"            
-            height="25" width="104" mode="view"
-            classtype="org.hyperic.hq.ui.util.Tab"/>
-      <item value="History" link="/resource/group/Control.do"
-            height="25" width="104" mode="history"
-            classtype="org.hyperic.hq.ui.util.Tab"/>
+      <bean classtype="org.hyperic.hq.ui.util.Tab">
+        <set-property property="value" value="Current" />
+        <set-property property="link" value="/resource/group/Control.do" />
+        <set-property property="mode" value="view" />
+        <set-property property="height" value="25" />
+        <set-property property="width" value="104" />
+      </bean>    
+      <bean classtype="org.hyperic.hq.ui.util.Tab">
+        <set-property property="value" value="History" />
+        <set-property property="link" value="/resource/group/Control.do" />
+        <set-property property="mode" value="history" />
+        <set-property property="height" value="25" />
+        <set-property property="width" value="104" />
+      </bean>     
    </putList>
   </definition>
   
