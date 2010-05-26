@@ -131,7 +131,7 @@ public class VSphereUtil extends ServiceInstance {
             throw new PluginException(type + "/" + name + ": " + e, e);
         }
         if (obj == null) {
-            throw new PluginException(type + "/" + name + ": not found");
+            throw new ManagedEntityNotFoundException(type + "/" + name + ": not found");
         }
         return obj;
     }
