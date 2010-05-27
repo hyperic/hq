@@ -36,17 +36,21 @@
 		if (data) {
 			var div = jQuery("#controlStatus");
 			var className = "action-inprogress";
+			var message = "";
 			
 			if (data.status == 'Failed') {
 				className = "action-failed";
+				
+				message = data.message;
 			} else if (data.status == 'Completed') {
 				className = "action-completed";
 			}
 	
-			div.find("#actionName").text(data.name);
-			div.find("#actionDescription").text(data.description);
-			div.find("#actionStatus").removeClass().addClass(className).text(data.status);
-			div.find("#actionMessage").text(data.message);
+			div.find("#actionName").empty().text(data.name);
+			div.find("#actionDescription").empty().text(data.description);
+			div.find("#actionStatus").removeClass().addClass(className).empty().text(data.status);
+			div.find("#actionMessage").empty().text(message);
+			
 			div.show();
 		}
 	};
@@ -67,7 +71,7 @@
 							checkControlActionStatus(resourceId, actionId);
 						});
 					} else {
-						updateControlStatus(data);
+						updateControlStatus(payload);
 					}
 				}
 			}
@@ -86,11 +90,13 @@
 			data: params,
 			success: function(data) {
 				if (data.success) {
-					updateControlStatus(data.payload);
+					var payload = data.payload;
 					
-					if (data.status.toLowerCase() == 'in progress') {
+					updateControlStatus(payload);
+					
+					if (payload && payload.status.toLowerCase() == 'in progress') {
 						jQuery("#controlStatus").oneTime("3s", function() {
-							checkControlActionStatus(id, data.payload.id);
+							checkControlActionStatus(id, payload.id);
 						});
 					}
 				} else {
