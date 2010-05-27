@@ -25,3 +25,6 @@
 [submodule "hq_bin/pgsql"]
 	path = hq_bin/pgsql
 	url = git@git.springsource.org:hq/pgsql.git
+[submodule "hq_bin/jres"]
+	path = hq_bin/jres
+	url = git@git.springsource.org:hq/jres.git
