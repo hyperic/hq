@@ -19,3 +19,6 @@
 [submodule "hq_bin/jboss"]
 	path = hq_bin/jboss
 	url = git@git.springsource.org:hq/jboss.git
+[submodule "hq_bin/ant"]
+	path = hq_bin/ant
+	url = git@git.springsource.org:hq/ant.git
