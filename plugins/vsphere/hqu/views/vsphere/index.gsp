@@ -20,7 +20,7 @@
     	</div>
   	</div>
 
-  	<div id="tabs-content" style="float:right; width:78%;">
+  	<div id="tabs-content" style="float:right; width:78%; padding-bottom:20px;">
 		<ul>
         	<li>
         		<a href="/hqu/vsphere/performance/index.hqu" title="${l['tab.label.performance']}">${l['tab.label.performance']}</a>

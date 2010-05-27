@@ -267,7 +267,7 @@ span.navLink a {
 }
 
 .action-inprogress {
-	background: url('/hqu/vsphere/public/images/status-bar.gif') no-repeat;
+	background: url('/hqu/vsphere/public/images/status_bar.gif') no-repeat 0 3px;
 	padding-left: 55px;
 }
 
