@@ -12,6 +12,13 @@ import org.json.JSONObject
 
 import org.hyperic.hq.hqu.rendit.BaseController
 import org.hyperic.hq.measurement.MeasurementConstants
+import org.hyperic.hq.product.PluginException
+import org.hyperic.hq.authz.shared.PermissionException
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants
+import org.hyperic.hq.appdef.shared.AppdefEntityID
+import org.hyperic.hq.control.server.session.ControlManagerEJBImpl
+import org.hyperic.hq.control.server.session.ControlHistory
+import org.hyperic.hq.control.server.session.ControlScheduleManagerEJBImpl
 
 class VsphereController extends BaseController {
     protected void init() {
@@ -141,6 +148,133 @@ class VsphereController extends BaseController {
                 node.put("children", children)
             }
         }
+    }
+    
+    private getControlActionData(appdefEntityId, actionId) {
+        def conSchMan = ControlScheduleManagerEJBImpl.one
+        def result = new JSONObject()
+        def controlHistory
+        
+        if (actionId) {
+            controlHistory = conSchMan.getJobByJobId(user, actionId)
+        }
+        
+        if (!controlHistory) {
+            // Check for current job 
+            controlHistory = conSchMan.getCurrentJob(user, appdefEntityId)
+        }
+        
+        if (!controlHistory) {
+            // Check for last job
+            controlHistory = conSchMan.getLastJob(user, appdefEntityId)
+        }
+            
+        def action = new JSONObject()
+            
+        if (controlHistory) {
+            action.put("id", controlHistory.getId())
+            action.put("name", controlHistory.getAction())
+            action.put("description", controlHistory.getDescription())
+            action.put("status", controlHistory.getStatus())
+            action.put("startTime", controlHistory.getStartTime())
+            action.put("message", controlHistory.getMessage())
+            action.put("scheduleTime", controlHistory.getDateScheduled())
+            action.put("duration", controlHistory.getDuration())
+        }
+            
+        result.put("payload", action)
+        
+        result
+    }
+    
+    def control(param) {
+        def id = param.getOne('id')?.toInteger()
+                                   
+        if (!id) {
+            render(inline: "")
+
+            return
+        }
+
+        def resource = resourceHelper.findById(id)
+        def conMan = ControlManagerEJBImpl.one
+        def controlActions = conMan.getActions(user, new AppdefEntityID(resource))
+        def associatedPlatform
+        
+        if (resource.prototype.name == "VMware vSphere VM") {
+            def children = resourceHelper.findChildResourcesByVirtualRelation(resource)
+
+            associatedPlatform = children.find({ res -> 
+                res.resourceType.id == AuthzConstants.authzPlatform 
+            })
+        } else {
+            resource = null
+        }
+        
+        render(locals:[ actions: controlActions.sort({ a, b -> a.toLowerCase() <=> b.toLowerCase() }),
+                        resource: resource,
+                        associatedPlatform: associatedPlatform ])
+    }
+    
+    def checkControlStatus(param) {
+        def id = param.getOne('id')?.toInteger()
+        def actionId = param.getOne('aid')?.toInteger()
+                                          
+        if (!id) {
+            render(inline: "")
+                                              
+            return
+        }
+
+        def resource = resourceHelper.findById(id)
+        def appdefEntityId = new AppdefEntityID(resource)
+        def result = getControlActionData(appdefEntityId, actionId)
+        
+        render(inline:"${result}", contentType:'text/json-comment-filtered')
+    }
+    
+    def executeControlAction(param) {
+        def id = param.getOne('id')?.toInteger()
+        def action = param.getOne('action')
+        def args = param.getOne('args')
+                
+        if (!id) {
+            render(inline: "")
+            
+            return
+        }
+
+        def resource = resourceHelper.findById(id)
+        def appdefEntityId = new AppdefEntityID(resource)
+        def conMan = ControlManagerEJBImpl.one
+        def conSchMan = ControlScheduleManagerEJBImpl.one
+        def result = new JSONObject()
+        def success = false
+        
+        try {
+            conMan.doAction(user, new AppdefEntityID(resource), action, args)
+ 
+            result = getControlActionData(appdefEntityId, null)
+            success = true
+        } catch(PermissionException e) {
+            def error = new JSONObject()
+            
+            error.put("exception", "Permission exception")
+            error.put("message", e.getMessage())
+            
+            result.put("error", error)
+        } catch(PluginException e) {
+            def error = new JSONObject()
+            
+            error.put("expection", "Plugin exception")
+            error.put("message", e.getMessage())
+            
+            result.put("error", error)
+        }
+        
+        result.put("success", success)
+
+        render(inline:"${result}", contentType:'text/json-comment-filtered')
     }
     
     def findByName(params) {

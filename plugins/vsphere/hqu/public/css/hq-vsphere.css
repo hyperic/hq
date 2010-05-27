@@ -162,6 +162,116 @@ div.panelHeader span.navLink {
 
 span.navLink a {
 	font-weight: normal;
-	background: url('/hqu/vsphere/public/images/icons/page_go.png') no-repeat right;
+	background: url('/hqu/vsphere/public/images/icons/go.png') no-repeat right;
 	padding-right: 20px;
+}
+
+.vm-action-container {
+	padding: 15px; 
+	background-color: #EFF1FF; 
+	-moz-border-radius: 7px;
+	-webkit-border-radius: 7px;
+	margin-top: 10px;
+	position: relative;
+}
+
+.vm-action-container h2 {
+	margin: 10px 0;
+}
+
+.vm-action-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	width: 50%;
+}
+
+.vm-action {
+	padding-left: 20px;
+	height: 24px;
+}
+
+.vm-action-start {
+	background: url('/hqu/vsphere/public/images/icons/vm-poweron.png') no-repeat;
+}
+
+.vm-action-stop {
+	background: url('/hqu/vsphere/public/images/icons/vm-poweroff.png') no-repeat;
+}
+
+.vm-action-suspend {
+	background: url('/hqu/vsphere/public/images/icons/vm-suspend.png') no-repeat;
+}
+
+.vm-action-reset {
+	background: url('/hqu/vsphere/public/images/icons/vm-reset.png') no-repeat;
+}
+
+.vm-action-rebootguest {
+	background: url('/hqu/vsphere/public/images/icons/refresh.png') no-repeat;
+}
+
+.vm-action-standbyguest {
+	background: url('/hqu/vsphere/public/images/icons/vm-poweron.png') no-repeat;
+}
+
+.vm-action-guestheartbeatstatus {
+	background: url('/hqu/vsphere/public/images/icons/vm-poweron.png') no-repeat;
+}
+
+.vm-action-createsnapshot {
+	background: url('/hqu/vsphere/public/images/icons/vm-snapshot.png') no-repeat;
+}
+
+.vm-action-reverttosnapshot {
+	background: url('/hqu/vsphere/public/images/icons/vm-snapshot-revert.png') no-repeat;
+}
+
+.vm-action-removeallsnapshots {
+	background: url('/hqu/vsphere/public/images/icons/vm-poweron.png') no-repeat;
+}
+
+#controlStatus {
+	-moz-border-radius:7px;
+	-webkit-border-radius:7px;
+	background-color:#FFFFFF;
+	height:70%;
+	padding:20px;
+	position:absolute;
+	right:15px;
+	top:39px;
+	width:50%;
+}
+
+#actionName {
+	font-size: 1.25em;
+	font-weight: bold;
+}
+
+#actionDescription {
+	font-style: italic;
+	font-size: 1em;
+}
+
+#actionStatus {
+	font-size: 1.45em;
+}
+
+#actionMessage {
+	font-size: 1.25em;
+}
+
+.action-failed {
+	background: url('/hqu/vsphere/public/images/icons/failure.png') no-repeat;
+	padding-left: 20px;
+}
+
+.action-inprogress {
+	background: url('/hqu/vsphere/public/images/status-bar.gif') no-repeat;
+	padding-left: 55px;
+}
+
+.action-completed {
+	background: url('/hqu/vsphere/public/images/icons/success.png') no-repeat;
+	padding-left: 20px;
 }

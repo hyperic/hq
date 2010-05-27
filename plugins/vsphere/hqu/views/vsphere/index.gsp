@@ -28,11 +28,10 @@
 			<li>
         		<a href="/hqu/vsphere/summary/index.hqu" title="${l['tab.label.summary']}">${l['tab.label.summary']}</a>
         	</li>
+			<li style="display:none;">
+        		<a href="/hqu/vsphere/vsphere/control.hqu" title="${l['tab.label.control']}">${l['tab.label.control']}</a>
+        	</li>
 		</ul>
-    
-    	<!-- TODO: auto-scale height to browser height -->    
-    	<div id="tab-summary" class="scroll-pane"></div>
-    	<div id="tab-performance" class="scroll-pane"></div>
   	</div>
   	<div style="clear:both;">&nbsp;</div>
 </div>
@@ -54,12 +53,12 @@
   	var resourceId = null;
 
   	function setAjaxParameters(tabs, load) {
-    	if(typeof(resourceId) != "undefined") {
+    	if (resourceId) {
      		var extraData = {'id':resourceId, 'load':load };
 
      		tabs.tabs('option', 'ajaxOptions', { 
      			data: extraData,
-     			success: function (event) {
+     			success: function (data) {
      				jQuery("span.lastUpdated").text("${l['text.last.updated']} " + (new Date()).format("longTime"));
      			} 
      		});
@@ -69,17 +68,22 @@
   	jQuery(document).ready(function() {
     	// Initialize tab containers
     	jQuery("#tabs-trees").tabs();
+    	
+    	var mainTabs = jQuery("#tabs-content");
+    	
     	// Must lazy load performance content so that canvas elements have dimensions.
-    	jQuery("#tabs-content").tabs({
+    	mainTabs.tabs({
      		select: function(event, ui) {
-      		var tabs = jQuery('#tabs-content').tabs();
-        
+	      		var tabs = jQuery('#tabs-content').tabs();
+
         		if (ui.panel.id == "tab-performance") {
-       			setAjaxParameters(tabs, 'false');
+       				setAjaxParameters(tabs, 'false');
         		} else {
         			setAjaxParameters(tabs, 'true');
         		}
-        
+
+				jQuery.bbq.pushState({ "t": ui.index });
+				
         		return true;
      		},
      		show: function(event, ui) {
@@ -92,7 +96,14 @@
         		}
      		}
     	});
-
+		
+		// Check for state, and select appropriate tab
+		var index = jQuery.bbq.getState("t", true);
+		
+		if (index) {
+			mainTabs.tabs("select", index);
+		}
+		
     	// Initialize inventory tree
     	jQuery("#tree-inventory").treecontrol({
          treeId: "vTree",
@@ -112,7 +123,6 @@
     		maxItems: 25,
     		minChars: 3,
     		postVar: "name",
-    		autoFill: true,
     		onSelect: function (event, ui) {
     			jQuery("#tree-inventory").trigger("selectNode", ui.data.id);
     		},
@@ -132,12 +142,24 @@
 	};
 	
   	function setSelectedResource(id) {
-    	resourceId = id;
-    	
     	var tabs = jQuery('#tabs-content').tabs();
     	var selected = tabs.tabs('option', 'selected');
-    
-    	setAjaxParameters(tabs, 'true');
-    	tabs.tabs('load' , selected);
+    	
+    	if (resourceId != id || selected != 2) {
+	    	resourceId = id;
+	
+	    	setAjaxParameters(tabs, 'true');
+    		tabs.tabs('load', selected);
+    	
+    		var span = jQuery("#_content" + id);
+	    	var classes = span.attr("class");
+
+    		if (classes.indexOf("icon-vm") != -1) {
+				tabs.find("ul>li:hidden").show();
+	    	} else {
+    			tabs.tabs('load', 0);
+    			tabs.find("ul>li:visible").size() == 3 && tabs.find("ul>li:visible")[2].hide();
+	    	}
+    	}
   	};
 </script>
