@@ -344,6 +344,7 @@ class VsphereController extends BaseController {
     def index(params) {
         def openNodes = []
         def selectedId = params.getOne('sn')?.toInteger()
+        def refreshInterval = params.getOne('r')
         def result = [:]
                    
         if (selectedId) {
@@ -367,6 +368,6 @@ class VsphereController extends BaseController {
             generateBranch(nodes, openNodes)
         } 
 
-        render(locals: [payload: nodes, selectedId: selectedId])
+        render(locals: [payload: nodes, selectedId: selectedId, refreshInterval: refreshInterval])
     }
 }

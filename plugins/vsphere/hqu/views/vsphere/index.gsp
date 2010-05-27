@@ -106,13 +106,15 @@
 		
     	// Initialize inventory tree
     	jQuery("#tree-inventory").treecontrol({
-         treeId: "vTree",
+         	treeId: "vTree",
      		url: "/hqu/vsphere/vsphere/inventory.hqu",
      		initialDataset: ${payload},
      		<% if (selectedId) { %>
 	     		initialSelectId: ${selectedId},
      		<% } %>
-     		refreshInterval: "300s",
+     		<% if (refreshInterval) { %>
+	     		refreshInterval: "${refreshInterval}",
+	     	<% } %>
      		selectedCallback: function(item) {
      			setSelectedResource(item.id);
      		}
@@ -157,7 +159,7 @@
     		if (classes.indexOf("icon-vm") != -1) {
 				tabs.find("ul>li:hidden").show();
 	    	} else {
-    			tabs.tabs('load', 0);
+    			tabs.tabs('select', 0);
     			tabs.find("ul>li:visible").size() == 3 && tabs.find("ul>li:visible")[2].hide();
 	    	}
     	}
