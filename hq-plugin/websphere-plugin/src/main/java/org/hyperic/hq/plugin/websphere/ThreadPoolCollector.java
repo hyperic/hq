@@ -22,18 +22,17 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-
 package org.hyperic.hq.plugin.websphere;
 
-import javax.management.j2ee.statistics.Stats;
+import javax.management.ObjectName;
 
 import org.hyperic.hq.product.PluginException;
 
 import com.ibm.websphere.management.AdminClient;
 
-public class ThreadPoolCollector extends WebsphereCollector {
+public class ThreadPoolCollector extends StatsDefaultCollector {
 
-    private static final String[][] ATTRS = { 
+    private static final String[][] ATTRS = {
         { "PoolSize", "poolSize" },
         { "CreateCount", "threadCreates" },
         { "DestroyCount", "threadDestroys" },
@@ -41,32 +40,13 @@ public class ThreadPoolCollector extends WebsphereCollector {
     };
 
     protected void init(AdminClient mServer) throws PluginException {
-        super.init(mServer);
-
-        this.name =
-            newObjectNamePattern("type=ThreadPool," +
-                                 "name=" + getModuleName() + "," +
-                                 getProcessAttributes());
-        
-        this.name = resolve(mServer, this.name);
+        ObjectName name = newObjectNamePattern("type=ThreadPool,"
+                + "name=" + getModuleName() + ","
+                + getProcessAttributes());
+        setObjectName(resolve(mServer, name));
     }
 
-    public void collect() {
-        AdminClient mServer = getMBeanServer();
-        if (mServer == null) {
-            return;
-        }
-        Stats stats = getStats(mServer, this.name);
-        if (stats == null) {
-            //XXX certain threadpools have no stats, why?
-            Object o = getAttribute(mServer, this.name, "name");
-            if (o != null) {
-                setAvailability(true);
-            }
-        }
-        else {
-            setAvailability(true);
-            collectStatCount(stats, ATTRS);
-        }
+    protected String[][] getAttributes() {
+        return ATTRS;
     }
 }

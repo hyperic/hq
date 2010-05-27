@@ -27,6 +27,7 @@ package org.hyperic.hq.plugin.weblogic.jmx;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -37,6 +38,8 @@ import javax.management.InstanceNotFoundException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.hyperic.hq.plugin.weblogic.WeblogicConfig;
 import org.hyperic.hq.plugin.weblogic.WeblogicProductPlugin;
@@ -53,6 +56,8 @@ public class WeblogicQuery {
         new WeblogicQuery[0];
     private static final String[] NOOP_ATTRIBUTE_NAMES = new String[0];
     private static final Properties NOOP_PROPERTIES = new Properties();
+
+    private static final Log log = LogFactory.getLog(WeblogicQuery.class);
 
     public WeblogicQuery cloneInstance() {
         WeblogicQuery query;
@@ -85,9 +90,11 @@ public class WeblogicQuery {
         return getAttributes(mServer, name, getAttributeNames());
     }
 
-    protected void logAttrFailure(ObjectName name, Exception e) {
-        String msg = "Failed to get attributes for " + name;
-        WeblogicDiscover.getLog().debug(msg, e);
+    protected void logAttrFailure(ObjectName name, String[] attrNames, Exception e) {
+        if (log.isDebugEnabled()) {
+            String msg = "attributes " + Arrays.asList(attrNames) + " not found for '" + name+"' : "+e;
+            log.debug(msg);
+        }
     }
 
     public boolean getAttributes(MBeanServer mServer,
@@ -111,11 +118,11 @@ public class WeblogicQuery {
             //returned by the server this should not happen.
             //however, it is possible when nodes are not properly
             //configured.
-            logAttrFailure(name, e);
+            logAttrFailure(name,attrNames, e);
             return false;
         } catch (ReflectionException e) {
             //this should not happen either
-            logAttrFailure(name, e);
+            logAttrFailure(name,attrNames, e);
             return false;
         } 
 

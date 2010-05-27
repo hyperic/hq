@@ -422,7 +422,12 @@ public abstract class ServerControlPlugin extends ControlPlugin {
             //which do not background themselves
             Properties props = getManager().getProperties(); 
             String cwd = System.getProperty("user.dir");
-            String dir = props.getProperty(AgentConfig.PROP_INSTALLHOME[0]);
+            String dir = "";
+            try{
+                dir=props.getProperty(AgentConfig.PROP_INSTALLHOME[0]);
+            }catch(java.lang.NoClassDefFoundError e){ // in standalone -> Exception in thread "main" java.lang.NoClassDefFoundError: org/hyperic/hq/agent/AgentConfig
+                dir = props.getProperty("agent.install.home", cwd);
+            }
 
             if (dir.equals(".")) {
                 //XXX: ./background.sh command silently fails when running
@@ -433,13 +438,21 @@ public abstract class ServerControlPlugin extends ControlPlugin {
             File background = new File(dir, BACKGROUND_SCRIPT);
             if (!background.exists()) {
                 //try relative to pdk.dir for command-line usage
-                String pdk = ProductPluginManager.getPdkDir();
-                dir = pdk + "/../";
-                background = new File(dir, BACKGROUND_SCRIPT);
+                File pdk = new File(ProductPluginManager.getPdkDir());
+                if(!pdk.isAbsolute()){
+                    pdk=new File(new File(cwd),ProductPluginManager.getPdkDir());
+                }
+                background = new File(pdk, "../"+BACKGROUND_SCRIPT);
             }
             if (background.exists()) {
-                args.add(background.toString());
+                try {
+                    args.add(background.getCanonicalPath());
+                } catch (IOException ex1) {
+                    args.add(background.getAbsolutePath());
+                    getLog().debug(ex1);
+                }
             }
+            getLog().info("background="+background);
         }
 
         String prefix = getControlProgramPrefix();

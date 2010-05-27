@@ -35,6 +35,7 @@ import org.hyperic.hq.product.MetricNotFoundException;
 import org.hyperic.hq.product.MetricUnreachableException;
 import org.hyperic.hq.product.ServerControlPlugin;
 import org.hyperic.hq.product.PluginException;
+import org.hyperic.hq.product.ProductPluginManager;
 import org.hyperic.hq.product.TypeInfo;
 
 import org.hyperic.util.config.ConfigOption;
@@ -177,19 +178,20 @@ public class WeblogicControlPlugin
     }
 
     public boolean isWeblogicRunning() {
+        boolean res = false;
+
         Metric metric = getLifecycleMetric();
-
-        Integer state;
-
         try {
-            state = (Integer)WeblogicUtil.getRemoteMBeanValue(metric);
+            Integer state = (Integer) WeblogicUtil.getRemoteMBeanValue(metric);
+            double val = WeblogicUtil.convertStateVal(state);
+            res = (val == Metric.AVAIL_UP);
         } catch (Exception e) {
-            return false;
+            if (getLog().isDebugEnabled()) {
+                getLog().error(e);
+            }
         }
-
-        double val = WeblogicUtil.convertStateVal(state);
-
-        return val == Metric.AVAIL_UP;
+        getLog().error("[isWeblogicRunning] "+res);
+        return res;
     }
 
     protected boolean isBackgroundCommand() {

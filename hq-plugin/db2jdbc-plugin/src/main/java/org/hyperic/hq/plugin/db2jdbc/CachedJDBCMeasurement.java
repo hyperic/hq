@@ -46,13 +46,7 @@ public abstract class CachedJDBCMeasurement extends JDBCMeasurementPlugin {
                 if (getLog().isDebugEnabled()) {
                     getLog().error("Metric: '" + metric + "' Error='" + ex.getMessage() + "'", ex);
                 }
-                if (metric.getAttributeName().endsWith(AVAIL_ATTR)) {
-                    values = new HashMap();
-                    values.put(metric.getAttributeName(), new MetricValue(Metric.AVAIL_DOWN));
-                    cache.put(key, new CacheEntry(values));
-                } else {
-                    throw ex;
-                }
+                throw ex;
             }
 
         } else {

@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>Hyperic HQ 4.0 and 4.1 Documentation : ui-Alert.List</title>
+        <title>Hyperic HQ 4.x Documentation : ui-Alert.List</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -12,11 +12,11 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            Hyperic HQ 4.0 and 4.1 Documentation : ui-Alert.List
+                            Hyperic HQ 4.x Documentation : ui-Alert.List
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jul 14, 2009 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Apr 18, 2010 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><em>Topics marked with</em> <font color="red"><em>&#42;</em></font> <em>relate to HQ Enterprise-only features.</em></p>
@@ -24,11 +24,11 @@
 
 <p>You can use the navigation controls on the page to list all alerts for the resource that are still in the HQ database. By default, alerts are removed from the HQ database after 31 days - the retention period is configurable on the <b>HQ Server Settings</b> page, in the <b>Administration</b> tab.</p>
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1247596315844 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1247596315844 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1247596315844 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1271622981676 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1271622981676 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1271622981676 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1247596315844'>
+/*]]>*/</style><div class='rbtoc1271622981676'>
 <ul>
     <li><a href='#ui-Alert.List-AlertListforaResource'>Alert List for a Resource</a></li>
     <li><a href='#ui-Alert.List-ViewAlertsandStatusforaDifferentday'>View Alerts and Status for a Different day</a></li>
@@ -41,6 +41,7 @@ div.rbtoc1247596315844 li {margin-left: 0px;padding-left: 0px;}
 <h2><a name="ui-Alert.List-AlertListforaResource"></a>Alert List for a Resource</h2>
 
 <p>The following information is shown for each alert.</p>
+<div class='table-wrap'>
 <table class='confluenceTable'><tbody>
 <tr>
 <th class='confluenceTh'> Column </th>
@@ -48,7 +49,7 @@ div.rbtoc1247596315844 li {margin-left: 0px;padding-left: 0px;}
 </tr>
 <tr>
 <td class='confluenceTd'> Priority </td>
-<td class='confluenceTd'> The priority assigned to the alert definition. <br clear="all" /> </td>
+<td class='confluenceTd'> The priority assigned to the alert definition. <br class="atl-forced-newline" /> </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Alert Date </td>
@@ -56,7 +57,7 @@ div.rbtoc1247596315844 li {margin-left: 0px;padding-left: 0px;}
 </tr>
 <tr>
 <td class='confluenceTd'> Alert Definition </td>
-<td class='confluenceTd'> The name of the alert definition. Click to view the alert definition. <br clear="all" /> </td>
+<td class='confluenceTd'> The name of the alert definition. Click to view the alert definition. <br class="atl-forced-newline" /> </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Alert Condition </td>
@@ -75,10 +76,12 @@ div.rbtoc1247596315844 li {margin-left: 0px;padding-left: 0px;}
 <td class='confluenceTd'> An icon in this column indicates that the alert both has an escalation assigned, and has not yet been acknowledged. </td>
 </tr>
 </tbody></table>
+</div>
+
 
 <h2><a name="ui-Alert.List-ViewAlertsandStatusforaDifferentday"></a>View Alerts and Status for a Different day</h2>
 
-<p>To display alerts for a different date click <img src="download/attachments/59375682/schedule_left.gif" align="absmiddle" border="0"/> or <img src="download/attachments/59375682/schedule_right.gif" align="absmiddle" border="0"/> to navigate forward and backward, or by click <img src="download/attachments/59375682/schedule_iconCal.gif" align="absmiddle" border="0"/> and select a specific date.</p>
+<p>To display alerts for a different date click <span class="image-wrap" style=""><img src="attachments/59375682/59539637.gif" style="border: 0px solid black"/></span> or <span class="image-wrap" style=""><img src="attachments/59375682/59539794.gif" style="border: 0px solid black"/></span> to navigate forward and backward, or by click <span class="image-wrap" style=""><img src="attachments/59375682/59539584.gif" style="border: 0px solid black"/></span> and select a specific date.</p>
 
 <h2><a name="ui-Alert.List-MarkOneorMoreAlertFixed"></a>Mark One or More Alert Fixed</h2>
 
@@ -96,9 +99,9 @@ div.rbtoc1247596315844 li {margin-left: 0px;padding-left: 0px;}
 
 <h2><a name="ui-Alert.List-AcknowledgeAlertwithEscalation"></a>Acknowledge Alert with Escalation</h2>
 
-<p>Alerts with escalations that have not yet been acknowledged will have <img src="download/attachments/59375682/icon_ack.gif" align="absmiddle" border="0"/> in the "Ack" column. You can:</p>
+<p>Alerts with escalations that have not yet been acknowledged will have <span class="image-wrap" style=""><img src="attachments/59375682/59539717.gif" style="border: 0px solid black"/></span> in the "Ack" column. You can:</p>
 <ul>
-	<li>Click <img src="download/attachments/59375682/icon_ack.gif" align="absmiddle" border="0"/> on the alert's row in the "Ack" column to acknowledge the alert, if you don't want to enter a comment or take advantage of a pause option defined for the escalation.</li>
+	<li>Click <span class="image-wrap" style=""><img src="attachments/59375682/59539717.gif" style="border: 0px solid black"/></span> on the alert's row in the "Ack" column to acknowledge the alert, if you don't want to enter a comment or take advantage of a pause option defined for the escalation.</li>
 </ul>
 
 
@@ -114,7 +117,7 @@ div.rbtoc1247596315844 li {margin-left: 0px;padding-left: 0px;}
 <p>To view a list of alert definitions for the resource, click <b>Configure</b> at the top of the alert list.&nbsp; The page has options for creating and editing alert definitions.</p>
 <div class="panel" style="border-width: 1px;"><div class="panelHeader" style="border-bottom-width: 1px;"><b>Related Information</b></div><div class="panelContent">
 <ul>
-	<li>For information about escalations see <a href="http://support.hyperic.com/confluence/display/DOC/Escalation" title="Escalation">Escalation</a>.</li>
+	<li>For information about escalations see <a href="http://support.hyperic.com/confluence/display/DOC/Understanding+Escalations" title="Understanding Escalations">Understanding Escalations</a>.</li>
 	<li>For an overview of alerting in HQ, see <a href="http://support.hyperic.com/confluence/display/DOC/Key+Facts+about+HQ+Alerting" title="Key Facts about HQ Alerting">Key Facts about HQ Alerting</a>.</li>
 	<li>To understand the components of an alert definition - the properties, conditions, and actions - see <a href="ui-Alert.Edit.html" title="ui-Alert.Edit">ui&#45;Alert.Edit</a>.</li>
 </ul>
@@ -127,19 +130,19 @@ div.rbtoc1247596315844 li {margin-left: 0px;padding-left: 0px;}
 
                         <div class="greybox" align="left">
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="download/attachments/59375682/tbb_delete.png">tbb_delete.png</a> (image/png)
+                                <a href="attachments/59375682/59539476.png">tbb_delete.png</a> (image/png)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="download/attachments/59375682/schedule_right.gif">schedule_right.gif</a> (image/gif)
+                                <a href="attachments/59375682/59539794.gif">schedule_right.gif</a> (image/gif)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="download/attachments/59375682/schedule_left.gif">schedule_left.gif</a> (image/gif)
+                                <a href="attachments/59375682/59539637.gif">schedule_left.gif</a> (image/gif)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="download/attachments/59375682/schedule_iconCal.gif">schedule_iconCal.gif</a> (image/gif)
+                                <a href="attachments/59375682/59539584.gif">schedule_iconCal.gif</a> (image/gif)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="download/attachments/59375682/icon_ack.gif">icon_ack.gif</a> (image/gif)
+                                <a href="attachments/59375682/59539717.gif">icon_ack.gif</a> (image/gif)
                                 <br/>
                                                     </div>
 				    
@@ -151,7 +154,7 @@ div.rbtoc1247596315844 li {margin-left: 0px;padding-left: 0px;}
 				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 20, 2009 15:33</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Apr 20, 2010 15:01</font></td>
 		    </tr>
 	    </table>
     </body>

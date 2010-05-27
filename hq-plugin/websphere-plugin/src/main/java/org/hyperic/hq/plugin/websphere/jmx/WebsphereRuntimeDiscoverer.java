@@ -46,8 +46,10 @@ import org.hyperic.util.config.ConfigResponse;
 
 import com.ibm.websphere.management.AdminClient;
 import com.ibm.websphere.management.exception.ConnectorException;
+import java.io.File;
 import org.hyperic.hq.plugin.websphere.WebSphereProcess;
 import org.hyperic.hq.plugin.websphere.WebsphereDetector;
+import org.hyperic.hq.product.ServerControlPlugin;
 import org.hyperic.hq.product.ServerResource;
 
 /**
@@ -154,7 +156,8 @@ public class WebsphereRuntimeDiscoverer {
         } catch (MetricUnreachableException e) {
             throw new PluginException(e.getMessage(), e);
         } catch (ConnectorException e) {
-            throw new PluginException(e.getMessage(), e);
+            if(log.isDebugEnabled())
+                log.error(e.getMessage(),e);
         }
 
         return res;
@@ -326,10 +329,9 @@ public class WebsphereRuntimeDiscoverer {
 
             this.log.debug("discovered server: " + server.getName());
 
-
             server.setProductConfig(productConfig);
             server.setMeasurementConfig(new ConfigResponse(serverQuery.getMetricProperties()));
-            server.setControlConfig(new ConfigResponse());
+            server.setControlConfig(serverDetector.getControlConfig(proc));
             server.setCustomProperties(new ConfigResponse(serverQuery.getCustomProperties()));
 
             ArrayList services = new ArrayList();

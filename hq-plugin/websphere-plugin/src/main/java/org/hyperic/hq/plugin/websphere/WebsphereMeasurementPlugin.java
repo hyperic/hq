@@ -47,6 +47,10 @@ public class WebsphereMeasurementPlugin
         MetricUnreachableException,
         MetricNotFoundException {
 
+        if(!WebsphereProductPlugin.VALID_JVM)
+            throw new MetricUnreachableException("The WebSphere plugin needs a IBM JVM !!! "
+                        + "(agent jvm=" + System.getProperty("java.vm.vendor") + ")");
+
         if (useJMX()) {
             return super.getValue(metric); //collector
         }

@@ -150,9 +150,16 @@ public class DataBaseServerDetector extends DefaultServerDetector {
             String err = inputStreamAsString(cmd.getErrorStream());
             cmd.waitFor();
 
-            getLog().debug("[createDataBases] sal=" + sal);
-            if (sal.length() == 0) {
-                getLog().debug("[createDataBases] (" + cmd.exitValue() + ") err=" + err);
+            if (getLog().isDebugEnabled()) {
+                if (cmd.exitValue() != 0) {
+                    getLog().error("[createDataBases] exit=" + cmd.exitValue());
+                    getLog().error("[createDataBases] sal=" + sal);
+                } else {
+                    getLog().debug("[createDataBases] sal=" + sal);
+                }
+                if (sal.length() == 0) {
+                    getLog().debug("[createDataBases] (" + cmd.exitValue() + ") err=" + err);
+                }
             }
 
             Matcher m = regExpDataBases.matcher(sal);
@@ -226,7 +233,7 @@ public class DataBaseServerDetector extends DefaultServerDetector {
         PreparedStatement ps = null;
         try {
             getLog().debug("getList props=" + props);
-            conn = getConnection(props);
+            conn = getConnection(props.toProperties());
             ps = conn.prepareStatement(query);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
@@ -234,7 +241,7 @@ public class DataBaseServerDetector extends DefaultServerDetector {
             }
             getLog().debug("getList '" + query + "' => res= " + res);
         } catch (Exception ex) {
-            getLog().debug("getList '" + query + "' => " + ex.getMessage());
+            getLog().debug("getList '" + query + "' => " + ex.getMessage(),ex);
         } finally {
             try {
                 if (ps != null) {

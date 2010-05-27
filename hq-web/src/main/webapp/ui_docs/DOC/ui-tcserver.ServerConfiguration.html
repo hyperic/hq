@@ -1,0 +1,304 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>Hyperic HQ 4.x Documentation : ui-tcserver.ServerConfiguration</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            Hyperic HQ 4.x Documentation : ui-tcserver.ServerConfiguration
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Dec 01, 2009 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p>The features described on this page are available in tc Server and tc Server Standard Edition.</p>
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1259684586869 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1259684586869 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1259684586869 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1259684586869'>
+<ul>
+    <li><a href='#ui-tcserver.ServerConfiguration-tcServerConfiguration'>tc Server Configuration</a></li>
+<ul>
+    <li><a href='#ui-tcserver.ServerConfiguration-NavigatingtcServerConfigurationPages'>Navigating tc Server Configuration Pages</a></li>
+    <li><a href='#ui-tcserver.ServerConfiguration-SavingorUndoingChanges'>Saving or Undoing Changes</a></li>
+    <li><a href='#ui-tcserver.ServerConfiguration-ConfiguringGeneraltcServerOptions'>Configuring General tc Server Options</a></li>
+    <li><a href='#ui-tcserver.ServerConfiguration-ConfiguringStartupOptions'>Configuring Startup Options</a></li>
+    <li><a href='#ui-tcserver.ServerConfiguration-ConfiguringtheContextContainer'>Configuring the Context Container</a></li>
+    <li><a href='#ui-tcserver.ServerConfiguration-ConfiguringJSPOptions'>Configuring JSP Options</a></li>
+    <li><a href='#ui-tcserver.ServerConfiguration-ConfiguringStaticContentDefaults'>Configuring Static Content Defaults</a></li>
+    <li><a href='#ui-tcserver.ServerConfiguration-ConfiguringandCreatingJDBCDataSources'>Configuring and Creating JDBC Data Sources</a></li>
+    <li><a href='#ui-tcserver.ServerConfiguration-ConfiguringandCreatingtcServerServices'>Configuring and Creating tc Server Services</a></li>
+    <li><a href='#ui-tcserver.ServerConfiguration-ConfiguringandCreatingConnectors'>Configuring and Creating Connectors</a></li>
+    <li><a href='#ui-tcserver.ServerConfiguration-ConfiguringandCreatingVirtualHosts'>Configuring and Creating Virtual Hosts</a></li>
+    <li><a href='#ui-tcserver.ServerConfiguration-ConfiguringtcServerServerLogging'>Configuring tc Server Server Logging</a></li>
+</ul>
+</ul></div>
+<p><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></p>
+
+<h1><a name="ui-tcserver.ServerConfiguration-tcServerConfiguration"></a>tc Server Configuration</h1>
+
+<p>On this page you can configure the selected tc Server.</p>
+
+<h2><a name="ui-tcserver.ServerConfiguration-NavigatingtcServerConfigurationPages"></a>Navigating tc Server Configuration Pages</h2>
+
+<p><a name="ui-tcserver.ServerConfiguration-navigating"></a><br/>
+To navigate to the Server Configuration pages of a tc Server instance.</p>
+<ol>
+	<li>Click <b>Resources &gt; Browse</b> in the HQ user interface.</li>
+	<li>Click <b>Servers</b> link to list all the servers in inventory.
+	<ul>
+		<li>tc Server instances have the server type "SpringSource tc Server 6.0"</li>
+		<li>Apache Tomcat instances have the server type "Tomcat X.X".</li>
+	</ul>
+	</li>
+	<li>Click the name of the tc Server instance to which you want to navigate.</li>
+	<li>Click the <b>Views &gt; Server Configuration</b> tab.</li>
+</ol>
+
+
+<p>There are three tc Server configuration pages, each with their own tab beneath the main <b>Views &gt; Server Configuration</b> tab:</p>
+<ul>
+	<li><b>Configuration</b> &#45; Configure general tc Server options, such as JVM options, JSP behavior, and default options for static content.</li>
+	<li><b>Resources</b> &#45; Create, configure, and delete JDBC data sources.</li>
+	<li><b>Services</b>&nbsp; - Configure the default catalina service, and create new ones. A tc Server service groups together one or more connectors and a single engine. The engine, in turn, groups together one or more virtual hosts.</li>
+</ul>
+
+
+<h2><a name="ui-tcserver.ServerConfiguration-SavingorUndoingChanges"></a>Saving or Undoing Changes</h2>
+
+<p><a name="ui-tcserver.ServerConfiguration-saving"></a><br/>
+HQ populates the fields of the tc Server configuration pages from the its configuration files, including:</p>
+<ul>
+	<li><tt>conf/server.xml</tt></li>
+	<li><tt>conf/context.xml</tt></li>
+	<li><tt>conf/web.xml</tt></li>
+	<li><tt>bin/setenv.sh</tt></li>
+</ul>
+
+
+<p>(All relative to <tt>CATALINA_BASE</tt>, the root directory of the tc Server instance.)</p>
+
+<p>Each configuration page includes a <b>Save</b> button for saving the changes made in the user interface to the tc Server configuration files. If you try to navigate to a different page without saving any of your updates, HQ asks you if you want to leave the page and lose these updates.</p>
+
+<p>When you click <b>Save</b> to save your changes, a box labeled "Changes have been made locally" is displayed until you click either:</p>
+<ul>
+	<li><b>Push</b> &#45; to write the configuration changes you have made to the appropriate tc Server configuration file (such as <tt>server.xml</tt>). If you push the changes, HQ overwrites existing configuration, saving a backup of the overwritten configuration. Most saved changes to the tc Server configuration require a server restart to take effect; HQ flags these cases and provides a link to easily restart the tc Server.</li>
+</ul>
+
+
+<ul>
+	<li><b>Undo</b> &#45; to undo all changes that have been made since the last push or undo.</li>
+</ul>
+
+
+<p>If you update tc Server configuration settings from the HQ user interface, do NOT manually update the tc Server configuration files at the same time. HQ clears its local memory and reloads the configuration files upon certain events, not continuously.</p>
+
+<h2><a name="ui-tcserver.ServerConfiguration-ConfiguringGeneraltcServerOptions"></a>Configuring General tc Server Options</h2>
+
+<p>The main tc Server configuration page includes options to change the Shutdown Port and Shutdown Command.</p>
+<ol>
+	<li>Navigate to the tc Server configuration pages for the server instance. For instructions, see <a href="#ui-tcserver.ServerConfiguration-navigating">Navigating tc Server Configuration Pages</a>.</li>
+	<li>Click the <b>Configuration</b> tab.</li>
+	<li>Click the <b>General</b> link in the list on the left. For information about the fields on the page, see <a href="ui-tcserver.ServerConfigurationRef.html" title="ui-tcserver.ServerConfigurationRef">tc Server Configuration Reference</a>.</li>
+	<li>Make your changes.</li>
+	<li>Click <b>Save</b>. The message "Configuration saved successfully" indicates your changes were successfully saved.</li>
+	<li>To write your changes to the tc Server configuration files, click <b>Push</b> in the "Changes have been made locally" box. See <a href="#ui-tcserver.ServerConfiguration-saving">Saving or Undoing Changes</a>.</li>
+</ol>
+
+
+<p>For additional detailed information about configuring the tc Server, see <a href="http://tomcat.apache.org/tomcat-6.0-doc/config/server.html">The Server Component</a>, in <a href="http://tomcat.apache.org/tomcat-6.0-doc/index.html">Apache Tomcat documentation</a>.</p>
+
+<h2><a name="ui-tcserver.ServerConfiguration-ConfiguringStartupOptions"></a>Configuring Startup Options</h2>
+
+<p>The page for configuring tc Server Start settings includes options for configuring the JVM where the instance runs, including minimum and maximum heap size, garbage collection, and debugging options.</p>
+
+<p><b>NOTE:</b> HQ populates the tc Server Start page with information from the <tt>CATALINA_HOME/bin/setenv.sh</tt> file of the server instance you are configuring (specifically the JVM_OPTS environment variable.) By default, the <tt>bin/setenv.sh</tt> file does not exist; you must create it. If you have not created the file, or if the file exists but you have not set the JVM_OPTS environment variable, then the fields in the Server Start page will be blank.</p>
+
+<p>The page allows you to  add your own command line arguments to the JVM; be careful using this option because HQ does not validate the options but simply adds them to the Java command that starts tc Server. If you enter them incorrectly, you will get an error starting tc Server.</p>
+<ol>
+	<li><a href="#ui-tcserver.ServerConfiguration-navigate">Navigate to the tc Server configuration pages.</a></li>
+	<li>Click the <b>Configuration</b> tab.</li>
+	<li>Click the <b>Server Start</b> link in the list on the left. For information about the fields on this page, see <a href="ui-tcserver.ServerConfigurationRef.html#ui-tcserver.ServerConfigurationRef-configurationstartup">tc Server Configuration Reference</a>.</li>
+	<li>Make your changes.&nbsp;</li>
+	<li>To add your own JVM command line arguments, click the <b>Advanced</b> link at the bottom and enter them in the form the form "-X<em>option</em><em>value</em> or &#45;XX:<em>option</em>=<em>value</em>, separating options with a space.</li>
+	<li>Click <b>Save</b>. The message "Configuration saved successfully" indicates your changes were successfully saved.</li>
+	<li>To write your changes to the tc Server configuration files, click <b>Push</b> in the "Changes have been made locally" box. See <a href="#ui-tcserver.ServerConfiguration-saving">Saving or Undoing Changes</a>.</li>
+</ol>
+
+
+<h2><a name="ui-tcserver.ServerConfiguration-ConfiguringtheContextContainer"></a>Configuring the Context Container</h2>
+
+<p>Use this page to configure the context for <em>every</em> Web application deployed to this tc Server instance.</p>
+<ol>
+	<li><a href="#ui-tcserver.ServerConfiguration-navigate">Navigate to the tc Server configuration pages.</a></li>
+	<li>Click the <b>Configuration</b> tab.</li>
+	<li>Click the <b>Context Container</b> link in the list on the left.</li>
+	<li>Make your changes. For reference information about the fields on this page, see <a href="ui-tcserver.ServerConfigurationRef.html#ui-tcserver.ServerConfigurationRef-configurationcontainer">tc Server Configuration Reference</a>.</li>
+	<li>Click <b>Save</b>. The message "Configuration saved successfully" indicates your changes were successfully saved.</li>
+	<li>To write your changes to the tc Server configuration files, click <b>Push</b> in the "Changes have been made locally" box. See <a href="#ui-tcserver.ServerConfiguration-saving">Saving or Undoing Changes</a>.</li>
+</ol>
+
+
+<p>For additional detailed information about configuring the context container for tc Server, see <a href="http://tomcat.apache.org/tomcat-6.0-doc/config/context.html">The Context Container</a>, part of the general <a href="http://tomcat.apache.org/tomcat-6.0-doc/index.html">Apache Tomcat documentation</a>.</p>
+
+<h2><a name="ui-tcserver.ServerConfiguration-ConfiguringJSPOptions"></a>Configuring JSP Options</h2>
+
+<p>SpringSource tc Server implements version 2.1 of the Java Server Pages (JSP) specification. Use this page to configure the behavior of the JSPs that are deployed to tc Server.</p>
+<ol>
+	<li><a href="#ui-tcserver.ServerConfiguration-navigate">Navigate to the tc Server configuration pages.</a></li>
+	<li>Click the <b>Configuration</b> tab.</li>
+	<li>Click the <b>Server Defaults: JSP</b> link in the list on the left.</li>
+	<li>Make your changes. For information about the fields on this page, see <a href="ui-tcserver.ServerConfigurationRef.html#ui-tcserver.ServerConfigurationRef-configurationdefaultsJsp">tc Server Configuration Reference</a>.</li>
+	<li>Click <b>Save</b>. The message "Configuration saved successfully" indicates your changes were successfully saved.</li>
+	<li>To write your changes to the tc Server configuration files, click <b>Push</b> in the "Changes have been made locally" box. See <a href="#ui-tcserver.ServerConfiguration-saving">Saving or Undoing Changes</a>.</li>
+</ol>
+
+
+<p>For more information about configuring the behavior of JSPs in tc Server, see <a href="http://tomcat.apache.org/tomcat-6.0-doc/jasper-howto.html">Jasper 2 JSP Engine How To</a>, part of <a href="http://tomcat.apache.org/tomcat-6.0-doc/index.html">Apache Tomcat documentation</a>.</p>
+
+<h2><a name="ui-tcserver.ServerConfiguration-ConfiguringStaticContentDefaults"></a>Configuring Static Content Defaults</h2>
+
+<p>Use this page to configure the behavior of static content in Web applications that run on tc Server.</p>
+<ol>
+	<li><a href="#ui-tcserver.ServerConfiguration-navigate">Navigate to the tc Server configuration pages.</a></li>
+	<li>Click the <b>Configuration</b> tab.</li>
+	<li>Click the <b>Server Defaults: Static Content</b> link in the list on the left.</li>
+	<li>Make your changes. For&nbsp; information about the fields on this page, see <a href="ui-tcserver.ServerConfigurationRef.html#ui-tcserver.ServerConfigurationRef-configurationdefaultsStatic">tc Server Configuration Reference</a>.</li>
+	<li>Click <b>Save</b>. The message "Configuration saved successfully" indicates your changes were successfully saved.</li>
+	<li>To write your changes to the tc Server configuration files, click <b>Push</b> in the "Changes have been made locally" box. See <a href="#ui-tcserver.ServerConfiguration-saving">Saving or Undoing Changes</a>.</li>
+</ol>
+
+
+<p>For additional detailed information about configuring the behavior of static content in tc Server, see <a href="http://tomcat.apache.org/tomcat-6.0-doc/default-servlet.html">Default Servlet Reference</a>, part of the general <a href="http://tomcat.apache.org/tomcat-6.0-doc/index.html">Apache Tomcat documentation</a>.</p>
+
+<h2><a name="ui-tcserver.ServerConfiguration-ConfiguringandCreatingJDBCDataSources"></a>Configuring and Creating JDBC Data Sources</h2>
+
+<p>JDBC datasources make it easy for a user to access data in a database server. A datasource defines a pool of JDBC connections which in turn connect to a specific database using a specified URL, username, and so on. Use this page to create and configure configure datasources.</p>
+
+<p>You can create two types of JDBC data sources:</p>
+<ul>
+	<li><a href="#ui-tcserver.ServerConfiguration-dbcpdatasource">Database Connection Pool (DBCP) Datasource</a>&#45; The DBCP Datasource is the standard datasource provided by tc Server that uses the commons-dbcp package. Although this datasource is adequate for simple applications, it is single-threaded which means that in order to be thread-safe, tc Server must lock the entire pool, even during query validation. Thus it is not suitable for highly concurrent environments. Additionally, it can be slow, which in turn can negatively affect the performance of Web applications.</li>
+</ul>
+
+
+<ul>
+	<li><a href="#ui-tcserver.ServerConfiguration-tomcatdatasource">Tomcat Datasource</a> &#45; The <b>Tomcat Datasource</b> includes all the functionality of the DBCP datasource, but adds additional features to support highly-concurrent environments and multiple core/cpu systems. The Tomcat datasource typically performs much better than the DBCP datasource. Additional features include:
+<br class="atl-forced-newline" />
+	<ul>
+		<li>Dynamic implementation of the interfaces, which means that the datasource supports the java.sql and javax.sql interfaces for your runtime environment (as long as your JDBC driver supports it), even when compiled with a lower version of the JDK.</li>
+		<li>Validation intervals so that tc Server doesn't have to validate every single time the application uses the connection, which improves performance.</li>
+		<li>Run-Once query, which is a configurable query that tc Server runs only once when the connection to the database is established. This is very useful to setup session settings that you want to exist during the entire time the connection is established.</li>
+		<li>Ability to configure custom interceptors to enhance the functionality of the datasource. You can use interceptors to gather query stats, cache session states, reconnect the connection upon failures, retry queries, cache query results, and so on. The interceptors are dynamic and not tied to a JDK version of a java.sql/javax.sql interface.</li>
+		<li>Asynchronous connection retrieval - you can queue your request for a connection and receive a Future back.</li>
+	</ul>
+	</li>
+</ul>
+
+
+<p>To create a new JDBC datasource, or edit an existing one:</p>
+<ol>
+	<li><a href="#ui-tcserver.ServerConfiguration-navigate">Navigate to the tc Server configuration pages.</a></li>
+	<li>Click the <b>Resources</b> tab.</li>
+	<li>Click the <b>JDBC Data Sources</b> link in the list on the left.</li>
+	<li>If you want to edit an existing data source, click its name in the table and make your changes. If you want to create a new one, click the <b>Create a New Tomcat/DBCP Data Source</b> link. For information about the fields on this page, see <a href="ui-tcserver.ServerJDBCRef.html" title="ui-tcserver.ServerJDBCRef">tc Server JDBC Reference</a>.</li>
+	<li>Click <b>Save</b>. The message "Configuration saved successfully" indicates your changes were successfully saved.</li>
+	<li>To write your changes to the tc Server configuration files, click <b>Push</b> in the "Changes have been made locally" box. See <a href="#ui-tcserver.ServerConfiguration-saving">Saving or Undoing Changes</a>.</li>
+</ol>
+
+
+<p>For more information about configuring JDBC data sources, see <a href="http://tomcat.apache.org/tomcat-6.0-doc/jndi-datasource-examples-howto.html">JNDI Datasource HOW-TO</a>, part of <a href="http://tomcat.apache.org/tomcat-6.0-doc/index.html">Apache Tomcat documentation</a>.</p>
+
+<h2><a name="ui-tcserver.ServerConfiguration-ConfiguringandCreatingtcServerServices"></a>Configuring and Creating tc Server Services</h2>
+
+<p>A tc Server service represents the combination of one or more connector components that share a single engine component for processing incoming requests. A tc Server can have one or more services configured. The default service is "catalina".</p>
+<ol>
+	<li><a href="#ui-tcserver.ServerConfiguration-navigate">Navigate to the tc Server configuration pages.</a></li>
+	<li>Click the <b>Services</b> tab.</li>
+	<li>If you want to edit an existing service, such as the default "catalina" service, click its name in the table and then configure, or add, the following components of the service:
+	<ul>
+		<li><a href="#ui-tcserver.ServerConfiguration-connector">Connectors</a></li>
+		<li><a href="#ui-tcserver.ServerConfiguration-engine">Engine</a></li>
+		<li><a href="#ui-tcserver.ServerConfiguration-host">Virtual Host</a></li>
+		<li><a href="#ui-tcserver.ServerConfiguration-logging">Logging System</a></li>
+	</ul>
+	</li>
+	<li>If you want to create a new service, click the <b>New Service</b> link. For information about the fields on the <b>Create a New Service</b> page, see <a href="ui-tcserver.ServerServicesRef.html" title="ui-tcserver.ServerServicesRef">tc Server Service Reference</a>.</li>
+	<li>Click <b>Save</b>. The message "Configuration saved successfully" indicates your changes were successfully saved.</li>
+</ol>
+
+
+<p>For more information about configuring tc Server services, see <a href="http://tomcat.apache.org/tomcat-6.0-doc/config/service.html">The Service Component</a>, part of <a href="http://tomcat.apache.org/tomcat-6.0-doc/index.html">Apache Tomcat documentation</a>.</p>
+
+<h2><a name="ui-tcserver.ServerConfiguration-ConfiguringandCreatingConnectors"></a>Configuring and Creating Connectors</h2>
+
+<p>Connectors represent the interface between external clients sending requests to (and receiving responses from) a particular tc Server service. A tc Server instance can have one or more connectors, one for each supported message protocol. The default connector, configured for each tc Server, is the HTTP connector.</p>
+
+<p>Use this page to configure, or create new, connectors for the current tc Server service.</p>
+<ol>
+	<li><a href="#ui-tcserver.ServerConfiguration-navigate">Navigate to the tc Server configuration pages.</a></li>
+	<li>Click the <b>Services</b> tab.</li>
+	<li>In the <b>Services</b> table, click the name of the service for which you want to configure or create a connector.</li>
+	<li>Click the <b>Connectors</b> link in the list on the left.</li>
+	<li>If you want to edit an existing connector, click its name in the table and make your changes. If you want to create a new one, click the <b>New AJP Connector</b> or <b>New HTTP(S) Connector</b> link, depending on the type of connector you want to create. For information about the fields on this page, see <a href="ui-tcserver.ServerServicesRef.html#ui-tcserver.ServerServicesRef-ConnectorProperties">tc Server Services Reference</a>.</li>
+	<li>Click <b>Save</b>. The message "Configuration saved successfully" indicates your changes were successfully saved.</li>
+</ol>
+
+
+<p>For additional detailed information about configuring tc Server connectors, see <a href="http://tomcat.apache.org/tomcat-6.0-doc/connectors">Connectors How-To</a>, part of the general <a href="http://tomcat.apache.org/tomcat-6.0-doc/index.html">Apache Tomcat documentation</a>.</p>
+
+<h2><a name="ui-tcserver.ServerConfiguration-ConfiguringandCreatingVirtualHosts"></a>Configuring and Creating Virtual Hosts</h2>
+
+<p>A tc Server host represents a virtual host, which is an association of a network name for a server (such as "www.mycompany.com") with the particular computer which hosts tc Server. In order to be effective, this name must be registered in the Domain Name Service (DNS) server that manages your Internet domain.</p>
+
+<p>Use this page to configure, or create new, virtual hosts for the current tc Server service.</p>
+<ol>
+	<li><a href="#ui-tcserver.ServerConfiguration-navigate">Navigate to the tc Server configuration pages.</a></li>
+	<li>Click the <b>Services</b> tab.</li>
+	<li>In the <b>Services</b> table, click the name of the service for which you want to configure or create a virtual host.</li>
+	<li>Click the <b>Hosts</b> link in the list on the left.</li>
+	<li>If you want to edit an existing host, click its name in the table and make your changes. If you want to create a new one, click the <b>New Host</b> link. For reference information about the fields on this page, see <a href="ui-tcserver.ServerServicesRef.html#ui-tcserver.ServerServicesRef-HostProperties">tc Server Services Reference</a>.</li>
+	<li>Click <b>Save</b>. The message "Configuration saved successfully" indicates your changes were successfully saved.</li>
+</ol>
+
+
+<p>For more information about configuring tc Server hosts, see <a href="http://tomcat.apache.org/tomcat-6.0-doc/config/host.html">The Host Container</a>, part of <a href="http://tomcat.apache.org/tomcat-6.0-doc/index.html">Apache Tomcat documentation</a>.</p>
+
+<h2><a name="ui-tcserver.ServerConfiguration-ConfiguringtcServerServerLogging"></a>Configuring tc Server Server Logging</h2>
+
+<p>Use this page to configure the logging system for the current engine. Note that you can also configure logging for a host by configuring the specific Host component; see <a href="#ui-tcserver.ServerConfiguration-host">Configuring and Creating Virtual Hosts</a>.</p>
+<ol>
+	<li><a href="#ui-tcserver.ServerConfiguration-navigate">Navigate to the tc Server configuration pages.</a></li>
+	<li>Click the <b>Services</b> tab.</li>
+	<li>In the <b>Services</b> table, click the name of the service for which you want to configure logging.</li>
+	<li>Click the <b>Logging</b> link in the list on the left.</li>
+	<li>Make your changes in the table. For information about the fields on this page, see <a href="ui-tcserver.ServerServicesRef.html#ui-tcserver.ServerServicesRef-serviceslogging">tc Server Services Reference</a>.</li>
+	<li>Click <b>Save</b>. The message "Configuration saved successfully" indicates your changes were successfully saved.</li>
+</ol>
+
+
+<p>For more information about configuring tc Server logging, see <a href="http://tomcat.apache.org/tomcat-6.0-doc/logging.html">Logging in Tomcat</a>, part of the general <a href="http://tomcat.apache.org/tomcat-6.0-doc/index.html">Apache Tomcat documentation</a>.</p>
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Apr 20, 2010 15:01</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

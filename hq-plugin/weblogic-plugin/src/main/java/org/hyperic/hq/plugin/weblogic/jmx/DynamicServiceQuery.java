@@ -113,15 +113,15 @@ public class DynamicServiceQuery extends ServiceQuery {
             //returned by the server this should not happen.
             //however, it is possible when nodes are not properly
             //configured.
-            logAttrFailure(name, e);
+            logAttrFailure(name, attrNames,e);
             return false;
         } catch (ReflectionException e) {
             //this should not happen either
-            logAttrFailure(name, e);
+            logAttrFailure(name, attrNames,e);
             return false;
         }catch (IOException e) {
             //this should not happen either
-            logAttrFailure(name, e);
+            logAttrFailure(name, attrNames,e);
             return false;
         }  
 
