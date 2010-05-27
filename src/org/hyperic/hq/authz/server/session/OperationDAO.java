@@ -65,4 +65,19 @@ public class OperationDAO extends HibernateDAO {
             .setParameter(0, roleId)
             .list();
     }
+    
+    public boolean userHasOperation(AuthzSubject subj, Operation op) {
+        String hql = new StringBuilder(128)
+            .append("select 1 from Role r ")
+            .append("join r.operations op ")
+            .append("join r.subjects s ")
+            .append("where s = :subject and op = :operation")
+            .toString();
+        return null != getSession()
+            .createQuery(hql)
+            .setParameter("subject", subj)
+            .setParameter("operation", op)
+            .uniqueResult();
+    }
+
 }
