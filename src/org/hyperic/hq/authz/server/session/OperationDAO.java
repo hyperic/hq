@@ -48,9 +48,16 @@ public class OperationDAO extends HibernateDAO {
         super.remove(entity);
     }
 
+    public Operation getByName(String name) {
+        String sql = "from Operation where name = :name";
+        return (Operation) getSession()
+            .createQuery(sql)
+            .setParameter("name", name)
+            .uniqueResult();
+    }
+
     public Operation findByTypeAndName(ResourceType type, String name) {
         String sql = "from Operation where resourceType=? and name=?";
-
         return (Operation)getSession().createQuery(sql)
             .setParameter(0, type)
             .setString(1, name)

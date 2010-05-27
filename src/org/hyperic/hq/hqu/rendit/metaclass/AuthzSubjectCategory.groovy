@@ -1,10 +1,13 @@
 package org.hyperic.hq.hqu.rendit.metaclass
 
+import org.hyperic.dao.DAOFactory
 import org.hyperic.hq.auth.server.session.AuthManagerEJBImpl as AuthMan
 import org.hyperic.hq.auth.shared.SessionManager
 import org.hyperic.hq.authz.shared.PermissionManagerFactory
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl as SubMan
+import org.hyperic.hq.authz.server.session.Operation
+import org.hyperic.hq.authz.server.session.OperationDAO
 import org.hyperic.hq.bizapp.server.session.AuthzBossEJBImpl as AuthzBoss
 import org.hyperic.util.config.ConfigResponse
 
@@ -13,12 +16,24 @@ class AuthzSubjectCategory {
     static subMan = SubMan.one
     static authMan = AuthMan.one
     static authzBoss = AuthzBoss.one
+    static operationDao = new OperationDAO(DAOFactory.getDAOFactory())
 
     /**
      * Check if the current user has administration permission
      */
     static boolean isSuperUser(AuthzSubject subject) {
         PermissionManagerFactory.getInstance().hasAdminPermission(subject.id)
+    }
+    
+    /**
+     * Check if the AuthzSubject has the ability to run the specified operation
+     */
+    static boolean hasOperation(AuthzSubject subject, String opName) {
+        Operation op = operationDao.getByName(opName)
+        if (op == null) {
+            return false
+        }
+        return operationDao.userHasOperation(subject, op)
     }
 
     /**
