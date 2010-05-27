@@ -22,3 +22,6 @@
 [submodule "hq_bin/ant"]
 	path = hq_bin/ant
 	url = git@git.springsource.org:hq/ant.git
+[submodule "hq_bin/pgsql"]
+	path = hq_bin/pgsql
+	url = git@git.springsource.org:hq/pgsql.git
