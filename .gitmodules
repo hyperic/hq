@@ -16,3 +16,15 @@
 [submodule "ui_plugins/hqapi1"]
 	path = ui_plugins/hqapi1
 	url = git://git.springsource.org/hq/hqapi1.git
+[submodule "hq_bin/jboss"]
+	path = hq_bin/jboss
+	url = git@git.springsource.org:hq/jboss.git
+[submodule "hq_bin/ant"]
+	path = hq_bin/ant
+	url = git@git.springsource.org:hq/ant.git
+[submodule "hq_bin/pgsql"]
+	path = hq_bin/pgsql
+	url = git@git.springsource.org:hq/pgsql.git
+[submodule "hq_bin/jres"]
+	path = hq_bin/jres
+	url = git@git.springsource.org:hq/jres.git
