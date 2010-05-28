@@ -191,6 +191,10 @@ span.navLink a {
 	height: 24px;
 }
 
+.vm-action a {
+	font-weight: normal;
+}
+
 .vm-action-start {
 	background: url('/hqu/vsphere/public/images/icons/vm-poweron.png') no-repeat;
 }
