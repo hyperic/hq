@@ -28,9 +28,11 @@
 			<li>
         		<a href="/hqu/vsphere/summary/index.hqu" title="${l['tab.label.summary']}">${l['tab.label.summary']}</a>
         	</li>
-			<li style="display:none;">
-        		<a href="/hqu/vsphere/vsphere/control.hqu" title="${l['tab.label.control']}">${l['tab.label.control']}</a>
-        	</li>
+        	<% if (canControl) { %>
+				<li style="display:none;">
+    	    		<a href="/hqu/vsphere/vsphere/control.hqu" title="${l['tab.label.control']}">${l['tab.label.control']}</a>
+        		</li>
+        	<% } %>
 		</ul>
   	</div>
   	<div style="clear:both;">&nbsp;</div>
@@ -153,15 +155,17 @@
 	    	setAjaxParameters(tabs, 'true');
     		tabs.tabs('load', selected);
     	
-    		var span = jQuery("#_content" + id);
-	    	var classes = span.attr("class");
+    		<% if (canControl) { %>
+    			var span = jQuery("#_content" + id);
+		    	var classes = span.attr("class");
 
-    		if (classes.indexOf("icon-vm") != -1) {
-				tabs.find("ul>li:hidden").show();
-	    	} else {
-    			tabs.tabs('select', 0);
-    			tabs.find("ul>li:visible").size() == 3 && tabs.find("ul>li:visible")[2].hide();
-	    	}
+	    		if (classes.indexOf("icon-vm") != -1) {
+					tabs.find("ul>li:hidden").show();
+	    		} else {
+    				tabs.tabs('select', 0);
+    				tabs.find("ul>li:visible").size() == 3 && tabs.find("ul>li:visible")[2].hide();
+		    	}
+	    	<% } %>
     	}
   	};
 </script>

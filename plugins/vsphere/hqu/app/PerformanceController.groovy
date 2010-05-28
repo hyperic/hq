@@ -30,8 +30,8 @@ class PerformanceController
         def ancestors = resourceHelper.findAncestorsByVirtualRelation(resource)       
         def associatedPlatform = null
         
-        if (type == "VMware vSphere VM") {
-            def host = ancestors.find { res -> res.prototype.name == 'VMware vSphere Host' }
+        if (type == AuthzConstants.platformPrototypeVmwareVsphereVm) {
+            def host = ancestors.find { res -> res.prototype.name == AuthzConstants.platformPrototypeVmwareVsphereHost }
             
             for (metric in host.getEnabledMetrics()) {
                 metrics << [name: host.name + " " + metric.template.name, 
@@ -44,14 +44,14 @@ class PerformanceController
         } else if (type != "VMware vSphere Host") {
             // HQ resource
         	
-        	def vm = ancestors.find { res -> res.prototype.name == 'VMware vSphere VM' }
+        	def vm = ancestors.find { res -> res.prototype.name == AuthzConstants.platformPrototypeVmwareVsphereVm }
         	
             for (metric in vm.getEnabledMetrics()) {
                 metrics << [name: vm.name + " " + metric.template.name,
                             id: metric.id]
             }
             
-            def host = ancestors.find { res -> res.prototype.name == 'VMware vSphere Host' }
+            def host = ancestors.find { res -> res.prototype.name == AuthzConstants.platformPrototypeVmwareVsphereHost }
             
             for (metric in host.getEnabledMetrics()) {
                 metrics << [name: host.name + " " + metric.template.name,

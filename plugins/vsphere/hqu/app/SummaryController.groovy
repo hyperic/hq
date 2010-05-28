@@ -36,12 +36,12 @@ class SummaryController
             vm = null, vmProps = null, associatedPlatform = null,
             server = null, serverProps = null
 
-       	if (resource.prototype.name == 'VMware vCenter') {
+       	if (resource.prototype.name == AuthzConstants.serverPrototypeVmwareVcenter) {
        		// TODO
-       	} else if (resource.prototype.name == "VMware vSphere Host") {
+       	} else if (resource.prototype.name == AuthzConstants.platformPrototypeVmwareVsphereHost) {
        		host = resource
        		hostProps = getCustomProperties(resource)
-       	} else if (resource.prototype.name == "VMware vSphere VM") {
+       	} else if (resource.prototype.name == AuthzConstants.platformPrototypeVmwareVsphereVm) {
        		vm = resource
        		vmProps = getCustomProperties(resource)
        		
@@ -54,12 +54,12 @@ class SummaryController
        	}
             
         ancestors.each { res ->
-        	if (res.prototype.name == 'VMware vCenter') {
+        	if (res.prototype.name == AuthzConstants.serverPrototypeVmwareVcenter) {
         		// TODO
-        	} else if (res.prototype.name == "VMware vSphere Host") {
+        	} else if (res.prototype.name == AuthzConstants.platformPrototypeVmwareVsphereHost) {
         		host = res
         		hostProps = getCustomProperties(res)
-        	} else if (res.prototype.name == "VMware vSphere VM") {
+        	} else if (res.prototype.name == AuthzConstants.platformPrototypeVmwareVsphereVm) {
         		vm = res
         		vmProps = getCustomProperties(res)
                 
