@@ -19,11 +19,15 @@
 		</ul>
 		<div id="controlStatus" style="display:none;">
 			<p>
+				<span>${l['label.control.name']}</span>
 				<span id="actionName"></span><br/>
+				<span id="lblDescription" style="display:none;">${l['label.control.description']}</span>
 				<span id="actionDescription"></span>
 			</p>
 			<p>
-				<span id="actionStatus"></span><br/><br/>
+				<span>${l['label.control.status']}</span>
+				<span id="actionStatus"></span>&nbsp;<span id="actionDuration"></span><br/><br/>
+				<span id="lblMessage" style="display:none;">${l['label.control.message']}</span>
 				<span id="actionMessage"></span>
 			</p>
 		</div>
@@ -36,20 +40,40 @@
 		if (data) {
 			var div = jQuery("#controlStatus");
 			var className = "action-inprogress";
-			var message = "";
+			var duration = "";
+			var formatDuration = function(duration) {
+				var txt = "${l['text.control.in.duration']}";
+				
+				return txt.replace("{0}", duration); 
+			};
 			
 			if (data.status == 'Failed') {
 				className = "action-failed";
-				
-				message = data.message;
+				duration = formatDuration(data.duration / 1000);
 			} else if (data.status == 'Completed') {
 				className = "action-completed";
+				duration = formatDuration(data.duration / 1000);
 			}
 	
 			div.find("#actionName").empty().text(data.name);
-			div.find("#actionDescription").empty().text(data.description);
+			div.find("#actionDescription").empty();
+			div.find("#lblDescription").hide();
+			
+			if (data.description) {
+				div.find("#actionDescription").text(data.description);
+				div.find("#lblDescription").show();
+			}
+			
 			div.find("#actionStatus").removeClass().addClass(className).empty().text(data.status);
-			div.find("#actionMessage").empty().text(message);
+			div.find("#actionMessage").empty();
+			div.find("#lblMessage").hide();
+			
+			if (data.message) {
+				div.find("#actionMessage").text(data.message);
+				div.find("#lblMessage").show();
+			}
+			
+			div.find("#actionDuration").empty().text(duration);
 			
 			div.show();
 		}

@@ -54,7 +54,7 @@
 		// url - user defined property. specifies the service endpoint
 		// initialDataset - user defined property. specifies the initial dataset on page load
 		// selectedCallback - user defined function. the data object is passed as a parameter
-		// refreshInterval - user defined property. specifies the refresh interval.  If not set, no auto refresh occurs.
+		refreshInterval: "60s" // - user defined property. specifies the refresh interval.  If not set, no auto refresh occurs.
 		// treeId - user defined property. specifies the unique id of the tree, this used to save state across page views.
 	};
 	
