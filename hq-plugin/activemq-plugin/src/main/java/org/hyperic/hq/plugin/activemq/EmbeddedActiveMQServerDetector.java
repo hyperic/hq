@@ -51,7 +51,7 @@ public class EmbeddedActiveMQServerDetector
             if (webappsDir.exists()) {
                 for( File app: webappsDir.listFiles()) {
                     if (app.isDirectory()) {
-                        File wlibDir = new File(webappsDir, "WEB-INF" + File.separator + "lib");
+                        File wlibDir = new File(app, "WEB-INF" + File.separator + "lib");
                         if (wlibDir.exists()) {
                             File versionFile = super.findVersionFile(wlibDir, pattern);
                             if (versionFile != null) {
