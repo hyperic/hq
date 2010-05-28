@@ -133,7 +133,7 @@ public class ServerConfiguratorImpl implements ServerConfigurator {
         FileOutputStream fo = null;
         try {
             String targetLicenseDir = engineHome + File.separator + "hq-server" + File.separator +
-                                      "webapps" + File.separator + "ROOT" + File.separator +
+                                      "webapps" + File.separator + "ROOT" + File.separator + "WEB-INF" + File.separator +
                                       "license";
             new File(targetLicenseDir).mkdir();
             fi = new FileInputStream(licenseFile);

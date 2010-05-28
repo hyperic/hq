@@ -37,7 +37,6 @@
 				<exclude>**/.gitignore</exclude>
 				<exclude>wrapper/**/*</exclude>
 			</excludes>
-			<filtered>true</filtered>
 			<fileMode>0644</fileMode>
 			<directoryMode>0755</directoryMode>
 		</fileSet>
@@ -48,7 +47,6 @@
 				<include>**/*.sh</include>
 				<include>**/*.pl</include>
 			</includes>
-			<filtered>true</filtered>
 			<fileMode>0755</fileMode>
 			<directoryMode>0755</directoryMode>
 		</fileSet>
@@ -71,7 +69,6 @@
 				<exclude>conf/logging.properties</exclude>
 				<exclude>webapps/ROOT/**</exclude>
 			</excludes>
-			<filtered>true</filtered>
 			<fileMode>0644</fileMode>
 			<directoryMode>0755</directoryMode>
 		</fileSet>
@@ -82,7 +79,6 @@
 				<include>**/*.sh</include>
 				<include>**/*.pl</include>
 			</includes>
-			<filtered>true</filtered>
 			<fileMode>0755</fileMode>
 			<directoryMode>0755</directoryMode>
 		</fileSet>
