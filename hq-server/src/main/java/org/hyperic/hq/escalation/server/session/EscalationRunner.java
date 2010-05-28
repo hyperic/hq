@@ -3,6 +3,7 @@ package org.hyperic.hq.escalation.server.session;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.springframework.dao.OptimisticLockingFailureException;
 
 /**
@@ -23,7 +24,12 @@ public class EscalationRunner implements Runnable {
         int maxRetries = 3;
         for (int i=0; i<maxRetries; i++) {
             try {
+                final boolean debug = log.isDebugEnabled();
+                if (debug) log.debug("Running escalation state [" + stateId + "]");
+                final long start = System.currentTimeMillis();
                 escalationRuntime.executeState(stateId);
+                final long end = System.currentTimeMillis();
+                ConcurrentStatsCollector.getInstance().addStat((end-start), ConcurrentStatsCollector.ESCALATION_EXECUTE_STATE_TIME);
                 break;
             }catch(OptimisticLockingFailureException e) {
                 if ((i+1) < maxRetries) {

@@ -354,7 +354,6 @@
 	<!-- Lather servlet -->
   <servlet>
     <servlet-name>lather</servlet-name>
-    <display-name>Lather Servlet</display-name>
     <servlet-class>
         org.hyperic.lather.server.LatherServlet
     </servlet-class>

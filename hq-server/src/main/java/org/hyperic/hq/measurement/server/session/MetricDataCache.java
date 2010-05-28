@@ -2,6 +2,7 @@ package org.hyperic.hq.measurement.server.session;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.hyperic.hq.product.MetricValue;
 
@@ -48,5 +49,17 @@ public interface MetricDataCache {
      * @return true if the MetricValue was added to the cache, false otherwise.
      */
     boolean add(Integer mid, MetricValue mval);
+    
+    /**
+     * Get {@link MetricValue}s from the cache within the specified time range, from timestamp
+     * to currentTimeMillis.
+     *
+     * @param mids {@link List} of {@link Integer}s representing MeasurementIds.
+     * @param timestamp the start of the time range (inclusive) in millis.
+     * @return {@link Map} of {@link Integer} of measurementIds to {@link MetricValue}
+     * from the cache.  If the mid does not exist or the timestamp of value is out of the
+     * specified window the returned Map will not include any representation of the mid.
+     */
+    Map<Integer,MetricValue> getAll(List<Integer> mids, long timestamp);
 
 }

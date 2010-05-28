@@ -49,6 +49,7 @@ import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.hqu.server.session.UIPlugin;
 import org.hyperic.hq.hqu.shared.UIPluginManager;
+import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -69,6 +70,7 @@ public class UpdateBossImpl implements UpdateBoss {
     private UpdateStatusDAO updateDAO;
     private ServerConfigAuditFactory serverConfigAuditFactory;
     private String updateNotifyUrl;
+    private static final int HTTP_TIMEOUT_MILLIS = 30000;
 
     @Autowired
     public UpdateBossImpl(
@@ -141,6 +143,8 @@ public class UpdateBossImpl implements UpdateBoss {
      * 
      */
     public void fetchReport() {
+        final boolean debug = log.isDebugEnabled();
+        final StopWatch watch = new StopWatch();
         UpdateStatus status = getOrCreateStatus();
         Properties req;
         byte[] reqBytes;
@@ -164,29 +168,43 @@ public class UpdateBossImpl implements UpdateBoss {
             log.warn("Error creating report request", e);
             return;
         }
-
-        log.debug("Generated report.  Size=" + reqBytes.length + " report:\n" + req);
+        if(debug){
+            log.debug("Generated report.  Size=" + reqBytes.length + " report:\n" + req);
+        }
 
         PostMethod post = new PostMethod(this.updateNotifyUrl);
         post.addRequestHeader("x-hq-guid", req.getProperty("hq.guid"));
         HttpClient c = new HttpClient();
-        c.setTimeout(5 * 60 * 1000);
+        c.setConnectionTimeout(HTTP_TIMEOUT_MILLIS);
+        c.setTimeout(HTTP_TIMEOUT_MILLIS);
 
         ByteArrayInputStream bIs = new ByteArrayInputStream(reqBytes);
 
         post.setRequestBody(bIs);
 
-        String response;
-        int statusCode;
+        String response = null;
+        int statusCode = -1;
         try {
+            if (debug) watch.markTimeBegin("post");
             statusCode = c.executeMethod(post);
+            if (debug) watch.markTimeEnd("post");
 
             response = post.getResponseBodyAsString();
         } catch (Exception e) {
-            log.debug("Unable to get updates", e);
+            if(debug) {
+                log.debug("Unable to get updates from " + updateNotifyUrl, e);
+            }
             return;
         } finally {
             post.releaseConnection();
+            if (debug) {
+                log.debug("fetchReport: " + watch
+                    + ", currentReport {" + status.getReport()
+                    + "}, latestReport {url=" + updateNotifyUrl
+                    + ", statusCode=" + statusCode
+                    + ", response=" + response
+                    + "}");
+            }
         }
 
         processReport(statusCode, response);

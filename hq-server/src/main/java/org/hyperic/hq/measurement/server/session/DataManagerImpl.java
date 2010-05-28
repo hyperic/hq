@@ -1199,7 +1199,9 @@ public class DataManagerImpl implements DataManager {
         if (historicalData.size() == 0) {
             return null;
         }
-        double high = Double.MIN_VALUE, low = Double.MAX_VALUE, total = 1;
+        double high = Double.MIN_VALUE;
+        double low = Double.MAX_VALUE;
+        double total = 0;
         Double lastVal = null;
         int count = 0;
         long last = Long.MIN_VALUE;
@@ -1994,7 +1996,7 @@ public class DataManagerImpl implements DataManager {
     // TODO remove after HE-54 allows injection
     @Transactional(readOnly = true)
     public Analyzer getAnalyzer() {
-        boolean analyze = true;
+        boolean analyze = false;
         try {
             Properties conf = serverConfigManager.getConfig();
             if (conf.containsKey(HQConstants.OOBEnabled)) {

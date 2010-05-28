@@ -1148,6 +1148,7 @@ public class AgentClient {
             }
         };
         watcherThread.add(loggingWatcher);
+        watcherThread.doStart();
       
         listenIp = cfg.getListenIp();
         try {

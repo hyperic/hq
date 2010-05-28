@@ -27,6 +27,7 @@ package org.hyperic.hq.authz.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -91,17 +92,32 @@ public class ResourceEdgeDAO
         return res;
     }
 
+    /**
+           * @return {@link Collection} of {@link ResourceEdge}s
+     */
     @SuppressWarnings("unchecked")
-    Collection<ResourceEdge> findDescendantEdges(Resource r, ResourceRelation rel) {
-        String sql = "from ResourceEdge e where e.from = :from " +
-                     "and distance > :distance " +
-                     "and rel_id = :rel_id ";
-
-        return getSession().createQuery(sql)
-                .setParameter("from", r)
+    Collection<ResourceEdge> findDescendantEdges(List<Resource> resources, ResourceRelation rel) {
+        String sql = "from ResourceEdge e " +
+                          "where e.from in (:resources) " +
+                       "and distance > :distance " +
+                       "and rel_id = :rel_id ";
+        List<ResourceEdge> rtn = new ArrayList<ResourceEdge>();
+        Query query = getSession().createQuery(sql);
+        int size = resources.size();
+        for (int i=0; i<size; i+=BATCH_SIZE) {
+            int end = Math.min(i+BATCH_SIZE, size);
+            rtn.addAll(query.setParameterList("resources", resources.subList(i, end))
                 .setInteger("distance", 0)
                 .setInteger("rel_id", rel.getId().intValue())
-                .list();
+                .list());
+        }
+        return rtn;
+    }
+    /**
+     * @return {@link Collection} of {@link ResourceEdge}s
+     */
+    Collection<ResourceEdge> findDescendantEdges(Resource r, ResourceRelation rel) {
+        return findDescendantEdges(Collections.singletonList(r), rel);
     }
 
     List<ResourceEdge> findDescendantEdgesByNetworkRelation(Integer resourceId,
