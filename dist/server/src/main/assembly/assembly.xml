@@ -12,6 +12,8 @@
 				<exclude>**/*.sh</exclude>
 				<exclude>**/*.pl</exclude>
 				<exclude>**/.gitignore</exclude>
+				<exclude>**/*.jar</exclude>
+				<exclude>**/*.keystore</exclude>
 			</excludes>
 			<filtered>true</filtered>
 			<fileMode>0644</fileMode>
@@ -25,6 +27,16 @@
 				<include>**/*.pl</include>
 			</includes>
 			<filtered>true</filtered>
+			<fileMode>0755</fileMode>
+			<directoryMode>0755</directoryMode>
+		</fileSet>
+		<fileSet>
+			<directory>src/main/resources</directory>
+			<outputDirectory>/</outputDirectory>
+			<includes>
+				<include>**/*.jar</include>
+				<include>**/*.keystore</include>
+			</includes>
 			<fileMode>0755</fileMode>
 			<directoryMode>0755</directoryMode>
 		</fileSet>
