@@ -10,6 +10,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.hyperic.hq.appdef.Agent;
@@ -54,8 +55,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
-
-import edu.emory.mathcs.backport.java.util.Arrays;
 
 /**
  * @author iperumal
@@ -1109,194 +1108,240 @@ public class ServiceManagerTest {
         assertEquals(svalues, svalues1);
     }
 
-//    /**
-//     * Test method for
-//     * {@link org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getMappedPlatformServices(org.hyperic.hq.authz.server.session.AuthzSubject, java.lang.Integer, org.hyperic.util.pager.PageControl)}
-//     * .
-//     */
-//    @Test
-//    public void testGetMappedPlatformServices() {
-//        fail("Not yet implemented");
-//    }
-//
-//    /**
-//     * Test method for
-//     * {@link org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getServicesByPlatform(org.hyperic.hq.authz.server.session.AuthzSubject, java.lang.Integer, java.lang.Integer, org.hyperic.util.pager.PageControl)}
-//     * .
-//     */
-//    @Test
-//    public void testGetServicesByPlatformAuthzSubjectIntegerIntegerPageControl() {
-//        fail("Not yet implemented");
-//    }
-//
-//    /**
-//     * Test method for
-//     * {@link org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getServicesByApplication(org.hyperic.hq.authz.server.session.AuthzSubject, java.lang.Integer, org.hyperic.util.pager.PageControl)}
-//     * .
-//     */
-//    @Test
-//    public void testGetServicesByApplicationAuthzSubjectIntegerPageControl() {
-//        fail("Not yet implemented");
-//    }
-//
-//    /**
-//     * Test method for
-//     * {@link org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getServicesByApplication(org.hyperic.hq.authz.server.session.AuthzSubject, java.lang.Integer, java.lang.Integer, org.hyperic.util.pager.PageControl)}
-//     * .
-//     */
-//    @Test
-//    public void testGetServicesByApplicationAuthzSubjectIntegerIntegerPageControl() {
-//        fail("Not yet implemented");
-//    }
-//
-//    /**
-//     * Test method for
-//     * {@link org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getServicesByApplication(org.hyperic.hq.authz.server.session.AuthzSubject, java.lang.Integer)}
-//     * .
-//     */
-//    @Test
-//    public void testGetServicesByApplicationAuthzSubjectInteger() {
-//        fail("Not yet implemented");
-//    }
-//
-//    /**
-//     * Test method for
-//     * {@link org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getServiceInventoryByApplication(org.hyperic.hq.authz.server.session.AuthzSubject, java.lang.Integer, org.hyperic.util.pager.PageControl)}
-//     * .
-//     */
-//    @Test
-//    public void testGetServiceInventoryByApplicationAuthzSubjectIntegerPageControl() {
-//        fail("Not yet implemented");
-//    }
-//
-//    /**
-//     * Test method for
-//     * {@link org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getFlattenedServicesByApplication(org.hyperic.hq.authz.server.session.AuthzSubject, java.lang.Integer, java.lang.Integer, org.hyperic.util.pager.PageControl)}
-//     * .
-//     */
-//    @Test
-//    public void testGetFlattenedServicesByApplication() {
-//        fail("Not yet implemented");
-//    }
-//
-//    /**
-//     * Test method for
-//     * {@link org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getServiceInventoryByApplication(org.hyperic.hq.authz.server.session.AuthzSubject, java.lang.Integer, java.lang.Integer, org.hyperic.util.pager.PageControl)}
-//     * .
-//     */
-//    @Test
-//    public void testGetServiceInventoryByApplicationAuthzSubjectIntegerIntegerPageControl() {
-//        fail("Not yet implemented");
-//    }
-//
-//    /**
-//     * Test method for
-//     * {@link org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getFlattenedServiceIdsByApplication(org.hyperic.hq.authz.server.session.AuthzSubject, java.lang.Integer)}
-//     * .
-//     */
-//    @Test
-//    public void testGetFlattenedServiceIdsByApplication() {
-//        fail("Not yet implemented");
-//    }
-//
-//    /**
-//     * Test method for
-//     * {@link org.hyperic.hq.appdef.server.session.ServiceManagerImpl#updateServiceZombieStatus(org.hyperic.hq.authz.server.session.AuthzSubject, org.hyperic.hq.appdef.server.session.Service, boolean)}
-//     * .
-//     */
-//    @Test
-//    public void testUpdateServiceZombieStatus() {
-//        fail("Not yet implemented");
-//    }
-//
-//    /**
-//     * Test method for
-//     * {@link org.hyperic.hq.appdef.server.session.ServiceManagerImpl#updateService(org.hyperic.hq.authz.server.session.AuthzSubject, org.hyperic.hq.appdef.shared.ServiceValue)}
-//     * .
-//     */
-//    @Test
-//    public void testUpdateService() {
-//        fail("Not yet implemented");
-//    }
-//
-//    /**
-//     * Test method for
-//     * {@link org.hyperic.hq.appdef.server.session.ServiceManagerImpl#updateServiceTypes(java.lang.String, org.hyperic.hq.product.ServiceTypeInfo[])}
-//     * .
-//     */
-//    @Test
-//    public void testUpdateServiceTypes() {
-//        fail("Not yet implemented");
-//    }
-//
-//    /**
-//     * Test method for
-//     * {@link org.hyperic.hq.appdef.server.session.ServiceManagerImpl#deleteServiceType(org.hyperic.hq.appdef.server.session.ServiceType, org.hyperic.hq.authz.server.session.AuthzSubject, org.hyperic.hq.authz.shared.ResourceGroupManager, org.hyperic.hq.authz.shared.ResourceManager)}
-//     * .
-//     */
-//    @Test
-//    public void testDeleteServiceType() {
-//        fail("Not yet implemented");
-//    }
-//
-//    /**
-//     * Test method for
-//     * {@link org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getServiceCluster(org.hyperic.hq.authz.server.session.ResourceGroup)}
-//     * .
-//     */
-//    @Test
-//    public void testGetServiceCluster() {
-//        fail("Not yet implemented");
-//    }
-//
-//    /**
-//     * Test method for
-//     * {@link org.hyperic.hq.appdef.server.session.ServiceManagerImpl#removeService(org.hyperic.hq.authz.server.session.AuthzSubject, org.hyperic.hq.appdef.server.session.Service)}
-//     * .
-//     */
-//    @Test
-//    public void testRemoveService() {
-//        fail("Not yet implemented");
-//    }
-//
-//    /**
-//     * Test method for
-//     * {@link org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getOperationByName(org.hyperic.hq.authz.server.session.ResourceType, java.lang.String)}
-//     * .
-//     */
-//    @Test
-//    public void testGetOperationByName() {
-//        fail("Not yet implemented");
-//    }
-//
-//    /**
-//     * Test method for
-//     * {@link org.hyperic.hq.appdef.server.session.ServiceManagerImpl#handleResourceDelete(org.hyperic.hq.authz.server.session.Resource)}
-//     * .
-//     */
-//    @Test
-//    public void testHandleResourceDelete() {
-//        fail("Not yet implemented");
-//    }
-//
-//    /**
-//     * Test method for
-//     * {@link org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getServiceTypeCounts()}
-//     * .
-//     */
-//    @Test
-//    public void testGetServiceTypeCounts() {
-//        fail("Not yet implemented");
-//    }
-//
-//    /**
-//     * Test method for
-//     * {@link org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getServiceCount()}
-//     * .
-//     */
-//    @Test
-//    public void testGetServiceCount() {
-//        fail("Not yet implemented");
-//    }
+    // /**
+    // * Test method for
+    // * {@link
+    // org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getMappedPlatformServices(org.hyperic.hq.authz.server.session.AuthzSubject,
+    // java.lang.Integer, org.hyperic.util.pager.PageControl)}
+    // * .
+    // */
+    // @Test
+    // public void testGetMappedPlatformServices() {
+    // fail("Not yet implemented");
+    // }
+    //
+    // /**
+    // * Test method for
+    // * {@link
+    // org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getServicesByPlatform(org.hyperic.hq.authz.server.session.AuthzSubject,
+    // java.lang.Integer, java.lang.Integer,
+    // org.hyperic.util.pager.PageControl)}
+    // * .
+    // */
+    // @Test
+    // public void
+    // testGetServicesByPlatformAuthzSubjectIntegerIntegerPageControl() {
+    // fail("Not yet implemented");
+    // }
+    //
+    // /**
+    // * Test method for
+    // * {@link
+    // org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getServicesByApplication(org.hyperic.hq.authz.server.session.AuthzSubject,
+    // java.lang.Integer, org.hyperic.util.pager.PageControl)}
+    // * .
+    // */
+    // @Test
+    // public void testGetServicesByApplicationAuthzSubjectIntegerPageControl()
+    // {
+    // fail("Not yet implemented");
+    // }
+    //
+    // /**
+    // * Test method for
+    // * {@link
+    // org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getServicesByApplication(org.hyperic.hq.authz.server.session.AuthzSubject,
+    // java.lang.Integer, java.lang.Integer,
+    // org.hyperic.util.pager.PageControl)}
+    // * .
+    // */
+    // @Test
+    // public void
+    // testGetServicesByApplicationAuthzSubjectIntegerIntegerPageControl() {
+    // fail("Not yet implemented");
+    // }
+    //
+    // /**
+    // * Test method for
+    // * {@link
+    // org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getServicesByApplication(org.hyperic.hq.authz.server.session.AuthzSubject,
+    // java.lang.Integer)}
+    // * .
+    // */
+    // @Test
+    // public void testGetServicesByApplicationAuthzSubjectInteger() {
+    // fail("Not yet implemented");
+    // }
+    //
+    // /**
+    // * Test method for
+    // * {@link
+    // org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getServiceInventoryByApplication(org.hyperic.hq.authz.server.session.AuthzSubject,
+    // java.lang.Integer, org.hyperic.util.pager.PageControl)}
+    // * .
+    // */
+    // @Test
+    // public void
+    // testGetServiceInventoryByApplicationAuthzSubjectIntegerPageControl() {
+    // fail("Not yet implemented");
+    // }
+    //
+    // /**
+    // * Test method for
+    // * {@link
+    // org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getFlattenedServicesByApplication(org.hyperic.hq.authz.server.session.AuthzSubject,
+    // java.lang.Integer, java.lang.Integer,
+    // org.hyperic.util.pager.PageControl)}
+    // * .
+    // */
+    // @Test
+    // public void testGetFlattenedServicesByApplication() {
+    // fail("Not yet implemented");
+    // }
+    //
+    // /**
+    // * Test method for
+    // * {@link
+    // org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getServiceInventoryByApplication(org.hyperic.hq.authz.server.session.AuthzSubject,
+    // java.lang.Integer, java.lang.Integer,
+    // org.hyperic.util.pager.PageControl)}
+    // * .
+    // */
+    // @Test
+    // public void
+    // testGetServiceInventoryByApplicationAuthzSubjectIntegerIntegerPageControl()
+    // {
+    // fail("Not yet implemented");
+    // }
+    //
+    // /**
+    // * Test method for
+    // * {@link
+    // org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getFlattenedServiceIdsByApplication(org.hyperic.hq.authz.server.session.AuthzSubject,
+    // java.lang.Integer)}
+    // * .
+    // */
+    // @Test
+    // public void testGetFlattenedServiceIdsByApplication() {
+    // fail("Not yet implemented");
+    // }
+    //
+    // /**
+    // * Test method for
+    // * {@link
+    // org.hyperic.hq.appdef.server.session.ServiceManagerImpl#updateServiceZombieStatus(org.hyperic.hq.authz.server.session.AuthzSubject,
+    // org.hyperic.hq.appdef.server.session.Service, boolean)}
+    // * .
+    // */
+    // @Test
+    // public void testUpdateServiceZombieStatus() {
+    // fail("Not yet implemented");
+    // }
+    //
+    // /**
+    // * Test method for
+    // * {@link
+    // org.hyperic.hq.appdef.server.session.ServiceManagerImpl#updateService(org.hyperic.hq.authz.server.session.AuthzSubject,
+    // org.hyperic.hq.appdef.shared.ServiceValue)}
+    // * .
+    // */
+    // @Test
+    // public void testUpdateService() {
+    // fail("Not yet implemented");
+    // }
+    //
+    // /**
+    // * Test method for
+    // * {@link
+    // org.hyperic.hq.appdef.server.session.ServiceManagerImpl#updateServiceTypes(java.lang.String,
+    // org.hyperic.hq.product.ServiceTypeInfo[])}
+    // * .
+    // */
+    // @Test
+    // public void testUpdateServiceTypes() {
+    // fail("Not yet implemented");
+    // }
+    //
+    // /**
+    // * Test method for
+    // * {@link
+    // org.hyperic.hq.appdef.server.session.ServiceManagerImpl#deleteServiceType(org.hyperic.hq.appdef.server.session.ServiceType,
+    // org.hyperic.hq.authz.server.session.AuthzSubject,
+    // org.hyperic.hq.authz.shared.ResourceGroupManager,
+    // org.hyperic.hq.authz.shared.ResourceManager)}
+    // * .
+    // */
+    // @Test
+    // public void testDeleteServiceType() {
+    // fail("Not yet implemented");
+    // }
+    //
+    // /**
+    // * Test method for
+    // * {@link
+    // org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getServiceCluster(org.hyperic.hq.authz.server.session.ResourceGroup)}
+    // * .
+    // */
+    // @Test
+    // public void testGetServiceCluster() {
+    // fail("Not yet implemented");
+    // }
+    //
+    // /**
+    // * Test method for
+    // * {@link
+    // org.hyperic.hq.appdef.server.session.ServiceManagerImpl#removeService(org.hyperic.hq.authz.server.session.AuthzSubject,
+    // org.hyperic.hq.appdef.server.session.Service)}
+    // * .
+    // */
+    // @Test
+    // public void testRemoveService() {
+    // fail("Not yet implemented");
+    // }
+    //
+    // /**
+    // * Test method for
+    // * {@link
+    // org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getOperationByName(org.hyperic.hq.authz.server.session.ResourceType,
+    // java.lang.String)}
+    // * .
+    // */
+    // @Test
+    // public void testGetOperationByName() {
+    // fail("Not yet implemented");
+    // }
+    //
+    // /**
+    // * Test method for
+    // * {@link
+    // org.hyperic.hq.appdef.server.session.ServiceManagerImpl#handleResourceDelete(org.hyperic.hq.authz.server.session.Resource)}
+    // * .
+    // */
+    // @Test
+    // public void testHandleResourceDelete() {
+    // fail("Not yet implemented");
+    // }
+    //
+    // /**
+    // * Test method for
+    // * {@link
+    // org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getServiceTypeCounts()}
+    // * .
+    // */
+    // @Test
+    // public void testGetServiceTypeCounts() {
+    // fail("Not yet implemented");
+    // }
+    //
+    // /**
+    // * Test method for
+    // * {@link
+    // org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getServiceCount()}
+    // * .
+    // */
+    // @Test
+    // public void testGetServiceCount() {
+    // fail("Not yet implemented");
+    // }
 
 }
