@@ -581,6 +581,7 @@
 					<artifactId>maven-surefire-plugin</artifactId>
 					<configuration>
 						<argLine>-Xmx512m</argLine>
+						<enableAssertions>false</enableAssertions>
 					</configuration>
 				</plugin>
 			</plugins>
