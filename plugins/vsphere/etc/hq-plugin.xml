@@ -280,7 +280,7 @@
     <actions>
       <include name="createSnapshot"/>
       <include name="removeAllSnapshots"/>
-      <include name="revertToSnapshot"/>
+      <include name="revertToCurrentSnapshot"/>
       <include name="stop"/>
       <include name="start"/>
       <include name="reset"/>
