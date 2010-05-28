@@ -2,6 +2,7 @@ package org.hyperic.hq.appdef.server.session;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
@@ -10,6 +11,8 @@ import java.util.List;
 
 import org.hibernate.NonUniqueObjectException;
 import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.appdef.Ip;
+import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateFQDNException;
@@ -19,6 +22,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.ApplicationManager;
+import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.IpValue;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
@@ -26,12 +30,14 @@ import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceManager;
+import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
@@ -39,9 +45,12 @@ import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.context.IntegrationTestContextLoader;
+import org.hyperic.hq.product.PlatformTypeInfo;
 import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.hq.product.ServiceTypeInfo;
+import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.junit.Before;
 import org.junit.Test;
@@ -117,7 +126,7 @@ public class PlatformManagerTest {
         }
         // Create on Linux platform (supported platform)
         AIPlatformValue aiPlatform = new AIPlatformValue();
-        aiPlatform.setName("TestLinux Platform");
+        aiPlatform.setName("Test Platform Linux");
         aiPlatform.setCpuCount(2);
         aiPlatform.setPlatformTypeName("Linux");
         aiPlatform.setAgentToken(agentToken);
@@ -693,7 +702,7 @@ public class PlatformManagerTest {
         assertEquals(testPlatform.getPlatformValue(), pValues.get(0));
     }
 
-    /*@Test
+    // TODO
     public void testGetPlatformsByApplication() throws ApplicationException, NotFoundException {
         ServiceValue serviceValue = testService.getServiceValue();
         List<ServiceValue> services = new ArrayList<ServiceValue>();
@@ -702,112 +711,296 @@ public class PlatformManagerTest {
         appValue.setName("Test Application");
         appValue.setEngContact("Testing");
         appValue.setBusinessContact("SpringSource");
-        appValue.setOpsContact("TechOps");
-        //Set "Generic Application" type
+        appValue.setOpsContact("TechOps"); // Set "Generic Application" type
         appValue.setApplicationType(applicationManager.findApplicationType(1));
-        //TODO: waiting on addService method fix
+        // TODO: waiting on addService method fix
         Application app = applicationManager.createApplication(authzSubjectManager
             .getOverlordPojo(), appValue, services);
         PageControl pc = new PageControl();
         PageList<PlatformValue> pValues = platformManager.getPlatformsByApplication(
             authzSubjectManager.getOverlordPojo(), app.getId(), pc);
         assertEquals(testPlatform.getPlatformValue(), pValues.get(0));
-    }*/
-
-    public void testGetViewablePlatformPKs() {
-        fail("Not yet implemented");
     }
 
-    public void testGetOperationByName() {
-        fail("Not yet implemented");
+    @Test
+    public void testGetPlatformIdsByType() throws ApplicationException {
+        Integer[] platformIds = platformManager.getPlatformIds(authzSubjectManager
+            .getOverlordPojo(), testPlatform.getPlatformType().getId());
+        assertEquals(platformIds[0], testPlatform.getId());
     }
 
-    public void testGetPlatformIds() {
-        fail("Not yet implemented");
+    @Test
+    public void testGetPlatformsByType() throws ApplicationException {
+        List<Platform> platforms = platformManager.getPlatformsByType(authzSubjectManager
+            .getOverlordPojo(), testPlatform.getPlatformType().getName());
+        assertEquals(platforms.get(0), testPlatform);
     }
 
-    public void testGetPlatformsByType() {
-        fail("Not yet implemented");
+    @Test
+    public void testFindPlatformsByIpAddr() throws ApplicationException {
+        PlatformValue pValue = new PlatformValue();
+        pValue.setCpuCount(2);
+        pValue.setName("Test Platform ByPlatformType");
+        pValue.setFqdn("Test Platform CreationByPlatformType");
+        IpValue ipValue = new IpValue();
+        ipValue.setAddress("127.0.0.1");
+        ipValue.setMACAddress("12:34:G0:93:58:96");
+        ipValue.setNetmask("255:255:255:0");
+        pValue.addIpValue(ipValue);
+        Platform platform = platformManager.createPlatform(authzSubjectManager.getOverlordPojo(),
+            testPlatformType.getId(), pValue, testAgent.getId());
+        PageControl pc = new PageControl();
+        PageList<PlatformValue> foundPlatformValue = platformManager.findPlatformsByIpAddr(
+            authzSubjectManager.getOverlordPojo(), "127.0.0.1", pc);
+        assertEquals(platform.getPlatformValue(), foundPlatformValue.get(0));
+        foundPlatformValue = platformManager.findPlatformsByIpAddr(authzSubjectManager
+            .getOverlordPojo(), "127.0.0.2", pc);
+        assertTrue(foundPlatformValue.isEmpty());
     }
 
-    public void testGetViewablePlatforms() {
-        fail("Not yet implemented");
+    @Test
+    public void testFindPlatformPojosByTypeAndName() throws ApplicationException {
+        List<Platform> platforms = new ArrayList<Platform>(10);
+        for (int i = 1; i <= 10; i++) {
+            AIPlatformValue aiPlatform = new AIPlatformValue();
+            aiPlatform.setName("RegexTestPlatform" + i);
+            aiPlatform.setCpuCount(2);
+            aiPlatform.setPlatformTypeName(testPlatformTypes.get(0).getName());
+            aiPlatform.setAgentToken("agentToken123");
+            aiPlatform.setFqdn("RegexTestPlatform" + i);
+            platforms.add(i - 1, platformManager.createPlatform(authzSubjectManager
+                .getOverlordPojo(), aiPlatform));
+        }
+        List<Platform> foundPlatforms = platformManager.findPlatformPojosByTypeAndName(
+            authzSubjectManager.getOverlordPojo(), testPlatformTypes.get(0).getId(),
+            "RegexTestPlatform");
+        assertEquals(platforms, foundPlatforms);
     }
 
-    public void testFindPlatformsByIpAddr() {
-        fail("Not yet implemented");
-    }
-
-    public void testFindPlatformPojosByTypeAndName() {
-        fail("Not yet implemented");
-    }
-
+    // TODO
     public void testFindParentPlatformPojosByNetworkRelation() {
         fail("Not yet implemented");
     }
 
+    // TODO
     public void testFindPlatformPojosByNoNetworkRelation() {
         fail("Not yet implemented");
     }
 
-    public void testFindPlatformPojosByIpAddr() {
-        fail("Not yet implemented");
+    @Test
+    public void testFindPlatformPojosByIpAddr() throws ApplicationException {
+        PlatformValue pValue = new PlatformValue();
+        pValue.setCpuCount(2);
+        pValue.setName("Test Platform ByPlatformType");
+        pValue.setFqdn("Test Platform CreationByPlatformType");
+        IpValue ipValue = new IpValue();
+        ipValue.setAddress("127.0.0.1");
+        ipValue.setMACAddress("12:34:G0:93:58:96");
+        ipValue.setNetmask("255:255:255:0");
+        pValue.addIpValue(ipValue);
+        Platform platform = platformManager.createPlatform(authzSubjectManager.getOverlordPojo(),
+            testPlatformType.getId(), pValue, testAgent.getId());
+        Collection<Platform> foundPlatform = platformManager.findPlatformPojosByIpAddr("127.0.0.1");
+        assertEquals(platform, foundPlatform.iterator().next());
     }
 
+    // TODO
     public void testFindDeletedPlatforms() {
         fail("Not yet implemented");
     }
 
-    public void testUpdatePlatformImpl() {
-        fail("Not yet implemented");
+    @Test
+    public void testUpdatePlatformImpl() throws ApplicationException {
+        PlatformValue pv = new PlatformValue();
+        pv.setCpuCount(2);
+        pv.setName("Test Platform ByPlatformType");
+        pv.setFqdn("Test Platform CreationByPlatformType");
+        Platform platform = platformManager.createPlatform(authzSubjectManager.getOverlordPojo(),
+            testPlatformType.getId(), pv, testAgent.getId());
+        pv.setCpuCount(null);
+        pv.setName("Updated Platform");
+        pv.setFqdn("UpdatedPlatform");
+        pv.setId(platform.getId());
+        Platform updatedPlatform = platformManager.updatePlatformImpl(authzSubjectManager
+            .getOverlordPojo(), pv);
+        assertEquals(updatedPlatform.getCpuCount().intValue(), 2);
+        assertEquals(updatedPlatform.getName(), "Updated Platform");
+        assertEquals(updatedPlatform.getFqdn(), "UpdatedPlatform");
     }
 
-    public void testUpdatePlatform() {
-        fail("Not yet implemented");
+    @Test(expected = AppdefDuplicateNameException.class)
+    public void testUpdatePlatformImplDupName() throws ApplicationException {
+        PlatformValue pv = new PlatformValue();
+        pv.setCpuCount(2);
+        pv.setName("Test Platform ByPlatformType");
+        pv.setFqdn("Test Platform CreationByPlatformType");
+        Platform platform = platformManager.createPlatform(authzSubjectManager.getOverlordPojo(),
+            testPlatformType.getId(), pv, testAgent.getId());
+        pv.setCpuCount(null);
+        // Update the name to an existing platform name (testPlatform)
+        pv.setName(testPlatform.getName());
+        pv.setFqdn("UpdatedPlatform");
+        pv.setId(platform.getId());
+        platformManager.updatePlatformImpl(authzSubjectManager.getOverlordPojo(), pv);
     }
 
-    public void testDeletePlatformType() {
-        fail("Not yet implemented");
+    @Test(expected = AppdefDuplicateFQDNException.class)
+    public void testUpdatePlatformImplDupFqdn() throws ApplicationException {
+        PlatformValue pv = new PlatformValue();
+        pv.setCpuCount(2);
+        pv.setName("Test Platform ByPlatformType");
+        pv.setFqdn("Test Platform CreationByPlatformType");
+        Platform platform = platformManager.createPlatform(authzSubjectManager.getOverlordPojo(),
+            testPlatformType.getId(), pv, testAgent.getId());
+        pv.setCpuCount(null);
+        // Update the name to an existing platform name (testPlatform)
+        pv.setName("Updated Platform");
+        pv.setFqdn(testPlatform.getFqdn());
+        pv.setId(platform.getId());
+        platformManager.updatePlatformImpl(authzSubjectManager.getOverlordPojo(), pv);
     }
 
-    public void testUpdatePlatformTypes() {
-        fail("Not yet implemented");
+    // TODO:
+    /*
+     * Yet to confirm how does the method updatePlatformTypes updates the
+     * platformType name
+     */
+    public void testUpdatePlatformTypes() throws NotFoundException, VetoException {
+        PlatformTypeInfo[] pInfos = new PlatformTypeInfo[] { new PlatformTypeInfo("Linux") };
+        platformManager.updatePlatformTypes("Test Plugin", pInfos);
     }
 
-    public void testCreatePlatformType() {
-        fail("Not yet implemented");
+    @Test
+    public void testCreatePlatformType() throws NotFoundException {
+        String platformTypeName = "platformType";
+        String plugin = "Test PlatformType Plugin";
+        PlatformType pType = platformManager.createPlatformType(platformTypeName, plugin);
+        assertEquals(pType.getName(), platformTypeName);
+        assertEquals(pType.getPlugin(), plugin);
+        assertNotNull(platformManager.findResource(pType));
+        assertEquals(platformManager.findResource(pType).getName(), platformTypeName);
+        assertEquals(platformManager.findResource(pType).getResourceType(), resourceManager
+            .findResourceTypeByName(AuthzConstants.platformPrototypeTypeName));
     }
 
-    public void testUpdateWithAI() {
-        fail("Not yet implemented");
+    @Test
+    public void testUpdateWithAI() throws ApplicationException {
+        AIPlatformValue aiPlatform = new AIPlatformValue();
+        // Set AIPlatformValue for the testPlatform
+        aiPlatform.setPlatformTypeName(testPlatform.getPlatformType().getName());
+        aiPlatform.setAgentToken(testPlatform.getAgent().getAgentToken());
+        aiPlatform.setFqdn(testPlatform.getFqdn());
+        // Now set the name & CPU count of the platform
+        aiPlatform.setName("Updated PlatformName");
+        aiPlatform.setCpuCount(4);
+        platformManager.updateWithAI(aiPlatform, authzSubjectManager.getOverlordPojo());
+        assertEquals(testPlatform.getName(), "Updated PlatformName");
+        assertEquals(testPlatform.getResource().getName(), "Updated PlatformName");
+        assertEquals(testPlatform.getCpuCount().intValue(), 4);
     }
 
+    // TODO
+    // Currently the method updateWithAI -> getPlatformByAIPlatform() ->
+    // getPhysPlatformByAgentToken(agentToken) has some issues
+    // Once this is fixed, we can add the usecase to update FQDN
+    public void testUpdateAIForFQDNChange() {
+    }
+
+    // TODO
+    public void testUpdateAIIpValues() throws ApplicationException {
+        AIPlatformValue aiPlatform = new AIPlatformValue();
+        // Set AIPlatformValue for the testPlatform
+        aiPlatform.setPlatformTypeName(testPlatform.getPlatformType().getName());
+        aiPlatform.setAgentToken(testPlatform.getAgent().getAgentToken());
+        aiPlatform.setFqdn(testPlatform.getFqdn());
+        AIIpValue aiIpVal = new AIIpValue();
+        aiIpVal.setAddress("192.168.1.2");
+        aiIpVal.setMACAddress("12:34:G0:93:58:96");
+        aiIpVal.setNetmask("255:255:255:0");
+        // Queue status to AIQueueConstants.Q_STATUS_REMOVED
+        aiIpVal.setQueueStatus(3);
+        aiPlatform.addAIIpValue(aiIpVal);
+        // Now perform updateAI
+        // TODO: why update of AgentIP happens only if the queue status removed?
+        platformManager.updateWithAI(aiPlatform, authzSubjectManager.getOverlordPojo());
+    }
+
+    @Test
     public void testAddIp() {
-        fail("Not yet implemented");
+        platformManager.addIp(testPlatform, "127.0.0.1", "255:255:255:0", "12:34:G0:93:58:96");
+        platformManager.addIp(testPlatform, "192.168.1.2", "255:255:0:0", "91:34:45:93:67:96");
+        Collection<Ip> ips = testPlatform.getIps();
+        assertEquals(ips.size(), 2);
+        for (Ip ip : ips) {
+            if (ip.getAddress().equals("192.168.1.2")) {
+                assertEquals(ip.getMacAddress(), "91:34:45:93:67:96");
+                assertEquals(ip.getNetmask(), "255:255:0:0");
+            } else {
+                assertEquals(ip.getAddress(), "127.0.0.1");
+                assertEquals(ip.getMacAddress(), "12:34:G0:93:58:96");
+                assertEquals(ip.getNetmask(), "255:255:255:0");
+            }
+        }
     }
 
+    @Test
     public void testUpdateIp() {
-        fail("Not yet implemented");
+        platformManager.addIp(testPlatform, "127.0.0.1", "255:255:255:0", "12:34:G0:93:58:96");
+        Collection<Ip> ips = testPlatform.getIps();
+        for (Ip ip : ips) {
+            assertEquals(ip.getAddress(), "127.0.0.1");
+            assertEquals(ip.getMacAddress(), "12:34:G0:93:58:96");
+            assertEquals(ip.getNetmask(), "255:255:255:0");
+        }
+        platformManager.updateIp(testPlatform, "127.0.0.1", "255:255:0:0", "91:34:45:93:67:96");
+        ips = testPlatform.getIps();
+        for (Ip ip : ips) {
+            assertEquals(ip.getAddress(), "127.0.0.1");
+            assertEquals(ip.getMacAddress(), "91:34:45:93:67:96");
+            assertEquals(ip.getNetmask(), "255:255:0:0");
+        }
     }
 
+    @Test
     public void testRemoveIp() {
-        fail("Not yet implemented");
+        platformManager.addIp(testPlatform, "127.0.0.1", "255:255:255:0", "12:34:G0:93:58:96");
+        platformManager.addIp(testPlatform, "192.168.1.2", "255:255:0:0", "91:34:45:93:67:96");
+        platformManager.removeIp(testPlatform, "192.168.1.2", "255:255:0:0", "91:34:45:93:67:96");
+        Collection<Ip> ips = testPlatform.getIps();
+        assertEquals(ips.size(), 1);
+        for (Ip ip : ips) {
+            assertEquals(ip.getAddress(), "127.0.0.1");
+            assertEquals(ip.getMacAddress(), "12:34:G0:93:58:96");
+            assertEquals(ip.getNetmask(), "255:255:255:0");
+        }
     }
 
+    @Test
     public void testGetPlatformTypeCounts() {
-        fail("Not yet implemented");
+        
+        List<Object[]> counts = platformManager.getPlatformTypeCounts();
+        List<Object[]> actuals = new ArrayList<Object[]>(10);
+        //Add the Linux testPlatformType as the result is sorted
+        actuals.add(0, new Object[]{testPlatformTypes.get(9).getName(), Long.valueOf("1")});
+        for (int i=1; i<=9; i++) {
+            // Add platform Type name and count (here count is always 1)
+        actuals.add(i, new Object[]{testPlatformTypes.get(i-1).getName(), Long.valueOf("1")});
+        }   
+        for (int i=0; i<=9; i++) {
+           assertEquals((String)counts.get(i)[0],((String)actuals.get(i)[0]));
+           assertEquals((Long)counts.get(i)[1],((Long)actuals.get(i)[1]));
+        }        
     }
 
+    @Test
     public void testGetPlatformCount() {
-        fail("Not yet implemented");
+        //we have added 10 test platforms during initial setup
+        assertEquals(platformManager.getPlatformCount().intValue(), 10);
     }
 
+    @Test
     public void testGetCpuCount() {
-        fail("Not yet implemented");
+        //10 test platforms with each having 2 CPUs
+        assertEquals(platformManager.getCpuCount().intValue(), 20);
     }
-
-    public void testAfterPropertiesSet() {
-        fail("Not yet implemented");
-    }
-
 }

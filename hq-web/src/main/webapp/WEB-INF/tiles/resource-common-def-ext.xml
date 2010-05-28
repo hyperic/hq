@@ -8,15 +8,24 @@
               path="/resource/common/ControlTab.jsp">
    <put name="selectedIndex"  value="0" />
    <putList name="tabList">
-      <item value="Monitor" link="XXX"
-            height="21" width="102"
-            classtype="org.hyperic.hq.ui.util.Tab"/>
-      <item value="Inventory" link="XXX"
-            height="21" width="102"
-            classtype="org.hyperic.hq.ui.util.Tab"/>
-      <item value="Views" link="XXX"
-            height="21" width="102"
-            classtype="org.hyperic.hq.ui.util.Tab"/>
+     <bean classtype="org.hyperic.hq.ui.util.Tab">
+       <set-property property="value" value="Monitor" />
+       <set-property property="link" value="XXXX" />
+       <set-property property="height" value="21" />
+       <set-property property="width" value="102" />
+     </bean>
+      <bean classtype="org.hyperic.hq.ui.util.Tab">
+       <set-property property="value" value="Inventory" />
+       <set-property property="link" value="XXXX" />
+       <set-property property="height" value="21" />
+       <set-property property="width" value="102" />
+     </bean>    
+      <bean classtype="org.hyperic.hq.ui.util.Tab">
+       <set-property property="value" value="Views" />
+       <set-property property="link" value="XXXX" />
+       <set-property property="height" value="21" />
+       <set-property property="width" value="102" />
+     </bean>    
    </putList> 
   </definition>
               
@@ -25,35 +34,50 @@
               path="/resource/common/monitor/visibility/DashMiniTabs.jsp">
     <put name="tabUrl" value="/Resource.do"/>
     <putList name="standard">
-      <item icon="Indicators"
-            mode="currentHealth"
-            value="0" link="XXX"
-            height="21" width="102"
-            classtype="org.hyperic.hq.ui.util.Tab"/>
-      <item icon="MetricData"
-            mode="resourceMetrics"
-            value="1" link="XXX"
-            height="21" width="102"
-            classtype="org.hyperic.hq.ui.util.Tab"/>
+      <bean classtype="org.hyperic.hq.ui.util.Tab">
+        <set-property property="value" value="0" />
+        <set-property property="link" value="XXX" />
+        <set-property property="icon" value="Indicators" />
+        <set-property property="mode" value="currentHealth" />
+        <set-property property="height" value="21" />
+        <set-property property="width" value="102" />
+      </bean> 
+      <bean classtype="org.hyperic.hq.ui.util.Tab">
+        <set-property property="value" value="1" />
+        <set-property property="link" value="XXX" />
+        <set-property property="icon" value="MetricData" />
+        <set-property property="mode" value="resourceMetrics" />
+        <set-property property="height" value="21" />
+        <set-property property="width" value="102" />
+      </bean>     
     </putList> 
     <putList name="nometrics">
-      <item icon="Indicators"
-            mode="currentHealth"
-            value="0" link="XXX"
-            height="21" width="102"
-            classtype="org.hyperic.hq.ui.util.Tab"/>
+      <bean classtype="org.hyperic.hq.ui.util.Tab">
+        <set-property property="value" value="0" />
+        <set-property property="link" value="XXX" />
+        <set-property property="icon" value="Indicators" />
+        <set-property property="mode" value="currentHealth" />
+        <set-property property="height" value="21" />
+        <set-property property="width" value="102" />
+      </bean> 
     </putList> 
     <putList name="perf">
-      <item icon="Indicators"
-            mode="currentHealth"
-            value="0" link="XXX"
-            height="21" width="102"
-            classtype="org.hyperic.hq.ui.util.Tab"/>
-      <item icon="MetricData"
-            mode="resourceMetrics"
-            value="1" link="XXX"
-            height="21" width="102"
-            classtype="org.hyperic.hq.ui.util.Tab"/>
+      <bean classtype="org.hyperic.hq.ui.util.Tab">
+        <set-property property="value" value="0" />
+        <set-property property="link" value="XXX" />
+        <set-property property="icon" value="Indicators" />
+        <set-property property="mode" value="currentHealth" />
+        <set-property property="height" value="21" />
+        <set-property property="width" value="102" />
+      </bean> 
+      <bean classtype="org.hyperic.hq.ui.util.Tab">
+        <set-property property="value" value="1" />
+        <set-property property="link" value="XXX" />
+        <set-property property="icon" value="MetricData" />
+        <set-property property="mode" value="resourceMetrics" />
+        <set-property property="height" value="21" />
+        <set-property property="width" value="102" />
+      </bean>   
     </putList> 
   </definition>
 
