@@ -117,10 +117,10 @@
      <put name="selectedIndex"  value="0" />
      <putList name="tabList">
        <bean classtype="org.hyperic.hq.ui.util.Tab">
-         <set-property value="value" property="Monitor"/>
-         <set-property value="link" property="XXX"/>
-         <set-property value="height" property="21"/>
-         <set-property value="width" property="102"/>
+         <set-property property="value" value="Monitor"/>
+         <set-property property="link" value="XXX"/>
+         <set-property property="height" value="21"/>
+         <set-property property="width" value="102"/>
        </bean>
      </putList>
   </definition>
