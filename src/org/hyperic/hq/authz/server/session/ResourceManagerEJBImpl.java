@@ -846,43 +846,51 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
                 }
             
                 ResourceEdgeDAO eDAO = getResourceEdgeDAO();
-                Collection edges = findResourceEdges(relation, parentResource);
                 ResourceEdge existing = null;
                 Resource childResource = null;
 
-                if (edges.isEmpty()) {
+                if (!hasResourceRelation(parentResource, relation)) {
                     // create self-edge for parent of virtual hierarchy
                     eDAO.create(parentResource, parentResource, 0, relation);
                 }
                 for (int i=0; i< children.length; i++) {
                     //TODO: Add VM/host verification check ???
                     childResource = findResource(children[i]);
-                                    
+                                        
                     // Check if child resource already exists in VM hierarchy
                     // TODO: This needs to be optimized
                     existing = getParentResourceEdge(childResource, relation);
 
                     if (existing != null) {
-                        Resource existingParent = existing.getFrom();
+                        Resource existingParent = existing.getTo();
                         if (existingParent.getId().equals(parentResource.getId())) {
                             // already exists with same parent, so skip
-                            log.info("Skipping. Virtual resource edge already exists: from id=" 
-                                        + parentResource.getId()
-                                        + ", to id=" + childResource.getId());
+                            if (log.isDebugEnabled()) {
+                                log.debug("Skipping. Virtual resource edge already exists: from id=" 
+                                              + parentResource.getId()
+                                              + ", to id=" + childResource.getId());
+                            }
                             continue;
                         } else {
                             // already exists with different parent
-                            // TODO: vMotion occurred
-                            
-                            log.info("Virtual resource edge exists with another resource: from id="
-                                        + existingParent.getId()
-                                        + ", to id=" + childResource.getId()
-                                        + ", target from id=" + parentResource.getId());
-                            continue;
+                            // TODO: vMotion occurred                            
+                            if (log.isDebugEnabled()) {
+                                log.debug("Virtual resource edge exists with another resource: fromId="
+                                          + existingParent.getId()
+                                          + ", toId=" + childResource.getId()
+                                          + ". vMotion occurred. Moving to target fromId=" 
+                                          + parentResource.getId());
+                            }
+                                                        
+                            // Clean out edges for the current target
+                            eDAO.deleteEdges(childResource);
                         }
                     }
                 
                     if (childResource != null && !childResource.isInAsyncDeleteState()) {                    
+                        if (!hasResourceRelation(childResource, relation)) {
+                            eDAO.create(childResource, childResource, 0, relation);
+                        }
                         eDAO.create(parentResource, childResource, 1, relation);
                         eDAO.create(childResource, parentResource, -1, relation);
                         
