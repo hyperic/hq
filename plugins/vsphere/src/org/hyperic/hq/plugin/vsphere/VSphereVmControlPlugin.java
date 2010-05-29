@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2010], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -54,10 +54,6 @@ public class VSphereVmControlPlugin extends ControlPlugin {
         return _props.getProperty(VSphereVmCollector.PROP_VM);
     }
 
-    private String getHostName() {
-        return _props.getProperty(VSphereHostCollector.PROP_HOSTNAME);
-    }
-
     public void doAction(String action, String[] args)
         throws PluginException {
 
@@ -85,16 +81,14 @@ public class VSphereVmControlPlugin extends ControlPlugin {
             else if (action.equals("reset")) {
                 task = vm.resetVM_Task();
             }
-            else if (action.equals("revertToSnapshot")) {
-                HostSystem host = vim.getHost(getHostName());
-                task = vm.revertToCurrentSnapshot_Task(host);
+            else if (action.equals("revertToCurrentSnapshot")) {
+                task = vm.revertToCurrentSnapshot_Task(null);
             }
             else if (action.equals("stop")) {
                 task = vm.powerOffVM_Task();
             }
             else if (action.equals("start")) {
-                HostSystem host = vim.getHost(getHostName());
-                task = vm.powerOnVM_Task(host);
+                task = vm.powerOnVM_Task(null);
             }
             else if (action.equals("suspend")) {
                 task = vm.suspendVM_Task();
