@@ -199,7 +199,22 @@ public class MxNotificationListener implements NotificationListener {
         }
 
         long time     = notification.getTimeStamp();
+
+        // Default level to INFO
         int level     = LogTrackPlugin.LOGLEVEL_INFO;
+
+        // Check notification.getType() for Error, Warn, Info, Debug (case insensitive)
+        String typeString = notification.getType();
+        if(typeString != null) {
+            if(typeString.equalsIgnoreCase(LogTrackPlugin.LOGLEVEL_ERROR_LABEL)) {
+                level = LogTrackPlugin.LOGLEVEL_ERROR;
+            } else if(typeString.equals(LogTrackPlugin.LOGLEVEL_WARN_LABEL)) {
+                level = LogTrackPlugin.LOGLEVEL_WARN;
+            } else if(typeString.equals(LogTrackPlugin.LOGLEVEL_DEBUG_LABEL)) {
+                level = LogTrackPlugin.LOGLEVEL_DEBUG;
+            }
+        }
+
         String source = notification.getSource().toString();
 
         if (isAttrChange) {

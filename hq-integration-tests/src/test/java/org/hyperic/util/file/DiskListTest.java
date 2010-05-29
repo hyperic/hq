@@ -493,6 +493,75 @@ public class DiskListTest extends TestCase
         }
     }
     
+    public void testConcurrentIteration() throws Exception {
+
+        DiskListDataHolder holder = null;
+
+        try {
+
+            try {
+                holder = new DiskListDataHolder();
+            } catch (Exception e) {
+                e.printStackTrace();
+                fail(e.toString());
+            }
+
+            for (long i = 0; i < MAXRECS; ++i) {
+                String toPut = String.valueOf(i);
+                holder.list.addToList(toPut);                
+            }
+            
+            final int nThreads = 50;
+            IterationRunner[] threads = new IterationRunner[nThreads];
+
+            for (int i = 0; i < nThreads; ++i) {
+                threads[i] = new IterationRunner(holder.list.getListIterator());
+            }
+            
+            for (int i = 0; i < nThreads; ++i) {
+                threads[i].start();
+            }
+            
+            for (int i = 0; i < nThreads; ++i) {
+                threads[i].join();
+                if (threads[i].getFailure() != null) {
+                    threads[i].getFailure().printStackTrace();
+                    fail("Exception during iteration");
+                }
+            }
+
+        } finally {
+            
+            holder.dispose();
+            
+        }
+    }
+    
+    private static class IterationRunner extends Thread {
+        
+        private Iterator it;
+        private Exception failure;
+
+        IterationRunner(Iterator it) {
+            this.it = it;
+            this.failure = null;
+        }
+        
+        public void run() {
+            try {
+                while (it.hasNext()) {
+                    it.next();
+                }
+            } catch (Exception e) {
+                failure = e;
+            }
+        }
+        
+        Exception getFailure() {
+            return failure;
+        }
+    }
+    
     private static class DiskListDataHolder {
         DiskList list;
         File dataFile;

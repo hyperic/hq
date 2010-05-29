@@ -122,7 +122,7 @@ public class PluginDiscoverer implements ScanListener {
     public void scanComplete(ScanState state)
         throws AutoinventoryException, SystemException {
 
-        this.servers = state.getAllServers(this.log);
+        this.servers = state.getAllServers();
     }
 
     private void addScanners(ScanConfiguration scanConfig,

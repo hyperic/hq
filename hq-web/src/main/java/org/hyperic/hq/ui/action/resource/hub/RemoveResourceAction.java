@@ -120,7 +120,7 @@ public class RemoveResourceAction
         List<AppdefEntityID> entities = BizappUtils.buildAppdefEntityIds(resourceList);
         if (resourceItems != null && resourceItems.length > 0) {
             Set<AppdefEntityID> deleted = new HashSet<AppdefEntityID>();
-            int vetoed = 0;
+            String vetoMessage = null;
             // about the exception handling:
             // if someone either deleted the entity out from under our user
             // or the user hit the back button, a derivative of
@@ -135,13 +135,14 @@ public class RemoveResourceAction
                 } catch (AppdefEntityNotFoundException e) {
                     log.error("Removing resource " + resourceId + "failed.");
                 } catch (VetoException v) {
-                    vetoed++;
-                    log.info(v.getMessage());
+                    vetoMessage = v.getMessage();
+                    log.info(vetoMessage);
                 }
             }
 
-            if (vetoed > 0) {
-                RequestUtils.setError(request, "resource.common.inventory.groups.error.RemoveVetoed");
+            if (vetoMessage != null) {
+                RequestUtils.setErrorObject(request,"resource.common.inventory.groups.error.RemoveVetoed",
+                    vetoMessage);
             } else if (deleted.size() > 0) {
                 RequestUtils.setConfirmation(request, "resource.common.confirm.ResourcesRemoved");
             }

@@ -94,5 +94,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/hq-server"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/hq-util"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/hq-pdk-shared"/>
+	<classpathentry kind="lib" path="target/generated-test-resources"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

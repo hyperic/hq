@@ -129,7 +129,7 @@ document.write(
 "<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n" + 
 "	<tr>\n" + 
 "		<td class=\"ErrorBlock\"><img src=\"<html:rewrite page="/images/"/>tt_error.gif\" width=\"10\" height=\"11\" hspace=\"5\" border=\"0\"/></td>\n" + 
-"		<td class=\"ErrorBlock\" width=\"100%\"><fmt:message key="errors.jsp.problem"/> <a href=\"javascript:displayStackTrace<%= randomNum %>()\"><fmt:message key="errors.jsp.ClickHere"/></a> <fmt:message key="errors.jsp.ToSee"/><br><fmt:message key="errors.jsp.contactsupport"/>  - <fmt:message key="errors.jsp.callhyperic"/></td>\n" +
+"       <td class=\"ErrorBlock\" width=\"100%\"><fmt:message key="errors.jsp.problem"/> <a href=\"javascript:displayStackTrace<%= randomNum %>()\"><fmt:message key="errors.jsp.ClickHere"/></a> <fmt:message key="errors.jsp.ToSee"/></td>\n" +
 "	</tr>\n" +
 "</table>\n" + 
 "</td>\n" + 

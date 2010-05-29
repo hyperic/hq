@@ -64,6 +64,8 @@ djConfig.scopeMap = [
 <script type="text/javascript">
     var imagePath = "<html:rewrite page="/images/"/>";
     dojo11.require('dojo.date');
+    dojo.require('dojo.event.*');
+	dojo.require('dojo.widget.*');
 </script>
 <script src="<html:rewrite page='/js/prototype.js'/>" type="text/javascript"></script>
 <script src="<html:rewrite page='/js/popup.js'/>" type="text/javascript"></script>

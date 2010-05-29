@@ -26,9 +26,9 @@
 package org.hyperic.hq.autoinventory;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -42,19 +42,20 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
-import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AIServerExtValue;
+import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.StringifiedException;
-
-import org.apache.commons.logging.Log;
 
 public class ScanState {
 
     private static HashMap installdirExcludes = new HashMap();
     private static List installdirExcludesPrefixes = new ArrayList();
+    private static final Log _log = LogFactory.getLog(ScanState.class);
     
     static {
         loadInstalldirExcludes();
@@ -372,7 +373,6 @@ public class ScanState {
      */
     public void printStackTraces () {
         ScanMethodState[] smStates = _core.getScanMethodStates();
-        AIServerValue[] servers;
         StringifiedException[] exc;
         for ( int i=0; i<smStates.length; i++ ) {
             exc = smStates[i].getExceptions();
@@ -513,7 +513,7 @@ public class ScanState {
      * is based on the server autoinventory identifier, which is
      * usually the same as the install path.
      */
-    public Set getAllServers (Log logger) throws AutoinventoryException {
+    public Set getAllServers () throws AutoinventoryException {
 
         // allServers will guarantee uniqueness on the AIID.
         Set allServers = new TreeSet(COMPARE_AIID);
@@ -544,8 +544,8 @@ public class ScanState {
             if ( servers != null ) {
                 for ( int j=0; j<servers.length; j++ ) {
                     if ( !allServers.add(servers[j]) ) {
-                        if ( logger != null ) {
-                            logger.info("Server not added because another scan "
+                        if ( _log != null ) {
+                            _log.info("Server not added because another scan "
                                         + "method already detected it:" 
                                         + servers[j]);
                         }
@@ -594,8 +594,8 @@ public class ScanState {
                 //disable metric collection
                 server.unsetMeasurementConfig();
 
-                if (logger != null) {
-                    logger.info("Turning off AutoEnable for server " +
+                if (_log != null) {
+                    _log.info("Turning off AutoEnable for server " +
                                 server.getName() +
                                 " [" + server.getInstallPath() + "]" +
                                 ", has the same metric connect config as " +
@@ -651,8 +651,8 @@ public class ScanState {
         if (!AICompare.compareAIPlatforms(p1, p2)) return false;
 
         Set servers1, servers2;
-        servers1 = getAllServers(null);
-        servers2 = other.getAllServers(null);
+        servers1 = getAllServers();
+        servers2 = other.getAllServers();
         if (!AICompare.compareAIServers(servers1, servers2)) return false;
 
         return true;

@@ -157,6 +157,8 @@ dojo.declare(
 		//		False will disable refocusing. Default: true
 		refocus: true,
 
+		autofocus: true, 
+		
 		// _firstFocusItem: DomNode
 		//		The pointer to the first focusable node in the dialog
 		_firstFocusItem:null,
@@ -351,9 +353,11 @@ dojo.declare(
 			this._getFocusItems(this.domNode);
 
 			// set timeout to allow the browser to render dialog
-			setTimeout(dojo.hitch(this, function(){
-				dijit.focus(this._firstFocusItem);
-			}), 50);
+			if(this.autofocus){ 
+				setTimeout(dojo.hitch(this, function(){
+					dijit.focus(this._firstFocusItem);
+				}), 50);
+			}
 		},
 
 		hide: function(){

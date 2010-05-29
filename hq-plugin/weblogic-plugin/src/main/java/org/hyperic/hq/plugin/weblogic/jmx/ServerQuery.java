@@ -26,6 +26,7 @@
 package org.hyperic.hq.plugin.weblogic.jmx;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Hashtable;
@@ -36,6 +37,9 @@ import java.util.StringTokenizer;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.MalformedObjectNameException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.plugin.weblogic.WeblogicDetector;
 
 import org.hyperic.hq.product.TypeBuilder;
 
@@ -46,6 +50,8 @@ import org.hyperic.hq.plugin.weblogic.WeblogicProductPlugin;
 public class ServerQuery
     extends BaseServerQuery
     implements Comparator {
+
+    private static final Log log = LogFactory.getLog(ServerQuery.class);
 
     private WeblogicDiscover discover;
     private String url;
@@ -445,19 +451,17 @@ public class ServerQuery
         if (!this.isRunning) {
             return "";
         }
-
-        if (this.isAdmin) {
-            ctl = new File(this.cwd, "startWebLogic.sh").toString();
-        }
-        else {
-            if (this.cwd.getName().equals("nodemanager")) {
-                ctl = "";
+        
+        if (this.cwd.getName().equals("nodemanager")) {
+            ctl = "";
+        } else {
+            try {
+                ctl = new File(this.cwd, WeblogicDetector.NODE_START).getCanonicalPath();
+            } catch (IOException ex) {
+                ctl = new File(this.cwd, WeblogicDetector.NODE_START).getPath();
+                log.debug(ex);
             }
-            else {
-                ctl = new File(this.cwd, "startManagedWebLogic.sh").toString();
-            }
         }
-
         return ctl;
     }
 

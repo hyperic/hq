@@ -250,7 +250,9 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 		<table width="100%" cellpadding="0" cellspacing="0" border="0">
 			<tr>
 				<td class="ListCellLineEmpty"><html:img page="/images/spacer.gif" width="5" height="1" border="0"/></td>
-				<td class="ListHeaderInactive"><input type="checkbox" name="toToggleAll" onClick="ToggleAll(this, widgetProperties);" /></td>
+
+				<td class="ListHeaderInactive"><input type="checkbox" name="toToggleAll" onClick="ToggleAll(this, widgetProperties);"/></td>
+
 				<td class="ListHeaderInactiveSorted">
 				<html:img page="/images/spacer.gif" width="200" height="1" border="0"/><br>
 				<fmt:message key="common.header.Group"/><html:img page="/images/tb_sortup_inactive.gif" width="9" height="9" border="0"/></td>

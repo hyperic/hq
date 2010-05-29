@@ -41,6 +41,8 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -54,6 +56,7 @@ import org.hyperic.hq.events.server.session.AlertDAO;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
 import org.hyperic.hq.galerts.server.session.GalertEscalationAlertType;
 import org.hyperic.hq.galerts.server.session.GalertLogDAO;
+import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -114,6 +117,11 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
 		// backport apis but don't think this is a good idea)
 		// 3 threads to service requests
 		_executor = new ThreadPoolExecutor(3, 3, Long.MAX_VALUE, TimeUnit.SECONDS, new LinkedBlockingQueue());
+	}
+	
+	@PostConstruct
+	public void initStatsCollection() {
+	    ConcurrentStatsCollector.getInstance().register(ConcurrentStatsCollector.ESCALATION_EXECUTE_STATE_TIME);
 	}
 
 	/**

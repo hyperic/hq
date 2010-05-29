@@ -211,6 +211,8 @@ public interface ResourceManager {
      * @return Array of resources owned by the given subject.
      */
     public Collection<Resource> findResourceByOwner(AuthzSubject owner);
+    
+    Collection<ResourceEdge> findResourceEdges(ResourceRelation relation, List<Resource> parentList);
 
     public Collection<ResourceEdge> findResourceEdges(ResourceRelation relation, Resource parent);
 

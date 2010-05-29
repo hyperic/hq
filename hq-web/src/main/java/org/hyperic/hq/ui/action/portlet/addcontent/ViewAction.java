@@ -84,9 +84,11 @@ public class ViewAction
         if (wide.booleanValue()) {
             userPortlets = dashPrefs.getValue(Constants.USER_PORTLETS_SECOND);
             multi = (List<String>) context.getAttribute("multi.wide");
+            session.setAttribute("multi.wide", multi);
         } else {
             userPortlets = dashPrefs.getValue(Constants.USER_PORTLETS_FIRST);
             multi = (List<String>) context.getAttribute("multi.narrow");
+            session.setAttribute("multi.narrow", multi);
         }
 
         // Populate available portlets list...

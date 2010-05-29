@@ -96,23 +96,37 @@ public class ConfigManagerImpl implements ConfigManager {
      */
     @Transactional(readOnly=true)
     public ConfigResponseDB getConfigResponse(AppdefEntityID id) {
-        ConfigResponseDB config;
+        ConfigResponseDB config = null;
 
         switch (id.getType()) {
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                config = platformDAO.findById(id.getId()).getConfigResponse();
+                Platform platform = platformDAO.get(id.getId());
+                if(platform != null) {
+                    config = platform.getConfigResponse();
+                }
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                config = serverDAO.findById(id.getId()).getConfigResponse();
+                Server server = serverDAO.get(id.getId());
+                if(server != null) {
+                    config = server.getConfigResponse();
+                }
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                config = serviceDAO.findById(id.getId()).getConfigResponse();
+                Service service = serviceDAO.get(id.getId());
+                if(service != null) {
+                    config = service.getConfigResponse();
+                }
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
             default:
-                throw new IllegalArgumentException("The passed entity type " + "does not support config " + "responses");
+                throw new IllegalArgumentException("The resource[ " + id + "] does not support config " + "responses");
         }
-
+        // Platforms, servers, and services should have a config response record.
+        // A null config response could indicate that the resource has been deleted.
+        if (config == null) {
+            throw new IllegalArgumentException(
+                "No config response found for resource[" + id + "]");
+        }
         return config;
     }
 

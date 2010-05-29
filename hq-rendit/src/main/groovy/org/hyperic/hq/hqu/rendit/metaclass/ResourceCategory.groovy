@@ -8,6 +8,7 @@ import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.control.shared.ControlManager;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.control.shared.ControlScheduleManager;
 import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.authz.server.session.ResourceGroup
@@ -32,6 +33,7 @@ import org.hyperic.hq.product.PluginNotFoundException
 
 
 import org.hyperic.hq.livedata.shared.LiveDataCommand
+import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.livedata.shared.LiveDataManager;
 import org.hyperic.hq.livedata.shared.LiveDataResult
@@ -154,6 +156,22 @@ class ResourceCategory {
 	static Collection getMetrics(Resource r) {
 		dman.findMeasurements(null, r)
 	}
+	
+    /**
+     * Get the metrics summary for a resource
+     */
+    static Map getMetricsSummary(Resource r, AuthzSubject user, long begin, long end) {
+       def mgr = SessionManager.instance
+       def sessionId = mgr.put(user)
+       def aeids = [new AppdefEntityID(r)] as AppdefEntityID[]
+       return Bootstrap.getBean(MeasurementBoss.class).findMetrics(sessionId,
+           aeids,
+           MeasurementConstants.FILTER_NONE,
+           null,
+           begin,
+           end,
+           false)          
+   }
 	
 	/**
 	 * Get the availability Measurement for a Resource.

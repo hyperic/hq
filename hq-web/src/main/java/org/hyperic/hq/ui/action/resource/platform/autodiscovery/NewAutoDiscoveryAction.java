@@ -89,6 +89,10 @@ public class NewAutoDiscoveryAction
             PlatformAutoDiscoveryForm newForm = (PlatformAutoDiscoveryForm) form;
 
             Integer platformId = newForm.getRid();
+            if (platformId == null) {
+                RequestUtils.setError(request, Constants.ERR_PLATFORM_NOT_FOUND);
+                return returnFailure(request, mapping);
+            }
             Integer platformType = newForm.getType();
 
             HashMap<String, Object> forwardParams = new HashMap<String, Object>(3);

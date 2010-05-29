@@ -45,22 +45,7 @@ public class WebsphereControlPlugin
     private static final List commands     = Arrays.asList(actions);
 
     private InetPortPinger portPinger;
-    private String binDir = null;
     private String[] ctlArgs = new String[0];
-
-    protected String getDefaultScript() {
-        return
-            "bin/startServer" +
-            getScriptExtension(getTypeInfo()); 
-    }
-
-    public void init(PluginManager manager)
-        throws PluginException {
-
-        super.init(manager);
-        setTimeout(DEFAULT_TIMEOUT * 10);
-        setControlProgram(getDefaultScript());
-    }
 
     protected String getAdminHost() {
         return getConfig().getValue(WebsphereProductPlugin.PROP_ADMIN_HOST);
@@ -100,12 +85,6 @@ public class WebsphereControlPlugin
     {
         super.configure(config);
 
-        validateControlProgram(WebsphereProductPlugin.SERVER_NAME);
-
-        this.binDir = getControlProgramDir();
-
-        //5.0 startup script takes server.name as an arg
-        //and stop takes user/pass w/ global security enabled
         String username = getUsername();
         String password = getPassword();
 
@@ -186,7 +165,8 @@ public class WebsphereControlPlugin
     }
 
     protected int doCommand(String action, String[] args) {
-        String script = this.binDir + File.separator + action + "Server.sh";
+        String script=getConfig().getValue(PROP_PROGRAM+"."+action);
+        setControlProgram(script);
 
         getLog().debug("command script=" + script);
 

@@ -1,0 +1,104 @@
+#!/usr/bin/perl -w
+
+use Getopt::Long;
+use File::Basename;
+use strict;
+
+my ($sourceUser, $sourcePass, $targetUser, $targetPass);
+my ($sourceUrl, $targetUrl, $debug);
+
+my $BASEDIR = dirname($0);
+my $LIBS = "-cp $BASEDIR/../lib/dbunit-2.2.jar:$BASEDIR/../lib/mysql-connector-java-5.0.5-bin.jar:$BASEDIR/../lib/postgresql-8.1-407.jdbc3.jar:$BASEDIR/../lib/dbmigrate.jar";
+my $ARGS = "-Xms1536m -Xmx1536m";
+
+sub main() {
+    getArgs();
+    my $tmpDir = "$BASEDIR/../tmp/";
+    mkdir($tmpDir);
+    if (!(-d "$tmpDir")) {
+        print STDERR "ERROR dir $tmpDir cannot be created\n";
+    }
+    my $cmd = "java $ARGS $LIBS DatabaseExport -s $sourceUser -p $sourcePass ".
+              "-t $targetUser -r $targetPass -u $sourceUrl -g $targetUrl -w $tmpDir";
+    $cmd = (defined($debug)) ? "$cmd -d" : "$cmd";
+    print "$cmd\n";
+    exec($cmd);
+}
+
+main();
+
+sub getArgs() {
+    my $count = @ARGV;
+    Getopt::Long::Configure ("bundling");
+    $Getopt::Long::ignorecase = 0;
+    $Getopt::Long::autoabbrev = 0;
+    GetOptions("s=s" => \$sourceUser,
+               "sourceuser=s" => \$sourceUser,
+               "p=s" => \$sourcePass,
+               "sourcepass=s" => \$sourcePass,
+               "t=s" => \$targetUser,
+               "targetuser=s" => \$targetUser,
+               "r=s" => \$targetPass,
+               "targetpass=s" => \$targetPass,
+               "u=s" => \$sourceUrl,
+               "sourceurl=s" => \$sourceUrl,
+               "g=s" => \$targetUrl,
+               "targeturl=s" => \$targetUrl,
+               "vmargs=s" => \$ARGS,
+               "d" => \$debug,
+               "debug" => \$debug) || printUsage() && exit(1);
+    if ($count == 0 || ($count == 1 && $debug)) {
+        printUsage();
+        exit(0);
+    }
+    if (!defined($targetUrl)) {
+        print "ERROR, targeturl not defined\n";
+        printUsage();
+        exit(1);
+    }
+    if (!defined($sourceUrl)) {
+        print "ERROR, sourceurl not defined\n";
+        printUsage();
+        exit(1);
+    }
+    if (!defined($targetPass)) {
+        print "ERROR, targetpass not defined\n";
+        printUsage();
+        exit(1);
+    }
+    if (!defined($targetUser)) {
+        print "ERROR, targetuser not defined\n";
+        printUsage();
+        exit(1);
+    }
+    if (!defined($sourcePass)) {
+        print "ERROR, sourcepass not defined\n";
+        printUsage();
+        exit(1);
+    }
+    if (!defined($sourceUser)) {
+        print "ERROR, sourceuser not defined\n";
+        printUsage();
+        exit(1);
+    }
+}
+
+sub printUsage() {
+    my $thisprog = basename($0);
+    my $sp = " " x length($thisprog);
+    print "usage:\n";
+    print "$thisprog --sourceuser <user> --sourcepass <pass>\n";
+    print "$sp --targetuser <user> --targetpass <pass>\n";
+    print "$sp --sourceurl <jdbcurl> --targeturl <jdbcurl>\n";
+    print "$thisprog:\n";
+    print "$sp -s, --sourceuser => source postgres db username\n";
+    print "$sp -p, --sourcepass => source postgres db password\n";
+    print "$sp -u, --sourceurl  => source postgres url (e.g. jdbc:postgresql://localhost:5432/hqdb)\n";
+    print "$sp -t, --targetuser => target mysql db username\n";
+    print "$sp -r, --targetpass => target mysql db password\n";
+    print "$sp -g, --targeturl  => target mysql url (e.g. jdbc:mysql://localhost:3306/hqdb)\n";
+    print "$sp -d, --debug      => prints debugging statetments to STDOUT\n";
+    print "$sp --vmargs         => java vm args, default = \"$ARGS\"\n";
+    print "$sp ARGS             => $LIBS\n" if ($debug);
+}
+

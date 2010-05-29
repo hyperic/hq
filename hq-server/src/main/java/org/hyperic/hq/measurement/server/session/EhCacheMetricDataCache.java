@@ -28,6 +28,7 @@ package org.hyperic.hq.measurement.server.session;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
@@ -108,6 +109,24 @@ public class EhCacheMetricDataCache implements MetricDataCache {
 
         return true;            
     }
+    
+    public Map<Integer,MetricValue> getAll(List<Integer> mids, long timestamp) {
+        final Map<Integer,MetricValue> rtn = new HashMap<Integer,MetricValue>(mids.size());
+        synchronized (cacheLock) {
+            for (final Integer mid : mids ) {
+                final Element elem = cache.get(mid);
+                if (elem == null) {
+                    continue;
+                }
+                final MetricValue val = (MetricValue) elem.getObjectValue();
+                if (val != null && val.getTimestamp() >= timestamp) {
+                    rtn.put(mid, val);
+                }
+            }
+        }
+        return rtn;
+    }
+
 
    
     public MetricValue get(Integer mid, long timestamp) {

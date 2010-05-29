@@ -652,7 +652,16 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 
         return meas;
     }
-
+    
+    /**
+     * @param aeids {@link List} of {@link Resource}s
+     * @return {@link Map} of {@link Integer} representing resourceId to
+     * {@link List} of {@link Measurement}s
+     */
+    public Map<Integer,List<Measurement>> getEnabledMeasurements(List<Resource> resources) {
+        return measurementDAO.findEnabledByResources(resources);
+    }
+    
     /**
      * Look up a list of enabled Measurements for a category
      * 
@@ -1583,6 +1592,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         getMeasurementProcessor().scheduleSynchronous(aeids);
     }
 
+    @Transactional(readOnly=true)
     public void unschedule(List<AppdefEntityID> aeids) throws MeasurementUnscheduleException {
         getMeasurementProcessor().unschedule(aeids);
     }

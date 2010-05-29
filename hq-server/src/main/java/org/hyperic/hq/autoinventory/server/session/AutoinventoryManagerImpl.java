@@ -628,11 +628,11 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager,
         // TODO: G
         log.info("Received auto-inventory report from " + aiPlatform.getFqdn() + "; IPs -> " +
                  getIps(aiPlatform.getAddedAIIpValues()) + "; CertDN -> " + aiPlatform.getCertdn() +
-                 "; (" + state.getAllServers(log).size() + " servers)");
+                 "; (" + state.getAllServers().size() + " servers)");
 
         if (debug) {
             log.debug("AutoinventoryManager.reportAIData called, " + "scan state=" + state);
-            log.debug("AISERVERS=" + state.getAllServers(log));
+            log.debug("AISERVERS=" + state.getAllServers());
         }
 
         // In the future we may want this method to act as
@@ -664,7 +664,7 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager,
 
         if (stateCore.getAreServersIncluded()) {
             // TODO: G
-            Set<AIServerValue> serverSet = state.getAllServers(log);
+            Set<AIServerValue> serverSet = state.getAllServers();
 
             for (AIServerValue aiServer : serverSet) {
                 // Ensure the server reported has a valid appdef type
@@ -769,7 +769,7 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager,
         Collection<AgentReportStatus> dirties = agentReportStatusDao.findDirtyStatus();
         List<Agent> res = new ArrayList<Agent>(dirties.size());
 
-        log.debug("Found " + dirties.size() + " agents with " + "serviceDirty = true");
+        log.info("Found " + dirties.size() + " agents with " + "serviceDirty = true");
 
         for (AgentReportStatus s : dirties) {
             if (!serviceMerger.currentlyWorkingOn(s.getAgent())) {

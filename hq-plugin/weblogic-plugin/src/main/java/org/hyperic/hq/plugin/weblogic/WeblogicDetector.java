@@ -30,6 +30,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
@@ -49,6 +50,7 @@ import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
 
 import org.hyperic.hq.plugin.weblogic.jmx.WeblogicRuntimeDiscoverer;
+import org.hyperic.sigar.SigarException;
 
 public class WeblogicDetector
     extends ServerDetector 
@@ -64,14 +66,12 @@ public class WeblogicDetector
     private static final String ADMIN_START =
         "startWebLogic" + SCRIPT_EXT;
 
-    private static final String NODE_START =
-        "startManagedWebLogic" + SCRIPT_EXT;
+    public static final String NODE_START = "bin/startManagedWebLogic" + SCRIPT_EXT;
 
     private static final String PROP_MX_SERVER =
         "-Dweblogic.management.server";
 
-    private static final Log _log = LogFactory.getLog("WeblogicDetector");
-    private Log log = _log; //XXX cleanup
+    private static final Log log = LogFactory.getLog(WeblogicDetector.class);
 
     public WeblogicDetector() {
         super();
@@ -80,28 +80,6 @@ public class WeblogicDetector
 
     public RuntimeDiscoverer getRuntimeDiscoverer() {
         return new WeblogicRuntimeDiscoverer(this);
-    }
-
-    private File getPossibleControlProgram(File dir) {
-        String[] scripts = dir.list(new FilenameFilter() {
-            public boolean accept(File dir, String name) {
-                if (name.startsWith("start") &&
-                    name.endsWith(SCRIPT_EXT) &&
-                    !name.equals(NODE_START) &&
-                    (name.indexOf("PointBase") == -1))
-                {
-                    return true;
-                }
-                return false;
-            }
-         });
-
-        if ((scripts == null) || (scripts.length == 0)) {
-            return null;
-        }
-        else {
-            return new File(dir, scripts[0]);
-        }
     }
 
     //just here to override protected access.
@@ -206,41 +184,31 @@ public class WeblogicDetector
             "logs",  //9.1
         };
         
-        File log = null;
+        File wlsLog = null;
         
         for (int i=0; i<dirs.length; i++) {
-            log =
+            wlsLog =
                 new File(installDir,
                          dirs[i] + File.separator + srvName + ".log");
-            if (log.exists()) {
+            if (wlsLog.exists()) {
                 break;
             }
         }
 
         productConfig.setValue(WeblogicLogFileTrackPlugin.PROP_FILES_SERVER,
-                               log.toString());
+                               wlsLog.toString());
 
         ConfigResponse controlConfig = new ConfigResponse();
-        File script = //9.1
-            getPossibleControlProgram(new File(installDir, "../.."));
-        if ((script == null) || !script.exists()) {
-            script = getPossibleControlProgram(installDir);
-        }
-        if (script == null) {
-            script = new File(installDir, ADMIN_START);
-        }
-
+        File script = new File(installDir,"../../" + ADMIN_START);
         try {
-            controlConfig.setValue(ServerControlPlugin.PROP_PROGRAM,
-                                   getCanonicalPath(script.getPath()));
-        } catch (InvalidOptionException e) {
-            this.log.error(e.getMessage(), e);
-        } catch (InvalidOptionValueException e) {
-            this.log.error(e.getMessage(), e);
+            controlConfig.setValue(ServerControlPlugin.PROP_PROGRAM, script.getCanonicalPath());
+        } catch (IOException ex) {
+            controlConfig.setValue(ServerControlPlugin.PROP_PROGRAM, script.getPath());
+            log.debug(ex);
         }
 
         boolean hasCreds = false;
-        //for use w/ -jar hq-pdk-shared.jar or agent.properties
+        //for use w/ -jar hq-product.jar or agent.properties
         Properties props = getManager().getProperties();
         String[] credProps = {
             WeblogicMetric.PROP_ADMIN_USERNAME,
@@ -278,8 +246,8 @@ public class WeblogicDetector
 
         server.setName(name);
 
-        server.setProductConfig(productConfig);
-        server.setControlConfig(controlConfig);
+        setProductConfig(server,productConfig);
+        setControlConfig(server,controlConfig);
         //force user to configure by not setting measurement config
         //since we dont discover username or password.
         if (hasCreds) {
@@ -338,18 +306,26 @@ public class WeblogicDetector
         long[] pids = getPids(PTQL_QUERY);
 
         for (int i=0; i<pids.length; i++) {
-            //nothin in the ProcArgs to indicate installpath
-            String cwd = getProcCwd(pids[i]);
+            log.debug("pid = '"+pids[i]+"'");
+            String cwd = null;
+            try {
+                cwd = getSigar().getProcExe(pids[i]).getCwd();
+                log.debug("cwd = '"+cwd+"'");
+            } catch (SigarException e) {
+                log.debug("Error getting process info, pid: '"+pids[i]+"', reason: '"+e.getMessage()+"'");
+            }
             boolean haveCwd = cwd != null;
 
             //9.1-specific since config.xml no longer tells us
             //this is an admin server, check the args for this prop,
             //which if found means this is a node server, skip it.
             String[] args = getProcArgs(pids[i]);
+            log.debug("args = "+Arrays.asList(args));
             for (int j=0; j<args.length; j++) {
                 String arg = args[j];
                 if (arg.startsWith(PROP_MX_SERVER)) {
                     haveCwd = false;
+                    log.debug(PROP_MX_SERVER+" found");
                     break;
                 }
                 else if (!haveCwd && arg.startsWith("-D")) {
@@ -359,6 +335,7 @@ public class WeblogicDetector
                         String path = arg.substring(ix+1).trim();
                         if (isAdminDir(path)) {
                             cwd = path;
+                            log.debug("cwd = '"+cwd+"'");
                             haveCwd = true;
                         }
                     }
@@ -422,7 +399,7 @@ public class WeblogicDetector
 
                 installpath = getInstallRoot(arg);
                 if (installpath != null) {
-                    _log.debug(WeblogicProductPlugin.PROP_INSTALLPATH + "=" +
+                    log.debug(WeblogicProductPlugin.PROP_INSTALLPATH + "=" +
                                installpath + " (derived from " + args[j] + ")");
                     break;
                 }

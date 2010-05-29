@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>Hyperic HQ 4.0 and 4.1 Documentation : ui-Alert.ListDefinition</title>
+        <title>Hyperic HQ 4.x Documentation : ui-Alert.ListDefinition</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -12,11 +12,11 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            Hyperic HQ 4.0 and 4.1 Documentation : ui-Alert.ListDefinition
+                            Hyperic HQ 4.x Documentation : ui-Alert.ListDefinition
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jul 14, 2009 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 25, 2010 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><em>Topics marked with</em> <font color="red"><em>&#42;</em></font> <em>relate to HQ Enterprise-only features.</em></p>
@@ -32,11 +32,11 @@
 </ol>
 </div></div>
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1247597618846 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1247597618846 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1247597618846 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1264441868829 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1264441868829 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1264441868829 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1247597618846'>
+/*]]>*/</style><div class='rbtoc1264441868829'>
 <ul>
     <li><a href='#ui-Alert.ListDefinition-ListAlertDefinitionsforaResource'>List Alert Definitions for a Resource</a></li>
     <li><a href='#ui-Alert.ListDefinition-CreateanAlertDefinitionforaResource'>Create an Alert Definition for a Resource</a></li>
@@ -49,43 +49,45 @@ div.rbtoc1247597618846 li {margin-left: 0px;padding-left: 0px;}
 <h2><a name="ui-Alert.ListDefinition-ListAlertDefinitionsforaResource"></a>List Alert Definitions for a Resource</h2>
 
 <p>The following information is shown for each alert definition that is assigned to the resource, or in HQ Enterprise, inherited by the resource from a  resource type alert definition.&nbsp; An inherited alert definition has a red asterisk preceding its name in the "Alert Definition" column.</p>
+<div class='table-wrap'>
 <table class='confluenceTable'><tbody>
 <tr>
-<th class='confluenceTh'> Label <br clear="all" /> </th>
-<th class='confluenceTh'> Description <br clear="all" /> </th>
+<th class='confluenceTh'> Label <br class="atl-forced-newline" /> </th>
+<th class='confluenceTh'> Description <br class="atl-forced-newline" /> </th>
 </tr>
 <tr>
-<td class='confluenceTd'> Alert Definition <br clear="all" /> </td>
-<td class='confluenceTd'> Name assigned to the alert definition. <br clear="all" /> </td>
+<td class='confluenceTd'> Alert Definition <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Name assigned to the alert definition. <br class="atl-forced-newline" /> </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Description </td>
-<td class='confluenceTd'> Description defined in the alert definition. <br clear="all" /> </td>
+<td class='confluenceTd'> Description defined in the alert definition. <br class="atl-forced-newline" /> </td>
 </tr>
 <tr>
-<td class='confluenceTd'> Date Created <br clear="all" /> </td>
-<td class='confluenceTd'> Date and time the alert definition was created. <br clear="all" /> </td>
+<td class='confluenceTd'> Date Created <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Date and time the alert definition was created. <br class="atl-forced-newline" /> </td>
 </tr>
 <tr>
-<td class='confluenceTd'> Last Modified <br clear="all" /> </td>
-<td class='confluenceTd'> Date and time the alert definition was most recently modified. <br clear="all" /> </td>
+<td class='confluenceTd'> Last Modified <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Date and time the alert definition was most recently modified. <br class="atl-forced-newline" /> </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Active </td>
-<td class='confluenceTd'> Indicates whether the alert definition is currently enabled or disabled. </td>
+<td class='confluenceTd'> Indicates whether the alert definition is currently enabled or disabled. "Yes" and a yellow flag <span class="image-wrap" style=""><img src="attachments/66926072/67273187.gif" style="border: 0px solid black"/></span> in this column indicates that the alert definition has fired once and is disabled until it it is "Fixed". (The alert definition was configured to "fire once and disable until fixed".) When the alert is fixed the definition will be re-enabled. </td>
 </tr>
 </tbody></table>
+</div>
+
 
 <h2><a name="ui-Alert.ListDefinition-CreateanAlertDefinitionforaResource"></a>Create an Alert Definition for a Resource</h2>
 
-<p>Click <img src="download/attachments/59375640/tbb_new.png" align="absmiddle" border="0"/> and proceed to the "New Alert Definition" page - the new alert definition will apply to the currently selected resource. For more information, see the associated <a href="ui-Alert.New.html" title="ui-Alert.New">help</a> page.</p>
+<p>Click <span class="image-wrap" style=""><img src="attachments/59375640/59539677.png" style="border: 0px solid black"/></span> and proceed to the "New Alert Definition" page - the new alert definition will apply to the currently selected resource. For more information, see the associated <a href="ui-Alert.New.html" title="ui-Alert.New">help</a> page.</p>
 
 <h2><a name="ui-Alert.ListDefinition-EnableorDisableaResourceAlertDefinition"></a>Enable or Disable a Resource Alert Definition</h2>
 
 <p>When an alert definition is "enabled" it is active and alerts can fire. When an alert definition is "disabled", alerts for it will not fire.</p>
 
-
-<p>Check the alert definition name, and in <ins>Set Active</ins>, select "YES" (to enable) or "NO" (to disable) in the dropdown box and click <img src="download/attachments/59375640/dash-button_go-arrow.png" align="absmiddle" border="0"/>.</p>
+<p>Check the alert definition name, and in <ins>Set Active</ins>, select "YES" (to enable) or "NO" (to disable) in the dropdown box and click <span class="image-wrap" style=""><img src="attachments/59375640/59539570.png" style="border: 0px solid black"/></span>.</p>
 
 <p><b>Note</b>: If you use HQ Enterprise, do not disable an alert definition marked with an asterisk (<tt>&#42;</tt>) - this indicates it is inherited from a resource type alert definition.&nbsp; Changes made to an inherited alert definition from a resource's <b>Alert</b> tab will be overridden by subsequent updates to the resource type alert definition. To enable or disable a resource type alert definition, go to the list of alert definitions for the resource type, as described in the note at the top of this page.</p>
 
@@ -97,9 +99,10 @@ div.rbtoc1247597618846 li {margin-left: 0px;padding-left: 0px;}
 
 <h2><a name="ui-Alert.ListDefinition-DeleteaResourceAlertDefinition"></a>Delete a Resource Alert Definition</h2>
 
-<p>Check the alert definition name and click <img src="download/attachments/59375640/tbb_delete.png" align="absmiddle" border="0"/>.</p>
+<p>Check the alert definition name and click <span class="image-wrap" style=""><img src="attachments/59375640/59539501.png" style="border: 0px solid black"/></span>.</p>
 
-<p><b>Note</b>: If you use HQ Enterprise, do not use the delete option on this page for&nbsp; an alert definition marked with an asterisk (<tt>&#42;</tt>) - this indicates it is inherited from a resource type alert definition.&nbsp; Changes made to an inherited alert definition from a resource's <b>Alert</b>tab will be overridden by subsequent updates to the resource type alert definition. To delete a resource type alert definition, go to the list of alert definitions for the resource type, as described in the note at the top of this page.<br clear="all" /></p>
+<p><b>Note</b>: If you use HQ Enterprise, do not use the delete option on this page for&nbsp; an alert definition marked with an asterisk (<tt>&#42;</tt>) - this indicates it is inherited from a resource type alert definition.&nbsp; Changes made to an inherited alert definition from a resource's <b>Alert</b>tab will be overridden by subsequent updates to the resource type alert definition. To delete a resource type alert definition, go to the list of alert definitions for the resource type, as described in the note at the top of this page.
+<br class="atl-forced-newline" /></p>
 <div class="panel" style="border-width: 1px;"><div class="panelHeader" style="border-bottom-width: 1px;"><b>Related Information</b></div><div class="panelContent">
 <ul>
 	<li>For an overview of alerting in HQ, see <a href="http://support.hyperic.com/confluence/display/DOC/Key+Facts+about+HQ+Alerting" title="Key Facts about HQ Alerting">Key Facts about HQ Alerting</a>.</li>
@@ -114,16 +117,16 @@ div.rbtoc1247597618846 li {margin-left: 0px;padding-left: 0px;}
 
                         <div class="greybox" align="left">
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="download/attachments/59375640/SubMonitor_Alerts_off.png">SubMonitor_Alerts_off.png</a> (image/png)
+                                <a href="attachments/59375640/59539712.png">SubMonitor_Alerts_off.png</a> (image/png)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="download/attachments/59375640/tbb_new.png">tbb_new.png</a> (image/png)
+                                <a href="attachments/59375640/59539677.png">tbb_new.png</a> (image/png)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="download/attachments/59375640/dash-button_go-arrow.png">dash-button_go-arrow.png</a> (image/png)
+                                <a href="attachments/59375640/59539570.png">dash-button_go-arrow.png</a> (image/png)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="download/attachments/59375640/tbb_delete.png">tbb_delete.png</a> (image/png)
+                                <a href="attachments/59375640/59539501.png">tbb_delete.png</a> (image/png)
                                 <br/>
                                                     </div>
 				    
@@ -135,7 +138,7 @@ div.rbtoc1247597618846 li {margin-left: 0px;padding-left: 0px;}
 				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 20, 2009 15:33</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Apr 20, 2010 15:01</font></td>
 		    </tr>
 	    </table>
     </body>

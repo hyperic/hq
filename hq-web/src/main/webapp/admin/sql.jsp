@@ -45,11 +45,12 @@ $Header: /var/cvsroot/hyperic_hq/web/admin/sql.jsp,v 1.3 2005/04/21 20:38:26 dou
 <%@ page import="org.hyperic.hq.bizapp.shared.AuthzBoss" %>
 <%@ page import="org.hyperic.hq.common.shared.HQConstants" %>
 <%@ page import="org.hyperic.hq.ui.util.SessionUtils" %>
+<%@ page import="org.apache.commons.lang.StringEscapeUtils"%>
 
 <%!public static final SimpleDateFormat DBDATEFORMAT = new SimpleDateFormat("dd-MMM-yyyy");
 public static final SimpleDateFormat DBDATETIMEFORMAT = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss");
 
-public static final String NULL = "<em>null</em>";
+public static final String NULL = "null";
 
 private String stripSQLComments ( String sql ) {
     if ( sql == null ) return null;
@@ -174,8 +175,8 @@ private StringBuffer processSQL ( Connection conn, String sql, int index, int nu
                         } else if ( couldBeTimes[i-1] && isLongField(aValue) ) {
                             aValue = DBDATETIMEFORMAT.format(new Date(Long.parseLong(aValue)));
                         }
-                        rstr.append("<td valign=\"top\"><font face=\"Verdana,Arial,Helvetica\" size=\"-2\">")
-                            .append(aValue).append("</font></td>");
+                        rstr.append("<td valign=\"top\"><font face=\"Verdana,Arial,Helvetica\" size=\"-2\" style=\"font-weight: normal;\">")
+                 	 		.append(StringEscapeUtils.escapeHtml(aValue)).append("</font></td>");
                     }
                     rstr.append("</tr>");
                 }

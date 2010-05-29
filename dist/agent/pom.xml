@@ -37,6 +37,7 @@
 		<dependency>
   			<groupId>postgresql</groupId>
   			<artifactId>postgresql</artifactId>
+			<version>${postgresql.agent.driver.version}</version>
 		</dependency>
 		<dependency>
     		<groupId>mx4j</groupId>

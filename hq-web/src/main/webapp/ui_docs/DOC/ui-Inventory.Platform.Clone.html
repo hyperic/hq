@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>Hyperic HQ 4.0 and 4.1 Documentation : ui-Inventory.Platform.Clone</title>
+        <title>Hyperic HQ 4.x Documentation : ui-Inventory.Platform.Clone</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -12,40 +12,103 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            Hyperic HQ 4.0 and 4.1 Documentation : ui-Inventory.Platform.Clone
+                            Hyperic HQ 4.x Documentation : ui-Inventory.Platform.Clone
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jul 20, 2009 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jul 24, 2009 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
-				    <h1><a name="ui-Inventory.Platform.Clone-CloningaPlatform"></a>Cloning a Platform<font color="red">&#42;</font></h1>
+				    <p><b>Available only in <font color="red">HQ Enterprise</font></b></p>
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1248440782147 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1248440782147 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1248440782147 li {margin-left: 0px;padding-left: 0px;}
 
-<p><b>Available only in <font color="red">HQ Enterprise</font></b></p>
-<p>This screen allows users to copy the inventory resources on one platform to one or more other platforms in HQ inventory. The cloning process:</p>
+/*]]>*/</style><div class='rbtoc1248440782147'>
 <ul>
-	<li>Clones all servers on the source platform to the target platforms.</li>
-	<li>Does not clone the services that comprise the cloned servers; the child services will be added through the auto-discovery process.</li>
-	<li>Clones all manually created platform services on the source platform to the target platforms.</li>
-	<li>Does not clone auto-discovered platform services on the source platform to the target platforms.</li>
-</ul>
+    <li><a href='#ui-Inventory.Platform.Clone-CloningaPlatform'>Cloning a Platform <span style="color: red">*</span></a></li>
+    <li><a href='#ui-Inventory.Platform.Clone-HowtoCloneaPlatform'>How to Clone a Platform</a></li>
+    <li><a href='#ui-Inventory.Platform.Clone-WhatCloningisGoodFor'>What Cloning is Good For</a></li>
+    <li><a href='#ui-Inventory.Platform.Clone-WhatCloningDoes'>What Cloning Does</a></li>
+    <li><a href='#ui-Inventory.Platform.Clone-WhatCloningDoesn%27tDo'>What Cloning Doesn't Do</a></li>
+</ul></div>
+<p><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></p>
 
+<h1><a name="ui-Inventory.Platform.Clone-CloningaPlatform"></a>Cloning a Platform<font color="red">&#42;</font></h1>
+
+<p>HQ Enterprise's <b>Clone Platform</b> feature allows you to copy configuration properties for servers and manually created platform services from one platform to one or more other platforms.&nbsp;</p>
+
+<p><b>Note:&nbsp;</b> Manually created platform services are the types of platform services that cannot be auto-discovered - typically the types you configure to proxy metrics for network services and devices, such as "HTTP", "POP3, or "DNS" services.&nbsp;</p>
+
+
+<p>Platform cloning is supported between platforms of the same type (for example, "Linux") that run the same version of the HQ Agent.</p>
+
+<h1><a name="ui-Inventory.Platform.Clone-HowtoCloneaPlatform"></a>How to Clone a Platform</h1>
 
 <p>The <b>Clone Platform</b> page is available on the <b>Tools</b> menu when a platform is selected.</p>
-<p><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></p>
-<p><b>To clone a platform:</b></p>
 <ol>
 	<li>Navigate to the platform whose inventory resources you wish to clone.</li>
 	<li>Choose <b>Clone Platform</b> from the <b>Tools</b> menu.&nbsp;</li>
-	<li>On the <b>Clone Platform</b> page, the "Available clone targets" list shows all platforms in inventory. You can narrow the list by entering a string in the "Search resources" box.</li>
-	<li>Move the target platforms that you wish to configure from the "Available clone targets" list to the "Selected clone targets" list. &nbsp;</li>
+	<li>On the <b>Clone Platform</b> page, the "Available clone targets" list shows platforms of the same type as the source platform. You can narrow the list by entering a string in the "Search resources" box.</li>
+	<li>Move the target platforms that you from the "Available clone targets" list to the "Selected clone targets" list. &nbsp;</li>
 	<li>Click <b>Queue for Cloning</b>. Cloning occurs asynchronously. You can perform other functions in the user interface without waiting for the cloning process to complete.</li>
 </ol>
 
 
-<h5><a name="ui-Inventory.Platform.Clone-ReturntoHQPortalReferenceHQUserInterfaceReference."></a>Return to <a href="http://support.hyperic.com/confluence/display/DOC/HQ+User+Interface+Reference" title="HQ User Interface Reference">HQ Portal Reference</a>.</h5>
+<h1><a name="ui-Inventory.Platform.Clone-WhatCloningisGoodFor"></a>What Cloning is Good For</h1>
 
-<p><br clear="all" /></p>
+<p>Platform cloning makes it easy to replicate configuration properties for resources of the same type.&nbsp; For instance,</p>
+<ul>
+	<li>You have a dozen Linux platforms, each running Tomcat 6.0, JBoss 4.2, and MySQL 5.0. The HQ Agent is installed on each platform, and has auto-discovered the Tomcat, JBoss, and MySQL instances on each platform.&nbsp; You want to implement an identical log tracking configuration for servers of the same type on each of platforms.&nbsp; You edit the "Configuration Properties" on the Inventory page for the Tomcat, JBoss, and MySQL instances on one of the platforms. You can use <b>Clone Platform</b> to copy the configuration settings to the Tomcat, JBoss, and MySQL instances on the other 11 platforms.</li>
+</ul>
+
+
+<ul>
+	<li>You are setting up multiple platforms to monitor&nbsp;network services or devices. To enable network monitoring, on each platform you need a properly configured platform service to serve as a proxy for each remote service or device. You can configure the platform services on one platform, and use <b>Clone Platform</b> to create platform services with the same configuration properties on each of the&nbsp; other platforms.</li>
+</ul>
+
+
+<h1><a name="ui-Inventory.Platform.Clone-WhatCloningDoes"></a>What Cloning Does</h1>
+
+<p>The cloning process can create new resources on the target platform or update an existing resource's configuration properties. The cloning process:</p>
+
+<ul>
+	<li>Copies the configuration properties for each server on the source platform to corresponding servers of the same type on the target platforms. If there is not a corresponding server of the same type on a target platform, it is created, with the same configuration properties as the source server.</li>
+</ul>
+
+
+<ul>
+	<li>Copies the configuration properties for each manually created platform service on the source platform to the target platforms - adding a new platform service to the target platform's inventory, or updating configuration properties of corresponding instances in the target platform inventory.</li>
+</ul>
+
+
+<ul>
+	<li>Cloning occurs asynchronously, so you can perform other functions in the HQ user interface after initiating the process. The <b>Event Center</b> indicates the start and stop of the cloning process for the source platform.</li>
+</ul>
+
+
+<h1><a name="ui-Inventory.Platform.Clone-WhatCloningDoesn%27tDo"></a>What Cloning Doesn't Do</h1>
+
+<p>The cloning process:</p>
+<ul>
+	<li>Does not update auto-discovered properties</li>
+</ul>
+
+
+<ul>
+	<li>Does not create or update auto-discovered platform services, such as CPUs or File Server Mounts</li>
+</ul>
+
+
+<ul>
+	<li>Does not create or update services that comprise the cloned servers; the child services will be added to inventory on the target platform via auto-discovery.</li>
+</ul>
+
+
+<h5><a name="ui-Inventory.Platform.Clone-ReturntoHQPortalReferenceHQUserInterfaceReference."></a>Return to <a href="HQ User Interface Reference.html" title="HQ User Interface Reference">HQ Portal Reference</a>.</h5>
+
+<p><br class="atl-forced-newline" /></p>
 
 <p>&nbsp; </p>
 
@@ -58,7 +121,7 @@
 				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 20, 2009 15:33</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Apr 20, 2010 15:01</font></td>
 		    </tr>
 	    </table>
     </body>

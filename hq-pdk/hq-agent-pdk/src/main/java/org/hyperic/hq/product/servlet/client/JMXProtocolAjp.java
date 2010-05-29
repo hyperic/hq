@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2010], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -50,7 +50,9 @@ import java.net.UnknownHostException;
 public class JMXProtocolAjp extends JMXProtocolRequest {
     private static Log log = LogFactory.getLog(JMXProtocolAjp.class);
 
+    private static final String PROP_JMX_AJP_TIMEOUT = "jmx.ajpTimeOut";
     private static final int M_GET = 2;
+    private static final int SOCKET_TIMEOUT = 60000;
 
     private HashMap sockets = new HashMap();
 
@@ -66,14 +68,28 @@ public class JMXProtocolAjp extends JMXProtocolRequest {
         }
 
         if (s == null) {
-            log.debug("Connect " + host + " " + port );
+            if (log.isDebugEnabled()) {
+                log.debug("Connect " + host + " " + port );
+            }
             s = new Socket(host, port);
+            s.setSoTimeout(getSocketTimeout());
             sockets.put(key, s);
         }
 
         return s;
     }
 
+    private int getSocketTimeout() {
+        int soTimeout;
+        try {
+            soTimeout = 
+                Integer.parseInt(System.getProperty(PROP_JMX_AJP_TIMEOUT));
+        } catch (NumberFormatException e) {
+            soTimeout = SOCKET_TIMEOUT;
+        }
+        return soTimeout;
+    }
+    
     private void closeSocket(Socket s)
         throws SocketException, IOException {
         s.shutdownOutput();

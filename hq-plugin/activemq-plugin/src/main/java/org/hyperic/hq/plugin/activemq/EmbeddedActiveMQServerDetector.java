@@ -1,8 +1,15 @@
 package org.hyperic.hq.plugin.activemq;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.jar.JarFile;
 import java.util.regex.Pattern;
 
+import org.hyperic.hq.product.PluginException;
+import org.hyperic.hq.product.PluginManager;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.jmx.MxServerDetector;
 
@@ -15,6 +22,16 @@ import org.hyperic.hq.product.jmx.MxServerDetector;
  */
 public class EmbeddedActiveMQServerDetector
     extends MxServerDetector {
+	
+	boolean recursive = false;
+	private final static String RECURSIVE_PROP = "activemq.search.recursive";
+
+	public void init(PluginManager manager) throws PluginException {
+	    super.init(manager);
+	    recursive = "true".equalsIgnoreCase(manager.getProperty(RECURSIVE_PROP, "false"));
+	    getLog().debug(RECURSIVE_PROP + "=" + recursive);
+	}
+
 
     @Override
     protected File findVersionFile(File dir, Pattern pattern) {
@@ -22,22 +39,47 @@ public class EmbeddedActiveMQServerDetector
         // CATALINA_BASE
         // Give preferential search treatment to webapps/*/WEB-INF/lib for
         // performance gains
-        File webapps = new File(dir + File.separator + "webapps");
-        if (webapps.exists()) {
-            File[] apps = webapps.listFiles();
-            for (File app : apps) {
-                if (app.isDirectory() &&
-                    new File(app + File.separator + "WEB-INF" + File.separator + "lib").exists()) {
-                    File versionFile = super.findVersionFile(new File(app + File.separator +
-                                                                      "WEB-INF" + File.separator +
-                                                                      "lib"), pattern);
-                    if (versionFile != null) {
-                        return versionFile;
+        File libDir = new File(dir, "lib");
+            if (libDir.exists()) {
+                File versionFile = super.findVersionFile(libDir, pattern);
+                if (versionFile != null) {
+                    return versionFile;
+                }
+            }
+    
+            File webappsDir = new File(dir, "webapps");
+            if (webappsDir.exists()) {
+                for( File app: webappsDir.listFiles()) {
+                    if (app.isDirectory()) {
+                        File wlibDir = new File(app, "WEB-INF" + File.separator + "lib");
+                        if (wlibDir.exists()) {
+                            File versionFile = super.findVersionFile(wlibDir, pattern);
+                            if (versionFile != null) {
+                                return versionFile;
+                            }
+                        }
+                    } else if (app.getName().endsWith(".war")) {
+                        try {
+                            JarFile war = new JarFile(app);
+                            Enumeration files = war.entries();
+                            while (files.hasMoreElements()) {
+                                final String fileName = files.nextElement().toString();
+                                if (pattern.matcher(fileName).find()) {
+                                    return new File(app + "!" + fileName);
+                                }
+                            }
+                        } catch (IOException ex) {
+                            getLog().debug("Error: '"+app+"': "+ex.getMessage(),ex);
+                        }
                     }
                 }
             }
-        }
-        return super.findVersionFile(dir, pattern);
+   
+            if (recursive) {
+                return super.findVersionFile(dir, pattern);
+            }
+            return null;
+
     }
 
     @Override
