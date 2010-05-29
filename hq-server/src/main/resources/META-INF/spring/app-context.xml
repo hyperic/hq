@@ -133,9 +133,6 @@
 		<constructor-arg ref="sessionFactory" />
 	</bean>
 
-	<bean id="permissionManager" class="org.hyperic.hq.authz.shared.PermissionManagerFactory"
-		factory-method="getPermissionManager" autowire="constructor" />
-
 	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
 		<property name="dataSource" ref="dataSource" />
 		<property name="quartzProperties">

@@ -57,7 +57,10 @@ import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component("permissionManager")
 public class PermissionManagerImpl
     extends PermissionManager {
     private static final Log _log = LogFactory.getLog(PermissionManagerImpl.class.getName());
@@ -94,6 +97,7 @@ public class PermissionManagerImpl
 
     }
 
+    @Autowired
     public PermissionManagerImpl(DBUtil dbUtil) {
         Connection conn = null;
         this.dbUtil = dbUtil;
