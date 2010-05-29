@@ -1,8 +1,10 @@
+import org.hyperic.hq.authz.shared.PermissionManagerFactory
+import org.hyperic.hq.authz.shared.PermissionException
 import org.hyperic.hq.authz.shared.AuthzConstants
 import org.hyperic.hq.hqu.rendit.BaseController
 
 class SummaryController
-	extends BaseController {
+    extends BaseController {
 
     /**
      * Get the custom properties for a resource
@@ -20,6 +22,19 @@ class SummaryController
         }
         props
     }
+ 
+    private boolean hasPlatformPermission(instanceId) {
+        try {
+            PermissionManagerFactory.getInstance().check(user.getId(), 
+                                                     AuthzConstants.platformResType, 
+                                                     instanceId,
+                                                     AuthzConstants.platformOpViewPlatform)
+        } catch(PermissionException e) {
+            return false
+        }
+        
+        return true
+    }
 
     def index(params) {
         def id = params.getOne('id')?.toInteger()
@@ -36,37 +51,43 @@ class SummaryController
             vm = null, vmProps = null, associatedPlatform = null,
             server = null, serverProps = null
 
-       	if (resource.prototype.name == AuthzConstants.serverPrototypeVmwareVcenter) {
-       		// TODO
-       	} else if (resource.prototype.name == AuthzConstants.platformPrototypeVmwareVsphereHost) {
-       		host = resource
-       		hostProps = getCustomProperties(resource)
-       	} else if (resource.prototype.name == AuthzConstants.platformPrototypeVmwareVsphereVm) {
-       		vm = resource
-       		vmProps = getCustomProperties(resource)
-       		
-       		def children = resourceHelper.findChildResourcesByVirtualRelation(resource)
-
-       		associatedPlatform = children.find({ res -> res.resourceType.id == AuthzConstants.authzPlatform })
-       	} else if (resource.resourceType.id == AuthzConstants.authzServer){
-       		server = resource
-       		serverProps = getCustomProperties(resource)
-       	}
+        if (resource.prototype.name == AuthzConstants.serverPrototypeVmwareVcenter) {
+            // TODO
+        } else if (resource.prototype.name == AuthzConstants.platformPrototypeVmwareVsphereHost) {
+            host = resource
+            hostProps = getCustomProperties(resource)
+        } else if (resource.prototype.name == AuthzConstants.platformPrototypeVmwareVsphereVm) {
+            vm = resource
+            vmProps = getCustomProperties(resource)
+            
+            def children = resourceHelper.findChildResourcesByVirtualRelation(resource)
+            def platform = children.find({ res -> res.resourceType.id == AuthzConstants.authzPlatform })
+                
+            if (platform && hasPlatformPermission(platform.getInstanceId())) {
+                associatedPlatform = platform
+            }
+        } else if (resource.resourceType.id == AuthzConstants.authzServer){
+            server = resource
+            serverProps = getCustomProperties(resource)
+        }
             
         ancestors.each { res ->
-        	if (res.prototype.name == AuthzConstants.serverPrototypeVmwareVcenter) {
-        		// TODO
-        	} else if (res.prototype.name == AuthzConstants.platformPrototypeVmwareVsphereHost) {
-        		host = res
-        		hostProps = getCustomProperties(res)
-        	} else if (res.prototype.name == AuthzConstants.platformPrototypeVmwareVsphereVm) {
-        		vm = res
-        		vmProps = getCustomProperties(res)
+            if (res.prototype.name == AuthzConstants.serverPrototypeVmwareVcenter) {
+                // TODO
+            } else if (res.prototype.name == AuthzConstants.platformPrototypeVmwareVsphereHost) {
+                host = res
+                hostProps = getCustomProperties(res)
+            } else if (res.prototype.name == AuthzConstants.platformPrototypeVmwareVsphereVm) {
+                vm = res
+                vmProps = getCustomProperties(res)
                 
                 def children = resourceHelper.findChildResourcesByVirtualRelation(resource)
-
-                associatedPlatform = children.find({ r -> r.resourceType.id == AuthzConstants.authzPlatform })
-        	}
+                def platform = children.find({ r -> r.resourceType.id == AuthzConstants.authzPlatform })
+                
+                if (platform && hasPlatformPermission(platform.getInstanceId())) {
+                    associatedPlatform = platform
+                }
+            }
         }
         
         render(locals:[ host : host,

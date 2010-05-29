@@ -335,6 +335,8 @@
 			} else if ($("ul>li>span." + _CLASSES.selected, $li).size() > 0) {
 				$("span#" + _CONSTS.contentId($li.data().id) + " a").click();
 			}
+			
+			_pushState(_CONSTS.openNodes, _getOpenNodes());
 		}
 	};
 

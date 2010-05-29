@@ -1,5 +1,3 @@
-import org.hyperic.hq.authz.shared.PermissionManagerFactory
-
 import java.util.Collection
 import java.util.Iterator
 import java.util.Map
@@ -16,6 +14,7 @@ import org.json.JSONObject
 import org.hyperic.hq.hqu.rendit.BaseController
 import org.hyperic.hq.measurement.MeasurementConstants
 import org.hyperic.hq.product.PluginException
+import org.hyperic.hq.authz.shared.PermissionManagerFactory
 import org.hyperic.hq.authz.shared.PermissionException
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants
 import org.hyperic.hq.appdef.shared.AppdefEntityID
@@ -25,7 +24,7 @@ import org.hyperic.hq.control.server.session.ControlScheduleManagerEJBImpl
 
 class VsphereController extends BaseController {
     protected void init() {
-        onlyAllowSuperUsers()
+        //onlyAllowSuperUsers()
     }
 
     private getNode(id, name, classes, collapsed, children) {
@@ -85,15 +84,8 @@ class VsphereController extends BaseController {
                 res.resourceType.id == AuthzConstants.authzPlatform 
             })
         
-            if (platform) {
-                def hasPermission = PermissionManagerFactory.getInstance().check(user.getId(), 
-                                                                                 AuthzConstants.platformResType, 
-                                                                                 platform.getInstanceId(),
-                                                                                 AuthzConstants.platformOpViewPlatform)
-
-                if (hasPermission) {
-                   children = new JSONArray()
-                }
+            if (platform && hasPlatformPermission(platform.getInstanceId())) {
+                children = new JSONArray()
             }
         }
         
@@ -113,17 +105,10 @@ class VsphereController extends BaseController {
                     res.resourceType.id == AuthzConstants.authzPlatform 
                 })
                 
-                if (platform) {
-                    def hasPermission = PermissionManagerFactory.getInstance().check(user.getId(), 
-                                                                                     AuthzConstants.platformResType, 
-                                                                                     platform.getInstanceId(),
-                                                                                     AuthzConstants.platformOpViewPlatform)
-
-                    if (hasPermission) {
-                        descendants.each { res ->
-                            if (res.resourceType.id == AuthzConstants.authzServer) {
-                                nodes << res
-                            }
+                if (platform && hasPlatformPermission(platform.getInstanceId())) {
+                    descendants.each { res ->
+                        if (res.resourceType.id == AuthzConstants.authzServer) {
+                            nodes << res
                         }
                     }
                 }
@@ -216,6 +201,19 @@ class VsphereController extends BaseController {
         result
     }
     
+    private boolean hasPlatformPermission(instanceId) {
+        try {
+            PermissionManagerFactory.getInstance().check(user.getId(), 
+                                                     AuthzConstants.platformResType, 
+                                                     instanceId,
+                                                     AuthzConstants.platformOpViewPlatform)
+        } catch(PermissionException e) {
+            return false
+        }
+        
+        return true
+    }
+    
     private boolean hasControlPlatformPermission() {
         hasPermission(AuthzConstants.platformOpControlPlatform)
     }
@@ -225,11 +223,6 @@ class VsphereController extends BaseController {
     }
     
     private boolean hasPermission(operation) {
-        /*
-        def userOpsMap = (Map) getInvokeArgs().request.getSession().getAttribute("useroperations")
-        
-        userOpsMap.containsKey(operation)
-        */
         user.hasOperation(operation)
     }
     
