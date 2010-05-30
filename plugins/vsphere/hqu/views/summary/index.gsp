@@ -119,7 +119,7 @@
 	      		<td>${hostProps['Data Center']}</td>
    			</tr>
       		<tr>
-      			<td>${l['label.location']}</td>
+      			<td>${l['label.manufacturer']}</td>
       			<td>${hostProps['Manufacturer']}</td>
 	   		</tr>
       		<tr>

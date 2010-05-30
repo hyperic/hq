@@ -10,7 +10,7 @@ class Plugin extends HQUPlugin {
                 attachType:   'masthead', 
                 controller:   VsphereController,
                 action:       'index', 
-                category:     'tracker')
+                category:     'resource')
     }
 }
 

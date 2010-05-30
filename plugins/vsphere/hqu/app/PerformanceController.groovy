@@ -1,3 +1,5 @@
+import org.hyperic.hq.authz.shared.PermissionManagerFactory
+import org.hyperic.hq.authz.shared.PermissionException
 import org.hyperic.hq.hqu.rendit.BaseController
 import org.hyperic.hq.measurement.server.session.DataPoint
 import org.hyperic.hq.authz.shared.AuthzConstants
@@ -6,6 +8,19 @@ import org.json.JSONObject
 
 class PerformanceController
 	extends BaseController {
+ 
+    private boolean hasPlatformPermission(instanceId) {
+        try {
+            PermissionManagerFactory.getInstance().check(user.getId(), 
+                                                     AuthzConstants.platformResType, 
+                                                     instanceId,
+                                                     AuthzConstants.platformOpViewPlatform)
+        } catch(PermissionException e) {
+            return false
+        }
+        
+        return true
+    }
 
     def index(params) {
         def id = params.getOne('id')?.toInteger()
@@ -28,10 +43,10 @@ class PerformanceController
         def type = resource.prototype.name
         def metrics = [] // Metrics which this resource can be compared against
         def ancestors = resourceHelper.findAncestorsByVirtualRelation(resource)       
-        def associatedPlatform = null
+        def associatedPlatform
         
-        if (type == "VMware vSphere VM") {
-            def host = ancestors.find { res -> res.prototype.name == 'VMware vSphere Host' }
+        if (type == AuthzConstants.platformPrototypeVmwareVsphereVm) {
+            def host = ancestors.find { res -> res.prototype.name == AuthzConstants.platformPrototypeVmwareVsphereHost }
             
             for (metric in host.getEnabledMetrics()) {
                 metrics << [name: host.name + " " + metric.template.name, 
@@ -39,19 +54,22 @@ class PerformanceController
             }
             
             def children = resourceHelper.findChildResourcesByVirtualRelation(resource)
-
-            associatedPlatform = children.find({ res -> res.resourceType.id == AuthzConstants.authzPlatform })
+			def platform = children.find({ res -> res.resourceType.id == AuthzConstants.authzPlatform })
+				
+			if (platform && hasPlatformPermission(platform.getInstanceId())) {
+				associatedPlatform = platform
+			}
         } else if (type != "VMware vSphere Host") {
             // HQ resource
         	
-        	def vm = ancestors.find { res -> res.prototype.name == 'VMware vSphere VM' }
+        	def vm = ancestors.find { res -> res.prototype.name == AuthzConstants.platformPrototypeVmwareVsphereVm }
         	
             for (metric in vm.getEnabledMetrics()) {
                 metrics << [name: vm.name + " " + metric.template.name,
                             id: metric.id]
             }
             
-            def host = ancestors.find { res -> res.prototype.name == 'VMware vSphere Host' }
+            def host = ancestors.find { res -> res.prototype.name == AuthzConstants.platformPrototypeVmwareVsphereHost }
             
             for (metric in host.getEnabledMetrics()) {
                 metrics << [name: host.name + " " + metric.template.name,

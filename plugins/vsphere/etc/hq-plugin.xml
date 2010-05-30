@@ -23,11 +23,6 @@
             description="Host System name"/>
   </config>
 
-  <config name="pool">
-    <option name="pool"
-            description="Resource Pool name"/>
-  </config>
-
   <platform name="VMware vSphere Host">
 
     <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
@@ -218,58 +213,6 @@
             alias="mem.sysUsage.average"
             units="KB"/>
 
-    <server name="VMware vSphere Resource Pool">
-      <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
-      <plugin type="collector" class="org.hyperic.hq.plugin.vsphere.VSpherePoolCollector"/>
-
-      <config include="pool"/>
-
-      <properties>
-        <property name="parent"
-                  description="Parent pool"/>
-      </properties>
-
-      <property name="template" value="${host.template},${pool.config}:${alias}"/>
-
-      <metric name="Availability" indicator="true"/>
-
-      <!-- units=MHz -->
-      <metric name="CPU Usage (Average)"
-              indicator="true"
-              alias="cpu.usagemhz.average"
-              units="none"/>
-  
-      <metric name="Memory Balloon"
-              indicator="true"
-              alias="mem.vmmemctl.average"
-              units="KB"/>
-  
-      <metric name="Memory Overhead"
-              alias="mem.overhead.average"
-              units="KB"/>
-  
-      <metric name="Memory Zero"
-              alias="mem.zero.average"
-              units="KB"/>
-  
-      <metric name="Memory Active"
-              indicator="true"
-              alias="mem.active.average"
-              units="KB"/>
-  
-      <metric name="Memory Shared"
-              indicator="true"
-              alias="mem.shared.average"
-              units="KB"/>
-  
-      <metric name="Memory Granted"
-              alias="mem.granted.average"
-              units="KB"/>
-  
-      <metric name="Memory Swapped"
-              alias="mem.swapped.average"
-              units="KB"/>
-    </server>
   </platform>
 
   <platform name="VMware vSphere VM">
@@ -280,7 +223,7 @@
     <actions>
       <include name="createSnapshot"/>
       <include name="removeAllSnapshots"/>
-      <include name="revertToSnapshot"/>
+      <include name="revertToCurrentSnapshot"/>
       <include name="stop"/>
       <include name="start"/>
       <include name="reset"/>

@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -311,121 +312,14 @@ public class VCenterPlatformDetector {
         return platform;
     }
 
-    private List<Resource> discoverVirtualMachines(VSphereUtil vim, Agent agent)
-        throws IOException, PluginException {
-    
-        List<Resource> resources = new ArrayList<Resource>();
-        ResourcePrototype type = getResourceType(VM_TYPE);
-
-        try {
-            ManagedEntity[] vms = vim.find(VSphereUtil.VM);
-
-            for (int i=0; i<vms.length; i++) {
-                if (! (vms[i] instanceof VirtualMachine)) {
-                    log.debug(vms[i] + " not a VirtualMachine, type=" +
-                              vms[i].getMOR().getType());
-                    continue;
-                }
-                VirtualMachine vm = (VirtualMachine)vms[i];
-                if (vm.getConfig().isTemplate()) {
-                    continue; //filter out template VMs
-                }
-                try {
-                    VSphereResource platform = discoverVM(vm);
-                    if (platform == null) {
-                        continue;
-                    }
-                    platform.setResourcePrototype(type);
-                    platform.setAgent(agent);
-                    mergeVSphereConfig(platform);
-                    resources.add(platform);
-                } catch (Exception e) {
-                    log.error(e.getMessage(), e);
-                }
-            }
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-
-        return resources;
-    }
-
-    private VSphereServerResource discoverPool(VSphereUtil vim, ResourcePool pool)
-        throws Exception {
-
-        //determine pool parent (if any) and host
-        ManagedEntity mor = pool.getParent();
-        String parent = null;
-        while (true) {
-            if (mor.getName().equals(DEFAULT_POOL)) {
-                VSphereServerResource server = new VSphereServerResource();
-                String host = mor.getParent().getName();
-                server.setName(pool.getName());
-                server.addConfig(VSpherePoolCollector.PROP_POOL, pool.getName());
-                server.setAutoIdentifier(pool.getName()); //XXX
-                server.setInstallPath("/"); //XXX
-                server.setHost(host);
-                if (parent != null) {
-                    server.addProperty("parent", parent);
-                }
-                return server;
-            }
-            else {
-                parent = mor.getName();
-            }
-            if ((mor = mor.getParent()) == null) {
-                break;
-            }
-        }
-
-        return null;
-    }
-
-    private Map<String, List<Resource>> discoverPools(VSphereUtil vim)
-        throws IOException, PluginException {
-
-        ResourcePrototype type = getResourceType(POOL_TYPE);
-        Map<String, List<Resource>> resources = new HashMap<String, List<Resource>>();
-        ManagedEntity[] pools = vim.find(VSphereUtil.POOL);
-
-        for (int i=0; i<pools.length; i++) {
-            if (!(pools[i] instanceof ResourcePool)) {
-                log.debug(pools[i] + " not a " + VSphereUtil.POOL +
-                          ", type=" + pools[i].getMOR().getType());
-                continue;
-            }
-            ResourcePool pool = (ResourcePool)pools[i];
-            if (pool.getName().equals(DEFAULT_POOL)) {
-                continue; //default pool is hidden
-            }
-            try {
-                VSphereServerResource server = discoverPool(vim, pool);
-                if (server == null) {
-                    continue;
-                }
-                server.setResourcePrototype(type);
-                List<Resource> servers = resources.get(server.getHost());
-                if (servers == null) {
-                    servers = new ArrayList<Resource>();
-                    resources.put(server.getHost(), servers);
-                }
-                //XXX servers.add(server);
-            } catch (Exception e) {
-                log.error(e.getMessage(), e);
-            }
-        }
-
-        return resources;
-    }
-
-    private VSphereResource discoverHost(HostSystem host)
+    private VSphereHostResource discoverHost(HostSystem host)
         throws Exception {
 
         HostConfigInfo info = host.getConfig();
         HostNetworkInfo netinfo = info.getNetwork();
         AboutInfo about = info.getProduct();
         String address = null;
-        VSphereResource platform = new VSphereResource();
+        VSphereHostResource platform = new VSphereHostResource();
 
         ConfigResponse cprops = new ConfigResponse();
         platform.setName(host.getName());
@@ -496,12 +390,12 @@ public class VCenterPlatformDetector {
         return platform;
     }
 
-    private List<Resource> discoverHosts(VSphereUtil vim, Agent agent,
-                                         Map<String, List<Resource>> pools)
+    private List<Resource> discoverHosts(VSphereUtil vim, Agent agent)
         throws IOException, PluginException {
 
         List<Resource> resources = new ArrayList<Resource>();
         ResourcePrototype hostType = getResourceType(HOST_TYPE);
+        ResourcePrototype vmType = getResourceType(VM_TYPE);
 
         try {
             ManagedEntity[] hosts = vim.find(VSphereUtil.HOST_SYSTEM);
@@ -515,7 +409,7 @@ public class VCenterPlatformDetector {
 
                 HostSystem host = (HostSystem)hosts[i];
                 try {
-                    VSphereResource platform = discoverHost(host);
+                    VSphereHostResource platform = discoverHost(host);
                     if (platform == null) {
                         continue;
                     }
@@ -523,8 +417,6 @@ public class VCenterPlatformDetector {
                     platform.setAgent(agent);
                     mergeVSphereConfig(platform);
                     
-                    // TODO: Uncomment and remove discoverVirtualMachines
-                    /*
                     VirtualMachine[] hostVms = host.getVms();
                     for (int v=0; v<hostVms.length; v++) {
                         VSphereResource vm = discoverVM(hostVms[v]);
@@ -532,14 +424,10 @@ public class VCenterPlatformDetector {
                             vm.setResourcePrototype(vmType);
                             vm.setAgent(agent);
                             mergeVSphereConfig(vm);
-                            resources.add(vm);
+                            platform.getVirtualMachines().add(vm);
                         }
-                    */                   
-                    
-                    List<Resource> rpools = pools.get(host.getName());
-                    if (rpools != null) {
-                        platform.getResource().addAll(rpools);
                     }
+                    
                     resources.add(platform);
                 } catch (Exception e) {
                     log.error(e.getMessage(), e);
@@ -559,32 +447,38 @@ public class VCenterPlatformDetector {
 
         try {
             Agent agent = getAgent();
-            ResourceApi api = getApi().getResourceApi();
+            List<Resource> hosts = discoverHosts(vim, agent);
+            List<Resource> vms = new ArrayList<Resource>();
+            Map<String, List<Resource>> hostVmMap = new HashMap<String, List<Resource>>();
 
-            List<Resource> vms = discoverVirtualMachines(vim, agent);
-            Map<String, List<Resource>> pools = discoverPools(vim);
-            List<Resource> hosts = discoverHosts(vim, agent, pools);
+            for (Resource r : hosts) {
+                VSphereHostResource h = (VSphereHostResource) r;
+                vms.addAll(h.getVirtualMachines());
+                hostVmMap.put(r.getName(), h.getVirtualMachines());
+            }
+            
             if (isDump) {
                 dump(vms);
                 dump(hosts);
             }
             else {
+                ResourceApi api = getApi().getResourceApi();
+
                 StatusResponse response;
                 response = api.syncResources(vms);
                 assertSuccess(response, "sync " + vms.size() + " VMs", false);
                 response = api.syncResources(hosts);
                 assertSuccess(response, "sync " + hosts.size() + " Hosts", false);
+                
+                syncResourceEdges(vim, hostVmMap);
             }
         } finally {
             VSphereUtil.dispose(vim);
         }
-        
-        if (!isDump) {
-            syncResourceEdges();
-        }
     }
     
-    private void syncResourceEdges() 
+    private void syncResourceEdges(VSphereUtil vim,
+                                   Map<String, List<Resource>> vcHostVmMap) 
         throws IOException, PluginException {
         ResourceApi rApi = getApi().getResourceApi();
         ResourceEdgeApi reApi = getApi().getResourceEdgeApi();
@@ -652,7 +546,7 @@ public class VCenterPlatformDetector {
         ResourcesResponse vmResponse = rApi.getResources(vmType, true, false);
         assertSuccess(vmResponse, "Getting all " + VM_TYPE, false);
         
-        Map<String, List<Resource>> hostVmMap = new HashMap<String, List<Resource>>();
+        Map<String, List<Resource>> hqHostVmMap = new HashMap<String, List<Resource>>();
 
         for (Resource r : vmResponse.getResource()) {
             String esxHost = null;
@@ -662,10 +556,10 @@ public class VCenterPlatformDetector {
                     break;
                 }
             }
-            List<Resource> vmResources = hostVmMap.get(esxHost);
+            List<Resource> vmResources = hqHostVmMap.get(esxHost);
             if (vmResources == null) {
                 vmResources = new ArrayList<Resource>();
-                hostVmMap.put(esxHost, vmResources);
+                hqHostVmMap.put(esxHost, vmResources);
             }
             vmResources.add(r);
         }
@@ -677,7 +571,7 @@ public class VCenterPlatformDetector {
             parent.setResource(r);
             
             ResourceTo children = new ResourceTo();
-            List<Resource> vmResources = hostVmMap.get(r.getName());
+            List<Resource> vmResources = hqHostVmMap.get(r.getName());
             if (vmResources != null) {
                 children.getResource().addAll(vmResources);
             }
@@ -697,5 +591,49 @@ public class VCenterPlatformDetector {
         
         syncResponse = reApi.syncResourceEdges(edges);
         assertSuccess(syncResponse, "Sync host and VM edges", false);
+        
+        // delete VMs that have been manually removed from vCenter
+        for (Iterator it=hqHostVmMap.keySet().iterator(); it.hasNext();) {
+            String hostName = (String)it.next();
+            List<Resource> hqVms = hqHostVmMap.get(hostName);
+            List<Resource> vcVms = vcHostVmMap.get(hostName);
+            
+            if (vcVms != null) {
+                List<String> vcVmNames = new ArrayList<String>();
+                for (Resource r : vcVms) {
+                    vcVmNames.add(r.getName());
+                }
+                
+                for (Resource r : hqVms) {
+                    if (!vcVmNames.contains(r.getName())) {
+                        // Not one of the powered-on VMs from vCenter
+                        try {
+                            // check to see if it exists in vCenter
+                            VirtualMachine vm =
+                                (VirtualMachine)vim.find(VSphereUtil.VM, r.getName());
+                        } catch (ManagedEntityNotFoundException me) {
+                            removeResource(r);
+                        }                         
+                    }
+                }
+            }
+        }
+    }
+            
+    private void removeResource(Resource r) 
+        throws IOException, PluginException {
+
+        if (log.isDebugEnabled()) {
+            log.debug("VM (" + r.getName() + ") no longer exists in vCenter. "
+                         + " Removing from HQ inventory.");
+        }
+
+        ResourceApi rApi = getApi().getResourceApi();
+
+        // TODO: As a final step, need to check resource availability
+        // (must be DOWN) before deleting.
+        
+        StatusResponse deleteResponse = rApi.deleteResource(r.getId());
+        assertSuccess(deleteResponse, "Delete resource id=" + r.getId(), false);
     }
 }
