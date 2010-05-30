@@ -76,6 +76,7 @@ import org.hyperic.util.pager.PageList;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -233,6 +234,7 @@ public class DataManagerImpl implements DataManager {
      * 
      * 
      */
+    @Transactional(propagation=Propagation.REQUIRES_NEW)
     public void addData(Integer mid, MetricValue mv, boolean overwrite) {
 
         Measurement meas = measurementManager.getMeasurement(mid);
@@ -250,6 +252,7 @@ public class DataManagerImpl implements DataManager {
      * 
      * 
      */
+    @Transactional(propagation=Propagation.REQUIRES_NEW)
     public boolean addData(List<DataPoint> data) {
         if (shouldAbortDataInsertion(data)) {
             return true;
@@ -334,6 +337,7 @@ public class DataManagerImpl implements DataManager {
      * 
      * 
      */
+    @Transactional(propagation=Propagation.REQUIRES_NEW)
     public void addData(List<DataPoint> data, boolean overwrite) {
         /**
          * We have to account for 2 types of metric data insertion here: 1 - New
