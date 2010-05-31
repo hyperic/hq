@@ -18,7 +18,7 @@
     <bean id="jasyptConfiguration"
         class="org.jasypt.encryption.pbe.config.EnvironmentStringPBEConfig">
         <property name="algorithm" value="PBEWithMD5AndTripleDES" />
-        <property name="passwordSysPropertyName" value="jasypt.encryption.password" />
+        <property name="passwordSysPropertyName" value="server.encryption-key" />
     </bean>
     
     <bean id="propertyPasswordEncryptor"
@@ -105,12 +105,6 @@
 						<prop key="hibernate.connection.password">${server.database-password}</prop>
 						<prop key="hibernate.dialect">${server.hibernate.dialect}</prop>
 					</props>
-				</property>
-				<property name="locations">
-					<list>
-						<value>classpath:/hibernate.properties</value>
-						<value>classpath:/hq-server.conf</value>
-					</list>
 				</property>
 				<property name="localOverride" value="true" />
 			</bean>
