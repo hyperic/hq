@@ -102,10 +102,9 @@ public class AgentCommandsServer
             if (props.isEmpty()) return new AgentRestart_result(); // Fall back to what it used to do, if we have an empty map
             
             String version = (String) props.get(AgentUpgrade_result.VERSION);
-            String build = (String) props.get(AgentUpgrade_result.BUILD);
             String bundleName = (String) props.get(AgentUpgrade_result.BUNDLE_NAME);
             
-            return new AgentUpgrade_result(version, build, bundleName);
+            return new AgentUpgrade_result(version, bundleName);
         } else if(cmd.equals(AgentCommandsAPI.command_die)){
             new AgentDie_args(args);  // Just parse the args
             agentCommandsService.die();

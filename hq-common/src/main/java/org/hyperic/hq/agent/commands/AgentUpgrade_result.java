@@ -32,12 +32,10 @@ import org.hyperic.hq.agent.AgentRemoteValue;
 
 public class AgentUpgrade_result extends AgentRemoteValue {
     public static final String VERSION = "version";
-    public static final String BUILD = "build";
     public static final String BUNDLE_NAME = "bundleName";
     
-    public AgentUpgrade_result(String version, String build, String bundleName) {
+    public AgentUpgrade_result(String version, String bundleName) {
         super.setValue(AgentUpgrade_result.VERSION, version);
-        super.setValue(AgentUpgrade_result.BUILD, build);
         super.setValue(AgentUpgrade_result.BUNDLE_NAME, bundleName);
     }
 
@@ -45,16 +43,11 @@ public class AgentUpgrade_result extends AgentRemoteValue {
     throws AgentRemoteException 
     {
         this(args.getValue(AgentUpgrade_result.VERSION),
-             args.getValue(AgentUpgrade_result.BUILD),
              args.getValue(AgentUpgrade_result.BUNDLE_NAME));
     }
 
     public String getAgentVersion() {
         return this.getValue(AgentUpgrade_result.VERSION); 
-    }
-
-    public String getAgentBuild() {
-        return this.getValue(AgentUpgrade_result.BUILD); 
     }
 
     public String getAgentBundleName() {

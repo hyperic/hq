@@ -394,14 +394,11 @@ public class AgentCommandsService implements AgentCommandsClient {
 
                 // Created return map
                 String version = newVersionProperties.getProperty("version");
-                String build = newVersionProperties.getProperty("build.number");
-                
+               
                 _log.debug("VERSION: " + version);
-                _log.debug("BUILD: " + build);
                 _log.debug("BUNDLE_NAME: " + bundleHome);
                 
                 result.put(AgentUpgrade_result.VERSION, version);
-                result.put(AgentUpgrade_result.BUILD, build);
                 result.put(AgentUpgrade_result.BUNDLE_NAME, bundleHome);
             } catch(MalformedURLException e) {
                 _log.warn("Could not access new hq-version.properties due to a malformed url, version value will not be updated in the database.", e);
