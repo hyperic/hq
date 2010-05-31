@@ -4,6 +4,7 @@
 package org.hyperic.hq.appdef.server.session;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -11,8 +12,11 @@ import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.hibernate.SessionFactory;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AgentManager;
@@ -41,6 +45,7 @@ import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
+import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.context.IntegrationTestContextLoader;
 import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.hq.product.ServiceTypeInfo;
@@ -89,6 +94,9 @@ public class ServiceManagerTest {
 
     @Autowired
     ApplicationManager applicationManager;
+    
+    @Autowired
+    private SessionFactory sessionFactory;
 
     private Agent testAgent;
 
@@ -272,6 +280,9 @@ public class ServiceManagerTest {
         assertEquals(service.getServiceType(), serviceType);
         assertEquals(service.getServer(), testServers.get(0));
         assertEquals(service.getLocation(), "my computer");
+        assertFalse(service.getServiceValue().getServiceRt());
+        assertFalse(service.getServiceValue().getEndUserRt());
+        assertFalse(service.isAutodiscoveryZombie());
         assertNotNull(service.getResource());
         assertEquals(service.getResource().getName(), "Test Service Name");
     }
@@ -963,7 +974,7 @@ public class ServiceManagerTest {
         PageControl pc = new PageControl();
         pc.setSortattribute(SortAttribute.SERVICE_NAME);
         PageList<ServiceValue> svalues1 = serviceManager.getServicesByPlatform(subject,
-            testPlatforms.get(0).getId(), serviceType.getId(), pc);
+            testPlatforms.get(0).getId(), pc);
         // TODO: Sorting has some issues; reported in HE-783
         assertEquals(svalues, svalues1);
     }
@@ -1108,240 +1119,313 @@ public class ServiceManagerTest {
         assertEquals(svalues, svalues1);
     }
 
-    // /**
-    // * Test method for
-    // * {@link
-    // org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getMappedPlatformServices(org.hyperic.hq.authz.server.session.AuthzSubject,
-    // java.lang.Integer, org.hyperic.util.pager.PageControl)}
-    // * .
-    // */
-    // @Test
-    // public void testGetMappedPlatformServices() {
-    // fail("Not yet implemented");
-    // }
-    //
-    // /**
-    // * Test method for
-    // * {@link
-    // org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getServicesByPlatform(org.hyperic.hq.authz.server.session.AuthzSubject,
-    // java.lang.Integer, java.lang.Integer,
-    // org.hyperic.util.pager.PageControl)}
-    // * .
-    // */
-    // @Test
-    // public void
-    // testGetServicesByPlatformAuthzSubjectIntegerIntegerPageControl() {
-    // fail("Not yet implemented");
-    // }
-    //
-    // /**
-    // * Test method for
-    // * {@link
-    // org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getServicesByApplication(org.hyperic.hq.authz.server.session.AuthzSubject,
-    // java.lang.Integer, org.hyperic.util.pager.PageControl)}
-    // * .
-    // */
-    // @Test
-    // public void testGetServicesByApplicationAuthzSubjectIntegerPageControl()
-    // {
-    // fail("Not yet implemented");
-    // }
-    //
-    // /**
-    // * Test method for
-    // * {@link
-    // org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getServicesByApplication(org.hyperic.hq.authz.server.session.AuthzSubject,
-    // java.lang.Integer, java.lang.Integer,
-    // org.hyperic.util.pager.PageControl)}
-    // * .
-    // */
-    // @Test
-    // public void
-    // testGetServicesByApplicationAuthzSubjectIntegerIntegerPageControl() {
-    // fail("Not yet implemented");
-    // }
-    //
-    // /**
-    // * Test method for
-    // * {@link
-    // org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getServicesByApplication(org.hyperic.hq.authz.server.session.AuthzSubject,
-    // java.lang.Integer)}
-    // * .
-    // */
-    // @Test
-    // public void testGetServicesByApplicationAuthzSubjectInteger() {
-    // fail("Not yet implemented");
-    // }
-    //
-    // /**
-    // * Test method for
-    // * {@link
-    // org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getServiceInventoryByApplication(org.hyperic.hq.authz.server.session.AuthzSubject,
-    // java.lang.Integer, org.hyperic.util.pager.PageControl)}
-    // * .
-    // */
-    // @Test
-    // public void
-    // testGetServiceInventoryByApplicationAuthzSubjectIntegerPageControl() {
-    // fail("Not yet implemented");
-    // }
-    //
-    // /**
-    // * Test method for
-    // * {@link
-    // org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getFlattenedServicesByApplication(org.hyperic.hq.authz.server.session.AuthzSubject,
-    // java.lang.Integer, java.lang.Integer,
-    // org.hyperic.util.pager.PageControl)}
-    // * .
-    // */
-    // @Test
-    // public void testGetFlattenedServicesByApplication() {
-    // fail("Not yet implemented");
-    // }
-    //
-    // /**
-    // * Test method for
-    // * {@link
-    // org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getServiceInventoryByApplication(org.hyperic.hq.authz.server.session.AuthzSubject,
-    // java.lang.Integer, java.lang.Integer,
-    // org.hyperic.util.pager.PageControl)}
-    // * .
-    // */
-    // @Test
-    // public void
-    // testGetServiceInventoryByApplicationAuthzSubjectIntegerIntegerPageControl()
-    // {
-    // fail("Not yet implemented");
-    // }
-    //
-    // /**
-    // * Test method for
-    // * {@link
-    // org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getFlattenedServiceIdsByApplication(org.hyperic.hq.authz.server.session.AuthzSubject,
-    // java.lang.Integer)}
-    // * .
-    // */
-    // @Test
-    // public void testGetFlattenedServiceIdsByApplication() {
-    // fail("Not yet implemented");
-    // }
-    //
-    // /**
-    // * Test method for
-    // * {@link
-    // org.hyperic.hq.appdef.server.session.ServiceManagerImpl#updateServiceZombieStatus(org.hyperic.hq.authz.server.session.AuthzSubject,
-    // org.hyperic.hq.appdef.server.session.Service, boolean)}
-    // * .
-    // */
-    // @Test
-    // public void testUpdateServiceZombieStatus() {
-    // fail("Not yet implemented");
-    // }
-    //
-    // /**
-    // * Test method for
-    // * {@link
-    // org.hyperic.hq.appdef.server.session.ServiceManagerImpl#updateService(org.hyperic.hq.authz.server.session.AuthzSubject,
-    // org.hyperic.hq.appdef.shared.ServiceValue)}
-    // * .
-    // */
-    // @Test
-    // public void testUpdateService() {
-    // fail("Not yet implemented");
-    // }
-    //
-    // /**
-    // * Test method for
-    // * {@link
-    // org.hyperic.hq.appdef.server.session.ServiceManagerImpl#updateServiceTypes(java.lang.String,
-    // org.hyperic.hq.product.ServiceTypeInfo[])}
-    // * .
-    // */
-    // @Test
-    // public void testUpdateServiceTypes() {
-    // fail("Not yet implemented");
-    // }
-    //
-    // /**
-    // * Test method for
-    // * {@link
-    // org.hyperic.hq.appdef.server.session.ServiceManagerImpl#deleteServiceType(org.hyperic.hq.appdef.server.session.ServiceType,
-    // org.hyperic.hq.authz.server.session.AuthzSubject,
-    // org.hyperic.hq.authz.shared.ResourceGroupManager,
-    // org.hyperic.hq.authz.shared.ResourceManager)}
-    // * .
-    // */
-    // @Test
-    // public void testDeleteServiceType() {
-    // fail("Not yet implemented");
-    // }
-    //
-    // /**
-    // * Test method for
-    // * {@link
-    // org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getServiceCluster(org.hyperic.hq.authz.server.session.ResourceGroup)}
-    // * .
-    // */
-    // @Test
-    // public void testGetServiceCluster() {
-    // fail("Not yet implemented");
-    // }
-    //
-    // /**
-    // * Test method for
-    // * {@link
-    // org.hyperic.hq.appdef.server.session.ServiceManagerImpl#removeService(org.hyperic.hq.authz.server.session.AuthzSubject,
-    // org.hyperic.hq.appdef.server.session.Service)}
-    // * .
-    // */
-    // @Test
-    // public void testRemoveService() {
-    // fail("Not yet implemented");
-    // }
-    //
-    // /**
-    // * Test method for
-    // * {@link
-    // org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getOperationByName(org.hyperic.hq.authz.server.session.ResourceType,
-    // java.lang.String)}
-    // * .
-    // */
-    // @Test
-    // public void testGetOperationByName() {
-    // fail("Not yet implemented");
-    // }
-    //
-    // /**
-    // * Test method for
-    // * {@link
-    // org.hyperic.hq.appdef.server.session.ServiceManagerImpl#handleResourceDelete(org.hyperic.hq.authz.server.session.Resource)}
-    // * .
-    // */
-    // @Test
-    // public void testHandleResourceDelete() {
-    // fail("Not yet implemented");
-    // }
-    //
-    // /**
-    // * Test method for
-    // * {@link
-    // org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getServiceTypeCounts()}
-    // * .
-    // */
-    // @Test
-    // public void testGetServiceTypeCounts() {
-    // fail("Not yet implemented");
-    // }
-    //
-    // /**
-    // * Test method for
-    // * {@link
-    // org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getServiceCount()}
-    // * .
-    // */
-    // @Test
-    // public void testGetServiceCount() {
-    // fail("Not yet implemented");
-    // }
+    /**
+     * Test method for
+     * {@link org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getMappedPlatformServices(org.hyperic.hq.authz.server.session.AuthzSubject, java.lang.Integer, org.hyperic.util.pager.PageControl)}
+     * .
+     */
+    @Test
+    public void testGetMappedPlatformServices() throws ApplicationException, NotFoundException {
+        ServerType vServerType = createVirtualServerType("CPU Server", "1.0",
+            new String[] { testPlatforms.get(0).getPlatformType().getName() },
+            "Test virtual Server Plugin");
+        ServerType vServerType1 = createVirtualServerType("CPU Server1", "1.1",
+            new String[] { testPlatforms.get(0).getPlatformType().getName() },
+            "Test virtual Server1 Plugin");
+        ServerValue serverVal = new ServerValue();
+        Server virtualServer = serverManager.createServer(subject, testPlatforms.get(0).getId(),
+            vServerType.getId(), serverVal);
+        List<ServiceValue> svalues = new ArrayList<ServiceValue>(5);
+        List<ServiceValue> svalues1 = new ArrayList<ServiceValue>(5);
+        ServiceTypeInfo sinfo = new ServiceTypeInfo();
+        sinfo.setDescription("Test ServiceType Desc");
+        sinfo.setInternal(false);
+        sinfo.setName("Test ServiceType Name");
+        ServiceType serviceType = serviceManager.createServiceType(sinfo, "Test Service Plugin",
+            vServerType);
+        ServiceType serviceType1 = serviceManager.createServiceType(sinfo, "Test Service Plugin",
+            vServerType1);
+        for (int i = 1; i <= 5; i++) {
+            svalues.add(serviceManager.createService(subject, virtualServer.getId(),
+                serviceType.getId(), "Test Service Name" + i, "Test Service From Server" + i,
+                "my computer").getServiceValue());
+            svalues1.add(serviceManager.createService(subject, virtualServer.getId(),
+                serviceType1.getId(), "Test Service Name" + i, "Test Service From Server" + i,
+                "my computer").getServiceValue());
+        }
+        Map<Integer, List<ServiceValue>> mappedServices = new HashMap<Integer, List<ServiceValue>>();
+        mappedServices.put(serviceType.getId(), svalues);
+        mappedServices.put(serviceType1.getId(), svalues1);
+        Map<Integer, List> mappedServices1 = (Map<Integer, List>) serviceManager
+            .getMappedPlatformServices(subject, testPlatforms.get(0).getId(), new PageControl());
+        for (Map.Entry<Integer, List> entry : mappedServices1.entrySet()) {
+            Integer typeId = entry.getKey();
+            List svcs = entry.getValue();
+            if (typeId.equals(serviceType.getId())) {
+                // TODO: Should the list contain ServiceValue?
+                assertEquals(mappedServices1.get(serviceType.getId()), svalues);
+            } else if (typeId.equals(serviceType1.getId())) {
+                assertEquals(mappedServices1.get(serviceType.getId()), svalues);
+            }
+        }
+    }
+
+    /**
+     * Test method for
+     * {@link org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getServicesByPlatform(org.hyperic.hq.authz.server.session.AuthzSubject, java.lang.Integer, java.lang.Integer, org.hyperic.util.pager.PageControl)}
+     * .
+     */
+    // TODO
+    public void testGetServicesByPlatformServiceType() throws ApplicationException,
+        NotFoundException {
+        PageList<ServiceValue> svalues = new PageList<ServiceValue>();
+        ServiceTypeInfo sinfo = new ServiceTypeInfo();
+        sinfo.setDescription("Test ServiceType Desc");
+        sinfo.setInternal(false);
+        sinfo.setName("Test ServiceType Name");
+        ServiceType serviceType = serviceManager.createServiceType(sinfo, "Test Service Plugin",
+            testServerType);
+        for (int i = 1; i <= 5; i++) {
+            svalues.add(serviceManager.createService(subject, testServers.get(0).getId(),
+                serviceType.getId(), "Test Service Name" + i, "Test Service From Server" + i,
+                "my computer").getServiceValue());
+        }
+        PageControl pc = new PageControl();
+        pc.setSortattribute(SortAttribute.SERVICE_NAME);
+        PageList<ServiceValue> svalues1 = serviceManager.getServicesByPlatform(subject,
+            testPlatforms.get(0).getId(), pc);
+        // TODO: Sorting has some issues; reported in HE-783
+        assertEquals(svalues, svalues1);
+    }
+
+    /**
+     * Test method for
+     * {@link org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getServicesByApplication(org.hyperic.hq.authz.server.session.AuthzSubject, java.lang.Integer, org.hyperic.util.pager.PageControl)}
+     * .
+     */
+    // TODO: HE-781
+    public void testGetServicesByApplicationAuthzSubjectIntegerPageControl() {
+        fail("Not yet implemented");
+    }
+
+    /**
+     * Test method for
+     * {@link org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getServicesByApplication(org.hyperic.hq.authz.server.session.AuthzSubject, java.lang.Integer, java.lang.Integer, org.hyperic.util.pager.PageControl)}
+     * .
+     */
+    // TODO: HE-781
+    public void testGetServicesByApplicationAuthzSubjectIntegerIntegerPageControl() {
+        fail("Not yet implemented");
+    }
+
+    /**
+     * Test method for
+     * {@link org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getServicesByApplication(org.hyperic.hq.authz.server.session.AuthzSubject, java.lang.Integer)}
+     * .
+     */
+    // TODO: HE-781
+    public void testGetServicesByApplicationAuthzSubjectInteger() {
+        fail("Not yet implemented");
+    }
+
+    /**
+     * Test method for
+     * {@link org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getServiceInventoryByApplication(org.hyperic.hq.authz.server.session.AuthzSubject, java.lang.Integer, org.hyperic.util.pager.PageControl)}
+     * .
+     */
+    // TODO: HE-781
+    public void testGetServiceInventoryByApplicationAuthzSubjectIntegerPageControl() {
+        fail("Not yet implemented");
+    }
+
+    /**
+     * Test method for
+     * {@link org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getFlattenedServicesByApplication(org.hyperic.hq.authz.server.session.AuthzSubject, java.lang.Integer, java.lang.Integer, org.hyperic.util.pager.PageControl)}
+     * .
+     */
+    // TODO: HE-781
+    public void testGetFlattenedServicesByApplication() {
+        fail("Not yet implemented");
+    }
+
+    /**
+     * Test method for
+     * {@link org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getServiceInventoryByApplication(org.hyperic.hq.authz.server.session.AuthzSubject, java.lang.Integer, java.lang.Integer, org.hyperic.util.pager.PageControl)}
+     * .
+     */
+    // TODO: HE-781
+    public void testGetServiceInventoryByApplicationAuthzSubjectIntegerIntegerPageControl() {
+        fail("Not yet implemented");
+    }
+
+    /**
+     * Test method for
+     * {@link org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getFlattenedServiceIdsByApplication(org.hyperic.hq.authz.server.session.AuthzSubject, java.lang.Integer)}
+     * .
+     */
+    // TODO: HE-781
+    public void testGetFlattenedServiceIdsByApplication() {
+        fail("Not yet implemented");
+    }
+
+    /**
+     * Test method for
+     * {@link org.hyperic.hq.appdef.server.session.ServiceManagerImpl#updateServiceZombieStatus(org.hyperic.hq.authz.server.session.AuthzSubject, org.hyperic.hq.appdef.server.session.Service, boolean)}
+     * .
+     */
+    @Test
+    public void testUpdateServiceZombieStatus() throws ApplicationException, NotFoundException {
+        ServiceTypeInfo sinfo = new ServiceTypeInfo();
+        sinfo.setDescription("Test ServiceType Desc");
+        sinfo.setInternal(false);
+        sinfo.setName("Test ServiceType Name");
+        ServiceType serviceType = serviceManager.createServiceType(sinfo, "Test Service Plugin",
+            testServerType);
+        Service service = serviceManager.createService(subject, testServers.get(0).getId(),
+            serviceType.getId(), "Test Service Name", "Test Service From Server", "my computer");
+        assertFalse(service.isAutodiscoveryZombie());
+        serviceManager.updateServiceZombieStatus(subject, service, true);
+        assertTrue(service.isAutodiscoveryZombie());
+    }
+
+    /**
+     * Test method for
+     * {@link org.hyperic.hq.appdef.server.session.ServiceManagerImpl#updateService(org.hyperic.hq.authz.server.session.AuthzSubject, org.hyperic.hq.appdef.shared.ServiceValue)}
+     * .
+     */
+    @Test
+    public void testUpdateService() throws ApplicationException, NotFoundException {
+        ServiceTypeInfo sinfo = new ServiceTypeInfo();
+        sinfo.setDescription("Test ServiceType Desc");
+        sinfo.setInternal(false);
+        sinfo.setName("Test ServiceType Name");
+        ServiceType serviceType = serviceManager.createServiceType(sinfo, "Test Service Plugin",
+            testServerType);
+        Service service = serviceManager.createService(subject, testServers.get(0).getId(),
+            serviceType.getId(), "Test Service Name", "Test Service From Server", "my computer");
+        ServiceValue sValue = new ServiceValue();
+        sValue.setName("Changed Name");
+        sValue.setDescription("Changed Description");
+        sValue.setLocation("Changed Location");
+        sValue.setAutodiscoveryZombie(true);
+        sValue.setServiceRt(true);
+        sValue.setEndUserRt(true);
+        sValue.setId(service.getId());
+        serviceManager.updateService(subject, sValue);
+        assertEquals(service.getName(), "Changed Name");
+        assertEquals(service.getDescription(), "Changed Description");
+        assertEquals(service.getServiceType(), serviceType);
+        assertEquals(service.getServer(), testServers.get(0));
+        assertEquals(service.getLocation(), "Changed Location");
+        assertTrue(service.getServiceValue().getServiceRt());
+        assertTrue(service.getServiceValue().getEndUserRt());
+        assertTrue(service.isAutodiscoveryZombie());
+    }
+
+    /**
+     * Test method for
+     * {@link org.hyperic.hq.appdef.server.session.ServiceManagerImpl#updateServiceTypes(java.lang.String, org.hyperic.hq.product.ServiceTypeInfo[])}
+     * .
+     */
+    // TODO
+    public void testUpdateServiceTypes() throws NotFoundException, VetoException {
+        ServiceTypeInfo sinfo = new ServiceTypeInfo();
+        sinfo.setDescription("Test ServiceType Desc");
+        sinfo.setInternal(false);
+        sinfo.setName("Test ServiceType Name");
+        ServiceType serviceType = serviceManager.createServiceType(sinfo, "Test Service Plugin",
+            testServers.get(0).getServerType());
+        sinfo.setDescription("Changed Description");
+        sinfo.setInternal(true);
+        sinfo.setName("Changed Name");
+        ServerTypeInfo svrTypeInfo = new ServerTypeInfo(serviceType.getServerType().getName(),
+            serviceType.getServerType().getDescription(), "1.0");
+        sinfo.setServerTypeInfo(svrTypeInfo);
+        // TODO: Deletion of service type gives issue
+        serviceManager.updateServiceTypes(serviceType.getPlugin(), new ServiceTypeInfo[] { sinfo });
+        assertEquals(serviceType.getName(), "Changed Name");
+        assertEquals(serviceType.getDescription(), "Changed Description");
+        assertEquals(serviceType.getPlugin(), "Test Service Plugin");
+        assertEquals(serviceType.getServerType(), testServerType);
+        assertEquals(serviceType.isIsInternal(), true);
+    }
+
+    /**
+     * Test method for
+     * {@link org.hyperic.hq.appdef.server.session.ServiceManagerImpl#deleteServiceType(org.hyperic.hq.appdef.server.session.ServiceType, org.hyperic.hq.authz.server.session.AuthzSubject, org.hyperic.hq.authz.shared.ResourceGroupManager, org.hyperic.hq.authz.shared.ResourceManager)}
+     * .
+     */
+    // TODO
+    public void testDeleteServiceType() {
+        fail("Not yet implemented");
+    }
+
+    /**
+     * Test method for
+     * {@link org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getServiceCluster(org.hyperic.hq.authz.server.session.ResourceGroup)}
+     * .
+     */
+    // TODO
+    public void testGetServiceCluster() {
+        fail("Not yet implemented");
+    }
+
+    /**
+     * Test method for
+     * {@link org.hyperic.hq.appdef.server.session.ServiceManagerImpl#removeService(org.hyperic.hq.authz.server.session.AuthzSubject, org.hyperic.hq.appdef.server.session.Service)}
+     * .
+     */
+    // TODO
+    public void testRemoveService() {
+        fail("Not yet implemented");
+    }
+
+    /**
+     * Test method for
+     * {@link org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getServiceTypeCounts()}
+     * .
+     */
+    @Test
+    public void testGetServiceTypeCounts() throws NotFoundException, ApplicationException {
+        List<Object[]> actuals = new ArrayList<Object[]>(10);
+        ServiceTypeInfo sinfo = new ServiceTypeInfo();
+        ServiceType serviceType;
+        for (int i = 1; i <= 9; i++) {
+            sinfo.setDescription("Test ServiceType Desc"+i);
+            sinfo.setInternal(false);
+            sinfo.setName("Test ServiceType Name"+i);
+            serviceType = serviceManager.createServiceType(sinfo, "Test Service Plugin"+i, testServerType);
+            // Create Services as well here as the query uses join from Service
+            serviceManager.createService(subject, testServers.get(0).getId(),
+                serviceType.getId(), "Test Service Name"+i, "Test Service From Server"+i, "my computer");
+            actuals.add(i-1, new Object[]{"Test ServiceType Name"+i, Long.valueOf("1")});
+        }
+        
+        List<Object[]> counts = serviceManager.getServiceTypeCounts();
+        for (int i=0; i<9; i++) {
+            assertEquals((String)counts.get(i)[0],((String)actuals.get(i)[0]));
+            assertEquals((Long)counts.get(i)[1],((Long)actuals.get(i)[1]));
+         } 
+    }
+
+    /**
+     * Test method for
+     * {@link org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getServiceCount()}
+     * .
+     */
+    @Test
+    public void testGetServiceCount() throws NotFoundException, ApplicationException {
+        ServiceTypeInfo sinfo = new ServiceTypeInfo();
+        sinfo.setDescription("Test ServiceType Desc");
+        sinfo.setInternal(false);
+        sinfo.setName("Test ServiceType Name");
+        ServiceType serviceType = serviceManager.createServiceType(sinfo, "Test Service Plugin",
+            testServerType);
+        for (int i=1; i<=10; i++){
+        Service service = serviceManager.createService(subject, testServers.get(0).getId(),
+            serviceType.getId(), "Test Service Name"+i, "Test Service From Server"+i, "my computer");
+        }
+        assertEquals(serviceManager.getServiceCount().intValue(), 10);
+    }
 
 }
