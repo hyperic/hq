@@ -19,7 +19,7 @@
 	<properties>
 		<maven.build.timestamp.format>MMM dd, yyyy</maven.build.timestamp.format>
 		<build.timestamp>${maven.build.timestamp}</build.timestamp>
-		<tomcat.version>6.0.24</tomcat.version>
+		<tomcat.version>6.0.26</tomcat.version>
 	</properties>
 
 
