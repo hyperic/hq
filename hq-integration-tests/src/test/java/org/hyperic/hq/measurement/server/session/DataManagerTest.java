@@ -38,6 +38,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.transaction.AfterTransaction;
@@ -51,6 +52,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = IntegrationTestContextLoader.class, locations = { "classpath*:META-INF/spring/*-context.xml" })
 @Transactional
+@DirtiesContext
 public class DataManagerTest {
 
     @Autowired
@@ -283,7 +285,7 @@ public class DataManagerTest {
      * .
      */
     @Test
-    public final void testAddDataListOfDataPoint() {
+    public void testAddDataListOfDataPoint() {
         // assertTrue(dataManager.addData(randomDataPoints));
     }
 
@@ -291,7 +293,7 @@ public class DataManagerTest {
      * Verify the MetricDataCache update
      */
     @Test
-    public final void testVerifyMetricDataCacheUpdate() {
+    public void testVerifyMetricDataCacheUpdate() {
         assertTrue(dataManager.addData(randomDataPoints));
         Integer metricId;
         Long timeStamp;
@@ -310,7 +312,7 @@ public class DataManagerTest {
      * Adding EmptyList
      */
     @Test
-    public final void testAddDataListOfEmptyDataPoint() {
+    public void testAddDataListOfEmptyDataPoint() {
         // Create an Empty List<DataPoint>
         List<DataPoint> dataPoints = new ArrayList<DataPoint>();
         assertTrue(dataManager.addData(dataPoints));
