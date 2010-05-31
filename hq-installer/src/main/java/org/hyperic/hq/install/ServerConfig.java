@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2010], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -50,6 +50,8 @@ import org.hyperic.util.config.PortConfigOption;
 import org.hyperic.util.config.StringConfigOption;
 import org.hyperic.util.config.YesNoConfigOption;
 import org.hyperic.util.jdbc.DriverLoadException;
+import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
+import org.jasypt.properties.PropertyValueEncryptionUtils;
 
 public class ServerConfig
     extends BaseConfig {
@@ -112,6 +114,7 @@ public class ServerConfig
     public static final String Q_JDBC_URL = "Enter the JDBC connection URL for the %%DBNAME%% database";
     public static final String Q_JDBC_USER = "Enter the username to use to connect to the database";
     public static final String Q_JDBC_PASSWORD = "Enter the password to use to connect to the database.";
+    public static final String Q_ENCRYPTION_KEY = "Enter an encryption key to use to encrypt the database password.";
     public static final String Q_ADMIN_USER = "What should the username be for the initial admin user?";
     public static final String Q_ADMIN_PASSWORD = "What should the password be for the initial admin user?";
     public static final String Q_ADMIN_EMAIL = "What should the email address be for the initial admin user?";
@@ -367,6 +370,10 @@ public class ServerConfig
                     schema.addOption(passwordOption);
                 }
 
+                StringConfigOption encryptionKeyOption = new StringConfigOption("server.encryption-key", Q_ENCRYPTION_KEY);
+                encryptionKeyOption.setMinLength(8);
+                schema.addOption(encryptionKeyOption);
+
                 senderChoice = previous.getValue("server.mail.sender");
                 // dont ask about admin username if this is an HA node
                 // this should have already been set up
@@ -392,6 +399,22 @@ public class ServerConfig
                 break;
 
             case 7:
+                // Get encryption key
+                String encryptionKey = previous.getValue("server.encryption-key");
+                
+                // Encrypt database password
+                String encryptedPw = encryptPassword("PBEWithMD5AndTripleDES",
+                                                     encryptionKey,
+                                                     previous.getValue("server.database-password"));
+                
+                schema.addOption(new HiddenConfigOption("server.encryption-key",
+                                                        encryptionKey));
+                
+                schema.addOption(new HiddenConfigOption("server.database-password-encrypted",
+                                                        encryptedPw.toString()));
+                break;
+
+            case 8:
                 // For servers using the builtinDB we have only gotten the port
                 // at
                 // this point. Now we setup the url based on the port selection
@@ -403,7 +426,7 @@ public class ServerConfig
                 }
                 break;
 
-            case 8:
+            case 9:
                 // Now that they have made their jdbc selections, do a sanity
                 // check:
                 // If we are in "quick" mode and the database already exists,
@@ -427,7 +450,7 @@ public class ServerConfig
                 }
                 break;
 
-            case 9:
+            case 10:
                 String dbUpgradeChoice = previous.getValue(SERVER_DATABASE_UPGRADE_CHOICE);
                 if (dbUpgradeChoice.equals(DB_CHOICE_OVERWRITE)) {
                     schema.addOption(new HiddenConfigOption("server.database.create",
@@ -652,6 +675,20 @@ public class ServerConfig
                 .append(nl).append(" to initialize.  Subsequent startups will be much faster.");
         }
         return s;
+    }
+
+    private String encryptPassword(String algorithm,
+                                   String encryptionKey,
+                                   String clearTextPassword) {
+        
+        // TODO: This needs to be refactored into a security utility class
+
+        StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
+        encryptor.setPassword(encryptionKey);
+        encryptor.setAlgorithm(algorithm);
+                
+        //return PropertyValueEncryptionUtils.encrypt(clearTextPassword, encryptor);
+        return clearTextPassword;
     }
 
     protected boolean databaseExists(ConfigResponse config) throws EarlyExitException {

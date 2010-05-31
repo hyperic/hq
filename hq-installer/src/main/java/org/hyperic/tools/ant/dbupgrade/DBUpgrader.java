@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2010], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -46,6 +46,8 @@ import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.jdbc.JDBC;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.tools.db.TypeMap;
+import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
+import org.jasypt.properties.PropertyValueEncryptionUtils;
 
 public class DBUpgrader extends Task {
 
@@ -396,7 +398,31 @@ public class DBUpgrader extends Task {
         if ( _jdbcUser == null && _jdbcPassword == null ) {
             return DriverManager.getConnection(_jdbcUrl);
         } else {
-            return DriverManager.getConnection(_jdbcUrl, _jdbcUser, _jdbcPassword);
+            String password = _jdbcPassword;
+                        
+            if (PropertyValueEncryptionUtils.isEncryptedValue(password)) {
+                String encryptionKey = System.getProperty("server.encryption-key");
+
+                password = decryptPassword(
+                                "PBEWithMD5AndTripleDES",
+                                encryptionKey,
+                                password);
+            }
+            
+            return DriverManager.getConnection(_jdbcUrl, _jdbcUser, password);
         }
+    }
+    
+    private String decryptPassword(String algorithm,
+                                   String encryptionKey,
+                                   String clearTextPassword) {
+        
+        // TODO: This needs to be refactored into a security utility class
+        
+        StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
+        encryptor.setPassword(encryptionKey);
+        encryptor.setAlgorithm(algorithm);
+        
+        return PropertyValueEncryptionUtils.decrypt(clearTextPassword, encryptor);
     }
 }

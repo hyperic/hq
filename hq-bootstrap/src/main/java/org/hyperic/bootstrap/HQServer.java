@@ -128,6 +128,9 @@ public class HQServer {
             log.info("Setting -d64 JAVA OPTION to enable SunOS 64-bit JRE");
             optList.add("-d64");
         }
+        String encryptionKey = System.getProperty("server.encryption-key");
+        optList.add("-Dserver.encryption-key=" + encryptionKey);
+        
         return optList;
     }
     
@@ -145,6 +148,7 @@ public class HQServer {
                 rs = stmt.executeQuery(sql);
                 if (rs.next()) {
                     final String currSchema = rs.getString("propvalue");
+                    log.info("HQ DB schema: " + currSchema);
                     if (currSchema.contains(HQConstants.SCHEMA_MOD_IN_PROGRESS)) {
                         log.fatal("HQ DB schema is in a bad state: '" + currSchema +
                             "'.  This is most likely due to a failed upgrade.  " +
@@ -175,6 +179,8 @@ public class HQServer {
         }
         
         String javaHome = System.getProperty("java.home");
+        String encryptionKey = System.getProperty("server.encryption-key");
+
         return processManager.executeProcess(
             new String[] { javaHome + "/bin/java",
                           "-cp",
@@ -183,6 +189,7 @@ public class HQServer {
                           "-Dant.home=" + serverHome,
                           "-Dtomcat.home="  + engineHome + "/hq-server",
                           "-Dlog4j.configuration=" + logConfigFileUrl,
+                          "-Dserver.encryption-key=" + encryptionKey,
                           "org.apache.tools.ant.launch.Launcher",
                           "-q",
                           "-lib",
