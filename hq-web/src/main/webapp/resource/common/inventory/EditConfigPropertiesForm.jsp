@@ -113,7 +113,7 @@
 		<td width="25%" class="BlockLabel"><c:if test="${resourceConfigOption.optional == false}"><html:img page="/images/icon_required.gif" width="9" height="9" border="0"/></c:if><bean:write name="resourceConfigOption" property="shortOption"/><br><span class="CaptionText"><c:out value="${resourceConfigOption.description}"/></span></td>
 <c:choose>
     <c:when test="${resourceConfigOption.isEnumeration == false && resourceConfigOption.isBoolean == false}">
-	<td width="25%" class="BlockContent"><c:choose><c:when test="${resourceConfigOption.isSecret == true }"><input type="password"/> </c:when><c:otherwise><input type="text"/> </c:otherwise></c:choose>size="35" name="<c:out value='${resourceConfigOption.option}'/>" value="<c:out value='${resourceConfigOption.value}'/>"></td>
+ <td width="25%" class="BlockContent"><c:choose><c:when test="${resourceConfigOption.isSecret == true }"><input type="password" </c:when><c:otherwise><input type="text" </c:otherwise></c:choose>size="35" name="<c:out value='${resourceConfigOption.option}'/>" value="<c:out value='${resourceConfigOption.value}'/>"></td>
     </c:when>
     <c:when test="${resourceConfigOption.isBoolean == true}">
     <td width="25%" class="BlockContent">
@@ -150,7 +150,7 @@
 		<td width="25%" class="BlockLabel"><c:if test="${monitorConfigOption.optional == false}"><html:img page="/images/icon_required.gif" width="9" height="9" border="0"/></c:if><bean:write name="monitorConfigOption" property="shortOption"/><br><span class="CaptionText"><c:out value="${monitorConfigOption.description}"/></span></td>
 <c:choose>
     <c:when test="${monitorConfigOption.isEnumeration == false && monitorConfigOption.isBoolean == false}">
-	<td width="25%" class="BlockContent"><c:choose><c:when test="${monitorConfigOption.isSecret == true }"><input type="password"/> </c:when><c:otherwise><input type="text"/> </c:otherwise></c:choose>size="35" name="<c:out value='${monitorConfigOption.option}'/>" value="<c:out value='${monitorConfigOption.value}'/>"></td>
+ <td width="25%" class="BlockContent"><c:choose><c:when test="${monitorConfigOption.isSecret == true }"><input type="password" </c:when><c:otherwise><input type="text" </c:otherwise></c:choose>size="35" name="<c:out value='${monitorConfigOption.option}'/>" value="<c:out value='${monitorConfigOption.value}'/>"></td>
     </c:when>
     <c:when test="${monitorConfigOption.isBoolean == true}">
     <td width="25%" class="BlockContent">
@@ -207,7 +207,7 @@
 		<td width="25%" class="BlockLabel"><c:if test="${rtConfigOption.optional == false}"><html:img page="/images/icon_required.gif" width="9" height="9" border="0"/></c:if><bean:write name="rtConfigOption" property="shortOption"/><br><span class="CaptionText"><c:out value="${rtConfigOption.description}"/></span></td>
 <c:choose>
     <c:when test="${rtConfigOption.isArray == false && rtConfigOption.isEnumeration == false && rtConfigOption.isBoolean == false}">
-	<td width="25%" class="BlockContent"><c:choose><c:when test="${rtConfigOption.isSecret == true }"><input type="password"/> </c:when><c:otherwise><input type="text"/> </c:otherwise></c:choose>size="35" name="<c:out value='${rtConfigOption.option}'/>" value="<c:out value='${rtConfigOption.value}'/>"></td>
+<td width="25%" class="BlockContent"><c:choose><c:when test="${rtConfigOption.isSecret == true }"><input type="password" </c:when><c:otherwise><input type="text" </c:otherwise></c:choose>size="35" name="<c:out value='${rtConfigOption.option}'/>" value="<c:out value='${rtConfigOption.value}'/>"></td>
     </c:when>
     <c:when test="${rtConfigOption.isArray == true}">
     <td class="BlockContent" >
@@ -276,7 +276,7 @@
 		<td width="25%" class="BlockLabel"><c:if test="${controlConfigOption.optional == false}"><html:img page="/images/icon_required.gif" width="9" height="9" border="0"/></c:if><bean:write name="controlConfigOption" property="shortOption"/><br><span class="CaptionText"><c:out value="${controlConfigOption.description}"/></span></td>
 <c:choose>
     <c:when test="${controlConfigOption.isEnumeration == false && controlConfigOption.isBoolean == false }">
-	<td width="25%" class="BlockContent"><c:choose><c:when test="${controlConfigOption.isSecret == true }"><input type="password"/> </c:when><c:otherwise><input type="text"/> </c:otherwise></c:choose>size="35" name="<c:out value='${controlConfigOption.option}'/>" value="<c:out value='${controlConfigOption.value}'/>"></td>
+ <td width="25%" class="BlockContent"><c:choose><c:when test="${controlConfigOption.isSecret == true }"><input type="password" </c:when><c:otherwise><input type="text" </c:otherwise></c:choose>size="35" name="<c:out value='${controlConfigOption.option}'/>" value="<c:out value='${controlConfigOption.value}'/>"></td>
     </c:when>
     <c:when test="${controlConfigOption.isBoolean == true}">
     <td width="25%" class="BlockContent">

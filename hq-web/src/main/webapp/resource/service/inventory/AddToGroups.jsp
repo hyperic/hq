@@ -251,7 +251,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 			<tr>
 				<td class="ListCellLineEmpty"><html:img page="/images/spacer.gif" width="5" height="1" border="0"/></td>
 
-				<td class="ListHeaderInactive"><input type="checkbox" name="toToggleAll" onClick="ToggleAll(this, widgetProperties);"/></td>
+			  <td class="ListHeaderInactive"><input type="checkbox" name="toToggleAll" onClick="ToggleAll(this, widgetProperties);"/></td>
 
 				<td class="ListHeaderInactiveSorted">
 				<html:img page="/images/spacer.gif" width="200" height="1" border="0"/><br>
