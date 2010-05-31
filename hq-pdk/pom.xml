@@ -19,6 +19,7 @@
 	<modules>
 		<module>hq-pdk-shared</module>
 		<module>hq-agent-pdk</module>
+		<module>hq-product</module>
 	</modules>
 
 	<build>
