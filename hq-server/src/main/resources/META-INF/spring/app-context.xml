@@ -18,7 +18,7 @@
    
     <bean id="jasyptConfiguration"
         class="org.jasypt.encryption.pbe.config.EnvironmentStringPBEConfig">
-        <property name="algorithm" value="PBEWithMD5AndTripleDES" />
+        <property name="algorithm" value="PBEWithMD5AndDES" />
         <property name="passwordSysPropertyName" value="server.encryption-key" />
     </bean>
     
