@@ -227,7 +227,7 @@ span.navLink a {
 	background: url('/hqu/vsphere/public/images/icons/vm-snapshot.png') no-repeat;
 }
 
-.vm-action-reverttosnapshot {
+.vm-action-reverttocurrentsnapshot {
 	background: url('/hqu/vsphere/public/images/icons/vm-snapshot-revert.png') no-repeat;
 }
 
