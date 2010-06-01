@@ -687,8 +687,7 @@ public class ServerConfig
         encryptor.setPassword(encryptionKey);
         encryptor.setAlgorithm(algorithm);
                 
-        //return PropertyValueEncryptionUtils.encrypt(clearTextPassword, encryptor);
-        return clearTextPassword;
+        return PropertyValueEncryptionUtils.encrypt(clearTextPassword, encryptor);
     }
 
     protected boolean databaseExists(ConfigResponse config) throws EarlyExitException {

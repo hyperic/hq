@@ -91,8 +91,8 @@ public class HQServer {
         }
         log.info("Verifying HQ database schema...");
         upgradeDB();
-        if(!(verifySchema())) {
-            //Schema is not valid.  Something went wrong with the DB upgrade.
+        if (!(verifySchema())) {
+            // Schema is not valid. Something went wrong with the DB upgrade.
             return;
         }
         List<String> javaOpts = getJavaOpts();
@@ -128,68 +128,60 @@ public class HQServer {
             log.info("Setting -d64 JAVA OPTION to enable SunOS 64-bit JRE");
             optList.add("-d64");
         }
-        String encryptionKey = System.getProperty("server.encryption-key");
-        optList.add("-Dserver.encryption-key=" + encryptionKey);
-        
         return optList;
     }
-    
-  
-    
+
     boolean verifySchema() {
-            Statement stmt  = null;
-            ResultSet rs    = null;
-            Connection conn = null;
-            try {
-                conn = dataSource.getConnection();
-                stmt = conn.createStatement();
-                final String sql = "select propvalue from EAM_CONFIG_PROPS " +
-                    "WHERE propkey = '" + HQConstants.SchemaVersion + "'";
-                rs = stmt.executeQuery(sql);
-                if (rs.next()) {
-                    final String currSchema = rs.getString("propvalue");
-                    log.info("HQ DB schema: " + currSchema);
-                    if (currSchema.contains(HQConstants.SCHEMA_MOD_IN_PROGRESS)) {
-                        log.fatal("HQ DB schema is in a bad state: '" + currSchema +
-                            "'.  This is most likely due to a failed upgrade.  " +
-                            "Please either restore from backups and start your " +
-                            "previous version of HQ or contact HQ support.  " +
-                            "HQ cannot start while the current DB Schema version " +
-                            "is in this state");
-                       return false;
-                    }
+        Statement stmt = null;
+        ResultSet rs = null;
+        Connection conn = null;
+        try {
+            conn = dataSource.getConnection();
+            stmt = conn.createStatement();
+            final String sql = "select propvalue from EAM_CONFIG_PROPS " + "WHERE propkey = '" +
+                               HQConstants.SchemaVersion + "'";
+            rs = stmt.executeQuery(sql);
+            if (rs.next()) {
+                final String currSchema = rs.getString("propvalue");
+                log.info("HQ DB schema: " + currSchema);
+                if (currSchema.contains(HQConstants.SCHEMA_MOD_IN_PROGRESS)) {
+                    log.fatal("HQ DB schema is in a bad state: '" + currSchema +
+                              "'.  This is most likely due to a failed upgrade.  " +
+                              "Please either restore from backups and start your " +
+                              "previous version of HQ or contact HQ support.  " +
+                              "HQ cannot start while the current DB Schema version " +
+                              "is in this state");
+                    return false;
                 }
-            } catch (SQLException e) {
-                log.error("Error verifying if HQ schema is valid.  Cause: " + e.getMessage());
-            }  finally {
-                DBUtil.closeJDBCObjects(HQServer.class.getName(), conn, stmt, rs);
             }
-            return true;
+        } catch (SQLException e) {
+            log.error("Error verifying if HQ schema is valid.  Cause: " + e.getMessage());
+        } finally {
+            DBUtil.closeJDBCObjects(HQServer.class.getName(), conn, stmt, rs);
+        }
+        return true;
     }
 
     int upgradeDB() {
         String logConfigFileUrl;
         try {
-            logConfigFileUrl = new File(serverHome +
-                             "/conf/log4j.xml").toURI().toURL().toString();
+            logConfigFileUrl = new File(serverHome + "/conf/log4j.xml").toURI().toURL().toString();
         } catch (MalformedURLException e) {
             log.error("Unable to determine URL for logging config file " + serverHome +
-                             "/conf/log4j.xml.  Cause: " + e.getMessage());
+                      "/conf/log4j.xml.  Cause: " + e.getMessage());
             return 1;
         }
-        
-        String javaHome = System.getProperty("java.home");
-        String encryptionKey = System.getProperty("server.encryption-key");
 
+        String javaHome = System.getProperty("java.home");
+       
         return processManager.executeProcess(
             new String[] { javaHome + "/bin/java",
                           "-cp",
                           serverHome + "/lib/ant-launcher-1.7.1.jar",
                           "-Dserver.home=" + serverHome,
                           "-Dant.home=" + serverHome,
-                          "-Dtomcat.home="  + engineHome + "/hq-server",
+                          "-Dtomcat.home=" + engineHome + "/hq-server",
                           "-Dlog4j.configuration=" + logConfigFileUrl,
-                          "-Dserver.encryption-key=" + encryptionKey,
                           "org.apache.tools.ant.launch.Launcher",
                           "-q",
                           "-lib",

@@ -57,7 +57,6 @@ public class HQServerTest {
 
     @Test
     public void testGetJavaOptsSunJava64() {
-        /*
         Properties testProps = new Properties();
         testProps.put("server.java.opts",
             "-XX:MaxPermSize=192m -Xmx512m -Xms512m -XX:+HeapDumpOnOutOfMemoryError");
@@ -76,12 +75,10 @@ public class HQServerTest {
         List<String> javaOpts = server.getJavaOpts();
         verify();
         assertEquals(expectedOpts, javaOpts);
-        */
     }
 
     @Test
     public void testStart() throws Exception {
-        /*
         EasyMock.expect(engineController.isEngineRunning()).andReturn(false);
         serverConfigurator.configure();
         EasyMock.expect(embeddedDatabaseController.shouldUse()).andReturn(true);
@@ -133,7 +130,6 @@ public class HQServerTest {
         replay();
         server.start();
         verify();
-        */
     }
 
     @Test
@@ -154,7 +150,6 @@ public class HQServerTest {
 
     @Test
     public void testStartErrorConfiguring() throws Exception {
-        /*
         EasyMock.expect(engineController.isEngineRunning()).andReturn(false);
         serverConfigurator.configure();
         EasyMock.expectLastCall().andThrow(new NullPointerException());
@@ -206,12 +201,10 @@ public class HQServerTest {
         replay();
         server.start();
         verify();
-        */
     }
 
     @Test
     public void testStartErrorVerifyingSchema() throws Exception {
-        /*
         EasyMock.expect(engineController.isEngineRunning()).andReturn(false);
         serverConfigurator.configure();
         EasyMock.expect(embeddedDatabaseController.shouldUse()).andReturn(true);
@@ -254,12 +247,10 @@ public class HQServerTest {
         replay();
         server.start();
         verify();
-        */
     }
 
     @Test
     public void testStartInvalidDBSchema() throws Exception {
-        /*
         EasyMock.expect(engineController.isEngineRunning()).andReturn(false);
         serverConfigurator.configure();
         EasyMock.expect(embeddedDatabaseController.shouldUse()).andReturn(true);
@@ -299,12 +290,10 @@ public class HQServerTest {
         replay();
         server.start();
         verify();
-        */
     }
 
     @Test
     public void testStartNoDBResultsWithSchemaCheck() throws Exception {
-        /*
         EasyMock.expect(engineController.isEngineRunning()).andReturn(false);
         serverConfigurator.configure();
         EasyMock.expect(embeddedDatabaseController.shouldUse()).andReturn(true);
@@ -355,7 +344,6 @@ public class HQServerTest {
         replay();
         server.start();
         verify();
-        */
     }
 
     @Test

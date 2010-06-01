@@ -1,13 +1,15 @@
 package org.hyperic.tools.ant;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
 import org.apache.tools.ant.BuildException;
+import org.jasypt.properties.PropertyValueEncryptionUtils;
 import org.junit.Test;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Unit test of {@link ServerConfigUpgrader}
@@ -77,7 +79,12 @@ public class ServerConfigUpgraderTest {
         expectedConfig.put("server.connection-validation-sql", "select 1");
         expectedConfig.put("server.hibernate.dialect",
             "org.hyperic.hibernate.dialect.MySQL5InnoDBDialect");
+        expectedConfig.put("server.encryption-key", "defaultkey");
+        expectedConfig.remove("server.database-password");
+
         Properties serverConfig = upgrader.upgradeServerConfig(input);
+        String encryptedPw = (String) serverConfig.remove("server.database-password");
+        assertTrue(PropertyValueEncryptionUtils.isEncryptedValue(encryptedPw));
         assertEquals(expectedConfig, serverConfig);
     }
 
@@ -101,7 +108,11 @@ public class ServerConfigUpgraderTest {
         expectedConfig.put("server.connection-validation-sql", "select 1 from dual");
         expectedConfig.put("server.hibernate.dialect",
             "org.hyperic.hibernate.dialect.Oracle9Dialect");
+        expectedConfig.put("server.encryption-key", "defaultkey");
+        expectedConfig.remove("server.database-password");
         Properties serverConfig = upgrader.upgradeServerConfig(input);
+        String encryptedPw = (String) serverConfig.remove("server.database-password");
+        assertTrue(PropertyValueEncryptionUtils.isEncryptedValue(encryptedPw));
         assertEquals(expectedConfig, serverConfig);
     }
 
@@ -128,7 +139,11 @@ public class ServerConfigUpgraderTest {
             "jdbc:postgresql://127.0.0.1:9432/hqdb?protocolVersion=2");
         expectedConfig.put("server.hibernate.dialect",
             "org.hyperic.hibernate.dialect.PostgreSQLDialect");
+        expectedConfig.put("server.encryption-key", "defaultkey");
+        expectedConfig.remove("server.database-password");
         Properties serverConfig = upgrader.upgradeServerConfig(input);
+        String encryptedPw = (String) serverConfig.remove("server.database-password");
+        assertTrue(PropertyValueEncryptionUtils.isEncryptedValue(encryptedPw));
         assertEquals(expectedConfig, serverConfig);
     }
 
@@ -158,4 +173,5 @@ public class ServerConfigUpgraderTest {
         upgrader.parseMailConfig(props);
         assertTrue(props.isEmpty());
     }
+
 }

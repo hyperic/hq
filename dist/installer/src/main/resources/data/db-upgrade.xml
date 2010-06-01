@@ -22,6 +22,7 @@ has already been defined.
     <property name="jdbc.url" value="${server.database-url}"/>
     <property name="jdbc.user" value="${server.database-user}"/>
     <property name="jdbc.password" value="${server.database-password}"/>
+	<property name="server.encryption-key" value="${server.encryption-key}"/>
     <property name="typemap.file" value="common-dbsetup-typemap.xml"/>
     <property name="schema.target" value="LATEST"/>
     <echo>^^^DEBUG: Loading taskdefs...</echo>
@@ -33,7 +34,7 @@ has already been defined.
 <target name="upgrade" depends="load-server-properties">
 
 <dbupgrade
-   jdbcUrl="${jdbc.url}" jdbcUser="${jdbc.user}" jdbcPassword="${jdbc.password}"
+   jdbcUrl="${jdbc.url}" jdbcUser="${jdbc.user}" jdbcPassword="${jdbc.password}" encryptionKey="${server.encryption-key}"
 
    valueColumn="VALUE" table="EAM_CONFIG_PROPS"
    keyColumn="KEY" keyMatch="CAM_SCHEMA_VERSION"

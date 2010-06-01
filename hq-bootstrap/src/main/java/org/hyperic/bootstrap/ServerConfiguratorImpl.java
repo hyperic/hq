@@ -111,11 +111,18 @@ public class ServerConfiguratorImpl implements ServerConfigurator {
     }
 
     private void exportEngineProps() throws IOException {
+        Properties propsToExport = new Properties();
+      
+        for(Object prop: serverProps.keySet()) {
+            if(prop != null && !(((String)prop).startsWith("server.database"))) {
+                propsToExport.put(prop, serverProps.get(prop));
+            }
+        }
         FileOutputStream fo = null;
         try {
             fo = new FileOutputStream(engineHome + File.separator + "hq-server" + File.separator +
                                       "conf" + File.separator + "hq-catalina.properties");
-            serverProps.store(fo, null);
+            propsToExport.store(fo, null);
         } finally {
             if (fo != null) {
                 fo.close();

@@ -15,6 +15,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
+import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
+import org.jasypt.properties.PropertyValueEncryptionUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -217,6 +219,19 @@ public class ServerConfigUpgrader
                     "org.hyperic.hibernate.dialect.PostgreSQLDialect");
             }
         }
+        if (serverProps.getProperty("server.encryption-key") == null) {
+            serverProps.setProperty("server.encryption-key", "defaultkey");
+            serverProps.setProperty("server.database-password", encryptPassword("defaultkey",
+                serverProps.getProperty("server.database-password")));
+        }
+    }
+
+    private String encryptPassword(String encryptionKey, String clearTextPassword) {
+        // TODO: This needs to be refactored into a security utility class
+        StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
+        encryptor.setPassword(encryptionKey);
+        encryptor.setAlgorithm("PBEWithMD5AndTripleDES");
+        return PropertyValueEncryptionUtils.encrypt(clearTextPassword, encryptor);
     }
 
     Properties upgradeServerConfig() {

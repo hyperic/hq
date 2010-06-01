@@ -56,7 +56,7 @@ public class DBUpgrader extends Task {
     
 
     private List   _schemaSpecs = new ArrayList();
-
+    private String encryptionKey;
     private String _jdbcDriver;
     private String _jdbcUrl;
     private String _jdbcUser;
@@ -116,6 +116,10 @@ public class DBUpgrader extends Task {
 
     public void setTargetSchemaVersion (String v) {
         _targetSchemaVersionStr = v;
+    }
+
+    public void setEncryptionKey(String encryptionKey) {
+        this.encryptionKey = encryptionKey;
     }
 
     public SchemaSpec createSchemaSpec () {
@@ -401,8 +405,7 @@ public class DBUpgrader extends Task {
             String password = _jdbcPassword;
                         
             if (PropertyValueEncryptionUtils.isEncryptedValue(password)) {
-                String encryptionKey = System.getProperty("server.encryption-key");
-
+                log("Encryption key is " + encryptionKey);
                 password = decryptPassword(
                                 "PBEWithMD5AndTripleDES",
                                 encryptionKey,
