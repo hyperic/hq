@@ -44,7 +44,7 @@ import java.util.UUID;
 public class PerformanceMonitor {
 
     private final Log logger = LogFactory.getLog(this.getClass().getName());
-    /* undetermined requirement */
+
     private long maximumDuration;
 
     private String warningMessage;
@@ -63,30 +63,31 @@ public class PerformanceMonitor {
      * @param pjp
      */
     @Around("org.hyperic.hq.monitor.aop.MonitorArchitecture.serviceLayerOperationDuration()")
-    public void monitorServiceMethod(ProceedingJoinPoint pjp){
+    public Object monitorServiceMethod(ProceedingJoinPoint pjp) throws Throwable {
         logger.debug("\nMonitoring " + buildStartMessage(pjp));
+        Object invocation = null;
 
         StopWatch sw = new StopWatch();
         sw.start(pjp.getSignature().getName() + UUID.randomUUID().toString());
 
         try {
-            Object invocation = pjp.proceed();
+            invocation = pjp.proceed();
         }
-        catch (Throwable throwable) {
-            logger.warn(throwable);
+        finally {
+            sw.stop();
         }
 
-        sw.stop();
         long endTime = sw.getTotalTimeMillis();
-
 
         if(exceededThreshold(endTime)) {
            logger.warn("\n"+warningMessage + " " + endTime);
         }
         else {
-            logger.debug("\n"+buildStartMessage(pjp) + buildEndMessage(sw));
+           logger.debug("\n"+buildStartMessage(pjp) + buildEndMessage(sw));
         }
 
+        return invocation;
+         
     }
 
     /**

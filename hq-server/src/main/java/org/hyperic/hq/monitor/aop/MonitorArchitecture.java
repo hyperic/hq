@@ -37,7 +37,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class MonitorArchitecture {
 
-    @Pointcut("inServiceLayer() && execution(* org.hyperic.hq..*.*(..))")
+    @Pointcut("inServiceLayer() && execution(* *.hyperic.hq..*.*(..))")
     public void serviceLayerOperationDuration(){}
 
 
@@ -51,7 +51,7 @@ public class MonitorArchitecture {
     @Pointcut("execution(* (@org.springframework.transaction.annotation.Transactional *).*(..))")
     public void transactionalOperation() {}
 
-    @Pointcut("execution(* (@org.springframework.stereotype.Service *).*(..))") //execution(* org.hyperic.hq..*.*(..)
+    @Pointcut("execution(* (@org.springframework.stereotype.Service *).*(..))") 
     public void serviceOperation() {}
 
  

@@ -46,7 +46,7 @@ private final Log logger = LogFactory.getLog(this.getClass().getName());
 
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void foo(long duration) {
-        logger.debug("running " + this.getClass().getName() + ".foo()");
+        logger.debug("Starting to run " + this.getClass().getName() + ".foo() for an unacceptable duration..");
 
         try {
 

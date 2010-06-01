@@ -3,17 +3,21 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:p="http://www.springframework.org/schema/p"
 	xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:context="http://www.springframework.org/schema/context"
 	xsi:schemaLocation=
 	   "http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
-		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
 
+
+    <!--  ToDo: get maximumDuration from <context:property-placeholder location="classpath:/tweak.properties"/>  -->
 
     <aop:aspectj-autoproxy/> 
 
 
     <bean id="performanceMonitorAspect" class="org.hyperic.hq.monitor.aop.aspects.PerformanceMonitor">
-        <description>Monitors duration of execution on transactional methods in the service layer. Note undetermined requirement: max duration</description>
-        <property name="maximumDuration" value="3000"/>
+        <description>Monitors duration of execution on transactional methods in the service layer.</description>
+        <property name="maximumDuration" value="300000"/>
         <property name="warningMessage" value="Method exceeded acceptable duration: "/>
     </bean>    
 

@@ -53,8 +53,8 @@ public class ExceedsThresholdTests extends BaseInfrastructureTest {
 
     @Autowired private MockService mockServiceImpl;
     @Autowired private AutoinventoryManager autoInventoryManagerImpl;
-    private long acceptableDuration = 1000;
-    private long unAcceptableDuration = 1500;
+ 
+    private long unAcceptableDuration = 300000; 
 
     @Before
     public void before() {
@@ -68,7 +68,7 @@ public class ExceedsThresholdTests extends BaseInfrastructureTest {
      * 
      */
     @Test
-    @Ignore("Comment out to see it work - don't want to break ci builds")
+    //@Ignore("comment out: designed to fail")
     public void monitorControlPerformance() {
         StopWatch sw = new StopWatch();
         sw.start("test");
@@ -82,7 +82,6 @@ public class ExceedsThresholdTests extends BaseInfrastructureTest {
     @Test
     public void monitorPerformance(){
         autoInventoryManagerImpl.notifyAgentsNeedingRuntimeScan();
-        System.out.println("finished");
     }
 
 
