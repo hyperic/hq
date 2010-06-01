@@ -407,7 +407,7 @@ public class DBUpgrader extends Task {
             if (PropertyValueEncryptionUtils.isEncryptedValue(password)) {
                 log("Encryption key is " + encryptionKey);
                 password = decryptPassword(
-                                "PBEWithMD5AndTripleDES",
+                                "PBEWithMD5AndDES",
                                 encryptionKey,
                                 password);
             }
