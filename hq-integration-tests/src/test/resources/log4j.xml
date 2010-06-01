@@ -180,6 +180,10 @@
 		<level value="DEBUG" />
 	</logger>  -->
 
+     
+    <!--<logger name="org.hyperic.hq.monitor">
+		<level value="DEBUG" />
+	</logger>-->
 
 	<!-- ======================= -->
 	<!-- Setup the Root logger -->
