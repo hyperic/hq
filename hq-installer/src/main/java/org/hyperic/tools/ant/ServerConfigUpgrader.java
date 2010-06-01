@@ -230,7 +230,7 @@ public class ServerConfigUpgrader
         // TODO: This needs to be refactored into a security utility class
         StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
         encryptor.setPassword(encryptionKey);
-        encryptor.setAlgorithm("PBEWithMD5AndTripleDES");
+        encryptor.setAlgorithm("PBEWithMD5AndDES");
         return PropertyValueEncryptionUtils.encrypt(clearTextPassword, encryptor);
     }
 

@@ -403,7 +403,7 @@ public class ServerConfig
                 String encryptionKey = previous.getValue("server.encryption-key");
                 
                 // Encrypt database password
-                String encryptedPw = encryptPassword("PBEWithMD5AndTripleDES",
+                String encryptedPw = encryptPassword("PBEWithMD5AndDES",
                                                      encryptionKey,
                                                      previous.getValue("server.database-password"));
                 
