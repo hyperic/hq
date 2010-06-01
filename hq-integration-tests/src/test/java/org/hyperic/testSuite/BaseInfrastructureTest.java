@@ -47,7 +47,7 @@ import org.springframework.transaction.annotation.Transactional;
 @DirtiesContext
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = "classpath*:META-INF/spring/*-context.xml", loader = IntegrationTestContextLoader.class)
-public class BaseInfrastructureTest {
+abstract public class BaseInfrastructureTest {
     
     protected Log logger = LogFactory.getLog(this.getClass());
     protected long startTime;

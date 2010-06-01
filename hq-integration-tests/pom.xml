@@ -117,9 +117,6 @@
 				</executions>
 				<configuration>
 					<argLine>-Xmx512m</argLine>
-                    <excludes>
-                        <exclude>**/testSuite/*.java</exclude>
-                    </excludes>
 				</configuration>
 			</plugin>
 			<plugin>
