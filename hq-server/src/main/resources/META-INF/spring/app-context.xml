@@ -15,6 +15,7 @@
 		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
+   
     <bean id="jasyptConfiguration"
         class="org.jasypt.encryption.pbe.config.EnvironmentStringPBEConfig">
         <property name="algorithm" value="PBEWithMD5AndTripleDES" />
@@ -83,8 +84,6 @@
 			</map>
 		</property>
 	</bean>
-
-	<context:annotation-config />
 
 	<context:component-scan base-package="org.hyperic,com.hyperic" />
 
@@ -196,5 +195,7 @@
     <bean class="org.hyperic.hq.common.Log4jWatcher">
         <constructor-arg value="/log4j.xml"/>
     </bean>
+
+
 
 </beans>
