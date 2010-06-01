@@ -40,6 +40,10 @@ public class WebsphereAdminDetector extends WebsphereDetector {
 
     protected List discoverServers(ConfigResponse config)
             throws PluginException {
+        if (!WebsphereProductPlugin.VALID_JVM) {
+            return new ArrayList();
+        }
+
         if (this.discoverer == null) {
             String version = getTypeInfo().getVersion();
             this.discoverer = new WebsphereRuntimeDiscoverer(version, this);
@@ -64,18 +68,6 @@ public class WebsphereAdminDetector extends WebsphereDetector {
         }
         return this.discoverer.discoverServers(config);
     }
-
-    protected static String getStartupScript() {
-        if (isWin32()) {
-            return "bin\\startNode.bat";
-        } else {
-            return "bin/startNode.sh";
-        }
-    }
-
-    /*public String getIdentifier(WebSphereProcess proc) {
-    return proc.getServerRoot();
-    }*/
 
     public List getServerResources(ConfigResponse platformConfig) throws PluginException {
         List servers = new ArrayList();

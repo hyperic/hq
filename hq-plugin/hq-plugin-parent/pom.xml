@@ -28,7 +28,7 @@
 								<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
 							</manifest>
 							<manifestEntries>
-								<Specification-Title>HQU Plugin</Specification-Title>
+								<Specification-Title>HQ Plugin</Specification-Title>
 								<Build-Date>${build.timestamp}</Build-Date>
 							</manifestEntries>
 						</archive>

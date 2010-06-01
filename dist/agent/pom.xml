@@ -37,6 +37,7 @@
 		<dependency>
   			<groupId>postgresql</groupId>
   			<artifactId>postgresql</artifactId>
+			<version>${postgresql.agent.driver.version}</version>
 		</dependency>
 		<dependency>
     		<groupId>mx4j</groupId>
@@ -65,6 +66,11 @@
 			<version>${sigar.version}</version>
 			<type>zip</type>
 			<classifier>libs</classifier>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.agent</groupId>
+			<artifactId>hq-product</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq</groupId>

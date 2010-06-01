@@ -216,6 +216,7 @@ public class WeblogicRuntimeDiscoverer implements RuntimeDiscoverer, PrivilegedA
 
 			for (int i = 0; i < servers.size(); i++) {
 				serverQuery = (ServerQuery) servers.get(i);
+                if(!serverQuery.isRunning()) continue;
 
 				if (serverQuery.isAdmin()) {
 					adminVersion = serverQuery.getVersion();
@@ -299,9 +300,19 @@ public class WeblogicRuntimeDiscoverer implements RuntimeDiscoverer, PrivilegedA
 					pluginUpdater.updateServiceTypes(plugin.getProductPlugin(), serviceTypes);
 				}
 
-				for (int k = 0; k < services.size(); k++) {
-					aServices.add(generateService((ServiceQuery) services.get(k)));
-				}
+                for (int k = 0; k < services.size(); k++) {
+                    boolean valid = true;
+                    ServiceQuery service = (ServiceQuery) services.get(k);
+                    if (service instanceof ApplicationQuery) {
+                        valid = ((ApplicationQuery) service).isEAR();
+                    }
+                    if (valid) {
+                        aServices.add(generateService(service));
+
+                    } else {
+                        log.debug("skipped service:"+service.getName());
+                    }
+                }
 
 				AIServiceValue[] aiservices = (AIServiceValue[]) aServices.toArray(new AIServiceValue[0]);
 				aServer.setAIServiceValues(aiservices);

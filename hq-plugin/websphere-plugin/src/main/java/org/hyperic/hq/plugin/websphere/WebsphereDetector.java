@@ -80,6 +80,8 @@ public class WebsphereDetector
     private String node = null;
 
     protected List discoverServices(ConfigResponse config) throws PluginException {
+        if(!WebsphereProductPlugin.VALID_JVM) return new ArrayList();
+
         if (this.discoverer == null) {
             String version = getTypeInfo().getVersion();
             this.discoverer = new WebsphereRuntimeDiscoverer(version, this);
@@ -144,13 +146,22 @@ public class WebsphereDetector
         return this.node;
     }
 
-    protected static String getStartupScript() {
-        if (isWin32()) {
-            return "bin\\startServer.bat";
-        }
-        else {
-            return "bin/startServer.sh";
-        }
+    public final String getControlScript(String script) {
+        return "bin"+File.separatorChar+script+getScriptExtension();
+    }
+
+    public final ConfigResponse getControlConfig(WebSphereProcess proc) {
+        String type = proc.getServer().equals("nodeagent") ? "Node" : "Server";
+        File cs1 = new File(proc.getServerRoot(), getControlScript("start" + type));
+        File cs2 = new File(proc.getServerRoot(), getControlScript("stop" + type));
+        assert cs1.exists() : cs1.getAbsolutePath();
+        assert cs2.exists() : cs2.getAbsolutePath();
+        ConfigResponse cc = new ConfigResponse();
+        cc.setValue(ServerControlPlugin.PROP_PROGRAM + ".start", cs1.getAbsolutePath());
+        cc.setValue(ServerControlPlugin.PROP_PROGRAM + ".stop", cs2.getAbsolutePath());
+        log.debug("[getControlConfig] server=" + proc.getServer());
+        log.debug("[getControlConfig] cc=" + cc);
+        return cc;
     }
 
     protected void initDetector(File root) {
@@ -401,17 +412,6 @@ public class WebsphereDetector
         server.setIdentifier(proc.getIdentifier());
         server.setName(getPlatformName() + " " + type + " " + proc.getServerName());
 
-        ConfigResponse controlConfig = null;
-
-        if (!isServiceControl()) {
-            File controlScript = new File( proc.getServerRoot(), getStartupScript());
-            Properties controlProps = new Properties();
-            controlProps.setProperty(ServerControlPlugin.PROP_PROGRAM,
-                                     controlScript.getAbsolutePath());
-            controlConfig = 
-                new ConfigResponse(controlProps);
-        }
-
         ConfigResponse productConfig =
             new ConfigResponse(getProductConfig(proc));
 
@@ -428,16 +428,13 @@ public class WebsphereDetector
         //this will make sure only 1 gets auto-enabled for metrics/ai
         server.setConnectProperties(METRIC_CONNECT_PROPS);
 
-        server.setProductConfig(productConfig);
+        setProductConfig(server, productConfig);
         server.setMeasurementConfig();
-        if (controlConfig != null) {
-            server.setControlConfig(controlConfig);
-        }
+        setControlConfig(server, getControlConfig(proc));
 
         servers.add(server);
 
-        this.log.debug("Detected " + server.getName() +
-                       " in " + serverDir);
+        log.debug("Detected " + server.getName() + " in " + serverDir);
         return servers;
     }
 

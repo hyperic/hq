@@ -208,12 +208,16 @@ public class ResourceOperationsHelper {
             case AppdefEntityConstants.APPDEF_TYPE_GROUP:
                 resourceTypeCode = GROUP;
                 break;
+            case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
+                resourceTypeCode = APPLICATION;
+                break;
             default:
                 resourceTypeCode = -1;
         }
         
         if (resourceTypeCode < 0) {
-            throw new IllegalArgumentException("resourceType must be a platform, server, service or group resource type.");
+            throw new IllegalArgumentException("resourceType must be a platform, server, service or group resource type," +
+                                               " illegal type was " + resourceTypeId);
         }
         
         return getOperationName(resourceTypeCode, operationCode);

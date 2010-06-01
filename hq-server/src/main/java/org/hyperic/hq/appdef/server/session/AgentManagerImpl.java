@@ -962,6 +962,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      * @see org.hyperic.hq.appdef.server.session.AgentManagerImpl#pingAgent(org.hyperic.hq.authz.server.session.AuthzSubject,
      *      org.hyperic.hq.appdef.Agent)
      */
+    @Transactional(readOnly=true)
     public long pingAgent(AuthzSubject subject, AppdefEntityID id) throws AgentNotFoundException,
         PermissionException, AgentConnectionException, IOException, ConfigPropertyException,
         AgentRemoteException {
@@ -990,6 +991,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      * @throws ConfigPropertyException if the server configuration cannot be
      *         retrieved.
      */
+    @Transactional(readOnly=true)
     public long pingAgent(AuthzSubject subject, Agent agent) throws PermissionException,
         AgentNotFoundException, AgentConnectionException, AgentRemoteException, IOException,
         ConfigPropertyException {

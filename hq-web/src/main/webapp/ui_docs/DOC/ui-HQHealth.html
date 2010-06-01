@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>Hyperic HQ 4.0 and 4.1 Documentation : ui-HQHealth</title>
+        <title>Hyperic HQ 4.x Documentation : ui-HQHealth</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -12,7 +12,7 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            Hyperic HQ 4.0 and 4.1 Documentation : ui-HQHealth
+                            Hyperic HQ 4.x Documentation : ui-HQHealth
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
@@ -54,6 +54,7 @@
 <h3><a name="ui-HQHealth-SectionsonthisScreen"></a>Sections on this Screen</h3>
 
 <p>The top of the screen displays standard health statistics for a server. Below are three tabs that display more data about the state of the server and database:</p>
+<div class='table-wrap'>
 <table class='confluenceTable'><tbody>
 <tr>
 <th class='confluenceTh'> Tab </th>
@@ -61,7 +62,7 @@
 </tr>
 <tr>
 <td class='confluenceTd'> Diagnostics </td>
-<td class='confluenceTd'> This tab contains the information that HQ prints to log files every 15 minutes. You can choose these diagnostics from the drop-down list.&nbsp; <br clear="all" />
+<td class='confluenceTd'> This tab contains the information that HQ prints to log files every 15 minutes. You can choose these diagnostics from the drop-down list.&nbsp; <br class="atl-forced-newline" />
 <ul>
 	<li>Batch Aggregate AvailabilityInserter<font color="red">&#42;</font>: Status of queue for availability updates to database. Available only if using the Batch Aggregate inserter.</li>
 	<li>Batch Aggregate DataInserter<font color="red">&#42;</font>: Status of queue for metric updates to the database. Available only if using the Batch Aggregate inserter.</li>
@@ -78,8 +79,8 @@
 </tr>
 <tr>
 <td class='confluenceTd'> Load </td>
-<td class='confluenceTd'> Current load on HQ Server, including: <br clear="all" />
-<br clear="all" />
+<td class='confluenceTd'> Current load on HQ Server, including: <br class="atl-forced-newline" />
+<br class="atl-forced-newline" />
 <ul>
 	<li>Metrics collected per minute</li>
 	<li>Platforms</li>
@@ -122,7 +123,7 @@
 		<li>Postgres Activity - In HQ 4.1 and later.</li>
 		<li>Active But Disabled Resource Alert Defs</li>
 		<li>Resource Type Alert Defs with Triggers</li>
-		<li>Database Version Information&nbsp; <br clear="all" /></li>
+		<li>Database Version Information&nbsp; <br class="atl-forced-newline" /></li>
 	</ul>
 	</li>
 </ul>
@@ -146,6 +147,8 @@
 </td>
 </tr>
 </tbody></table>
+</div>
+
 
 <h3><a name="ui-HQHealth-OrphanedDatabaseRows"></a>Orphaned Database Rows</h3>
 
@@ -157,7 +160,8 @@
 
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <pre class="code-java">org.hyperic.hq.events.AlertConditionCreateException:
-org.hyperic.hq.measurement.MeasurementNotFoundException: No measurement found <span class="code-keyword">for</span> 10288 with template 33434 at org.hyperic.hq.bizapp.server.session.EventsBossImpl.updateAlertDefinition(EventsBossImpl.java:887)</pre>
+org.hyperic.hq.measurement.MeasurementNotFoundException: No measurement found <span class="code-keyword">for</span> 10288 with template 33434 at org.hyperic.hq.bizapp.server.session.EventsBossEJBImpl.updateAlertDefinition(EventsBossEJBImpl.java:887)
+</pre>
 </div></div>
 <ul>
 	<li>If the HQ database contains orphaned resources, an exception like this may result:</li>
@@ -165,7 +169,8 @@ org.hyperic.hq.measurement.MeasurementNotFoundException: No measurement found <s
 
 
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
-<pre class="code-java">java.rmi.ServerException: RuntimeException; nested exception is: org.hyperic.hq.common.SystemException: javax.ejb.TransactionRolledbackLocalException: Error updating platform with <span class="code-keyword">new</span> AIServer data.; CausedByException is: Error updating platform with <span class="code-keyword">new</span> AIServer data. at org.jboss.ejb.plugins.LogInterceptor.handleException(LogInterceptor.java:386) at org.jboss.ejb.plugins.LogInterceptor.invoke(LogInterceptor.java:196) at</pre>
+<pre class="code-java">java.rmi.ServerException: RuntimeException; nested exception is: org.hyperic.hq.common.SystemException: javax.ejb.TransactionRolledbackLocalException: Error updating platform with <span class="code-keyword">new</span> AIServer data.; CausedByException is: Error updating platform with <span class="code-keyword">new</span> AIServer data. at org.jboss.ejb.plugins.LogInterceptor.handleException(LogInterceptor.java:386) at org.jboss.ejb.plugins.LogInterceptor.invoke(LogInterceptor.java:196) at
+</pre>
 </div></div>
 <p>The HQ Health page provides orphaned item queries for alert definitions, resources, groups, and audits.</p>
 
@@ -175,6 +180,7 @@ org.hyperic.hq.measurement.MeasurementNotFoundException: No measurement found <s
 <h3><a name="ui-HQHealth-NavigatingviatheMastheadMenu"></a>Navigating via the Masthead Menu</h3>
 
 <p>Main screens in Hyperic contain a masthead menu. Users can navigate to the following parts of HQ using this menu:</p>
+<div class='table-wrap'>
 <table class='confluenceTable'><tbody>
 <tr>
 <td class='confluenceTd'> <b>Dashboard</b> </td>
@@ -186,24 +192,26 @@ org.hyperic.hq.measurement.MeasurementNotFoundException: No measurement found <s
 </tr>
 <tr>
 <td class='confluenceTd'> <b>Analyze</b> </td>
-<td class='confluenceTd'> Click the menu name to access <b>Reporting</b> <font color="red">&#42;</font> (presents the <a href="ui-Report.Center.html" title="ui-Report.Center">Reporting</a> screen, from which reports can be generated), <b>Alert Center</b> (presents the <a href="ui-Alert.Center.html" title="ui-Alert.Center">Alert Center</a>, which displays a deployment wide alert summary), or <b>Event Center</b> (presents the <a href="ui-Event.Center.html" title="ui-Event.Center">Event Center</a>, which displays a deployment-wide event summary). <br clear="all" /> </td>
+<td class='confluenceTd'> Click the menu name to access <b>Reporting</b> <font color="red">&#42;</font> (presents the <a href="ui-ReportCenter.html" title="ui-ReportCenter">Reporting</a> screen, from which reports can be generated), <b>Alert Center</b> (presents the <a href="ui-Alert.Center.html" title="ui-Alert.Center">Alert Center</a>, which displays a deployment wide alert summary), or <b>Event Center</b> (presents the <a href="ui-Event.Center.html" title="ui-Event.Center">Event Center</a>, which displays a deployment-wide event summary). <br class="atl-forced-newline" /> </td>
 </tr>
 <tr>
 <td class='confluenceTd'> <b>Administration</b> </td>
 <td class='confluenceTd'> Takes users (with "Administer Hyperic HQ Server Configuration" permissions) to the <a href="ui-Admin.html" title="ui-Admin">Administration</a> screen, where they can manage the system-wide settings </td>
 </tr>
 <tr>
-<td class='confluenceTd'> <b>Search</b> <br clear="all" /> </td>
-<td class='confluenceTd'> The Search box in the upper right of the Masthead allows you to search for HQ resources of any type and HQ users. <br clear="all" />
-<br clear="all" />
-Search results appear after four characters are entered in the text box. Results will include the first 10 platforms, servers, services, and groups whose name includes the search string. <br clear="all" />  <br clear="all" />
+<td class='confluenceTd'> <b>Search</b> <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> The Search box in the upper right of the Masthead allows you to search for HQ resources of any type and HQ users. <br class="atl-forced-newline" />
+<br class="atl-forced-newline" />
+Search results appear after four characters are entered in the text box. Results will include the first 10 platforms, servers, services, and groups whose name includes the search string. <br class="atl-forced-newline" />  <br class="atl-forced-newline" />
 Double-click a resource in the list to navigate to its Resource page. </td>
 </tr>
 </tbody></table>
+</div>
+
 <p>The masthead also displays the two most recently triggered alerts. Users can click the alert's time to be taken to the <a href="ui-Alert.Detail.html" title="ui-Alert.Detail">alert detail</a>.</p>
 <p><a href="#ui-HQHealth-top"><em>back to top</em></a></p>
 
-<h5><a name="ui-HQHealth-ReturntotheHQUserInterfaceReference."></a>Return to the <a href="http://support.hyperic.com/confluence/display/DOC/HQ+User+Interface+Reference" title="HQ User Interface Reference">HQ User Interface Reference</a>.</h5>
+<h5><a name="ui-HQHealth-ReturntotheHQUserInterfaceReference."></a>Return to the <a href="HQ User Interface Reference.html" title="HQ User Interface Reference">HQ User Interface Reference</a>.</h5>
 
 				    
                     			    </td>
@@ -214,7 +222,7 @@ Double-click a resource in the list to navigate to its Resource page. </td>
 				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 20, 2009 15:33</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Apr 20, 2010 15:01</font></td>
 		    </tr>
 	    </table>
     </body>

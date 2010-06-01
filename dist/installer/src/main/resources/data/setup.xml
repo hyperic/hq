@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 
 <project name="setup" default="all" basedir=".">
+  <property name="oss.license.file" value="${install.dir}/../open_source_licenses.txt"/>	
 
   <!-- true for text based installs -->
   <available property="server.pgsql.available"
@@ -44,17 +45,17 @@
 
   <!-- The server uses a 1.6 JRE. -->
   <target name="pick-server-jre" if="use.builtin.jre">
-    <condition property="jre.tar.name" value="amd64-linux-jre-1_6.tar.gz">
-        <available file="${install.dir}/jres/amd64-linux-jre-1_6.tar.gz"/>
+    <condition property="jre.tar.name" value="amd64-linux-1.6.tar.gz">
+        <available file="${install.dir}/jres/amd64-linux-1.6.tar.gz"/>
     </condition>
-    <condition property="jre.tar.name" value="x86-linux-glibc2-jre-1_6.tar.gz">
-        <available file="${install.dir}/jres/x86-linux-glibc2-jre-1_6.tar.gz"/>
+    <condition property="jre.tar.name" value="x86-linux-1.6.tar.gz">
+        <available file="${install.dir}/jres/x86-linux-1.6.tar.gz"/>
     </condition>
-    <condition property="jre.tar.name" value="sparc-sun-solaris-jre-1_6.tar.gz">
-        <available file="${install.dir}/jres/sparc-sun-solaris-jre-1_6.tar.gz"/>
+    <condition property="jre.tar.name" value="sparc-sun-solaris-1.6.tar.gz">
+        <available file="${install.dir}/jres/sparc-sun-solaris-1.6.tar.gz"/>
     </condition>
-    <condition property="jre.exe.name" value="x86-win32-jre-1_6.exe">
-        <available file="${install.dir}/jres/x86-win32-jre-1_6.exe"/>
+    <condition property="jre.exe.name" value="x86-win32-1.6.exe">
+        <available file="${install.dir}/jres/x86-win32-1.6.exe"/>
     </condition>
   </target>
 
@@ -254,7 +255,12 @@ __ll__
   		<foreach param="crlf.dir" target="fix-text-files">
   	  	 	<path>
   	  	  	  	<dirset dir="${hyperic-hq-agent.installdir}" includes="hyperic-hq*-agent-${version}"/>
-  	  	  	 </path>
+  	  	  	</path>
+  	  	</foreach>
+  	    <foreach param="oss.license.to.dir" target="copy-oss-license-file">
+  	  	  	<path>
+  	  	  	  	<dirset dir="${hyperic-hq-agent.installdir}" includes="hyperic-hq*-agent-${version}"/>
+  	  	  	</path>
   	  	</foreach>
   </target>
 
@@ -280,7 +286,7 @@ __ll__
   	  			<fileset dir="${base}" includes="hyperic-hq*-agent-*.zip"/>
   	  		</path>
   	 </foreach>
-  	
+    
     <echo>^^^COMPLETION:
       Agent successfully installed to: ${hyperic-hq-agent.installdir}
     </echo>
@@ -411,6 +417,9 @@ ${errMsg}
           description="Install or upgrade the HQ server.">
     <antcall target="server-install"/>
     <antcall target="server-upgrade"/>
+  	 <antcall target="copy-oss-license-file">
+  	 	 	<param name="oss.license.to.dir" value="${server.installdir}/server-${version}"/>
+  	 </antcall>
   </target>
 
   <target name="server-install" depends="setup-server-init" unless="setup.upgrade">
@@ -619,6 +628,11 @@ ${errMsg}
   <target name="fix-text-files" if="isWin32">
     <fixcrlf srcdir="${crlf.dir}"
         includes="**/*.bat **/*.properties **/*.txt **/ReadMe* **/*.conf **/*.xml"/>
+  </target>
+	
+  <!--- Copy the license file for the open source software to a designated directory -->
+  <target name="copy-oss-license-file">
+	 <copy file="${oss.license.file}" todir="${oss.license.to.dir}"/>
   </target>
 
   <target name="chmod-exec">

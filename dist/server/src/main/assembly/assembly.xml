@@ -12,6 +12,8 @@
 				<exclude>**/*.sh</exclude>
 				<exclude>**/*.pl</exclude>
 				<exclude>**/.gitignore</exclude>
+				<exclude>**/*.jar</exclude>
+				<exclude>**/*.keystore</exclude>
 			</excludes>
 			<filtered>true</filtered>
 			<fileMode>0644</fileMode>
@@ -29,6 +31,16 @@
 			<directoryMode>0755</directoryMode>
 		</fileSet>
 		<fileSet>
+			<directory>src/main/resources</directory>
+			<outputDirectory>/</outputDirectory>
+			<includes>
+				<include>**/*.jar</include>
+				<include>**/*.keystore</include>
+			</includes>
+			<fileMode>0755</fileMode>
+			<directoryMode>0755</directoryMode>
+		</fileSet>
+		<fileSet>
 			<directory>${project.build.directory}/generated-resources/bootstrap-${project.version}</directory>
 			<outputDirectory>/</outputDirectory>
 			<excludes>
@@ -37,7 +49,6 @@
 				<exclude>**/.gitignore</exclude>
 				<exclude>wrapper/**/*</exclude>
 			</excludes>
-			<filtered>true</filtered>
 			<fileMode>0644</fileMode>
 			<directoryMode>0755</directoryMode>
 		</fileSet>
@@ -48,7 +59,6 @@
 				<include>**/*.sh</include>
 				<include>**/*.pl</include>
 			</includes>
-			<filtered>true</filtered>
 			<fileMode>0755</fileMode>
 			<directoryMode>0755</directoryMode>
 		</fileSet>
@@ -71,7 +81,6 @@
 				<exclude>conf/logging.properties</exclude>
 				<exclude>webapps/ROOT/**</exclude>
 			</excludes>
-			<filtered>true</filtered>
 			<fileMode>0644</fileMode>
 			<directoryMode>0755</directoryMode>
 		</fileSet>
@@ -82,7 +91,6 @@
 				<include>**/*.sh</include>
 				<include>**/*.pl</include>
 			</includes>
-			<filtered>true</filtered>
 			<fileMode>0755</fileMode>
 			<directoryMode>0755</directoryMode>
 		</fileSet>

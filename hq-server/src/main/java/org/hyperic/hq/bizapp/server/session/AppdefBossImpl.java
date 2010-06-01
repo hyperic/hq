@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.bizapp.server.session;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -35,6 +36,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.PatternSyntaxException;
@@ -184,6 +186,8 @@ import org.springframework.transaction.annotation.Transactional;
 @org.springframework.stereotype.Service
 @Transactional
 public class AppdefBossImpl implements AppdefBoss {
+    private static final String BUNDLE = "org.hyperic.hq.bizapp.Resources";
+    
     private static final String APPDEF_PAGER_PROCESSOR = "org.hyperic.hq.appdef.shared.pager.AppdefPagerProc";
 
     private SessionManager sessionManager;
@@ -1230,11 +1234,20 @@ public class AppdefBossImpl implements AppdefBoss {
                 MaintenanceEvent event = getMaintenanceEventManager().getMaintenanceEvent(subject, aeid.getId());
 
                 if (event != null && event.getStartTime() != 0) {
-                    throw new VetoException("Could not remove resource " + aeid +
-                                            " because a downtime schedule exists.");
+                    String msg = ResourceBundle.getBundle(BUNDLE).getString("resource.groups.remove.error.downtime.exists");
+                    throw new VetoException(MessageFormat.format(msg, new String[] {res.getName()}));
                 }
             } catch (SchedulerException se) {
-                throw new ApplicationException(se);
+                // HHQ-3772: This should not happen. However, if it does,
+                // log the exception as a warning and do not allow to delete
+                // until the scheduler issue is resolved
+                log.warn("Scheduler error getting the downtime schedule for group[" + aeid + "]: "
+                    + se.getMessage(), se);
+           
+                String msg = ResourceBundle.getBundle(BUNDLE)
+                    .getString("resource.groups.remove.error.downtime.scheduler.failure");
+                 
+                throw new VetoException(MessageFormat.format(msg, new String[] {res.getName()}));
             }
         }
         if (res == null) {
@@ -1454,7 +1467,8 @@ public class AppdefBossImpl implements AppdefBoss {
 
         try {
             response = configManager.getMergedConfigResponse(subject, ProductPlugin.TYPE_MEASUREMENT, id, true);
-        } catch (Exception e) {
+        } catch (Throwable t) {
+            log.debug("Unable to get config response: " + t.getMessage(), t);
             // If anything goes wrong getting the config, just move
             // along. The plugins will be removed on the next agent
             // restart.
@@ -2739,13 +2753,14 @@ public class AppdefBossImpl implements AppdefBoss {
     @Transactional(readOnly=true)
     public PageList<AppdefResourceValue> findAvailableServicesForApplication(int sessionId, Integer appId,
                                                                              AppdefEntityID[] pendingEntities,
-                                                                             String resourceName, PageControl pc)
+                                                                             String nameFilter, PageControl pc)
         throws AppdefEntityNotFoundException, PermissionException, SessionException {
 
+        final StopWatch watch = new StopWatch();
+        final boolean debug = log.isDebugEnabled();
         AuthzSubject subject = sessionManager.getSubject(sessionId);
 
         // init our (never-null) page and filter lists
-        List<AppdefEntityID> toBePaged = new ArrayList<AppdefEntityID>();
         List<AppdefPagerFilter> filterList = new ArrayList<AppdefPagerFilter>();
 
         // add a pager filter for removing pending appdef entities
@@ -2755,28 +2770,32 @@ public class AppdefBossImpl implements AppdefBoss {
 
         int oriPageSize = pc.getPagesize();
         pc.setPagesize(PageControl.SIZE_UNLIMITED);
-
-        List<Resource> authzResources = resourceManager.findViewableSvcResources(subject, resourceName, pc);
+        if (debug) watch.markTimeBegin("findViewableSvcResources");
+        Set<Resource> authzResources = new TreeSet<Resource>(resourceManager.findViewableSvcResources(subject, nameFilter, pc));
+        if (debug) watch.markTimeEnd("findViewableSvcResources");
+     
+        int authzResourcesSize = authzResources.size();
 
         pc.setPagesize(oriPageSize);
 
         // Remove existing application assigned inventory
+        if (debug) watch.markTimeBegin("findServiceInventoryByApplication");
         List<AppdefResourceValue> assigned = findServiceInventoryByApplication(sessionId, appId, PageControl.PAGE_ALL);
-
-        List<AppdefEntityID> assignedIds = new ArrayList<AppdefEntityID>();
-        for (int x = 0; x < assigned.size(); x++) {
-            assignedIds.add(assigned.get(x).getEntityId());
+        if (debug) watch.markTimeEnd("findServiceInventoryByApplication");
+        if (debug) watch.markTimeBegin("loop1");
+      
+        for (AppdefResourceValue val : assigned ) {
+            authzResources.remove(resourceManager.findResource(val.getEntityId()));
         }
+        if (debug) watch.markTimeEnd("loop1");
 
-        for (Resource rv : authzResources) {
-            AppdefEntityID id = AppdefUtil.newAppdefEntityId(rv);
-            if (!assignedIds.contains(id)) {
-                toBePaged.add(id);
-            }
+        List<AppdefEntityID> toBePaged = new ArrayList<AppdefEntityID>(authzResources.size());
+        for (Resource r : authzResources) {
+            toBePaged.add(AppdefUtil.newAppdefEntityId(r));
         }
 
         // Page it, then convert to AppdefResourceValue
-        List<AppdefResourceValue> finalList = new ArrayList<AppdefResourceValue>();
+        List<AppdefResourceValue> finalList = new ArrayList<AppdefResourceValue>(authzResources.size());
         // TODO: G
         PageList<AppdefEntityID> pl = getPageList(toBePaged, pc, filterList);
         for (AppdefEntityID ent : pl) {
@@ -2786,17 +2805,15 @@ public class AppdefBossImpl implements AppdefBoss {
                 // XXX - hack to ignore the error. This must have occurred when
                 // we created the resource, and rolled back the AppdefEntity
                 // but not the Resource
-                log.error("Invalid entity still in resource table: " + ent);
+                log.error("Invalid entity still in resource table: " + ent, e);
             }
         }
 
-        int pendingSize = 0;
-        if (pendingEntities != null) {
-            pendingSize = pendingEntities.length;
-        }
-
-        int adjustedSize = authzResources.size() - pendingSize;
-        return new PageList<AppdefResourceValue>(finalList, adjustedSize);
+        int pendingSize = (pendingEntities != null) ? pendingEntities.length : 0;
+        int adjustedSize = authzResourcesSize - pendingSize;
+        PageList<AppdefResourceValue> rtn = new PageList<AppdefResourceValue>(finalList,adjustedSize);
+        if (debug) log.debug(watch);
+        return rtn;
     }
 
     private <T> PageList<T> getPageList(Collection<T> coll, PageControl pc) {

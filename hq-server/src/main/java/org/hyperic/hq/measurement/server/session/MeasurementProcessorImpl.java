@@ -177,6 +177,7 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
     /**
      * @param eids List<AppdefEntityID>
      */
+    @Transactional(readOnly=true)
     public void scheduleEnabled(Agent agent, Collection<AppdefEntityID> eids) throws MonitorAgentException {
         final StopWatch watch = new StopWatch();
         final boolean debug = log.isDebugEnabled();
@@ -289,6 +290,7 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
      * @param entIds the entity IDs whose metrics should be unscheduled
      * @throws MeasurementUnscheduleException if an error occurs
      */
+    @Transactional(readOnly=true)
     public void unschedule(String agentToken, Collection<AppdefEntityID> entIds) throws MeasurementUnscheduleException {
         try {
             // Get the agent from agent token
@@ -308,6 +310,7 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
      * @param entIds the entity IDs whose metrics should be unscheduled
      * @throws MeasurementUnscheduleException if an error occurs
      */
+    @Transactional(readOnly=true)
     public void unschedule(AppdefEntityID agentEnt, AppdefEntityID[] entIds) throws MeasurementUnscheduleException {
         try {
             // Get the agent IP and Port from server ID
@@ -325,6 +328,7 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
      * @param aeids List of {@link AppdefEntityID}
      * @throws MeasurementUnscheduleException if an error occurs
      */
+    @Transactional(readOnly=true)
     public void unschedule(Collection<AppdefEntityID> aeids) throws MeasurementUnscheduleException {
         Map<Integer, Collection<AppdefEntityID>> agents = getAgentMap(aeids);
         for (Map.Entry<Integer, Collection<AppdefEntityID>> entry : agents.entrySet()) {

@@ -1,0 +1,65 @@
+<project name="DBMigrage" default="all" basedir=".">
+  <description>
+      PG -> MySql Migration Tool
+  </description>
+  <!-- set global properties for this build -->
+  <property name="src"     location="src"/>
+  <property name="build"   location="build"/>
+  <property name="classes" location="${build}/classes"/>
+  <property name="dist"    location="dist"/>
+  <property name="bundle"  location="bundle"/>
+  <property name="lib"     location="lib"/>
+  <property name="bin"     location="bin"/>
+
+  <target name="init">
+    <mkdir dir="${build}"/>
+    <mkdir dir="${classes}"/>
+  </target>
+
+  <path id='my.class.path'>
+    <pathelement location="${lib}/dbunit-2.2.jar" />
+    <pathelement location="${lib}/mysql-connector-java-5.0.5-bin.jar" />
+    <pathelement location="${lib}/postgresql-8.1-407.jdbc3.jar" />
+  </path>
+
+  <target name="compile" depends="init" description="compile the source">
+    <javac srcdir="${src}" destdir="${classes}" debug="yes">
+      <classpath refid='my.class.path' />
+    </javac>
+  </target>
+
+  <target name="all" depends="bundle" description="Run all tasks (except clean)" />
+
+  <target name="dist" depends="compile" description="generate the distribution">
+    <!-- Create the distribution directory -->
+    <mkdir dir="${dist}/lib"/>
+    <copy todir="${dist}/lib">
+      <fileset dir="${lib}">
+        <include name="*.jar" />
+      </fileset>
+    </copy>
+    <mkdir dir="${dist}/bin"/>
+    <copy todir="${dist}/bin">
+      <fileset dir="${bin}">
+        <include name="*" />
+      </fileset>
+    </copy>
+    <jar jarfile="${dist}/lib/dbmigrate.jar" basedir="${classes}"/>
+    <chmod file="${dist}/bin/migrateDB" perm="555"/>
+    <chmod file="${dist}/bin/migrateDB.README" perm="444"/>
+  </target>
+
+  <target name="bundle" depends="dist" description="bundle the distribution">
+    <mkdir dir="${bundle}"/>
+    <tar destfile="${bundle}/dbmigrate.tar" basedir="${dist}"/>
+    <gzip src="${bundle}/dbmigrate.tar" destfile="${bundle}/dbmigrate.tgz"/>
+    <delete file="${bundle}/dbmigrate.tar"/>
+  </target>
+
+  <target name="clean" description="clean up">
+    <!-- Delete the ${build} and ${dist} directory trees -->
+    <delete dir="${build}"/>
+    <delete dir="${dist}"/>
+    <delete dir="${bundle}"/>
+  </target>
+</project>

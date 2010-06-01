@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>Hyperic HQ 4.0 and 4.1 Documentation : ui-Admin.HQServer</title>
+        <title>Hyperic HQ 4.x Documentation : ui-Admin.HQServer</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -12,11 +12,11 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            Hyperic HQ 4.0 and 4.1 Documentation : ui-Admin.HQServer
+                            Hyperic HQ 4.x Documentation : ui-Admin.HQServer
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jul 17, 2009 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Apr 18, 2010 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><em>Topics marked with</em> <font color="red"><em>&#42;</em></font> <em>relate to HQ Enterprise-only features.</em></p>
@@ -24,11 +24,11 @@
 <p>The <b>HQ Server Settings</b> page allows an HQ user with Super User role to configure a variety of HQ Server behaviors. Most changes take effect upon HQ Server restart.</p>
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1247860074806 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1247860074806 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1247860074806 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1271612253719 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1271612253719 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1271612253719 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1247860074806'>
+/*]]>*/</style><div class='rbtoc1271612253719'>
 <ul>
     <li><a href='#ui-Admin.HQServer-HQEmailConfigurationProperties'>HQ Email Configuration Properties</a></li>
     <li><a href='#ui-Admin.HQServer-HypericIQProperties'>Hyperic IQ Properties <span style="color: red">*</span></a></li>
@@ -40,24 +40,41 @@ div.rbtoc1247860074806 li {margin-left: 0px;padding-left: 0px;}
     <li><a href='#ui-Admin.HQServer-AutomaticBaselineConfigurationProperties'>Automatic Baseline Configuration Properties <span style="color: red">*</span></a></li>
     <li><a href='#ui-Admin.HQServer-LDAPConfigurationProperties'>LDAP Configuration Properties <span style="color: red">*</span></a></li>
     <li><a href='#ui-Admin.HQServer-KerberosConfigurationProperties'>Kerberos Configuration Properties <span style="color: red">*</span></a></li>
-    <li><a href='#ui-Admin.HQServer-SNMPServerConfigurationProperties'>SNMP Server Configuration Properties <span style="color: red">*</span></a></li>
+    <li><a href='#ui-Admin.HQServer-SNMPServerConfigurationProperties%284.2andearlier%29'>SNMP Server Configuration Properties (4.2 and earlier) <span style="color: red">*</span></a></li>
+    <li><a href='#ui-Admin.HQServer-SNMPServerConfigurationProperties%284.3Beta%29'>SNMP Server Configuration Properties (4.3 Beta) <span style="color: red">*</span></a></li>
+<ul>
+    <li><a href='#ui-Admin.HQServer-ConfigureHQServerforSNMPv1'>Configure HQ Server for SNMP v1</a></li>
+    <li><a href='#ui-Admin.HQServer-ConfigureHQServerforSNMPv2c'>Configure HQ Server for SNMP v2c</a></li>
+    <li><a href='#ui-Admin.HQServer-ConfigureHQServerforSNMPv3'>Configure HQ Server for SNMP v3</a></li>
+</ul>
 </ul></div>
 
 <p><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></p>
 
 <div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>HQ Server settings have a fundamental and wide-ranging impact on the functionality and behavior of your HQ deployment. Edit with extreme caution.</td></tr></table></div>
 
-
 <h1><a name="ui-Admin.HQServer-HQEmailConfigurationProperties"></a>HQ Email Configuration Properties</h1>
+<p>In the notification that HQ sends for a fired alert, the "From" address and the URL to the <b>Alert Detail</b> page are formed using the properties defined in the "HQ Email" section of the <b>HQ Server Settings</b> page. </p>
 
-<p>These properties relate to alert notifications sent via email:</p>
 <ul>
-	<li><b>Base URL</b> &#45; The address and port where the HQ Server listens for web application requests. The value forms the prefix of the URL, included in an alert notification, that points to the <b>Alert Detail</b> page for the fired alert.</li>
+	<li><b>Base URL</b> - Specifies the address:port where HQ Server listens for web application requests. The initial value of <b>Base URL</b> is the web application listen port configured when HQ Server was installed. For example:</li>
 </ul>
 
 
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>http://Dorcas-Parmentiers-MacBook-Pro-15.local:7080/
+</pre>
+</div></div>
+
+<p>The <b>Base URL</b> forms the prefix of an URL to any HQ appends the remainder of the URL that points to the <b>Alert Detail</b> page for the fired alert. For example:</p>
+
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>http://Dorcas-Parmentiers-MacBook-Pro-15.local:7080/alerts/Alerts.do?mode=viewAlert&amp;eid=5:10611&amp;a=16431
+</pre>
+</div></div>
+
 <ul>
-	<li><b>From Email Address</b> &#45;&nbsp; The email address listed as the sender of the alert emails.</li>
+	<li><b>From Email Address</b> - The email address listed as the sender of the alert emails.</li>
 </ul>
 
 
@@ -100,7 +117,7 @@ div.rbtoc1247860074806 li {margin-left: 0px;padding-left: 0px;}
 </ol>
 
 
-<p>In HQ 4.2, this setting is in the <a href="#ui-Admin.HQServer-GlobalAlertProperties">Global Alert Properties</a> section of the page.</p>
+<p>In HQ 4.2 and later, this setting is in the <a href="#ui-Admin.HQServer-GlobalAlertProperties">Global Alert Properties</a> section of the page.</p>
 
 <h1><a name="ui-Admin.HQServer-DataManagerConfigurationProperties"></a>Data Manager Configuration Properties</h1>
 
@@ -116,7 +133,7 @@ div.rbtoc1247860074806 li {margin-left: 0px;padding-left: 0px;}
 
 
 <ul>
-	<li><b>Reindex Metric Data Tables Nightly</b> &#45; Controls whether HQ reindexes metric data tables every night. When set to <b>Yes</b>, HQ reindexes the tables around midnight.</li>
+	<li><b>Reindex Metric Data Tables Nightly</b> &#45; Controls whether HQ reindexes metric data tables every night. When set to <b>Yes</b>, HQ re-indexes the tables around midnight.</li>
 </ul>
 
 
@@ -130,6 +147,7 @@ div.rbtoc1247860074806 li {margin-left: 0px;padding-left: 0px;}
 </ul>
 
 
+<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Warning:  Data Management Changes Require Server Restart</b><br />Any changes made in this section require the HQ Server to be restarted before they take effect.</td></tr></table></div>
 <h1><a name="ui-Admin.HQServer-GlobalAlertProperties"></a>Global Alert Properties</h1>
 
 <p>As of HQ 4.2, these properties enable immediate and global control of alert processing.</p>
@@ -171,8 +189,8 @@ div.rbtoc1247860074806 li {margin-left: 0px;padding-left: 0px;}
 <p>In HQ Enterprise, these properties control the HQ <a href="http://support.hyperic.com/confluence/display/DOC/Baselines" title="Baselines">baselining</a> process and the accuracy of the baseline.</p>
 <ul>
 	<li><b>Baseline Frequency</b> &#45; The frequency with which HQ calculates a baseline for each metric. By default, every 3 days.</li>
-	<li><b>Baseline Dataset</b> &#45; The time range of metric data used in calculating the baseline. By default, 3 days of data.</li>
-	<li><b>Baseline Minimum Data Points</b> &#45; The minimum number of datapoints used in calculating a baseline. By default, 40.</li>
+	<li><b>Baseline Dataset</b> &#45; The time range of metric data used in calculating the baseline. By default, 7 days of data.</li>
+	<li><b>Baseline Minimum Data Points</b> &#45; The minimum number of data points used in calculating a baseline. By default, 40.</li>
 	<li><b>Track Out-of-Bounds Metrics</b> &#45; Controls whether or not HQ tracks <a href="http://support.hyperic.com/confluence/display/DOC/Monitoring+Overview#MonitoringOverview-ProblemMetrics">OOB metrics</a>.</li>
 </ul>
 
@@ -192,8 +210,8 @@ div.rbtoc1247860074806 li {margin-left: 0px;padding-left: 0px;}
 </ul>
 
 
-<p>After LDAP authentication has been successfully configured, users will be able to log into HQ with their LDAP password (using the value specified as the <ins>Login Property</ins> as their username). The first time LDAP users log in to HQ, they will be asked to provide some identifying information before they can continue: their first and last name, email address, phone number, etc. This is for display purposes and alert notification purposes.<b>Note:</b>&nbsp; LDAP Users Need HQ Roles, Too<br/>
-As with all new users in HQ, LDAP users are not assigned to any roles by default and therefore they will not be able to see any resources in HQ until they are added to a role. HQ administrators will need to <a href="http://support.hyperic.com/confluence/display/DOC/HQ+Users+and+Roles#HQUsersandRoles-assignuser">add a new LDAP user to a role</a> in HQ after the new user logs in for the first time.</p>
+<p>After LDAP authentication has been successfully configured, users will be able to log into HQ with their LDAP password (using the value specified as the <ins>Login Property</ins> as their username).  The first time LDAP users log in to HQ, they will be asked to provide some identifying information before they can continue: their first and last name, email address, phone number, etc.  This is for display purposes and alert notification purposes.<b>Note:</b>&nbsp; LDAP Users Need HQ Roles, Too<br/>
+As with all new users in HQ, LDAP users are not assigned to any roles by default and therefore they will not be able to see any resources in HQ until they are added to a role.  HQ administrators will need to assign the appropriate role or roles to the user in HQ. (On the HQ <b>Administration</b> page, click <b>List Users</b>, select the user, and click <b>Add to List</b> in the "Roles Assigned To" section of the page.)</p>
 
 <h1><a name="ui-Admin.HQServer-KerberosConfigurationProperties"></a>Kerberos Configuration Properties<font color="red">&#42;</font></h1>
 
@@ -205,11 +223,11 @@ As with all new users in HQ, LDAP users are not assigned to any roles by default
 </ul>
 
 
-<h1><a name="ui-Admin.HQServer-SNMPServerConfigurationProperties"></a>SNMP Server Configuration Properties <font color="red">&#42;</font></h1>
+<h1><a name="ui-Admin.HQServer-SNMPServerConfigurationProperties%284.2andearlier%29"></a>SNMP Server Configuration Properties (4.2 and earlier) <font color="red">&#42;</font></h1>
 
 <p>This section lists the properties for configuring HQ Enterprise for an SNMP server, which can be used for alert notification once SNMP traps are <a href="http://support.hyperic.com/confluence/display/DOC/SNMP+Traps" title="SNMP Traps">enabled</a>. The display of configuration properties depends on the selected <ins>SNMP Protocol Version</ins> (if any).</p>
 <table class="sectionMacro" border="0" cellpadding="5" cellspacing="0" width="100%"><tbody><tr>
-<td class="confluenceTd"  valign="top" width="34%">
+<td class="confluenceTd" valign="top" width="34%">
 <p><b>For version 3:</b></p>
 <ul>
 	<li>Trap OID</li>
@@ -222,14 +240,14 @@ As with all new users in HQ, LDAP users are not assigned to any roles by default
 	<li>Engine Id</li>
 </ul>
 </td>
-<td class="confluenceTd"  valign="top" width="33%">
+<td class="confluenceTd" valign="top" width="33%">
 <p><b>For version 2c:</b></p>
 <ul>
 	<li>Trap OID</li>
 	<li>Community</li>
 </ul>
 </td>
-<td class="confluenceTd"  valign="top" width="33%">
+<td class="confluenceTd" valign="top" width="33%">
 <p><b>For version 1:</b></p>
 <ul>
 	<li>Trap OID</li>
@@ -241,6 +259,218 @@ As with all new users in HQ, LDAP users are not assigned to any roles by default
 </ul>
 </td></tr></tbody></table>
 
+<h1><a name="ui-Admin.HQServer-SNMPServerConfigurationProperties%284.3Beta%29"></a>SNMP Server Configuration Properties (4.3 Beta) <font color="red">&#42;</font></h1>
+<p><b>Describes<font color="blue"> HQ 4.3 Beta</font> feature</b></p>
+
+<p>If you configure HQ Enterprise to send SNMP messages to your NMS, you can use SNMP notifications in alert actions or as a step in an escalation.</p>
+
+<p>You define SNMP options for HQ Server in the "SNMP Server Configuration Properties" section of the <b>Administration &gt; HQ Server Settings</b> page. The properties you define specify the SNMP protocol version for communicating with the NMS (v1, v2c, or V3), the type of notification (v1 Trap, v2c Trap, or Inform), and the properties required for the SNMP version you use. After this configuration, you can select the SNMP notification type:</p>
+
+<ul>
+	<li>As an alert action - The notification sent when the alert fires will contain three variable bindings:
+	<ul>
+		<li><tt>sysUptimeOID.0</tt> &#45; No configuration is required for this binding.</li>
+		<li><tt>snmpTrapOID.0</tt> &#45; This binding is configured on the <b>HQ Server</b> settings page.</li>
+		<li>A variable binding for the alert data specified in the <tt>snmp_trap.gsp</tt> alert notification template - the alert definition name and the "short reason" for firing. Note that Alert templates may be customized, as described in <a href="http://support.hyperic.com/confluence/display/DOC/Tailoring+Alert+Notification+Templates" title="Tailoring Alert Notification Templates">Tailoring Alert Notification Templates</a>.</li>
+	</ul>
+	</li>
+</ul>
+
+
+<ul>
+	<li>As an escalation step - The behavior varies by version of HQ Enterprise:
+	<ul>
+		<li>In HQ Enterprise 4.2 and earlier - The notification sent will contain three variable bindings:
+		<ul>
+			<li><tt>sysUptimeOID.0</tt> &#45; No configuration is required for this binding.</li>
+			<li><tt>snmpTrapOID.0</tt> &#45; This binding is configured on the <b>HQ Server</b> settings page.</li>
+			<li>A variable binding for the alert data specified in the <tt>snmp_trap.gsp</tt> alert notification template - the alert definition name and the "short reason" for firing. Note that Alert templates may be customized, as described in <a href="http://support.hyperic.com/confluence/display/DOC/Tailoring+Alert+Notification+Templates" title="Tailoring Alert Notification Templates">Tailoring Alert Notification Templates</a>.The notification has two varbinds - <tt>SysUpTime.0</tt> and <tt>snmpTrapOID.0</tt>.</li>
+		</ul>
+		</li>
+		<li>In HQ Enterprise 4.3 Beta and later - When you configure an SNMP notification as an escalation step, you can specify additional variable bindings. When the escalation step is performed, the trap will contain those variable bindings, along with <tt>SysUpTime.0</tt>, <tt>snmpTrapOID.0</tt>, and a variable binding for the alert data specified in the <tt>snmp_trap.gsp</tt> alert notification template.</li>
+	</ul>
+	</li>
+</ul>
+
+<h3><a name="ui-Admin.HQServer-ConfigureHQServerforSNMPv1"></a>Configure HQ Server for SNMP v1</h3>
+
+<p>Select "v1" from the&nbsp; <b>SNMP Protocol Version</b> pulldown and supply values for the properties defined in the table below.</p>
+
+<p>The table below defines the properties for configuring HQ Server for SNMP V1 communications with an NMS.</p>
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Configuration Option </th>
+<th class='confluenceTh'> Description </th>
+<th class='confluenceTh'> Allowable Values <br class="atl-forced-newline" /> </th>
+</tr>
+<tr>
+<td class='confluenceTd'> SNMP Trap OID </td>
+<td class='confluenceTd'> The OID of the notification to be sent. Supplies the value of <tt>snmpTrapOID.0</tt> &#45; the second varbind in a trap or inform that HQ Server generates. (The first varbind is <tt>SysUpTime.0</tt>.) <br class="atl-forced-newline" />
+<br class="atl-forced-newline" />
+<br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> Default Notification Mechanism <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Your selection governs the notification type that will appear as the default notification type option in the "Notification Mechanism" pulldown list that is presented in configuration dialogs when user configures an SNMP notification as an alert action, or as a step in an escalation. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> For v1 of the SNMP protocol, choose V1 Trap. This is the only trap type you can generate for SNMP v1. <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Enterprise OID <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Enterprise OID. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> Community </td>
+<td class='confluenceTd'> The community name to be sent with the trap. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> Generic ID <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Single digit identifier of the trap type. </td>
+<td class='confluenceTd'> 0 - coldStart <br class="atl-forced-newline" />
+1 - warmStart <br class="atl-forced-newline" />
+2 - linkDown <br class="atl-forced-newline" />
+3 - linkUp <br class="atl-forced-newline" />
+4 - authenticationFailure <br class="atl-forced-newline" />
+5 - egpNeighborLoss <br class="atl-forced-newline" />
+6 - enterpriseSpecific </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Specific ID <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> The specific trap code for an enterprise-specific trap (when <b>Generic ID</b> is set to to 6). <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> Agent Address <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Address of the managed object that generates the trap. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+</tbody></table>
+</div>
+
+
+<h3><a name="ui-Admin.HQServer-ConfigureHQServerforSNMPv2c"></a>Configure HQ Server for SNMP v2c</h3>
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Configuration Option </th>
+<th class='confluenceTh'> Description </th>
+<th class='confluenceTh'> Allowable Values </th>
+</tr>
+<tr>
+<td class='confluenceTd'> SNMP Trap OID </td>
+<td class='confluenceTd'> The OID of the notification to be sent. Supplies the value of <tt>snmpTrapOID.0</tt> &#45; the second varbind in a trap or inform that HQ Server generates. (The first varbind is <tt>SysUpTime.0</tt>.) </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> Default Notification Mechanism <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Specifies the default notification type that will appear in configuration dialogs when an authorized user configures an SNMP notification as an alert action, or as a step in an escalation. This choice simply defines the default option - the user configuring an alert action or escalation can choose a different message type. </td>
+<td class='confluenceTd'><ul>
+	<li>V1 Trap</li>
+	<li>V2c Trap</li>
+	<li>Inform <br class="atl-forced-newline" /></li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class='confluenceTd'> Community </td>
+<td class='confluenceTd'> The community name to be sent with the trap. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+</tbody></table>
+</div>
+
+
+
+<h3><a name="ui-Admin.HQServer-ConfigureHQServerforSNMPv3"></a>Configure HQ Server for SNMP v3</h3>
+
+
+<p>This section lists the properties for enabling HQ Enterprise to sent SNMP notifications to an NMS. When HQ is so enabled, you can use SNMP notifications in alert definitions - as alert actions and escalation steps.</p>
+
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Configuration Option </th>
+<th class='confluenceTh'> Description </th>
+<th class='confluenceTh'> Allowable Values </th>
+</tr>
+<tr>
+<td class='confluenceTd'> SNMP Trap OID </td>
+<td class='confluenceTd'> The OID of the notification to be sent. Supplies the value of <tt>snmpTrapOID.0</tt> &#45; the second varbind in a trap or inform that HQ Server generates. (The first varbind is <tt>SysUpTime.0</tt>.) </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> Default Notification Mechanism <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Specifies the default notification type that will appear in configuration dialogs when an authorized user configures an SNMP notification as an alert action, or as a step in an escalation. This choice simply defines the default option - the user configuring an alert action or escalation can choose a different message type. </td>
+<td class='confluenceTd'><ul>
+	<li>V1 Trap</li>
+	<li>V2c Trap</li>
+	<li>Inform <br class="atl-forced-newline" /></li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class='confluenceTd'> Security Name </td>
+<td class='confluenceTd'> The username HQ's SNMP agent should use when sending notifications to the NMS.&nbsp; <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Required. <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Local Engine ID </td>
+<td class='confluenceTd'> ID of HQ's SNMP agent; this value appears automatically, and is not user-configurable. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Auth Protocol </td>
+<td class='confluenceTd'> The SNMP authentication protocol HQ Server should use for communications with the NMS. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'><ul>
+	<li>none</li>
+	<li>MD5</li>
+	<li>SHA</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class='confluenceTd'> Auth Passphrase <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> The SNMP authorization passphrase configured for use when communication with the NMS.&nbsp; <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Privacy Protocol </td>
+<td class='confluenceTd'> The SNMP Privacy Protocol HQ Server should use for&nbsp; communication with the NMS. </td>
+<td class='confluenceTd'><ul>
+	<li>none</li>
+	<li>DES</li>
+	<li>3DES</li>
+	<li>AES-128,</li>
+	<li>AES-192</li>
+	<li>AES-256</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class='confluenceTd'> Privacy Passphrase </td>
+<td class='confluenceTd'> The SNMP privacy passphrase configured for use when communication with the NMS. </td>
+<td class='confluenceTd'> <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Context Engine ID </td>
+<td class='confluenceTd'> The EngineID of the NMS. This, along with Context Name, identifies the SNMP context for accessing management data. </td>
+<td class='confluenceTd'> Required for v1 and v2c traps.&nbsp; Do not supply for Inform. <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Context Name <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> The name of the SNMP context that provides access to management information on the NMS.&nbsp; A context is identified by the Context Name and Context Engine ID. </td>
+<td class='confluenceTd'> <br class="atl-forced-newline" /> </td>
+</tr>
+</tbody></table>
+</div>
+
+
 				    
                     			    </td>
 		    </tr>
@@ -250,7 +480,7 @@ As with all new users in HQ, LDAP users are not assigned to any roles by default
 				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 20, 2009 15:33</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Apr 20, 2010 15:01</font></td>
 		    </tr>
 	    </table>
     </body>

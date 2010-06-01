@@ -286,6 +286,10 @@ public class IndicatorChartsAction
         return data;    
     }
     
+    /**
+    * TODO: The logic here is similar to MeasurementProcessor.getMetricDisplaySummary().
+    * Need to consolidate the code.
+    */
     private MetricDisplaySummary getSummarizedMetricData(MeasurementTemplate template, double[] data, long begin, long end, int totalConfigured) {
         MetricDisplaySummary summary = new MetricDisplaySummary();
         
@@ -316,8 +320,8 @@ public class IndicatorChartsAction
             if (totalConfigured == 1 || template.getCollectionType() == MeasurementConstants.COLL_TYPE_STATIC) {
                 summary.setMetric(MetricDisplayConstants.LAST_KEY, new MetricDisplayValue(data[MeasurementConstants.IND_LAST_TIME]));
             } else {
-                // Availability does not need to be summed
-                if (template.isAvailability()) {
+                // Percentage metrics (including Availability) do not need to be summed
+                if (MeasurementConstants.UNITS_PERCENTAGE.equals(template.getUnits())) {
                     summary.setMetric(MetricDisplayConstants.LAST_KEY, new MetricDisplayValue(data[MeasurementConstants.IND_AVG]));
                 } else {
                     summary.setMetric(MetricDisplayConstants.LAST_KEY, new MetricDisplayValue(data[MeasurementConstants.IND_AVG] * data[MeasurementConstants.IND_CFG_COUNT]));

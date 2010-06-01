@@ -14,8 +14,27 @@
 
 	<bean class="org.hyperic.sigar.Sigar" />
 
+	<bean id="jasyptConfiguration"
+		class="org.jasypt.encryption.pbe.config.EnvironmentStringPBEConfig">
+		<property name="algorithm" value="PBEWithMD5AndTripleDES" />
+		<property name="password" value="#{serverProps['server.encryption-key']}" />
+	</bean>
+
+	<bean id="propertyPasswordEncryptor" class="org.jasypt.encryption.pbe.StandardPBEStringEncryptor">
+		<property name="config" ref="jasyptConfiguration" />
+	</bean>
+	
+	<bean id="serverProps" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+		<property name="locations">
+			<list>
+				<value>classpath:/hq-server.conf</value>
+			</list>
+		</property>
+	</bean>
+
 	<bean
-		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		class="org.jasypt.spring.properties.EncryptablePropertyPlaceholderConfigurer">
+		<constructor-arg ref="propertyPasswordEncryptor" />
 		<property name="locations">
 			<list>
 				<value>classpath:/hq-server.conf</value>

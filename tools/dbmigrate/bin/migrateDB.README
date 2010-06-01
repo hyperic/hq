@@ -1,0 +1,80 @@
+To migrate:
+
+(PG = PostgreSQL)
+
+PRE-CONDITIONS:
+
+1) PG HQ Server and MySQL HQ Server must either be located on the same boxes,
+   -OR- boxes with the same IP for a cut-over scenario.
+   The database boxes may be on another box if you wish.
+
+TIP: Setup your HQ server with all agents pointed at a virtual interface instead
+     of the physical one.  This makes any server migration much easier and allows
+     agents to be cut off while the HQ Server is reachable for any type of maintenance.
+
+TO INSTALL:
+
+1) Download the latest version of HQ for PG and MySQL.
+   If you are already running the latest version of HQ on PG just download the latest
+   version of HQ on MySQL.  Verify that this is the case (bottom of the UI).
+
+2) shutdown your HQ installation running on PG.
+
+3) Install MySQL on a box and set it up according to our installation instructions.
+   http://support.hyperic.com/display/DOC/Set+Up+MySQL
+
+4) upgrade your HQ PostgreSQL with the newly downloaded version of HQ on PG.
+   Ignore this step if you are already running the latest HQ on PG.
+
+5) run the installer of the newly downloaded version HQ on MySQL on the HQ Server Box
+   (must be either the same box as the PG Server or have the same IP).
+   Point it at the newly configured MySQL database.
+
+6) use the migrateDB command to migrate all HQ data from PG to MySQL.
+   Expect this to take 1-3 hours (depends on your deployment size).
+   An example of this command is:
+
+$ migrateDB 
+usage:
+migrateDB --sourceuser <user> --sourcepass <pass>
+          --targetuser <user> --targetpass <pass>
+          --sourceurl <jdbcurl> --targeturl <jdbcurl>
+migrateDB:
+          -s, --sourceuser => source postgres db username
+          -p, --sourcepass => source postgres db password
+          -u, --sourceurl  => source postgres url (e.g. jdbc:postgresql://localhost:5432/hqdb)
+          -t, --targetuser => target mysql db username
+          -r, --targetpass => target mysql db password
+          -g, --targeturl  => target mysql url (e.g. jdbc:mysql://localhost:3306/hqdb)
+          -d, --debug      => prints debugging statetments to STDOUT
+          --vmargs         => java vm args, default = "-Xms1536m -Xmx1536m"
+
+$ migrateDB -s hqadmin -p hqadmin -u jdbc:postgresql://localhost:5432/hqdb -t hqadmin -r hqadmin -g jdbc:mysql://localhost:3306/hqdb
+
+--------
+
+7) Make sure all your settings, minus the database config in hq-server.conf,
+   are moved from the old installation to the new MySQL installation.
+
+   Files of interest are:
+   /path/to/server-version/conf/hq-server.conf (be careful not to take any postgres specific configuration)
+   /path/to/server-version/hq-engine/server/default/deploy/hq.ear/ehcache.xml
+
+8) At this time it is a good idea to backup both your PG and your MySQL databases.
+
+examples of backing up:
+
+(MySQL example)
+$ mysqladmin -u root -p<root passwd> flush-logs
+$ mysqldump -u hqadmin -p<hqadmin passwd> --quick --single-transaction hqdb | gzip > hqdb.pg.dmp.gz
+
+(PG example)
+$ pg_dump hqdb | gzip > hqdb.pg.dmp.gz 
+
+9) Start your HQ server from the HQ on MySQL server directory.  Log on to your
+   shiny revamped HQ instance!
+
+NOTE: If anything goes wrong you may just shut down your HQ on MySQL server and
+      startup the old HQ on PG server.  In this scenario you may lose some
+      in-coming metrics, but that is all.  If there are any errors please
+      contact the HQ Support Team.

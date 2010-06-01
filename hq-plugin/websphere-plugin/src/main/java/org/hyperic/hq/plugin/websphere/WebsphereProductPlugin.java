@@ -33,6 +33,7 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -46,10 +47,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ProductPluginManager;
+import org.hyperic.sigar.OperatingSystem;
 import org.hyperic.sigar.win32.RegistryKey;
 import org.hyperic.sigar.win32.Win32Exception;
 
 public class WebsphereProductPlugin extends ProductPlugin {
+    public static boolean VALID_JVM=true;
 
     public static final String NAME = "websphere";
 
@@ -119,26 +122,19 @@ public class WebsphereProductPlugin extends ProductPlugin {
     //if we are running with the ibm jdk we can configure
     //websphere.installpath ourselves.
     private static String getInstallPathFromJDK() {
-        String vendor = System.getProperty("java.vendor");
-
-        if (!vendor.startsWith("IBM")) {
-            return null;
+        String res = null;
+        if (VALID_JVM) {
+            String javaHome = System.getProperty("java.home");
+            File dir = new File(javaHome);
+            do {
+                if (!new File(dir, "profiles").exists()) {
+                    dir = dir.getParentFile();
+                } else {
+                    res = dir.getAbsolutePath();
+                }
+            } while ((res == null) && (dir.getParentFile() != null));
         }
-
-        String javaHome = System.getProperty("java.home");
-
-        File dir = new File(javaHome);
-
-        //exists in both 4.0 and 5.0
-        final String jar = "lib" + File.separator + "websphere-validation.jar";
-
-        while ((dir = dir.getParentFile()) != null) {
-            if (new File(dir, jar).exists()) {
-                return dir.getAbsolutePath();
-            }
-        }
-
-        return null;
+        return res;
     }
 
     /**
@@ -215,6 +211,9 @@ public class WebsphereProductPlugin extends ProductPlugin {
                 dir = root + "/IBM/WebSphere/AppServer";
                 if (!new File(dir).isDirectory()) {
                     dir = root + "/WebSphere/AppServer";
+                    if (!new File(dir).isDirectory()) {
+                        dir=null;
+                    }
                 }
                 where = "default location";
             }
@@ -225,7 +224,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
             return null;
         }
         else {
-            log.debug(PROP_INSTALLPATH + " configured using " + where);
+            log.debug(PROP_INSTALLPATH + " configured using " + where+" ("+dir+")");
             return dir;
         }
     }
@@ -431,30 +430,44 @@ public class WebsphereProductPlugin extends ProductPlugin {
             }
         }
 
-     
+        path.add("pdk/lib/mx4j/hq-jmx.jar");
         String[] cp = new String[path.size()];
         path.toArray(cp);
         return cp;
     }
 
     public String[] getClassPath(ProductPluginManager manager) {
+        OperatingSystem os = OperatingSystem.getInstance();
+        boolean testIBMJDK = (os.getName().equals(OperatingSystem.NAME_LINUX)
+                || os.getName().equals(OperatingSystem.NAME_WIN32));
+        assert testIBMJDK : os.getName();
+        if (testIBMJDK) {
+            VALID_JVM = System.getProperty("java.vm.vendor").toUpperCase().indexOf("IBM") != -1;
+            if (!VALID_JVM) {
+                log.debug("The WebSphere plugin needs a IBM JVM !!! "
+                        + "(agent jvm=" + System.getProperty("java.vm.vendor") + ")");
+            }
+        }
+
         if (isWin32()) {
             String prop = "websphere.regkey";
-            REG_KEY=getPluginProperty(prop);
+            REG_KEY = getProperties().getProperty(prop);
             if (REG_KEY == null) {
-                log.error("Prop " + prop + "undefined");
-                return new String[] {};
+                throw new IllegalArgumentException(prop +
+                                                   " property undefined");
             }
         }
 
         Properties managerProps = manager.getProperties();
 
         autoRT = "true".equals(managerProps.getProperty("websphere.autort"));
-
+        
         useJMX = !"false".equals(managerProps.getProperty("websphere.usejmx"));
 
-        useExt = "true".equals(managerProps.getProperty("websphere.useext"));
-        log.debug("useExt=" + useExt);
+        final String propKey = "websphere.useext";
+        String useExtString = managerProps.getProperty(propKey, "false");
+        useExt = new Boolean(useExtString).booleanValue();
+        log.debug(propKey + "=" + useExt);
 
         String installDir =
             managerProps.getProperty(PROP_INSTALLPATH);
@@ -464,7 +477,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
         }
 
         if (installDir == null) {
-            return new String[] {};
+            return new String[] {"pdk/lib/mx4j/hq-jmx.jar"};
         }
 
         //required for authentication
@@ -535,7 +548,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
             if (useExt) {
                 try {
                     setExtDirs(installDir);
-                    return new String[] {};
+                    return new String[] {"pdk/lib/mx4j/hq-jmx.jar"};
                 } catch (Exception e) {
                     log.error("setExtDirs: " + e, e);
                 }
@@ -606,7 +619,8 @@ public class WebsphereProductPlugin extends ProductPlugin {
             installDir + "/java/jre/lib/ibmcertpathprovider.jar",
             installDir + "/java/jre/lib/ext/ibmjceprovider.jar",
             installDir + "/java/jre/lib/ext/ibmjcefips.jar",
-            installDir + "/etc/tmx4jTransform.jar"
+            installDir + "/etc/tmx4jTransform.jar",
+            "pdk/lib/mx4j/hq-jmx.jar"
         };
     }
 

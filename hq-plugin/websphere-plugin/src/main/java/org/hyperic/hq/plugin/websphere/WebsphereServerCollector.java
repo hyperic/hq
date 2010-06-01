@@ -29,6 +29,7 @@ import javax.management.j2ee.statistics.Stats;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import javax.management.ObjectName;
 import org.hyperic.hq.product.PluginException;
 
 import com.ibm.websphere.management.AdminClient;
@@ -38,7 +39,6 @@ public class WebsphereServerCollector extends WebsphereCollector {
     private static final Log log =
         LogFactory.getLog(WebsphereServerCollector.class.getName());
     private boolean isJVM;
-    private String[][] attrs;
 
     //MBean Attribute -> legacy pmi name
     private static final String[][] TX_ATTRS = {
@@ -57,67 +57,58 @@ public class WebsphereServerCollector extends WebsphereCollector {
     };
 
     protected void init(AdminClient mServer) throws PluginException {
-        super.init(mServer);
-
+        String serverName = getProperties().getProperty("server.name");
         String module = getProperties().getProperty("Module");
+        log.debug("[init] [" + serverName + "] module=" + module);
 
+        String name;
         if (module.equals("jvmRuntimeModule")) {
             isJVM = true;
-            this.name =
-                newObjectNamePattern("name=JVM," +
-                                     "type=JVM," +
-                                     "j2eeType=JVM," +
-                                     getServerAttributes());
-
-            this.name = resolve(mServer, this.name);
+            name = "name=JVM,type=JVM,j2eeType=JVM";
+        } else if (module.equals("transactionModule")) {
+            name = "type=TransactionService,j2eeType=JTAResource";
+        } else if (module.equals("adminModule")) {
+            name = "name=JVM,type=JVM";
+        } else {
+            throw new PluginException("Unexpected module '" + module + "'");
         }
-        else if (module.equals("transactionModule")) {
-            this.name =
-                newObjectNamePattern("type=TransactionService," +
-                                     "j2eeType=JTAResource," +
-                                     getServerAttributes());
 
-            try {
-                this.name = resolve(mServer, this.name);
-                this.attrs = TX_ATTRS;
-            } catch (PluginException e) {
-                //ok in the case of networkdeployer/nodeagent;
-                //where there is no TransactionService
-                log.debug(this.name + ": " + e.getMessage());
-                this.name = null;
-            }
-        }
+        ObjectName on=newObjectNamePattern(name+","+getServerAttributes());
+        on=resolve(mServer, on);
+        log.debug("[init] [" + serverName + "] name=" + on);
+        setObjectName(on);
+
+        // check server properties.
+        getStats(mServer, getObjectName());
     }
 
-    public void collect() {
-        log.debug("[collect] name="+name);
-
-        setAvailability(false);
-
-        AdminClient mServer = getMBeanServer();
-        if (mServer == null) {
-            return;
-        }
-
-        setAvailability(true);
-
-        if (this.name != null) {
-            Stats stats =(Stats) getStats(mServer, this.name);
+    public void collect(AdminClient mServer) throws PluginException {
+        if (getModuleName().equalsIgnoreCase("adminModule")) {
+            setValue("NumJVMs", count(mServer));
+        } else {
+            Stats stats = (Stats) getStats(mServer, getObjectName());
 
             if (stats != null) {
                 if (isJVM) {
                     double total = getStatCount(stats, "HeapSize");
-                    double used  = getStatCount(stats, "UsedMemory");
+                    double used = getStatCount(stats, "UsedMemory");
                     setValue("totalMemory", total);
                     setValue("usedMemory", used);
-                    setValue("freeMemory", total-used);
+                    setValue("freeMemory", total - used);
+                } else {
+                    collectStatCount(stats, TX_ATTRS);
                 }
-                else {
-                    collectStatCount(stats, this.attrs);
-                }
-            }else{
+            } else {
                 log.debug("no Stats");
             }
+        }
+    }
+
+    private double count(AdminClient mServer) throws PluginException{
+        try {
+            return WebsphereUtil.getMBeanCount(mServer, getObjectName(), null);
+        } catch (Exception ex) {
+            throw new PluginException(ex.getMessage(),ex);
         }
     }
 }

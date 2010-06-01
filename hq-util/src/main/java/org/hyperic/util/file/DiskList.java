@@ -572,7 +572,7 @@ public class DiskList {
                 } catch(IOException exc){
                     log.error("IOException while reading record");
                     if (log.isDebugEnabled()) {
-                        log.debug(exc);
+                        log.debug("IOException while trying to read record number " + this.curIdx, exc);
                     }
                     throw new NoSuchElementException("Error getting next " +
                                                      "element: " +

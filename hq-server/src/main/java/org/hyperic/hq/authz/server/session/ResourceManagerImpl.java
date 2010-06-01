@@ -24,6 +24,7 @@ package org.hyperic.hq.authz.server.session;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -67,7 +68,6 @@ import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.ResourceAuditFactory;
 import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
-import org.hyperic.util.StringUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -544,12 +544,18 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
      * 
      */
     public void removeResource(AuthzSubject subject, Resource r) throws VetoException {
+        if (r == null) {
+            return;
+        }
         applicationContext.publishEvent(new ResourceDeleteRequestedEvent(r));
       
         final long now = System.currentTimeMillis();
         resourceAuditFactory.deleteResource(findResourceById(AuthzConstants.authzHQSystem),
             subject, now, now);
-        r.getGroupBag().clear();
+        Collection groupBag = r.getGroupBag();
+        if (groupBag != null) {
+            groupBag.clear();
+        }
         resourceDAO.remove(r);
     }
 
@@ -717,36 +723,32 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
      * 
      */
     @Transactional(readOnly=true)
-    public PageList<Resource> findViewableSvcResources(AuthzSubject subject, String resourceName,
+    public PageList<Resource> findViewableSvcResources(AuthzSubject subject, String nameFilter,
                                                        PageControl pc) {
-        Collection<Resource> resources;
-
+       
         AuthzSubject subj = authzSubjectDAO.findById(subject.getId());
 
         pc = PageControl.initDefaults(pc, SortAttribute.RESOURCE_NAME);
 
         PermissionManager pm = PermissionManagerFactory.getInstance();
 
-        // Damn I love this code. -- JMT
-        switch (pc.getSortattribute()) {
-            case SortAttribute.RESOURCE_NAME:
-            default:
-                resources = pm.findServiceResources(subj, Boolean.FALSE);
-                break;
+        // returns a sorted Collection by resourceName
+        Collection<Resource> resources = pm.findServiceResources(subj, Boolean.FALSE);
+
+        if (nameFilter != null) {
+            for (Iterator<Resource> it=resources.iterator(); it.hasNext(); ) {
+                Resource r = it.next();
+                if (r == null || r.isInAsyncDeleteState() ||
+                    !r.getName().toLowerCase().contains(nameFilter.toLowerCase())) {
+                    it.remove();
+                }
+            }
         }
-
-        // TODO: Move filtering into QL
-        ArrayList<Resource> ordResources = new ArrayList<Resource>(resources.size());
-        for (Resource res : resources) {
-            if (StringUtil.stringDoesNotExist(res.getName(), resourceName)) {
-                continue;
-            }
-
-            if (pc.isDescending()) { // Add to head of array list
-                ordResources.add(0, res);
-            } else { // Add to tail of array list
-                ordResources.add(res);
-            }
+        
+        Collection<Resource> ordResources = resources;
+        if (pc.isDescending()) {
+            ordResources = new ArrayList<Resource>(resources);
+            Collections.reverse((List<Resource>)ordResources);
         }
 
         return new PageList<Resource>(ordResources, ordResources.size());
@@ -761,6 +763,16 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
     @Transactional(readOnly=true)
     public Collection<Resource> findResourceByOwner(AuthzSubject owner) {
         return resourceDAO.findByOwner(owner);
+    }
+    
+    /**
+     *
+     * @param parentList {@link List} of {@link Resource}s
+     * @return {@link Collection} of {@link ResourceEdge}s
+     */
+    @Transactional(readOnly=true)
+    public Collection<ResourceEdge> findResourceEdges(ResourceRelation relation, List<Resource> parentList) {
+        return resourceEdgeDAO.findDescendantEdges(parentList, relation);
     }
 
     /**
@@ -1053,7 +1065,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
         }
         zeventManager.enqueueEventsAfterCommit(events);
     }
-
+    
     @Transactional(readOnly=true)
     public ResourceRelation getContainmentRelation() {
         return resourceRelationDAO.findById(AuthzConstants.RELATION_CONTAINMENT_ID);

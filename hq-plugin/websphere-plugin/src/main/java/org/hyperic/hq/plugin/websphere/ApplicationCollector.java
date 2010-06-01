@@ -27,50 +27,27 @@ package org.hyperic.hq.plugin.websphere;
 
 import org.hyperic.hq.product.PluginException;
 
+import javax.management.ObjectName;
+
 import com.ibm.websphere.management.AdminClient;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 public class ApplicationCollector extends WebsphereCollector {
 
-    private static final Log log = LogFactory.getLog(ApplicationCollector.class.getName());
-
     protected void init(AdminClient mServer) throws PluginException {
-        super.init(mServer);
+        ObjectName name = newObjectNamePattern("j2eeType=J2EEApplication,"
+                + "name=" + getModuleName() + ","
+                + getProcessAttributes());
 
-        this.name =
-            newObjectNamePattern("j2eeType=J2EEApplication," +
-                                 "name=" + getModuleName() + "," +
-                                 getProcessAttributes());
-
-        try {
-            this.name = resolve(mServer, this.name);
-        } catch (PluginException e) {
-            //XXX 6.0 hack
-            if (getModuleName().equals("adminconsole")) {
-                this.name = null;
-            }
-            else {
-                throw e;
-            }
-        }
+        setObjectName(resolve(mServer, name));
     }
 
-    public void collect() {
-        if (this.name == null) {
-            setAvailability(true);
-            return;
-        }
-        Object state =
-            getAttribute(getMBeanServer(), this.name, "state");
-
-        log.debug("[collect] name='"+name.getKeyProperty("name")+"' state='"+state+"("+state.getClass()+")'");
-
+    public void collect(AdminClient mServer) throws PluginException {
+        Object state = getAttribute(mServer, getObjectName(), "state");
         if ((state == null) || (!(state instanceof Integer))) {
             setAvailability(false);
-        }
-        else {
-            setAvailability(((Integer)state).intValue()==1);
+        } else {
+            setAvailability(((Integer) state).intValue() == 1);
         }
     }
 }

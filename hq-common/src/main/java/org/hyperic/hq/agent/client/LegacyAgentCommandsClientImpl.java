@@ -170,7 +170,6 @@ public class LegacyAgentCommandsClientImpl implements AgentCommandsClient {
         Map result = new HashMap();
 
         result.put(AgentUpgrade_result.VERSION, upgradeResult.getAgentVersion());
-        result.put(AgentUpgrade_result.BUILD, upgradeResult.getAgentBuild());
         result.put(AgentUpgrade_result.BUNDLE_NAME, upgradeResult.getAgentBundleName());
 
         return result;

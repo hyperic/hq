@@ -2205,8 +2205,8 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
                     data[MeasurementConstants.IND_LAST_TIME]));
     }
     else {
-        // Availability does not need to be summed
-        if (tmpl.isAvailability()) {
+        // Percentage metrics (including Availability) do not need to be summed
+        if (MeasurementConstants.UNITS_PERCENTAGE.equals(tmpl.getUnits())) {
             summary.setMetric(MetricDisplayConstants.LAST_KEY,
                 new MetricDisplayValue(data[MeasurementConstants.IND_AVG]));
         }

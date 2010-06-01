@@ -55,6 +55,7 @@ public class HTTPCollector extends SocketChecker {
     private String url;
     private String method;
     private String hosthdr;
+    private String useragent;
     private Pattern pattern;
     private ArrayList matches = new ArrayList();
     private String proxyHost = null;
@@ -87,6 +88,12 @@ public class HTTPCollector extends SocketChecker {
         this.url = 
             protocol + "://" + getHostname() + ":" + getPort() + getPath();
 
+        this.useragent = getPlugin().getManagerProperty("http.useragent");
+        
+        if (this.useragent == null || this.useragent.trim().length() == 0) {
+            this.useragent = "Hyperic-HQ-Agent/" + ProductProperties.getVersion();
+        }
+        
         //for log_track
         setSource(this.url);
 
@@ -257,8 +264,7 @@ public class HTTPCollector extends SocketChecker {
             getMethod().equals(METHOD_HEAD);
         HttpClient client = new HttpClient();
         HttpClientParams params = new HttpClientParams();
-        String userAgent = "Hyperic-HQ-Agent/" + ProductProperties.getVersion();
-        params.setParameter(HttpMethodParams.USER_AGENT, userAgent);
+        params.setParameter(HttpMethodParams.USER_AGENT, this.useragent);
         if (this.hosthdr != null) {
             params.setVirtualHost(this.hosthdr);
         }

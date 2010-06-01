@@ -76,6 +76,7 @@ import org.hyperic.util.pager.PageList;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -233,6 +234,7 @@ public class DataManagerImpl implements DataManager {
      * 
      * 
      */
+    @Transactional(propagation=Propagation.REQUIRES_NEW)
     public void addData(Integer mid, MetricValue mv, boolean overwrite) {
 
         Measurement meas = measurementManager.getMeasurement(mid);
@@ -250,6 +252,7 @@ public class DataManagerImpl implements DataManager {
      * 
      * 
      */
+    @Transactional(propagation=Propagation.REQUIRES_NEW)
     public boolean addData(List<DataPoint> data) {
         if (shouldAbortDataInsertion(data)) {
             return true;
@@ -334,6 +337,7 @@ public class DataManagerImpl implements DataManager {
      * 
      * 
      */
+    @Transactional(propagation=Propagation.REQUIRES_NEW)
     public void addData(List<DataPoint> data, boolean overwrite) {
         /**
          * We have to account for 2 types of metric data insertion here: 1 - New
@@ -1199,7 +1203,9 @@ public class DataManagerImpl implements DataManager {
         if (historicalData.size() == 0) {
             return null;
         }
-        double high = Double.MIN_VALUE, low = Double.MAX_VALUE, total = 1;
+        double high = Double.MIN_VALUE;
+        double low = Double.MAX_VALUE;
+        double total = 0;
         Double lastVal = null;
         int count = 0;
         long last = Long.MIN_VALUE;
@@ -1994,7 +2000,7 @@ public class DataManagerImpl implements DataManager {
     // TODO remove after HE-54 allows injection
     @Transactional(readOnly = true)
     public Analyzer getAnalyzer() {
-        boolean analyze = true;
+        boolean analyze = false;
         try {
             Properties conf = serverConfigManager.getConfig();
             if (conf.containsKey(HQConstants.OOBEnabled)) {

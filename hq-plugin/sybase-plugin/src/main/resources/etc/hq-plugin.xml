@@ -29,34 +29,20 @@
   USA.
  -->
 
-<plugin package="org.hyperic.hq.plugin.sybase" class="SysbaseProductPlugin">
-  <classpath>
+<plugin package="org.hyperic.hq.plugin.sybase" class="SybaseProductPlugin">
+  <!--classpath>
     <include name="pdk/lib/jdbc/jconn3.jar"/>
     <include name="pdk/lib/jdbc/jconn4.jar"/>
     <include name="pdk/lib/jdbc/jTDS3.jar"/>
     <include name="pdk/lib/jdbc/jTDS4.jar"/>
-  </classpath>
+  </classpath-->
 
   <!-- we use a dummy jmx object name -->
   <filter name="domain" value="sybase"/>
 
   <!-- appended to each template by MeasurementInfoXML -->
   <property name="template-config"
-            value="jdbcUrl=%jdbcUrl%,jdbcUser=%jdbcUser%,jdbcPassword=%jdbcPassword%"/>
-
-  <filter name="sysmon_script"
-          value="pdk/work/scripts/sybase/get_sysmon_stats.pl"/>
-
-  <filter name="template"
-          value="${domain}:Type=Server:${alias}"/>
-  <metrics name="ServerMetrics">
-    <metric name="Availability"
-            category="AVAILABILITY"
-            indicator="true"
-            units="percentage"
-            collectionType="dynamic"/>
-
-  </metrics>
+            value="interval=%interval%,jdbcUrl=%jdbcUrl%,jdbcUser=%jdbcUser%,jdbcPassword=%jdbcPassword%"/>
 
   <filter name="template"
           value="${domain}:Type=Service,instance=%instance%:${alias}"/>
@@ -160,9 +146,9 @@
             collectionType="dynamic"/>
   </metrics>
 
-  <filter name="template">
-        sbSysmon:interval=%interval%,jdbcUrl=%jdbcUrl%,jdbcUser=%jdbcUser%,jdbcPassword=%jdbcPassword%:${alias}
-  </filter>
+  <filter name="template"
+          value="${domain}:Type=Server:${alias}"/>
+
   <metrics name="SybaseAvailability">
     <metric name="Availability"
             category="AVAILABILITY"
@@ -171,6 +157,9 @@
             collectionType="dynamic"/>
   </metrics>
 
+  <filter name="template">
+        sbSysmon:interval=%interval%,jdbcUrl=%jdbcUrl%,jdbcUser=%jdbcUser%,jdbcPassword=%jdbcPassword%:${alias}
+  </filter>
   <metrics name="sp_sysmon">
     <metric name="Deadlocks"
             category="THROUGHPUT"
@@ -220,7 +209,6 @@
     <plugin type="autoinventory"
             class="SybaseServerDetector"/>
     <metrics include="SybaseAvailability"/>
-    <metrics include="ServerMetrics"/>
     <metrics include="sp_sysmon"/>
 
     <properties>
@@ -230,7 +218,7 @@
 
     <config type="measurement">
       <option name="jdbcUrl"
-              description="JDBC Url (NOTE: localhost may not work)"
+              description="JDBC Url (NOTE: Use fqdn or IP, localhost is invalid)"
               default="jdbc:sybase:Tds:localhost:4100"/>
       <option name="jdbcUser"
               description="JDBC User"
@@ -244,9 +232,6 @@
       <option name="interval"
               description="sp_sysmon interval"
               default="00:05:00"/>
-      <option name="timeout"
-              description="Timeout for sp_sysmon, must be greater than the interval"
-              default="3500"/>
     </config>
 
     <service name="sp_sysmonEngine">
@@ -398,22 +383,13 @@
   <help name="Sybase">
     <![CDATA[
     <p>
-    <h3>Configure Sybase ${product.version} for Monitoring</h3>
-    </p>
-    <p>
-      Please run the HQ agent on the local Sybase server as the sybase user.
-      <br>
-      This is neccessary to get the proper ENV vars setup in order to execute
-      <br>
-      the sp_sysmon procedure.
+    	<h3>Configure Sybase ${product.version} for Monitoring</h3>
     </p>
     <p>
       <b>NOTES:</b>
-      <br>
-      The jdbcUrl may not work using localhost.  Please specify the actual hostname.
-      <br>
-      On Windows install <a href="http://www.activestate.com/activeperl">ActivePerl</a>
-      and bind the extension .pl to automatically execute perl when the file type is invoked.
+      <ul>
+      	<li>To configure the jdbcUrl, specifiy the fully qualified domain name or IP address of the host machine. The use of localhost is invalid.</li>
+	   </ul>
     </p>
     ]]>
   </help>

@@ -126,10 +126,21 @@ public class WebsphereUtil {
         AdminClient mServer;
         WebsphereStopWatch timer = new WebsphereStopWatch();
 
+        // http://blogs.sun.com/sunabl/entry/websphere_application_server_and_jvm ????
+        // XXX test it with solaris version.
         try {
             mServer = AdminClientFactory.createAdminClient(props);
-        } catch (ConnectorException e) {
+        } catch (LinkageError e) {
+            log.error("!!! Incorrect JVM !!!", e);
             throw new MetricUnreachableException(e.getMessage(), e);
+        } catch (ConnectorException ex) {
+            Throwable e = ex;
+            while ((e = (Throwable) e.getCause()) != null) {
+                if (e instanceof LinkageError) {
+                    throw new MetricUnreachableException("!!! Incorrect JVM !!!", e);
+                }
+            }
+            throw new MetricUnreachableException(ex.getMessage(), ex);
         }
 
         if (log.isDebugEnabled() && timer.isTooLong()) {

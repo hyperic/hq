@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.PluginException;
@@ -62,7 +63,7 @@ public class SybaseServerDetector
                         PROP_URL      = SybaseMeasurementPlugin.PROP_URL,
                         PROP_USER     = SybaseMeasurementPlugin.PROP_USER,
             PROP_PASSWORD = SybaseMeasurementPlugin.PROP_PASSWORD;
-    private static String PTQL_QUERY;
+    public static String PTQL_QUERY;
     static {
         if (isWin32()) {
             PTQL_QUERY =
@@ -90,7 +91,7 @@ public class SybaseServerDetector
                         VERSION_12_5 = "12.5.x",
                         VERSION_12_0 = "12.x";
 
-    private Log log=getLog();
+    private Log log=LogFactory.getLog(SybaseServerDetector.class);
     public List getServerResources(ConfigResponse config) throws PluginException
     {
         log.debug("[getServerResources] config=" + config);
@@ -139,11 +140,6 @@ public class SybaseServerDetector
 
         String installdir = getParentDir(path, 3);
 
-        ConfigResponse productConfig = new ConfigResponse();
-        productConfig.setValue(PROP_USER, "sa");
-        productConfig.setValue(PROP_PASSWORD, "");
-        productConfig.setValue("serverName", name);
-
         String version = "";
 
 
@@ -163,20 +159,24 @@ public class SybaseServerDetector
         if (!version.equals(getTypeInfo().getVersion())) {
             return servers;
         }
+
+        ConfigResponse measurementConfig = new ConfigResponse();
+        measurementConfig.setValue("serverName", name);
+
         ServerResource server = createServerResource(installpath);
         // Set custom properties
         ConfigResponse cprop = new ConfigResponse();
         cprop.setValue("version", version);
         server.setCustomProperties(cprop);
-        setProductConfig(server, productConfig);
-        server.setMeasurementConfig();
+        setProductConfig(server, new ConfigResponse());
+        setMeasurementConfig(server,measurementConfig);
         server.setName(getPlatformName() + " " + SERVER_NAME + " " + version + " " + name);
         servers.add(server);
 
-        log.debug("sysbase.aiid.orginal=" + SysbaseProductPlugin.isOriginalAIID());
+        log.debug("sysbase.aiid.orginal=" + SybaseProductPlugin.isOriginalAIID());
         log.debug("installdir=" + installdir);
         log.debug("installpath=" + installpath);
-        if (SysbaseProductPlugin.isOriginalAIID()) {
+        if (SybaseProductPlugin.isOriginalAIID()) {
             server.setIdentifier(installdir);
         } else {
             server.setIdentifier(installpath);

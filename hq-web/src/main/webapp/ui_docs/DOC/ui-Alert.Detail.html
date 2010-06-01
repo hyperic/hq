@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>Hyperic HQ 4.0 and 4.1 Documentation : ui-Alert.Detail</title>
+        <title>Hyperic HQ 4.x Documentation : ui-Alert.Detail</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -12,100 +12,85 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            Hyperic HQ 4.0 and 4.1 Documentation : ui-Alert.Detail
+                            Hyperic HQ 4.x Documentation : ui-Alert.Detail
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jul 14, 2009 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Apr 18, 2010 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><em>Topics marked with</em> <font color="red"><em>&#42;</em></font> <em>relate to HQ Enterprise-only features.</em></p>
-<style type='text/css'>/*<![CDATA[*/
-div.rbtoc1247596026909 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1247596026909 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1247596026909 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1247596026909'>
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1271612793345 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1271612793345 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1271612793345 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1271612793345'>
 <ul>
     <li><a href='#ui-Alert.Detail-AlertDetailPage'>Alert Detail Page</a></li>
 <ul>
-    <li><a href='#ui-Alert.Detail-UnderstandingAlertDetails'>Understanding Alert Details</a></li>
+    <li><a href='#ui-Alert.Detail-ViewAlertDetail'>View Alert Detail</a></li>
     <li><a href='#ui-Alert.Detail-MarkAlertFixed'>Mark Alert Fixed</a></li>
     <li><a href='#ui-Alert.Detail-AcknowledgeAlert'>Acknowledge Alert</a></li>
     <li><a href='#ui-Alert.Detail-GototheAlertDefinitionPage'>Go to the Alert Definition Page</a></li>
-    <li><a href='#ui-Alert.Detail-ViewMetricsandOtherAlertsfortheResource'>View Metrics and Other Alerts for the Resource</a></li>
+    <li><a href='#ui-Alert.Detail-GototheResource%27sIndicatorsPage'>Go to the Resource's Indicators Page</a></li>
 </ul>
 </ul></div>
 <p><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></p>
-
 <h1><a name="ui-Alert.Detail-AlertDetailPage"></a>Alert Detail Page</h1>
 
-<p>To view the <b>Alert Detail</b> page for a fired alert, you can:</p>
-<ul>
-	<li>click the date link for an alert in the <b>Recent Alerts</b> dashboard portlet,</li>
-	<li>click the date link for an alert in a resource's <b>Alert</b> tab, or&nbsp;</li>
-	<li>click the alert definition name for an alert in the <b>Alert Center</b>.</li>
-</ul>
+<p>The <b>Alert Detail</b> page lists information about a fired alert, and allows you to mark it "fixed", and acknowledge it if there is an associated escalation.</p>
 
+<h2><a name="ui-Alert.Detail-ViewAlertDetail"></a>View Alert Detail</h2>
 
-<p>The <b>Alert Detail</b> page summarizes&nbsp; key information about a fired alert - why it fired, what automatic actions and notifications were performed, responder comments, and current status.&nbsp; As appropriate, you can mark an alert "Fixed" and acknowledge an alert with an escalation.</p>
-
-<h2><a name="ui-Alert.Detail-UnderstandingAlertDetails"></a>Understanding Alert Details</h2>
+<p>The <b>Alert Detail</b> page displays the alert definition for a fired alert, what actions have been performed, and as available, comments supplied when the alert was acknowledged or fixed. </p>
 
 <ul>
-	<li><b>Alert Properties</b> &#45; This section tells you the alert definition that fired the alert, the affected resource, the alert's priority and whether it has been fixed. You can click the alert definition name to view it, or the resource name to view metrics and charts.</li>
+	<li><b>Alert Properties</b> &#45; Shows the name of the alert definition, the resource for which the alert fired, the priority of the alert, when it fired, and whether it has been fixed.  You can click the alert definition name to view or edit it, or click the resource name to see its Indicators page.</li>
 </ul>
 
 
 <ul>
-	<li><b>Condition Set</b> &#45; This section shows the condition and firing rules from the alert definition, and the metric value ("Actual Value") or event that made the alert fire.&nbsp;</li>
+	<li><b>Condition Set</b> &#45; The metric value or event that caused the alert.</li>
 </ul>
 
 
 <ul>
-	<li><b>Control Action</b> &#45; If HQ performed an automatic control action when the alert fired (as may be be specified in an alert definition) the action is listed here.&nbsp;</li>
+	<li><b>Control Action</b> &#45; If HQ performed a control action when the alert fired, it is listed.</li>
 </ul>
 
 
 <ul>
-	<li><b>Notification Actions</b> &#45; This section lists any notification actions that HQ performed for the fired alert, for example emails to HQ users.&nbsp;</li>
+	<li><b>Notification Actions</b> &#45; The HQ user(s) or other recipients for notifications.</li>
 </ul>
 
 
 <ul>
-	<li><b>Escalation</b> &#45; If the alert has an escalation, this section lists the actions defined for the escalation, the steps that have been performed. Acknowledgment notes are shown, if available.</li>
+	<li><b>Escalation</b> &#45; If the alert has an escalation, this section lists the actions defined for the escalation, and a log of any steps that have been performed.  Acknowledgment notes are shown, if available.</li>
 </ul>
 
 
 <ul>
-	<li><b>Fix</b> &#45; If the alert is fixed, the user that fixed it is listed. In HQ Enterprise, if the alert was fixed by a recovery alert, the <b>Fix</b> section will show "Recovery Alert".  If the alert is unfixed, the <b>Fixed</b> button is available.</li>
+	<li><b>Fix</b> &#45; If the alert has been marked fixed, the HQ user that fixed it, and comments entered at fix time are shown. If the alert was fixed by a recovery alert, the Fix section will say "The problem fixed itself."</li>
 </ul>
 
 
 <h2><a name="ui-Alert.Detail-MarkAlertFixed"></a>Mark Alert Fixed</h2>
 
-<p>In the "Fix" section, enter comments on the alert resolution, and click <b>Fixed</b> at the bottom of the page. The icon appears only if the alert is unfixed.</p>
+<p>In the "Fix" section, enter comments on the alert resolution, and click <b>Fixed</b> at the bottom of the page.  The icon appears only if the alert is unfixed.</p>
 
 <h2><a name="ui-Alert.Detail-AcknowledgeAlert"></a>Acknowledge Alert</h2>
 
-<p>In the "Escalation" section, click the <b>Acknowledge</b> icon. The icon appears only if the alert has an escalation, and hasn't already been acknowledged.</p>
+<p>In the "Escalation" section, click  the <b>Acknowledge</b> icon. The icon appears only if the alert has an escalation, and  hasn't already been acknowledged. </p>
 
 <h2><a name="ui-Alert.Detail-GototheAlertDefinitionPage"></a>Go to the Alert Definition Page</h2>
 
 <p>To view or edit the alert definition, click the alert definition name in the "Alert Properties" section of the page.</p>
 
-<h2><a name="ui-Alert.Detail-ViewMetricsandOtherAlertsfortheResource"></a>View Metrics and Other Alerts for the Resource</h2>
+<h2><a name="ui-Alert.Detail-GototheResource%27sIndicatorsPage"></a>Go to the Resource's Indicators Page</h2>
 
-<p>To view the <b>Indicators</b> page for the resource for which the alert fired, click the resource name in the "Alert Properties" section of the page.  On the <b>Indicators</b> page, you can click the <b>Alert</b> tab to view a list of all fired alerts for the resource.</p>
-
-<div class="panel" style="border-width: 1px;"><div class="panelHeader" style="border-bottom-width: 1px;"><b>Related Information</b></div><div class="panelContent">
-<ul>
-	<li>For an overview of alerting in HQ, see <a href="http://support.hyperic.com/confluence/display/DOC/Key+Facts+about+HQ+Alerting" title="Key Facts about HQ Alerting">Key Facts about HQ Alerting</a>.</li>
-	<li>To understand the components of an alert definition - the properties, conditions, and actions - see <a href="ui-Alert.Edit.html" title="ui-Alert.Edit">ui&#45;Alert.Edit</a>.</li>
-	<li>For information about recovery alerts and how they "fix" a primary alert, see <a href="http://support.hyperic.com/confluence/display/DOC/Recovery+Alerts" title="Recovery Alerts">Recovery Alerts</a>.</li>
-	<li>For information about escalations, see&nbsp;<a href="http://support.hyperic.com/confluence/display/DOC/Escalation" title="Escalation">Escalation</a>.</li>
-</ul>
-</div></div>
+<p>To view the <b>Indicators</b> page for the resource for which the alert fired, click the resource name in the Alert Properties section of the page.</p>
 
 				    					    <br/>
                         <div class="tabletitle">
@@ -114,10 +99,10 @@ div.rbtoc1247596026909 li {margin-left: 0px;padding-left: 0px;}
 
                         <div class="greybox" align="left">
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="download/attachments/59375778/icon_fixed.gif">icon_fixed.gif</a> (image/gif)
+                                <a href="attachments/59375778/59539525.gif">icon_fixed.gif</a> (image/gif)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="download/attachments/59375778/icon_ack.gif">icon_ack.gif</a> (image/gif)
+                                <a href="attachments/59375778/59539481.gif">icon_ack.gif</a> (image/gif)
                                 <br/>
                                                     </div>
 				    
@@ -129,7 +114,7 @@ div.rbtoc1247596026909 li {margin-left: 0px;padding-left: 0px;}
 				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 20, 2009 15:33</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Apr 20, 2010 15:01</font></td>
 		    </tr>
 	    </table>
     </body>

@@ -47,20 +47,28 @@ import org.apache.commons.logging.LogFactory;
 
 import com.ibm.websphere.management.AdminClient;
 import com.ibm.websphere.management.exception.ConnectorException;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Set;
+import javax.management.modelmbean.ModelMBeanAttributeInfo;
 
 public abstract class WebsphereCollector extends Collector {
 
     private static final Log log =
         LogFactory.getLog(WebsphereCollector.class.getName());
 
-    protected ObjectName name;
+    private ObjectName name;
     private String domain;
 
-    protected ObjectName getObjectName() {
+    protected final ObjectName getObjectName() {
         return this.name;
     }
 
-    protected ObjectName newObjectNamePattern(String attrs)
+    protected final void setObjectName(ObjectName name) {
+        this.name=name;
+    }
+
+    protected final ObjectName newObjectNamePattern(String attrs)
         throws PluginException {
 
         try {
@@ -70,20 +78,25 @@ public abstract class WebsphereCollector extends Collector {
         }
     }
 
-    protected String getServerAttributes() {
+    protected final String getServerAttributes() {
         return
             "J2EEServer=" + getServerName() + "," +
             "node=" + getNodeName();
     }
 
-    protected String getProcessAttributes() {
+    protected final String getProcessAttributes() {
         return
             "process=" + getServerName() + "," +
             "node=" + getNodeName();
     }
 
-    protected void init() throws PluginException {
+    protected final void init() throws PluginException {
+        if(log.isDebugEnabled()){
+            log.debug("[init] ("+getClass().getSimpleName()+") props="+getProperties());
+        }
+
         AdminClient mServer = getMBeanServer();
+        assert mServer!=null;
         if(mServer==null) return;
         
         try {
@@ -99,24 +112,21 @@ public abstract class WebsphereCollector extends Collector {
         }
     }
 
-    protected void init(AdminClient mServer)
-        throws PluginException {
+    protected abstract void init(AdminClient mServer) throws PluginException;
 
-    }
-
-    protected String getNodeName() {
+    private final String getNodeName() {
         return getProperties().getProperty(WebsphereProductPlugin.PROP_SERVER_NODE);
     }
 
-    protected String getServerName() {
+    protected final String getServerName() {
         return getProperties().getProperty(WebsphereProductPlugin.PROP_SERVER_NAME);
     }
 
-    protected String getModuleName() {
+    protected final String getModuleName() {
         return getProperties().getProperty("Module");
     }
 
-    protected AdminClient getMBeanServer() {
+    private AdminClient getMBeanServer() {
         try {
             return WebsphereUtil.getMBeanServer(getProperties());
         } catch (MetricUnreachableException e) {
@@ -140,9 +150,10 @@ public abstract class WebsphereCollector extends Collector {
         }
     }
 
-    protected Object getAttribute(AdminClient mServer,
+    protected final Object getAttribute(AdminClient mServer,
                                   ObjectName name,
-                                  String attr) {
+                                  String attr)
+        throws PluginException{
 
         try {
             WebsphereStopWatch timer = new WebsphereStopWatch();
@@ -162,16 +173,16 @@ public abstract class WebsphereCollector extends Collector {
             if (log.isDebugEnabled()) {
                log.debug("getAttribute(" + name + ", " + attr +
                           "): " + e.getMessage(), e);
-            }
-            return null;
+                            }
+            throw new PluginException(e.getMessage());
         }
     }
 
-    protected Stats getStats(AdminClient mServer, ObjectName name) {
+    protected final Stats getStats(AdminClient mServer, ObjectName name) throws PluginException {
         return (Stats)getAttribute(mServer, name, "stats");
     }
 
-    protected double getStatCount(Statistic stat) {
+    private double getStatCount(Statistic stat) {
         if (stat instanceof CountStatistic) {
             return ((CountStatistic)stat).getCount();
         }
@@ -197,7 +208,7 @@ public abstract class WebsphereCollector extends Collector {
         }
     }
 
-    protected double getStatCount(Stats stats, String metric) {
+    protected final double getStatCount(Stats stats, String metric) {
         Statistic stat = stats.getStatistic(metric);
         if (stat == null) {
             return MetricValue.VALUE_NONE;
@@ -205,7 +216,7 @@ public abstract class WebsphereCollector extends Collector {
         return getStatCount(stat);
     }
 
-    protected void collectStatCount(Stats stats, String[][] attrs) {
+    protected final void collectStatCount(Stats stats, String[][] attrs) {
         for (int i=0; i<attrs.length; i++) {
             String[] entry = attrs[i];
             String statKey = entry[0];
@@ -218,11 +229,11 @@ public abstract class WebsphereCollector extends Collector {
         }
     }
 
-    public MetricValue getValue(Metric metric, CollectorResult result) {
+    public final MetricValue getValue(Metric metric, CollectorResult result) {
         return super.getValue(metric, result);
     }
 
-    protected boolean collectStats(ObjectName name) {
+    protected final boolean collectStats(ObjectName name) throws PluginException {
         AdminClient mServer = getMBeanServer();
         if (mServer == null) {
             return false;
@@ -230,7 +241,7 @@ public abstract class WebsphereCollector extends Collector {
         return collectStats(mServer, name);
     }
 
-    protected boolean collectStats(AdminClient mServer, ObjectName oname) {
+    private boolean collectStats(AdminClient mServer, ObjectName oname) throws PluginException {
         Stats stats = getStats(mServer, oname);
         if (stats == null) {
             setAvailability(false);
@@ -252,4 +263,44 @@ public abstract class WebsphereCollector extends Collector {
 
         return true;
     }
+
+    public final void collect() {
+        String serverName = getProperties().getProperty("server.name");
+        String module = getProperties().getProperty("Module");
+
+        if (log.isDebugEnabled()) {
+            log.debug("[collect] [" + serverName + "] class=" + this.getClass().getName());
+            log.debug("[collect] [" + serverName + "] name=" + getObjectName());
+            log.debug("[collect] [" + serverName + "] module=" + module);
+            log.debug("[collect] [" + serverName + "] getProperties=" + getProperties());
+        }
+        setAvailability(false);
+
+        if (getObjectName() == null) {
+            try {
+                init();
+            } catch (PluginException ex) {
+                log.debug("[collect] [" + serverName + "] error!!! " + ex.getMessage());
+                return;
+            }
+        }
+
+        AdminClient mServer = getMBeanServer();
+        if (mServer == null) {
+            return;
+        }
+
+        setAvailability(true);
+
+        try{
+            collect(mServer);
+        } catch (PluginException e) {
+            setAvailability(false);
+            setMessage(e.getMessage());
+            log.debug("[collect] [" + serverName + "] error:"+e.getMessage(),e);
+        }
+        log.debug("[collect] [" + serverName + "] end");
+    }
+
+    protected abstract void collect(AdminClient mServer) throws PluginException;
 }

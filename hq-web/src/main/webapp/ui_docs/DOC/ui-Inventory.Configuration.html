@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>Hyperic HQ 4.0 and 4.1 Documentation : ui-Inventory.Configuration</title>
+        <title>Hyperic HQ 4.x Documentation : ui-Inventory.Configuration</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -12,7 +12,7 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            Hyperic HQ 4.0 and 4.1 Documentation : ui-Inventory.Configuration
+                            Hyperic HQ 4.x Documentation : ui-Inventory.Configuration
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
@@ -23,8 +23,7 @@
 
 <p><em>Topics marked with</em> <font color="red"><em>&#42;</em></font> <em>relate to HQ Enterprise-only features.</em></p>
 <p>This inventory screen allows users to edit a <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-resource">resource's</a> configuration properties, that is, those data that HQ needs to properly monitor and, in some cases, control the resource. Users can also enable and disable <a href="http://support.hyperic.com/confluence/display/DOC/Log+Tracking" title="Log Tracking">log</a> and <a href="http://support.hyperic.com/confluence/display/DOC/Configuration+Tracking" title="Configuration Tracking">configuration tracking</a> for the resource.</p>
-<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Product-Specific Configuration</b><br />
-<p>The configuration information displayed and available for editing in each section depends entirely on the resource type (product). Product-specific information can be found through the list of <a href="http://support.hyperic.com/confluence/display/hypcomm/HyperFORGE" title="HyperFORGE">products managed by HQ</a>. These pages list what metrics are gathered for a resource type, what control actions (if any) are available for the resource type, whether log and configuration tracking are supported, and any special configuration that users must perform in order for HQ to manage the product. All of this information is ultimately defined in the plugin for that product.</p></td></tr></table></div>
+<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Product-Specific Configuration</b><br />The configuration information displayed and available for editing in each section depends entirely on the resource type (product). Product-specific information can be found through the list of <a href="http://support.hyperic.com/confluence/display/hypcomm/HyperFORGE" title="HyperFORGE">products managed by HQ</a>. These pages list what metrics are gathered for a resource type, what control actions (if any) are available for the resource type, whether log and configuration tracking are supported, and any special configuration that users must perform in order for HQ to manage the product. All of this information is ultimately defined in the plugin for that product.</td></tr></table></div>
 <ul>
 	<li><a href="#ui-Inventory.Configuration-Tasks">Tasks</a> available on this screen</li>
 	<li><a href="#ui-Inventory.Configuration-Sections">Sections</a> on this screen</li>
@@ -40,7 +39,7 @@
 
 <p><b>To enable or disable auto-discovery of this resource:</b></p>
 <ul>
-	<li>Check <ins>Auto-Discover</ins> and click <img src="download/attachments/59375698/fb_ok.gif" align="absmiddle" border="0"/>.</li>
+	<li>Check <ins>Auto-Discover</ins> and click <span class="image-wrap" style=""><img src="attachments/59375698/59539467.gif" style="border: 0px solid black"/></span>.</li>
 </ul>
 
 
@@ -49,6 +48,7 @@
 	<li>Check <ins>Enable Log Tracking</ins>.</li>
 	<li>In <ins>Track Event Log Level</ins>, select a log level. Only events of a level greater than or equal to this level will be tracked. The hierarchy of log levels, from greatest to least, is: Error, Warn, Info, Debug.<br/>
 <b>Mapping of error type to log-level:</b>
+<div class='table-wrap'>
 <table class='confluenceTable'><tbody>
 <tr>
 <th class='confluenceTh'> error type </th>
@@ -70,12 +70,14 @@
 <td class='confluenceTd'> debug </td>
 <td class='confluenceTd'> Debug </td>
 </tr>
-</tbody></table></li>
+</tbody></table>
+</div>
+</li>
 	<li>In <ins>Log Pattern Match</ins>, provide a substring or a regular expression that must be matched by a log message. For more information, see <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">java.util.regex.Pattern</a>.</li>
 	<li>In <ins>Log Pattern Exclude</ins>, provide a substring that, if found in a log message, will cause the message to be excluded.</li>
 	<li>In <ins>Log Files</ins>, specify a comma-delimited list of log files to track.<br/>
 The HQ Agent must be able to read these files, so make sure permissions are set appropriately.</li>
-	<li>Click <img src="download/attachments/59375698/fb_ok.gif" align="absmiddle" border="0"/>.</li>
+	<li>Click <span class="image-wrap" style=""><img src="attachments/59375698/59539467.gif" style="border: 0px solid black"/></span>.</li>
 </ol>
 
 
@@ -83,7 +85,7 @@ The HQ Agent must be able to read these files, so make sure permissions are set 
 <ol>
 	<li>Check <ins>Enable Config Tracking</ins>.</li>
 	<li>In <ins>Configuration Files</ins>, specify a comma-delimited list of log files to track.</li>
-	<li>Click <img src="download/attachments/59375698/fb_ok.gif" align="absmiddle" border="0"/>.</li>
+	<li>Click <span class="image-wrap" style=""><img src="attachments/59375698/59539467.gif" style="border: 0px solid black"/></span>.</li>
 </ol>
 
 
@@ -135,7 +137,7 @@ For an Apache server, HQ can perform these control actions: start, stop, restart
 
 <p><em><a href="#ui-Inventory.Configuration-top"><em>back to top</em></a></em></p>
 
-<p><br clear="all" /></p>
+<p><br class="atl-forced-newline" /></p>
 <table class="sectionMacro" border="0" cellpadding="5" cellspacing="0" width="100%"><tbody><tr>
 <div class="panel" style="border-width: 1px;"><div class="panelHeader" style="border-bottom-width: 1px;"><b>Related Information</b></div><div class="panelContent">
 <p><a href="http://support.hyperic.com/confluence/display/DOC/Plugin+Development+Center" title="Plugin Development Center">Learn how to understand and write product plugins</a><br/>
@@ -143,7 +145,7 @@ For an Apache server, HQ can perform these control actions: start, stop, restart
 <a href="http://support.hyperic.com/confluence/display/DOC/Configuration+Tracking" title="Configuration Tracking">Configuration Tracking</a></p>
 </div></div></tr></tbody></table>
 
-<h5><a name="ui-Inventory.Configuration-ReturntoHQUserInterfaceReference."></a>Return to <a href="http://support.hyperic.com/confluence/display/DOC/HQ+User+Interface+Reference" title="HQ User Interface Reference">HQ User Interface Reference</a>.</h5>
+<h5><a name="ui-Inventory.Configuration-ReturntoHQUserInterfaceReference."></a>Return to <a href="HQ User Interface Reference.html" title="HQ User Interface Reference">HQ User Interface Reference</a>.</h5>
 
 				    					    <br/>
                         <div class="tabletitle">
@@ -152,7 +154,7 @@ For an Apache server, HQ can perform these control actions: start, stop, restart
 
                         <div class="greybox" align="left">
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="download/attachments/59375698/fb_ok.gif">fb_ok.gif</a> (image/gif)
+                                <a href="attachments/59375698/59539467.gif">fb_ok.gif</a> (image/gif)
                                 <br/>
                                                     </div>
 				    
@@ -164,7 +166,7 @@ For an Apache server, HQ can perform these control actions: start, stop, restart
 				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 20, 2009 15:33</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Apr 20, 2010 15:01</font></td>
 		    </tr>
 	    </table>
     </body>

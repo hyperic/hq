@@ -12,6 +12,7 @@
 				<exclude>**/*.sh</exclude>
 				<exclude>**/*.pl</exclude>
 				<exclude>**/.gitignore</exclude>
+				<exclude>**/*.tar.gz</exclude>
 			</excludes>
 			<filtered>true</filtered>
 			<fileMode>0644</fileMode>
@@ -28,6 +29,15 @@
 			<fileMode>0755</fileMode>
 			<directoryMode>0755</directoryMode>
 		</fileSet>
+		<fileSet>
+			<directory>src/main/resources</directory>
+			<outputDirectory>/</outputDirectory>
+			<includes>
+				<include>**/*.tar.gz</include>
+			</includes>
+			<fileMode>0755</fileMode>
+			<directoryMode>0755</directoryMode>
+		</fileSet>
 	</fileSets>
 
 	<dependencySets>
@@ -41,6 +51,7 @@
 				<exclude>mx4j:*</exclude>
 				<exclude>org.hyperic.hq:hq-pdk-shared</exclude>
 				<exclude>org.hyperic:sigar</exclude>
+				<exclude>org.hyperic.hq.agent:hq-product</exclude>
 			</excludes>
 			<unpack>true</unpack>
 			<fileMode>0644</fileMode>
@@ -92,6 +103,17 @@
 			</includes>
 			<fileMode>0644</fileMode>
 			<directoryMode>0755</directoryMode>
+		</dependencySet>
+		<dependencySet>
+				<useProjectArtifact>false</useProjectArtifact>
+				<useTransitiveDependencies>false</useTransitiveDependencies>
+				<outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+				<outputDirectory>/pdk/lib</outputDirectory>
+				<includes>
+					<include>org.hyperic.hq.agent:hq-product</include>
+				</includes>
+				<fileMode>0644</fileMode>
+				<directoryMode>0755</directoryMode>
 		</dependencySet>
 		<dependencySet>
 				<useProjectArtifact>false</useProjectArtifact>

@@ -65,9 +65,12 @@
               path="/resource/common/ControlTab.jsp">
    <put name="selectedIndex"  value="0" />
    <putList name="tabList">
-      <item value="Inventory" link="XXX"
-            height="21" width="102"
-            classtype="org.hyperic.hq.ui.util.Tab"/>
+      <bean classtype="org.hyperic.hq.ui.util.Tab">
+        <set-property property="value" value="Inventory" />
+        <set-property property="link" value="XXX" />
+        <set-property property="height" value="21" />
+        <set-property property="width" value="102" />
+      </bean> 
    </putList> 
   </definition>
   
@@ -75,12 +78,18 @@
               path="/resource/common/ControlTab.jsp">
    <put name="selectedIndex"  value="0" />
    <putList name="tabList">
-      <item value="Monitor" link="XXX"
-            height="21" width="102"
-            classtype="org.hyperic.hq.ui.util.Tab"/>
-      <item value="Inventory" link="XXX"
-            height="21" width="102"
-            classtype="org.hyperic.hq.ui.util.Tab"/>
+     <bean classtype="org.hyperic.hq.ui.util.Tab">
+       <set-property property="value" value="Monitor" />
+       <set-property property="link" value="XXX" />
+       <set-property property="height" value="21" />
+       <set-property property="width" value="102" />
+     </bean>
+      <bean classtype="org.hyperic.hq.ui.util.Tab">
+       <set-property property="value" value="Inventory" />
+       <set-property property="link" value="XXX" />
+       <set-property property="height" value="21" />
+       <set-property property="width" value="102" />
+     </bean>    
    </putList> 
   </definition>
 

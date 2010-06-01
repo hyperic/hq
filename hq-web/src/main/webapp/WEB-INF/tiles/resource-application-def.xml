@@ -38,14 +38,20 @@
 
   <definition name=".tabs.resource.application"
               extends=".tabs.resource.nocontrol"> 
-   <putList name="tabList">
-       <item value="Monitor" mode="currentHealth"
-           link="/resource/application/monitor/Visibility.do"
-            height="21" width="102"
-            classtype="org.hyperic.hq.ui.util.Tab"/>
-      <item value="Inventory" link="/resource/application/Inventory.do"
-            height="21" width="102"
-            classtype="org.hyperic.hq.ui.util.Tab"/>
+   <putList name="tabList">   
+     <bean classtype="org.hyperic.hq.ui.util.Tab">
+       <set-property property="value" value="Monitor" />
+       <set-property property="link" value="/resource/application/monitor/Visibility.do" />
+       <set-property property="mode" value="currentHealth" />
+       <set-property property="height" value="21" />
+       <set-property property="width" value="102" />
+     </bean> 
+     <bean classtype="org.hyperic.hq.ui.util.Tab">
+       <set-property property="value" value="Inventory" />
+       <set-property property="link" value="/resource/application/Inventory.do" />
+       <set-property property="height" value="21" />
+       <set-property property="width" value="102" />
+     </bean>       
    </putList>     
   </definition>
 
@@ -161,18 +167,28 @@
   <definition name=".tabs.resource.application"
               extends=".tabs.resource">
     <putList name="tabList">
-      <item value="Monitor" mode="currentHealth"
-            link="/resource/application/monitor/Visibility.do"
-            height="21" width="102"
-            classtype="org.hyperic.hq.ui.util.Tab"/>
-      <item value="Inventory" mode="view"
-            link="/resource/application/Inventory.do"
-            height="21" width="102"
-            classtype="org.hyperic.hq.ui.util.Tab"/>
-      <item value="Views" mode="list"
-            link="/TabBodyAttach.do"
-            height="21" width="102"
-            classtype="org.hyperic.hq.ui.util.Tab"/>
+    
+     <bean classtype="org.hyperic.hq.ui.util.Tab">
+       <set-property property="value" value="Monitor" />
+       <set-property property="link" value="/resource/application/monitor/Visibility.do" />
+       <set-property property="mode" value="currentHealth" />
+       <set-property property="height" value="21" />
+       <set-property property="width" value="102" />
+     </bean> 
+     <bean classtype="org.hyperic.hq.ui.util.Tab">
+       <set-property property="value" value="Inventory" />
+       <set-property property="link" value="/resource/application/Inventory.do" />
+       <set-property property="mode" value="view" />
+       <set-property property="height" value="21" />
+       <set-property property="width" value="102" />
+     </bean>      
+     <bean classtype="org.hyperic.hq.ui.util.Tab">
+       <set-property property="value" value="Views" />
+       <set-property property="link" value="/TabBodyAttach.do" />
+       <set-property property="mode" value="list" />
+       <set-property property="height" value="21" />
+       <set-property property="width" value="102" />
+     </bean> 
     </putList> 
   </definition>
 

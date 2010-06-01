@@ -55,9 +55,7 @@ public class AgentProductPlugin
                                    "Agent Version");
         schema.addOption(opt);
 
-        opt = new StringConfigOption("build",
-        "Agent Build");
-        schema.addOption(opt);
+       
 
         opt = new StringConfigOption("JavaVersion",
                                      "Java Version");
