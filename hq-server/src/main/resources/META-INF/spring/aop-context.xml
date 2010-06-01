@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation=
+	   "http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
+
+
+    <aop:aspectj-autoproxy/> 
+
+
+    <bean id="performanceMonitorAspect" class="org.hyperic.hq.monitor.aop.aspects.PerformanceMonitor">
+        <description>Monitors duration of execution on transactional methods in the service layer. Note undetermined requirement: max duration</description>
+        <property name="maximumDuration" value="3000"/>
+        <property name="warningMessage" value="Method exceeded acceptable duration: "/>
+    </bean>    
+
+
+
+</beans>
