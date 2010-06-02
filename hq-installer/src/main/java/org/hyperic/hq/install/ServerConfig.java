@@ -317,7 +317,8 @@ public class ServerConfig
                         "org.quartz.impl.jdbcjobstore.oracle.OracleDelegate"));
                     schema.addOption(new HiddenConfigOption("server.hibernate.dialect",
                         "org.hyperic.hibernate.dialect.Oracle9Dialect"));
-                    schema.addOption(new HiddenConfigOption("server.connection-validation-sql","select 1 from dual"));
+                    schema.addOption(new HiddenConfigOption("server.connection-validation-sql",
+                        "select 1 from dual"));
 
                 } else if (dbChoiceStr.startsWith(DBC_PGSQL)) {
                     schema.addOption(new StringConfigOption("server.database-url", StringUtil
@@ -329,18 +330,20 @@ public class ServerConfig
                         "org.quartz.impl.jdbcjobstore.PostgreSQLDelegate"));
                     schema.addOption(new HiddenConfigOption("server.hibernate.dialect",
                         "org.hyperic.hibernate.dialect.PostgreSQLDialect"));
-                    schema.addOption(new HiddenConfigOption("server.connection-validation-sql","select 1"));
+                    schema.addOption(new HiddenConfigOption("server.connection-validation-sql",
+                        "select 1"));
                 } else if (dbChoice.equals(DB_MYSQL)) {
                     schema.addOption(new StringConfigOption("server.database-url", StringUtil
                         .replace(Q_JDBC_URL, "%%DBNAME%%", dbChoiceStr),
-                        "jdbc:mysql://localhost:3306/" + PRODUCT ));
+                        "jdbc:mysql://localhost:3306/" + PRODUCT));
                     schema.addOption(new HiddenConfigOption("server.database-driver",
                         "com.mysql.jdbc.Driver"));
                     schema.addOption(new HiddenConfigOption("server.quartzDelegate",
                         "org.quartz.impl.jdbcjobstore.StdJDBCDelegate"));
                     schema.addOption(new HiddenConfigOption("server.hibernate.dialect",
                         "org.hyperic.hibernate.dialect.MySQL5InnoDBDialect"));
-                    schema.addOption(new HiddenConfigOption("server.connection-validation-sql","select 1"));
+                    schema.addOption(new HiddenConfigOption("server.connection-validation-sql",
+                        "select 1"));
                 } else {
                     if (!installMode.isQuick()) {
                         // In "full" mode, we even let them pick the pgsql port
@@ -356,7 +359,8 @@ public class ServerConfig
                         "org.quartz.impl.jdbcjobstore.PostgreSQLDelegate"));
                     schema.addOption(new HiddenConfigOption("server.hibernate.dialect",
                         "org.hyperic.hibernate.dialect.PostgreSQLDialect"));
-                    schema.addOption(new HiddenConfigOption("server.connection-validation-sql","select 1"));
+                    schema.addOption(new HiddenConfigOption("server.connection-validation-sql",
+                        "select 1"));
                 }
 
                 if (dbChoiceStr.equals(DBC_BUILTIN)) {
@@ -370,7 +374,8 @@ public class ServerConfig
                     schema.addOption(passwordOption);
                 }
 
-                StringConfigOption encryptionKeyOption = new StringConfigOption("server.encryption-key", Q_ENCRYPTION_KEY);
+                StringConfigOption encryptionKeyOption = new StringConfigOption(
+                    "server.encryption-key", Q_ENCRYPTION_KEY);
                 encryptionKeyOption.setMinLength(8);
                 schema.addOption(encryptionKeyOption);
 
@@ -401,17 +406,15 @@ public class ServerConfig
             case 7:
                 // Get encryption key
                 String encryptionKey = previous.getValue("server.encryption-key");
-                
+
                 // Encrypt database password
-                String encryptedPw = encryptPassword("PBEWithMD5AndDES",
-                                                     encryptionKey,
-                                                     previous.getValue("server.database-password"));
-                
-                schema.addOption(new HiddenConfigOption("server.encryption-key",
-                                                        encryptionKey));
-                
+                String encryptedPw = encryptPassword("PBEWithMD5AndDES", encryptionKey, previous
+                    .getValue("server.database-password"));
+
+                schema.addOption(new HiddenConfigOption("server.encryption-key", encryptionKey));
+
                 schema.addOption(new HiddenConfigOption("server.database-password-encrypted",
-                                                        encryptedPw.toString()));
+                    encryptedPw.toString()));
                 break;
 
             case 8:
@@ -524,6 +527,10 @@ public class ServerConfig
     protected boolean serverAlreadyInstalled(String dir) {
         String serverFile = dir + File.separator + "server-" + getProjectProperty("version") +
                             File.separator + "hq-engine";
+        if (Boolean.parseBoolean(getProjectProperty("eula.present"))) {
+            serverFile = dir + File.separator + "server-" + getProjectProperty("version") + "-EE" +
+                         File.separator + "hq-engine";
+        }
         File f = new File(serverFile);
         return f.exists();
     }
@@ -537,7 +544,7 @@ public class ServerConfig
                                                  "bin/hq-server.exe",
                                                  "bin/hq-server.bat",
                                                  "bin/ams-server.sh",
-                                                 "bin/ams-server.exe"};
+                                                 "bin/ams-server.exe" };
 
     protected String[] getMarkerFiles() {
         return MARKER_FILES;
@@ -587,17 +594,15 @@ public class ServerConfig
                                          "versions, follow the instructions in README.txt\n\n__ll__");
         }
     }
-    
-    public String getProductInstallDir (ConfigResponse config) {
+
+    public String getProductInstallDir(ConfigResponse config) {
         String installDir = getInstallDir(config);
-        if(Boolean.parseBoolean(getProjectProperty("eula.present"))) {
-            return installDir
-            + getBaseName() + "-" + getProjectProperty("version") + "-EE"
-            + File.separator;
+        if (Boolean.parseBoolean(getProjectProperty("eula.present"))) {
+            return installDir + getBaseName() + "-" + getProjectProperty("version") + "-EE" +
+                   File.separator;
         } else {
-        return installDir
-            + getBaseName() + "-" + getProjectProperty("version")
-            + File.separator;
+            return installDir + getBaseName() + "-" + getProjectProperty("version") +
+                   File.separator;
         }
     }
 
@@ -690,16 +695,14 @@ public class ServerConfig
         return s;
     }
 
-    private String encryptPassword(String algorithm,
-                                   String encryptionKey,
-                                   String clearTextPassword) {
-        
+    private String encryptPassword(String algorithm, String encryptionKey, String clearTextPassword) {
+
         // TODO: This needs to be refactored into a security utility class
 
         StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
         encryptor.setPassword(encryptionKey);
         encryptor.setAlgorithm(algorithm);
-                
+
         return PropertyValueEncryptionUtils.encrypt(clearTextPassword, encryptor);
     }
 
