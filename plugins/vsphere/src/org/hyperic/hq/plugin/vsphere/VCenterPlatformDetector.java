@@ -516,12 +516,14 @@ public class VCenterPlatformDetector {
         ResourceEdge edge = new ResourceEdge();
         ResourceFrom from = new ResourceFrom();
         ResourceTo to = new ResourceTo();
+        Map<String, Resource> hqHostResourceMap = new HashMap<String, Resource>();
 
         for (Resource r : hostResponse.getResource()) {            
             for (ResourceConfig c : r.getResourceConfig()) {                
                 if (VSphereUtil.PROP_URL.equals(c.getKey())) {
                     if (c.getValue().equals(VSphereUtil.getURL(this.props))) {
                         to.getResource().add(r);
+                        hqHostResourceMap.put(r.getName(), r);
                     }
                 }
             }            
@@ -592,13 +594,19 @@ public class VCenterPlatformDetector {
         syncResponse = reApi.syncResourceEdges(edges);
         assertSuccess(syncResponse, "Sync host and VM edges", false);
         
-        // delete VMs that have been manually removed from vCenter
+        // delete resouces that have been manually removed from vCenter
         for (Iterator it=hqHostVmMap.keySet().iterator(); it.hasNext();) {
             String hostName = (String)it.next();
             List<Resource> hqVms = hqHostVmMap.get(hostName);
             List<Resource> vcVms = vcHostVmMap.get(hostName);
             
-            if (vcVms != null) {
+            if (vcVms == null) {
+                // not one of the hosts in vCenter
+                Resource r = hqHostResourceMap.get(hostName);
+                if (r != null) {
+                    removeHost(vim, r);
+                }
+            } else {
                 List<String> vcVmNames = new ArrayList<String>();
                 for (Resource r : vcVms) {
                     vcVmNames.add(r.getName());
@@ -607,25 +615,51 @@ public class VCenterPlatformDetector {
                 for (Resource r : hqVms) {
                     if (!vcVmNames.contains(r.getName())) {
                         // Not one of the powered-on VMs from vCenter
-                        try {
-                            // check to see if it exists in vCenter
-                            VirtualMachine vm =
-                                (VirtualMachine)vim.find(VSphereUtil.VM, r.getName());
-                        } catch (ManagedEntityNotFoundException me) {
-                            removeResource(r);
-                        }                         
+                        removeVM(vim, r);
                     }
                 }
             }
         }
     }
             
+    private void removeHost(VSphereUtil vim, Resource r)
+        throws IOException, PluginException {
+        
+        try {
+            // verify to see if it exists in vCenter
+            HostSystem hs =
+                (HostSystem)vim.find(VSphereUtil.HOST_SYSTEM, r.getName());
+        } catch (ManagedEntityNotFoundException me) {
+            removeResource(r);
+        }
+    }
+
+    private void removeVM(VSphereUtil vim, Resource r)
+        throws IOException, PluginException {
+    
+        try {
+            // verify to see if it exists in vCenter
+            VirtualMachine vm =
+                (VirtualMachine)vim.find(VSphereUtil.VM, r.getName());
+        } catch (ManagedEntityNotFoundException me) {
+            removeResource(r);
+        }
+    }
+    
     private void removeResource(Resource r) 
         throws IOException, PluginException {
 
         if (log.isDebugEnabled()) {
-            log.debug("VM (" + r.getName() + ") no longer exists in vCenter. "
+            log.debug("Managed entity (" + r.getName() + ") no longer exists in vCenter. "
                          + " Removing from HQ inventory.");
+        }
+        
+        // throttle requests to the hq server to minimize StaleStateExceptions
+        // TODO: there needs to be a better way to do this 
+        try {
+            Thread.sleep(2500);
+        } catch (InterruptedException e) {
+            // Ignore
         }
 
         ResourceApi rApi = getApi().getResourceApi();
