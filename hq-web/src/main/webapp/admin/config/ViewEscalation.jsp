@@ -553,6 +553,7 @@ function addRow() {
         onchange_handler(this);
         clearDisplay();
         clearOthers();
+        clearWhoSelection(this);
     }
     select2.setAttribute('name', 'action');
     addOption(select2, 'Select', '<fmt:message key="alert.config.escalation.notify.how"/>');
@@ -582,6 +583,7 @@ function addRow() {
     addOption(select3, 'Users', '<fmt:message key="monitoring.events.MiniTabs.Users"/>');
     addOption(select3, 'Others', '<fmt:message key="monitoring.events.MiniTabs.Others"/>');
 
+    select3.style.display= 'none';
     escTr2.appendChild(td4);
     td4.setAttribute('valign', 'top');
     td4.setAttribute('align', 'left');
@@ -765,6 +767,13 @@ function clearOthers() {
     dojo11.byId('emailinputDiv').style.display = "none";
 }
 
+function clearWhoSelection(el){
+    var idStr = el.id;
+    var getId = idStr.split('_');
+    var whoSelector = dojo11.byId('who_' + getId[1]);
+    whoSelector.options[0].selected = true;
+}
+
 function onchange_handler(el) {
 
     var writeAction = dojo11.byId('actionName');
@@ -781,10 +790,10 @@ function onchange_handler(el) {
         writeAction.innerHTML = 'Action: ' + index;
     }
 
-    if (index == "Email" || index == "SMS" || index == "NoOp" || index == "SNMP" || index == 'Select') {
-        hideSyslogInput(el);
-    } else {
+    if (index == "Syslog"){
         showSyslogInput(el);
+    } else {
+        hideSyslogInput(el);
     }
 
     if (index == "SNMP") {
@@ -794,11 +803,11 @@ function onchange_handler(el) {
         hideSnmpInput(el);
     }
 
-    if (index == "Syslog" || index == "NoOp" || index == "SNMP") {
-        hideWhoSelect(el);
+    if (index == "Email" || index == "SMS") {
+        showWhoSelect(el);
     }
     else {
-        showWhoSelect(el);
+        hideWhoSelect(el);
     }
     selActionTypeEsc = index;
 }
