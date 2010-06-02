@@ -587,6 +587,19 @@ public class ServerConfig
                                          "versions, follow the instructions in README.txt\n\n__ll__");
         }
     }
+    
+    public String getProductInstallDir (ConfigResponse config) {
+        String installDir = getInstallDir(config);
+        if(Boolean.parseBoolean(getProjectProperty("eula.present"))) {
+            return installDir
+            + getBaseName() + "-" + getProjectProperty("version") + "-EE"
+            + File.separator;
+        } else {
+        return installDir
+            + getBaseName() + "-" + getProjectProperty("version")
+            + File.separator;
+        }
+    }
 
     public String getCompletionText(ConfigResponse config) {
         StringBuffer s = new StringBuffer();

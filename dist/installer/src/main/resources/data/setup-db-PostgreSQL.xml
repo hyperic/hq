@@ -52,11 +52,11 @@
 
   <target name="dbsetup-builtin" if="using.builtin.db">
     <absolutePath property="absolute.server.dir" 
-                  path="${server.installdir}/server-${version}" />
+                  path="${server.product.dir}" />
     <property name="server.home"
-              value="${server.installdir}/server-${version}"/>
+              value="${server.product.dir}"/>
     <property name="engine.home"
-              value="${server.installdir}/server-${version}/hq-engine"/>
+              value="${server.product.dir}/hq-engine"/>
 
     <!-- Before doing any dbsetup stuff, make sure the kernel's shared
          memory and other parameters are properly tuned -->
@@ -71,12 +71,12 @@
 
     <!-- Setup PostgreSQL -->
     <property name="server.hqdb.dir"
-              value="${server.installdir}/server-${version}/hqdb"/>
+              value="${server.product.dir}/hqdb"/>
 
     <!-- Copy postgresql driver to server's lib dir -->
     <echo>^^^INFO: Setting up JDBC driver...</echo>
-    <mkdir dir="${server.installdir}/server-${version}/lib"/>
-    <copy todir="${server.installdir}/server-${version}/lib">
+    <mkdir dir="${server.product.dir}/lib"/>
+    <copy todir="${server.product.dir}/lib">
       <fileset dir="${install.dir}/lib">
         <include name="postgresql-8.2-505.jdbc3.jar"/>
       </fileset>
@@ -122,7 +122,7 @@
         <chmod dir="${server.hqdb.dir}/data" perm="700"/>
         <ant antfile="setup.xml" target="chmod-exec">
         <property name="chmod.dir"
-                  value="${server.installdir}/server-${version}/hqdb"/>
+                  value="${server.product.dir}/hqdb"/>
         </ant>
       </else>
     </if>

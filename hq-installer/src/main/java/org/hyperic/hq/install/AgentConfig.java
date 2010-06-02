@@ -55,22 +55,4 @@ public class AgentConfig extends BaseConfig {
         return MARKER_FILES;
     }
 
-    public String getCompletionText (ConfigResponse config) {
-        StringBuffer s = new StringBuffer();
-        String sp = File.separator;
-        String installDir  = getInstallDir(config);
-        String startup = installDir + "hyperic-hq-agent-" + getProjectProperty("version");
-        if(!(new File(startup).exists())) {
-        	startup = installDir + "hyperic-hqee-agent-" + getProjectProperty("version");
-        }
-        
-        startup += File.separator + "bin" + sp + PRODUCT.toLowerCase() + "-agent" + getScriptExtension();
-        char nl = '\n';
-        s.append("__ll__")
-            .append(nl)
-            .append(" You can now start your HQ agent by running this command:")
-            .append(nl).append(nl).append("  ").append(startup).append(" start")
-            .append(nl).append("__ll__");
-        return s.toString();
-    }
 }
