@@ -96,9 +96,9 @@ public class VCenterPlatformDetector {
     private static final String AGENT_IP = "agent.setup.agentIP";
     private static final String AGENT_PORT = "agent.setup.agentPort";
 
-    private static final String VC_TYPE = "VMware vCenter";
+    private static final String VC_TYPE = AuthzConstants.serverPrototypeVmwareVcenter;
     private static final String VM_TYPE = AuthzConstants.platformPrototypeVmwareVsphereVm;
-    private static final String HOST_TYPE = "VMware vSphere Host";
+    private static final String HOST_TYPE = AuthzConstants.platformPrototypeVmwareVsphereHost;
     private static final String POOL_TYPE = "VMware vSphere Resource Pool";
     private static final String DEFAULT_POOL = "Resources";
 
@@ -297,7 +297,8 @@ public class VCenterPlatformDetector {
             }
         }
         else {
-            log.info(info.getName() + " powerState=" + state);
+            log.info("Skipping " + VM_TYPE + "[name=" + info.getName() 
+                         + ", powerState=" + state + "]");
             return null;
         }
 
@@ -308,7 +309,12 @@ public class VCenterPlatformDetector {
         }
 
         platform.addProperties(cprops);
-        log.debug("discovered " + VM_TYPE + ": " + vm.getName());
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Discovered " + VM_TYPE + "[name=" + platform.getName() 
+                          + ", powerState=" + state + "]");
+        }
+        
         return platform;
     }
 
@@ -387,6 +393,11 @@ public class VCenterPlatformDetector {
         platform.addProperties(cprops);
         platform.addConfig(VSphereUtil.PROP_HOSTNAME, host.getName());
 
+        if (log.isDebugEnabled()) {
+            log.debug("Discovered " + HOST_TYPE + "[name=" + platform.getName() 
+                          + ", powerState=" + host.getRuntime().getPowerState() + "]");
+        }
+        
         return platform;
     }
 
@@ -529,17 +540,17 @@ public class VCenterPlatformDetector {
             }            
         }
         
-        if (log.isDebugEnabled()) {
-            log.debug("vc name=" + vCenter.getName()
-                        + ", resourceId=" + vCenter.getId()
-                        + ", host size=" + to.getResource().size());
-        }
-
         from.setResource(vCenter);
         edge.setRelation("virtual");
         edge.setResourceFrom(from);
         edge.setResourceTo(to);
         edges.add(edge);
+
+        if (log.isDebugEnabled()) {
+            log.debug("Syncing resource edges for vCenter[name=" + vCenter.getName()
+                        + ", resourceId=" + vCenter.getId()
+                        + "] with " + to.getResource().size() + " hosts.");
+        }
 
         StatusResponse syncResponse = reApi.syncResourceEdges(edges);
         assertSuccess(syncResponse, "Sync vCenter and host edges", false);
@@ -585,9 +596,9 @@ public class VCenterPlatformDetector {
             edges.add(rEdge);
             
             if (log.isDebugEnabled()) {
-                log.debug("host name=" + r.getName()
+                log.debug("Syncing resource edges for host[name=" + r.getName()
                             + ", resourceId=" + r.getId()
-                            + ", vm size=" + children.getResource().size());
+                            + "] with " + children.getResource().size() + " VMs.");
             }
         }
         
