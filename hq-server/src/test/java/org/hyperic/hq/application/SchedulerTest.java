@@ -27,6 +27,9 @@ package org.hyperic.hq.application;
 
 import java.util.concurrent.ScheduledFuture;
 
+import org.hyperic.util.SpinBarrier;
+import org.hyperic.util.SpinBarrierCondition;
+
 import junit.framework.TestCase;
 
 /**
@@ -34,8 +37,13 @@ import junit.framework.TestCase;
  */
 public class SchedulerTest extends TestCase {
 
-    public SchedulerTest(String name) {
-        super(name);
+    private Scheduler scheduler;
+    
+    public void tearDown() throws Exception{
+        super.tearDown();
+        if(this.scheduler != null) {
+            this.scheduler.shutdown();
+        }
     }
         
     public void testIllegalPoolSize() {
@@ -59,51 +67,59 @@ public class SchedulerTest extends TestCase {
     }
     
     public void testExecuteAtFixedRate() throws Exception {
-        Scheduler scheduler = new Scheduler(1);
+        this.scheduler = new Scheduler(1);
                 
-        RunnableCounter counter = new RunnableCounter(50, false);
+        final RunnableCounter counter = new RunnableCounter(50, false);
         
         ScheduledFuture future = 
             scheduler.scheduleAtFixedRate(counter, Scheduler.NO_INITIAL_DELAY, 100);
         
-        Thread.sleep(210);
+        final SpinBarrier counterUpdated = new SpinBarrier(new SpinBarrierCondition() {
+            public boolean evaluate() {
+                return counter.numRuns() >= 2;
+            }
+        });
+        assertTrue(counterUpdated.waitFor());
         
         assertFalse(future.isDone());
         assertFalse(future.isCancelled());
         
-        assertTrue(counter.numRuns() >= 2);
-        
-        scheduler.shutdown();
     }
     
     public void testExecuteWithFixedDelay() throws Exception {
-        Scheduler scheduler = new Scheduler(1);
+        this.scheduler = new Scheduler(1);
         
-        RunnableCounter counter = new RunnableCounter(100, false);
+        final RunnableCounter counter = new RunnableCounter(100, false);
         
         // the execution period is about 200 msec (delay+runtime)
         ScheduledFuture future = 
             scheduler.scheduleWithFixedDelay(counter, Scheduler.NO_INITIAL_DELAY, 100);
         
-        Thread.sleep(210);
+        final SpinBarrier counterUpdated = new SpinBarrier(new SpinBarrierCondition() {
+            public boolean evaluate() {
+                return counter.numRuns() >= 2;
+            }
+        });
+        assertTrue(counterUpdated.waitFor());
         
         assertFalse(future.isDone());
-        assertFalse(future.isCancelled());
-        
-        assertTrue(counter.numRuns() >= 2);
-        
-        scheduler.shutdown();        
+        assertFalse(future.isCancelled());      
     }
     
     public void testCancellingScheduledTask() throws Exception {
-        Scheduler scheduler = new Scheduler(1);
+        this.scheduler = new Scheduler(1);
         
-        RunnableCounter counter = new RunnableCounter(50, false);
+        final RunnableCounter counter = new RunnableCounter(50, false);
         
         ScheduledFuture future = 
             scheduler.scheduleAtFixedRate(counter, Scheduler.NO_INITIAL_DELAY, 100);
         
-        Thread.sleep(210);
+        SpinBarrier counterUpdated = new SpinBarrier(new SpinBarrierCondition() {
+            public boolean evaluate() {
+                return counter.numRuns() >= 2;
+            }
+        });
+        assertTrue(counterUpdated.waitFor());
         
         assertFalse(future.isDone());
         assertFalse(future.isCancelled());
@@ -113,47 +129,54 @@ public class SchedulerTest extends TestCase {
         assertTrue(future.isDone());
         assertTrue(future.isCancelled());
         
-        Thread.sleep(100);
+        counterUpdated = new SpinBarrier(new SpinBarrierCondition() {
+            public boolean evaluate() {
+                return counter.numRuns() >= 3;
+            }
+        });
+        assertTrue(counterUpdated.waitFor());
         
-        assertTrue(counter.numRuns() >= 3);
-        
-        scheduler.shutdown();
+       
     }
     
     public void testExecuteAtFixedRateWithInitialDelay() throws Exception {
-        Scheduler scheduler = new Scheduler(1);
+        this.scheduler = new Scheduler(1);
         
-        RunnableCounter counter = new RunnableCounter(50, false);
+        final RunnableCounter counter = new RunnableCounter(50, false);
         
         ScheduledFuture future = 
             scheduler.scheduleAtFixedRate(counter, 100, 100);
         
-        Thread.sleep(250);
+        final SpinBarrier counterUpdated = new SpinBarrier(new SpinBarrierCondition() {
+            public boolean evaluate() {
+                return counter.numRuns() >= 2;
+            }
+        });
+        assertTrue(counterUpdated.waitFor());
         
         assertFalse(future.isDone());
-        assertFalse(future.isCancelled());
+        assertFalse(future.isCancelled());        
         
-        assertTrue(counter.numRuns() >= 2);
-        
-        scheduler.shutdown();        
     }
     
     public void testExecuteWithFixedDelayWithInitialDelay() throws Exception {
-        Scheduler scheduler = new Scheduler(1);
+        this.scheduler = new Scheduler(1);
         
-        RunnableCounter counter = new RunnableCounter(50, false);
+        final RunnableCounter counter = new RunnableCounter(50, false);
         
         ScheduledFuture future = 
             scheduler.scheduleWithFixedDelay(counter, 100, 50);
         
-        Thread.sleep(300);
+        final SpinBarrier counterUpdated = new SpinBarrier(new SpinBarrierCondition() {
+            public boolean evaluate() {
+                return counter.numRuns() >= 2;
+            }
+        });
+        assertTrue(counterUpdated.waitFor());
         
         assertFalse(future.isDone());
         assertFalse(future.isCancelled());
-        
-        assertTrue(counter.numRuns() >= 2);
-        
-        scheduler.shutdown();        
+
     }
     
     /**
@@ -162,11 +185,11 @@ public class SchedulerTest extends TestCase {
      * @throws Exception
      */
     public void testExecuteConcurrentTasks() throws Exception {
-        Scheduler scheduler = new Scheduler(2);
+        this.scheduler = new Scheduler(2);
         
-        RunnableCounter counter1 = new RunnableCounter(10, false);
+        final RunnableCounter counter1 = new RunnableCounter(10, false);
 
-        RunnableCounter counter2 = new RunnableCounter(10, false);
+        final RunnableCounter counter2 = new RunnableCounter(10, false);
                 
         ScheduledFuture future1 = 
             scheduler.scheduleAtFixedRate(counter1, Scheduler.NO_INITIAL_DELAY, 50);
@@ -175,19 +198,20 @@ public class SchedulerTest extends TestCase {
         ScheduledFuture future2 = 
             scheduler.scheduleWithFixedDelay(counter2, Scheduler.NO_INITIAL_DELAY, 50);
         
-        Thread.sleep(210);
+        final SpinBarrier counterUpdated = new SpinBarrier(new SpinBarrierCondition() {
+            
+            public boolean evaluate() {
+                return ((counter1.numRuns() >= 5) && (counter2.numRuns() >= 4));
+            }
+        });
         
+        assertTrue(counterUpdated.waitFor());
         assertFalse(future1.isDone());
         assertFalse(future1.isCancelled());
 
         assertFalse(future2.isDone());
         assertFalse(future2.isCancelled());
-        
-        assertTrue(counter1.numRuns() >= 5);
-
-        assertTrue(counter2.numRuns() >= 4);
-        
-        scheduler.shutdown();               
+           
     }
     
     /**
@@ -195,22 +219,20 @@ public class SchedulerTest extends TestCase {
      * unchecked exception.
      */
     public void testUncheckedExceptionInTask() throws Exception {
-        Scheduler scheduler = new Scheduler(1);
+        this.scheduler = new Scheduler(1);
         
-        RunnableCounter counter = new RunnableCounter(50, true);
+        final RunnableCounter counter = new RunnableCounter(50, true);
         
-        ScheduledFuture future = 
+        final ScheduledFuture future = 
             scheduler.scheduleAtFixedRate(counter, Scheduler.NO_INITIAL_DELAY, 100);
         
-        Thread.sleep(210);
-        
-        assertTrue(future.isDone());
-        assertFalse(future.isCancelled());
-        
-        // only should have run once since a runtime exception was thrown
-        assertEquals(1, counter.numRuns());
-        
-        scheduler.shutdown();        
+        final SpinBarrier counterUpdated = new SpinBarrier(new SpinBarrierCondition() {
+            public boolean evaluate() {
+                // only should have run once since a runtime exception was thrown
+                return ((counter.numRuns() == 1) && (future.isDone()) && !(future.isCancelled()));
+            }
+        });
+        assertTrue(counterUpdated.waitFor());
     }
     
     private class RunnableCounter implements Runnable {

@@ -27,6 +27,9 @@ package org.hyperic.hq.transport.util;
 
 import java.io.IOException;
 
+import org.hyperic.util.SpinBarrier;
+import org.hyperic.util.SpinBarrierCondition;
+
 import junit.framework.TestCase;
 
 /**
@@ -162,13 +165,14 @@ public class InputStreamServiceTest extends TestCase {
         _streamService.writeBufferToRemoteStream(is1.getStreamId(), buffer);
         _streamService.writeBufferToRemoteStream(is2.getStreamId(), buffer);
         
-        // need to age the buffers a bit
-        Thread.sleep(100);
-
-        // now age out all the registered buffers
-        int numAged = _streamService.ageOutOldBuffersFromRegistry(0);
+        final SpinBarrier buffersAged = new SpinBarrier(new SpinBarrierCondition() {
+            
+            public boolean evaluate() {
+                return _streamService.ageOutOldBuffersFromRegistry(0) == 2;
+            }
+        });
         
-        assertEquals(2, numAged);
+        assertTrue(buffersAged.waitFor());
         
         // now any writes to the remote streams should throw an IOException since 
         // there is no registered buffer for the stream ids
