@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.plugin.vsphere;
 
+import java.util.Calendar;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
@@ -35,20 +36,17 @@ import org.hyperic.util.config.ConfigResponse;
 
 import com.vmware.vim25.Event;
 import com.vmware.vim25.EventFilterSpec;
-import com.vmware.vim25.mo.EventHistoryCollector;
-import com.vmware.vim25.mo.EventManager;
+import com.vmware.vim25.EventFilterSpecByEntity;
+import com.vmware.vim25.EventFilterSpecByTime;
+import com.vmware.vim25.ManagedObjectReference;
 
-public class VSphereHostEventPlugin
-    extends LogTrackPlugin
-    implements Runnable {
+public class VSphereHostEventPlugin extends LogTrackPlugin implements Runnable {
 
     private static final long INTERVAL = 1000 * 60 * 5;
-    private static final Log _log =
-        LogFactory.getLog(VSphereHostEventPlugin.class.getName());
+    private static final Log _log = LogFactory.getLog(VSphereHostEventPlugin.class.getName());
     protected Properties _props;
     private long _lastCheck;
     private VSphereUtil _vim; 
-    private EventHistoryCollector _history;
 
     private String getEventClass(Event event) {
         String name = event.getClass().getName();
@@ -59,9 +57,7 @@ public class VSphereHostEventPlugin
         return name;
     }
 
-    public void configure(ConfigResponse config)
-        throws PluginException {
-
+    public void configure(ConfigResponse config) throws PluginException {
         super.configure(config);
         _props = config.toProperties();
         setup();
@@ -69,24 +65,18 @@ public class VSphereHostEventPlugin
     }
 
     private void setup() throws PluginException {
+        if (_vim != null && _vim.isSessionValid()) {
+            return;
+        }
+        if (_vim != null) {
+            VSphereUtil.dispose(_vim);
+        }
         _lastCheck = System.currentTimeMillis();
         try {
             _vim = VSphereUtil.getInstance(_props);
         } catch (PluginException e) {
             _props = null;
             throw e;
-        }
-
-        EventFilterSpec eventFilter = new EventFilterSpec();
-
-        try {
-            EventManager eventManager = _vim.getEventManager();
-            _history =
-            eventManager.createCollectorForEvents(eventFilter);
-        } catch (Exception e) {
-            VSphereUtil.dispose(_vim);
-            _vim = null;
-            throw new PluginException(e.getMessage(), e);
         }
     }
 
@@ -98,33 +88,34 @@ public class VSphereHostEventPlugin
         }
         super.shutdown();
     }
+    
+    private EventFilterSpecByTime getTimeFilter(long begin, long end) {
+        EventFilterSpecByTime filter = new EventFilterSpecByTime();
+        Calendar beginCal = Calendar.getInstance();
+        beginCal.setTimeInMillis(begin);
+        filter.setBeginTime(beginCal);
+        Calendar endCal = Calendar.getInstance();
+        endCal.setTimeInMillis(end);
+        filter.setEndTime(endCal);
+        return filter;
+    }
 
-    private void checkForEvents(VSphereUtil vim) throws PluginException {
-        long now = System.currentTimeMillis();
-        if ((now - _lastCheck) < INTERVAL) {
-            //XXX checkForUpdates() api?
-            return;
-        }
-        _log.debug("Checking for events");
+    private EventFilterSpecByEntity getEntity(String vmName) {
+        EventFilterSpecByEntity rtn = new EventFilterSpecByEntity();
+        ManagedObjectReference entity = new ManagedObjectReference();
+        entity.setType("VirtualMachine");
+        entity.setVal(vmName);
+        rtn.setEntity(entity);
+        return null;
+    }
 
-        if (!_vim.isSessionValid()) {
-            VSphereUtil.dispose(_vim);
-            setup();
-        }
-        Event[] events;
-        try {
-            events = _history.getLatestPage();
-        } catch (Exception e) {
-            throw new PluginException("getEvents: " + e, e);
-        }
-
+    private void processEvents(Event[] events) {
         for (int i = 0; i < events.length; i++) { 
             Event event = events[i];
             long created = event.getCreatedTime().getTimeInMillis();
             if (created < _lastCheck) {
                 continue;
             }
-
             reportEvent(created,
                         //XXX how-to map log level?
                         LogTrackPlugin.LOGLEVEL_INFO,
@@ -133,14 +124,48 @@ public class VSphereHostEventPlugin
                         "[" + getEventClass(event) + "] " +
                         event.getFullFormattedMessage());
         }
+    }
 
-        _lastCheck = now;
+    private Event[] getEvents() throws PluginException {
+        try {
+            String vmName = getConfig("vm");
+            if (vmName == null) {
+                return new Event[0];
+            }
+            _log.debug("querying events for vm=" + vmName);
+            EventFilterSpec criteria = new EventFilterSpec();
+            criteria.setTime(getTimeFilter(_lastCheck, now()));
+            criteria.setEntity(getEntity(vmName));
+            Event[] events = _vim.getEventManager().queryEvents(criteria);
+            if (events == null) {
+                return new Event[0];
+            }
+            return events;
+        } catch (Exception e) {
+            throw new PluginException("getEvents: " + e, e);
+        }
+    }
+
+    private long now() {
+        return System.currentTimeMillis();
     }
 
     public void run() {
         try {
-            checkForEvents(_vim);
+            long now = now();
+            if ((now - _lastCheck) < INTERVAL) {
+                //XXX checkForUpdates() api?
+                return;
+            }
+            setup();
+            Event[] events = getEvents();
+            processEvents(events);
+            _lastCheck = now;
         } catch (PluginException e) {
+            if (_vim != null && !_vim.isSessionValid()) {
+                VSphereUtil.dispose(_vim);
+                _vim = null;
+            }
             _log.error("checkForEvents: " + e, e);
         }
     }
