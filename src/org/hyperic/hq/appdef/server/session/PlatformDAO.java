@@ -416,6 +416,17 @@ public class PlatformDAO extends HibernateDAO {
             .setString(0, addr)
             .list();
     }
+    
+    public Collection findByMacAddr(String macAddress) {
+        // Both the VM and the Guest will have IP entries with 
+        // the given MAC address.
+        String hql = "select distinct p from Platform p " +
+                     "join p.ips ip where ip.macAddress=?";
+
+        return getSession().createQuery(hql)
+                    .setString(0, macAddress)
+                    .list();
+    }
 
     public Resource findVirtualByInstanceId(Integer id) {
         VirtualDAO dao = DAOFactory.getDAOFactory().getVirtualDAO(); 

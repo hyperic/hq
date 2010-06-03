@@ -45,6 +45,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.ConfigResponseDB;
+import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.server.session.ApplicationManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.Platform;
@@ -160,18 +161,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
             
         eDAO.create(res, res, 0, relation);  // Self-edge
         if (parent != null) {
-            Collection ancestors = eDAO.findAncestorEdges(parent, relation);
-            eDAO.create(res, parent, -1, relation);
-            eDAO.create(parent, res, 1, relation);
-            
-            for (Iterator i = ancestors.iterator(); i.hasNext();) {
-                ResourceEdge ancestorEdge = (ResourceEdge)i.next();
-                
-                int distance = ancestorEdge.getDistance() - 1;
-                
-                eDAO.create(res, ancestorEdge.getTo(), distance, relation);
-                eDAO.create(ancestorEdge.getTo(), res, -distance, relation);
-            }
+            createResourceEdges(parent, res, relation, false);
         }
         
         ResourceAudit.createResource(res, owner, start, 
@@ -201,23 +191,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
         // Clean out edges for the current target
         eDAO.deleteEdges(target);
 
-        // Self-edge
-        eDAO.create(target, target, 0, relation);
-
-        // Direct edges
-        eDAO.create(target, destination, -1, relation);
-        eDAO.create(destination, target, 1, relation);
-
-        // Ancestor edges to new destination resource
-        Collection ancestors = eDAO.findAncestorEdges(destination, relation);
-        for (Iterator i = ancestors.iterator(); i.hasNext();) {
-            ResourceEdge ancestorEdge = (ResourceEdge)i.next();
-
-            int distance = ancestorEdge.getDistance() - 1;
-
-            eDAO.create(target, ancestorEdge.getTo(), distance, relation);
-            eDAO.create(ancestorEdge.getTo(), target, -distance, relation);
-        }
+        createResourceEdges(destination, target, relation, true);
 
         ResourceAudit.moveResource(target, destination, owner, start,
                                    System.currentTimeMillis());
@@ -779,6 +753,34 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
                                 resourceId, platformTypeIds, platformName);
     }
 
+    private void createResourceEdges(Resource parent,
+                                     Resource child,
+                                     ResourceRelation relation,
+                                     boolean createSelfEdge) {
+        
+        ResourceEdgeDAO eDAO = getResourceEdgeDAO();
+
+        // Self-edge
+        if (createSelfEdge) {
+            eDAO.create(child, child, 0, relation);
+        }
+
+        // Direct edges
+        eDAO.create(child, parent, -1, relation);
+        eDAO.create(parent, child, 1, relation);
+
+        // Ancestor edges to new destination resource
+        Collection ancestors = eDAO.findAncestorEdges(parent, relation);
+        for (Iterator i = ancestors.iterator(); i.hasNext();) {
+            ResourceEdge ancestorEdge = (ResourceEdge)i.next();
+
+            int distance = ancestorEdge.getDistance() - 1;
+
+            eDAO.create(child, ancestorEdge.getTo(), distance, relation);
+            eDAO.create(ancestorEdge.getTo(), child, -distance, relation);
+        }
+    }
+    
     /**
      * 
      * @ejb:interface-method
@@ -865,6 +867,8 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
                     if (existing != null) {
                         Resource existingParent = existing.getTo();
                         if (existingParent.getId().equals(parentResource.getId())) {
+                            createVirtualResourceEdgeByMacAddress(subject, childResource);
+                            
                             // already exists with same parent, so skip
                             if (log.isDebugEnabled()) {
                                 log.debug("Skipping. Virtual resource edge already exists: from id=" 
@@ -873,8 +877,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
                             }
                             continue;
                         } else {
-                            // already exists with different parent
-                            // TODO: vMotion occurred                            
+                            // already exists with different parent, assume vMotion occurred
                             if (log.isDebugEnabled()) {
                                 log.debug("Virtual resource edge exists with another resource: fromId="
                                           + existingParent.getId()
@@ -889,22 +892,10 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
                     }
                 
                     if (childResource != null && !childResource.isInAsyncDeleteState()) {                    
-                        if (!hasResourceRelation(childResource, relation)) {
-                            eDAO.create(childResource, childResource, 0, relation);
-                        }
-                        eDAO.create(parentResource, childResource, 1, relation);
-                        eDAO.create(childResource, parentResource, -1, relation);
+                        createResourceEdges(parentResource, childResource, relation,
+                                            !hasResourceRelation(childResource, relation));
                         
-                        Collection ancestors = eDAO.findAncestorEdges(parentResource, relation);
-
-                        for (Iterator a=ancestors.iterator(); a.hasNext();) {
-                            ResourceEdge ancestorEdge = (ResourceEdge)a.next();
-                            
-                            int distance = ancestorEdge.getDistance() - 1;
-                            
-                            eDAO.create(childResource, ancestorEdge.getTo(), distance, relation);
-                            eDAO.create(ancestorEdge.getTo(), childResource, -distance, relation);
-                        }
+                        createVirtualResourceEdgeByMacAddress(subject, childResource);
                     }
                 }
             } catch (Throwable t) {
@@ -913,6 +904,71 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
         }        
     }
 
+    private void createVirtualResourceEdgeByMacAddress(AuthzSubject subject,
+                                                       Resource vmResource) {
+        
+        String prototype = vmResource.getPrototype().getName();
+        if (!AuthzConstants.platformPrototypeVmwareVsphereVm.equals(prototype)) {
+            return;
+        }
+        
+        String macAddress = null;
+        
+        try {
+            PlatformManagerLocal mgr = PlatformManagerEJBImpl.getOne();
+            Platform vmPlatform = mgr.findPlatformById(vmResource.getInstanceId());
+            
+            for (Iterator i = vmPlatform.getIps().iterator(); i.hasNext(); ) {
+                Ip ip = (Ip) i.next();
+                if (!"00:00:00:00:00:00".equals(ip.getMacAddress())) {
+                    macAddress = ip.getMacAddress();
+                    break;
+                }
+            }
+            
+            if (macAddress == null) {
+                return;
+            }
+        
+            Collection platforms = mgr.getPlatformByMacAddr(subject, macAddress);
+            Resource hqPlatform = null;
+            
+            for (Iterator i = platforms.iterator(); i.hasNext(); ) {
+                Platform p = (Platform) i.next();
+                if (!p.getId().equals(vmPlatform.getId())) {
+                    // TODO: Add additional logic if there are more than 2 platforms
+                    hqPlatform = p.getResource();
+                    break;
+                }
+            }
+            
+            if (hqPlatform == null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("No matching platform found from "
+                                  + platforms.size() + " platforms."
+                                  + " Could not create virtual resource edge by MAC address"
+                                  + " for resource[id=" + vmResource.getId() 
+                                  + ", macAddress=" + macAddress
+                                  + "].");
+                }
+                return;
+            }
+            
+            ResourceRelation relation = getVirtualRelation();
+            
+            if (getParentResourceEdge(hqPlatform, relation) == null) {
+                createResourceEdges(vmResource, hqPlatform, relation, true);
+            }
+            
+        } catch (Exception e) {
+            log.error("Could not create virtual resource edge by MAC address"
+                          + " for resource[id=" + vmResource.getId() 
+                          + ", macAddress=" + macAddress
+                          + "]: "
+                          + e.getMessage(), e);
+        }
+    }
+    
     private void createNetworkResourceEdges(AuthzSubject subject,
                                             ResourceRelation relation,
                                             AppdefEntityID parent,

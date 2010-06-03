@@ -891,6 +891,16 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
+     * Get the Collection of platforms that have the specified MAC address
+     * 
+     * @ejb:interface-method
+     */
+    public Collection getPlatformByMacAddr(AuthzSubject subject, String address)
+        throws PermissionException {
+        return getPlatformDAO().findByMacAddr(address);
+    }
+    
+    /**
      * Get the platform by agent token
      * 
      * @ejb:interface-method
