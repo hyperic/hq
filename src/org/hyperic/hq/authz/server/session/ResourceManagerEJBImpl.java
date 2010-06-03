@@ -401,6 +401,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
         ResourceEdgeDAO edgeDao = getResourceEdgeDAO();
         if (debug) watch.markTimeBegin("removeResourcePerms.findEdges");
         Collection edges = edgeDao.findDescendantEdges(r, getContainmentRelation());
+        edges.addAll(edgeDao.findDescendantEdges(r, getVirtualRelation()));
         if (debug) watch.markTimeEnd("removeResourcePerms.findEdges");
         for (Iterator it = edges.iterator(); it.hasNext(); ) {
             ResourceEdge edge = (ResourceEdge) it.next();

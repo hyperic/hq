@@ -1,0 +1,61 @@
+.grey {
+	background: url('../images/gray.png') repeat-x;
+}
+
+.green {
+	background: url('../images/green.png') repeat-x
+}
+
+.yellow {
+	background: url('../images/yellow.png') repeat-x;
+}
+
+.red {
+	background: url('../images/red.png') repeat-x;
+}
+
+.rle-box {
+	margin: 15px;
+}
+
+.rle-cont {
+	cursor: default;
+	border: 2px solid black;
+	padding-bottom: 2px;
+}
+
+.rle-data {
+	cursor:default;
+}
+
+.rle-metric {
+	height: 14px;
+}
+
+/*
+.rle-metric:first-child {
+	-moz-border-radius-topleft: 4px;
+	-moz-border-radius-bottomleft: 4px;
+	-webkit-border-radius-topleft: 4px;
+	-webkit-border-radius-bottomleft: 4px;
+}
+
+.rle-metric:last-child {
+	-moz-border-radius-topright: 4px;
+	-moz-border-radius-bottomright: 4px;
+	-webkit-border-radius-topright: 4px;
+	-webkit-border-radius-bottomright: 4px;
+}
+*/
+
+.rle-legend {
+}
+
+.ll {
+	padding-left: 4px;
+}
+
+.rl {
+	float: right;
+	padding-right: 4px;
+}

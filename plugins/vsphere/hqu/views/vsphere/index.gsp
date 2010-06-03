@@ -1,6 +1,7 @@
 <link type="text/css" href="/${urlFor(asset:'css')}/ui.all.css" rel="stylesheet"/>
 <link type="text/css" href="/${urlFor(asset:'css')}/jquery.auto-complete.css" rel="stylesheet"/>
 <link type="text/css" href="/${urlFor(asset:'css')}/jquery.hyperic.treecontrol.css" rel="stylesheet"/>
+<link type="text/css" href="/${urlFor(asset:'css')}/jquery.hyperic.healthcontrol.css" rel="stylesheet"/>
 <link type="text/css" href="/${urlFor(asset:'css')}/tablesorter/blue/style.css" rel="stylesheet"/>
 <link type="text/css" href="/${urlFor(asset:'css')}/hq-vsphere.css" rel="stylesheet"/>
 
@@ -49,8 +50,11 @@
 <script src="/${urlFor(asset:'js')}/jquery.timers-1.2.js" type="text/javascript"></script>
 <script src="/${urlFor(asset:'js')}/jquery.ba-bbq.1.2.1.min.js" type="text/javascript"></script>
 <script src="/${urlFor(asset:'js')}/jquery.hyperic.treecontrol.js" type="text/javascript"></script>
+<script src="/${urlFor(asset:'js')}/jquery.hyperic.healthcontrol.js" type="text/javascript"></script>
 <script src="/${urlFor(asset:'js')}/date.format.js" type="text/javascript"></script>
 <script type="text/javascript">
+  	document.navTabCat = "Resource";
+  	
   	// Global resource id for which resource is currently being viewed.
   	var resourceId = null;
 
