@@ -163,7 +163,7 @@ class ResourceCategory {
     static Map getMetricsSummary(Resource r, AuthzSubject user, long begin, long end) {
        def mgr = SessionManager.instance
        def sessionId = mgr.put(user)
-       def aeids = [new AppdefEntityID(r)] as AppdefEntityID[]
+       def aeids = [AppdefUtil.newAppdefEntityId(r)] as AppdefEntityID[]
        return Bootstrap.getBean(MeasurementBoss.class).findMetrics(sessionId,
            aeids,
            MeasurementConstants.FILTER_NONE,
