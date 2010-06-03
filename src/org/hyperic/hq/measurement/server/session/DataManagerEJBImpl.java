@@ -43,6 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.ejb.CreateException;
 import javax.ejb.SessionBean;
@@ -51,9 +52,8 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hibernate.dialect.HQDialect;
-import org.hyperic.hibernate.dialect.HQDialectUtil;
 import org.hyperic.hibernate.Util;
+import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
 import org.hyperic.hq.common.shared.HQConstants;
@@ -68,14 +68,12 @@ import org.hyperic.hq.measurement.ext.MeasurementEvent;
 import org.hyperic.hq.measurement.shared.AvailabilityManagerLocal;
 import org.hyperic.hq.measurement.shared.DataManagerLocal;
 import org.hyperic.hq.measurement.shared.DataManagerUtil;
-import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
-import org.hyperic.hq.measurement.shared.MeasRangeObj;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
+import org.hyperic.hq.measurement.shared.MeasRangeObj;
+import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
-import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.zevents.ZeventManager;
-import org.hyperic.util.StringUtil;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -960,14 +958,37 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      *      the timerange represents the same timerange as one
      *      metric data table
      */
-    private String getDataTable(long begin, long end, Integer[] measIds,
-                                boolean useAggressiveRollup) {
+    private String[] getDataTables(long begin, long end, boolean useAggressiveRollup) {
         long now = System.currentTimeMillis();
-
         if (!confDefaultsLoaded) {
             loadConfigDefaults();
         }
+        if (usesMetricUnion(begin, end, useAggressiveRollup)) {
+            return MeasTabManagerUtil.getMetricTables(begin, end);
+        } else if (now - this.purge1h < begin) {
+            return new String[] { TAB_DATA_1H };
+        } else if (now - this.purge6h < begin) {
+            return new String[] { TAB_DATA_6H };
+        } else {
+            return new String[] { TAB_DATA_1D };
+        }
+    }
 
+    /**
+     * @param begin beginning of the time range
+     * @param end end of the time range
+     * @param measIds the measurement_ids associated with the query.
+     *      This is only used for 'UNION ALL' queries
+     * @param useAggressiveRollup will use the rollup tables if
+     *      the timerange represents the same timerange as one
+     *      metric data table
+     */
+    private String getDataTable(long begin, long end, Integer[] measIds,
+                                boolean useAggressiveRollup) {
+        long now = System.currentTimeMillis();
+        if (!confDefaultsLoaded) {
+            loadConfigDefaults();
+        }
         if (usesMetricUnion(begin, end, useAggressiveRollup)) {
             return MeasTabManagerUtil.getUnionStatement(begin, end, measIds);
         } else if (now - this.purge1h < begin) {
@@ -1045,6 +1066,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                     .append(" AND measurement_id=").append(m.getId())
                     .append(" ORDER BY timestamp ")
                     .append(pc.isAscending() ? "ASC" : "DESC");
+
                 Integer total = null;
                 if (sizeLimit) {
                     // need to get the total count if there is a limit on the
@@ -1095,6 +1117,94 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         } finally {
             DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
         }
+    }
+
+    /**
+     * @return array of {@link MetricValue} representing the raw metric data collected.  Since
+     * Availability just keeps state changes this does not apply, therefore one {@link MetricValue}
+     * will be returned per interval.
+     * 
+     * @ejb:interface-method
+     */
+    public MetricValue[] getRawData(Measurement m, long begin, long end) {
+        final int mid = m.getId().intValue();
+        final long interval = m.getInterval();
+        begin = TimingVoodoo.roundDownTime(begin, interval);
+        end = TimingVoodoo.roundDownTime(end, interval);
+        Collection points;
+        if (m.getTemplate().isAvailability()) {
+            points = getAvailMan().getHistoricalAvailData(
+                new Integer[] {m.getId()}, begin, end, interval, PageControl.PAGE_ALL, true);
+        } else {
+            points = getRawDataPoints(mid, begin, end);
+        }
+        return (MetricValue[]) points.toArray(new MetricValue[0]);
+    }
+
+    private TreeSet getRawDataPoints(int mid, long begin, long end) {
+        final StringBuilder sqlBuf = getRawDataSql(mid, begin, end);
+        final TreeSet rtn = new TreeSet(getTimestampComparator());
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            conn = safeGetConnection();
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery(sqlBuf.toString());
+            final int valCol = rs.findColumn("value");
+            final int timestampCol = rs.findColumn("timestamp");
+            while (rs.next()) {
+                final double val = rs.getDouble(valCol);
+                final long timestamp = rs.getLong(timestampCol);
+                rtn.add(new HighLowMetricValue(val, timestamp));
+            }
+        } catch (SQLException e) {
+            throw new SystemException(e);
+        } finally {
+            DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
+        }
+        return rtn;
+    }
+
+    private StringBuilder getRawDataSql(int mid, long begin, long end) {
+        final String sql = new StringBuilder(128)
+            .append("SELECT value, timestamp FROM :table")
+            .append(" WHERE timestamp BETWEEN ")
+            .append(begin).append(" AND ").append(end)
+            .append(" AND measurement_id=").append(mid)
+            .toString();
+        final String[] tables = getDataTables(begin, end, false);
+        final StringBuilder sqlBuf = new StringBuilder(128*tables.length);
+        for (int i=0; i<tables.length; i++) {
+            sqlBuf.append(sql.replace(":table", tables[i]));
+            if (i < (tables.length-1)) {
+                sqlBuf.append(" UNION ALL ");
+            }
+        }
+        return sqlBuf;
+    }
+
+    private Comparator getTimestampComparator() {
+        return new Comparator() {
+            public int compare(Object arg0, Object arg1) {
+                if (!(arg0 instanceof MetricValue) || !(arg1 instanceof MetricValue)) {
+                    throw new ClassCastException();
+                }
+                Long point0 = new Long(((MetricValue) arg0).getTimestamp());
+                Long point1 = new Long(((MetricValue) arg1).getTimestamp());
+                return point0.compareTo(point1);
+            }
+        };
+    }
+
+    private TreeSet getRawAvailDataPoints(Measurement m, long begin, long end) {
+        final List avails = getAvailMan().getHistoricalAvailData(m.getResource(), begin, end);
+        final TreeSet rtn = new TreeSet(getTimestampComparator());
+        for (final Iterator it=avails.iterator(); it.hasNext(); ) {
+            final AvailabilityDataRLE rle = (AvailabilityDataRLE) it.next();
+            rtn.add(new HighLowMetricValue(rle.getAvailVal(), rle.getStartime()));
+        }
+        return rtn;
     }
 
     private String getSelectType(int type, long begin)
@@ -1278,7 +1388,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * @param interval Interval for the time range
      * @param type Collection type for the metric
      * @param returnMetricNulls Specifies whether intervals with no data should
-     * be return as nulls
+     * be return as {@link HighLowMetricValue} with the value set as Double.NaN
      * @see org.hyperic.hq.measurement.server.session.AvailabilityManagerEJBImpl#getHistoricalData()
      * @return the list of data points
      * @ejb:interface-method
@@ -1403,7 +1513,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     }
 
     private PageList getPageList(long begin, long end, long interval,
-                                 List points, boolean returnNulls,
+                                 Collection points, boolean returnNulls,
                                  PageControl pc) {
         List rtn = new ArrayList();
         Iterator it=points.iterator();
