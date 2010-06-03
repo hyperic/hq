@@ -44,6 +44,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.ejb.CreateException;
 import javax.ejb.SessionBean;
@@ -1124,10 +1125,14 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * Availability just keeps state changes this does not apply, therefore one {@link MetricValue}
      * will be returned per interval.
      * 
+     * @param publishedInterval {@link AtomicLong} interval, in millis, of the dataset which is
+     * returned from the api.  For example for queries that are a month long HQ will use a daily
+     * rollup table to retrieve the data from.  In this case publishedInterval would be set with an
+     * interval that represents one day.
+     * 
      * @ejb:interface-method
      */
-    public Collection getRawData(Measurement m, long begin, long end) {
-        final int mid = m.getId().intValue();
+    public Collection getRawData(Measurement m, long begin, long end, AtomicLong publishedInterval) {
         final long interval = m.getInterval();
         begin = TimingVoodoo.roundDownTime(begin, interval);
         end = TimingVoodoo.roundDownTime(end, interval);
@@ -1135,14 +1140,15 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         if (m.getTemplate().isAvailability()) {
             points = getAvailMan().getHistoricalAvailData(
                 new Integer[] {m.getId()}, begin, end, interval, PageControl.PAGE_ALL, true);
+            publishedInterval.set(interval);
         } else {
-            points = getRawDataPoints(mid, begin, end);
+            points = getRawDataPoints(m, begin, end, publishedInterval);
         }
         return points;
     }
 
-    private TreeSet getRawDataPoints(int mid, long begin, long end) {
-        final StringBuilder sqlBuf = getRawDataSql(mid, begin, end);
+    private TreeSet getRawDataPoints(Measurement m, long begin, long end, AtomicLong publishedInterval) {
+        final StringBuilder sqlBuf = getRawDataSql(m, begin, end, publishedInterval);
         final TreeSet rtn = new TreeSet(getTimestampComparator());
         Connection conn = null;
         Statement stmt = null;
@@ -1166,14 +1172,23 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         return rtn;
     }
 
-    private StringBuilder getRawDataSql(int mid, long begin, long end) {
+    private StringBuilder getRawDataSql(Measurement m, long begin, long end, AtomicLong publishedInterval) {
         final String sql = new StringBuilder(128)
             .append("SELECT value, timestamp FROM :table")
             .append(" WHERE timestamp BETWEEN ")
             .append(begin).append(" AND ").append(end)
-            .append(" AND measurement_id=").append(mid)
+            .append(" AND measurement_id=").append(m.getId())
             .toString();
         final String[] tables = getDataTables(begin, end, false);
+        if (tables.length == 1) {
+            if (tables[0].equals(TAB_DATA_1H)) {
+                publishedInterval.set(HOUR);
+            } else if (tables[0].equals(TAB_DATA_6H)) {
+                publishedInterval.set(HOUR*6);
+            } else if (tables[0].equals(TAB_DATA_1D)) {
+                publishedInterval.set(HOUR*24);
+            }
+        }
         final StringBuilder sqlBuf = new StringBuilder(128*tables.length);
         for (int i=0; i<tables.length; i++) {
             sqlBuf.append(sql.replace(":table", tables[i]));
