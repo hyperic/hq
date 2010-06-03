@@ -157,8 +157,8 @@
 	    	resourceId = id;
 	
 	    	setAjaxParameters(tabs, 'true');
-    		tabs.tabs('load', selected);
-    	
+			tabs.tabs('load', selected);
+    		
     		<% if (canControl) { %>
     			var span = jQuery("#_content" + id);
 		    	var classes = span.attr("class");
@@ -166,10 +166,13 @@
 	    		if (classes.indexOf("icon-vm") != -1) {
 					tabs.find("ul>li:hidden").show();
 	    		} else {
-    				tabs.tabs('select', 0);
+	    			if (selected == 2) {
+	    				tabs.tabs('select', 0);
+	    			}
+	    			
     				tabs.find("ul>li:visible").size() == 3 && tabs.find("ul>li:visible")[2].hide();
 		    	}
-	    	<% } %>
+         	<% } %>
     	}
   	};
 </script>
