@@ -1126,7 +1126,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * 
      * @ejb:interface-method
      */
-    public MetricValue[] getRawData(Measurement m, long begin, long end) {
+    public Collection getRawData(Measurement m, long begin, long end) {
         final int mid = m.getId().intValue();
         final long interval = m.getInterval();
         begin = TimingVoodoo.roundDownTime(begin, interval);
@@ -1138,7 +1138,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         } else {
             points = getRawDataPoints(mid, begin, end);
         }
-        return (MetricValue[]) points.toArray(new MetricValue[0]);
+        return points;
     }
 
     private TreeSet getRawDataPoints(int mid, long begin, long end) {
