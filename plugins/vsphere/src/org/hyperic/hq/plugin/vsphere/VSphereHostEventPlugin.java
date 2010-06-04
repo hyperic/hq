@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2010], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -100,11 +100,15 @@ public class VSphereHostEventPlugin extends LogTrackPlugin implements Runnable {
         return filter;
     }
 
-    private EventFilterSpecByEntity getEntity(String vmName) {
+    private EventFilterSpecByEntity getEntity(String hostname, boolean isVm) {
         EventFilterSpecByEntity rtn = new EventFilterSpecByEntity();
         ManagedObjectReference entity = new ManagedObjectReference();
-        entity.setType("VirtualMachine");
-        entity.setVal(vmName);
+        if (isVm) {
+            entity.setType("VirtualMachine");
+        } else {
+            entity.setType("HostSystem");
+        }
+        entity.setVal(hostname);
         rtn.setEntity(entity);
         return null;
     }
@@ -112,6 +116,12 @@ public class VSphereHostEventPlugin extends LogTrackPlugin implements Runnable {
     private void processEvents(Event[] events) {
         for (int i = 0; i < events.length; i++) { 
             Event event = events[i];
+            if (event == null || (event.getHost() == null && event.getVm() == null)) {
+                // XXX we observed that events are being returned that are not associated
+                // with the host in the criteria.  this needs to be verified and a bug against
+                // vijava filed if it is really the case.
+                continue;
+            }
             long created = event.getCreatedTime().getTimeInMillis();
             if (created < _lastCheck) {
                 continue;
@@ -128,14 +138,20 @@ public class VSphereHostEventPlugin extends LogTrackPlugin implements Runnable {
 
     private Event[] getEvents() throws PluginException {
         try {
-            String vmName = getConfig("vm");
-            if (vmName == null) {
+            String hostname = getConfig("vm");
+            boolean isVm = true;
+            if (hostname == null) {
+                // Could be a physical host (not a vm)
+                hostname = getConfig("hostname");
+                isVm = false;
+            }
+            if (hostname == null) {
                 return new Event[0];
             }
-            _log.debug("querying events for vm=" + vmName);
+            _log.debug("querying events for vm=" + hostname);
             EventFilterSpec criteria = new EventFilterSpec();
             criteria.setTime(getTimeFilter(_lastCheck, now()));
-            criteria.setEntity(getEntity(vmName));
+            criteria.setEntity(getEntity(hostname, isVm));
             Event[] events = _vim.getEventManager().queryEvents(criteria);
             if (events == null) {
                 return new Event[0];

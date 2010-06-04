@@ -217,8 +217,9 @@
 
   <platform name="VMware vSphere VM">
     <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
-    <plugin type="collector" class="org.hyperic.hq.plugin.vsphere.VSphereVmCollector"/>
-    <plugin type="control" class="org.hyperic.hq.plugin.vsphere.VSphereVmControlPlugin"/>
+    <plugin type="collector"   class="org.hyperic.hq.plugin.vsphere.VSphereVmCollector"/>
+    <plugin type="control"     class="org.hyperic.hq.plugin.vsphere.VSphereVmControlPlugin"/>
+    <plugin type="log_track"   class="org.hyperic.hq.plugin.vsphere.VSphereHostEventPlugin"/>
 
     <actions>
       <include name="createSnapshot"/>
@@ -403,9 +404,6 @@
 
     <plugin type="measurement"
             class="org.hyperic.hq.product.MeasurementPlugin"/>
-
-    <plugin type="log_track"
-            class="org.hyperic.hq.plugin.vsphere.VSphereHostEventPlugin"/>
 
     <metric name="Availability"
             template="sigar:Type=ProcState,Arg=%process.query%:State"
