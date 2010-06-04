@@ -62,7 +62,7 @@
 			<useTransitiveDependencies>false</useTransitiveDependencies>
 			<outputDirectory>/pdk/javadoc</outputDirectory>
 			<includes>
-				<include>org.hyperic.hq:hq-pdk-shared</include>
+				<include>org.hyperic.hq:hq-pdk-shared:*:javadoc</include>
 			</includes>
 			<unpack>true</unpack>
 			<fileMode>0644</fileMode>
