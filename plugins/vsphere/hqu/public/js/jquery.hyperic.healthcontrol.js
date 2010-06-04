@@ -37,9 +37,9 @@
 				var startTime       = new Date(opts.data.start);
 				var endTime         = new Date(opts.data.end);
 				var startTimeLabel  = $('<span></span>').addClass('ll')
-				                                        .text(startTime.format('default'));
+				                                        .text($.fn.healthcontrol.formatTimestamp(startTime));
 				var endTimeLabel    = $('<span></span>').addClass('rl')
-				                                        .text(endTime.format('default'));
+				                                        .text($.fn.healthcontrol.formatTimestamp(endTime));
 
 				_createHealthBar(opts.data.metrics, dataContainer);
 				
@@ -66,13 +66,19 @@
         	                          .css('width', units + '%')
         	                          .css('position', 'absolute')
         	                          .css('left', leftPos + '%')
-        	                          .attr('title', iStart.format('default') + ' - ' + iEnd.format('default'))
+        	                          .attr('title', $.fn.healthcontrol.formatTimestamp(iStart) + ' - ' + $.fn.healthcontrol.formatTimestamp(iEnd))
         	                          .html('&nbsp;');
         	
         	$container.append(section);
         	
         	leftPos += units;
         }
+	};
+	
+	$.fn.healthcontrol.formatTimestamp = function(timestamp) {
+		var DATE_FORMAT = 'ddd, mmm dS, h:MMTT Z';
+		
+		return timestamp.format(DATE_FORMAT);
 	};
 	
 	$.fn.healthcontrol.defaults = {

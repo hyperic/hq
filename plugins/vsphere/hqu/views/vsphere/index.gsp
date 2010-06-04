@@ -154,6 +154,16 @@
     	var selected = tabs.tabs('option', 'selected');
     	
     	if (resourceId != id || selected != 2) {
+    		if (resourceId != id) {
+    			var currentState = jQuery.bbq.getState();
+    			
+    			for (var name in currentState) {
+    				if (name != 'on' && name != 'sn') {
+    					jQuery.bbq.removeState(name);
+    				}
+    			}
+    		}
+    	
 	    	resourceId = id;
 	
 	    	setAjaxParameters(tabs, 'true');

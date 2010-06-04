@@ -21,7 +21,7 @@
 .rle-cont {
 	cursor: default;
 	border: 2px solid black;
-	padding-bottom: 2px;
+	padding: 2px;
 }
 
 .rle-data {
@@ -53,9 +53,11 @@
 
 .ll {
 	padding-left: 4px;
+	font-size: smaller;
 }
 
 .rl {
 	float: right;
 	padding-right: 4px;
+	font-size: smaller;
 }
