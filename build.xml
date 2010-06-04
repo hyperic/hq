@@ -27,7 +27,7 @@
   <property name="jre.dir" value="hq_bin/jres" />
   <property name="pgsql.dir" value="hq_bin/pgsql" />
   <property name="ant.dir" value="hq_bin/ant" />
-
+  <property name="hqapi.dir" location="ui_plugins/hqapi1" />
 
   <property name="build.dir" location="${basedir}/build" />
   <property name="archive.basename" value="hyperic-hq" />
@@ -35,7 +35,6 @@
 
   <!-- Native libs -->
   <property name="hq.bin" location="hq_bin" />
-  <property name="hqapi.lib" location="ui_plugins/hqapi1/lib" />
   <property name="lather.lib" location="${hq.bin}/lather_bin" />
   <property name="sigar.lib" location="${hq.bin}/sigar_bin/lib" />
   <property name="db2monitor.dir" location="${hq.bin}/db2monitor_bin"/>
@@ -277,7 +276,7 @@
 			<path refid="testjars" />
 			<path location="${build.dir}/classes"/>
 	      	<path>
-	      		<fileset dir="${hqapi.lib}" includes="hqapi*.jar" />
+	      		<fileset dir="${hqapi.dir}" includes="lib/hqapi*.jar" />
 	      	</path>
 		  </classpath>
 	      <src>
@@ -1028,8 +1027,6 @@
         <!-- for CollectorThread -->
         <include name="backport-util-concurrent-3.1.jar"/>
       </fileset>
-      <!-- for vsphere plugin -->
-      <fileset dir="${hqapi.lib}" includes="hqapi*.jar" />
     </copy>
 
     <!-- product.jmx.* has to be loaded from the plugin ClassLoader -->
@@ -1157,7 +1154,9 @@
 
     <hqplugin name="vmware"/>
 
-    <hqplugin name="vsphere"/>
+    <hqplugin name="vsphere">
+        <fileset dir="${hqapi.dir}" includes="lib/hqapi*.jar"/>
+  	</hqplugin>
 
     <hqplugin name="xen">
        <!-- XXX Xen sdk built w/ 1.6 + mods for Xen 4.0 compat -->
