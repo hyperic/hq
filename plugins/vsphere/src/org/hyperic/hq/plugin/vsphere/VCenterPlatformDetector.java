@@ -68,6 +68,7 @@ import com.vmware.vim25.HostConfigInfo;
 import com.vmware.vim25.HostHardwareSummary;
 import com.vmware.vim25.HostIpConfig;
 import com.vmware.vim25.HostNetworkInfo;
+import com.vmware.vim25.HostRuntimeInfo;
 import com.vmware.vim25.HostVirtualNic;
 import com.vmware.vim25.HostVirtualNicSpec;
 import com.vmware.vim25.ManagedObjectReference;
@@ -269,7 +270,7 @@ public class VCenterPlatformDetector {
         cprops.setValue("pool", (String)pool.getPropertyByPath("name"));
 
         String state = runtime.getPowerState().toString();
-        if (state.equals("poweredOn")) {
+        if ("poweredOn".equalsIgnoreCase(state)) {
             String name;
             if ((name = guest.getHostName()) != null) {
                 cprops.setValue("hostName", name);
@@ -321,6 +322,19 @@ public class VCenterPlatformDetector {
     private VSphereHostResource discoverHost(HostSystem host)
         throws Exception {
 
+        HostRuntimeInfo runtime = host.getRuntime();
+        String powerState = runtime.getPowerState().toString();
+        
+        if ("unknown".equalsIgnoreCase(powerState)) {
+            // an unknown power state could indicate that the host
+            // is disconnected from vCenter
+            if (log.isDebugEnabled()) {
+                log.debug("Skipping " + HOST_TYPE + "[name=" + host.getName() 
+                              + ", powerState=" + powerState + "]");
+            }
+            return null;
+        }
+        
         HostConfigInfo info = host.getConfig();
         HostNetworkInfo netinfo = info.getNetwork();
         AboutInfo about = info.getProduct();
@@ -395,7 +409,7 @@ public class VCenterPlatformDetector {
 
         if (log.isDebugEnabled()) {
             log.debug("Discovered " + HOST_TYPE + "[name=" + platform.getName() 
-                          + ", powerState=" + host.getRuntime().getPowerState() + "]");
+                          + ", powerState=" + powerState + "]");
         }
         
         return platform;
@@ -640,6 +654,11 @@ public class VCenterPlatformDetector {
             // verify to see if it exists in vCenter
             HostSystem hs =
                 (HostSystem)vim.find(VSphereUtil.HOST_SYSTEM, r.getName());
+            
+            if (log.isDebugEnabled()) {
+                log.debug(HOST_TYPE + "[name=" + r.getName() 
+                              + "] exists in vCenter. Not removing from HQ.");
+            }
         } catch (ManagedEntityNotFoundException me) {
             removeResource(r);
         }
@@ -652,6 +671,11 @@ public class VCenterPlatformDetector {
             // verify to see if it exists in vCenter
             VirtualMachine vm =
                 (VirtualMachine)vim.find(VSphereUtil.VM, r.getName());
+            
+            if (log.isDebugEnabled()) {
+                log.debug(VM_TYPE + "[name=" + r.getName() 
+                              + "] exists in vCenter. Not removing from HQ.");
+            }
         } catch (ManagedEntityNotFoundException me) {
             removeResource(r);
         }
