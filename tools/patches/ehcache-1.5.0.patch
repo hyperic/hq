@@ -1,0 +1,26 @@
+Index: src/main/java/net/sf/ehcache/CacheManager.java
+===================================================================
+--- src/main/java/net/sf/ehcache/CacheManager.java  (revision 839)
++++ src/main/java/net/sf/ehcache/CacheManager.java  (working copy)
+@@ -870,6 +870,10 @@
+        return cacheManagerPeerProvider;
+    }
+
++    public void setCacheManagerPeerProvider(CacheManagerPeerProvider provider) {
++        cacheManagerPeerProvider = provider;
++    }
++
+    /**
+     * When CacheManage is configured as part of a cluster, a CacheManagerPeerListener will
+     * be registered in it. Use this to access the individual cache listeners
+@@ -880,6 +884,10 @@
+        return cacheManagerPeerListener;
+    }
+
++    public void setCacheManagerPeerListener(CacheManagerPeerListener listener) {
++        cacheManagerPeerListener = listener;
++    }
++
+    /**
+     * Returns the composite listener. A notification sent to this listener will notify all registered
+     * listeners.
