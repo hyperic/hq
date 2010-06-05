@@ -25,29 +25,253 @@
 
 package org.hyperic.hq.appdef.server.session;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
-import org.hyperic.hq.appdef.server.session.Cprop;
-import org.hyperic.hq.appdef.server.session.CpropKey;
+import org.hyperic.hibernate.Util;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefEntityValue;
+import org.hyperic.hq.appdef.shared.CPropKeyNotFoundException;
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public class CpropDAO
     extends HibernateDAO<Cprop> {
+
+    private JdbcTemplate jdbcTemplate;
+    private static final int CHUNKSIZE = 1000; // Max size for each row
+    private static final String CPROP_TABLE = "EAM_CPROP";
+    private static final String CPROPKEY_TABLE = "EAM_CPROP_KEY";
+    private CpropKeyDAO cPropKeyDAO;
+
     @Autowired
-    public CpropDAO(SessionFactory f) {
+    public CpropDAO(SessionFactory f, JdbcTemplate jdbcTemplate, CpropKeyDAO cPropKeyDAO) {
         super(Cprop.class, f);
+        this.jdbcTemplate = jdbcTemplate;
+        this.cPropKeyDAO = cPropKeyDAO;
     }
 
+    @SuppressWarnings("unchecked")
     public List<Cprop> findByKeyName(CpropKey key, boolean asc) {
         Criteria c = createCriteria().add(Expression.eq("key", key)).addOrder(
             asc ? Order.asc("propValue") : Order.desc("propValue"));
         return c.list();
+    }
+
+    public void deleteValues(final int appdefType, final int id) {
+        jdbcTemplate.update(new PreparedStatementCreator() {
+            public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+                PreparedStatement stmt = con.prepareStatement("DELETE FROM " + CPROP_TABLE +
+                                                              " WHERE keyid IN " +
+                                                              "(SELECT id FROM " + CPROPKEY_TABLE +
+                                                              " WHERE appdef_type = ?) " +
+                                                              "AND appdef_id = ?");
+                stmt.setInt(1, appdefType);
+                stmt.setInt(2, id);
+                return stmt;
+            }
+        });
+    }
+
+    public String setValue(final AppdefEntityID aID, int typeId, String key, String val)
+        throws CPropKeyNotFoundException, AppdefEntityNotFoundException, PermissionException {
+
+        CpropKey propKey = getKey(aID, typeId, key);
+
+        Integer pk = propKey.getId();
+        final int keyId = pk.intValue();
+
+        // no need to grab the for update since we are in a transaction
+        // and therefore automatically get a shared lock
+        String sql = new StringBuilder().append("SELECT PROPVALUE FROM ").append(CPROP_TABLE)
+            .append(" WHERE KEYID=").append(keyId).append(" AND APPDEF_ID=").append(aID.getID())
+            .toString();
+
+        String oldval = this.jdbcTemplate.queryForObject(sql, String.class);
+
+        if (val == null && oldval == null) {
+            return oldval;
+        } else if (val != null && val.equals(oldval)) {
+            return oldval;
+        }
+
+        if (oldval != null) {
+            String deleteSql = new StringBuilder().append("DELETE FROM ").append(CPROP_TABLE)
+                .append(" WHERE KEYID=").append(keyId).append(" AND APPDEF_ID=")
+                .append(aID.getID()).toString();
+            jdbcTemplate.update(deleteSql);
+        }
+
+        // Optionally add new values
+        if (val != null) {
+            final String[] chunks = chunk(val, CHUNKSIZE);
+
+            StringBuilder insertSQL = new StringBuilder().append("INSERT INTO ")
+                .append(CPROP_TABLE);
+
+            final Cprop nprop = new Cprop();
+
+            insertSQL.append(" (id,keyid,appdef_id,value_idx,PROPVALUE) VALUES ").append(
+                "(?, ?, ?, ?, ?)");
+
+            jdbcTemplate.batchUpdate(insertSQL.toString(), new BatchPreparedStatementSetter() {
+
+                public void setValues(PreparedStatement pstmt, int i) throws SQLException {
+                    pstmt.setInt(2, keyId);
+                    pstmt.setInt(3, aID.getID());
+                    int id = Util.generateId("org.hyperic.hq.appdef.server.session.Cprop", nprop)
+                        .intValue();
+                    pstmt.setInt(1, id);
+                    pstmt.setInt(4, i);
+                    pstmt.setString(5, chunks[i]);
+                }
+
+                public int getBatchSize() {
+                    return chunks.length;
+                }
+            });
+        }
+        return oldval;
+    }
+
+    public String getValue(AppdefEntityValue aVal, String key) throws CPropKeyNotFoundException,
+        AppdefEntityNotFoundException, PermissionException {
+
+        final AppdefEntityID aID = aVal.getID();
+        AppdefResourceType recType = aVal.getAppdefResourceType();
+        int typeId = recType.getId().intValue();
+        CpropKey propKey = this.getKey(aID, typeId, key);
+
+        Integer pk = propKey.getId();
+        final int keyId = pk.intValue();
+        StringBuffer buf = new StringBuffer();
+
+        List<String> propvals = this.jdbcTemplate.query(new PreparedStatementCreator() {
+            public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+                PreparedStatement stmt = con.prepareStatement("SELECT PROPVALUE FROM " +
+                                                              CPROP_TABLE +
+                                                              " WHERE KEYID=? AND APPDEF_ID=? " +
+                                                              "ORDER BY VALUE_IDX");
+
+                stmt.setInt(1, keyId);
+                stmt.setInt(2, aID.getID());
+                return stmt;
+            }
+        }, new RowMapper<String>() {
+            public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+                return rs.getString(1);
+            }
+        });
+
+        if (propvals.isEmpty()) {
+            return null;
+        }
+        for (String propval : propvals) {
+            buf.append(propval);
+        }
+
+        return buf.toString();
+    }
+
+    public Properties getEntries(AppdefEntityID aID, String column) {
+        Properties res = new Properties();
+        String lastKey = null;
+        StringBuffer buf = null;
+        List<Map<String, Object>> props = jdbcTemplate.queryForList("SELECT A." + column + ", B.propvalue FROM " + CPROPKEY_TABLE +
+            " A, " + CPROP_TABLE + " B WHERE " +
+            "B.keyid=A.id AND A.appdef_type=? " + "AND B.appdef_id=? " +
+            "ORDER BY B.value_idx",aID.getType(),aID.getId());
+        for(Map<String,Object> prop: props) {
+            String keyName = (String)prop.get(column);
+            String valChunk = (String)prop.get("propvalue");
+            if (lastKey == null || lastKey.equals(keyName) == false) {
+                if (lastKey != null) {
+                    res.setProperty(lastKey, buf.toString());
+                }
+
+                buf = new StringBuffer();
+                lastKey = keyName;
+            }
+            buf.append(valChunk);
+        }
+        // Have one at the end to add
+        if (buf != null && buf.length() != 0) {
+            res.setProperty(lastKey, buf.toString());
+        }
+
+        return res;
+    }
+
+    /**
+     * Split a string into a list of same sized chunks, and a chunk of
+     * potentially different size at the end, which contains the remainder.
+     * 
+     * e.g. chunk("11223", 2) -> { "11", "22", "3" }
+     * 
+     * @param src String to chunk
+     * @param chunkSize The max size of any chunk
+     * 
+     * @return an array containing the chunked string
+     */
+    private String[] chunk(String src, int chunkSize) {
+        String[] res;
+        int strLen, nAlloc;
+
+        if (chunkSize <= 0) {
+            throw new IllegalArgumentException("chunkSize must be >= 1");
+        }
+
+        strLen = src.length();
+        nAlloc = strLen / chunkSize;
+
+        if ((strLen % chunkSize) != 0) {
+            nAlloc++;
+        }
+
+        res = new String[nAlloc];
+
+        for (int i = 0; i < nAlloc; i++) {
+            int begIdx, endIdx;
+
+            begIdx = i * chunkSize;
+            endIdx = (i + 1) * chunkSize;
+            if (endIdx > strLen)
+                endIdx = strLen;
+
+            res[i] = src.substring(begIdx, endIdx);
+        }
+
+        return res;
+    }
+
+    private CpropKey getKey(AppdefEntityID aID, int typeId, String key)
+        throws CPropKeyNotFoundException, AppdefEntityNotFoundException, PermissionException {
+        CpropKey res = cPropKeyDAO.findByKey(aID.getType(), typeId, key);
+
+        if (res == null) {
+            String msg = "Key, '" + key + "', does " + "not exist for aID=" + aID + ", typeId=" +
+                         typeId;
+
+            throw new CPropKeyNotFoundException(msg);
+        }
+
+        return res;
     }
 }
