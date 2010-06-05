@@ -819,8 +819,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
             createVirtualResourceEdges(subject,
                                        relation,
                                        parent,
-                                       children,
-                                       false);
+                                       children);
         } else {
             throw new ResourceEdgeCreateException(
                         "Unsupported resource relation: "
@@ -831,8 +830,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
     private void createVirtualResourceEdges(AuthzSubject subject,
                                             ResourceRelation relation,
                                             AppdefEntityID parent,
-                                            AppdefEntityID[] children,
-                                            boolean deleteExisting)
+                                            AppdefEntityID[] children)
         throws PermissionException, ResourceEdgeCreateException {
         
         //TODO: Add VM/host verification check ???
@@ -844,13 +842,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
                 && children.length > 0) {
 
             try {
-                if (deleteExisting) {
-                    removeResourceEdges(subject, relation, parentResource);
-                }
-            
                 ResourceEdgeDAO eDAO = getResourceEdgeDAO();
-                ResourceEdge existing = null;
-                Resource childResource = null;
 
                 if (!hasResourceRelation(parentResource, relation)) {
                     // create self-edge for parent of virtual hierarchy
@@ -858,11 +850,11 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
                 }
                 for (int i=0; i< children.length; i++) {
                     //TODO: Add VM/host verification check ???
-                    childResource = findResource(children[i]);
+                    Resource childResource = findResource(children[i]);
                                         
                     // Check if child resource already exists in VM hierarchy
                     // TODO: This needs to be optimized
-                    existing = getParentResourceEdge(childResource, relation);
+                    ResourceEdge existing = getParentResourceEdge(childResource, relation);
 
                     if (existing != null) {
                         Resource existingParent = existing.getTo();
@@ -887,7 +879,15 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
                             }
                                                         
                             // Clean out edges for the current target
-                            eDAO.deleteEdges(childResource);
+                            Collection edges = findDescendantResourceEdges(childResource, relation);
+                            for (Iterator e = edges.iterator(); e.hasNext(); ) {
+                                ResourceEdge re = (ResourceEdge) e.next();
+                                eDAO.deleteEdges(re.getTo(), relation);
+                            }
+                            eDAO.deleteEdges(childResource, relation);
+                            
+                            // TODO: if agents are different, need to
+                            // remove measurement schedule from old agent
                         }
                     }
                 
