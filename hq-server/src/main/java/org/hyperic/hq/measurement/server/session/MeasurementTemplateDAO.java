@@ -25,17 +25,27 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.id.IdentifierGenerator;
+import org.hibernate.impl.SessionFactoryImpl;
+import org.hibernate.impl.SessionImpl;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.product.MeasurementInfo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -44,10 +54,18 @@ public class MeasurementTemplateDAO
 
     private CategoryDAO catDAO;
 
+    private final Log log = LogFactory.getLog(MeasurementTemplateDAO.class);
+
+    private static final int ALIAS_LIMIT = 100;
+
+    private JdbcTemplate jdbcTemplate;
+
     @Autowired
-    public MeasurementTemplateDAO(SessionFactory f, CategoryDAO categoryDAO) {
+    public MeasurementTemplateDAO(SessionFactory f, CategoryDAO categoryDAO,
+                                  JdbcTemplate jdbcTemplate) {
         super(MeasurementTemplate.class, f);
         this.catDAO = categoryDAO;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     MeasurementTemplate create(String name, String alias, String units, int collectionType,
@@ -214,5 +232,62 @@ public class MeasurementTemplateDAO
                      + "where mt.name = ? " + "order by m.name asc ";
 
         return getSession().createQuery(sql).setString(0, name).list();
+    }
+
+    public void createTemplates(final String pluginName,
+                                final List<MonitorableMeasurementInfo> toAdd) {
+        final IdentifierGenerator tmplIdGenerator = ((SessionFactoryImpl) sessionFactory)
+            .getEntityPersister(MeasurementTemplate.class.getName()).getIdentifierGenerator();
+
+        final String templatesql = "INSERT INTO EAM_MEASUREMENT_TEMPL "
+                                   + "(id, name, alias, units, collection_type, default_on, "
+                                   + "default_interval, designate, monitorable_type_id, "
+                                   + "category_id, template, plugin, ctime, mtime) "
+                                   + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        final long current = System.currentTimeMillis();
+        //We need JdbcTemplate to throw runtime Exception to roll back tx if batch update fails, else we'll get partial write
+        jdbcTemplate.batchUpdate(templatesql, new BatchPreparedStatementSetter() {
+            HashMap<String, Category> cats = new HashMap<String, Category>();
+
+            public void setValues(PreparedStatement stmt, int i) throws SQLException {
+                MeasurementInfo info = toAdd.get(i).getMeasurementInfo();
+                Category cat = (Category) cats.get(info.getCategory());
+                if (cat == null) {
+                    cat = catDAO.findByName(info.getCategory());
+                    if (cat == null) {
+                        cat = catDAO.create(info.getCategory());
+                    }
+                    cats.put(info.getCategory(), cat);
+                }
+                Integer rawid = (Integer) tmplIdGenerator.generate((SessionImpl) getSession(),
+                    new MeasurementTemplate());
+                stmt.setInt(1, rawid.intValue());
+                stmt.setString(2, info.getName());
+                String alias = info.getAlias();
+                if (alias.length() > ALIAS_LIMIT) {
+                    alias = alias.substring(0, ALIAS_LIMIT);
+                    log
+                        .warn("ALIAS field of EAM_MEASUREMENT_TEMPLATE truncated: original value was " +
+                              info.getAlias() + ", truncated value is " + alias);
+                }
+                stmt.setString(3, alias);
+                stmt.setString(4, info.getUnits());
+                stmt.setInt(5, info.getCollectionType());
+                stmt.setBoolean(6, info.isDefaultOn());
+                stmt.setLong(7, info.getInterval());
+                stmt.setBoolean(8, info.isIndicator());
+                stmt.setInt(9, toAdd.get(i).getMonitorableType().getId().intValue());
+                stmt.setInt(10, cat.getId().intValue());
+                stmt.setString(11, info.getTemplate());
+                stmt.setString(12, pluginName);
+                stmt.setLong(13, current);
+                stmt.setLong(14, current);
+            }
+
+            public int getBatchSize() {
+                return toAdd.size();
+            }
+        });
     }
 }

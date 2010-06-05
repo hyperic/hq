@@ -64,6 +64,7 @@ import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
+import org.hyperic.hq.measurement.server.session.MonitorableMeasurementInfo;
 import org.hyperic.hq.measurement.server.session.MonitorableType;
 import org.hyperic.hq.measurement.shared.TemplateManager;
 import org.hyperic.hq.product.MeasurementInfo;
@@ -431,7 +432,7 @@ public class ProductManagerImpl implements ProductManager {
 
         // Get the measurement templates
         // Keep a list of templates to add
-        Map<MonitorableType, Map<?, MeasurementInfo>> toAdd = new HashMap<MonitorableType, Map<?, MeasurementInfo>>();
+       List<MonitorableMeasurementInfo> toAdd = new ArrayList<MonitorableMeasurementInfo>();
 
         Map<String, MonitorableType> types = new HashMap<String,MonitorableType>(templateManager.getMonitorableTypesByName(pluginName));
         if (debug)
@@ -462,7 +463,9 @@ public class ProductManagerImpl implements ProductManager {
                     pluginName, info, monitorableType, measurements);
                 if (debug)
                     watch.markTimeEnd("updateTemplates");
-                toAdd.put(monitorableType, newMeasurements);
+                for(MeasurementInfo measurementInfo: newMeasurements.values()) {
+                    toAdd.add(new MonitorableMeasurementInfo(monitorableType, measurementInfo));
+                }
             }
         }
         if (debug)
