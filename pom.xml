@@ -661,6 +661,38 @@
 					<module>hq-web</module>
 			</modules>
 		</profile>
+		<profile>
+			<id>release</id>
+			<modules>
+					<module>hq-util</module>
+					<module>hq-common</module>
+					<module>hq-lather</module>
+					<module>hq-pdk</module>
+					<module>hq-agent</module>
+					<module>hq-plugin</module>
+					<module>hq-rendit</module>
+					<module>hq-server</module>
+					<module>hq-uiplugin</module>
+					<module>hq-installer</module>
+					<module>hq-bootstrap</module>
+					<module>hq-web</module>
+					<module>hq-integration-tests</module>
+					<module>dist</module>
+			</modules>
+			<build>
+			<pluginManagement>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+				 		<configuration>
+          					<skipTests>true</skipTests>
+        				</configuration>
+					</plugin>
+				</plugins>
+			</pluginManagement>
+			</build>
+		</profile>
 	</profiles>
 
 	<repositories>
