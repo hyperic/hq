@@ -110,7 +110,7 @@ public class VSphereHostEventPlugin extends LogTrackPlugin implements Runnable {
         }
         entity.setVal(hostname);
         rtn.setEntity(entity);
-        return null;
+        return rtn;
     }
 
     private void processEvents(Event[] events) {
