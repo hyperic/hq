@@ -424,7 +424,7 @@ public class PlatformDAO extends HibernateDAO {
                      "join p.ips ip where upper(ip.macAddress)=?";
 
         return getSession().createQuery(hql)
-                    .setString(0, macAddress)
+                    .setString(0, macAddress.toUpperCase())
                     .list();
     }
 
