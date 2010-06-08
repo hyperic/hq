@@ -34,6 +34,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.hibernate.Query; 
+import org.hibernate.criterion.MatchMode;
+import org.hibernate.criterion.Restrictions;
 import org.hibernate.type.IntegerType;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.Util;
@@ -229,12 +231,11 @@ public class ResourceEdgeDAO
     }
 
     List findByName(String name, ResourceRelation relation) {
-        String hql = "from ResourceEdge re " +
-                     "where re.from.name like :name and distance=0 and relation=:relation";
-        
-        return getSession().createQuery(hql)
-                           .setParameter("name", "%" + name + "%")
-                           .setParameter("relation", relation)
+        return getSession().createCriteria(ResourceEdge.class)
+                           .createAlias("from", "f")
+                           .add(Restrictions.ilike("f.name", name, MatchMode.ANYWHERE))
+                           .add(Restrictions.eq("relation", relation))
+                           .add(Restrictions.eq("distance", 0))
                            .list();
     }
     
