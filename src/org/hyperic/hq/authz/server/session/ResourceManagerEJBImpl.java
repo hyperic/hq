@@ -44,10 +44,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
-import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.Ip;
-import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ApplicationManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.Platform;
@@ -56,7 +54,6 @@ import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
-import org.hyperic.hq.appdef.shared.AgentManagerLocal;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
@@ -80,7 +77,6 @@ import org.hyperic.hq.bizapp.server.session.AppdefBossEJBImpl;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.ResourceAudit;
-import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -890,24 +886,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
                                           + ". Moving to target fromId=" 
                                           + parentResource.getId());
                             }
-                            
-                            // if agents are different, need to unschedule measurements from old agent
-                            try {
-                                AgentManagerLocal agentMgr = AgentManagerEJBImpl.getOne();
-                                Agent agentExistingParent = 
-                                    agentMgr.getAgent(new AppdefEntityID(existingParent));
-                                Agent agentNewParent = 
-                                    agentMgr.getAgent(new AppdefEntityID(parentResource));
-                                
-                                if (!agentExistingParent.equals(agentNewParent)) {
-                                    MeasurementManagerEJBImpl.getOne()
-                                        .disableMeasurements(subject, childResource);
-                                }
-                            } catch (Exception e) {
-                                log.error("Unable to unschedule measurements for resource id=" 
-                                              + childResource.getId(), e);
-                            }
-                            
+                                                        
                             // Clean out edges for the current target
                             Collection edges = findDescendantResourceEdges(childResource, relation);
                             for (Iterator e = edges.iterator(); e.hasNext(); ) {
