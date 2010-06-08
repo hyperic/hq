@@ -172,7 +172,12 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
         final List resources = new ArrayList(platforms.size());
         for (final Iterator it=platforms.iterator(); it.hasNext(); ) {
             final Platform platform = (Platform) it.next();
+            final Resource r = platform.getResource();
+            if (r == null || r.isInAsyncDeleteState()) {
+                continue;
+            }
             if ((now - platform.getCreationTime()) < THRESHOLD  ||
+                !measCache.containsKey(r.getId()) || 
                 !platformIsAvailable(platform, measCache, avails)) {
                 continue;
             }
@@ -226,7 +231,8 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
 
     private boolean platformIsAvailable(Platform platform, Map measCache, Map avails) {
         final Resource resource = platform.getResource();
-        final Measurement availMeas = (Measurement) ((List)measCache.get(resource.getId())).get(0);
+        final List measurements = (List) measCache.get(resource.getId());
+        final Measurement availMeas = (Measurement) measurements.get(0);
         MetricValue val = (MetricValue) avails.get(availMeas.getId());
         return (val.getValue() == MeasurementConstants.AVAIL_DOWN) ? false : true;
     }
