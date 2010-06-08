@@ -235,7 +235,7 @@ public class ResourceEdgeDAO
                            .createAlias("from", "f")
                            .add(Restrictions.ilike("f.name", name, MatchMode.ANYWHERE))
                            .add(Restrictions.eq("relation", relation))
-                           .add(Restrictions.eq("distance", 0))
+                           .add(Restrictions.eq("distance", new Integer(0)))
                            .list();
     }
     
