@@ -51,6 +51,7 @@ import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
+import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
@@ -162,6 +163,17 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
         eDAO.create(res, res, 0, relation);  // Self-edge
         if (parent != null) {
             createResourceEdges(parent, res, relation, false);
+            
+            // virtual resource edges are needed for servers to improve
+            // performance of vCenter resource searches
+            if (res.getResourceType().getId().equals(AuthzConstants.authzServer)) {
+                ResourceRelation virtual = getVirtualRelation();
+                // see if parent platform is associated with a vm
+                Collection edges = findAncestorResourceEdges(parent, virtual);
+                if (!edges.isEmpty()) {
+                    createResourceEdges(parent, res, virtual, true);
+                }
+            }
         }
         
         ResourceAudit.createResource(res, owner, start, 
@@ -931,13 +943,13 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
             }
         
             Collection platforms = mgr.getPlatformByMacAddr(subject, macAddress);
-            Resource hqPlatform = null;
+            Platform hqPlatform = null;
             
             for (Iterator i = platforms.iterator(); i.hasNext(); ) {
                 Platform p = (Platform) i.next();
                 if (!p.getId().equals(vmPlatform.getId())) {
                     // TODO: Add additional logic if there are more than 2 platforms
-                    hqPlatform = p.getResource();
+                    hqPlatform = p;
                     break;
                 }
             }
@@ -956,8 +968,16 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
             
             ResourceRelation relation = getVirtualRelation();
             
-            if (getParentResourceEdge(hqPlatform, relation) == null) {
-                createResourceEdges(vmResource, hqPlatform, relation, true);
+            if (getParentResourceEdge(hqPlatform.getResource(), relation) == null) {
+                createResourceEdges(vmResource, hqPlatform.getResource(), relation, true);
+            }
+            
+            // create virtual resource edges for the servers for the platform.
+            // data is redundant with the containtment resource edges,
+            // but is needed to improve search speed
+            for (Iterator i=hqPlatform.getServers().iterator(); i.hasNext(); ) {
+                Server s = (Server)i.next();
+                createResourceEdges(hqPlatform.getResource(), s.getResource(), relation, true);
             }
             
         } catch (Exception e) {
