@@ -27,33 +27,26 @@ import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
-import org.hyperic.hq.context.IntegrationTestContextLoader;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.measurement.shared.DataManager;
 import org.hyperic.hq.measurement.shared.MeasRangeObj;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
+import org.hyperic.testSuite.BaseInfrastructureTest;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.jdbc.DBUtil;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.transaction.AfterTransaction;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Integration test of the {@link DataManagerImpl}
  * @author iperumal
  * 
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(loader = IntegrationTestContextLoader.class, locations = { "classpath*:META-INF/spring/*-context.xml" })
-@Transactional
-@DirtiesContext
-public class DataManagerTest {
+
+public class DataManagerTest
+    extends BaseInfrastructureTest {
 
     @Autowired
     private DataManager dataManager;
@@ -65,31 +58,10 @@ public class DataManagerTest {
     private MetricDataCache metricDataCache;
 
     @Autowired
-    private AgentManager agentManager;
-
-    @Autowired
-    private AppdefBoss appDefBoss;
-
-    @Autowired
-    private ResourceManager resourceManager;
-
-    @Autowired
-    private PlatformManager platformManager;
-
-    @Autowired
-    private AuthzSubjectManager authzSubjectManager;
-
+    private MeasurementManager measurementManager;
+    
     @Autowired
     private SessionFactory sessionFactory;
-
-    @Autowired
-    private MeasurementManager measurementManager;
-
-    @Autowired
-    private AvailabilityManager availabilityManager;
-
-    @Autowired
-    private ResourceGroupManager resourceGroupManager;
 
     private Platform testPlatform;
 
@@ -100,24 +72,19 @@ public class DataManagerTest {
     private List<DataPoint> measDataPoints;
 
     private List<DataPoint> availDataPoints;
-    
+
     private List<DataPoint> pointsToClean;
 
     private void createTestPlatform() throws ApplicationException, NotFoundException {
         // Setup Agent
         String agentToken = "agentToken123";
-        agentManager.createLegacyAgent("127.0.0.1", 2144, "authToken", agentToken, "5.0");
+        createAgent("127.0.0.1", 2144, "authToken", agentToken, "5.0");
         // Create PlatformType
         String platformType = "Linux";
         platformManager.createPlatformType(platformType, "Test Plugin");
         // Create test platform
-        AIPlatformValue aiPlatform = new AIPlatformValue();
-        aiPlatform.setCpuCount(2);
-        aiPlatform.setPlatformTypeName(platformType);
-        aiPlatform.setAgentToken(agentToken);
-        aiPlatform.setFqdn("Test Platform");
-        platformManager.createPlatform(authzSubjectManager.getOverlordPojo(), aiPlatform);
-        sessionFactory.getCurrentSession().flush();
+        createPlatform(agentToken,platformType,"Test Platform","Test Platform");
+        flushSession();
     }
 
     private List<Measurement> createMeasurements() throws ApplicationException {
@@ -189,14 +156,15 @@ public class DataManagerTest {
     public void initializeTestData() throws ApplicationException, NotFoundException {
         createTestPlatform();
         measurements = createMeasurements();
-         randomDataPoints = createRandomDataPoints();
+        randomDataPoints = createRandomDataPoints();
         measDataPoints = createRealisticDataPoints();
     }
 
-    // Cleanup the datapoints committed in a separate transaction by DataManagerImpl
+    // Cleanup the datapoints committed in a separate transaction by
+    // DataManagerImpl
     @AfterTransaction
     public void cleanupDataPoints() throws SQLException {
-        if(this.pointsToClean == null) {
+        if (this.pointsToClean == null) {
             return;
         }
         Connection conn = null;
@@ -225,7 +193,7 @@ public class DataManagerTest {
         } finally {
             DBUtil.closeConnection(DataManagerTest.class.getName(), conn);
         }
-        
+
     }
 
     private boolean performDeletion(Connection conn, List<DataPoint> data) {
@@ -318,121 +286,149 @@ public class DataManagerTest {
         assertTrue(dataManager.addData(dataPoints));
     }
 
-//    /**
-//     * Test method for
-//     * {@link org.hyperic.hq.measurement.shared.DataManager#addData(java.util.List, boolean)}
-//     * .
-//     * 
-//     @Test public final void testAddDataListOfDataPointBoolean() {
-//     *       fail("Not yet implemented"); // TODO }/
-//     * 
-//     *       /** Test method for
-//     *       {@link org.hyperic.hq.measurement.shared.DataManager#getHistoricalData(org.hyperic.hq.measurement.server.session.Measurement, long, long, org.hyperic.util.pager.PageControl, boolean)}
-//     *       .
-//     */
-//    @Test
-//    public final void testGetHistoricalDataMeasurementLongLongPageControlBoolean() {
-//        fail("Not yet implemented"); // TODO
-//    }
-//
-//    /**
-//     * Test method for
-//     * {@link org.hyperic.hq.measurement.shared.DataManager#getHistoricalData(org.hyperic.hq.measurement.server.session.Measurement, long, long, org.hyperic.util.pager.PageControl)}
-//     * .
-//     */
-//    @Test
-//    public final void testGetHistoricalDataMeasurementLongLongPageControl() {
-//        fail("Not yet implemented"); // TODO
-//    }
-//
-//    /**
-//     * Test method for
-//     * {@link org.hyperic.hq.measurement.shared.DataManager#getAggregateData(java.util.List, long, long)}
-//     * .
-//     */
-//    @Test
-//    public final void testGetAggregateData() {
-//        fail("Not yet implemented"); // TODO
-//    }
-//
-//    /**
-//     * Test method for
-//     * {@link org.hyperic.hq.measurement.shared.DataManager#getAggregateDataByTemplate(java.util.List, long, long)}
-//     * .
-//     */
-//    @Test
-//    public final void testGetAggregateDataByTemplate() {
-//        fail("Not yet implemented"); // TODO
-//    }
-//
-//    /**
-//     * Test method for
-//     * {@link org.hyperic.hq.measurement.shared.DataManager#getHistoricalData(java.util.List, long, long, long, int, boolean, org.hyperic.util.pager.PageControl)}
-//     * .
-//     */
-//    @Test
-//    public final void testGetHistoricalDataListOfMeasurementLongLongLongIntBooleanPageControl() {
-//        fail("Not yet implemented"); // TODO
-//    }
-//
-//    /**
-//     * Test method for
-//     * {@link org.hyperic.hq.measurement.shared.DataManager#getLastHistoricalData(org.hyperic.hq.measurement.server.session.Measurement)}
-//     * .
-//     */
-//    @Test
-//    public final void testGetLastHistoricalData() {
-//        fail("Not yet implemented"); // TODO
-//    }
-//
-//    /**
-//     * Test method for
-//     * {@link org.hyperic.hq.measurement.shared.DataManager#getLastDataPoints(java.util.List, long)}
-//     * .
-//     */
-//    @Test
-//    public final void testGetLastDataPoints() {
-//        fail("Not yet implemented"); // TODO
-//    }
-//
-//    /**
-//     * Test method for
-//     * {@link org.hyperic.hq.measurement.shared.DataManager#getCachedDataPoints(java.lang.Integer[], java.util.Map, long)}
-//     * .
-//     */
-//    @Test
-//    public final void testGetCachedDataPoints() {
-//        fail("Not yet implemented"); // TODO
-//    }
-//
-//    /**
-//     * Test method for
-//     * {@link org.hyperic.hq.measurement.shared.DataManager#getBaselineData(org.hyperic.hq.measurement.server.session.Measurement, long, long)}
-//     * .
-//     */
-//    @Test
-//    public final void testGetBaselineData() {
-//        fail("Not yet implemented"); // TODO
-//    }
-//
-//    /**
-//     * Test method for
-//     * {@link org.hyperic.hq.measurement.shared.DataManager#getAggregateDataByMetric(java.lang.Integer[], java.lang.Integer[], long, long, boolean)}
-//     * .
-//     */
-//    @Test
-//    public final void testGetAggregateDataByMetricIntegerArrayIntegerArrayLongLongBoolean() {
-//        fail("Not yet implemented"); // TODO
-//    }
-//
-//    /**
-//     * Test method for
-//     * {@link org.hyperic.hq.measurement.shared.DataManager#getAggregateDataByMetric(java.util.List, long, long, boolean)}
-//     * .
-//     */
-//    @Test
-//    public final void testGetAggregateDataByMetricListOfMeasurementLongLongBoolean() {
-//        fail("Not yet implemented"); // TODO
-//    }
+    // /**
+    // * Test method for
+    // * {@link
+    // org.hyperic.hq.measurement.shared.DataManager#addData(java.util.List,
+    // boolean)}
+    // * .
+    // *
+    // @Test public final void testAddDataListOfDataPointBoolean() {
+    // * fail("Not yet implemented"); // TODO }/
+    // *
+    // * /** Test method for
+    // * {@link
+    // org.hyperic.hq.measurement.shared.DataManager#getHistoricalData(org.hyperic.hq.measurement.server.session.Measurement,
+    // long, long, org.hyperic.util.pager.PageControl, boolean)}
+    // * .
+    // */
+    // @Test
+    // public final void
+    // testGetHistoricalDataMeasurementLongLongPageControlBoolean() {
+    // fail("Not yet implemented"); // TODO
+    // }
+    //
+    // /**
+    // * Test method for
+    // * {@link
+    // org.hyperic.hq.measurement.shared.DataManager#getHistoricalData(org.hyperic.hq.measurement.server.session.Measurement,
+    // long, long, org.hyperic.util.pager.PageControl)}
+    // * .
+    // */
+    // @Test
+    // public final void testGetHistoricalDataMeasurementLongLongPageControl() {
+    // fail("Not yet implemented"); // TODO
+    // }
+    //
+    // /**
+    // * Test method for
+    // * {@link
+    // org.hyperic.hq.measurement.shared.DataManager#getAggregateData(java.util.List,
+    // long, long)}
+    // * .
+    // */
+    // @Test
+    // public final void testGetAggregateData() {
+    // fail("Not yet implemented"); // TODO
+    // }
+    //
+    // /**
+    // * Test method for
+    // * {@link
+    // org.hyperic.hq.measurement.shared.DataManager#getAggregateDataByTemplate(java.util.List,
+    // long, long)}
+    // * .
+    // */
+    // @Test
+    // public final void testGetAggregateDataByTemplate() {
+    // fail("Not yet implemented"); // TODO
+    // }
+    //
+    // /**
+    // * Test method for
+    // * {@link
+    // org.hyperic.hq.measurement.shared.DataManager#getHistoricalData(java.util.List,
+    // long, long, long, int, boolean, org.hyperic.util.pager.PageControl)}
+    // * .
+    // */
+    // @Test
+    // public final void
+    // testGetHistoricalDataListOfMeasurementLongLongLongIntBooleanPageControl()
+    // {
+    // fail("Not yet implemented"); // TODO
+    // }
+    //
+    // /**
+    // * Test method for
+    // * {@link
+    // org.hyperic.hq.measurement.shared.DataManager#getLastHistoricalData(org.hyperic.hq.measurement.server.session.Measurement)}
+    // * .
+    // */
+    // @Test
+    // public final void testGetLastHistoricalData() {
+    // fail("Not yet implemented"); // TODO
+    // }
+    //
+    // /**
+    // * Test method for
+    // * {@link
+    // org.hyperic.hq.measurement.shared.DataManager#getLastDataPoints(java.util.List,
+    // long)}
+    // * .
+    // */
+    // @Test
+    // public final void testGetLastDataPoints() {
+    // fail("Not yet implemented"); // TODO
+    // }
+    //
+    // /**
+    // * Test method for
+    // * {@link
+    // org.hyperic.hq.measurement.shared.DataManager#getCachedDataPoints(java.lang.Integer[],
+    // java.util.Map, long)}
+    // * .
+    // */
+    // @Test
+    // public final void testGetCachedDataPoints() {
+    // fail("Not yet implemented"); // TODO
+    // }
+    //
+    // /**
+    // * Test method for
+    // * {@link
+    // org.hyperic.hq.measurement.shared.DataManager#getBaselineData(org.hyperic.hq.measurement.server.session.Measurement,
+    // long, long)}
+    // * .
+    // */
+    // @Test
+    // public final void testGetBaselineData() {
+    // fail("Not yet implemented"); // TODO
+    // }
+    //
+    // /**
+    // * Test method for
+    // * {@link
+    // org.hyperic.hq.measurement.shared.DataManager#getAggregateDataByMetric(java.lang.Integer[],
+    // java.lang.Integer[], long, long, boolean)}
+    // * .
+    // */
+    // @Test
+    // public final void
+    // testGetAggregateDataByMetricIntegerArrayIntegerArrayLongLongBoolean() {
+    // fail("Not yet implemented"); // TODO
+    // }
+    //
+    // /**
+    // * Test method for
+    // * {@link
+    // org.hyperic.hq.measurement.shared.DataManager#getAggregateDataByMetric(java.util.List,
+    // long, long, boolean)}
+    // * .
+    // */
+    // @Test
+    // public final void
+    // testGetAggregateDataByMetricListOfMeasurementLongLongBoolean() {
+    // fail("Not yet implemented"); // TODO
+    // }
 
 }

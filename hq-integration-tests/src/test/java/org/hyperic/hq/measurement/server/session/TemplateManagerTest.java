@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.hibernate.SessionFactory;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.shared.TemplateManager;
 import org.hyperic.hq.product.MeasurementInfo;
@@ -27,14 +26,11 @@ public class TemplateManagerTest
     @Autowired
     private CategoryDAO categoryDAO;
 
-    @Autowired
-    private SessionFactory sessionFactory;
-
     @Test
     public void testCreateTemplates() {
         MonitorableType monitorableType = templateManager.createMonitorableType("tomcat",
             new ServerTypeInfo("tomcat server", "A server of tomcat", "1.0"));
-        sessionFactory.getCurrentSession().flush();
+        flushSession();
         
         MeasurementInfo measurementInfo = new MeasurementInfo();
         Map<String, Object> measAttributes = new HashMap<String, Object>();

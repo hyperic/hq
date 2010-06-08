@@ -24,19 +24,57 @@
  */
 package org.hyperic.testSuite;
 
-
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
-import org.hyperic.hq.context.IntegrationTestContextLoader;
-import org.junit.*;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.junit.runner.RunWith;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.appdef.server.session.Platform;
+import org.hyperic.hq.appdef.server.session.PlatformType;
+import org.hyperic.hq.appdef.server.session.Server;
+import org.hyperic.hq.appdef.server.session.ServerType;
+import org.hyperic.hq.appdef.server.session.Service;
+import org.hyperic.hq.appdef.server.session.ServiceType;
+import org.hyperic.hq.appdef.shared.AIPlatformValue;
+import org.hyperic.hq.appdef.shared.AgentCreateException;
+import org.hyperic.hq.appdef.shared.AgentManager;
+import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
+import org.hyperic.hq.appdef.shared.PlatformManager;
+import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
+import org.hyperic.hq.appdef.shared.ServerManager;
+import org.hyperic.hq.appdef.shared.ServerNotFoundException;
+import org.hyperic.hq.appdef.shared.ServerValue;
+import org.hyperic.hq.appdef.shared.ServiceManager;
+import org.hyperic.hq.appdef.shared.ValidationException;
+import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.server.session.Role;
+import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
+import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceGroupManager;
+import org.hyperic.hq.authz.shared.ResourceManager;
+import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.NotFoundException;
+import org.hyperic.hq.context.IntegrationTestContextLoader;
+import org.hyperic.hq.product.ServerTypeInfo;
+import org.hyperic.hq.product.ServiceTypeInfo;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
-
 
 /**
  * BaseInfrastructureTest
@@ -48,42 +86,152 @@ import org.springframework.transaction.annotation.Transactional;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = "classpath*:META-INF/spring/*-context.xml", loader = IntegrationTestContextLoader.class)
 abstract public class BaseInfrastructureTest {
-    
+
     protected Log logger = LogFactory.getLog(this.getClass());
     protected long startTime;
     protected long endTime;
 
+    @Autowired
+    protected PlatformManager platformManager;
+
+    @Autowired
+    protected AuthzSubjectManager authzSubjectManager;
+
+    @Autowired
+    protected ServerManager serverManager;
+
+    @Autowired
+    protected ServiceManager serviceManager;
+
+    @Autowired
+    protected AgentManager agentManager;
+
+    @Autowired
+    private SessionFactory sessionFactory;
+
+    @Autowired
+    protected ResourceManager resourceManager;
+
+    @Autowired
+    protected ResourceGroupManager resourceGroupManager;
+
     @BeforeClass
-    public static void initialize(){
+    public static void initialize() {
 
     }
 
-    
     @Before
-    public void before(){
+    public void before() {
         startTime = System.nanoTime();
         logger.debug("****** Test starting ******");
     }
 
     @After
-    public void after(){
+    public void after() {
         endTime = System.nanoTime();
         logger.debug(buildMessage());
     }
 
     @AfterClass
-    public static void tearDown(){
+    public static void tearDown() {
 
     }
 
     /**
-     *
+     * 
      * @return
      */
-    private String buildMessage(){
-        return new StringBuilder().append("****** Test executed in ").append(endTime).append(" nanoseconds or ").
-                append(TimeUnit.SECONDS.convert(endTime, TimeUnit.NANOSECONDS)).append(" seconds").toString();
+    private String buildMessage() {
+        return new StringBuilder().append("****** Test executed in ").append(endTime).append(
+            " nanoseconds or ").append(TimeUnit.SECONDS.convert(endTime, TimeUnit.NANOSECONDS))
+            .append(" seconds").toString();
+    }
+
+    protected Platform createPlatform(String agentToken, String platformType, String fqdn,
+                                      String name) throws ApplicationException {
+        AIPlatformValue aiPlatform = new AIPlatformValue();
+        aiPlatform.setCpuCount(2);
+        aiPlatform.setPlatformTypeName(platformType);
+        aiPlatform.setAgentToken(agentToken);
+        aiPlatform.setFqdn(fqdn);
+        aiPlatform.setName(name);
+        return platformManager.createPlatform(authzSubjectManager.getOverlordPojo(), aiPlatform);
+    }
+
+    protected Server createServer(Platform platform, ServerType serverType, String name)
+        throws PlatformNotFoundException, AppdefDuplicateNameException, ValidationException,
+        PermissionException, NotFoundException {
+        ServerValue server = new ServerValue();
+        server.setName(name);
+        return serverManager.createServer(authzSubjectManager.getOverlordPojo(), platform.getId(),
+            serverType.getId(), server);
+    }
+
+    protected ServerType createServerType(String serverTypeName, String serverVersion,
+                                          String[] validPlatformTypes, String plugin,
+                                          boolean virtual) throws NotFoundException {
+        ServerTypeInfo serverTypeInfo = new ServerTypeInfo();
+        serverTypeInfo.setDescription(serverTypeName);
+        serverTypeInfo.setName(serverTypeName);
+        serverTypeInfo.setVersion(serverVersion);
+        serverTypeInfo.setVirtual(virtual);
+        serverTypeInfo.setValidPlatformTypes(validPlatformTypes);
+        return serverManager.createServerType(serverTypeInfo, plugin);
+    }
+
+    protected ServiceType createServiceType(String serviceTypeName, String plugin,
+                                            ServerType serverType) throws NotFoundException {
+        ServiceTypeInfo sinfo = new ServiceTypeInfo();
+        sinfo.setDescription(serviceTypeName);
+        sinfo.setInternal(false);
+        sinfo.setName(serviceTypeName);
+        return serviceManager.createServiceType(sinfo, plugin, serverType);
+    }
+
+    protected Service createService(Server server, ServiceType serviceType, String serviceName,
+                                    String description, String location)
+        throws ServerNotFoundException, AppdefDuplicateNameException, ValidationException,
+        PermissionException {
+        return serviceManager.createService(authzSubjectManager.getOverlordPojo(), server.getId(),
+            serviceType.getId(), serviceName, "Spring JDBC Template", "my computer");
+    }
+
+    protected Agent createAgent(String address, Integer port, String authToken, String agentToken,
+                                String version) throws AgentCreateException {
+        return agentManager.createLegacyAgent(address, port, authToken, agentToken, version);
+    }
+
+    protected PlatformType createPlatformType(String typeName, String plugin)
+        throws NotFoundException {
+        return platformManager.createPlatformType(typeName, plugin);
+    }
+
+    protected ResourceGroup createPlatformResourceGroup(Platform platform, String groupName) throws ApplicationException,
+        PermissionException {
+
+        Resource platformRes = platform.getResource();
+
+        List<Resource> resources = new ArrayList<Resource>();
+        resources.add(platformRes);
+
+        AppdefEntityTypeID appDefEntTypeId = new AppdefEntityTypeID(
+            AppdefEntityConstants.APPDEF_TYPE_PLATFORM, platform.getResource()
+                .getResourceType().getAppdefType());
+
+        ResourceGroupCreateInfo gCInfo = new ResourceGroupCreateInfo(groupName, "",
+            AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP, resourceManager
+                .findResourcePrototype(appDefEntTypeId), "", 0, false, false);
+        ResourceGroup resGrp = resourceGroupManager.createResourceGroup(authzSubjectManager
+            .getOverlordPojo(), gCInfo, new ArrayList<Role>(0), resources);
+        return resGrp;
+    }
+
+    protected void flushSession() {
+        sessionFactory.getCurrentSession().flush();
+    }
+    
+    protected void clearSession() {
+        sessionFactory.getCurrentSession().clear(); 
     }
 
 }
-
