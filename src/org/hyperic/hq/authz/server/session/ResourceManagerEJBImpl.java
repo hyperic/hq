@@ -44,8 +44,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
+import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.Ip;
+import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ApplicationManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.Platform;
@@ -54,6 +56,7 @@ import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
+import org.hyperic.hq.appdef.shared.AgentManagerLocal;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
@@ -77,6 +80,7 @@ import org.hyperic.hq.bizapp.server.session.AppdefBossEJBImpl;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.ResourceAudit;
+import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -845,7 +849,6 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
                                             AppdefEntityID[] children)
         throws PermissionException, ResourceEdgeCreateException {
         
-        //TODO: Add VM/host verification check ???
         Resource parentResource = findResource(parent);
         
         if (parentResource != null 
@@ -861,11 +864,9 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
                     eDAO.create(parentResource, parentResource, 0, relation);
                 }
                 for (int i=0; i< children.length; i++) {
-                    //TODO: Add VM/host verification check ???
                     Resource childResource = findResource(children[i]);
                                         
                     // Check if child resource already exists in VM hierarchy
-                    // TODO: This needs to be optimized
                     ResourceEdge existing = getParentResourceEdge(childResource, relation);
 
                     if (existing != null) {
@@ -886,10 +887,27 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
                                 log.debug("Virtual resource edge exists with another resource: fromId="
                                           + existingParent.getId()
                                           + ", toId=" + childResource.getId()
-                                          + ". vMotion occurred. Moving to target fromId=" 
+                                          + ". Moving to target fromId=" 
                                           + parentResource.getId());
                             }
-                                                        
+                            
+                            // if agents are different, need to unschedule measurements from old agent
+                            try {
+                                AgentManagerLocal agentMgr = AgentManagerEJBImpl.getOne();
+                                Agent agentExistingParent = 
+                                    agentMgr.getAgent(new AppdefEntityID(existingParent));
+                                Agent agentNewParent = 
+                                    agentMgr.getAgent(new AppdefEntityID(parentResource));
+                                
+                                if (!agentExistingParent.equals(agentNewParent)) {
+                                    MeasurementManagerEJBImpl.getOne()
+                                        .disableMeasurements(subject, childResource);
+                                }
+                            } catch (Exception e) {
+                                log.error("Unable to unschedule measurements for resource id=" 
+                                              + childResource.getId(), e);
+                            }
+                            
                             // Clean out edges for the current target
                             Collection edges = findDescendantResourceEdges(childResource, relation);
                             for (Iterator e = edges.iterator(); e.hasNext(); ) {
@@ -897,9 +915,6 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
                                 eDAO.deleteEdges(re.getTo(), relation);
                             }
                             eDAO.deleteEdges(childResource, relation);
-                            
-                            // TODO: if agents are different, need to
-                            // remove measurement schedule from old agent
                         }
                     }
                 
@@ -970,16 +985,15 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
             
             if (getParentResourceEdge(hqPlatform.getResource(), relation) == null) {
                 createResourceEdges(vmResource, hqPlatform.getResource(), relation, true);
+                
+                // create virtual resource edges for the servers for the platform.
+                // data is redundant with the containtment resource edges,
+                // but is needed to improve search speed
+                for (Iterator i=hqPlatform.getServers().iterator(); i.hasNext(); ) {
+                    Server s = (Server)i.next();
+                    createResourceEdges(hqPlatform.getResource(), s.getResource(), relation, true);
+                }
             }
-            
-            // create virtual resource edges for the servers for the platform.
-            // data is redundant with the containtment resource edges,
-            // but is needed to improve search speed
-            for (Iterator i=hqPlatform.getServers().iterator(); i.hasNext(); ) {
-                Server s = (Server)i.next();
-                createResourceEdges(hqPlatform.getResource(), s.getResource(), relation, true);
-            }
-            
         } catch (Exception e) {
             log.error("Could not create virtual resource edge by MAC address"
                           + " for resource[id=" + vmResource.getId() 
