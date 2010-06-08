@@ -275,7 +275,8 @@ public class CPropManagerImpl implements CPropManager {
     public void setValue(AppdefEntityID aID, int typeId, String key, String val)
         throws CPropKeyNotFoundException, AppdefEntityNotFoundException, PermissionException {
         String oldval = cPropDAO.setValue(aID, typeId, key, val);
-        if(val.equals(oldval)) {
+        if((val == null && oldval == null) || (val != null && val.equals(oldval))) {
+            //We didn't change anything
             return;
         }
         if (log.isDebugEnabled()) {

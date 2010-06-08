@@ -29,6 +29,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -104,12 +105,18 @@ public class CpropDAO
             .append(" WHERE KEYID=").append(keyId).append(" AND APPDEF_ID=").append(aID.getID())
             .toString();
 
-        String oldval = this.jdbcTemplate.queryForObject(sql, String.class);
+        List<String> oldvals = this.jdbcTemplate.queryForList(sql,String.class);
+        
+        String oldval = null;
+        if(! oldvals.isEmpty()) {
+            oldval = oldvals.get(0);
+        }
 
         if (val == null && oldval == null) {
-            return oldval;
+            //We don't need to change anything here
+            return null;
         } else if (val != null && val.equals(oldval)) {
-            return oldval;
+            return val;
         }
 
         if (oldval != null) {
@@ -192,28 +199,27 @@ public class CpropDAO
 
     public Properties getEntries(AppdefEntityID aID, String column) {
         Properties res = new Properties();
-        String lastKey = null;
-        StringBuffer buf = null;
+       
         List<Map<String, Object>> props = jdbcTemplate.queryForList("SELECT A." + column + ", B.propvalue FROM " + CPROPKEY_TABLE +
             " A, " + CPROP_TABLE + " B WHERE " +
             "B.keyid=A.id AND A.appdef_type=? " + "AND B.appdef_id=? " +
             "ORDER BY B.value_idx",aID.getType(),aID.getId());
+  
+        //Props share the same value_idx when chunked, so there is no guarantee that 
+        //you don't end up with the ordered set being propA.chunk0,propB.chunk0,propA.chunk1
+        Map<String,StringBuilder> propChunks = new HashMap<String,StringBuilder>();
         for(Map<String,Object> prop: props) {
             String keyName = (String)prop.get(column);
             String valChunk = (String)prop.get("propvalue");
-            if (lastKey == null || lastKey.equals(keyName) == false) {
-                if (lastKey != null) {
-                    res.setProperty(lastKey, buf.toString());
-                }
-
-                buf = new StringBuffer();
-                lastKey = keyName;
+            StringBuilder fullVal = propChunks.get(keyName);
+            if(fullVal == null) {
+                fullVal =  new StringBuilder();
             }
-            buf.append(valChunk);
+            fullVal.append(valChunk);
+            propChunks.put(keyName, fullVal);
         }
-        // Have one at the end to add
-        if (buf != null && buf.length() != 0) {
-            res.setProperty(lastKey, buf.toString());
+        for(Map.Entry<String,StringBuilder> propChunk :propChunks.entrySet()) {
+            res.setProperty(propChunk.getKey(), propChunk.getValue().toString());
         }
 
         return res;
