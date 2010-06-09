@@ -26,7 +26,9 @@
 package org.hyperic.hq.grouping.critters;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -34,7 +36,6 @@ import org.hibernate.Query;
 import org.hyperic.hq.grouping.Critter;
 import org.hyperic.hq.grouping.CritterDump;
 import org.hyperic.hq.grouping.CritterTranslationContext;
-import org.hyperic.hq.grouping.CritterTranslator;
 import org.hyperic.hq.grouping.CritterType;
 import org.hyperic.hq.grouping.GroupException;
 import org.hyperic.hq.grouping.prop.CritterPropType;
@@ -55,7 +56,7 @@ public class ResourceTypeCritterType extends BaseCritterType {
     }
 
     public Critter compose(CritterDump dump) {
-        return new ResourceTypeCritter(dump.getStringProp(), this);
+        return new ResourceTypeCritter(dump.getStringProp(), this, null);
         
     }
 
@@ -71,14 +72,16 @@ public class ResourceTypeCritterType extends BaseCritterType {
         return true;
     }
 
-    public Critter newInstance(String resTypeName) {
-        return new ResourceTypeCritter(resTypeName, this);
+    public Critter newInstance(String resTypeName, Integer protoToExclude) {
+        List list = (protoToExclude == null) ?
+            Collections.EMPTY_LIST : Collections.singletonList(protoToExclude);
+        return new ResourceTypeCritter(resTypeName, this, list);
     }
 
     public Critter newInstance(Map critterProps) throws GroupException {
         validate(critterProps);
         StringCritterProp prop = (StringCritterProp)critterProps.get(PROP_NAME);
-        return new ResourceTypeCritter(prop.getString(), this);
+        return new ResourceTypeCritter(prop.getString(), this, null);
     }
     
     /**
@@ -89,11 +92,12 @@ public class ResourceTypeCritterType extends BaseCritterType {
         private String                  _resTypeName;
         private List                    _props;
         private ResourceTypeCritterType _type;
+        private Collection              _excludes;
 
-        public ResourceTypeCritter(String resTypeName,
-                                   ResourceTypeCritterType type)
-        {
+        public ResourceTypeCritter(String resTypeName, ResourceTypeCritterType type,
+                                   Collection excludes) {
             _resTypeName = resTypeName;
+            _excludes = excludes;
             List c = new ArrayList();
             c.add(new StringCritterProp(PROP_NAME, resTypeName));
             _props = Collections.unmodifiableList(c);
@@ -121,23 +125,33 @@ public class ResourceTypeCritterType extends BaseCritterType {
             return _props;
         }
 
-        public String getSql(CritterTranslationContext ctx,
-                             String resourceAlias) {
+        public String getSql(CritterTranslationContext ctx, String resourceAlias) {
             String  bool = ctx.getDialect().toBooleanValueString(false);
             return new StringBuilder()
                 .append("(@type@.name = :@resTypeName@ and ")
-                .append(resourceAlias).append(".fsystem = ")
-                .append(bool).append(")").toString();
+                .append(resourceAlias).append(".fsystem = ").append(bool).append(")")
+                .toString();
         }
 
-        public String getSqlJoins(CritterTranslationContext ctx,
-                                  String resourceAlias)
-        {
-            return new StringBuilder()
+        public String getSqlJoins(CritterTranslationContext ctx, String resourceAlias) {
+            StringBuilder rtn = new StringBuilder()
                 .append("JOIN EAM_RESOURCE_TYPE @type@ on ")
-                .append(resourceAlias)
-                .append(".resource_type_id = @type@.id ")
-                .toString();
+                .append(resourceAlias).append(".resource_type_id = @type@.id ");
+            setExcludes(resourceAlias, rtn);
+            return rtn.toString();
+        }
+        
+        private void setExcludes(String resourceAlias, StringBuilder sql) {
+            if (_excludes == null || _excludes.size() == 0) {
+                return;
+            }
+            for (Iterator it=_excludes.iterator(); it.hasNext(); ) {
+                Integer protoId = (Integer) it.next();
+                if (protoId == null) {
+                    continue;
+                }
+                sql.append(" AND ").append(resourceAlias).append(".proto_id != " + protoId);
+            }
         }
         
         public boolean equals(Object other) {

@@ -3080,25 +3080,30 @@ public class AppdefBossEJBImpl
         throws PatternSyntaxException
     {
         Critter tmp;
-        Resource proto = null;
-        if (appdefResType != null) {
-           ResourceManagerLocal rman = ResourceManagerEJBImpl.getOne();
-           proto = rman.findResourcePrototype(appdefResType); 
-        }
+        ResourceManagerLocal rman = ResourceManagerEJBImpl.getOne();
+        Resource proto = (appdefResType != null) ?
+           rman.findResourcePrototype(appdefResType) : null;
         boolean isGroup = (groupTypes == null) ? false : true;
         List critters = new ArrayList();
         if (isGroup) {
             critters.add(getGrpTypeCritter(groupTypes, proto));
-            if (null != (tmp = getResourceTypeCritter(grpEntId))) {
+            if (null != (tmp = getResourceTypeCritter(grpEntId, null))) {
                 critters.add(tmp);
-            } else if (null != (tmp = getResourceTypeCritter(appdefTypeId))) {
+            } else if (null != (tmp = getResourceTypeCritter(appdefTypeId, null))) {
                 critters.add(tmp);
             }
         } else {
             if (null != (tmp = getProtoCritter(appdefResType, proto))) {
                 critters.add(tmp);
             }
-            if (null != (tmp = getResourceTypeCritter(appdefTypeId))) {
+            // HPD-476 want to hide vm images from browse resources when viewing all
+            Resource protoToExclude =
+                rman.findResourcePrototypeByName(AuthzConstants.platformPrototypeVmwareVsphereVm);
+            Integer excludeId = (protoToExclude == null) ? null : protoToExclude.getId();
+            if (proto != null && excludeId != null && excludeId.equals(proto.getId())) {
+                excludeId = null;
+            }
+            if (null != (tmp = getResourceTypeCritter(appdefTypeId, excludeId))) {
                 critters.add(tmp);
             }
         }
@@ -3156,7 +3161,7 @@ public class AppdefBossEJBImpl
         return null;
     }
 
-    private Critter getResourceTypeCritter(int appdefTypeId) {
+    private Critter getResourceTypeCritter(int appdefTypeId, Integer protoToExclude) {
         if (appdefTypeId == APPDEF_GROUP_TYPE_UNDEFINED ||
             appdefTypeId == APPDEF_TYPE_UNDEFINED ||
             appdefTypeId == APPDEF_RES_TYPE_UNDEFINED) {
@@ -3164,7 +3169,7 @@ public class AppdefBossEJBImpl
         }
         String resTypeName = AppdefUtil.appdefTypeIdToAuthzTypeStr(appdefTypeId);
         ResourceTypeCritterType type = new ResourceTypeCritterType();
-        return type.newInstance(resTypeName);
+        return type.newInstance(resTypeName, protoToExclude);
     }
 
     private Critter getResourceNameCritter(String resourceName)
