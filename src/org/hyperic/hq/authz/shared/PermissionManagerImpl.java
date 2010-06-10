@@ -96,15 +96,6 @@ public class PermissionManagerImpl
                "PROTO_ID IN (SELECT ID FROM EAM_RESOURCE " +
                             "WHERE PROTO_ID = 0 AND SORT_NAME LIKE UPPER(?))) ";
 
-    private Connection getConnection() throws SQLException {
-        try {
-            return DBUtil.getConnByContext(getInitialContext(),
-                                           HQConstants.DATASOURCE);            
-        } catch (NamingException e) {
-            throw new SQLException("Failed to retrieve datasource: "+e);
-        }
-    }
-
     public PermissionManagerImpl() { 
         Connection conn = null;
         
@@ -519,4 +510,5 @@ public class PermissionManagerImpl
     public HierarchicalAlertingManagerInterface getHierarchicalAlertingManager() {
         return HierarchicalAlertingManagerEJBImpl.getOne();
     }
+
 }

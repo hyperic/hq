@@ -31,7 +31,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -57,13 +57,16 @@ import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
+import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.bizapp.shared.uibeans.ResourceTreeNode;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.util.jdbc.DBUtil;
@@ -174,39 +177,13 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="Supports"
      */
-    public int getPlatformsCount (AuthzSubject subject) {
-        Statement stmt = null;
-        ResultSet rs = null;
-        Integer subjectId = subject.getId();
-
-        try {
-            Connection conn = getDBConn();
-            
-            String sql =
-                "SELECT COUNT(PLAT.ID) " +
-                "FROM " + TBL_PLATFORM + "_TYPE PLATT, " +
-                          TBL_PLATFORM + " PLAT " +
-                "WHERE PLAT.PLATFORM_TYPE_ID = PLATT.ID AND EXISTS (" +
-                    pm.getResourceTypeSQL("PLAT.ID", subjectId, platformResType,
-                                          platformOpViewPlatform) + ")";
-            stmt = conn.createStatement();
-
-            if (log.isDebugEnabled())
-                log.debug(sql);
-    
-            rs = stmt.executeQuery(sql);
-    
-            while (rs.next()) {
-                return rs.getInt(1);
-            }
-        } catch (SQLException e) {
-            log.error("Caught SQL Exception counting Platforms: " + e, e);
-            throw new SystemException(e);
-        } finally {
-            DBUtil.closeJDBCObjects(logCtx, null, stmt, rs);
-            disconnect();
-        } 
-        return 0;
+    public int getPlatformsCount (AuthzSubject subj) {
+        ResourceManagerLocal rman = ResourceManagerEJBImpl.getOne();
+        Resource proto =
+            rman.findResourcePrototypeByName(AuthzConstants.platformPrototypeVmwareVsphereVm);
+        Integer excludeId = (proto == null) ? null : proto.getId();
+        return pm.findResourceCount(
+            subj, platformResType, platformOpViewPlatform, Collections.singletonList(excludeId));
     }
 
     /**
