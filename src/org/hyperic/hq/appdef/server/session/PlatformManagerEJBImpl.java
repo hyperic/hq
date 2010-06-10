@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2009], Hyperic, Inc.
+ * Copyright (C) [2004-2010], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -897,9 +897,72 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      */
     public Collection getPlatformByMacAddr(AuthzSubject subject, String address)
         throws PermissionException {
+        
+        // TODO: Add permission check
+        
         return getPlatformDAO().findByMacAddr(address);
     }
-    
+
+    /**
+     * Get the associated platform that has the same 
+     * MAC address as the given resource
+     * 
+     * @ejb:interface-method
+     */
+    public Platform getAssociatedPlatformByMacAddress(AuthzSubject subject, 
+                                                      Resource r)
+        throws PermissionException, PlatformNotFoundException {
+        // TODO: Add permission check
+        
+        ResourceType rt = r.getResourceType();
+        if (rt != null && !rt.getId().equals(AuthzConstants.authzPlatform)) {
+            throw new PlatformNotFoundException(
+                         "Invalid resource type = " + rt.getName());
+        }
+        
+        Platform platform = findPlatformById(r.getInstanceId());
+        String macAddr = getPlatformMacAddress(platform);    
+        Collection platforms = getPlatformByMacAddr(subject, macAddr);
+        Platform associatedPlatform = null;
+
+        for (Iterator i = platforms.iterator(); i.hasNext(); ) {
+            Platform p = (Platform) i.next();
+            if (!p.getId().equals(platform.getId())) {
+                // TODO: Add additional logic if there are more than 2 platforms
+                associatedPlatform = p;
+                break;
+            }
+        }
+
+        if (associatedPlatform == null) {
+            if (_log.isDebugEnabled()) {
+                _log.debug("No matching platform found from "
+                              + platforms.size() + " platforms"
+                              + " for resource[id=" + r.getId() 
+                              + ", macAddress=" + macAddr
+                              + "].");
+            }
+        }
+
+        return associatedPlatform;
+    }
+
+    private String getPlatformMacAddress(Platform platform) {
+        // TODO: Should this method be part of the Platform object?
+        
+        String macAddress = null;
+        
+        for (Iterator i = platform.getIps().iterator(); i.hasNext(); ) {
+            Ip ip = (Ip) i.next();
+            if (!"00:00:00:00:00:00".equals(ip.getMacAddress())) {
+                macAddress = ip.getMacAddress();
+                break;
+            }
+        }
+        
+        return macAddress;
+    }
+
     /**
      * Get the platform by agent token
      * 

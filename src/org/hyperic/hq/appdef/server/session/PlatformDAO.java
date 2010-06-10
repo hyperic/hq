@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of 
  * "derived work". 
  *  
- * Copyright (C) [2004-2009], Hyperic, Inc. 
+ * Copyright (C) [2004-2010], Hyperic, Inc. 
  * This file is part of HQ.         
  *  
  * HQ is free software; you can redistribute it and/or modify 
@@ -27,6 +27,7 @@ package org.hyperic.hq.appdef.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -418,6 +419,9 @@ public class PlatformDAO extends HibernateDAO {
     }
     
     public Collection findByMacAddr(String macAddress) {
+        if (macAddress == null) {
+            return Collections.EMPTY_LIST;
+        }
         // Both the VM and the Guest will have IP entries with 
         // the given MAC address.
         String hql = "select distinct p from Platform p " +
