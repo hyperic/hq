@@ -127,6 +127,7 @@ public class ServiceTypeFactory {
 		final ConfigResponse pluginClasses = new ConfigResponse();
 		pluginClasses.setValue("measurement", productPlugin.getPluginProperty("measurement-class"));
 		pluginClasses.setValue("control", productPlugin.getPluginProperty("control-class"));
+		pluginClasses.setValue("log_track", "org.hyperic.hq.product.jmx.MxNotificationPlugin");
 		serviceType.setPluginClasses(pluginClasses);
 	}
 
@@ -137,6 +138,7 @@ public class ServiceTypeFactory {
 				serviceType.getServiceName());
 		properties.setValue(serviceType.getInfo().getName() + ".OBJECT_NAME",
 				getObjectNameProperty(objectName));
+		properties.setValue(serviceType.getInfo().getName() + ".DEFAULT_LOG_TRACK_ENABLE", "true");
 		serviceType.setProperties(properties);
 	}
 

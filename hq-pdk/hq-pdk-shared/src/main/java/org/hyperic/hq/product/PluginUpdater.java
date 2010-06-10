@@ -64,6 +64,9 @@ public class PluginUpdater {
 		productPlugin.getPluginData().addServiceInventoryPlugin(
 				serviceType.getInfo().getServerName(),
 				serviceType.getInfo().getName(), null);
+		
+		productPlugin.getPluginData().addPlugin("log_track", serviceType.getInfo().getName(), 
+		    "org.hyperic.hq.product.jmx.MxNotificationPlugin");
 	}
 
 	private void addProperties(final ServiceType serviceType) {

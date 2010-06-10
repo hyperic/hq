@@ -127,9 +127,23 @@ class ConfigPopulateThread
                 if(LogTrackPlugin.isEnabled(config, id.getType())) {
                     this.log.info("Creating log track plugin " + 
                                   ents[i].getPluginName());
-                    this.ltManager.createPlugin(ents[i].getPluginName(),
+                    //nasty hack b/c dynamically discovered services w/JMX notif log track plugin may not have been
+                    //found again after agent restart, triggering addition of the log track plugin for the dynamic type.
+                    boolean created=false;
+                    for(int t=0; t < 10 && !(created);t++) {
+                        try {
+                            this.ltManager.createPlugin(ents[i].getPluginName(),
                                                 ents[i].getPluginType(),
                                                 config);
+                            created=true;
+                        }catch(Exception e) {
+                            try {
+                                Thread.sleep(1000 * 60);
+                            }catch(InterruptedException ie) {
+                                
+                            }
+                        }
+                    }
                 }
             } catch(Exception exc){
                 this.log.error("Unable to create plugin: " +
