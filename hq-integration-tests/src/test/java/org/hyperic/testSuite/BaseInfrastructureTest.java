@@ -26,11 +26,11 @@ package org.hyperic.testSuite;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.Platform;
@@ -57,12 +57,14 @@ import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
+import org.hyperic.hq.authz.shared.GroupCreationException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.context.IntegrationTestContextLoader;
+import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.hq.product.ServiceTypeInfo;
 import org.junit.After;
@@ -206,32 +208,83 @@ abstract public class BaseInfrastructureTest {
         return platformManager.createPlatformType(typeName, plugin);
     }
 
-    protected ResourceGroup createPlatformResourceGroup(Platform platform, String groupName) throws ApplicationException,
-        PermissionException {
+    protected ResourceGroup createPlatformResourceGroup(Set<Platform> platforms, String groupName)
+        throws ApplicationException, PermissionException {
+        return createPlatformResourceGroup(platforms, groupName, new ArrayList<Role>(0));
+    }
 
-        Resource platformRes = platform.getResource();
-
+    protected ResourceGroup createPlatformResourceGroup(Set<Platform> platforms, String groupName,
+                                                        List<Role> roles)
+        throws ApplicationException, PermissionException {
         List<Resource> resources = new ArrayList<Resource>();
-        resources.add(platformRes);
-
+        for (Platform platform : platforms) {
+            Resource platformRes = platform.getResource();
+            resources.add(platformRes);
+        }
         AppdefEntityTypeID appDefEntTypeId = new AppdefEntityTypeID(
-            AppdefEntityConstants.APPDEF_TYPE_PLATFORM, platform.getResource()
+            AppdefEntityConstants.APPDEF_TYPE_PLATFORM, platforms.iterator().next().getResource()
                 .getResourceType().getAppdefType());
 
+        return createResourceGroup(groupName, appDefEntTypeId, roles, resources);
+    }
+
+    protected ResourceGroup createServerResourceGroup(Set<Server> servers, String groupName)
+        throws ApplicationException, PermissionException {
+        return createServerResourceGroup(servers, groupName, new ArrayList<Role>(0));
+    }
+
+    protected ResourceGroup createServerResourceGroup(Set<Server> servers, String groupName,
+                                                      List<Role> roles)
+        throws ApplicationException, PermissionException {
+        List<Resource> resources = new ArrayList<Resource>();
+        for (Server server : servers) {
+            Resource serverRes = server.getResource();
+            resources.add(serverRes);
+        }
+        AppdefEntityTypeID appDefEntTypeId = new AppdefEntityTypeID(
+            AppdefEntityConstants.APPDEF_TYPE_SERVER, servers.iterator().next().getResource()
+                .getResourceType().getAppdefType());
+
+        return createResourceGroup(groupName, appDefEntTypeId, roles, resources);
+    }
+
+    protected ResourceGroup createServiceResourceGroup(Set<Service> services, String groupName)
+        throws ApplicationException, PermissionException {
+        return createServiceResourceGroup(services, groupName, new ArrayList<Role>(0));
+    }
+
+    protected ResourceGroup createServiceResourceGroup(Set<Service> services, String groupName,
+                                                      List<Role> roles)
+        throws ApplicationException, PermissionException {
+        List<Resource> resources = new ArrayList<Resource>();
+        for (Service service: services) {
+            Resource serviceRes = service.getResource();
+            resources.add(serviceRes);
+        }
+        AppdefEntityTypeID appDefEntTypeId = new AppdefEntityTypeID(
+            AppdefEntityConstants.APPDEF_TYPE_SERVICE, services.iterator().next().getResource()
+                .getResourceType().getAppdefType());
+
+        return createResourceGroup(groupName, appDefEntTypeId, roles, resources);
+    }
+
+    private ResourceGroup createResourceGroup(String groupName, AppdefEntityTypeID appDefEntTypeId,
+                                              List<Role> roles, List<Resource> resources)
+        throws GroupDuplicateNameException, GroupCreationException {
         ResourceGroupCreateInfo gCInfo = new ResourceGroupCreateInfo(groupName, "",
             AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP, resourceManager
                 .findResourcePrototype(appDefEntTypeId), "", 0, false, false);
         ResourceGroup resGrp = resourceGroupManager.createResourceGroup(authzSubjectManager
-            .getOverlordPojo(), gCInfo, new ArrayList<Role>(0), resources);
+            .getOverlordPojo(), gCInfo, roles, resources);
         return resGrp;
     }
 
     protected void flushSession() {
         sessionFactory.getCurrentSession().flush();
     }
-    
+
     protected void clearSession() {
-        sessionFactory.getCurrentSession().clear(); 
+        sessionFactory.getCurrentSession().clear();
     }
 
 }

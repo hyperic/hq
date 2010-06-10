@@ -13,8 +13,10 @@ import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
@@ -102,7 +104,9 @@ public class ServiceManagerTest
             "Test Server Plugin", false);
         // Create test server
         testServers = createServers(testPlatforms, testServerType);
-        createPlatformResourceGroup(testPlatforms.get(0), "AllPlatformGroup");
+        Set<Platform> platforms = new HashSet<Platform>(1);
+        platforms.add(testPlatforms.get(0));
+        createPlatformResourceGroup(platforms, "AllPlatformGroup");
     }
 
     /**

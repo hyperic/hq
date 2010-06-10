@@ -7,7 +7,9 @@ import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.hibernate.NonUniqueObjectException;
 import org.hyperic.hq.appdef.Agent;
@@ -109,7 +111,9 @@ public class PlatformManagerTest
         // Create test service
         testService = createService(testServer, serviceType, "platformService jdbcTemplate",
             "Spring JDBC Template", "my computer");
-        createPlatformResourceGroup(testPlatform, "AllPlatformGroup");
+        Set<Platform> testPlatforms = new HashSet<Platform>(1);
+        testPlatforms.add(testPlatform);
+        createPlatformResourceGroup(testPlatforms, "AllPlatformGroup");
     }
 
     @Test
