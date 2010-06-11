@@ -74,6 +74,9 @@ public class LoginController {
         result.addObject("guestUsername", (guestUser != null) ? guestUser.getName() : "guest");
         result.addObject("guestEnabled", (guestUser != null && guestUser.getActive()));
         
+        // ...set a response header so we can identify the login page explicitly...
+        response.setHeader("hq-requires-auth", "1");
+        
         return result;
     }
 }
