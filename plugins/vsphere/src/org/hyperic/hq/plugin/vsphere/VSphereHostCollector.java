@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2010], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -37,6 +37,7 @@ import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.collection.IntHashMap;
 
+import com.vmware.vim25.HostSystemPowerState;
 import com.vmware.vim25.PerfCounterInfo;
 import com.vmware.vim25.PerfEntityMetric;
 import com.vmware.vim25.PerfEntityMetricBase;
@@ -44,6 +45,7 @@ import com.vmware.vim25.PerfMetricId;
 import com.vmware.vim25.PerfMetricIntSeries;
 import com.vmware.vim25.PerfMetricSeries;
 import com.vmware.vim25.PerfQuerySpec;
+import com.vmware.vim25.mo.HostSystem;
 import com.vmware.vim25.mo.ManagedEntity;
 import com.vmware.vim25.mo.PerformanceManager;
 
@@ -117,12 +119,42 @@ public class VSphereHostCollector extends VSphereCollector {
         }
     }
 
+    protected void setAvailability(ManagedEntity entity) {
+        double avail;
+        HostSystem host = (HostSystem) entity;        
+        HostSystemPowerState powerState = host.getRuntime().getPowerState();
+
+        if (powerState == HostSystemPowerState.poweredOn) {
+            avail = Metric.AVAIL_UP;
+        } else if (powerState == HostSystemPowerState.poweredOff) {
+            avail = Metric.AVAIL_DOWN;
+        } else if (powerState == HostSystemPowerState.standBy) {
+            avail = Metric.AVAIL_PAUSED;
+        } else {
+            avail = Metric.AVAIL_UNKNOWN;
+        }
+        
+        setValue(Metric.ATTR_AVAIL, avail);
+    }
+    
     protected void collect(VSphereUtil vim)
         throws Exception {
 
         final boolean printMetric =
             "true".equals(System.getProperty("vim.xml"));
-        ManagedEntity mor = getManagedEntity(vim);
+        
+        ManagedEntity mor;
+        
+        try {
+            mor = getManagedEntity(vim);
+            setAvailability(mor);
+        } catch (Exception e) {
+            setAvailability(false);
+            _log.error("Error setting availability for " + getName()
+                          + ": " + e.getMessage(), e);            
+            return;
+        }
+        
         PerformanceManager perfManager = vim.getPerformanceManager();
         IntHashMap counters = getCounterInfo(perfManager);
         PerfMetricId[] ids = getPerfMetricIds(perfManager, mor);
@@ -142,7 +174,6 @@ public class VSphereHostCollector extends VSphereCollector {
                        getName() + " " + getType());
             return;
         }
-        setAvailability(true);
         PerfEntityMetric metric = (PerfEntityMetric)values[0];
         PerfMetricSeries[] vals = metric.getValue();
 
