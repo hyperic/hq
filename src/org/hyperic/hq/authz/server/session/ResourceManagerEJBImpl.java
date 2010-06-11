@@ -164,16 +164,9 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
         if (parent != null) {
             createResourceEdges(parent, res, relation, false);
             
-            // virtual resource edges are needed for servers to improve
-            // performance of vCenter resource searches
-            if (res.getResourceType().getId().equals(AuthzConstants.authzServer)) {
-                ResourceRelation virtual = getVirtualRelation();
-                // see if parent platform is associated with a vm
-                Collection edges = findAncestorResourceEdges(parent, virtual);
-                if (!edges.isEmpty()) {
-                    createResourceEdges(parent, res, virtual, true);
-                }
-            }
+            // TODO: Explore calling this when ResourceCreatedZevent
+            // is processed instead
+            createVirtualResourceEdges(owner, parent, res);
         }
         
         ResourceAudit.createResource(res, owner, start, 
@@ -868,7 +861,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
                     if (existing != null) {
                         Resource existingParent = existing.getTo();
                         if (existingParent.getId().equals(parentResource.getId())) {
-                            createVirtualResourceEdgeByMacAddress(subject, childResource);
+                            createVirtualResourceEdgesByMacAddress(subject, childResource);
                             
                             // already exists with same parent, so skip
                             if (log.isDebugEnabled()) {
@@ -901,7 +894,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
                         createResourceEdges(parentResource, childResource, relation,
                                             !hasResourceRelation(childResource, relation));
                         
-                        createVirtualResourceEdgeByMacAddress(subject, childResource);
+                        createVirtualResourceEdgesByMacAddress(subject, childResource);
                     }
                 }
             } catch (Throwable t) {
@@ -909,77 +902,118 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
             }
         }        
     }
+    
+    /**
+     * Create virtual resource edges when a resource is created
+     */
+    private void createVirtualResourceEdges(AuthzSubject owner,
+                                            Resource parent, 
+                                            Resource res) {
+        
+        if (res.getResourceType().getId().equals(AuthzConstants.authzServer)) {
+            // TODO: this is a hack because the mac address is not available
+            // yet when the platform is created. associate platform to a vm 
+            // if necessary when the server is created
+            createVirtualResourceEdgesByMacAddress(owner, parent);            
 
-    private void createVirtualResourceEdgeByMacAddress(AuthzSubject subject,
-                                                       Resource vmResource) {
-        
-        String prototype = vmResource.getPrototype().getName();
-        if (!AuthzConstants.platformPrototypeVmwareVsphereVm.equals(prototype)) {
-            return;
+            // virtual resource edges are needed for servers to improve
+            // performance of vCenter resource searches
+            ResourceRelation virtual = getVirtualRelation();
+            // see if parent platform is associated with a vm
+            Collection edges = findAncestorResourceEdges(parent, virtual);
+            if (!edges.isEmpty()) {
+                createResourceEdges(parent, res, virtual, true);
+            }
         }
-        
-        String macAddress = null;
+    }
+    
+    private boolean createVirtualResourceEdgesByMacAddress(AuthzSubject subject,
+                                                           Resource resource) {        
+        boolean isEdgesCreated = false;
         
         try {
-            PlatformManagerLocal mgr = PlatformManagerEJBImpl.getOne();
-            Platform vmPlatform = mgr.findPlatformById(vmResource.getInstanceId());
+            Platform associatedPlatform = PlatformManagerEJBImpl.getOne()
+                        .getAssociatedPlatformByMacAddress(subject, resource);
             
-            for (Iterator i = vmPlatform.getIps().iterator(); i.hasNext(); ) {
-                Ip ip = (Ip) i.next();
-                if (!"00:00:00:00:00:00".equals(ip.getMacAddress())) {
-                    macAddress = ip.getMacAddress();
-                    break;
-                }
-            }
-            
-            if (macAddress == null) {
-                return;
-            }
-        
-            Collection platforms = mgr.getPlatformByMacAddr(subject, macAddress);
-            Platform hqPlatform = null;
-            
-            for (Iterator i = platforms.iterator(); i.hasNext(); ) {
-                Platform p = (Platform) i.next();
-                if (!p.getId().equals(vmPlatform.getId())) {
-                    // TODO: Add additional logic if there are more than 2 platforms
-                    hqPlatform = p;
-                    break;
-                }
-            }
-            
-            if (hqPlatform == null) {
-                if (log.isDebugEnabled()) {
-                    log.debug("No matching platform found from "
-                                  + platforms.size() + " platforms."
-                                  + " Could not create virtual resource edge by MAC address"
-                                  + " for resource[id=" + vmResource.getId() 
-                                  + ", macAddress=" + macAddress
-                                  + "].");
-                }
-                return;
-            }
-            
-            ResourceRelation relation = getVirtualRelation();
-            
-            if (getParentResourceEdge(hqPlatform.getResource(), relation) == null) {
-                createResourceEdges(vmResource, hqPlatform.getResource(), relation, true);
-                
-                // create virtual resource edges for the servers for the platform.
-                // data is redundant with the containtment resource edges,
-                // but is needed to improve search speed
-                for (Iterator i=hqPlatform.getServers().iterator(); i.hasNext(); ) {
-                    Server s = (Server)i.next();
-                    createResourceEdges(hqPlatform.getResource(), s.getResource(), relation, true);
-                }
+            if (associatedPlatform != null) {
+                String vmPrototype = AuthzConstants.platformPrototypeVmwareVsphereVm;
+                if (vmPrototype.equals(resource.getPrototype().getName())) {
+                    isEdgesCreated = createVirtualResourceEdgesByMacAddress(
+                                          resource, associatedPlatform.getResource());
+                } else {
+                    isEdgesCreated = createVirtualResourceEdgesByMacAddress(
+                                          associatedPlatform.getResource(), resource, false);
+                }   
             }
         } catch (Exception e) {
             log.error("Could not create virtual resource edge by MAC address"
-                          + " for resource[id=" + vmResource.getId() 
-                          + ", macAddress=" + macAddress
+                          + " for resource[id=" + resource.getId() 
                           + "]: "
                           + e.getMessage(), e);
         }
+        
+        return isEdgesCreated;
+    }
+
+    private boolean createVirtualResourceEdgesByMacAddress(Resource vmResource,
+                                                           Resource hqResource) 
+        throws ResourceEdgeCreateException {
+        
+        return createVirtualResourceEdgesByMacAddress(vmResource, hqResource, true);
+    }
+    
+    private boolean createVirtualResourceEdgesByMacAddress(Resource vmResource,
+                                                           Resource hqResource,
+                                                           boolean createServerEdges) 
+        throws ResourceEdgeCreateException {
+        
+        boolean isEdgesCreated = false;
+        
+        try {
+            String vmPrototype = AuthzConstants.platformPrototypeVmwareVsphereVm;
+            
+            if (!vmPrototype.equals(vmResource.getPrototype().getName())) {
+                throw new ResourceEdgeCreateException("Resource[id=" 
+                         + vmResource.getId() + "] is not a " + vmPrototype);
+            } else if (vmPrototype.equals(hqResource.getPrototype().getName())) {
+                throw new ResourceEdgeCreateException("Resource[id="
+                         + hqResource.getId() + "] cannot be a " + vmPrototype);
+            }
+        
+            ResourceRelation relation = getVirtualRelation();
+        
+            if (getParentResourceEdge(hqResource, relation) == null) {
+                createResourceEdges(vmResource, hqResource, relation, true);
+            
+                if (createServerEdges) {
+                    // create virtual resource edges for the servers for the platform.
+                    // data is redundant with the containtment resource edges,
+                    // but is needed to improve search speed
+                    try {
+                        Platform hqPlatform = PlatformManagerEJBImpl.getOne()
+                                                .findPlatformById(hqResource.getInstanceId());
+                    
+                        for (Iterator i=hqPlatform.getServers().iterator(); i.hasNext(); ) {
+                            Server s = (Server)i.next();
+                            createResourceEdges(hqResource, s.getResource(), relation, true);
+                        }                        
+                    } catch (Exception e) {
+                        throw new ResourceEdgeCreateException(e.getMessage(), e);
+                    }
+                }
+                
+                isEdgesCreated = true;
+            }
+        } finally {
+            if (log.isDebugEnabled()) {
+                log.debug("createVirtualResourceEdgesByMacAddress: vmResourceId=" 
+                              + vmResource.getId()
+                              + ", hqResourceId=" + hqResource.getId()
+                              + ", isEdgesCreated=" + isEdgesCreated);
+            }
+        }
+        
+        return isEdgesCreated;
     }
     
     private void createNetworkResourceEdges(AuthzSubject subject,

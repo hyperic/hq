@@ -378,13 +378,16 @@ public class VCenterPlatformDetector {
             cprops.setValue("ip", address);
         }
         cprops.setValue("defaultGateway", netinfo.getIpRouteConfig().getDefaultGateway());
+
         String[] dns = netinfo.getDnsConfig().getAddress();
-        String[] dnsProps = { "primaryDNS", "secondaryDNS" };
-        for (int i=0; i<dnsProps.length; i++) {
-            if (i >= dns.length) {
-                break;
+        if (dns != null) {
+            String[] dnsProps = { "primaryDNS", "secondaryDNS" };
+            for (int i=0; i<dnsProps.length; i++) {
+                if (i >= dns.length) {
+                    break;
+                }
+                cprops.setValue(dnsProps[i], dns[i]);
             }
-            cprops.setValue(dnsProps[i], dns[i]);
         }
 
         HostHardwareSummary hw = host.getSummary().getHardware();

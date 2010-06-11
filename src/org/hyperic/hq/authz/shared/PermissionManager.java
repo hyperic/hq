@@ -25,11 +25,21 @@
 
 package org.hyperic.hq.authz.shared;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.ejb.FinderException;
+import javax.naming.NamingException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hibernate.Query;
 import org.hyperic.hq.appdef.shared.CloningBossInterface;
 import org.hyperic.hq.authz.server.session.AuthzSession;
@@ -37,12 +47,16 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.PagerProcessor_operation;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceType;
-import org.hyperic.hq.events.shared.MaintenanceEventManagerInterface;
+import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.events.shared.HierarchicalAlertingManagerInterface;
+import org.hyperic.hq.events.shared.MaintenanceEventManagerInterface;
+import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.pager.PageControl;
 
 public abstract class PermissionManager extends AuthzSession {
 
+    private static final Log _log = LogFactory.getLog(PermissionManager.class);
     public static final String OPERATION_PAGER = 
         PagerProcessor_operation.class.getName();
 
@@ -326,5 +340,80 @@ public abstract class PermissionManager extends AuthzSession {
      * Return the HierarchicalAlertingManager implementation
      */
     public abstract HierarchicalAlertingManagerInterface getHierarchicalAlertingManager();
+
+    /**
+     * @param subj {@link AuthzSubject}
+     * @param platformResType The resource_type associated with the EAM_RESOURCE and
+     * EAM_RESOURCE_TYPE tables. e.g. "covalentEAMPlatform" from {@link AuthzConstants} class.
+     * @param operation The associated operation from {@link AuthzConstants}.  e.g. "viewPlatform"
+     * @param excludes {@link Collection} of {@link Integer}s that represent the {@link Resource}Id
+     * of the protoTypes to exclude
+     * @return a count of viewable resources that the subj is able view
+     */
+    public int findResourceCount(AuthzSubject subj, String resourceType,
+                                 String operation, Collection excludes) {
+        // want to exclude top level resource prototypes (protoTypeId = rootResourceId)
+        if (excludes == null) {
+            excludes = Collections.singletonList(AuthzConstants.rootResourceId);
+        } else {
+            excludes = new HashSet(excludes);
+            excludes.add(AuthzConstants.rootResourceId);
+        }
+        Connection conn = null;
+        Statement stmt  = null;
+        ResultSet rs    = null;
+        try {
+            conn = getConnection();
+            String sql = new StringBuilder()
+                .append("SELECT COUNT(r.ID) ")
+                .append("FROM EAM_RESOURCE r ")
+                .append("JOIN EAM_RESOURCE_TYPE rtype on rtype.id = r.resource_type_id ")
+                .append("WHERE rtype.name = '").append(resourceType).append("' AND ")
+                .append(getExcludes(excludes))
+                .append("EXISTS (")
+                .append(getResourceTypeSQL("r.INSTANCE_ID", subj.getId(), resourceType, operation))
+                .append(")")
+                .toString();
+            stmt = conn.createStatement();
+            if (_log.isDebugEnabled()) _log.debug(sql);
+            rs = stmt.executeQuery(sql);
+            while (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            _log.error("Caught SQL Exception counting Platforms: " + e, e);
+            throw new SystemException(e);
+        } finally {
+            DBUtil.closeJDBCObjects(ctx, conn, stmt, rs);
+        } 
+        return 0;
+    }
+
+    private String getExcludes(Collection excludes) {
+        if (excludes == null || excludes.size() == 0) {
+            return "";
+        }
+        StringBuilder rtn = new StringBuilder(" r.proto_id not in (");
+        for (Iterator it=excludes.iterator(); it.hasNext(); ) {
+            Integer protoId = (Integer) it.next();
+            if (protoId == null) {
+                continue;
+            }
+            rtn.append(protoId).append(",");
+        }
+        if (rtn.length() == 0) {
+            return "";
+        }
+        rtn.deleteCharAt(rtn.length()-1);
+        return rtn.append(") AND ").toString();
+    }
     
+    protected Connection getConnection() throws SQLException {
+        try {
+            return DBUtil.getConnByContext(getInitialContext(), HQConstants.DATASOURCE);            
+        } catch (NamingException e) {
+            throw new SystemException("Failed to retrieve datasource: " + e, e);
+        }
+    }
+
 }
