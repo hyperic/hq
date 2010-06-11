@@ -45,8 +45,11 @@ import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceEdge;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.ControlBoss;
@@ -192,9 +195,18 @@ public abstract class ResourceController extends BaseDispatchAction {
                         AttachmentDescriptor descriptor = (AttachmentDescriptor) i.next();
                         
                         if (descriptor.getAttachment().getView().getPlugin().getName().equals("vsphere")) {
-                            pluginLinkMap.put("pluginId", descriptor.getAttachment().getId());
-                            pluginLinkMap.put("selectedId", resourceObj.getId());
-                            request.setAttribute("pluginLinkInfo", pluginLinkMap);
+                            ResourceManagerLocal resMan = ResourceManagerEJBImpl.getOne();
+                            ResourceEdge parent = resMan.getParentResourceEdge(resourceObj, resMan.getVirtualRelation());
+
+                            // TODO This is ugly and I hate putting it in, but there's no easy way to link into a 
+                            // plugin right now...
+                            if (parent != null && parent.getTo().getPrototype().getName().equals(AuthzConstants.platformPrototypeVmwareVsphereVm)) {
+                                cprops.put("VM Instance", "<a href='/mastheadAttach.do?typeId=" + descriptor.getAttachment().getId() + "&sn=" + parent.getTo().getId() + "'>" + parent.getTo().getName() + "</a>");
+                            } else {
+                                pluginLinkMap.put("pluginId", descriptor.getAttachment().getId());
+                                pluginLinkMap.put("selectedId", resourceObj.getId());
+                                request.setAttribute("pluginLinkInfo", pluginLinkMap);
+                            }
                             
                             break;
                         }
