@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2010], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -28,6 +28,7 @@ package org.hyperic.hq.plugin.vsphere;
 import org.hyperic.hq.product.Metric;
 
 import com.vmware.vim25.VirtualMachinePowerState;
+import com.vmware.vim25.mo.ManagedEntity;
 import com.vmware.vim25.mo.VirtualMachine;
 
 public class VSphereVmCollector extends VSphereHostCollector {
@@ -43,30 +44,21 @@ public class VSphereVmCollector extends VSphereHostCollector {
         return TYPE;
     }
 
-    protected void collect(VSphereUtil vim) throws Exception {
-        super.collect(vim);
-        try {
-            double avail;
-            VirtualMachine vm =
-                (VirtualMachine)vim.find(TYPE, getName());
-            VirtualMachinePowerState state =
-                vm.getRuntime().getPowerState();
+    protected void setAvailability(ManagedEntity entity) {
+        double avail;
+        VirtualMachine vm = (VirtualMachine) entity;
+        VirtualMachinePowerState state = vm.getRuntime().getPowerState();
 
-            if (state == VirtualMachinePowerState.poweredOn) {
-                avail = Metric.AVAIL_UP;
-            }
-            else if (state == VirtualMachinePowerState.poweredOff) {
-                avail = Metric.AVAIL_DOWN;
-            }
-            else if (state == VirtualMachinePowerState.suspended) {
-                avail = Metric.AVAIL_PAUSED;
-            }
-            else {
-                avail = Metric.AVAIL_UNKNOWN;
-            }
-            setValue(Metric.ATTR_AVAIL, avail);
-        } catch (Exception e) {
-            setAvailability(false);
+        if (state == VirtualMachinePowerState.poweredOn) {
+            avail = Metric.AVAIL_UP;
+        } else if (state == VirtualMachinePowerState.poweredOff) {
+            avail = Metric.AVAIL_DOWN;
+        } else if (state == VirtualMachinePowerState.suspended) {
+            avail = Metric.AVAIL_PAUSED;
+        } else {
+            avail = Metric.AVAIL_UNKNOWN;
         }
+        
+        setValue(Metric.ATTR_AVAIL, avail);
     }
 }
