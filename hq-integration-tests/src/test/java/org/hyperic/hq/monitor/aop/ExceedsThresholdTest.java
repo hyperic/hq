@@ -24,18 +24,17 @@
  */
 package org.hyperic.hq.monitor.aop;
 
-import org.hyperic.hq.autoinventory.shared.AutoinventoryManager; 
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNotNull;
+
 import org.hyperic.hq.monitor.MockService;
 import org.hyperic.testSuite.BaseInfrastructureTest;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.StopWatch;
-
-import static junit.framework.Assert.*;
 
 
 /**
@@ -49,17 +48,17 @@ import static junit.framework.Assert.*;
  * @see <a href="http://jira.hyperic.com/browse/HE-356">Add aspect to track @Transactional/@Service method runtime and log if exceeded threshold</a>
  */
 @ContextConfiguration
-public class ExceedsThresholdTests extends BaseInfrastructureTest {
+@Ignore("This test requires manual verification that the aspect logged a message")
+public class ExceedsThresholdTest extends BaseInfrastructureTest {
 
     @Autowired private MockService mockServiceImpl;
-    @Autowired private AutoinventoryManager autoInventoryManagerImpl;
+   
  
     private long unAcceptableDuration = 300000; 
 
     @Before
     public void before() {
         assertNotNull("mockServiceImpl should not be null", mockServiceImpl);
-        assertNotNull("autoInventoryManager should not be null", autoInventoryManagerImpl);
     }
 
     /**
@@ -68,7 +67,6 @@ public class ExceedsThresholdTests extends BaseInfrastructureTest {
      * 
      */
     @Test
-    //@Ignore("comment out: designed to fail")
     public void monitorControlPerformance() {
         StopWatch sw = new StopWatch();
         sw.start("test");
@@ -76,13 +74,9 @@ public class ExceedsThresholdTests extends BaseInfrastructureTest {
         mockServiceImpl.foo(unAcceptableDuration);
 
         sw.stop(); 
-        assertTrue("method exceeded acceptable duration: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < unAcceptableDuration);
+        assertFalse("method exceeded acceptable duration: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < unAcceptableDuration);
     }
 
-    @Test
-    public void monitorPerformance(){
-        autoInventoryManagerImpl.notifyAgentsNeedingRuntimeScan();
-    }
 
 
 }
