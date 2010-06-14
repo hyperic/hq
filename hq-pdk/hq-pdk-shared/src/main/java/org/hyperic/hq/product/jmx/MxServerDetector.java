@@ -41,6 +41,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.DaemonDetector;
+import org.hyperic.hq.product.LogTrackPlugin;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
@@ -451,6 +452,7 @@ public class MxServerDetector
             service.setMeasurementConfig();
 
             service.setCustomProperties(cprops);
+            enableLogAndConfigTrackPlugins(service);
 
             services.add(service);
         }
@@ -458,6 +460,37 @@ public class MxServerDetector
         setCustomProperties(new ConfigResponse(serverQuery.getCustomProperties()));
 
         return services;
+    }
+    
+    private void enableLogAndConfigTrackPlugins(final ServiceResource service) {
+        int logLevel = -1;
+        boolean enableConfigTrack = false;
+        if ("true".equals(getTypeProperty(service.getType(),
+                "DEFAULT_LOG_TRACK_ENABLE"))) {
+            logLevel = LogTrackPlugin.LOGLEVEL_INFO;
+            if (getTypeProperty(service.getType(), "DEFAULT_LOG_LEVEL") != null) {
+                try {
+                    logLevel = Integer.valueOf(getTypeProperty(service
+                            .getType(), "DEFAULT_LOG_LEVEL"));
+                }
+                catch (NumberFormatException e) {
+                    //TODO add logger
+                    //logger
+                      //      .warn("Error converting default log level of "
+                        //            + getTypeProperty(service.getType(),
+                          //                  DEFAULT_LOG_LEVEL)
+                            //        + " to an integer.  The log level will bet set to INFO.");
+                }
+            }
+        }
+        if ("true".equals(getTypeProperty(service.getType(),
+                "DEFAULT_CONFIG_TRACK_ENABLE"))) {
+            enableConfigTrack = true;
+        }
+        if (logLevel != -1 || enableConfigTrack) {
+            service.setMeasurementConfig(new ConfigResponse(), logLevel,
+                    enableConfigTrack);
+        }
     }
 
     protected List discoverServices(ConfigResponse serverConfig)
