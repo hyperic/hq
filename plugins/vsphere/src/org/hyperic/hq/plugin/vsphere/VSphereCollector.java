@@ -35,6 +35,7 @@ import org.hyperic.util.collection.IntHashMap;
 
 import com.vmware.vim25.PerfCounterInfo;
 import com.vmware.vim25.PerfMetricId;
+import com.vmware.vim25.PerfProviderSummary;
 import com.vmware.vim25.mo.ManagedEntity;
 import com.vmware.vim25.mo.PerformanceManager;
 
@@ -67,6 +68,15 @@ public abstract class VSphereCollector extends Collector {
         String name = info.getNameInfo().getKey();
         String rollup = info.getRollupType().toString();
         return group + "." + name + "." + rollup;
+    }
+    
+    protected Integer getRefreshRate(PerformanceManager perfManager,
+                                     ManagedEntity entity)
+        throws Exception {
+        
+        PerfProviderSummary summary = perfManager.queryPerfProviderSummary(entity);
+        
+        return summary.getRefreshRate();        
     }
 
     //http://pubs.vmware.com/vi3/sdk/ReferenceGuide/vim.PerformanceManager.html

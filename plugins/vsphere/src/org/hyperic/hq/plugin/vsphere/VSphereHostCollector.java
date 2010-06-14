@@ -157,25 +157,39 @@ public class VSphereHostCollector extends VSphereCollector {
         
         PerformanceManager perfManager = vim.getPerformanceManager();
         IntHashMap counters = getCounterInfo(perfManager);
+        Integer refreshRate = getRefreshRate(perfManager, mor);
         PerfMetricId[] ids = getPerfMetricIds(perfManager, mor);
 
         PerfQuerySpec spec = new PerfQuerySpec();
         spec.setEntity(mor.getMOR());
         spec.setMetricId(ids);
         spec.setMaxSample(new Integer(1));
-        spec.setIntervalId(new Integer(20));
+        spec.setIntervalId(refreshRate);
        
         PerfQuerySpec[] query = new PerfQuerySpec[] { spec };      
         PerfEntityMetricBase[] values =
             perfManager.queryPerf(query);
 
         if (values == null) {
-            _log.debug("No performance metrics available for: " +
-                       getName() + " " + getType());
+            if (_log.isDebugEnabled()) {
+                _log.debug("No performance metrics available for "
+                           + getType() + "[name=" + getName()
+                           + ", refreshRate=" + refreshRate
+                           + ", availablePerfMetric=" + ids.length
+                           + "]");
+            }
             return;
         }
         PerfEntityMetric metric = (PerfEntityMetric)values[0];
         PerfMetricSeries[] vals = metric.getValue();
+
+        if (_log.isDebugEnabled()) {
+            _log.debug(getType() + "[name=" + getName()
+                       + ", refreshRate=" + refreshRate
+                       + ", availablePerfMetric=" + ids.length
+                       + ", perfQuery=" + vals.length
+                       + "]");
+        }
 
         for (int i=0; i<vals.length; i++) {
             PerfCounterInfo info =
