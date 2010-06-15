@@ -210,6 +210,14 @@ public class TomcatServerDetector
         return null;
     }
 
+    protected String getProcQuery(String path) {
+        String query = super.getProcessQuery();
+        if (path != null) {
+            query += path;
+        }
+        return query;
+    }
+
     /**
      * Auto scan
      */

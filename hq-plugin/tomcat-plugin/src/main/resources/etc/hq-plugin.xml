@@ -165,6 +165,9 @@
     <property name="PROC_HOME_PROPERTY"
               value="catalina.base-DISABLED"/>
 
+    <property name="PROC_QUERY"
+              value="State.Name.re=java|jsvc,State.Name.Pne=$1,Args.*.sw=-Dcatalina.home="/>
+
     <property name="DEFAULT_CONF"
               value="conf/server.xml"/>
 
@@ -214,7 +217,7 @@
               type="secret"/>
       <option name="ptql"
               description="PTQL for Tomcat Process"
-              default="State.Name.eq=java,Args.*.ct=catalina.home"/>
+              default="${PROC_QUERY}"/>
     </config>
 
     <plugin type="measurement"
@@ -507,7 +510,7 @@
     <service name="Java Process Metrics">
       <config>
         <option name="process.query"
-                default="%ptql%"
+                default="${PROC_QUERY}"
                 description="PTQL for Tomcat Java Process"/>
       </config>
       <metric name="Availability"
