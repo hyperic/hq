@@ -26,6 +26,7 @@
 package org.hyperic.hq.plugin.bind;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Properties;
 
 import java.io.BufferedReader;
@@ -51,6 +52,70 @@ public class BindMeasurementPlugin
     static final String PROP_NAMED_STATS = "named.stats";
 
     private static final HashMap queryInfo = new HashMap();
+
+    private static void processStatsFile(File file)
+        throws MetricNotFoundException
+    {
+        // Process the stats file.
+        BufferedReader in = null;
+        try {
+            in = new BufferedReader(new FileReader(file));
+
+            String line;
+            Double val;
+            while ((line = in.readLine()) != null) {
+                String trimmed = line.trim();
+                if (trimmed.startsWith("success")) {
+                    val = new Double(trimmed.substring(8 ,trimmed.length()));
+                    queryInfo.put("SuccessfulQueries", val);
+                } else if (trimmed.startsWith("referral")) {
+                    val = new Double(trimmed.substring(9, trimmed.length()));
+                    queryInfo.put("ReferralQueries", val);
+                } else if (trimmed.startsWith("nxrrset")) {
+                    val = new Double(trimmed.substring(8, trimmed.length()));
+                    queryInfo.put("NoRecordQueries", val);
+                } else if (trimmed.startsWith("nxdomain")) {
+                    val = new Double(trimmed.substring(9, trimmed.length()));
+                    queryInfo.put("NoDomainQueries", val);
+                } else if (trimmed.startsWith("recursion")) {
+                    val = new Double(trimmed.substring(10, trimmed.length()));
+                    queryInfo.put("RecursiveQueries", val);
+                } else if (trimmed.startsWith("failure")) {
+                    val = new Double(trimmed.substring(8, trimmed.length()));
+                    queryInfo.put("FailedQueries", val);
+                }
+                // [HHQ-3939] Add forward compatibility for existing Bind 9.x
+                // metrics.  Should be expanded to cover all new metrics found
+                // in Bind 9.5 and up.
+                else if (trimmed.endsWith("queries resulted in successful answer")) {
+                    val = new Double(trimmed.substring(0, trimmed.indexOf(' ')));
+                    queryInfo.put("SuccessfulQueries", val);
+                } else if (trimmed.endsWith("queries resulted in referral")) {
+                    val = new Double(trimmed.substring(0, trimmed.indexOf(' ')));
+                    queryInfo.put("ReferralQueries", val);
+                } else if (trimmed.endsWith("queries resulted in nxrrset")) {
+                    val = new Double(trimmed.substring(0, trimmed.indexOf(' ')));
+                    queryInfo.put("NoRecordQueries", val);
+                } else if (trimmed.endsWith("queries resulted in NXDOMAIN")) {
+                    val = new Double(trimmed.substring(0, trimmed.indexOf(' ')));
+                    queryInfo.put("NoDomainQueries", val);
+                } else if (trimmed.endsWith("queries caused recursion")) {
+                    val = new Double(trimmed.substring(0, trimmed.indexOf(' ')));
+                    queryInfo.put("RecursiveQueries", val);
+                } else if (trimmed.endsWith("queries resulted in SERVFAIL")) {
+                    val = new Double(trimmed.substring(0, trimmed.indexOf(' ')));
+                    queryInfo.put("FailedQueries", val);
+                }
+            }
+        } catch (IOException e) {
+            throw new MetricNotFoundException("Unable to process rndc " +
+                                              "output: " + e);
+        } finally {
+            if (in != null) {
+                try { in.close(); } catch (IOException e) {}
+            }
+        }
+    }
 
     public void getQueryInfo(Properties props)
         throws MetricNotFoundException
@@ -115,44 +180,7 @@ public class BindMeasurementPlugin
         } catch (InterruptedException e) {
         }
 
-        // Process the stats file.
-        BufferedReader in = null;
-        try {
-            in = new BufferedReader(new FileReader(statsFile));
-
-            String line;
-            Double val;
-            while ((line = in.readLine()) != null) {
-
-                if (line.startsWith("success")) {
-                    val = new Double(line.substring(8 ,line.length()));
-                    queryInfo.put("SuccessfulQueries", val);
-                } else if (line.startsWith("referral")) {
-                    val = new Double(line.substring(9, line.length()));
-                    queryInfo.put("ReferralQueries", val);
-                } else if (line.startsWith("nxrrset")) {
-                    val = new Double(line.substring(8, line.length()));
-                    queryInfo.put("NoRecordQueries", val);
-                } else if (line.startsWith("nxdomain")) {
-                    val = new Double(line.substring(9, line.length()));
-                    queryInfo.put("NoDomainQueries", val);
-                } else if (line.startsWith("recursion")) {
-                    val = new Double(line.substring(10, line.length()));
-                    queryInfo.put("RecursiveQueries", val);
-                } else if (line.startsWith("failure")) {
-                    val = new Double(line.substring(8, line.length()));
-                    queryInfo.put("FailedQueries", val);
-                }
-            }
-        } catch (IOException e) {
-            throw new MetricNotFoundException("Unable to process rndc " +
-                                              "output: " + e);
-        } finally {
-            if (in != null) {
-                try { in.close(); } catch (IOException e) {}
-            }
-        }
-
+        processStatsFile(statsFile);
     }
 
     public MetricValue getValue(Metric metric)
@@ -184,5 +212,24 @@ public class BindMeasurementPlugin
         queryInfo.remove(attr);
 
         return new MetricValue(val.doubleValue(), System.currentTimeMillis());
+    }
+
+    public static void main(String[] args) throws Exception {
+        if (args.length == 1) {
+            File statsFile = new File(args[0]);
+            if (!statsFile.exists()) {
+                System.err.println("Unable to find stats file " + statsFile);
+            } else {
+                System.out.println("Parsing stats file: " + args[0]);
+                processStatsFile(statsFile);
+                for (Iterator i = queryInfo.keySet().iterator(); i.hasNext(); ) {
+                    String key = (String)i.next();
+                    System.out.println(key + "=" + queryInfo.get(key));
+                }
+                System.out.println("Done");
+            }
+        } else {
+            System.err.println("Usage: BindMeasurementPlugin <stats.file>");
+        }
     }
 }
