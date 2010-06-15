@@ -66,11 +66,14 @@ public class VSphereVmControlPlugin extends ControlPlugin {
             Task task;
 
             if (action.equals("createSnapshot")) {
-                if (args.length != 2) {
+                if (args.length < 1 || args.length > 2) {
                     throw new PluginException("Usage: name, description");
                 }
                 String name = args[0];
-                String description = args[1];
+                String description = "";
+                if (args.length == 2) {
+                    description = args[1];
+                }
                 task = vm.createSnapshot_Task(name, description,
                                               true, true);
             }
