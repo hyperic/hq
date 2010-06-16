@@ -39,7 +39,7 @@ public class InternalAuthenticationProvider implements AuthenticationProvider {
         // TODO: Once this is evolution, remove the getOne in favor of DI
         AuthBossLocal authBoss = AuthBossEJBImpl.getOne();
         AuthzSubjectManagerLocal authzManager = AuthzSubjectManagerEJBImpl.getOne();
-        AuthzSubject guestUser = authzManager.findSubjectById(AuthzConstants.guestId);
+        AuthzSubject guestUser = authzManager.getSubjectById(AuthzConstants.guestId);
         
         // First, we get the username and password from the authentication object passed in...
         String username = authentication.getName();
