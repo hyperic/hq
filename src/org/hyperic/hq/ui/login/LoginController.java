@@ -54,7 +54,7 @@ public class LoginController {
         // TODO This is temporary for 4.3, we'll be revisiting this mechanism in a future version
         //      were this EJB business will be reworked...
         AuthzSubjectManagerLocal authzManager = AuthzSubjectManagerEJBImpl.getOne();
-        AuthzSubject guestUser = authzManager.findSubjectById(AuthzConstants.guestId);
+        AuthzSubject guestUser = authzManager.getSubjectById(AuthzConstants.guestId);
         
         // ...before we return, check for an error message...
         boolean loginError = request.getParameter("authfailed") != null;
