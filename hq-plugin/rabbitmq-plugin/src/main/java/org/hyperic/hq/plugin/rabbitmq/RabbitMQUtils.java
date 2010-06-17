@@ -15,10 +15,13 @@ import com.ericsson.otp.erlang.OtpPeer;
 import com.ericsson.otp.erlang.OtpSelf;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.objs.Application;
+import org.hyperic.hq.plugin.rabbitmq.objs.Queue;
 import org.hyperic.hq.plugin.rabbitmq.objs.Status;
 import org.hyperic.hq.product.PluginException;
 
@@ -31,9 +34,15 @@ public class RabbitMQUtils {
     private static Log log = LogFactory.getLog(RabbitMQUtils.class);
 
     public static List getQueues(String server, String vHost) throws PluginException {
-        OtpErlangObject[] args=new OtpErlangObject[]{new OtpErlangBinary(vHost.getBytes())}; //,new OtpErlangAtom("name")};
-        OtpErlangList vhosts = (OtpErlangList) executeCommand(server, "rabbit_amqqueue", "info_all", new OtpErlangList(args));
+        OtpErlangObject[] args = new OtpErlangObject[]{new OtpErlangBinary(vHost.getBytes())};
+        OtpErlangList queues = (OtpErlangList) executeCommand(server, "rabbit_amqqueue", "info_all", new OtpErlangList(args));
         List res = new ArrayList();
+        for (int n = 0; n < queues.arity(); n++) {
+            res.add(new Queue((OtpErlangList) queues.elementAt(n)));
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("[getQueues] res=" + res);
+        }
         return res;
     }
 
@@ -120,6 +129,24 @@ public class RabbitMQUtils {
             }
         }
         log.debug("[parseStatusObject] res=" + res);
+        return res;
+    }
+
+    public static Map tupleToMap(OtpErlangTuple list){
+        Map res=new HashMap();
+        int n=0;
+        do{
+            res.put(list.elementAt(n++).toString(), list.elementAt(n++));
+        }while(n<list.arity());
+        return res;
+    }
+
+    public static Map tupleListToMap(OtpErlangList list){
+        Map res=new HashMap();
+        int n=0;
+        for(int i=0;i<list.arity();i++){
+            res.putAll(tupleToMap((OtpErlangTuple) list.elementAt(i)));
+        }
         return res;
     }
 }

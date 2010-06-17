@@ -1,45 +1,62 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-	<modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>org.hyperic.hq.plugin</groupId>
-		<artifactId>hq-plugin-parent</artifactId>
-		<version>4.5.0.BUILD-SNAPSHOT</version>
-	</parent>
+    <parent>
+        <groupId>org.hyperic.hq.plugin</groupId>
+        <artifactId>hq-plugin-parent</artifactId>
+        <version>4.5.0.BUILD-SNAPSHOT</version>
+    </parent>
 
-	<artifactId>rabbitmq-plugin</artifactId>
-	<packaging>jar</packaging>
-	<name>Hyperic HQ Plugin - RabbitMQ Plugin</name>
+    <artifactId>rabbitmq-plugin</artifactId>
+    <packaging>jar</packaging>
+    <name>Hyperic HQ Plugin - RabbitMQ Plugin</name>
 
-	<dependencies>
-		<dependency>
-			<groupId>org.hyperic.hq</groupId>
-			<artifactId>hq-pdk-shared</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.erlang.otp</groupId>
-			<artifactId>jinterface</artifactId>
-			<version>1.5.2</version>
-		</dependency>
-		<dependency>
-  				<groupId>com.cenqua.clover</groupId>
-  				<artifactId>clover</artifactId>
-  				<version>${clover2.version}</version>
-				<scope>provided</scope>
-		</dependency>
-	</dependencies>
-	
-	<build>
-		<plugins>
-			<!-- The exec-maven-plugin is configured to validate plugin XML.  See hq-plugin-parent pom for details-->
-			<plugin>
-        		<groupId>org.codehaus.mojo</groupId>
-        		<artifactId>exec-maven-plugin</artifactId>
-			</plugin>
-		</plugins>
-	</build>
+    <dependencies>
+        <dependency>
+            <groupId>org.hyperic.hq</groupId>
+            <artifactId>hq-pdk-shared</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.erlang.otp</groupId>
+            <artifactId>jinterface</artifactId>
+            <version>1.5.2</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.cenqua.clover</groupId>
+            <artifactId>clover</artifactId>
+            <version>${clover2.version}</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/classes/lib</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>            <!-- The exec-maven-plugin is configured to validate plugin XML.  See hq-plugin-parent pom for details-->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

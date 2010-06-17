@@ -30,9 +30,65 @@
  -->
 
 <plugin package="org.hyperic.hq.plugin.rabbitmq" class="RabbitMQProductPlugin">
+    <property name="template" value="rabbitmq:queue=%name%,vhost=%vhost%,server=%server.name%:${alias}"/>
+    <metrics name="RabbitMQ 1.7 Queue">
+        <metric name="Availability"
+                category="AVAILABILITY"
+                units="percentage"
+                indicator="true"
+                collectionType="dynamic"/>
+        <metric name="Msg Ready"    alias="messages_ready"
+                category="UTILIZATION"
+                units="none"
+                indicator="true"
+                collectionType="dynamic"/>
+        <metric name="Msg UnAck."
+                alias="messages_unacknowledged"
+                category="UTILIZATION"
+                units="none"
+                indicator="true"
+                collectionType="dynamic"/>
+        <metric name="Msg UnComm."
+                alias="messages_uncommitted"
+                category="UTILIZATION"
+                units="none"
+                indicator="true"
+                collectionType="dynamic"/>
+        <metric name="Messages"
+                alias="messages"
+                category="UTILIZATION"
+                units="none"
+                indicator="true"
+                collectionType="dynamic"/>
+        <metric name="Ack. UnComm."
+                alias="acks_uncommitted"
+                category="UTILIZATION"
+                units="none"
+                indicator="true"
+                collectionType="dynamic"/>
+        <metric name="Consumers"
+                alias="consumers"
+                category="UTILIZATION"
+                units="none"
+                indicator="true"
+                collectionType="dynamic"/>
+        <metric name="Transactions"
+                alias="transactions"
+                category="UTILIZATION"
+                units="none"
+                indicator="true"
+                collectionType="dynamic"/>
+        <metric name="Memory"
+                alias="memory"
+                category="UTILIZATION"
+                units="b"
+                indicator="true"
+                collectionType="dynamic"/>
+    </metrics>
     <server name="RabbitMQ" version="1.7">
         <plugin type="autoinventory" class="RabbitMQServerDetector"/>
         <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
+        <plugin type="collector" class="org.hyperic.hq.product.MeasurementPlugin"/>
 
         <config type="product">
             <option name="server.name" description="XXXXXXX"/>
@@ -40,6 +96,15 @@
         <config type="measurement">
             <option name="process.query" default="State.Name.eq=beam,Args.*.eq=-sname,Args.*.eq=%server.name%" description="XXXXXXX"/>
         </config>
+
+        <service name="VHost"/>
+        <service name="Queue">
+            <plugin type="collector" class="RabbitMQQueueCollector"/>
+            <config type="product">
+                <option name="vhost" description="queue vHost"/>
+                <option name="name" description="queue Name"/>
+            </config>
+        </service>
 
         &process-metrics;
 

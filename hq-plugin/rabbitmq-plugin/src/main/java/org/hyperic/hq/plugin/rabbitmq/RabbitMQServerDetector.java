@@ -7,10 +7,12 @@ package org.hyperic.hq.plugin.rabbitmq;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.logging.Log;
+import org.hyperic.hq.plugin.rabbitmq.objs.Queue;
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
+import org.hyperic.hq.product.ServiceResource;
 import org.hyperic.util.config.ConfigResponse;
 
 /**
@@ -52,11 +54,24 @@ public class RabbitMQServerDetector extends ServerDetector implements AutoServer
     @Override
     protected List discoverServices(ConfigResponse config) throws PluginException {
         log.debug("[discoverServices] config=" + config);
+        List<ServiceResource> res=new ArrayList();
         List<String> vHosts = RabbitMQUtils.getVHost(config.getValue(SERVERNAME));
         for (String vHost : vHosts) {
-            RabbitMQUtils.getQueues(config.getValue(SERVERNAME),vHost);
+            ServiceResource svh = createServiceResource("VHost");
+            svh.setName(getTypeInfo().getName()+" VHost "+vHost);
+            res.add(svh);
+            List<Queue> queues=RabbitMQUtils.getQueues(config.getValue(SERVERNAME),vHost);
+            for(Queue queue : queues){
+                ServiceResource q=createServiceResource("Queue");
+                q.setName(getTypeInfo().getName()+" Queue "+ queue.getFullName());
+                ConfigResponse c = new ConfigResponse();
+                c.setValue("vhost", queue.getVHost());
+                c.setValue("name", queue.getName());
+                q.setProductConfig( c);
+                res.add(q);
+            }
         }
-        return super.discoverServices(config);
+        return res;
     }
 
     private String getServerName(String[] args) {
