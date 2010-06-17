@@ -166,7 +166,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
             
             // TODO: Explore calling this when ResourceCreatedZevent
             // is processed instead
-            createVirtualResourceEdges(owner, parent, res);
+            createVirtualResourceEdges(owner, parent, res, system);
         }
         
         ResourceAudit.createResource(res, owner, start, 
@@ -908,9 +908,12 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      */
     private void createVirtualResourceEdges(AuthzSubject owner,
                                             Resource parent, 
-                                            Resource res) {
+                                            Resource res,
+                                            boolean system) {
         
-        if (res.getResourceType().getId().equals(AuthzConstants.authzServer)) {
+        // do not add virtual servers
+        
+        if (!system && res.getResourceType().getId().equals(AuthzConstants.authzServer)) {
             // TODO: this is a hack because the mac address is not available
             // yet when the platform is created. associate platform to a vm 
             // if necessary when the server is created
@@ -995,7 +998,10 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
                     
                         for (Iterator i=hqPlatform.getServers().iterator(); i.hasNext(); ) {
                             Server s = (Server)i.next();
-                            createResourceEdges(hqResource, s.getResource(), relation, true);
+                            // do not add virtual servers
+                            if (!s.getServerType().isVirtual()) {
+                                createResourceEdges(hqResource, s.getResource(), relation, true);
+                            }
                         }                        
                     } catch (Exception e) {
                         throw new ResourceEdgeCreateException(e.getMessage(), e);

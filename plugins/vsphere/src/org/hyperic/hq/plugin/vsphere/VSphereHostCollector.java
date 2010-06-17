@@ -156,10 +156,18 @@ public class VSphereHostCollector extends VSphereCollector {
         }
         
         PerformanceManager perfManager = vim.getPerformanceManager();
-        IntHashMap counters = getCounterInfo(perfManager);
-        Integer refreshRate = getRefreshRate(perfManager, mor);
         PerfMetricId[] ids = getPerfMetricIds(perfManager, mor);
 
+        if (ids == null || ids.length == 0) {
+            if (_log.isDebugEnabled()) {
+                _log.debug("No available performance metrics for "
+                           + getType() + "[name=" + getName()
+                           + "]");
+            }
+            return;
+        }
+        
+        Integer refreshRate = getRefreshRate(perfManager, mor);
         PerfQuerySpec spec = new PerfQuerySpec();
         spec.setEntity(mor.getMOR());
         spec.setMetricId(ids);
@@ -172,7 +180,7 @@ public class VSphereHostCollector extends VSphereCollector {
 
         if (values == null) {
             if (_log.isDebugEnabled()) {
-                _log.debug("No performance metrics available for "
+                _log.debug("No performance metrics for "
                            + getType() + "[name=" + getName()
                            + ", refreshRate=" + refreshRate
                            + ", availablePerfMetric=" + ids.length
@@ -180,6 +188,8 @@ public class VSphereHostCollector extends VSphereCollector {
             }
             return;
         }
+        
+        IntHashMap counters = getCounterInfo(perfManager);
         PerfEntityMetric metric = (PerfEntityMetric)values[0];
         PerfMetricSeries[] vals = metric.getValue();
 
@@ -187,11 +197,11 @@ public class VSphereHostCollector extends VSphereCollector {
             _log.debug(getType() + "[name=" + getName()
                        + ", refreshRate=" + refreshRate
                        + ", availablePerfMetric=" + ids.length
-                       + ", perfQuery=" + vals.length
+                       + ", perfQuery=" + (vals == null ? 0 : vals.length)
                        + "]");
         }
-
-        for (int i=0; i<vals.length; i++) {
+        
+        for (int i=0; vals!=null && i<vals.length; i++) {
             PerfCounterInfo info =
                 (PerfCounterInfo)counters.get(vals[i].getId().getCounterId());
 

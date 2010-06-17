@@ -2,7 +2,7 @@
 
   <config name="sdk">
     <option name="url"
-            description="VI sdk url"
+            description="vCenter sdk url"
             default="https://localhost/sdk"/>
 
     <option name="user"
