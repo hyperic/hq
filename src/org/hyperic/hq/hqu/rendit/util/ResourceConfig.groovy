@@ -1,6 +1,7 @@
 package org.hyperic.hq.hqu.rendit.util
 
 import org.hyperic.hq.appdef.Agent
+import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl as AgentMan
 import org.hyperic.hq.appdef.server.session.CPropManagerEJBImpl as CPropMan
 import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl as ConfigMan
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl as PlatMan
@@ -29,6 +30,7 @@ import org.hyperic.util.config.ConfigResponse
  * types (users?, roles?)
  */
 class ResourceConfig {
+    private static agentMan  = AgentMan.one
     private static authzMan  = AuthzMan.one
     private static cpropMan  = CPropMan.one
     private static appBoss   = AppdefBoss.one
@@ -54,6 +56,8 @@ class ResourceConfig {
                         set: { platVal, desc -> platVal.description = desc}],
         'location':    [get: { plat -> plat.location },
                         set: { platVal, loc -> platVal.location = loc}],
+        'agentId':     [get: { plat -> plat.agent.id },
+                        set: { platVal, agentId -> platVal.agent = agentMan.getAgent(agentId)}],
     ]
     
     private static SERVER_FIELD_KEYS = [
