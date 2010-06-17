@@ -1019,9 +1019,6 @@
         <include name="xmlrpc-client-3.1.jar"/>
         <include name="xmlrpc-common-3.1.jar"/>
         <include name="ws-commons-util-1.0.2.jar"/>
-        <!-- for vim plugin using vijava 2.0 -->
-        <include name="com.springsource.com.sun.xml.bind-2.1.7.jar"/>
-        <include name="com.springsource.javax.xml.bind-2.1.7.jar"/>
       </fileset>
       <fileset dir="${tapestry_lib}">
         <!-- for CollectorThread -->
@@ -1248,22 +1245,22 @@
     </copy>
   	
     <copy todir="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/lib" >
-		<fileset dir="${thirdparty.lib}">
-		  <include name="jboss-remoting.jar"/>
-		  <include name="jboss-common.jar"/>
-	      <include name="jboss-jmx.jar"/>
-		</fileset>
-		<fileset dir="${thirdparty.lib}/hibernate" includes="concurrent*.jar"/>
+        <fileset dir="${thirdparty.lib}">
+            <include name="jboss-remoting.jar"/>
+            <include name="jboss-common.jar"/>
+            <include name="jboss-jmx.jar"/>
+        </fileset>
+        <fileset dir="${thirdparty.lib}/hibernate" includes="concurrent*.jar"/>
     </copy>
-	  
+
     <copy todir="${agent.dir}/wrapper/sbin" >
       <fileset dir="${wrapper.bin}" includes="*" />
     </copy> 	
-  	
+
     <copy todir="${agent.dir}/wrapper/lib" >
       <fileset dir="${wrapper.lib}" includes="*" />
     </copy> 	
-	  
+
     <!-- Autoinventory jars -->
     <jar basedir="${build.dir}/classes" jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/AgentAutoinventoryServer.jar">
       <include name="org/hyperic/hq/autoinventory/**"/>
@@ -1304,12 +1301,12 @@
 	  
 	  <!-- New Handler for Transport -->
     <jar basedir="${build.dir}/classes" jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/lib/AgentTransport.jar">
-	  <include name="org/hyperic/hq/agent/server/AgentTransportLifecycleImpl.class"/> 	
+      <include name="org/hyperic/hq/agent/server/AgentTransportLifecycleImpl.class"/> 	
       <include name="org/hyperic/hq/transport/AgentTransport*.class"/>
       <include name="org/hyperic/hq/transport/PollerClient.class"/>
       <include name="org/hyperic/hq/transport/util/*.class"/>   
       <exclude name="org/hyperic/hq/transport/**/*_test*"/> 
-	  <include name="org/hyperic/hq/measurement/agent/commands/*.class"/>	 
+      <include name="org/hyperic/hq/measurement/agent/commands/*.class"/>	 
     </jar>
 	  	  
     <!-- Top level stuff -->
