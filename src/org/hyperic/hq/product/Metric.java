@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2010], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -59,6 +59,7 @@ public class Metric {
     public static final double AVAIL_DOWN    = MeasurementConstants.AVAIL_DOWN;
     public static final double AVAIL_WARN    = MeasurementConstants.AVAIL_WARN;
     public static final double AVAIL_PAUSED  = MeasurementConstants.AVAIL_PAUSED;
+    public static final double AVAIL_POWERED_OFF = MeasurementConstants.AVAIL_POWERED_OFF;
 
     private static HashMap cache = new HashMap();
     private static HashMap secrets = new HashMap();
