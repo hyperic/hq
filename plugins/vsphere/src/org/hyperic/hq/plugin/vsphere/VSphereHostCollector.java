@@ -127,10 +127,7 @@ public class VSphereHostCollector extends VSphereCollector {
         if (powerState == HostSystemPowerState.poweredOn) {
             avail = Metric.AVAIL_UP;
         } else if (powerState == HostSystemPowerState.poweredOff) {
-            // for backwards compatibility with pre-4.4 agents,
-            // cannot use the new AVAIL_POWERED_OFF constant
-            //avail = Metric.AVAIL_POWERED_OFF;
-            avail = -0.02;
+            avail = Metric.AVAIL_POWERED_OFF;
         } else if (powerState == HostSystemPowerState.standBy) {
             avail = Metric.AVAIL_PAUSED;
         } else {
