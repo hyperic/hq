@@ -82,9 +82,11 @@ public class ScheduleThread
     private final    Object     _lock = new Object();
 
     private          Map       _schedules;   // AppdefID -> Schedule
+    private final    List      _pendingUnschedules = Collections.synchronizedList(new ArrayList());
+    private final    List      _pendingSchedules = Collections.synchronizedList(new ArrayList());
     private volatile boolean   _shouldDie;   // Should I shut down?
-    private          Object    _interrupter; // Interrupt object
-    private          HashMap   _errors;      // Hash of DSNs to their errors
+    private final    Object    _interrupter = new Object();// Interrupt object
+    private final    HashMap   _errors = new HashMap();      // Hash of DSNs to their errors
 
     private MeasurementPluginManager _manager;
     private SenderThread             _sender;  // Guy handling the results
@@ -109,10 +111,8 @@ public class ScheduleThread
     {
         _schedules    = Collections.synchronizedMap(new HashMap());
         _shouldDie    = false;
-        _interrupter  = new Object();
         _manager      = manager;
         _sender       = sender;               
-        _errors       = new HashMap();
     }
 
     private ResourceSchedule getSchedule(ScheduledMeasurement meas) {
@@ -137,75 +137,88 @@ public class ScheduleThread
      * Unschedule a previously scheduled, repeatable measurement.  
      *
      * @param ent Entity to unschedule metrics for
-     *
-     * @throws UnscheduledItemException indicating the passed ID was not found
      */
-    void unscheduleMeasurements(AppdefEntityID ent)
-        throws UnscheduledItemException
-    {
-        String key = ent.getAppdefKey();
-        ScheduledItem[] items = null;
-        if (ent.isPlatform() && _platformAvailSchedule != null &&
-            ent.equals(_platformAvailSchedule._id)) {
-            items = _platformAvailSchedule._schedule.getScheduledItems();
-            _platformAvailSchedule = null;
-            _log.debug("Unscheduling metrics for Platform Availability");
-        } else {
-            ResourceSchedule rs = (ResourceSchedule)_schedules.remove(key);
-            if (rs == null) {
-                throw new UnscheduledItemException("No measurement schedule for: " + key);
-            }
-            items = rs._schedule.getScheduledItems();
-            _log.debug("Unscheduling " + items.length + " metrics for " + ent);
-        }
-        synchronized (_lock) {
-            _stat_numMetricsScheduled -= items.length;            
-        }
+    void unscheduleMeasurements(AppdefEntityID ent) {
+        _pendingUnschedules.add(ent);
+    }
 
-        for (int i=0; i<items.length; i++) {
-            ScheduledMeasurement meas = (ScheduledMeasurement)items[i].getObj();
-            //For plugin/Collector awareness
-            ParsedTemplate tmpl = getParsedTemplate(meas);
-            tmpl.metric.setInterval(-1);
+    private void unscheduleMeasurements_internal() {
+        synchronized (_pendingUnschedules) {
+            for (Iterator it = _pendingUnschedules.iterator(); it.hasNext();) {
+                AppdefEntityID ent = (AppdefEntityID) it.next();
+                String key = ent.getAppdefKey();
+                ScheduledItem[] items = null;
+                if (ent.isPlatform() && _platformAvailSchedule != null &&
+                        ent.equals(_platformAvailSchedule._id)) {
+                    items = _platformAvailSchedule._schedule.getScheduledItems();
+                    _platformAvailSchedule = null;
+                    _log.debug("Un-scheduling metrics for Platform Availability");
+                } else {
+                    ResourceSchedule rs = (ResourceSchedule) _schedules.remove(key);
+                    if (rs == null) {
+                        _log.error("No measurement schedule for: " + key);
+                        continue;
+                    }
+                    items = rs._schedule.getScheduledItems();
+                    _log.debug("Un-scheduling " + items.length + " metrics for " + ent);
+                }
+                synchronized (_lock) {
+                    _stat_numMetricsScheduled -= items.length;
+                }
+
+                for (int i = 0; i < items.length; i++) {
+                    ScheduledMeasurement meas = (ScheduledMeasurement) items[i].getObj();
+                    //For plugin/Collector awareness
+                    ParsedTemplate tmpl = getParsedTemplate(meas);
+                    tmpl.metric.setInterval(-1);
+                }
+                it.remove();
+            }
         }
     }
 
     /**
-     * Schedule a measurement to be taken at a given interval.  
+     * Schedule a measurement to be taken at a given interval.
      *
-     * @param meas Measurement to schedule
+     * @param meas The ScheduledMeasurement to add to the collection schedule.
      */
+    void scheduleMeasurement(ScheduledMeasurement meas) {
+        _pendingSchedules.add(meas);
+        interruptMe(); // Notify ScheduleThread we have new schedules to process.
+    }
 
-    void scheduleMeasurement(ScheduledMeasurement meas){
-        ResourceSchedule rs = getSchedule(meas);
-        try {
-            final String platformTemplate =
-                ("system.avail:Type=Platform:Availability").toLowerCase();
-            final String dsn = meas.getDSN().toLowerCase();
-            if (_log.isDebugEnabled()) {
-                _log.debug("scheduleMeasurement " + dsn);
+    void scheduleMeasurements_internal() {
+        synchronized (_pendingSchedules) {
+            for (Iterator it = _pendingSchedules.iterator(); it.hasNext();) {
+                ScheduledMeasurement meas = (ScheduledMeasurement) it.next();
+                ResourceSchedule rs = getSchedule(meas);
+                try {
+                    final String platformTemplate =
+                            ("system.avail:Type=Platform:Availability").toLowerCase();
+                    final String dsn = meas.getDSN().toLowerCase();
+                    if (_log.isDebugEnabled()) {
+                        _log.debug("scheduleMeasurement " + dsn);
+                    }
+                    if (dsn.endsWith(platformTemplate)) {
+                        _log.debug("Scheduling Platform Availability");
+                        _platformAvailSchedule = new ResourceSchedule();
+                        _platformAvailSchedule._id = meas.getEntity();
+                        _platformAvailSchedule._schedule.scheduleItem(
+                                meas, meas.getInterval(), true, true);
+                    } else {
+                        rs._schedule.scheduleItem(meas, meas.getInterval(), true, true);
+                    }
+                    synchronized (_lock) {
+                        _stat_numMetricsScheduled++;
+                    }
+                } catch (ScheduleException e) {
+                    _log.error("Unable to schedule metric '" +
+                            getParsedTemplate(meas) + "', skipping. Cause is " +
+                            e.getMessage(), e);
+                }
+                it.remove();
             }
-            if (dsn.endsWith(platformTemplate)) {
-                _log.debug("Scheduling Platform Availability");
-                _platformAvailSchedule = new ResourceSchedule();
-                _platformAvailSchedule._id = meas.getEntity();
-                _platformAvailSchedule._schedule.scheduleItem(
-                    meas, meas.getInterval(), true, true);
-            } else {
-                rs._schedule.scheduleItem(meas, meas.getInterval(), true, true);
-            }
-            synchronized (_lock) {
-                _stat_numMetricsScheduled++;
-            }
-        } catch (ScheduleException e) {
-            _log.error("Unable to schedule metric '" +
-                      getParsedTemplate(meas) + "', skipping. Cause is " +
-                      e.getMessage(), e);
-            return;
         }
-
-        //XXX older rev would call interruptMe() if newNextTime < oldNextTime
-        //but interruptMe() and run() both synchronize on _interrupter
     }
 
     /**
@@ -509,6 +522,11 @@ public class ScheduleThread
     public void run(){
         boolean isDebug = _log.isDebugEnabled();
         while (_shouldDie == false) {
+
+            // First process any unschedules/schedules
+            unscheduleMeasurements_internal();
+            scheduleMeasurements_internal();
+
             long timeOfNext = collect();
             long now = System.currentTimeMillis();
             if (timeOfNext > now) {
