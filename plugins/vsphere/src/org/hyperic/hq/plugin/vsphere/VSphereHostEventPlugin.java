@@ -104,19 +104,6 @@ public class VSphereHostEventPlugin extends LogTrackPlugin implements Runnable {
         return filter;
     }
 
-    private EventFilterSpecByEntity getEntity(String hostname, boolean isVm) {
-        EventFilterSpecByEntity rtn = new EventFilterSpecByEntity();
-        ManagedObjectReference entity = new ManagedObjectReference();
-        if (isVm) {
-            entity.setType("VirtualMachine");
-        } else {
-            entity.setType("HostSystem");
-        }
-        entity.setVal(hostname);
-        rtn.setEntity(entity);
-        return rtn;
-    }
-
     private void processEvents(Event[] events) {
         for (int i = 0; i < events.length; i++) { 
             Event event = events[i];
@@ -155,13 +142,10 @@ public class VSphereHostEventPlugin extends LogTrackPlugin implements Runnable {
             _log.debug("querying events for vm=" + hostname);
             EventFilterSpec criteria = new EventFilterSpec();
             criteria.setTime(getTimeFilter(_lastCheck, now()));
-// XXX need to work out why this is failing.  put workaround in for now.
-//            criteria.setEntity(getEntity(hostname, isVm));
             Event[] events = _vim.getEventManager().queryEvents(criteria);
             if (events == null) {
                 return new Event[0];
             }
-            // XXX workaround for getEntity() criteria failing
             List rtn = new ArrayList(events.length);
             for (Iterator it=Arrays.asList(events).iterator(); it.hasNext(); ) {
                 Event event = (Event) it.next();
@@ -174,7 +158,6 @@ public class VSphereHostEventPlugin extends LogTrackPlugin implements Runnable {
                     rtn.add(event);
                 }
             }
-            // XXX end workaround
             _log.debug("returning " + rtn.size() + " events");
             return (Event[]) rtn.toArray(new Event[0]);
         } catch (Exception e) {
