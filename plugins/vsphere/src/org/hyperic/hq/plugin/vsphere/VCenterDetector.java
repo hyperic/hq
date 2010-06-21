@@ -35,6 +35,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.server.AgentDaemon;
 import org.hyperic.hq.agent.server.AgentStorageProvider;
 import org.hyperic.hq.agent.server.ConfigStorage;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.product.DaemonDetector;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
@@ -45,8 +46,7 @@ public class VCenterDetector extends DaemonDetector {
         LogFactory.getLog(VCenterDetector.class.getName());
 
     // TODO: these constants are part of RuntimeAutodiscoverer as private
-    // constants, so for backwards compatibility with pre-4.4 agents, we
-    // need to define them again here.
+    // constants, so we need to define them again here.
     private static final String STORAGE_PREFIX  = "runtimeautodiscovery";
     private static final String STORAGE_KEYLIST = "runtimeAD-keylist";
 
@@ -84,9 +84,7 @@ public class VCenterDetector extends DaemonDetector {
                 ConfigStorage.Key key = (ConfigStorage.Key)entry.getKey();
                 String type = key.getTypeName();
 
-                // TODO: should use AuthzConstants.serverPrototypeVmwareVcenter,
-                // but pre-4.4 agents do not have access to this new constant
-                if ("VMware vCenter".equals(type)) {
+                if (AuthzConstants.serverPrototypeVmwareVcenter.equals(type)) {
                     ConfigResponse serverConfig = (ConfigResponse)entry.getValue();
                     discoverPlatforms(serverConfig);
                 }
