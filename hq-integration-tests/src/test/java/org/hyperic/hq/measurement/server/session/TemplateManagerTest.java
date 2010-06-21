@@ -16,7 +16,11 @@ import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.testSuite.BaseInfrastructureTest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-
+/**
+ * Integration test of the {@link TemplateManagerImpl}
+ * @author jhickey
+ *
+ */
 public class TemplateManagerTest
     extends BaseInfrastructureTest {
 

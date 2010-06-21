@@ -73,7 +73,8 @@ public class OperationDAO
             .setCacheable(true).setCacheRegion("Operation.findByTypeAndName").uniqueResult();
     }
 
-    public Collection findByRole(Integer roleId) {
+    @SuppressWarnings("unchecked")
+    public Collection<Role> findByRole(Integer roleId) {
         String sql = "select o from Role r join r.operations o where r.id = ?";
         return getSession().createQuery(sql).setParameter(0, roleId).list();
     }

@@ -11,7 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-
+/**
+ * Integration test of {@link CPropManagerImpl}
+ * @author jhickey
+ *
+ */
 public class CPropManagerTest
     extends BaseInfrastructureTest {
 
