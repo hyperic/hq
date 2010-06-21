@@ -1,0 +1,74 @@
+<?xml version="1.0"?>
+<!-- standard include for process metrics -->
+<!DOCTYPE plugin [
+  <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
+]>
+<plugin package="org.hyperic.hq.plugin.java">
+    <!-- add the jmx libraries to the classpath -->
+	<classpath>
+		<include name="pdk/lib/mx4j" />
+	</classpath>
+
+	<!-- Template for jmx metrics -->
+	<filter name="template" value="${OBJECT_NAME}:${alias}" />
+
+	<!-- Custom metrics that we will get from our MBean -->
+	<metrics name="Custom Metrics">
+		<metric name="Metric1" category="UTILIZATION" indicator="true" interval="60000" />
+		<metric name="Metric2" category="UTILIZATION" indicator="true" interval="60000" />
+	</metrics>
+
+	<!-- Define a server with JMX settings and monitor services -->
+	<server name="Simple JMX Server" version="1.0">
+	
+		<!-- Tell HQ where the home directory for this process is -->
+	    <property name="PROC_HOME_PROPERTY" value="catalina.base=/opt/springsource/tcServer-6.0/server3"/>
+
+		<!--
+			Tell HQ to look for a file relative to the "PROC_HOME_PROPERTY". If
+			the file exists, server will be discovered
+		-->
+		<property name="VERSION_FILE" value="SPRINGSOURCE_PULA.txt" />
+
+		<!--
+		    Setup JMX server properties and PTQL query for the server
+		    The JMX port and tcServer's name should be set to your configuration.
+		-->
+		<config>
+			<option name="jmx.url"
+			        description="JMX URL to MBeanServer"
+				    default="service:jmx:rmi:///jndi/rmi://localhost:6973/jmxrmi" />
+				    
+			<option name="jmx.username"
+			        description="JMX username"
+				    optional="true" default="admin" />
+				    
+			<option name="jmx.password"
+			        description="JMX password"
+				    optional="true" default="springsource" />
+				    
+			<option name="process.query"
+			        description="PTQL for Java Process"
+				    default="State.Name.sw=java,Args.*.eq=${PROC_MAIN_CLASS},Args.*.re=-D${PROC_HOME_PROPERTY}" />
+		</config>
+
+		<!-- Check to see if server is up -->
+		<metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State" indicator="true" />
+
+		<!-- Report on system process metrics (OPTIONAL) -->
+		&process-metrics;
+
+		<!-- Required to auto-inventory JMX Beans -->
+		<plugin type="autoinventory" class="com.vmware.springsource.hyperic.plugin.gemfire.MxServerDetector" />
+		<plugin type="measurement" class="org.hyperic.hq.product.jmx.MxMeasurementPlugin" />
+		<plugin type="control" class="org.hyperic.hq.product.jmx.MxControlPlugin"/>
+	
+		<!--  Include our Custom Metrics in the Monitoring GUI -->
+		<property name="OBJECT_NAME" value="spring.demo:type=CustomApp,name=AppMetricsBean" />
+		<metrics include="Custom Metrics" />
+		<actions include="reset1,reset2,setMetric1,setMetric2"/>
+		
+        <property name="PROC_HOME_ENV" value="JAVA_HOME"/>
+	</server>
+</plugin>
+
