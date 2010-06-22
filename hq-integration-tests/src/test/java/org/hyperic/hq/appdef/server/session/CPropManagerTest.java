@@ -4,10 +4,12 @@ import java.util.Properties;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.CPropManager;
-import org.hyperic.testSuite.BaseInfrastructureTest;
+import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -16,6 +18,7 @@ import static org.junit.Assert.assertTrue;
  * @author jhickey
  *
  */
+@DirtiesContext
 public class CPropManagerTest
     extends BaseInfrastructureTest {
 

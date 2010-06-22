@@ -13,15 +13,17 @@ import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefManager;
 import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.authz.server.session.RoleDAO;
-import org.hyperic.testSuite.BaseInfrastructureTest;
+import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 /**
  * Integration test of the {@link AppdefManagerImpl}
  * @author jhickey
  *
  */
+@DirtiesContext
 public class AppdefManagerTest
     extends BaseInfrastructureTest {
 

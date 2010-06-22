@@ -26,12 +26,13 @@ package org.hyperic.hq.monitor.aop;
 
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManager; 
 import org.hyperic.hq.monitor.MockService;
-import org.hyperic.testSuite.BaseInfrastructureTest;
+import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.StopWatch;
 
@@ -49,6 +50,7 @@ import static junit.framework.Assert.*;
  * @see <a href="http://jira.hyperic.com/browse/HE-356">Add aspect to track @Transactional/@Service method runtime and log if exceeded threshold</a>
  */
 @ContextConfiguration
+@DirtiesContext
 public class ExceedsThresholdTests extends BaseInfrastructureTest {
 
     @Autowired private MockService mockServiceImpl;

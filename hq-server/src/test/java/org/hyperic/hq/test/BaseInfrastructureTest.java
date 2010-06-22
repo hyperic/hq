@@ -22,7 +22,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-package org.hyperic.testSuite;
+package org.hyperic.hq.test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,7 +73,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
@@ -84,7 +83,6 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Helena Edelson
  */
 @Transactional
-@DirtiesContext
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = "classpath*:META-INF/spring/*-context.xml", loader = IntegrationTestContextLoader.class)
 abstract public class BaseInfrastructureTest {

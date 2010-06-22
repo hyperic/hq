@@ -33,19 +33,20 @@ import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.product.PlatformTypeInfo;
-import org.hyperic.testSuite.BaseInfrastructureTest;
+import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 
 /**
  * Integration test of the {@link PlatformManagerImpl}
  * @author iperumal
  * 
  */
-
+@DirtiesContext
 public class PlatformManagerTest
     extends BaseInfrastructureTest {
 

@@ -31,12 +31,13 @@ import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.measurement.shared.DataManager;
 import org.hyperic.hq.measurement.shared.MeasRangeObj;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
-import org.hyperic.testSuite.BaseInfrastructureTest;
+import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.jdbc.DBUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.transaction.AfterTransaction;
 
 /**
@@ -44,7 +45,7 @@ import org.springframework.test.context.transaction.AfterTransaction;
  * @author iperumal
  * 
  */
-
+@DirtiesContext
 public class DataManagerTest
     extends BaseInfrastructureTest {
 

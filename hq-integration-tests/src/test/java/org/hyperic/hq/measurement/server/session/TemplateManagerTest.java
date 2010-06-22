@@ -13,14 +13,16 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.shared.TemplateManager;
 import org.hyperic.hq.product.MeasurementInfo;
 import org.hyperic.hq.product.ServerTypeInfo;
-import org.hyperic.testSuite.BaseInfrastructureTest;
+import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 /**
  * Integration test of the {@link TemplateManagerImpl}
  * @author jhickey
  *
  */
+@DirtiesContext
 public class TemplateManagerTest
     extends BaseInfrastructureTest {
 

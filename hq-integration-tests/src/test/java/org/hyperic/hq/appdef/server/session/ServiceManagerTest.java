@@ -36,19 +36,20 @@ import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.hq.product.ServiceTypeInfo;
-import org.hyperic.testSuite.BaseInfrastructureTest;
+import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.SortAttribute;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 
 /**
  * @author iperumal
  * 
  */
-
+@DirtiesContext
 public class ServiceManagerTest
     extends BaseInfrastructureTest {
 

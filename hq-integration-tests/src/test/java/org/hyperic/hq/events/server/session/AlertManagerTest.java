@@ -48,13 +48,14 @@ import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.server.session.MonitorableType;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
-import org.hyperic.testSuite.BaseInfrastructureTest;
+import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -63,7 +64,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @author jhickey
  * 
  */
-
+@DirtiesContext
 public class AlertManagerTest
     extends BaseInfrastructureTest {
 
