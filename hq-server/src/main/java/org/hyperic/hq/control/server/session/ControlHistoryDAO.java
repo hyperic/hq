@@ -24,7 +24,11 @@
  */
 package org.hyperic.hq.control.server.session;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
@@ -32,15 +36,21 @@ import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.util.jdbc.DBUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public class ControlHistoryDAO
     extends HibernateDAO<ControlHistory> {
+    
+    private JdbcTemplate jdbcTemplate;
+    
     @Autowired
-    public ControlHistoryDAO(SessionFactory f) {
+    public ControlHistoryDAO(SessionFactory f, JdbcTemplate jdbcTemplate) {
         super(ControlHistory.class, f);
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     ControlHistory create(AppdefEntityID entityId, Integer groupId, Integer batchId,
@@ -123,6 +133,24 @@ public class ControlHistoryDAO
     public Collection<ControlHistory> findByGroupDateScheduled(int groupId, int batchId, boolean asc) {
         return createFindByGroup(groupId, batchId).addOrder(
             asc ? Order.asc("dateScheduled") : Order.desc("dateScheduled")).list();
+    }
+    
+    public List<ControlFrequency> getControlFrequencies(int numToReturn) throws SQLException {
+        String sqlStr = "SELECT entity_type, entity_id, action, COUNT(id) AS num " +
+                        "FROM EAM_CONTROL_HISTORY " + "WHERE scheduled = " +
+                         DBUtil.getBooleanValue(false, jdbcTemplate.getDataSource().getConnection()) +
+                        " GROUP BY entity_type, entity_id, action " + "ORDER by num DESC ";
+
+        List<ControlFrequency> frequencies = new ArrayList<ControlFrequency>();
+        List<Map<String, Object>> rows = this.jdbcTemplate.queryForList(sqlStr);
+
+        for (int i = 0; i < numToReturn && i < rows.size(); i++) {
+            Map<String, Object> row = rows.get(i);
+            final AppdefEntityID id = new AppdefEntityID(((Integer) row.get("entity_type")).intValue(),
+                ((Integer) row.get("entity_id")).intValue());
+            frequencies.add(new ControlFrequency(id,(String)row.get("action"),(Long)row.get("num")));
+        }
+        return frequencies;
     }
 
     private Criteria createFindByEntity(int type, int id) {

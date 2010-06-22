@@ -40,6 +40,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class ControlScheduleDAO
     extends HibernateDAO<ControlSchedule> {
+
     @Autowired
     public ControlScheduleDAO(SessionFactory f) {
         super(ControlSchedule.class, f);
@@ -67,20 +68,24 @@ public class ControlScheduleDAO
         }
     }
 
+    @SuppressWarnings("unchecked")
     public Collection<ControlSchedule> findByFireTime(boolean asc) {
         return createCriteria().addOrder(
             asc ? Order.asc("nextFireTime") : Order.desc("nextFireTime")).list();
     }
 
+    @SuppressWarnings("unchecked")
     public Collection<ControlSchedule> findByEntity(int type, int id) {
         return createFindByEntity(type, id).list();
     }
 
+    @SuppressWarnings("unchecked")
     public Collection<ControlSchedule> findByEntityAction(int type, int id, boolean asc) {
         return createFindByEntity(type, id).addOrder(
             asc ? Order.asc("action") : Order.desc("action")).list();
     }
 
+    @SuppressWarnings("unchecked")
     public Collection<ControlSchedule> findByEntityFireTime(int type, int id, boolean asc) {
         return createFindByEntity(type, id).addOrder(
             asc ? Order.asc("nextFireTime") : Order.desc("nextFireTime")).list();
@@ -90,4 +95,6 @@ public class ControlScheduleDAO
         return createCriteria().add(Expression.eq("entityId", new Integer(id))).add(
             Expression.eq("entityType", new Integer(type)));
     }
+
+   
 }

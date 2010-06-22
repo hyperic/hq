@@ -25,10 +25,6 @@
 
 package org.hyperic.hq.control.server.session;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.Collections;
@@ -40,7 +36,6 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
-import org.hyperic.hibernate.Util;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
@@ -264,55 +259,26 @@ public class ControlScheduleManagerImpl
     @Transactional(readOnly=true)
     public PageList<ControlFrequencyValue> getOnDemandControlFrequency(AuthzSubject subject, int numToReturn)
         throws ApplicationException {
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
+    
         PageList<ControlFrequencyValue> list = new PageList<ControlFrequencyValue>();
 
         try {
-            conn = Util.getConnection();
-
-            String sqlStr = "SELECT entity_type, entity_id, action, COUNT(id) AS num " + "FROM EAM_CONTROL_HISTORY " +
-                            "WHERE scheduled = " + DBUtil.getBooleanValue(false, conn) +
-                            " GROUP BY entity_type, entity_id, action " + "ORDER by num DESC ";
-
-            stmt = conn.createStatement();
-            rs = stmt.executeQuery(sqlStr);
-
-            int i = 0;
-            while (rs.next() && i++ < numToReturn) {
-
-                AppdefEntityID id;
-                String name;
-                try {
-
-                    id = new AppdefEntityID(rs.getInt(1), rs.getInt(2));
-
-                    try {
-                        checkControlPermission(subject, id);
-                    } catch (PermissionException e) {
-                        continue;
-                    }
-
-                    AppdefEntityValue aVal = new AppdefEntityValue(id, subject);
-                    name = aVal.getName();
-
-                } catch (Exception e) {
-                    // Should never happen
-                    log.error("Error looking up appdef name for type=" + rs.getInt(1) + " id=" + rs.getInt(2));
-                    continue;
-                }
-
-                ControlFrequencyValue cv = new ControlFrequencyValue(name, id.getType(), id.getID(), rs.getString(3),
-                    rs.getInt(4));
+              List<ControlFrequency> frequencies = controlHistoryDAO.getControlFrequencies(numToReturn);
+              for(ControlFrequency frequency: frequencies) {
+                 try {
+                     checkControlPermission(subject, frequency.getId());
+                 } catch (PermissionException e) {
+                     continue;
+                 }
+                 AppdefEntityValue aVal = new AppdefEntityValue(frequency.getId(), subject);
+                 String name = aVal.getName();
+                 ControlFrequencyValue cv = new ControlFrequencyValue(name, frequency.getId().getType(), frequency.getId().getID(), frequency.getAction(),
+                   (int)frequency.getCount());
                 list.add(cv);
             }
-        } catch (SQLException e) {
+        } catch (Exception e) {
             throw new ApplicationException(e);
-        } finally {
-            DBUtil.closeJDBCObjects(log, null, stmt, rs);
-
-        }
+        } 
 
         return list;
     }
