@@ -78,16 +78,18 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @org.springframework.stereotype.Service
 public class AppdefStatManagerImpl implements AppdefStatManager {
+   
+    private static final String LOG_CTX = AppdefStatManagerImpl.class.getName();
+
+    private final Log log = LogFactory.getLog(LOG_CTX);
+    private static int DB_TYPE = -1;
+    
     private static final String TBL_GROUP = "EAM_RESOURCE_GROUP";
     private static final String TBL_PLATFORM = "EAM_PLATFORM";
     private static final String TBL_SERVICE = "EAM_SERVICE";
     private static final String TBL_SERVER = "EAM_SERVER";
     private static final String TBL_APP = "EAM_APPLICATION";
     private static final String TBL_RES = "EAM_RESOURCE";
-    private static final String LOG_CTX = AppdefStatManagerImpl.class.getName();
-
-    private final Log log = LogFactory.getLog(LOG_CTX);
-    private static int DB_TYPE = -1;
 
     private static final String PLATFORM_RES_TYPE = AuthzConstants.platformResType;
     private static final String APPLICATION_RES_TYPE = AuthzConstants.applicationResType;
@@ -116,17 +118,20 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
     private ServiceManager serviceManager;
 
     private ResourceGroupManager resourceGroupManager;
+    
+    private AppdefStatDAO appdefStatDAO;
 
     @Autowired
     public AppdefStatManagerImpl(PermissionManager permissionManager, ApplicationManager applicationManager,
                                  PlatformManager platformManager, ServerManager serverManager,
-                                 ServiceManager serviceManager, ResourceGroupManager resourceGroupManager) {
+                                 ServiceManager serviceManager, ResourceGroupManager resourceGroupManager, AppdefStatDAO appdefStatDAO) {
         this.permissionManager = permissionManager;
         this.applicationManager = applicationManager;
         this.platformManager = platformManager;
         this.serverManager = serverManager;
         this.serviceManager = serviceManager;
         this.resourceGroupManager = resourceGroupManager;
+        this.appdefStatDAO = appdefStatDAO;
     }
 
     /**
@@ -136,44 +141,12 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
      */
     @Transactional(propagation = Propagation.SUPPORTS, readOnly=true)
     public Map<String, Integer> getPlatformCountsByTypeMap(AuthzSubject subject) {
-        Map<String, Integer> platMap = new HashMap<String, Integer>();
-        Statement stmt = null;
-        ResultSet rs = null;
-        Integer subjectId = subject.getId();
-
         try {
-            Connection conn = getDBConn();
-            String sql = "SELECT PLATT.NAME, COUNT(PLAT.ID) " +
-                         "FROM " +
-                         TBL_PLATFORM +
-                         "_TYPE PLATT, " +
-                         TBL_PLATFORM +
-                         " PLAT " +
-                         "WHERE PLAT.PLATFORM_TYPE_ID = PLATT.ID AND EXISTS (" +
-                         permissionManager.getResourceTypeSQL("PLAT.ID", subjectId, PLATFORM_RES_TYPE,
-                             PLATFORM_OP_VIEW_PLATFORM) + ") " + "GROUP BY PLATT.NAME ORDER BY PLATT.NAME";
-            stmt = conn.createStatement();
-
-            if (log.isDebugEnabled())
-                log.debug(sql);
-
-            int total = 0;
-            rs = stmt.executeQuery(sql);
-
-            String platTypeName = null;
-            while (rs.next()) {
-                platTypeName = rs.getString(1);
-                total = rs.getInt(2);
-                platMap.put(platTypeName, new Integer(total));
-            }
-
-        } catch (SQLException e) {
-            log.error("Caught SQL Exception finding Platforms by type: " + e, e);
+          return appdefStatDAO.getPlatformCountsByTypeMap(subject);
+        } catch (Exception e) {
+            log.error("Caught Exception finding Platforms by type: " + e, e);
             throw new SystemException(e);
-        } finally {
-            DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
         }
-        return platMap;
     }
 
     /**
@@ -184,40 +157,12 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
      */
     @Transactional(propagation = Propagation.SUPPORTS, readOnly=true)
     public int getPlatformsCount(AuthzSubject subject) {
-        Statement stmt = null;
-        ResultSet rs = null;
-        Integer subjectId = subject.getId();
-
         try {
-            Connection conn = getDBConn();
-
-            String sql = "SELECT COUNT(PLAT.ID) " +
-                         "FROM " +
-                         TBL_PLATFORM +
-                         "_TYPE PLATT, " +
-                         TBL_PLATFORM +
-                         " PLAT " +
-                         "WHERE PLAT.PLATFORM_TYPE_ID = PLATT.ID AND EXISTS (" +
-                         permissionManager.getResourceTypeSQL("PLAT.ID", subjectId, PLATFORM_RES_TYPE,
-                             PLATFORM_OP_VIEW_PLATFORM) + ")";
-            stmt = conn.createStatement();
-
-            if (log.isDebugEnabled())
-                log.debug(sql);
-
-            rs = stmt.executeQuery(sql);
-
-            while (rs.next()) {
-                return rs.getInt(1);
-            }
-        } catch (SQLException e) {
-            log.error("Caught SQL Exception counting Platforms: " + e, e);
+           return appdefStatDAO.getPlatformsCount(subject);
+        } catch (Exception e) {
+            log.error("Caught Exception counting Platforms: " + e, e);
             throw new SystemException(e);
-        } finally {
-            DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
-           
         }
-        return 0;
     }
 
     /**
@@ -228,42 +173,12 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
      */
     @Transactional(propagation = Propagation.SUPPORTS, readOnly=true)
     public Map<String, Integer> getServerCountsByTypeMap(AuthzSubject subject) {
-        Map<String, Integer> servMap = new HashMap<String, Integer>();
-        Statement stmt = null;
-        ResultSet rs = null;
-        Integer subjectId = subject.getId();
-
         try {
-            Connection conn = getDBConn();
-            String sql = "SELECT SERVT.NAME, COUNT(SERV.ID) " +
-                         "FROM " +
-                         TBL_SERVER +
-                         "_TYPE SERVT, " +
-                         TBL_SERVER +
-                         " SERV " +
-                         "WHERE SERV.SERVER_TYPE_ID = SERVT.ID AND EXISTS (" +
-                         permissionManager.getResourceTypeSQL("SERV.ID", subjectId, SERVER_RES_TYPE,
-                             SERVER_OP_VIEW_SERVER) + ") " + "GROUP BY SERVT.NAME ORDER BY SERVT.NAME";
-            stmt = conn.createStatement();
-
-            int total = 0;
-            rs = stmt.executeQuery(sql);
-
-            String servTypeName = null;
-            while (rs.next()) {
-                servTypeName = rs.getString(1);
-                total = rs.getInt(2);
-                servMap.put(servTypeName, new Integer(total));
-            }
-
-        } catch (SQLException e) {
-            log.error("Caught SQL Exception finding Servers by type: " + e, e);
+            return appdefStatDAO.getServerCountsByTypeMap(subject);
+        } catch (Exception e) {
+            log.error("Caught Exception finding Servers by type: " + e, e);
             throw new SystemException(e);
-        } finally {
-            DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
-          
-        }
-        return servMap;
+        } 
     }
 
     /**
@@ -273,34 +188,12 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
      */
     @Transactional(propagation = Propagation.SUPPORTS, readOnly=true)
     public int getServersCount(AuthzSubject subject) {
-        Statement stmt = null;
-        ResultSet rs = null;
-        Integer subjectId = subject.getId();
         try {
-            Connection conn = getDBConn();
-            String sql = "SELECT COUNT(SERV.ID) " +
-                         "FROM " +
-                         TBL_SERVER +
-                         "_TYPE SERVT, " +
-                         TBL_SERVER +
-                         " SERV " +
-                         "WHERE SERV.SERVER_TYPE_ID = SERVT.ID AND EXISTS (" +
-                         permissionManager.getResourceTypeSQL("SERV.ID", subjectId, SERVER_RES_TYPE,
-                             SERVER_OP_VIEW_SERVER) + ") ";
-            stmt = conn.createStatement();
-            rs = stmt.executeQuery(sql);
-
-            while (rs.next()) {
-                return rs.getInt(1);
-            }
-        } catch (SQLException e) {
-            log.error("Caught SQL Exception finding Servers by type: " + e, e);
+           return appdefStatDAO.getServersCount(subject);
+        } catch (Exception e) {
+            log.error("Caught Exception finding Servers by type: " + e, e);
             throw new SystemException(e);
-        } finally {
-            DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
-           
-        }
-        return 0;
+        } 
     }
 
     /**
