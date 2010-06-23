@@ -446,8 +446,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
                 }
             }
             if (debug) watch.markTimeBegin("getLastAvail");
-            data.putAll(
-                aMan.getLastAvail((Integer[])mids.toArray(new Integer[0])));
+            data.putAll(aMan.getLastAvail((Integer[])mids.toArray(new Integer[0])));
             if (debug) watch.markTimeEnd("getLastAvail");
         }
         for (int i = 0; i < ids.length; i++) {
@@ -468,22 +467,18 @@ public class MetricSessionEJB extends BizappSessionEJB {
                 // cases for abstract resources whose availability are xor'd
                 switch (ids[i].getType()) {
                     case AppdefEntityConstants.APPDEF_TYPE_APPLICATION :
-                        AppdefEntityValue appVal =
-                            new AppdefEntityValue(ids[i], subject);
+                        AppdefEntityValue appVal = new AppdefEntityValue(ids[i], subject);
                         if (debug) watch.markTimeBegin("getFlattenedServiceIds");
-                        AppdefEntityID[] services =
-                            appVal.getFlattenedServiceIds();
+                        AppdefEntityID[] services = appVal.getFlattenedServiceIds();
                         if (debug) watch.markTimeEnd("getFlattenedServiceIds");
     
                         if (debug) watch.markTimeBegin("getAggregateAvailability");
-                        result[i] = getAggregateAvailability(
-                            subject, services, null, availCache);
+                        result[i] = getAggregateAvailability(subject, services, null, availCache);
                         if (debug) watch.markTimeEnd("getAggregateAvailability");
                         break;
                     case AppdefEntityConstants.APPDEF_TYPE_GROUP :
                         if (debug) watch.markTimeBegin("getGroupAvailability");
-                        result[i] = getGroupAvailability(
-                            subject, ids[i].getId(), null, null);
+                        result[i] = getGroupAvailability(subject, ids[i].getId(), null, null);
                         if (debug) watch.markTimeEnd("getGroupAvailability");
                         break;
                     default :

@@ -138,6 +138,13 @@ import org.hyperic.util.timer.StopWatch;
 public class MeasurementBossEJBImpl extends MetricSessionEJB
     implements SessionBean 
 {
+    private static final double AVAIL_WARN        = MeasurementConstants.AVAIL_WARN;
+    private static final double AVAIL_DOWN        = MeasurementConstants.AVAIL_DOWN;
+    private static final double AVAIL_PAUSED      = MeasurementConstants.AVAIL_PAUSED;
+    private static final double AVAIL_POWERED_OFF = MeasurementConstants.AVAIL_POWERED_OFF;
+    private static final double AVAIL_UNKNOWN     = MeasurementConstants.AVAIL_UNKNOWN;
+    private static final double AVAIL_UP          = MeasurementConstants.AVAIL_UP;
+
     protected static Log _log = LogFactory.getLog(MeasurementBossEJBImpl.class);
 
     private List findDesignatedMetrics(AuthzSubject subject, AppdefEntityID id,
@@ -1919,9 +1926,10 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 // maybe so
                 unknownCnt++;
             }
-            else if ((MeasurementConstants.AVAIL_DOWN <= data[i] &&
-                      MeasurementConstants.AVAIL_UP > data[i]) ||
-                     MeasurementConstants.AVAIL_PAUSED == data[i]) {
+            else if ((AVAIL_DOWN        <= data[i] &&
+                      AVAIL_UP           > data[i]) ||
+                      AVAIL_PAUSED      == data[i] ||
+                      AVAIL_POWERED_OFF == data[i]) {
                 // no
                 unavailCnt++;
             }
@@ -1933,9 +1941,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 _log.error("Resource " + resourceArray[i] + " is reporting " +
                            "an invalid availability state of " +
                            data[i] + " (measurement id=" +
-                           findAvailabilityMetric(sessionId,
-                                                  resourceArray[i]).getId() +
-                           ")");
+                           findAvailabilityMetric(sessionId, resourceArray[i]).getId() + ")");
             }
         }
         
@@ -2113,6 +2119,14 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         return summaries;
     }
 
+    /**
+     * summary logic is not aggregated, instead it is calcuted with the following logic:
+     * 
+     * Red only (regardless of any Gray) = Red
+     * Red + Green (regardless of any Gray) = Yellow
+     * Gray only (regardless of any Green) = Gray
+     * Green only = Green
+     */
     private void setResourceTypeDisplaySummary(AuthzSubject subject,
                                       ResourceTypeDisplaySummary summary, 
                                       AppdefResourceTypeValue resType,
@@ -2129,24 +2143,80 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
 
         // Availability
         try {
+            boolean hasDownValues = false;
+            boolean hasUpValues = false;
+            boolean hasUnknownValues = false;
+            boolean hasOtherValues = false;
             double[] data = getAvailability(subject, ids, midMap, null);
             if (data.length > 0) {
                 double sum = 0;
-                for (int i = 0; i < data.length; i++) {
-                    sum += data[i];
+                for (int ii=0; ii<data.length; ii++) {
+                    double val = data[ii];
+                    if (val == MeasurementConstants.AVAIL_DOWN) {
+                        hasDownValues = true;
+                    } else if (val == MeasurementConstants.AVAIL_UP) {
+                        hasUpValues = true;
+                    } else if (val == MeasurementConstants.AVAIL_UNKNOWN) {
+                        hasUnknownValues = true;
+                    } else {
+                        hasOtherValues = true;
+                    }
+                    sum += val;
                 }
-                summary.setAvailability(
-                    new Double(sum / (double) data.length));
+                summary.setAvailability(getSummaryValue(hasDownValues,
+                                                        hasUpValues,
+                                                        hasUnknownValues,
+                                                        hasOtherValues,
+                                                        sum, data.length));
             }
-        } catch (Exception e) {
-            // No Availability data
-            summary.setAvailability(
-                new Double(MeasurementConstants.AVAIL_UNKNOWN));
+        } catch (AppdefEntityNotFoundException e) {
+            _log.debug(e,e);
+            summary.setAvailability(new Double(MeasurementConstants.AVAIL_UNKNOWN));
+        } catch (PermissionException e) {
+            _log.debug(e,e);
+            summary.setAvailability(new Double(MeasurementConstants.AVAIL_UNKNOWN));
         }
 
         if (_log.isDebugEnabled())
             _log.debug("END setResourceTypeDisplaySummary -- " +
                     watch.getElapsed() + " msec");
+    }
+
+    /**
+     * Red only (regardless of any Gray) = Red
+     * Red + Green (regardless of any Gray) = Yellow
+     * Gray only (regardless of any Green) = Gray
+     * Green only = Green
+     */
+    private Double getSummaryValue(boolean hasDownValues,
+                                   boolean hasUpValues,
+                                   boolean hasUnknownValues,
+                                   boolean hasOtherValues,
+                                   double sum, int length) {
+        if (!hasDownValues && hasUpValues && !hasUnknownValues && !hasOtherValues) {
+            return new Double(AVAIL_UP);
+        } else if (hasDownValues && !hasUpValues && !hasUnknownValues && !hasOtherValues ||
+                   hasDownValues && !hasUpValues &&  hasUnknownValues &&  hasOtherValues ||
+                   hasDownValues && !hasUpValues &&  hasUnknownValues && !hasOtherValues ||
+                   hasDownValues && !hasUpValues && !hasUnknownValues &&  hasOtherValues) {
+            return new Double(AVAIL_DOWN);
+        } else if (hasDownValues && hasUpValues && !hasUnknownValues && !hasOtherValues ||
+                   hasDownValues && hasUpValues && !hasUnknownValues &&  hasOtherValues ||
+                   hasDownValues && hasUpValues &&  hasUnknownValues &&  hasOtherValues) {
+            return new Double(AVAIL_WARN);
+        } else if (!hasDownValues && hasUpValues && hasUnknownValues && !hasOtherValues ||
+                   !hasDownValues && hasUpValues && hasUnknownValues &&  hasOtherValues) {
+            return new Double(AVAIL_UNKNOWN);
+        }
+        double rtn = sum / (double) length;
+        if (rtn == AVAIL_PAUSED) {
+            return new Double(AVAIL_PAUSED);
+        } else if (rtn == AVAIL_POWERED_OFF) {
+            return new Double(AVAIL_PAUSED);
+        } else if (rtn < AVAIL_DOWN) {
+            return new Double(AVAIL_WARN);
+        }
+        return new Double(rtn);
     }
 
     /**

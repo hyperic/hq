@@ -659,8 +659,8 @@ public class AvailabilityManagerEJBImpl
         final List midList = Collections.unmodifiableList(Arrays.asList(mids));
         final Map rtn = new HashMap(midList.size());
         final List list = _dao.findLastAvail(midList);
-        for (final Iterator i=list.iterator(); i.hasNext(); ) {
-            final AvailabilityDataRLE avail = (AvailabilityDataRLE)i.next();
+        for (final Iterator it=list.iterator(); it.hasNext(); ) {
+            final AvailabilityDataRLE avail = (AvailabilityDataRLE)it.next();
             final Integer mid = avail.getMeasurement().getId();
             final AvailabilityMetricValue mVal =
                 new AvailabilityMetricValue(avail.getAvailVal(),
@@ -669,11 +669,10 @@ public class AvailabilityManagerEJBImpl
             rtn.put(mid, mVal);
         }
         // fill in missing measurements
-        final long now = TimingVoodoo.roundDownTime(
-            System.currentTimeMillis(), MeasurementConstants.MINUTE);
+        final long now = TimingVoodoo.roundDownTime(now(), MeasurementConstants.MINUTE);
         if (midList.size() > 0) {
-            for (final Iterator i=midList.iterator(); i.hasNext(); ) {
-                final Integer mid = (Integer)i.next();
+            for (final Iterator it=midList.iterator(); it.hasNext(); ) {
+                final Integer mid = (Integer)it.next();
                 if (!rtn.containsKey(mid)) {
                     final MetricValue mVal = new MetricValue(AVAIL_UNKNOWN, now);
                     rtn.put(mid, mVal);
@@ -681,6 +680,10 @@ public class AvailabilityManagerEJBImpl
             }
         }
         return rtn;
+    }
+    
+    private long now() {
+        return System.currentTimeMillis();
     }
 
     /**
