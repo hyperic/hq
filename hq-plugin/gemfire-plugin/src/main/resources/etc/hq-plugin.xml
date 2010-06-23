@@ -5,80 +5,82 @@
 ]>
 <plugin package="com.vmware.springsource.hyperic.plugin.gemfire">
     <!-- add the jmx libraries to the classpath -->
-	<classpath>
-		<include name="pdk/lib/mx4j" />
-	</classpath>
+    <classpath>
+        <include name="pdk/lib/mx4j" />
+    </classpath>
 
 	<!-- Template for jmx metrics -->
-	<filter name="template" value="${OBJECT_NAME}:${alias}" />
+    <filter name="template" value="${OBJECT_NAME}:${alias}" />
 
 	<!-- Custom metrics that we will get from our MBean -->
 	<!-- use name="xyz" to get metric xyz from cachePerfStats
 	     else use name="category,attribute"  eg: name="distributionStats,processedMessages"
 	     collectiontype=TrendsUp -->
-	<metrics name="GemFireMetrics">
-		<metric name="cacheListenerCallsCompleted" category="UTILIZATION" collectionType="trendsup" indicator="true" interval="60000" />
-		<metric name="creates" category="UTILIZATION" collectionType="trendsup" indicator="true" interval="60000" />
-		<metric name="puts" category="UTILIZATION" collectionType="trendsup" indicator="true" interval="60000" />
-		<metric name="misses" category="UTILIZATION" collectionType="trendsup" indicator="true" interval="60000" />
-		<metric name="loadsCompleted" category="UTILIZATION" collectionType="trendsup" indicator="true" interval="60000" />
-		<metric name="gets" category="UTILIZATION" collectionType="trendsup" indicator="true" interval="60000" />
-		<metric name="entries" category="UTILIZATION" collectionType="trendsup" indicator="true" interval="60000" />
-		<metric name="destroys" category="UTILIZATION" collectionType="trendsup" indicator="true" interval="60000" />
-		<metric name="distributionStats,deserializations" collectionType="trendsup" category="UTILIZATION" indicator="true" interval="60000" />
-	</metrics>
+    <metrics name="GemFireMetrics">
+        <metric name="cacheListenerCallsCompleted" category="UTILIZATION" collectionType="trendsup" indicator="true" interval="60000" />
+        <metric name="creates" category="UTILIZATION" collectionType="trendsup" indicator="true" interval="60000" />
+        <metric name="puts" category="UTILIZATION" collectionType="trendsup" indicator="true" interval="60000" />
+        <metric name="misses" category="UTILIZATION" collectionType="trendsup" indicator="true" interval="60000" />
+        <metric name="loadsCompleted" category="UTILIZATION" collectionType="trendsup" indicator="true" interval="60000" />
+        <metric name="gets" category="UTILIZATION" collectionType="trendsup" indicator="true" interval="60000" />
+        <metric name="entries" category="UTILIZATION" collectionType="trendsup" indicator="true" interval="60000" />
+        <metric name="destroys" category="UTILIZATION" collectionType="trendsup" indicator="true" interval="60000" />
+        <metric name="distributionStats,deserializations" collectionType="trendsup" category="UTILIZATION" indicator="true" interval="60000" />
+    </metrics>
 
 	<!-- Define a server with JMX settings and monitor services -->
-	<server name="GemFire" version="6.5">
+    <server name="GemFire" version="6.0">
 	
 		<!-- Tell HQ where the home directory for this process is -->
-	    <property name="PROC_HOME_PROPERTY" value="State.Name.sw=java,Args.*.re=AgentLauncher" />
-
-		<!--
-			Tell HQ to look for a file relative to the "PROC_HOME_PROPERTY". If
-			the file exists, server will be discovered.  In this case it's JAVA_HOME, 
-			so choose a convienent file such as README.html.  Maybe this can be deleted?
-		-->
-		<property name="VERSION_FILE" value="README.html" />
+        <property name="PROC_MAIN_CLASS" value="com.gemstone.gemfire.admin.jmx.internal.AgentLauncher" />
+        <property name="JAR_FILE" value="lib/gemfire.jar" />
+        <property name="VERSION_FILE" value="lib/GemFireVersion.properties" />
+        <property name="VERSION" value="6.0" />
 
 		<!--
 		    Setup JMX server properties and PTQL query for the server
 		    The JMX port and tcServer's name should be set to your configuration.
 		-->
-		<config>
-			<option name="jmx.url"
+        <config>
+            <option name="jmx.url"
 			        description="JMX URL to GemFire Agent"
 				    default="service:jmx:rmi://localhost/jndi/rmi://:1099/jmxconnector" />
 				    
-			<option name="jmx.username"
+            <option name="jmx.username"
 			        description="JMX username"
 				    optional="true" default="" />
 				    
-			<option name="jmx.password"
+            <option name="jmx.password"
 			        description="JMX password"
 				    optional="true" default="" />
 				    
-			<option name="process.query"
+            <option name="process.query"
 			        description="PTQL for Java Process"
 				    default="State.Name.sw=java,Args.*.re=AgentLauncher" />
-		</config>
+        </config>
 
 		<!-- Check to see if server is up -->
-		<metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State" indicator="true" />
+        <metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State" indicator="true" />
 
 		<!-- Report on system process metrics (OPTIONAL) -->
 		&process-metrics;
 
 		<!-- Required to auto-inventory JMX Beans -->
-		<plugin type="autoinventory" class="com.vmware.springsource.hyperic.plugin.gemfire.MxServerDetector" />
-		<plugin type="measurement" class="MxMeasurementPlugin" />
-		<plugin type="control" class="MxControlPlugin"/>
+        <plugin type="autoinventory" class="GemFireDetector" />
+        <plugin type="measurement" class="MxMeasurementPlugin" />
+        <plugin type="control" class="MxControlPlugin"/>
 	
 		<!--  Include our Custom Metrics in the Monitoring GUI -->
-		<property name="OBJECT_NAME" value="GemFire:type=Agent" />
-		<metrics include="GemFireMetrics" />
+        <property name="OBJECT_NAME" value="GemFire:type=Agent" />
+        <metrics include="GemFireMetrics" />
 		
         <property name="PROC_HOME_ENV" value="JAVA_HOME"/>
-	</server>
+    </server>
+
+
+    <server name="GemFire" version="6.5" include="6.0">
+        <property name="VERSION" value="6.1.2" />
+    </server>
+
 </plugin>
 
