@@ -25,6 +25,7 @@
 package org.hyperic.hq.test;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -33,6 +34,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.SessionFactory;
 import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.appdef.server.session.Application;
+import org.hyperic.hq.appdef.server.session.ApplicationType;
+import org.hyperic.hq.appdef.server.session.ApplicationTypeDAO;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.server.session.Server;
@@ -44,13 +48,19 @@ import org.hyperic.hq.appdef.shared.AgentCreateException;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
+import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
+import org.hyperic.hq.appdef.shared.ApplicationManager;
+import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
+import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceManager;
+import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
@@ -114,6 +124,13 @@ abstract public class BaseInfrastructureTest {
 
     @Autowired
     protected ResourceGroupManager resourceGroupManager;
+
+    @Autowired
+    protected ApplicationManager applicationManager;
+
+    protected static final int GENERIC_APPLICATION_TYPE = 1;
+
+    protected static final int J2EE_APPLICATION_TYPE = 2;
 
     @BeforeClass
     public static void initialize() {
@@ -252,10 +269,10 @@ abstract public class BaseInfrastructureTest {
     }
 
     protected ResourceGroup createServiceResourceGroup(Set<Service> services, String groupName,
-                                                      List<Role> roles)
+                                                       List<Role> roles)
         throws ApplicationException, PermissionException {
         List<Resource> resources = new ArrayList<Resource>();
-        for (Service service: services) {
+        for (Service service : services) {
             Resource serviceRes = service.getResource();
             resources.add(serviceRes);
         }
@@ -275,6 +292,25 @@ abstract public class BaseInfrastructureTest {
         ResourceGroup resGrp = resourceGroupManager.createResourceGroup(authzSubjectManager
             .getOverlordPojo(), gCInfo, roles, resources);
         return resGrp;
+    }
+
+    protected Application createApplication(String name, String desc, int applicationType,
+                                            List<AppdefEntityID> services)
+        throws AppdefDuplicateNameException, ValidationException, PermissionException,
+        NotFoundException, ApplicationNotFoundException, AppdefGroupNotFoundException {
+        ApplicationValue app = new ApplicationValue();
+        app.setName(name);
+        app.setDescription(desc);
+        app.setEngContact("admin");
+        app.setBusinessContact("admin");
+        app.setOpsContact("admin");
+        app.setLocation("dataCenter");
+        app.setApplicationType(applicationManager.findApplicationType(applicationType));
+        Application application = applicationManager.createApplication(authzSubjectManager
+            .getOverlordPojo(), app);
+        applicationManager.setApplicationServices(authzSubjectManager.getOverlordPojo(),
+            application.getId(), services);
+        return application;
     }
 
     protected void flushSession() {

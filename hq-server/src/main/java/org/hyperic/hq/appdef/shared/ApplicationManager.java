@@ -41,8 +41,7 @@ public interface ApplicationManager {
      *        initial set of services for the application. This can be null if
      *        you are creating an empty application.
      */
-    public Application createApplication(AuthzSubject subject, ApplicationValue newApp,
-                                         Collection<ServiceValue> services) throws ValidationException,
+    public Application createApplication(AuthzSubject subject, ApplicationValue newApp) throws ValidationException,
         PermissionException, AppdefDuplicateNameException, NotFoundException;
 
     /**

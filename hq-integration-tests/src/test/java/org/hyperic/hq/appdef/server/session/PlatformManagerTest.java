@@ -20,12 +20,9 @@ import org.hyperic.hq.appdef.shared.AppdefDuplicateFQDNException;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.appdef.shared.ApplicationManager;
-import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.IpValue;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformValue;
-import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.common.ApplicationException;
@@ -38,7 +35,6 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 
 /**
@@ -49,9 +45,6 @@ import org.springframework.test.annotation.DirtiesContext;
 @DirtiesContext
 public class PlatformManagerTest
     extends BaseInfrastructureTest {
-
-    @Autowired
-    ApplicationManager applicationManager;
 
     private Agent testAgent;
 
@@ -574,20 +567,15 @@ public class PlatformManagerTest
         assertEquals(testPlatform.getPlatformValue(), pValues.get(0));
     }
 
-    // TODO
+    @Test
     public void testGetPlatformsByApplication() throws ApplicationException, NotFoundException {
-        ServiceValue serviceValue = testService.getServiceValue();
-        List<ServiceValue> services = new ArrayList<ServiceValue>();
-        services.add(serviceValue);
-        ApplicationValue appValue = new ApplicationValue();
-        appValue.setName("Test Application");
-        appValue.setEngContact("Testing");
-        appValue.setBusinessContact("SpringSource");
-        appValue.setOpsContact("TechOps"); // Set "Generic Application" type
-        appValue.setApplicationType(applicationManager.findApplicationType(1));
-        // TODO: waiting on addService method fix
-        Application app = applicationManager.createApplication(authzSubjectManager
-            .getOverlordPojo(), appValue, services);
+        AppdefEntityID serviceId= testService.getEntityId();
+        List<AppdefEntityID> services = new ArrayList<AppdefEntityID>();
+        services.add(serviceId);
+        Application app = createApplication("Test Application", "testing", GENERIC_APPLICATION_TYPE, services);
+        flushSession();
+        //clear the session to update the bi-directional app to app service relationship
+        clearSession();
         PageControl pc = new PageControl();
         PageList<PlatformValue> pValues = platformManager.getPlatformsByApplication(
             authzSubjectManager.getOverlordPojo(), app.getId(), pc);
