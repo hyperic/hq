@@ -203,42 +203,12 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
      */
     @Transactional(propagation = Propagation.SUPPORTS, readOnly=true)
     public Map<String, Integer> getServiceCountsByTypeMap(AuthzSubject subject) {
-        Map<String, Integer> svcMap = new HashMap<String, Integer>();
-        Statement stmt = null;
-        ResultSet rs = null;
-        Integer subjectId = subject.getId();
-
         try {
-            Connection conn = getDBConn();
-            String sql = "SELECT SVCT.NAME, COUNT(SVC.ID) " +
-                         "FROM " +
-                         TBL_SERVICE +
-                         "_TYPE SVCT, " +
-                         TBL_SERVICE +
-                         " SVC " +
-                         "WHERE SVC.SERVICE_TYPE_ID = SVCT.ID AND EXISTS (" +
-                         permissionManager.getResourceTypeSQL("SVC.ID", subjectId, SERVICE_RES_TYPE,
-                             SERVICE_OP_VIEW_SERVICE) + ") " + "GROUP BY SVCT.NAME ORDER BY SVCT.NAME";
-            stmt = conn.createStatement();
-
-            int total = 0;
-            rs = stmt.executeQuery(sql);
-
-            String serviceTypeName = null;
-            while (rs.next()) {
-                serviceTypeName = rs.getString(1);
-                total = rs.getInt(2);
-                svcMap.put(serviceTypeName, new Integer(total));
-            }
-
-        } catch (SQLException e) {
-            log.error("Caught SQL Exception finding Services by type: " + e, e);
+           return appdefStatDAO.getServiceCountsByTypeMap(subject);
+        } catch (Exception e) {
+            log.error("Caught Exception finding Services by type: " + e, e);
             throw new SystemException(e);
-        } finally {
-            DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
-           
-        }
-        return svcMap;
+        } 
     }
 
     /**
@@ -248,34 +218,12 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
      */
     @Transactional(propagation = Propagation.SUPPORTS, readOnly=true)
     public int getServicesCount(AuthzSubject subject) {
-        Statement stmt = null;
-        ResultSet rs = null;
-        Integer subjectId = subject.getId();
         try {
-            Connection conn = getDBConn();
-            String sql = "SELECT COUNT(SVC.ID) " +
-                         "FROM " +
-                         TBL_SERVICE +
-                         "_TYPE SVCT, " +
-                         TBL_SERVICE +
-                         " SVC " +
-                         "WHERE SVC.SERVICE_TYPE_ID = SVCT.ID AND EXISTS (" +
-                         permissionManager.getResourceTypeSQL("SVC.ID", subjectId, SERVICE_RES_TYPE,
-                             SERVICE_OP_VIEW_SERVICE) + ") ";
-            stmt = conn.createStatement();
-            rs = stmt.executeQuery(sql);
-
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-        } catch (SQLException e) {
-            log.error("Caught SQL Exception finding Services by type: " + e, e);
+            return appdefStatDAO.getServicesCount(subject);
+        } catch (Exception e) {
+            log.error("Caught Exception finding Services by type: " + e, e);
             throw new SystemException(e);
-        } finally {
-            DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
-          
-        }
-        return 0;
+        } 
     }
 
     /**
@@ -285,42 +233,12 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
      */
     @Transactional(propagation = Propagation.SUPPORTS, readOnly=true)
     public Map<String, Integer> getApplicationCountsByTypeMap(AuthzSubject subject) {
-        Map<String, Integer> appMap = new HashMap<String, Integer>();
-        Statement stmt = null;
-        ResultSet rs = null;
-        Integer subjectId = subject.getId();
-
         try {
-            Connection conn = getDBConn();
-            String sql = "SELECT APPT.NAME, COUNT(APP.ID) " +
-                         "FROM " +
-                         TBL_APP +
-                         "_TYPE APPT, " +
-                         TBL_APP +
-                         " APP " +
-                         "WHERE APP.APPLICATION_TYPE_ID = APPT.ID AND EXISTS (" +
-                         permissionManager.getResourceTypeSQL("APP.ID", subjectId, APPLICATION_RES_TYPE,
-                             APPLICATION_OP_VIEW_APPLICATION) + ") " + "GROUP BY APPT.NAME ORDER BY APPT.NAME";
-            stmt = conn.createStatement();
-
-            int total = 0;
-            rs = stmt.executeQuery(sql);
-
-            String appTypeName = null;
-            while (rs.next()) {
-                appTypeName = rs.getString(1);
-                total = rs.getInt(2);
-                appMap.put(appTypeName, new Integer(total));
-            }
-
-        } catch (SQLException e) {
-            log.error("Caught SQL Exception finding applications by type: " + e, e);
+           return appdefStatDAO.getApplicationCountsByTypeMap(subject);
+        } catch (Exception e) {
+            log.error("Caught Exception finding applications by type: " + e, e);
             throw new SystemException(e);
-        } finally {
-            DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
-            
-        }
-        return appMap;
+        } 
     }
 
     /**
@@ -330,34 +248,12 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
      */
     @Transactional(propagation = Propagation.SUPPORTS, readOnly=true)
     public int getApplicationsCount(AuthzSubject subject) {
-        Statement stmt = null;
-        ResultSet rs = null;
-        Integer subjectId = subject.getId();
-
         try {
-            Connection conn = getDBConn();
-            String sql = "SELECT COUNT(APP.ID) FROM " +
-                         TBL_APP +
-                         "_TYPE APPT, " +
-                         TBL_APP +
-                         " APP " +
-                         "WHERE APP.APPLICATION_TYPE_ID = APPT.ID AND EXISTS (" +
-                         permissionManager.getResourceTypeSQL("APP.ID", subjectId, APPLICATION_RES_TYPE,
-                             APPLICATION_OP_VIEW_APPLICATION) + ") ";
-            stmt = conn.createStatement();
-            rs = stmt.executeQuery(sql);
-
-            while (rs.next()) {
-                return rs.getInt(1);
-            }
-        } catch (SQLException e) {
-            log.error("Caught SQL Exception finding applications by type: " + e, e);
+          return appdefStatDAO.getApplicationsCount(subject);
+        } catch (Exception e) {
+            log.error("Caught Exception finding applications by type: " + e, e);
             throw new SystemException(e);
-        } finally {
-            DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
-           
-        }
-        return 0;
+        } 
     }
 
     /**
@@ -367,43 +263,12 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
      */
     @Transactional(propagation = Propagation.SUPPORTS, readOnly=true)
     public Map<Integer, Integer> getGroupCountsMap(AuthzSubject subject) {
-        Map<Integer, Integer> grpMap = new HashMap<Integer, Integer>();
-        Statement stmt = null;
-        ResultSet rs = null;
-        int[] groupTypes = AppdefEntityConstants.getAppdefGroupTypes();
-        Integer subjectId = subject.getId();
-
         try {
-            Connection conn = getDBConn();
-
-            for (int x = 0; x < groupTypes.length; x++) {
-                String sql = "SELECT COUNT(*) FROM " +
-                             TBL_GROUP +
-                             " GRP " +
-                             "WHERE GRP.GROUPTYPE = " +
-                             groupTypes[x] +
-                             " AND EXISTS (" +
-                             permissionManager.getResourceTypeSQL("GRP.ID", subjectId, GROUP_RES_TYPE,
-                                 GROUP_OP_VIEW_RESOURCE_GROUP) + ")";
-
-                try {
-                    int total = 0;
-                    stmt = conn.createStatement();
-                    rs = stmt.executeQuery(sql);
-
-                    if (rs.next()) {
-                        total = rs.getInt(1);
-                        grpMap.put(new Integer(groupTypes[x]), new Integer(total));
-                    }
-                } finally {
-                    DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
-                }
-            }
-        } catch (SQLException e) {
-            log.error("Caught SQL Exception finding groups by type: " + e, e);
+            return appdefStatDAO.getGroupCountsMap(subject);
+        } catch (Exception e) {
+            log.error("Caught Exception finding groups by type: " + e, e);
             throw new SystemException(e);
         } 
-        return grpMap;
     }
 
     /**
@@ -419,140 +284,28 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
             ResourceTreeNode[] retVal;
             retVal = getNavMapDataForPlatform(subject, plat);
             return retVal;
-        } catch (SQLException e) {
+        } catch (Exception e) {
             log.error("Unable to get NavMap data: " + e, e);
             throw new SystemException(e);
         }
     }
 
     private ResourceTreeNode[] getNavMapDataForPlatform(AuthzSubject subject, Platform plat)
-        throws PermissionException, SQLException {
-        ResourceTreeNode[] retVal = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-        StringBuffer buf;
-        Integer subjectId = subject.getId();
-
-        try {
-            Connection conn = getDBConn();
-            String falseStr = DBUtil.getBooleanValue(false, conn);
-            buf = new StringBuffer();
-            buf.append("SELECT svr_svrt_svc_svct.server_id, ").append("svr_svrt_svc_svct.server_name, ").append(
-                "       svr_svrt_svc_svct.server_type_id, ").append("svr_svrt_svc_svct.server_type_name, ").append(
-                "       svr_svrt_svc_svct.service_id, ").append("svr_svrt_svc_svct.service_name, ").append(
-                "       svr_svrt_svc_svct.service_type_id, ").append("svr_svrt_svc_svct.service_type_name ").append(
-                "FROM (SELECT app.id as application_id, ").append("appsvc.service_id as service_id ").append(
-                "      FROM EAM_APP_SERVICE appsvc ");
-            if (isOracle8()) {
-                buf.append(", ").append(TBL_APP).append(" app ").append(
-                    "WHERE app.id=appsvc.application_id(+) AND EXISTS (").append(
-                    permissionManager.getResourceTypeSQL("app.id", subjectId, APPLICATION_RES_TYPE,
-                        APPLICATION_OP_VIEW_APPLICATION)).append(") ) app_appsvc, ");
-            } else {
-                buf.append("RIGHT JOIN ").append(TBL_APP).append(" app ON app.id=appsvc.application_id ").append(
-                    "WHERE EXISTS (").append(
-                    permissionManager.getResourceTypeSQL("app.id", subjectId, APPLICATION_RES_TYPE,
-                        APPLICATION_OP_VIEW_APPLICATION)).append(") ) app_appsvc RIGHT JOIN ");
-            }
-            buf.append("(SELECT svr_svrt.server_id, ").append("svr_svrt.server_name, ").append(
-                "        svr_svrt.server_type_id, ").append("svr_svrt.server_type_name, ").append(
-                "        svc_svct.service_id, ").append("svc_svct.service_name, ").append(
-                "        svc_svct.service_type_id, ").append("svc_svct.service_type_name ").append(
-                " FROM ( SELECT svc.id as service_id, ").append("               res2.name  as service_name, ").append(
-                "               svct.id   as service_type_id, ").append(
-                "               svct.name as service_type_name,").append("               svc.server_id as server_id ")
-                .append("          FROM ").append(TBL_SERVICE).append("_TYPE svct, ").append(TBL_SERVICE).append(
-                    " svc ").append(" JOIN " + TBL_RES).append(" res2 ON svc.resource_id = res2.id ").append(
-                    "         WHERE svc.service_type_id=svct.id ").append("           AND EXISTS (").append(
-                    permissionManager
-                        .getResourceTypeSQL("svc.id", subjectId, SERVICE_RES_TYPE, SERVICE_OP_VIEW_SERVICE)).append(
-                    ") ) svc_svct ");
-            if (isOracle8()) {
-                buf.append(",");
-            } else {
-                buf.append("     RIGHT JOIN");
-            }
-            buf.append("       ( SELECT svr.id    as server_id, ").append("                res1.name as server_name, ")
-                .append("                svrt.id   as server_type_id,").append(
-                    "                svrt.name as server_type_name ").append("         FROM ").append(TBL_SERVER)
-                .append("_TYPE svrt, ").append(TBL_SERVER).append(" svr ").append(" JOIN " + TBL_RES).append(
-                    " res1 ON svr.resource_id = res1.id ").append("         WHERE  svr.platform_id=")
-                .append(plat.getId())
-                // exclude virtual server types from the navMap
-                .append("                    AND svrt.fvirtual = " + falseStr).append(
-                    "                    AND svrt.id=svr.server_type_id ").append("                    AND EXISTS (")
-                .append(
-                    permissionManager.getResourceTypeSQL("svr.id", subjectId, SERVER_RES_TYPE, SERVER_OP_VIEW_SERVER))
-                .append(") ) svr_svrt ");
-            if (isOracle8()) {
-                buf.append(" WHERE svr_svrt.server_id=svc_svct.server_id(+)").append("  ) svr_svrt_svc_svct ").append(
-                    "WHERE svr_svrt_svc_svct.service_id=app_appsvc.service_id(+)");
-            } else {
-                buf.append("   ON svr_svrt.server_id=svc_svct.server_id ").append("  ) svr_svrt_svc_svct ").append(
-                    "ON svr_svrt_svc_svct.service_id=app_appsvc.service_id ");
-            }
-            buf.append(" ORDER BY svr_svrt_svc_svct.server_id, ").append("svr_svrt_svc_svct.server_type_id, ").append(
-                "          svr_svrt_svc_svct.service_id, ").append("svr_svrt_svc_svct.service_type_id ");
-
-            if (log.isDebugEnabled())
-                log.debug(buf.toString());
-
-            Set<ResourceTreeNode> servers = new HashSet<ResourceTreeNode>();
-            Set<ResourceTreeNode> services = new HashSet<ResourceTreeNode>();
-
-            ResourceTreeNode aPlatformNode = new ResourceTreeNode(plat.getName(), getAppdefTypeLabel(
+        throws SQLException {
+        ResourceTreeNode aPlatformNode = new ResourceTreeNode(plat.getName(), getAppdefTypeLabel(
                 APPDEF_TYPE_PLATFORM, plat.getAppdefResourceType().getName()), plat.getEntityId(),
                 ResourceTreeNode.RESOURCE);
 
-            int thisSvrId = 0;
-            String thisServerName = null;
-            int thisServerTypeId = 0;
-            String thisServerTypeName = null;
-            int thisSvcId = 0;
-            String thisServiceName = null;
-            int thisServiceTypeId = 0;
-            String thisServiceTypeName = null;
-
-            stmt = conn.createStatement();
-            rs = stmt.executeQuery(buf.toString());
-
-            while (rs.next()) {
-                thisSvrId = rs.getInt(1);
-                thisServerName = rs.getString(2);
-                thisServerTypeId = rs.getInt(3);
-                thisServerTypeName = rs.getString(4);
-                thisSvcId = rs.getInt(5);
-                thisServiceName = rs.getString(6);
-                thisServiceTypeId = rs.getInt(7);
-                thisServiceTypeName = rs.getString(8);
-
-                if (thisServerTypeName != null) {
-                    servers.add(new ResourceTreeNode(thisServerName, getAppdefTypeLabel(APPDEF_TYPE_SERVER,
-                        thisServerTypeName), AppdefEntityID.newServerID(new Integer(thisSvrId)), plat.getEntityId(),
-                        thisServerTypeId));
-                }
-
-                if (thisServiceTypeName != null) {
-                    services.add(new ResourceTreeNode(thisServiceName, getAppdefTypeLabel(APPDEF_TYPE_SERVICE,
-                        thisServiceTypeName), AppdefEntityID.newServiceID(new Integer(thisSvcId)), AppdefEntityID
-                        .newServerID(new Integer(thisSvrId)), thisServiceTypeId));
-                }
-            }
-            // XXX Leave out service data No current way to represent it
-            // (ResourceTreeNode[]) serviceMap.values()
-            // .toArray(new ResourceTreeNode[0]);
-            aPlatformNode.setSelected(true);
-            ResourceTreeNode[] svrNodes = (ResourceTreeNode[]) servers.toArray(new ResourceTreeNode[0]);
-            ResourceTreeNode.alphaSortNodes(svrNodes, true);
-            aPlatformNode.addUpChildren(svrNodes);
-
-            retVal = new ResourceTreeNode[] { aPlatformNode };
-        } catch (SQLException e) {
-            throw e;
-        } finally {
-            DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
-           
-        }
+        // XXX Leave out service data No current way to represent it
+        // (ResourceTreeNode[]) serviceMap.values()
+        // .toArray(new ResourceTreeNode[0]);
+        Set<ResourceTreeNode> servers = appdefStatDAO.foo(subject, plat);
+        aPlatformNode.setSelected(true);
+        ResourceTreeNode[] svrNodes = (ResourceTreeNode[]) servers.toArray(new ResourceTreeNode[0]);
+        ResourceTreeNode.alphaSortNodes(svrNodes, true);
+        aPlatformNode.addUpChildren(svrNodes);
+        ResourceTreeNode[] retVal = new ResourceTreeNode[] { aPlatformNode };
+        
         if (log.isDebugEnabled()) {
             log.debug(mapToString(retVal));
         }
