@@ -79,6 +79,10 @@ public class VSphereHostCollector extends VSphereCollector {
     protected String getName() {
         return getHostname();
     }
+    
+    protected String getUuid() {
+        return getProperties().getProperty(PROP_UUID);
+    }
 
     protected void printXml(PerfCounterInfo info, String key) {
         String rollup = info.getRollupType().toString();

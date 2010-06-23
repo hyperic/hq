@@ -249,16 +249,18 @@ public class VCenterPlatformDetector {
         ResourcePool pool = vm.getResourcePool();
 
         VSphereResource platform = new VSphereResource();
-        VirtualMachineFileInfo files = info.getFiles();
+        String uuid = info.getUuid();
         platform.setName(info.getName());
-        platform.setFqdn(info.getUuid());
+        platform.setFqdn(uuid);
         platform.setDescription(info.getGuestFullName());
 
         ConfigResponse config = new ConfigResponse();
         config.setValue(VSphereVmCollector.PROP_VM, info.getName());
+        config.setValue(VSphereCollector.PROP_UUID, uuid);
         platform.addConfig(config);
         //ConfigInfo
         ConfigResponse cprops = new ConfigResponse();
+        VirtualMachineFileInfo files = info.getFiles();
         cprops.setValue(ProductPlugin.PROP_INSTALLPATH, files.getVmPathName());
         cprops.setValue("guestOS", info.getGuestFullName());
         cprops.setValue("version", info.getVersion());
@@ -391,7 +393,8 @@ public class VCenterPlatformDetector {
         }
 
         HostHardwareSummary hw = host.getSummary().getHardware();
-        platform.setFqdn(hw.getUuid());
+        String uuid = hw.getUuid();
+        platform.setFqdn(uuid);
         cprops.setValue("hwVendor", hw.getVendor());
         cprops.setValue("hwModel", hw.getModel());
         cprops.setValue("hwCpu", hw.getCpuModel());
@@ -415,6 +418,7 @@ public class VCenterPlatformDetector {
 
         platform.addProperties(cprops);
         platform.addConfig(VSphereUtil.PROP_HOSTNAME, host.getName());
+        platform.addConfig(VSphereCollector.PROP_UUID, uuid);
 
         if (log.isDebugEnabled()) {
             log.debug("Discovered " + HOST_TYPE + "[name=" + platform.getName() 

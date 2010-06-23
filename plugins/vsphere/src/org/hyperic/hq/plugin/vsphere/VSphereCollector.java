@@ -45,6 +45,8 @@ public abstract class VSphereCollector extends Collector {
         LogFactory.getLog(VSphereCollector.class.getName());
 
     public static final String PROP_URL = "url";
+    public static final String PROP_UUID = "uuid";
+    
     protected Properties _props;
 
     protected abstract void collect(VSphereUtil vim)
@@ -53,6 +55,8 @@ public abstract class VSphereCollector extends Collector {
     protected abstract String getType();
 
     protected abstract String getName();
+    
+    protected abstract String getUuid();
 
     protected void init() throws PluginException {
         _props = getProperties();
@@ -98,7 +102,11 @@ public abstract class VSphereCollector extends Collector {
     protected ManagedEntity getManagedEntity(VSphereUtil mo) 
         throws Exception {
 
-        return mo.find(getType(), getName());
+        if (getUuid() == null) {
+            return mo.find(getType(), getName());
+        } else {
+            return mo.findByUuid(getType(), getUuid());
+        }
     }
 
     protected IntHashMap getCounterInfo(PerformanceManager perfManager)
