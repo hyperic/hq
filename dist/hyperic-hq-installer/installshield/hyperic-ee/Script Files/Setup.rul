@@ -25,13 +25,11 @@
     export prototype WriteInstallSummary(HWND); 
     prototype SubstituteToken(STRING, STRING, STRING); 
     prototype UpdateProgressBar(HWND, STRING); 
-    prototype DeleteEnvironmentVariable(STRING);
-    prototype CreateFileWithContents(STRING, STRING, LIST);  
     export prototype ValidateAdminPrivilege(HWND);
     export prototype ValidatePorts(HWND);   
     prototype ForceDeleteDir(STRING, STRING);
     
-#define HQ_VERSION "3.2.0-EE"    
+#define HQ_VERSION "4.3.0-EE"    
     
 #define  SETUP_FILE "setup.conf" 
 #define  INSTALLDIR_INDEX 0  
@@ -58,18 +56,19 @@
 #define  SERVER_POSTGRESQL_PORT_INDEX 14
 #define  HQ_ENGINE_PORT_INDEX  15
 #define  HQ_ENGINE_JNP_PORT_INDEX  16 
-#define SERVER_WINDOWS_TEMP_INDEX 17   
+#define SERVER_WINDOWS_TEMP_INDEX  17   
 
 // agent properties 
-#define  AGENT_INSTALLDIR_INDEX 0  
-#define  AGENT_SERVER_ADDRESS_INDEX   1
-#define  AGENT_SERVER_PORT_INDEX   2
-#define  AGENT_SERVER_SSL_PORT_INDEX      3
-#define  AGENT_IS_SECURE_INDEX     4
-#define  AGENT_SERVER_USER_INDEX     5
-#define  AGENT_SERVER_PASSWORD_INDEX  6
-#define  AGENT_ADDRESS_INDEX       7
-#define  AGENT_PORT_INDEX        8
+#define  AGENT_INSTALLDIR_INDEX 		0  
+#define  AGENT_SERVER_ADDRESS_INDEX   	1
+#define  AGENT_SERVER_PORT_INDEX   		2
+#define  AGENT_SERVER_SSL_PORT_INDEX    3
+#define  AGENT_IS_SECURE_INDEX     		4
+#define  AGENT_SERVER_USER_INDEX     	5
+#define  AGENT_SERVER_PASSWORD_INDEX  	6
+#define  AGENT_ADDRESS_INDEX       		7
+#define  AGENT_PORT_INDEX        		8
+#define	 AGENT_IS_UNIDIR_INDEX			9
 
 // ant properties 
 #define  TEMP_INDEX 1
@@ -146,7 +145,8 @@ begin
 	    ListAddString ( listProperties, "server.multicast.port=" + sMulticastPort, AFTER );    
 	    ListAddString ( listProperties, "hq-engine.server.port=" + sHqEnginePort, AFTER );
 	    ListAddString ( listProperties, "hq-engine.jnp.port=" + sHqEngineJnpPort, AFTER );    
-	    ListAddString ( listProperties, "server.ha.bind_addr=*.*", AFTER );  
+	    ListAddString ( listProperties, "server.ha.bind_addr=*.*", AFTER );
+	    ListAddString ( listProperties, "accept.eula=true", AFTER );  
     	WritePropertiesToFile(listProperties, sWindowsTemp, SETUP_FILE);   
     	ListDestroy ( listProperties );
 	endif;    
@@ -181,7 +181,7 @@ end;
 
 function WriteAgentProperties(hMSI)
     STRING  sInstallDir, sServerAddress, sServerPort, sServerSSL;
-    STRING sIsSecure, sUser, sPassword, sAddress, sPort; 
+    STRING sIsSecure, sUser, sPassword, sAddress, sPort, sIsUni; 
     LIST listProperties;   
     NUMBER nTimeOut;   
     HWND hRec;
@@ -196,7 +196,8 @@ begin
     sUser = GetIndexedProperty(listProperties, AGENT_SERVER_USER_INDEX);
     sPassword = GetIndexedProperty(listProperties, AGENT_SERVER_PASSWORD_INDEX);
     sAddress = GetIndexedProperty(listProperties, AGENT_ADDRESS_INDEX);
-    sPort = GetIndexedProperty(listProperties, AGENT_PORT_INDEX);    
+    sPort = GetIndexedProperty(listProperties, AGENT_PORT_INDEX);
+    sIsUni = GetIndexedProperty(listProperties, AGENT_IS_UNIDIR_INDEX);    
     ListDestroy ( listProperties );
     // Find the search string in the source file. 
     SubstituteToken("%AGENT_SERVER_ADDRESS%", sServerAddress, sInstallDir + "agent.properties");  
@@ -212,8 +213,19 @@ begin
     SubstituteToken("%AGENT_SERVER_PASSWORD%", sPassword, sInstallDir + "agent.properties");  
     SubstituteToken("%AGENT_ADDRESS%", sAddress, sInstallDir + "agent.properties");   
     SubstituteToken("%AGENT_PORT%", sPort, sInstallDir + "agent.properties");
+    if (sIsUni = "1") then
+    	sIsUni = "Yes";
+    else
+    	sIsUni = "No";
+    endif;  
+    SubstituteToken("%AGENT_UNIDIRECTIONAL%", sIsUni, sInstallDir + "agent.properties");
+
+    // Need to comment out PDK variables that are wrong
+    SubstituteToken("agent.pdkLibDir", "#agent.pdkLibDir", sInstallDir + "agent.properties");
+    SubstituteToken("agent.pdkPluginDir", "#agent.pdkPluginDir", sInstallDir + "agent.properties");
+    
     // copy properties to agent folder
-    CopyFile ( sInstallDir ^ "agent.properties" , sInstallDir ^ "agent-" + HQ_VERSION ^ "agent.properties" );           
+    CopyFile ( sInstallDir ^ "agent.properties" , sInstallDir ^ "agent-" + HQ_VERSION ^ "conf" ^ "agent.properties" );           
 	DeleteFile( sInstallDir ^ "agent.properties");
 end;    
 
@@ -466,7 +478,7 @@ begin
 end;   
 
 function CreateAgentService(hMSI)   
-    STRING  sInstallDir, sShellDir, sJavaHome; 
+    STRING  sInstallDir, sShellDir, sJavaHome, szProgram, szApplicationPath; 
     LIST listProperties;     
     HWND hRec;
     NUMBER nTimeOut;
@@ -488,25 +500,48 @@ begin
 	endif;    
                                           
     sJavaHome = "JAVA_HOME=" + sInstallDir ^ "agent-" + HQ_VERSION ^ "jre";                                      
-	LAAW_PARAMETERS.lpEnvironment = &sJavaHome; 
+	//LAAW_PARAMETERS.lpEnvironment = &sJavaHome; 
 	LAAW_PARAMETERS.nTimeOut = nTimeOut;
-	LAAW_PARAMETERS.lpCurrentDirectory = &sInstallDir;   	  
+	//LAAW_PARAMETERS.lpCurrentDirectory = &sInstallDir;   	  
 	
-    if (LaunchAppAndWait ( sInstallDir ^ "agent-" + HQ_VERSION ^ "hq-agent.exe" , "-i" , 
+	GetEnvVar ( "COMSPEC", szProgram );     
+	szApplicationPath = sInstallDir ^ "agent-" + HQ_VERSION ^ "bin" ^ "hq-agent.bat";   
+	LongPathToQuote( szApplicationPath, TRUE );            
+
+    if (LaunchAppAndWait ( szApplicationPath , "install" ,
+//    if (LaunchAppAndWait ( "", szProgram +  " /c " +  szApplicationPath + " install" ,  
        	LAAW_OPTION_WAIT | LAAW_OPTION_HIDDEN ) < 0) then
        	MessageBox ("Failed to create HQ Agent Windows Service" , SEVERE);    	
 	endif; 
 end; 
 
-function StartAgent(hMSI)   
-    HWND hRec;
-begin 
-	UpdateProgressBar(hMSI, "Starting HQ Agent Windows Service");
-	if (ServiceStartService ( "Hyperic HQ Agent" , "" ) < 0) then 
-	   	MessageBox ("Failed to start the HQ Agent Windows Service" , SEVERE); 
-	endif;   	  
-end;
+function StartAgent(hMSI) 
+	STRING  sInstallDir, szProgram, szApplicationPath;       
+	LIST listProperties;  
+    HWND hRec;    
+    NUMBER nTimeOut;
+begin    
+	// set timeout to 5 minutes
+	nTimeOut = 5 * 60 * 1000;          
+	
+    listProperties = GetMSIProperties(hMSI); 
+    sInstallDir = GetIndexedProperty(listProperties, INSTALLDIR_INDEX);
+    ListDestroy ( listProperties );  
+    	
+	UpdateProgressBar(hMSI, "Starting HQ Agent Windows Service"); 
 
+	LAAW_PARAMETERS.nTimeOut = nTimeOut; 	  
+	
+	GetEnvVar ( "COMSPEC", szProgram );     
+	szApplicationPath = sInstallDir ^ "agent-" + HQ_VERSION ^ "bin" ^ "hq-agent.bat";   
+	LongPathToQuote( szApplicationPath, TRUE );                                     
+	
+	if (LaunchAppAndWait ( szApplicationPath, "start" , 
+//	if (LaunchAppAndWait ( "", szProgram +  " /c " +  szApplicationPath + " start" ,  
+       	LAAW_OPTION_WAIT | LAAW_OPTION_HIDDEN ) < 0) then
+	   	MessageBox ("Failed to start the HQ Agent Windows Service" , SEVERE); 	
+	endif; 		  
+end;
 
 function LaunchBrowser(hMSI)
 begin    

@@ -31,7 +31,7 @@
     export prototype ValidatePorts(HWND);   
     prototype ForceDeleteDir(STRING, STRING);
     
-#define HQ_VERSION "3.2.0"    
+#define HQ_VERSION "4.3.0"    
     
 #define  SETUP_FILE "setup.conf" 
 #define  INSTALLDIR_INDEX 0  
@@ -212,8 +212,14 @@ begin
     SubstituteToken("%AGENT_SERVER_PASSWORD%", sPassword, sInstallDir + "agent.properties");  
     SubstituteToken("%AGENT_ADDRESS%", sAddress, sInstallDir + "agent.properties");   
     SubstituteToken("%AGENT_PORT%", sPort, sInstallDir + "agent.properties");
+    SubstituteToken("%AGENT_UNIDIRECTIONAL%", "no", sInstallDir + "agent.properties");
+    
+    // Need to comment out PDK variables that are wrong
+    SubstituteToken("agent.pdkLibDir", "#agent.pdkLibDir", sInstallDir + "agent.properties");
+    SubstituteToken("agent.pdkPluginDir", "#agent.pdkPluginDir", sInstallDir + "agent.properties");
+    
     // copy properties to agent folder
-    CopyFile ( sInstallDir ^ "agent.properties" , sInstallDir ^ "agent-" + HQ_VERSION ^ "agent.properties" );           
+    CopyFile ( sInstallDir ^ "agent.properties" , sInstallDir ^ "agent-" + HQ_VERSION ^ "conf" ^ "agent.properties" );           
 	DeleteFile( sInstallDir ^ "agent.properties");
 end;    
 
@@ -466,7 +472,7 @@ begin
 end;   
 
 function CreateAgentService(hMSI)   
-    STRING  sInstallDir, sShellDir, sJavaHome; 
+    STRING  sInstallDir, sShellDir, sJavaHome, szProgram, szApplicationPath; 
     LIST listProperties;     
     HWND hRec;
     NUMBER nTimeOut;
@@ -488,25 +494,48 @@ begin
 	endif;    
                                           
     sJavaHome = "JAVA_HOME=" + sInstallDir ^ "agent-" + HQ_VERSION ^ "jre";                                      
-	LAAW_PARAMETERS.lpEnvironment = &sJavaHome; 
+	//LAAW_PARAMETERS.lpEnvironment = &sJavaHome; 
 	LAAW_PARAMETERS.nTimeOut = nTimeOut;
-	LAAW_PARAMETERS.lpCurrentDirectory = &sInstallDir;   	  
+	//LAAW_PARAMETERS.lpCurrentDirectory = &sInstallDir;   	  
 	
-    if (LaunchAppAndWait ( sInstallDir ^ "agent-" + HQ_VERSION ^ "hq-agent.exe" , "-i" , 
+	GetEnvVar ( "COMSPEC", szProgram );     
+	szApplicationPath = sInstallDir ^ "agent-" + HQ_VERSION ^ "bin" ^ "hq-agent.bat";   
+	LongPathToQuote( szApplicationPath, TRUE );    
+	        
+    if (LaunchAppAndWait ( szApplicationPath , "install" , 
+//    if (LaunchAppAndWait ( "", szProgram +  " /c " +  szApplicationPath + " install" ,  
        	LAAW_OPTION_WAIT | LAAW_OPTION_HIDDEN ) < 0) then
        	MessageBox ("Failed to create HQ Agent Windows Service" , SEVERE);    	
 	endif; 
 end; 
 
-function StartAgent(hMSI)   
-    HWND hRec;
-begin 
-	UpdateProgressBar(hMSI, "Starting HQ Agent Windows Service");
-	if (ServiceStartService ( "Hyperic HQ Agent" , "" ) < 0) then 
-	   	MessageBox ("Failed to start the HQ Agent Windows Service" , SEVERE); 
-	endif;   	  
-end;
+function StartAgent(hMSI) 
+	STRING  sInstallDir, szProgram, szApplicationPath;       
+	LIST listProperties;  
+    HWND hRec;    
+    NUMBER nTimeOut;
+begin    
+	// set timeout to 5 minutes
+	nTimeOut = 5 * 60 * 1000;          
+	
+    listProperties = GetMSIProperties(hMSI); 
+    sInstallDir = GetIndexedProperty(listProperties, INSTALLDIR_INDEX);
+    ListDestroy ( listProperties );  
+    	
+	UpdateProgressBar(hMSI, "Starting HQ Agent Windows Service"); 
 
+	LAAW_PARAMETERS.nTimeOut = nTimeOut; 	  
+	
+	GetEnvVar ( "COMSPEC", szProgram );     
+	szApplicationPath = sInstallDir ^ "agent-" + HQ_VERSION ^ "bin" ^ "hq-agent.bat";   
+	LongPathToQuote( szApplicationPath, TRUE );                                     
+	
+	if (LaunchAppAndWait ( szApplicationPath, "start" , 
+//	if (LaunchAppAndWait ( "", szProgram +  " /c " +  szApplicationPath + " start" ,  
+       	LAAW_OPTION_WAIT | LAAW_OPTION_HIDDEN ) < 0) then
+	   	MessageBox ("Failed to start the HQ Agent Windows Service" , SEVERE); 	
+	endif; 		  
+end;
 
 function LaunchBrowser(hMSI)
 begin    
