@@ -37,7 +37,8 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hibernate.Util;
+import org.hibernate.SessionFactory;
+import org.hibernate.engine.SessionFactoryImplementor;
 import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
@@ -87,13 +88,15 @@ public class DataCompressImpl implements DataCompress {
     private DBUtil dbUtil;
     private ServerConfigManager serverConfigManager;
     private AlertManager alertManager;
+    private SessionFactory sessionFactory;
 
     @Autowired
     public DataCompressImpl(DBUtil dbUtil, ServerConfigManager serverConfigManager,
-                            AlertManager alertManager) {
+                            AlertManager alertManager, SessionFactory sessionFactory) {
         this.dbUtil = dbUtil;
         this.serverConfigManager = serverConfigManager;
         this.alertManager = alertManager;
+        this.sessionFactory = sessionFactory;
     }
 
     @PostConstruct
@@ -156,7 +159,8 @@ public class DataCompressImpl implements DataCompress {
 
             Statement stmt = null;
             try {
-                HQDialect dialect = Util.getHQDialect();
+                HQDialect dialect =  (HQDialect) ((SessionFactoryImplementor) sessionFactory)
+                .getDialect();
                 stmt = conn.createStatement();
                 if (!dialect.viewExists(stmt, TAB_DATA))
                     stmt.execute(EAM_METRIC_DATA_VIEW);
@@ -231,7 +235,7 @@ public class DataCompressImpl implements DataCompress {
             StopWatch watch = new StopWatch();
             log.debug("Truncating tables, starting with -> " + delTable + " (currTable -> " +
                       currTable + ")\n");
-            HQDialect dialect = Util.getHQDialect();
+            HQDialect dialect = (HQDialect) ((SessionFactoryImplementor) sessionFactory).getDialect();
             while (!currTable.equals(delTable) && truncateBefore > currTruncTime) {
                 try {
                     log.debug("Truncating table " + delTable);
@@ -267,7 +271,8 @@ public class DataCompressImpl implements DataCompress {
         long last;
 
         // Compress hourly data
-        String metricUnion = MeasurementUnionStatementBuilder.getUnionStatement((now - HOUR), now);
+        String metricUnion = MeasurementUnionStatementBuilder.getUnionStatement((now - HOUR), now, (HQDialect) ((SessionFactoryImplementor) sessionFactory)
+            .getDialect());
         last = compressData(metricUnion, TAB_DATA_1H, HOUR, now);
         // Purge, ensuring we don't purge data not yet compressed.
         truncateMeasurementData(Math.min(now - this.purgeRaw, last));

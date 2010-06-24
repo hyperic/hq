@@ -71,8 +71,10 @@ public class TemplateManagerTest
         List<MonitorableMeasurementInfo> measInfos = new ArrayList<MonitorableMeasurementInfo>();
         measInfos.add(meas1);
         measInfos.add(meas2);
+        Map<MonitorableType,List<MonitorableMeasurementInfo>> typeToInfos = new HashMap<MonitorableType,List<MonitorableMeasurementInfo>>();
+        typeToInfos.put(monitorableType, measInfos);
         
-        templateManager.createTemplates("tomcat", measInfos);
+        templateManager.createTemplates("tomcat", typeToInfos);
 
         MeasurementTemplate expQueueSize = new MeasurementTemplate("Queue Size", "queueSize",
             "messages", MeasurementConstants.COLL_TYPE_DYNAMIC, true, 1234, true,

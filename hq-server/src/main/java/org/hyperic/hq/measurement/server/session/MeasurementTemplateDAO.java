@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -235,7 +236,7 @@ public class MeasurementTemplateDAO
     }
 
     public void createTemplates(final String pluginName,
-                                final List<MonitorableMeasurementInfo> toAdd) {
+                                final Map<MonitorableType,List<MonitorableMeasurementInfo>> toAdd) {
         final IdentifierGenerator tmplIdGenerator = ((SessionFactoryImpl) sessionFactory)
             .getEntityPersister(MeasurementTemplate.class.getName()).getIdentifierGenerator();
 
@@ -244,14 +245,17 @@ public class MeasurementTemplateDAO
                                    + "default_interval, designate, monitorable_type_id, "
                                    + "category_id, template, plugin, ctime, mtime) "
                                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
+        final List<MonitorableMeasurementInfo> combinedInfos = new ArrayList<MonitorableMeasurementInfo>();
+        for(List<MonitorableMeasurementInfo> info : toAdd.values()) {
+            combinedInfos.addAll(info);
+        }
         final long current = System.currentTimeMillis();
         //We need JdbcTemplate to throw runtime Exception to roll back tx if batch update fails, else we'll get partial write
         jdbcTemplate.batchUpdate(templatesql, new BatchPreparedStatementSetter() {
             HashMap<String, Category> cats = new HashMap<String, Category>();
 
             public void setValues(PreparedStatement stmt, int i) throws SQLException {
-                MeasurementInfo info = toAdd.get(i).getMeasurementInfo();
+                MeasurementInfo info = combinedInfos.get(i).getMeasurementInfo();
                 Category cat = (Category) cats.get(info.getCategory());
                 if (cat == null) {
                     cat = catDAO.findByName(info.getCategory());
@@ -277,7 +281,7 @@ public class MeasurementTemplateDAO
                 stmt.setBoolean(6, info.isDefaultOn());
                 stmt.setLong(7, info.getInterval());
                 stmt.setBoolean(8, info.isIndicator());
-                stmt.setInt(9, toAdd.get(i).getMonitorableType().getId().intValue());
+                stmt.setInt(9, combinedInfos.get(i).getMonitorableType().getId().intValue());
                 stmt.setInt(10, cat.getId().intValue());
                 stmt.setString(11, info.getTemplate());
                 stmt.setString(12, pluginName);
@@ -286,7 +290,7 @@ public class MeasurementTemplateDAO
             }
 
             public int getBatchSize() {
-                return toAdd.size();
+                return combinedInfos.size();
             }
         });
     }

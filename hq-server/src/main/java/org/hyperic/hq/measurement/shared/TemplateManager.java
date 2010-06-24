@@ -113,7 +113,7 @@ public interface TemplateManager {
      * Add new measurement templates for a plugin. This does a batch style
      * insert
      */
-    public void createTemplates(String pluginName, List<MonitorableMeasurementInfo> toAdd);
+    public void createTemplates(String pluginName, Map<MonitorableType,List<MonitorableMeasurementInfo>> toAdd);
 
     public void setDesignated(MeasurementTemplate tmpl, boolean designated);
 

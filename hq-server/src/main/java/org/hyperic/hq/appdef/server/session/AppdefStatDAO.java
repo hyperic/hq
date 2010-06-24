@@ -13,7 +13,9 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hibernate.Util;
+import org.hibernate.SessionFactory;
+import org.hibernate.engine.SessionFactoryImplementor;
+import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -58,12 +60,15 @@ public class AppdefStatDAO {
     private static final int APPDEF_TYPE_GROUP = AppdefEntityConstants.APPDEF_TYPE_GROUP;
 
     protected JdbcTemplate jdbcTemplate;
+    
+    private SessionFactory sessionFactory;
 
     protected final Log log = LogFactory.getLog(AppdefStatDAO.class);
 
     @Autowired
-    public AppdefStatDAO(JdbcTemplate jdbcTemplate) {
+    public AppdefStatDAO(JdbcTemplate jdbcTemplate, SessionFactory sessionFactory) {
         this.jdbcTemplate = jdbcTemplate;
+        this.sessionFactory = sessionFactory;
     }
 
     public Map<String, Integer> getPlatformCountsByTypeMap(AuthzSubject subject)
@@ -949,7 +954,7 @@ public class AppdefStatDAO {
 
         Map<Integer, String> entNameMap = new HashMap<Integer, String>();
         if (groupVo.getTotalSize() > 0) {
-            final int max = Util.getHQDialect().getMaxExpressions();
+            final int max = getHQDialect().getMaxExpressions();
             final int batchSize = (max < 0) ? Integer.MAX_VALUE : max;
             for (int ii = 0; ii < agEntries.size(); ii += batchSize) {
                 int end = Math.min(ii + batchSize, agEntries.size());
@@ -976,6 +981,11 @@ public class AppdefStatDAO {
         retVal = new ResourceTreeNode[] { grpNode };
 
         return retVal;
+    }
+    
+    private HQDialect getHQDialect() {
+        return (HQDialect) ((SessionFactoryImplementor) sessionFactory)
+            .getDialect();
     }
 
     private void setEntNameMap(final Map<Integer, String> entNameMap, List<AppdefEntityID> list,

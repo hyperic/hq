@@ -37,7 +37,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hibernate.Util;
+import org.hibernate.SessionFactory;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AIAuditFactory;
 import org.hyperic.hq.appdef.server.session.Platform;
@@ -115,13 +115,15 @@ public class RuntimeReportProcessor {
     private String _agentToken;
     private ServiceTypeFactory serviceTypeFactory;
     private AIAuditFactory aiAuditFactory;
+    private SessionFactory sessionFactory;
 
     @Autowired
     public RuntimeReportProcessor(AutoinventoryManager aiMgr, PlatformManager platformMgr, ServerManager serverMgr,
                                   ServiceManager serviceMgr, ConfigManager configMgr, AuthzSubjectManager subjectMgr,
                                   CPropManager cpropMgr, AgentManager agentManager,
                                   ServiceTypeFactory serviceTypeFactory, AIAuditFactory aiAuditFactory, AuditManager auditManager,
-                                  ResourceManager resourceManager, MeasurementProcessor measurementProcessor, ZeventEnqueuer zEventManager) {
+                                  ResourceManager resourceManager, MeasurementProcessor measurementProcessor, ZeventEnqueuer zEventManager,
+                                  SessionFactory sessionFactory) {
         aiManager = aiMgr;
         platformManager = platformMgr;
         serverManager = serverMgr;
@@ -136,6 +138,7 @@ public class RuntimeReportProcessor {
         this.resourceManager = resourceManager;
         this.measurementProcessor = measurementProcessor;
         this.zEventManager = zEventManager;
+        this.sessionFactory = sessionFactory;
     }
 
     public void processRuntimeReport(AuthzSubject subject, String agentToken, CompositeRuntimeResourceReport crrr)
@@ -250,7 +253,7 @@ public class RuntimeReportProcessor {
                         platformToServers.put(aiplatforms[j].getFqdn(), tmp);
                     }
                     tmp.addAll(mergePlatformIntoInventory(subject, aiplatforms[j], appdefServer));
-                    Util.flushCurrentSession();
+                    flushCurrentSession();
                 } else {
                     log.error("Runtime Report from server: " + appdefServers[i].getName() +
                               " contained null aiPlatform. Skipping.");
@@ -260,6 +263,11 @@ public class RuntimeReportProcessor {
         rescheduleNonReportedServers(subject, platformToServers);
         long endTime = System.currentTimeMillis() - startTime;
         log.info("Completed processing Runtime AI report in: " + endTime / 1000 + " seconds.");
+    }
+    
+    private void flushCurrentSession()
+    {
+        sessionFactory.getCurrentSession().flush();
     }
     
     private boolean isValid(Server server) {
@@ -349,7 +357,7 @@ public class RuntimeReportProcessor {
             if (aiservers[i] != null) {
                 mergeServerIntoInventory(subject, appdefPlatform, aiplatform, aiservers[i], appdefServers,
                     reportingServer);
-                Util.flushCurrentSession();
+                flushCurrentSession();
             } else {
                 log.error("Platform: " + appdefPlatform.getName() + " reported null aiServer. Skipping.");
             }
@@ -381,7 +389,7 @@ public class RuntimeReportProcessor {
                 final ServiceType serviceType = serviceTypeFactory.create(serviceTypes[i], foundAppdefServer
                     .getServerType());
                 serviceTypeMerges.add(serviceType);
-                Util.flushCurrentSession();
+                flushCurrentSession();
             }
         }
     }
@@ -602,7 +610,7 @@ public class RuntimeReportProcessor {
                 sInfo.aiservice = aiService;
                 sInfo.agentToken = _agentToken;
                 _serviceMerges.add(sInfo);
-                Util.flushCurrentSession();
+                flushCurrentSession();
             }
         }
         zEventManager.enqueueEventAfterCommit(new AgentScheduleSyncZevent(toSchedule));

@@ -48,7 +48,6 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hibernate.Util;
 import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.common.ProductProperties;
 import org.hyperic.hq.common.SystemException;
@@ -262,7 +261,7 @@ public class DataManagerImpl implements DataManager {
 
         log.debug("Attempting to insert data in a single transaction.");
 
-        HQDialect dialect = Util.getHQDialect();
+        HQDialect dialect = measurementDAO.getHQDialect();
         boolean succeeded = false;
         final boolean debug = log.isDebugEnabled();
 
@@ -742,7 +741,7 @@ public class DataManagerImpl implements DataManager {
         PreparedStatement stmt = null;
         final List<DataPoint> left = new ArrayList<DataPoint>();
         final Map<String, List<DataPoint>> buckets = MeasRangeObj.getInstance().bucketData(data);
-        final HQDialect dialect = Util.getHQDialect();
+        final HQDialect dialect = measurementDAO.getHQDialect();
         final boolean supportsDupInsStmt = dialect.supportsDuplicateInsertStmt();
         final boolean supportsPLSQL = dialect.supportsPLSQL();
         final String plSQL = "BEGIN " + "INSERT INTO :table (measurement_id, timestamp, value) "
@@ -949,7 +948,7 @@ public class DataManagerImpl implements DataManager {
         }
 
         if (usesMetricUnion(begin, end, useAggressiveRollup)) {
-            return MeasurementUnionStatementBuilder.getUnionStatement(begin, end, measIds);
+            return MeasurementUnionStatementBuilder.getUnionStatement(begin, end, measIds, measurementDAO.getHQDialect());
         } else if (now - this.purge1h < begin) {
             return TAB_DATA_1H;
         } else if (now - this.purge6h < begin) {
@@ -1040,7 +1039,7 @@ public class DataManagerImpl implements DataManager {
                                   pc.getPagesize());
                     }
                 }
-                final HQDialect dialect = Util.getHQDialect();
+                final HQDialect dialect = measurementDAO.getHQDialect();
                 final int offset = pc.getPageEntityIndex();
                 final int limit = pc.getPagesize();
                 final String sql = (sizeLimit) ? dialect.getLimitBuf(sqlBuf.toString(), offset,
@@ -1270,7 +1269,7 @@ public class DataManagerImpl implements DataManager {
         final Integer[] avIds = (Integer[]) availIds.toArray(new Integer[0]);
         final PageList<HighLowMetricValue> rtn = availabilityManager.getHistoricalAvailData(avIds,
             begin, end, interval, pc, true);
-        final HQDialect dialect = Util.getHQDialect();
+        final HQDialect dialect = measurementDAO.getHQDialect();
         final int maxExprs = (dialect.getMaxExpressions() == -1) ? Integer.MAX_VALUE : dialect
             .getMaxExpressions();
         for (int i = 0; i < measIds.size(); i += maxExprs) {
@@ -1486,7 +1485,7 @@ public class DataManagerImpl implements DataManager {
             conn = dbUtil.getConnection();
 
             final String metricUnion = MeasurementUnionStatementBuilder.getUnionStatement(8 * HOUR,
-                m.getId().intValue());
+                m.getId().intValue(), measurementDAO.getHQDialect());
             StringBuilder sqlBuf = new StringBuilder().append("SELECT timestamp, value FROM ")
                 .append(metricUnion).append(", (SELECT MAX(timestamp) AS maxt").append(" FROM ")
                 .append(metricUnion).append(") mt ").append("WHERE measurement_id = ").append(
@@ -1664,11 +1663,11 @@ public class DataManagerImpl implements DataManager {
                                                                                        timestamp,
                                                                                        System
                                                                                            .currentTimeMillis(),
-                                                                                       measIds)
+                                                                                       measIds, measurementDAO.getHQDialect())
                                                                                : MeasurementUnionStatementBuilder
                                                                                    .getUnionStatement(
                                                                                        getPurgeRaw(),
-                                                                                       measIds);
+                                                                                       measIds, measurementDAO.getHQDialect());
 
         StringBuilder sqlBuf = new StringBuilder(
             "SELECT measurement_id, value, timestamp" + " FROM " + tables + ", " +

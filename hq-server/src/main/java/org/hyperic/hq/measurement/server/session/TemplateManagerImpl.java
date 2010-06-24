@@ -465,7 +465,7 @@ public class TemplateManagerImpl implements TemplateManager {
      * 
      * This does a batch style insert
      */
-    public void createTemplates(String pluginName,List<MonitorableMeasurementInfo> toAdd) {
+    public void createTemplates(String pluginName,Map<MonitorableType,List<MonitorableMeasurementInfo>> toAdd) {
         measurementTemplateDAO.createTemplates(pluginName, toAdd);
     }
 

@@ -38,7 +38,9 @@ import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
-import org.hyperic.hibernate.Util;
+import org.hibernate.engine.SessionFactoryImplementor;
+import org.hibernate.engine.SessionImplementor;
+import org.hibernate.id.IdentifierGenerator;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
@@ -143,7 +145,7 @@ public class CpropDAO
                 public void setValues(PreparedStatement pstmt, int i) throws SQLException {
                     pstmt.setInt(2, keyId);
                     pstmt.setInt(3, aID.getID());
-                    int id = Util.generateId("org.hyperic.hq.appdef.server.session.Cprop", nprop)
+                    int id = generateId("org.hyperic.hq.appdef.server.session.Cprop", nprop)
                         .intValue();
                     pstmt.setInt(1, id);
                     pstmt.setInt(4, i);
@@ -156,6 +158,25 @@ public class CpropDAO
             });
         }
         return oldval;
+    }
+    
+    /**
+     * Generate a new ID for a class of the given type.
+     * 
+     * @param className the persisted class name, as per the .hbm descriptor:
+     *                  e.g. org.hyperic.hq.appdef.server.session.CpropKey
+     * @param o         The object which will be getting the new ID
+     * 
+     * @return an Integer id for the new object.  If your class uses Long IDs
+     *         then that's too bad ... we'll have to write another method.
+     */
+    private Integer generateId(String className, Object o) {
+        SessionFactoryImplementor factImpl = 
+            (SessionFactoryImplementor)sessionFactory;
+        IdentifierGenerator gen = factImpl.getIdentifierGenerator(className); 
+        SessionImplementor sessImpl = (SessionImplementor)
+            factImpl.getCurrentSession();
+        return (Integer)gen.generate(sessImpl, o);
     }
 
     public String getValue(AppdefEntityValue aVal, String key) throws CPropKeyNotFoundException,

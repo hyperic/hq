@@ -20,7 +20,6 @@ import org.hyperic.hq.common.Humidor
 import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.util.jdbc.DBUtil
 import org.hyperic.hibernate.PageInfo
-import org.hyperic.hibernate.Util
 import org.hyperic.hq.measurement.shared.MeasurementManager
 
 import java.text.DateFormat;
