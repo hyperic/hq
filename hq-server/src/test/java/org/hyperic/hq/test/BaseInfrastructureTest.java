@@ -25,7 +25,6 @@
 package org.hyperic.hq.test;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -35,8 +34,6 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.SessionFactory;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.Application;
-import org.hyperic.hq.appdef.server.session.ApplicationType;
-import org.hyperic.hq.appdef.server.session.ApplicationTypeDAO;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.server.session.Server;
@@ -60,7 +57,6 @@ import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceManager;
-import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
@@ -91,6 +87,7 @@ import org.springframework.transaction.annotation.Transactional;
  * BaseInfrastructureTest
  * 
  * @author Helena Edelson
+ * @author Jennifer Hickey
  */
 @Transactional
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -237,8 +234,7 @@ abstract public class BaseInfrastructureTest {
             resources.add(platformRes);
         }
         AppdefEntityTypeID appDefEntTypeId = new AppdefEntityTypeID(
-            AppdefEntityConstants.APPDEF_TYPE_PLATFORM, platforms.iterator().next().getResource()
-                .getResourceType().getAppdefType());
+            AppdefEntityConstants.APPDEF_TYPE_PLATFORM, platforms.iterator().next().getPlatformType().getId());
 
         return createResourceGroup(groupName, appDefEntTypeId, roles, resources);
     }
@@ -257,8 +253,7 @@ abstract public class BaseInfrastructureTest {
             resources.add(serverRes);
         }
         AppdefEntityTypeID appDefEntTypeId = new AppdefEntityTypeID(
-            AppdefEntityConstants.APPDEF_TYPE_SERVER, servers.iterator().next().getResource()
-                .getResourceType().getAppdefType());
+            AppdefEntityConstants.APPDEF_TYPE_SERVER, servers.iterator().next().getServerType().getId());
 
         return createResourceGroup(groupName, appDefEntTypeId, roles, resources);
     }
@@ -277,8 +272,7 @@ abstract public class BaseInfrastructureTest {
             resources.add(serviceRes);
         }
         AppdefEntityTypeID appDefEntTypeId = new AppdefEntityTypeID(
-            AppdefEntityConstants.APPDEF_TYPE_SERVICE, services.iterator().next().getResource()
-                .getResourceType().getAppdefType());
+            AppdefEntityConstants.APPDEF_TYPE_SERVICE, services.iterator().next().getServiceType().getId());
 
         return createResourceGroup(groupName, appDefEntTypeId, roles, resources);
     }
@@ -287,7 +281,7 @@ abstract public class BaseInfrastructureTest {
                                               List<Role> roles, List<Resource> resources)
         throws GroupDuplicateNameException, GroupCreationException {
         ResourceGroupCreateInfo gCInfo = new ResourceGroupCreateInfo(groupName, "",
-            AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP, resourceManager
+            AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS, resourceManager
                 .findResourcePrototype(appDefEntTypeId), "", 0, false, false);
         ResourceGroup resGrp = resourceGroupManager.createResourceGroup(authzSubjectManager
             .getOverlordPojo(), gCInfo, roles, resources);

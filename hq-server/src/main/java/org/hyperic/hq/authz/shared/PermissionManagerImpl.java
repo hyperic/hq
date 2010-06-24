@@ -358,12 +358,6 @@ public class PermissionManagerImpl
         }
     }
 
-    public String getResourceTypeSQL(String instanceId, Integer subjectId, String resType, String op) {
-        return "SELECT RES.ID FROM EAM_RESOURCE RES, " + " EAM_RESOURCE_TYPE RT " + "WHERE " +
-               instanceId + " = RES.INSTANCE_ID " + "  AND RES.FSYSTEM = " + _falseToken +
-               "  AND RES.RESOURCE_TYPE_ID = RT.ID " + "  AND RT.NAME = '" + resType + "'";
-    }
-
     public List getAllOperations(AuthzSubject subject, PageControl pc) throws PermissionException {
         Role rootRole = getRoleDAO().findById(AuthzConstants.rootRoleId);
         Set ops = new HashSet();

@@ -1,7 +1,10 @@
 package org.hyperic.hq.appdef.server.session;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -10,17 +13,24 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hibernate.Util;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefEntityValue;
+import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.uibeans.ResourceTreeNode;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -47,9 +57,9 @@ public class AppdefStatDAO {
     private static final int APPDEF_TYPE_PLATFORM = AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
     private static final int APPDEF_TYPE_GROUP = AppdefEntityConstants.APPDEF_TYPE_GROUP;
 
-    private JdbcTemplate jdbcTemplate;
+    protected JdbcTemplate jdbcTemplate;
 
-    private final Log log = LogFactory.getLog(AppdefStatDAO.class);
+    protected final Log log = LogFactory.getLog(AppdefStatDAO.class);
 
     @Autowired
     public AppdefStatDAO(JdbcTemplate jdbcTemplate) {
@@ -58,7 +68,7 @@ public class AppdefStatDAO {
 
     public Map<String, Integer> getPlatformCountsByTypeMap(AuthzSubject subject)
         throws SQLException {
-        Map<String, Integer> platMap = new HashMap<String, Integer>();
+        final Map<String, Integer> platMap = new HashMap<String, Integer>();
 
         String sql = "SELECT PLATT.NAME, COUNT(PLAT.ID) " +
                      "FROM " +
@@ -75,12 +85,12 @@ public class AppdefStatDAO {
             log.debug(sql);
         }
 
-        List<Map<String, Object>> rows = this.jdbcTemplate.queryForList(sql);
-        for (Map<String, Object> row : rows) {
-            platMap.put((String) row.get("NAME"), new Integer(((Long) row.get("COUNT(PLAT.ID)"))
-                .intValue()));
-        }
-
+        this.jdbcTemplate.query(sql, new RowCallbackHandler() {
+            public void processRow(ResultSet rs) throws SQLException {
+               platMap.put(rs.getString(1), rs.getInt(2));
+            }            
+        });
+ 
         return platMap;
     }
 
@@ -102,7 +112,7 @@ public class AppdefStatDAO {
     }
 
     public Map<String, Integer> getServerCountsByTypeMap(AuthzSubject subject) throws SQLException {
-        Map<String, Integer> servMap = new HashMap<String, Integer>();
+        final Map<String, Integer> servMap = new HashMap<String, Integer>();
         String sql = "SELECT SERVT.NAME, COUNT(SERV.ID) " +
                      "FROM " +
                      TBL_SERVER +
@@ -113,11 +123,12 @@ public class AppdefStatDAO {
                      getResourceTypeSQL("SERV.ID", subject.getId(), SERVER_RES_TYPE,
                          SERVER_OP_VIEW_SERVER) + ") " + "GROUP BY SERVT.NAME ORDER BY SERVT.NAME";
 
-        List<Map<String, Object>> rows = this.jdbcTemplate.queryForList(sql);
-        for (Map<String, Object> row : rows) {
-            servMap.put((String) row.get("NAME"), new Integer(((Long) row.get("COUNT(SERV.ID)"))
-                .intValue()));
-        }
+        this.jdbcTemplate.query(sql, new RowCallbackHandler() {
+            public void processRow(ResultSet rs) throws SQLException {
+              servMap.put(rs.getString(1), rs.getInt(2));
+            }
+        });
+      
         return servMap;
     }
 
@@ -135,7 +146,7 @@ public class AppdefStatDAO {
     }
 
     public Map<String, Integer> getServiceCountsByTypeMap(AuthzSubject subject) throws SQLException {
-        Map<String, Integer> servMap = new HashMap<String, Integer>();
+        final Map<String, Integer> servMap = new HashMap<String, Integer>();
         String sql = "SELECT SVCT.NAME, COUNT(SVC.ID) " +
                      "FROM " +
                      TBL_SERVICE +
@@ -146,11 +157,13 @@ public class AppdefStatDAO {
                      getResourceTypeSQL("SVC.ID", subject.getId(), SERVICE_RES_TYPE,
                          SERVICE_OP_VIEW_SERVICE) + ") " + "GROUP BY SVCT.NAME ORDER BY SVCT.NAME";
 
-        List<Map<String, Object>> rows = this.jdbcTemplate.queryForList(sql);
-        for (Map<String, Object> row : rows) {
-            servMap.put((String) row.get("NAME"), new Integer(((Long) row.get("COUNT(SVC.ID)"))
-                .intValue()));
-        }
+        this.jdbcTemplate.query(sql, new RowCallbackHandler() {
+
+            public void processRow(ResultSet rs) throws SQLException {
+                servMap.put(rs.getString(1), rs.getInt(2));
+            }
+            
+        });
         return servMap;
     }
 
@@ -169,7 +182,7 @@ public class AppdefStatDAO {
 
     public Map<String, Integer> getApplicationCountsByTypeMap(AuthzSubject subject)
         throws SQLException {
-        Map<String, Integer> appMap = new HashMap<String, Integer>();
+        final Map<String, Integer> appMap = new HashMap<String, Integer>();
         String sql = "SELECT APPT.NAME, COUNT(APP.ID) " +
                      "FROM " +
                      TBL_APP +
@@ -180,11 +193,12 @@ public class AppdefStatDAO {
                      getResourceTypeSQL("APP.ID", subject.getId(), APPLICATION_RES_TYPE,
                          APPLICATION_OP_VIEW_APPLICATION) + ") " +
                      "GROUP BY APPT.NAME ORDER BY APPT.NAME";
-        List<Map<String, Object>> rows = this.jdbcTemplate.queryForList(sql);
-        for (Map<String, Object> row : rows) {
-            appMap.put((String) row.get("NAME"), new Integer(((Long) row.get("COUNT(APP.ID)"))
-                .intValue()));
-        }
+        this.jdbcTemplate.query(sql, new RowCallbackHandler() {
+            public void processRow(ResultSet rs) throws SQLException {
+                appMap.put(rs.getString(1), rs.getInt(2));
+            }
+        });
+      
         return appMap;
     }
 
@@ -699,7 +713,305 @@ public class AppdefStatDAO {
         return appNode;
     }
 
-    private String getResourceTypeSQL(String instanceId, Integer subjectId, String resType,
+    public ResourceTreeNode[] getNavMapDataForAutoGroup(AuthzSubject subject,
+                                                        final AppdefEntityID[] parents,
+                                                        AppdefResourceType type, final int pEntityType, final int cEntityType)
+        throws AppdefEntityNotFoundException, PermissionException, SQLException {
+        final String sqlStmt;
+        String bindMarkerStr = "";
+        String authzResName;
+        String authzOpName;
+        final int appdefTypeUndefined = -1;
+        List<ResourceTreeNode> parentNodes = null;
+       
+        // If the auto-group has parents, fetch the resources
+        if (parents != null) {
+            parentNodes = new ArrayList<ResourceTreeNode>(parents.length);
+            for (int x = 0; x < parents.length; x++) {
+                AppdefEntityValue av = new AppdefEntityValue(parents[x], subject);
+                parentNodes.add(new ResourceTreeNode(av.getName(), getAppdefTypeLabel(pEntityType,
+                    av.getTypeName()), parents[x], ResourceTreeNode.RESOURCE));
+            }
+        }
+
+        // Platforms don't have a auto-group parents
+        if (pEntityType != appdefTypeUndefined) {
+            for (int x = 0; x < parents.length; x++) {
+                bindMarkerStr += (x < parents.length - 1) ? "?," : "?";
+            }
+        }
+
+        final String res_join = " JOIN " + TBL_RES + " res on resource_id = res.id ";
+        final String platAGSql = "SELECT p.id as platform_id, res.name as platform_name, " +
+                                 "       pt.id as platform_type_id, pt.name as platform_type_name " +
+                                 "FROM " +
+                                 TBL_PLATFORM +
+                                 "_TYPE pt, " +
+                                 TBL_PLATFORM +
+                                 " p " +
+                                 res_join +
+                                 " WHERE p.platform_type_id=pt.id AND platform_type_id=" +
+                                 type.getId() +
+                                 " AND " +
+                                 "EXISTS (" +
+                                 getResourceTypeSQL("p.id", subject.getId(), PLATFORM_RES_TYPE,
+                                     PLATFORM_OP_VIEW_PLATFORM) + ") ";
+
+        final String svrAGSql = "SELECT s.id as server_id, res.name as server_name, " +
+                                "       st.id as server_type_id, st.name as server_type_name " +
+                                "FROM " +
+                                TBL_SERVER +
+                                "_TYPE st, " +
+                                TBL_SERVER +
+                                " s " +
+                                res_join +
+                                " WHERE s.server_type_id=st.id AND platform_id in ( " +
+                                bindMarkerStr +
+                                " ) " +
+                                "   AND server_type_id=" +
+                                type.getId() +
+                                "   AND EXISTS (" +
+                                getResourceTypeSQL("s.id", subject.getId(), SERVER_RES_TYPE,
+                                    SERVER_OP_VIEW_SERVER) + ") ";
+
+        final String svcAGSql = "SELECT s.id as service_id, res.name as service_name, " +
+                                "       st.id as service_type_id, st.name as service_type_name " +
+                                "FROM " +
+                                TBL_SERVICE +
+                                "_TYPE st, " +
+                                TBL_SERVICE +
+                                " s " +
+                                res_join +
+                                " WHERE s.service_type_id=st.id AND s.server_id in ( " +
+                                bindMarkerStr +
+                                " ) AND " +
+                                "s.service_type_id=" +
+                                type.getId() +
+                                "   AND EXISTS (" +
+                                getResourceTypeSQL("s.id", subject.getId(), SERVICE_RES_TYPE,
+                                    SERVICE_OP_VIEW_SERVICE) + ") ";
+
+        final String appSvcAGSql = "SELECT s.id as service_id, res.name as service_name, " +
+                                   "       st.id as service_type_id, st.name as service_type_name " +
+                                   "FROM " +
+                                   TBL_SERVICE +
+                                   "_TYPE st, EAM_APP_SERVICE aps, " +
+                                   TBL_SERVICE +
+                                   " s " +
+                                   res_join +
+                                   " WHERE s.service_type_id=st.id and s.id=aps.service_id AND " +
+                                   "aps.application_id in ( " +
+                                   bindMarkerStr +
+                                   " ) AND " +
+                                   "s.service_type_id=" +
+                                   type.getId() +
+                                   "   AND EXISTS (" +
+                                   getResourceTypeSQL("s.id", subject.getId(), SERVICE_RES_TYPE,
+                                       SERVICE_OP_VIEW_SERVICE) + ") ";
+
+        switch (pEntityType) {
+            case APPDEF_TYPE_PLATFORM:
+                sqlStmt = svrAGSql;
+                authzResName = AuthzConstants.serverResType;
+                authzOpName = AuthzConstants.serverOpViewServer;
+                break;
+            case APPDEF_TYPE_SERVER:
+                sqlStmt = svcAGSql;
+                authzResName = AuthzConstants.serviceResType;
+                authzOpName = AuthzConstants.serviceOpViewService;
+                break;
+            case (AppdefEntityConstants.APPDEF_TYPE_APPLICATION):
+                sqlStmt = appSvcAGSql;
+                authzResName = AuthzConstants.serviceResType;
+                authzOpName = AuthzConstants.serviceOpViewService;
+                break;
+            case (appdefTypeUndefined):
+                sqlStmt = platAGSql;
+                authzResName = AuthzConstants.platformResType;
+                authzOpName = AuthzConstants.platformOpViewPlatform;
+                break;
+            default:
+                throw new IllegalArgumentException("No auto-group support " + "for specified type");
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug(sqlStmt);
+        }
+
+        final ResourceTreeNode agNode = new ResourceTreeNode(type.getName(), getAppdefTypeLabel(
+            cEntityType, type.getName()), parents, type.getId().intValue(),
+            ResourceTreeNode.AUTO_GROUP);
+        final Set<ResourceTreeNode> entitySet = new HashSet<ResourceTreeNode>();
+        final List<ResourceTreeNode> parentNodeList = parentNodes;
+        StopWatch timer = new StopWatch();
+        ResourceTreeNode[] groupNode = jdbcTemplate.query(new PreparedStatementCreator() {
+            public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+                PreparedStatement stmt = con.prepareStatement(sqlStmt);
+                if (pEntityType != appdefTypeUndefined) {
+                    for (int x = 0; x < parents.length; x++) {
+                        stmt.setInt(x + 1, parents[x].getID());
+                    }
+                }
+                return stmt;
+            }
+        }, new ResultSetExtractor<ResourceTreeNode[]>() {
+            public ResourceTreeNode[] extractData(ResultSet rs) throws SQLException,
+                DataAccessException {
+                while (rs.next()) {
+                    int thisEntityId = rs.getInt(1);
+                    String thisEntityName = rs.getString(2);
+                    String thisEntityTypeName = rs.getString(4);
+
+                    entitySet.add(new ResourceTreeNode(thisEntityName, getAppdefTypeLabel(
+                        cEntityType, thisEntityTypeName), new AppdefEntityID(cEntityType,
+                        thisEntityId), ResourceTreeNode.RESOURCE));
+                }
+
+                agNode.setSelected(true);
+                if (parentNodeList != null) {
+                    ResourceTreeNode[] parNodeArr = (ResourceTreeNode[]) parentNodeList
+                        .toArray(new ResourceTreeNode[0]);
+                    ResourceTreeNode.alphaSortNodes(parNodeArr, true);
+                    agNode.addUpChildren(parNodeArr);
+                }
+
+                ResourceTreeNode[] members = (ResourceTreeNode[]) entitySet
+                    .toArray(new ResourceTreeNode[0]);
+
+                ResourceTreeNode.alphaSortNodes(members);
+                agNode.addDownChildren(members);
+
+                return new ResourceTreeNode[] { agNode };
+            }
+
+        });
+
+        if (log.isDebugEnabled()) {
+            log.debug("getNavMapDataForAutoGroup() executed in: " + timer);
+            log.debug("SQL: " + sqlStmt);
+            int i;
+            for (i = 0; i < parents.length; i++) {
+                log.debug("Arg " + (i + 1) + ": " + parents[i].getID());
+            }
+            i = 1;
+            log.debug("Arg " + (i++) + ": " + type.getId());
+            log.debug("Arg " + (i++) + ": " + subject.getId());
+            log.debug("Arg " + (i++) + ": " + subject.getId());
+            log.debug("Arg " + (i++) + ": " + authzResName);
+            log.debug("Arg " + (i++) + ": " + authzOpName);
+        }
+
+        return groupNode;
+    }
+
+    public ResourceTreeNode[] getNavMapDataForGroup(AuthzSubject subject, AppdefGroupValue groupVo)
+        throws PermissionException, SQLException {
+        ResourceTreeNode grpNode = new ResourceTreeNode(groupVo.getName(), getAppdefTypeLabel(
+            APPDEF_TYPE_GROUP, groupVo.getAppdefResourceTypeValue().getName()), groupVo
+            .getEntityId(), ResourceTreeNode.CLUSTER);
+        final List<AppdefEntityID> agEntries = groupVo.getAppdefGroupEntries();
+        if (agEntries.size() == 0) {
+            return new ResourceTreeNode[] { grpNode };
+        }
+        ResourceTreeNode[] retVal = null;
+        final StringBuilder grpSqlStmt = new StringBuilder();
+        final boolean debug = log.isDebugEnabled();
+
+        int entityType = groupVo.getGroupEntType();
+
+        final String resJoin = new StringBuilder().append(" JOIN ").append(TBL_RES).append(
+            " res on resource_id = res.id ").toString();
+
+        switch (entityType) {
+            case APPDEF_TYPE_PLATFORM:
+                grpSqlStmt.append("SELECT p.id as platform_id, res.name as platform_name ").append(
+                    " FROM ").append(TBL_PLATFORM).append(" p ").append(resJoin).append(
+                    "WHERE p.id IN (");
+                break;
+            case APPDEF_TYPE_SERVER:
+                grpSqlStmt.append("SELECT s.id as server_id, res.name as server_name ").append(
+                    "FROM ").append(TBL_SERVER).append(" s ").append(resJoin).append(
+                    "WHERE s.id IN (");
+                break;
+            case APPDEF_TYPE_SERVICE:
+                grpSqlStmt.append("SELECT s.id as service_id, res.name as service_name ").append(
+                    "FROM ").append(TBL_SERVICE).append(" s  ").append(resJoin).append(
+                    "WHERE s.id IN (");
+                break;
+            default:
+                throw new IllegalArgumentException("No group support " + "for specified type");
+        }
+
+        if (debug) {
+            log.debug(grpSqlStmt);
+        }
+        Set<ResourceTreeNode> entitySet = new HashSet<ResourceTreeNode>(agEntries.size());
+
+        Map<Integer, String> entNameMap = new HashMap<Integer, String>();
+        if (groupVo.getTotalSize() > 0) {
+            final int max = Util.getHQDialect().getMaxExpressions();
+            final int batchSize = (max < 0) ? Integer.MAX_VALUE : max;
+            for (int ii = 0; ii < agEntries.size(); ii += batchSize) {
+                int end = Math.min(ii + batchSize, agEntries.size());
+                List<AppdefEntityID> list = agEntries.subList(ii, end);
+                setEntNameMap(entNameMap, list, grpSqlStmt);
+            }
+
+            // Let group member order drive node creation (not db order).
+            for (AppdefEntityID id : groupVo.getAppdefGroupEntries()) {
+                entitySet
+                    .add(new ResourceTreeNode((String) entNameMap.get(id.getId()),
+                        getAppdefTypeLabel(id.getType(), groupVo.getAppdefResourceTypeValue()
+                            .getName()), new AppdefEntityID(entityType, id.getId()),
+                        ResourceTreeNode.RESOURCE));
+            }
+        }
+
+        ResourceTreeNode[] memberNodes = entitySet.toArray(new ResourceTreeNode[0]);
+
+        grpNode.setSelected(true);
+        ResourceTreeNode.alphaSortNodes(memberNodes);
+        grpNode.addDownChildren(memberNodes);
+
+        retVal = new ResourceTreeNode[] { grpNode };
+
+        return retVal;
+    }
+
+    private void setEntNameMap(final Map<Integer, String> entNameMap, List<AppdefEntityID> list,
+                               StringBuilder grpSqlStmt) throws SQLException {
+        if (list.size() == 0) {
+            return;
+        }
+        final boolean debug = log.isDebugEnabled();
+        // don't overwrite the caller's object
+        grpSqlStmt = new StringBuilder(grpSqlStmt);
+
+        int x = 1;
+        for (AppdefEntityID mem : list) {
+            if (debug) {
+                log.debug("Arg " + x + ": " + mem.getID());
+            }
+            grpSqlStmt.append((x == 1 ? "" : ",")).append(mem.getID());
+            x++;
+        }
+        grpSqlStmt.append(")");
+        StopWatch timer = new StopWatch();
+        if (debug) {
+            log.debug("SQL: " + grpSqlStmt);
+        }
+        jdbcTemplate.query(grpSqlStmt.toString(), new RowCallbackHandler() {
+            public void processRow(ResultSet rs) throws SQLException {
+                entNameMap.put(rs.getInt(1), rs.getString(2));
+            } 
+        });   
+     
+        if (debug) {
+            log.debug("getNavMapDataForGroup() executed in: " + timer);
+        }
+    }
+
+    protected String getResourceTypeSQL(String instanceId, Integer subjectId, String resType,
                                       String op) throws SQLException {
         return "SELECT RES.ID FROM EAM_RESOURCE RES, " + " EAM_RESOURCE_TYPE RT " + "WHERE " +
                instanceId + " = RES.INSTANCE_ID " + "  AND RES.FSYSTEM = " +
