@@ -700,7 +700,7 @@ public class VCenterPlatformDetector {
         try {
             // verify to see if it exists in vCenter
             HostSystem hs =
-                (HostSystem)vim.find(VSphereUtil.HOST_SYSTEM, r.getName());
+                (HostSystem)vim.findByUuid(VSphereUtil.HOST_SYSTEM, getFqdn(r));
             
             if (log.isDebugEnabled()) {
                 log.debug(HOST_TYPE + "[name=" + r.getName() 
@@ -717,7 +717,7 @@ public class VCenterPlatformDetector {
         try {
             // verify to see if it exists in vCenter
             VirtualMachine vm =
-                (VirtualMachine)vim.find(VSphereUtil.VM, r.getName());
+                (VirtualMachine)vim.findByUuid(VSphereUtil.VM, getFqdn(r));
             
             if (log.isDebugEnabled()) {
                 log.debug(VM_TYPE + "[name=" + r.getName() 
