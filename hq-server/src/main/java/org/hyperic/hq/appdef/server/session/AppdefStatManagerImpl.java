@@ -78,29 +78,27 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @org.springframework.stereotype.Service
 public class AppdefStatManagerImpl implements AppdefStatManager {
-   
+
     private static final String LOG_CTX = AppdefStatManagerImpl.class.getName();
 
     private final Log log = LogFactory.getLog(LOG_CTX);
     private static int DB_TYPE = -1;
-    
-    private static final String TBL_GROUP = "EAM_RESOURCE_GROUP";
+
     private static final String TBL_PLATFORM = "EAM_PLATFORM";
     private static final String TBL_SERVICE = "EAM_SERVICE";
     private static final String TBL_SERVER = "EAM_SERVER";
-    private static final String TBL_APP = "EAM_APPLICATION";
+
     private static final String TBL_RES = "EAM_RESOURCE";
 
     private static final String PLATFORM_RES_TYPE = AuthzConstants.platformResType;
-    private static final String APPLICATION_RES_TYPE = AuthzConstants.applicationResType;
+
     private static final String SERVER_RES_TYPE = AuthzConstants.serverResType;
     private static final String SERVICE_RES_TYPE = AuthzConstants.serviceResType;
-    private static final String GROUP_RES_TYPE = AuthzConstants.groupResType;
+
     private static final String PLATFORM_OP_VIEW_PLATFORM = AuthzConstants.platformOpViewPlatform;
-    private static final String APPLICATION_OP_VIEW_APPLICATION = AuthzConstants.appOpViewApplication;
+
     private static final String SERVER_OP_VIEW_SERVER = AuthzConstants.serverOpViewServer;
     private static final String SERVICE_OP_VIEW_SERVICE = AuthzConstants.serviceOpViewService;
-    private static final String GROUP_OP_VIEW_RESOURCE_GROUP = AuthzConstants.groupOpViewResourceGroup;
 
     private static final int APPDEF_TYPE_PLATFORM = AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
     private static final int APPDEF_TYPE_SERVER = AppdefEntityConstants.APPDEF_TYPE_SERVER;
@@ -118,13 +116,16 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
     private ServiceManager serviceManager;
 
     private ResourceGroupManager resourceGroupManager;
-    
+
     private AppdefStatDAO appdefStatDAO;
 
     @Autowired
-    public AppdefStatManagerImpl(PermissionManager permissionManager, ApplicationManager applicationManager,
+    public AppdefStatManagerImpl(PermissionManager permissionManager,
+                                 ApplicationManager applicationManager,
                                  PlatformManager platformManager, ServerManager serverManager,
-                                 ServiceManager serviceManager, ResourceGroupManager resourceGroupManager, AppdefStatDAO appdefStatDAO) {
+                                 ServiceManager serviceManager,
+                                 ResourceGroupManager resourceGroupManager,
+                                 AppdefStatDAO appdefStatDAO) {
         this.permissionManager = permissionManager;
         this.applicationManager = applicationManager;
         this.platformManager = platformManager;
@@ -139,10 +140,10 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
      * Return map of platform counts.
      * </p>
      */
-    @Transactional(propagation = Propagation.SUPPORTS, readOnly=true)
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
     public Map<String, Integer> getPlatformCountsByTypeMap(AuthzSubject subject) {
         try {
-          return appdefStatDAO.getPlatformCountsByTypeMap(subject);
+            return appdefStatDAO.getPlatformCountsByTypeMap(subject);
         } catch (Exception e) {
             log.error("Caught Exception finding Platforms by type: " + e, e);
             throw new SystemException(e);
@@ -155,10 +156,10 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
      * </p>
      * 
      */
-    @Transactional(propagation = Propagation.SUPPORTS, readOnly=true)
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
     public int getPlatformsCount(AuthzSubject subject) {
         try {
-           return appdefStatDAO.getPlatformsCount(subject);
+            return appdefStatDAO.getPlatformsCount(subject);
         } catch (Exception e) {
             log.error("Caught Exception counting Platforms: " + e, e);
             throw new SystemException(e);
@@ -171,14 +172,14 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
      * </p>
      * 
      */
-    @Transactional(propagation = Propagation.SUPPORTS, readOnly=true)
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
     public Map<String, Integer> getServerCountsByTypeMap(AuthzSubject subject) {
         try {
             return appdefStatDAO.getServerCountsByTypeMap(subject);
         } catch (Exception e) {
             log.error("Caught Exception finding Servers by type: " + e, e);
             throw new SystemException(e);
-        } 
+        }
     }
 
     /**
@@ -186,14 +187,14 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
      * Return servers count.
      * </p>
      */
-    @Transactional(propagation = Propagation.SUPPORTS, readOnly=true)
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
     public int getServersCount(AuthzSubject subject) {
         try {
-           return appdefStatDAO.getServersCount(subject);
+            return appdefStatDAO.getServersCount(subject);
         } catch (Exception e) {
             log.error("Caught Exception finding Servers by type: " + e, e);
             throw new SystemException(e);
-        } 
+        }
     }
 
     /**
@@ -201,14 +202,14 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
      * Return map of service counts.
      * </p>
      */
-    @Transactional(propagation = Propagation.SUPPORTS, readOnly=true)
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
     public Map<String, Integer> getServiceCountsByTypeMap(AuthzSubject subject) {
         try {
-           return appdefStatDAO.getServiceCountsByTypeMap(subject);
+            return appdefStatDAO.getServiceCountsByTypeMap(subject);
         } catch (Exception e) {
             log.error("Caught Exception finding Services by type: " + e, e);
             throw new SystemException(e);
-        } 
+        }
     }
 
     /**
@@ -216,14 +217,14 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
      * Return services count.
      * </p>
      */
-    @Transactional(propagation = Propagation.SUPPORTS, readOnly=true)
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
     public int getServicesCount(AuthzSubject subject) {
         try {
             return appdefStatDAO.getServicesCount(subject);
         } catch (Exception e) {
             log.error("Caught Exception finding Services by type: " + e, e);
             throw new SystemException(e);
-        } 
+        }
     }
 
     /**
@@ -231,14 +232,14 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
      * Return map of app counts.
      * </p>
      */
-    @Transactional(propagation = Propagation.SUPPORTS, readOnly=true)
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
     public Map<String, Integer> getApplicationCountsByTypeMap(AuthzSubject subject) {
         try {
-           return appdefStatDAO.getApplicationCountsByTypeMap(subject);
+            return appdefStatDAO.getApplicationCountsByTypeMap(subject);
         } catch (Exception e) {
             log.error("Caught Exception finding applications by type: " + e, e);
             throw new SystemException(e);
-        } 
+        }
     }
 
     /**
@@ -246,14 +247,14 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
      * Return apps count.
      * </p>
      */
-    @Transactional(propagation = Propagation.SUPPORTS, readOnly=true)
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
     public int getApplicationsCount(AuthzSubject subject) {
         try {
-          return appdefStatDAO.getApplicationsCount(subject);
+            return appdefStatDAO.getApplicationsCount(subject);
         } catch (Exception e) {
             log.error("Caught Exception finding applications by type: " + e, e);
             throw new SystemException(e);
-        } 
+        }
     }
 
     /**
@@ -261,14 +262,14 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
      * Return map of grp counts.
      * </p>
      */
-    @Transactional(propagation = Propagation.SUPPORTS, readOnly=true)
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
     public Map<Integer, Integer> getGroupCountsMap(AuthzSubject subject) {
         try {
             return appdefStatDAO.getGroupCountsMap(subject);
         } catch (Exception e) {
             log.error("Caught Exception finding groups by type: " + e, e);
             throw new SystemException(e);
-        } 
+        }
     }
 
     /**
@@ -276,13 +277,15 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
      * Return directly connected resource tree for node level platform
      * </p>
      */
-    @Transactional(propagation = Propagation.SUPPORTS, readOnly=true)
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
     public ResourceTreeNode[] getNavMapDataForPlatform(AuthzSubject subject, Integer platformId)
         throws PlatformNotFoundException, PermissionException {
         try {
             Platform plat = platformManager.findPlatformById(platformId);
-            ResourceTreeNode[] retVal;
-            retVal = getNavMapDataForPlatform(subject, plat);
+            ResourceTreeNode[] retVal = appdefStatDAO.getNavMapDataForPlatform(subject, plat);
+            if (log.isDebugEnabled()) {
+                log.debug(mapToString(retVal));
+            }
             return retVal;
         } catch (Exception e) {
             log.error("Unable to get NavMap data: " + e, e);
@@ -290,175 +293,22 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
         }
     }
 
-    private ResourceTreeNode[] getNavMapDataForPlatform(AuthzSubject subject, Platform plat)
-        throws SQLException {
-        ResourceTreeNode aPlatformNode = new ResourceTreeNode(plat.getName(), getAppdefTypeLabel(
-                APPDEF_TYPE_PLATFORM, plat.getAppdefResourceType().getName()), plat.getEntityId(),
-                ResourceTreeNode.RESOURCE);
-
-        // XXX Leave out service data No current way to represent it
-        // (ResourceTreeNode[]) serviceMap.values()
-        // .toArray(new ResourceTreeNode[0]);
-        Set<ResourceTreeNode> servers = appdefStatDAO.foo(subject, plat);
-        aPlatformNode.setSelected(true);
-        ResourceTreeNode[] svrNodes = (ResourceTreeNode[]) servers.toArray(new ResourceTreeNode[0]);
-        ResourceTreeNode.alphaSortNodes(svrNodes, true);
-        aPlatformNode.addUpChildren(svrNodes);
-        ResourceTreeNode[] retVal = new ResourceTreeNode[] { aPlatformNode };
-        
-        if (log.isDebugEnabled()) {
-            log.debug(mapToString(retVal));
-        }
-        return retVal;
-    }
-
-    private boolean isOracle8() {
-        return DB_TYPE == DBUtil.DATABASE_ORACLE_8;
-    }
-
-    private boolean isOracle() {
-        return isOracle8() || DB_TYPE == DBUtil.DATABASE_ORACLE_9;
-    }
-
     /**
      * <p>
      * Return directly connected resource tree for node level server
      * </p>
      */
-    @Transactional(propagation = Propagation.SUPPORTS, readOnly=true)
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
     public ResourceTreeNode[] getNavMapDataForServer(AuthzSubject subject, Integer serverId)
         throws ServerNotFoundException, PermissionException {
         Server server = serverManager.findServerById(serverId);
 
-        ResourceTreeNode[] retVal = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-        StringBuffer buf;
-        Integer subjectId = subject.getId();
         try {
-            Connection conn = getDBConn();
-
-            buf = new StringBuffer();
-            buf.append("SELECT svc_svct_svr_plat.platform_id, ").append("svc_svct_svr_plat.platform_name, ").append(
-                "       svc_svct_svr_plat.platform_type_id, ").append("svc_svct_svr_plat.platform_type_name, ").append(
-                "       svc_svct_svr_plat.service_id, ").append("svc_svct_svr_plat.service_name, ").append(
-                "       svc_svct_svr_plat.service_type_id, ").append("svc_svct_svr_plat.service_type_name ").append(
-                "FROM (SELECT app.id as application_id, ").append("appsvc.service_id as service_id ").append(
-                "        FROM EAM_APP_SERVICE appsvc ");
-            if (isOracle()) {
-                buf.append(" , ").append(TBL_APP).append(" app ").append(
-                    "WHERE app.id=appsvc.application_id(+) AND EXISTS (").append(
-                    permissionManager.getResourceTypeSQL("app.id", subjectId, APPLICATION_RES_TYPE,
-                        APPLICATION_OP_VIEW_APPLICATION)).append(") ) app_appsvc, ");
-            } else {
-                buf.append("  RIGHT JOIN ").append(TBL_APP).append(" app ON app.id=appsvc.application_id ").append(
-                    " WHERE EXISTS (").append(
-                    permissionManager.getResourceTypeSQL("app.id", subjectId, APPLICATION_RES_TYPE,
-                        APPLICATION_OP_VIEW_APPLICATION)).append(") ) app_appsvc RIGHT JOIN ");
-            }
-            buf.append(" (SELECT svc_svct.service_id, ").append("svc_svct.service_name, ").append(
-                "         svc_svct.service_type_id, ").append("svc_svct.service_type_name, ").append(
-                "         plat.id as platform_id, ").append("res0.name as platform_name, ").append(
-                "         platt.id as platform_type_id, ").append("platt.name as platform_type_name ").append(
-                "  FROM (SELECT svc.id    as service_id, ").append("               res2.name  as service_name, ")
-                .append("               svct.id   as service_type_id,").append(
-                    "               svct.name as service_type_name,").append(
-                    "               svc.server_id as server_id ").append("        FROM ").append(TBL_SERVICE).append(
-                    "_TYPE svct, ").append(TBL_SERVICE).append(" svc ").append(" JOIN " + TBL_RES).append(
-                    " res2 ON svc.resource_id = res2.id ").append(
-                    "        WHERE svc.service_type_id=svct.id AND EXISTS (").append(
-                    permissionManager
-                        .getResourceTypeSQL("svc.id", subjectId, SERVICE_RES_TYPE, SERVICE_OP_VIEW_SERVICE)).append(
-                    ") ) svc_svct ");
-            if (isOracle()) {
-                buf.append(" ," + TBL_SERVER + " svr, ");
-            } else {
-                buf.append(" RIGHT JOIN " + TBL_SERVER + " svr ").append("ON svc_svct.server_id=svr.id, ");
-            }
-            buf.append(TBL_PLATFORM).append("_TYPE platt, ").append(TBL_PLATFORM).append(" plat JOIN ").append(TBL_RES)
-                .append(" res0 ON plat.resource_id = res0.id").append(" WHERE svr.id=").append(server.getId()).append(
-                    "   AND platt.id=plat.platform_type_id ").append("   AND plat.id=svr.platform_id AND EXISTS (")
-                .append(
-                    permissionManager.getResourceTypeSQL("plat.id", subjectId, PLATFORM_RES_TYPE,
-                        PLATFORM_OP_VIEW_PLATFORM)).append(") ");
-
-            if (isOracle()) {
-                buf.append(" AND svr.id=svc_svct.server_id(+) ").append("       ) svc_svct_svr_plat ").append(
-                    " WHERE svc_svct_svr_plat.service_id=app_appsvc.service_id(+)");
-            } else {
-                buf.append(" ) svc_svct_svr_plat ").append(" ON svc_svct_svr_plat.service_id=app_appsvc.service_id ");
-            }
-            buf.append("order by service_type_id ");
-
-            stmt = conn.createStatement();
-            StopWatch timer = new StopWatch();
-
-            rs = stmt.executeQuery(buf.toString());
-
-            if (log.isDebugEnabled()) {
-                log.debug("getNavMapDataForServer() executed in: " + timer);
-                log.debug("SQL: " + buf);
-            }
-
-            Map<Integer, ResourceTreeNode> serviceMap = new HashMap<Integer, ResourceTreeNode>();
-            ResourceTreeNode aServerNode;
-            ResourceTreeNode aPlatformNode;
-
-            aPlatformNode = null;
-            aServerNode = new ResourceTreeNode(server.getName(), getAppdefTypeLabel(server.getEntityId().getType(),
-                server.getAppdefResourceType().getName()), server.getEntityId(), ResourceTreeNode.RESOURCE);
-
-            int thisPlatId = 0;
-            String thisPlatformName = null;
-            int thisPlatformTypeId = 0;
-            String thisPlatformTypeName = null;
-            int thisSvcId = 0;
-            String thisServiceName = null;
-            int thisServiceTypeId = 0;
-            String thisServiceTypeName = null;
-
-            while (rs.next()) {
-
-                if (thisPlatId == 0) {
-                    thisPlatId = rs.getInt(1);
-                    thisPlatformName = rs.getString(2);
-                    thisPlatformTypeId = rs.getInt(3);
-                    thisPlatformTypeName = rs.getString(4);
-                    aPlatformNode = new ResourceTreeNode(thisPlatformName, getAppdefTypeLabel(APPDEF_TYPE_PLATFORM,
-                        thisPlatformTypeName), AppdefEntityID.newPlatformID(new Integer(thisPlatId)),
-                        (AppdefEntityID) null, thisPlatformTypeId);
-                }
-
-                thisSvcId = rs.getInt(5);
-                thisServiceName = rs.getString(6);
-                thisServiceTypeId = rs.getInt(7);
-                thisServiceTypeName = rs.getString(8);
-
-                if (thisServiceName != null) {
-                    serviceMap.put(new Integer(thisSvcId), new ResourceTreeNode(thisServiceName, getAppdefTypeLabel(
-                        APPDEF_TYPE_SERVICE, thisServiceTypeName), AppdefEntityID.newServiceID(new Integer(thisSvcId)),
-                        server.getEntityId(), thisServiceTypeId));
-                }
-            }
-
-            aServerNode.setSelected(true);
-            ResourceTreeNode[] services = (ResourceTreeNode[]) serviceMap.values().toArray(new ResourceTreeNode[0]);
-            ResourceTreeNode.alphaSortNodes(services, true);
-            aServerNode.addUpChildren(services);
-            // aPlatformNode can be null if user is unauthz
-            if (aPlatformNode != null) {
-                aServerNode.addDownChild(aPlatformNode);
-            }
-            retVal = new ResourceTreeNode[] { aServerNode };
-
-        } catch (SQLException e) {
+            return appdefStatDAO.getNavMapDataForServer(subject, server);
+        } catch (Exception e) {
             log.error("Unable to get NavMap data: " + e, e);
             throw new SystemException(e);
-        } finally {
-            DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
-            
         }
-        return retVal;
     }
 
     /**
@@ -466,166 +316,16 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
      * Return directly connected resource tree for node level service
      * </p>
      */
-    @Transactional(propagation = Propagation.SUPPORTS, readOnly=true)
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
     public ResourceTreeNode[] getNavMapDataForService(AuthzSubject subject, Integer serviceId)
         throws ServiceNotFoundException, PermissionException {
         Service service = serviceManager.findServiceById(serviceId);
-
-        ResourceTreeNode[] retVal = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-        StringBuffer buf;
-        Integer subjectId = subject.getId();
         try {
-            Connection conn = getDBConn();
-
-            String trueStr = DBUtil.getBooleanValue(true, conn);
-            buf = new StringBuffer();
-            buf.append("SELECT plat.platform_id, ").append("platform_name, ").append("       platform_type_name, ")
-                .append("asvc_svr.server_id, ").append("       asvc_svr.server_name, ").append(
-                    "asvc_svr.server_type_name, ").append("       asvc_svr.application_id, ").append(
-                    "asvc_svr.application_name, ").append("       asvc_svr.application_type_name, ")
-                .append("fvirtual ").append(
-                    "FROM (SELECT plat.id as platform_id, " + "res0.name as platform_name, " +
-                        "platt.name as platform_type_name " + "FROM " + TBL_PLATFORM + "_TYPE platt, " + TBL_PLATFORM +
-                        " plat JOIN " + TBL_RES + " res0 ON plat.resource_id = res0.id " +
-                        "WHERE plat.platform_type_id=platt.id AND " + " EXISTS (").append(
-                    permissionManager.getResourceTypeSQL("plat.id", subjectId, PLATFORM_RES_TYPE,
-                        PLATFORM_OP_VIEW_PLATFORM)).append(")) plat ");
-
-            if (isOracle8()) {
-                buf.append(", ");
-            } else {
-                buf.append("RIGHT JOIN ");
-            }
-            buf.append("( SELECT asvc.application_id, ").append("asvc.application_name, ").append(
-                "         asvc.application_type_name, ").append("svr.id as server_id, ").append(
-                "         res1.name as server_name, ").append("         svrt.name as server_type_name, ").append(
-                "         svr.platform_id, fvirtual ").append(" FROM ").append(TBL_RES).append(" res1 JOIN ").append(
-                TBL_SERVER).append(" svr ON res1.id = svr.resource_id ");
-            if (isOracle8()) {
-                buf.append(" , ");
-            } else {
-                buf.append(" RIGHT JOIN ");
-            }
-            buf.append(" (SELECT app_appsvc.application_id, ").append("app_appsvc.application_name, ").append(
-                "         app_appsvc.application_type_name, ").append("svc.server_id as server_id ").append(
-                "    FROM (SELECT app.id as application_id, ").append("r.name as application_name, ").append(
-                "                 EAM_APPLICATION_TYPE.name as application_type_name, ").append(
-                "                 appsvc.service_id as service_id ").append("          FROM EAM_APP_SERVICE appsvc ");
-            if (isOracle8()) {
-                buf.append(" , ").append(TBL_APP).append(" app, EAM_APPLICATION_TYPE, ").append(TBL_RES).append(" r ")
-                    .append(" WHERE app.id=appsvc.application_id(+) ").append(
-                        "   AND EAM_APPLICATION_TYPE.id=app.application_type_id ").append(
-                        "   AND app.resource_id = r.id AND EXISTS (").append(
-                        permissionManager.getResourceTypeSQL("app.id", subjectId, APPLICATION_RES_TYPE,
-                            APPLICATION_OP_VIEW_APPLICATION)).append(") ) app_appsvc, ").append(TBL_SERVICE).append(
-                        " svc WHERE svc.id=app_appsvc.service_id(+) AND svc.id=").append(service.getId()).append(
-                        ") asvc ");
-            } else {
-                buf.append(" RIGHT JOIN ").append(TBL_APP).append(" app ON app.id=appsvc.application_id ").append(
-                    " RIGHT JOIN ").append(TBL_RES).append(" r ON app.resource_id = r.id, ").append(
-                    " EAM_APPLICATION_TYPE  ").append(" WHERE EAM_APPLICATION_TYPE.id=app.application_type_id ")
-                    .append("   AND EXISTS (").append(
-                        permissionManager.getResourceTypeSQL("app.id", subjectId, APPLICATION_RES_TYPE,
-                            APPLICATION_OP_VIEW_APPLICATION)).append(") ) app_appsvc RIGHT JOIN ").append(TBL_SERVICE)
-                    .append(" svc ON svc.id=app_appsvc.service_id ").append(" WHERE svc.id=").append(service.getId())
-                    .append(") asvc ");
-            }
-            if (isOracle8()) {
-                buf.append(" , ").append(TBL_SERVER).append("_TYPE svrt ").append(" WHERE svr.server_type_id=svrt.id ")
-                    .append("   AND asvc.server_id=svr.id(+) ").append("   AND (fvirtual = ").append(trueStr).append(
-                        "    OR EXISTS (").append(
-                        permissionManager.getResourceTypeSQL("svr.id", subjectId, SERVER_RES_TYPE,
-                            SERVER_OP_VIEW_SERVER)).append(")) ) asvc_svr, ").append(TBL_PLATFORM + "_TYPE platt ")
-                    .append("WHERE plat.platform_type_id=platt.id ").append(
-                        "  AND asvc_svr.platform_id=plat.id(+) AND EXISTS (").append(
-                        permissionManager.getResourceTypeSQL("plat.id", subjectId, PLATFORM_RES_TYPE,
-                            PLATFORM_OP_VIEW_PLATFORM)).append(") ");
-            } else {
-                buf.append(" ON asvc.server_id=svr.id, ").append(TBL_SERVER).append("_TYPE svrt ").append(
-                    " WHERE svr.server_type_id=svrt.id ").append("   AND (fvirtual = ").append(trueStr).append(
-                    "    OR EXISTS (").append(
-                    permissionManager.getResourceTypeSQL("svr.id", subjectId, SERVER_RES_TYPE, SERVER_OP_VIEW_SERVER))
-                    .append(")) ) asvc_svr ").append("     ON asvc_svr.platform_id = plat.platform_id");
-            }
-
-            stmt = conn.createStatement();
-            StopWatch timer = new StopWatch();
-
-            rs = stmt.executeQuery(buf.toString());
-
-            if (log.isDebugEnabled()) {
-                log.debug("getNavMapDataForService() executed in: " + timer);
-                log.debug("SQL: " + buf);
-            }
-
-            ResourceTreeNode aPlatformNode = null;
-            ResourceTreeNode aServerNode = null;
-            ResourceTreeNode aServiceNode = null;
-            Map<Integer, ResourceTreeNode> appMap = new HashMap<Integer, ResourceTreeNode>();
-
-            aServiceNode = new ResourceTreeNode(service.getName(), getAppdefTypeLabel(service.getEntityId().getType(),
-                service.getAppdefResourceType().getName()), service.getEntityId(), ResourceTreeNode.RESOURCE);
-
-            while (rs.next()) {
-
-                int i = 1;
-                int thisPlatId = rs.getInt(i++);
-                String thisPlatformName = rs.getString(i++);
-                String thisPlatformTypeName = rs.getString(i++);
-                int thisSvrId = rs.getInt(i++);
-                String thisServerName = rs.getString(i++);
-                String thisServerTypeName = rs.getString(i++);
-                int thisAppId = rs.getInt(i++);
-                String thisApplicationName = rs.getString(i++);
-                String thisApplicationDesc = rs.getString(i++);
-                String virtualServer = rs.getString(i++);
-
-                if (thisPlatformName != null) {
-                    aPlatformNode = new ResourceTreeNode(thisPlatformName, getAppdefTypeLabel(APPDEF_TYPE_PLATFORM,
-                        thisPlatformTypeName), AppdefEntityID.newPlatformID(new Integer(thisPlatId)),
-                        ResourceTreeNode.RESOURCE);
-                }
-
-                if (thisServerName != null && !trueStr.startsWith(virtualServer)) {
-                    aServerNode = new ResourceTreeNode(thisServerName, getAppdefTypeLabel(APPDEF_TYPE_SERVER,
-                        thisServerTypeName), AppdefEntityID.newServerID(new Integer(thisSvrId)),
-                        ResourceTreeNode.RESOURCE);
-                }
-
-                if (thisApplicationName != null) {
-                    appMap.put(new Integer(thisAppId), new ResourceTreeNode(thisApplicationName, getAppdefTypeLabel(
-                        AppdefEntityConstants.APPDEF_TYPE_APPLICATION, thisApplicationDesc), AppdefEntityID
-                        .newAppID(new Integer(thisAppId)), ResourceTreeNode.RESOURCE));
-                }
-            }
-            aServiceNode.setSelected(true);
-
-            // server nodes and platform nodes can be null if user is unauthz
-            if (aServerNode != null) {
-                if (aPlatformNode != null) {
-                    aServerNode.addDownChild(aPlatformNode);
-                }
-                aServiceNode.addDownChild(aServerNode);
-            } else if (aPlatformNode != null) {
-                aServiceNode.addDownChild(aPlatformNode);
-            }
-
-            ResourceTreeNode[] appNodes = (ResourceTreeNode[]) appMap.values().toArray(new ResourceTreeNode[0]);
-            ResourceTreeNode.alphaSortNodes(appNodes, true);
-            aServiceNode.addUpChildren(appNodes);
-
-            retVal = new ResourceTreeNode[] { aServiceNode };
-
-        } catch (SQLException e) {
+            return appdefStatDAO.getNavMapDataForService(subject, service);
+        } catch (Exception e) {
             log.error("Unable to get NavMap data: " + e, e);
             throw new SystemException(e);
-        } finally {
-            DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
-            
         }
-        return retVal;
     }
 
     private String mapToString(ResourceTreeNode[] node) {
@@ -645,120 +345,21 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
         return sb.toString();
     }
 
-    private final String getPermGroupSQL(Integer subjectId) {
-        StringBuffer rtn = new StringBuffer().append("SELECT grp.id as group_id, res.name, cluster_id ").append(
-            " FROM ").append(TBL_GROUP).append(" grp, ").append(TBL_RES).append(" res ").append(
-            " WHERE grp.resource_id = res.id AND EXISTS (").append(
-            permissionManager.getResourceTypeSQL("grp.id", subjectId, GROUP_RES_TYPE, GROUP_OP_VIEW_RESOURCE_GROUP))
-            .append(")");
-        return rtn.toString();
-    }
-
-    private final String getPermServiceSQL(Integer subjectId) {
-        StringBuffer rtn = new StringBuffer().append("SELECT svc.id as service_id, res.name as service_name,").append(
-            " server_id").append(" FROM  " + TBL_SERVICE + " svc JOIN ").append(TBL_RES).append(
-            " res ON resource_id = svc.id ").append(" WHERE EXISTS (").append(
-            permissionManager.getResourceTypeSQL("svc.id", subjectId, SERVICE_RES_TYPE, SERVICE_OP_VIEW_SERVICE))
-            .append(")");
-        return rtn.toString();
-    }
-
     /**
      * <p>
      * Return directly connected resource tree for node level service
      * </p>
      */
-    @Transactional(propagation = Propagation.SUPPORTS, readOnly=true)
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
     public ResourceTreeNode[] getNavMapDataForApplication(AuthzSubject subject, Integer appId)
         throws ApplicationNotFoundException, PermissionException {
         Application app = applicationManager.findApplicationById(subject, appId);
-
-        ResourceTreeNode[] retVal = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-        Integer subjectId = subject.getId();
         try {
-            Connection conn = getDBConn();
-
-            StringBuffer buf = new StringBuffer().append("SELECT appsvc.service_id, pm.name,").append(
-                " appsvc.service_type_id,").append(" svct.name as service_type_name,").append(
-                " appsvc.application_id, appsvc.group_id").append(" FROM EAM_APP_SERVICE appsvc, ").append(TBL_SERVICE)
-                .append("_TYPE svct, ").append(TBL_GROUP).append(" grp, (").append(getPermGroupSQL(subjectId)).append(
-                    ") pm").append(" WHERE svct.id = appsvc.service_type_id AND ").append(
-                    " grp.id = appsvc.group_id AND pm.group_id = grp.id").append(" AND appsvc.application_id = ")
-                .append(app.getId()).append(" UNION ALL ").append("SELECT appsvc.service_id, res2.name,").append(
-                    " appsvc.service_type_id,").append(" svct.name as service_type_name,").append(
-                    " appsvc.application_id, appsvc.group_id").append(" FROM EAM_APP_SERVICE appsvc, ").append(
-                    TBL_SERVICE).append("_TYPE svct, (").append(getPermServiceSQL(subjectId)).append(") pm, ").append(
-                    TBL_SERVICE).append(" svc JOIN ").append(TBL_RES).append(" res2 ON svc.resource_id = res2.id ")
-                .append(" WHERE svct.id = appsvc.service_type_id AND ").append(" svc.id = appsvc.service_id AND ")
-                .append(" pm.service_id = svc.id AND ").append(" appsvc.application_id = ").append(app.getId()).append(
-                    " ORDER BY service_type_id, service_id");
-
-            if (log.isDebugEnabled()) {
-                log.debug(buf.toString());
-            }
-            stmt = conn.createStatement();
-
-            StopWatch timer = new StopWatch();
-
-            rs = stmt.executeQuery(buf.toString());
-
-            if (log.isDebugEnabled()) {
-                log.debug("getNavMapDataForApplication() executed in: " + timer);
-                log.debug("SQL: " + buf);
-            }
-
-            Map<String, ResourceTreeNode> svcMap = new HashMap<String, ResourceTreeNode>();
-
-            ResourceTreeNode appNode = new ResourceTreeNode(app.getName(), getAppdefTypeLabel(app.getEntityId()
-                .getType(), app.getAppdefResourceType().getName()), app.getEntityId(), ResourceTreeNode.RESOURCE);
-
-            int svc_id_col = rs.findColumn("service_id"), name_col = rs.findColumn("name"), service_type_col = rs
-                .findColumn("service_type_id"), type_name_col = rs.findColumn("service_type_name"), group_id_col = rs
-                .findColumn("group_id");
-
-            while (rs.next()) {
-                int serviceId = rs.getInt(svc_id_col);
-                String serviceName = rs.getString(name_col);
-                int serviceTypeId = rs.getInt(service_type_col);
-                String serviceTypeName = rs.getString(type_name_col);
-                int groupId = rs.getInt(group_id_col);
-                String thisGroupName = rs.getString(name_col);
-                // means that column is null, hence row is not a group
-                if (groupId == 0) {
-                    thisGroupName = null;
-                } else {
-                    serviceName = null;
-                }
-
-                if (thisGroupName != null) {
-                    String key = APPDEF_TYPE_GROUP + "-" + groupId;
-                    svcMap.put(key, new ResourceTreeNode(thisGroupName, getAppdefTypeLabel(APPDEF_TYPE_GROUP,
-                        serviceTypeName), AppdefEntityID.newGroupID(new Integer(groupId)), ResourceTreeNode.CLUSTER));
-                } else if (serviceName != null) {
-                    String key = APPDEF_TYPE_SERVICE + "-" + serviceId;
-                    svcMap.put(key, new ResourceTreeNode(serviceName, getAppdefTypeLabel(APPDEF_TYPE_SERVICE,
-                        serviceTypeName), AppdefEntityID.newServiceID(new Integer(serviceId)), app.getEntityId(),
-                        serviceTypeId));
-                }
-            }
-
-            appNode.setSelected(true);
-            ResourceTreeNode[] svcNodes = (ResourceTreeNode[]) svcMap.values().toArray(new ResourceTreeNode[0]);
-            ResourceTreeNode.alphaSortNodes(svcNodes);
-            appNode.addDownChildren(svcNodes);
-
-            retVal = new ResourceTreeNode[] { appNode };
-
-        } catch (SQLException e) {
+            return appdefStatDAO.getNavMapDataForApplication(subject, app);
+        } catch (Exception e) {
             log.error("Unable to get NavMap data: " + e, e);
             throw new SystemException(e);
-        } finally {
-            DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
-          
         }
-        return retVal;
     }
 
     /**
@@ -766,12 +367,14 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
      * Return resources for autogroups
      * </p>
      */
-    @Transactional(propagation = Propagation.SUPPORTS, readOnly=true)
-    public ResourceTreeNode[] getNavMapDataForAutoGroup(AuthzSubject subject, AppdefEntityID[] parents, Integer resType)
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+    public ResourceTreeNode[] getNavMapDataForAutoGroup(AuthzSubject subject,
+                                                        AppdefEntityID[] parents, Integer resType)
         throws AppdefEntityNotFoundException, PermissionException {
         try {
             // platform auto-groups do not have parent resource types
-            int entType = (parents != null) ? getChildEntityType(parents[0].getType()) : APPDEF_TYPE_PLATFORM;
+            int entType = (parents != null) ? getChildEntityType(parents[0].getType())
+                                           : APPDEF_TYPE_PLATFORM;
 
             AppdefResourceType type = getResourceTypeValue(entType, resType);
             return getNavMapDataForAutoGroup(subject, parents, type);
@@ -795,9 +398,10 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
         }
     }
 
-    private ResourceTreeNode[] getNavMapDataForAutoGroup(AuthzSubject subject, AppdefEntityID[] parents,
-                                                         AppdefResourceType type) throws AppdefEntityNotFoundException,
-        PermissionException, SQLException {
+    private ResourceTreeNode[] getNavMapDataForAutoGroup(AuthzSubject subject,
+                                                         AppdefEntityID[] parents,
+                                                         AppdefResourceType type)
+        throws AppdefEntityNotFoundException, PermissionException, SQLException {
         ResourceTreeNode[] retVal = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -813,7 +417,8 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
         Integer subjectId = subject.getId();
         // derive parent and child entity types
         pEntityType = (parents != null) ? parents[0].getType() : APPDEF_TYPE_UNDEFINED;
-        cEntityType = (pEntityType != APPDEF_TYPE_UNDEFINED) ? getChildEntityType(pEntityType) : APPDEF_TYPE_PLATFORM;
+        cEntityType = (pEntityType != APPDEF_TYPE_UNDEFINED) ? getChildEntityType(pEntityType)
+                                                            : APPDEF_TYPE_PLATFORM;
 
         try {
 
@@ -822,8 +427,8 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
                 parentNodes = new ArrayList<ResourceTreeNode>(parents.length);
                 for (int x = 0; x < parents.length; x++) {
                     AppdefEntityValue av = new AppdefEntityValue(parents[x], subject);
-                    parentNodes.add(new ResourceTreeNode(av.getName(),
-                        getAppdefTypeLabel(pEntityType, av.getTypeName()), parents[x], ResourceTreeNode.RESOURCE));
+                    parentNodes.add(new ResourceTreeNode(av.getName(), getAppdefTypeLabel(
+                        pEntityType, av.getTypeName()), parents[x], ResourceTreeNode.RESOURCE));
                 }
             }
 
@@ -848,8 +453,8 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
                                      type.getId() +
                                      " AND " +
                                      "EXISTS (" +
-                                     permissionManager.getResourceTypeSQL("p.id", subjectId, PLATFORM_RES_TYPE,
-                                         PLATFORM_OP_VIEW_PLATFORM) + ") ";
+                                     permissionManager.getResourceTypeSQL("p.id", subjectId,
+                                         PLATFORM_RES_TYPE, PLATFORM_OP_VIEW_PLATFORM) + ") ";
 
             final String svrAGSql = "SELECT s.id as server_id, res.name as server_name, " +
                                     "       st.id as server_type_id, st.name as server_type_name " +
@@ -865,8 +470,8 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
                                     "   AND server_type_id=" +
                                     type.getId() +
                                     "   AND EXISTS (" +
-                                    permissionManager.getResourceTypeSQL("s.id", subjectId, SERVER_RES_TYPE,
-                                        SERVER_OP_VIEW_SERVER) + ") ";
+                                    permissionManager.getResourceTypeSQL("s.id", subjectId,
+                                        SERVER_RES_TYPE, SERVER_OP_VIEW_SERVER) + ") ";
 
             final String svcAGSql = "SELECT s.id as service_id, res.name as service_name, " +
                                     "       st.id as service_type_id, st.name as service_type_name " +
@@ -882,8 +487,8 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
                                     "s.service_type_id=" +
                                     type.getId() +
                                     "   AND EXISTS (" +
-                                    permissionManager.getResourceTypeSQL("s.id", subjectId, SERVICE_RES_TYPE,
-                                        SERVICE_OP_VIEW_SERVICE) + ") ";
+                                    permissionManager.getResourceTypeSQL("s.id", subjectId,
+                                        SERVICE_RES_TYPE, SERVICE_OP_VIEW_SERVICE) + ") ";
 
             final String appSvcAGSql = "SELECT s.id as service_id, res.name as service_name, " +
                                        "       st.id as service_type_id, st.name as service_type_name " +
@@ -900,8 +505,8 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
                                        "s.service_type_id=" +
                                        type.getId() +
                                        "   AND EXISTS (" +
-                                       permissionManager.getResourceTypeSQL("s.id", subjectId, SERVICE_RES_TYPE,
-                                           SERVICE_OP_VIEW_SERVICE) + ") ";
+                                       permissionManager.getResourceTypeSQL("s.id", subjectId,
+                                           SERVICE_RES_TYPE, SERVICE_OP_VIEW_SERVICE) + ") ";
 
             switch (pEntityType) {
                 case APPDEF_TYPE_PLATFORM:
@@ -925,14 +530,16 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
                     authzOpName = AuthzConstants.platformOpViewPlatform;
                     break;
                 default:
-                    throw new IllegalArgumentException("No auto-group support " + "for specified type");
+                    throw new IllegalArgumentException("No auto-group support "
+                                                       + "for specified type");
             }
 
             if (log.isDebugEnabled())
                 log.debug(sqlStmt);
 
-            ResourceTreeNode agNode = new ResourceTreeNode(type.getName(), getAppdefTypeLabel(cEntityType, type
-                .getName()), parents, type.getId().intValue(), ResourceTreeNode.AUTO_GROUP);
+            ResourceTreeNode agNode = new ResourceTreeNode(type.getName(), getAppdefTypeLabel(
+                cEntityType, type.getName()), parents, type.getId().intValue(),
+                ResourceTreeNode.AUTO_GROUP);
             Set<ResourceTreeNode> entitySet = new HashSet<ResourceTreeNode>();
             int x = 0;
             try {
@@ -968,18 +575,21 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
                     String thisEntityName = rs.getString(2);
                     String thisEntityTypeName = rs.getString(4);
 
-                    entitySet.add(new ResourceTreeNode(thisEntityName, getAppdefTypeLabel(cEntityType,
-                        thisEntityTypeName), new AppdefEntityID(cEntityType, thisEntityId), ResourceTreeNode.RESOURCE));
+                    entitySet.add(new ResourceTreeNode(thisEntityName, getAppdefTypeLabel(
+                        cEntityType, thisEntityTypeName), new AppdefEntityID(cEntityType,
+                        thisEntityId), ResourceTreeNode.RESOURCE));
                 }
 
                 agNode.setSelected(true);
                 if (parentNodes != null) {
-                    ResourceTreeNode[] parNodeArr = (ResourceTreeNode[]) parentNodes.toArray(new ResourceTreeNode[0]);
+                    ResourceTreeNode[] parNodeArr = (ResourceTreeNode[]) parentNodes
+                        .toArray(new ResourceTreeNode[0]);
                     ResourceTreeNode.alphaSortNodes(parNodeArr, true);
                     agNode.addUpChildren(parNodeArr);
                 }
 
-                ResourceTreeNode[] members = (ResourceTreeNode[]) entitySet.toArray(new ResourceTreeNode[0]);
+                ResourceTreeNode[] members = (ResourceTreeNode[]) entitySet
+                    .toArray(new ResourceTreeNode[0]);
 
                 ResourceTreeNode.alphaSortNodes(members);
                 agNode.addDownChildren(members);
@@ -1000,8 +610,9 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
      * Return resources for groups (not autogroups)
      * </p>
      */
-    @Transactional(propagation = Propagation.SUPPORTS, readOnly=true)
-    public ResourceTreeNode[] getNavMapDataForGroup(AuthzSubject subject, Integer groupId) throws PermissionException {
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+    public ResourceTreeNode[] getNavMapDataForGroup(AuthzSubject subject, Integer groupId)
+        throws PermissionException {
 
         ResourceGroup group = resourceGroupManager.findResourceGroupById(subject, groupId);
         AppdefGroupValue groupVal = resourceGroupManager.getGroupConvert(subject, group);
@@ -1015,8 +626,9 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
 
     private ResourceTreeNode[] getNavMapDataForGroup(AuthzSubject subject, AppdefGroupValue groupVo)
         throws PermissionException, SQLException {
-        ResourceTreeNode grpNode = new ResourceTreeNode(groupVo.getName(), getAppdefTypeLabel(APPDEF_TYPE_GROUP,
-            groupVo.getAppdefResourceTypeValue().getName()), groupVo.getEntityId(), ResourceTreeNode.CLUSTER);
+        ResourceTreeNode grpNode = new ResourceTreeNode(groupVo.getName(), getAppdefTypeLabel(
+            APPDEF_TYPE_GROUP, groupVo.getAppdefResourceTypeValue().getName()), groupVo
+            .getEntityId(), ResourceTreeNode.CLUSTER);
         final List<AppdefEntityID> agEntries = groupVo.getAppdefGroupEntries();
         if (agEntries.size() == 0) {
             return new ResourceTreeNode[] { grpNode };
@@ -1029,26 +641,27 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
 
         final Connection conn = getDBConn();
 
-        final String resJoin = new StringBuilder().append(" JOIN ")
-                .append(TBL_RES)
-                .append(" res on resource_id = res.id ")
-                .toString();
+        final String resJoin = new StringBuilder().append(" JOIN ").append(TBL_RES).append(
+            " res on resource_id = res.id ").toString();
 
         switch (entityType) {
-                case APPDEF_TYPE_PLATFORM:
-                    grpSqlStmt.append("SELECT p.id as platform_id, res.name as platform_name ").append(" FROM ")
-                        .append(TBL_PLATFORM).append(" p ").append(resJoin).append("WHERE p.id IN (");
-                    break;
-                case APPDEF_TYPE_SERVER:
-                    grpSqlStmt.append("SELECT s.id as server_id, res.name as server_name ").append("FROM ").append(
-                        TBL_SERVER).append(" s ").append(resJoin).append("WHERE s.id IN (");
-                    break;
-                case APPDEF_TYPE_SERVICE:
-                    grpSqlStmt.append("SELECT s.id as service_id, res.name as service_name ").append("FROM ").append(
-                        TBL_SERVICE).append(" s  ").append(resJoin).append("WHERE s.id IN (");
-                    break;
-                default:
-                    throw new IllegalArgumentException("No group support " + "for specified type");
+            case APPDEF_TYPE_PLATFORM:
+                grpSqlStmt.append("SELECT p.id as platform_id, res.name as platform_name ").append(
+                    " FROM ").append(TBL_PLATFORM).append(" p ").append(resJoin).append(
+                    "WHERE p.id IN (");
+                break;
+            case APPDEF_TYPE_SERVER:
+                grpSqlStmt.append("SELECT s.id as server_id, res.name as server_name ").append(
+                    "FROM ").append(TBL_SERVER).append(" s ").append(resJoin).append(
+                    "WHERE s.id IN (");
+                break;
+            case APPDEF_TYPE_SERVICE:
+                grpSqlStmt.append("SELECT s.id as service_id, res.name as service_name ").append(
+                    "FROM ").append(TBL_SERVICE).append(" s  ").append(resJoin).append(
+                    "WHERE s.id IN (");
+                break;
+            default:
+                throw new IllegalArgumentException("No group support " + "for specified type");
         }
 
         if (debug) {
@@ -1056,23 +669,24 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
         }
         Set<ResourceTreeNode> entitySet = new HashSet<ResourceTreeNode>(agEntries.size());
 
-           
         Map<Integer, String> entNameMap = new HashMap<Integer, String>();
         if (groupVo.getTotalSize() > 0) {
-                final int max = Util.getHQDialect().getMaxExpressions();
-                final int batchSize = (max < 0) ? Integer.MAX_VALUE : max;
-                for (int ii=0; ii<agEntries.size(); ii+=batchSize) {
-                    int end = Math.min(ii+batchSize, agEntries.size());
-                    List<AppdefEntityID> list = agEntries.subList(ii, end);
-                    setEntNameMap(entNameMap, list, conn, grpSqlStmt);
-                }
+            final int max = Util.getHQDialect().getMaxExpressions();
+            final int batchSize = (max < 0) ? Integer.MAX_VALUE : max;
+            for (int ii = 0; ii < agEntries.size(); ii += batchSize) {
+                int end = Math.min(ii + batchSize, agEntries.size());
+                List<AppdefEntityID> list = agEntries.subList(ii, end);
+                setEntNameMap(entNameMap, list, conn, grpSqlStmt);
+            }
 
-                // Let group member order drive node creation (not db order).
-                for (AppdefEntityID id : groupVo.getAppdefGroupEntries()) {
-                    entitySet.add(new ResourceTreeNode((String) entNameMap.get(id.getId()), getAppdefTypeLabel(id
-                        .getType(), groupVo.getAppdefResourceTypeValue().getName()), new AppdefEntityID(entityType, id
-                        .getId()), ResourceTreeNode.RESOURCE));
-                }
+            // Let group member order drive node creation (not db order).
+            for (AppdefEntityID id : groupVo.getAppdefGroupEntries()) {
+                entitySet
+                    .add(new ResourceTreeNode((String) entNameMap.get(id.getId()),
+                        getAppdefTypeLabel(id.getType(), groupVo.getAppdefResourceTypeValue()
+                            .getName()), new AppdefEntityID(entityType, id.getId()),
+                        ResourceTreeNode.RESOURCE));
+            }
         }
 
         ResourceTreeNode[] memberNodes = entitySet.toArray(new ResourceTreeNode[0]);
@@ -1083,11 +697,11 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
 
         retVal = new ResourceTreeNode[] { grpNode };
 
-       
         return retVal;
     }
-    
-    private void setEntNameMap(Map<Integer,String> entNameMap, List<AppdefEntityID> list, Connection conn, StringBuilder grpSqlStmt) throws SQLException {
+
+    private void setEntNameMap(Map<Integer, String> entNameMap, List<AppdefEntityID> list,
+                               Connection conn, StringBuilder grpSqlStmt) throws SQLException {
         if (list.size() == 0) {
             return;
         }
@@ -1097,21 +711,23 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
         Statement stmt = null;
         ResultSet rs = null;
         try {
-             stmt = conn.createStatement();
-             int x=1;
-             for (AppdefEntityID mem : list ) {
-                 if (debug) log.debug("Arg " + x + ": " +  mem.getID());
-                 grpSqlStmt.append((x==1 ? "" : ",")).append(mem.getID());
-             }
-             grpSqlStmt.append(")");
-             StopWatch timer = new StopWatch();
-             if (debug) log.debug("SQL: " + grpSqlStmt);
-             rs = stmt.executeQuery(grpSqlStmt.toString());
-             if (debug) {
-                 log.debug("getNavMapDataForGroup() executed in: " + timer);
-             }
+            stmt = conn.createStatement();
+            int x = 1;
+            for (AppdefEntityID mem : list) {
+                if (debug)
+                    log.debug("Arg " + x + ": " + mem.getID());
+                grpSqlStmt.append((x == 1 ? "" : ",")).append(mem.getID());
+            }
+            grpSqlStmt.append(")");
+            StopWatch timer = new StopWatch();
+            if (debug)
+                log.debug("SQL: " + grpSqlStmt);
+            rs = stmt.executeQuery(grpSqlStmt.toString());
+            if (debug) {
+                log.debug("getNavMapDataForGroup() executed in: " + timer);
+            }
             while (rs.next()) {
-                int    thisEntityId   = rs.getInt(1);
+                int thisEntityId = rs.getInt(1);
                 String thisEntityName = rs.getString(2);
                 entNameMap.put(new Integer(thisEntityId), thisEntityName);
             }
@@ -1119,8 +735,6 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
             DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
         }
     }
-                                    
-
 
     // The methods in this class should call getDBConn() to obtain a connection,
     // because it also initializes the private database-related variables
