@@ -51,6 +51,7 @@ class ResourceHelper extends BaseHelper {
      * To find platforms: 
      *   find platform:'My Platform', permCheck:false
      *   find platform:10001  // find the platform by ID
+     *   find byFqdn:'platformFqdn'
      *
      * To find servers:
      *   find platform:'My Platform', server:'My Server'
@@ -72,6 +73,7 @@ class ResourceHelper extends BaseHelper {
         // Initialize all used arguments to null
         ['count', 'platform', 'server', 'service',
          'byPrototype', 'prototype', 'withPaging',
+         'byFqdn',
         ].each {args.get(it, null)}
         args.get('user', user)         // Use default user  
         args.get('operation', 'view')  // Default permission required
@@ -104,6 +106,10 @@ class ResourceHelper extends BaseHelper {
         
         if (args.byPrototype) {
             return findByPrototype(args)
+        }
+        
+        if (args.byFqdn) {
+            return findByFqdn(args.byFqdn)
         }
         
         def plat
@@ -157,6 +163,15 @@ class ResourceHelper extends BaseHelper {
     
     public Resource findById(id) {
         rman.findResourceById(id)
+    }
+    
+    private Resource findByFqdn(fqdn) {
+        try {
+            def plat = PlatMan.one.findPlatformByFqdn(user, fqdn)
+            return plat.resource
+        } catch (PlatformNotFoundException e) {
+            return null
+        }
     }
     
     private Resource findPrototype(Map args) {
