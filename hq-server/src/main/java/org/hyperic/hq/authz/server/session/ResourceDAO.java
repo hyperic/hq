@@ -209,8 +209,10 @@ public class ResourceDAO
 
     @SuppressWarnings("unchecked")
     public Collection<Resource> findViewableSvcRes_orderName(Integer user, Boolean fSystem) {
-        ResourceType serviceType = Bootstrap.getBean(ResourceTypeDAO.class).findByName(AuthzConstants.serviceResType);
-        Operation op = Bootstrap.getBean(OperationDAO.class).findByTypeAndName(serviceType, AuthzConstants.serviceOpViewService);
+        ResourceType serviceType = Bootstrap.getBean(ResourceTypeDAO.class).findByName(
+            AuthzConstants.serviceResType);
+        Operation op = Bootstrap.getBean(OperationDAO.class).findByTypeAndName(serviceType,
+            AuthzConstants.serviceOpViewService);
         final String sql = new StringBuilder(1024).append("SELECT {res.*} ").append(
             "FROM EAM_SUBJECT subject ").append(
             "JOIN EAM_SUBJECT_ROLE_MAP subjrolemap on subject.ID = subjrolemap.SUBJECT_ID ")
@@ -227,10 +229,10 @@ public class ResourceDAO
                 "WHERE res.SUBJECT_ID = :subjectId AND res.RESOURCE_TYPE_ID = :resourceTypeId ")
             .append("AND res.FSYSTEM = :system ").toString();
 
-        List<Resource> resources = getSession().createSQLQuery(sql).addEntity("res", Resource.class)
-            .setBoolean("system", fSystem.booleanValue()).setInteger("opId", op.getId().intValue())
-            .setInteger("subjectId", user.intValue()).setInteger("resourceTypeId",
-                serviceType.getId().intValue()).list();
+        List<Resource> resources = getSession().createSQLQuery(sql)
+            .addEntity("res", Resource.class).setBoolean("system", fSystem.booleanValue())
+            .setInteger("opId", op.getId().intValue()).setInteger("subjectId", user.intValue())
+            .setInteger("resourceTypeId", serviceType.getId().intValue()).list();
 
         // use TreeSet to eliminate dups and sort by Resource
         return new TreeSet<Resource>(resources);
@@ -362,4 +364,13 @@ public class ResourceDAO
                 AuthzConstants.authzServer).setParameter("svcProto", AuthzConstants.authzService)
             .list();
     }
+
+    int getPlatformCountMinusVsphereVmPlatforms() {
+        String sql = "select count(*) from Resource r " + "where r.resourceType.id = :platProto "
+                     + "and r.prototype.name != :vspherevm";
+        return ((Integer) getSession().createQuery(sql).setInteger("platProto",
+            AuthzConstants.authzPlatform.intValue()).setString("vspherevm",
+            AuthzConstants.platformPrototypeVmwareVsphereVm).uniqueResult()).intValue();
+    }
+
 }

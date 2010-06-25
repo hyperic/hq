@@ -25,7 +25,9 @@
 
 package org.hyperic.hq.ui.action.resource;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
@@ -41,11 +43,19 @@ import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceEdge;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.ControlBoss;
+import org.hyperic.hq.bizapp.shared.ProductBoss;
 import org.hyperic.hq.common.ProductProperties;
+import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.hqu.AttachmentDescriptor;
+import org.hyperic.hq.hqu.server.session.AttachType;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseDispatchAction;
@@ -56,6 +66,8 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.hq.ui.util.UIUtils;
 import org.hyperic.util.config.ConfigResponse;
+
+
 
 /**
  * An abstract subclass of <code>BaseDispatchAction</code> that provides common
@@ -155,6 +167,37 @@ public abstract class ResourceController
 
                 // Get the custom properties
                 Properties cprops = appdefBoss.getCPropDescEntries(sessionId.intValue(), entityId);
+                
+                Resource resourceObj = Bootstrap.getBean(ResourceManager.class).findResource(entityId);
+                
+                if ((entityId.isPlatform() || entityId.isServer()) && 
+                    appdefBoss.hasVirtualResourceRelation(resourceObj)) {
+                   
+                    Collection mastheadAttachments = Bootstrap.getBean(ProductBoss.class).findAttachments(sessionId.intValue(), AttachType.MASTHEAD);
+                    Map pluginLinkMap = new HashMap();
+                    
+                    for (Iterator i = mastheadAttachments.iterator(); i.hasNext();) {
+                        AttachmentDescriptor descriptor = (AttachmentDescriptor) i.next();
+                        
+                        if (descriptor.getAttachment().getView().getPlugin().getName().equals("vsphere")) {
+                          
+                            ResourceEdge parent = Bootstrap.getBean(ResourceManager.class).getParentResourceEdge(resourceObj, Bootstrap.getBean(ResourceManager.class).getVirtualRelation());
+                
+                            // TODO This is ugly and I hate putting it in, but there's no easy way to link into a 
+                            // plugin right now...
+                            if (parent != null && parent.getTo().getPrototype().getName().equals(AuthzConstants.platformPrototypeVmwareVsphereVm)) {
+                                cprops.put("VM Instance", "<a href='/mastheadAttach.do?typeId=" + descriptor.getAttachment().getId() + "&sn=" + parent.getTo().getId() + "'>" + parent.getTo().getName() + "</a>");
+                            } else {
+                                pluginLinkMap.put("pluginId", descriptor.getAttachment().getId());
+                                pluginLinkMap.put("selectedId", resourceObj.getId());
+                                request.setAttribute("pluginLinkInfo", pluginLinkMap);
+                            }
+                            
+                            break;
+                        }
+                    }
+                }
+
 
                 // Set the properties in the request
                 if (cprops.size() > 0) {

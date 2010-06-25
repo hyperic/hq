@@ -783,4 +783,10 @@ public interface AppdefBoss {
     public Map<String, List<AppdefResourceType>> getUnavailableResourcesCount(AuthzSubject user)
         throws AppdefEntityNotFoundException, PermissionException;
     
+    /**
+     * Check whether or not a given resource exists in the virtual hierarchy
+     * 
+     */
+    public boolean hasVirtualResourceRelation(Resource resource);
+    
 }

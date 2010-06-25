@@ -66,6 +66,11 @@ public class OperationDAO
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    public Operation getByName(String name) {
+        String sql = "from Operation where name = :name";
+        return (Operation) getSession().createQuery(sql).setParameter("name", name).uniqueResult();
+    }
+
     public Operation findByTypeAndName(ResourceType type, String name) {
         String sql = "from Operation where resourceType=? and name=?";
 
@@ -80,10 +85,9 @@ public class OperationDAO
     }
 
     public List<Integer> findOperableResourceIds(final AuthzSubject subj,
-                                                    final String resourceTable,
-                                                    final String resourceColumn,
-                                                    final String resType, final String operation,
-                                                    final String addCond) {
+                                                 final String resourceTable,
+                                                 final String resourceColumn, final String resType,
+                                                 final String operation, final String addCond) {
 
         final StringBuffer sql = new StringBuffer("SELECT DISTINCT(s.").append(resourceColumn)
             .append(") FROM ").append(resourceTable).append(OPERABLE_SQL);
@@ -110,6 +114,14 @@ public class OperationDAO
 
         return resTypeIds;
 
+    }
+
+    public boolean userHasOperation(AuthzSubject subj, Operation op) {
+        String hql = new StringBuilder(128).append("select 1 from Role r ").append(
+            "join r.operations op ").append("join r.subjects s ").append(
+            "where s = :subject and op = :operation").toString();
+        return null != getSession().createQuery(hql).setParameter("subject", subj).setParameter(
+            "operation", op).uniqueResult();
     }
 
 }
