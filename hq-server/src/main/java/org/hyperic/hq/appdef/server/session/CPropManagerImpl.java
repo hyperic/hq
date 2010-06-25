@@ -274,7 +274,13 @@ public class CPropManagerImpl implements CPropManager {
      */
     public void setValue(AppdefEntityID aID, int typeId, String key, String val)
         throws CPropKeyNotFoundException, AppdefEntityNotFoundException, PermissionException {
-        String oldval = cPropDAO.setValue(aID, typeId, key, val);
+        String oldval;
+        try {
+           oldval = cPropDAO.setValue(aID, typeId, key, val);
+        }catch(Exception e) {
+            log.error("Unable to update CPropKey values: " + e.getMessage(), e);
+            throw new SystemException(e);
+        }
         if((val == null && oldval == null) || (val != null && val.equals(oldval))) {
             //We didn't change anything
             return;
@@ -303,7 +309,12 @@ public class CPropManagerImpl implements CPropManager {
     @Transactional(readOnly = true)
     public String getValue(AppdefEntityValue aVal, String key) throws CPropKeyNotFoundException,
         AppdefEntityNotFoundException, PermissionException {
-       return cPropDAO.getValue(aVal, key);
+        try {
+            return cPropDAO.getValue(aVal, key);
+        }catch(Exception e) {
+            log.error("Unable to get CPropKey values: " + e.getMessage(), e);
+            throw new SystemException(e);
+        }
     }
 
     /**
@@ -379,7 +390,12 @@ public class CPropManagerImpl implements CPropManager {
      * Remove custom properties for a given resource.
      */
     public void deleteValues(int appdefType, int id) {
-       cPropDAO.deleteValues(appdefType, id);
+        try {
+            cPropDAO.deleteValues(appdefType, id);
+        }catch(Exception e) {
+            log.error("Unable to delete CProp values: " + e.getMessage(), e);
+            throw new SystemException(e);
+        }
     }
 
     /**
