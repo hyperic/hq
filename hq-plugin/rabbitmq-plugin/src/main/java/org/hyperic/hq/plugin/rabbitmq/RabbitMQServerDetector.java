@@ -64,7 +64,7 @@ public class RabbitMQServerDetector extends ServerDetector implements AutoServer
                 setMeasurementConfig(server, new ConfigResponse());
 
                 res.add(server);
-                //new Dummy(serverName).run();
+                new Dummy(serverName).run();
             }
         }
         return res;
