@@ -2,6 +2,7 @@
 
 <!DOCTYPE plugin [
 <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
+<!ENTITY multi-process-metrics SYSTEM "/pdk/plugins/multi-process-metrics.xml">
 ]>
 
 <!--
@@ -92,10 +93,21 @@
 
         <config type="product">
             <option name="server.name" description="XXXXXXX"/>
+            <option name="server.path" description="XXXXXXX"/>
         </config>
         <config type="measurement">
-            <option name="process.query" default="State.Name.eq=beam,Args.*.eq=-sname,Args.*.eq=%server.name%" description="XXXXXXX"/>
+            <option name="process.query" default="State.Name.eq=beam,Args.*.eq=-sname,Args.*.ct=%server.path%" description="XXXXXXX"/>
         </config>
+
+        <service name="Proccess">
+            <config type="product">
+                <option name="process.name" description="XXXXXXX"/>
+            </config>
+            <config type="measurement">
+                <option name="process.query" default="State.Name.eq=beam,Args.*.eq=-sname,Args.*.eq=%proccess.name%" description="XXXXXXX"/>
+            </config>
+            &process-metrics;
+        </service>
 
         <service name="VHost"/>
         <service name="Queue">
@@ -106,7 +118,7 @@
             </config>
         </service>
 
-        &process-metrics;
+        &multi-process-metrics;
 
     </server>
 </plugin>

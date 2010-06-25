@@ -4,11 +4,13 @@
  */
 package org.hyperic.hq.plugin.rabbitmq;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.hyperic.hq.plugin.rabbitmq.objs.Queue;
 import org.hyperic.hq.product.AutoServerDetector;
+import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
@@ -29,23 +31,40 @@ public class RabbitMQServerDetector extends ServerDetector implements AutoServer
     public List getServerResources(ConfigResponse platformConfig) throws PluginException {
         log.debug("[getServerResources] platformConfig=" + platformConfig);
         List res = new ArrayList();
-
+        List<String> paths = new ArrayList();
         long[] pids = getPids(PTQL_QUERY);
         for (long pid : pids) {
             String args[] = getProcArgs(pid);
-            String serverName = getServerName(args);
+            String path = getServerDir(args);
+            path = new File(path).getParent();
+            if (!paths.contains(path)) {
+                paths.add(path);
+            }
+        }
+
+        for (String path : paths) {
+            String serverName = "";
+            for (long pid : pids) {
+                String args[] = getProcArgs(pid);
+                if (getServerDir(args).startsWith(path)) {
+                    serverName += getServerName(args) + ",";
+                }
+            }
+            log.debug("path='" + path + "' ='" + serverName + "'");
             if (RabbitMQUtils.getServerVersion(serverName).startsWith(getTypeInfo().getVersion())) {
                 log.debug("ok " + serverName);
-                ServerResource server = createServerResource(getServerDir(args));
-                server.setName(getPlatformName() + " " + getTypeInfo().getName() + " " + serverName);
+                ServerResource server = createServerResource(path);
+                server.setName(getPlatformName() + " " + getTypeInfo().getName() + " " + path);
 
                 ConfigResponse conf = new ConfigResponse();
                 conf.setValue(SERVERNAME, serverName);
+                conf.setValue("server.path", path);
 
                 setProductConfig(server, conf);
                 setMeasurementConfig(server, new ConfigResponse());
 
                 res.add(server);
+                //new Dummy(serverName).run();
             }
         }
         return res;
@@ -54,22 +73,36 @@ public class RabbitMQServerDetector extends ServerDetector implements AutoServer
     @Override
     protected List discoverServices(ConfigResponse config) throws PluginException {
         log.debug("[discoverServices] config=" + config);
-        List<ServiceResource> res=new ArrayList();
-        List<String> vHosts = RabbitMQUtils.getVHost(config.getValue(SERVERNAME));
+        String serverName = config.getValue(SERVERNAME);
+        List<ServiceResource> res = new ArrayList();
+        List<String> vHosts = RabbitMQUtils.getVHost(serverName);
         for (String vHost : vHosts) {
             ServiceResource svh = createServiceResource("VHost");
-            svh.setName(getTypeInfo().getName()+" VHost "+vHost);
+            svh.setName(getTypeInfo().getName() + " VHost " + vHost);
             //res.add(svh);
-            List<Queue> queues=RabbitMQUtils.getQueues(config.getValue(SERVERNAME),vHost);
-            for(Queue queue : queues){
-                ServiceResource q=createServiceResource("Queue");
-                q.setName(getTypeInfo().getName()+" Queue "+ queue.getFullName());
+            List<Queue> queues = RabbitMQUtils.getQueues(serverName, vHost);
+            for (Queue queue : queues) {
+                ServiceResource q = createServiceResource("Queue");
+                q.setName(getTypeInfo().getName() + " " + serverName + " Queue " + queue.getFullName());
                 ConfigResponse c = new ConfigResponse();
                 c.setValue("vhost", queue.getVHost());
                 c.setValue("name", queue.getName());
-                q.setProductConfig( c);
+                q.setProductConfig(c);
                 res.add(q);
             }
+        }
+
+        long[] pids = getPids(Metric.translate(config.getValue("process.query"), config));
+        for (long pid : pids) {
+            String args[] = getProcArgs(pid);
+            String name = getServerName(args);
+            ServiceResource p = createServiceResource("Proccess");
+            ConfigResponse c = new ConfigResponse();
+            p.setName(getTypeInfo().getName() + " Proccess " + name);
+            c.setValue("proccess.name", name);
+            p.setProductConfig(c);
+            setMeasurementConfig(p, new ConfigResponse());
+            res.add(p);
         }
         return res;
     }
@@ -89,6 +122,9 @@ public class RabbitMQServerDetector extends ServerDetector implements AutoServer
         for (int n = 0; n < args.length; n++) {
             if (args[n].equalsIgnoreCase("-mnesia") && args[n + 1].equalsIgnoreCase("dir")) {
                 res = args[n + 2];
+                if (res.startsWith("\"")) {
+                    res = res.substring(1, res.length() - 2);
+                }
             }
         }
         return res;

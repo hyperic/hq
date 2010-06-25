@@ -10,10 +10,8 @@ import com.ericsson.otp.erlang.OtpErlangBinary;
 import com.ericsson.otp.erlang.OtpErlangList;
 import com.ericsson.otp.erlang.OtpErlangObject;
 import com.ericsson.otp.erlang.OtpErlangTuple;
-import com.ericsson.otp.erlang.OtpException;
 import com.ericsson.otp.erlang.OtpPeer;
 import com.ericsson.otp.erlang.OtpSelf;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -60,7 +58,8 @@ public class RabbitMQUtils {
     }
 
     public static String getServerVersion(String server) throws PluginException {
-        OtpErlangObject received = executeCommand(server, "rabbit", "status", new OtpErlangList());
+        String serverName=server.split(",")[0]; // XXX test with all server names...
+        OtpErlangObject received = executeCommand(serverName, "rabbit", "status", new OtpErlangList());
         Status status = parseStatusObject((OtpErlangList) received);
         Application app = status.getApplication("rabbit");
         return app.getVersion();
@@ -86,14 +85,12 @@ public class RabbitMQUtils {
                     throw new PluginException(received.toString());
                 }
             }
-        } catch (OtpException ex) {
+        } catch (Exception ex) {
+            if (connection != null) {
+                connection.close();
+                connection=null;
+            }
             throw new PluginException(ex.getMessage(), ex);
-        } catch (IOException ex) {
-            throw new PluginException(ex.getMessage(), ex);
-        } finally {
-//            if (connection != null) {
-//                connection.close();
-//            }
         }
 
         if (log.isDebugEnabled()) {
