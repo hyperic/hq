@@ -1,0 +1,141 @@
+<?xml version="1.0"?>
+
+<project name="RELEASE" default="usage" basedir=".">
+
+  <property name="hq.home" location="." />
+
+  <property environment="ENV" />
+
+  <!-- User defined overrides -->
+  <property file="${user.home}/.hq/build.properties" />
+
+  <!-- Eval license params -->
+  <property name="license.platformLimit" value="50"/>
+  <!-- Set expiry date to 50 days in future -->
+  <tstamp>
+      <format property="license.expiration" pattern="yyyy-MM-dd" offset="90" unit="day"/>
+  </tstamp>
+
+  <!-- Release dir -->
+  <property name="release.dir"
+            value="/raid/release/candidates/hq"/>
+
+  <!-- Version file -->
+  <property name="version.properties" value="etc/version.properties"/>
+
+  <target name="usage">
+    <echo>Available targets:</echo>
+    <echo>ant autobuild-hq   - Release the hq project</echo>
+  </target>
+
+  <target name="unpack-jboss">
+    <unzip src="hq_bin/jboss/jboss-4.2.3.GA.zip" overwrite="false" dest="."/>
+    <property name="jboss.zip"
+              value="${basedir}/hq_bin/jboss/jboss-4.2.3.GA.zip"/>
+    <property name="jboss.home"
+              value="${basedir}/jboss-4.2.3.GA"/>
+  </target>
+	
+  <target name="autobuild-hq" depends="unpack-jboss">
+
+    <property name="versionfile" value="${hq.home}/${version.properties}"/>
+
+
+    <!-- Increment build # -->
+    <propertyfile file="${versionfile}">
+      <entry key="build" type="int" default="0" operation="+" pattern="0000"/>
+    </propertyfile>
+
+    <property name="release.comment" value="Release Build"/>
+    <property name="hq.isDev" value="false"/>
+    <property file="${versionfile}" />
+ 
+    <!-- Build -->
+    <ant antfile="${hq.home}/build.xml" dir="${hq.home}" target="clean"/>
+    <ant antfile="${hq.home}/build.xml" dir="${hq.home}" target="archive-full"/>
+
+    <!-- Pack src bundles -->
+    <tar tarfile="${hq.home}/build/hyperic-hq-src-${version}-${build}.tgz"
+         basedir="."
+         longfile="gnu"
+         compression="gzip"
+         includes="hq/**"
+         excludes="hq/build/**"/>
+
+    <zip destfile="${hq.home}/build/hyperic-hq-src-${version}-${build}.zip"
+         basedir="."
+         includes="hq/**"
+         excludes="hq/build/**"/>
+
+    <checksum forceOverwrite="yes" fileext=".md5">
+        <fileset dir="${hq.home}/build" includes="hyperic-*.tgz"/>
+        <fileset dir="${hq.home}/build" includes="hyperic-*.zip"/>
+    </checksum>
+
+    <git command="add version.properties" dir="${hq.home}/etc"/>
+    <git command="commit -m 'Release ${version} build #${build}'" dir="${hq.home}/etc"/>
+    <git command="push git@git.springsource.org:hq/hq.git" dir="${hq.home}/etc"/>
+
+    <!-- Copy to release dir -->
+    <copy todir="${release.dir}">
+      <fileset dir="${hq.home}/build" includes="hyperic-*.tgz"/>
+      <fileset dir="${hq.home}/build" includes="hyperic-*.zip"/>
+      <fileset dir="${hq.home}/build" includes="*.md5"/>
+    </copy>
+
+    <!-- Send email -->
+    <mail from="bob.builder@hyperic.com"
+          tolist="s2-hqproduct@vmware.com"
+          subject="HQ Autobuild Released: ${version} build #${build}"
+          encoding="mime"
+          mailhost="localhost"
+          mailport="25">
+      <message>
+The autobuild has completed successfully.
+
+This build is available for download from:
+  http://10.0.0.37${release.dir}/hyperic-hq-installer-${version}-${build}-sparc-solaris.tgz
+  http://10.0.0.37${release.dir}/hyperic-hq-installer-${version}-${build}-x86-linux.tgz
+  http://10.0.0.37${release.dir}/hyperic-hq-installer-${version}-${build}-win32.zip
+  http://10.0.0.37${release.dir}/hyperic-hq-installer-${version}-${build}-x86_64-linux.tgz
+  http://10.0.0.37${release.dir}/hyperic-hq-installer-${version}-${build}-apple-osx.tgz
+  http://10.0.0.37${release.dir}/hyperic-hq-installer-${version}-${build}-noJRE.tgz
+  http://10.0.0.37${release.dir}/hyperic-hq-installer-${version}-${build}-noJRE.zip
+
+Agent bundles are available for download from:
+  http://10.0.0.37${release.dir}/hyperic-hq-agent-${version}-${build}-hpux-11.tgz
+  http://10.0.0.37${release.dir}/hyperic-hq-agent-${version}-${build}-sparc-solaris.tgz
+  http://10.0.0.37${release.dir}/hyperic-hq-agent-${version}-${build}-x86-linux.tgz
+  http://10.0.0.37${release.dir}/hyperic-hq-agent-${version}-${build}-win32.zip
+  http://10.0.0.37${release.dir}/hyperic-hq-agent-${version}-${build}-x86_64-linux.tgz
+  http://10.0.0.37${release.dir}/hyperic-hq-agent-${version}-${build}-apple-osx.tgz
+  http://10.0.0.37${release.dir}/hyperic-hq-agent-${version}-${build}-ppc-aix.tgz
+  http://10.0.0.37${release.dir}/hyperic-hq-agent-${version}-${build}-noJRE.tgz
+  http://10.0.0.37${release.dir}/hyperic-hq-agent-${version}-${build}-noJRE.zip
+
+Source bundles are available for download from:
+
+  ${release.dir}/hyperic-hq-src-${version}-${build}.zip
+  ${release.dir}/hyperic-hq-src-${version}-${build}.tgz
+
+      </message>
+    </mail>
+  </target>
+
+<macrodef name="git">
+    <attribute name="command"/>
+    <attribute name="dir" default=""/>
+    <element name="args" optional="true"/>
+    <sequential>
+        <echo message="git @{command}"/>
+        <exec executable="git" dir="@{dir}">
+            <arg line="@{command}"/>
+            <args/>
+        </exec>
+    </sequential>
+</macrodef>
+
+
+</project>
+  
+
