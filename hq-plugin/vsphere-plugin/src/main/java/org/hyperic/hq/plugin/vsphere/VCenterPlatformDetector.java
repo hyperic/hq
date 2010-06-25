@@ -49,6 +49,7 @@ import org.hyperic.hq.hqapi1.types.Resource;
 import org.hyperic.hq.hqapi1.types.ResourceConfig;
 import org.hyperic.hq.hqapi1.types.ResourceEdge;
 import org.hyperic.hq.hqapi1.types.ResourceFrom;
+import org.hyperic.hq.hqapi1.types.ResourceInfo;
 import org.hyperic.hq.hqapi1.types.ResourceProperty;
 import org.hyperic.hq.hqapi1.types.ResourcePrototype;
 import org.hyperic.hq.hqapi1.types.ResourcePrototypeResponse;
@@ -249,16 +250,18 @@ public class VCenterPlatformDetector {
         ResourcePool pool = vm.getResourcePool();
 
         VSphereResource platform = new VSphereResource();
-        VirtualMachineFileInfo files = info.getFiles();
+        String uuid = info.getUuid();
         platform.setName(info.getName());
-        platform.setFqdn(info.getUuid());
+        platform.setFqdn(uuid);
         platform.setDescription(info.getGuestFullName());
 
         ConfigResponse config = new ConfigResponse();
         config.setValue(VSphereVmCollector.PROP_VM, info.getName());
+        config.setValue(VSphereCollector.PROP_UUID, uuid);
         platform.addConfig(config);
         //ConfigInfo
         ConfigResponse cprops = new ConfigResponse();
+        VirtualMachineFileInfo files = info.getFiles();
         cprops.setValue(ProductPlugin.PROP_INSTALLPATH, files.getVmPathName());
         cprops.setValue("guestOS", info.getGuestFullName());
         cprops.setValue("version", info.getVersion());
@@ -378,17 +381,21 @@ public class VCenterPlatformDetector {
             cprops.setValue("ip", address);
         }
         cprops.setValue("defaultGateway", netinfo.getIpRouteConfig().getDefaultGateway());
+
         String[] dns = netinfo.getDnsConfig().getAddress();
-        String[] dnsProps = { "primaryDNS", "secondaryDNS" };
-        for (int i=0; i<dnsProps.length; i++) {
-            if (i >= dns.length) {
-                break;
+        if (dns != null) {
+            String[] dnsProps = { "primaryDNS", "secondaryDNS" };
+            for (int i=0; i<dnsProps.length; i++) {
+                if (i >= dns.length) {
+                    break;
+                }
+                cprops.setValue(dnsProps[i], dns[i]);
             }
-            cprops.setValue(dnsProps[i], dns[i]);
         }
 
         HostHardwareSummary hw = host.getSummary().getHardware();
-        platform.setFqdn(hw.getUuid());
+        String uuid = hw.getUuid();
+        platform.setFqdn(uuid);
         cprops.setValue("hwVendor", hw.getVendor());
         cprops.setValue("hwModel", hw.getModel());
         cprops.setValue("hwCpu", hw.getCpuModel());
@@ -412,6 +419,7 @@ public class VCenterPlatformDetector {
 
         platform.addProperties(cprops);
         platform.addConfig(VSphereUtil.PROP_HOSTNAME, host.getName());
+        platform.addConfig(VSphereCollector.PROP_UUID, uuid);
 
         if (log.isDebugEnabled()) {
             log.debug("Discovered " + HOST_TYPE + "[name=" + platform.getName() 
@@ -625,13 +633,20 @@ public class VCenterPlatformDetector {
                     removeHost(vim, r);
                 }
             } else {
-                List<String> vcVmNames = new ArrayList<String>();
+                // vm names may be the same, so use fqdn (uuid) to
+                // determine whether vms should be deleted from hq
+                
+                List<String> vcVmFqdns = new ArrayList<String>();
                 for (Resource r : vcVms) {
-                    vcVmNames.add(r.getName());
+                    String fqdn = getFqdn(r);
+                    if (fqdn != null) {
+                        vcVmFqdns.add(fqdn);
+                    }
                 }
                 
                 for (Resource r : hqVms) {
-                    if (!vcVmNames.contains(r.getName())) {
+                    String fqdn = getFqdn(r);
+                    if (fqdn != null && !vcVmFqdns.contains(fqdn)) {
                         // Not one of the powered-on VMs from vCenter
                         removeVM(vim, r);
                     }
@@ -667,6 +682,17 @@ public class VCenterPlatformDetector {
         
         return esxHost;
     }
+
+    private String getFqdn(Resource r) {
+        String fqdn = null;
+        for (ResourceInfo ri : r.getResourceInfo()) {
+            if ("fqdn".equals(ri.getKey())) {
+                fqdn = ri.getValue();
+                break;
+            }
+        }
+        return fqdn;
+    }
     
     private void removeHost(VSphereUtil vim, Resource r)
         throws IOException, PluginException {
@@ -674,7 +700,7 @@ public class VCenterPlatformDetector {
         try {
             // verify to see if it exists in vCenter
             HostSystem hs =
-                (HostSystem)vim.find(VSphereUtil.HOST_SYSTEM, r.getName());
+                (HostSystem)vim.findByUuid(VSphereUtil.HOST_SYSTEM, getFqdn(r));
             
             if (log.isDebugEnabled()) {
                 log.debug(HOST_TYPE + "[name=" + r.getName() 
@@ -691,7 +717,7 @@ public class VCenterPlatformDetector {
         try {
             // verify to see if it exists in vCenter
             VirtualMachine vm =
-                (VirtualMachine)vim.find(VSphereUtil.VM, r.getName());
+                (VirtualMachine)vim.findByUuid(VSphereUtil.VM, getFqdn(r));
             
             if (log.isDebugEnabled()) {
                 log.debug(VM_TYPE + "[name=" + r.getName() 

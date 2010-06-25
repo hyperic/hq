@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2010], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -41,6 +41,7 @@ import com.vmware.vim25.mo.HostSystem;
 import com.vmware.vim25.mo.InventoryNavigator;
 import com.vmware.vim25.mo.ManagedEntity;
 import com.vmware.vim25.mo.ServiceInstance;
+import com.vmware.vim25.mo.VirtualMachine;
 
 public class VSphereUtil extends ServiceInstance {
 
@@ -121,11 +122,48 @@ public class VSphereUtil extends ServiceInstance {
         return _nav;
     }
 
+    /**
+     * Find a managed entity by UUID. This may be less performant
+     * than using find(type, name), but allows managed entities
+     * with the same name to be uniquely found.
+     */
+    public ManagedEntity findByUuid(String type, String uuid)
+        throws PluginException {
+        
+        ManagedEntity obj = null;
+        try {
+            ManagedEntity[] entities = find(type);
+            for (int i=0; entities!=null && i<entities.length; i++) {
+                ManagedEntity entity = entities[i];
+                if (uuid.equals(getUuid(entity))) {
+                    obj = entity;
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            throw new PluginException(type + "/" + uuid + ": " + e, e);
+        } finally {
+            if (_log.isDebugEnabled()) {
+                _log.debug("findByUuid: type=" + type
+                               + ", uuid=" + uuid
+                               + ", managedEntity=" + obj);
+            }
+        }
+        
+        if (obj == null) {
+            throw new ManagedEntityNotFoundException(type + "/" + uuid + ": not found");
+        }
+
+        return obj;
+    }
+    
     public ManagedEntity find(String type, String name)
         throws PluginException {
 
-        ManagedEntity obj;
+        ManagedEntity obj = null;
         try {
+            // the vijava api will return the first instance of the
+            // entity type with the given name
             obj = getNavigator().searchManagedEntity(type, name);
         } catch (Exception e) {
             throw new PluginException(type + "/" + name + ": " + e, e);
@@ -151,6 +189,18 @@ public class VSphereUtil extends ServiceInstance {
 
     public HostSystem getHost(String host) throws PluginException {
         return (HostSystem)find(HOST_SYSTEM, host);
+    }
+    
+    private String getUuid(ManagedEntity entity) {
+        String uuid = null;
+        if (entity instanceof HostSystem) {
+            HostSystem host = (HostSystem) entity;
+            uuid = host.getSummary().getHardware().getUuid();
+        } else if (entity instanceof VirtualMachine) {
+            VirtualMachine vm = (VirtualMachine) entity;
+            uuid = vm.getConfig().getUuid();
+        }
+        return uuid;
     }
 
     public static String getURL(Properties props) {

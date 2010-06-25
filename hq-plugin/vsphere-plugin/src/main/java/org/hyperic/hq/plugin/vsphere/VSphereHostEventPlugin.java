@@ -25,7 +25,11 @@
 
 package org.hyperic.hq.plugin.vsphere;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
@@ -100,19 +104,6 @@ public class VSphereHostEventPlugin extends LogTrackPlugin implements Runnable {
         return filter;
     }
 
-    private EventFilterSpecByEntity getEntity(String hostname, boolean isVm) {
-        EventFilterSpecByEntity rtn = new EventFilterSpecByEntity();
-        ManagedObjectReference entity = new ManagedObjectReference();
-        if (isVm) {
-            entity.setType("VirtualMachine");
-        } else {
-            entity.setType("HostSystem");
-        }
-        entity.setVal(hostname);
-        rtn.setEntity(entity);
-        return rtn;
-    }
-
     private void processEvents(Event[] events) {
         for (int i = 0; i < events.length; i++) { 
             Event event = events[i];
@@ -151,12 +142,24 @@ public class VSphereHostEventPlugin extends LogTrackPlugin implements Runnable {
             _log.debug("querying events for vm=" + hostname);
             EventFilterSpec criteria = new EventFilterSpec();
             criteria.setTime(getTimeFilter(_lastCheck, now()));
-            criteria.setEntity(getEntity(hostname, isVm));
             Event[] events = _vim.getEventManager().queryEvents(criteria);
             if (events == null) {
                 return new Event[0];
             }
-            return events;
+            List rtn = new ArrayList(events.length);
+            for (Iterator it=Arrays.asList(events).iterator(); it.hasNext(); ) {
+                Event event = (Event) it.next();
+                if (event.getVm() != null || event.getHost() != null) {
+                    event.toString();
+                }
+                if (isVm && event.getVm() != null && event.getVm().getName().equals(hostname)) {
+                    rtn.add(event);
+                } else if (!isVm && event.getHost() != null && event.getHost().getName().equals(hostname)) {
+                    rtn.add(event);
+                }
+            }
+            _log.debug("returning " + rtn.size() + " events");
+            return (Event[]) rtn.toArray(new Event[0]);
         } catch (Exception e) {
             throw new PluginException("getEvents: " + e, e);
         }

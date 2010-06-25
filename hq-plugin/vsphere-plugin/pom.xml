@@ -20,6 +20,11 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>org.hyperic.hq.agent</groupId>
+			<artifactId>hq-agent-core</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
   			<groupId>dom4j</groupId>
   			<artifactId>dom4j</artifactId>
   			<version>1.6.1</version>

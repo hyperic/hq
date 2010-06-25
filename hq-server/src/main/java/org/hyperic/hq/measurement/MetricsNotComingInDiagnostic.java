@@ -194,7 +194,12 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
         final long now = now();
         final List<Resource> resources = new ArrayList<Resource>(platforms.size());
         for (final Platform platform : platforms) {
+            final Resource r = platform.getResource();
+            if (r == null || r.isInAsyncDeleteState()) {
+                continue;
+            }
             if ((now - platform.getCreationTime()) < THRESHOLD ||
+                !measCache.containsKey(r.getId()) || 
                 !platformIsAvailable(platform, measCache, avails)) {
                 continue;
             }
@@ -248,7 +253,8 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
                                         Map<Integer, List<Measurement>> measCache,
                                         Map<Integer, MetricValue> avails) {
         final Resource resource = platform.getResource();
-        final Measurement availMeas = measCache.get(resource.getId()).get(0);
+        final List<Measurement> measurements =  measCache.get(resource.getId());
+        final Measurement availMeas = (Measurement) measurements.get(0);
         MetricValue val = avails.get(availMeas.getId());
         return (val.getValue() == MeasurementConstants.AVAIL_DOWN) ? false : true;
     }

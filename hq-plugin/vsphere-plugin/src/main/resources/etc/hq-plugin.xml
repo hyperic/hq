@@ -2,7 +2,7 @@
 
   <config name="sdk">
     <option name="url"
-            description="VI sdk url"
+            description="vCenter sdk url"
             default="https://localhost/sdk"/>
 
     <option name="user"
@@ -16,11 +16,15 @@
   <config name="vm" include="sdk">
     <option name="vm"
             description="Virtual Machine name"/>
+    <option name="uuid"
+            description="Virtual Machine UUID"/>
   </config>
 
   <config name="host" include="sdk">
     <option name="hostname"
             description="Host System name"/>
+    <option name="uuid"
+            description="Host System UUID"/>
   </config>
 
   <platform name="VMware vSphere Host">
@@ -230,7 +234,6 @@
       <include name="reset"/>
       <include name="suspend"/>
       <include name="rebootGuest"/>
-      <include name="standbyGuest"/>
       <include name="guestHeartbeatStatus"/>
     </actions>
 
