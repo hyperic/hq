@@ -216,7 +216,7 @@ public class ResourceEdgeDAO
         String hql = "select count(re) from ResourceEdge re "
                      + "where re.from=:from and distance > 0 and relation=:relation";
 
-        return ((Integer) getSession().createQuery(hql).setParameter("from", resource)
+        return ((Number) getSession().createQuery(hql).setParameter("from", resource)
             .setParameter("relation", relation).iterate().next()).intValue();
     }
 
@@ -236,7 +236,7 @@ public class ResourceEdgeDAO
         String hql = "select count(re) from ResourceEdge re "
                      + "where re.from=:from and distance=:distance and relation=:relation";
 
-        int result = ((Integer) getSession().createQuery(hql).setParameter("from", resource)
+        int result = ((Number) getSession().createQuery(hql).setParameter("from", resource)
             .setParameter("relation", relation).setInteger("distance", distance).iterate().next())
             .intValue();
 
