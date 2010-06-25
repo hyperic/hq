@@ -59,7 +59,7 @@ public class RabbitMQServerDetector extends ServerDetector implements AutoServer
         for (String vHost : vHosts) {
             ServiceResource svh = createServiceResource("VHost");
             svh.setName(getTypeInfo().getName()+" VHost "+vHost);
-            res.add(svh);
+            //res.add(svh);
             List<Queue> queues=RabbitMQUtils.getQueues(config.getValue(SERVERNAME),vHost);
             for(Queue queue : queues){
                 ServiceResource q=createServiceResource("Queue");

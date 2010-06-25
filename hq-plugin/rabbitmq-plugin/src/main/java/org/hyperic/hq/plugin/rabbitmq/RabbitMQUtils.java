@@ -149,4 +149,8 @@ public class RabbitMQUtils {
         }
         return res;
     }
+
+    public static String toString(OtpErlangBinary bin) {
+        return new String(bin.binaryValue());
+    }
 }
