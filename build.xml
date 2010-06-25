@@ -24,6 +24,9 @@
   <property name="jbossweb.home" value="jboss-web.deployer"/>
   <property name="tomcat.home" 
   	location="${jboss.home}/server/default/deploy/${jbossweb.home}" />
+  <property name="jre.dir" value="hq_bin/jres" />
+  <property name="pgsql.dir" value="hq_bin/pgsql" />
+  <property name="ant.dir" value="hq_bin/ant" />
 
   <property name="build.dir" location="${basedir}/build" />
   <property name="archive.basename" value="hyperic-hq" />
