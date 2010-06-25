@@ -12,6 +12,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplateSortField;
+import org.hyperic.hq.measurement.server.session.MonitorableMeasurementInfo;
 import org.hyperic.hq.measurement.server.session.MonitorableType;
 import org.hyperic.hq.product.MeasurementInfo;
 import org.hyperic.hq.product.TypeInfo;
@@ -36,7 +37,8 @@ public interface TemplateManager {
      * @throws TemplateNotFoundException if no measurement templates are found.
      * @return a MeasurementTemplate value
      */
-    public List<MeasurementTemplate> getTemplates(Integer[] ids, PageControl pc) throws TemplateNotFoundException;
+    public List<MeasurementTemplate> getTemplates(Integer[] ids, PageControl pc)
+        throws TemplateNotFoundException;
 
     /**
      * Get all the templates. Must be superuser to execute.
@@ -46,8 +48,8 @@ public interface TemplateManager {
      *        defaultOn
      * @return a list of {@link MeasurementTemplate}s
      */
-    public List<MeasurementTemplate> findTemplates(AuthzSubject user, PageInfo pInfo, Boolean defaultOn)
-        throws PermissionException;
+    public List<MeasurementTemplate> findTemplates(AuthzSubject user, PageInfo pInfo,
+                                                   Boolean defaultOn) throws PermissionException;
 
     /**
      * Get all templates for a given MonitorableType
@@ -57,14 +59,17 @@ public interface TemplateManager {
      *        defaultOn
      * @return a list of {@link MeasurementTemplate}s
      */
-    public List<MeasurementTemplate> findTemplatesByMonitorableType(AuthzSubject user, PageInfo pInfo, String type,
-                                                                    Boolean defaultOn) throws PermissionException;
+    public List<MeasurementTemplate> findTemplatesByMonitorableType(AuthzSubject user,
+                                                                    PageInfo pInfo, String type,
+                                                                    Boolean defaultOn)
+        throws PermissionException;
 
     /**
      * Look up a measurement templates for a monitorable type and category.
      * @return a MeasurementTemplate value
      */
-    public List<MeasurementTemplate> findTemplates(String type, String cat, Integer[] excludeIds, PageControl pc);
+    public List<MeasurementTemplate> findTemplates(String type, String cat, Integer[] excludeIds,
+                                                   PageControl pc);
 
     /**
      * Look up a measurement templates for a monitorable type and filtered by
@@ -85,7 +90,8 @@ public interface TemplateManager {
      * @param templIds - a list of integer template ids
      * @param interval - the interval of collection to set to
      */
-    public void updateTemplateDefaultInterval(AuthzSubject subject, Integer[] templIds, long interval);
+    public void updateTemplateDefaultInterval(AuthzSubject subject, Integer[] templIds,
+                                              long interval);
 
     /**
      * Make metrics disabled by default for a list of meas. templates
@@ -100,13 +106,14 @@ public interface TemplateManager {
      *         created.
      */
     public Map<String, MeasurementInfo> updateTemplates(String pluginName, TypeInfo ownerEntity,
-                                                        MonitorableType monitorableType, MeasurementInfo[] tmpls);
+                                                        MonitorableType monitorableType,
+                                                        MeasurementInfo[] tmpls);
 
     /**
      * Add new measurement templates for a plugin. This does a batch style
-     * insert, and expects a map of maps indexed by the monitorable type id.
+     * insert
      */
-    public void createTemplates(String pluginName, Map<MonitorableType, Map<?, MeasurementInfo>> toAdd);
+    public void createTemplates(String pluginName, Map<MonitorableType,List<MonitorableMeasurementInfo>> toAdd);
 
     public void setDesignated(MeasurementTemplate tmpl, boolean designated);
 

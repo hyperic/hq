@@ -1144,12 +1144,12 @@ public class AppdefBossImpl implements AppdefBoss {
      * 
      */
     public ApplicationValue createApplication(int sessionID, ApplicationValue appVal,
-                                              Collection<ServiceValue> services, ConfigResponse protoProps)
+                                              ConfigResponse protoProps)
         throws ValidationException, SessionTimeoutException, SessionNotFoundException, PermissionException,
         AppdefDuplicateNameException, NotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
 
-        Application pk = applicationManager.createApplication(subject, appVal, services);
+        Application pk = applicationManager.createApplication(subject, appVal);
         return pk.getApplicationValue();
     }
 

@@ -36,7 +36,6 @@ import java.util.Set;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.type.IntegerType;
-import org.hyperic.hibernate.Util;
 import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.shared.ServiceValue;
@@ -157,7 +156,7 @@ public class ServiceDAO
     Collection<ServiceType> getServiceTypes(final List serviceIds, final boolean asc) {
         final String hql = new StringBuilder().append("SELECT distinct s.serviceType").append(
             " FROM Service s").append(" WHERE s.id in (:svcs)").toString();
-        final HQDialect dialect = Util.getHQDialect();
+        final HQDialect dialect = getHQDialect();
         // can't go over 1000 due to the hibernate bug
         // http://opensource.atlassian.com/projects/hibernate/browse/HHH-1985
         final int max = dialect.getMaxExpressions();

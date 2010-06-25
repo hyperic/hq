@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -64,6 +65,7 @@ import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
+import org.hyperic.hq.measurement.server.session.MonitorableMeasurementInfo;
 import org.hyperic.hq.measurement.server.session.MonitorableType;
 import org.hyperic.hq.measurement.shared.TemplateManager;
 import org.hyperic.hq.product.MeasurementInfo;
@@ -431,7 +433,7 @@ public class ProductManagerImpl implements ProductManager {
 
         // Get the measurement templates
         // Keep a list of templates to add
-        Map<MonitorableType, Map<?, MeasurementInfo>> toAdd = new HashMap<MonitorableType, Map<?, MeasurementInfo>>();
+       Map<MonitorableType,List<MonitorableMeasurementInfo>> toAdd = new HashMap<MonitorableType,List<MonitorableMeasurementInfo>>();
 
         Map<String, MonitorableType> types = new HashMap<String,MonitorableType>(templateManager.getMonitorableTypesByName(pluginName));
         if (debug)
@@ -462,7 +464,12 @@ public class ProductManagerImpl implements ProductManager {
                     pluginName, info, monitorableType, measurements);
                 if (debug)
                     watch.markTimeEnd("updateTemplates");
-                toAdd.put(monitorableType, newMeasurements);
+                final List<MonitorableMeasurementInfo> infos = new ArrayList<MonitorableMeasurementInfo>();
+                for(MeasurementInfo measurementInfo: newMeasurements.values()) {
+                    infos.add(new MonitorableMeasurementInfo(monitorableType, measurementInfo));
+                }
+                //we may encounter the same set of templates twice.  Last one wins
+                toAdd.put(monitorableType,infos);
             }
         }
         if (debug)

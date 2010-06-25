@@ -36,7 +36,6 @@ import java.util.Map;
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 import org.hibernate.type.IntegerType;
-import org.hyperic.hibernate.Util;
 import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.authz.shared.AuthzConstants;
@@ -138,7 +137,7 @@ public class ResourceEdgeDAO
         }
 
         if (platformName != null && platformName.trim().length() > 0) {
-            HQDialect dialect = Util.getHQDialect();
+            HQDialect dialect = getHQDialect();
             nameEx = dialect.getRegExSQL("r.sort_name", ":regex", true, false);
 
             sql += " and (" + nameEx + ") ";

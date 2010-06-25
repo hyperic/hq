@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.hyperic.hibernate.Util;
 import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.shared.MeasRange;
@@ -28,10 +27,9 @@ public class MeasurementUnionStatementBuilder {
      * @param end The end of the time range
      * @return The UNION SQL statement.
      */
-    public static final String getUnionStatement(final long begin, long end) {
+    public static final String getUnionStatement(final long begin, long end, final HQDialect dialect) {
         final StringBuilder sql = new StringBuilder();
         final MeasRangeObj measRangeObj = MeasRangeObj.getInstance();
-        final HQDialect dialect = Util.getHQDialect();
         final List ranges = (dialect.useMetricUnion()) ?
             Collections.singletonList(new MeasRange(TAB_DATA, begin, end)) :
             measRangeObj.getRanges();
@@ -64,12 +62,11 @@ public class MeasurementUnionStatementBuilder {
      */
     public static final String getUnionStatement(final long begin,
                                                  final long end,
-                                                 final Integer[] measIds) {
+                                                 final Integer[] measIds, final HQDialect dialect) {
         final String measInStmt = (measIds.length == 0) ?
             "" : MeasTabManagerUtil.getMeasInStmt(measIds, true);
         final StringBuilder sql = new StringBuilder();
         final MeasRangeObj measRangeObj = MeasRangeObj.getInstance();
-        final HQDialect dialect = Util.getHQDialect();
         final List ranges = (dialect.useMetricUnion()) ?
             Collections.singletonList(new MeasRange(TAB_DATA, begin, end)) :
             measRangeObj.getRanges();
@@ -108,28 +105,28 @@ public class MeasurementUnionStatementBuilder {
      * @param measId The measurement id to set the where clause against
      * @return The UNION SQL statement.
      */
-    public static String getUnionStatement(long begin, long end, int measId) {
+    public static String getUnionStatement(long begin, long end, int measId, final HQDialect dialect) {
         Integer[] measArray = new Integer[1];
         measArray[0] = new Integer(measId);
-        return getUnionStatement(begin, end, measArray);
+        return getUnionStatement(begin, end, measArray, dialect);
     }
 
-    public static String getUnionStatement(long millisBack) {
+    public static String getUnionStatement(long millisBack, final HQDialect dialect) {
         long timeNow = System.currentTimeMillis(),
              begin   = (timeNow - millisBack);
-        return getUnionStatement(begin, timeNow);
+        return getUnionStatement(begin, timeNow, dialect);
     }
 
-    public static String getUnionStatement(long millisBack, Integer[] measIds) {
+    public static String getUnionStatement(long millisBack, Integer[] measIds, final HQDialect dialect) {
         long timeNow = System.currentTimeMillis(),
              begin   = (timeNow - millisBack);
-        return getUnionStatement(begin, timeNow, measIds);
+        return getUnionStatement(begin, timeNow, measIds, dialect);
     }
 
-    public static String getUnionStatement(long millisBack, int measId) {
+    public static String getUnionStatement(long millisBack, int measId, final HQDialect dialect) {
         long timeNow = System.currentTimeMillis(),
              begin   = (timeNow - millisBack);
-        return getUnionStatement(begin, timeNow, measId);
+        return getUnionStatement(begin, timeNow, measId, dialect);
     }
 
 }

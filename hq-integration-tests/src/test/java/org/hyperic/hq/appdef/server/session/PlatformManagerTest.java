@@ -7,94 +7,44 @@ import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.hibernate.NonUniqueObjectException;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
-import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateFQDNException;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
-import org.hyperic.hq.appdef.shared.ApplicationManager;
-import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.IpValue;
-import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformValue;
-import org.hyperic.hq.appdef.shared.ServerManager;
-import org.hyperic.hq.appdef.shared.ServerValue;
-import org.hyperic.hq.appdef.shared.ServiceManager;
-import org.hyperic.hq.appdef.shared.ServiceValue;
-import org.hyperic.hq.appdef.shared.ValidationException;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.Role;
-import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.AuthzSubjectManager;
-import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.ResourceGroupManager;
-import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
-import org.hyperic.hq.context.IntegrationTestContextLoader;
 import org.hyperic.hq.product.PlatformTypeInfo;
-import org.hyperic.hq.product.ServerTypeInfo;
-import org.hyperic.hq.product.ServiceTypeInfo;
+import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Integration test of the {@link PlatformManagerImpl}
  * @author iperumal
  * 
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(loader = IntegrationTestContextLoader.class, locations = { "classpath*:META-INF/spring/*-context.xml" })
-@Transactional
 @DirtiesContext
-public class PlatformManagerTest {
-
-    @Autowired
-    PlatformManager platformManager;
-
-    @Autowired
-    AuthzSubjectManager authzSubjectManager;
-
-    @Autowired
-    AgentManager agentManager;
-
-    @Autowired
-    ServerManager serverManager;
-
-    @Autowired
-    ServiceManager serviceManager;
-
-    @Autowired
-    ResourceGroupManager resourceGroupManager;
-
-    @Autowired
-    ResourceManager resourceManager;
-
-    @Autowired
-    ApplicationManager applicationManager;
+public class PlatformManagerTest
+    extends BaseInfrastructureTest {
 
     private Agent testAgent;
 
@@ -110,29 +60,15 @@ public class PlatformManagerTest {
 
     private Service testService;
 
-    private ResourceGroup testGroup;
-
     private List<Platform> createPlatforms(String agentToken) throws ApplicationException {
         List<Platform> platforms = new ArrayList<Platform>(10);
         for (int i = 1; i < 10; i++) {
-            AIPlatformValue aiPlatform = new AIPlatformValue();
-            aiPlatform.setName("TestPlatform" + i);
-            aiPlatform.setCpuCount(2);
-            aiPlatform.setPlatformTypeName("pType" + i);
-            aiPlatform.setAgentToken(agentToken);
-            aiPlatform.setFqdn("Test Platform" + i);
-            platforms.add(i - 1, platformManager.createPlatform(authzSubjectManager
-                .getOverlordPojo(), aiPlatform));
+            platforms.add(i - 1, createPlatform(agentToken, "pType" + i, "TestPlatform" + i,
+                "TestPlatform" + i));
         }
         // Create on Linux platform (supported platform)
-        AIPlatformValue aiPlatform = new AIPlatformValue();
-        aiPlatform.setName("Test Platform Linux");
-        aiPlatform.setCpuCount(2);
-        aiPlatform.setPlatformTypeName("Linux");
-        aiPlatform.setAgentToken(agentToken);
-        aiPlatform.setFqdn("Test Platform Linux");
-        platforms.add(9, platformManager.createPlatform(authzSubjectManager.getOverlordPojo(),
-            aiPlatform));
+        platforms.add(9, createPlatform(agentToken, "Linux", "Test Platform Linux",
+            "Test Platform Linux"));
         return platforms;
     }
 
@@ -141,78 +77,17 @@ public class PlatformManagerTest {
         String platformType;
         for (int i = 1; i < 10; i++) {
             platformType = "pType" + i;
-            pTypes.add(i - 1, platformManager.createPlatformType(platformType, "Test Plugin" + i));
+            pTypes.add(i - 1, createPlatformType(platformType, "Test Plugin" + i));
         }
-        pTypes.add(9, platformManager.createPlatformType("Linux", "Test Plugin"));
+        pTypes.add(9, createPlatformType("Linux", "Test Plugin"));
         return pTypes;
-    }
-
-    private Server createServer(Platform platform, ServerType serverType)
-        throws PlatformNotFoundException, AppdefDuplicateNameException, ValidationException,
-        PermissionException, NotFoundException {
-        ServerValue server = new ServerValue();
-        return serverManager.createServer(authzSubjectManager.getOverlordPojo(), platform.getId(),
-            serverType.getId(), server);
-    }
-
-    private ServerType createServerType(String serverName, String serverVersion,
-                                        String[] validPlatformTypes, String plugin)
-        throws NotFoundException {
-        ServerTypeInfo serverTypeInfo = new ServerTypeInfo();
-        serverTypeInfo.setDescription(serverName);
-        serverTypeInfo.setName(serverName);
-        serverTypeInfo.setVersion(serverVersion);
-        serverTypeInfo.setVirtual(false);
-        serverTypeInfo.setValidPlatformTypes(validPlatformTypes);
-        return serverManager.createServerType(serverTypeInfo, plugin);
-    }
-
-    private ServerType createVirtualServerType(String serverName, String serverVersion,
-                                               String[] validPlatformTypes, String plugin)
-        throws NotFoundException {
-        ServerTypeInfo serverTypeInfo = new ServerTypeInfo();
-        serverTypeInfo.setDescription(serverName);
-        serverTypeInfo.setName(serverName);
-        serverTypeInfo.setVersion(serverVersion);
-        serverTypeInfo.setVirtual(true);
-        serverTypeInfo.setValidPlatformTypes(validPlatformTypes);
-        return serverManager.createServerType(serverTypeInfo, plugin);
-    }
-
-    private ServiceType createServiceType(String serviceTypeName, String plugin,
-                                          ServerType serverType) throws NotFoundException {
-        ServiceTypeInfo sinfo = new ServiceTypeInfo();
-        sinfo.setDescription(serviceTypeName);
-        sinfo.setInternal(false);
-        sinfo.setName(serviceTypeName);
-        return serviceManager.createServiceType(sinfo, plugin, serverType);
-    }
-
-    private ResourceGroup createResourceGroup(Platform testPlatform) throws ApplicationException,
-        PermissionException {
-        AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
-        Resource platformRes = testPlatform.getResource();
-
-        List<Resource> resources = new ArrayList<Resource>();
-        resources.add(platformRes);
-
-        AppdefEntityTypeID appDefEntTypeId = new AppdefEntityTypeID(
-            AppdefEntityConstants.APPDEF_TYPE_PLATFORM, testPlatform.getResource()
-                .getResourceType().getAppdefType());
-
-        ResourceGroupCreateInfo gCInfo = new ResourceGroupCreateInfo("AllPlatformGroup", "",
-            AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP, resourceManager
-                .findResourcePrototype(appDefEntTypeId), "", 0, false, false);
-        ResourceGroup resGrp = resourceGroupManager.createResourceGroup(overlord, gCInfo,
-            new ArrayList<Role>(0), resources);
-        return resGrp;
     }
 
     @Before
     public void initializeTestData() throws ApplicationException, NotFoundException {
         String agentToken = "agentToken123";
-        testAgent = agentManager.createLegacyAgent("127.0.0.1", 2144, "authToken", agentToken,
-            "4.5");
+        testAgent = createAgent("127.0.0.1", 2144, "authToken", agentToken, "4.5");
+
         testPlatformTypes = createTestPlatformTypes();
         // Get Linux platform type
         testPlatformType = testPlatformTypes.get(9);
@@ -221,17 +96,18 @@ public class PlatformManagerTest {
         testPlatform = testPlatforms.get(9);
         // Create ServerType
         ServerType testServerType = createServerType("Tomcat", "6.0", new String[] { "Linux" },
-            "Test Server Plugin");
+            "Test Server Plugin", false);
         // Create test server
-        testServer = createServer(testPlatform, testServerType);
+        testServer = createServer(testPlatform, testServerType, "My Tomcat");
         // Create ServiceType
         ServiceType serviceType = createServiceType("Spring JDBC Template", "Test Server Plugin",
             testServerType);
         // Create test service
-        testService = serviceManager.createService(authzSubjectManager.getOverlordPojo(),
-            testServer.getId(), serviceType.getId(), "platformService jdbcTemplate",
+        testService = createService(testServer, serviceType, "platformService jdbcTemplate",
             "Spring JDBC Template", "my computer");
-        testGroup = createResourceGroup(testPlatform);
+        Set<Platform> testPlatforms = new HashSet<Platform>(1);
+        testPlatforms.add(testPlatform);
+        createPlatformResourceGroup(testPlatforms, "AllPlatformGroup");
     }
 
     @Test
@@ -335,14 +211,9 @@ public class PlatformManagerTest {
     @Test
     public void testCreatePlatformByAIPlatformValues() throws ApplicationException {
         String agentToken = "agentToken123";
-        AIPlatformValue aiPlatform = new AIPlatformValue();
-        aiPlatform.setName("Test PlatformByAIValues");
-        aiPlatform.setCpuCount(2);
-        aiPlatform.setPlatformTypeName(testPlatformType.getName());
-        aiPlatform.setAgentToken(agentToken);
-        aiPlatform.setFqdn("Test Platform CreationByAIValues");
-        Platform platform = platformManager.createPlatform(authzSubjectManager.getOverlordPojo(),
-            aiPlatform);
+
+        Platform platform = createPlatform(agentToken, testPlatformType.getName(),
+            "Test Platform CreationByAIValues", "Test PlatformByAIValues");
         assertNotNull(platform.getResource());
         assertEquals(platform.getName(), "Test PlatformByAIValues");
         assertEquals(platform.getAgent().getAgentToken(), agentToken);
@@ -354,18 +225,12 @@ public class PlatformManagerTest {
     @Test
     public void testCreatePlatformIncorrectPlatformType() throws ApplicationException {
         String agentToken = "agentToken123";
-        AIPlatformValue aiPlatform = new AIPlatformValue();
-        aiPlatform.setName("Test Platform");
-        aiPlatform.setCpuCount(2);
-        // Provide a non-existent platform type
-        aiPlatform.setPlatformTypeName("abcd");
-        aiPlatform.setAgentToken(agentToken);
-        aiPlatform.setFqdn("Test Platform Creation");
+
         try {
-            platformManager.createPlatform(authzSubjectManager.getOverlordPojo(), aiPlatform);
+            // Provide a non-existent platform type
+            createPlatform(agentToken, "abcd", "Test Platform Creation", "Test Platform");
         } catch (SystemException e) {
-            assertEquals(e.getMessage(), "Unable to find PlatformType [" +
-                                         aiPlatform.getPlatformTypeName() + "]");
+            assertEquals(e.getMessage(), "Unable to find PlatformType [abcd]");
             return;
         }
         fail("Expected SystemException is not thrown");
@@ -445,8 +310,8 @@ public class PlatformManagerTest {
     public void testCreatePlatformAddVirtualServers() throws ApplicationException,
         NotFoundException {
         // Create virtual server types for test platform type
-        ServerType vServerType = createVirtualServerType("CPU Server", "1.0",
-            new String[] { testPlatformType.getName() }, "Test virtual Server Plugin");
+        ServerType vServerType = createServerType("CPU Server", "1.0",
+            new String[] { testPlatformType.getName() }, "Test virtual Server Plugin", true);
         PlatformValue pValue = new PlatformValue();
         pValue.setCpuCount(2);
         pValue.setName("Test Platform ByPlatformType");
@@ -702,20 +567,15 @@ public class PlatformManagerTest {
         assertEquals(testPlatform.getPlatformValue(), pValues.get(0));
     }
 
-    // TODO
+    @Test
     public void testGetPlatformsByApplication() throws ApplicationException, NotFoundException {
-        ServiceValue serviceValue = testService.getServiceValue();
-        List<ServiceValue> services = new ArrayList<ServiceValue>();
-        services.add(serviceValue);
-        ApplicationValue appValue = new ApplicationValue();
-        appValue.setName("Test Application");
-        appValue.setEngContact("Testing");
-        appValue.setBusinessContact("SpringSource");
-        appValue.setOpsContact("TechOps"); // Set "Generic Application" type
-        appValue.setApplicationType(applicationManager.findApplicationType(1));
-        // TODO: waiting on addService method fix
-        Application app = applicationManager.createApplication(authzSubjectManager
-            .getOverlordPojo(), appValue, services);
+        AppdefEntityID serviceId= testService.getEntityId();
+        List<AppdefEntityID> services = new ArrayList<AppdefEntityID>();
+        services.add(serviceId);
+        Application app = createApplication("Test Application", "testing", GENERIC_APPLICATION_TYPE, services);
+        flushSession();
+        //clear the session to update the bi-directional app to app service relationship
+        clearSession();
         PageControl pc = new PageControl();
         PageList<PlatformValue> pValues = platformManager.getPlatformsByApplication(
             authzSubjectManager.getOverlordPojo(), app.getId(), pc);
@@ -977,30 +837,31 @@ public class PlatformManagerTest {
 
     @Test
     public void testGetPlatformTypeCounts() {
-        
+
         List<Object[]> counts = platformManager.getPlatformTypeCounts();
         List<Object[]> actuals = new ArrayList<Object[]>(10);
-        //Add the Linux testPlatformType as the result is sorted
-        actuals.add(0, new Object[]{testPlatformTypes.get(9).getName(), Long.valueOf("1")});
-        for (int i=1; i<=9; i++) {
+        // Add the Linux testPlatformType as the result is sorted
+        actuals.add(0, new Object[] { testPlatformTypes.get(9).getName(), Long.valueOf("1") });
+        for (int i = 1; i <= 9; i++) {
             // Add platform Type name and count (here count is always 1)
-        actuals.add(i, new Object[]{testPlatformTypes.get(i-1).getName(), Long.valueOf("1")});
-        }   
-        for (int i=0; i<=9; i++) {
-           assertEquals((String)counts.get(i)[0],((String)actuals.get(i)[0]));
-           assertEquals((Long)counts.get(i)[1],((Long)actuals.get(i)[1]));
-        }        
+            actuals.add(i,
+                new Object[] { testPlatformTypes.get(i - 1).getName(), Long.valueOf("1") });
+        }
+        for (int i = 0; i <= 9; i++) {
+            assertEquals((String) counts.get(i)[0], ((String) actuals.get(i)[0]));
+            assertEquals((Long) counts.get(i)[1], ((Long) actuals.get(i)[1]));
+        }
     }
 
     @Test
     public void testGetPlatformCount() {
-        //we have added 10 test platforms during initial setup
+        // we have added 10 test platforms during initial setup
         assertEquals(platformManager.getPlatformCount().intValue(), 10);
     }
 
     @Test
     public void testGetCpuCount() {
-        //10 test platforms with each having 2 CPUs
+        // 10 test platforms with each having 2 CPUs
         assertEquals(platformManager.getCpuCount().intValue(), 20);
     }
 }

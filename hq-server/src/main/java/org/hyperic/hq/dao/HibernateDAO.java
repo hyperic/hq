@@ -35,6 +35,8 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Order;
+import org.hibernate.engine.SessionFactoryImplementor;
+import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
@@ -50,6 +52,11 @@ public abstract class HibernateDAO<T> {
     protected HibernateDAO(Class<T> persistentClass, SessionFactory f) {
         _persistentClass = persistentClass;
         sessionFactory = f;
+    }
+    
+    public HQDialect getHQDialect() {
+        return (HQDialect) ((SessionFactoryImplementor) sessionFactory)
+            .getDialect();
     }
 
     public Class<T> getPersistentClass() {

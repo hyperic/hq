@@ -36,7 +36,6 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Expression;
 import org.hibernate.type.IntegerType;
-import org.hyperic.hibernate.Util;
 import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.galerts.server.session.GalertAuxLog;
@@ -59,7 +58,7 @@ public class MetricAuxLogDAO
         final String hql = "delete from MetricAuxLogPojo where metric.id in (:ids)";
 
         Session session = getSession();
-        HQDialect dialect = Util.getHQDialect();
+        HQDialect dialect = getHQDialect();
         int maxExprs;
         if (-1 == (maxExprs = dialect.getMaxExpressions())) {
             return session.createQuery(hql).setParameterList("ids", ids).executeUpdate();
@@ -91,7 +90,7 @@ public class MetricAuxLogDAO
 
     Collection find(Collection mids) {
         List rtn = new ArrayList();
-        HQDialect dialect = Util.getHQDialect();
+        HQDialect dialect = getHQDialect();
         String sql = "from MetricAuxLogPojo p where p.metric.id in (:metrics)";
         int maxExprs;
         if (-1 == (maxExprs = dialect.getMaxExpressions())) {
@@ -128,7 +127,7 @@ public class MetricAuxLogDAO
                      + "where exists (select p.id from MetricAuxLogPojo p "
                      + "where p.auxLog = g and " + "p.metric.id in (:metrics))";
 
-        HQDialect dialect = Util.getHQDialect();
+        HQDialect dialect = getHQDialect();
         int maxExprs;
         if (-1 == (maxExprs = dialect.getMaxExpressions())) {
             getSession().createQuery(hql).setInteger("type",

@@ -28,11 +28,12 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 
 import org.hyperic.hq.monitor.MockService;
-import org.hyperic.testSuite.BaseInfrastructureTest;
+import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.StopWatch;
 
@@ -49,6 +50,7 @@ import org.springframework.util.StopWatch;
  */
 @ContextConfiguration
 @Ignore("This test requires manual verification that the aspect logged a message")
+@DirtiesContext
 public class ExceedsThresholdTest extends BaseInfrastructureTest {
 
     @Autowired private MockService mockServiceImpl;

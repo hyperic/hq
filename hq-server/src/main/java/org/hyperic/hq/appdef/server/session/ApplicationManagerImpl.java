@@ -160,8 +160,7 @@ public class ApplicationManagerImpl implements ApplicationManager,
      *        you are creating an empty application.
      * 
      */
-    public Application createApplication(AuthzSubject subject, ApplicationValue newApp,
-                                         Collection<ServiceValue> services)
+    public Application createApplication(AuthzSubject subject, ApplicationValue newApp)
         throws ValidationException, PermissionException, AppdefDuplicateNameException,
         NotFoundException {
 
@@ -192,12 +191,6 @@ public class ApplicationManagerImpl implements ApplicationManager,
             Application application = applicationDAO.create(newApp);
             // AUTHZ CHECK
             createAuthzApplication(subject, application);
-            // now add the services
-            for (ServiceValue aService : services) {
-
-                log.debug("Adding service: " + aService + " to application");
-                application.addService(aService.getId());
-            }
             return application;
         } catch (ValidationException e) {
             throw e;

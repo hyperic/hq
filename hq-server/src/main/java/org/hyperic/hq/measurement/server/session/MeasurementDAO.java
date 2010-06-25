@@ -39,7 +39,6 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.type.IntegerType;
-import org.hyperic.hibernate.Util;
 import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AgentDAO;
@@ -510,7 +509,7 @@ public class MeasurementDAO
         final List sortedResourceIds = new ArrayList(resourceIds);
         Collections.sort(sortedResourceIds);
 
-        final HQDialect dialect = Util.getHQDialect();
+        final HQDialect dialect = getHQDialect();
         final int max = (dialect.getMaxExpressions() <= 0) ? Integer.MAX_VALUE : dialect
             .getMaxExpressions();
         final List rtn = new ArrayList(sortedResourceIds.size());
@@ -551,7 +550,7 @@ public class MeasurementDAO
         Collections.sort(sortedResourceIds);
 
         final List rtn = new ArrayList(sortedResourceIds.size());
-        final HQDialect dialect = Util.getHQDialect();
+        final HQDialect dialect = getHQDialect();
         final int max = (dialect.getMaxExpressions() <= 0) ? Integer.MAX_VALUE : dialect
             .getMaxExpressions();
 

@@ -29,10 +29,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.dialect.Dialect;
-import org.hyperic.hibernate.Util;
+import org.hibernate.engine.SessionFactoryImplementor;
 import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.util.StringUtil;
 
 /**
@@ -52,8 +54,9 @@ public class CritterTranslationContext {
     private final AuthzSubject _subject;
     
     public CritterTranslationContext(AuthzSubject subj) {
-        this(subj, Util.getSessionFactory().getCurrentSession(),
-             Util.getHQDialect(), "x");
+        this(subj, Bootstrap.getBean(SessionFactory.class).getCurrentSession(),
+            (HQDialect) ((SessionFactoryImplementor) Bootstrap.getBean(SessionFactory.class))
+            .getDialect(), "x");
     }
 
     public CritterTranslationContext(AuthzSubject subj, Session s, HQDialect d,
@@ -61,7 +64,7 @@ public class CritterTranslationContext {
         _subject = subj;
         _session = s;
         _hqDialect = d;
-        _dialect = Util.getDialect();
+        _dialect = ((SessionFactoryImplementor)Bootstrap.getBean(SessionFactory.class)).getDialect();
         _prefix  = prefix;
     }
     

@@ -25,9 +25,6 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -38,14 +35,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hibernate.Session;
-import org.hibernate.id.IdentifierGenerator;
-import org.hibernate.impl.SessionFactoryImpl;
-import org.hibernate.impl.SessionImpl;
 import org.hyperic.hibernate.PageInfo;
-import org.hyperic.hibernate.Util;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -70,9 +60,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class TemplateManagerImpl implements TemplateManager {
-    private static final int ALIAS_LIMIT = 100;
-    private final Log log = LogFactory.getLog(TemplateManagerImpl.class);
-    private CategoryDAO categoryDAO;
+   
     private MeasurementDAO measurementDAO;
     private MeasurementTemplateDAO measurementTemplateDAO;
     private MonitorableTypeDAO monitorableTypeDAO;
@@ -81,12 +69,11 @@ public class TemplateManagerImpl implements TemplateManager {
     private SRNCache srnCache;
 
     @Autowired
-    public TemplateManagerImpl(CategoryDAO categoryDAO, MeasurementDAO measurementDAO,
+    public TemplateManagerImpl(MeasurementDAO measurementDAO,
                                MeasurementTemplateDAO measurementTemplateDAO,
                                MonitorableTypeDAO monitorableTypeDAO,
                                ScheduleRevNumDAO scheduleRevNumDAO, SRNManager srnManager,
                                SRNCache srnCache) {
-        this.categoryDAO = categoryDAO;
         this.measurementDAO = measurementDAO;
         this.measurementTemplateDAO = measurementTemplateDAO;
         this.monitorableTypeDAO = monitorableTypeDAO;
@@ -476,83 +463,10 @@ public class TemplateManagerImpl implements TemplateManager {
     /**
      * Add new measurement templates for a plugin.
      * 
-     * This does a batch style insert, and expects a map of maps indexed by the
-     * monitorable type id.
+     * This does a batch style insert
      */
-    public void createTemplates(String pluginName,
-                                Map<MonitorableType, Map<?, MeasurementInfo>> toAdd) {
-        // Add the new templates
-        PreparedStatement stmt;
-
-        SessionFactoryImpl sessionFactory = (SessionFactoryImpl) Util.getSessionFactory();
-        Session session = measurementTemplateDAO.getSession();
-        try {
-            IdentifierGenerator tmplIdGenerator = sessionFactory.getEntityPersister(
-                MeasurementTemplate.class.getName()).getIdentifierGenerator();
-
-            Connection conn = Util.getConnection();
-
-            final String templatesql = "INSERT INTO EAM_MEASUREMENT_TEMPL "
-                                       + "(id, name, alias, units, collection_type, default_on, "
-                                       + "default_interval, designate, monitorable_type_id, "
-                                       + "category_id, template, plugin, ctime, mtime) "
-                                       + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-            long current = System.currentTimeMillis();
-            stmt = conn.prepareStatement(templatesql);
-
-            // can assume this is called in a single thread
-            // This is called at hq server startup
-            HashMap<String, Category> cats = new HashMap<String, Category>();
-            for (Map.Entry<MonitorableType, Map<?, MeasurementInfo>> entry : toAdd.entrySet()) {
-                MonitorableType monitorableType = entry.getKey();
-                Map<?, MeasurementInfo> newMetrics = entry.getValue();
-
-                for (MeasurementInfo info : newMetrics.values()) {
-                    Category cat = (Category) cats.get(info.getCategory());
-                    if (cat == null) {
-                        cat = categoryDAO.findByName(info.getCategory());
-                        if (cat == null) {
-                            cat = categoryDAO.create(info.getCategory());
-                        }
-                        cats.put(info.getCategory(), cat);
-                    }
-
-                    int col = 1;
-                    Integer rawid = (Integer) tmplIdGenerator.generate((SessionImpl) session,
-                        new MeasurementTemplate());
-
-                    stmt.setInt(col++, rawid.intValue());
-                    stmt.setString(col++, info.getName());
-                    String alias = info.getAlias();
-                    if (alias.length() > ALIAS_LIMIT) {
-                        alias = alias.substring(0, ALIAS_LIMIT);
-                        log
-                            .warn("ALIAS field of EAM_MEASUREMENT_TEMPLATE truncated: original value was " +
-                                  info.getAlias() + ", truncated value is " + alias);
-                    }
-                    stmt.setString(col++, alias);
-                    stmt.setString(col++, info.getUnits());
-                    stmt.setInt(col++, info.getCollectionType());
-                    stmt.setBoolean(col++, info.isDefaultOn());
-                    stmt.setLong(col++, info.getInterval());
-                    stmt.setBoolean(col++, info.isIndicator());
-                    stmt.setInt(col++, monitorableType.getId().intValue());
-                    stmt.setInt(col++, cat.getId().intValue());
-                    stmt.setString(col++, info.getTemplate());
-                    stmt.setString(col++, pluginName);
-                    stmt.setLong(col++, current);
-                    stmt.setLong(col, current);
-                    stmt.addBatch();
-                }
-            }
-            stmt.executeBatch();
-            stmt.close();
-        } catch (SQLException e) {
-            this.log.error("Unable to add measurements for: " + pluginName, e);
-        } finally {
-            // Util.endConnection();
-        }
+    public void createTemplates(String pluginName,Map<MonitorableType,List<MonitorableMeasurementInfo>> toAdd) {
+        measurementTemplateDAO.createTemplates(pluginName, toAdd);
     }
 
     /** 

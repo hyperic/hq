@@ -32,6 +32,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
@@ -124,6 +125,7 @@ public class SRNManagerImpl implements SRNManager {
      * 
      * @param aid The AppdefEntityID to remove.
      */
+    @Transactional(noRollbackFor=ObjectNotFoundException.class)
     public void removeSrn(AppdefEntityID aid) {
         SrnId id = new SrnId(aid.getType(), aid.getID());
         if (srnCache.remove(id)) {

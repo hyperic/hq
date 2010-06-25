@@ -39,7 +39,6 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 import org.hibernate.type.IntegerType;
-import org.hyperic.hibernate.Util;
 import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.dao.HibernateDAO;
@@ -326,7 +325,7 @@ public class AvailabilityDataDAO
                 " rle.endtime").append(" ORDER BY rle.endtime").toString();
         final List<Integer> measIds = Arrays.asList(mids);
         final int size = measIds.size();
-        final HQDialect dialect = Util.getHQDialect();
+        final HQDialect dialect = getHQDialect();
         final int batchSize = dialect.getMaxExpressions() < 0 ? Integer.MAX_VALUE : dialect.getMaxExpressions();
         final List<Object[]> rtn = new ArrayList<Object[]>(size);
         for (int i=0; i<size; i+=batchSize) {

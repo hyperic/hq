@@ -36,7 +36,6 @@ import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.type.IntegerType;
-import org.hyperic.hibernate.Util;
 import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.Ip;
@@ -205,7 +204,7 @@ public class PlatformDAO
     }
 
     public List<Platform> findByTypeAndRegEx(Integer pType, String regex) {
-        HQDialect dialect = Util.getHQDialect();
+        HQDialect dialect = getHQDialect();
         String fqdnEx = dialect.getRegExSQL("p.fqdn", ":regex", true, false);
         String nameEx = dialect.getRegExSQL("rez.sort_name", ":regex", true, false);
         String sql = "select {p.*} from EAM_PLATFORM p" +
@@ -238,7 +237,7 @@ public class PlatformDAO
         }
 
         if (platformName != null && platformName.trim().length() > 0) {
-            HQDialect dialect = Util.getHQDialect();
+            HQDialect dialect = getHQDialect();
             nameEx = dialect.getRegExSQL("r.sort_name", ":regex", true, false);
 
             whereClause.append((whereClause.length() > 0) ? " and" : "").append(" (")
@@ -274,7 +273,7 @@ public class PlatformDAO
                      AuthzConstants.RELATION_NETWORK_ID + " and e.to_id = p.resource_id ) ";
 
         if (platformName != null && platformName.trim().length() > 0) {
-            HQDialect dialect = Util.getHQDialect();
+            HQDialect dialect = getHQDialect();
             nameEx = dialect.getRegExSQL("r.sort_name", ":regex", true, false);
             String fqdnEx = dialect.getRegExSQL("p.fqdn", ":regex", true, false);
 

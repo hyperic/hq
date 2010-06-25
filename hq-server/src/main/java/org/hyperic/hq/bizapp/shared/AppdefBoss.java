@@ -310,7 +310,7 @@ public interface AppdefBoss {
      * @return ApplicationValue - the saved application
      */
     public ApplicationValue createApplication(int sessionID, ApplicationValue appVal,
-                                              Collection<ServiceValue> services, ConfigResponse protoProps)
+                                              ConfigResponse protoProps)
         throws ValidationException, SessionTimeoutException, SessionNotFoundException, PermissionException,
         AppdefDuplicateNameException, NotFoundException;
 

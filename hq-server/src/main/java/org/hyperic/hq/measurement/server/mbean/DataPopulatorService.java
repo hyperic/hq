@@ -10,6 +10,9 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.SessionFactory;
+import org.hibernate.engine.SessionFactoryImplementor;
+import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.measurement.MeasurementConstants;
@@ -17,7 +20,6 @@ import org.hyperic.hq.measurement.server.session.DataPoint;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementUnionStatementBuilder;
 import org.hyperic.hq.measurement.shared.DataManager;
-import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.StringUtil;
@@ -46,16 +48,18 @@ public class DataPopulatorService implements DataPopulatorServiceMBean {
     private MeasurementManager measurementManager;
     private DataManager dataManager;
     private ServerConfigManager serverConfigManager;
+    private SessionFactory sessionFactory;
     
     
     
     @Autowired
     public DataPopulatorService(DBUtil dbUtil, MeasurementManager measurementManager, DataManager dataManager,
-                                ServerConfigManager serverConfigManager) {
+                                ServerConfigManager serverConfigManager, SessionFactory sessionFactory) {
         this.dbUtil = dbUtil;
         this.measurementManager = measurementManager;
         this.dataManager = dataManager;
         this.serverConfigManager = serverConfigManager;
+        this.sessionFactory = sessionFactory;
     }
 
     /**
@@ -136,7 +140,8 @@ public class DataPopulatorService implements DataPopulatorServiceMBean {
     private DataPoint getLastDataPoint(Integer mid) throws Exception {
 
         String table = MeasurementUnionStatementBuilder.getUnionStatement(
-            getDetailedPurgeInterval(), mid.intValue());
+            getDetailedPurgeInterval(), mid.intValue(), (HQDialect) ((SessionFactoryImplementor) sessionFactory)
+            .getDialect());
         final String SQL =
             "SELECT timestamp, value FROM " + table +
             " WHERE measurement_id = ? AND timestamp = " +
