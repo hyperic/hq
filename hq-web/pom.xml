@@ -14,7 +14,7 @@
 	<name>Hyperic HQ Web Application</name>
 
 	<properties>
-		<hqapi.version>4.0.0.M1</hqapi.version>
+		<hqapi.version>4.0.0.BUILD-SNAPSHOT</hqapi.version>
 	</properties>
 
 	<dependencies>
