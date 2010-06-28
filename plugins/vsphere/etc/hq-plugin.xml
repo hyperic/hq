@@ -15,16 +15,20 @@
 
   <config name="vm" include="sdk">
     <option name="vm"
-            description="Virtual Machine name"/>
+            description="Virtual Machine name"
+            type="hidden" />
     <option name="uuid"
-            description="Virtual Machine UUID"/>
+            description="Virtual Machine UUID"
+            type="hidden" />
   </config>
 
   <config name="host" include="sdk">
     <option name="hostname"
-            description="Host System name"/>
+            description="Host System name"
+            type="hidden" />
     <option name="uuid"
-            description="Host System UUID"/>
+            description="Host System UUID"
+            type="hidden" />
   </config>
 
   <platform name="VMware vSphere Host">
