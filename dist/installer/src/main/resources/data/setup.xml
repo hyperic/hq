@@ -102,11 +102,20 @@
        Make sure that the setup property is set to the correct file and
        try running the installer again.
     </msgfail>
-
+       	
+    <findWritable property="newSetup"
+       	                  preferredDir="${install.dir}"
+       	                  filename="data/setup.properties"
+       	                  altDirPrefix="HQ_tmp">^^^INFO:
+       	WARNING: New setup properties file can't be written to %ORIGINALFILE%
+       	Setup properties will be written to %WRITABLEFILE% instead.
+    </findWritable>
+     <delete file="${newSetup}"/>
     <echo>^^^INFO: Loading install configuration...</echo>
     <echo>^^^DEBUG: Loading from ${setup}...</echo>
-    <property file="${setup.absolute}"/>
+   
     <ant antfile="setup-noninteractive.xml" target="generate-props"/>
+    <property file="${newSetup}"/>
     <echo>^^^DEBUG: Install configuration loaded.</echo>
   </target>
 

@@ -8,6 +8,7 @@
   <target name="generate-server-props">
     <configSchema inputPrefix="^^^INPUT:" outputPrefix="^^^INFO:"
            class="org.hyperic.hq.install.ServerConfig"
+    	   file="${newSetup}"
            loadFile="${setup.absolute}"
            ifDefined="server.installdir"
            completionFile="${setup}.server-summary.txt" />
@@ -16,9 +17,12 @@
   <target name="generate-agent-props">
     <configSchema inputPrefix="^^^INPUT:" outputPrefix="^^^INFO:"
            class="org.hyperic.hq.install.AgentConfig"
+    	   file="${newSetup}"
            loadFile="${setup.absolute}"
-           ifDefined="agent.installdir"
+           ifDefined="hyperic-hq-agent.installdir"
            completionFile="${setup}.agent-summary.txt" />
   </target>
+	
+	
 
 </project>
