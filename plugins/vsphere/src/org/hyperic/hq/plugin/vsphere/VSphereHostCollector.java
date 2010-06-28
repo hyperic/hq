@@ -134,8 +134,12 @@ public class VSphereHostCollector extends VSphereCollector {
             avail = Metric.AVAIL_POWERED_OFF;
         } else if (powerState == HostSystemPowerState.standBy) {
             avail = Metric.AVAIL_PAUSED;
+        } else if (powerState == HostSystemPowerState.unknown) {
+            // hosts that are powered off can also have an unknown power state
+            avail = Metric.AVAIL_POWERED_OFF;
         } else {
-            avail = Metric.AVAIL_UNKNOWN;
+            // undetermined state, so mark as down
+            avail = Metric.AVAIL_DOWN;
         }
         
         setValue(Metric.ATTR_AVAIL, avail);
