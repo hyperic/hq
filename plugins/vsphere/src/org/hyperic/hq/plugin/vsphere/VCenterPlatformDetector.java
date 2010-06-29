@@ -49,6 +49,7 @@ import org.hyperic.hq.hqapi1.types.Resource;
 import org.hyperic.hq.hqapi1.types.ResourceConfig;
 import org.hyperic.hq.hqapi1.types.ResourceEdge;
 import org.hyperic.hq.hqapi1.types.ResourceFrom;
+import org.hyperic.hq.hqapi1.types.ResourceInfo;
 import org.hyperic.hq.hqapi1.types.ResourceProperty;
 import org.hyperic.hq.hqapi1.types.ResourcePrototype;
 import org.hyperic.hq.hqapi1.types.ResourcePrototypeResponse;
@@ -632,13 +633,20 @@ public class VCenterPlatformDetector {
                     removeHost(vim, r);
                 }
             } else {
-                List<String> vcVmNames = new ArrayList<String>();
+                // vm names may be the same, so use fqdn (uuid) to
+                // determine whether vms should be deleted from hq
+                
+                List<String> vcVmFqdns = new ArrayList<String>();
                 for (Resource r : vcVms) {
-                    vcVmNames.add(r.getName());
+                    String fqdn = getFqdn(r);
+                    if (fqdn != null) {
+                        vcVmFqdns.add(fqdn);
+                    }
                 }
                 
                 for (Resource r : hqVms) {
-                    if (!vcVmNames.contains(r.getName())) {
+                    String fqdn = getFqdn(r);
+                    if (fqdn != null && !vcVmFqdns.contains(fqdn)) {
                         // Not one of the powered-on VMs from vCenter
                         removeVM(vim, r);
                     }
@@ -674,6 +682,17 @@ public class VCenterPlatformDetector {
         
         return esxHost;
     }
+
+    private String getFqdn(Resource r) {
+        String fqdn = null;
+        for (ResourceInfo ri : r.getResourceInfo()) {
+            if ("fqdn".equals(ri.getKey())) {
+                fqdn = ri.getValue();
+                break;
+            }
+        }
+        return fqdn;
+    }
     
     private void removeHost(VSphereUtil vim, Resource r)
         throws IOException, PluginException {
@@ -681,7 +700,7 @@ public class VCenterPlatformDetector {
         try {
             // verify to see if it exists in vCenter
             HostSystem hs =
-                (HostSystem)vim.find(VSphereUtil.HOST_SYSTEM, r.getName());
+                (HostSystem)vim.findByUuid(VSphereUtil.HOST_SYSTEM, getFqdn(r));
             
             if (log.isDebugEnabled()) {
                 log.debug(HOST_TYPE + "[name=" + r.getName() 
@@ -698,7 +717,7 @@ public class VCenterPlatformDetector {
         try {
             // verify to see if it exists in vCenter
             VirtualMachine vm =
-                (VirtualMachine)vim.find(VSphereUtil.VM, r.getName());
+                (VirtualMachine)vim.findByUuid(VSphereUtil.VM, getFqdn(r));
             
             if (log.isDebugEnabled()) {
                 log.debug(VM_TYPE + "[name=" + r.getName() 

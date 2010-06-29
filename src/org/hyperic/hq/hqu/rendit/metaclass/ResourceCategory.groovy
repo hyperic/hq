@@ -419,6 +419,11 @@ class ResourceCategory {
         return r.resourceType.id == AuthzConstants.authzServiceProto
     }
     
+    static boolean isVSpherePlatformPrototype(Resource r) {
+        return (r.name == AuthzConstants.platformPrototypeVmwareVsphereVm
+                    || r.name == AuthzConstants.platformPrototypeVmwareVsphereHost)
+    }
+    
     static Resource getPlatform(Resource r) {
         def aeid = new AppdefEntityID(r)
         def aeval = new AppdefEntityValue(aeid, authzMan.overlordPojo)
