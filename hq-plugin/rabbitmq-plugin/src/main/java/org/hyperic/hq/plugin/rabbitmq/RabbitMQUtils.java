@@ -58,7 +58,7 @@ public class RabbitMQUtils {
     }
 
     public static String getServerVersion(String server) throws PluginException {
-        String serverName=server.split(",")[0]; // XXX test with all server names...
+        String serverName = server.split(",")[0]; // XXX test with all server names...
         OtpErlangObject received = executeCommand(serverName, "rabbit", "status", new OtpErlangList());
         Status status = parseStatusObject((OtpErlangList) received);
         Application app = status.getApplication("rabbit");
@@ -71,6 +71,8 @@ public class RabbitMQUtils {
             log.debug("[executeCommand] server=" + server + ", mod=" + mod + ", fun=" + fun + ", args=" + args);
         }
 
+        server=server.split(",")[0];
+        
         OtpErlangObject received;
         try {
             if (connection == null) {
@@ -86,11 +88,12 @@ public class RabbitMQUtils {
                 }
             }
         } catch (Exception ex) {
+            throw new PluginException(ex.getMessage(), ex);
+        } finally {
             if (connection != null) {
                 connection.close();
-                connection=null;
+                connection = null;
             }
-            throw new PluginException(ex.getMessage(), ex);
         }
 
         if (log.isDebugEnabled()) {
@@ -129,19 +132,19 @@ public class RabbitMQUtils {
         return res;
     }
 
-    public static Map tupleToMap(OtpErlangTuple list){
-        Map res=new HashMap();
-        int n=0;
-        do{
+    public static Map tupleToMap(OtpErlangTuple list) {
+        Map res = new HashMap();
+        int n = 0;
+        do {
             res.put(list.elementAt(n++).toString(), list.elementAt(n++));
-        }while(n<list.arity());
+        } while (n < list.arity());
         return res;
     }
 
-    public static Map tupleListToMap(OtpErlangList list){
-        Map res=new HashMap();
-        int n=0;
-        for(int i=0;i<list.arity();i++){
+    public static Map tupleListToMap(OtpErlangList list) {
+        Map res = new HashMap();
+        int n = 0;
+        for (int i = 0; i < list.arity(); i++) {
             res.putAll(tupleToMap((OtpErlangTuple) list.elementAt(i)));
         }
         return res;

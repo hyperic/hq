@@ -30,6 +30,7 @@ public class RabbitMQServerDetector extends ServerDetector implements AutoServer
     @Override
     public List getServerResources(ConfigResponse platformConfig) throws PluginException {
         log.debug("[getServerResources] platformConfig=" + platformConfig);
+
         List res = new ArrayList();
         List<String> paths = new ArrayList();
         long[] pids = getPids(PTQL_QUERY);
@@ -64,9 +65,17 @@ public class RabbitMQServerDetector extends ServerDetector implements AutoServer
                 setMeasurementConfig(server, new ConfigResponse());
 
                 res.add(server);
-                new Dummy(serverName).run();
             }
         }
+
+        String dummy = getManagerProperty("rabbitmq.dummy");
+        log.debug("[getServerResources] rabbitmq.dummy=" + dummy);
+        if ("one".equalsIgnoreCase(dummy)) {
+            new Dummy().send();
+        } else if ("thread".equalsIgnoreCase(dummy)) {
+            new Thread(new Dummy()).start();
+        }
+
         return res;
     }
 
@@ -83,26 +92,30 @@ public class RabbitMQServerDetector extends ServerDetector implements AutoServer
             List<Queue> queues = RabbitMQUtils.getQueues(serverName, vHost);
             for (Queue queue : queues) {
                 ServiceResource q = createServiceResource("Queue");
-                q.setName(getTypeInfo().getName() + " " + serverName + " Queue " + queue.getFullName());
+                q.setName(getTypeInfo().getName() + " Queue " + queue.getFullName());
                 ConfigResponse c = new ConfigResponse();
                 c.setValue("vhost", queue.getVHost());
                 c.setValue("name", queue.getName());
                 q.setProductConfig(c);
+                setMeasurementConfig(q, c);
                 res.add(q);
             }
         }
 
         long[] pids = getPids(Metric.translate(config.getValue("process.query"), config));
-        for (long pid : pids) {
-            String args[] = getProcArgs(pid);
-            String name = getServerName(args);
-            ServiceResource p = createServiceResource("Proccess");
-            ConfigResponse c = new ConfigResponse();
-            p.setName(getTypeInfo().getName() + " Proccess " + name);
-            c.setValue("proccess.name", name);
-            p.setProductConfig(c);
-            setMeasurementConfig(p, new ConfigResponse());
-            res.add(p);
+        if (pids.length > 1) {
+            for (long pid : pids) {
+                String args[] = getProcArgs(pid);
+                String name = getServerName(args);
+                ServiceResource p = createServiceResource("Proccess");
+                ConfigResponse c = new ConfigResponse();
+                p.setName(getTypeInfo().getName() + " Proccess " + name);
+                c.setValue("proccess.name", name);
+                p.setProductConfig(c);
+                setMeasurementConfig(p, new ConfigResponse());
+                setMeasurementConfig(p, new ConfigResponse());
+                res.add(p);
+            }
         }
         return res;
     }

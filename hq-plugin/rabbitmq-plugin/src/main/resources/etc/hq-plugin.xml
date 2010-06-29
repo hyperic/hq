@@ -106,10 +106,11 @@
             <config type="measurement">
                 <option name="process.query" default="State.Name.eq=beam,Args.*.eq=-sname,Args.*.eq=%proccess.name%" description="XXXXXXX"/>
             </config>
+            <metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State" indicator="true"/>
             &process-metrics;
         </service>
 
-        <service name="VHost"/>
+        <!--service name="VHost"/-->
         <service name="Queue">
             <plugin type="collector" class="RabbitMQQueueCollector"/>
             <config type="product">

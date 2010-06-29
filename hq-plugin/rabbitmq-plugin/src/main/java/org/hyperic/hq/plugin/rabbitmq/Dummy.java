@@ -24,38 +24,51 @@ public class Dummy implements Runnable {
     private static Log log = LogFactory.getLog(Dummy.class);
     RabbitMQProducer p;
     RabbitMQConsumer c;
-    private final String sn;
+    String host = "/";
 
-    public Dummy(String sn) {
+    public Dummy() {
         p = new RabbitMQProducer();
-        this.sn = sn;
-//        c = new RabbitMQConsumer();
+        c = new RabbitMQConsumer();
+    }
+
+    public void send() {
+        try {
+            p.produce();
+            c.consume();
+        } catch (Exception ex) {
+            log.debug(ex.getMessage(), ex);
+        }
     }
 
     public void run() {
         try {
-            p.produce(sn);
-            c.consume();
-        } catch (Exception ex) {
-            log.debug(ex.getMessage());
+            while (true) {
+                send();
+                Thread.sleep(1000);
+            }
+        } catch (InterruptedException ex) {
+            log.error(ex, ex);
         }
     }
 
     public class RabbitMQProducer {
 
-        public void produce(String sn) throws Exception {
+        public void produce() throws Exception {
             ConnectionParameters params = new ConnectionParameters();
             params.setUsername("guest");
             params.setPassword("guest");
-            params.setVirtualHost("/");
+            params.setVirtualHost(host);
             params.setRequestedHeartbeat(0);
             ConnectionFactory factory = new ConnectionFactory(params);
             Connection conn = factory.newConnection("localhost", 5672);
             Channel channel = conn.createChannel();
             String exchangeName = "myExchange";
             String routingKey = "testRoute";
-            byte[] messageBodyBytes = "Hello, world!".getBytes();
-            channel.basicPublish(exchangeName, routingKey, MessageProperties.PERSISTENT_TEXT_PLAIN, messageBodyBytes);
+            int run = 0;
+            while (run++ < 6) {
+                byte[] messageBodyBytes = ("Hello, world (" + run + ") !").getBytes();
+                channel.basicPublish(exchangeName, routingKey, MessageProperties.PERSISTENT_TEXT_PLAIN, messageBodyBytes);
+            }
             channel.close();
             conn.close();
         }
@@ -67,7 +80,7 @@ public class Dummy implements Runnable {
             ConnectionParameters params = new ConnectionParameters();
             params.setUsername("guest");
             params.setPassword("guest");
-            params.setVirtualHost("/");
+            params.setVirtualHost(host);
             params.setRequestedHeartbeat(0);
             ConnectionFactory factory = new ConnectionFactory(params);
             Connection conn = factory.newConnection("127.0.0.1", 5672);
@@ -82,8 +95,8 @@ public class Dummy implements Runnable {
             boolean noAck = false;
             QueueingConsumer consumer = new QueueingConsumer(channel);
             channel.basicConsume(queueName, noAck, consumer);
-            boolean runInfinite = true;
-            while (runInfinite) {
+            int run = 0;
+            while (run++ < 5) {
                 QueueingConsumer.Delivery delivery;
                 try {
                     delivery = consumer.nextDelivery();
