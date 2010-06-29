@@ -65,6 +65,7 @@ import org.hyperic.hq.measurement.agent.commands.TrackPluginRemove_args;
 import org.hyperic.hq.measurement.agent.commands.TrackPluginRemove_result;
 import org.hyperic.hq.measurement.agent.commands.UnscheduleMeasurements_args;
 import org.hyperic.hq.measurement.agent.commands.UnscheduleMeasurements_result;
+import org.hyperic.hq.measurement.agent.server.ScheduleThread.ParsedTemplate;
 import org.hyperic.hq.product.ConfigTrackPluginManager;
 import org.hyperic.hq.product.LogTrackPluginManager;
 import org.hyperic.hq.product.MeasurementPluginManager;
@@ -330,6 +331,7 @@ public class MeasurementCommandsServer
                 while (scheduleIter.hasNext()) { 
                     ScheduledMeasurement metric = (ScheduledMeasurement) scheduleIter.next();
                     if (metric != null) {
+                        ParsedTemplate templ = ScheduleThread.getParsedTemplate(metric);
                         scheduleSize++;
                         StringBuffer s = new StringBuffer("Measurement Schedule[")
                                 .append(scheduleSize)
@@ -338,7 +340,7 @@ public class MeasurementCommandsServer
                                 .append(", interval=").append(metric.getInterval())
                                 .append(", derivedId=").append(metric.getDerivedID())
                                 .append(", dsnId=").append(metric.getDsnID())
-                                .append(", dsn=").append(metric.getDSN());
+                                .append(", dsn=").append(templ.metric.toDebugString());
                     
                         this.log.debug(s.toString());
                     }

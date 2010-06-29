@@ -183,7 +183,7 @@ public class ScheduleThread
                 ("system.avail:Type=Platform:Availability").toLowerCase();
             final String dsn = meas.getDSN().toLowerCase();
             if (_log.isDebugEnabled()) {
-                _log.debug("scheduleMeasurement " + dsn);
+                _log.debug("scheduleMeasurement " + getParsedTemplate(meas).metric.toDebugString());
             }
             if (dsn.endsWith(platformTemplate)) {
                 _log.debug("Scheduling Platform Availability");
@@ -259,7 +259,7 @@ public class ScheduleThread
         }
     }
 
-    private class ParsedTemplate {
+    static class ParsedTemplate {
         String plugin;
         Metric metric;
         
@@ -268,7 +268,7 @@ public class ScheduleThread
         }
     }
 
-    private ParsedTemplate getParsedTemplate(ScheduledMeasurement meas) {
+    static ParsedTemplate getParsedTemplate(ScheduledMeasurement meas) {
         ParsedTemplate tmpl = new ParsedTemplate();
         String template = meas.getDSN();
         //duplicating some code from MeasurementPluginManager
@@ -429,9 +429,11 @@ public class ScheduleThread
 
             if (success) {
                 if (isDebug) {
+                    String debugDsn = getParsedTemplate(meas).metric.toDebugString();
                     String msg =
                         "[" + aid + ":" + category +
-                        "] Metric='" + dsn + "' -> " + data;
+                        "] Metric='" + debugDsn + "' -> " + data;
+                    
                     _log.debug(msg + " timestamp=" + data.getTimestamp());
                 }
                 if (data.isNone()) {
