@@ -34,6 +34,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.StringUtil;
@@ -51,6 +53,8 @@ import org.hyperic.util.StringUtil;
  */
 
 public class Metric {
+    
+    private static final Log log = LogFactory.getLog(Metric.class);
 
     public static final String ATTR_AVAIL = "Availability";
     
@@ -155,7 +159,9 @@ public class Metric {
     }
 
     public static void addSecret(String key) {
-        secrets.put(key, Boolean.TRUE);
+        synchronized(secrets) {
+            secrets.put(key, Boolean.TRUE);
+        }
     }
 
     //we only encode/decode property values
@@ -255,9 +261,18 @@ public class Metric {
     public String toString() {
         return this.template;
     }
+    
+    public static Map getSecretFields() {
+        synchronized(secrets) {
+            return new HashMap(secrets);
+        }
+    }
 
     static boolean isSecret(String key) {
-        return secrets.get(key) == Boolean.TRUE;
+        synchronized(secrets) {
+            Object obj = secrets.get(key);
+            return (obj != null && obj.equals(Boolean.TRUE)) ? true : false;
+        }
     }
 
     static String mask(String val) {
@@ -272,7 +287,7 @@ public class Metric {
     }
 
     private String toDebugString(String orig, Properties props) {
-        if (props == null) {
+        if (props == null && orig == null) {
             return orig;    
         }
         StringBuffer ds = new StringBuffer();
@@ -285,8 +300,9 @@ public class Metric {
                 continue;
             }
             String key = pair.substring(0, ix);
+            String origVal = pair.substring(ix-1, pair.length());
             if (isSecret(key)) {
-                String val = props.getProperty(key);
+                String val = (props == null) ? origVal : props.getProperty(key);
                 ds.append(key).append('=');
                 ds.append(mask(val));
             }
