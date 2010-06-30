@@ -27,19 +27,22 @@ package org.hyperic.hq.livedata.server.session;
 
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.product.GenericPlugin;
 
 class LiveDataExecutorCommand {
     private AppdefEntityID _id;
     private String _type;
     private String _command;
     private ConfigResponse _config;
+    private GenericPlugin plugin;
 
     public LiveDataExecutorCommand(AppdefEntityID id, String type, String command,
-                                   ConfigResponse config) {
+                                   ConfigResponse config, GenericPlugin plugin) {
         _id = id;
         _type = type;
         _command = command;
         _config = config;
+        this.plugin = plugin;
     }
 
     public AppdefEntityID getAppdefEntityID() {
@@ -57,4 +60,9 @@ class LiveDataExecutorCommand {
     public ConfigResponse getConfig() {
         return _config;
     }
+
+    public GenericPlugin getPlugin() {
+        return plugin;
+    }
+    
 }
