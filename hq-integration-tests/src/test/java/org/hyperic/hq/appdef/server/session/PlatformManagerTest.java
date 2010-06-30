@@ -130,7 +130,7 @@ public class PlatformManagerTest
     @Test
     public void testFindAllPlatformTypes() {
         List<PlatformType> allPTypes = (List<PlatformType>) platformManager.findAllPlatformTypes();
-        assertEquals("Not all platform types fetched", allPTypes, testPlatformTypes);
+        assertTrue("Not all platform types fetched", allPTypes.containsAll(testPlatformTypes));
     }
 
     @Test
@@ -144,10 +144,20 @@ public class PlatformManagerTest
     public void testFindUnsupportedPlatformTypes() {
         List<PlatformType> unSupported = (List<PlatformType>) platformManager
             .findUnsupportedPlatformTypes();
-        for (int i = 0; i < 9; i++) {
-            assertEquals("Unsupported platform doesn't exist", unSupported.get(i),
-                testPlatformTypes.get(i));
+        List<PlatformType> unsupportedPlatformTypes = new ArrayList<PlatformType>();
+        List<PlatformType> expectedPlatformTypes = new ArrayList<PlatformType>();
+        for (PlatformType platformType : unSupported) {
+            if(platformType.getName().startsWith("pType")) {
+                unsupportedPlatformTypes.add(platformType);
+            }
         }
+        for (PlatformType platformType : testPlatformTypes) {
+            if(platformType.getName().startsWith("pType")) {
+                expectedPlatformTypes.add(platformType);
+            }
+        }
+        assertEquals("Unsupported platform doesn't exist", unsupportedPlatformTypes,
+            expectedPlatformTypes);
     }
 
     @Test
