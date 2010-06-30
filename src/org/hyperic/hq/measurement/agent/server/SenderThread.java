@@ -65,7 +65,7 @@ import org.apache.commons.logging.LogFactory;
 
 public class SenderThread 
     extends AgentMonitorSimple
-    implements Runnable 
+    implements Sender, Runnable 
 {
     private static final String PROP_METRICDUP  = 
         "agent.metricDup";
@@ -273,7 +273,7 @@ public class SenderThread
         return Base64.encode(bOs.toByteArray());
     }
 
-    void processData(int dsnId, MetricValue data, int derivedID){
+    public void processData(int dsnId, MetricValue data, int derivedID){
         String encodedRec;
         double val;
 
