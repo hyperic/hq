@@ -482,6 +482,19 @@ public class VCenterPlatformDetector {
 
     public void discoverPlatforms()
         throws IOException, PluginException {
+        
+        String vCenterUrl = VSphereUtil.getURL(this.props);
+        Resource vCenter = getVCenterServer(vCenterUrl);
+        
+        if (vCenter == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Skip discovering hosts and VMs. "
+                            + "No VMware vCenter server found with url=" 
+                            + vCenterUrl);
+            }
+            return;
+        }
+        
         VSphereUtil vim = null;
         vim = VSphereUtil.getInstance(this.props);
 
@@ -523,30 +536,22 @@ public class VCenterPlatformDetector {
     private void syncResourceEdges(VSphereUtil vim,
                                    Map<String, List<Resource>> vcHostVmMap) 
         throws IOException, PluginException {
-        ResourceApi rApi = getApi().getResourceApi();
-        ResourceEdgeApi reApi = getApi().getResourceEdgeApi();
 
-        Resource vCenter = null;
         String vCenterUrl = VSphereUtil.getURL(this.props);
-        ResourcePrototype vcType = getResourceType(VC_TYPE);
-        ResourcesResponse vcResponse = rApi.getResources(vcType, true, false);
-        assertSuccess(vcResponse, "Getting all " + VC_TYPE, false);
-        
-        for (Resource r : vcResponse.getResource()) {
-            if (isVCenterManagedEntity(vCenterUrl, r)) {
-                vCenter = r;
-                break;
-            }
-        }
+        Resource vCenter = getVCenterServer(vCenterUrl);
 
         if (vCenter == null) {
             if (log.isDebugEnabled()) {
-                log.debug("No VMware vCenter server found with url=" 
-                            + VSphereUtil.getURL(this.props));
+                log.debug("Skip syncing resource edges. "
+                            + "No VMware vCenter server found with url=" 
+                            + vCenterUrl);
             }
             return;
         }
         
+        ResourceApi rApi = getApi().getResourceApi();
+        ResourceEdgeApi reApi = getApi().getResourceEdgeApi();
+
         ResourcePrototype hostType = getResourceType(HOST_TYPE);
         ResourcesResponse hostResponse = rApi.getResources(hostType, true, false);
         assertSuccess(hostResponse, "Getting all " + HOST_TYPE, false);
@@ -676,6 +681,29 @@ public class VCenterPlatformDetector {
         }
         
         return result;
+    }
+    
+    private Resource getVCenterServer(String vCenterUrl)
+        throws IOException, PluginException {
+        
+        if (vCenterUrl == null) {
+            return null;
+        }
+        
+        Resource vCenter = null;        
+        ResourceApi rApi = getApi().getResourceApi();
+        ResourcePrototype vcType = getResourceType(VC_TYPE);
+        ResourcesResponse vcResponse = rApi.getResources(vcType, true, false);
+        assertSuccess(vcResponse, "Getting all " + VC_TYPE, false);
+        
+        for (Resource r : vcResponse.getResource()) {
+            if (isVCenterManagedEntity(vCenterUrl, r)) {
+                vCenter = r;
+                break;
+            }
+        }
+        
+        return vCenter;
     }
     
     private String getEsxHost(Resource r) {
