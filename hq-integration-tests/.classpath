@@ -95,5 +95,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/hq-util"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/hq-pdk-shared"/>
 	<classpathentry kind="lib" path="target/generated-test-resources"/>
+	<classpathentry kind="var" path="M2_REPO/org/easymock/easymockclassextension/2.4/easymockclassextension-2.4.jar" sourcepath="M2_REPO/org/easymock/easymockclassextension/2.4/easymockclassextension-2.4-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/easymock/easymock/2.4/easymock-2.4.jar" sourcepath="M2_REPO/org/easymock/easymock/2.4/easymock-2.4-sources.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
