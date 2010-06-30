@@ -251,7 +251,7 @@ public class VCenterPlatformDetector {
 
         VSphereResource platform = new VSphereResource();
         String uuid = info.getUuid();
-        platform.setName(info.getName());
+        platform.setName(generatePlatformName(info.getName(), uuid));
         platform.setFqdn(uuid);
         platform.setDescription(info.getGuestFullName());
 
@@ -321,7 +321,7 @@ public class VCenterPlatformDetector {
         platform.addProperties(cprops);
         
         if (log.isDebugEnabled()) {
-            log.debug("Discovered " + VM_TYPE + "[name=" + platform.getName() 
+            log.debug("Discovered " + VM_TYPE + "[name=" + info.getName()
                           + ", powerState=" + state + "]");
         }
         
@@ -347,21 +347,23 @@ public class VCenterPlatformDetector {
         HostConfigInfo info = host.getConfig();
         HostNetworkInfo netinfo = info.getNetwork();
         AboutInfo about = info.getProduct();
+        HostHardwareSummary hw = host.getSummary().getHardware();
         String address = null;
         VSphereHostResource platform = new VSphereHostResource();
 
-        ConfigResponse cprops = new ConfigResponse();
-        platform.setName(host.getName());
+        String uuid = hw.getUuid();
+        platform.setName(generatePlatformName(host.getName(), uuid));
         platform.setDescription(about.getFullName());
+        platform.setFqdn(uuid);
         
         if (netinfo.getVnic() == null) {
             try {
                 // Host name may be the IP address
-                InetAddress inet = InetAddress.getByName(platform.getName());
+                InetAddress inet = InetAddress.getByName(host.getName());
                 address = inet.getHostAddress();
             } catch (Exception e) {
                 if (log.isDebugEnabled()) {
-                    log.debug(platform.getName() + " does not have an IP address", e);
+                    log.debug(host.getName() + " does not have an IP address", e);
                 }
             }
         } else {
@@ -375,6 +377,7 @@ public class VCenterPlatformDetector {
             }
         }
 
+        ConfigResponse cprops = new ConfigResponse();
         cprops.setValue("version", about.getVersion());
         cprops.setValue("build", about.getBuild());
         if (address != null) {
@@ -393,9 +396,6 @@ public class VCenterPlatformDetector {
             }
         }
 
-        HostHardwareSummary hw = host.getSummary().getHardware();
-        String uuid = hw.getUuid();
-        platform.setFqdn(uuid);
         cprops.setValue("hwVendor", hw.getVendor());
         cprops.setValue("hwModel", hw.getModel());
         cprops.setValue("hwCpu", hw.getCpuModel());
@@ -422,7 +422,7 @@ public class VCenterPlatformDetector {
         platform.addConfig(VSphereCollector.PROP_UUID, uuid);
 
         if (log.isDebugEnabled()) {
-            log.debug("Discovered " + HOST_TYPE + "[name=" + platform.getName() 
+            log.debug("Discovered " + HOST_TYPE + "[name=" + host.getName() 
                           + ", powerState=" + powerState + "]");
         }
         
@@ -692,6 +692,13 @@ public class VCenterPlatformDetector {
             }
         }
         return fqdn;
+    }
+    
+    /**
+     * Generate an unique platform name by appending the uuid
+     */
+    private String generatePlatformName(String name, String uuid) {
+        return name + " {" + uuid + "}";
     }
     
     private void removeHost(VSphereUtil vim, Resource r)
