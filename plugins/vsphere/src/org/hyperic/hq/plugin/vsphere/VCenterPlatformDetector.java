@@ -104,6 +104,7 @@ public class VCenterPlatformDetector {
     private static final String HOST_TYPE = AuthzConstants.platformPrototypeVmwareVsphereHost;
     private static final String POOL_TYPE = "VMware vSphere Resource Pool";
     private static final String DEFAULT_POOL = "Resources";
+    private static final String ESX_HOST = "esxHost";
 
     private static final Log log =
         LogFactory.getLog(VCenterPlatformDetector.class.getName());
@@ -315,7 +316,7 @@ public class VCenterPlatformDetector {
         ManagedObjectReference hmor = runtime.getHost();
         if (hmor != null) {
             HostSystem host = new HostSystem(vm.getServerConnection(), hmor);
-            cprops.setValue("esxHost", host.getName());
+            cprops.setValue(ESX_HOST, host.getName());
         }
 
         platform.addProperties(cprops);
@@ -493,7 +494,10 @@ public class VCenterPlatformDetector {
             for (Resource r : hosts) {
                 VSphereHostResource h = (VSphereHostResource) r;
                 vms.addAll(h.getVirtualMachines());
-                hostVmMap.put(r.getName(), h.getVirtualMachines());
+                String esxHost = getEsxHost(r);
+                if (esxHost != null) {
+                    hostVmMap.put(esxHost, h.getVirtualMachines());
+                }
             }
             
             if (isDump) {
@@ -556,7 +560,10 @@ public class VCenterPlatformDetector {
         for (Resource r : hostResponse.getResource()) {
             if (isVCenterManagedEntity(vCenterUrl, r)) {
                 toHosts.getResource().add(r);
-                hqHostResourceMap.put(r.getName(), r);
+                String esxHost = getEsxHost(r);
+                if (esxHost != null) {
+                    hqHostResourceMap.put(esxHost, r);
+                }
             }
         }
         
@@ -599,7 +606,8 @@ public class VCenterPlatformDetector {
             parent.setResource(r);
             
             ResourceTo children = new ResourceTo();
-            List<Resource> vmResources = hqHostVmMap.get(r.getName());
+            String esxHost = getEsxHost(r);
+            List<Resource> vmResources = hqHostVmMap.get(esxHost);
             if (vmResources != null) {
                 children.getResource().addAll(vmResources);
             }
@@ -670,13 +678,23 @@ public class VCenterPlatformDetector {
         return result;
     }
     
-    private String getEsxHost(Resource vm) {
+    private String getEsxHost(Resource r) {
         String esxHost = null;
+        String prototype = r.getResourcePrototype().getName();
         
-        for (ResourceProperty p : vm.getResourceProperty()) {
-            if ("esxHost".equals(p.getKey())) {
-                esxHost = p.getValue();
-                break;
+        if (VM_TYPE.equals(prototype)) {
+            for (ResourceProperty p : r.getResourceProperty()) {
+                if (ESX_HOST.equals(p.getKey())) {
+                    esxHost = p.getValue();
+                    break;
+                }
+            }
+        } else if (HOST_TYPE.equals(prototype)) {
+            for (ResourceConfig c : r.getResourceConfig()) {
+                if (VSphereUtil.PROP_HOSTNAME.equals(c.getKey())) {
+                    esxHost = c.getValue();
+                    break;
+                }
             }
         }
         
