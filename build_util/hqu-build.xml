@@ -23,6 +23,7 @@
 				<mkdir dir="@{wardir}/hqu" />
 				<copy todir="@{wardir}/hqu">
 					<fileset dir="${basedir}/ui_plugins">
+                                                <exclude name="hqapi1/.git/**" />
 						<exclude name="scaffold/**" />
 						<exclude name="extra/**" />
 						<exclude name="old/**" />
