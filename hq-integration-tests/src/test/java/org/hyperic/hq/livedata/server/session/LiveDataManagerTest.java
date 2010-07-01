@@ -49,7 +49,7 @@ public class LiveDataManagerTest
     private ProductPluginDeployer productPluginDeployer;
 
     public class MockLiveDataCommandsClient implements LiveDataCommandsClient {
-        @Override
+     
         public LiveDataResult getData(AppdefEntityID id, String type, String command,
                                       ConfigResponse config) throws AgentRemoteException {
             Object result;
