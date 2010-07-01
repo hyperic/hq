@@ -339,7 +339,14 @@ public class ConfigResponse implements GenericValueMap, Serializable  {
         for (Iterator it=attributes.entrySet().iterator(); it.hasNext(); ) {
             Entry entry = (Entry) it.next();
             String key = entry.getKey().toString();
-            String val = (secrets.containsKey(key)) ? "******" : entry.getValue().toString();
+            String val = null;
+            if (secrets.containsKey(key)) {
+                val = "******";
+            } else {
+                if (entry.getValue() != null) {
+                    val = entry.getValue().toString();
+                }
+            }
             rtn.append(key).append("=").append(val).append(",");
         }
         if (rtn.length() == 0) {
