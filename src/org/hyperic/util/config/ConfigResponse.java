@@ -39,6 +39,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import org.hyperic.hq.product.Metric;
 import org.hyperic.util.GenericValueMap;
 import org.hyperic.util.StringUtil;
 
@@ -333,7 +334,19 @@ public class ConfigResponse implements GenericValueMap, Serializable  {
     }
 
     public String toString(){
-        return this.attributes.toString();
+        Map secrets = Metric.getSecretFields();
+        StringBuffer rtn = new StringBuffer();
+        for (Iterator it=attributes.entrySet().iterator(); it.hasNext(); ) {
+            Entry entry = (Entry) it.next();
+            String key = entry.getKey().toString();
+            String val = (secrets.containsKey(key)) ? "******" : entry.getValue().toString();
+            rtn.append(key).append("=").append(val).append(",");
+        }
+        if (rtn.length() == 0) {
+            return "";
+        }
+        rtn.substring(0, rtn.length()-1);
+        return rtn.toString();
     }
 
     public int size(){
