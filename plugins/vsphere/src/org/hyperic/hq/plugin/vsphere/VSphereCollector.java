@@ -41,8 +41,10 @@ import com.vmware.vim25.mo.PerformanceManager;
 
 public abstract class VSphereCollector extends Collector {
 
-    private static final Log _log =
-        LogFactory.getLog(VSphereCollector.class.getName());
+    private static final long CACHE_TIMEOUT = 60000;
+    private static final Log _log = LogFactory.getLog(VSphereCollector.class.getName());
+    private static ObjectCache<IntHashMap> cached;
+    private static final Object CACHE_LOCK = new Object();
 
     public static final String PROP_URL = "url";
     public static final String PROP_UUID = "uuid";
@@ -88,9 +90,13 @@ public abstract class VSphereCollector extends Collector {
     private static final Integer PERF_INTERVAL_ID = new Integer(300);
 
     protected PerfMetricId[] getPerfMetricIds(PerformanceManager perfManager,
-                                              ManagedEntity entity)
-        throws Exception {
+                                              ManagedEntity entity, Integer interval)
+    throws Exception {
+        return perfManager.queryAvailablePerfMetric(entity, null, null, interval);
+    }    
 
+    protected PerfMetricId[] getPerfMetricIds(PerformanceManager perfManager, ManagedEntity entity)
+    throws Exception {
         PerfMetricId[] ids =
             perfManager.queryAvailablePerfMetric(entity,
                                                  null,
@@ -108,16 +114,26 @@ public abstract class VSphereCollector extends Collector {
             return mo.findByUuid(getType(), getUuid());
         }
     }
+    
+    private IntHashMap getCounterCached() {
+        synchronized (CACHE_LOCK) {
+            return (cached == null || cached.isExpired()) ? null : cached.getEntity();
+        }
+    }
 
     protected IntHashMap getCounterInfo(PerformanceManager perfManager)
-        throws Exception {
-
-        PerfCounterInfo[] counters =
-            perfManager.getPerfCounter();
-
-        IntHashMap info = new IntHashMap(counters.length);
+    throws Exception {
+        IntHashMap info = getCounterCached();
+        if (info != null) {
+            return info;
+        }
+        PerfCounterInfo[] counters = perfManager.getPerfCounter();
+        info = new IntHashMap(counters.length);
         for (int i=0; i<counters.length; i++) {
             info.put(counters[i].getKey(), counters[i]);
+        }
+        synchronized (CACHE_LOCK) {
+            cached = new ObjectCache<IntHashMap>(info, CACHE_TIMEOUT);
         }
         return info;
     }
@@ -130,7 +146,6 @@ public abstract class VSphereCollector extends Collector {
 
     public void collect() {
         VSphereConnection conn;
-
         try {
             setAvailability(false);
             conn = VSphereConnection.getInstance(getProperties());
