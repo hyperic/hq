@@ -2590,6 +2590,12 @@ span.returnToLink {
 	width: 12px;
 }
 
+.availabilityBlack {
+	display:inline-block;
+	background: url(../images/icon_available_black.gif) no-repeat;
+	height: 12px;
+	width: 12px;
+}
 .formButtonContainer {
 	background-color:#fff;
 	margin-bottom:10px;
