@@ -163,6 +163,8 @@ public class ViewAction extends BaseAction {
                 return "red";
             } else if (avail == MeasurementConstants.AVAIL_PAUSED) {
                 return "orange";
+            } else if (avail == MeasurementConstants.AVAIL_POWERED_OFF) {
+                return "black";
             } else if (avail > MeasurementConstants.AVAIL_DOWN && 
                        avail < MeasurementConstants.AVAIL_UP) {
                 return "yellow";

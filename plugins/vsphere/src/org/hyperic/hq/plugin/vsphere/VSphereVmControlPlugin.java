@@ -31,7 +31,6 @@ import org.hyperic.hq.product.ControlPlugin;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
 
-import com.vmware.vim25.mo.HostSystem;
 import com.vmware.vim25.mo.Task;
 import com.vmware.vim25.mo.VirtualMachine;
 
@@ -54,6 +53,10 @@ public class VSphereVmControlPlugin extends ControlPlugin {
         return _props.getProperty(VSphereVmCollector.PROP_VM);
     }
 
+    private String getUuid() {
+        return _props.getProperty(VSphereCollector.PROP_UUID);
+    }
+    
     public void doAction(String action, String[] args)
         throws PluginException {
 
@@ -62,7 +65,7 @@ public class VSphereVmControlPlugin extends ControlPlugin {
         VSphereUtil vim = VSphereUtil.getInstance(getConfig());
         try {
             VirtualMachine vm =
-                (VirtualMachine)vim.find(getType(), getVmName());
+                (VirtualMachine)vim.findByUuid(getType(), getUuid());
             Task task;
 
             if (action.equals("createSnapshot")) {
@@ -132,8 +135,10 @@ public class VSphereVmControlPlugin extends ControlPlugin {
             throw e;
         } catch (Exception e) {
             setMessage(e.getMessage());
-            throw new PluginException(action + " " + getVmName() +
-                                      ": " + e, e);
+            throw new PluginException(action + " " + getType() 
+                                      + "[name=" + getVmName()
+                                      + ", uuid=" + getUuid()
+                                      + "]: " + e.getMessage(), e);
         } finally  {
             VSphereUtil.dispose(vim);
         }

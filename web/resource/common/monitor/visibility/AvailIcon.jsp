@@ -43,6 +43,9 @@
     <c:when test="${availability == -0.01}">
 		<c:set var="availabilityClassName" value="availabilityOrange" />
     </c:when>
+    <c:when test="${availability == -0.02}">
+		<c:set var="availabilityClassName" value="availabilityBlack" />
+    </c:when>
     <c:when test="${availability < 1 && availability > 0}">
 		<c:set var="availabilityClassName" value="availabilityYellow" />
     </c:when>

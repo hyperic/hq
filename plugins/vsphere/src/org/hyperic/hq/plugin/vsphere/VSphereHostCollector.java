@@ -110,8 +110,14 @@ public class VSphereHostCollector extends VSphereCollector {
 
     protected void init() throws PluginException {
         super.init();
+        // HPD-681, this is a BIG performance hit and will stall the ScheduleThread when
+        // HQ is configured to collect for several esx servers/vms
+        // Therefore since ScehduleThread does not need to validate configOpts just return
+        // Could possibly be taken out when we switch VSphereUtil to use SearchIndex.findByUuid()
+        if (Thread.currentThread().getName().toLowerCase().equals("schedulethread")) {
+            return;
+        }
         VSphereUtil vim = null;
-
         try {
             vim = VSphereUtil.getInstance(getProperties());
             //validate config
