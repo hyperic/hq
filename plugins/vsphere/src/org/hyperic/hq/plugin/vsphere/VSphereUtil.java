@@ -25,6 +25,9 @@
 
 package org.hyperic.hq.plugin.vsphere;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.rmi.RemoteException;
@@ -43,6 +46,8 @@ import org.hyperic.util.config.ConfigResponse;
 import com.vmware.vim25.mo.HostSystem;
 import com.vmware.vim25.mo.InventoryNavigator;
 import com.vmware.vim25.mo.ManagedEntity;
+import com.vmware.vim25.mo.ManagedObject;
+import com.vmware.vim25.mo.ServerConnection;
 import com.vmware.vim25.mo.ServiceInstance;
 import com.vmware.vim25.mo.VirtualMachine;
 
@@ -62,7 +67,7 @@ public class VSphereUtil extends ServiceInstance {
         LogFactory.getLog(VSphereUtil.class.getName());
     private InventoryNavigator _nav;
     private String _url;
-    private static final Map<String, ObjectCache<ManagedEntity>> entitiesByUuid =
+    private final Map<String, ObjectCache<ManagedEntity>> entitiesByUuid =
         Collections.synchronizedMap(new HashMap());
 
     public VSphereUtil(URL url, String username, String password, boolean ignoreCert)
@@ -148,8 +153,21 @@ public class VSphereUtil extends ServiceInstance {
         ManagedEntity obj = findByUuidCached(uuid);
         final boolean debug = _log.isDebugEnabled();
         if (obj != null) {
-            if (debug) _log.debug("uuid=" + uuid + " is cached");
-            return obj;
+            // HPD-681 / HPD-691 need to set the serverConnection field in order to avoid an 
+            // NPE when the connection associated with the object is closed
+            // This whole method should be re-written once we start packaging the libs necessary
+            // in order to call SearchIndex.findByUuid()
+            try {
+                Field field = ManagedObject.class.getDeclaredField("serverConnection");
+                field.setAccessible(true);
+                field.set(obj, getServerConnection());
+                if (debug) _log.debug("uuid=" + uuid + " is cached");
+                return obj;
+            } catch (NoSuchFieldException e) {
+                _log.debug(e,e);
+            } catch (IllegalAccessException e) {
+                _log.debug(e,e);
+            }
         }
         if (debug) _log.debug("uuid=" + uuid + " is NOT CACHED");
         try {
@@ -163,7 +181,8 @@ public class VSphereUtil extends ServiceInstance {
                 if (entUuid == null) {
                     continue;
                 }
-                entitiesByUuid.put(entUuid, new ObjectCache<ManagedEntity>(entity, CACHE_TIMEOUT));
+                entitiesByUuid.put(
+                    entUuid, new ObjectCache<ManagedEntity>(entity, CACHE_TIMEOUT));
                 if (uuid.equals(entUuid)) {
                     obj = entity;
                     break;
