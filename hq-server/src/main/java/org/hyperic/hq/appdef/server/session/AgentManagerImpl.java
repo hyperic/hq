@@ -178,6 +178,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         int i = 0;
         for (Platform plat : plats) {
             platIds[i] = AppdefEntityID.newPlatformID(plat.getId());
+            i++;
         }
 
         ResourceTreeGenerator generator = Bootstrap.getBean(ResourceTreeGenerator.class);
