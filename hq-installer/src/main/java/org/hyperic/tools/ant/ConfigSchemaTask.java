@@ -118,7 +118,7 @@ public class ConfigSchemaTask
         validateAttributes();
         itsProject = getProject();
 
-        boolean isInteractive = (itsFile != null);
+        boolean isInteractive = (itsLoadFile == null);
 
         itsSchemaProvider.setProjectProperties(itsProject.getProperties());
         String installDir = itsProject.getProperty(itsInstallDirPropName);
@@ -236,10 +236,6 @@ public class ConfigSchemaTask
         if ( itsFile == null && itsLoadFile == null ) {
             throw new BuildException("ConfigSchema: No 'file' or 'loadFile' "
                                      + "attribute specified.");
-        }
-        if ( itsFile != null && itsLoadFile != null ) {
-            throw new BuildException("ConfigSchema: Cannot specify both 'file' "
-                                     + "and 'loadFile' attributes.");
         }
         if (itsLoadFile == null && itsIfDefined != null) {
             throw new BuildException("ConfigSchema: Cannot specify 'ifDefined' "

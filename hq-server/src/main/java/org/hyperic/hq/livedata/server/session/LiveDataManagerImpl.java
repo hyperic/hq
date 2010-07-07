@@ -40,6 +40,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
+import org.hyperic.hq.appdef.server.session.PlatformType;
+import org.hyperic.hq.appdef.server.session.ServerType;
+import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -64,11 +67,13 @@ import org.hyperic.hq.livedata.shared.LiveDataCommand;
 import org.hyperic.hq.livedata.shared.LiveDataException;
 import org.hyperic.hq.livedata.shared.LiveDataManager;
 import org.hyperic.hq.livedata.shared.LiveDataResult;
+import org.hyperic.hq.product.GenericPlugin;
 import org.hyperic.hq.product.LiveDataPluginManager;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.shared.ProductManager;
+import org.hyperic.util.PluginLoader;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
@@ -91,21 +96,23 @@ public class LiveDataManagerImpl implements LiveDataManager {
     private ProductManager productManager;
 
     private ConfigManager configManager;
-    
+
     private LiveDataCommandsClientFactory liveDataCommandsClientFactory;
 
     @Autowired
-    public LiveDataManagerImpl(ProductManager productManager, ConfigManager configManager, LiveDataCommandsClientFactory liveDataCommandsClientFactory) {
+    public LiveDataManagerImpl(ProductManager productManager, ConfigManager configManager,
+                               LiveDataCommandsClientFactory liveDataCommandsClientFactory) {
         this.productManager = productManager;
         this.configManager = configManager;
-        this.liveDataCommandsClientFactory =  liveDataCommandsClientFactory;
+        this.liveDataCommandsClientFactory = liveDataCommandsClientFactory;
     }
 
     @PostConstruct
     public void init() {
         // Initialize local objects
         try {
-            manager = (LiveDataPluginManager) productManager.getPluginManager(ProductPlugin.TYPE_LIVE_DATA);
+            manager = (LiveDataPluginManager) productManager
+                .getPluginManager(ProductPlugin.TYPE_LIVE_DATA);
             cache = CacheManager.getInstance().getCache(CACHENAME);
         } catch (Exception e) {
             log.error("Unable to initialize LiveData manager", e);
@@ -123,18 +130,15 @@ public class LiveDataManagerImpl implements LiveDataManager {
     /**
      * Live data subsystem uses measurement configs.
      */
-    private ConfigResponse getConfig(AuthzSubject subject,
-                                     LiveDataCommand command)
+    private ConfigResponse getConfig(AuthzSubject subject, LiveDataCommand command)
         throws LiveDataException {
         try {
             AppdefEntityID id = command.getAppdefEntityID();
             ConfigResponse config = command.getConfig();
 
             try {
-                ConfigResponse mConfig = configManager.
-                                                      getMergedConfigResponse(subject,
-                                                                              ProductPlugin.TYPE_MEASUREMENT,
-                                                                              id, true);
+                ConfigResponse mConfig = configManager.getMergedConfigResponse(subject,
+                    ProductPlugin.TYPE_MEASUREMENT, id, true);
                 mConfig.merge(config, false);
                 return mConfig;
             } catch (ConfigFetchException e) {
@@ -149,18 +153,29 @@ public class LiveDataManagerImpl implements LiveDataManager {
     /**
      * Get the appdef type for a given entity id.
      */
-    private String getType(AuthzSubject subject, LiveDataCommand cmd)
+    private AppdefResourceType getType(AuthzSubject subject, LiveDataCommand cmd)
         throws AppdefEntityNotFoundException, PermissionException {
         AppdefEntityID id = cmd.getAppdefEntityID();
         AppdefEntityValue val = new AppdefEntityValue(id, subject);
 
         AppdefResourceType typeVal = val.getAppdefResourceType();
-        return typeVal.getName();
+        return typeVal;
+    }
+
+    private String getPlugin(AppdefResourceType resourceType) {
+        String plugin = null;
+        if (resourceType instanceof ServiceType) {
+            plugin = ((ServiceType) resourceType).getPlugin();
+        } else if (resourceType instanceof ServerType) {
+            plugin = ((ServerType) resourceType).getPlugin();
+        } else if (resourceType instanceof PlatformType) {
+            plugin = ((PlatformType) resourceType).getPlugin();
+        }
+        return plugin;
     }
 
     private void putElement(LiveDataCommand cmd, LiveDataResult res) {
-        putElement(new LiveDataCommand[] { cmd },
-                   new LiveDataResult[] { res });
+        putElement(new LiveDataCommand[] { cmd }, new LiveDataResult[] { res });
     }
 
     private void putElement(LiveDataCommand[] cmds, LiveDataResult[] res) {
@@ -171,8 +186,7 @@ public class LiveDataManagerImpl implements LiveDataManager {
     }
 
     private LiveDataResult getElement(LiveDataCommand cmd, long timeout) {
-        LiveDataResult[] res = getElement(new LiveDataCommand[] { cmd },
-                                          timeout);
+        LiveDataResult[] res = getElement(new LiveDataCommand[] { cmd }, timeout);
         return res == null ? null : res[0];
     }
 
@@ -191,8 +205,7 @@ public class LiveDataManagerImpl implements LiveDataManager {
             return null;
         }
 
-        log.info("Returning cached result " +
-                 StringUtil.arrayToString(obj.getResult()));
+        log.info("Returning cached result " + StringUtil.arrayToString(obj.getResult()));
         return obj.getResult();
     }
 
@@ -201,10 +214,9 @@ public class LiveDataManagerImpl implements LiveDataManager {
      * 
      * 
      */
-    public LiveDataResult getData(AuthzSubject subject,
-                                  LiveDataCommand cmd)
-        throws AppdefEntityNotFoundException, PermissionException,
-        AgentNotFoundException, LiveDataException {
+    public LiveDataResult getData(AuthzSubject subject, LiveDataCommand cmd)
+        throws AppdefEntityNotFoundException, PermissionException, AgentNotFoundException,
+        LiveDataException {
         return getData(subject, cmd, NO_CACHE);
     }
 
@@ -215,10 +227,9 @@ public class LiveDataManagerImpl implements LiveDataManager {
      * @param cacheTimeout
      * 
      */
-    public LiveDataResult getData(AuthzSubject subject,
-                                  LiveDataCommand cmd, long cacheTimeout)
-        throws PermissionException, AgentNotFoundException,
-        AppdefEntityNotFoundException, LiveDataException {
+    public LiveDataResult getData(AuthzSubject subject, LiveDataCommand cmd, long cacheTimeout)
+        throws PermissionException, AgentNotFoundException, AppdefEntityNotFoundException,
+        LiveDataException {
         // Attempt load from cache
         LiveDataResult res;
 
@@ -231,16 +242,36 @@ public class LiveDataManagerImpl implements LiveDataManager {
 
         AppdefEntityID id = cmd.getAppdefEntityID();
 
-        LiveDataCommandsClient client =
-                                        liveDataCommandsClientFactory.getClient(id);
+        LiveDataCommandsClient client = liveDataCommandsClientFactory.getClient(id);
 
         ConfigResponse config = getConfig(subject, cmd);
-        String type = getType(subject, cmd);
+
+        AppdefResourceType resourceType = getType(subject, cmd);
+        String type = resourceType.getName();
+        String pluginName = getPlugin(resourceType);
+
+        boolean setClassLoader = false;
+        GenericPlugin productPlugin = null;
+        if (pluginName != null) {
+            // We need to use the plugin's ClassLoader for serializing the
+            // XStream return value,
+            // as it may require plugin-specific classes
+            try {
+                productPlugin = manager.getParent().getPlugin(pluginName);
+                setClassLoader = PluginLoader.setClassLoader(productPlugin);
+            } catch (PluginNotFoundException e) {
+                throw new LiveDataException(e);
+            }
+        }
 
         try {
             res = client.getData(id, type, cmd.getCommand(), config);
         } catch (AgentRemoteException e) {
             res = new LiveDataResult(id, e, e.getMessage());
+        } finally {
+            if (setClassLoader) {
+                PluginLoader.resetClassLoader(productPlugin);
+            }
         }
 
         if (cacheTimeout != NO_CACHE) {
@@ -255,25 +286,22 @@ public class LiveDataManagerImpl implements LiveDataManager {
      * 
      * 
      */
-    public LiveDataResult[] getData(AuthzSubject subject,
-                                    LiveDataCommand[] commands)
-        throws AppdefEntityNotFoundException, PermissionException,
-        AgentNotFoundException, LiveDataException {
+    public LiveDataResult[] getData(AuthzSubject subject, LiveDataCommand[] commands)
+        throws AppdefEntityNotFoundException, PermissionException, AgentNotFoundException,
+        LiveDataException {
         return getData(subject, commands, NO_CACHE);
     }
 
     /**
-     * Run a list of live data commands in batch. If cached data is found
-     * that is not older than the cacheTimeout the cached data will be returned.
+     * Run a list of live data commands in batch. If cached data is found that
+     * is not older than the cacheTimeout the cached data will be returned.
      * 
      * @param cacheTimeout The cache timeout given in milliseconds.
      * 
      */
-    public LiveDataResult[] getData(AuthzSubject subject,
-                                    LiveDataCommand[] commands,
-                                    long cacheTimeout)
-        throws PermissionException, AppdefEntityNotFoundException,
-        AgentNotFoundException, LiveDataException {
+    public LiveDataResult[] getData(AuthzSubject subject, LiveDataCommand[] commands,
+                                    long cacheTimeout) throws PermissionException,
+        AppdefEntityNotFoundException, AgentNotFoundException, LiveDataException {
         // Attempt load from cache
         LiveDataResult[] res;
         if (cacheTimeout != NO_CACHE) {
@@ -289,10 +317,19 @@ public class LiveDataManagerImpl implements LiveDataManager {
             AppdefEntityID id = cmd.getAppdefEntityID();
 
             ConfigResponse config = getConfig(subject, cmd);
-            String type = getType(subject, cmd);
-
-            LiveDataExecutorCommand exec =
-                                           new LiveDataExecutorCommand(id, type, cmd.getCommand(), config);
+            AppdefResourceType resourceType = getType(subject, cmd);
+            String type = resourceType.getName();
+            String pluginName = getPlugin(resourceType);
+            GenericPlugin productPlugin = null;
+            if (pluginName != null) {
+                try {
+                    productPlugin = manager.getParent().getPlugin(pluginName);
+                } catch (PluginNotFoundException e) {
+                    throw new LiveDataException(e);
+                }
+            }
+            LiveDataExecutorCommand exec = new LiveDataExecutorCommand(id, type, cmd.getCommand(),
+                config, productPlugin);
 
             List<LiveDataExecutorCommand> queue = buckets.get(id);
             if (queue == null) {
@@ -308,8 +345,7 @@ public class LiveDataManagerImpl implements LiveDataManager {
         for (AppdefEntityID id : buckets.keySet()) {
             List<LiveDataExecutorCommand> cmds = buckets.get(id);
 
-            LiveDataCommandsClient client =
-                                            liveDataCommandsClientFactory.getClient(id);
+            LiveDataCommandsClient client = liveDataCommandsClientFactory.getClient(id);
 
             executor.getData(client, cmds);
         }
@@ -330,8 +366,8 @@ public class LiveDataManagerImpl implements LiveDataManager {
      * 
      * 
      */
-    public String[] getCommands(AuthzSubject subject, AppdefEntityID id)
-        throws PluginException, PermissionException {
+    public String[] getCommands(AuthzSubject subject, AppdefEntityID id) throws PluginException,
+        PermissionException {
         try {
             AppdefEntityValue val = new AppdefEntityValue(id, subject);
             AppdefResourceType tVal = val.getAppdefResourceType();
@@ -341,14 +377,12 @@ public class LiveDataManagerImpl implements LiveDataManager {
             throw new PluginNotFoundException("No plugin found for " + id, e);
         }
     }
-   
 
     /**
      * 
      */
     public void registerFormatter(LiveDataFormatter f) {
-        log.info("Registering formatter [" + f.getName() + "]: " +
-                 f.getDescription());
+        log.info("Registering formatter [" + f.getName() + "]: " + f.getDescription());
         FormatterRegistry.getInstance().registerFormatter(f);
     }
 
@@ -361,8 +395,8 @@ public class LiveDataManagerImpl implements LiveDataManager {
     }
 
     /**
-     * Gets a set of {@link LiveDataFormatter}s which are able to format
-     * the passed command.
+     * Gets a set of {@link LiveDataFormatter}s which are able to format the
+     * passed command.
      * 
      * 
      */
@@ -383,8 +417,7 @@ public class LiveDataManagerImpl implements LiveDataManager {
      * 
      * 
      */
-    public ConfigSchema getConfigSchema(AuthzSubject subject,
-                                        AppdefEntityID id, String command)
+    public ConfigSchema getConfigSchema(AuthzSubject subject, AppdefEntityID id, String command)
         throws PluginException, PermissionException {
         try {
             AppdefEntityValue val = new AppdefEntityValue(id, subject);
@@ -394,5 +427,16 @@ public class LiveDataManagerImpl implements LiveDataManager {
         } catch (AppdefEntityNotFoundException e) {
             throw new PluginNotFoundException("No plugin found for " + id, e);
         }
+    }
+
+    /**
+     * For testing without the agent
+     * @param liveDataCommandsClientFactory An implementation of @{link
+     *        {@link LiveDataCommandsClientFactory} to use for invoking live
+     *        data commands
+     */
+    void setLiveDataCommandsClientFactory(
+                                          LiveDataCommandsClientFactory liveDataCommandsClientFactory) {
+        this.liveDataCommandsClientFactory = liveDataCommandsClientFactory;
     }
 }

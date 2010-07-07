@@ -248,12 +248,14 @@ public class EventsBossImpl implements EventsBoss, ApplicationListener<Applicati
      *        because no measurement is found corresponding to the measurement
      *        template specified in a parent condition; <code>false</code> to
      *        throw a {@link MeasurementNotFoundException} when this occurs.
+     * @param allowStale True if we don't need to perform a flush to query for measurements
+     * (this will be the case if we are not in the same transaction that measurements are created in)    
      * @return <code>true</code> if cloning succeeded; <code>false</code> if
      *         cloning failed.
      */
     private boolean cloneParentConditions(AuthzSubject subject, AppdefEntityID id,
                                           AlertDefinitionValue adval, AlertConditionValue[] conds,
-                                          boolean failSilently) throws MeasurementNotFoundException {
+                                          boolean failSilently, boolean allowStale) throws MeasurementNotFoundException {
         // scrub and copy the parent's conditions
         adval.removeAllConditions();
 
@@ -266,12 +268,12 @@ public class EventsBossImpl implements EventsBoss, ApplicationListener<Applicati
                 case EventConstants.TYPE_CHANGE:
                     Integer tid = new Integer(clone.getMeasurementId());
 
-                    // Don't need to synch the Measurement with the db
+                    // If allowStale is true, don't need to synch the Measurement with the db
                     // since changes to the Measurement aren't cascaded
                     // on saving the AlertCondition.
                     try {
                         Measurement dmv = measurementManager.findMeasurement(subject, tid, id
-                            .getId(), true);
+                            .getId(), allowStale);
                         clone.setMeasurementId(dmv.getId().intValue());
                     } catch (MeasurementNotFoundException e) {
                         log.error("No measurement found for entity " + id +
@@ -409,7 +411,7 @@ public class EventsBossImpl implements EventsBoss, ApplicationListener<Applicati
                 if (parent != null) {
                     adval.setParentId(parent.getId());
                     try {
-                        cloneParentConditions(subject, id, adval, parent.getConditions(), false);
+                        cloneParentConditions(subject, id, adval, parent.getConditions(), false, true);
                     } catch (MeasurementNotFoundException e) {
                         throw new AlertConditionCreateException(e);
                     }
@@ -510,7 +512,7 @@ public class EventsBossImpl implements EventsBoss, ApplicationListener<Applicati
 
             try {
                 boolean succeeded = cloneParentConditions(subject, id, adval, parent
-                    .getConditions(), true);
+                    .getConditions(), true, true);
 
                 if (!succeeded) {
                     continue;
@@ -634,7 +636,7 @@ public class EventsBossImpl implements EventsBoss, ApplicationListener<Applicati
 
             try {
                 boolean succeeded = cloneParentConditions(subject, id, adval,
-                    adval.getConditions(), true);
+                    adval.getConditions(), true, false);
 
                 if (!succeeded) {
                     continue;
@@ -821,7 +823,7 @@ public class EventsBossImpl implements EventsBoss, ApplicationListener<Applicati
 
                 // Now add parent's conditions, actions, and new triggers
                 try {
-                    cloneParentConditions(subject, id, child, adval.getConditions(), false);
+                    cloneParentConditions(subject, id, child, adval.getConditions(), false, true);
                 } catch (MeasurementNotFoundException e) {
                     throw new AlertConditionCreateException(e);
                 }

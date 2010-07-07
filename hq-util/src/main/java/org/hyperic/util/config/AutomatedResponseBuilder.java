@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
 import java.util.List;
+import java.util.Set;
 
 import org.hyperic.util.PropertyUtil;
 
@@ -37,6 +38,7 @@ public class AutomatedResponseBuilder extends InteractiveResponseBuilder {
     private Properties props = null;
     private String requiredProp = null;
     private boolean hasRequiredProp = false;
+   
 
     public AutomatedResponseBuilder (InteractiveResponseBuilder_IOHandler io,
                                      Properties props,
@@ -78,7 +80,12 @@ public class AutomatedResponseBuilder extends InteractiveResponseBuilder {
             String optName = opt.getName();
             try {
                 String prop = props.getProperty(optName);
-                res.setValue(optName, prop);
+                if(prop == null && opt.isOptional()) {
+                    //use the default value if this is an optional field
+                    res.setValue(optName, opt.getDefault());
+                }else {
+                    res.setValue(optName, prop);
+                }
             } catch(InvalidOptionValueException exc){
                 sendToErrStream(exc.getMessage());
                 throw new IllegalStateException("Error setting option "

@@ -17,6 +17,7 @@ public class ServerDetectorTest
         if (tmpDirStr != null) {
             try {
                 tmpDir = new File(tmpDirStr);
+                System.out.println("Using tmp dir: " + tmpDirStr);
                 simpleFile = new File(tmpDir, "installFile");
                 simpleFile.createNewFile();
                 File d = new File(tmpDir, "deep/dir/structure");
@@ -143,7 +144,7 @@ public class ServerDetectorTest
         // full match and no match -- logical contradiction, should fail
         props.setProperty(TestServerDetector.getInstallPathMatch(), installPath);
         tsd = new TestServerDetector(props);
-
+        System.out.println("Using folder" + installPath);
         assertTrue(tsd.isInstallTypeVersion(installPath));
     }
     
@@ -160,7 +161,7 @@ public class ServerDetectorTest
         // full match and no match -- logical contradiction, should fail
         props.setProperty(TestServerDetector.getInstallPathNoMatch(), "gobbledygook");
         tsd = new TestServerDetector(props);
-
+        System.out.println("Using folder" + installPath);
         assertTrue(tsd.isInstallTypeVersion(installPath));
     }
     

@@ -19,6 +19,14 @@
 			<artifactId>spring-test</artifactId>
 		</dependency>
 		<dependency>
+  			<groupId>org.easymock</groupId>
+  			<artifactId>easymockclassextension</artifactId>
+		</dependency>
+		<dependency>
+  			<groupId>org.easymock</groupId>
+  			<artifactId>easymock</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.hyperic.hq</groupId>
 			<artifactId>hq-server</artifactId> 
 			<version>${project.version}</version>

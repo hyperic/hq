@@ -163,11 +163,12 @@ public class EmailAction extends EmailActionConfig
 
     private String createSubject(AlertDefinitionInterface alertdef,
                                  AlertInterface alert, Resource resource,
-                                 String status) {
+                                 ActionExecutionInfo action, String status) {
         Map params = new HashMap();
         params.put("resource", resource);
         params.put("alertDef", alertdef);
         params.put("alert", alert);
+        params.put("action", action);
         params.put("status", status);
         params.put("isSms", new Boolean(isSms()));
 
@@ -237,7 +238,7 @@ public class EmailAction extends EmailActionConfig
             						"text_email.gsp", user);
             		}
 
-            		final String subject = createSubject(alertDef, alert, resource, "");
+            		final String subject = createSubject(alertDef, alert, resource, info, "");
             		sendAlert(appEnt, to, subject, body, htmlBody,
             				alertDef.getPriority(), alertDef.isNotifyFiltered());
 
@@ -380,7 +381,7 @@ public class EmailAction extends EmailActionConfig
                                                   appEnt.getId());
 
         final String subject = createSubject(
-            defInfo, alert.getAlertInfo(), resource, change.getDescription());
+            defInfo, alert.getAlertInfo(), resource, null, change.getDescription());
         sendAlert(getResource(defInfo), to, subject, messages, messages,
             defInfo.getPriority(), false);
     }
