@@ -110,8 +110,14 @@ public class VSphereHostCollector extends VSphereCollector {
 
     protected void init() throws PluginException {
         super.init();
+        // HPD-681, this is a BIG performance hit and will stall the ScheduleThread when
+        // HQ is configured to collect for several esx servers/vms
+        // Therefore since ScehduleThread does not need to validate configOpts just return
+        // Could possibly be taken out when we switch VSphereUtil to use SearchIndex.findByUuid()
+        if (Thread.currentThread().getName().toLowerCase().equals("schedulethread")) {
+            return;
+        }
         VSphereUtil vim = null;
-
         try {
             vim = VSphereUtil.getInstance(getProperties());
             //validate config
@@ -134,8 +140,12 @@ public class VSphereHostCollector extends VSphereCollector {
             avail = Metric.AVAIL_POWERED_OFF;
         } else if (powerState == HostSystemPowerState.standBy) {
             avail = Metric.AVAIL_PAUSED;
+        } else if (powerState == HostSystemPowerState.unknown) {
+            // hosts that are powered off can also have an unknown power state
+            avail = Metric.AVAIL_POWERED_OFF;
         } else {
-            avail = Metric.AVAIL_UNKNOWN;
+            // undetermined state, so mark as down
+            avail = Metric.AVAIL_DOWN;
         }
         
         setValue(Metric.ATTR_AVAIL, avail);

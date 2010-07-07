@@ -104,6 +104,7 @@ public class VCenterPlatformDetector {
     private static final String HOST_TYPE = AuthzConstants.platformPrototypeVmwareVsphereHost;
     private static final String POOL_TYPE = "VMware vSphere Resource Pool";
     private static final String DEFAULT_POOL = "Resources";
+    private static final String ESX_HOST = "esxHost";
 
     private static final Log log =
         LogFactory.getLog(VCenterPlatformDetector.class.getName());
@@ -251,7 +252,7 @@ public class VCenterPlatformDetector {
 
         VSphereResource platform = new VSphereResource();
         String uuid = info.getUuid();
-        platform.setName(info.getName());
+        platform.setName(generatePlatformName(info.getName(), uuid));
         platform.setFqdn(uuid);
         platform.setDescription(info.getGuestFullName());
 
@@ -315,13 +316,13 @@ public class VCenterPlatformDetector {
         ManagedObjectReference hmor = runtime.getHost();
         if (hmor != null) {
             HostSystem host = new HostSystem(vm.getServerConnection(), hmor);
-            cprops.setValue("esxHost", host.getName());
+            cprops.setValue(ESX_HOST, host.getName());
         }
 
         platform.addProperties(cprops);
         
         if (log.isDebugEnabled()) {
-            log.debug("Discovered " + VM_TYPE + "[name=" + platform.getName() 
+            log.debug("Discovered " + VM_TYPE + "[name=" + info.getName()
                           + ", powerState=" + state + "]");
         }
         
@@ -347,21 +348,23 @@ public class VCenterPlatformDetector {
         HostConfigInfo info = host.getConfig();
         HostNetworkInfo netinfo = info.getNetwork();
         AboutInfo about = info.getProduct();
+        HostHardwareSummary hw = host.getSummary().getHardware();
         String address = null;
         VSphereHostResource platform = new VSphereHostResource();
 
-        ConfigResponse cprops = new ConfigResponse();
-        platform.setName(host.getName());
+        String uuid = hw.getUuid();
+        platform.setName(generatePlatformName(host.getName(), uuid));
         platform.setDescription(about.getFullName());
+        platform.setFqdn(uuid);
         
         if (netinfo.getVnic() == null) {
             try {
                 // Host name may be the IP address
-                InetAddress inet = InetAddress.getByName(platform.getName());
+                InetAddress inet = InetAddress.getByName(host.getName());
                 address = inet.getHostAddress();
             } catch (Exception e) {
                 if (log.isDebugEnabled()) {
-                    log.debug(platform.getName() + " does not have an IP address", e);
+                    log.debug(host.getName() + " does not have an IP address", e);
                 }
             }
         } else {
@@ -375,6 +378,7 @@ public class VCenterPlatformDetector {
             }
         }
 
+        ConfigResponse cprops = new ConfigResponse();
         cprops.setValue("version", about.getVersion());
         cprops.setValue("build", about.getBuild());
         if (address != null) {
@@ -393,9 +397,6 @@ public class VCenterPlatformDetector {
             }
         }
 
-        HostHardwareSummary hw = host.getSummary().getHardware();
-        String uuid = hw.getUuid();
-        platform.setFqdn(uuid);
         cprops.setValue("hwVendor", hw.getVendor());
         cprops.setValue("hwModel", hw.getModel());
         cprops.setValue("hwCpu", hw.getCpuModel());
@@ -422,7 +423,7 @@ public class VCenterPlatformDetector {
         platform.addConfig(VSphereCollector.PROP_UUID, uuid);
 
         if (log.isDebugEnabled()) {
-            log.debug("Discovered " + HOST_TYPE + "[name=" + platform.getName() 
+            log.debug("Discovered " + HOST_TYPE + "[name=" + host.getName() 
                           + ", powerState=" + powerState + "]");
         }
         
@@ -481,6 +482,19 @@ public class VCenterPlatformDetector {
 
     public void discoverPlatforms()
         throws IOException, PluginException {
+        
+        String vCenterUrl = VSphereUtil.getURL(this.props);
+        Resource vCenter = getVCenterServer(vCenterUrl);
+        
+        if (vCenter == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Skip discovering hosts and VMs. "
+                            + "No VMware vCenter server found with url=" 
+                            + vCenterUrl);
+            }
+            return;
+        }
+        
         VSphereUtil vim = null;
         vim = VSphereUtil.getInstance(this.props);
 
@@ -493,7 +507,10 @@ public class VCenterPlatformDetector {
             for (Resource r : hosts) {
                 VSphereHostResource h = (VSphereHostResource) r;
                 vms.addAll(h.getVirtualMachines());
-                hostVmMap.put(r.getName(), h.getVirtualMachines());
+                String esxHost = getEsxHost(r);
+                if (esxHost != null) {
+                    hostVmMap.put(esxHost, h.getVirtualMachines());
+                }
             }
             
             if (isDump) {
@@ -519,30 +536,22 @@ public class VCenterPlatformDetector {
     private void syncResourceEdges(VSphereUtil vim,
                                    Map<String, List<Resource>> vcHostVmMap) 
         throws IOException, PluginException {
-        ResourceApi rApi = getApi().getResourceApi();
-        ResourceEdgeApi reApi = getApi().getResourceEdgeApi();
 
-        Resource vCenter = null;
         String vCenterUrl = VSphereUtil.getURL(this.props);
-        ResourcePrototype vcType = getResourceType(VC_TYPE);
-        ResourcesResponse vcResponse = rApi.getResources(vcType, true, false);
-        assertSuccess(vcResponse, "Getting all " + VC_TYPE, false);
-        
-        for (Resource r : vcResponse.getResource()) {
-            if (isVCenterManagedEntity(vCenterUrl, r)) {
-                vCenter = r;
-                break;
-            }
-        }
+        Resource vCenter = getVCenterServer(vCenterUrl);
 
         if (vCenter == null) {
             if (log.isDebugEnabled()) {
-                log.debug("No VMware vCenter server found with url=" 
-                            + VSphereUtil.getURL(this.props));
+                log.debug("Skip syncing resource edges. "
+                            + "No VMware vCenter server found with url=" 
+                            + vCenterUrl);
             }
             return;
         }
         
+        ResourceApi rApi = getApi().getResourceApi();
+        ResourceEdgeApi reApi = getApi().getResourceEdgeApi();
+
         ResourcePrototype hostType = getResourceType(HOST_TYPE);
         ResourcesResponse hostResponse = rApi.getResources(hostType, true, false);
         assertSuccess(hostResponse, "Getting all " + HOST_TYPE, false);
@@ -556,7 +565,10 @@ public class VCenterPlatformDetector {
         for (Resource r : hostResponse.getResource()) {
             if (isVCenterManagedEntity(vCenterUrl, r)) {
                 toHosts.getResource().add(r);
-                hqHostResourceMap.put(r.getName(), r);
+                String esxHost = getEsxHost(r);
+                if (esxHost != null) {
+                    hqHostResourceMap.put(esxHost, r);
+                }
             }
         }
         
@@ -599,7 +611,8 @@ public class VCenterPlatformDetector {
             parent.setResource(r);
             
             ResourceTo children = new ResourceTo();
-            List<Resource> vmResources = hqHostVmMap.get(r.getName());
+            String esxHost = getEsxHost(r);
+            List<Resource> vmResources = hqHostVmMap.get(esxHost);
             if (vmResources != null) {
                 children.getResource().addAll(vmResources);
             }
@@ -670,13 +683,46 @@ public class VCenterPlatformDetector {
         return result;
     }
     
-    private String getEsxHost(Resource vm) {
-        String esxHost = null;
+    private Resource getVCenterServer(String vCenterUrl)
+        throws IOException, PluginException {
         
-        for (ResourceProperty p : vm.getResourceProperty()) {
-            if ("esxHost".equals(p.getKey())) {
-                esxHost = p.getValue();
+        if (vCenterUrl == null) {
+            return null;
+        }
+        
+        Resource vCenter = null;        
+        ResourceApi rApi = getApi().getResourceApi();
+        ResourcePrototype vcType = getResourceType(VC_TYPE);
+        ResourcesResponse vcResponse = rApi.getResources(vcType, true, false);
+        assertSuccess(vcResponse, "Getting all " + VC_TYPE, false);
+        
+        for (Resource r : vcResponse.getResource()) {
+            if (isVCenterManagedEntity(vCenterUrl, r)) {
+                vCenter = r;
                 break;
+            }
+        }
+        
+        return vCenter;
+    }
+    
+    private String getEsxHost(Resource r) {
+        String esxHost = null;
+        String prototype = r.getResourcePrototype().getName();
+        
+        if (VM_TYPE.equals(prototype)) {
+            for (ResourceProperty p : r.getResourceProperty()) {
+                if (ESX_HOST.equals(p.getKey())) {
+                    esxHost = p.getValue();
+                    break;
+                }
+            }
+        } else if (HOST_TYPE.equals(prototype)) {
+            for (ResourceConfig c : r.getResourceConfig()) {
+                if (VSphereUtil.PROP_HOSTNAME.equals(c.getKey())) {
+                    esxHost = c.getValue();
+                    break;
+                }
             }
         }
         
@@ -692,6 +738,13 @@ public class VCenterPlatformDetector {
             }
         }
         return fqdn;
+    }
+    
+    /**
+     * Generate an unique platform name by appending the uuid
+     */
+    private String generatePlatformName(String name, String uuid) {
+        return name + " {" + uuid + "}";
     }
     
     private void removeHost(VSphereUtil vim, Resource r)

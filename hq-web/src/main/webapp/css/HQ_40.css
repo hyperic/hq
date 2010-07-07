@@ -2543,6 +2543,12 @@ span.returnToLink {
 	width: 9px;
 }
 
+.timelineBlack {
+	background: url(../images/timeline_black.gif) repeat-x;
+	height: 10px;
+	width: 9px;
+}
+
 .resourceCommentIcon {
 	background: url(../images/comment.gif) no-repeat 0 3px;
 	height: 14px;
@@ -2584,6 +2590,12 @@ span.returnToLink {
 	width: 12px;
 }
 
+.availabilityBlack {
+	display:inline-block;
+	background: url(../images/icon_available_black.gif) no-repeat;
+	height: 12px;
+	width: 12px;
+}
 .formButtonContainer {
 	background-color:#fff;
 	margin-bottom:10px;

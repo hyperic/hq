@@ -55,9 +55,12 @@ public class AvailabilityServlet extends AvailabilityBaseServlet {
     private static final String ICON_PAUSED_URL =
         "/images/icon_available_orange.gif";
 
+    private static final String ICON_POWERED_OFF_URL =
+        "/images/icon_available_black.gif";
+
     private static final String[] iconUrls = {
         ICON_ERR_URL, ICON_AVAIL_URL, ICON_UNAVAIL_URL, ICON_WARNING_URL,
-        ICON_PAUSED_URL };
+        ICON_PAUSED_URL, ICON_POWERED_OFF_URL };
 
     private static Log log =
        LogFactory.getLog(AvailabilityServlet.class.getName());
@@ -120,6 +123,16 @@ public class AvailabilityServlet extends AvailabilityBaseServlet {
                                   HttpServletResponse response) {
         try {
             sendIcon(request, response, ICON_PAUSED_URL);
+        } catch (Exception e) {
+            log.debug("can't send paused icon: ", e);
+            sendErrorIcon(request, response);
+        }
+    }
+
+    protected void sendPoweredOffIcon(HttpServletRequest request,
+                                  HttpServletResponse response) {
+        try {
+            sendIcon(request, response, ICON_POWERED_OFF_URL);
         } catch (Exception e) {
             log.debug("can't send paused icon: ", e);
             sendErrorIcon(request, response);

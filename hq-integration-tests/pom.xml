@@ -31,12 +31,15 @@
 			<artifactId>hq-server</artifactId> 
 			<version>${project.version}</version>
 		</dependency>
-		<dependency>
+			<dependency>
 			<groupId>org.hyperic.hq</groupId>
-			<artifactId>hq-server</artifactId>
+			<artifactId>hq-server</artifactId> 
 			<version>${project.version}</version>
-			<classifier>tests</classifier>
-			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.agent.handler</groupId>
+			<artifactId>hq-agent-handler-measurement</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic</groupId>

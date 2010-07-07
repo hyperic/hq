@@ -128,7 +128,9 @@ public abstract class AvailabilityBaseServlet extends HttpServlet {
                 sendAvailIcon(request, response);
             } else if (val == MeasurementConstants.AVAIL_PAUSED) {
                 sendPausedIcon(request, response);
-            } else {
+            } else if (val == MeasurementConstants.AVAIL_POWERED_OFF) {
+                sendPoweredOffIcon(request, response);
+            }else {
                 sendWarningIcon(request, response);
             }
         } catch (Throwable t) {
@@ -167,6 +169,9 @@ public abstract class AvailabilityBaseServlet extends HttpServlet {
             HttpServletResponse response);
 
     protected abstract void sendPausedIcon(HttpServletRequest request,
+            HttpServletResponse response);
+    
+    protected abstract void sendPoweredOffIcon(HttpServletRequest request,
             HttpServletResponse response);
 
     protected abstract void sendErrorIcon(HttpServletRequest request,
