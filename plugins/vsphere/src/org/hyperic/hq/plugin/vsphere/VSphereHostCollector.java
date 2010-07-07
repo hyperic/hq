@@ -151,21 +151,16 @@ public class VSphereHostCollector extends VSphereCollector {
         setValue(Metric.ATTR_AVAIL, avail);
     }
     
-    protected void collect(VSphereUtil vim)
-        throws Exception {
-
-        final boolean printMetric =
-            "true".equals(System.getProperty("vim.xml"));
-        
+    protected void collect(VSphereUtil vim) throws Exception {
+        final boolean printMetric = "true".equals(System.getProperty("vim.xml"));
         ManagedEntity mor;
-        
         try {
             mor = getManagedEntity(vim);
             setAvailability(mor);
         } catch (Exception e) {
             setAvailability(false);
-            _log.error("Error setting availability for " + getName()
-                          + ": " + e.getMessage(), e);            
+            _log.error("Error setting availability for " + getName() + ": " + e.getMessage());            
+            _log.debug(e,e);
             return;
         }
         
