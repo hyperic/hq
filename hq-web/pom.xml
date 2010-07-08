@@ -13,9 +13,6 @@
 	<packaging>war</packaging>
 	<name>Hyperic HQ Web Application</name>
 
-	<properties>
-		<hqapi.version>4.0.0.BUILD-SNAPSHOT</hqapi.version>
-	</properties>
 
 	<dependencies>
 		<dependency>

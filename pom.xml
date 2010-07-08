@@ -31,6 +31,7 @@
 		<groovy.version>1.6.7</groovy.version>
 		<hibernate.version>3.2.6.ga</hibernate.version>
 		<hibernate-tools.version>3.2.3.GA</hibernate-tools.version>
+		<hqapi.version>4.0.0.BUILD-SNAPSHOT</hqapi.version>
 		<httpclient.version>3.1</httpclient.version>
 		<j2ee-management.version>1.1</j2ee-management.version>
 		<jasypt.version>1.6</jasypt.version>
@@ -197,6 +198,11 @@
 				<groupId>org.hyperic</groupId>
 				<artifactId>sigar</artifactId>
 				<version>${sigar.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hyperic.hq.hqapi</groupId>
+				<artifactId>hqapi1</artifactId>
+				<version>${hqapi.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jasypt</groupId>

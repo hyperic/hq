@@ -67,6 +67,10 @@
 			<artifactId>xalan</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.hyperic.hq.hqapi</groupId>
+			<artifactId>hqapi1</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 		</dependency>
