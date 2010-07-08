@@ -67,10 +67,6 @@
 			<artifactId>xalan</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.hyperic.hq.hqapi</groupId>
-			<artifactId>hqapi1</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 		</dependency>
@@ -96,6 +92,9 @@
 						<descriptor>src/main/assembly/agent.xml</descriptor>
 					</descriptors>
 				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-source-plugin</artifactId>
 			</plugin>
 			<plugin>
 				<artifactId>maven-javadoc-plugin</artifactId>
