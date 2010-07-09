@@ -74,7 +74,7 @@ public class PlatformControllerAction extends ResourceControlController {
                                                    HttpServletRequest request,
                                                    HttpServletResponse response) 
     throws Exception {
-        Portal portal = Portal.createPortal("resource.server.Control.PageTitle.New", ".resource.server.control.new");
+        Portal portal = Portal.createPortal("resource.server.Control.PageTitle.New", ".resource.platform.control.new");
         portal.setDialog(true);
 
         super.newScheduledControlAction(mapping, form, request, response, portal);
@@ -87,7 +87,7 @@ public class PlatformControllerAction extends ResourceControlController {
                                                     HttpServletRequest request,
                                                     HttpServletResponse response) 
     throws Exception {
-        Portal portal = Portal.createPortal("resource.server.Control.PageTitle.Edit", ".resource.server.control.edit");
+        Portal portal = Portal.createPortal("resource.platform.Control.PageTitle.Edit", ".resource.platform.control.edit");
         portal.setDialog(true);
 
         super.editScheduledControlAction(mapping, form, request, response, portal);

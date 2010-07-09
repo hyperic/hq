@@ -1159,46 +1159,46 @@
         <set-property property="title" value="Control"/>
       </action>
 
-      <action path="/resource/server/control/NewFormPrepare"
+      <action path="/resource/*/control/NewFormPrepare"
               name="ServerControlForm"
               scope="request"
               type="org.hyperic.hq.ui.action.resource.common.control.NewFormPrepareAction">
         <set-property property="title" value="Control.New"/>
       </action>
 
-      <action path="/resource/server/control/New"   
+      <action path="/resource/*/control/New"
               type="org.hyperic.hq.ui.action.resource.common.control.NewAction"
               name="ServerControlForm"
               scope="request"
-              input="/resource/server/Control.do?mode=new">
-        <forward name="add" path="/resource/server/Control.do?mode=new"/>
-        <forward name="remove" path="/resource/server/Control.do?mode=new"/>
-        <forward name="cancel" path="/resource/server/Control.do?mode=view"
+              input="/resource/{1}/Control.do?mode=new">
+        <forward name="add" path="/resource/{1}/Control.do?mode=new"/>
+        <forward name="remove" path="/resource/{1}/Control.do?mode=new"/>
+        <forward name="cancel" path="/resource/{1}/Control.do?mode=view"
                  redirect="true"/>
-        <forward name="reset" path="/resource/server/Control.do?mode=new"
+        <forward name="reset" path="/resource/{1}/Control.do?mode=new"
                  redirect="true"/>
-        <forward name="failure" path="/resource/server/Control.do?mode=new" />
-        <forward name="success" path="/resource/server/Control.do?mode=view" redirect="true" />
+        <forward name="failure" path="/resource/{1}/Control.do?mode=new" />
+        <forward name="success" path="/resource/{1}/Control.do?mode=view" redirect="true" />
       </action>
 
-      <action path="/resource/server/control/EditFormPrepare"
+      <action path="/resource/*/control/EditFormPrepare"
               name="ServerControlForm"
               scope="request"
               type="org.hyperic.hq.ui.action.resource.common.control.EditFormPrepareAction">
         <set-property property="title" value="Control"/>
       </action>
 
-      <action path="/resource/server/control/Edit"
+      <action path="/resource/*/control/Edit"
               type="org.hyperic.hq.ui.action.resource.common.control.EditAction"
               name="ServerControlForm"
               scope="request"
-              input="/resource/server/Control.do?mode=edit">
-        <forward name="add" path="/resource/server/Control.do?mode=edit"/>
-        <forward name="remove" path="/resource/server/Control.do?mode=edit"/>              
-        <forward name="cancel" path="/resource/server/Control.do?mode=view" redirect="true"/>
-        <forward name="reset" path="/resource/server/Control.do?mode=edit"/>
-        <forward name="failure" path="/resource/server/Control.do?mode=edit"/>
-        <forward name="success" path="/resource/server/Control.do?mode=view" redirect="true"/>
+              input="/resource/{1}/Control.do?mode=edit">
+        <forward name="add" path="/resource/{1}/Control.do?mode=edit"/>
+        <forward name="remove" path="/resource/{1}/Control.do?mode=edit"/>              
+        <forward name="cancel" path="/resource/{1}/Control.do?mode=view" redirect="true"/>
+        <forward name="reset" path="/resource/{1}/Control.do?mode=edit"/>
+        <forward name="failure" path="/resource/{1}/Control.do?mode=edit"/>
+        <forward name="success" path="/resource/{1}/Control.do?mode=view" redirect="true"/>
       </action>
 
       <action path="/resource/server/control/RemoveHistory"
