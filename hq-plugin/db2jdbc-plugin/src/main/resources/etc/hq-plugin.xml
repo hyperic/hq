@@ -81,9 +81,9 @@
         <metric name="Data Logical Reads" alias="POOL_DATA_L_READS" template="db2:${server}:${alias}" category="THROUGHPUT"  units="none" collectionType="trendsup"/>
         <metric name="Index Logical Reads" alias="POOL_INDEX_L_READS" template="db2:${server}:${alias}" category="THROUGHPUT"  units="none" collectionType="trendsup"/>
 
-        <metric name="Total Phydical Reads" alias="TOTAL_PHYSICAL_READS" template="db2:${server}:${alias}" category="THROUGHPUT" indicator="true" units="none" collectionType="trendsup"/>
-        <metric name="Data Phydical Reads" alias="POOL_DATA_P_READS" template="db2:${server}:${alias}" category="THROUGHPUT"  units="none" collectionType="trendsup"/>
-        <metric name="Index Phydical Reads" alias="POOL_INDEX_P_READS" template="db2:${server}:${alias}" category="THROUGHPUT"  units="none" collectionType="trendsup"/>
+        <metric name="Total Physical Reads" alias="TOTAL_PHYSICAL_READS" template="db2:${server}:${alias}" category="THROUGHPUT" indicator="true" units="none" collectionType="trendsup"/>
+        <metric name="Data Physical Reads" alias="POOL_DATA_P_READS" template="db2:${server}:${alias}" category="THROUGHPUT"  units="none" collectionType="trendsup"/>
+        <metric name="Index Physical Reads" alias="POOL_INDEX_P_READS" template="db2:${server}:${alias}" category="THROUGHPUT"  units="none" collectionType="trendsup"/>
 
         <metric name="Data Page Hit Ratio" alias="DATA_PAGE_HIT_RATIO" template="db2:${server}:${alias}" category="THROUGHPUT" indicator="true" units="percentage"/>
         <metric name="Index Page Hit Ratio" alias="INDEX_PAGE_HIT_RATIO" template="db2:${server}:${alias}" category="THROUGHPUT" indicator="true" units="percentage"/>
@@ -99,9 +99,9 @@
         <metric name="Data Logical Reads" alias="POOL_DATA_L_READS" template="db2:${bufferpool}:${alias}" category="THROUGHPUT"  units="none" collectionType="trendsup"/>
         <metric name="Index Logical Reads" alias="POOL_INDEX_L_READS" template="db2:${bufferpool}:${alias}" category="THROUGHPUT"  units="none" collectionType="trendsup"/>
 
-        <metric name="Total Phydical Reads" alias="TOTAL_PHYSICAL_READS" template="db2:${bufferpool}:${alias}" category="THROUGHPUT" indicator="true" units="none" collectionType="trendsup"/>
-        <metric name="Data Phydical Reads" alias="POOL_DATA_P_READS" template="db2:${bufferpool}:${alias}" category="THROUGHPUT"  units="none" collectionType="trendsup"/>
-        <metric name="Index Phydical Reads" alias="POOL_INDEX_P_READS" template="db2:${bufferpool}:${alias}" category="THROUGHPUT"  units="none" collectionType="trendsup"/>
+        <metric name="Total Physical Reads" alias="TOTAL_PHYSICAL_READS" template="db2:${bufferpool}:${alias}" category="THROUGHPUT" indicator="true" units="none" collectionType="trendsup"/>
+        <metric name="Data Physical Reads" alias="POOL_DATA_P_READS" template="db2:${bufferpool}:${alias}" category="THROUGHPUT"  units="none" collectionType="trendsup"/>
+        <metric name="Index Physical Reads" alias="POOL_INDEX_P_READS" template="db2:${bufferpool}:${alias}" category="THROUGHPUT"  units="none" collectionType="trendsup"/>
 
         <metric name="Data Page Hit Ratio" alias="DATA_PAGE_HIT_RATIO" template="db2:${bufferpool}:${alias}" category="THROUGHPUT" indicator="true" units="percentage"/>
         <metric name="Index Page Hit Ratio" alias="INDEX_PAGE_HIT_RATIO" template="db2:${bufferpool}:${alias}" category="THROUGHPUT" indicator="true" units="percentage"/>
@@ -163,9 +163,9 @@
         <metric name="Data Logical Reads" alias="POOL_DATA_L_READS" template="db2:${tablespace_io}:${alias}" category="THROUGHPUT"  units="none" collectionType="trendsup"/>
         <metric name="Index Logical Reads" alias="POOL_INDEX_L_READS" template="db2:${tablespace_io}:${alias}" category="THROUGHPUT"  units="none" collectionType="trendsup"/>
 
-        <metric name="Total Phydical Reads" alias="TOTAL_PHYSICAL_READS" template="db2:${tablespace_io}:${alias}" category="THROUGHPUT" indicator="true" units="none" collectionType="trendsup"/>
-        <metric name="Data Phydical Reads" alias="POOL_DATA_P_READS" template="db2:${tablespace_io}:${alias}" category="THROUGHPUT"  units="none" collectionType="trendsup"/>
-        <metric name="Index Phydical Reads" alias="POOL_INDEX_P_READS" template="db2:${tablespace_io}:${alias}" category="THROUGHPUT"  units="none" collectionType="trendsup"/>
+        <metric name="Total Physical Reads" alias="TOTAL_PHYSICAL_READS" template="db2:${tablespace_io}:${alias}" category="THROUGHPUT" indicator="true" units="none" collectionType="trendsup"/>
+        <metric name="Data Physical Reads" alias="POOL_DATA_P_READS" template="db2:${tablespace_io}:${alias}" category="THROUGHPUT"  units="none" collectionType="trendsup"/>
+        <metric name="Index Physical Reads" alias="POOL_INDEX_P_READS" template="db2:${tablespace_io}:${alias}" category="THROUGHPUT"  units="none" collectionType="trendsup"/>
 
         <metric name="Data Page Hit Ratio" alias="DATA_PAGE_HIT_RATIO" template="db2:${tablespace_io}:${alias}" category="THROUGHPUT" indicator="true" units="percentage"/>
         <metric name="Index Page Hit Ratio" alias="INDEX_PAGE_HIT_RATIO" template="db2:${tablespace_io}:${alias}" category="THROUGHPUT" indicator="true" units="percentage"/>
