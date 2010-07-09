@@ -28,6 +28,7 @@ package org.hyperic.hq.plugin.vsphere;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,6 +81,7 @@ import com.vmware.vim25.VirtualMachineRuntimeInfo;
 import com.vmware.vim25.mo.HostSystem;
 import com.vmware.vim25.mo.ManagedEntity;
 import com.vmware.vim25.mo.ResourcePool;
+import com.vmware.vim25.mo.VirtualApp;
 import com.vmware.vim25.mo.VirtualMachine;
 
 /**
@@ -96,6 +98,7 @@ public class VCenterPlatformDetector {
     static final String VC_TYPE = AuthzConstants.serverPrototypeVmwareVcenter;
     static final String VM_TYPE = AuthzConstants.platformPrototypeVmwareVsphereVm;
     static final String HOST_TYPE = AuthzConstants.platformPrototypeVmwareVsphereHost;
+    static final String VAPP_TYPE = AuthzConstants.PLATFORM_PROTOTYPE_VMWARE_VSPHERE_VAPP;
     static final String ESX_HOST = "esxHost";
 
     private static final Log log =
@@ -174,7 +177,7 @@ public class VCenterPlatformDetector {
         }
     }
 
-    private void dump(List<Resource> resources) {
+    private void dump(Collection<? extends Resource> resources) {
         ResourcesResponse rr = new ResourcesResponse();
         rr.getResource().addAll(resources);
         try {
@@ -303,6 +306,62 @@ public class VCenterPlatformDetector {
         
         return platform;
     }
+    
+    private VSphereHostResource discoverVApp(VirtualApp vapp) {
+        //TODO MOR value is only a unique identifier per vCenter server.  Not good enough to uniquely identify the vapp, but what is?
+        VSphereHostResource platform = new VSphereHostResource();
+        platform.setName(generatePlatformName(vapp.getName(),vapp.getMOR().getVal()));
+        platform.setFqdn(vapp.getMOR().getVal());
+        //TODO description? any config or custom props?
+        return platform;
+    }
+    
+    private Map<String,VSphereHostResource> discoverVApps(Agent agent, Map<String,VSphereResource> vms) throws PluginException, IOException {
+        Map<String,VSphereHostResource> resources = new HashMap<String,VSphereHostResource>();
+        ResourcePrototype vAppType = getResourceType(VAPP_TYPE);
+        try {
+            ManagedEntity[] managedEntities = vim.find(VSphereUtil.VAPP);
+            for(ManagedEntity managedEntity: managedEntities) {
+                if (! (managedEntity instanceof VirtualApp)) {
+                log.debug(managedEntity + " not a VirtualApplication, type=" +
+                          managedEntity.getMOR().getType());
+                continue;
+                }
+                VirtualApp vapp = (VirtualApp) managedEntity;
+                try {
+                    VSphereHostResource platform = discoverVApp(vapp);
+                    if (platform == null) {
+                        continue;
+                    }
+                    platform.setResourcePrototype(vAppType);
+                    platform.setAgent(agent);
+                    mergeVSphereConfig(platform);
+                    
+                    
+                    VirtualMachine[] vAppVms = vapp.getVMs();
+                   
+                    for (VirtualMachine vAppVm: vAppVms) {
+                        VirtualMachineConfigInfo info = vAppVm.getConfig();
+                        if (info.isTemplate()) {
+                           continue; //filter out template VMs
+                        }
+                        String uuid = info.getUuid();
+                        VSphereResource vm = vms.get(uuid);
+                        if(vm != null) {
+                            platform.getVirtualMachines().add(vm);
+                        }
+                    }
+                    
+                    resources.put(getFqdn(platform),platform);
+                } catch (Exception e) {
+                    log.error(e.getMessage(), e);
+                }
+            }  
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        return resources;
+    }
 
     private VSphereHostResource discoverHost(HostSystem host)
         throws Exception {
@@ -405,7 +464,7 @@ public class VCenterPlatformDetector {
         return platform;
     }
 
-    private List<Resource> discoverHosts(VSphereUtil vim, Agent agent)
+    private List<Resource> discoverHosts(Agent agent)
         throws IOException, PluginException {
 
         List<Resource> resources = new ArrayList<Resource>();
@@ -433,6 +492,7 @@ public class VCenterPlatformDetector {
                     mergeVSphereConfig(platform);
                     
                     VirtualMachine[] hostVms = host.getVms();
+                   
                     for (int v=0; v<hostVms.length; v++) {
                         VSphereResource vm = discoverVM(hostVms[v]);
                         if (vm != null) {
@@ -472,45 +532,53 @@ public class VCenterPlatformDetector {
         
         try {
             Agent agent = getAgent();
-            List<Resource> hosts = discoverHosts(vim, agent);
-            List<Resource> vms = new ArrayList<Resource>();
-            Map<String, List<Resource>> hostVmMap = new HashMap<String, List<Resource>>();
+            List<Resource> hosts = discoverHosts(agent);
+          
+            Map<String,VSphereResource> vms = new HashMap<String,VSphereResource>();
+            Map<String, List<VSphereResource>> vcHostVms = new HashMap<String, List<VSphereResource>>();
 
             for (Resource r : hosts) {
                 VSphereHostResource h = (VSphereHostResource) r;
-                vms.addAll(h.getVirtualMachines());
+                for(VSphereResource vmResource : h.getVirtualMachines()) {
+                    vms.put(getFqdn(vmResource), vmResource);
+                }
+               
                 String esxHost = getEsxHost(r);
                 if (esxHost != null) {
-                    hostVmMap.put(esxHost, h.getVirtualMachines());
+                    vcHostVms.put(esxHost, h.getVirtualMachines());
                 }
             }
             
+            Map<String,VSphereHostResource> vapps = discoverVApps(agent, vms);
+            
             if (isDump) {
-                dump(vms);
+                dump(vms.values());
                 dump(hosts);
             }
             else {
                 ResourceApi api = hqApi.getResourceApi();
 
                 StatusResponse response;
-                response = api.syncResources(vms);
+                response = api.syncResources(new ArrayList<Resource>(vms.values()));
                 assertSuccess(response, "sync " + vms.size() + " VMs", false);
                 response = api.syncResources(hosts);
                 assertSuccess(response, "sync " + hosts.size() + " Hosts", false);
                 
-                Map<String, Resource> hqHostResourceMap = new HashMap<String, Resource>();
-                Map<String, List<Resource>> hqHostVmMap = new HashMap<String, List<Resource>>();
-                syncResourceEdges(vim, hostVmMap, hqHostResourceMap,hqHostVmMap);
-                removeStaleServers(vim,hostVmMap, hqHostResourceMap, hqHostVmMap);
+                response = api.syncResources(new ArrayList<Resource>(vapps.values()));
+                assertSuccess(response, "sync " + vapps.size() + " vApps", false);
+                
+                Map<String, Resource> existingHosts = new HashMap<String, Resource>();
+                Map<String, List<Resource>> existingHostVms = new HashMap<String, List<Resource>>();
+                syncResourceEdges(existingHosts,existingHostVms, vapps);
+                //TODO add vApps to this removePlatformsFromInventory method
+                removePlatformsFromInventory(vcHostVms, existingHosts, existingHostVms);
             }
         } finally {
             VSphereUtil.dispose(vim);
         }
     }
-    
-    private void syncResourceEdges(VSphereUtil vim,
-                                   Map<String, List<Resource>> vcHostVmMap, 
-                                   Map<String, Resource> hqHostResourceMap, Map<String, List<Resource>> hqHostVmMap ) 
+     
+    private void syncResourceEdges(Map<String, Resource> existingHosts, Map<String, List<Resource>> existingHostVms, Map<String,VSphereHostResource> vcVapps ) 
         throws IOException, PluginException {
 
         String vCenterUrl = VSphereUtil.getURL(this.props);
@@ -524,10 +592,19 @@ public class VCenterPlatformDetector {
             }
             return;
         }
-        
+        synchVCenterServerToHostResourceEdges(vCenter, existingHosts);
+        ResourcePrototype vmType = getResourceType(VM_TYPE);
+        ResourcesResponse vmResponse = hqApi.getResourceApi().getResources(vmType, true, false);
+        assertSuccess(vmResponse, "Getting all " + VM_TYPE, false);
+
+        synchHostToVmResourceEdges(existingHostVms, existingHosts, vmResponse.getResource()); 
+        synchVAppToVmResourceEdges(vcVapps, vmResponse.getResource());
+    }
+    
+    private void synchVCenterServerToHostResourceEdges(Resource vCenter, Map<String, Resource> existingHosts ) throws IOException, PluginException{
+        String vCenterUrl = VSphereUtil.getURL(this.props);
         ResourceApi rApi = hqApi.getResourceApi();
         ResourceEdgeApi reApi = hqApi.getResourceEdgeApi();
-
         ResourcePrototype hostType = getResourceType(HOST_TYPE);
         ResourcesResponse hostResponse = rApi.getResources(hostType, true, false);
         assertSuccess(hostResponse, "Getting all " + HOST_TYPE, false);
@@ -543,7 +620,7 @@ public class VCenterPlatformDetector {
                 toHosts.getResource().add(r);
                 String esxHost = getEsxHost(r);
                 if (esxHost != null) {
-                    hqHostResourceMap.put(esxHost, r);
+                    existingHosts.put(esxHost, r);
                 }
             }
         }
@@ -562,33 +639,86 @@ public class VCenterPlatformDetector {
 
         StatusResponse syncResponse = reApi.syncResourceEdges(edges);
         assertSuccess(syncResponse, "Sync vCenter and host edges", false);
-        edges.clear();
+    }
+    
+    private Resource getVMByUUID(String uuid, List<Resource> vms) {
+        for(Resource vm: vms) {
+            List<ResourceConfig> configOpts = vm.getResourceConfig();
+            for(ResourceConfig configOpt : configOpts) {
+                if(configOpt.getKey().equals(VSphereCollector.PROP_UUID) && uuid.equals(configOpt.getValue())) {
+                    return vm;
+                }
+            }
+        }
+        return null;
+    }
+    
+    private void synchVAppToVmResourceEdges(Map<String,VSphereHostResource> vcVapps, List<Resource> vms) throws IOException, PluginException {
+        //TODO Assuming that we just need to create edges with recently found vApps.  
+        //Would a VM ever change vApps or unassociate from a vApp (in which case sync won't do the trick b/c RE has to be deleted)?
+        String vCenterUrl = VSphereUtil.getURL(this.props);
+        List<ResourceEdge> vappToVmEdges  = new ArrayList<ResourceEdge>();
 
-        ResourcePrototype vmType = getResourceType(VM_TYPE);
-        ResourcesResponse vmResponse = rApi.getResources(vmType, true, false);
-        assertSuccess(vmResponse, "Getting all " + VM_TYPE, false);
-        
-       
+        ResourcePrototype vappType = getResourceType(VAPP_TYPE);
+        ResourcesResponse vappResponse = hqApi.getResourceApi().getResources(vappType, true, false);
+        assertSuccess(vappResponse, "Getting all " + VAPP_TYPE, false);
 
-        for (Resource r : vmResponse.getResource()) {
+        for (Resource r : vappResponse.getResource()) {
+            if (isVCenterManagedEntity(vCenterUrl, r)) {
+                VSphereHostResource updatedVApp = vcVapps.get(getFqdn(r));
+                if(updatedVApp == null) {
+                    continue;
+                }
+                ResourceFrom parent = new ResourceFrom();
+                parent.setResource(r);
+                ResourceTo children = new ResourceTo();
+                List<VSphereResource> updatedVms = updatedVApp.getVirtualMachines();
+                for(VSphereResource updatedVm : updatedVms) {
+                    Resource vm = getVMByUUID(getFqdn(updatedVm), vms);
+                    if(vm != null) {
+                        children.getResource().add(vm);
+                    }
+                }               
+                ResourceEdge rEdge = new ResourceEdge();
+                rEdge.setRelation("virtual");
+                rEdge.setResourceFrom(parent);
+                rEdge.setResourceTo(children);
+                vappToVmEdges.add(rEdge);
+                if (log.isDebugEnabled()) {
+                    log.debug("Syncing resource edges for vApp[name=" + r.getName()
+                                + ", resourceId=" + r.getId()
+                                + "] with " + children.getResource().size() + " VMs.");
+                }
+            }
+        }
+     
+        StatusResponse syncResponse = hqApi.getResourceEdgeApi().syncResourceEdges(vappToVmEdges);
+        assertSuccess(syncResponse, "Sync vApp and VM edges", false);
+    }
+    
+    private void synchHostToVmResourceEdges( Map<String, List<Resource>> existingHostVms,  Map<String, Resource> existingHosts, List<Resource> vms) throws IOException, PluginException {
+        String vCenterUrl = VSphereUtil.getURL(this.props);
+        List<ResourceEdge> hostToVmEdges  = new ArrayList<ResourceEdge>();
+
+        for (Resource r : vms) {
             if (isVCenterManagedEntity(vCenterUrl, r)) {
                 String esxHost = getEsxHost(r);
-                List<Resource> vmResources = hqHostVmMap.get(esxHost);
+                List<Resource> vmResources = existingHostVms.get(esxHost);
                 if (vmResources == null) {
                     vmResources = new ArrayList<Resource>();
-                    hqHostVmMap.put(esxHost, vmResources);
+                    existingHostVms.put(esxHost, vmResources);
                 }
                 vmResources.add(r);
             }
         }
                 
-        for (Resource r : toHosts.getResource()) {
+        for (Resource r : existingHosts.values()) {
             ResourceFrom parent = new ResourceFrom();
             parent.setResource(r);
             
             ResourceTo children = new ResourceTo();
             String esxHost = getEsxHost(r);
-            List<Resource> vmResources = hqHostVmMap.get(esxHost);
+            List<Resource> vmResources = existingHostVms.get(esxHost);
             if (vmResources != null) {
                 children.getResource().addAll(vmResources);
             }
@@ -597,7 +727,7 @@ public class VCenterPlatformDetector {
             rEdge.setRelation("virtual");
             rEdge.setResourceFrom(parent);
             rEdge.setResourceTo(children);
-            edges.add(rEdge);
+            hostToVmEdges.add(rEdge);
             
             if (log.isDebugEnabled()) {
                 log.debug("Syncing resource edges for host[name=" + r.getName()
@@ -606,26 +736,25 @@ public class VCenterPlatformDetector {
             }
         }
         
-        syncResponse = reApi.syncResourceEdges(edges);
+        StatusResponse syncResponse = hqApi.getResourceEdgeApi().syncResourceEdges(hostToVmEdges);
         assertSuccess(syncResponse, "Sync host and VM edges", false);
-         
     }
     
     /**
      *  Delete resources that have been manually removed from vCenter
      */
-    private void removeStaleServers(VSphereUtil vim,  Map<String, List<Resource>> vcHostVmMap, 
-                                    Map<String, Resource> hqHostResourceMap, Map<String, List<Resource>> hqHostVmMap)  throws IOException, PluginException {
+    private void removePlatformsFromInventory(Map<String, List<VSphereResource>> vcHosts, 
+                                    Map<String, Resource> existingHosts, Map<String, List<Resource>> existingHostVms)  throws IOException, PluginException {
         //
-        for (String hostName : hqHostVmMap.keySet()) {
-            List<Resource> hqVms = hqHostVmMap.get(hostName);
-            List<Resource> vcVms = vcHostVmMap.get(hostName);
+        for (String hostName : existingHostVms.keySet()) {
+            List<Resource> hqVms = existingHostVms.get(hostName);
+            List<VSphereResource> vcVms = vcHosts.get(hostName);
             
             if (vcVms == null) {
                 // not one of the hosts in vCenter
-                Resource r = hqHostResourceMap.get(hostName);
+                Resource r = existingHosts.get(hostName);
                 if (r != null) {
-                    removeHost(vim, r);
+                    removeHost(r);
                 }
             } else {
                 // vm names may be the same, so use fqdn (uuid) to
@@ -643,7 +772,7 @@ public class VCenterPlatformDetector {
                     String fqdn = getFqdn(r);
                     if (fqdn != null && !vcVmFqdns.contains(fqdn)) {
                         // Not one of the powered-on VMs from vCenter
-                        removeVM(vim, r);
+                        removeVM(r);
                     }
                 }
             }
@@ -729,7 +858,7 @@ public class VCenterPlatformDetector {
         return name + " {" + uuid + "}";
     }
     
-    private void removeHost(VSphereUtil vim, Resource r)
+    private void removeHost(Resource r)
         throws IOException, PluginException {
         
         try {
@@ -745,7 +874,7 @@ public class VCenterPlatformDetector {
         }
     }
 
-    private void removeVM(VSphereUtil vim, Resource r)
+    private void removeVM(Resource r)
         throws IOException, PluginException {
     
         try {

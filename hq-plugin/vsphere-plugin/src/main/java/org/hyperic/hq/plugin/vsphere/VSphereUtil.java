@@ -26,8 +26,6 @@
 package org.hyperic.hq.plugin.vsphere;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.rmi.RemoteException;
@@ -47,7 +45,6 @@ import com.vmware.vim25.mo.HostSystem;
 import com.vmware.vim25.mo.InventoryNavigator;
 import com.vmware.vim25.mo.ManagedEntity;
 import com.vmware.vim25.mo.ManagedObject;
-import com.vmware.vim25.mo.ServerConnection;
 import com.vmware.vim25.mo.ServiceInstance;
 import com.vmware.vim25.mo.VirtualMachine;
 
@@ -57,11 +54,13 @@ public class VSphereUtil extends ServiceInstance {
     static final String HOST_SYSTEM = "HostSystem";
     static final String POOL = "ResourcePool";
     static final String VM = "VirtualMachine";
+    static final String VAPP = "VirtualApp";
 
     static final String PROP_URL = VSphereCollector.PROP_URL;
     static final String PROP_HOSTNAME = VSphereCollector.PROP_HOSTNAME;
     static final String PROP_USERNAME = VSphereCollector.PROP_USERNAME;
     static final String PROP_PASSWORD = VSphereCollector.PROP_PASSWORD;
+    
 
     private static final Log _log =
         LogFactory.getLog(VSphereUtil.class.getName());

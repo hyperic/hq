@@ -34,11 +34,11 @@ public class VCenterPlatformDetectorTest {
     
     private ResourceEdgeApi resourceEdgeApi;
     
-    private static final String VCENTER_URL= "https://10.150.29.72/sdk";
+    private static final String VCENTER_URL= "url";
     
-    private static final String VCENTER_UNAME = "administrator";
+    private static final String VCENTER_UNAME = "uname";
     
-    private static final String VCENTER_PW = "ca$hc0w";
+    private static final String VCENTER_PW = "pw";
     private static final int ESX_HOST_ID = 12345;
     
     private VSphereUtil vim;
@@ -64,7 +64,7 @@ public class VCenterPlatformDetectorTest {
 
     @Test
     public void testDiscoverPlatforms() throws Exception {
-        EasyMock.expect(hqApi.getResourceApi()).andReturn(resourceApi).times(11);
+        EasyMock.expect(hqApi.getResourceApi()).andReturn(resourceApi).times(15);
         ResourcePrototypeResponse protoResponse = new ResourcePrototypeResponse();
         protoResponse.setStatus(ResponseStatus.SUCCESS);
         ResourcePrototype vcType = new ResourcePrototype();
@@ -96,20 +96,31 @@ public class VCenterPlatformDetectorTest {
         vmProtoResponse.setResourcePrototype(vmType);
         EasyMock.expect(resourceApi.getResourcePrototype(VCenterPlatformDetector.VM_TYPE)).andReturn(vmProtoResponse).times(2);
         
+        ResourcePrototypeResponse vAppProtoResponse = new ResourcePrototypeResponse();
+        vAppProtoResponse.setStatus(ResponseStatus.SUCCESS);
+        ResourcePrototype vAppType = new ResourcePrototype();
+        vAppType.setName(VCenterPlatformDetector.VAPP_TYPE);
+        vAppProtoResponse.setResourcePrototype(vAppType);
+        EasyMock.expect(resourceApi.getResourcePrototype(VCenterPlatformDetector.VAPP_TYPE)).andReturn(vAppProtoResponse).times(2);
+        
+        
         StatusResponse genericSuccess =  new StatusResponse();
         genericSuccess.setStatus(ResponseStatus.SUCCESS);
         //TODO validate data being passed to syncResources
-        EasyMock.expect(resourceApi.syncResources(EasyMock.isA(List.class))).andReturn(genericSuccess).times(2);
-        EasyMock.expect(hqApi.getResourceEdgeApi()).andReturn(resourceEdgeApi);
+        EasyMock.expect(resourceApi.syncResources(EasyMock.isA(List.class))).andReturn(genericSuccess).times(3);
+        EasyMock.expect(hqApi.getResourceEdgeApi()).andReturn(resourceEdgeApi).times(3);
         
         ResourcesResponse esxHostResponse = getEsxHostResourceResponse(hostType);
         EasyMock.expect(resourceApi.getResources(hostType, true,false)).andReturn(esxHostResponse);
       
        //TODO validate data being passed to syncResourceEdges
-        EasyMock.expect(resourceEdgeApi.syncResourceEdges(EasyMock.isA(List.class))).andReturn(genericSuccess).times(2);
+        EasyMock.expect(resourceEdgeApi.syncResourceEdges(EasyMock.isA(List.class))).andReturn(genericSuccess).times(3);
         
         ResourcesResponse vmResponse = getVMResourceResponse(vmType);
         EasyMock.expect(resourceApi.getResources(vmType, true,false)).andReturn(vmResponse);
+        
+        ResourcesResponse vappResponse = getVAppResourceResponse(vAppType);
+        EasyMock.expect(resourceApi.getResources(vAppType, true,false)).andReturn(vappResponse);
         
         EasyMock.expect(resourceApi.deleteResource(ESX_HOST_ID)).andReturn(genericSuccess);
         replay();
@@ -161,12 +172,37 @@ public class VCenterPlatformDetectorTest {
         resourceConfig.setValue(VCENTER_URL);
         resource.getResourceConfig().add(resourceConfig);
         
+        ResourceConfig uuidConfig = new ResourceConfig();
+        uuidConfig.setKey(VSphereCollector.PROP_UUID);
+        uuidConfig.setValue("4206c445-7eb4-a72f-38c8-d865c4c374f2");
+        resource.getResourceConfig().add(uuidConfig);
+        
         ResourceProperty property =  new ResourceProperty();
         property.setKey(VCenterPlatformDetector.ESX_HOST);
         property.setValue("testEsx");
         resource.getResourceProperty().add(property);
         
         resource.setResourcePrototype(vmType);
+        ResourcesResponse response = new ResourcesResponse();
+        response.getResource().add(resource);
+        response.setStatus(ResponseStatus.SUCCESS);
+        return response;
+    }
+    
+    private ResourcesResponse getVAppResourceResponse(ResourcePrototype vAppType) {
+        Resource resource = new Resource();
+        resource.setName("JenApp");
+        ResourceConfig resourceConfig = new ResourceConfig();
+        resourceConfig.setKey(VSphereUtil.PROP_URL);
+        resourceConfig.setValue(VCENTER_URL);
+        resource.getResourceConfig().add(resourceConfig);
+        
+        ResourceInfo resourceInfo = new ResourceInfo();
+        resourceInfo.setKey("fqdn");
+        resourceInfo.setValue("resgroup-v327");
+        resource.getResourceInfo().add(resourceInfo);
+        
+        resource.setResourcePrototype(vAppType);
         ResourcesResponse response = new ResourcesResponse();
         response.getResource().add(resource);
         response.setStatus(ResponseStatus.SUCCESS);
