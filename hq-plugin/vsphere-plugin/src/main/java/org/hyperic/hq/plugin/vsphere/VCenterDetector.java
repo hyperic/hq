@@ -36,6 +36,7 @@ import org.hyperic.hq.agent.server.AgentDaemon;
 import org.hyperic.hq.agent.server.AgentStorageProvider;
 import org.hyperic.hq.agent.server.ConfigStorage;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.hqapi1.HQApi;
 import org.hyperic.hq.product.DaemonDetector;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
@@ -49,6 +50,37 @@ public class VCenterDetector extends DaemonDetector {
     // constants, so we need to define them again here.
     private static final String STORAGE_PREFIX  = "runtimeautodiscovery";
     private static final String STORAGE_KEYLIST = "runtimeAD-keylist";
+    static final String HQ_IP = "agent.setup.camIP";
+    static final String HQ_PORT = "agent.setup.camPort";
+    static final String HQ_SPORT = "agent.setup.camSSLPort";
+    static final String HQ_SSL = "agent.setup.camSecure";
+    static final String HQ_USER = "agent.setup.camLogin";
+    static final String HQ_PASS = "agent.setup.camPword";
+    
+    //XXX future HQ/pdk should provide this.
+    private HQApi getApi(Properties props) {
+        boolean isSecure;
+        String scheme;
+        String host = props.getProperty(HQ_IP, "localhost");
+        String port;
+        if ("yes".equals(props.getProperty(HQ_SSL))) {
+            isSecure = true;
+            port = props.getProperty(HQ_SPORT, "7443");
+            scheme = "https";
+        }
+        else {
+            isSecure = false;
+            port = props.getProperty(HQ_PORT, "7080");
+            scheme = "http";
+        }
+        String user = props.getProperty(HQ_USER, "hqadmin");
+        String pass =  props.getProperty(HQ_PASS, "hqadmin");
+
+        HQApi api = new HQApi(host, Integer.parseInt(port), isSecure, user, pass);
+        _log.debug("Using HQApi at " + scheme + "://" + host + ":" + port);
+        return api;
+    }
+
 
     /**
      * FIXME: This will be executed twice during a runtime scan,
@@ -61,7 +93,7 @@ public class VCenterDetector extends DaemonDetector {
         props.putAll(getManager().getProperties());
         props.putAll(config.toProperties());
 
-        VCenterPlatformDetector vpd = new VCenterPlatformDetector(props);
+        VCenterPlatformDetector vpd = new VCenterPlatformDetector(props, getApi(props), VSphereUtil.getInstance(props));
         try {
             vpd.discoverPlatforms();
         } catch (IOException e) {
