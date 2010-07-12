@@ -1952,7 +1952,7 @@
 
     <!-- Copy SNMP and RT packages -->
     <copy toDir="${archive-dir}/agent-${version}/bundles/${agent.bundle.dir}/product_connectors">
-      <fileset dir="${hq.bin}/product_connectors">
+      <fileset dir="${hq.bin}/product_connectors" excludes=".git/">
         <include name="**" />
       </fileset>
     </copy>

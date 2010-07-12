@@ -133,7 +133,7 @@
 
     <!-- Copy SNMP and RT packages -->
     <copy toDir="${connectors.dir}">
-      <fileset dir="${hq.bin}/product_connectors">
+      <fileset dir="${hq.bin}/product_connectors" excludes=".git/">
         <include name="**" />
       </fileset>
     </copy>
