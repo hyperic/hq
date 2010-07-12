@@ -62,10 +62,7 @@ import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
 import org.hyperic.util.timer.StopWatch;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -78,7 +75,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-public class AlertDefinitionManagerImpl implements AlertDefinitionManager, ApplicationContextAware {
+public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
     private Log log = LogFactory.getLog(AlertDefinitionManagerImpl.class);
 
     private AlertPermissionManager alertPermissionManager;
@@ -105,14 +102,15 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
 
     private AlertAuditFactory alertAuditFactory;
     
-    private ApplicationContext applicationContext;
+    private AvailabilityDownAlertDefinitionCache availabilityDownAlertDefinitionCache;
 
     @Autowired
     public AlertDefinitionManagerImpl(AlertPermissionManager alertPermissionManager, AlertDefinitionDAO alertDefDao,
                                       ActionDAO actionDao, AlertConditionDAO alertConditionDAO, 
                                       MeasurementDAO measurementDAO, RegisteredTriggerManager registeredTriggerManager,
                                       ResourceManager resourceManager, EscalationManager escalationManager,
-                                      AlertAuditFactory alertAuditFactory, AlertDAO alertDAO) {
+                                      AlertAuditFactory alertAuditFactory, AlertDAO alertDAO, 
+                                      AvailabilityDownAlertDefinitionCache availabilityDownAlertDefinitionCache) {
         this.alertPermissionManager = alertPermissionManager;
         this.alertDefDao = alertDefDao;
         this.actionDao = actionDao;
@@ -123,6 +121,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
         this.escalationManager = escalationManager;
         this.alertAuditFactory = alertAuditFactory;
         this.alertDAO = alertDAO;
+        this.availabilityDownAlertDefinitionCache = availabilityDownAlertDefinitionCache;
     }
 
     @PostConstruct
@@ -140,7 +139,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
         }
         watch.markTimeEnd("endEscalation");
 
-        applicationContext.publishEvent(new AlertDefinitionDeletedEvent(alertdef));
+        availabilityDownAlertDefinitionCache.removeFromCache(alertdef);
 
         if (log.isDebugEnabled()) {
             log.debug("deleteAlertDefinitionStuff: " + watch);
@@ -306,8 +305,8 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
         // Alert definitions are the root of the cascade relationship, so
         // we must explicitly save them
         alertDefDao.save(res);
-
-        applicationContext.publishEvent(new AlertDefinitionCreatedEvent(res));
+        
+        availabilityDownAlertDefinitionCache.removeFromCache(res);
 
         return res.getAlertDefinitionValue();
     }
@@ -352,7 +351,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
             }
             child.setMtime(System.currentTimeMillis());
 
-            applicationContext.publishEvent(new AlertDefinitionChangedEvent(child));
+            availabilityDownAlertDefinitionCache.removeFromCache(child);
         }
         if (debug) {
             watch.markTimeEnd("updateBasic");
@@ -514,7 +513,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
         // we must explicitly save them
         alertDefDao.save(aldef);
 
-        applicationContext.publishEvent(new AlertDefinitionChangedEvent(aldef));
+        availabilityDownAlertDefinitionCache.removeFromCache(aldef);
 
         return aldef.getAlertDefinitionValue();
     }
@@ -566,7 +565,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
 
         alertDefDao.setChildrenActive(def, activate);
 
-        applicationContext.publishEvent(new AlertDefinitionChangedEvent(def));
+        availabilityDownAlertDefinitionCache.removeFromCache(def);
     }
 
     /**
@@ -1101,9 +1100,5 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
     @Transactional(readOnly=true)
     public int getActiveCount() {
         return alertDefDao.getNumActiveDefs();
-    }
-
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-       this.applicationContext = applicationContext;
     }
 }
