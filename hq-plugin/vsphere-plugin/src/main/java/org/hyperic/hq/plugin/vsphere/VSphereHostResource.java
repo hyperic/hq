@@ -28,13 +28,15 @@ package org.hyperic.hq.plugin.vsphere;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hyperic.hq.hqapi1.types.Resource;
+
 public class VSphereHostResource extends VSphereResource {
 
-    private List<VSphereResource> vms;
+    private List<Resource> vms;
     
-    public List<VSphereResource> getVirtualMachines() {
+    public List<Resource> getVirtualMachines() {
         if (this.vms == null) {
-            this.vms = new ArrayList<VSphereResource>();
+            this.vms = new ArrayList<Resource>();
         }
         return this.vms;
     }

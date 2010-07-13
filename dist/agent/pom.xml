@@ -398,6 +398,13 @@
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>vsphere-resources-plugin</artifactId>
+			<version>${project.version}</version>
+			<classifier>agent</classifier>
+		    <type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>servlet-plugin</artifactId>
 			<version>${project.version}</version>
 		</dependency>

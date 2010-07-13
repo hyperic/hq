@@ -54,7 +54,6 @@ public class VSphereUtil extends ServiceInstance {
     static final String HOST_SYSTEM = "HostSystem";
     static final String POOL = "ResourcePool";
     static final String VM = "VirtualMachine";
-    static final String VAPP = "VirtualApp";
 
     static final String PROP_URL = VSphereCollector.PROP_URL;
     static final String PROP_HOSTNAME = VSphereCollector.PROP_HOSTNAME;

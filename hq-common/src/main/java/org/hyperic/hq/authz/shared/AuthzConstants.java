@@ -147,7 +147,6 @@ public final class AuthzConstants {
     
     public static final String platformPrototypeVmwareVsphereVm = "VMware vSphere VM";
     public static final String platformPrototypeVmwareVsphereHost = "VMware vSphere Host";
-    public static final String PLATFORM_PROTOTYPE_VMWARE_VSPHERE_VAPP = "VMware vSphere vApp";
     public static final String serverPrototypeVmwareVcenter = "VMware vCenter";
         
     public static final String rootOpCAMAdmin = "administerCAM";
