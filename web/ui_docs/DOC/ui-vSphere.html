@@ -16,16 +16,16 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jul 08, 2010 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jul 12, 2010 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><b>Available only in <font color="red">HQ Enterprise</font></b></p>
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1278627539743 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1278627539743 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1278627539743 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1278974000295 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1278974000295 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1278974000295 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1278627539743'>
+/*]]>*/</style><div class='rbtoc1278974000295'>
 <ul>
     <li><a href='#ui-vSphere-AbouttheHQvSpherePage'>About the HQ vSphere Page</a></li>
 <ul>
@@ -62,7 +62,7 @@ div.rbtoc1278627539743 li {margin-left: 0px;padding-left: 0px;}
 <br class="atl-forced-newline" />
 <br class="atl-forced-newline" />
 <a name="ui-vSphere-installagent"></a></p>
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>"Performance data not available?"</b><br />The <b>Performance</b> tab is present for a VM only if there is an HQ Agent running in the VM. For information about installing an HQ Agent, see <a href="http://support.hyperic.com/confluence/display/DOC/Configure+and+Run+the+HQ+Agent" title="Configure and Run the HQ Agent">Configure and Run the HQ Agent</a>.</td></tr></table></div>
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>"Performance data not available?"</b><br />The <b>Performance</b> tab appears for a VM only if there is an HQ Agent running in the VM. For information about installing an HQ Agent, see <a href="http://support.hyperic.com/confluence/display/DOC/Configure+and+Run+the+HQ+Agent" title="Configure and Run the HQ Agent">Configure and Run the HQ Agent</a>.</td></tr></table></div>
 
 <h2><a name="ui-vSphere-DisplaytheHQvSpherePage"></a>Display the HQ vSphere Page</h2>
 
@@ -88,21 +88,42 @@ div.rbtoc1278627539743 li {margin-left: 0px;padding-left: 0px;}
 
 <h1><a name="ui-vSphere-HQvSphereInventoryTab"></a>HQ vSphere Inventory Tab</h1>
 
-<p>The <b>Inventory</b> tab on the <b>HQ vSphere</b> page is a tree of the vSphere resources under HQ management, organized in the resource type hierarchy shown below. The lowest level is present for a VM that has an HQ Agent running and monitoring resources running in the VM.</p>
+<p>The <b>Inventory</b> tab on the <b>HQ vSphere</b> page is a tree of the vSphere resources under HQ management, organized in the resource type hierarchy shown below. The lowest level appears for a VM that has an HQ Agent running and monitoring resources running in the VM.</p>
+
+<p>The contents of the <b>Inventory</b> tab are updated once per minute.</p>
 
 <p>You can use the <b>Inventory</b> tab to view the virtual resource hierarchy and to navigate among resources. When you select a resource, the tab or tabs on the right side of the page contain resource data, performance charts, and resource control commands, as appropriate to the resource type.</p>
 
-<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
-<pre class="code-java">
-VMware vCenter
-\\HQ inventory model type: Server
-VMware vSphere Host    \\HQ inventory model type: Platform (as used to model virtual/network hosts)
-       VMware vSphere VM
-        \HQ inventory model type: Platform (as used to model virtual/network hosts)
-            HQ Agent-managed Resource running in VM
-            \\HQ inventory model type: Server
-</pre>
-</div></div>
+<p>The table below shows the vSphere resource type hierarchy; the right column indicates the inventory level for a type in the HQ inventory model. &nbsp;&nbsp;</p>
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<td class='confluenceTd'> <b>Vsphere Resource Hierarchy</b> </td>
+<td class='confluenceTd'> <b>Inventory Type</b> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VMware vCenter<br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> server </td>
+</tr>
+<tr>
+<td class='confluenceTd'> &nbsp; &nbsp; VMware vSphere Host<br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> platform </td>
+</tr>
+<tr>
+<td class='confluenceTd'> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;VMware vSphere VM<br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> platform </td>
+</tr>
+<tr>
+<td class='confluenceTd'> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; HQ Agent-managed resource in VM &nbsp; &nbsp; &nbsp;&nbsp;<br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> server </td>
+</tr>
+</tbody></table>
+</div>
+
+<p><br class="atl-forced-newline" />
+<br class="atl-forced-newline" />
+<br class="atl-forced-newline" /></p>
+
 
 
 <p>Click the thumbnail to see an expanded hierarchy in the <b>Inventory</b> tab.<br/>
@@ -113,31 +134,31 @@ VMware vSphere Host    \\HQ inventory model type: Platform (as used to model vir
 <table class='confluenceTable'><tbody>
 <tr>
 <td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/66926072/71925830.png" width="20" style="border: 0px solid black"/></span> </td>
-<td class='confluenceTd'>vCenter Server </td>
+<td class='confluenceTd'> vCenter Server </td>
 </tr>
 <tr>
 <td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/66926072/71925840.png" width="20" style="border: 0px solid black"/></span> </td>
-<td class='confluenceTd'>vSphere Host </td>
+<td class='confluenceTd'> vSphere Host </td>
 </tr>
 <tr>
 <td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/66926072/71925832.png" width="20" style="border: 0px solid black"/></span> </td>
-<td class='confluenceTd'>VM whose availability status is "up'. </td>
+<td class='confluenceTd'> VM whose availability status is "up". </td>
 </tr>
 <tr>
 <td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/66926072/71925823.png" width="20" style="border: 0px solid black"/></span> </td>
-<td class='confluenceTd'>VM whose availability status is "paused". </td>
+<td class='confluenceTd'> VM whose availability status is "paused". </td>
 </tr>
 <tr>
 <td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/66926072/71925829.png" width="20" style="border: 0px solid black"/></span> </td>
-<td class='confluenceTd'>VM whose availability status is "down". </td>
+<td class='confluenceTd'> VM whose availability status is "down". </td>
 </tr>
 <tr>
 <td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/66926072/71925824.png" width="20" style="border: 0px solid black"/></span> </td>
-<td class='confluenceTd'>VM whose availability status is unknown. </td>
+<td class='confluenceTd'> VM whose availability status is unknown. </td>
 </tr>
 <tr>
 <td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/66926072/71925839.png" width="20" style="border: 0px solid black"/></span> </td>
-<td class='confluenceTd'>An HQ-managed resource running in a VM that has an HQ Agent running in it.</td>
+<td class='confluenceTd'> An HQ-managed resource running in a VM that has an HQ Agent running in it. </td>
 </tr>
 </tbody></table>
 </div>
@@ -145,7 +166,7 @@ VMware vSphere Host    \\HQ inventory model type: Platform (as used to model vir
 
 <h1><a name="ui-vSphere-HQvSphereSummaryTab"></a>HQ vSphere Summary Tab</h1>
 
-<p>The <b>Summary</b> tab, present when any resource in the <b>Inventory</b> tab is selected, displays properties for the selected resource, and its parent resource, as applicable.</p>
+<p>The <b>Summary</b> tab, available when any resource in the <b>Inventory</b> tab is selected, displays properties for the selected resource, and its parent resource, as applicable.</p>
 
 <div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Jump to Resource Hub View of a Resource</b><br />To view a vSphere resource in the HQ resource hub - for instance to visit its <b>Inventory</b> or <b>Alert</b> page - click the <b>view resource</b> link to the right of the resource name.</td></tr></table></div>
 
@@ -218,7 +239,11 @@ VMware vSphere Host    \\HQ inventory model type: Platform (as used to model vir
 
 <p><b>Note:</b> This information applies to a VM with a running HQ Agent that is managing resources in the VM. Otherwise, resources running in the VM do not appear in the <b>HQ vSphere</b> page.</p>
 
-<p>When you select a managed resource running in a VM, the <b>Summary</b> tab displays the vSphere Host and VM properties described in <a href="#ui-vSphere-SummaryTabforvSphereVM">Summary Tab for vSphere VM</a>. Click the thumbnail for an example screenshot; the  selected resource is a DB2 server running on a VM whose name is "vmcent54x64-db297".</p>
+<p>When you select a managed resource running in a VM, the <b>Summary</b> tab displays the vSphere Host and VM properties described in <a href="#ui-vSphere-SummaryTabforvSphereVM">Summary Tab for vSphere VM</a>. </p>
+
+<p>The contents of the <b>Summary</b> tab are updated once per minute.</p>
+
+<p>Click the thumbnail for an example screenshot; the  selected resource is a DB2 server running on a VM whose name is "vmcent54x64-db297".</p>
 
 <p><span class="image-wrap" style=""><a class="confluence-thumbnail-link 1014x699" href='http://support.hyperic.com/confluence/download/attachments/66915257/ServerInVmSummaryTab.png'><img src="attachments/thumbnails/66915257/71925785" style="border: 0px solid black"/></a></span></p>
 
@@ -226,9 +251,10 @@ VMware vSphere Host    \\HQ inventory model type: Platform (as used to model vir
 
 <h1><a name="ui-vSphere-HQvSpherePerformanceTab"></a>HQ vSphere Performance Tab</h1>
 
-<p>The <b>Performance</b> tab is present when a vSphere Host is selected, and, if the VMs running on the host have HQ Agents running, for each VM, and for the managed resources running in the VMs.</p>
+<p>The <b>Performance</b> tab appears when a vSphere Host is selected, and, if the VMs running on the host have HQ Agents running, for each VM, and for the managed resources running in the VMs.</p>
 
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>If a VM does not have an agent running in it, no <b>Performance</b> tab is present. You can view the VM metrics in its <b>Monitor</b> page in the Resource Hub. Click <b>view resource</b> next to the "Hostname" property on the VM's <b>Summary</b> tab.</td></tr></table></div>
+<p>The contents of the <b>Performance</b> tab are updated once per minute.</p>
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>If a VM does not have an agent running in it, no <b>Performance</b> tab appears. You can view the VM metrics in its <b>Monitor</b> page in the Resource Hub. Click <b>view resource</b> next to the "Hostname" property on the VM's <b>Summary</b> tab.</td></tr></table></div>
 
 <h2><a name="ui-vSphere-ViewMetrics"></a>View Metrics</h2>
 
@@ -276,13 +302,13 @@ VMware vSphere Host    \\HQ inventory model type: Platform (as used to model vir
 
 <h1><a name="ui-vSphere-HQvSphereControlTab"></a>HQ vSphere Control Tab</h1>
 
-<p>The The <b>Control</b> tab is present when a VM is selected (if there is an HQ Agent running in the VM) and allows you to issue a control command to the VM. See <a href="http://support.hyperic.com/confluence/display/DOC/Monitoring+vSphere+Components#MonitoringvSphereComponents-control">Management Functions for VMware VSphere VM</a> for information about the supported control actions.</p>
+<p>The The <b>Control</b> tab appears when a VM is selected (if there is an HQ Agent running in the VM) and allows you to issue a control command to the VM. See <a href="http://support.hyperic.com/confluence/display/DOC/Monitoring+vSphere+Components#MonitoringvSphereComponents-control">Management Functions for VMware VSphere VM</a> for information about the supported control actions.</p>
 
 <p>Click the thumbnail to see the an example screenshot.</p>
 
 <p><span class="image-wrap" style=""><a class="confluence-thumbnail-link 992x819" href='http://support.hyperic.com/confluence/download/attachments/66915257/VmControlTab.png'><img src="attachments/thumbnails/66915257/71598145" style="border: 0px solid black"/></a></span></p>
 
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>If a VM does not have an agent running in it, no <b>Control</b> tab is present. You can run control actions from the "Control" page for the VM in the Resource Hub. Click <b>view resource</b> next to the "Hostname" property on the VM's <b>Summary</b> tab.</td></tr></table></div>
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>If a VM does not have an agent running in it, no <b>Control</b> tab appears. You can run control actions from the "Control" page for the VM in the Resource Hub. Click <b>view resource</b> next to the "Hostname" property on the VM's <b>Summary</b> tab.</td></tr></table></div>
 
 <h1><a name="ui-vSphere-Metrics"></a>Metrics</h1>
 
@@ -293,6 +319,7 @@ VMware vSphere Host    \\HQ inventory model type: Platform (as used to model vir
 <tr>
 <th class='confluenceTh'> Name </th>
 <th class='confluenceTh'> Alias </th>
+<th class='confluenceTh'> vCenter Statistics Level </th>
 <th class='confluenceTh'> Definition </th>
 <th class='confluenceTh'> Units </th>
 <th class='confluenceTh'> Category </th>
@@ -302,6 +329,7 @@ VMware vSphere Host    \\HQ inventory model type: Platform (as used to model vir
 <tr>
 <td class='confluenceTd'> <font color="navy">Availability</font> </td>
 <td class='confluenceTd'> <font color="navy">Availability</font> </td>
+<td class='confluenceTd'>&nbsp;</td>
 <td class='confluenceTd'> The plugin collects the power state of the host once per minute, by default.  If the power state is: <br class="atl-forced-newline" />
 <ul>
 	<li><tt>poweredOn</tt> &#45; Availability state is "up"</li>
@@ -319,6 +347,7 @@ VMware vSphere Host    \\HQ inventory model type: Platform (as used to model vir
 <td class='confluenceTd'> <font color="gray">Uptime</font> </td>
 <td class='confluenceTd'> <font color="gray">sys.uptime.latest</font> </td>
 <td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
 <td class='confluenceTd'> <font color="gray">sec</font> </td>
 <td class='confluenceTd'> <font color="gray">AVAILABILITY</font> </td>
 <td class='confluenceTd'> <font color="gray">false</font> </td>
@@ -327,6 +356,7 @@ VMware vSphere Host    \\HQ inventory model type: Platform (as used to model vir
 <tr>
 <td class='confluenceTd'> <font color="navy">CPU Usage (Average)</font> </td>
 <td class='confluenceTd'> <font color="navy">cpu.usage.average</font> </td>
+<td class='confluenceTd'> 1 </td>
 <td class='confluenceTd'> CPU usage as a percentage during the interval. <br class="atl-forced-newline" />
 Actively used CPU of the host, as a percentage of the total available CPU. Active CPU is approximately equal to the ratio of the used CPU to the available CPU. <br class="atl-forced-newline" />
 available CPU = # of physical CPUs × clock rate <br class="atl-forced-newline" />
@@ -339,6 +369,7 @@ available CPU = # of physical CPUs × clock rate <br class="atl-forced-newline" 
 <tr>
 <td class='confluenceTd'> <font color="navy">Disk Usage (Average)</font> </td>
 <td class='confluenceTd'> <font color="navy">disk.usage.average</font> </td>
+<td class='confluenceTd'> 1 </td>
 <td class='confluenceTd'>&nbsp;</td>
 <td class='confluenceTd'> <font color="navy">KB</font> </td>
 <td class='confluenceTd'> <font color="navy">UTILIZATION</font> </td>
@@ -348,6 +379,7 @@ available CPU = # of physical CPUs × clock rate <br class="atl-forced-newline" 
 <tr>
 <td class='confluenceTd'> <font color="navy">Highest Disk Latency</font> </td>
 <td class='confluenceTd'> <font color="navy">disk.maxTotalLatency.latest</font> </td>
+<td class='confluenceTd'> 1 </td>
 <td class='confluenceTd'> Highest latency value across all disks used by the host. Latency measures the time taken to process a SCSI command issued by the guest OS to the virtual machine. The kernel latency is the time VMkernel takes to process an IO request. The device latency is the time it takes the hardware to handle the request. <br class="atl-forced-newline" />
 Total latency = kernelLatency + deviceLatency <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> <font color="navy">ms</font> </td>
@@ -358,6 +390,7 @@ Total latency = kernelLatency + deviceLatency <br class="atl-forced-newline" /> 
 <tr>
 <td class='confluenceTd'> <font color="navy">Memory Usage (Average)</font> </td>
 <td class='confluenceTd'> <font color="navy">mem.usage.average</font> </td>
+<td class='confluenceTd'> 1 </td>
 <td class='confluenceTd'> memory usage = memory consumed ÷ host configured memory size <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> <font color="navy">percent</font> </td>
 <td class='confluenceTd'> <font color="navy">UTILIZATION</font> </td>
@@ -367,6 +400,7 @@ Total latency = kernelLatency + deviceLatency <br class="atl-forced-newline" /> 
 <tr>
 <td class='confluenceTd'> <font color="navy">Network Usage (Average)</font> </td>
 <td class='confluenceTd'> <font color="navy">net.usage.average</font> </td>
+<td class='confluenceTd'> 1 </td>
 <td class='confluenceTd'> Sum of the data transmitted and received during the collection interval.Sum of data transmitted and received across all physical NIC instances connected to the host. <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> <font color="navy">KB</font> </td>
 <td class='confluenceTd'> <font color="navy">UTILIZATION</font> </td>
@@ -376,6 +410,7 @@ Total latency = kernelLatency + deviceLatency <br class="atl-forced-newline" /> 
 <tr>
 <td class='confluenceTd'> <font color="gray">CPU Reserved Capacity</font> </td>
 <td class='confluenceTd'> <font color="gray">cpu.reservedCapacity.average</font> </td>
+<td class='confluenceTd'> 2 </td>
 <td class='confluenceTd'> Total CPU capacity reserved by the virtual machines. <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> <font color="gray">none</font> </td>
 <td class='confluenceTd'> <font color="gray">UTILIZATION</font> </td>
@@ -385,6 +420,7 @@ Total latency = kernelLatency + deviceLatency <br class="atl-forced-newline" /> 
 <tr>
 <td class='confluenceTd'> <font color="gray">CPU Throttled (1 min. Average)</font> </td>
 <td class='confluenceTd'> <font color="gray">rescpu.maxLimited1.latest</font> </td>
+<td class='confluenceTd'> 3 </td>
 <td class='confluenceTd'>&nbsp;</td>
 <td class='confluenceTd'> <font color="gray">percent</font> </td>
 <td class='confluenceTd'> <font color="gray">UTILIZATION</font> </td>
@@ -394,6 +430,7 @@ Total latency = kernelLatency + deviceLatency <br class="atl-forced-newline" /> 
 <tr>
 <td class='confluenceTd'> <font color="gray">CPU Throttled (5 min. Average)</font> </td>
 <td class='confluenceTd'> <font color="gray">rescpu.maxLimited5.latest</font> </td>
+<td class='confluenceTd'> 3 </td>
 <td class='confluenceTd'>&nbsp;</td>
 <td class='confluenceTd'> <font color="gray">percent</font> </td>
 <td class='confluenceTd'> <font color="gray">UTILIZATION</font> </td>
@@ -403,6 +440,7 @@ Total latency = kernelLatency + deviceLatency <br class="atl-forced-newline" /> 
 <tr>
 <td class='confluenceTd'> <font color="gray">CPU Throttled (15 min. Average)</font> </td>
 <td class='confluenceTd'> <font color="gray">rescpu.maxLimited15.latest</font> </td>
+<td class='confluenceTd'> 3 </td>
 <td class='confluenceTd'>&nbsp;</td>
 <td class='confluenceTd'> <font color="gray">percent</font> </td>
 <td class='confluenceTd'> <font color="gray">UTILIZATION</font> </td>
@@ -412,6 +450,7 @@ Total latency = kernelLatency + deviceLatency <br class="atl-forced-newline" /> 
 <tr>
 <td class='confluenceTd'> <font color="gray">CPU Running (1 min. Average)</font> </td>
 <td class='confluenceTd'> <font color="gray">rescpu.runav1.latest</font> </td>
+<td class='confluenceTd'> 3 </td>
 <td class='confluenceTd'>&nbsp;</td>
 <td class='confluenceTd'> <font color="gray">percent</font> </td>
 <td class='confluenceTd'> <font color="gray">UTILIZATION</font> </td>
@@ -421,6 +460,7 @@ Total latency = kernelLatency + deviceLatency <br class="atl-forced-newline" /> 
 <tr>
 <td class='confluenceTd'> <font color="gray">CPU Running (5 min. Average)</font> </td>
 <td class='confluenceTd'> <font color="gray">rescpu.runav5.latest</font> </td>
+<td class='confluenceTd'> 3 </td>
 <td class='confluenceTd'>&nbsp;</td>
 <td class='confluenceTd'> <font color="gray">percent</font> </td>
 <td class='confluenceTd'> <font color="gray">UTILIZATION</font> </td>
@@ -430,6 +470,7 @@ Total latency = kernelLatency + deviceLatency <br class="atl-forced-newline" /> 
 <tr>
 <td class='confluenceTd'> <font color="gray">CPU Running (15 min. Average)</font> </td>
 <td class='confluenceTd'> <font color="gray">rescpu.runav15.latest</font> </td>
+<td class='confluenceTd'> 3 </td>
 <td class='confluenceTd'>&nbsp;</td>
 <td class='confluenceTd'> <font color="gray">percent</font> </td>
 <td class='confluenceTd'> <font color="gray">UTILIZATION</font> </td>
@@ -439,6 +480,7 @@ Total latency = kernelLatency + deviceLatency <br class="atl-forced-newline" /> 
 <tr>
 <td class='confluenceTd'> <font color="gray">CPU Active (1 min. Average)</font> </td>
 <td class='confluenceTd'> <font color="gray">rescpu.actav1.latest</font> </td>
+<td class='confluenceTd'> 3 </td>
 <td class='confluenceTd'>&nbsp;</td>
 <td class='confluenceTd'> <font color="gray">percent</font> </td>
 <td class='confluenceTd'> <font color="gray">UTILIZATION</font> </td>
@@ -448,6 +490,7 @@ Total latency = kernelLatency + deviceLatency <br class="atl-forced-newline" /> 
 <tr>
 <td class='confluenceTd'> <font color="gray">CPU Active (5 min. Average)</font> </td>
 <td class='confluenceTd'> <font color="gray">rescpu.actav5.latest</font> </td>
+<td class='confluenceTd'> 3 </td>
 <td class='confluenceTd'>&nbsp;</td>
 <td class='confluenceTd'> <font color="gray">percent</font> </td>
 <td class='confluenceTd'> <font color="gray">UTILIZATION</font> </td>
@@ -457,6 +500,7 @@ Total latency = kernelLatency + deviceLatency <br class="atl-forced-newline" /> 
 <tr>
 <td class='confluenceTd'> <font color="gray">CPU Active (15 min. Average)</font> </td>
 <td class='confluenceTd'> <font color="gray">rescpu.actav15.latest</font> </td>
+<td class='confluenceTd'> 3 </td>
 <td class='confluenceTd'>&nbsp;</td>
 <td class='confluenceTd'> <font color="gray">percent</font> </td>
 <td class='confluenceTd'> <font color="gray">UTILIZATION</font> </td>
@@ -466,6 +510,7 @@ Total latency = kernelLatency + deviceLatency <br class="atl-forced-newline" /> 
 <tr>
 <td class='confluenceTd'> <font color="gray">Memory Swap In</font> </td>
 <td class='confluenceTd'> <font color="gray">mem.swapin.average</font> </td>
+<td class='confluenceTd'> 2 </td>
 <td class='confluenceTd'> Sum of memory swapin of all powered on VMs on the host. <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> <font color="gray">KB</font> </td>
 <td class='confluenceTd'> <font color="gray">UTILIZATION</font> </td>
@@ -475,6 +520,7 @@ Total latency = kernelLatency + deviceLatency <br class="atl-forced-newline" /> 
 <tr>
 <td class='confluenceTd'> <font color="gray">Memory Swap Out</font> </td>
 <td class='confluenceTd'> <font color="gray">mem.swapout.average</font> </td>
+<td class='confluenceTd'> 2 </td>
 <td class='confluenceTd'> Sum of Memory Swap Out of all powered on VMs on the host. <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> <font color="gray">KB</font> </td>
 <td class='confluenceTd'> <font color="gray">UTILIZATION</font> </td>
@@ -484,6 +530,7 @@ Total latency = kernelLatency + deviceLatency <br class="atl-forced-newline" /> 
 <tr>
 <td class='confluenceTd'> <font color="gray">Memory Swap Used</font> </td>
 <td class='confluenceTd'> <font color="gray">mem.swapused.average</font> </td>
+<td class='confluenceTd'> 2 </td>
 <td class='confluenceTd'> Amount of memory that is used by swap. Sum of Memory Swapped of all powered on virtual machines and vSphere services on the host. <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> <font color="gray">KB</font> </td>
 <td class='confluenceTd'> <font color="gray">UTILIZATION</font> </td>
@@ -493,6 +540,7 @@ Total latency = kernelLatency + deviceLatency <br class="atl-forced-newline" /> 
 <tr>
 <td class='confluenceTd'> <font color="navy">Memory Balloon</font> </td>
 <td class='confluenceTd'> <font color="navy">mem.vmmemctl.average</font> </td>
+<td class='confluenceTd'> 1 </td>
 <td class='confluenceTd'> Sum of Memory Balloon (Amount of memory allocated by the virtual machine memory control driver) of all powered on virtual machines and vSphere services on the host. If the balloon target value is greater than the balloon value, the VMkernel inflates the balloon, causing more virtual machine memory to be reclaimed. If the balloon target value is less than the balloon value, the VMkernel deflate the balloon, which allows the virtual machine to consume additional memory if needed. <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> <font color="navy">KB</font> </td>
 <td class='confluenceTd'> <font color="navy">UTILIZATION</font> </td>
@@ -502,6 +550,7 @@ Total latency = kernelLatency + deviceLatency <br class="atl-forced-newline" /> 
 <tr>
 <td class='confluenceTd'> <font color="gray">Memory Unreserved</font> </td>
 <td class='confluenceTd'> <font color="gray">mem.unreserved.average</font> </td>
+<td class='confluenceTd'> 2 </td>
 <td class='confluenceTd'> Amount of memory that is unreserved. Memory reservation not used by the Service Console, VMkernel, vSphere services and other powered on VMs’ user-specified memory reservations and overhead memory. <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> <font color="gray">KB</font> </td>
 <td class='confluenceTd'> <font color="gray">UTILIZATION</font> </td>
@@ -511,6 +560,7 @@ Total latency = kernelLatency + deviceLatency <br class="atl-forced-newline" /> 
 <tr>
 <td class='confluenceTd'> <font color="gray">Memory Heap</font> </td>
 <td class='confluenceTd'> <font color="gray">mem.heap.average</font> </td>
+<td class='confluenceTd'> 2 </td>
 <td class='confluenceTd'> Amount of VMkernel virtual address space dedicated to VMkernel main heap and related data. <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> <font color="gray">KB</font> </td>
 <td class='confluenceTd'> <font color="gray">UTILIZATION</font> </td>
@@ -520,6 +570,7 @@ Total latency = kernelLatency + deviceLatency <br class="atl-forced-newline" /> 
 <tr>
 <td class='confluenceTd'> <font color="gray">Memory Heap Free</font> </td>
 <td class='confluenceTd'> <font color="gray">mem.heapfree.average</font> </td>
+<td class='confluenceTd'> 2 </td>
 <td class='confluenceTd'> Amount of free address space in the VMkernel’s main heap. Heap Free varies, depending on the number of physical devices and various configuration options. There is no direct way for the user to increase or decrease this statistic. <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> <font color="gray">KB</font> </td>
 <td class='confluenceTd'> <font color="gray">UTILIZATION</font> </td>
@@ -529,6 +580,7 @@ Total latency = kernelLatency + deviceLatency <br class="atl-forced-newline" /> 
 <tr>
 <td class='confluenceTd'> <font color="gray">Memory Overhead</font> </td>
 <td class='confluenceTd'> <font color="gray">mem.overhead.average</font> </td>
+<td class='confluenceTd'> 1 </td>
 <td class='confluenceTd'> Total of all overhead metrics (Amount of additional machine memory allocated to a virtual machine for overhead. The overhead amount is beyond the reserved amount).for powered-on virtual machines, plus the overhead of running vSphere services on the host. <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> <font color="gray">KB</font> </td>
 <td class='confluenceTd'> <font color="gray">UTILIZATION</font> </td>
@@ -538,6 +590,7 @@ Total latency = kernelLatency + deviceLatency <br class="atl-forced-newline" /> 
 <tr>
 <td class='confluenceTd'> <font color="gray">Memory Zero</font> </td>
 <td class='confluenceTd'> <font color="gray">mem.zero.average</font> </td>
+<td class='confluenceTd'> 2 </td>
 <td class='confluenceTd'> Amount of memory that is zeroed out (contains only 0s). This statistic is included in Memory Shared.  For a vSphere Host, Sum of Memory Zero of all powered on VMs and vSphere services on the host. <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> <font color="gray">KB</font> </td>
 <td class='confluenceTd'> <font color="gray">UTILIZATION</font> </td>
@@ -547,6 +600,7 @@ Total latency = kernelLatency + deviceLatency <br class="atl-forced-newline" /> 
 <tr>
 <td class='confluenceTd'> <font color="gray">Memory Reserved Capacity</font> </td>
 <td class='confluenceTd'> <font color="gray">mem.reservedCapacity.average</font> </td>
+<td class='confluenceTd'> 2 </td>
 <td class='confluenceTd'> Total amount of memory reservation used by powered on VMs and vSphere services on the host. Includes overhead amount. <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> <font color="gray">MB</font> </td>
 <td class='confluenceTd'> <font color="gray">UTILIZATION</font> </td>
@@ -556,6 +610,7 @@ Total latency = kernelLatency + deviceLatency <br class="atl-forced-newline" /> 
 <tr>
 <td class='confluenceTd'> <font color="navy">Memory Active</font> </td>
 <td class='confluenceTd'> <font color="navy">mem.active.average</font> </td>
+<td class='confluenceTd'> 2 </td>
 <td class='confluenceTd'> Amount of memory actively used, as estimated by VMkernel. Active memory is based on the current workload of the virtual machine or host. <br class="atl-forced-newline" />
 For a vSphere Host,&nbsp;sum of the active guest physical memory of all powered on virtual machines on the host, plus memory used by basic VMKernel applications on the host. </td>
 <td class='confluenceTd'> <font color="navy">KB</font> </td>
@@ -566,6 +621,7 @@ For a vSphere Host,&nbsp;sum of the active guest physical memory of all powered 
 <tr>
 <td class='confluenceTd'> <font color="navy">Memory Shared</font> </td>
 <td class='confluenceTd'> <font color="navy">mem.shared.average</font> </td>
+<td class='confluenceTd'> 2 </td>
 <td class='confluenceTd'> Sum of the shared memory values of all powered-on virtual machines, plus the amount for the vSphere services on the host. The host’s Memory Shared may be larger than the amount of machine memory if memory is overcommitted (the aggregate virtual machine configured memory is much greater than machine memory). The value of this statistic reflects how effective transparent page sharing and memory overcommitment are for saving machine memory. <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> <font color="navy">KB</font> </td>
 <td class='confluenceTd'> <font color="navy">UTILIZATION</font> </td>
@@ -575,6 +631,7 @@ For a vSphere Host,&nbsp;sum of the active guest physical memory of all powered 
 <tr>
 <td class='confluenceTd'> <font color="gray">Memory Granted</font> </td>
 <td class='confluenceTd'> <font color="gray">mem.granted.average</font> </td>
+<td class='confluenceTd'> 2 </td>
 <td class='confluenceTd'> The total of all granted metrics for all powered-on virtual machines, plus memory for vSphere services on the host. <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> <font color="gray">KB</font> </td>
 <td class='confluenceTd'> <font color="gray">UTILIZATION</font> </td>
@@ -584,6 +641,7 @@ For a vSphere Host,&nbsp;sum of the active guest physical memory of all powered 
 <tr>
 <td class='confluenceTd'> <font color="gray">Memory Consumed</font> </td>
 <td class='confluenceTd'> <font color="gray">mem.consumed.average</font> </td>
+<td class='confluenceTd'> 1 </td>
 <td class='confluenceTd'> Amount of machine memory used on the host. Consumed memory includes memory used by virtual machines, the service console, VMkernel, and vSphere services, plus the total consumed memory for all running virtual machines. <br class="atl-forced-newline" />
 host consumed memory = total host memory - free host memory <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> <font color="gray">KB</font> </td>
@@ -594,6 +652,7 @@ host consumed memory = total host memory - free host memory <br class="atl-force
 <tr>
 <td class='confluenceTd'> <font color="gray">Memory State</font> </td>
 <td class='confluenceTd'> <font color="gray">mem.state.latest</font> </td>
+<td class='confluenceTd'> 2 </td>
 <td class='confluenceTd'> Amount of free machine memory on the host. VMkernel has four free-memory thresholds that affect the mechanisms used for memory reclamation. <br class="atl-forced-newline" />
 0 (High) - Free memory &gt;= 6% of machine memory - service console memory <br class="atl-forced-newline" />
 1 (Soft) - Free memory &gt;= 4% of machine memory - service console memory <br class="atl-forced-newline" />
@@ -608,6 +667,7 @@ For 0&nbsp;and&nbsp;1, swapping is favored over ballooning. For&nbsp;2&nbsp;and&
 <tr>
 <td class='confluenceTd'> <font color="gray">Memory Shared Common</font> </td>
 <td class='confluenceTd'> <font color="gray">mem.sharedcommon.average</font> </td>
+<td class='confluenceTd'> 2 </td>
 <td class='confluenceTd'> Amount of machine memory that is shared by all powered-on virtual machines and vSphere services on the host. <br class="atl-forced-newline" />
 Memory Shared - Memory Shared Common = Host memory saved by sharing <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> <font color="gray">KB</font> </td>
@@ -618,6 +678,7 @@ Memory Shared - Memory Shared Common = Host memory saved by sharing <br class="a
 <tr>
 <td class='confluenceTd'> <font color="gray">Memory Used by vmkernel</font> </td>
 <td class='confluenceTd'> <font color="gray">mem.sysUsage.average</font> </td>
+<td class='confluenceTd'> 2 </td>
 <td class='confluenceTd'> Amount of memory used by the VMkernel. Amount of machine memory used by the VMkernel for “core” functionality (such as its own internal uses, device drivers, etc). It does not include memory used by VMs or by vSphere services. <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> <font color="gray">KB</font> </td>
 <td class='confluenceTd'> <font color="gray">UTILIZATION</font> </td>
@@ -635,6 +696,7 @@ Memory Shared - Memory Shared Common = Host memory saved by sharing <br class="a
 <tr>
 <th class='confluenceTh'> Name </th>
 <th class='confluenceTh'> Alias </th>
+<th class='confluenceTh'> vCenter Statistics Level </th>
 <th class='confluenceTh'> Definition </th>
 <th class='confluenceTh'> Units </th>
 <th class='confluenceTh'> Category </th>
@@ -644,7 +706,8 @@ Memory Shared - Memory Shared Common = Host memory saved by sharing <br class="a
 <tr>
 <td class='confluenceTd'> <font color="navy">Availability</font> </td>
 <td class='confluenceTd'> <font color="navy">Availability</font> </td>
-<td class='confluenceTd'>The plugin collects the power state of the VM once per minute, by default. If the power state is: <br class="atl-forced-newline" />
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> The plugin collects the power state of the VM once per minute, by default. If the power state is: <br class="atl-forced-newline" />
 <ul>
 	<li><tt>poweredOn</tt> &#45; Availability state is "poweredOn"</li>
 	<li><tt>poweredOff</tt> &#45; Availability state is "poweredOff"</li>
@@ -660,6 +723,7 @@ Memory Shared - Memory Shared Common = Host memory saved by sharing <br class="a
 <tr>
 <td class='confluenceTd'> <font color="gray">Uptime</font> </td>
 <td class='confluenceTd'> <font color="gray">sys.uptime.latest</font> </td>
+<td class='confluenceTd'> 1 </td>
 <td class='confluenceTd'>&nbsp;</td>
 <td class='confluenceTd'> <font color="gray">sec</font> </td>
 <td class='confluenceTd'> <font color="gray">AVAILABILITY</font> </td>
@@ -669,10 +733,11 @@ Memory Shared - Memory Shared Common = Host memory saved by sharing <br class="a
 <tr>
 <td class='confluenceTd'> <font color="navy">CPU Usage (Average)</font> </td>
 <td class='confluenceTd'> <font color="navy">cpu.usage.average</font> </td>
+<td class='confluenceTd'> 1 </td>
 <td class='confluenceTd'> CPU usage as a percentage during the interval. <br class="atl-forced-newline" />
-Actively used CPU of the host, as a percentage of the total available CPU. Active CPU is approximately equal to the ratio of the used CPU to the available CPU. <br class="atl-forced-newline" />
-available CPU = # of physical CPUs × clock rate <br class="atl-forced-newline" />
-100% represents all CPUs on the host. For example, if a four-CPU host is running a virtual machine with two CPUs, and the usage is 50%, the host is using two CPUs completely. <br class="atl-forced-newline" /> </td>
+ <br class="atl-forced-newline" />
+This value is reported with 100% representing all processor cores on the system. As an example, a 2-way VM using 50% of a four-core system is completely using two cores. <br class="atl-forced-newline" />
+<br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> <font color="navy">percent</font> </td>
 <td class='confluenceTd'> <font color="navy">UTILIZATION</font> </td>
 <td class='confluenceTd'> <font color="navy">true</font> </td>
@@ -681,6 +746,7 @@ available CPU = # of physical CPUs × clock rate <br class="atl-forced-newline" 
 <tr>
 <td class='confluenceTd'> <font color="navy">Disk Usage (Average)</font> </td>
 <td class='confluenceTd'> <font color="navy">disk.usage.average</font> </td>
+<td class='confluenceTd'> 1 </td>
 <td class='confluenceTd'>&nbsp;</td>
 <td class='confluenceTd'> <font color="navy">KB</font> </td>
 <td class='confluenceTd'> <font color="navy">UTILIZATION</font> </td>
@@ -690,7 +756,8 @@ available CPU = # of physical CPUs × clock rate <br class="atl-forced-newline" 
 <tr>
 <td class='confluenceTd'> <font color="navy">Memory Usage (Average)</font> </td>
 <td class='confluenceTd'> <font color="navy">mem.usage.average</font> </td>
-<td class='confluenceTd'> memory usage = memory consumed ÷ host configured memory size <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> 1 </td>
+<td class='confluenceTd'> The percentage of memory used as a percent of all available machine memory. <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> <font color="navy">percent</font> </td>
 <td class='confluenceTd'> <font color="navy">UTILIZATION</font> </td>
 <td class='confluenceTd'> <font color="navy">true</font> </td>
@@ -699,7 +766,9 @@ available CPU = # of physical CPUs × clock rate <br class="atl-forced-newline" 
 <tr>
 <td class='confluenceTd'> <font color="navy">Network Usage (Average)</font> </td>
 <td class='confluenceTd'> <font color="navy">net.usage.average</font> </td>
-<td class='confluenceTd'> Sum of the data transmitted and received during the collection interval.Sum of data transmitted and received across all physical NIC instances connected to the host. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> 1 </td>
+<td class='confluenceTd'> Sum of the data transmitted and received during the collection interval.<br class="atl-forced-newline" />
+ <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> <font color="navy">KB</font> </td>
 <td class='confluenceTd'> <font color="navy">UTILIZATION</font> </td>
 <td class='confluenceTd'> <font color="navy">true</font> </td>
@@ -708,6 +777,7 @@ available CPU = # of physical CPUs × clock rate <br class="atl-forced-newline" 
 <tr>
 <td class='confluenceTd'> <font color="gray">CPU Throttled (1 min. Average)</font> </td>
 <td class='confluenceTd'> <font color="gray">rescpu.maxLimited1.latest</font> </td>
+<td class='confluenceTd'> 3 </td>
 <td class='confluenceTd'>&nbsp;</td>
 <td class='confluenceTd'> <font color="gray">percent</font> </td>
 <td class='confluenceTd'> <font color="gray">UTILIZATION</font> </td>
@@ -717,6 +787,7 @@ available CPU = # of physical CPUs × clock rate <br class="atl-forced-newline" 
 <tr>
 <td class='confluenceTd'> <font color="gray">CPU Throttled (5 min. Average)</font> </td>
 <td class='confluenceTd'> <font color="gray">rescpu.maxLimited5.latest</font> </td>
+<td class='confluenceTd'> 3 </td>
 <td class='confluenceTd'>&nbsp;</td>
 <td class='confluenceTd'> <font color="gray">percent</font> </td>
 <td class='confluenceTd'> <font color="gray">UTILIZATION</font> </td>
@@ -726,6 +797,7 @@ available CPU = # of physical CPUs × clock rate <br class="atl-forced-newline" 
 <tr>
 <td class='confluenceTd'> <font color="gray">CPU Throttled (15 min. Average)</font> </td>
 <td class='confluenceTd'> <font color="gray">rescpu.maxLimited15.latest</font> </td>
+<td class='confluenceTd'> 3 </td>
 <td class='confluenceTd'>&nbsp;</td>
 <td class='confluenceTd'> <font color="gray">percent</font> </td>
 <td class='confluenceTd'> <font color="gray">UTILIZATION</font> </td>
@@ -735,6 +807,7 @@ available CPU = # of physical CPUs × clock rate <br class="atl-forced-newline" 
 <tr>
 <td class='confluenceTd'> <font color="gray">CPU Running (1 min. Average)</font> </td>
 <td class='confluenceTd'> <font color="gray">rescpu.runav1.latest</font> </td>
+<td class='confluenceTd'> 3 </td>
 <td class='confluenceTd'>&nbsp;</td>
 <td class='confluenceTd'> <font color="gray">percent</font> </td>
 <td class='confluenceTd'> <font color="gray">UTILIZATION</font> </td>
@@ -744,6 +817,7 @@ available CPU = # of physical CPUs × clock rate <br class="atl-forced-newline" 
 <tr>
 <td class='confluenceTd'> <font color="gray">CPU Running (5 min. Average)</font> </td>
 <td class='confluenceTd'> <font color="gray">rescpu.runav5.latest</font> </td>
+<td class='confluenceTd'> 3 </td>
 <td class='confluenceTd'>&nbsp;</td>
 <td class='confluenceTd'> <font color="gray">percent</font> </td>
 <td class='confluenceTd'> <font color="gray">UTILIZATION</font> </td>
@@ -753,6 +827,7 @@ available CPU = # of physical CPUs × clock rate <br class="atl-forced-newline" 
 <tr>
 <td class='confluenceTd'> <font color="gray">CPU Running (15 min. Average)</font> </td>
 <td class='confluenceTd'> <font color="gray">rescpu.runav15.latest</font> </td>
+<td class='confluenceTd'> 3 </td>
 <td class='confluenceTd'>&nbsp;</td>
 <td class='confluenceTd'> <font color="gray">percent</font> </td>
 <td class='confluenceTd'> <font color="gray">UTILIZATION</font> </td>
@@ -762,6 +837,7 @@ available CPU = # of physical CPUs × clock rate <br class="atl-forced-newline" 
 <tr>
 <td class='confluenceTd'> <font color="gray">CPU Active (1 min. Average)</font> </td>
 <td class='confluenceTd'> <font color="gray">rescpu.actav1.latest</font> </td>
+<td class='confluenceTd'> 3 </td>
 <td class='confluenceTd'>&nbsp;</td>
 <td class='confluenceTd'> <font color="gray">percent</font> </td>
 <td class='confluenceTd'> <font color="gray">UTILIZATION</font> </td>
@@ -771,6 +847,7 @@ available CPU = # of physical CPUs × clock rate <br class="atl-forced-newline" 
 <tr>
 <td class='confluenceTd'> <font color="gray">CPU Active (5 min. Average)</font> </td>
 <td class='confluenceTd'> <font color="gray">rescpu.actav5.latest</font> </td>
+<td class='confluenceTd'> 3 </td>
 <td class='confluenceTd'>&nbsp;</td>
 <td class='confluenceTd'> <font color="gray">percent</font> </td>
 <td class='confluenceTd'> <font color="gray">UTILIZATION</font> </td>
@@ -780,6 +857,7 @@ available CPU = # of physical CPUs × clock rate <br class="atl-forced-newline" 
 <tr>
 <td class='confluenceTd'> <font color="gray">CPU Active (15 min. Average)</font> </td>
 <td class='confluenceTd'> <font color="gray">rescpu.actav15.latest</font> </td>
+<td class='confluenceTd'> 3 </td>
 <td class='confluenceTd'>&nbsp;</td>
 <td class='confluenceTd'> <font color="gray">percent</font> </td>
 <td class='confluenceTd'> <font color="gray">UTILIZATION</font> </td>
@@ -789,7 +867,8 @@ available CPU = # of physical CPUs × clock rate <br class="atl-forced-newline" 
 <tr>
 <td class='confluenceTd'> <font color="gray">Memory Swap In</font> </td>
 <td class='confluenceTd'> <font color="gray">mem.swapin.average</font> </td>
-<td class='confluenceTd'> Sum of memory swapin of all powered on VMs on the host. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> 2 </td>
+<td class='confluenceTd'> Average memory Swap In.&nbsp;A large number here represents a problem with lack of memory and a clear indication that performance is suffering as a result. <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> <font color="gray">KB</font> </td>
 <td class='confluenceTd'> <font color="gray">UTILIZATION</font> </td>
 <td class='confluenceTd'> <font color="gray">false</font> </td>
@@ -798,7 +877,8 @@ available CPU = # of physical CPUs × clock rate <br class="atl-forced-newline" 
 <tr>
 <td class='confluenceTd'> <font color="gray">Memory Swap Out</font> </td>
 <td class='confluenceTd'> <font color="gray">mem.swapout.average</font> </td>
-<td class='confluenceTd'> Sum of Memory Swap Out of all powered on VMs on the host. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> 2 </td>
+<td class='confluenceTd'> Average Memory Swap Out.&nbsp;A large number here represents a problem with lack of memory and a clear indication that performance is suffering as a result. <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> <font color="gray">KB</font> </td>
 <td class='confluenceTd'> <font color="gray">UTILIZATION</font> </td>
 <td class='confluenceTd'> <font color="gray">false</font> </td>
@@ -807,25 +887,32 @@ available CPU = # of physical CPUs × clock rate <br class="atl-forced-newline" 
 <tr>
 <td class='confluenceTd'> <font color="navy">Memory Balloon</font> </td>
 <td class='confluenceTd'> <font color="navy">mem.vmmemctl.average</font> </td>
-<td class='confluenceTd'> Sum of Memory Balloon (Amount of memory allocated by the virtual machine memory control driver) of all powered on virtual machines and vSphere services on the host. If the balloon target value is greater than the balloon value, the VMkernel inflates the balloon, causing more virtual machine memory to be reclaimed. If the balloon target value is less than the balloon value, the VMkernel deflate the balloon, which allows the virtual machine to consume additional memory if needed. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> 1 </td>
+<td class='confluenceTd'> Sum of Memory Balloon (Amount of memory allocated by the virtual machine memory control driver) <br class="atl-forced-newline" />
+<br class="atl-forced-newline" />
+If the balloon target value is greater than the balloon value, the VMkernel inflates the balloon, causing more virtual machine memory to be reclaimed. If the balloon target value is less than the balloon value, the VMkernel deflate the balloon, which allows the virtual machine to consume additional memory if needed. <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> <font color="navy">KB</font> </td>
 <td class='confluenceTd'> <font color="navy">UTILIZATION</font> </td>
 <td class='confluenceTd'> <font color="navy">true</font> </td>
 <td class='confluenceTd'> <font color="navy">5 min</font> </td>
 </tr>
 <tr>
-<td class='confluenceTd'> Memory Balloon Target </td>
+<td class='confluenceTd'> <font color="gray">Memory Balloon Target</font> </td>
+<td class='confluenceTd'> <font color="gray">mem.vmmemctltarget.average</font> </td>
+<td class='confluenceTd'> 2 </td>
 <td class='confluenceTd'>&nbsp;</td>
-<td class='confluenceTd'>&nbsp;</td>
-<td class='confluenceTd'>&nbsp;</td>
-<td class='confluenceTd'>&nbsp;</td>
-<td class='confluenceTd'>&nbsp;</td>
-<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <font color="gray">KB</font> </td>
+<td class='confluenceTd'> <font color="gray">UTILIZATION</font> </td>
+<td class='confluenceTd'> <font color="gray">false</font> </td>
+<td class='confluenceTd'> <font color="gray">5 min</font> </td>
 </tr>
 <tr>
 <td class='confluenceTd'> <font color="gray">Memory Zero</font> </td>
 <td class='confluenceTd'> <font color="gray">mem.zero.average</font> </td>
-<td class='confluenceTd'> Amount of memory that is zeroed out (contains only 0s). This statistic is included in Memory Shared. For a vSphere Host, Sum of Memory Zero of all powered on VMs and vSphere services on the host. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> 2 </td>
+<td class='confluenceTd'> Amount of memory that is zeroed out (contains only 0s). This statistic is included in Memory Shared. <br class="atl-forced-newline" />
+ <br class="atl-forced-newline" />
+For a vSphere Host, Sum of Memory Zero of all powered on VMs and vSphere services on the host. <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> <font color="gray">KB</font> </td>
 <td class='confluenceTd'> <font color="gray">UTILIZATION</font> </td>
 <td class='confluenceTd'> <font color="gray">false</font> </td>
@@ -834,7 +921,9 @@ available CPU = # of physical CPUs × clock rate <br class="atl-forced-newline" 
 <tr>
 <td class='confluenceTd'> <font color="navy">Memory Active</font> </td>
 <td class='confluenceTd'> <font color="navy">mem.active.average</font> </td>
+<td class='confluenceTd'> 2 </td>
 <td class='confluenceTd'> Amount of memory actively used, as estimated by VMkernel. Active memory is based on the current workload of the virtual machine or host. <br class="atl-forced-newline" />
+ <br class="atl-forced-newline" />
 For a vSphere Host,&nbsp;sum of the active guest physical memory of all powered on virtual machines on the host, plus memory used by basic VMKernel applications on the host. </td>
 <td class='confluenceTd'> <font color="navy">KB</font> </td>
 <td class='confluenceTd'> <font color="navy">UTILIZATION</font> </td>
@@ -844,7 +933,8 @@ For a vSphere Host,&nbsp;sum of the active guest physical memory of all powered 
 <tr>
 <td class='confluenceTd'> <font color="navy">Memory Shared</font> </td>
 <td class='confluenceTd'> <font color="navy">mem.shared.average</font> </td>
-<td class='confluenceTd'> Sum of the shared memory values of all powered-on virtual machines, plus the amount for the vSphere services on the host. The host’s Memory Shared may be larger than the amount of machine memory if memory is overcommitted (the aggregate virtual machine configured memory is much greater than machine memory). The value of this statistic reflects how effective transparent page sharing and memory overcommitment are for saving machine memory. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> 2 </td>
+<td class='confluenceTd'> The average amount of shared memory. Shared memory represents the entire pool of memory from which sharing savings are possible. The amount of memory that this has been condensed to is reported in shared common memory. So, total saving due to memory sharing equals shared memory minus shared common memory. <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> <font color="navy">KB</font> </td>
 <td class='confluenceTd'> <font color="navy">UTILIZATION</font> </td>
 <td class='confluenceTd'> <font color="navy">true</font> </td>
@@ -853,7 +943,8 @@ For a vSphere Host,&nbsp;sum of the active guest physical memory of all powered 
 <tr>
 <td class='confluenceTd'> <font color="gray">Memory Granted</font> </td>
 <td class='confluenceTd'> <font color="gray">mem.granted.average</font> </td>
-<td class='confluenceTd'> The total of all granted metrics for all powered-on virtual machines, plus memory for vSphere services on the host. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> 2 </td>
+<td class='confluenceTd'> The amount of memory that was granted to the VM by the host. Memory is not granted to the host until it is touched one time and granted memory may be swapped out or ballooned away if the VMkernel needs the memory. </td>
 <td class='confluenceTd'> <font color="gray">KB</font> </td>
 <td class='confluenceTd'> <font color="gray">UTILIZATION</font> </td>
 <td class='confluenceTd'> <font color="gray">false</font> </td>
@@ -862,8 +953,12 @@ For a vSphere Host,&nbsp;sum of the active guest physical memory of all powered 
 <tr>
 <td class='confluenceTd'> <font color="gray">Memory Consumed</font> </td>
 <td class='confluenceTd'> <font color="gray">mem.consumed.average</font> </td>
-<td class='confluenceTd'> Amount of machine memory used on the host. Consumed memory includes memory used by virtual machines, the service console, VMkernel, and vSphere services, plus the total consumed memory for all running virtual machines. <br class="atl-forced-newline" />
-host consumed memory = total host memory - free host memory <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> 1 </td>
+<td class='confluenceTd'> The amount of machine memory that is in use by the VM. <br class="atl-forced-newline" />
+ <br class="atl-forced-newline" />
+While a VM may&nbsp;have been configured to use 4 GB of RAM, as an example, it might have<br class="atl-forced-newline" />
+ only touched half of that. Of the 2 GB left, half of that might be<br class="atl-forced-newline" />
+ saved from memory sharing. That would result in 1 GB of consumed memory. <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> <font color="gray">KB</font> </td>
 <td class='confluenceTd'> <font color="gray">UTILIZATION</font> </td>
 <td class='confluenceTd'> <font color="gray">false</font> </td>
@@ -882,7 +977,7 @@ host consumed memory = total host memory - free host memory <br class="atl-force
 				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 08, 2010 15:30</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jul 12, 2010 15:34</font></td>
 		    </tr>
 	    </table>
     </body>
