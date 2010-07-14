@@ -56,7 +56,8 @@ public class VCenterDetector extends DaemonDetector {
     static final String HQ_SSL = "agent.setup.camSecure";
     static final String HQ_USER = "agent.setup.camLogin";
     static final String HQ_PASS = "agent.setup.camPword";
-    
+   
+
     //XXX future HQ/pdk should provide this.
     private HQApi getApi(Properties props) {
         boolean isSecure;
@@ -80,6 +81,10 @@ public class VCenterDetector extends DaemonDetector {
         _log.debug("Using HQApi at " + scheme + "://" + host + ":" + port);
         return api;
     }
+    
+    protected VCenterPlatformDetector getPlatformDetector() {
+        return new VMAndHostVCenterPlatformDetector();
+    }
 
 
     /**
@@ -92,13 +97,15 @@ public class VCenterDetector extends DaemonDetector {
         Properties props = new Properties();
         props.putAll(getManager().getProperties());
         props.putAll(config.toProperties());
-
-        VCenterPlatformDetector vpd = new VCenterPlatformDetector(props, getApi(props), VSphereUtil.getInstance(props));
+       
+		VSphereUtil vim =  VSphereUtil.getInstance(props);
         try {
-            vpd.discoverPlatforms();
+            getPlatformDetector().discoverPlatforms(props,getApi(props), vim);
         } catch (IOException e) {
             throw new PluginException(e.getMessage(), e);
-        }
+        } finally {
+			 VSphereUtil.dispose(vim);
+		}
     }
     
     private void discoverPlatforms(AgentDaemon agent)

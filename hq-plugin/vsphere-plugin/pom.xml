@@ -52,4 +52,14 @@
 		</dependency>
 	</dependencies>
 	
+	<build>
+		<plugins>
+			<!-- The exec-maven-plugin is configured to validate plugin XML.  See hq-plugin-parent pom for details-->
+			<plugin>
+        		<groupId>org.codehaus.mojo</groupId>
+        		<artifactId>exec-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+	
 </project>
