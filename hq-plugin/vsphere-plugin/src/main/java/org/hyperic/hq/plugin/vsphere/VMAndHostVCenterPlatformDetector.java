@@ -753,7 +753,7 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
         }
     }
     
-    private void removeResource(Resource r, HQApi hqApi) 
+    protected void removeResource(Resource r, HQApi hqApi) 
         throws IOException, PluginException {
 
         if (log.isDebugEnabled()) {

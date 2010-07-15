@@ -140,6 +140,7 @@ public class VSphereUtil extends ServiceInstance {
         return System.currentTimeMillis();
     }
 
+
     /**
      * Find a managed entity by UUID. This may be less performant
      * than using find(type, name), but allows managed entities
@@ -205,6 +206,21 @@ public class VSphereUtil extends ServiceInstance {
         }
         return obj;
     }
+
+	public ManagedEntity findByMOR(String type, String value) throws PluginException {
+		ManagedEntity[] managedEntities = find(type);
+		ManagedEntity obj = null;
+		for(ManagedEntity managedEntity: managedEntities) {
+			if(managedEntity.getMOR().getVal().equals(value)) {
+				obj = managedEntity;
+				break;
+			}
+		}
+	  	if (obj == null) {
+            throw new ManagedEntityNotFoundException(type + "/" + value + ": not found");
+        }
+        return obj;
+	}
     
     public ManagedEntity find(String type, String name)
         throws PluginException {

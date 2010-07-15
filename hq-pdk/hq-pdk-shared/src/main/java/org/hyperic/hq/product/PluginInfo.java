@@ -68,7 +68,7 @@ public class PluginInfo implements java.io.Serializable {
     public PluginInfo(ProductPlugin plugin, String jar) {
         try {
             File jarFile = new File(jar);
-
+            this.deploymentOrder = plugin.getDeploymentOrder();
             this.name  = plugin.getName();
             this.product = plugin.getName();
             this.md5   = getMD5(plugin, jar);
@@ -85,6 +85,7 @@ public class PluginInfo implements java.io.Serializable {
         this.jar   = info.jar;
         this.mtime = info.mtime;
         this.resourceLoader = info.resourceLoader;
+        this.deploymentOrder = info.deploymentOrder;
     }
 
     private String getMD5(ProductPlugin plugin, String jar)
