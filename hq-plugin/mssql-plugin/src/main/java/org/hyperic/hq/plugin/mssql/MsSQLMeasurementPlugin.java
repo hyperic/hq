@@ -117,9 +117,15 @@ public class MsSQLMeasurementPlugin
         MetricNotFoundException, MetricUnreachableException {
 
         String name = getServiceName(metric);
-        if (getServiceStatus(name) != Service.SERVICE_STOPPED) {
-            return super.getValue(metric);
-        }
+		try {
+			if (getServiceStatus(name) != Service.SERVICE_STOPPED) {
+				return super.getValue(metric);
+			}
+		} catch (MetricNotFoundException e) {
+			// if the metric existed, but is no longer found
+			// we need to set the availability status as down.
+			return new MetricValue(Metric.AVAIL_DOWN);
+		}
         //XXX should not have to do this, but pdh.dll seems to cache last
         //value in some environments
         if (metric.isAvail() ||
