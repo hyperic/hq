@@ -34,11 +34,11 @@ public class VCenterPlatformDetectorTest {
 
     private ResourceEdgeApi resourceEdgeApi;
 
-    private static final String VCENTER_URL = "https://10.150.29.72/sdk";
+    private static final String VCENTER_URL = "url";
 
-    private static final String VCENTER_UNAME = "administrator";
+    private static final String VCENTER_UNAME = "uname";
 
-    private static final String VCENTER_PW = "ca$hc0w";
+    private static final String VCENTER_PW = "pass";
     private static final int ESX_HOST_ID = 12345;
 
     private VSphereUtil vim;
