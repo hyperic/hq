@@ -182,7 +182,12 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             if (endtime == MAX_AVAIL_TIMESTAMP) {
                 endtime = System.currentTimeMillis();
             }
-            rtn += (endtime - avail.getStartime());
+            long rangeStartTime = avail.getStartime();
+            // Make sure the start of the down time is not earlier then the begin time
+            if (rangeStartTime < begin){
+            	rangeStartTime = begin;
+            }
+            rtn += (endtime - rangeStartTime);
         }
         return rtn;
     }
