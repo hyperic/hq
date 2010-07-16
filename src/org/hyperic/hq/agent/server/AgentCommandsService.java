@@ -25,7 +25,9 @@
 
 package org.hyperic.hq.agent.server;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -51,7 +53,11 @@ import org.hyperic.hq.agent.commands.AgentReceiveFileData_args;
 import org.hyperic.hq.agent.commands.AgentUpgrade_result;
 import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.transport.util.RemoteInputStream;
+import org.hyperic.util.JDK;
 import org.hyperic.util.StringUtil;
+import org.hyperic.util.exec.Execute;
+import org.hyperic.util.exec.ExecuteWatchdog;
+import org.hyperic.util.exec.PumpStreamHandler;
 import org.hyperic.util.file.FileUtil;
 import org.hyperic.util.file.FileWriter;
 import org.hyperic.util.math.MathUtil;
@@ -68,7 +74,7 @@ public class AgentCommandsService implements AgentCommandsClient {
 
     private final AgentDaemon _agent;
     private final AgentTransportLifecycle _agentTransportLifecycle;
-    
+
     public AgentCommandsService(AgentDaemon agent) throws AgentRunningException {
         _agent = agent;
         _agentTransportLifecycle = _agent.getAgentTransportLifecycle();
@@ -302,6 +308,35 @@ public class AgentCommandsService implements AgentCommandsClient {
         return _agent.getCurrentAgentBundle();
     }
 
+    private void setExecuteBit(File file) throws AgentRemoteException {
+        int timeout = 10 * 6000;
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        ExecuteWatchdog watch = new ExecuteWatchdog(timeout);
+        Execute exec = new Execute(new PumpStreamHandler(output), watch);
+        int rc;
+
+        try {
+            String[] arguments = {"chmod", "+x", file.getCanonicalPath()};
+            exec.setCommandline(arguments);
+
+            _log.info("Running " + exec.getCommandLineString());
+            rc = exec.execute();
+        } catch (Exception e) {
+             rc = -1;
+             _log.error(e);
+        }
+
+        if (rc != 0) {
+            String msg = output.toString().trim();
+            if (msg.length() == 0) {
+                msg = "timeout after " + timeout + "ms";
+            }
+            throw new AgentRemoteException("Failed to set permissions: " + "[" +
+                                           exec.getCommandLineString() + "] " +
+                                           msg);
+        }
+    }
+
     /**
      * @see org.hyperic.hq.agent.client.AgentCommandsClient#upgrade(java.lang.String, java.lang.String)
      */
@@ -362,6 +397,36 @@ public class AgentCommandsService implements AgentCommandsClient {
             if (!extractedBundleDir.renameTo(bundleDir)) {
                 throw new AgentRemoteException(
                         "Failed to copy agent bundle from " + extractedBundleDir + " to " + bundleDir);
+            }
+
+            // Handle potential permissions issues
+            if (!JDK.IS_WIN32) {
+                File pdkdir = new File(bundleDir, "pdk");
+                File pdklibdir = new File(pdkdir, "lib");
+                if (!pdklibdir.exists()) {
+                    throw new AgentRemoteException("Invalid PDK library directory " +
+                            pdklibdir.getAbsolutePath());
+                }
+
+                File[] libs = pdklibdir.listFiles();
+                for (int i = 0; i < libs.length; i++) {
+                    if (libs[i].getName().endsWith("sl")) {
+                        // chmod +x ./bundles/$AGENT_BUNDLE/pdk/lib/*.sl
+                        setExecuteBit(libs[i]);
+                    }
+                }
+
+                File pdkscriptsdir = new File(pdkdir, "scripts");
+                if (!pdkscriptsdir.exists()) {
+                    throw new AgentRemoteException("Invalid PDK scripts directory " +
+                            pdklibdir.getAbsolutePath());
+                }
+
+                File[] scripts = pdkscriptsdir.listFiles();
+                for (int i = 0; i < scripts.length; i++) {
+                    // chmod +x ./bundles/$AGENT_BUNDLE/pdk/scripts/*
+                    setExecuteBit(scripts[i]);
+                }
             }
             
             // update the wrapper configuration for next JVM restart
