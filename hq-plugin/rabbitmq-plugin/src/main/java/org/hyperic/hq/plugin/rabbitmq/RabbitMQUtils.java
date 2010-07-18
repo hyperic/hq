@@ -71,8 +71,9 @@ public class RabbitMQUtils {
             log.debug("[executeCommand] server=" + server + ", mod=" + mod + ", fun=" + fun + ", args=" + args);
         }
 
-        server=server.split(",")[0];
-        
+        server = server.split(",")[0];
+        log.debug("[executeCommand] server=" + server);
+
         OtpErlangObject received;
         try {
             if (connection == null) {
@@ -88,12 +89,12 @@ public class RabbitMQUtils {
                 }
             }
         } catch (Exception ex) {
-            throw new PluginException(ex.getMessage(), ex);
-        } finally {
             if (connection != null) {
                 connection.close();
                 connection = null;
             }
+            throw new PluginException(ex.getMessage(), ex);
+        } finally {
         }
 
         if (log.isDebugEnabled()) {

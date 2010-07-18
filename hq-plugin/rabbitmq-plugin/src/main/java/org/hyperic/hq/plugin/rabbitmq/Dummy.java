@@ -36,7 +36,7 @@ public class Dummy implements Runnable {
             p.produce();
             c.consume();
         } catch (Exception ex) {
-            log.debug(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
         }
     }
 

@@ -37,9 +37,11 @@ public class RabbitMQServerDetector extends ServerDetector implements AutoServer
         for (long pid : pids) {
             String args[] = getProcArgs(pid);
             String path = getServerDir(args);
-            path = new File(path).getParent();
-            if (!paths.contains(path)) {
-                paths.add(path);
+            if (path != null) {
+                path = new File(path).getParent();
+                if (!paths.contains(path)) {
+                    paths.add(path);
+                }
             }
         }
 
@@ -63,6 +65,7 @@ public class RabbitMQServerDetector extends ServerDetector implements AutoServer
 
                 setProductConfig(server, conf);
                 setMeasurementConfig(server, new ConfigResponse());
+
 
                 res.add(server);
             }
@@ -103,19 +106,23 @@ public class RabbitMQServerDetector extends ServerDetector implements AutoServer
         }
 
         long[] pids = getPids(Metric.translate(config.getValue("process.query"), config));
-        if (pids.length > 1) {
-            for (long pid : pids) {
-                String args[] = getProcArgs(pid);
-                String name = getServerName(args);
-                ServiceResource p = createServiceResource("Proccess");
-                ConfigResponse c = new ConfigResponse();
-                p.setName(getTypeInfo().getName() + " Proccess " + name);
-                c.setValue("proccess.name", name);
-                p.setProductConfig(c);
-                setMeasurementConfig(p, new ConfigResponse());
-                setMeasurementConfig(p, new ConfigResponse());
-                res.add(p);
+        for (long pid : pids) {
+            String args[] = getProcArgs(pid);
+            String name = getServerName(args);
+            ServiceResource p = createServiceResource("Proccess");
+            ConfigResponse c = new ConfigResponse();
+            p.setName(getTypeInfo().getName() + " Proccess " + name);
+            c.setValue("proccess.name", name);
+            p.setProductConfig(c);
+            ConfigResponse mc = new ConfigResponse();
+            mc.setValue("service.log_track.enable", true);
+            File plog = new File("/var/log/rabbitmq", name + ".log");
+            if (log.isDebugEnabled()) {
+                log.debug("[discoverServices] log=" + log + " (" + plog.exists() + ")");
             }
+            mc.setValue("service.log_track.files", plog.getAbsolutePath());
+            setMeasurementConfig(p, mc);
+            res.add(p);
         }
         return res;
     }

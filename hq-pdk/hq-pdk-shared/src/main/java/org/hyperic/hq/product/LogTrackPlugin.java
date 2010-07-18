@@ -290,6 +290,7 @@ public class LogTrackPlugin extends GenericPlugin {
         return newTrackEvent(time, 0, source, message);
     }
 
+    //XXX quitar esto.....
     void debugLog(String debugMsg) {
         debugLog(null, debugMsg);
     }
