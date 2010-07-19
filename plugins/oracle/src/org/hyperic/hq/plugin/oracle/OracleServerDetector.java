@@ -579,7 +579,7 @@ public class OracleServerDetector
             return "";
         }
         String fs = File.separator;
-        String[] toks = tnsnames.split(fs);
+        String[] toks = tnsnames.split(Pattern.quote(fs));
         StringBuilder rtn = new StringBuilder();
         for (int i=0; i<toks.length-1; i++) {
             rtn.append(toks[i]).append(fs);
