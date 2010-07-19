@@ -19,10 +19,12 @@ import org.hyperic.hq.hqapi1.types.ResourcePrototypeResponse;
 import org.hyperic.hq.hqapi1.types.ResourcesResponse;
 import org.hyperic.hq.hqapi1.types.ResponseStatus;
 import org.hyperic.hq.hqapi1.types.StatusResponse;
-
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+
+import com.vmware.vim25.HostRuntimeInfo;
+import com.vmware.vim25.mo.HostSystem;
+import com.vmware.vim25.mo.ManagedEntity;
 
 public class VCenterPlatformDetectorTest {
 
@@ -46,6 +48,8 @@ public class VCenterPlatformDetectorTest {
     private VMAndHostVCenterPlatformDetector detector;
 
     private Properties props = new Properties();
+    
+    private HostSystem host;
 
     @Before
     public void setUp() throws Exception {
@@ -57,9 +61,8 @@ public class VCenterPlatformDetectorTest {
         this.resourceApi = EasyMock.createMock(ResourceApi.class);
         this.agentApi = EasyMock.createMock(AgentApi.class);
         this.resourceEdgeApi = EasyMock.createMock(ResourceEdgeApi.class);
-        // TODO make a mock vim for true unit test, switch out to connect to a
-        // real vCenter
-        this.vim = VSphereUtil.getInstance(props);
+        this.vim = EasyMock.createMock(VSphereUtil.class);
+        this.host = EasyMock.createMock(HostSystem.class);
         this.detector = new VMAndHostVCenterPlatformDetector();
     }
 
@@ -93,6 +96,11 @@ public class VCenterPlatformDetectorTest {
         EasyMock.expect(
             resourceApi.getResourcePrototype(VMAndHostVCenterPlatformDetector.HOST_TYPE))
             .andReturn(hostProtoResponse).times(2);
+        
+        EasyMock.expect(vim.find(VSphereUtil.HOST_SYSTEM)).andReturn(new ManagedEntity[] {host});
+        HostRuntimeInfo hostInfo = new HostRuntimeInfo();
+        EasyMock.expect(host.getRuntime()).andReturn(hostInfo);
+        EasyMock.expect(vim.findByUuid(VSphereUtil.HOST_SYSTEM, "myPlat.testEsx")).andThrow(new ManagedEntityNotFoundException("Not Found"));
 
         ResourcePrototypeResponse vmProtoResponse = new ResourcePrototypeResponse();
         vmProtoResponse.setStatus(ResponseStatus.SUCCESS);
@@ -187,10 +195,10 @@ public class VCenterPlatformDetectorTest {
     }
 
     private void replay() {
-        EasyMock.replay(hqApi, resourceApi, agentApi, resourceEdgeApi);
+        EasyMock.replay(hqApi, resourceApi, agentApi, resourceEdgeApi, vim, host);
     }
 
     private void verify() {
-        EasyMock.verify(hqApi, resourceApi, agentApi, resourceEdgeApi);
+        EasyMock.verify(hqApi, resourceApi, agentApi, resourceEdgeApi, vim, host);
     }
 }
