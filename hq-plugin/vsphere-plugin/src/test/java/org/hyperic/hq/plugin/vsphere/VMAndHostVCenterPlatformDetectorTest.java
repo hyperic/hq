@@ -26,7 +26,7 @@ import com.vmware.vim25.HostRuntimeInfo;
 import com.vmware.vim25.mo.HostSystem;
 import com.vmware.vim25.mo.ManagedEntity;
 
-public class VCenterPlatformDetectorTest {
+public class VMAndHostVCenterPlatformDetectorTest {
 
     private HQApi hqApi;
 
