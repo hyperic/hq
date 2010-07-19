@@ -82,6 +82,7 @@ public class SybaseMeasurementPlugin
         super.init(manager);
         if (!manager.isRegistered("sbSysmon")) {
             manager.registerPlugin("sbSysmon", new SybaseSysmonPlugin());
+			manager.setPluginInfo("sbSysmon", new PluginInfo("sbSysmon"));
         }
 
     }
