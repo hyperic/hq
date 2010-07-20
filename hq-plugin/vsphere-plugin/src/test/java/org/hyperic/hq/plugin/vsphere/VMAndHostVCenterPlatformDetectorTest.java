@@ -1,6 +1,7 @@
 package org.hyperic.hq.plugin.vsphere;
 
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -13,14 +14,18 @@ import org.hyperic.hq.hqapi1.types.Agent;
 import org.hyperic.hq.hqapi1.types.AgentResponse;
 import org.hyperic.hq.hqapi1.types.Resource;
 import org.hyperic.hq.hqapi1.types.ResourceConfig;
-import org.hyperic.hq.hqapi1.types.ResourceInfo;
-import org.hyperic.hq.hqapi1.types.ResourceProperty;
+import org.hyperic.hq.hqapi1.types.ResourceEdge;
+import org.hyperic.hq.hqapi1.types.ResourceFrom;
 import org.hyperic.hq.hqapi1.types.ResourcePrototype;
 import org.hyperic.hq.hqapi1.types.ResourcePrototypeResponse;
+import org.hyperic.hq.hqapi1.types.ResourceTo;
 import org.hyperic.hq.hqapi1.types.ResourcesResponse;
 import org.hyperic.hq.hqapi1.types.ResponseStatus;
 import org.hyperic.hq.hqapi1.types.StatusResponse;
 import org.hyperic.hq.product.PluginException;
+import org.hyperic.hq.product.ProductPlugin;
+import org.hyperic.util.ReflectionEqualsArgumentMatcher;
+import org.hyperic.util.config.ConfigResponse;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -49,10 +54,12 @@ import com.vmware.vim25.mo.HostSystem;
 import com.vmware.vim25.mo.ManagedEntity;
 import com.vmware.vim25.mo.ResourcePool;
 import com.vmware.vim25.mo.VirtualMachine;
+
 /**
  * Unit test of the {@link VMAndHostVCenterPlatformDetector}
+ * TODO Add tests for deleting removed hosts and VMs from inventory
  * @author jhickey
- *
+ * 
  */
 public class VMAndHostVCenterPlatformDetectorTest {
 
@@ -69,7 +76,6 @@ public class VMAndHostVCenterPlatformDetectorTest {
     private static final String VCENTER_UNAME = "uname";
 
     private static final String VCENTER_PW = "pass";
-    private static final int ESX_HOST_ID = 12345;
 
     private VSphereUtil vim;
 
@@ -78,13 +84,13 @@ public class VMAndHostVCenterPlatformDetectorTest {
     private Properties props = new Properties();
 
     private HostSystem host;
-    
+
     private ManagedEntity dataCenter;
-    
+
     private ManagedEntity dataCenters;
-    
+
     private VirtualMachine vm;
-    
+
     private ResourcePool resourcePool;
 
     @Before
@@ -108,7 +114,7 @@ public class VMAndHostVCenterPlatformDetectorTest {
 
     @Test
     public void testDiscoverPlatforms() throws Exception {
-        EasyMock.expect(hqApi.getResourceApi()).andReturn(resourceApi).times(12);
+        EasyMock.expect(hqApi.getResourceApi()).andReturn(resourceApi).times(11);
         ResourcePrototypeResponse protoResponse = new ResourcePrototypeResponse();
         protoResponse.setStatus(ResponseStatus.SUCCESS);
         ResourcePrototype vcType = new ResourcePrototype();
@@ -140,9 +146,6 @@ public class VMAndHostVCenterPlatformDetectorTest {
         createHost();
         createVM();
         
-        EasyMock.expect(vim.findByUuid(VSphereUtil.HOST_SYSTEM, "myPlat.testEsx")).andThrow(
-            new ManagedEntityNotFoundException("Not Found"));
-
         ResourcePrototypeResponse vmProtoResponse = new ResourcePrototypeResponse();
         vmProtoResponse.setStatus(ResponseStatus.SUCCESS);
         ResourcePrototype vmType = new ResourcePrototype();
@@ -153,22 +156,35 @@ public class VMAndHostVCenterPlatformDetectorTest {
 
         StatusResponse genericSuccess = new StatusResponse();
         genericSuccess.setStatus(ResponseStatus.SUCCESS);
-        // TODO validate data being passed to syncResources
-        EasyMock.expect(resourceApi.syncResources(EasyMock.isA(List.class))).andReturn(
-            genericSuccess).times(2);
+
+        List<Resource> expectedResources = new ArrayList<Resource>();
+        VSphereHostResource expectedHost = getExpectedHost(hostType, vmType, agent);
+        expectedResources.add(expectedHost);
+        EasyMock.expect(
+            resourceApi.syncResources(ReflectionEqualsArgumentMatcher.eqObject(expectedResources)))
+            .andReturn(genericSuccess).times(2);
         EasyMock.expect(hqApi.getResourceEdgeApi()).andReturn(resourceEdgeApi).times(2);
 
-        ResourcesResponse esxHostResponse = getEsxHostResourceResponse(hostType);
+        ResourcesResponse esxHostResponse = getEsxHostResourceResponse(hostType, vmType, agent);
         EasyMock.expect(resourceApi.getResources(hostType, true, false)).andReturn(esxHostResponse);
 
-        // TODO validate data being passed to syncResourceEdges
-        EasyMock.expect(resourceEdgeApi.syncResourceEdges(EasyMock.isA(List.class))).andReturn(
-            genericSuccess).times(2);
+        List<ResourceEdge> expectedVCenterToHostEdges = new ArrayList<ResourceEdge>();
+        expectedVCenterToHostEdges.add(getExpectedVirtualEdge(vCenterResponse.getResource().get(0),
+            expectedHost));
+        EasyMock.expect(
+            resourceEdgeApi.syncResourceEdges(ReflectionEqualsArgumentMatcher
+                .eqObject(expectedVCenterToHostEdges))).andReturn(genericSuccess);
 
-        ResourcesResponse vmResponse = getVMResourceResponse(vmType);
+        List<ResourceEdge> expectedHostToVMEdges = new ArrayList<ResourceEdge>();
+        expectedHostToVMEdges.add(getExpectedVirtualEdge(expectedHost, expectedHost
+            .getVirtualMachines().get(0)));
+        EasyMock.expect(
+            resourceEdgeApi.syncResourceEdges(ReflectionEqualsArgumentMatcher
+                .eqObject(expectedHostToVMEdges))).andReturn(genericSuccess);
+
+        ResourcesResponse vmResponse = getVMResourceResponse(vmType, agent);
         EasyMock.expect(resourceApi.getResources(vmType, true, false)).andReturn(vmResponse);
-
-        EasyMock.expect(resourceApi.deleteResource(ESX_HOST_ID)).andReturn(genericSuccess);
+        
         replay();
         detector.discoverPlatforms(props, hqApi, vim);
         verify();
@@ -187,54 +203,21 @@ public class VMAndHostVCenterPlatformDetectorTest {
         return response;
     }
 
-    private ResourcesResponse getEsxHostResourceResponse(ResourcePrototype hostType) {
-        Resource resource = new Resource();
-        ResourceInfo resourceInfo = new ResourceInfo();
-        resourceInfo.setKey("fqdn");
-        resourceInfo.setValue("myPlat.testEsx");
-        resource.getResourceInfo().add(resourceInfo);
-        ResourceConfig resourceConfig = new ResourceConfig();
-        resourceConfig.setKey(VSphereUtil.PROP_URL);
-        resourceConfig.setValue(VCENTER_URL);
-        resource.getResourceConfig().add(resourceConfig);
-
-        ResourceConfig hostConfig = new ResourceConfig();
-        hostConfig.setKey(VSphereUtil.PROP_HOSTNAME);
-        hostConfig.setValue("testEsx");
-        resource.getResourceConfig().add(hostConfig);
-
-        resource.setResourcePrototype(hostType);
-        resource.setId(ESX_HOST_ID);
+    private ResourcesResponse getEsxHostResourceResponse(ResourcePrototype hostType,
+                                                         ResourcePrototype vmType, Agent agent) {
         ResourcesResponse response = new ResourcesResponse();
-        response.getResource().add(resource);
+        response.getResource().add(getExpectedHost(hostType, vmType, agent));
         response.setStatus(ResponseStatus.SUCCESS);
         return response;
     }
 
-    private ResourcesResponse getVMResourceResponse(ResourcePrototype vmType) {
-        Resource resource = new Resource();
-        ResourceConfig resourceConfig = new ResourceConfig();
-        resourceConfig.setKey(VSphereUtil.PROP_URL);
-        resourceConfig.setValue(VCENTER_URL);
-        resource.getResourceConfig().add(resourceConfig);
-
-        ResourceConfig uuidConfig = new ResourceConfig();
-        uuidConfig.setKey(VSphereCollector.PROP_UUID);
-        uuidConfig.setValue("4206c445-7eb4-a72f-38c8-d865c4c374f2");
-        resource.getResourceConfig().add(uuidConfig);
-
-        ResourceProperty property = new ResourceProperty();
-        property.setKey(VMAndHostVCenterPlatformDetector.ESX_HOST);
-        property.setValue("testEsx");
-        resource.getResourceProperty().add(property);
-
-        resource.setResourcePrototype(vmType);
+    private ResourcesResponse getVMResourceResponse(ResourcePrototype vmType, Agent agent) {
         ResourcesResponse response = new ResourcesResponse();
-        response.getResource().add(resource);
+        response.getResource().add(getExpectedVM(vmType, agent));
         response.setStatus(ResponseStatus.SUCCESS);
         return response;
     }
-    
+
     private void createHost() throws PluginException {
         EasyMock.expect(vim.find(VSphereUtil.HOST_SYSTEM)).andReturn(new ManagedEntity[] { host });
         HostRuntimeInfo hostInfo = new HostRuntimeInfo();
@@ -246,10 +229,10 @@ public class VMAndHostVCenterPlatformDetectorTest {
         ipRouteConfig.setDefaultGateway("1.2.3.4");
         networkInfo.setIpRouteConfig(ipRouteConfig);
         HostDnsConfig dnsConfig = new HostDnsConfig();
-        
+
         networkInfo.setDnsConfig(dnsConfig);
         HostVirtualNic nic = new HostVirtualNic();
-        
+
         HostVirtualNicSpec nicSpec = new HostVirtualNicSpec();
         nic.setSpec(nicSpec);
         HostIpConfig ipConfig = new HostIpConfig();
@@ -261,13 +244,18 @@ public class VMAndHostVCenterPlatformDetectorTest {
         networkInfo.setVnic(new HostVirtualNic[] { nic });
         AboutInfo aboutInfo = new AboutInfo();
         aboutInfo.setFullName("ESX Host 4.1");
+        aboutInfo.setVersion("4.1");
+        aboutInfo.setBuild("5322");
         hostConfig.setNetwork(networkInfo);
         hostConfig.setProduct(aboutInfo);
         HostListSummary hostListSummary = new HostListSummary();
         HostHardwareSummary hardware = new HostHardwareSummary();
         hardware.setUuid("1234-5678-9012-34");
-        hardware.setNumCpuCores((short)4);
-        hardware.setNumCpuPkgs((short)2);
+        hardware.setNumCpuCores((short) 4);
+        hardware.setNumCpuPkgs((short) 2);
+        hardware.setVendor("Home Depot");
+        hardware.setModel("3G67");
+        hardware.setCpuModel("Intel");
         hostListSummary.setHardware(hardware);
         EasyMock.expect(host.getConfig()).andReturn(hostConfig);
         EasyMock.expect(host.getSummary()).andReturn(hostListSummary);
@@ -278,9 +266,9 @@ public class VMAndHostVCenterPlatformDetectorTest {
         EasyMock.expect(dataCenters.getName()).andReturn("Datacenters");
         EasyMock.expect(dataCenters.getParent()).andReturn(null);
     }
-    
+
     private void createVM() throws InvalidProperty, RuntimeFault, RemoteException {
-        EasyMock.expect(host.getVms()).andReturn(new VirtualMachine[]  {vm});
+        EasyMock.expect(host.getVms()).andReturn(new VirtualMachine[] { vm });
         VirtualMachineConfigInfo config = new VirtualMachineConfigInfo();
         config.setTemplate(false);
         config.setUuid("4206c445-7eb4-a72f-38c8-d865c4c374f2");
@@ -308,11 +296,82 @@ public class VMAndHostVCenterPlatformDetectorTest {
         EasyMock.expect(vm.getResourcePool()).andReturn(resourcePool);
     }
 
+    private VSphereHostResource getExpectedHost(ResourcePrototype hostPrototype,
+                                                ResourcePrototype vmType, Agent agent) {
+        VSphereHostResource expectedHost = new VSphereHostResource();
+        expectedHost.setName("esxHost123 {1234-5678-9012-34}");
+        expectedHost.setDescription("ESX Host 4.1");
+        expectedHost.setFqdn("1234-5678-9012-34");
+        expectedHost.addIp("10.0.1.123", "10.0.1.0", "65.7.8.9");
+        expectedHost.addConfig(VSphereUtil.PROP_HOSTNAME, "esxHost123");
+        expectedHost.addConfig(VSphereCollector.PROP_UUID, "1234-5678-9012-34");
+        ConfigResponse cprops = new ConfigResponse();
+        cprops.setValue("version", "4.1");
+        cprops.setValue("build", "5322");
+        cprops.setValue("ip", "10.0.1.123");
+        cprops.setValue("defaultGateway", "1.2.3.4");
+        cprops.setValue("hwVendor", "Home Depot");
+        cprops.setValue("hwModel", "3G67");
+        cprops.setValue("hwCpu", "Intel");
+        cprops.setValue("hwSockets", "2");
+        cprops.setValue("hwCores", "2");
+        cprops.setValue("parent", "Test DataCenter");
+        expectedHost.addProperties(cprops);
+        expectedHost.setResourcePrototype(hostPrototype);
+        expectedHost.setAgent(agent);
+        expectedHost.addConfig(VSphereUtil.PROP_URL, VCENTER_URL);
+        expectedHost.addConfig(VSphereUtil.PROP_USERNAME, VCENTER_UNAME);
+        expectedHost.addConfig(VSphereUtil.PROP_PASSWORD, VCENTER_PW);
+        expectedHost.getVirtualMachines().add(getExpectedVM(vmType, agent));
+        return expectedHost;
+    }
+
+    private VSphereResource getExpectedVM(ResourcePrototype vmType, Agent agent) {
+        VSphereResource expectedVm = new VSphereResource();
+        expectedVm.setName("Test VM {4206c445-7eb4-a72f-38c8-d865c4c374f2}");
+        expectedVm.setFqdn("4206c445-7eb4-a72f-38c8-d865c4c374f2");
+        expectedVm.setDescription("Linux OS");
+        ConfigResponse config = new ConfigResponse();
+        config.setValue(VSphereVmCollector.PROP_VM, "Test VM");
+        config.setValue(VSphereCollector.PROP_UUID, "4206c445-7eb4-a72f-38c8-d865c4c374f2");
+        expectedVm.addConfig(config);
+        ConfigResponse cprops = new ConfigResponse();
+        cprops.setValue(ProductPlugin.PROP_INSTALLPATH, "/pathto/vm");
+        cprops.setValue("guestOS", "Linux OS");
+        cprops.setValue("version", "8.1");
+        cprops.setValue("numvcpus", 4);
+        cprops.setValue("memsize", 1000);
+        cprops.setValue("toolsVersion", "4");
+        cprops.setValue("pool", "Test vApp");
+        cprops.setValue("hostName", "leela.local");
+        expectedVm.addProperties(cprops);
+        expectedVm.setResourcePrototype(vmType);
+        expectedVm.setAgent(agent);
+        expectedVm.addConfig(VSphereUtil.PROP_URL, VCENTER_URL);
+        expectedVm.addConfig(VSphereUtil.PROP_USERNAME, VCENTER_UNAME);
+        expectedVm.addConfig(VSphereUtil.PROP_PASSWORD, VCENTER_PW);
+        return expectedVm;
+    }
+
+    private ResourceEdge getExpectedVirtualEdge(Resource parent, Resource child) {
+        ResourceEdge edge = new ResourceEdge();
+        ResourceFrom from = new ResourceFrom();
+        from.setResource(parent);
+        ResourceTo to = new ResourceTo();
+        to.getResource().add(child);
+        edge.setRelation("virtual");
+        edge.setResourceFrom(from);
+        edge.setResourceTo(to);
+        return edge;
+    }
+
     private void replay() {
-        EasyMock.replay(hqApi, resourceApi, agentApi, resourceEdgeApi, vim, host, dataCenter, dataCenters, vm, resourcePool);
+        EasyMock.replay(hqApi, resourceApi, agentApi, resourceEdgeApi, vim, host, dataCenter,
+            dataCenters, vm, resourcePool);
     }
 
     private void verify() {
-        EasyMock.verify(hqApi, resourceApi, agentApi, resourceEdgeApi, vim, host, dataCenter, dataCenters, vm, resourcePool);
+        EasyMock.verify(hqApi, resourceApi, agentApi, resourceEdgeApi, vim, host, dataCenter,
+            dataCenters, vm, resourcePool);
     }
 }

@@ -50,6 +50,13 @@
 			<groupId>org.easymock</groupId>
 			<artifactId>easymockclassextension</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq</groupId>
+			<artifactId>hq-util</artifactId>
+			<version>${project.version}</version>
+			<classifier>tests</classifier>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 	
 	<build>
