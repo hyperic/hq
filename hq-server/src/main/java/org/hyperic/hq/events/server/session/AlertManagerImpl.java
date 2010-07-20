@@ -108,7 +108,8 @@ public class AlertManagerImpl implements AlertManager {
     private MessagePublisher messagePublisher;
 
     private AlertRegulator alertRegulator;
-
+    private ConcurrentStatsCollector concurrentStatsCollector;
+    
     @Autowired
     public AlertManagerImpl(AlertPermissionManager alertPermissionManager,
                             AlertDefinitionDAO alertDefDao, AlertActionLogDAO alertActionLogDAO,
@@ -117,7 +118,7 @@ public class AlertManagerImpl implements AlertManager {
                             AlertDefinitionManager alertDefinitionManager,
                             AuthzSubjectManager authzSubjectManager,
                             EscalationManager escalationManager, MessagePublisher messagePublisher,
-                            AlertRegulator alertRegulator) {
+                            AlertRegulator alertRegulator, ConcurrentStatsCollector concurrentStatsCollector) {
         this.alertPermissionManager = alertPermissionManager;
         this.alertDefDao = alertDefDao;
         this.alertActionLogDAO = alertActionLogDAO;
@@ -130,12 +131,13 @@ public class AlertManagerImpl implements AlertManager {
         this.escalationManager = escalationManager;
         this.alertRegulator = alertRegulator;
         this.messagePublisher = messagePublisher;
+        this.concurrentStatsCollector = concurrentStatsCollector;
     }
 
     @PostConstruct
     public void afterPropertiesSet() throws Exception {
         pojoPager = Pager.getDefaultPager();
-        ConcurrentStatsCollector.getInstance().register(ConcurrentStatsCollector.FIRE_ALERT_TIME);
+        concurrentStatsCollector.register(ConcurrentStatsCollector.FIRE_ALERT_TIME);
     }
 
     /**
@@ -421,8 +423,7 @@ public class AlertManagerImpl implements AlertManager {
                           ") fired.");
             }
 
-            ConcurrentStatsCollector.getInstance().addStat(System.currentTimeMillis() - startTime,
-                ConcurrentStatsCollector.FIRE_ALERT_TIME);
+            concurrentStatsCollector.addStat(System.currentTimeMillis() - startTime, ConcurrentStatsCollector.FIRE_ALERT_TIME);
         } catch (PermissionException e) {
             log.error("Alert not firing due to a permissions issue", e);
         } catch (ResourceDeletedException e) {

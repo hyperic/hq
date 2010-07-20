@@ -9,11 +9,9 @@ import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.test.context.support.GenericXmlContextLoader;
 
-public class IntegrationTestContextLoader
-    extends GenericXmlContextLoader {
+public class IntegrationTestContextLoader extends GenericXmlContextLoader {
+	private final Log log = LogFactory.getLog(IntegrationTestContextLoader.class);
 	
-	 private final Log log = LogFactory.getLog(IntegrationTestContextLoader.class);
-
     @Override
     protected void customizeContext(GenericApplicationContext context) {
         Bootstrap.appContext = context;

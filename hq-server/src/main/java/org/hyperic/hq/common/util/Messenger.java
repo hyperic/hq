@@ -41,10 +41,12 @@ public class Messenger implements MessagePublisher {
     private static Log _log = LogFactory.getLog(Messenger.class);
 
     private JmsTemplate eventsJmsTemplate;
-
+    private ConcurrentStatsCollector concurrentStatsCollector;
+    
     @Autowired
-    public Messenger(JmsTemplate eventsJmsTemplate) {
+    public Messenger(JmsTemplate eventsJmsTemplate, ConcurrentStatsCollector concurrentStatsCollector) {
         this.eventsJmsTemplate = eventsJmsTemplate;
+        this.concurrentStatsCollector = concurrentStatsCollector;
     }
 
     /**
@@ -70,7 +72,6 @@ public class Messenger implements MessagePublisher {
         final long start = System.currentTimeMillis();
         eventsJmsTemplate.convertAndSend(name, sObj);
         final long end= System.currentTimeMillis();
-        ConcurrentStatsCollector.getInstance().addStat(
-            (end- start), ConcurrentStatsCollector.JMS_TOPIC_PUBLISH_TIME);
+        concurrentStatsCollector.addStat((end- start), ConcurrentStatsCollector.JMS_TOPIC_PUBLISH_TIME);
     }
 }

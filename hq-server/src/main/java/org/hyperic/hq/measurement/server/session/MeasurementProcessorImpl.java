@@ -79,13 +79,14 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
     private MeasurementCommandsClientFactory measurementCommandsClientFactory;
     private ResourceManager resourceManager;
     private ZeventEnqueuer zEventManager;
-
+    private ConcurrentStatsCollector concurrentStatsCollector;
+    
     @Autowired
     public MeasurementProcessorImpl(AgentManager agentManager, MeasurementManager measurementManager,
                                     SRNManager srnManager,
                                     AgentMonitor agentMonitor,
                                     MeasurementCommandsClientFactory measurementCommandsClientFactory, ResourceManager resourceManager,
-                                    ZeventEnqueuer zEventManager) {
+                                    ZeventEnqueuer zEventManager, ConcurrentStatsCollector concurrentStatsCollector) {
 
         this.agentManager = agentManager;
         this.measurementManager = measurementManager;
@@ -94,11 +95,12 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
         this.measurementCommandsClientFactory = measurementCommandsClientFactory;
         this.resourceManager = resourceManager;
         this.zEventManager = zEventManager;
+        this.concurrentStatsCollector = concurrentStatsCollector;
     }
     
     @PostConstruct
     public void initStatsCollector() {
-        ConcurrentStatsCollector.getInstance().register(ConcurrentStatsCollector.MEASUREMENT_SCHEDULE_TIME);
+    	concurrentStatsCollector.register(ConcurrentStatsCollector.MEASUREMENT_SCHEDULE_TIME);
     }
 
     /**
@@ -209,7 +211,6 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
       
         final StringBuilder debugBuf = new StringBuilder();
         try {
-            final ConcurrentStatsCollector stats = ConcurrentStatsCollector.getInstance();
             client = measurementCommandsClientFactory.getClient(agent);
            
             for (AppdefEntityID eid : eids ) {
@@ -235,7 +236,7 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
                     }
                     Measurement[] array = (Measurement[])measurements.toArray(new Measurement[0]);
                     agentMonitor.schedule(client, srn, array);
-                    stats.addStat((now()-begin), ConcurrentStatsCollector.MEASUREMENT_SCHEDULE_TIME);
+                    concurrentStatsCollector.addStat((now()-begin), ConcurrentStatsCollector.MEASUREMENT_SCHEDULE_TIME);
                 } catch (AgentConnectionException e) {
                     final String emsg = "Error reported by agent @ "
                         + agent.connectionString() 
