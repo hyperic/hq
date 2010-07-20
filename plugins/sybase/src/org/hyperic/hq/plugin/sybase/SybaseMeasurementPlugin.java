@@ -41,6 +41,7 @@ import org.apache.commons.logging.Log;
 import org.hyperic.hq.product.JDBCMeasurementPlugin;
 import org.hyperic.hq.product.Metric;
 
+import org.hyperic.hq.product.PluginInfo;
 import org.hyperic.hq.product.PluginManager;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.jdbc.DBUtil;
