@@ -10,3 +10,5 @@ junit_results
 activemq-data
 ExecutionStrategyStates.dat
 
+hq-plugin/gemfire-plugin/nbactions.xml
+hq-plugin/weblogic-plugin/nbactions.xml
