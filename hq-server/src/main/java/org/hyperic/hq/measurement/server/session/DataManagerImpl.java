@@ -130,26 +130,23 @@ public class DataManagerImpl implements DataManager {
     private static final long HOURS_PER_MEAS_TAB = MeasTabManagerUtil.NUMBER_OF_TABLES_PER_DAY;
 
     private MeasurementDAO measurementDAO;
-
     private MeasurementManager measurementManager;
-
     private ServerConfigManager serverConfigManager;
-
     private AvailabilityManager availabilityManager;
-
     private MetricDataCache metricDataCache;
-
     private ZeventEnqueuer zeventManager;
     private MessagePublisher messagePublisher;
     private RegisteredTriggers registeredTriggers;
-
+    private ConcurrentStatsCollector concurrentStatsCollector;
+    
     @Autowired
     public DataManagerImpl(DBUtil dbUtil, MeasurementDAO measurementDAO,
                            MeasurementManager measurementManager,
                            ServerConfigManager serverConfigManager,
                            AvailabilityManager availabilityManager,
                            MetricDataCache metricDataCache, ZeventEnqueuer zeventManager,
-                           MessagePublisher messagePublisher, RegisteredTriggers registeredTriggers) {
+                           MessagePublisher messagePublisher, RegisteredTriggers registeredTriggers,
+                           ConcurrentStatsCollector concurrentStatsCollector) {
         this.dbUtil = dbUtil;
         this.measurementDAO = measurementDAO;
         this.measurementManager = measurementManager;
@@ -159,12 +156,12 @@ public class DataManagerImpl implements DataManager {
         this.zeventManager = zeventManager;
         this.messagePublisher = messagePublisher;
         this.registeredTriggers = registeredTriggers;
+        this.concurrentStatsCollector = concurrentStatsCollector;
     }
 
     @PostConstruct
     public void initStatsCollector() {
-        ConcurrentStatsCollector.getInstance().register(
-            ConcurrentStatsCollector.DATA_MANAGER_INSERT_TIME);
+    	concurrentStatsCollector.register(ConcurrentStatsCollector.DATA_MANAGER_INSERT_TIME);
     }
 
     private double getValue(ResultSet rs) throws SQLException {
@@ -289,8 +286,8 @@ public class DataManagerImpl implements DataManager {
                         log.debug("Inserting data in a single transaction " + "succeeded");
                         log.debug("Data Insertion process took " + (end - start) + " ms");
                     }
-                    ConcurrentStatsCollector.getInstance().addStat(end - start,
-                        DATA_MANAGER_INSERT_TIME);
+                    
+                    concurrentStatsCollector.addStat(end - start, DATA_MANAGER_INSERT_TIME);
                     sendMetricEvents(data);
                 } else {
                     if (debug) {
@@ -301,8 +298,8 @@ public class DataManagerImpl implements DataManager {
                     conn.setAutoCommit(true);
                     List<DataPoint> processed = addDataWithCommits(data, true, conn);
                     final long end = System.currentTimeMillis();
-                    ConcurrentStatsCollector.getInstance().addStat(end - start,
-                        DATA_MANAGER_INSERT_TIME);
+                    
+                    concurrentStatsCollector.addStat(end - start, DATA_MANAGER_INSERT_TIME);
                     sendMetricEvents(processed);
                     if (debug) {
                         log.debug("Data Insertion process took " + (end - start) + " ms");

@@ -117,11 +117,13 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     private MessagePublisher messagePublisher;
     private RegisteredTriggers registeredTriggers;
     private AvailabilityCache availabilityCache;
-
+    private ConcurrentStatsCollector concurrentStatsCollector;
+    
     @Autowired
     public AvailabilityManagerImpl(ResourceManager resourceManager, MessagePublisher messenger,
                                    AvailabilityDataDAO availabilityDataDAO, MeasurementDAO measurementDAO,
-                                   MessagePublisher messagePublisher, RegisteredTriggers registeredTriggers, AvailabilityCache availabilityCache) {
+                                   MessagePublisher messagePublisher, RegisteredTriggers registeredTriggers, AvailabilityCache availabilityCache,
+                                   ConcurrentStatsCollector concurrentStatsCollector) {
         this.resourceManager = resourceManager;
         this.messenger = messenger;
         this.availabilityDataDAO = availabilityDataDAO;
@@ -129,11 +131,12 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         this.messagePublisher = messagePublisher;
         this.registeredTriggers = registeredTriggers;
         this.availabilityCache = availabilityCache;
+        this.concurrentStatsCollector = concurrentStatsCollector;
     }
 
     @PostConstruct
     public void initStatsCollector() {
-        ConcurrentStatsCollector.getInstance().register(ConcurrentStatsCollector.AVAIL_MANAGER_METRICS_INSERTED);
+    	concurrentStatsCollector.register(ConcurrentStatsCollector.AVAIL_MANAGER_METRICS_INSERTED);
     }
     
     // To break AvailabilityManager - MeasurementManager circular dependency
@@ -182,7 +185,12 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             if (endtime == MAX_AVAIL_TIMESTAMP) {
                 endtime = System.currentTimeMillis();
             }
-            rtn += (endtime - avail.getStartime());
+            long rangeStartTime = avail.getStartime();
+            // Make sure the start of the down time is not earlier then the begin time
+            if (rangeStartTime < begin){
+            	rangeStartTime = begin;
+            }
+            rtn += (endtime - rangeStartTime);
         }
         return rtn;
     }
@@ -721,7 +729,9 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
                 throw new SystemException(e);
             }
         }
-        ConcurrentStatsCollector.getInstance().addStat(availPoints.size(), AVAIL_MANAGER_METRICS_INSERTED);
+        
+        concurrentStatsCollector.addStat(availPoints.size(), AVAIL_MANAGER_METRICS_INSERTED);
+        
         if (sendData) {
             sendDataToEventHandlers(availPoints);
         }

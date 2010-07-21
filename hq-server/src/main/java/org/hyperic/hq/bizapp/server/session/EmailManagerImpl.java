@@ -81,6 +81,8 @@ public class EmailManagerImpl implements EmailManager {
     private AuthzSubjectManager authzSubjectManager;
     private PlatformManager platformManager;
     private ResourceManager resourceManager;
+    private ConcurrentStatsCollector concurrentStatsCollector;
+    
     final Log log = LogFactory.getLog(EmailManagerImpl.class);
 
     public static final String JOB_GROUP = "EmailFilterGroup";
@@ -89,17 +91,19 @@ public class EmailManagerImpl implements EmailManager {
 
     @Autowired
     public EmailManagerImpl(JavaMailSender mailSender, ServerConfigManager serverConfigManager,
-                            AuthzSubjectManager authzSubjectManager, PlatformManager platformManager, ResourceManager resourceManager) {
+                            AuthzSubjectManager authzSubjectManager, PlatformManager platformManager, ResourceManager resourceManager,
+                            ConcurrentStatsCollector concurrentStatsCollector) {
         this.mailSender = mailSender;
         this.serverConfigManager = serverConfigManager;
         this.authzSubjectManager = authzSubjectManager;
         this.platformManager = platformManager;
         this.resourceManager = resourceManager;
+        this.concurrentStatsCollector = concurrentStatsCollector;
     }
     
     @PostConstruct
     public void initStats() {
-        ConcurrentStatsCollector.getInstance().register(ConcurrentStatsCollector.SEND_ALERT_TIME);
+    	concurrentStatsCollector.register(ConcurrentStatsCollector.SEND_ALERT_TIME);
     }
 
     public void sendEmail(EmailRecipient[] addresses, String subject, String[] body, String[] htmlBody, Integer priority) {

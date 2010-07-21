@@ -77,8 +77,7 @@ public class AgentScheduleSynchronizer {
     
     private final Set<Integer> activeAgents = Collections.synchronizedSet(new HashSet<Integer>());
     
-    private final ConcurrentStatsCollector stats = ConcurrentStatsCollector.getInstance();
-    
+    private ConcurrentStatsCollector concurrentStatsCollector;
     private MeasurementProcessor measurementProcessor;
     
     
@@ -86,10 +85,11 @@ public class AgentScheduleSynchronizer {
     
 
     @Autowired
-    public AgentScheduleSynchronizer(ZeventEnqueuer zEventManager, AgentManager agentManager, MeasurementProcessor measurementProcessor) {
+    public AgentScheduleSynchronizer(ZeventEnqueuer zEventManager, AgentManager agentManager, MeasurementProcessor measurementProcessor, ConcurrentStatsCollector concurrentStatsCollector) {
         this.zEventManager = zEventManager;
         this.agentManager = agentManager;
         this.measurementProcessor = measurementProcessor;
+        this.concurrentStatsCollector = concurrentStatsCollector;
     }
 
     @PostConstruct
@@ -180,8 +180,8 @@ public class AgentScheduleSynchronizer {
 
         zEventManager.addBufferedListener(AgentScheduleSyncZevent.class, l);
         zEventManager.addBufferedListener(AgentUnscheduleZevent.class, l);
-        stats.register(ConcurrentStatsCollector.SCHEDULE_QUEUE_SIZE);
-        stats.register(ConcurrentStatsCollector.UNSCHEDULE_QUEUE_SIZE);
+        concurrentStatsCollector.register(ConcurrentStatsCollector.SCHEDULE_QUEUE_SIZE);
+        concurrentStatsCollector.register(ConcurrentStatsCollector.UNSCHEDULE_QUEUE_SIZE);
     }
 
     private class SchedulerThread implements Runnable {
@@ -200,10 +200,10 @@ public class AgentScheduleSynchronizer {
                 boolean hasMoreToSchedule = true;
                 boolean hasMoreToUnschedule = true;
                 synchronized (scheduleAeids) {
-                    stats.addStat(scheduleAeids.size(), ConcurrentStatsCollector.SCHEDULE_QUEUE_SIZE);
+                	concurrentStatsCollector.addStat(scheduleAeids.size(), ConcurrentStatsCollector.SCHEDULE_QUEUE_SIZE);
                 }
                 synchronized (unscheduleAeids) {
-                    stats.addStat(unscheduleAeids.size(), ConcurrentStatsCollector.UNSCHEDULE_QUEUE_SIZE);
+                	concurrentStatsCollector.addStat(unscheduleAeids.size(), ConcurrentStatsCollector.UNSCHEDULE_QUEUE_SIZE);
                 }
                 while (hasMoreToSchedule || hasMoreToUnschedule) {
                     hasMoreToUnschedule = syncMetrics(unscheduleAeids, false);
