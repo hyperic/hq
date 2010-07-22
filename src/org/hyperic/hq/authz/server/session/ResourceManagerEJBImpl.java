@@ -52,6 +52,7 @@ import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.appdef.server.session.Server;
+import org.hyperic.hq.appdef.server.session.ServerType;
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
@@ -998,8 +999,10 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
                     
                         for (Iterator i=hqPlatform.getServers().iterator(); i.hasNext(); ) {
                             Server s = (Server)i.next();
-                            // do not add virtual servers
-                            if (!s.getServerType().isVirtual()) {
+                            ServerType st = s.getServerType();
+                            // do not add virtual servers or vCenter server
+                            if (!AuthzConstants.serverPrototypeVmwareVcenter.equals(st.getName())
+                                    && !st.isVirtual()) {
                                 createResourceEdges(hqResource, s.getResource(), relation, true);
                             }
                         }                        

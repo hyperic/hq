@@ -174,11 +174,9 @@ public class VSphereHostCollector extends VSphereCollector {
         PerfMetricId[] ids = getPerfMetricIds(perfManager, mor);
 
         if (ids == null || ids.length == 0) {
-            if (_log.isDebugEnabled()) {
-                _log.debug("No available performance metrics for "
+            _log.info("No available performance metrics for "
                            + getType() + "[name=" + getName()
                            + "]");
-            }
             return;
         }
         
@@ -194,13 +192,11 @@ public class VSphereHostCollector extends VSphereCollector {
             perfManager.queryPerf(query);
 
         if (values == null) {
-            if (_log.isDebugEnabled()) {
-                _log.debug("No performance metrics for "
+            _log.info("No performance metrics for "
                            + getType() + "[name=" + getName()
                            + ", refreshRate=" + refreshRate
                            + ", availablePerfMetric=" + ids.length
                            + "]");
-            }
             return;
         }
         

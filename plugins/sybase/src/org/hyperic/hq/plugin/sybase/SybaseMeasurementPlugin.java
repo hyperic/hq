@@ -35,13 +35,10 @@ import java.sql.SQLException;
 import java.sql.ResultSetMetaData;
 
 import java.util.Properties;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.hyperic.hq.product.JDBCMeasurementPlugin;
 import org.hyperic.hq.product.Metric;
 
-import org.hyperic.hq.product.PluginManager;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.hq.product.MetricUnreachableException;
@@ -77,14 +74,6 @@ public class SybaseMeasurementPlugin
     private static HashMap syb12Queries    = null;  // Sybase 12.5 only
     private static HashMap genericQueries  = null;  // Any
     private static HashMap connectionCache = new HashMap();
-
-    public void init(PluginManager manager) throws PluginException {
-        super.init(manager);
-        if (!manager.isRegistered("sbSysmon")) {
-            manager.registerPlugin("sbSysmon", new SybaseSysmonPlugin());
-        }
-
-    }
 
     protected void getDriver()
         throws ClassNotFoundException {
@@ -268,6 +257,9 @@ public class SybaseMeasurementPlugin
             MetricInvalidException,
                MetricNotFoundException
     {
+        if(log.isDebugEnabled())
+            log.debug("[getValue] metric="+metric);
+
         initQueries();
         String objectName = metric.getObjectName(),
                alias      = metric.getAttributeName();
