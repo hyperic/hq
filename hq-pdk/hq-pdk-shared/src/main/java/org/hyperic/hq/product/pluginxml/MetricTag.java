@@ -369,7 +369,7 @@ class MetricTag
     
     private String validateAlias(String alias) {
         final int min = 3;
-        final int max = 50; //sql/measurement-schema.xml
+        final int max = 100; //sql/measurement-schema.xml
         
         if (alias.length() < min) {
             return "< " + min + " chars";
