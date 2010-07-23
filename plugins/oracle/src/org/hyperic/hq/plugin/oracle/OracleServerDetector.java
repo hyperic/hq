@@ -233,7 +233,8 @@ public class OracleServerDetector
         }
 
         // HHQ-3577 allow listener names in tnsnames.ora to be used in the url
-        String tnsDir = getTnsNamesDir(path, "network/admin/tnsnames.ora");
+        String fs = File.separator;
+        String tnsDir = getTnsNamesDir(path, "network" + fs + "admin" + fs + "tnsnames.ora");
         if (log.isDebugEnabled()) log.debug("using tns dir as " + tnsDir);
         System.setProperty("oracle.net.tns_admin", tnsDir);
 
@@ -596,9 +597,11 @@ public class OracleServerDetector
         List rtn = new ArrayList();
         try
         {
-            if (log.isDebugEnabled())
-                log.debug("READING tnsnames.ora FILE: "+installpath+"/"+tnsnames);
-            reader = new BufferedReader(new FileReader(installpath+"/"+tnsnames));
+            String fs = File.separator;
+            if (log.isDebugEnabled()) {
+                log.debug("READING tnsnames.ora FILE: "+installpath+fs+tnsnames);
+            }
+            reader = new BufferedReader(new FileReader(installpath+fs+tnsnames));
             while (null != (line = reader.readLine()))
             {
                 if (_serviceNameEx.matcher(line).find())
