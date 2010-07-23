@@ -507,11 +507,10 @@ public class VCenterPlatformDetector {
             return;
         }
         
-        VSphereConnection conn = null;
+        VSphereUtil vim = null;
+        vim = VSphereUtil.getInstance(this.props);
 
         try {
-            conn = VSphereConnection.getPooledInstance(props);
-            VSphereUtil vim = conn.vim;
             Agent agent = getAgent();
             List<Resource> hosts = discoverHosts(vim, agent);
             List<Resource> vms = new ArrayList<Resource>();
@@ -542,7 +541,7 @@ public class VCenterPlatformDetector {
                 syncResourceEdges(vim, hostVmMap);
             }
         } finally {
-            if (conn != null) conn.release();
+            VSphereUtil.dispose(vim);
         }
     }
     

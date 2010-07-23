@@ -98,26 +98,20 @@ public abstract class VSphereCollector extends Collector {
     protected PerfMetricId[] getPerfMetricIds(PerformanceManager perfManager, ManagedEntity entity)
     throws Exception {
         PerfMetricId[] ids =
-            perfManager.queryAvailablePerfMetric(entity, null, null, PERF_INTERVAL_ID);
+            perfManager.queryAvailablePerfMetric(entity,
+                                                 null,
+                                                 null,
+                                                 PERF_INTERVAL_ID);
         return ids;
     }    
 
-    protected ManagedEntity getManagedEntity(VSphereUtil mo) throws Exception {
-        final String uuid = getUuid();
-        final String name = getName();
-        final String type = getType();
-        if (uuid != null && name != null) {
-            ManagedEntity entity = mo.findByUuid(type, uuid);
-            if (entity == null) {
-                entity = mo.find(type, name);
-                return (entity == null || !VSphereUtil.getUuid(entity).equals(uuid)) ? null : entity;
-            } else {
-                return entity;
-            }
-        } else if (uuid == null) {
-            return mo.find(type, name);
+    protected ManagedEntity getManagedEntity(VSphereUtil mo) 
+        throws Exception {
+
+        if (getUuid() == null) {
+            return mo.find(getType(), getName());
         } else {
-            return mo.findByUuid(type, uuid);
+            return mo.findByUuid(getType(), getUuid());
         }
     }
     
@@ -151,18 +145,16 @@ public abstract class VSphereCollector extends Collector {
     }
 
     public void collect() {
-        VSphereConnection conn = null;
+        VSphereConnection conn;
         try {
             setAvailability(false);
-            conn = VSphereConnection.getPooledInstance(getProperties());
+            conn = VSphereConnection.getInstance(getProperties());
             synchronized (conn.LOCK) {
                 collect(conn.vim);
             }
         } catch (Exception e) {
             setErrorMessage(e.getMessage(), e);
             _log.error(e.getMessage(), e);
-        } finally {
-            if (conn != null) conn.release();
         }
     }
 }
