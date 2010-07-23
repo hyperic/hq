@@ -336,23 +336,24 @@ public class ResourceHubPortalAction extends BaseAction {
         boolean canModify = false;
         List ids = new ArrayList();
         
-        if (resources != null) {
-            if (resources.size() > 0 && DEFAULT_RESOURCE_TYPE != resourceType && AppdefEntityConstants.APPDEF_TYPE_APPLICATION != resourceType) {
-                // ...use the first element to check permission, since there's not an easy way to this that I know of...
-                try {
-                    AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
-                    AuthzSubject subject = authzBoss.getCurrentSubject(sessionId);
-                    AppdefResourceValue resource = (AppdefResourceValue) resources.get(0);
-                  
-                    // ...check to see if user can modify resources of this type...
-                    SessionBase.canModifyAlertDefinition(subject, resource.getEntityId());
-                    
-                    canModify = true;
-                } catch(PermissionException e) {
-                    // ...user doesn't have permission to modify this resource type...
-                }    
-            }
+        // ...to determine the resource type, first see if we have any resources...
+        if (resources != null && resources.size() > 0) {
+            // ...use the first element to get the resource type...
+            AppdefResourceValue resource = (AppdefResourceValue) resources.get(0);
             
+            try {
+                AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
+                AuthzSubject subject = authzBoss.getCurrentSubject(sessionId);
+                
+                // ...check to see if user can modify resources of this type...
+                SessionBase.canModifyAlertDefinition(subject, resource.getEntityId());
+                
+                canModify = true;
+            } catch(PermissionException e) {
+                // ...user doesn't have permission to modify this resource type...
+                log.debug("No permission to modify alert definition for resource: " + resource.getEntityId());
+            }   
+
             for (Iterator it = resources.iterator(); it.hasNext();) {
                 AppdefResourceValue rv = (AppdefResourceValue) it.next();
                 ids.add(rv.getEntityId());
