@@ -137,7 +137,7 @@ public class EmailManagerImpl implements EmailManager {
                 mimeMessage.setRecipient(Message.RecipientType.TO, addresses[i].getAddress());
 
                 if (addresses[i].useHtml()) {
-                    mimeMessage.setContent(htmlBody[i], "text/html");
+                    mimeMessage.setContent(htmlBody[i], "text/html; charset=UTF-8");
                     if (log.isDebugEnabled()) {
                         log.debug("Sending HTML Alert notification: " + subject + " to " +
                                   addresses[i].getAddress().getAddress() +
@@ -149,7 +149,7 @@ public class EmailManagerImpl implements EmailManager {
                                   addresses[i].getAddress().getAddress() +
                                   "\n" + body[i]);
                     }
-                    mimeMessage.setContent(body[i], "text/plain");
+                    mimeMessage.setContent(body[i], "text/plain; charset=UTF-8");
                 }
 
                 mailSender.send(mimeMessage);
