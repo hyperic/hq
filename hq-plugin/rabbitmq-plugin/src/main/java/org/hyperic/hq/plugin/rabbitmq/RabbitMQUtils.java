@@ -64,6 +64,23 @@ public class RabbitMQUtils {
         Application app = status.getApplication("rabbit");
         return app.getVersion();
     }
+
+    public static void getExchanges(String server, String vHost) throws PluginException {
+        OtpErlangObject[] args = new OtpErlangObject[]{new OtpErlangBinary(vHost.getBytes())};
+        OtpErlangObject received = executeCommand(server, "rabbit_exchange", "list", new OtpErlangList(args));
+        log.debug("[getExchanges] ->" + received);
+    }
+
+    public static void getBindings(String server, String vHost) throws PluginException {
+        OtpErlangObject[] args = new OtpErlangObject[]{new OtpErlangBinary(vHost.getBytes())};
+        OtpErlangObject received = executeCommand(server, "rabbit_exchange", "list_bindings", new OtpErlangList(args));
+        log.debug("[getBindings] ->" + received);
+    }
+
+    public static void getChannels(String server) throws PluginException {
+        OtpErlangObject received = executeCommand(server, "rabbit_channel", "info_all", new OtpErlangList());
+        log.debug("[getChannels] ->" + received);
+    }
     static OtpConnection connection = null;
 
     private static OtpErlangObject executeCommand(String server, String mod, String fun, OtpErlangList args) throws PluginException {
@@ -77,7 +94,7 @@ public class RabbitMQUtils {
         OtpErlangObject received;
         try {
             if (connection == null) {
-                OtpSelf self = new OtpSelf("guest");
+                OtpSelf self = new OtpSelf("guest",RabbitMQProductPlugin.ERLANG_COOKIE);
                 OtpPeer other = new OtpPeer(server);
                 connection = self.connect(other);
             }
@@ -115,12 +132,17 @@ public class RabbitMQUtils {
                     Application app = new Application(appvals.elementAt(0), appvals.elementAt(1), appvals.elementAt(2));
                     res.addApplication(app);
                 }
-            } else if (key.equalsIgnoreCase("nodes")) {
-                OtpErlangList nodes = (OtpErlangList) ele.elementAt(1);
-                for (int i = 0; i < nodes.arity(); i++) {
-                    OtpErlangAtom node = (OtpErlangAtom) nodes.elementAt(i);
-                    res.addNode(node.atomValue());
-                }
+//            } else if (key.equalsIgnoreCase("nodes")) {
+//                OtpErlangList nodes = (OtpErlangList) ele.elementAt(1);
+//                for (int i = 0; i < nodes.arity(); i++) {
+//                    Object nodeObj=nodes.elementAt(i);
+//                    if (nodeObj instanceof OtpErlangAtom) {
+//                        OtpErlangAtom node = (OtpErlangAtom) nodeObj;
+//                        res.addNode(node.atomValue());
+//                    }else{
+//                        throw new IllegalArgumentException("[parseStatusObject] nodeObj="+nodeObj+" ("+nodeObj.getClass().getName()+")");
+//                    }
+//                }
             } else if (key.equalsIgnoreCase("running_nodes")) {
                 OtpErlangList nodes = (OtpErlangList) ele.elementAt(1);
                 for (int i = 0; i < nodes.arity(); i++) {

@@ -4,7 +4,10 @@
  */
 package org.hyperic.hq.plugin.rabbitmq;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.logging.Log;
@@ -15,6 +18,7 @@ import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.ServiceResource;
+import org.hyperic.sigar.OperatingSystem;
 import org.hyperic.util.config.ConfigResponse;
 
 /**
@@ -25,11 +29,37 @@ public class RabbitMQServerDetector extends ServerDetector implements AutoServer
 
     public static final String SERVERNAME = "server.name";
     Log log = getLog();
-    private final static String PTQL_QUERY = "State.Name.eq=beam,Args.*.eq=-sname";
+    private final static String PTQL_QUERY = "State.Name.sw=beam,Args.*.eq=-sname";
 
     @Override
     public List getServerResources(ConfigResponse platformConfig) throws PluginException {
         log.debug("[getServerResources] platformConfig=" + platformConfig);
+
+        // reading the erlang cookie
+        // XXX esto se puede mejorar...
+        if (RabbitMQProductPlugin.ERLANG_COOKIE == null) {
+            if (RabbitMQProductPlugin.ERLANG_COOKIE_FILE == null) {
+                if (platformConfig.getValue("platform.type").equals(OperatingSystem.NAME_MACOSX)) {
+                    RabbitMQProductPlugin.ERLANG_COOKIE_FILE = "/opt/local/var/lib/rabbitmq/.erlang.cookie";
+                } else if (platformConfig.getValue("platform.type").equals(OperatingSystem.NAME_LINUX)) {
+                    RabbitMQProductPlugin.ERLANG_COOKIE_FILE = "/var/lib/rabbitmq/.erlang.cookie";
+                } else {
+                    RabbitMQProductPlugin.ERLANG_COOKIE_FILE = "C:\\WINDOWS\\.erlang.cookie";
+                }
+            }
+            log.debug("[getServerResources] ERLANG_COOKIE_FILE=" + RabbitMQProductPlugin.ERLANG_COOKIE_FILE);
+            File cookieFile = new File(RabbitMQProductPlugin.ERLANG_COOKIE_FILE);
+            try {
+                BufferedReader in = new BufferedReader(new FileReader(cookieFile));
+                RabbitMQProductPlugin.ERLANG_COOKIE = in.readLine();
+                log.debug("[getServerResources] ERLANG_COOKIE=" + RabbitMQProductPlugin.ERLANG_COOKIE);
+            } catch (IOException ex) {
+                if (log.isDebugEnabled()) {
+                    log.error("Error reading the Erlang Cookie: " + ex.getMessage(), ex);
+                }
+            }
+        }
+        //
 
         List res = new ArrayList();
         List<String> paths = new ArrayList();
@@ -53,7 +83,8 @@ public class RabbitMQServerDetector extends ServerDetector implements AutoServer
                     serverName += getServerName(args) + ",";
                 }
             }
-            log.debug("path='" + path + "' ='" + serverName + "'");
+            log.debug("path='" + path + "' serverName='" + serverName + "'");
+
             if (RabbitMQUtils.getServerVersion(serverName).startsWith(getTypeInfo().getVersion())) {
                 log.debug("ok " + serverName);
                 ServerResource server = createServerResource(path);
@@ -89,6 +120,15 @@ public class RabbitMQServerDetector extends ServerDetector implements AutoServer
         List<ServiceResource> res = new ArrayList();
         List<String> vHosts = RabbitMQUtils.getVHost(serverName);
         for (String vHost : vHosts) {
+
+            // ################
+            log.debug("#################################################");
+            RabbitMQUtils.getChannels(serverName);
+            RabbitMQUtils.getBindings(serverName, vHost);
+            RabbitMQUtils.getExchanges(serverName, vHost);
+            log.debug("#################################################");
+            // ################
+
             ServiceResource svh = createServiceResource("VHost");
             svh.setName(getTypeInfo().getName() + " VHost " + vHost);
             //res.add(svh);
@@ -118,7 +158,7 @@ public class RabbitMQServerDetector extends ServerDetector implements AutoServer
             mc.setValue("service.log_track.enable", true);
             File plog = new File("/var/log/rabbitmq", name + ".log");
             if (log.isDebugEnabled()) {
-                log.debug("[discoverServices] log=" + log + " (" + plog.exists() + ")");
+                log.debug("[discoverServices] plog=" + plog + " (" + plog.exists() + ")");
             }
             mc.setValue("service.log_track.files", plog.getAbsolutePath());
             setMeasurementConfig(p, mc);

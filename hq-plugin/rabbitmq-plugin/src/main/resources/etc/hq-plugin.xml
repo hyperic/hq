@@ -90,13 +90,14 @@
         <plugin type="autoinventory" class="RabbitMQServerDetector"/>
         <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
         <plugin type="collector" class="org.hyperic.hq.product.MeasurementPlugin"/>
+        <plugin type="log_track" class="RabbitMQBrokerLog"/>
 
         <config type="product">
             <option name="server.name" description="XXXXXXX"/>
             <option name="server.path" description="XXXXXXX"/>
         </config>
         <config type="measurement">
-            <option name="process.query" default="State.Name.eq=beam,Args.*.eq=-sname,Args.*.ct=%server.path%" description="XXXXXXX"/>
+            <option name="process.query" default="State.Name.sw=beam,Args.*.eq=-sname,Args.*.ct=%server.path%" description="XXXXXXX"/>
         </config>
 
         <service name="Proccess">
@@ -105,7 +106,7 @@
                 <option name="process.name" description="XXXXXXX"/>
             </config>
             <config type="measurement">
-                <option name="process.query" default="State.Name.eq=beam,Args.*.eq=-sname,Args.*.eq=%proccess.name%" description="XXXXXXX"/>
+                <option name="process.query" default="State.Name.sw=beam,Args.*.eq=-sname,Args.*.eq=%proccess.name%" description="XXXXXXX"/>
             </config>
             <metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State" indicator="true"/>
             &process-metrics;
@@ -123,4 +124,5 @@
         &multi-process-metrics;
 
     </server>
+        <server name="RabbitMQ" version="1.8" include="RabbitMQ 1.7"/>
 </plugin>

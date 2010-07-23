@@ -17,7 +17,7 @@
         <dependency>
             <groupId>com.rabbitmq</groupId>
             <artifactId>amqp-client</artifactId>
-            <version>1.7.2</version>
+            <version>1.8.1</version>
         </dependency>
         <dependency>
             <groupId>org.hyperic.hq</groupId>
@@ -41,7 +41,7 @@
 
     <build>
         <plugins>
-            <!--plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
@@ -56,7 +56,8 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin-->            <!-- The exec-maven-plugin is configured to validate plugin XML.  See hq-plugin-parent pom for details-->
+            </plugin>
+            <!-- The exec-maven-plugin is configured to validate plugin XML.  See hq-plugin-parent pom for details-->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>

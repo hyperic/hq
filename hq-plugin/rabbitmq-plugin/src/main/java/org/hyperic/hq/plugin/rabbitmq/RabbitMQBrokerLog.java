@@ -32,7 +32,7 @@ public class RabbitMQBrokerLog extends LogFileTailPlugin {
         log.debug("[configure] config=" + config);
 
         String[] files = getFiles(config);
-        log.debug("[configure]Adding file watchers for files=" + Arrays.asList(files));
+        log.debug("[configure] Adding file watchers for files=" + Arrays.asList(files));
 
         super.configure(config);
     }
