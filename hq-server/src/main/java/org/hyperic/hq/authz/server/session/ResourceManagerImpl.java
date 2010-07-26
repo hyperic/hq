@@ -47,6 +47,7 @@ import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.ServerDAO;
+import org.hyperic.hq.appdef.server.session.ServerType;
 import org.hyperic.hq.appdef.server.session.ServiceDAO;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -1089,8 +1090,10 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
                             .findPlatformById(hqResource.getInstanceId());
 
                         for (Server s : hqPlatform.getServers()) {
-                            // do not add virtual servers
-                            if (!s.getServerType().isVirtual()) {
+                            ServerType st = s.getServerType();
+                            // do not add virtual servers or vCenter server
+                            if (!AuthzConstants.serverPrototypeVmwareVcenter.equals(st.getName())
+                               && !st.isVirtual()) {
                                 createResourceEdges(hqResource, s.getResource(), relation, true);
                             }
                         }
