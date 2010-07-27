@@ -41,9 +41,7 @@ import org.hyperic.hq.appdef.galerts.ResourceAuxLog;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.common.SystemException;
@@ -54,7 +52,6 @@ import org.hyperic.hq.galerts.processor.Gtrigger;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategy;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.server.session.Measurement;
-import org.hyperic.hq.measurement.server.session.MeasurementManagerImpl;
 import org.hyperic.hq.measurement.server.session.MeasurementScheduleZevent;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.server.session.MeasurementZevent;
@@ -82,7 +79,8 @@ public class MeasurementGtrigger
      * We need to allow up to a 1 minute time skew with the agent behind the 
      * server.
      */
-    private static final int AGENT_SERVER_TIME_SKEW_TOLERANCE=60*1000;
+    
+    private static final int DEFAULT_AGENT_SERVER_TIME_SKEW=60 * 1000;
     
     /**
      * The minimum assumed measurement collection interval. This 
@@ -90,7 +88,7 @@ public class MeasurementGtrigger
      * estimate the time window if we have the case where none 
      * of the resources in the group are collecting on the metric.
      */
-    private static final int MIN_COLLECTION_INTERVAL=60*1000;
+    private static final int DEFAULT_MIN_COLLECTION_INTERVAL= 60 * 1000;
     
     private final SizeComparator     _sizeCompare;
     private final int                _numResources; // Num needed to match
@@ -104,7 +102,9 @@ public class MeasurementGtrigger
     private final TreeSet            _trackedHeartBeatTimestamps;
     private       String             _triggerName;
     private       String             _partitionDescription;
+    private       long                minCollectionInterval;
     private       long               _maxCollectionInterval;
+    private       long                timeSkew;
     private       boolean            _isWithinFirstTimeWindow;
     private       boolean            _isTimeWindowingInitialized;
     private       long               _startOfTimeWindowExact; // the start of the time window
@@ -137,11 +137,13 @@ public class MeasurementGtrigger
         _isNotReportingEventsOffending = isNotReportingOffending;
         _srcId2CollectionInterval = new HashMap();
         _trackedHeartBeatTimestamps = new TreeSet();
-        _maxCollectionInterval = MIN_COLLECTION_INTERVAL;
+        this.minCollectionInterval = DEFAULT_MIN_COLLECTION_INTERVAL;
+        _maxCollectionInterval = minCollectionInterval;
+        this.timeSkew = DEFAULT_AGENT_SERVER_TIME_SKEW;
         _isTimeWindowingInitialized = false;
         setTriggerName();
     }
-    
+   
     public Set getInterestedEvents() {
         return Collections.unmodifiableSet(_interestedEvents);
     }
@@ -273,7 +275,7 @@ public class MeasurementGtrigger
         
         long oldInterval = _maxCollectionInterval;
         
-        _maxCollectionInterval = MIN_COLLECTION_INTERVAL;
+        _maxCollectionInterval = minCollectionInterval;
         
         for (Iterator iter = derivedMeas.iterator(); iter.hasNext();) {
             Measurement meas = (Measurement) iter.next();
@@ -297,7 +299,7 @@ public class MeasurementGtrigger
         if (_isWithinFirstTimeWindow) {
             if (System.currentTimeMillis() <
                 _startOfTimeWindowExact+(2*_maxCollectionInterval)+
-                AGENT_SERVER_TIME_SKEW_TOLERANCE) {
+                timeSkew) {
                 // still in first time window
                 _isWithinFirstTimeWindow = true;
             } else {
@@ -767,7 +769,7 @@ public class MeasurementGtrigger
             
             List derivedMeas = getMeasurementsCollecting();
             
-            _maxCollectionInterval = MIN_COLLECTION_INTERVAL;
+            _maxCollectionInterval = minCollectionInterval;
             
             for (Iterator iter = derivedMeas.iterator(); iter.hasNext();) {
                 Measurement meas = (Measurement) iter.next();
@@ -842,4 +844,24 @@ public class MeasurementGtrigger
         _triggerName = getAlertDefName()+" ["+_metricName+" "+_comparator+" "+_metricVal+"]";
     }
     
+    /**
+     * 
+     * @param minCollectionInterval The smallest allowable collection interval in ms.  
+     * The start time window will be determined by taking the max of this number
+     * and the metric collection interval of the MeasurementEvent being processed.
+     * Default is 1 min.
+     */
+    void setMinCollectionInterval(long minCollectionInterval) {
+        this.minCollectionInterval = minCollectionInterval;
+    }
+
+    /**
+     * 
+     * @param timeSkew The amount of time to add to the initial delay in metric processing to account for time lag b/w agent and server in ms.  
+     * Default is 1 minute.
+     */
+    void setTimeSkew(long timeSkew) {
+        this.timeSkew = timeSkew;
+    }
+
 }
