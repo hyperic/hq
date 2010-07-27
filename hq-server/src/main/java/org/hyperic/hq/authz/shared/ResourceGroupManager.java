@@ -36,7 +36,8 @@ public interface ResourceGroupManager
      * @param roles List of {@link Role}s
      * @param resources List of {@link Resource}s
      */
-    public ResourceGroup createResourceGroup(AuthzSubject whoami, ResourceGroup.ResourceGroupCreateInfo cInfo,
+    public ResourceGroup createResourceGroup(AuthzSubject whoami,
+                                             ResourceGroup.ResourceGroupCreateInfo cInfo,
                                              Collection<Role> roles, Collection<Resource> resources)
         throws GroupCreationException, GroupDuplicateNameException;
 
@@ -46,7 +47,8 @@ public interface ResourceGroupManager
      * @return {@link ResourceGroup} or null if it does not exist XXX scottmf,
      *         why is this method called find() but calls dao.get()???
      */
-    public ResourceGroup findResourceGroupById(AuthzSubject whoami, Integer id) throws PermissionException;
+    public ResourceGroup findResourceGroupById(AuthzSubject whoami, Integer id)
+        throws PermissionException;
 
     /**
      * Find the group that has the given ID. Does not do any authz checking
@@ -61,7 +63,8 @@ public interface ResourceGroupManager
      * @throws PermissionException whoami does not have viewResourceGroup on the
      *         requested group
      */
-    public ResourceGroup findResourceGroupByName(AuthzSubject whoami, String name) throws PermissionException;
+    public ResourceGroup findResourceGroupByName(AuthzSubject whoami, String name)
+        throws PermissionException;
 
     public Collection<ResourceGroup> findDeletedGroups();
 
@@ -72,8 +75,9 @@ public interface ResourceGroupManager
      * @throws DuplicateObjectException if an attempt to rename the group would
      *         result in a group with the same name.
      */
-    public void updateGroup(AuthzSubject whoami, ResourceGroup group, String name, String description, String location)
-        throws PermissionException, GroupDuplicateNameException;
+    public void updateGroup(AuthzSubject whoami, ResourceGroup group, String name,
+                            String description, String location) throws PermissionException,
+        GroupDuplicateNameException;
 
     /**
      * Remove all groups compatible with the specified resource prototype.
@@ -87,7 +91,8 @@ public interface ResourceGroupManager
      * @param whoami The current running user.
      * @param group The group to delete.
      */
-    public void removeResourceGroup(AuthzSubject whoami, ResourceGroup group) throws PermissionException, VetoException;
+    public void removeResourceGroup(AuthzSubject whoami, ResourceGroup group)
+        throws PermissionException, VetoException;
 
     public void addResources(AuthzSubject subj, ResourceGroup group, List<Resource> resources)
         throws PermissionException, VetoException;
@@ -97,7 +102,7 @@ public interface ResourceGroupManager
      */
     public ResourceGroup addResource(AuthzSubject whoami, ResourceGroup group, Resource resource)
         throws PermissionException, VetoException;
-    
+
     /**
      * Add a resource to a collection of groups
      * 
@@ -105,9 +110,9 @@ public interface ResourceGroupManager
      * @param resource The resource
      * @param groups The groups to add to.
      * 
-     *
+     * 
      */
-    void addResource(AuthzSubject whoami, Resource resource,Collection<ResourceGroup> groups)
+    void addResource(AuthzSubject whoami, Resource resource, Collection<ResourceGroup> groups)
         throws PermissionException, VetoException;
 
     /**
@@ -115,9 +120,10 @@ public interface ResourceGroupManager
      * @param whoami The current running user.
      * @param group The group .
      */
-    public void removeResources(AuthzSubject whoami, ResourceGroup group, Collection<Resource> resources)
-        throws PermissionException, VetoException;
-    
+    public void removeResources(AuthzSubject whoami, ResourceGroup group,
+                                Collection<Resource> resources) throws PermissionException,
+        VetoException;
+
     /**
      * Remove a resource from a collection of groups
      * 
@@ -126,10 +132,10 @@ public interface ResourceGroupManager
      * @param groups The groups to remove from.
      * 
      * 
-     */    
-    public void removeResource(AuthzSubject whoami,
-                               Resource resource,
-                               Collection<ResourceGroup> groups) throws PermissionException, VetoException;
+     */
+    public void removeResource(AuthzSubject whoami, Resource resource,
+                               Collection<ResourceGroup> groups) throws PermissionException,
+        VetoException;
 
     /**
      * Sets the criteria list for this group.
@@ -139,16 +145,17 @@ public interface ResourceGroupManager
      * @throws PermissionException whoami does not own the resource.
      * @throws GroupException critters is not a valid list of criteria.
      */
-    public void setCriteria(AuthzSubject whoami, ResourceGroup group, CritterList critters) throws PermissionException,
-        GroupException;
+    public void setCriteria(AuthzSubject whoami, ResourceGroup group, CritterList critters)
+        throws PermissionException, GroupException;
 
     /**
      * Change the resource contents of a group to the specified list of
      * resources.
      * @param resources A list of {@link Resource}s to be in the group
      */
-    public void setResources(AuthzSubject whoami, ResourceGroup group, Collection<Resource> resources)
-        throws PermissionException, VetoException;
+    public void setResources(AuthzSubject whoami, ResourceGroup group,
+                             Collection<Resource> resources) throws PermissionException,
+        VetoException;
 
     /**
      * List the resources in this group that the caller is authorized to see.
@@ -211,7 +218,8 @@ public interface ResourceGroupManager
      * @param pInfo Pageinfo with a sort field of type
      *        {@link ResourceGroupSortField}
      */
-    public PageList<ResourceGroup> findGroupsNotContaining(AuthzSubject subject, Resource member, Resource prototype,
+    public PageList<ResourceGroup> findGroupsNotContaining(AuthzSubject subject, Resource member,
+                                                           Resource prototype,
                                                            Collection<ResourceGroup> excGrps,
                                                            org.hyperic.hibernate.PageInfo pInfo);
 
@@ -225,7 +233,8 @@ public interface ResourceGroupManager
      *        {@link ResourceGroupSortField}
      */
     public PageList<ResourceGroup> findGroupsContaining(AuthzSubject subject, Resource member,
-                                                        Collection<ResourceGroup> excludeGroups, PageInfo pInfo);
+                                                        Collection<ResourceGroup> excludeGroups,
+                                                        PageInfo pInfo);
 
     /**
      * Get all the resource groups excluding the root resource group.
@@ -242,7 +251,8 @@ public interface ResourceGroupManager
      * Get all compatible resource groups of the given entity type and resource
      * type.
      */
-    public Collection<ResourceGroup> getCompatibleResourceGroups(AuthzSubject subject, Resource resProto)
+    public Collection<ResourceGroup> getCompatibleResourceGroups(AuthzSubject subject,
+                                                                 Resource resProto)
         throws PermissionException, NotFoundException;
 
     /**
@@ -250,7 +260,8 @@ public interface ResourceGroupManager
      * @param ids the resource group ids
      * @param pc Paging information for the request
      */
-    public PageList<ResourceGroupValue> getResourceGroupsById(AuthzSubject whoami, Integer[] ids, PageControl pc)
+    public PageList<ResourceGroupValue> getResourceGroupsById(AuthzSubject whoami, Integer[] ids,
+                                                              PageControl pc)
         throws PermissionException;
 
     /**
@@ -275,28 +286,7 @@ public interface ResourceGroupManager
      */
     public void setGroupModifiedBy(AuthzSubject whoami, Integer id);
 
-    public void updateGroupType(AuthzSubject subject, ResourceGroup g, int groupType, int groupEntType,
-                                int groupEntResType) throws PermissionException;
-
-    /**
-     * Get the maximum collection interval for a scheduled metric within a
-     * compatible group of resources.
-     * @return The maximum collection time in milliseconds. TODO: This does not
-     *         belong here. Evict, evict! -- JMT 04/01/08
-     */
-    public long getMaxCollectionInterval(ResourceGroup g, Integer templateId);
-
-    /**
-     * Return a List of Measurements that are collecting for the given template
-     * ID and group.
-     * @param g The group in question.
-     * @param templateId The measurement template to query.
-     * @return templateId A list of Measurement objects with the given template
-     *         id in the group that are set to be collected. TODO: This does not
-     *         belong here. Evict, evict! -- JMT 04/01/08
-     */
-    public List<Measurement> getMetricsCollecting(ResourceGroup g, Integer templateId);
-
-    public ResourceRelation getContainmentRelation();
+    public void updateGroupType(AuthzSubject subject, ResourceGroup g, int groupType,
+                                int groupEntType, int groupEntResType) throws PermissionException;
 
 }
