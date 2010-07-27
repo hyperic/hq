@@ -176,6 +176,12 @@ public class DescendantProtoCritterType
             result = 37 * result + (_proto != null ? _proto.hashCode() : 0);
             return result;
         }
+
+        public boolean meets(Resource resource) {
+            // TODO Auto-generated method stub
+            return false;
+        }
+        
     }
 
 }

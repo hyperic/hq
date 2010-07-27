@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.hyperic.hibernate.PageInfo;
+import org.hyperic.hq.appdef.server.session.ResourceZevent;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
@@ -288,5 +289,7 @@ public interface ResourceGroupManager
 
     public void updateGroupType(AuthzSubject subject, ResourceGroup g, int groupType,
                                 int groupEntType, int groupEntResType) throws PermissionException;
+    
+    public void updateGroupMembers(List<? extends ResourceZevent> resourceEvents);
 
 }

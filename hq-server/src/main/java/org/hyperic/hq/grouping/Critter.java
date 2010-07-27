@@ -91,4 +91,6 @@ public interface Critter {
      *     - Resource has been modified in the last 2 days
      */
     String getConfig();
+    
+    boolean meets(Resource resource);
 }

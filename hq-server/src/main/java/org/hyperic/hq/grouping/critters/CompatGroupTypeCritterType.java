@@ -171,6 +171,13 @@ public class CompatGroupTypeCritterType extends BaseCritterType {
             }
             return _proto.hashCode();
         }
+
+        public boolean meets(Resource resource) {
+            // TODO Auto-generated method stub
+            return false;
+        }
+        
+        
     }
 
 }

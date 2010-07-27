@@ -33,6 +33,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import org.hibernate.Query;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.grouping.Critter;
 import org.hyperic.hq.grouping.CritterDump;
 import org.hyperic.hq.grouping.CritterTranslationContext;
@@ -158,5 +159,9 @@ public class ResourceNameCritterType
             int result = _nameRegex != null ? _nameRegex.hashCode() : 0;
             return result;
         }
+        
+        public boolean meets(Resource resource) {
+            return resource.getName().matches(_nameRegex);
+         }
     }
 }

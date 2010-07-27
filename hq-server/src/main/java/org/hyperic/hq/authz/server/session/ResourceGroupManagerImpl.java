@@ -41,7 +41,9 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.PageInfo;
+import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
+import org.hyperic.hq.appdef.server.session.ResourceZevent;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
@@ -62,11 +64,11 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.events.shared.EventLogManager;
+import org.hyperic.hq.grouping.Critter;
 import org.hyperic.hq.grouping.CritterList;
 import org.hyperic.hq.grouping.GroupException;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.grouping.shared.GroupEntry;
-import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -784,7 +786,65 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
             g.setResourcePrototype(r);
         }
     }
-
+    
+    public void updateGroupMembers(List<? extends ResourceZevent> resourceEvents) {
+        for(ResourceZevent resourceEvent : resourceEvents) {
+            if(resourceEvent instanceof ResourceCreatedZevent || resourceEvent instanceof ResourceDeletedZevent) {
+                updateGroupMember(resourceEvent);
+            }     
+        }
+    }
+    
+    private void updateGroupMember(ResourceZevent resourceEvent) {
+        final Resource resource = resourceManager.findResource(resourceEvent.getAppdefEntityID());
+        final AuthzSubject subject = authzSubjectManager.findSubjectById(resourceEvent.getAuthzSubjectId());
+        boolean create = resourceEvent instanceof ResourceCreatedZevent;
+        for(ResourceGroup group : getAllResourceGroups()) {
+            try {
+                CritterList groupCriteria = group.getCritterList();
+                if(isCriteriaMet(groupCriteria, resource)) { 
+                    updateGroupMember(subject, resource, group, create);
+                } 
+            } catch (GroupException e) {
+                log.error("Unable to access criteria for group " + group.getName() + " while processing event " 
+                    + resourceEvent + ".  The groups' members may not be updated.");
+            } 
+        }
+    }
+    
+    private boolean isCriteriaMet(CritterList groupCriteria, Resource resource) {
+        if(groupCriteria.getCritters().isEmpty()) {
+            return false;
+        }
+        if(groupCriteria.isAll()) {
+            for(Critter groupCrit : groupCriteria.getCritters()) {
+                if(!groupCrit.meets(resource)) {
+                   return false;
+                }
+            }
+            return true;
+        }
+        for(Critter groupCrit : groupCriteria.getCritters()) {
+            if(groupCrit.meets(resource)) {
+              return true;
+            }
+        }
+        return false;
+    }
+    
+    private void updateGroupMember(AuthzSubject subject, Resource resource, 
+                                                        ResourceGroup group, boolean create) {
+        try {
+            if(create) {
+                addResource(subject, group, resource);
+            }else  {
+                removeResource(subject, resource, Collections.singletonList(group));
+            }
+        } catch (Exception e) {
+            log.error("Unable to " + (create ? "create" : "remove") + " resource " + resource + " for group " + group.getName());
+        } 
+    }
+    
     private Resource findPrototype(AppdefEntityTypeID id) {
         Integer authzType;
 

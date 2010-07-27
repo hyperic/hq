@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.hibernate.Query;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.grouping.Critter;
 import org.hyperic.hq.grouping.CritterDump;
@@ -146,6 +147,11 @@ public class GroupMembershipCritterType extends BaseCritterType {
        public int hashCode() {
            int result = _group != null ? _group.hashCode() : 0;
            return result;
+       }
+       
+       public boolean meets(Resource resource) {
+           // TODO Auto-generated method stub
+           return false;
        }
     }
 }
