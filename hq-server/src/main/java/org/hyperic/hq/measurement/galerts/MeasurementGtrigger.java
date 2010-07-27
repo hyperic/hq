@@ -745,11 +745,7 @@ public class MeasurementGtrigger
     private MeasurementManager getDMMan() {
         return Bootstrap.getBean(MeasurementManager.class);
     }
-    
-    private ResourceGroupManager getRGMan() {
-        return Bootstrap.getBean(ResourceGroupManager.class);
-    }
-    
+     
     public void setGroup(ResourceGroup rg) {
         _resourceGroup = rg;
         
@@ -817,8 +813,8 @@ public class MeasurementGtrigger
      * 
      * @return The list of {@link org.hyperic.hq.measurement.server.session.Measurement} objects.
      */
-    private List getMeasurementsCollecting() {
-        return getRGMan().getMetricsCollecting(_resourceGroup, _templateId);
+    private List<Measurement> getMeasurementsCollecting() {
+        return getDMMan().getMetricsCollecting(_resourceGroup, _templateId);
     }
     
     private String getTriggerNameWithPartitionDesc() {

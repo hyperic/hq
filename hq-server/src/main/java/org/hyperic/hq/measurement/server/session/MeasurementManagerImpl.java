@@ -714,6 +714,24 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         return measurementDAO.findDesignatedByCategoryForGroup(g, cat);
     }
     
+    @Transactional(readOnly=true)
+    public long getMaxCollectionInterval(ResourceGroup g, Integer templateId) {
+        Long max = measurementDAO.getMaxCollectionInterval(g, templateId);
+
+        if (max == null) {
+            throw new IllegalArgumentException("Invalid template id =" + templateId + " for resource " + "group " +
+                                               g.getId());
+        }
+
+        return max.longValue();
+    }
+
+  
+    @Transactional(readOnly=true)
+    public List<Measurement> getMetricsCollecting(ResourceGroup g, Integer templateId) {
+        return measurementDAO.getMetricsCollecting(g, templateId);
+    }
+    
     /**
      * @param aeids {@link List} of {@link AppdefEntityID}s
      * @return {@link Map} of {@link Integer} representing resourceId to
