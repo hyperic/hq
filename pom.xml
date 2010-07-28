@@ -575,6 +575,8 @@
 					<artifactId>maven-surefire-plugin</artifactId>
 					<configuration>
 						<argLine>-Xmx512m</argLine>
+						<argLine>-XX:MaxPermSize=192m</argline>
+						<argLine>-XX:-UseGCOverheadLimit</argline>
 						<enableAssertions>false</enableAssertions>
 					</configuration>
 				</plugin>
