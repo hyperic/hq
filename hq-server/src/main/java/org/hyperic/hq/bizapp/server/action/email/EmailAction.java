@@ -407,8 +407,10 @@ public class EmailAction extends EmailActionConfig
                 _emails.add(obj);
             }
         }
-        ConcurrentStatsCollector.getInstance().addStat(
-            System.currentTimeMillis()-start, SEND_ALERT_TIME);
+        
+        ConcurrentStatsCollector concurrentStatsCollector = Bootstrap.getBean(ConcurrentStatsCollector.class);
+        
+        concurrentStatsCollector.addStat(System.currentTimeMillis()-start, SEND_ALERT_TIME);
     }
 
     private static final EmailManager getEmailMan() {

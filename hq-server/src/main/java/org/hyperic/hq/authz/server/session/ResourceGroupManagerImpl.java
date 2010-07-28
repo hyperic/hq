@@ -144,7 +144,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
 
         ResourceGroup res = resourceGroupDAO.create(whoami, cInfo, resources, roles);
 
-        resourceEdgeDAO.create(res.getResource(), res.getResource(), 0, getContainmentRelation()); // Self-edge
+        resourceEdgeDAO.create(res.getResource(), res.getResource(), 0, resourceRelationDAO.findById(AuthzConstants.RELATION_CONTAINMENT_ID)); // Self-edge
         applicationContext.publishEvent(new GroupCreatedEvent(res));
         return res;
     }
@@ -783,49 +783,6 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
             Resource r = findPrototype(new AppdefEntityTypeID(groupEntType, groupEntResType));
             g.setResourcePrototype(r);
         }
-    }
-
-    /**
-     * Get the maximum collection interval for a scheduled metric within a
-     * compatible group of resources.
-     * 
-     * @return The maximum collection time in milliseconds. TODO: This does not
-     *         belong here. Evict, evict! -- JMT 04/01/08
-     * 
-     */
-    @Transactional(readOnly=true)
-    public long getMaxCollectionInterval(ResourceGroup g, Integer templateId) {
-        Long max = resourceGroupDAO.getMaxCollectionInterval(g, templateId);
-
-        if (max == null) {
-            throw new IllegalArgumentException("Invalid template id =" + templateId + " for resource " + "group " +
-                                               g.getId());
-        }
-
-        return max.longValue();
-    }
-
-    /**
-     * Return a List of Measurements that are collecting for the given template
-     * ID and group.
-     * 
-     * @param g The group in question.
-     * @param templateId The measurement template to query.
-     * @return templateId A list of Measurement objects with the given template
-     *         id in the group that are set to be collected.
-     * 
-     *         TODO: This does not belong here. Evict, evict! -- JMT 04/01/08
-     * 
-     */
-    @Transactional(readOnly=true)
-    public List<Measurement> getMetricsCollecting(ResourceGroup g, Integer templateId) {
-
-        return resourceGroupDAO.getMetricsCollecting(g, templateId);
-    }
-
-    @Transactional(readOnly=true)
-    public ResourceRelation getContainmentRelation() {
-        return resourceRelationDAO.findById(AuthzConstants.RELATION_CONTAINMENT_ID);
     }
 
     private Resource findPrototype(AppdefEntityTypeID id) {

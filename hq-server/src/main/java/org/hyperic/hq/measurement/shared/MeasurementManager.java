@@ -346,5 +346,22 @@ public interface MeasurementManager {
     void scheduleSynchronous(List<AppdefEntityID> aeids);
 
     void unschedule(List<AppdefEntityID> aeids) throws MeasurementUnscheduleException;
+    
+    /**
+     * Get the maximum collection interval for a scheduled metric within a
+     * compatible group of resources.
+     * @return The maximum collection time in milliseconds.
+     */
+    long getMaxCollectionInterval(ResourceGroup g, Integer templateId);
+
+    /**
+     * Return a List of Measurements that are collecting for the given template
+     * ID and group.
+     * @param g The group in question.
+     * @param templateId The measurement template to query.
+     * @return templateId A list of Measurement objects with the given template
+     *         id in the group that are set to be collected.
+     */
+    List<Measurement> getMetricsCollecting(ResourceGroup g, Integer templateId);
 
 }

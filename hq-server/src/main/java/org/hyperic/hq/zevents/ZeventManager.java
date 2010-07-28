@@ -107,9 +107,11 @@ public class ZeventManager implements ZeventEnqueuer {
     private ThreadWatchdog threadWatchdog;
     private long maxQueue;
     private long batchSize;
-
+    private ConcurrentStatsCollector concurrentStatsCollector;
+    
     @Autowired
     public ZeventManager(DiagnosticsLogger diagnosticsLogger, ThreadWatchdog threadWatchdog,
+    					 ConcurrentStatsCollector concurrentStatsCollector,
                          @Value("#{tweakProperties['hq.zevent.maxQueueEnts'] }") Long maxQueue,
                          @Value("#{tweakProperties['hq.zevent.batchSize'] }") Long batchSize,
                          @Value("#{tweakProperties['hq.zevent.warnInterval'] }") Long warnInterval,  
@@ -119,6 +121,7 @@ public class ZeventManager implements ZeventEnqueuer {
         this._threadGroup.setDaemon(true);
         this.diagnosticsLogger = diagnosticsLogger;
         this.threadWatchdog = threadWatchdog;
+        this.concurrentStatsCollector = concurrentStatsCollector;
         this.maxQueue = maxQueue;
         this.batchSize = batchSize;
         this._warnInterval = warnInterval;
@@ -178,7 +181,7 @@ public class ZeventManager implements ZeventEnqueuer {
         };
 
         diagnosticsLogger.addDiagnosticObject(myDiag);
-        ConcurrentStatsCollector.getInstance().register(ConcurrentStatsCollector.ZEVENT_QUEUE_SIZE);
+        concurrentStatsCollector.register(ConcurrentStatsCollector.ZEVENT_QUEUE_SIZE);
     }
 
     public long getQueueSize() {
@@ -411,8 +414,8 @@ public class ZeventManager implements ZeventEnqueuer {
             e.enterQueue();
             _eventQueue.offer(e, 1, TimeUnit.SECONDS);
         }
-        ConcurrentStatsCollector.getInstance().addStat(_eventQueue.size(),
-            ConcurrentStatsCollector.ZEVENT_QUEUE_SIZE);
+        
+        concurrentStatsCollector.addStat(_eventQueue.size(), ConcurrentStatsCollector.ZEVENT_QUEUE_SIZE);
     }
 
     public void enqueueEventAfterCommit(Zevent event) {

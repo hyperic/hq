@@ -97,7 +97,7 @@ public class GalertProcessorImpl implements GalertProcessor {
      *        and checking session existance is too high on a per-event
      *        basis.
      */
-    void processEvents(final List events) {
+    public void processEvents(final List<Zevent> events) {
         for (Iterator i=events.iterator(); i.hasNext(); ) {
            Zevent z = (Zevent)i.next();
            processEvent(z);

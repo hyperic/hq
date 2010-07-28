@@ -317,19 +317,24 @@ public class ResourceHubPortalAction
         
         boolean canModify = false;
         ArrayList<AppdefEntityID> ids = new ArrayList<AppdefEntityID>();
-        if (resources != null) {
-            if (resources.size() > 0 && DEFAULT_RESOURCE_TYPE != resourceType && AppdefEntityConstants.APPDEF_TYPE_APPLICATION != resourceType) {
-                // ...use the first element to check permission, since there's not an easy way to this that I know of...
-                try {
-                    AuthzSubject subject = authzBoss.getCurrentSubject(sessionId);
-                    AppdefResourceValue resource = (AppdefResourceValue) resources.get(0);
-                    // ...check to see if user can modify resources of this type...
-                    alertPermissionManager.canModifyAlertDefinition(subject, resource.getEntityId());
-                    canModify = true;
-                } catch(PermissionException e) {
-                    // ...user doesn't have permission to modify this resource type...
-                }   
-            }
+
+        // ...to determine the resource type, first see if we have any resources...
+        if (resources != null && resources.size() > 0) {
+            // ...use the first element to get the resource type...
+        	AppdefResourceValue resource = (AppdefResourceValue) resources.get(0);
+            
+        	try {
+        		AuthzSubject subject = authzBoss.getCurrentSubject(sessionId);
+	            
+        		// ...check to see if user can modify resources of this type...
+        		alertPermissionManager.canModifyAlertDefinition(subject, resource.getEntityId());
+        		
+        		canModify = true;
+            } catch(PermissionException e) {
+                // ...user doesn't have permission to modify this resource type...
+            	log.debug("No permission to modify alert definition for resource: " + resource.getEntityId());
+            }   
+
             for (AppdefResourceValue rv : resources) {
                 ids.add(rv.getEntityId());
             }

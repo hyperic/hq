@@ -127,33 +127,22 @@ public class LatherDispatcherImpl implements LatherDispatcher {
 
     private HashSet<String> secureCommands = new HashSet<String>();
 
-    private final ConcurrentStatsCollector stats = ConcurrentStatsCollector.getInstance();
     private static final String LATHER_NUMBER_OF_CONNECTIONS = ConcurrentStatsCollector.LATHER_NUMBER_OF_CONNECTIONS;
 
     private AgentManager agentManager;
-
     private AuthManager authManager;
-
     private AuthzSubjectManager authzSubjectManager;
-
     private AutoinventoryManager autoinventoryManager;
-
     private ConfigManager configManager;
-
     private ControlManager controlManager;
-
     private MeasurementManager measurementManager;
-
     private PlatformManager platformManager;
-
     private ReportProcessor reportProcessor;
-
     private PermissionManager permissionManager;
-
     private ZeventEnqueuer zeventManager;
     private MessagePublisher messagePublisher;
     private AgentCommandsClientFactory agentCommandsClientFactory;
-
+    private ConcurrentStatsCollector concurrentStatsCollector;
     private HAService haService;
 
     @Autowired
@@ -166,7 +155,7 @@ public class LatherDispatcherImpl implements LatherDispatcher {
                                 PermissionManager permissionManager, ZeventEnqueuer zeventManager,
                                 MessagePublisher messagePublisher,
                                 AgentCommandsClientFactory agentCommandsClientFactory,
-                                HAService haService) {
+                                HAService haService, ConcurrentStatsCollector concurrentStatsCollector) {
         this.haService = haService;
         this.agentManager = agentManager;
         this.authManager = authManager;
@@ -184,11 +173,12 @@ public class LatherDispatcherImpl implements LatherDispatcher {
             secureCommands.add(CommandInfo.SECURE_COMMANDS[i]);
         }
         this.messagePublisher = messagePublisher;
+        this.concurrentStatsCollector = concurrentStatsCollector;
     }
     
     @PostConstruct
     public void initStatsCollector() {
-        stats.register(LATHER_NUMBER_OF_CONNECTIONS);
+    	concurrentStatsCollector.register(LATHER_NUMBER_OF_CONNECTIONS);
     }
 
     private void sendTopicMessage(String msgTopic, Serializable data) throws LatherRemoteException {
@@ -706,7 +696,9 @@ public class LatherDispatcherImpl implements LatherDispatcher {
         try {
             conn = agentManager.getAgentConnection(method, ctx.getCallerIP(), agentId);
             LatherValue rtn = runCommand(ctx, method, arg);
-            stats.addStat(1, LATHER_NUMBER_OF_CONNECTIONS);
+            
+            concurrentStatsCollector.addStat(1, LATHER_NUMBER_OF_CONNECTIONS);
+            
             return rtn;
         } finally {
             if (conn != null)

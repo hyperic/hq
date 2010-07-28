@@ -361,6 +361,44 @@ public class MeasurementDAO
             .setCacheable(true).setCacheRegion("Measurement.findDesignatedByCategoryForGroup")
             .list();
     }
+    
+    /**
+     * Return the maximum collection interval for the given template within the
+     * group.
+     * 
+     * @param g The group in question.
+     * @param templateId The measurement template to query.
+     * @return templateId The maximum collection time in milliseconds.
+     */
+    public Long getMaxCollectionInterval(ResourceGroup g, Integer templateId) {
+        String sql = "select max(m.interval) from Measurement m, GroupMember g "
+                     + "join g.group rg " + "join g.resource r "
+                     + "where m.instanceId = r.instanceId and " + "rg = ? and m.template.id = ?";
+
+        return (Long) getSession().createQuery(sql).setParameter(0, g).setInteger(1,
+            templateId.intValue()).setCacheable(true).setCacheRegion(
+            "ResourceGroup.getMaxCollectionInterval").uniqueResult();
+    }
+
+    /**
+     * Return a List of Measurements that are collecting for the given template
+     * ID and group.
+     * 
+     * @param g The group in question.
+     * @param templateId The measurement template to query.
+     * @return templateId A list of Measurement objects with the given template
+     *         id in the group that are set to be collected.
+     */
+    @SuppressWarnings("unchecked")
+    public List<Measurement> getMetricsCollecting(ResourceGroup g, Integer templateId) {
+        String sql = "select m from Measurement m, GroupMember g " + "join g.group rg "
+                     + "join g.resource r " + "where m.instanceId = r.instanceId and "
+                     + "rg = ? and m.template.id = ? and m.enabled = true";
+
+        return (List<Measurement>) getSession().createQuery(sql).setParameter(0, g).setInteger(1,
+            templateId.intValue()).setCacheable(true).setCacheRegion(
+            "ResourceGroup.getMetricsCollecting").list();
+    }
 
     @SuppressWarnings("unchecked")
     List<Measurement> findByCategory(String cat) {

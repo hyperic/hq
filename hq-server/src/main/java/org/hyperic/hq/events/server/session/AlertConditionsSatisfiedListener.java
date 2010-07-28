@@ -27,13 +27,15 @@ import org.springframework.stereotype.Component;
 public class AlertConditionsSatisfiedListener implements ZeventListener<AlertConditionsSatisfiedZEvent> {
     private AlertManager alertManager;
     private ZeventEnqueuer zEventManager;
+    private ConcurrentStatsCollector concurrentStatsCollector;
     private static final int MAX_RETRIES = 3;
     private final Log log = LogFactory.getLog(AlertConditionsSatisfiedListener.class);
 
     @Autowired
-    public AlertConditionsSatisfiedListener(AlertManager alertManager, ZeventEnqueuer zEventManager) {
+    public AlertConditionsSatisfiedListener(AlertManager alertManager, ZeventEnqueuer zEventManager, ConcurrentStatsCollector concurrentStatsCollector) {
         this.alertManager = alertManager;
         this.zEventManager = zEventManager;
+        this.concurrentStatsCollector = concurrentStatsCollector;
     }
     
     @PostConstruct
@@ -42,7 +44,7 @@ public class AlertConditionsSatisfiedListener implements ZeventListener<AlertCon
         Set<Class<?>> alertEvents = new HashSet<Class<?>>();
         alertEvents.add(AlertConditionsSatisfiedZEvent.class);
         zEventManager.addBufferedListener(alertEvents, this);
-        ConcurrentStatsCollector.getInstance().register(ConcurrentStatsCollector.FIRED_ALERT_TIME);
+        concurrentStatsCollector.register(ConcurrentStatsCollector.FIRED_ALERT_TIME);
     }
 
     public void processEvents(List<AlertConditionsSatisfiedZEvent> events) {
@@ -70,8 +72,6 @@ public class AlertConditionsSatisfiedListener implements ZeventListener<AlertCon
              }
         }
        
-        ConcurrentStatsCollector.getInstance().addStat(
-            System.currentTimeMillis()-start, ConcurrentStatsCollector.FIRED_ALERT_TIME);
+        concurrentStatsCollector.addStat(System.currentTimeMillis()-start, ConcurrentStatsCollector.FIRED_ALERT_TIME);
     }
-
 }

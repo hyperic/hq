@@ -19,21 +19,21 @@ public class MergePlatformAndServersEventListener implements ZeventListener<Merg
 
     private RuntimePlatformAndServerMerger runtimePlatformAndServerMerger;
     private ZeventEnqueuer zeventManager;
-    
-    private final ConcurrentStatsCollector _stats = ConcurrentStatsCollector.getInstance();
+    private ConcurrentStatsCollector concurrentStatsCollector;
     private static final String RUNTIME_PLATFORM_AND_SERVER_MERGER = ConcurrentStatsCollector.RUNTIME_PLATFORM_AND_SERVER_MERGER;
     private final Log log = LogFactory.getLog(MergePlatformAndServersEventListener.class);
     
     @Autowired
     public MergePlatformAndServersEventListener(RuntimePlatformAndServerMerger runtimePlatformAndServerMerger,
-                                                ZeventEnqueuer zeventManager) {
+                                                ZeventEnqueuer zeventManager, ConcurrentStatsCollector concurrentStatsCollector) {
         this.runtimePlatformAndServerMerger = runtimePlatformAndServerMerger;
         this.zeventManager = zeventManager;
+        this.concurrentStatsCollector = concurrentStatsCollector;
     }
 
     @PostConstruct
     public void subscribeForEvents() {
-        _stats.register(ConcurrentStatsCollector.RUNTIME_PLATFORM_AND_SERVER_MERGER);
+    	concurrentStatsCollector.register(ConcurrentStatsCollector.RUNTIME_PLATFORM_AND_SERVER_MERGER);
         Set<Class<?>>events = new HashSet<Class<?>>();
         events.add(MergePlatformAndServersZevent.class);
         zeventManager.addBufferedListener(events, this);
@@ -42,7 +42,7 @@ public class MergePlatformAndServersEventListener implements ZeventListener<Merg
     public void processEvents(List<MergePlatformAndServersZevent> events) {
         for (MergePlatformAndServersZevent event : events) {
             try {
-                _stats.addStat(1, RUNTIME_PLATFORM_AND_SERVER_MERGER);
+            	concurrentStatsCollector.addStat(1, RUNTIME_PLATFORM_AND_SERVER_MERGER);
                 runtimePlatformAndServerMerger.reportAIRuntimeReport(event.getAgentToken(), event.getCrrr());
             } catch (Exception e) {
                 log.error("Error merging platform and servers with " + "agentToken=" + event.getAgentToken(), e);

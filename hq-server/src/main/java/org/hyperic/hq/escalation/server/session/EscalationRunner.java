@@ -14,6 +14,7 @@ public class EscalationRunner implements Runnable {
     
     private Integer stateId;
     private EscalationRuntime escalationRuntime = Bootstrap.getBean(EscalationRuntime.class);
+    private ConcurrentStatsCollector concurrentStatsCollector = Bootstrap.getBean(ConcurrentStatsCollector.class);
     private final Log log = LogFactory.getLog(EscalationRunner.class);
     
     public EscalationRunner(Integer stateId) {
@@ -29,7 +30,7 @@ public class EscalationRunner implements Runnable {
                 final long start = System.currentTimeMillis();
                 escalationRuntime.executeState(stateId);
                 final long end = System.currentTimeMillis();
-                ConcurrentStatsCollector.getInstance().addStat((end-start), ConcurrentStatsCollector.ESCALATION_EXECUTE_STATE_TIME);
+                concurrentStatsCollector.addStat((end-start), ConcurrentStatsCollector.ESCALATION_EXECUTE_STATE_TIME);
                 break;
             }catch(OptimisticLockingFailureException e) {
                 if ((i+1) < maxRetries) {

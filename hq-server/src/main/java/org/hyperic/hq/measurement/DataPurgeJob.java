@@ -55,7 +55,7 @@ public class DataPurgeJob implements Runnable {
     private MeasurementManager measurementManager;
     private EventLogManager eventLogManager;
     private DataCompress dataCompress;
-
+    private ConcurrentStatsCollector concurrentStatsCollector;
     private long _lastAnalyze = 0l;
     private static final long ANALYZE_INTERVAL = 6 * HOUR;
     private final Object analyzeRunningLock = new Object();
@@ -65,19 +65,20 @@ public class DataPurgeJob implements Runnable {
 
     @Autowired
     public DataPurgeJob(ServerConfigManager serverConfigManager, MeasurementManager measurementManager,
-                        EventLogManager eventLogManager, DataCompress dataCompress) {
+                        EventLogManager eventLogManager, DataCompress dataCompress, ConcurrentStatsCollector concurrentStatsCollector) {
         this.serverConfigManager = serverConfigManager;
         this.measurementManager = measurementManager;
         this.eventLogManager = eventLogManager;
         this.dataCompress = dataCompress;
+        this.concurrentStatsCollector = concurrentStatsCollector;
     }
     
     @PostConstruct
     public void initStatsCollector() {
-        ConcurrentStatsCollector.getInstance().register(ConcurrentStatsCollector.METRIC_DATA_COMPRESS_TIME);
-        ConcurrentStatsCollector.getInstance().register(ConcurrentStatsCollector.DB_ANALYZE_TIME);
-        ConcurrentStatsCollector.getInstance().register(ConcurrentStatsCollector.PURGE_EVENT_LOGS_TIME);
-        ConcurrentStatsCollector.getInstance().register(ConcurrentStatsCollector.PURGE_MEASUREMENTS_TIME);
+    	concurrentStatsCollector.register(ConcurrentStatsCollector.METRIC_DATA_COMPRESS_TIME);
+    	concurrentStatsCollector.register(ConcurrentStatsCollector.DB_ANALYZE_TIME);
+    	concurrentStatsCollector.register(ConcurrentStatsCollector.PURGE_EVENT_LOGS_TIME);
+    	concurrentStatsCollector.register(ConcurrentStatsCollector.PURGE_MEASUREMENTS_TIME);
     }
 
     public synchronized void run() {
@@ -122,13 +123,12 @@ public class DataPurgeJob implements Runnable {
             // Announce
             _log.info("Data compression starting at " + TimeUtil.toString(time_start));
 
-            ConcurrentStatsCollector stats = ConcurrentStatsCollector.getInstance();
             runDBAnalyze();
-            stats.addStat((now() - time_start), ConcurrentStatsCollector.DB_ANALYZE_TIME);
+            concurrentStatsCollector.addStat((now() - time_start), ConcurrentStatsCollector.DB_ANALYZE_TIME);
 
             final long start = now();
             dataCompress.compressData();
-            stats.addStat((now() - start), ConcurrentStatsCollector.METRIC_DATA_COMPRESS_TIME);
+            concurrentStatsCollector.addStat((now() - start), ConcurrentStatsCollector.METRIC_DATA_COMPRESS_TIME);
 
         } catch (SQLException e) {
             _log.error("Unable to compress data: " + e, e);
@@ -219,13 +219,12 @@ public class DataPurgeJob implements Runnable {
     }
 
     protected void purge(Properties conf, long now)  {
-        ConcurrentStatsCollector stats = ConcurrentStatsCollector.getInstance();
         long start = now();
         purgeEventLogs(conf, now);
-        stats.addStat((now() - start), ConcurrentStatsCollector.PURGE_EVENT_LOGS_TIME);
+        concurrentStatsCollector.addStat((now() - start), ConcurrentStatsCollector.PURGE_EVENT_LOGS_TIME);
         start = now();
         purgeMeasurements();
-        stats.addStat((now() - start), ConcurrentStatsCollector.PURGE_MEASUREMENTS_TIME);
+        concurrentStatsCollector.addStat((now() - start), ConcurrentStatsCollector.PURGE_MEASUREMENTS_TIME);
     }
 
     /**

@@ -81,6 +81,8 @@ public class EmailManagerImpl implements EmailManager {
     private AuthzSubjectManager authzSubjectManager;
     private PlatformManager platformManager;
     private ResourceManager resourceManager;
+    private ConcurrentStatsCollector concurrentStatsCollector;
+    
     final Log log = LogFactory.getLog(EmailManagerImpl.class);
 
     public static final String JOB_GROUP = "EmailFilterGroup";
@@ -89,17 +91,19 @@ public class EmailManagerImpl implements EmailManager {
 
     @Autowired
     public EmailManagerImpl(JavaMailSender mailSender, ServerConfigManager serverConfigManager,
-                            AuthzSubjectManager authzSubjectManager, PlatformManager platformManager, ResourceManager resourceManager) {
+                            AuthzSubjectManager authzSubjectManager, PlatformManager platformManager, ResourceManager resourceManager,
+                            ConcurrentStatsCollector concurrentStatsCollector) {
         this.mailSender = mailSender;
         this.serverConfigManager = serverConfigManager;
         this.authzSubjectManager = authzSubjectManager;
         this.platformManager = platformManager;
         this.resourceManager = resourceManager;
+        this.concurrentStatsCollector = concurrentStatsCollector;
     }
     
     @PostConstruct
     public void initStats() {
-        ConcurrentStatsCollector.getInstance().register(ConcurrentStatsCollector.SEND_ALERT_TIME);
+    	concurrentStatsCollector.register(ConcurrentStatsCollector.SEND_ALERT_TIME);
     }
 
     public void sendEmail(EmailRecipient[] addresses, String subject, String[] body, String[] htmlBody, Integer priority) {
@@ -133,7 +137,7 @@ public class EmailManagerImpl implements EmailManager {
                 mimeMessage.setRecipient(Message.RecipientType.TO, addresses[i].getAddress());
 
                 if (addresses[i].useHtml()) {
-                    mimeMessage.setContent(htmlBody[i], "text/html");
+                    mimeMessage.setContent(htmlBody[i], "text/html; charset=UTF-8");
                     if (log.isDebugEnabled()) {
                         log.debug("Sending HTML Alert notification: " + subject + " to " +
                                   addresses[i].getAddress().getAddress() +
@@ -145,7 +149,7 @@ public class EmailManagerImpl implements EmailManager {
                                   addresses[i].getAddress().getAddress() +
                                   "\n" + body[i]);
                     }
-                    mimeMessage.setContent(body[i], "text/plain");
+                    mimeMessage.setContent(body[i], "text/plain; charset=UTF-8");
                 }
 
                 mailSender.send(mimeMessage);
