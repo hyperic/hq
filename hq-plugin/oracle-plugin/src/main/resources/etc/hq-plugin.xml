@@ -223,6 +223,20 @@ fi
             units="percentage"
             collectionType="dynamic"/>
 
+    <metric name="Data Dictionary Cache Hit Ratio"
+            alias="DataDictionaryCacheHitRatio"
+            template="${domain}:Type=Service:${alias}"
+            category="PERFORMANCE"
+            units="percentage"
+            collectionType="dynamic"/>
+
+    <metric name="Library Cache Hit Ratio"
+            alias="CacheHitRatio"
+            template="${domain}:Type=Service:${alias}"
+            category="PERFORMANCE"
+            units="percentage"
+            collectionType="dynamic"/>
+
     <metric name="Up Time"
             alias="UpTime"
             template="${domain}:Type=Service:${alias}"
