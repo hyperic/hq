@@ -114,7 +114,7 @@ abstract public class BaseInfrastructureTest {
     protected AgentManager agentManager;
 
     @Autowired
-    private SessionFactory sessionFactory;
+    protected SessionFactory sessionFactory;
 
     @Autowired
     protected ResourceManager resourceManager;

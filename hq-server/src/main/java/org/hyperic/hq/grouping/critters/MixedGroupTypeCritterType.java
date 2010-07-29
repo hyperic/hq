@@ -33,6 +33,7 @@ import java.util.Map;
 
 import org.hibernate.Query;
 import org.hibernate.type.IntegerType;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.MixedGroupType;
 import org.hyperic.hq.grouping.Critter;
 import org.hyperic.hq.grouping.CritterDump;
@@ -173,6 +174,11 @@ public class MixedGroupTypeCritterType extends BaseCritterType {
 
         public int hashCode() {
             return _groupType.hashCode();
+        }
+        
+        public boolean meets(Resource resource) {
+            //TODO implement
+            throw new UnsupportedOperationException();
         }
     }
 }
