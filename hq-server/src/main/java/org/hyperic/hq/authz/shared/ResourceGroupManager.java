@@ -8,13 +8,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.hyperic.hibernate.PageInfo;
-import org.hyperic.hq.appdef.server.session.ResourceZevent;
+import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupSortField;
-import org.hyperic.hq.authz.server.session.ResourceRelation;
 import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.common.NotFoundException;
@@ -22,7 +21,6 @@ import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.grouping.CritterList;
 import org.hyperic.hq.grouping.GroupException;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
-import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
@@ -139,12 +137,13 @@ public interface ResourceGroupManager
         VetoException;
 
     /**
-     * Sets the criteria list for this group.
+     * Sets the criteria list for this group and updates the groups members based on the criteria
      * @param whoami The current running user.
      * @param group This group.
      * @param critters List of critters to associate with this resource group.
      * @throws PermissionException whoami does not own the resource.
      * @throws GroupException critters is not a valid list of criteria.
+     * 
      */
     public void setCriteria(AuthzSubject whoami, ResourceGroup group, CritterList critters)
         throws PermissionException, GroupException;
@@ -290,6 +289,10 @@ public interface ResourceGroupManager
     public void updateGroupType(AuthzSubject subject, ResourceGroup g, int groupType,
                                 int groupEntType, int groupEntResType) throws PermissionException;
     
-    public void updateGroupMembers(List<? extends ResourceZevent> resourceEvents);
+    /**
+     * Adds new resources to any groups whose criteria match the resources
+     * @param resourceEvents Events representing resource creations
+     */
+    public void updateGroupMembers(List<ResourceCreatedZevent> resourceEvents);
 
 }

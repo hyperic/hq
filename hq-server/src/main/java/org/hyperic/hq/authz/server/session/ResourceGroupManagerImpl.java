@@ -40,10 +40,10 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.HibernateException;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
-import org.hyperic.hq.appdef.server.session.ResourceZevent;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
@@ -66,6 +66,8 @@ import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.events.shared.EventLogManager;
 import org.hyperic.hq.grouping.Critter;
 import org.hyperic.hq.grouping.CritterList;
+import org.hyperic.hq.grouping.CritterTranslationContext;
+import org.hyperic.hq.grouping.CritterTranslator;
 import org.hyperic.hq.grouping.GroupException;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.grouping.shared.GroupEntry;
@@ -106,12 +108,13 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     private ResourceDAO resourceDAO;
     private ResourceRelationDAO resourceRelationDAO;
     private ApplicationContext applicationContext;
+    private CritterTranslator critterTranslator;
 
     @Autowired
     public ResourceGroupManagerImpl(ResourceEdgeDAO resourceEdgeDAO, AuthzSubjectManager authzSubjectManager,
                                     EventLogManager eventLogManager, ResourceManager resourceManager,
                                     ResourceGroupDAO resourceGroupDAO, ResourceDAO resourceDAO,
-                                    ResourceRelationDAO resourceRelationDAO) {
+                                    ResourceRelationDAO resourceRelationDAO, CritterTranslator critterTranslator) {
         this.resourceEdgeDAO = resourceEdgeDAO;
         this.authzSubjectManager = authzSubjectManager;
         this.eventLogManager = eventLogManager;
@@ -119,6 +122,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         this.resourceGroupDAO = resourceGroupDAO;
         this.resourceDAO = resourceDAO;
         this.resourceRelationDAO = resourceRelationDAO;
+        this.critterTranslator = critterTranslator;
     }
 
     @PostConstruct
@@ -409,7 +413,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     }
 
     /**
-     * Sets the criteria list for this group.
+     * Sets the criteria list for this group and updates the groups members based on the criteria
      * @param whoami The current running user.
      * @param group This group.
      * @param critters List of critters to associate with this resource group.
@@ -420,8 +424,8 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     public void setCriteria(AuthzSubject whoami, ResourceGroup group, CritterList critters) throws PermissionException,
         GroupException {
         checkGroupPermission(whoami, group.getId(), AuthzConstants.perm_modifyResourceGroup);
-
         group.setCritterList(critters);
+        updateGroupMembers(whoami, group);
     }
 
     /**
@@ -787,26 +791,54 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         }
     }
     
-    public void updateGroupMembers(List<? extends ResourceZevent> resourceEvents) {
-        for(ResourceZevent resourceEvent : resourceEvents) {
-            if(resourceEvent instanceof ResourceCreatedZevent || resourceEvent instanceof ResourceDeletedZevent) {
-                updateGroupMember(resourceEvent);
-            }     
+    /**
+     * Updates the group with all resources meeting the group criteria
+     * @param whoami The user token
+     * @param group The group whose resources should be updated to match its criteria
+     * @throws HibernateException
+     * @throws GroupException
+     */
+    @SuppressWarnings("unchecked")
+    private void updateGroupMembers(AuthzSubject whoami, ResourceGroup group) throws GroupException {        
+        CritterTranslationContext translationContext = new CritterTranslationContext(whoami);
+        List<Resource> proposedResources = critterTranslator.translate(translationContext, group.getCritterList()).list();
+        Collection<Resource> groupMembers = getMembers(group);
+        Collection<Resource> resourcesToRemove = new HashSet<Resource>(groupMembers);
+        Collection<Resource> resourcesToAdd = new HashSet<Resource>(proposedResources);
+        //elements in existing group not in proposed group
+        resourcesToRemove.removeAll(proposedResources);
+        //elements in proposed group not in existing group
+        resourcesToAdd.removeAll(groupMembers);
+        
+        if(! resourcesToRemove.isEmpty()) {
+            removeResources(group, resourcesToRemove);
+        }
+        if(!(resourcesToAdd.isEmpty())) {
+            addResources(group, resourcesToAdd);
         }
     }
     
-    private void updateGroupMember(ResourceZevent resourceEvent) {
+    public void updateGroupMembers(List<ResourceCreatedZevent> resourceEvents) {
+        for(ResourceCreatedZevent resourceEvent : resourceEvents) {     
+                updateGroupMember(resourceEvent);
+        }
+    }
+    
+    private void updateGroupMember(ResourceCreatedZevent resourceEvent) {
         final Resource resource = resourceManager.findResource(resourceEvent.getAppdefEntityID());
         final AuthzSubject subject = authzSubjectManager.findSubjectById(resourceEvent.getAuthzSubjectId());
-        boolean create = resourceEvent instanceof ResourceCreatedZevent;
         for(ResourceGroup group : getAllResourceGroups()) {
             try {
                 CritterList groupCriteria = group.getCritterList();
                 if(isCriteriaMet(groupCriteria, resource)) { 
-                    updateGroupMember(subject, resource, group, create);
+                    try {
+                        addResource(subject, group, resource);
+                    } catch (Exception e) {
+                        log.error("Unable to add resource " + resource + " to group " + group.getName());
+                    } 
                 } 
-            } catch (GroupException e) {
-                log.error("Unable to access criteria for group " + group.getName() + " while processing event " 
+            } catch (Exception e) {
+                log.error("Unable to process criteria for group " + group.getName() + " while processing event " 
                     + resourceEvent + ".  The groups' members may not be updated.");
             } 
         }
@@ -830,19 +862,6 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
             }
         }
         return false;
-    }
-    
-    private void updateGroupMember(AuthzSubject subject, Resource resource, 
-                                                        ResourceGroup group, boolean create) {
-        try {
-            if(create) {
-                addResource(subject, group, resource);
-            }else  {
-                removeResource(subject, resource, Collections.singletonList(group));
-            }
-        } catch (Exception e) {
-            log.error("Unable to " + (create ? "create" : "remove") + " resource " + resource + " for group " + group.getName());
-        } 
     }
     
     private Resource findPrototype(AppdefEntityTypeID id) {

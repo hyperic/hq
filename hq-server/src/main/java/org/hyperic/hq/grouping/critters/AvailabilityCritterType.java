@@ -139,7 +139,7 @@ public class AvailabilityCritterType extends BaseCritterType {
 
         public boolean meets(Resource resource) {
            //TODO implement
-            return false;
+           throw new UnsupportedOperationException();
         }
     }
 }

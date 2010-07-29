@@ -161,8 +161,7 @@ public class ProtoCritterType extends BaseCritterType {
         }
         
         public boolean meets(Resource resource) {
-            // TODO Auto-generated method stub
-            return false;
+            return _proto.equals(resource.getPrototype());
         }
     }
 

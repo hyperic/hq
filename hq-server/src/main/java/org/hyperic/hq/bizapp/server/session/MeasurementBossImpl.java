@@ -158,6 +158,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
     private ServiceManager serviceManager;
     private VirtualManager virtualManager;
     private ApplicationManager applicationManager;
+    private CritterTranslator critterTranslator;
 
     @Autowired
     public MeasurementBossImpl(SessionManager sessionManager, AuthBoss authBoss,
@@ -168,7 +169,8 @@ public class MeasurementBossImpl implements MeasurementBoss {
                                ResourceManager resourceManager,
                                ResourceGroupManager resourceGroupManager,
                                ServerManager serverManager, ServiceManager serviceManager,
-                               VirtualManager virtualManager, ApplicationManager applicationManager) {
+                               VirtualManager virtualManager, ApplicationManager applicationManager, 
+                               CritterTranslator critterTranslator) {
         this.sessionManager = sessionManager;
         this.authBoss = authBoss;
         this.measurementManager = measurementManager;
@@ -183,6 +185,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
         this.serviceManager = serviceManager;
         this.virtualManager = virtualManager;
         this.applicationManager = applicationManager;
+        this.critterTranslator = critterTranslator;
     }
 
     private List<Measurement> findDesignatedMetrics(AuthzSubject subject, AppdefEntityID id,
@@ -2351,7 +2354,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
         }
 
         DescendantProtoCritterType descType = new DescendantProtoCritterType();
-        CritterTranslator trans = new CritterTranslator();
+      
         CritterTranslationContext ctx = new CritterTranslationContext(subject);
 
         for (int i = 0; i < aids.length; i++) {
@@ -2369,7 +2372,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
                 critters.add(descType.newInstance(r, proto));
                 CritterList cList = new CritterList(critters, false);
 
-                List<Resource> children = trans.translate(ctx, cList).list();
+                List<Resource> children = critterTranslator.translate(ctx, cList).list();
                 for (Resource child : children) {
 
                     res.add(AppdefUtil.newAppdefEntityId(child));

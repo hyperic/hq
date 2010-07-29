@@ -231,6 +231,8 @@ public class AppdefBossImpl implements AppdefBoss {
     private AppdefManager appdefManager;
 
     private ZeventEnqueuer zEventManager;
+    
+    private CritterTranslator critterTranslator; 
 
     protected Log log = LogFactory.getLog(AppdefBossImpl.class.getName());
     protected boolean debug = log.isDebugEnabled();
@@ -250,7 +252,7 @@ public class AppdefBossImpl implements AppdefBoss {
                           AIBoss aiBoss, ResourceGroupManager resourceGroupManager,
                           ResourceManager resourceManager, ServerManager serverManager,
                           ServiceManager serviceManager, TrackerManager trackerManager,
-                          AppdefManager appdefManager, ZeventEnqueuer zEventManager) {
+                          AppdefManager appdefManager, ZeventEnqueuer zEventManager, CritterTranslator critterTranslator) {
         this.sessionManager = sessionManager;
         this.agentManager = agentManager;
         this.aiQueueManager = aiQueueManager;
@@ -272,6 +274,7 @@ public class AppdefBossImpl implements AppdefBoss {
         this.trackerManager = trackerManager;
         this.appdefManager = appdefManager;
         this.zEventManager = zEventManager;
+        this.critterTranslator = critterTranslator;
     }
 
     /**
@@ -2689,12 +2692,12 @@ public class AppdefBossImpl implements AppdefBoss {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         PageList<AppdefResourceValue> res = new PageList<AppdefResourceValue>();
 
-        CritterTranslator trans = new CritterTranslator();
+       
         CritterTranslationContext ctx = new CritterTranslationContext(subject);
         CritterList cList = getCritterList(subject, matchAny, appdefResType, searchFor, grpId,
             grpEntId, groupSubType, appdefTypeId, matchOwn, matchUnavail);
         // TODO: G
-        PageList<Resource> children = trans.translate(ctx, cList, pc);
+        PageList<Resource> children = critterTranslator.translate(ctx, cList, pc);
         res.ensureCapacity(children.size());
         res.setTotalSize(children.getTotalSize());
         for (Resource child : children) {

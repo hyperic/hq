@@ -39,11 +39,13 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.springframework.stereotype.Component;
 
 /**
  * The CritterTranslator is a simple class useful composing a Hibernate query
  * from a list of critters
  */
+@Component
 public class CritterTranslator {
     private final Log _log = LogFactory.getLog(CritterTranslator.class);
     public static final String EMPTY_SQL = "";

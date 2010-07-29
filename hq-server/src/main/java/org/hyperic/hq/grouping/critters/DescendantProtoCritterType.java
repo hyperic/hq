@@ -178,8 +178,8 @@ public class DescendantProtoCritterType
         }
 
         public boolean meets(Resource resource) {
-            // TODO Auto-generated method stub
-            return false;
+            //TODO implement
+            throw new UnsupportedOperationException();
         }
         
     }
