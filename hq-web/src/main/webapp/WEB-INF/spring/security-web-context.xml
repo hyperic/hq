@@ -131,6 +131,9 @@
 	<!-- Security context holder aware request filter --> 
 	<bean id="securityContextHolderAwareRequestFilter" class="org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter" />
 
+    <!-- Setup expression handler (for JSP tags) -->
+    <bean id="expressionHandler" class="org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler" />
+
 	<!-- Setup the filter security interceptor -->
 	<bean id="filterSecurityInterceptor" class="org.springframework.security.web.access.intercept.FilterSecurityInterceptor">
 		<property name="authenticationManager" ref="authenticationManager" />
@@ -146,12 +149,9 @@
 		</property>
 		<property name="securityMetadataSource">
 			<sec:filter-security-metadata-source>
-				<sec:intercept-url pattern="/hqu/hqapi*/**" access="ROLE_USER" /> 
-		    	<sec:intercept-url pattern="/app/login" access="ROLE_ANONYMOUS,ROLE_USER" />
-		    	<sec:intercept-url pattern="/**" access="ROLE_USER" />
+				<sec:intercept-url pattern="/app/login" access="ROLE_ANONYMOUS,ROLE_USER" />
+		    	<sec:intercept-url pattern="/**" access="ROLE_USER" />		    	
 			</sec:filter-security-metadata-source>
 		</property>
 	</bean>
-	
-	
 </beans>

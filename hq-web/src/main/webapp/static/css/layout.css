@@ -1,0 +1,146 @@
+/* -------------------------------------------------------------- 
+  
+   reset.css
+   * Resets default browser CSS.
+   
+-------------------------------------------------------------- */
+
+html, body, div, span, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, code,
+del, dfn, em, img, q, dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-weight: inherit;
+  font-style: inherit;
+  font-size: 100%;
+  font-family: inherit;
+  vertical-align: baseline;
+}
+
+body { line-height: 1.5; }
+
+/* Tables still need 'cellspacing="0"' in the markup. */
+table { border-collapse: separate; border-spacing: 0; }
+caption, th, td { text-align: left; font-weight: normal; }
+table, td, th { vertical-align: middle; }
+
+/* Remove possible quote marks (") from <q>, <blockquote>. */
+blockquote:before, blockquote:after, q:before, q:after { content: ""; }
+blockquote, q { quotes: "" ""; }
+
+/* Remove annoying border on linked images. */
+a img { border: none; }
+
+
+/* HQ Styles Start Here */
+
+
+#footer {
+	width: 100%;
+}
+
+#header {
+	position: fixed;
+	top: 0;
+	width: 100%;
+    background: transparent url('../images/header_background.jpg') repeat-x scroll;
+    border-bottom: 3px solid #2D6EBE;
+    height: 64px;
+}
+
+#headerLinks {
+    position: absolute;
+    top: 0;
+    right: 0px;
+    height: 20px;
+    text-align: right;
+    padding: 8px 10px 0 0;
+}
+
+#headerLinks li {
+	margin: 0 5px;
+	list-style: none;
+    float: left;
+}
+
+#headerLinks span {
+    margin-left: 8px;
+}
+
+#headerLinks ul {
+	margin: 0;
+}
+#headerLinks ul li a {
+    text-decoration: none;
+}
+
+#headerLogo {
+    cursor: pointer;
+}
+
+#loginPanel {
+	margin:10% auto 0;
+}
+
+#loginPanel {
+    width: 350px;
+	padding: 16px 16px 10px;
+	text-align: left;
+    -moz-border-radius: 8px;
+    -webkit-border-radius: 8px;
+}
+
+#loginPanel .fieldRow {
+    height:33px;
+    position:relative;
+    clear:none;
+}
+
+#loginPanel .fieldRow input {
+    position:absolute;
+    right:5px;
+    top:5px;
+    float:none;
+}
+
+#loginPanel .fieldRow label {
+    top: 5px;
+    position: absolute;
+    text-align:left;
+    float:none;
+}
+
+#loginPanel form fieldset {
+	padding: 0 5px;
+}
+
+#loginPanel form fieldset p {
+	margin: 1em 0;
+}
+
+#loginPanel form fieldset p label {
+	padding-left: 5px;
+}
+
+#loginPanel .guestUser {
+	margin-right:0;
+}
+
+#loginPanel .guestUserLinkContainer {
+	margin-top: 5px; 
+	text-align: right;
+}
+
+#loginPanel input[type="password"], 
+#loginPanel input[type="text"] {
+    margin-right:5px;
+}
+
+#loginPanel .submitButtonContainer {
+	text-align: right; 
+	margin-right: 10px;
+}

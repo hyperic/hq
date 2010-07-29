@@ -1,4 +1,4 @@
-package org.hyperic.hq.ui.login;
+package org.hyperic.hq.web.controllers.login;
 
 import java.io.IOException;
 
@@ -23,6 +23,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
+/**
+ * This is the controller for the login view
+ * 
+ * @author David Crutchfield
+ *
+ */
 @Controller
 public class LoginController {
     private static final Log log = LogFactory.getLog(LoginController.class.getName());

@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<web-app xmlns="http://java.sun.com/xml/ns/j2ee"
-  		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-  		 xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee 
-      						 http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd" 
-      	 version="2.4">
+<web-app xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee 
+      						 http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
+	version="2.4">
 	<display-name>HQ</display-name>
 
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
 		<param-value>/WEB-INF/spring/*-context.xml,classpath*:/META-INF/spring/*-context.xml</param-value>
 	</context-param>
-	
+
 	<listener>
 		<listener-class>org.hyperic.hq.context.BootstrapContextLoaderListener</listener-class>
 	</listener>
@@ -60,15 +59,15 @@
 	</servlet-mapping>
 
 	<servlet>
-        <servlet-name>webapp</servlet-name>
-        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
+		<servlet-name>webapp</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
 
-    <servlet-mapping>
-        <servlet-name>webapp</servlet-name>
-        <url-pattern>/app/*</url-pattern>
-    </servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>webapp</servlet-name>
+		<url-pattern>/app/*</url-pattern>
+	</servlet-mapping>
 
 	<!-- URLRewite Filter -->
 	<filter>
@@ -87,9 +86,9 @@
 	</filter>
 
 	<filter>
-        <filter-name>filterChainProxy</filter-name>
-        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
-    </filter>
+		<filter-name>filterChainProxy</filter-name>
+		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+	</filter>
 
 	<filter>
 		<filter-name>Resource-Filter</filter-name>
@@ -111,26 +110,26 @@
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
 
-	 <filter-mapping>
-      <filter-name>filterChainProxy</filter-name>
-      <url-pattern>/*</url-pattern>
-    </filter-mapping> 
+	<filter-mapping>
+		<filter-name>filterChainProxy</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
 
 	<filter-mapping>
 		<filter-name>Resource-Filter</filter-name>
 		<url-pattern>/images/*</url-pattern>
 	</filter-mapping>
-	
+
 	<filter-mapping>
 		<filter-name>Resource-Filter</filter-name>
 		<url-pattern>/css/*</url-pattern>
 	</filter-mapping>
-	
+
 	<filter-mapping>
 		<filter-name>Resource-Filter</filter-name>
 		<url-pattern>/js/*</url-pattern>
 	</filter-mapping>
-	
+
 	<filter-mapping>
 		<filter-name>HQU-Filter</filter-name>
 		<url-pattern>/hqu/*</url-pattern>
@@ -139,7 +138,7 @@
 	<listener>
 		<listener-class>org.hyperic.hq.ui.Configurator</listener-class>
 	</listener>
-	
+
 	<servlet>
 		<servlet-name>hqu</servlet-name>
 		<servlet-class>org.hyperic.hq.ui.servlet.RenditServlet</servlet-class>
@@ -151,61 +150,61 @@
 		<servlet-class>org.hyperic.hq.ui.servlet.MetricDataServlet</servlet-class>
 		<load-on-startup>2</load-on-startup>
 	</servlet>
-	
+
 	<servlet>
 		<servlet-name>availability</servlet-name>
 		<servlet-class>org.hyperic.hq.ui.servlet.AvailabilityServlet</servlet-class>
 		<load-on-startup>2</load-on-startup>
 	</servlet>
-	
+
 	<servlet>
 		<servlet-name>availcolor</servlet-name>
 		<servlet-class>org.hyperic.hq.ui.servlet.AvailabilityColorServlet</servlet-class>
 		<load-on-startup>2</load-on-startup>
 	</servlet>
-	
+
 	<servlet>
 		<servlet-name>navMapImage</servlet-name>
 		<servlet-class>org.hyperic.hq.ui.servlet.NavMapImageServlet</servlet-class>
 		<load-on-startup>2</load-on-startup>
 	</servlet>
-	
+
 	<servlet>
 		<servlet-name>availHealthChart</servlet-name>
 		<servlet-class>org.hyperic.hq.ui.servlet.AvailHealthChartServlet</servlet-class>
 		<load-on-startup>2</load-on-startup>
 	</servlet>
-	
+
 	<servlet>
 		<servlet-name>usageHealthChart</servlet-name>
 		<servlet-class>org.hyperic.hq.ui.servlet.UsageHealthChartServlet</servlet-class>
 		<load-on-startup>2</load-on-startup>
 	</servlet>
-	
+
 	<servlet>
 		<servlet-name>utilizationHealthChart</servlet-name>
 		<servlet-class>org.hyperic.hq.ui.servlet.UtilizationHealthChartServlet</servlet-class>
 		<load-on-startup>2</load-on-startup>
 	</servlet>
-	
+
 	<servlet>
 		<servlet-name>highLowChart</servlet-name>
 		<servlet-class>org.hyperic.hq.ui.servlet.HighLowChartServlet</servlet-class>
 		<load-on-startup>2</load-on-startup>
 	</servlet>
-	
+
 	<servlet>
 		<servlet-name>metricChart</servlet-name>
 		<servlet-class>org.hyperic.hq.ui.servlet.MetricChartServlet</servlet-class>
 		<load-on-startup>2</load-on-startup>
 	</servlet>
-	
+
 	<servlet>
 		<servlet-name>availStoplight</servlet-name>
 		<servlet-class>org.hyperic.hq.ui.servlet.AvailabilityStoplightChartServlet</servlet-class>
 		<load-on-startup>2</load-on-startup>
 	</servlet>
-	
+
 	<!-- Standard Action Servlet Configuration (with debugging) -->
 	<servlet>
 		<servlet-name>action</servlet-name>
@@ -254,7 +253,7 @@
 		<servlet-name>ServletRedirector</servlet-name>
 		<url-pattern>/ServletRedirector</url-pattern>
 	</servlet-mapping>
-	
+
 	<servlet-mapping>
 		<servlet-name>JspRedirector</servlet-name>
 		<url-pattern>/JspRedirector</url-pattern>
@@ -265,118 +264,117 @@
 		<servlet-name>hqu</servlet-name>
 		<url-pattern>*.hqu</url-pattern>
 	</servlet-mapping>
-	
+
 	<servlet-mapping>
 		<servlet-name>hqu</servlet-name>
 		<url-pattern>*.groovy</url-pattern>
 	</servlet-mapping>
-	
+
 	<servlet-mapping>
 		<servlet-name>hqu</servlet-name>
 		<url-pattern>/hqu</url-pattern>
 	</servlet-mapping>
-	
+
 	<servlet-mapping>
 		<servlet-name>metricdata</servlet-name>
 		<url-pattern>/resource/MetricData</url-pattern>
 	</servlet-mapping>
-	
+
 	<servlet-mapping>
 		<servlet-name>availability</servlet-name>
 		<url-pattern>/resource/Availability</url-pattern>
 	</servlet-mapping>
-	
+
 	<servlet-mapping>
 		<servlet-name>availcolor</servlet-name>
 		<url-pattern>/resource/AvailColor</url-pattern>
 	</servlet-mapping>
-	
+
 	<servlet-mapping>
 		<servlet-name>navMapImage</servlet-name>
 		<url-pattern>/resource/NavMapImage</url-pattern>
 	</servlet-mapping>
-	
+
 	<servlet-mapping>
 		<servlet-name>availHealthChart</servlet-name>
 		<url-pattern>/resource/AvailHealthChart</url-pattern>
 	</servlet-mapping>
-	
+
 	<servlet-mapping>
 		<servlet-name>usageHealthChart</servlet-name>
 		<url-pattern>/resource/UsageHealthChart</url-pattern>
 	</servlet-mapping>
-	
+
 	<servlet-mapping>
 		<servlet-name>utilizationHealthChart</servlet-name>
 		<url-pattern>/resource/UtilizationHealthChart</url-pattern>
 	</servlet-mapping>
-	
+
 	<servlet-mapping>
 		<servlet-name>highLowChart</servlet-name>
 		<url-pattern>/resource/HighLowChart</url-pattern>
 	</servlet-mapping>
-	
+
 	<servlet-mapping>
 		<servlet-name>metricChart</servlet-name>
 		<url-pattern>/resource/MetricChart</url-pattern>
 	</servlet-mapping>
-	
+
 	<servlet-mapping>
 		<servlet-name>availStoplight</servlet-name>
 		<url-pattern>/resource/AvailStoplight</url-pattern>
 	</servlet-mapping>
-	
+
 	<!-- Standard Action Servlet Mapping -->
 	<servlet-mapping>
 		<servlet-name>action</servlet-name>
 		<url-pattern>*.rss</url-pattern>
 	</servlet-mapping>
-	
+
 	<servlet-mapping>
 		<servlet-name>action</servlet-name>
 		<url-pattern>*.do</url-pattern>
 	</servlet-mapping>
-	
+
 	<session-config>
 		<session-timeout>30</session-timeout>
 	</session-config>
-	
+
 	<!-- The Usual Welcome File List -->
 	<welcome-file-list>
 		<welcome-file>Dashboard.do</welcome-file>
 	</welcome-file-list>
 	
+	<!--
 	<error-page>
 		<error-code>404</error-code>
 		<location>/common/GenericError.jsp</location>
 	</error-page>
+	-->
 	
 	<!-- Lather servlet -->
-  <servlet>
-    <servlet-name>lather</servlet-name>
-    <servlet-class>
-        org.hyperic.lather.server.LatherServlet
-    </servlet-class>
-    <init-param>
-        <param-name>org.hyperic.lather.maxConns</param-name>
-        <param-value>3000</param-value>
-    </init-param>
-    <init-param>
-        <param-name>org.hyperic.lather.execTimeout</param-name>
-        <param-value>300000</param-value>
-    </init-param>
-    <load-on-startup>1</load-on-startup>
-  </servlet>
-  
-  <servlet-mapping>
-    <servlet-name>lather</servlet-name>
-    <url-pattern>/lather</url-pattern>
-  </servlet-mapping>
+	<servlet>
+		<servlet-name>lather</servlet-name>
+		<servlet-class>org.hyperic.lather.server.LatherServlet</servlet-class>
+		<init-param>
+			<param-name>org.hyperic.lather.maxConns</param-name>
+			<param-value>3000</param-value>
+		</init-param>
+		<init-param>
+			<param-name>org.hyperic.lather.execTimeout</param-name>
+			<param-value>300000</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
 
-  <!-- Map new lather servlet to pre-4.4 URLs to support upgrade -->
-  <servlet-mapping>
-    <servlet-name>lather</servlet-name>
-    <url-pattern>/jboss-lather/JBossLather</url-pattern>
-  </servlet-mapping>
-	
+	<servlet-mapping>
+		<servlet-name>lather</servlet-name>
+		<url-pattern>/lather</url-pattern>
+	</servlet-mapping>
+
+	<!-- Map new lather servlet to pre-4.4 URLs to support upgrade -->
+	<servlet-mapping>
+		<servlet-name>lather</servlet-name>
+		<url-pattern>/jboss-lather/JBossLather</url-pattern>
+	</servlet-mapping>
 </web-app>

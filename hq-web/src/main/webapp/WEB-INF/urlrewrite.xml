@@ -23,18 +23,22 @@
     </rule>
    	<rule>
 		<from>^/SignIn.html(.*)</from>
-		<to type="redirect">/app/login</to>
+		<to type="permanent-redirect">/app/login</to>
 	</rule>
    	<rule>
 		<from>^/SignIn(.*).shq</from>
-		<to type="redirect">/app/login</to>
+		<to type="permanent-redirect">/app/login</to>
 	</rule>
 	<rule>
 		<from>^/Login.do(.*)</from>
-		<to type="redirect">/app/login</to>
+		<to type="permanent-redirect">/app/login</to>
 	</rule>
 	<rule>
 		<from>^/Logout.do(.*)</from>
-		<to type="redirect">/j_spring_security_logout</to>
+		<to type="permanent-redirect">/j_spring_security_logout</to>
+	</rule>
+	<rule>
+		<from>^/static/(.*)/(images|js|css)</from>
+		<to type="forward">/static/$2</to>
 	</rule>
 </urlrewrite>

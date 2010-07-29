@@ -14,6 +14,12 @@
 	<large-icon></large-icon>
 	<description></description>
 
+	<tag> 
+		<name>staticContentBaseUrl</name> 
+		<tag-class>org.hyperic.hq.web.tag.StaticContentBaseUrlTag</tag-class>
+		<body-content>empty</body-content>
+	</tag> 
+
 	<tag>
 		<name>help</name>
 		<tag-class>org.hyperic.hq.ui.taglib.HelpTag</tag-class>
