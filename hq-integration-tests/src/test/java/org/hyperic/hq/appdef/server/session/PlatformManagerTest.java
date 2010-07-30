@@ -371,9 +371,14 @@ public class PlatformManagerTest
         assertEquals("Correct Platform is not fetched", platform, testPlatform);
     }
 
-    @Test(expected = PlatformNotFoundException.class)
+    @Test//(expected = PlatformNotFoundException.class)
     public void testGetPlatformByInvalidId() throws ApplicationException, NotFoundException {
-        platformManager.getPlatformById(authzSubjectManager.getOverlordPojo(), 12345);
+        try {
+            platformManager.getPlatformById(authzSubjectManager.getOverlordPojo(), 12345);
+            fail("No exception occurred retrieving by invalid id");
+        }catch(PlatformNotFoundException e) {
+            
+        }
     }
 
     @Test
