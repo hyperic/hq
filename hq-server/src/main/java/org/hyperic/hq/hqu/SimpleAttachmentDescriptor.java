@@ -28,40 +28,46 @@ package org.hyperic.hq.hqu;
 import org.hyperic.hq.hqu.server.session.Attachment;
 
 public class SimpleAttachmentDescriptor implements AttachmentDescriptor {
-    private Attachment _attachment;
-    private String     _helpTag;
-    private String     _html;
-    private String     _iconClass;
-
-    public SimpleAttachmentDescriptor(Attachment a, String helpTag,
-                                      String html)
-    {
-        this(a, helpTag, html, "favoriteIcon"); 
-        // XXX:  Need a better default than favouriteIcon
-    }
+    private Attachment attachment;
+    private String     helpTag;
+    private String     html;
+    private String     iconClass;
+    private String 	   name;
     
     public SimpleAttachmentDescriptor(Attachment a, String helpTag,
+    		                          String name, String html)
+    {
+        this(a, helpTag, name, html, "favoriteIcon"); 
+        // XXX:  Need a better default than favouriteIcon
+    }
+
+	public SimpleAttachmentDescriptor(Attachment attachment, String helpTag, String name,
                                       String html, String iconClass) 
     {
-        _attachment = a;
-        _helpTag    = helpTag;
-        _html       = html;
-        _iconClass  = iconClass;
+        this.attachment = attachment;
+        this.helpTag    = helpTag;
+        this.name       = name;
+        this.html       = html;
+        this.iconClass  = iconClass;
     }
     
     public Attachment getAttachment() {
-        return _attachment;
+        return attachment;
     }
 
     public String getHelpTag() {
-        return _helpTag;
+        return helpTag;
     }
+    
+    public String getName() {
+		return name;
+	}
 
     public String getHTML() {
-        return _html;
+        return html;
     }
     
     public String getIconClass() {
-        return _iconClass;
+        return iconClass;
     }
 }

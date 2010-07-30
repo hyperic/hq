@@ -44,6 +44,8 @@ public interface AttachmentDescriptor {
      */
     Attachment getAttachment();
     
+    String getName();
+    
     /**
      * Get the HTML used to render the attachment.  This is usually just the
      * text description, however it can be more elaborate (like using images
