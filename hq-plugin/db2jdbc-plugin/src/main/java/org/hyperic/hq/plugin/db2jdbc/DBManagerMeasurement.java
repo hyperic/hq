@@ -17,7 +17,7 @@ public class DBManagerMeasurement extends Measurement {
             getLog().debug("** metric = " + metric);
         }
         String func = metric.getObjectProperties().getProperty("func");
-        return "SELECT * FROM TABLE(" + func + "(-2))";
+        return "SELECT * FROM TABLE(" + func + "(-2)) AS T";
     }
 
 }
