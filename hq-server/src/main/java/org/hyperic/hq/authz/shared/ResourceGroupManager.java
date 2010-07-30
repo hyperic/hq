@@ -15,6 +15,7 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupSortField;
 import org.hyperic.hq.authz.server.session.Role;
+import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
 import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
@@ -39,6 +40,18 @@ public interface ResourceGroupManager
                                              ResourceGroup.ResourceGroupCreateInfo cInfo,
                                              Collection<Role> roles, Collection<Resource> resources)
         throws GroupCreationException, GroupDuplicateNameException;
+    
+    
+    /**
+     * Create a resource group and set its Criteria. Currently no permission checking.
+     * @param roles List of {@link Role}s
+     * @param resources List of {@link Resource}s
+     * @param criteriaList List of criteria for automatic addition of resources to the group
+     */
+    public ResourceGroup createResourceGroup(AuthzSubject whoami, ResourceGroupCreateInfo cInfo,
+                                             Collection<Role> roles,
+                                             Collection<Resource> resources,
+                                             CritterList criteriaList) throws GroupCreationException, GroupDuplicateNameException ;
 
     /**
      * Find the group that has the given ID. Performs authz checking

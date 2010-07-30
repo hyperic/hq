@@ -26,7 +26,7 @@ import org.hyperic.util.pager.PageControl
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants
 import org.hyperic.hq.appdef.shared.AppdefEntityID
-
+import org.hyperic.hq.grouping.CritterList;
 class ResourceHelper extends BaseHelper {
     private rman = Bootstrap.getBean(ResourceManager.class)
     private groupMan = Bootstrap.getBean(ResourceGroupManager.class)
@@ -550,6 +550,17 @@ class ResourceHelper extends BaseHelper {
     ResourceGroup createGroup(String name, String description, String location,
     Resource prototype, Collection roles,
     Collection resources, boolean isPrivate) {
+        groupMan.createResourceGroup(user, getCreateInfo(name,description,location,prototype,isPrivate), roles, resources)
+    }
+    
+    ResourceGroup createGroup(String name, String description, String location,
+    Resource prototype, Collection roles,
+    Collection resources, boolean isPrivate, CritterList criteria) {
+        groupMan.createResourceGroup(user, getCreateInfo(name,description,location,prototype,isPrivate), roles, resources, criteria)
+    }
+    
+    private ResourceGroupCreateInfo getCreateInfo(String name, String description, String location,
+    Resource prototype, boolean isPrivate) {
         int groupType
         if (!prototype) {
             groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS
@@ -564,7 +575,7 @@ class ResourceHelper extends BaseHelper {
         ResourceGroupCreateInfo info =
                 new ResourceGroupCreateInfo(name, description, groupType, prototype,
                 location, 0, false, isPrivate);
-        groupMan.createResourceGroup(user, info, roles, resources)
+        return info
     }
     
     /**

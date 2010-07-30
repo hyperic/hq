@@ -96,7 +96,8 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     private Pager _groupPager;
     private Pager _ownedGroupPager;
     private static final String GROUP_PAGER = PagerProcessor_resourceGroup.class.getName();
-    private static final String OWNEDGROUP_PAGER = PagerProcessor_ownedResourceGroup.class.getName();
+    private static final String OWNEDGROUP_PAGER = PagerProcessor_ownedResourceGroup.class
+        .getName();
 
     private ResourceEdgeDAO resourceEdgeDAO;
 
@@ -111,10 +112,13 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     private CritterTranslator critterTranslator;
 
     @Autowired
-    public ResourceGroupManagerImpl(ResourceEdgeDAO resourceEdgeDAO, AuthzSubjectManager authzSubjectManager,
-                                    EventLogManager eventLogManager, ResourceManager resourceManager,
+    public ResourceGroupManagerImpl(ResourceEdgeDAO resourceEdgeDAO,
+                                    AuthzSubjectManager authzSubjectManager,
+                                    EventLogManager eventLogManager,
+                                    ResourceManager resourceManager,
                                     ResourceGroupDAO resourceGroupDAO, ResourceDAO resourceDAO,
-                                    ResourceRelationDAO resourceRelationDAO, CritterTranslator critterTranslator) {
+                                    ResourceRelationDAO resourceRelationDAO,
+                                    CritterTranslator critterTranslator) {
         this.resourceEdgeDAO = resourceEdgeDAO;
         this.authzSubjectManager = authzSubjectManager;
         this.eventLogManager = eventLogManager;
@@ -142,47 +146,72 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     public ResourceGroup createResourceGroup(AuthzSubject whoami, ResourceGroupCreateInfo cInfo,
                                              Collection<Role> roles, Collection<Resource> resources)
         throws GroupCreationException, GroupDuplicateNameException {
+        ResourceGroup res = createGroup(whoami, cInfo, roles, resources);
+        applicationContext.publishEvent(new GroupCreatedEvent(res));
+        return res;
+    }
+
+    public ResourceGroup createResourceGroup(AuthzSubject whoami, ResourceGroupCreateInfo cInfo,
+                                             Collection<Role> roles,
+                                             Collection<Resource> resources,
+                                             CritterList criteriaList)
+        throws GroupCreationException, GroupDuplicateNameException {
+        ResourceGroup group = createGroup(whoami, cInfo, roles, resources);
+        try {
+            setCriteria(whoami, group, criteriaList);
+        } catch (PermissionException e) {
+            throw new GroupCreationException(
+                "Error creating group.  Unable to set group criteria.", e);
+        } catch (GroupException e) {
+            throw new GroupCreationException(
+                "Error creating group.  Unable to set group criteria.", e);
+        }
+        applicationContext.publishEvent(new GroupCreatedEvent(group));
+        return group;
+    }
+
+    private ResourceGroup createGroup(AuthzSubject whoami, ResourceGroupCreateInfo cInfo,
+                                      Collection<Role> roles, Collection<Resource> resources)
+        throws GroupDuplicateNameException, GroupCreationException {
         ResourceGroup existing = resourceGroupDAO.findByName(cInfo.getName());
 
         if (existing != null) {
-            throw new GroupDuplicateNameException("Group by the name [" + cInfo.getName() + "] already exists");
+            throw new GroupDuplicateNameException("Group by the name [" + cInfo.getName() +
+                                                  "] already exists");
         }
 
         ResourceGroup res = resourceGroupDAO.create(whoami, cInfo, resources, roles);
 
-        resourceEdgeDAO.create(res.getResource(), res.getResource(), 0, resourceRelationDAO.findById(AuthzConstants.RELATION_CONTAINMENT_ID)); // Self-edge
-        applicationContext.publishEvent(new GroupCreatedEvent(res));
+        resourceEdgeDAO.create(res.getResource(), res.getResource(), 0, resourceRelationDAO
+            .findById(AuthzConstants.RELATION_CONTAINMENT_ID)); // Self-edge
         return res;
     }
-    
+
     /**
-     * Do not allow resources to be added or removed from a group
-     * if the group has a downtime schedule in progress.
+     * Do not allow resources to be added or removed from a group if the group
+     * has a downtime schedule in progress.
      */
-    private void checkGroupMaintenance(AuthzSubject subj, ResourceGroup group) 
+    private void checkGroupMaintenance(AuthzSubject subj, ResourceGroup group)
         throws PermissionException, VetoException {
-    
+
         try {
             MaintenanceEvent event = PermissionManagerFactory.getInstance()
-                                        .getMaintenanceEventManager()
-                                            .getMaintenanceEvent(subj, group.getId());
+                .getMaintenanceEventManager().getMaintenanceEvent(subj, group.getId());
 
             if (event != null && MaintenanceEvent.STATE_RUNNING.equals(event.getState())) {
-                String msg = ResourceBundle.getBundle(BUNDLE)
-                                .getString("resourceGroup.update.error.downtime.running");
-                
-                throw new VetoException(
-                            MessageFormat.format(msg, new String[] {group.getName()}));
+                String msg = ResourceBundle.getBundle(BUNDLE).getString(
+                    "resourceGroup.update.error.downtime.running");
+
+                throw new VetoException(MessageFormat.format(msg, new String[] { group.getName() }));
             }
         } catch (SchedulerException se) {
             // This should not happen. Indicates a serious system error.
-            
-            String msg = ResourceBundle.getBundle(BUNDLE)
-                            .getString("resourceGroup.update.error.downtime.scheduler.failure");
-                        
-            throw new SystemException(
-                        MessageFormat.format(msg, new String[] {group.getName()}),
-                        se); 
+
+            String msg = ResourceBundle.getBundle(BUNDLE).getString(
+                "resourceGroup.update.error.downtime.scheduler.failure");
+
+            throw new SystemException(MessageFormat.format(msg, new String[] { group.getName() }),
+                se);
         }
     }
 
@@ -193,8 +222,9 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
      *         why is this method called find() but calls dao.get()???
      * 
      */
-    @Transactional(readOnly=true)
-    public ResourceGroup findResourceGroupById(AuthzSubject whoami, Integer id) throws PermissionException {
+    @Transactional(readOnly = true)
+    public ResourceGroup findResourceGroupById(AuthzSubject whoami, Integer id)
+        throws PermissionException {
         ResourceGroup group = resourceGroupDAO.get(id);
         if (group == null) {
             return null;
@@ -203,7 +233,8 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         return group;
     }
 
-    private void checkGroupPermission(AuthzSubject whoami, Integer group, Integer op) throws PermissionException {
+    private void checkGroupPermission(AuthzSubject whoami, Integer group, Integer op)
+        throws PermissionException {
         PermissionManager pm = PermissionManagerFactory.getInstance();
         pm.check(whoami.getId(), AuthzConstants.authzGroup, group, op);
     }
@@ -212,7 +243,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
      * Find the group that has the given ID. Does not do any authz checking
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public ResourceGroup findResourceGroupById(Integer id) {
         return resourceGroupDAO.findById(id);
     }
@@ -226,8 +257,9 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
      *         requested group
      * 
      */
-    @Transactional(readOnly=true)
-    public ResourceGroup findResourceGroupByName(AuthzSubject whoami, String name) throws PermissionException {
+    @Transactional(readOnly = true)
+    public ResourceGroup findResourceGroupByName(AuthzSubject whoami, String name)
+        throws PermissionException {
         ResourceGroup group = resourceGroupDAO.findByName(name);
 
         if (group == null) {
@@ -241,7 +273,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     /**
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public Collection<ResourceGroup> findDeletedGroups() {
         return resourceGroupDAO.findDeletedGroups();
     }
@@ -255,8 +287,9 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
      *         result in a group with the same name.
      * 
      */
-    public void updateGroup(AuthzSubject whoami, ResourceGroup group, String name, String description, String location)
-        throws PermissionException, GroupDuplicateNameException {
+    public void updateGroup(AuthzSubject whoami, ResourceGroup group, String name,
+                            String description, String location) throws PermissionException,
+        GroupDuplicateNameException {
         checkGroupPermission(whoami, group.getId(), AuthzConstants.perm_modifyResourceGroup);
 
         // XXX: Add Auditing
@@ -264,7 +297,8 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
             ResourceGroup existing = resourceGroupDAO.findByName(name);
 
             if (existing != null) {
-                throw new GroupDuplicateNameException("Group by that name [" + name + "] already exists");
+                throw new GroupDuplicateNameException("Group by that name [" + name +
+                                                      "] already exists");
             }
             group.setName(name);
             group.getResource().setName(name);
@@ -294,9 +328,8 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
                 try {
                     removeResourceGroup(overlord, group);
                 } catch (PermissionException exc) {
-                    log
-                        .warn("Perm denied while deleting group [" + group.getName() + " id=" + group.getId() + "]",
-                            exc);
+                    log.warn("Perm denied while deleting group [" + group.getName() + " id=" +
+                             group.getId() + "]", exc);
                 }
             }
         }
@@ -308,7 +341,8 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
      * @param group The group to delete.
      * 
      */
-    public void removeResourceGroup(AuthzSubject whoami, ResourceGroup group) throws PermissionException, VetoException {
+    public void removeResourceGroup(AuthzSubject whoami, ResourceGroup group)
+        throws PermissionException, VetoException {
         checkGroupPermission(whoami, group.getId(), AuthzConstants.perm_removeResourceGroup);
         // TODO scottmf, this should be invoking a pre-transaction callback
         eventLogManager.deleteLogs(group.getResource());
@@ -318,7 +352,8 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         resourceGroupDAO.getSession().flush();
 
         // Send resource delete event
-        ResourceDeletedZevent zevent = new ResourceDeletedZevent(whoami, AppdefEntityID.newGroupID(group.getId()));
+        ResourceDeletedZevent zevent = new ResourceDeletedZevent(whoami, AppdefEntityID
+            .newGroupID(group.getId()));
         ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
     }
 
@@ -349,47 +384,38 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         addResources(group, Collections.singletonList(resource));
         return group;
     }
-    
-   
-    public void addResource(AuthzSubject whoami, 
-                            Resource resource,
-                            Collection<ResourceGroup> groups)
-        throws PermissionException, VetoException
-    {
+
+    public void addResource(AuthzSubject whoami, Resource resource, Collection<ResourceGroup> groups)
+        throws PermissionException, VetoException {
         // Do all of the pre-condition checks first before
         // iterating through addResources() because
         // ResourceGroupDAO().addMembers() will commit
         // the changes after each iteration.
 
-        for (ResourceGroup g : groups) { 
-            checkGroupPermission(whoami, g.getId(),
-                                 AuthzConstants.perm_modifyResourceGroup);
+        for (ResourceGroup g : groups) {
+            checkGroupPermission(whoami, g.getId(), AuthzConstants.perm_modifyResourceGroup);
             checkGroupMaintenance(whoami, g);
         }
-        
-        for(ResourceGroup g : groups) {
+
+        for (ResourceGroup g : groups) {
             addResources(g, Collections.singletonList(resource));
         }
     }
 
-   
-    public void removeResource(AuthzSubject whoami,
-                               Resource resource,
-                               Collection<ResourceGroup> groups)
-        throws PermissionException, VetoException
-    {
+    public void removeResource(AuthzSubject whoami, Resource resource,
+                               Collection<ResourceGroup> groups) throws PermissionException,
+        VetoException {
         // Do all of the pre-condition checks first before
         // iterating through removeResources() because
         // ResourceGroupDAO().removeMembers() will commit
         // the changes after each iteration.
 
         for (ResourceGroup g : groups) {
-            checkGroupPermission(whoami, g.getId(),
-                                 AuthzConstants.perm_modifyResourceGroup);
+            checkGroupPermission(whoami, g.getId(), AuthzConstants.perm_modifyResourceGroup);
             checkGroupMaintenance(whoami, g);
         }
-        
-        for ( ResourceGroup g : groups) {
+
+        for (ResourceGroup g : groups) {
             removeResources(g, Collections.singletonList(resource));
         }
     }
@@ -400,20 +426,22 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
      * @param group The group .
      * 
      */
-    public void removeResources(AuthzSubject whoami, ResourceGroup group, Collection<Resource> resources)
-        throws PermissionException, VetoException {
+    public void removeResources(AuthzSubject whoami, ResourceGroup group,
+                                Collection<Resource> resources) throws PermissionException,
+        VetoException {
         checkGroupPermission(whoami, group.getId(), AuthzConstants.perm_modifyResourceGroup);
         checkGroupMaintenance(whoami, group);
         removeResources(group, resources);
     }
-    
+
     private void removeResources(ResourceGroup group, Collection<Resource> resources) {
-       resourceGroupDAO.removeMembers(group, resources);
-       applicationContext.publishEvent(new GroupMembersChangedEvent(group));
+        resourceGroupDAO.removeMembers(group, resources);
+        applicationContext.publishEvent(new GroupMembersChangedEvent(group));
     }
 
     /**
-     * Sets the criteria list for this group and updates the groups members based on the criteria
+     * Sets the criteria list for this group and updates the groups members
+     * based on the criteria
      * @param whoami The current running user.
      * @param group This group.
      * @param critters List of critters to associate with this resource group.
@@ -421,8 +449,8 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
      * @throws GroupException critters is not a valid list of criteria.
      * 
      */
-    public void setCriteria(AuthzSubject whoami, ResourceGroup group, CritterList critters) throws PermissionException,
-        GroupException {
+    public void setCriteria(AuthzSubject whoami, ResourceGroup group, CritterList critters)
+        throws PermissionException, GroupException {
         checkGroupPermission(whoami, group.getId(), AuthzConstants.perm_modifyResourceGroup);
         group.setCritterList(critters);
         updateGroupMembers(whoami, group);
@@ -435,8 +463,9 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
      * @param resources A list of {@link Resource}s to be in the group
      * 
      */
-    public void setResources(AuthzSubject whoami, ResourceGroup group, Collection<Resource> resources)
-        throws PermissionException, VetoException {
+    public void setResources(AuthzSubject whoami, ResourceGroup group,
+                             Collection<Resource> resources) throws PermissionException,
+        VetoException {
         checkGroupPermission(whoami, group.getId(), AuthzConstants.perm_modifyResourceGroup);
         checkGroupMaintenance(whoami, group);
         resourceGroupDAO.setMembers(group, resources);
@@ -451,16 +480,17 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
      * @return list of authorized resources in this group.
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public Collection<Resource> getResources(AuthzSubject whoami, Integer id) {
-        return PermissionManagerFactory.getInstance().getGroupResources(whoami.getId(), id, Boolean.FALSE);
+        return PermissionManagerFactory.getInstance().getGroupResources(whoami.getId(), id,
+            Boolean.FALSE);
     }
 
     /**
      * Get all the resource groups including the root resource group.
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public List<ResourceGroupValue> getAllResourceGroups(AuthzSubject subject, PageControl pc)
         throws PermissionException {
         return getAllResourceGroups(subject, pc, false);
@@ -472,7 +502,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
      * @return {@link Resource}s
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public Collection<Resource> getMembers(ResourceGroup g) {
         return resourceGroupDAO.getMembers(g);
     }
@@ -481,7 +511,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
      * Get the member type counts of a group
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public Map<String, Number> getMemberTypes(ResourceGroup g) {
         return resourceGroupDAO.getMemberTypes(g);
     }
@@ -492,7 +522,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
      * @return {@link ResourceGroup}s
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public Collection<ResourceGroup> getGroups(Resource r) {
         return resourceGroupDAO.getGroups(r);
     }
@@ -501,7 +531,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
      * Get the # of groups within HQ inventory
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public Number getGroupCount() {
         return new Integer(resourceGroupDAO.size());
     }
@@ -510,7 +540,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
      * Returns true if the passed resource is a member of the given group.
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public boolean isMember(ResourceGroup group, Resource resource) {
         return resourceGroupDAO.isMember(group, resource);
     }
@@ -519,7 +549,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
      * Get the # of members in a group
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public int getNumMembers(ResourceGroup g) {
         return getMembers(g).size();
     }
@@ -528,7 +558,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
      * Temporary method to convert a ResourceGroup into an AppdefGroupValue
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public AppdefGroupValue getGroupConvert(AuthzSubject subj, ResourceGroup g) {
         AppdefGroupValue retVal = new AppdefGroupValue();
         Collection<Resource> members = getMembers(g);
@@ -576,10 +606,13 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
      * 
      * 
      */
-    @Transactional(readOnly=true)
-    public PageList<ResourceGroup> findGroupsNotContaining(AuthzSubject subject, Resource member, Resource prototype,
-                                                           Collection<ResourceGroup> excGrps, PageInfo pInfo) {
-        return resourceGroupDAO.findGroupsClusionary(subject, member, prototype, excGrps, pInfo, false);
+    @Transactional(readOnly = true)
+    public PageList<ResourceGroup> findGroupsNotContaining(AuthzSubject subject, Resource member,
+                                                           Resource prototype,
+                                                           Collection<ResourceGroup> excGrps,
+                                                           PageInfo pInfo) {
+        return resourceGroupDAO.findGroupsClusionary(subject, member, prototype, excGrps, pInfo,
+            false);
     }
 
     /**
@@ -597,17 +630,19 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
      * 
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public PageList<ResourceGroup> findGroupsContaining(AuthzSubject subject, Resource member,
-                                                        Collection<ResourceGroup> excludeGroups, PageInfo pInfo) {
-        return resourceGroupDAO.findGroupsClusionary(subject, member, null, excludeGroups, pInfo, true);
+                                                        Collection<ResourceGroup> excludeGroups,
+                                                        PageInfo pInfo) {
+        return resourceGroupDAO.findGroupsClusionary(subject, member, null, excludeGroups, pInfo,
+            true);
     }
 
     /**
      * Get all the resource groups excluding the root resource group.
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public Collection<ResourceGroup> getAllResourceGroups(AuthzSubject subject, boolean excludeRoot)
         throws PermissionException {
         // first get the list of groups subject can view
@@ -621,8 +656,8 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
          */
         try {
             // TODO: G
-            groupIds = pm.findOperationScopeBySubject(subject, AuthzConstants.groupOpViewResourceGroup,
-                AuthzConstants.groupResourceTypeName);
+            groupIds = pm.findOperationScopeBySubject(subject,
+                AuthzConstants.groupOpViewResourceGroup, AuthzConstants.groupResourceTypeName);
         } catch (NotFoundException e) {
             // Makes no sense
             throw new SystemException(e);
@@ -650,7 +685,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
      * 
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public Collection<ResourceGroup> getAllResourceGroups() {
         return resourceGroupDAO.findAll();
     }
@@ -661,8 +696,9 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
      * 
      * 
      */
-    @Transactional(readOnly=true)
-    public Collection<ResourceGroup> getCompatibleResourceGroups(AuthzSubject subject, Resource resProto)
+    @Transactional(readOnly = true)
+    public Collection<ResourceGroup> getCompatibleResourceGroups(AuthzSubject subject,
+                                                                 Resource resProto)
         throws PermissionException, NotFoundException {
         // first get the list of groups subject can view
         PermissionManager pm = PermissionManagerFactory.getInstance();
@@ -685,8 +721,9 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     /**
      * Get all the resource groups excluding the root resource group and paged
      */
-    @Transactional(readOnly=true)
-    private PageList<ResourceGroupValue> getAllResourceGroups(AuthzSubject subject, PageControl pc, boolean excludeRoot)
+    @Transactional(readOnly = true)
+    private PageList<ResourceGroupValue> getAllResourceGroups(AuthzSubject subject, PageControl pc,
+                                                              boolean excludeRoot)
         throws PermissionException {
         Collection<ResourceGroup> groups = getAllResourceGroups(subject, excludeRoot);
         // TODO: G
@@ -699,8 +736,9 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
      * @param pc Paging information for the request
      * 
      */
-    @Transactional(readOnly=true)
-    public PageList<ResourceGroupValue> getResourceGroupsById(AuthzSubject whoami, Integer[] ids, PageControl pc)
+    @Transactional(readOnly = true)
+    public PageList<ResourceGroupValue> getResourceGroupsById(AuthzSubject whoami, Integer[] ids,
+                                                              PageControl pc)
         throws PermissionException {
         if (ids.length == 0)
             return new PageList<ResourceGroupValue>();
@@ -726,7 +764,8 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         }
 
         // TODO: G
-        PageList<ResourceGroupValue> plist = _groupPager.seek(groups, pc.getPagenum(), pc.getPagesize());
+        PageList<ResourceGroupValue> plist = _groupPager.seek(groups, pc.getPagenum(), pc
+            .getPagesize());
         plist.setTotalSize(groups.size());
 
         return plist;
@@ -749,7 +788,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
      * @exception NotFoundException Unable to find a group by id
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public AuthzSubject getResourceGroupOwner(Integer gid) throws NotFoundException {
         Resource gResource = resourceManager.findResourceByInstanceId(resourceManager
             .findResourceTypeByName(AuthzConstants.groupResourceTypeName), gid);
@@ -759,7 +798,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     /**
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public ResourceGroup getResourceGroupByResource(Resource resource) {
         return resourceGroupDAO.findResourceGroup(resource);
     }
@@ -778,8 +817,8 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     /**
      * 
      */
-    public void updateGroupType(AuthzSubject subject, ResourceGroup g, int groupType, int groupEntType,
-                                int groupEntResType) throws PermissionException {
+    public void updateGroupType(AuthzSubject subject, ResourceGroup g, int groupType,
+                                int groupEntType, int groupEntResType) throws PermissionException {
         checkGroupPermission(subject, g.getId(), AuthzConstants.perm_modifyResourceGroup);
 
         g.setGroupType(new Integer(groupType));
@@ -790,80 +829,85 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
             g.setResourcePrototype(r);
         }
     }
-    
+
     /**
      * Updates the group with all resources meeting the group criteria
      * @param whoami The user token
-     * @param group The group whose resources should be updated to match its criteria
+     * @param group The group whose resources should be updated to match its
+     *        criteria
      * @throws HibernateException
      * @throws GroupException
      */
     @SuppressWarnings("unchecked")
-    private void updateGroupMembers(AuthzSubject whoami, ResourceGroup group) throws GroupException {        
+    private void updateGroupMembers(AuthzSubject whoami, ResourceGroup group) throws GroupException {
         CritterTranslationContext translationContext = new CritterTranslationContext(whoami);
-        List<Resource> proposedResources = critterTranslator.translate(translationContext, group.getCritterList()).list();
+        List<Resource> proposedResources = critterTranslator.translate(translationContext,
+            group.getCritterList()).list();
         Collection<Resource> groupMembers = getMembers(group);
         Collection<Resource> resourcesToRemove = new HashSet<Resource>(groupMembers);
         Collection<Resource> resourcesToAdd = new HashSet<Resource>(proposedResources);
-        //elements in existing group not in proposed group
+        // elements in existing group not in proposed group
         resourcesToRemove.removeAll(proposedResources);
-        //elements in proposed group not in existing group
+        // elements in proposed group not in existing group
         resourcesToAdd.removeAll(groupMembers);
-        
-        if(! resourcesToRemove.isEmpty()) {
+
+        if (!resourcesToRemove.isEmpty()) {
             removeResources(group, resourcesToRemove);
         }
-        if(!(resourcesToAdd.isEmpty())) {
+        if (!(resourcesToAdd.isEmpty())) {
             addResources(group, resourcesToAdd);
         }
     }
-    
+
     public void updateGroupMembers(List<ResourceCreatedZevent> resourceEvents) {
-        for(ResourceCreatedZevent resourceEvent : resourceEvents) {     
-                updateGroupMember(resourceEvent);
+        for (ResourceCreatedZevent resourceEvent : resourceEvents) {
+            updateGroupMember(resourceEvent);
         }
     }
-    
+
     private void updateGroupMember(ResourceCreatedZevent resourceEvent) {
         final Resource resource = resourceManager.findResource(resourceEvent.getAppdefEntityID());
-        final AuthzSubject subject = authzSubjectManager.findSubjectById(resourceEvent.getAuthzSubjectId());
-        for(ResourceGroup group : getAllResourceGroups()) {
+        final AuthzSubject subject = authzSubjectManager.findSubjectById(resourceEvent
+            .getAuthzSubjectId());
+        for (ResourceGroup group : getAllResourceGroups()) {
             try {
                 CritterList groupCriteria = group.getCritterList();
-                if(isCriteriaMet(groupCriteria, resource)) { 
+                if (isCriteriaMet(groupCriteria, resource)) {
                     try {
                         addResource(subject, group, resource);
                     } catch (Exception e) {
-                        log.error("Unable to add resource " + resource + " to group " + group.getName());
-                    } 
-                } 
+                        log.error("Unable to add resource " + resource + " to group " +
+                                  group.getName());
+                    }
+                }
             } catch (Exception e) {
-                log.error("Unable to process criteria for group " + group.getName() + " while processing event " 
-                    + resourceEvent + ".  The groups' members may not be updated.");
-            } 
+                log.error("Unable to process criteria for group " + group.getName() +
+                          " while processing event " + resourceEvent +
+                          ".  The groups' members may not be updated.");
+            }
         }
     }
-    
+
     private boolean isCriteriaMet(CritterList groupCriteria, Resource resource) {
-        if(groupCriteria.getCritters().isEmpty()) {
+        if (groupCriteria.getCritters().isEmpty()) {
             return false;
         }
-        if(groupCriteria.isAll()) {
-            for(Critter groupCrit : groupCriteria.getCritters()) {
-                if(!groupCrit.meets(resource)) {
-                   return false;
+        if (groupCriteria.isAll()) {
+            for (Critter groupCrit : groupCriteria.getCritters()) {
+                if (!groupCrit.meets(resource)) {
+                    return false;
                 }
             }
             return true;
         }
-        for(Critter groupCrit : groupCriteria.getCritters()) {
-            if(groupCrit.meets(resource)) {
-              return true;
+        for (Critter groupCrit : groupCriteria.getCritters()) {
+            if (groupCrit.meets(resource)) {
+                return true;
             }
         }
         return false;
     }
-    
+
     private Resource findPrototype(AppdefEntityTypeID id) {
         Integer authzType;
 
@@ -884,6 +928,6 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     }
 
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-       this.applicationContext = applicationContext;
+        this.applicationContext = applicationContext;
     }
 }

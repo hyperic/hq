@@ -12,6 +12,9 @@ import java.util.Set;
 
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
+import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.common.ApplicationException;
@@ -48,7 +51,7 @@ public class ResourceGroupManagerTest
         flushSession();
     }
 
-    private void createGroup() throws Exception {
+    private void createGroup() throws PermissionException, ApplicationException  {
         Set<Platform> testPlatforms = new HashSet<Platform>(1);
         testPlatforms.add(testPlatform);
         this.group = createPlatformResourceGroup(testPlatforms, "AllPlatformGroup");
@@ -58,11 +61,11 @@ public class ResourceGroupManagerTest
     @Before
     public void setUp() throws Exception {
         createPlatform();
-        createGroup();
     }
 
     @Test
     public void testUpdateGroupMembersAddNewResource() throws ApplicationException {
+        createGroup();
         // Set the criteria - the evaluation should keep the existing group
         // member
         Critter nameMatch = new ResourceNameCritterType().newInstance(".*\\.local");
@@ -84,7 +87,8 @@ public class ResourceGroupManagerTest
     }
 
     @Test
-    public void testSetCriteriaNotMatchingResource() throws PermissionException, GroupException {
+    public void testSetCriteriaNotMatchingResource() throws ApplicationException {
+        createGroup();
         Critter nameMatch = new ResourceNameCritterType().newInstance(".*\\.remote");
         CritterList critterList = new CritterList(Collections.singletonList(nameMatch), true);
         resourceGroupManager.setCriteria(authzSubjectManager.getOverlordPojo(), group, critterList);
@@ -95,6 +99,7 @@ public class ResourceGroupManagerTest
 
     @Test
     public void testSetCriteriaAddsNewResource() throws ApplicationException {
+        createGroup();
         Platform testPlatform2 = createPlatform("agentToken", TEST_PLATFORM_TYPE, "calculon.local",
             "calculon.local");
         flushSession();
@@ -112,6 +117,7 @@ public class ResourceGroupManagerTest
 
     @Test
     public void testCreateNewResourceNotMatchingCriteria() throws ApplicationException {
+        createGroup();
         // Set the criteria - the evaluation should keep the existing group
         // member
         Critter nameMatch = new ResourceNameCritterType().newInstance(".*\\.local");
@@ -133,7 +139,8 @@ public class ResourceGroupManagerTest
 
     @Test
     public void testEvaluateAllCriteriaOneNotMatching() throws NotFoundException,
-        PermissionException, GroupException {
+        ApplicationException {
+        createGroup();
         createPlatformType("Jen OS", "test");
         flushSession();
         Resource platformType = resourceManager.findResourcePrototypeByName("Jen OS");
@@ -151,6 +158,7 @@ public class ResourceGroupManagerTest
 
     @Test
     public void testAddNewResourceNotMatchingAll() throws ApplicationException {
+        createGroup();
         Resource platformType = resourceManager.findResourcePrototypeByName(TEST_PLATFORM_TYPE);
         Critter nameMatch = new ResourceNameCritterType().newInstance(".*\\.local");
         Critter typeMatch = new ProtoCritterType().newInstance(platformType);
@@ -174,6 +182,7 @@ public class ResourceGroupManagerTest
 
     @Test
     public void testAddNewResourceAllCriteriaMatching() throws ApplicationException {
+        createGroup();
         Resource platformType = resourceManager.findResourcePrototypeByName(TEST_PLATFORM_TYPE);
         Critter nameMatch = new ResourceNameCritterType().newInstance(".*\\.local");
         Critter typeMatch = new ProtoCritterType().newInstance(platformType);
@@ -182,6 +191,48 @@ public class ResourceGroupManagerTest
         critters.add(typeMatch);
         CritterList critterList = new CritterList(critters, false);
         resourceGroupManager.setCriteria(authzSubjectManager.getOverlordPojo(), group, critterList);
+        flushSession();
+        Platform testPlatform2 = createPlatform("agentToken", TEST_PLATFORM_TYPE,
+            "calculon.local", "calculon.local");
+        ResourceCreatedZevent platformCreated = new ResourceCreatedZevent(authzSubjectManager
+            .getOverlordPojo(), testPlatform2.getEntityId());
+        resourceGroupManager.updateGroupMembers(Collections.singletonList(platformCreated));
+        flushSession();
+        List<Resource> expectedResources = new ArrayList<Resource>(2);
+        expectedResources.add(testPlatform2.getResource());
+        expectedResources.add(testPlatform.getResource());
+        Collection<Resource> groupMembers = resourceGroupManager.getMembers(group);
+        assertEquals(expectedResources, groupMembers);
+    }
+    
+    @Test
+    public void testCreateGroupSpecifyingCriteria() throws ApplicationException {
+        Resource platformType = resourceManager.findResourcePrototypeByName(TEST_PLATFORM_TYPE);
+        Critter nameMatch = new ResourceNameCritterType().newInstance(".*\\.local");
+        Critter typeMatch = new ProtoCritterType().newInstance(platformType);
+        List<Critter> critters = new ArrayList<Critter>(2);
+        critters.add(nameMatch);
+        critters.add(typeMatch);
+        CritterList critterList = new CritterList(critters, false);
+        
+        Set<Platform> testPlatforms = new HashSet<Platform>(1);
+        testPlatforms.add(testPlatform);
+        List<Resource> resources = new ArrayList<Resource>();
+        for (Platform platform : testPlatforms) {
+            Resource platformRes = platform.getResource();
+            resources.add(platformRes);
+        }
+        AppdefEntityTypeID appDefEntTypeId = new AppdefEntityTypeID(
+            AppdefEntityConstants.APPDEF_TYPE_PLATFORM, testPlatforms.iterator().next().getPlatformType().getId());
+        ResourceGroupCreateInfo gCInfo = new ResourceGroupCreateInfo("AllPlatformGroup", "",
+            AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS, resourceManager
+                .findResourcePrototype(appDefEntTypeId), "", 0, false, false);
+        try {
+        this.group = resourceGroupManager.createResourceGroup(authzSubjectManager
+            .getOverlordPojo(), gCInfo, new ArrayList<Role>(0), resources, critterList);
+        }catch(Exception e) {
+            
+        }
         flushSession();
         Platform testPlatform2 = createPlatform("agentToken", TEST_PLATFORM_TYPE,
             "calculon.local", "calculon.local");
