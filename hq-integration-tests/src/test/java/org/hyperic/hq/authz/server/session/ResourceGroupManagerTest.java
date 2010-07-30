@@ -155,6 +155,25 @@ public class ResourceGroupManagerTest
         Collection<Resource> groupMembers = resourceGroupManager.getMembers(group);
         assertTrue(groupMembers.isEmpty());
     }
+    
+    @Test
+    public void testEvaluateAnyCriteriaOneNotMatching() throws ApplicationException, NotFoundException{
+        createGroup();
+        flushSession();
+        Resource platformType = resourceManager.findResourcePrototypeByName(TEST_PLATFORM_TYPE);
+        Critter nameMatch = new ResourceNameCritterType().newInstance(".*\\.remote");
+        Critter typeMatch = new ProtoCritterType().newInstance(platformType);
+        List<Critter> critters = new ArrayList<Critter>(2);
+        //critters.add(nameMatch);
+        critters.add(typeMatch);
+        CritterList critterList = new CritterList(critters, true);
+        resourceGroupManager.setCriteria(authzSubjectManager.getOverlordPojo(), group, critterList);
+        flushSession();
+        List<Resource> expectedResources = new ArrayList<Resource>(1);
+        expectedResources.add(testPlatform.getResource());
+        Collection<Resource> groupMembers = resourceGroupManager.getMembers(group);
+        assertEquals(expectedResources, groupMembers);
+    }
 
     @Test
     public void testAddNewResourceNotMatchingAll() throws ApplicationException {
