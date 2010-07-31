@@ -214,7 +214,7 @@ public class AvailabilityManagerTest {
             dumpAvailsToLogger(avails);
         }
         
-        Assert.assertTrue(avails.size() == 2);
+        Assert.assertEquals(2,avails.size());
         // all points should be green in db after this
         for (int i = 0; i < 10; i++) {
             pt = new DataPoint(measId, new MetricValue(1.0, baseTime + (interval * i)));
@@ -314,7 +314,7 @@ public class AvailabilityManagerTest {
         if (avails.size() != 4) {
             dumpAvailsToLogger(avails);
         }
-        Assert.assertTrue(avails.size() == 4);
+        Assert.assertEquals(4,avails.size());
         list.clear();
         // After the network is up we start getting the availability data for
         // the period when the network was down
@@ -385,7 +385,7 @@ public class AvailabilityManagerTest {
         if (avails.size() != 2) {
             dumpAvailsToLogger(avails);
         }
-        Assert.assertTrue(avails.size() == 2);
+        Assert.assertEquals(2,avails.size());
         list.clear();
     }
 
