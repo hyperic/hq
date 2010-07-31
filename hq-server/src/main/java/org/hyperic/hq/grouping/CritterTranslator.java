@@ -37,6 +37,7 @@ import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
+import org.hyperic.util.StringUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.springframework.stereotype.Component;
@@ -87,12 +88,15 @@ public class CritterTranslator {
         if (cList.isAll()) {
             sql.append("EAM_RESOURCE res \n");
             sql.append(getSQLConstraints(ctx, cList, txContexts));
+            sql.append(PermissionManagerFactory.getInstance()
+                .getSQLWhere(ctx.getSubject().getId()));
         } else {
             sql.append(getUnionStmts(ctx, cList, txContexts));
-        }
-        // Get PermissionManager
-        sql.append(PermissionManagerFactory.getInstance()
+            sql.append(PermissionManagerFactory.getInstance()
                 .getSQLWhere(ctx.getSubject().getId()));
+            sql.append(") res ");
+        }
+      
         if (!issueCount) {
             sql.append(" ORDER BY res.name ");
             if (desc)
@@ -143,9 +147,12 @@ public class CritterTranslator {
                     sql.append(" UNION ");
                 }
             }
-            CritterList sysCritList = new CritterList(sysCritters, false);
-            String sysSQL = getSQLConstraints(ctx, sysCritList, txContexts);
-            sql.append(") res ").append(sysSQL);
+            
+            //TODO commented this out in favor of translate method appending ") res" after the permission manager SQL (was broken in EE).  If we did
+            //have a combo of system and non-system critters in future we'll need this back
+            //CritterList sysCritList = new CritterList(sysCritters, false);
+            //String sysSQL = getSQLConstraints(ctx, sysCritList, txContexts);
+            //sql.append(") res ").append(sysSQL);
         } else {
             CritterList sysCritList = new CritterList(sysCritters, false);
             sql.append("EAM_RESOURCE res ");
