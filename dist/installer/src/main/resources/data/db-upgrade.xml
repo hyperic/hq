@@ -11469,11 +11469,8 @@ has already been defined.
 	 </groovy>
  </schemaSpec>
   <schemaSpec version="3.196"> 
-	<schema-directSQL>  
-    	<statement desc="Adding virtual resource relation...">
-          	INSERT INTO EAM_RESOURCE_RELATION(ID, NAME, IS_HIER) VALUES (3, 'virtual', 1)
-      	</statement>   
-	</schema-directSQL>
+  	<schema-insert table="EAM_RESOURCE_RELATION"
+  	 	 	 	insertCmd="(ID, VERSION_COL, NAME, IS_HIER) VALUES (3, 0, 'virtual', %%TRUE%%)"/>
  </schemaSpec>
  
   <!-- Remove old HQ JBoss 4.x and HQ Tomcat 6.0 servers from server inventory -->
