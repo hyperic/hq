@@ -49,9 +49,10 @@ public class AvailabilityColorServlet extends AvailabilityBaseServlet {
     private static final String PX_UNAVAIL_URL = PX_URL_PRE + "red.gif";
     private static final String PX_WARNING_URL = PX_URL_PRE + "yellow.gif";
     private static final String PX_PAUSED_URL  = PX_URL_PRE + "orange.gif";
+    private static final String PX_POWERED_OFF_URL  = PX_URL_PRE + "black.gif";
     private static final String[] iconUrls = {
         PX_ERR_URL, PX_AVAIL_URL, PX_UNAVAIL_URL, PX_WARNING_URL,
-        PX_PAUSED_URL };
+        PX_PAUSED_URL, PX_POWERED_OFF_URL };
 
     protected String[] getIconUrls() {
         return iconUrls;
@@ -97,6 +98,17 @@ public class AvailabilityColorServlet extends AvailabilityBaseServlet {
         }
         catch (Exception e) {
             log.debug("can't send paused icon: ", e);
+            sendErrorIcon(request, response);
+        }
+    }
+
+    protected void sendPoweredOffIcon(HttpServletRequest request,
+                                  HttpServletResponse response) {
+        try {
+            sendIcon(request, response, PX_POWERED_OFF_URL);
+        }
+        catch (Exception e) {
+            log.debug("can't send powered off icon: ", e);
             sendErrorIcon(request, response);
         }
     }

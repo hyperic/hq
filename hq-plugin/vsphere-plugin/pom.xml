@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.hyperic.hq.plugin</groupId>
+		<artifactId>hq-plugin-parent</artifactId>
+		<version>4.5.0.BUILD-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>vsphere-plugin</artifactId>
+	<packaging>jar</packaging>
+	<name>Hyperic HQ Plugin - vSphere Plugin</name>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.hyperic.hq</groupId>
+			<artifactId>hq-pdk-shared</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.agent</groupId>
+			<artifactId>hq-agent-core</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+  			<groupId>dom4j</groupId>
+  			<artifactId>dom4j</artifactId>
+  			<version>1.6.1</version>
+		</dependency>
+		<dependency>
+  			<groupId>vmware</groupId>
+  			<artifactId>vijava</artifactId>
+  			<version>2.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.hqapi</groupId>
+			<artifactId>hqapi1</artifactId>
+		</dependency>
+		<dependency>
+  			<groupId>junit</groupId>
+  			<artifactId>junit</artifactId>
+  		</dependency>
+  		<dependency>
+			<groupId>org.easymock</groupId>
+			<artifactId>easymock</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.easymock</groupId>
+			<artifactId>easymockclassextension</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq</groupId>
+			<artifactId>hq-util</artifactId>
+			<version>${project.version}</version>
+			<classifier>tests</classifier>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+	
+	<build>
+		<plugins>
+			<!-- The exec-maven-plugin is configured to validate plugin XML.  See hq-plugin-parent pom for details-->
+			<plugin>
+        		<groupId>org.codehaus.mojo</groupId>
+        		<artifactId>exec-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+	
+</project>

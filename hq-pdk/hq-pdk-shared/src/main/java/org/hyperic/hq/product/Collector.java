@@ -38,6 +38,7 @@ import java.util.StringTokenizer;
 
 import org.hyperic.util.PluginLoader;
 import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.config.ConfigSchema;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -361,7 +362,7 @@ public abstract class Collector implements Runnable {
             Map.Entry entry = (Map.Entry)it.next();
             String key = (String)entry.getKey();
             String val = (String)entry.getValue();
-            if (Metric.isSecret(key)) {
+            if (ConfigSchema.isSecret(key)) {
                 val = Metric.mask(val);
             }
             props.put(key, val);

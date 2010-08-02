@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2010], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -34,8 +34,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.StringUtil;
 
 /**
@@ -51,6 +54,8 @@ import org.hyperic.util.StringUtil;
  */
 
 public class Metric {
+    
+    private static final Log log = LogFactory.getLog(Metric.class);
 
     public static final String ATTR_AVAIL = "Availability";
     
@@ -59,9 +64,10 @@ public class Metric {
     public static final double AVAIL_DOWN    = MeasurementConstants.AVAIL_DOWN;
     public static final double AVAIL_WARN    = MeasurementConstants.AVAIL_WARN;
     public static final double AVAIL_PAUSED  = MeasurementConstants.AVAIL_PAUSED;
+    public static final double AVAIL_POWERED_OFF = MeasurementConstants.AVAIL_POWERED_OFF;
 
     private static HashMap cache = new HashMap();
-    private static HashMap secrets = new HashMap();
+   
     private static final MetricProperties NO_PROPERTIES =
         new MetricProperties();
     
@@ -153,9 +159,7 @@ public class Metric {
         return unescapedDecoding;
     }
 
-    public static void addSecret(String key) {
-        secrets.put(key, Boolean.TRUE);
-    }
+   
 
     //we only encode/decode property values
     //which are input by a user or auto inventory
@@ -254,10 +258,10 @@ public class Metric {
     public String toString() {
         return this.template;
     }
+    
+  
 
-    static boolean isSecret(String key) {
-        return secrets.get(key) == Boolean.TRUE;
-    }
+ 
 
     static String mask(String val) {
         if (val == null) {
@@ -271,7 +275,7 @@ public class Metric {
     }
 
     private String toDebugString(String orig, Properties props) {
-        if (props == null) {
+        if (props == null && orig == null) {
             return orig;    
         }
         StringBuffer ds = new StringBuffer();
@@ -284,8 +288,9 @@ public class Metric {
                 continue;
             }
             String key = pair.substring(0, ix);
-            if (isSecret(key)) {
-                String val = props.getProperty(key);
+            String origVal = pair.substring(ix-1, pair.length());
+            if (ConfigSchema.isSecret(key)) {
+                String val = (props == null) ? origVal : props.getProperty(key);
                 ds.append(key).append('=');
                 ds.append(mask(val));
             }

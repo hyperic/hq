@@ -419,6 +419,11 @@ class ResourceCategory {
 	static boolean isServicePrototype(Resource r) {
 		return r.resourceType.id == AuthzConstants.authzServiceProto
 	}
+    
+    static boolean isVSpherePlatformPrototype(Resource r) {
+          return (r.name == AuthzConstants.platformPrototypeVmwareVsphereVm
+               || r.name == AuthzConstants.platformPrototypeVmwareVsphereHost)
+    }
 	
 	static Resource getPlatform(Resource r) {
 		def aeid = AppdefUtil.newAppdefEntityId(r)

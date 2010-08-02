@@ -4,8 +4,10 @@
 package org.hyperic.hq.measurement.shared;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.server.session.DataPoint;
@@ -178,5 +180,21 @@ public interface DataManager {
      */
     public Map<Integer, double[]> getAggregateDataByMetric(List<Measurement> measurements, long begin, long end,
                                                            boolean useAggressiveRollup);
+    
+    /**
+     * @return array of {@link MetricValue} representing the raw metric data
+     *         collected. Since Availability just keeps state changes this does
+     *         not apply, therefore one {@link MetricValue} will be returned per
+     *         interval.
+     * 
+     * @param publishedInterval {@link AtomicLong} interval, in millis, of the
+     *        dataset which is returned from the api. For example for queries
+     *        that are a month long HQ will use a daily rollup table to retrieve
+     *        the data from. In this case publishedInterval would be set with an
+     *        interval that represents one day.
+     * 
+     * 
+     */
+    public Collection getRawData(Measurement m, long begin, long end, AtomicLong publishedInterval);
 
 }

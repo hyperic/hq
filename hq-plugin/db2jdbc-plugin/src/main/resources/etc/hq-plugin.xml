@@ -235,6 +235,13 @@
                 <option name="sec_pool_id" description="Secondary ID" default=""/>
             </config>
         </service>
+        <help>
+        <![CDATA[
+        <b>Configure HQ for monitoring DB2 ${product.version}</b></br>
+The JDBC User (db2.jdbc.user) need SYSMON authorization<br>
+The HQ Agent must be run using DB2 environment
+  ]]>
+        </help>
     </server>
 
     <property name="dbmanager" value="func=SNAP_GET_DBM"/>
@@ -288,14 +295,14 @@
             <option name="db2.jdbc.user" description="JDBC User"/>
             <option name="db2.jdbc.password" description="JDBC Password" type="secret"/>
         </config>
-    </server>
-
-    <help name="DB2 JDBC 9.x">
+        <help>
         <![CDATA[
-        <b>Configure HQ for monitoring DB2</b></br>
+        <b>Configure HQ for monitoring DB2 ${product.version} Database Manager</b></br>
+        <p>Hyperic HQ need to use a DB2 DataBase (db2.jdbc.database) in order to acces to the Database Manager metrics through JDBC (db2.jdbc.hostname/db2.jdbc.port).</p>
 The JDBC User (db2.jdbc.user) need SYSMON authorization<br>
 The HQ Agent must be run using DB2 environment
   ]]>
-    </help>
-    <help name="DB2 JDBC Database Manager 9.x" include="DB2 JDBC 9.x"/>
+        </help>
+    </server>
+
 </plugin>

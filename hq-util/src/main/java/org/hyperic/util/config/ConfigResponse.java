@@ -42,6 +42,7 @@ import java.util.Map.Entry;
 import org.hyperic.util.GenericValueMap;
 import org.hyperic.util.StringUtil;
 
+
 public class ConfigResponse implements GenericValueMap, Serializable  {
 
             Map          attributes;
@@ -333,7 +334,26 @@ public class ConfigResponse implements GenericValueMap, Serializable  {
     }
 
     public String toString(){
-        return this.attributes.toString();
+        StringBuffer rtn = new StringBuffer();
+        for (Iterator it=attributes.entrySet().iterator(); it.hasNext(); ) {
+            Entry entry = (Entry) it.next();
+            String key = entry.getKey().toString();
+            String val = null;
+            if (ConfigSchema.isSecret(key)) {
+                val = "******";
+            } else {
+                if (entry.getValue() != null) {
+                    val = entry.getValue().toString();
+                }
+            }
+            rtn.append(key).append("=").append(val).append(",");
+        }
+        if (rtn.length() == 0) {
+            return "";
+        }
+        rtn.substring(0, rtn.length()-1);
+        return rtn.toString();
+
     }
 
     public int size(){

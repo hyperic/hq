@@ -1,5 +1,6 @@
 package org.hyperic.hq.hqu.rendit.metaclass
-
+import org.hyperic.hq.authz.server.session.Operation;
+import org.hyperic.hq.authz.server.session.OperationDAO;
 
 import org.hyperic.hq.auth.shared.AuthManager;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
@@ -15,6 +16,7 @@ class AuthzSubjectCategory {
     static subMan = Bootstrap.getBean(AuthzSubjectManager.class)
     static authMan = Bootstrap.getBean(AuthManager.class)
     static authzBoss = Bootstrap.getBean(AuthzBoss.class)
+    static operationDao = Bootstrap.getBean(OperationDAO.class)
 
     /**
      * Check if the current user has administration permission
@@ -22,6 +24,17 @@ class AuthzSubjectCategory {
     static boolean isSuperUser(AuthzSubject subject) {
         PermissionManagerFactory.getInstance().hasAdminPermission(subject.id) 
     }
+    
+    /**
+     * Check if the AuthzSubject has the ability to run the specified operation
+     */
+     static boolean hasOperation(AuthzSubject subject, String opName) {
+         Operation op = operationDao.getByName(opName)
+         if (op == null) {
+              return false
+         }
+         return operationDao.userHasOperation(subject, op)
+     }
 
     /**
      * Get a user preference by key

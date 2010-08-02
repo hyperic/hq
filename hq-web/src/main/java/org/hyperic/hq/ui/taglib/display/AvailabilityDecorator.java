@@ -59,7 +59,8 @@ public class AvailabilityDecorator extends ColumnDecorator implements Tag {
 	private final static String ICON_UP = ICON_PRE + "green.gif";
 	private final static String ICON_DOWN = ICON_PRE + "red.gif";
 	private final static String ICON_WARN = ICON_PRE + "yellow.gif";
-	private final static String ICON_PAUSED = ICON_PRE + "orange.gif";
+	private final static String ICON_POWERED_OFF = ICON_PRE + "black.gif";
+    private final static String ICON_PAUSED = ICON_PRE + "orange.gif";
 	private final static String ICON_ERR = ICON_PRE + "error.gif";
 
 	private static Log log = LogFactory.getLog(AvailabilityDecorator.class
@@ -296,7 +297,9 @@ public class AvailabilityDecorator extends ColumnDecorator implements Tag {
 			src.append(ICON_UP);
 		} else if (availVal == MeasurementConstants.AVAIL_PAUSED) {
 			src.append(ICON_PAUSED);
-		} else if (availVal < MeasurementConstants.AVAIL_UP
+		} else if (availVal == MeasurementConstants.AVAIL_POWERED_OFF) {
+            src.append(ICON_POWERED_OFF);
+        } else if (availVal < MeasurementConstants.AVAIL_UP
 				&& availVal > MeasurementConstants.AVAIL_DOWN) {
 			src.append(ICON_WARN);
 		} else {

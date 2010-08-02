@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2009], Hyperic, Inc.
+ * Copyright (C) [2004-2010], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -80,6 +80,9 @@ public final class MeasurementConstants  {
 
     /** Availability paused */
     public static final double AVAIL_PAUSED       = -0.01;    
+    
+    /** Availability powered off (for VMs) */
+    public static final double AVAIL_POWERED_OFF  = -0.02;
 
     /** The category for measurement method timing markers
      *  Set level to DEBUG */

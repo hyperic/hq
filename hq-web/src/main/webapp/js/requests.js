@@ -79,6 +79,9 @@
                         case "orange":
                             td2.innerHTML = "<img src=images/icon_available_orange.gif>";
                             break;
+                        case "black":
+                            td2.innerHTML = "<img src=images/icon_available_black.gif>";
+                            break;
                         default:
                             td2.innerHTML = "<img src=images/icon_available_error.gif>";
                     }
@@ -547,6 +550,9 @@
                                 break;
                             case "orange":
                                 td4.innerHTML = "<img src=/images/icon_available_orange.gif>";
+                                break;
+                            case "black":
+                                td4.innerHTML = "<img src=/images/icon_available_black.gif>";
                                 break;
                             default:
                                 td4.innerHTML = "<img src=/images/icon_available_error.gif>";

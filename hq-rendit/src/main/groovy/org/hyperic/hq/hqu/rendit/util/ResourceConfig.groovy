@@ -2,6 +2,7 @@ package org.hyperic.hq.hqu.rendit.util
 
 import org.hyperic.hq.appdef.Agent
 
+import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.ServerManager;
@@ -39,6 +40,7 @@ class ResourceConfig {
     private static platMan   = Bootstrap.getBean(PlatformManager.class)
     private static svrMan    = Bootstrap.getBean(ServerManager.class)
     private static svcMan    = Bootstrap.getBean(ServiceManager.class)
+    private static agentMan = Bootstrap.getBean(AgentManager.class)
      
     /**
      * *_FIELD_KEYS provides a mapping of string names onto closures which
@@ -56,6 +58,8 @@ class ResourceConfig {
                         set: { platVal, desc -> platVal.description = desc}],
         'location':    [get: { plat -> plat.location },
                         set: { platVal, loc -> platVal.location = loc}],
+         'agentId':     [get: { plat -> plat.agent.id },
+                        set: { platVal, agentId -> platVal.agent = agentMan.getAgent(agentId)}],
     ]
     
     private static SERVER_FIELD_KEYS = [
