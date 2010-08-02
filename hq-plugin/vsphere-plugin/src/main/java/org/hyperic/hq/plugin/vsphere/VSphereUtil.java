@@ -41,6 +41,9 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
 
+import com.vmware.vim25.HostHardwareSummary;
+import com.vmware.vim25.HostListSummary;
+import com.vmware.vim25.VirtualMachineConfigInfo;
 import com.vmware.vim25.mo.HostSystem;
 import com.vmware.vim25.mo.InventoryNavigator;
 import com.vmware.vim25.mo.ManagedEntity;
@@ -273,10 +276,22 @@ public class VSphereUtil extends ServiceInstance {
         String uuid = null;
         if (entity instanceof HostSystem) {
             HostSystem host = (HostSystem) entity;
-            uuid = host.getSummary().getHardware().getUuid();
+            HostListSummary summary = host.getSummary();
+            if (summary == null) {
+                return null;
+            }
+            HostHardwareSummary hardware = summary.getHardware();
+            if (hardware == null) {
+                return null;
+            }
+            uuid = hardware.getUuid();
         } else if (entity instanceof VirtualMachine) {
             VirtualMachine vm = (VirtualMachine) entity;
-            uuid = vm.getConfig().getUuid();
+            VirtualMachineConfigInfo config = vm.getConfig();
+            if (config == null) {
+                return null;
+            }
+            uuid = config.getUuid();
         }
         return uuid;
     }

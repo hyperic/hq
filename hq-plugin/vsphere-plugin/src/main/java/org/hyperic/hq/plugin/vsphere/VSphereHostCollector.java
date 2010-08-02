@@ -164,8 +164,8 @@ public class VSphereHostCollector extends VSphereCollector {
             setAvailability(mor);
         } catch (Exception e) {
             setAvailability(false);
-            _log.error("Error setting availability for " + getName()
-                          + ": " + e.getMessage(), e);            
+            _log.error("Error setting availability for " + getName() + ": " + e.getMessage());           
+            _log.debug(e,e);  
             return;
         }
         
