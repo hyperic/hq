@@ -251,11 +251,11 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
                 for (int i=0; i<nics.length; i++) {
                     String mac = nics[i].getMacAddress();
                     if (mac.equals("00:00:00:00:00:00")) {
-                        log.info("UUID=" + info.getUuid() +
-                                 " and NIC=" + nics[i].getIpAddress() +
-                                 " has macaddr=" + mac + 
-                                 ".  Ignoring entire platform since macaddr is invalid.  " +
-                                 "Platform will be picked up when the macaddr is valid");
+                        log.info("Skipping " + VM_TYPE + "[name=" + info.getName()
+                          + ", UUID=" + uuid
+                          + ", NIC=" + nics[i].getIpAddress()
+                          + ", MAC=" + mac
+                          + "]. Will be re-discovered when the MAC address is valid.");
                         return null;
                     }
                     String[] ips = nics[i].getIpAddress();
@@ -266,10 +266,19 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
                     }
                 }
             }
+            if (platform.getIp().isEmpty()) {
+                log.info("Skipping " + VM_TYPE + "[name=" + info.getName()
+                    + ", UUID=" + uuid
+                    + "] because the MAC address does not exist. "
+                    + "Will be re-discovered when the MAC address is valid.");
+                return null;
+            }
         }
         else {
             log.info("Skipping " + VM_TYPE + "[name=" + info.getName() 
-                         + ", powerState=" + state + "]");
+                + ", UUID=" + uuid
+                + ", powerState=" + state + "]. "
+                + "Will be re-discovered when it is powered on.");
             return null;
         }
 
@@ -283,6 +292,7 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
         
         if (log.isDebugEnabled()) {
             log.debug("Discovered " + VM_TYPE + "[name=" + info.getName()
+                          + ", UUID=" + uuid
                           + ", powerState=" + state + "]");
         }
         
@@ -386,6 +396,7 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
 
         if (log.isDebugEnabled()) {
             log.debug("Discovered " + HOST_TYPE + "[name=" + host.getName() 
+                          + ", UUID=" + uuid
                           + ", powerState=" + powerState + "]");
         }
         
