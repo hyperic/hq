@@ -233,8 +233,7 @@ public class OracleServerDetector
         }
         
         // HHQ-3577 allow listener names in tnsnames.ora to be used in the url
-        String fs = File.separator;
-        String tnsDir = getTnsNamesDir(path, "network" + fs + "admin" + fs + "tnsnames.ora");
+        String tnsDir = getTnsNamesDir(path, "network/admin/tnsnames.ora");
         if (log.isDebugEnabled()) log.debug("using tns dir as " + tnsDir);
         System.setProperty("oracle.net.tns_admin", tnsDir);
 
@@ -580,10 +579,7 @@ public class OracleServerDetector
            return "";
         }
         String fs = File.separator;
-        if (fs.equals("\\")) {
-            fs = fs + fs;
-        }
-        String[] toks = tnsnames.split(fs);
+        String[] toks = tnsnames.split(Pattern.quote(fs));
         StringBuilder rtn = new StringBuilder();
         for (int i=0; i<toks.length-1; i++) {
             rtn.append(toks[i]).append(fs);
@@ -600,11 +596,9 @@ public class OracleServerDetector
         List rtn = new ArrayList();
         try
         {
-            String fs = File.separator;
-            if (log.isDebugEnabled()) {
-                log.debug("READING tnsnames.ora FILE: "+installpath+fs+tnsnames);
-            }
-            reader = new BufferedReader(new FileReader(installpath+fs+tnsnames));
+            if (log.isDebugEnabled())
+                log.debug("READING tnsnames.ora FILE: "+installpath+"/"+tnsnames);
+            reader = new BufferedReader(new FileReader(installpath+"/"+tnsnames));
             while (null != (line = reader.readLine()))
             {
                 if (_serviceNameEx.matcher(line).find())
