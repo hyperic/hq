@@ -62,9 +62,9 @@ public class VSphereVmControlPlugin extends ControlPlugin {
 
         setResult(ControlPlugin.RESULT_FAILURE);
 
-        VSphereConnection conn = null;
+        VSphereUtil vim = VSphereUtil.getInstance(getConfig());
         try {
-            VSphereUtil vim = conn.vim;
+            
             VirtualMachine vm = (VirtualMachine)vim.findByUuid(getType(), getUuid());
             Task task;
 
@@ -140,7 +140,7 @@ public class VSphereVmControlPlugin extends ControlPlugin {
                                       + ", uuid=" + getUuid()
                                       + "]: " + e.getMessage(), e);
         } finally  {
-            if (conn != null) conn.release();
+            VSphereUtil.dispose(vim);
         }
     }
 }

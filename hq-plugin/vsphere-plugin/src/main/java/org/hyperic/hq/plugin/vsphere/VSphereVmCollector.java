@@ -28,7 +28,6 @@ package org.hyperic.hq.plugin.vsphere;
 import org.hyperic.hq.product.Metric;
 
 import com.vmware.vim25.VirtualMachinePowerState;
-import com.vmware.vim25.VirtualMachineRuntimeInfo;
 import com.vmware.vim25.mo.ManagedEntity;
 import com.vmware.vim25.mo.VirtualMachine;
 
@@ -48,17 +47,8 @@ public class VSphereVmCollector extends VSphereHostCollector {
     protected void setAvailability(ManagedEntity entity) {
         
         double avail;
-        if (entity == null) {
-            setValue(Metric.ATTR_AVAIL, Metric.AVAIL_UNKNOWN);
-            return;
-        }
         VirtualMachine vm = (VirtualMachine) entity;
-        VirtualMachineRuntimeInfo runtime = vm.getRuntime();
-        if (runtime == null) {
-            setValue(Metric.ATTR_AVAIL, Metric.AVAIL_UNKNOWN);
-            return;
-        }
-        VirtualMachinePowerState state = runtime.getPowerState();
+        VirtualMachinePowerState state = vm.getRuntime().getPowerState();
 
         if (state == VirtualMachinePowerState.poweredOn) {
             avail = Metric.AVAIL_UP;

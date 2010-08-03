@@ -97,16 +97,15 @@ public class VCenterDetector extends DaemonDetector {
         Properties props = new Properties();
         props.putAll(getManager().getProperties());
         props.putAll(config.toProperties());
-        VSphereConnection conn = null;
+        VSphereUtil vim= null;
 		
         try {
-            conn = VSphereConnection.getPooledInstance(props);
-            VSphereUtil vim = conn.vim;
+            vim = VSphereUtil.getInstance(props);
             getPlatformDetector().discoverPlatforms(props,getApi(props), vim);
         } catch (IOException e) {
             throw new PluginException(e.getMessage(), e);
         } finally {
-            if (conn != null) conn.release();
+            VSphereUtil.dispose(vim);
 		}
     }
     
