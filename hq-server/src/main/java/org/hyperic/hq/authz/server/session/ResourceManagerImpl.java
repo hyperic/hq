@@ -473,7 +473,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
             watch.markTimeBegin("removeResourcePerms.findEdges");
         }
         Collection<ResourceEdge> edges = edgeDao.findDescendantEdges(r, getContainmentRelation());
-        edges.addAll(edgeDao.findDescendantEdges(r, getVirtualRelation()));
+        Collection<ResourceEdge> virtEdges = edgeDao.findDescendantEdges(r, getVirtualRelation());
         if (debug) {
             watch.markTimeEnd("removeResourcePerms.findEdges");
         }
@@ -481,6 +481,10 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
         for (ResourceEdge edge : edges) {
             // Remove descendants' permissions
             removed.addAll(Arrays.asList(removeResourcePerms(subj, edge.getTo(), true)));
+        }
+        
+        for (ResourceEdge edge : virtEdges ) {
+           _removeResource(subj, edge.getTo(), true);
         }
 
         removed.add(AppdefUtil.newAppdefEntityId(r));
