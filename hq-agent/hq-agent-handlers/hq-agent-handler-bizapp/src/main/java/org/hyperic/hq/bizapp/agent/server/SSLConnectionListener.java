@@ -165,12 +165,13 @@ class SSLConnectionListener
         } catch(InterruptedIOException exc){
             throw exc;
         } catch(IOException exc){
-            throw new AgentConnectionException(exc.getMessage());
+            throw new AgentConnectionException(exc.getMessage(), exc);
         } finally {
             if(success == false && inConn != null){
                 try {
                     inConn.close();
                 } catch(IOException exc){
+                    log.debug(exc,exc);
                 }
             }
         }

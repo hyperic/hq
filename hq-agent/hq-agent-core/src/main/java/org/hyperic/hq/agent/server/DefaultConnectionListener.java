@@ -88,7 +88,7 @@ class DefaultConnectionListener
             throw exc;
         } catch(IOException exc){
             throw new AgentConnectionException("Error accepting socket: " +
-                                               exc.getMessage());
+                                               exc.getMessage(), exc);
         }
 
         return new DefaultServerConnection(conn);
