@@ -63,7 +63,7 @@ public class SpringStandaloneApplicationDetector extends MxServerDetector {
 			final String fqn = platformConfig.getValue("platform.name") + " " + dir + " Spring Application";
 			ServerResource server = new ServerResource();
 			server.setType(getTypeInfo().getName());
-			server.setInstallPath("");
+			server.setInstallPath(dir);
 			server.setName(fqn);
 			server.setIdentifier(fqn);
 			// default anything not auto-configured
