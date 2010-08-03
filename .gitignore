@@ -9,4 +9,6 @@ build
 junit_results
 activemq-data
 ExecutionStrategyStates.dat
+logs
+
 
