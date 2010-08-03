@@ -58,7 +58,7 @@ public class PluginInfo implements java.io.Serializable {
     }
 
     //for use by MeasurementPluginManager (proxies)
-    public PluginInfo(String name) {
+    PluginInfo(String name) {
         this.name = name;
         this.product = name;
         this.jar  = "";
