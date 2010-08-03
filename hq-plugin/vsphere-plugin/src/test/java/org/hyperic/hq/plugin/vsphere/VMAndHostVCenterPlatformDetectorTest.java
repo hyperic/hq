@@ -31,6 +31,7 @@ import org.junit.Test;
 
 import com.vmware.vim25.AboutInfo;
 import com.vmware.vim25.GuestInfo;
+import com.vmware.vim25.GuestNicInfo;
 import com.vmware.vim25.HostConfigInfo;
 import com.vmware.vim25.HostDnsConfig;
 import com.vmware.vim25.HostHardwareSummary;
@@ -157,12 +158,23 @@ public class VMAndHostVCenterPlatformDetectorTest {
         StatusResponse genericSuccess = new StatusResponse();
         genericSuccess.setStatus(ResponseStatus.SUCCESS);
 
+      
+        
+        List<Resource> expectedVMs = new ArrayList<Resource>();
+        VSphereResource expectedVM = getExpectedVM(vmType, agent);
+        expectedVMs.add(expectedVM);
+        EasyMock.expect(
+            resourceApi.syncResources(ReflectionEqualsArgumentMatcher.eqObject(expectedVMs)))
+            .andReturn(genericSuccess);
+        
+        
         List<Resource> expectedResources = new ArrayList<Resource>();
         VSphereHostResource expectedHost = getExpectedHost(hostType, vmType, agent);
         expectedResources.add(expectedHost);
         EasyMock.expect(
             resourceApi.syncResources(ReflectionEqualsArgumentMatcher.eqObject(expectedResources)))
-            .andReturn(genericSuccess).times(2);
+            .andReturn(genericSuccess);
+        
         EasyMock.expect(hqApi.getResourceEdgeApi()).andReturn(resourceEdgeApi).times(2);
 
         ResourcesResponse esxHostResponse = getEsxHostResourceResponse(hostType, vmType, agent);
@@ -290,6 +302,10 @@ public class VMAndHostVCenterPlatformDetectorTest {
         runtime.setPowerState(VirtualMachinePowerState.poweredOn);
         GuestInfo guestInfo = new GuestInfo();
         guestInfo.setHostName("leela.local");
+        GuestNicInfo nic = new GuestNicInfo();
+        nic.setMacAddress("123.456.789");
+        nic.setIpAddress(new String[] {"10.150.21.34"});
+        guestInfo.setNet(new GuestNicInfo[] {nic});
         EasyMock.expect(vm.getConfig()).andReturn(config);
         EasyMock.expect(vm.getRuntime()).andReturn(runtime);
         EasyMock.expect(vm.getGuest()).andReturn(guestInfo);

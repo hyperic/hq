@@ -7,6 +7,8 @@ import org.easymock.IArgumentMatcher;
 /**
  * Implementation of {@link IArgumentMatcher} that checks for argument equality
  * using recursive reflection to validate all fields
+ * TODO this still only does a .equals on elements in Collections, so won't do deep
+ * comparison of Collection members.  This could result in false positives
  * @author jhickey
  * 
  */
