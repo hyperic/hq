@@ -35,6 +35,7 @@
 			<groupId>org.hyperic.hq</groupId>
 			<artifactId>hq-server</artifactId> 
 			<version>${project.version}</version>
+			<classifier>tests</classifier>
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq.agent.handler</groupId>
@@ -125,7 +126,7 @@
 					</execution>
 				</executions>
 				<configuration>
-					<argLine>-Xmx512m -XX:MaxPermSize=192m -XX:-UseGCOverheadLimit</argLine>
+					<argLine>-Xmx1024m -XX:MaxPermSize=192m -XX:-UseGCOverheadLimit</argLine>
 				</configuration>
 			</plugin>
 			<plugin>

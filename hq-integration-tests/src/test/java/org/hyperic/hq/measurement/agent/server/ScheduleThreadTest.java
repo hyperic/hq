@@ -19,8 +19,9 @@ import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.util.schedule.UnscheduledItemException;
+import org.junit.Ignore;
 
-
+@Ignore("This test takes way too long to run.  Can we minimize sleep intervals by using a SpinBarrier?")
 public class ScheduleThreadTest extends TestCase {
 
     private static final String platformTemplate = (".system.avail:Type=Platform:Availability").toLowerCase();
