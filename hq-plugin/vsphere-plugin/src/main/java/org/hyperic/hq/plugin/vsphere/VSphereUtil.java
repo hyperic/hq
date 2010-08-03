@@ -25,12 +25,10 @@
 
 package org.hyperic.hq.plugin.vsphere;
 
-import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,7 +45,6 @@ import com.vmware.vim25.VirtualMachineConfigInfo;
 import com.vmware.vim25.mo.HostSystem;
 import com.vmware.vim25.mo.InventoryNavigator;
 import com.vmware.vim25.mo.ManagedEntity;
-import com.vmware.vim25.mo.ManagedObject;
 import com.vmware.vim25.mo.ServiceInstance;
 import com.vmware.vim25.mo.VirtualMachine;
 
@@ -64,12 +61,12 @@ public class VSphereUtil extends ServiceInstance {
     static final String PROP_PASSWORD = VSphereCollector.PROP_PASSWORD;
     
 
-    private static final Log _log =
-        LogFactory.getLog(VSphereUtil.class.getName());
+    private Map<String, ObjectCache<Map<String, ManagedEntity>>> entityCache =
+        new HashMap<String, ObjectCache<Map<String, ManagedEntity>>>();
+    private static final Log _log = LogFactory.getLog(VSphereUtil.class);
     private InventoryNavigator _nav;
     private String _url;
-    private final Map<String, ObjectCache<ManagedEntity>> entitiesByUuid =
-        Collections.synchronizedMap(new HashMap());
+   
 
     public VSphereUtil(URL url, String username, String password, boolean ignoreCert)
         throws RemoteException, MalformedURLException {
@@ -77,7 +74,7 @@ public class VSphereUtil extends ServiceInstance {
         _url = url.toString();
     }
 
-    public static VSphereUtil getInstance(Properties props)
+    private static VSphereUtil getInstance(Properties props)
         throws PluginException {
 
         String url = getURL(props);
@@ -134,44 +131,25 @@ public class VSphereUtil extends ServiceInstance {
         return _nav;
     }
 
-    private ManagedEntity findByUuidCached(String uuid) {
-        ObjectCache<ManagedEntity> rtn = entitiesByUuid.get(uuid);
-        return (rtn == null || rtn.isExpired()) ? null : rtn.getEntity();
-    }
-
-    private long now() {
-        return System.currentTimeMillis();
-    }
+    
 
 
-    /**
-     * Find a managed entity by UUID. This may be less performant
-     * than using find(type, name), but allows managed entities
-     * with the same name to be uniquely found.
+    /** Find a managed entity by UUID.  This method caches the entired vm inventory every 5 minutes.
+     * If a uuid is not found in the inventory during the cached period an Exception is thrown.
+     * @throws {@link PluginException} general case exception is thrown while grabbing all the
+     * entities.
+     * @throws {@link ManagedEntityNotFoundException} if the ManagedEntity is not found.
      */
-    public ManagedEntity findByUuid(String type, String uuid)
-        throws PluginException {
-        
-        ManagedEntity obj = findByUuidCached(uuid);
-        final boolean debug = _log.isDebugEnabled();
-        if (obj != null) {
-            // HPD-681 / HPD-691 need to set the serverConnection field in order to avoid an 
-            // NPE when the connection associated with the object is closed
-            // This whole method should be re-written once we start packaging the libs necessary
-            // in order to call SearchIndex.findByUuid()
-            try {
-                Field field = ManagedObject.class.getDeclaredField("serverConnection");
-                field.setAccessible(true);
-                field.set(obj, getServerConnection());
-                if (debug) _log.debug("uuid=" + uuid + " is cached");
-                return obj;
-            } catch (NoSuchFieldException e) {
-                _log.debug(e,e);
-            } catch (IllegalAccessException e) {
-                _log.debug(e,e);
-            }
+    public ManagedEntity findByUuid(String type, String uuid) throws PluginException {
+        Map<String, ManagedEntity> cached =
+            (entityCache.get(type) == null || entityCache.get(type).isExpired()) ?
+            null : entityCache.get(type).getEntity();
+        if (cached != null) {
+            return cached.get(uuid);
         }
-        if (debug) _log.debug("uuid=" + uuid + " is NOT CACHED");
+        ManagedEntity obj = null;
+        Exception ex = null;
+        cached = new HashMap<String, ManagedEntity>();
         try {
             ManagedEntity[] entities = find(type);
             for (int i=0; entities!=null && i<entities.length; i++) {
@@ -183,30 +161,30 @@ public class VSphereUtil extends ServiceInstance {
                 if (entUuid == null) {
                     continue;
                 }
-                entitiesByUuid.put(
-                    entUuid, new ObjectCache<ManagedEntity>(entity, CACHE_TIMEOUT));
+              
                 if (uuid.equals(entUuid)) {
                     obj = entity;
-                    break;
+                  
                 }
+                cached.put(entUuid, entity);
             }
         } catch (Exception e) {
-            throw new PluginException(type + "/" + uuid + ": " + e, e);
+            ex = e;
         } finally {
             if (_log.isDebugEnabled()) {
-                _log.debug("findByUuid: type=" + type
-                               + ", uuid=" + uuid
-                               + ", managedEntity=" + obj);
+                _log.debug("findByUuid: type=" + type + ", uuid=" + uuid + ", managedEntity=" + obj);
             }
         }
         
-        if (obj == null) {
+        // does not matter if obj is null, want to cache that as well
+        cached.put(uuid, obj);
+        entityCache.put(type, new ObjectCache<Map<String, ManagedEntity>>(cached, CACHE_TIMEOUT));
+        if (ex != null) {
+            throw new PluginException(type + "/" + uuid + ": " + ex, ex);
+        } else if (obj == null) {
             throw new ManagedEntityNotFoundException(type + "/" + uuid + ": not found");
         }
 
-        if (obj != null) {
-            entitiesByUuid.put(uuid, new ObjectCache<ManagedEntity>(obj, CACHE_TIMEOUT));
-        }
         return obj;
     }
 
@@ -272,7 +250,7 @@ public class VSphereUtil extends ServiceInstance {
         return (HostSystem)find(HOST_SYSTEM, host);
     }
     
-    private String getUuid(ManagedEntity entity) {
+    static String getUuid(ManagedEntity entity) {
         String uuid = null;
         if (entity instanceof HostSystem) {
             HostSystem host = (HostSystem) entity;
