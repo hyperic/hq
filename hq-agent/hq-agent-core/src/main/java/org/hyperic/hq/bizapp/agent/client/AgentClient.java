@@ -561,15 +561,8 @@ public class AgentClient {
 //        isNewTransportAgent = askYesNoQuestion("Should Agent communications to " + 
 //                PRODUCT + " use the new transport ", 
 //                false, QPROP_NEWTRANSPORT);   
-                
-        String version = ProductProperties.getVersion();
-        
-        log.debug("Agent version: "+version);
-        
-        boolean isUnidirectionalAgentSupported = 
-            version.toLowerCase().indexOf("ee") != -1;
-        
-        if (isUnidirectionalAgentSupported) {
+
+        if (isUnidirectionalAgentSupported()) {
             unidirectional = askYesNoQuestion("Should Agent communications to " + 
                                               PRODUCT + " be unidirectional", 
                                               false, QPROP_UNI);
@@ -877,6 +870,38 @@ public class AgentClient {
         }
 
         redirectOutputs(bootP); //win32
+    }
+    
+    private boolean isUnidirectionalAgentSupported() {
+        // TODO: Ideally, we should be able to check for the existence of a
+        // .com class by calling TransportUtils.tryLoadUnidirectionalTransportPollerClient()
+        // but there is some class loader issue with an EE agent. As a workaround,
+        // in HQ 4.5, we will just check for the existence of an EE agent jar.
+        
+        boolean isUnidirectionalSupported = false;
+        String libPath = AgentConfig.PROP_BUNDLEHOME[1] + "/lib";
+
+        try {            
+            File libDir = new File(libPath);
+            
+            if (libDir.isDirectory()) {
+                File[] libFiles = libDir.listFiles();
+                for (int i=0; i<libFiles.length; i++) {
+                    String fileName = libFiles[i].getName().toLowerCase();
+                    if (fileName.startsWith("hqee-agent")
+                            && fileName.endsWith(".jar")) {
+                        isUnidirectionalSupported = true;
+                        break;
+                    }
+                }
+            }           
+        } catch (Exception e) {
+            log.info("Could not determine whether the agent supports "
+                        + "unidirectional transport: "
+                        + e.getMessage(), e);
+        }
+        
+        return isUnidirectionalSupported;
     }
 
     private void verifyAgentRunning(ServerSocket startupSock)
