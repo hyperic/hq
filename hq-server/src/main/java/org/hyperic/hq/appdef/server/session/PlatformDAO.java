@@ -27,6 +27,7 @@ package org.hyperic.hq.appdef.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -346,6 +347,22 @@ public class PlatformDAO
         String sql = "select distinct p from Platform p " + "join p.ips ip where ip.address=?";
         return (Collection<Platform>) getSession().createQuery(sql).setString(0, addr).list();
     }
+    
+    @SuppressWarnings("unchecked")
+    public Collection<Platform> findByMacAddr(String macAddress) {
+        if (macAddress == null) {
+            return Collections.EMPTY_LIST;
+        }
+        // Both the VM and the Guest will have IP entries with 
+        // the given MAC address.
+        String hql = "select distinct p from Platform p " +
+                     "join p.ips ip where upper(ip.macAddress)=?";
+         
+        return getSession().createQuery(hql)
+                    .setString(0, macAddress.toUpperCase())
+                    .list();
+    }
+
 
     public Resource findVirtualByInstanceId(Integer id) {
 

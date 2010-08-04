@@ -381,7 +381,9 @@ public class AI2AppdefDiff {
 
                 revisedAIplatform.addAIServerValue(scannedServer);
             } else {
-                if (!scannedServer.getInstallPath().equals(appdefServer.getInstallPath())) {
+                String scannedInstallPath = scannedServer.getInstallPath();
+                if ((scannedInstallPath == null && appdefServer.getInstallPath() != null) ||
+                    (scannedInstallPath != null && !scannedInstallPath.equals(appdefServer.getInstallPath()))){
                     // InstallPath has changed
                     scannedServer.setQueueStatus(AIQueueConstants.Q_STATUS_CHANGED);
                     addDiff(scannedServer, AIQueueConstants.Q_SERVER_INSTALLPATH_CHANGED); 

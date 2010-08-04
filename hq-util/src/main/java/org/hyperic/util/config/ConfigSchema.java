@@ -43,6 +43,8 @@ public class ConfigSchema implements Serializable {
 	private static final long serialVersionUID = 8171794117881852319L;
 
 	private ArrayList configOptions;
+	
+	private static HashMap secrets = new HashMap();
 
     public ConfigSchema(){
         this.configOptions = new ArrayList();
@@ -180,6 +182,19 @@ public class ConfigSchema implements Serializable {
                 opt.setDefault(value);
                 break;
             }
+        }
+    }
+    
+    public static boolean isSecret(String key) {
+        synchronized(secrets) {
+            Object obj = secrets.get(key);
+            return (obj != null && obj.equals(Boolean.TRUE)) ? true : false;
+        }
+    }
+    
+    public static void addSecret(String key) {
+        synchronized(secrets) {
+            secrets.put(key, Boolean.TRUE);
         }
     }
 }

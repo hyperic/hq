@@ -43,6 +43,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.annotation.PostConstruct;
 
@@ -230,7 +232,7 @@ public class DataManagerImpl implements DataManager {
      * 
      * 
      */
-    @Transactional(propagation=Propagation.REQUIRES_NEW)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void addData(Integer mid, MetricValue mv, boolean overwrite) {
 
         Measurement meas = measurementManager.getMeasurement(mid);
@@ -248,7 +250,7 @@ public class DataManagerImpl implements DataManager {
      * 
      * 
      */
-    @Transactional(propagation=Propagation.REQUIRES_NEW)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public boolean addData(List<DataPoint> data) {
         if (shouldAbortDataInsertion(data)) {
             return true;
@@ -333,7 +335,7 @@ public class DataManagerImpl implements DataManager {
      * 
      * 
      */
-    @Transactional(propagation=Propagation.REQUIRES_NEW)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void addData(List<DataPoint> data, boolean overwrite) {
         /**
          * We have to account for 2 types of metric data insertion here: 1 - New
@@ -937,6 +939,30 @@ public class DataManagerImpl implements DataManager {
      * @param useAggressiveRollup will use the rollup tables if the timerange
      *        represents the same timerange as one metric data table
      */
+    private String[] getDataTables(long begin, long end, boolean useAggressiveRollup) {
+        long now = System.currentTimeMillis();
+        if (!confDefaultsLoaded) {
+            loadConfigDefaults();
+        }
+        if (usesMetricUnion(begin, end, useAggressiveRollup)) {
+            return MeasTabManagerUtil.getMetricTables(begin, end);
+        } else if (now - this.purge1h < begin) {
+            return new String[] { TAB_DATA_1H };
+        } else if (now - this.purge6h < begin) {
+            return new String[] { TAB_DATA_6H };
+        } else {
+            return new String[] { TAB_DATA_1D };
+        }
+    }
+
+    /**
+     * @param begin beginning of the time range
+     * @param end end of the time range
+     * @param measIds the measurement_ids associated with the query. This is
+     *        only used for 'UNION ALL' queries
+     * @param useAggressiveRollup will use the rollup tables if the timerange
+     *        represents the same timerange as one metric data table
+     */
     private String getDataTable(long begin, long end, Integer[] measIds, boolean useAggressiveRollup) {
         long now = System.currentTimeMillis();
 
@@ -945,7 +971,8 @@ public class DataManagerImpl implements DataManager {
         }
 
         if (usesMetricUnion(begin, end, useAggressiveRollup)) {
-            return MeasurementUnionStatementBuilder.getUnionStatement(begin, end, measIds, measurementDAO.getHQDialect());
+            return MeasurementUnionStatementBuilder.getUnionStatement(begin, end, measIds,
+                measurementDAO.getHQDialect());
         } else if (now - this.purge1h < begin) {
             return TAB_DATA_1H;
         } else if (now - this.purge6h < begin) {
@@ -1062,6 +1089,95 @@ public class DataManagerImpl implements DataManager {
         } finally {
             DBUtil.closeJDBCObjects(LOG_CTX, conn, stmt, rs);
         }
+    }
+
+    public Collection getRawData(Measurement m, long begin, long end, AtomicLong publishedInterval) {
+        final long interval = m.getInterval();
+        begin = TimingVoodoo.roundDownTime(begin, interval);
+        end = TimingVoodoo.roundDownTime(end, interval);
+        Collection points;
+        if (m.getTemplate().isAvailability()) {
+            points = availabilityManager.getHistoricalAvailData(new Integer[] { m.getId() }, begin, end,
+                interval, PageControl.PAGE_ALL, true);
+            publishedInterval.set(interval);
+        } else {
+            points = getRawDataPoints(m, begin, end, publishedInterval);
+        }
+        return points;
+    }
+
+    private TreeSet getRawDataPoints(Measurement m, long begin, long end,
+                                     AtomicLong publishedInterval) {
+        final StringBuilder sqlBuf = getRawDataSql(m, begin, end, publishedInterval);
+        final TreeSet rtn = new TreeSet(getTimestampComparator());
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            conn = safeGetConnection();
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery(sqlBuf.toString());
+            final int valCol = rs.findColumn("value");
+            final int timestampCol = rs.findColumn("timestamp");
+            while (rs.next()) {
+                final double val = rs.getDouble(valCol);
+                final long timestamp = rs.getLong(timestampCol);
+                rtn.add(new HighLowMetricValue(val, timestamp));
+            }
+        } catch (SQLException e) {
+            throw new SystemException(e);
+        } finally {
+            DBUtil.closeJDBCObjects(LOG_CTX, conn, stmt, rs);
+        }
+        return rtn;
+    }
+
+    private StringBuilder getRawDataSql(Measurement m, long begin, long end,
+                                        AtomicLong publishedInterval) {
+        final String sql = new StringBuilder(128).append("SELECT value, timestamp FROM :table")
+            .append(" WHERE timestamp BETWEEN ").append(begin).append(" AND ").append(end).append(
+                " AND measurement_id=").append(m.getId()).toString();
+        final String[] tables = getDataTables(begin, end, false);
+        if (tables.length == 1) {
+            if (tables[0].equals(TAB_DATA_1H)) {
+                publishedInterval.set(HOUR);
+            } else if (tables[0].equals(TAB_DATA_6H)) {
+                publishedInterval.set(HOUR * 6);
+            } else if (tables[0].equals(TAB_DATA_1D)) {
+                publishedInterval.set(HOUR * 24);
+            }
+        }
+        final StringBuilder sqlBuf = new StringBuilder(128 * tables.length);
+        for (int i = 0; i < tables.length; i++) {
+            sqlBuf.append(sql.replace(":table", tables[i]));
+            if (i < (tables.length - 1)) {
+                sqlBuf.append(" UNION ALL ");
+            }
+        }
+        return sqlBuf;
+    }
+
+    private Comparator getTimestampComparator() {
+        return new Comparator() {
+            public int compare(Object arg0, Object arg1) {
+                if (!(arg0 instanceof MetricValue) || !(arg1 instanceof MetricValue)) {
+                    throw new ClassCastException();
+                }
+                Long point0 = new Long(((MetricValue) arg0).getTimestamp());
+                Long point1 = new Long(((MetricValue) arg1).getTimestamp());
+                return point0.compareTo(point1);
+            }
+        };
+    }
+
+    private TreeSet getRawAvailDataPoints(Measurement m, long begin, long end) {
+        final List avails = availabilityManager.getHistoricalAvailData(m.getResource(), begin, end);
+        final TreeSet rtn = new TreeSet(getTimestampComparator());
+        for (final Iterator it = avails.iterator(); it.hasNext();) {
+            final AvailabilityDataRLE rle = (AvailabilityDataRLE) it.next();
+            rtn.add(new HighLowMetricValue(rle.getAvailVal(), rle.getStartime()));
+        }
+        return rtn;
     }
 
     private String getSelectType(int type, long begin) {
@@ -1237,7 +1353,8 @@ public class DataManagerImpl implements DataManager {
      * @param interval Interval for the time range
      * @param type Collection type for the metric
      * @param returnMetricNulls Specifies whether intervals with no data should
-     *        be return as nulls
+     *        be return as {@link HighLowMetricValue} with the value set as
+     *        Double.NaN
      * @see org.hyperic.hq.measurement.server.session.AvailabilityManagerImpl#getHistoricalData()
      * @return the list of data points
      * 
@@ -1360,7 +1477,7 @@ public class DataManagerImpl implements DataManager {
     }
 
     private PageList<HighLowMetricValue> getPageList(long begin, long end, long interval,
-                                                     List<HighLowMetricValue> points,
+                                                     Collection<HighLowMetricValue> points,
                                                      boolean returnNulls, PageControl pc) {
         List<HighLowMetricValue> rtn = new ArrayList<HighLowMetricValue>();
         Iterator<HighLowMetricValue> it = points.iterator();
@@ -1660,11 +1777,15 @@ public class DataManagerImpl implements DataManager {
                                                                                        timestamp,
                                                                                        System
                                                                                            .currentTimeMillis(),
-                                                                                       measIds, measurementDAO.getHQDialect())
+                                                                                       measIds,
+                                                                                       measurementDAO
+                                                                                           .getHQDialect())
                                                                                : MeasurementUnionStatementBuilder
                                                                                    .getUnionStatement(
                                                                                        getPurgeRaw(),
-                                                                                       measIds, measurementDAO.getHQDialect());
+                                                                                       measIds,
+                                                                                       measurementDAO
+                                                                                           .getHQDialect());
 
         StringBuilder sqlBuf = new StringBuilder(
             "SELECT measurement_id, value, timestamp" + " FROM " + tables + ", " +

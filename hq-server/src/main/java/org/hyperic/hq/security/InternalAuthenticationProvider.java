@@ -42,7 +42,7 @@ public class InternalAuthenticationProvider implements AuthenticationProvider {
         String password = authentication.getCredentials().toString();
 
         // Check if we're dealing with a guest user...
-        AuthzSubject guestUser = authzSubjectManager.findSubjectById(AuthzConstants.guestId);
+        AuthzSubject guestUser = authzSubjectManager.getSubjectById(AuthzConstants.guestId);
 
         if (guestUser == null || !guestUser.getActive() ||
             !guestUser.getName().equalsIgnoreCase(username)) {

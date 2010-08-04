@@ -61,6 +61,8 @@ public abstract class ProductPlugin extends GenericPlugin {
     public static final String PROP_PLATFORM_IP   = "platform.ip";
     public static final String PROP_PLATFORM_ID   = "platform.id";
     
+    public static final int DEPLOYMENT_ORDER_LAST = TypeInfo.TYPE_SERVICE + 1;
+    
     //XXX could be something else for windows or in general..
     //but if everything uses this constant, we can keep things consistent
     public static final String DEFAULT_INSTALLPATH = 
@@ -313,5 +315,20 @@ public abstract class ProductPlugin extends GenericPlugin {
         return ClientPluginDeployer.getSubDirectory(pdk,
                                                     type,
                                                     getName());
+    }
+    
+    protected int getDeploymentOrder() {
+        TypeInfo[] types = getTypes();
+        int order = DEPLOYMENT_ORDER_LAST;
+
+        if (types == null) {
+            return order;
+        }
+
+        for (TypeInfo type : types) {
+            order = Math.min(order, type.getType());
+        }
+
+        return order;
     }
 }

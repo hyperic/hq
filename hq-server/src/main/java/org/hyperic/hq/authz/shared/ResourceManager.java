@@ -44,7 +44,7 @@ public interface ResourceManager {
      * Check if there are any resources of a given type
      */
     public boolean resourcesExistOfType(String typeName);
-    
+
     /**
      * @param {@link Collection} of {@link Resource}s
      * 
@@ -54,8 +54,8 @@ public interface ResourceManager {
     /**
      * Create a resource.
      */
-    public Resource createResource(AuthzSubject owner, ResourceType rt, Resource prototype, Integer instanceId,
-                                   String name, boolean system, Resource parent);
+    public Resource createResource(AuthzSubject owner, ResourceType rt, Resource prototype,
+                                   Integer instanceId, String name, boolean system, Resource parent);
 
     /**
      * Move a resource. It is the responsibility of the caller (AppdefManager)
@@ -124,8 +124,9 @@ public interface ResourceManager {
      * @return AppdefEntityID[] - an array of the resources (including children)
      *         deleted
      */
-    public AppdefEntityID[] removeResourcePerms(AuthzSubject subj, Resource r, boolean nullResourceType)
-        throws VetoException, PermissionException;
+    public AppdefEntityID[] removeResourcePerms(AuthzSubject subj, Resource r,
+                                                boolean nullResourceType) throws VetoException,
+        PermissionException;
 
     public void _removeResource(AuthzSubject subj, Resource r, boolean nullResourceType);
 
@@ -147,8 +148,9 @@ public interface ResourceManager {
      * @param subject
      * @return Map of resource values
      */
-    public List<Integer> findViewableInstances(AuthzSubject subject, String typeName, String resName,
-                                               String appdefTypeStr, Integer typeId, PageControl pc);
+    public List<Integer> findViewableInstances(AuthzSubject subject, String typeName,
+                                               String resName, String appdefTypeStr,
+                                               Integer typeId, PageControl pc);
 
     /**
      * Get viewable resources by "type" OR "resource name"
@@ -203,7 +205,8 @@ public interface ResourceManager {
      * @param pc control
      * @return PageList of resource values
      */
-    public PageList<Resource> findViewableSvcResources(AuthzSubject subject, String resourceName, PageControl pc);
+    public PageList<Resource> findViewableSvcResources(AuthzSubject subject, String resourceName,
+                                                       PageControl pc);
 
     /**
      * Gets all the Resources owned by the given Subject.
@@ -211,25 +214,47 @@ public interface ResourceManager {
      * @return Array of resources owned by the given subject.
      */
     public Collection<Resource> findResourceByOwner(AuthzSubject owner);
-    
+
     Collection<ResourceEdge> findResourceEdges(ResourceRelation relation, List<Resource> parentList);
 
     public Collection<ResourceEdge> findResourceEdges(ResourceRelation relation, Resource parent);
 
     public boolean isResourceChildOf(Resource parent, Resource child);
 
+    public boolean hasChildResourceEdges(Resource resource, ResourceRelation relation);
+
+    public int getDescendantResourceEdgeCount(Resource resource, ResourceRelation relation);
+
+    public Collection<ResourceEdge> findChildResourceEdges(Resource resource,
+                                                           ResourceRelation relation);
+
+    public Collection<ResourceEdge> findDescendantResourceEdges(Resource resource,
+                                                                ResourceRelation relation);
+
+    public Collection<ResourceEdge> findAncestorResourceEdges(Resource resource,
+                                                              ResourceRelation relation);
+
+    public Collection<ResourceEdge> findResourceEdgesByName(String name, ResourceRelation relation);
+
+    public ResourceEdge getParentResourceEdge(Resource resource, ResourceRelation relation);
+
+    public boolean hasResourceRelation(Resource resource, ResourceRelation relation);
+
     public List<ResourceEdge> findResourceEdges(ResourceRelation relation, Integer resourceId,
                                                 List<Integer> platformTypeIds, String platformName);
 
-    public void createResourceEdges(AuthzSubject subject, ResourceRelation relation, AppdefEntityID parent,
-                                    AppdefEntityID[] children) throws PermissionException, ResourceEdgeCreateException;
+    public void createResourceEdges(AuthzSubject subject, ResourceRelation relation,
+                                    AppdefEntityID parent, AppdefEntityID[] children)
+        throws PermissionException, ResourceEdgeCreateException;
 
-    public void createResourceEdges(AuthzSubject subject, ResourceRelation relation, AppdefEntityID parent,
-                                    AppdefEntityID[] children, boolean deleteExisting) throws PermissionException,
+    public void createResourceEdges(AuthzSubject subject, ResourceRelation relation,
+                                    AppdefEntityID parent, AppdefEntityID[] children,
+                                    boolean deleteExisting) throws PermissionException,
         ResourceEdgeCreateException;
 
-    public void removeResourceEdges(AuthzSubject subject, ResourceRelation relation, AppdefEntityID parent,
-                                    AppdefEntityID[] children) throws PermissionException;
+    public void removeResourceEdges(AuthzSubject subject, ResourceRelation relation,
+                                    AppdefEntityID parent, AppdefEntityID[] children)
+        throws PermissionException;
 
     public void removeResourceEdges(AuthzSubject subject, ResourceRelation relation, Resource parent)
         throws PermissionException;
@@ -238,8 +263,18 @@ public interface ResourceManager {
 
     ResourceRelation getNetworkRelation();
 
-    void removeAuthzResource(AuthzSubject subject, AppdefEntityID aeid, Resource r) throws PermissionException,
-        VetoException;
+    void removeAuthzResource(AuthzSubject subject, AppdefEntityID aeid, Resource r)
+        throws PermissionException, VetoException;
 
     public String getAppdefEntityName(AppdefEntityID appEnt);
+    
+    /**
+     * @return the resource count with prototype of
+     *         {@link AuthzConstants.authzPlatform} minus resources with the
+     *         prototype of
+     *         {@link AuthConstants.platformPrototypeVmwareVsphereVm}
+     */
+    public int getPlatformCountMinusVsphereVmPlatforms();
+    
+    ResourceRelation getVirtualRelation();
 }

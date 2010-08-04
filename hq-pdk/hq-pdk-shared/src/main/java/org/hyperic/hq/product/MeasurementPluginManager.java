@@ -34,7 +34,7 @@ import org.hyperic.util.PluginLoader;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 
-public class MeasurementPluginManager extends PluginManager {
+public class MeasurementPluginManager extends PluginManager implements MeasurementValueGetter {
 
     private Map metricCache = Collections.synchronizedMap(new HashMap());
     private boolean debugRateMetrics;

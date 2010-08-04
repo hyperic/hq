@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2010], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -130,7 +130,14 @@ public class ScanStateCore implements Serializable {
         }
     }
 
-    public String getCertDN () { return _platform.getCertdn(); }
+    public String getCertDN () { 
+        if (_platform == null) {
+            return null;
+        } else {
+            return _platform.getCertdn(); 
+        }
+    }
+    
     public void setCertDN ( String certDN ) {
         this._certDN=certDN;
         if( _platform != null )

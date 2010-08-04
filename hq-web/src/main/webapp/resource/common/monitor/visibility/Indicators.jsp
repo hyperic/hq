@@ -160,6 +160,9 @@
 											<c:when test="${avail.value == -0.01}">
 												<c:set var="timelineIndicatorColor" value="timelineOrange" />
 											</c:when>
+											 <c:when test="${avail.value == -0.02}">
+ 	 	 	 									<c:set var="timelineIndicatorColor" value="timelineBlack" />
+ 	 	 	 								</c:when>
 											<c:when test="${avail.value <= 0}">
 												<c:set var="timelineIndicatorColor" value="timelineRed" />
 											</c:when>

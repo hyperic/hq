@@ -494,4 +494,13 @@ public class SystemPlugin extends ProductPlugin {
 
         return schema.getSchema();
     }
+
+    /**
+     * This plugin has to be loaded first.  Almost all other plugins require the OS platforms to be parents of their server types
+     */
+    protected int getDeploymentOrder() {
+       return 0;
+    }
+    
+    
 }

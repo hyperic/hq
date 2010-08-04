@@ -79,14 +79,6 @@ public class SybaseMeasurementPlugin
     private static HashMap genericQueries  = null;  // Any
     private static HashMap connectionCache = new HashMap();
 
-    public void init(PluginManager manager) throws PluginException {
-        super.init(manager);
-        if (!manager.isRegistered("sbSysmon")) {
-            manager.registerPlugin("sbSysmon", new SybaseSysmonPlugin());
-            manager.setPluginInfo("sbSysmon", new PluginInfo("sbSysmon"));
-        }
-
-    }
 
     protected void getDriver()
         throws ClassNotFoundException {
@@ -270,6 +262,8 @@ public class SybaseMeasurementPlugin
             MetricInvalidException,
                MetricNotFoundException
     {
+        if(log.isDebugEnabled())
+           log.debug("[getValue] metric="+metric);
         initQueries();
         String objectName = metric.getObjectName(),
                alias      = metric.getAttributeName();

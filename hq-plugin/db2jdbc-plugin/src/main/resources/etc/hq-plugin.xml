@@ -289,13 +289,14 @@
             <option name="db2.jdbc.password" description="JDBC Password" type="secret"/>
         </config>
     </server>
-
+    
     <help name="DB2 JDBC 9.x">
         <![CDATA[
         <b>Configure HQ for monitoring DB2</b></br>
-The JDBC User (db2.jdbc.user) need SYSMON authorization<br>
+The JDBC User (db2.jdbc.user) needs SYSMON authorization<br>
 The HQ Agent must be run using DB2 environment
   ]]>
     </help>
     <help name="DB2 JDBC Database Manager 9.x" include="DB2 JDBC 9.x"/>
+
 </plugin>

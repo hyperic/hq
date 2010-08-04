@@ -57,7 +57,7 @@ public class LoginController {
         
         // ...we're dealing with an unauthenticated user, we're going to show the login form...
         ModelAndView result = new ModelAndView();
-        AuthzSubject guestUser = authzSubjectManager.findSubjectById(AuthzConstants.guestId);
+        AuthzSubject guestUser = authzSubjectManager.getSubjectById(AuthzConstants.guestId);
         
         // ...before we return, check for an error message...
         boolean loginError = request.getParameter("authfailed") != null;
@@ -76,6 +76,9 @@ public class LoginController {
         
         result.addObject("guestUsername", (guestUser != null) ? guestUser.getName() : "guest");
         result.addObject("guestEnabled", (guestUser != null && guestUser.getActive()));
+        
+        // ...set a response header so we can identify the login page explicitly...
+        response.setHeader("hq-requires-auth", "1");
         
         return result;
     }

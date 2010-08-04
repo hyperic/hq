@@ -23,7 +23,7 @@ import org.hyperic.util.pager.PageList;
  * Local interface for PlatformManager.
  */
 public interface PlatformManager {
-    
+
     /**
      * Create a PlatformType
      * @param name The name of the platform type
@@ -32,6 +32,7 @@ public interface PlatformManager {
      * @throws NotFoundException
      */
     PlatformType createPlatformType(String name, String plugin) throws NotFoundException;
+
     /**
      * Find a PlatformType by id
      */
@@ -63,7 +64,7 @@ public interface PlatformManager {
      * @return List of PlatformTypeValues
      */
     public PageList<PlatformTypeValue> getViewablePlatformTypes(AuthzSubject subject, PageControl pc)
-        throws  PermissionException, NotFoundException;
+        throws PermissionException, NotFoundException;
 
     /**
      * Get PlatformPluginName for an entity id. There is no authz in this method
@@ -79,23 +80,25 @@ public interface PlatformManager {
      * @param subject The user performing the delete operation.
      * @param id - The id of the Platform
      */
-    public void removePlatform(AuthzSubject subject, Platform platform) throws 
-        PlatformNotFoundException, PermissionException, VetoException;
+    public void removePlatform(AuthzSubject subject, Platform platform)
+        throws PlatformNotFoundException, PermissionException, VetoException;
 
     public void handleResourceDelete(Resource resource);
 
     /**
      * Create a Platform of a specified type
      */
-    public Platform createPlatform(AuthzSubject subject, Integer platformTypeId, PlatformValue pValue, Integer agentPK)
-        throws  ValidationException, PermissionException, AppdefDuplicateNameException,
+    public Platform createPlatform(AuthzSubject subject, Integer platformTypeId,
+                                   PlatformValue pValue, Integer agentPK)
+        throws ValidationException, PermissionException, AppdefDuplicateNameException,
         AppdefDuplicateFQDNException, ApplicationException;
 
     /**
      * Create a Platform from an AIPlatform
      * @param aipValue the AIPlatform to create as a regular appdef platform.
      */
-    public Platform createPlatform(AuthzSubject subject, AIPlatformValue aipValue) throws ApplicationException;
+    public Platform createPlatform(AuthzSubject subject, AIPlatformValue aipValue)
+        throws ApplicationException;
 
     /**
      * Get all platforms.
@@ -105,8 +108,8 @@ public interface PlatformManager {
      * @return A List of PlatformValue objects representing all of the platforms
      *         that the given subject is allowed to view.
      */
-    public PageList<PlatformValue> getAllPlatforms(AuthzSubject subject, PageControl pc) throws 
-        PermissionException, NotFoundException;
+    public PageList<PlatformValue> getAllPlatforms(AuthzSubject subject, PageControl pc)
+        throws PermissionException, NotFoundException;
 
     /**
      * Get platforms created within a given time range.
@@ -118,13 +121,13 @@ public interface PlatformManager {
      *         within the given range.
      */
     public PageList<PlatformValue> getRecentPlatforms(AuthzSubject subject, long range, int size)
-        throws  PermissionException, NotFoundException;
+        throws PermissionException, NotFoundException;
 
     /**
      * Get platform light value by id. Does not check permission.
      */
-    public Platform getPlatformById(AuthzSubject subject, Integer id) throws PlatformNotFoundException,
-        PermissionException;
+    public Platform getPlatformById(AuthzSubject subject, Integer id)
+        throws PlatformNotFoundException, PermissionException;
 
     /**
      * Find a Platform by Id.
@@ -149,21 +152,39 @@ public interface PlatformManager {
      * @param subject - who is trying this
      * @param name - the name of the platform
      */
-    public PlatformValue getPlatformByName(AuthzSubject subject, String name) throws PlatformNotFoundException,
-        PermissionException;
+    public PlatformValue getPlatformByName(AuthzSubject subject, String name)
+        throws PlatformNotFoundException, PermissionException;
 
     public Platform getPlatformByName(String name);
 
     /**
      * Get the Platform that has the specified Fqdn
      */
-    public Platform findPlatformByFqdn(AuthzSubject subject, String fqdn) throws PlatformNotFoundException,
-        PermissionException;
+    public Platform findPlatformByFqdn(AuthzSubject subject, String fqdn)
+        throws PlatformNotFoundException, PermissionException;
 
     /**
      * Get the Collection of platforms that have the specified Ip address
      */
-    public Collection<Platform> getPlatformByIpAddr(AuthzSubject subject, String address) throws PermissionException;
+    public Collection<Platform> getPlatformByIpAddr(AuthzSubject subject, String address)
+        throws PermissionException;
+
+    /**
+     * Get the Collection of platforms that have the specified MAC address
+     * 
+     * 
+     */
+    Collection<Platform> getPlatformByMacAddr(AuthzSubject subject, String address)
+        throws PermissionException;
+
+    /**
+     * Get the associated platform that has the same MAC address as the given
+     * resource
+     * 
+     * 
+     */
+    Platform getAssociatedPlatformByMacAddress(AuthzSubject subject, Resource r)
+        throws PermissionException, PlatformNotFoundException;
 
     /**
      * Get the platform by agent token
@@ -194,8 +215,8 @@ public interface PlatformManager {
      * @param subject The subject trying to list services.
      * @param serverId Server ID.
      */
-    public PlatformValue getPlatformByServer(AuthzSubject subject, Integer serverId) throws PlatformNotFoundException,
-        PermissionException;
+    public PlatformValue getPlatformByServer(AuthzSubject subject, Integer serverId)
+        throws PlatformNotFoundException, PermissionException;
 
     /**
      * Get the platform ID for a server.
@@ -207,7 +228,8 @@ public interface PlatformManager {
      * Get the platforms for a list of servers.
      * @param subject The subject trying to list services.
      */
-    public PageList<PlatformValue> getPlatformsByServers(AuthzSubject subject, List<AppdefEntityID> sIDs)
+    public PageList<PlatformValue> getPlatformsByServers(AuthzSubject subject,
+                                                         List<AppdefEntityID> sIDs)
         throws PlatformNotFoundException, PermissionException;
 
     /**
@@ -218,7 +240,8 @@ public interface PlatformManager {
      * @return A List of ApplicationValue objects representing all of the
      *         services that the given subject is allowed to view.
      */
-    public PageList<PlatformValue> getPlatformsByApplication(AuthzSubject subject, Integer appId, PageControl pc)
+    public PageList<PlatformValue> getPlatformsByApplication(AuthzSubject subject, Integer appId,
+                                                             PageControl pc)
         throws ApplicationNotFoundException, PlatformNotFoundException, PermissionException;
 
     /**
@@ -227,7 +250,8 @@ public interface PlatformManager {
      * @return A PageList of ServerValue objects representing servers on the
      *         specified platform that the subject is allowed to view.
      */
-    public Integer[] getPlatformIds(AuthzSubject subject, Integer platTypeId) throws PermissionException;
+    public Integer[] getPlatformIds(AuthzSubject subject, Integer platTypeId)
+        throws PermissionException;
 
     /**
      * Get server IDs by server type and platform.
@@ -236,23 +260,27 @@ public interface PlatformManager {
      * @return A PageList of ServerValue objects representing servers on the
      *         specified platform that the subject is allowed to view.
      */
-    public List<Platform> getPlatformsByType(AuthzSubject subject, String type) throws PermissionException,
-        InvalidAppdefTypeException;
+    public List<Platform> getPlatformsByType(AuthzSubject subject, String type)
+        throws PermissionException, InvalidAppdefTypeException;
 
     /**
      * Get the platforms that have an IP with the specified address. If no
      * matches are found, this method DOES NOT throw a
      * PlatformNotFoundException, rather it returns an empty PageList.
      */
-    public PageList<PlatformValue> findPlatformsByIpAddr(AuthzSubject subject, String addr, PageControl pc)
-        throws PermissionException;
+    public PageList<PlatformValue> findPlatformsByIpAddr(AuthzSubject subject, String addr,
+                                                         PageControl pc) throws PermissionException;
 
-    public List<Platform> findPlatformPojosByTypeAndName(AuthzSubject subj, Integer pType, String regEx);
+    public List<Platform> findPlatformPojosByTypeAndName(AuthzSubject subj, Integer pType,
+                                                         String regEx);
 
-    public List<Platform> findParentPlatformPojosByNetworkRelation(AuthzSubject subj, List<Integer> platformTypeIds,
-                                                                   String platformName, Boolean hasChildren);
+    public List<Platform> findParentPlatformPojosByNetworkRelation(AuthzSubject subj,
+                                                                   List<Integer> platformTypeIds,
+                                                                   String platformName,
+                                                                   Boolean hasChildren);
 
-    public List<Platform> findPlatformPojosByNoNetworkRelation(AuthzSubject subj, List<Integer> platformTypeIds,
+    public List<Platform> findPlatformPojosByNoNetworkRelation(AuthzSubject subj,
+                                                               List<Integer> platformTypeIds,
                                                                String platformName);
 
     /**
@@ -268,18 +296,18 @@ public interface PlatformManager {
      * the platformValue.addIpValue(IpValue) method due to bug 4924
      * @param existing - the value object for the platform you want to save
      */
-    public Platform updatePlatformImpl(AuthzSubject subject, PlatformValue existing) throws UpdateException,
-        PermissionException, AppdefDuplicateNameException, PlatformNotFoundException, AppdefDuplicateFQDNException,
-        ApplicationException;
+    public Platform updatePlatformImpl(AuthzSubject subject, PlatformValue existing)
+        throws UpdateException, PermissionException, AppdefDuplicateNameException,
+        PlatformNotFoundException, AppdefDuplicateFQDNException, ApplicationException;
 
     /**
      * Update an existing Platform. Requires all Ip's to have been re-added via
      * the platformValue.addIpValue(IpValue) method due to bug 4924
      * @param existing - the value object for the platform you want to save
      */
-    public Platform updatePlatform(AuthzSubject subject, PlatformValue existing) throws UpdateException,
-        PermissionException, AppdefDuplicateNameException, PlatformNotFoundException, AppdefDuplicateFQDNException,
-        ApplicationException;
+    public Platform updatePlatform(AuthzSubject subject, PlatformValue existing)
+        throws UpdateException, PermissionException, AppdefDuplicateNameException,
+        PlatformNotFoundException, AppdefDuplicateFQDNException, ApplicationException;
 
     /**
      * DevNote: This method was refactored out of updatePlatformTypes. It does
@@ -291,14 +319,14 @@ public interface PlatformManager {
      * Update platform types
      */
     public void updatePlatformTypes(String plugin, org.hyperic.hq.product.PlatformTypeInfo[] infos)
-        throws    VetoException, NotFoundException;
+        throws VetoException, NotFoundException;
 
     /**
      * Update an existing appdef platform with data from an AI platform.
      * @param aiplatform the AI platform object to use for data
      */
-    public void updateWithAI(AIPlatformValue aiplatform, AuthzSubject subj) throws PlatformNotFoundException,
-        ApplicationException;
+    public void updateWithAI(AIPlatformValue aiplatform, AuthzSubject subj)
+        throws PlatformNotFoundException, ApplicationException;
 
     /**
      * Add an IP to a platform

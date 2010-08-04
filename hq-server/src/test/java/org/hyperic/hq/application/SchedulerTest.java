@@ -127,15 +127,7 @@ public class SchedulerTest extends TestCase {
         future.cancel(true);
         
         assertTrue(future.isDone());
-        assertTrue(future.isCancelled());
-        
-        counterUpdated = new SpinBarrier(new SpinBarrierCondition() {
-            public boolean evaluate() {
-                return counter.numRuns() >= 3;
-            }
-        });
-        assertTrue(counterUpdated.waitFor());
-        
+        assertTrue(future.isCancelled());     
        
     }
     

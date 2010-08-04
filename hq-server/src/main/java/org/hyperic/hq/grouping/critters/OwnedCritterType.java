@@ -32,6 +32,7 @@ import java.util.Map;
 
 import org.hibernate.Query;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.grouping.Critter;
 import org.hyperic.hq.grouping.CritterDump;
 import org.hyperic.hq.grouping.CritterTranslationContext;
@@ -123,6 +124,11 @@ public class OwnedCritterType
         public String getSqlJoins(CritterTranslationContext ctx,
                                   String resourceAlias) {
             return "";
+        }
+        
+        public boolean meets(Resource resource) {
+            //TODO implement
+            throw new UnsupportedOperationException();
         }
 
     }
