@@ -30,89 +30,47 @@ import java.rmi.RemoteException;
 import java.util.Calendar;
 
 /**
- * EventFilter
+ * EventFilterBuilder
  * Builder methods which create event filters
- * to partition event results from querying.
- * <p/>
- * To further filter results you can add a
- * String[] categories:
- * new String[]{"error", "warning"}
- * eventFilter.setCategory(categoryTypes);
+ * to partition event results from querying. 
  *
  * @author Helena Edelson
  */
 public class EventFilterBuilder {
 
     /** 
-     * Creates a filter for VM events for Sonoma.
-     * Refer to API Data Object vmEvent and see the
-     * extends class list for elaborate list of vmEvents.
-     * ToDo - determine which vm events we need
-     *
+     * Creates a filter for events.
      * @param rootFolder
      * @return
      */
-    public static EventFilterSpec buildVMEventFilters(ManagedObjectReference rootFolder) {
+    public static EventFilterSpec buildEventFilters(ManagedObjectReference rootFolder, Calendar lastQueriedTime, Calendar pendingQueryTime) {
         EventFilterSpec filter = new EventFilterSpec();
         filter.setEntity(filterByChildrenOfRootFolder(rootFolder));
+        filter.setType(EventTypes.getSubscription());
 
-        filter.setType(EventChannel.DEFAULT_SUBSCRIPTION);
+        EventFilterSpecByTime eventTimeFilter = EventFilterBuilder.filterSinceLastQuery(lastQueriedTime, pendingQueryTime);
+        filter.setTime(eventTimeFilter);
 
         return filter;
-    }
+    } 
 
     /**
-     * Creates a filter for Host events for Sonoma.
-     * Refer to API Data Object vmEvent and see the
-     * extends class list for elaborate list of vmEvents.
-     *
-     * @param rootFolder
+     * Filters events to only those that occurred
+     * between the time last queried and the pending query time.
+     * @param lastQueriedTime
+     * @param pendingQueryTime
      * @return
      */
-    public static EventFilterSpec buildHostEventFilters(ManagedObjectReference rootFolder) {
-        EventFilterSpec filter = new EventFilterSpec();
-        filter.setEntity(filterByChildrenOfRootFolder(rootFolder));
-        /* ToDo add to list */
-        filter.setType(new String[]
-                {EventChannel.Host.HostAddedEvent}
-        );
-
-        return filter;
-    }
-
-
-    /**
-     * Limits to the events happened in the past month
-     *
-     * @param currentTime
-     * @return
-     */
-    public static EventFilterSpecByTime filterByTime(Calendar currentTime, Calendar timeLastChecked) throws RemoteException {
+    public static EventFilterSpecByTime filterSinceLastQuery(Calendar lastQueriedTime, Calendar pendingQueryTime) {
         EventFilterSpecByTime filter = new EventFilterSpecByTime();
-        Calendar startTime = currentTime;
-        startTime.roll(Calendar.MINUTE, true);
-        /** This will collect only those events that have occurred after the specified time. */
-        filter.setBeginTime(startTime);
-        // ToDo refactor to do efs.setTime(filter);
-
-        return filter;
-    }
-
-    public static EventFilterSpecByTime filterSinceLastQuery(Calendar currentTime, Calendar lastQuery) throws RemoteException {
-        EventFilterSpecByTime filter = new EventFilterSpecByTime();
-        Calendar startTime = lastQuery;
-        startTime.roll(Calendar.MILLISECOND, true);
-
-        filter.setBeginTime(startTime);
-        filter.setEndTime(currentTime);
-        // ToDo refactor to do efs.setTime(filter);
+        filter.setBeginTime(lastQueriedTime);
+        filter.setEndTime(pendingQueryTime);
 
         return filter;
     }
 
     /**
-     * Limits to the children of root folder
-     *
+     * Filters to children of root folder
      * @return
      */
     public static EventFilterSpecByEntity filterByChildrenOfRootFolder(ManagedObjectReference rootFolder) {
@@ -125,7 +83,6 @@ public class EventFilterBuilder {
 
     /**
      * Limits to the user names passed in.
-     *
      * @param users
      * @return
      */
