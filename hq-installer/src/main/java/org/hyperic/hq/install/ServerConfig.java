@@ -467,8 +467,12 @@ public class ServerConfig
                     throw new EarlyExitException("No modifications made to existing database.  "
                                                  + "Exiting installer.");
                 }
+                break;            
+            case 11:
+                if(isEEInstall) {
+                    schema.addOption(new HiddenConfigOption("accept.eula",YesNoConfigOption.NO));
+                }
                 break;
-
             default:
                 return null;
         }
