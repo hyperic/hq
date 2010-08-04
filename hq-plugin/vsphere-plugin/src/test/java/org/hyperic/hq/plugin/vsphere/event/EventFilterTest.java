@@ -8,6 +8,8 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.util.Calendar;
+
 import static org.junit.Assert.*;
 /**
  * EventFilterTest
@@ -31,26 +33,18 @@ public class EventFilterTest extends BaseEventTest {
     }
 
     @Test
-    public void handleEvent() throws Exception {
-        EventFilterSpec eventFilter = EventFilterBuilder.buildVMEventFilters(rootFolder);
+    public void buildFilter() throws Exception {
+        Calendar pendingQuery = Calendar.getInstance();
+        Calendar lastQuery = Calendar.getInstance();
+        lastQuery.roll(Calendar.HOUR, false);
+
+        EventFilterSpec eventFilter = EventFilterBuilder.buildEventFilters(rootFolder, lastQuery, pendingQuery);
         assertNotNull(eventFilter);
         assertTrue(eventFilter.getType().length > 0);
         assertTrue(eventFilter.entity instanceof EventFilterSpecByEntity);
         assertEquals(eventFilter.entity.getEntity(), rootFolder);
     }
 
-    @Test
-    public void interrogateType() throws Exception {
-        EventFilterSpec eventFilter = EventFilterBuilder.buildVMEventFilters(rootFolder);
-        assertNotNull(eventFilter);
-
-        Event[] events = eventManager.queryEvents(eventFilter);
-        assertNotNull(events);
-        assertTrue(events.length > 0);
-        
-        for(Event e : events) { 
-            assertTrue(e instanceof VmEvent);
-        } 
-    }
+     
 
 }

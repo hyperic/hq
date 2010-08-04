@@ -5,10 +5,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import org.hyperic.hq.plugin.vsphere.event.DefaultEventHandler;
-import org.hyperic.hq.plugin.vsphere.event.EventHandler;
-import org.hyperic.hq.plugin.vsphere.event.EventService;
-import org.hyperic.hq.plugin.vsphere.event.EventServiceImpl;
 import org.hyperic.hq.product.PluginException;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -37,10 +33,10 @@ public class EventServiceTest extends BaseEventTest {
 
     private EventManager eventManager;
 
-    private EventService eventService;
+    private InventoryManager eventService;
 
      /** Default thread name prefix: "EventServiceImpl-". */
-	public static final String DEFAULT_THREAD_NAME_PREFIX = ClassUtils.getShortName(EventServiceImpl.class) + "-";
+	public static final String DEFAULT_THREAD_NAME_PREFIX = ClassUtils.getShortName(DefaultInventoryManager.class) + "-";
 
     protected TaskExecutor createDefaultTaskExecutor() {
 		return new SimpleAsyncTaskExecutor(DEFAULT_THREAD_NAME_PREFIX);
@@ -53,7 +49,7 @@ public class EventServiceTest extends BaseEventTest {
 
         this.eventManager = vSphereUtil.getEventManager();
         assertNotNull(eventManager);
-        this.eventService = new EventServiceImpl();
+        this.eventService = new DefaultInventoryManager();
     }
 
     /** Really we need a scheduler */
@@ -63,7 +59,7 @@ public class EventServiceTest extends BaseEventTest {
         assertNotNull(eventManager);
         final ManagedObjectReference rootFolder = vSphereUtil.getRootFolder().getMOR();
         assertNotNull(rootFolder);
-        final EventService eventService = new EventServiceImpl();
+        final InventoryManager eventService = new DefaultInventoryManager();
         final EventHandler eventHandler = new DefaultEventHandler();
 
         this.taskExecutor = createDefaultTaskExecutor();

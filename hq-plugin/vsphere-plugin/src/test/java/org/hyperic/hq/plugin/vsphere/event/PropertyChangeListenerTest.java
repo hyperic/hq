@@ -19,7 +19,6 @@ import com.vmware.vim25.mo.ViewManager;
  *
  * @author Helena Edelson
  */
-@Ignore("Investigating.")
 public class PropertyChangeListenerTest extends BaseEventTest {
 
     private Folder rootFolder;
@@ -37,10 +36,10 @@ public class PropertyChangeListenerTest extends BaseEventTest {
         this.viewManager = vSphereUtil.getViewManager();
         assertNotNull(viewManager);
     }
- 
+
     @Test
     public void waitForUpdates() throws Exception {
-        final PropertyChangeListener invoker = new PropertyChangeListener();
+        PropertyChangeListener invoker = new PropertyChangeListener();
         invoker.invoke(pc, rootFolder, viewManager, new DefaultEventHandler());
     }
 

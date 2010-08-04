@@ -3,9 +3,6 @@ package org.hyperic.hq.plugin.vsphere.event;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import org.hyperic.hq.plugin.vsphere.event.DefaultEventHandler;
-import org.hyperic.hq.plugin.vsphere.event.EventFilterBuilder;
-import org.hyperic.hq.plugin.vsphere.event.EventHandler;
 import org.hyperic.hq.product.PluginException;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -13,9 +10,10 @@ import org.junit.Test;
 
 import com.vmware.vim25.Event;
 import com.vmware.vim25.EventFilterSpec;
-import com.vmware.vim25.ManagedObjectReference;
-import com.vmware.vim25.mo.EventHistoryCollector;
+import com.vmware.vim25.ManagedObjectReference; 
 import com.vmware.vim25.mo.EventManager;
+
+import java.util.Calendar;
 
 /**
  * EventHandlerTest
@@ -43,34 +41,14 @@ public class EventHandlerTest extends BaseEventTest {
         assertNotNull(rootFolder);
  
     }
-
-    @Test
-    public void handleHistoricalEvents() throws Exception {
-        EventFilterSpec eventFilter = EventFilterBuilder.buildVMEventFilters(rootFolder);
-
-        Event[] events = eventManager.queryEvents(eventFilter);
-        assertNotNull(events);
-        assertTrue(events.length > 0);
-
-        EventHistoryCollector ehc = eventManager.createCollectorForEvents(eventFilter);
-        eventHandler.handleEvents(ehc, 50);
-    }
-
-    @Test
-    public void handleEvent() throws Exception {
-        EventFilterSpec eventFilter = EventFilterBuilder.buildVMEventFilters(rootFolder);
-        assertNotNull(eventFilter); 
-       
-        Event[] events = eventManager.queryEvents(eventFilter);
-        assertNotNull(events);
-        assertTrue(events.length > 0);
  
-        eventHandler.handleEvent(events[0]);
-    }
-
     @Test
     public void handleEvents() throws Exception {
-        EventFilterSpec eventFilter = EventFilterBuilder.buildVMEventFilters(rootFolder);
+        Calendar pendingQuery = Calendar.getInstance();
+        Calendar lastQuery = Calendar.getInstance();
+        lastQuery.roll(Calendar.HOUR, false);
+
+        EventFilterSpec eventFilter = EventFilterBuilder.buildEventFilters(rootFolder, lastQuery, pendingQuery);
 
         Event[] events = eventManager.queryEvents(eventFilter);
         assertNotNull(events);
