@@ -146,9 +146,9 @@ public class ControlHistoryDAO
 
         for (int i = 0; i < numToReturn && i < rows.size(); i++) {
             Map<String, Object> row = rows.get(i);
-            final AppdefEntityID id = new AppdefEntityID(((Integer) row.get("entity_type")).intValue(),
-                ((Integer) row.get("entity_id")).intValue());
-            frequencies.add(new ControlFrequency(id,(String)row.get("action"),(Long)row.get("num")));
+            final AppdefEntityID id = new AppdefEntityID(((Number) row.get("entity_type")).intValue(),
+                ((Number) row.get("entity_id")).intValue());
+            frequencies.add(new ControlFrequency(id,(String)row.get("action"),((Number) row.get("num")).longValue()));
         }
         return frequencies;
     }
