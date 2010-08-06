@@ -20,6 +20,12 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>org.hyperic.hq</groupId>
+			<artifactId>hq-pdk-shared</artifactId>
+			<version>${project.version}</version>
+			<classifier>tests</classifier>
+		</dependency>
+		<dependency>
 			<groupId>org.hyperic.hq.agent</groupId>
 			<artifactId>hq-agent-core</artifactId>
 			<version>${project.version}</version>
