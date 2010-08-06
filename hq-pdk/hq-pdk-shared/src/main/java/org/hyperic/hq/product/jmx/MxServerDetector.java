@@ -338,6 +338,18 @@ public class MxServerDetector
             }
         }
 
+        setJmxUrl(process,config);
+
+        // default anything not auto-configured
+        setProductConfig(server, config);
+        discoverServerConfig(server, process.getPid());
+
+        server.setMeasurementConfig();
+        return server;
+    }
+    
+    protected void setJmxUrl(MxProcess process, ConfigResponse config) {
+        String query = getProcQuery(process.getInstallPath());
         if (process.getURL() != null) {
             config.setValue(MxUtil.PROP_JMX_URL,
                             process.getURL());
@@ -353,13 +365,6 @@ public class MxServerDetector
                 }
             }
         }
-
-        // default anything not auto-configured
-        setProductConfig(server, config);
-        discoverServerConfig(server, process.getPid());
-
-        server.setMeasurementConfig();
-        return server;
     }
 
     public List getServerResources(ConfigResponse platformConfig)
