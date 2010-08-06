@@ -39,10 +39,19 @@ abstract public class BasePluginIntegrationTest {
     protected ConfigTrackPluginManager configTrackPluginManager;
     protected LogTrackPluginManager logTrackPluginManager;
     protected static File pluginJar;
+    static final String HQ_IP = "agent.setup.camIP";
+    static final String HQ_PORT = "agent.setup.camPort";
+    static final String HQ_USER = "agent.setup.camLogin";
+    static final String HQ_PASS = "agent.setup.camPword";
 
     @Before
     public void registerPlugin() throws PluginException {
-        this.productPluginManager = new ProductPluginManager(new Properties());
+        Properties agentProps = new Properties();
+        agentProps.put(HQ_IP, "127.0.0.1");
+        agentProps.put(HQ_PORT, "8080");
+        agentProps.put(HQ_USER,"hqadmin");
+        agentProps.put(HQ_PASS, "hqadmin");
+        this.productPluginManager = new ProductPluginManager(agentProps);
         this.productPluginManager.setRegisterTypes(false);
         this.productPluginManager.init();
         this.autoInventoryPluginManager = this.productPluginManager.getAutoinventoryPluginManager();
