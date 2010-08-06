@@ -48,26 +48,26 @@
             group="Reliability"
             collectionType="dynamic"
             units="sec"/>
-        <metric name="Lazy Writes/Sec"
-            template="${buffer.manager}"
+        <metric name="Lazy Writes"
+            template="Buffer Manager:Platform=Win32:Lazy Writes/Sec"
             category="UTILIZATION"
             group="Reliability"
-            collectionType="dynamic"
+            collectionType="trendsup"
             units="none"/>
-        <metric name="Checkpoint Pages/Sec"
-            template="${buffer.manager}"
+        <metric name="Checkpoint Pages"
+            template="Buffer Manager:Platform=Win32:Checkpoint Pages/Sec"
             category="UTILIZATION"
             group="Reliability"
-            collectionType="dynamic"
+            collectionType="trendsup"
             units="none"/>
-        <metric name="Page reads/sec"
-            template="${buffer.manager}"
+        <metric name="Page reads"
+            template="Buffer Manager:Platform=Win32:Page reads/sec"
             category="UTILIZATION"
             group="Reliability"
-            collectionType="dynamic"
+            collectionType="trendsup"
             units="none"/>
-        <metric name="Page writes/sec"
-            template="${buffer.manager}"
+        <metric name="Page writes"
+            template="Buffer Manager:Platform=Win32:Page writes/sec"
             category="UTILIZATION"
             group="Reliability"
             collectionType="dynamic"
@@ -156,8 +156,8 @@
             collectionType="trendsup"
             units="none"/>
 
-        <metric name="Transactions per Second"
-            alias="TransactionsSec"
+        <metric name="Transactions"
+            alias="Transactions"
             template="${db.domain}:Type=Formatted:Transactions/sec"
             category="THROUGHPUT"
             group="Throughput"
@@ -298,18 +298,18 @@
     </metrics>
 
     <metrics name="mssql-access">
-    <metric name="Full Scans/Sec"
-            alias="FullScansSec"
+    <metric name="Full Scans"
+            alias="FullScans"
             template="Access Methods:Platform=Win32:Full Scans/Sec"
             category="UTILIZATION"
             group="Resource Utilization"
-            collectionType="dynamic"
+            collectionType="trendsup"
             units="none"/>
-    <metric name="Worktables Created/Sec"
+    <metric name="Worktables Created"
             template="Access Methods:Platform=Win32:Worktables Created/Sec"
             category="UTILIZATION"
             group="Resource Utilization"
-            collectionType="dynamic"
+            collectionType="trendsup"
             units="none"/>
     <!--
 
@@ -338,12 +338,12 @@
             units="none"/>
 
 -->
-    <metric name="Workfiles Created/Sec"
+    <metric name="Workfiles Created"
             alias="WorkfilesCreatedSec"
             template="Access Methods:Platform=Win32:Workfiles Created/Sec"
             category="UTILIZATION"
             group="Resource Utilization"
-            collectionType="dynamic"
+            collectionType="trendsup"
             units="none"/>
 
 
@@ -436,12 +436,12 @@
             collectionType="dynamic"
             units="none"/>
 -->
-    <metric name="Page Splits/Sec"
+    <metric name="Page Splits"
             alias="PageSplitsSec"
             template="Access Methods:Platform=Win32:Page Splits/Sec"
             category="UTILIZATION"
             group="Resource Utilization"
-            collectionType="dynamic"
+            collectionType="trendsup"
             units="none"/>
 <!--
     <metric name="Table Lock Escalations/Sec"
@@ -455,20 +455,20 @@
     </metrics>
 
     <metrics name="mssql-general">
-    <metric name="Logins/Sec"
-            alias="LoginsSec"
+    <metric name="Logins"
+            alias="Logins"
             template="General Statistics:Platform=Win32:Logins/Sec"
             category="UTILIZATION"
             group="Resource Utilization"
-            collectionType="dynamic"
+            collectionType="trendsup"
             units="none"/>
 
-    <metric name="Logouts/Sec"
-            alias="LogoutsSec"
+    <metric name="Logouts"
+            alias="Logouts"
             template="General Statistics:Platform=Win32:Logouts/Sec"
             category="UTILIZATION"
             group="Resource Utilization"
-            collectionType="dynamic"
+            collectionType="trendsup"
             units="none"/>
 
         <metric name="User Connections"
@@ -595,12 +595,12 @@
     </metrics>
 
     <metrics name="mssql-stats">
-    <metric name="Batch Requests/Sec"
-            alias="BatchRequestsSec"
+    <metric name="Batch Requests"
+            alias="BatchRequests"
             template="SQL Statistics:Platform=Win32:Batch Requests/Sec"
             category="UTILIZATION"
             group="Resource Utilization"
-            collectionType="dynamic"
+            collectionType="trendsup"
             units="none"/>
     <!--
 
@@ -636,19 +636,19 @@
             collectionType="dynamic"
             units="none"/>
 -->
-    <metric name="SQL Compilations/Sec"
-            alias="SQLCompilationsSec"
+    <metric name="SQL Compilations"
+            alias="SQLCompilations"
             template="SQL Statistics:Platform=Win32:SQL Compilations/Sec"
             category="UTILIZATION"
             group="Resource Utilization"
-            collectionType="dynamic"
+            collectionType="trendsup"
             units="none"/>
-    <metric name="SQL Re-Compilations/Sec"
-            alias="SQLReCompilationsSec"
+    <metric name="SQL Re-Compilations"
+            alias="SQLReCompilations"
             template="SQL Statistics:Platform=Win32:SQL Re-Compilations/Sec"
             category="UTILIZATION"
             group="Resource Utilization"
-            collectionType="dynamic"
+            collectionType="trendsup"
             units="none"/>
     </metrics>
 
