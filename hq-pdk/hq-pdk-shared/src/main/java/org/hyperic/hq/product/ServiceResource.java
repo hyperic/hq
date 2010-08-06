@@ -104,6 +104,14 @@ public class ServiceResource {
             throw encodeException();
         }
     }
+    
+    public ConfigResponse getProductConfig() {
+        try {
+            return ConfigResponse.decode(this.resource.getProductConfig());
+        } catch (EncodingException e) {
+            throw encodeException();
+        }
+    }
 
     public void setMeasurementConfig(ConfigResponse config) {
         if (config == null) {
@@ -188,6 +196,8 @@ public class ServiceResource {
     public void setCustomProperties(Map props) {
         setCustomProperties(new ConfigResponse(props));
     }
+    
+    
 
     public String toString() {
         return this.resource.toString();
