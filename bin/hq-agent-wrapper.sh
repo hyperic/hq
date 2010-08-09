@@ -486,9 +486,37 @@ getpid() {
                         pidtest=`$PSEXE -ww -p $pid -o command | grep "$WRAPPER_CMD_PS" | tail -1`
                         ;;
                     'solaris')
-                        PSEXE="/usr/ucb/ps" 
-                        pidtest=`$PSEXE ww $pid | grep "$WRAPPER_CMD" | tail -1` 
-                        ;;
+	                    if [ -f "/usr/bin/pargs" ]
+	                    then
+	                       pidtest=`pargs $pid | grep "$WRAPPER_CMD" | tail -1`
+	                    else
+	                       case "$PSEXE" in
+	                          '/usr/ucb/ps')
+	                             pidtest=`$PSEXE -auxww  $pid | grep "$WRAPPER_CMD" | tail -1`
+	                             ;;
+	                          '/usr/bin/ps')
+	                             TRUNCATED_CMD=`$PSEXE -o comm -p $pid | tail -1`
+	                             COUNT=`echo $TRUNCATED_CMD | wc -m`
+	                             COUNT=`echo ${COUNT}`
+	                             COUNT=`expr $COUNT - 1`
+	                             TRUNCATED_CMD=`echo $WRAPPER_CMD | cut -c1-$COUNT`
+	                             pidtest=`$PSEXE -o comm -p $pid | grep "$TRUNCATED_CMD" | tail -1`
+	                             ;;
+	                          '/bin/ps')
+	                             TRUNCATED_CMD=`$PSEXE -o comm -p $pid | tail -1`
+	                             COUNT=`echo $TRUNCATED_CMD | wc -m`
+	                             COUNT=`echo ${COUNT}`
+	                             COUNT=`expr $COUNT - 1`
+	                             TRUNCATED_CMD=`echo $WRAPPER_CMD | cut -c1-$COUNT`
+	                             pidtest=`$PSEXE -o comm -p $pid | grep "$TRUNCATED_CMD" | tail -1`
+	                             ;;
+                              *)
+	                             echo "Unsupported ps command $PSEXE"
+	                             exit 1
+	                             ;;
+	                          esac
+	                     fi
+	                     ;;
                     'hpux')
                         pidtest=`$PSEXE -p $pid -x -o args | grep "$WRAPPER_CMD_PS" | tail -1`
                         ;;
@@ -547,16 +575,26 @@ testpid() {
     # The ps statement below looks for the specific wrapper command running as
     # the pid. If it is not found then the pid file is considered to be stale.
     case "$DIST_OS" in
-        'macosx')
-            pid=`$PSEXE -ww $pid | grep $pid | grep -v grep | awk '{print $1}' | tail -1`
+     'solaris')
+        case "$PSEXE" in
+        '/usr/ucb/ps')
+            pid=`$PSEXE  $pid | grep $pid | grep -v grep | awk '{print $1}' | tail -1`
             ;;
-        'solaris')
-            PSEXE="/usr/ucb/ps"
-            pid=`$PSEXE ww $pid | grep $pid | grep -v grep | awk '{print $1}' | tail -1`
-            ;;
-        *)
+        '/usr/bin/ps')
             pid=`$PSEXE -p $pid | grep $pid | grep -v grep | awk '{print $1}' | tail -1`
             ;;
+        '/bin/ps')
+            pid=`$PSEXE -p $pid | grep $pid | grep -v grep | awk '{print $1}' | tail -1`
+            ;;
+        *)
+            echo "Unsupported ps command $PSEXE"
+            exit 1
+            ;;
+        esac
+        ;;
+    *)
+        pid=`$PSEXE -p $pid | grep $pid | grep -v grep | awk '{print $1}' | tail -1` 2>/dev/null
+        ;;
     esac
     if [ "X$pid" = "X" ]
     then
