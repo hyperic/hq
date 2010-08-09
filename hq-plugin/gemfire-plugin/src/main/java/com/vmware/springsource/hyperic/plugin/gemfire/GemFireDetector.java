@@ -1,27 +1,3 @@
-/*
- * NOTE: This copyright does *not* cover user programs that use HQ
- * program services by normal system calls through the application
- * program interfaces provided as part of the Hyperic Plug-in Development
- * Kit or the Hyperic Client Development Kit - this is merely considered
- * normal use of the program, and does *not* fall under the heading of
- * "derived work".
- * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
- * This file is part of HQ.
- * 
- * HQ is free software; you can redistribute it and/or modify
- * it under the terms version 2 of the GNU General Public License as
- * published by the Free Software Foundation. This program is distributed
- * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
- * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
- * PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- * USA.
- */
 package com.vmware.springsource.hyperic.plugin.gemfire;
 
 import java.io.BufferedReader;
@@ -33,9 +9,13 @@ import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.product.jmx.MxServerDetector;
+import org.hyperic.hq.product.AutoServerDetector;
+import org.hyperic.hq.product.PluginException;
+import org.hyperic.hq.product.ServerDetector;
+import org.hyperic.hq.product.ServerResource;
+import org.hyperic.util.config.ConfigResponse;
 
-public class GemFireDetector extends MxServerDetector {
+public class GemFireDetector extends ServerDetector implements AutoServerDetector {
 
     //XXX make public on ServerDetector
     private static final String VERSION_FILE = "VERSION_FILE";
@@ -43,61 +23,56 @@ public class GemFireDetector extends MxServerDetector {
     private static final String JAR_FILE = "JAR_FILE";
     private static final String DEF_URL = "service:jmx:rmi://localhost/jndi/rmi://:1099/jmxconnector";
     private static final Log log = LogFactory.getLog(GemFireDetector.class);
+    private static final String procQuery = "State.Name.sw=java,Args.*.eq=com.gemstone.gemfire.admin.jmx.internal.AgentLauncher";
 
-    @Override
-    protected List getServerProcessList() {
-        String jarFile = getTypeProperty(JAR_FILE);
-        List procs = new ArrayList();
-        long[] pids = getPids(getProcQuery());
-        if (log.isDebugEnabled()) {
-            log.debug(getProcQuery() + " matched " + pids.length + " processes");
-        }
+    public List getServerResources(ConfigResponse platformConfig)
+            throws PluginException {
+        String jarFile = getTypeProperty("JAR_FILE");
+        List servers = new ArrayList();
+        try {
+            long[] pids = getPids(procQuery);
+            if (log.isDebugEnabled()) {
+                log.debug(procQuery + " matched " + pids.length + " processes");
+            }
 
-        for (int i = 0; i < pids.length; i++) {
-            long pid = pids[i];
-            String[] args = getProcArgs(pid);
-            String path = null;
-            String url = DEF_URL;
-            for (int j = 0; j < args.length; j++) {
-                String arg = args[j];
-                if (arg.equals("-classpath")) {
-                    List<String> classpath = Arrays.asList(args[j + 1].split(File.pathSeparator));
-                    for (String jar : classpath) {
-                        //XXX support regexp...
-                        if (jar.endsWith(jarFile)) {
-                            path = jar.substring(0, jar.length() - jarFile.length());
+            for (int i = 0; i < pids.length; i++) {
+                long pid = pids[i];
+                String[] args = getProcArgs(pid);
+                String path = null;
+                String url = DEF_URL;
+                for (int j = 0; j < args.length; j++) {
+                    String arg = args[j];
+                    if (arg.equals("-classpath")) {
+                        List<String> classpath = Arrays.asList(args[j + 1].split(File.pathSeparator));
+                        for (String jar : classpath) {
+                            //XXX support regexp...
+                            if (jar.endsWith(jarFile)) {
+                                path = jar.substring(0, jar.length() - jarFile.length());
+                            }
                         }
+                    } else if (arg.startsWith("rmi-bind-address")) {
+                        String host = arg.split("=")[1];
+                        url = url.replaceFirst("localhost", host);
+                    } else if (arg.startsWith("rmi-port")) {
+                        String port = arg.split("=")[1];
+                        url = url.replaceFirst("1099", port);
                     }
-                } else if (arg.startsWith("rmi-bind-address")) {
-                    String host = arg.split("=")[1];
-                    url = url.replaceFirst("localhost", host);
-                } else if (arg.startsWith("rmi-port")) {
-                    String port = arg.split("=")[1];
-                    url = url.replaceFirst("1099", port);
+                }
+
+                if ((path != null) && isInstallTypeVersion(path)) {
+                    //config.setValue("jmx.url", url);
+                    ServerResource server = createServerResource(path);
+                    servers.add(server);
                 }
             }
-
-            if (path != null) {
-                MxProcess process = new MxProcess(pid, args, path);
-                process.setURL(url);
-                procs.add(process);
-            }
+        } catch (Exception ex) {
+            log.debug("ERROR: " + ex.getMessage(), ex);
         }
-        return procs;
+
+        return servers;
     }
 
-    @Override
-    protected String getProcQuery(String path) {
-        log.debug("[getProcQuery] path=" + path);
-        String query=super.getProcQuery(path);
-        if(path!=null){
-            File jar=new File(path,"/lib/gemfire.jar");
-            query+=",Args.*.ct="+jar.getAbsolutePath();
-        }
-        log.debug("[getProcQuery] query=" + query);
-        return query;
-    }
-
+    // XXX sacar la version por JMX
     @Override
     protected boolean isInstallTypeVersion(String installpath) {
         log.debug("[isInstallTypeVersion] " + getTypeInfo().getVersion());

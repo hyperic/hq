@@ -4,19 +4,11 @@
   <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
 ]>
 <plugin package="com.vmware.springsource.hyperic.plugin.gemfire">
-    <!-- add the jmx libraries to the classpath -->
     <classpath>
         <include name="pdk/lib/mx4j" />
     </classpath>
 
-	<!-- Template for jmx metrics -->
-    <filter name="template" value="${OBJECT_NAME}:${alias}" />
-
-	<!-- Custom metrics that we will get from our MBean -->
-	<!-- use name="xyz" to get metric xyz from cachePerfStats
-	     else use name="category,attribute"  eg: name="distributionStats,processedMessages"
-	     collectiontype=TrendsUp -->
-    <metrics name="GemFireMetrics">
+    <!--metrics name="GemFireMetrics">
         <metric name="cacheListenerCallsCompleted" category="UTILIZATION" collectionType="trendsup" indicator="true" interval="60000" />
         <metric name="creates" category="UTILIZATION" collectionType="trendsup" indicator="true" interval="60000" />
         <metric name="puts" category="UTILIZATION" collectionType="trendsup" indicator="true" interval="60000" />
@@ -26,61 +18,83 @@
         <metric name="entries" category="UTILIZATION" collectionType="trendsup" indicator="true" interval="60000" />
         <metric name="destroys" category="UTILIZATION" collectionType="trendsup" indicator="true" interval="60000" />
         <metric name="distributionStats,deserializations" collectionType="trendsup" category="UTILIZATION" indicator="true" interval="60000" />
-    </metrics>
+    </metrics-->
 
-	<!-- Define a server with JMX settings and monitor services -->
-    <server name="GemFire" version="6.0">
-	
-		<!-- Tell HQ where the home directory for this process is -->
-        <property name="PROC_MAIN_CLASS" value="com.gemstone.gemfire.admin.jmx.internal.AgentLauncher" />
-        <property name="JAR_FILE" value="lib/gemfire.jar" />
-        <property name="VERSION_FILE" value="lib/GemFireVersion.properties" />
-        <property name="VERSION" value="6.0" />
 
-		<!--
-		    Setup JMX server properties and PTQL query for the server
-		    The JMX port and tcServer's name should be set to your configuration.
-		-->
-        <config>
+
+    <platform name="GemFire Distributed System">
+        <plugin type="autoinventory" class="GemfirePlatformDetector"/>
+        <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
+        <plugin type="collector" class="GemfireCollector" />
+        <plugin type="livedata" class="GemFireLiveData" />
+        <config type="measurement">
             <option name="jmx.url"
 			        description="JMX URL to GemFire Agent"
 				    default="service:jmx:rmi://localhost/jndi/rmi://:1099/jmxconnector" />
-				    
             <option name="jmx.username"
 			        description="JMX username"
 				    optional="true" default="" />
-				    
             <option name="jmx.password"
 			        description="JMX password"
 				    optional="true" default="" />
-				    
-            <option name="process.query"
-			        description="PTQL for Java Process"
-				    default="State.Name.sw=java,Args.*.re=AgentLauncher" />
         </config>
-
-		<!-- Check to see if server is up -->
-        <metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State" indicator="true" />
-
-		<!-- Report on system process metrics (OPTIONAL) -->
-		&process-metrics;
-
-		<!-- Required to auto-inventory JMX Beans -->
-        <plugin type="autoinventory" class="GemFireDetector" />
-        <plugin type="measurement" class="MxMeasurementPlugin" />
-        <plugin type="control" class="MxControlPlugin"/>
-	
-		<!--  Include our Custom Metrics in the Monitoring GUI -->
-        <property name="OBJECT_NAME" value="GemFire:type=Agent" />
-        <metrics include="GemFireMetrics" />
-		
-        <property name="PROC_HOME_ENV" value="JAVA_HOME"/>
-    </server>
-
-
-    <server name="GemFire" version="6.5" include="6.0">
-        <property name="VERSION" value="6.1.2" />
-    </server>
-
+        <filter name="template" value="GemFire:jmx.url=%jmx.url%:${alias}"/>
+        <metrics>
+            <metric name="Availability" indicator="true" />
+            <metric name="Cache Servers"     alias="n_caches"   indicator="true" />
+            <metric name="Applications Peer" alias="n_apps"     indicator="true" />
+            <metric name="Gateway Hubs"      alias="n_gateways" indicator="true" />
+        </metrics>
+        <!--server name="JMX Agent" version="6.5">
+            <plugin type="autoinventory" class="JMXAgentDetector" />
+            <plugin type="measurement" class="MemberMeasurement" />
+            <filter name="template" value="GemFire::${alias}"/>
+            <metrics>
+                <metric name="Availability"  indicator="true" />
+            </metrics>
+        </server-->
+        <server name="Cache Server">
+            <plugin type="autoinventory" class="CacheServerDetector" />
+            <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
+            <plugin type="collector" class="MemberCollector" />
+         <plugin type="livedata" class="GemFireLiveData" />
+           <config type="measurement">
+                <option name="memberID" description="Cache Server Id"/>
+            </config>
+            <filter name="template" value="GemFire:jmx.url=%jmx.url%,memberID=%memberID%:${alias}"/>
+            <metrics>
+                <metric name="Availability"  indicator="true" />
+                <metric name="Used Memory" alias="memory" indicator="true" />
+                <metric name="Used CPU" alias="cpu" indicator="true" />
+            </metrics>
+            <service name="Region">
+                <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
+                <plugin type="collector" class="RegionCollector" />
+                <config type="measurement">
+                    <option name="memberID" description="Cache Server Id"/>
+                    <option name="regionID" description="Region Name"/>
+                </config>
+                <filter name="template" value="GemFire:hi=hola,jmx.url=%jmx.url%,memberID=%memberID%,regionID=%regionID%:${alias}"/>
+                <metrics>
+                    <metric name="Availability"  indicator="true" />
+                    <metric name="Entry Count" alias="entry_count" indicator="true" />
+                </metrics>
+            </service>
+        </server>
+        <server name="Application Peer" include="Cache Server">
+                 <plugin type="autoinventory" class="ApplicationServerDetector" />
+        </server>
+        <!--server name="Gateway Hub">
+            <plugin type="autoinventory" class="GatewayServerDetector" />
+            <plugin type="measurement" class="MemberMeasurement" />
+            <filter name="template" value="GemFire::${alias}"/>
+            <config type="measurement">
+                <option name="Id" description="Cache Server Id"/>
+            </config>
+            <metrics>
+                <metric name="Availability"  indicator="true" />
+            </metrics>
+        </server-->
+    </platform>
 </plugin>
 

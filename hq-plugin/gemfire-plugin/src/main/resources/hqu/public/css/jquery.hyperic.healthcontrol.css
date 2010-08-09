@@ -1,0 +1,79 @@
+.rle-box {
+	margin: 15px;
+}
+
+.rle-box .grey {
+	background: url('../images/gray.png') repeat-x;
+}
+
+.rle-box .green {
+	background: url('../images/green.png') repeat-x
+}
+
+.rle-box .yellow {
+	background: url('../images/yellow.png') repeat-x;
+}
+
+.rle-box .orange {
+	background: url('../images/orange.png') repeat-x;
+}
+
+.rle-box .red {
+	background: url('../images/red.png') repeat-x;
+}
+
+.rle-box .black {
+	background: url('../images/black.png') repeat-x;
+}
+
+.rle-cont {
+	cursor: default;
+	padding: 2px;
+}
+
+.rle-title {
+	padding-bottom: 3px;
+	font-weight: bold;
+}
+
+.rle-data {
+	height: 16px;
+	cursor:default;
+}
+
+.rle-now,
+.rle-rule {
+	display: none;
+}
+
+.rle-metric {
+	height: 14px;
+}
+
+.rle-metric.first {
+	-moz-border-radius-topleft: 4px;
+	-moz-border-radius-bottomleft: 4px;
+	-webkit-border-top-left-radius: 4px;
+	-webkit-border-bottom-left-radius: 4px;
+}
+
+.rle-metric.last {
+	-moz-border-radius-topright: 4px;
+	-moz-border-radius-bottomright: 4px;
+	-webkit-border-top-right-radius: 4px;
+	-webkit-border-bottom-right-radius: 4px;
+}
+
+.rle-legend .ll {
+	float: left;
+	display: block;
+	font-size: smaller;
+	margin-left: -1%;
+}
+
+.rle-legend .rl {
+	float: right;
+	display: block;
+	font-size: smaller;
+	margin-right: -1%;
+}
