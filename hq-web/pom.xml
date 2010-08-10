@@ -105,6 +105,12 @@
   			<groupId>com.cenqua.clover</groupId>
   			<artifactId>clover</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-mapper-asl</artifactId>
+			<version>1.5.5</version>
+		</dependency>
+		
 		<!--  UI Plugins -->
 		<dependency>
 			<groupId>org.hyperic.hq.uiplugin</groupId>
