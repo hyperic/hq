@@ -2699,8 +2699,10 @@ hyperic.dashboard.summaryWidget = function(args) {
 // set the hyperic.dashboard.widget as the ancestor of the summaryWidget class.
 hyperic.dashboard.summaryWidget.prototype = hyperic.dashboard.widget;
 
-hyperic.group_manager = function() {
+hyperic.group_manager = function(args) {
 	var that = this;
+	var baseUrl = args.url;
+	
 	that.dialogs = {};
 	that.message_area = {};
 	that.button_area = {};
@@ -2896,12 +2898,11 @@ hyperic.group_manager = function() {
 								'Please wait. Processing your request...');
 
 		dojo11.xhrPost( {
-            url: "/api.shtml",
-            content: {v: "1.0", 
-					  s_id: "group_manager", 
-					  mode: "addGroups",
-					  eid: "['" + formArray.eid.split(",").join("','") + "']",
-					  groupId: "['" + formArray.group.toString().split(",").join("','") + "']"},
+            url: baseUrl + "association",
+            content: {
+				eid: formArray.eid.split(","),
+				groupId: formArray.group.toString().split(",")
+			},
             handleAs: 'json',
             load: function(data) {
 				if (data && data.error) {
@@ -2922,9 +2923,12 @@ hyperic.group_manager = function() {
 	}
 	
 	that.getGroupsNotContaining = function(eids) {    
-		dojo11.xhrPost( {
-            url: "/api.shtml",
-            content: {v: "1.0", s_id: "group_manager", eid: "['" + eids.join("','") + "']"},
+		dojo11.xhrGet( {
+            url: baseUrl + "associations",
+            content: {
+				eid: eids
+			},
+			headers: { "Content-Type": "application/json"},
             handleAs: 'json',
             preventCache: true,
             load: function(data) {            	
