@@ -43,26 +43,25 @@ import net.sf.ehcache.CacheManager;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
 import org.hyperic.util.stats.StatCollector;
 import org.hyperic.util.stats.StatUnreachableException;
 import org.hyperic.util.stats.StatsObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public final class ConcurrentStatsCollector {
-	private final Log _log = LogFactory.getLog(ConcurrentStatsCollector.class);
+	private final Log log = LogFactory.getLog(ConcurrentStatsCollector.class);
 
     // using tree due to ordering capabilities
-    private final Map<String, StatCollector> _statKeys = new TreeMap<String, StatCollector>();
-    private final MBeanServer _mbeanServer;
-	private final ConcurrentLinkedQueue<StatsObject> _queue = new ConcurrentLinkedQueue<StatsObject>();
-    private final Sigar _sigar = new Sigar();
-    private static boolean enabled = true;
-    private AtomicBoolean _hasStarted = new AtomicBoolean(false);
-    private Long _pid;
+    private final Map<String, StatCollector> statKeys = new TreeMap<String, StatCollector>();
+    private final MBeanServer mBeanServer;
+	private final ConcurrentLinkedQueue<StatsObject> queue = new ConcurrentLinkedQueue<StatsObject>();
+    private final Sigar sigar = new Sigar();
+    private AtomicBoolean hasStarted = new AtomicBoolean(false);
+    private Long pid;
 
     public static final int WRITE_PERIOD = 15;
     public static final String JVM_TOTAL_MEMORY = "JVM_TOTAL_MEMORY", 
@@ -99,56 +98,54 @@ public final class ConcurrentStatsCollector {
     						   JDBC_HQ_DS_MAX_ACTIVE = "JDBC_HQ_DS_MAX_ACTIVE", 
     						   JDBC_HQ_DS_IN_USE = "JDBC_HQ_DS_IN_USE";
 
-    private ConcurrentStatsCollector() {
-        if (ConcurrentStatsCollector.enabled) {
-            _mbeanServer = Bootstrap.getBean(MBeanServer.class);
-            registerInternalStats();
-        } else {
-            _mbeanServer = null;
-        }
+    @Autowired
+    public ConcurrentStatsCollector(MBeanServer mBeanServer) {
+    	this.mBeanServer = mBeanServer;
+    	
+        registerInternalStats();
     }
 
     public Map<String, StatCollector> getStatKeys() {
-		return _statKeys;
+		return statKeys;
 	}
 
 	public final void register(final String statId) {
         // can't register any stats after the collector has been initially
         // started due to consistent ordering in the csv output file
-        if (_hasStarted.get()) {
-        	_log.info("Cannot register " + statId + " because the collector has already been started.");
+        if (hasStarted.get()) {
+        	log.info("Cannot register " + statId + " because the collector has already been started.");
         	
             return;
         }
 
-        if (_statKeys.containsKey(statId)) {
+        if (statKeys.containsKey(statId)) {
             return;
         }
         
-        _statKeys.put(statId, null);
+        statKeys.put(statId, null);
     }
 
     public final void register(final StatCollector stat) {
         // can't register any stats after the collector has been initially
         // started due to the need for consistent ordering in the csv output
         // file
-        if (_hasStarted.get()) {
-            _log.warn(stat.getId() + " attempted to register in stat collector although it has " +
+        if (hasStarted.get()) {
+            log.warn(stat.getId() + " attempted to register in stat collector although it has " +
                       " already been started, not allowing");
             return;
         }
         
-        if (_statKeys.containsKey(stat.getId())) {
-            _log.warn(stat.getId() + " attempted to register in stat collector although it has " +
+        if (statKeys.containsKey(stat.getId())) {
+            log.warn(stat.getId() + " attempted to register in stat collector although it has " +
                       " already been registered, not allowing");
             return;
         }
         
-        _statKeys.put(stat.getId(), stat);
+        statKeys.put(stat.getId(), stat);
     }
 
     public final void addStat(final long value, final String id) {
-        if (!_statKeys.containsKey(id)) {
+        if (!statKeys.containsKey(id)) {
             return;
         }
         
@@ -156,11 +153,11 @@ public final class ConcurrentStatsCollector {
         // may want to look at pooling these objects to avoid creation overhead
         final StatsObject stat = new StatsObject(value, id);
         
-        _queue.add(stat);
+        queue.add(stat);
         
         final long total = System.currentTimeMillis() - now;
         
-        _queue.add(new StatsObject(total, CONCURRENT_STATS_COLLECTOR));
+        queue.add(new StatsObject(total, CONCURRENT_STATS_COLLECTOR));
     }
 
     private final void registerInternalStats() {
@@ -214,7 +211,7 @@ public final class ConcurrentStatsCollector {
 
             public long getVal() throws StatUnreachableException {
                 try {
-                    return (long) _sigar.getLoadAverage()[0];
+                    return (long) sigar.getLoadAverage()[0];
                 } catch (SigarException e) {
                     throw new StatUnreachableException(e.getMessage(), e);
                 }
@@ -227,7 +224,7 @@ public final class ConcurrentStatsCollector {
 
             public long getVal() throws StatUnreachableException {
                 try {
-                    return (long) _sigar.getProcCpu(getProcPid()).getPercent();
+                    return (long) sigar.getProcCpu(getProcPid()).getPercent();
                 } catch (SigarException e) {
                     throw new StatUnreachableException(e.getMessage(), e);
                 }
@@ -240,7 +237,7 @@ public final class ConcurrentStatsCollector {
 
             public long getVal() throws StatUnreachableException {
                 try {
-                    return (long) _sigar.getProcMem(getProcPid()).getResident();
+                    return (long) sigar.getProcMem(getProcPid()).getResident();
                 } catch (SigarException e) {
                     throw new StatUnreachableException(e.getMessage(), e);
                 }
@@ -255,7 +252,7 @@ public final class ConcurrentStatsCollector {
 
             public long getVal() throws StatUnreachableException {
                 try {
-                    long curr = _sigar.getTcp().getInErrs();
+                    long curr = sigar.getTcp().getInErrs();
                     long rtn = curr - last;
                     last = curr;
                     return rtn;
@@ -273,7 +270,7 @@ public final class ConcurrentStatsCollector {
 
             public long getVal() throws StatUnreachableException {
                 try {
-                    long curr = _sigar.getTcp().getRetransSegs();
+                    long curr = sigar.getTcp().getRetransSegs();
                     long rtn = curr - last;
                     last = curr;
                     return rtn;
@@ -291,7 +288,7 @@ public final class ConcurrentStatsCollector {
 
             public long getVal() throws StatUnreachableException {
                 try {
-                    long curr = _sigar.getSwap().getPageOut();
+                    long curr = sigar.getSwap().getPageOut();
                     long rtn = curr - last;
                     last = curr;
                     return rtn;
@@ -309,7 +306,7 @@ public final class ConcurrentStatsCollector {
 
             public long getVal() throws StatUnreachableException {
                 try {
-                    long curr = _sigar.getSwap().getPageIn();
+                    long curr = sigar.getSwap().getPageIn();
                     long rtn = curr - last;
                     last = curr;
                     return rtn;
@@ -369,11 +366,11 @@ public final class ConcurrentStatsCollector {
     }
 
     private long getProcPid() {
-        if (_pid != null) {
-            return _pid.longValue();
+        if (pid != null) {
+            return pid.longValue();
         }
-        _pid = new Long(_sigar.getPid());
-        return _pid.longValue();
+        pid = new Long(sigar.getPid());
+        return pid.longValue();
     }
 
     private class MBeanCollector implements StatCollector {
@@ -452,7 +449,7 @@ public final class ConcurrentStatsCollector {
             InstanceNotFoundException, MBeanException, ReflectionException, MalformedObjectNameException,
             NullPointerException {
             final ObjectName objName = new ObjectName(_objectName + name);
-            final CompositeDataSupport cds = (CompositeDataSupport) _mbeanServer.getAttribute(objName, _attrName);
+            final CompositeDataSupport cds = (CompositeDataSupport) mBeanServer.getAttribute(objName, _attrName);
             final long val = ((Number) cds.get(_valProp)).longValue();
             failures = 0;
             return val;
@@ -461,25 +458,21 @@ public final class ConcurrentStatsCollector {
         private final long getValue(String name) throws MalformedObjectNameException, NullPointerException,
             AttributeNotFoundException, InstanceNotFoundException, MBeanException, ReflectionException {
             final ObjectName _objName = new ObjectName(_objectName + name);
-            long rtn = ((Number) _mbeanServer.getAttribute(_objName, _attrName)).longValue();
+            long rtn = ((Number) mBeanServer.getAttribute(_objName, _attrName)).longValue();
             failures = 0;
             return rtn;
         }
-    }
-
-    public static void setEnabled(boolean enabled) {
-        ConcurrentStatsCollector.enabled = enabled;
     }
     
     public StatsObject generateMarker() {
     	final StatsObject marker = new StatsObject(-1, null);
     	
-    	_queue.add(marker);
+    	queue.add(marker);
     	
     	return marker;
     }
     
     public StatsObject pollQueue() {
-    	return _queue.poll();
+    	return queue.poll();
     }
 }
