@@ -22,7 +22,7 @@ public class Dummy implements Runnable {
     RabbitMQProducer p;
     RabbitMQConsumer c;
     String host = "/";
-    int portNumber = AMQP.PROTOCOL.PORT + 4;
+    int portNumber = AMQP.PROTOCOL.PORT;
 
     public Dummy() {
         p = new RabbitMQProducer();
@@ -42,7 +42,7 @@ public class Dummy implements Runnable {
         try {
             while (true) {
                 send();
-                Thread.sleep(1000);
+                Thread.sleep(100);
             }
         } catch (InterruptedException ex) {
             log.error(ex, ex);

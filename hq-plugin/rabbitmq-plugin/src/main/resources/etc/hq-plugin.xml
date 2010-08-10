@@ -100,7 +100,7 @@
             <option name="process.query" default="State.Name.sw=beam,Args.*.eq=-sname,Args.*.ct=%server.path%" description="XXXXXXX"/>
         </config>
 
-        <service name="Proccess">
+        <!--service name="Proccess">
             <plugin type="log_track" class="RabbitMQBrokerLog"/>
             <config type="product">
                 <option name="process.name" description="XXXXXXX"/>
@@ -110,7 +110,7 @@
             </config>
             <metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State" indicator="true"/>
             &process-metrics;
-        </service>
+        </service-->
 
         <!--service name="VHost"/-->
         <service name="Queue">

@@ -42,7 +42,8 @@ public class RabbitMQServerDetector extends ServerDetector implements AutoServer
                 if (platformConfig.getValue("platform.type").equals(OperatingSystem.NAME_MACOSX)) {
                     RabbitMQProductPlugin.ERLANG_COOKIE_FILE = "/opt/local/var/lib/rabbitmq/.erlang.cookie";
                 } else if (platformConfig.getValue("platform.type").equals(OperatingSystem.NAME_LINUX)) {
-                    RabbitMQProductPlugin.ERLANG_COOKIE_FILE = "/var/lib/rabbitmq/.erlang.cookie";
+                    String userHome = System.getProperty("user.home");
+                    RabbitMQProductPlugin.ERLANG_COOKIE_FILE = userHome+"/.erlang.cookie";
                 } else {
                     RabbitMQProductPlugin.ERLANG_COOKIE_FILE = "C:\\WINDOWS\\.erlang.cookie";
                 }
@@ -76,29 +77,26 @@ public class RabbitMQServerDetector extends ServerDetector implements AutoServer
         }
 
         for (String path : paths) {
-            String serverName = "";
             for (long pid : pids) {
                 String args[] = getProcArgs(pid);
-                if (getServerDir(args).startsWith(path)) {
-                    serverName += getServerName(args) + ",";
+                String serverName = getServerName(args);
+                log.debug("path='" + path + "' serverName='" + serverName + "'");
+
+                if (RabbitMQUtils.getServerVersion(serverName).startsWith(getTypeInfo().getVersion())) {
+                    log.debug("ok " + serverName);
+                    ServerResource server = createServerResource(path);
+                    server.setName(getPlatformName() + " " + getTypeInfo().getName() + " " + serverName);
+                    server.setIdentifier(path+" "+serverName);
+
+                    ConfigResponse conf = new ConfigResponse();
+                    conf.setValue(SERVERNAME, serverName);
+                    conf.setValue("server.path", path);
+
+                    setProductConfig(server, conf);
+                    setMeasurementConfig(server, new ConfigResponse());
+
+                    res.add(server);
                 }
-            }
-            log.debug("path='" + path + "' serverName='" + serverName + "'");
-
-            if (RabbitMQUtils.getServerVersion(serverName).startsWith(getTypeInfo().getVersion())) {
-                log.debug("ok " + serverName);
-                ServerResource server = createServerResource(path);
-                server.setName(getPlatformName() + " " + getTypeInfo().getName() + " " + path);
-
-                ConfigResponse conf = new ConfigResponse();
-                conf.setValue(SERVERNAME, serverName);
-                conf.setValue("server.path", path);
-
-                setProductConfig(server, conf);
-                setMeasurementConfig(server, new ConfigResponse());
-
-
-                res.add(server);
             }
         }
 
@@ -132,10 +130,11 @@ public class RabbitMQServerDetector extends ServerDetector implements AutoServer
             ServiceResource svh = createServiceResource("VHost");
             svh.setName(getTypeInfo().getName() + " VHost " + vHost);
             //res.add(svh);
+
             List<Queue> queues = RabbitMQUtils.getQueues(serverName, vHost);
             for (Queue queue : queues) {
                 ServiceResource q = createServiceResource("Queue");
-                q.setName(getTypeInfo().getName() + " Queue " + queue.getFullName());
+                q.setName(getTypeInfo().getName() + " "+serverName+" Queue " + queue.getFullName());
                 ConfigResponse c = new ConfigResponse();
                 c.setValue("vhost", queue.getVHost());
                 c.setValue("name", queue.getName());
@@ -143,26 +142,6 @@ public class RabbitMQServerDetector extends ServerDetector implements AutoServer
                 setMeasurementConfig(q, c);
                 res.add(q);
             }
-        }
-
-        long[] pids = getPids(Metric.translate(config.getValue("process.query"), config));
-        for (long pid : pids) {
-            String args[] = getProcArgs(pid);
-            String name = getServerName(args);
-            ServiceResource p = createServiceResource("Proccess");
-            ConfigResponse c = new ConfigResponse();
-            p.setName(getTypeInfo().getName() + " Proccess " + name);
-            c.setValue("proccess.name", name);
-            p.setProductConfig(c);
-            ConfigResponse mc = new ConfigResponse();
-            mc.setValue("service.log_track.enable", true);
-            File plog = new File("/var/log/rabbitmq", name + ".log");
-            if (log.isDebugEnabled()) {
-                log.debug("[discoverServices] plog=" + plog + " (" + plog.exists() + ")");
-            }
-            mc.setValue("service.log_track.files", plog.getAbsolutePath());
-            setMeasurementConfig(p, mc);
-            res.add(p);
         }
         return res;
     }

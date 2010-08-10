@@ -58,8 +58,7 @@ public class RabbitMQUtils {
     }
 
     public static String getServerVersion(String server) throws PluginException {
-        String serverName = server.split(",")[0]; // XXX test with all server names...
-        OtpErlangObject received = executeCommand(serverName, "rabbit", "status", new OtpErlangList());
+        OtpErlangObject received = executeCommand(server, "rabbit", "status", new OtpErlangList());
         Status status = parseStatusObject((OtpErlangList) received);
         Application app = status.getApplication("rabbit");
         return app.getVersion();
@@ -87,9 +86,6 @@ public class RabbitMQUtils {
         if (log.isDebugEnabled()) {
             log.debug("[executeCommand] server=" + server + ", mod=" + mod + ", fun=" + fun + ", args=" + args);
         }
-
-        server = server.split(",")[0];
-        log.debug("[executeCommand] server=" + server);
 
         OtpErlangObject received;
         try {
