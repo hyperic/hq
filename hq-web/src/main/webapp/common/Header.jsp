@@ -50,7 +50,7 @@
     }
     var resourceURL = '<html:rewrite action="/Resource" />';
 	var userURL = '<html:rewrite action="/admin/user/UserAdmin" />';
-    var searchWidget = new hyperic.widget.search({search:'/search.shtml'}, 3, {keyCode: 83, ctrl: true});
+    var searchWidget = new hyperic.widget.search({search:'/app/search'}, 3, {keyCode: 83, ctrl: true});
     dojo.require("dojo.lfx.html");
     dojo.event.connect(window, "onload",function(){ 
         activateHeaderTab();
