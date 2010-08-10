@@ -3868,13 +3868,15 @@ hyperic.maintenance_schedule = function(title_name, group_id, group_name) {
 	}
 };
 
-hyperic.clone_resource_dialog = function(title_name, platform_id) {
+hyperic.clone_resource_dialog = function(args) {
     var that = this;
+    var baseUrl = args.url;
+    
     that.dialog = null;
-    that.title_name = title_name;
+    that.title_name = args.titleName;
     that.data = {};
 	that.buttons = {};
-	that.platform_id = platform_id || null;
+	that.platform_id = args.platformId || null;
     that.sheets = {};
     that.sheets.clone_instructions = dojo11.byId('clone_instructions');
     that.sheets.clone_queue_status = dojo11.byId('clone_queue_status');
@@ -3967,9 +3969,9 @@ hyperic.clone_resource_dialog = function(title_name, platform_id) {
 
     that.fetchData = function() {
         dojo11.xhrGet( {
-            url: "/api.shtml",
-            content: {v: "1.0", s_id: "clone_platform", pid: that.platform_id},
+            url: baseUrl + "/targets",
             preventCache: true,
+            headers: { "Content-Type": "application/json"},
             handleAs: 'json',
             load: function(data){
                 if(data && !data.error)
@@ -4032,12 +4034,14 @@ hyperic.clone_resource_dialog = function(title_name, platform_id) {
         if(clone_target_ids.length > 0)
         {
         	dojo11.xhrPost( {
-                url: "/api.shtml",
-                content: {v: "1.0", s_id: "clone_platform", pid: that.platform_id, clone: "true", ctid: "[" + clone_target_ids.toString() + "]"},
-                handleAs: 'json',
-                load: function(data){
+                url: baseUrl,
+                content: {
+        			ctid: clone_target_ids
+        		},
+        		handleAs: 'json',
+                load: function(data) {
                 },
-                error: function(data){
+                error: function(data) {
                     console.info("An error occurred queueing platforms for cloning " + that.platform_id, data);
                 }
             });
