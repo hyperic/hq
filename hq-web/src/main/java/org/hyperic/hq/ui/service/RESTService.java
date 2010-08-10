@@ -239,7 +239,7 @@ public class RESTService extends BaseService {
                 DashboardPortletBoss dashBoss =
                     Bootstrap.getBean(DashboardPortletBoss.class);
 
-                res = dashBoss.getAlertCounts(me, gids, pi).toString();
+                res = dashBoss._getAlertCounts(me, gids, pi).toString();
             }
         } catch (Exception e) {
             log.debug(e.getLocalizedMessage());
@@ -317,7 +317,7 @@ public class RESTService extends BaseService {
                 }
                 // Only do one metric
                 res = Bootstrap.getBean(DashboardPortletBoss.class)
-                            .getMeasurementData(
+                            ._getMeasurementData(
                                     me, 
                                     new Integer(resourceIdParam),
                                     (Integer) mtidArray.get(0),

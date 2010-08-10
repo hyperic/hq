@@ -27,11 +27,15 @@ package org.hyperic.hq.bizapp.server.session;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -141,8 +145,9 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss {
      * @throws PermissionException
      * 
      */
+    
     @Transactional(readOnly=true)
-    public JSONArray getMeasurementData(AuthzSubject subj, Integer resId, Integer mtid, AppdefEntityTypeID ctype,
+    public JSONArray _getMeasurementData(AuthzSubject subj, Integer resId, Integer mtid, AppdefEntityTypeID ctype,
                                         long begin, long end) throws PermissionException {
         JSONArray rtn = new JSONArray();
 
@@ -201,6 +206,79 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss {
         }
         return rtn;
     }
+    
+    @Transactional(readOnly=true)
+    public List<Map<String, Object>> getMeasurementData(AuthzSubject subj, Integer resId, Integer mtid, AppdefEntityTypeID ctype,
+                                        long begin, long end) throws PermissionException {
+        List<Map<String, Object>> result = new ArrayList<Map<String,Object>>();
+
+        DateFormat dateFmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US);
+        long intv = (end - begin) / 60;
+        Map<String, Object> chartData = new HashMap<String, Object>();
+        Resource res = resourceManager.findResourceById(resId);
+        
+        if (res == null || res.isInAsyncDeleteState()) {
+            return result;
+        }
+        
+        AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(res);
+        
+        try {
+        	chartData.put("resourceName", res.getName());
+
+            AppdefEntityID[] aeids;
+            
+            if (aeid.isGroup()) {
+                List<AppdefEntityID> members = GroupUtil.getCompatGroupMembers(subj, aeid, null, PageControl.PAGE_ALL);
+            
+                aeids = (AppdefEntityID[]) members.toArray(new AppdefEntityID[members.size()]);
+            } else if (ctype != null) {
+                aeids = measurementBoss.getAutoGroupMemberIDs(subj, new AppdefEntityID[] { aeid }, ctype);
+            } else {
+                aeids = new AppdefEntityID[] { aeid };
+            }
+            
+            List<Measurement> metrics = measurementManager.findMeasurements(subj, mtid, aeids);
+
+            // Get measurement name
+            if (!metrics.isEmpty()) {
+                Measurement measurement = metrics.get(0);
+                
+                chartData.put("measurementName", measurement.getTemplate().getName());
+                chartData.put("measurementUnits", measurement.getTemplate().getUnits());
+            }
+
+            List<HighLowMetricValue> data = dataManager.getHistoricalData(metrics, begin, end, intv, 0, true,
+                PageControl.PAGE_ALL);
+
+            Map<String, List<Double>> metricData = new LinkedHashMap<String, List<Double>>();
+            
+            for (HighLowMetricValue pt : data) {
+                List<Double> metricValues = new ArrayList<Double>();
+                double val = pt.getValue();
+                
+                if (Double.isNaN(val) || Double.isInfinite(val)) {
+                    continue;
+                }
+                
+                metricValues.add(val);
+                
+                Date date = new Date(pt.getTimestamp());
+                
+                metricData.put(dateFmt.format(date), metricValues);
+            }
+
+            chartData.put("data", metricData);
+            
+            result.add(chartData);
+        } catch (AppdefEntityNotFoundException e) {
+            log.error("AppdefEntityNotFound: " + aeid);
+        } catch (GroupNotCompatibleException e) {
+            log.error("GroupNotCompatibleException: " + aeid);
+        }
+        
+        return result;
+    }
 
     /**
      * @throws PermissionException
@@ -222,7 +300,7 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss {
      * 
      */
     @Transactional(readOnly=true)
-    public JSONObject getAlertCounts(AuthzSubject subj, List<Integer> groupIds, PageInfo pageInfo)
+    public JSONObject _getAlertCounts(AuthzSubject subj, List<Integer> groupIds, PageInfo pageInfo)
         throws PermissionException, JSONException {
         final long PORTLET_RANGE = MeasurementConstants.DAY * 3;
 
@@ -246,6 +324,34 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss {
             }
         }
         return rtn;
+    }
+
+    @Transactional(readOnly=true)
+    public Map<Integer, List<String>> getAlertCounts(AuthzSubject subj, Integer[] groupIds, PageInfo pageInfo)
+        throws PermissionException {
+        final long PORTLET_RANGE = MeasurementConstants.DAY * 3;
+        final int maxRecords = pageInfo.getStartRow() + pageInfo.getPageSize();
+        
+        Map<Integer, List<String>> result = new HashMap<Integer, List<String>>();
+
+        for (int x = 0; x < groupIds.length && x < maxRecords; x++) {
+            if (x < pageInfo.getStartRow()) {
+                continue;
+            }
+            
+            Integer groupId = groupIds[x];
+            ResourceGroup group = resourceGroupManager.findResourceGroupById(subj, groupId);
+            
+            if (group != null) {
+            	List<String> alertStatus = new ArrayList<String>();
+            	
+            	alertStatus.add(getResourceStatus(subj, group, PORTLET_RANGE));
+            	alertStatus.add(getGroupStatus(subj, group, PORTLET_RANGE));
+            	result.put(group.getId(), alertStatus);
+            }
+        }
+        
+        return result;
     }
 
     private String getGroupStatus(AuthzSubject subj, ResourceGroup group, long range) {
