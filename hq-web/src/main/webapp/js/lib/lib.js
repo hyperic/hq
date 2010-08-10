@@ -3463,12 +3463,14 @@ hyperic.alert_center = function(title_name) {
 	that.initDialog();
 }
 
-hyperic.maintenance_schedule = function(title_name, group_id, group_name) {
+hyperic.maintenance_schedule = function(args, title_name, group_id, group_name) {
     var that = this;
+    var baseUrl = args.url;
+    
     that.existing_schedule = {};
-    that.group_id = group_id;
-    that.group_name = unescape(group_name);
-    that.title_name = title_name + " - " + that.group_name;
+    that.group_id = args.resourceId;
+    that.group_name = unescape(args.resourceName);
+    that.title_name = args.title + " - " + that.group_name;
     that.dialog = null;
 	that.buttons = {};
 	that.inputs = {};
@@ -3575,12 +3577,14 @@ hyperic.maintenance_schedule = function(title_name, group_id, group_name) {
 
     	    // create unix epoch datetime in GMT timezone
             from_datetime = (args.from_date.getTime() + args.from_time.getTime() - args.from_time.getTimezoneOffset() * 60000);
-
             to_datetime = (args.to_date.getTime() + args.to_time.getTime() - args.to_time.getTimezoneOffset() * 60000);
 
             return dojo11.xhrPost( {
-                url: "/api.shtml",
-                content: {v: "1.0", s_id: "maint_win", groupId: that.group_id, sched: "true", startTime: from_datetime, endTime: to_datetime},
+                url: baseUrl + "/schedule",
+                content: {
+            		startTime: from_datetime, 
+            		endTime: to_datetime
+            	},
                 handleAs: 'json',
                 load: function(data){
                     if(data && !data.error) 
@@ -3591,12 +3595,9 @@ hyperic.maintenance_schedule = function(title_name, group_id, group_name) {
                     	{
 	                        that.existing_schedule.from_time = parseInt(data.startTime,10);
 	                        that.existing_schedule.to_time = parseInt(data.endTime,10);
-	
 	                        that.selected_from_time = new Date(that.existing_schedule.from_time);
 	                        that.selected_to_time = new Date(that.existing_schedule.to_time);
-	
-	                        that.redraw(
-	                        		false, 
+	                        that.redraw(false, 
 	                        		hyperic.data.maintenance_schedule.message.currentSchedule, 
 	                        		hyperic.data.maintenance_schedule.message.success);
                     	}
@@ -3617,17 +3618,15 @@ hyperic.maintenance_schedule = function(title_name, group_id, group_name) {
     };
     
     that.clear_schedule_action = function() {
-        return dojo11.xhrPost( {
-            url: "/api.shtml",
-            content: {v: "1.0", s_id: "maint_win", groupId: that.group_id, sched: "false"},
+        return dojo11.xhrDelete( {
+            url: baseUrl + "/schedule/" + that.group_id,
             handleAs: 'json',
             load: function(data){
                 if(data && !data.error)
                 {
             		that.server_time = new Date(data.serverTime);
                 	that.resetSchedule();
-					that.redraw(
-							false,
+					that.redraw(false,
 							hyperic.data.maintenance_schedule.message.noSchedule,
 							hyperic.data.maintenance_schedule.message.success);
 				}
@@ -3646,8 +3645,8 @@ hyperic.maintenance_schedule = function(title_name, group_id, group_name) {
     
     that.getSchedule = function() {
         return dojo11.xhrGet( {
-            url: "/api.shtml",
-            content: {v: "1.0", s_id: "maint_win", groupId: that.group_id},
+            url: baseUrl + "/schedule/" + that.group_id,
+            headers: { "Content-Type": "application/json"},
             handleAs: 'json',
             preventCache: true,
             load: function(data){
