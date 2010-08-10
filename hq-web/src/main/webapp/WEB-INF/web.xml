@@ -9,7 +9,10 @@
 
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
-		<param-value>/WEB-INF/spring/*-context.xml,classpath*:/META-INF/spring/*-context.xml</param-value>
+		<param-value>
+			/WEB-INF/spring/security-web-context.xml,
+			classpath*:/META-INF/spring/*-context.xml
+		</param-value>
 	</context-param>
 	
 	<listener>
@@ -36,6 +39,10 @@
 	<servlet>
         <servlet-name>webapp</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>/WEB-INF/spring/webapp-servlet.xml</param-value>
+		</init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
 
