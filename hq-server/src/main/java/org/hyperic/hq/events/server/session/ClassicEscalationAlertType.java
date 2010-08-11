@@ -29,12 +29,10 @@ import java.util.Iterator;
 import java.util.ResourceBundle;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationAlertType;
-import org.hyperic.hq.escalation.server.session.EscalationManagerImpl;
 import org.hyperic.hq.escalation.server.session.EscalationStateChange;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.escalation.shared.EscalationManager;
@@ -50,27 +48,13 @@ public final class ClassicEscalationAlertType
         new ClassicEscalationAlertType(0xdeadbeef, "Classic", 
                                        "escalation.type.classic");
 
-    private static Object INIT_LOCK = new Object();
-    private static AlertManager           _alertMan;
-    private static AlertDefinitionManager _defMan;
-    
-    private void setup() {
-        synchronized (INIT_LOCK) {
-            if (_alertMan == null) {
-                _alertMan = Bootstrap.getBean(AlertManager.class);
-                _defMan = Bootstrap.getBean(AlertDefinitionManager.class);
-            }
-        }
-    }
     
     private AlertManager getAlertMan() {
-        setup();
-        return _alertMan;
+        return Bootstrap.getBean(AlertManager.class);
     }
     
     private AlertDefinitionManager getDefMan() {
-        setup();
-        return _defMan;
+       return Bootstrap.getBean(AlertDefinitionManager.class);
     }
 
     public Escalatable findEscalatable(Integer alertId) {
