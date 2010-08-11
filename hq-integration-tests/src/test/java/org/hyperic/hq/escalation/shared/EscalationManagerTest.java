@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import net.sf.ehcache.CacheManager;
+
 import org.hibernate.SessionFactory;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.Server;
@@ -158,6 +160,8 @@ public class EscalationManagerTest  {
     @After
     public void tearDown() {
         sessionFactory.evictQueries();
+        //Clear the 2nd level cache including regions with queries
+        CacheManager.getInstance().clearAll();
     }
 
 	@Test
