@@ -40,6 +40,7 @@ import org.hyperic.util.config.ConfigResponse;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 
 /**
  * Integration test of {@link GalertManager}. Defines a group alert and triggers
@@ -47,6 +48,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author jhickey
  * 
  */
+@DirtiesContext
 public class GalertManagerTest
     extends BaseInfrastructureTest {
 

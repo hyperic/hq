@@ -27,11 +27,13 @@ import org.hyperic.hq.grouping.critters.ResourceNameCritterType;
 import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.test.annotation.DirtiesContext;
 /**
  * Integration test of the {@link ResourceGroupManager}
  * @author jhickey
  *
  */
+@DirtiesContext
 public class ResourceGroupManagerTest
     extends BaseInfrastructureTest {
 
