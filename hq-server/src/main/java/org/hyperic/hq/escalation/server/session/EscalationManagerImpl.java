@@ -94,9 +94,8 @@ public class EscalationManagerImpl implements EscalationManager {
     public void initialize() {
         // Make sure the escalation enumeration is loaded and registered so
         // that the escalations run
-    	ClassicEscalationAlertType.class.getClass();
-        //ClassicEscalationAlertType.CLASSIC.toString();
-    	//GalertEscalationAlertType.GALERT.toString();
+        ClassicEscalationAlertType.CLASSIC.toString();
+    	GalertEscalationAlertType.GALERT.toString();
         AlertableRoleCalendarType.class.getClass();
     }
 
