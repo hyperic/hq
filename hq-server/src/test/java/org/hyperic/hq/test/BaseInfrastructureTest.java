@@ -142,6 +142,8 @@ abstract public class BaseInfrastructureTest {
 
     @After
     public void after() {
+        //Clear the query cache
+        sessionFactory.evictQueries();
         endTime = System.nanoTime();
         logger.debug(buildMessage());
     }

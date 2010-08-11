@@ -79,7 +79,8 @@ public class AgentDAO
 
     public Agent findByAgentToken(String token) {
         String sql = "from Agent where agentToken=?";
-        return (Agent) getSession().createQuery(sql).setString(0, token).uniqueResult();
+        return (Agent) getSession().createQuery(sql).setString(0, token).setCacheRegion(
+            "Agent.findByAgentToken").setCacheable(true).uniqueResult();
     }
 
     @SuppressWarnings("unchecked")
