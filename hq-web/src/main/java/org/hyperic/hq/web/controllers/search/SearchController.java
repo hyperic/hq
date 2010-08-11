@@ -26,6 +26,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+/**
+ * This controller handles the different actions that can be performed when
+ * performing a text-based search for resources.
+ * 
+ * @author David Crutchfield
+ * 
+ */
 @Controller
 public class SearchController extends BaseController {
 	@Autowired
@@ -33,11 +40,14 @@ public class SearchController extends BaseController {
 		super(appdefBoss, authzBoss);
 	}
 
+	// ...helper function that iterates through the list of search results and
+	// constructs a list of maps that contain the id and name...
 	private List<Map<String, String>> constructResourceMaps(
 			PageList<SearchResult> resources) {
 		List<Map<String, String>> result = new ArrayList<Map<String, String>>();
 
 		for (SearchResult searchResult : resources) {
+			// TODO create a representation object for this...
 			Map<String, String> resultMap = new HashMap<String, String>();
 
 			resultMap.put("id", searchResult.getAdeId());
@@ -49,11 +59,14 @@ public class SearchController extends BaseController {
 		return result;
 	}
 
+	// ...helper function that iterates through the list of authz subjects and
+	// constructs a list of maps that contain the id and name...
 	private List<Map<String, String>> constructUserMaps(
 			PageList<AuthzSubject> users) {
 		List<Map<String, String>> result = new ArrayList<Map<String, String>>();
 
 		for (AuthzSubject user : users) {
+			// TODO create a representation object for this...
 			Map<String, String> resultMap = new HashMap<String, String>();
 
 			resultMap.put("id", user.getId().toString());
@@ -70,6 +83,7 @@ public class SearchController extends BaseController {
 	Map<String, List<Map<String, String>>> listSearchResults(
 			@RequestParam(RequestParameterKeys.SEARCH_STRING) String searchString,
 			HttpSession session) {
+		// TODO Should this be exposed as a user preference?
 		final int DEFAULT_PAGE_SIZE = 10;
 
 		Map<String, List<Map<String, String>>> result = new LinkedHashMap<String, List<Map<String, String>>>();
