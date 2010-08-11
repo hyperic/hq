@@ -34,6 +34,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import net.sf.ehcache.CacheManager;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.context.IntegrationTestContextLoader;
@@ -43,6 +45,7 @@ import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.product.MetricValue;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -93,6 +96,12 @@ public class AvailabilityManagerTest {
         //TODO may not need to load all this data for every test - move this
         //into only test methods that need it?
         dbPopulator.restoreDatabase();
+    }
+    
+    @After
+    public void after() {
+        //Clear the 2nd level cache including regions with queries
+        CacheManager.getInstance().clearAll();
     }
 
     @Test
