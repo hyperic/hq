@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -75,9 +74,6 @@ import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.timer.StopWatch;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -133,78 +129,6 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss {
         this.alertDefinitionManager = alertDefinitionManager;
         this.escalationManager = escalationManager;
         this.alertPermissionManager = alertPermissionManager;
-    }
-
-    /**
-     * @return JSONArray made up of several JSONObjects. Output looks similar to
-     *         this:
-     *         [[{"data":{"2008-07-09T10:45:28-0700":[1],"2008-07-09T10:46:28-0700"
-     *         :[1],
-     *         "2008-07-09T10:48:28-0700":[1],"2008-07-09T10:58:28-0700":[1]},
-     *         "resourceName":"clone-0"}]]
-     * @throws PermissionException
-     * 
-     */
-    
-    @Transactional(readOnly=true)
-    public JSONArray _getMeasurementData(AuthzSubject subj, Integer resId, Integer mtid, AppdefEntityTypeID ctype,
-                                        long begin, long end) throws PermissionException {
-        JSONArray rtn = new JSONArray();
-
-        DateFormat dateFmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US);
-        long intv = (end - begin) / 60;
-        JSONObject jObj = new JSONObject();
-        Resource res = resourceManager.findResourceById(resId);
-        if (res == null || res.isInAsyncDeleteState()) {
-            return rtn;
-        }
-        AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(res);
-        try {
-            jObj.put("resourceName", res.getName());
-
-            AppdefEntityID[] aeids;
-            if (aeid.isGroup()) {
-                List<AppdefEntityID> members = GroupUtil.getCompatGroupMembers(subj, aeid, null, PageControl.PAGE_ALL);
-                aeids = (AppdefEntityID[]) members.toArray(new AppdefEntityID[members.size()]);
-            } else if (ctype != null) {
-                aeids = measurementBoss.getAutoGroupMemberIDs(subj, new AppdefEntityID[] { aeid }, ctype);
-            } else {
-                aeids = new AppdefEntityID[] { aeid };
-            }
-            List<Measurement> metrics = measurementManager.findMeasurements(subj, mtid, aeids);
-
-            // Get measurement name
-            if (!metrics.isEmpty()) {
-                Measurement measurement = metrics.get(0);
-                jObj.put("measurementName", measurement.getTemplate().getName());
-                jObj.put("measurementUnits", measurement.getTemplate().getUnits());
-            }
-
-            List<HighLowMetricValue> data = dataManager.getHistoricalData(metrics, begin, end, intv, 0, true,
-                PageControl.PAGE_ALL);
-
-            JSONObject dataObj = new JSONObject();
-            jObj.put("data", dataObj);
-            for (HighLowMetricValue pt : data) {
-                JSONArray array = new JSONArray();
-
-                double val = pt.getValue();
-                if (Double.isNaN(val) || Double.isInfinite(val)) {
-                    continue;
-                }
-                array.put(val);
-                Date date = new Date(pt.getTimestamp());
-                dataObj.put(dateFmt.format(date), array);
-            }
-            rtn.put(jObj);
-        } catch (JSONException e) {
-            log.error(e.getMessage(), e);
-        } catch (AppdefEntityNotFoundException e) {
-            log.error("AppdefEntityNotFound: " + aeid);
-        } catch (GroupNotCompatibleException e) {
-            log.error("GroupNotCompatibleException: " + aeid);
-        }
-        return rtn;
     }
     
     @Transactional(readOnly=true)
@@ -278,52 +202,6 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss {
         }
         
         return result;
-    }
-
-    /**
-     * @throws PermissionException
-     * @throws JSONException
-     * 
-     */
-    @Transactional(readOnly=true)
-    public JSONObject getAllGroups(AuthzSubject subj) throws PermissionException, JSONException {
-        JSONObject rtn = new JSONObject();
-        Collection<ResourceGroup> groups = resourceGroupManager.getAllResourceGroups(subj, true);
-        for (ResourceGroup group : groups) {
-
-            rtn.put(group.getId().toString(), group.getName());
-        }
-        return rtn;
-    }
-
-    /**
-     * 
-     */
-    @Transactional(readOnly=true)
-    public JSONObject _getAlertCounts(AuthzSubject subj, List<Integer> groupIds, PageInfo pageInfo)
-        throws PermissionException, JSONException {
-        final long PORTLET_RANGE = MeasurementConstants.DAY * 3;
-
-        JSONObject rtn = new JSONObject();
-
-        final int maxRecords = pageInfo.getStartRow() + pageInfo.getPageSize();
-        int i = 0;
-        for (Iterator<Integer> it = groupIds.iterator(); it.hasNext(); i++) {
-            if (maxRecords > 0 && i > maxRecords) {
-                break;
-            }
-            if (i < pageInfo.getStartRow()) {
-                continue;
-            }
-            Integer gId = it.next();
-            ResourceGroup group = resourceGroupManager.findResourceGroupById(subj, gId);
-            if (group != null) {
-                JSONArray array = new JSONArray().put(getResourceStatus(subj, group, PORTLET_RANGE)).put(
-                    getGroupStatus(subj, group, PORTLET_RANGE));
-                rtn.put(group.getId().toString(), array);
-            }
-        }
-        return rtn;
     }
 
     @Transactional(readOnly=true)
