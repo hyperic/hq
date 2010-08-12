@@ -1028,6 +1028,23 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
     }
 
     /**
+     * Get a list of all alert definitions with an availability metric condition
+     * @param subj the caller
+     * @return a list of alert definitions
+     */
+    @Transactional(readOnly=true)
+    public List<AlertDefinition> findAvailAlertDefinitions(AuthzSubject subj) 
+    	throws PermissionException {
+    	
+        if (!PermissionManagerFactory.getInstance()
+                .hasAdminPermission(subj.getId())) {
+            throw new PermissionException("Only administrators can do this");
+        }
+        
+        return alertDefDao.findAvailAlertDefs();
+    }
+    
+    /**
      * Get list of children alert definition for a parent alert definition
      * 
      */
