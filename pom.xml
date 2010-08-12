@@ -33,6 +33,7 @@
 		<hibernate-tools.version>3.2.3.GA</hibernate-tools.version>
 		<httpclient.version>3.1</httpclient.version>
 		<j2ee-management.version>1.1</j2ee-management.version>
+        <jackson-mapper-asl.version>1.5.5</jackson-mapper-asl.version>
 		<jasypt.version>1.6</jasypt.version>
 		<jdom.version>1.1</jdom.version>
 		<jmock.version>1.2.0</jmock.version>
@@ -161,6 +162,11 @@
 				<artifactId>velocity</artifactId>
 				<version>${velocity.version}</version>
 			</dependency>
+            <dependency>
+                <groupId>org.codehaus.jackson</groupId>
+                <artifactId>jackson-mapper-asl</artifactId>
+                <version>${jackson-mapper-asl.version}</version>
+            </dependency>
 			<!--  We use a version of dbunit that we patched -->
 			<dependency>
 				<groupId>org.hyperic</groupId>
