@@ -520,6 +520,17 @@
 	<build>
 		<pluginManagement>
 			<plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>test-jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
@@ -653,7 +664,7 @@
 	    			<module>dist</module>
 			</modules>
 		</profile>
-			<profile>
+        <profile>
 			<id>no-dist</id>
 			<modules>
 					<module>hq-util</module>
@@ -667,6 +678,17 @@
 					<module>hq-uiplugin</module>
 					<module>hq-installer</module>
 					<module>hq-bootstrap</module>
+					<module>hq-web</module>
+			</modules>
+		</profile>
+        <profile>
+			<id>web-app</id>
+			<modules>
+					<module>hq-util</module>
+					<module>hq-common</module>
+					<module>hq-pdk</module>
+					<module>hq-rendit</module>
+					<module>hq-server</module>
 					<module>hq-web</module>
 			</modules>
 		</profile>
